@@ -123,6 +123,8 @@ private:
                                 );
   
   cmXCodeObject* FindXCodeTarget(cmTarget*);
+  std::string GetOrCreateId(const char* name, const char* id);
+
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in this->XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
@@ -197,9 +199,11 @@ protected:
 
   unsigned int XcodeVersion;
   std::string VersionString;
+  std::set<cmStdString> XCodeObjectIDs;
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  void addObject(cmXCodeObject *obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;

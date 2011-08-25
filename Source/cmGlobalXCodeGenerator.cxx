@@ -489,10 +489,32 @@ void cmGlobalXCodeGenerator::ClearXCodeObjects()
     delete this->XCodeObjects[i];
     }
   this->XCodeObjects.clear();
+  this->XCodeObjectIDs.clear();
   this->GroupMap.clear();
   this->GroupNameMap.clear();
   this->TargetGroup.clear();
   this->FileRefs.clear();
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::addObject(cmXCodeObject *obj)
+{
+  if(obj->GetType() == cmXCodeObject::OBJECT)
+    {
+    cmStdString id = obj->GetId();
+
+    // If this is a duplicate id, it's an error:
+    //
+    if(this->XCodeObjectIDs.count(id))
+      {
+      cmSystemTools::Error(
+        "Xcode generator: duplicate object ids not allowed");
+      }
+
+    this->XCodeObjectIDs.insert(id);
+    }
+
+  this->XCodeObjects.push_back(obj);
 }
 
 //----------------------------------------------------------------------------
@@ -508,7 +530,7 @@ cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::PBXType ptype)
     {
     obj = new cmXCode21Object(ptype, cmXCodeObject::OBJECT);
     }
-  this->XCodeObjects.push_back(obj);
+  this->addObject(obj);
   return obj;
 }
 
@@ -517,7 +539,7 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 {
   cmXCodeObject* obj = new cmXCodeObject(cmXCodeObject::None, type);
-  this->XCodeObjects.push_back(obj);
+  this->addObject(obj);
   return obj;
 }
 
@@ -2040,6 +2062,9 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
       }
     }
 
+  target->SetId(this->GetOrCreateId(
+    cmtarget.GetName(), target->GetId()).c_str());
+
   return target;
 }
 
@@ -2188,6 +2213,8 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     target->AddAttribute("productType", this->CreateString(productType));
     }
   target->SetTarget(&cmtarget);
+  target->SetId(this->GetOrCreateId(
+    cmtarget.GetName(), target->GetId()).c_str());
   return target;
 }
 
@@ -2208,6 +2235,26 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(cmTarget* t)
       }
     }
   return 0;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
+                                                  const char* id)
+{
+  std::string guidStoreName = name;
+  guidStoreName += "_GUID_CMAKE";
+  const char* storedGUID =
+    this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
+
+  if(storedGUID)
+    {
+    return storedGUID;
+    }
+
+  this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(),
+    id, "Stored Xcode object GUID", cmCacheManager::INTERNAL);
+
+  return id;
 }
 
 //----------------------------------------------------------------------------
@@ -2739,6 +2786,12 @@ void cmGlobalXCodeGenerator
 
   this->RootObject = this->CreateObject(cmXCodeObject::PBXProject);
   this->RootObject->SetComment("Project object");
+
+  std::string project_id = "PROJECT_";
+  project_id += root->GetMakefile()->GetProjectName();
+  this->RootObject->SetId(this->GetOrCreateId(
+    project_id.c_str(), this->RootObject->GetId()).c_str());
+
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   this->RootObject->AddAttribute("mainGroup",
                              this->CreateObjectReference(mainGroup));
@@ -3137,6 +3190,11 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     }
   this->WriteXCodePBXProj(fout, root, generators);
   this->ClearXCodeObjects();
+
+  // Since this call may have created new cache entries, save the cache:
+  //
+  root->GetMakefile()->GetCacheManager()->SaveCache(
+    root->GetMakefile()->GetHomeOutputDirectory());
 }
 
 //----------------------------------------------------------------------------
