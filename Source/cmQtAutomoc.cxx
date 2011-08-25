@@ -207,7 +207,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->IncludeProjectDirsBefore = makefile->IsOn(
                                 "AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
   this->Srcdir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
-  this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
+  this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->MocCompileDefinitionsStr = makefile->GetSafeDefinition(
                                                  "AM_MOC_COMPILE_DEFINITIONS");
