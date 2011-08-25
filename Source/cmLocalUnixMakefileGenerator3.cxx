@@ -1276,6 +1276,7 @@ cmLocalUnixMakefileGenerator3
   // and there are no "." charactors in the string, then return the
   // unmodified combination.
   if((!this->MakefileVariableSize && unmodified.find('.') == s.npos)
+     && (!this->MakefileVariableSize && unmodified.find('+') == s.npos)
      && (!this->MakefileVariableSize && unmodified.find('-') == s.npos))
     {
     return unmodified;
@@ -1297,6 +1298,7 @@ cmLocalUnixMakefileGenerator3
     {
     cmSystemTools::ReplaceString(ret, ".", "_");
     cmSystemTools::ReplaceString(ret, "-", "__");
+    cmSystemTools::ReplaceString(ret, "+", "___");
     int ni = 0;
     char buffer[5];
     // make sure the _ version is not already used, if
