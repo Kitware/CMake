@@ -183,7 +183,7 @@ cmake::cmake()
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
   this->ProgressCallbackClientData = 0;
-  this->ScriptMode = false;
+  this->CurrentWorkingMode = NORMAL_MODE;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch = new cmVariableWatch;
@@ -356,6 +356,7 @@ void cmake::RemoveUnscriptableCommands()
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
+  bool findPackageMode = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -483,7 +484,17 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         }
       this->ReadListFile(args, path.c_str());
       }
+    else if (arg.find("--find-package",0) == 0)
+      {
+      findPackageMode = true;
+      }
     }
+
+  if (findPackageMode)
+    {
+    return this->FindPackage(args);
+    }
+
   return true;
 }
 
@@ -514,7 +525,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
-    if (this->GetScriptMode())
+    if (this->GetWorkingMode() != NORMAL_MODE)
       {
       std::string file(cmSystemTools::CollapseFullPath(path));
       cmSystemTools::ConvertToUnixSlashes(file);
@@ -534,6 +545,111 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     delete gg;
     }
 }
+
+
+bool cmake::FindPackage(const std::vector<std::string>& args)
+{
+  // if a generator was not yet created, temporarily create one
+  cmGlobalGenerator *gg = new cmGlobalGenerator;
+  gg->SetCMakeInstance(this);
+  this->SetGlobalGenerator(gg);
+
+  // read in the list file to fill the cache
+  std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+  cmMakefile* mf = lg->GetMakefile();
+  mf->SetHomeOutputDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  mf->SetStartOutputDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  mf->SetHomeDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+  mf->SetStartDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory().c_str());
+
+  mf->SetArgcArgv(args);
+
+  std::string systemFile = mf->GetModulesFile("CMakeFindPackageMode.cmake");
+  mf->ReadListFile(0, systemFile.c_str());
+
+  std::string language = mf->GetSafeDefinition("LANGUAGE");
+  std::string mode = mf->GetSafeDefinition("MODE");
+  std::string packageName = mf->GetSafeDefinition("NAME");
+  bool packageFound = mf->IsOn("PACKAGE_FOUND");
+  bool quiet = mf->IsOn("PACKAGE_QUIET");
+
+  if (!packageFound)
+    {
+    if (!quiet)
+      {
+      printf("%s not found.\n", packageName.c_str());
+      }
+    }
+  else if (mode == "EXIST")
+    {
+    if (!quiet)
+      {
+      printf("%s found.\n", packageName.c_str());
+      }
+    }
+  else if (mode == "COMPILE")
+    {
+    std::string includes = mf->GetSafeDefinition("PACKAGE_INCLUDE_DIRS");
+    std::vector<std::string> includeDirs;
+    cmSystemTools::ExpandListArgument(includes, includeDirs);
+    for(std::vector<std::string>::const_iterator dirIt=includeDirs.begin();
+            dirIt != includeDirs.end();
+            ++dirIt)
+      {
+      mf->AddIncludeDirectory(dirIt->c_str(), false);
+      }
+
+    std::string includeFlags = lg->GetIncludeFlags(language.c_str(), false);
+    std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");
+    printf("%s %s\n", includeFlags.c_str(), definitions.c_str());
+    }
+  else if (mode == "LINK")
+    {
+    const char* targetName = "dummy";
+    std::vector<std::string> srcs;
+    cmTarget* tgt = mf->AddExecutable(targetName, srcs, true);
+    tgt->SetProperty("LINKER_LANGUAGE", language.c_str());
+
+    std::string libs = mf->GetSafeDefinition("PACKAGE_LIBRARIES");
+    std::vector<std::string> libList;
+    cmSystemTools::ExpandListArgument(libs, libList);
+    for(std::vector<std::string>::const_iterator libIt=libList.begin();
+            libIt != libList.end();
+            ++libIt)
+      {
+      mf->AddLinkLibraryForTarget(targetName, libIt->c_str(),
+                                  cmTarget::GENERAL);
+      }
+
+
+    std::string linkLibs;
+    std::string flags;
+    std::string linkFlags;
+    lg->GetTargetFlags(linkLibs, flags, linkFlags, *tgt);
+
+    printf("%s\n", linkLibs.c_str() );
+
+/*    if ( use_win32 )
+      {
+      tgt->SetProperty("WIN32_EXECUTABLE", "ON");
+      }
+    if ( use_macbundle)
+      {
+      tgt->SetProperty("MACOSX_BUNDLE", "ON");
+      }*/
+    }
+
+  // free generic one if generated
+//  this->SetGlobalGenerator(0); // setting 0-pointer is not possible
+//  delete gg; // this crashes inside the cmake instance
+
+  return packageFound;
+}
+
 
 // Parse the args
 void cmake::SetArgs(const std::vector<std::string>& args,
@@ -603,6 +719,11 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       // skip for now
       }
     else if(arg.find("-P",0) == 0)
+      {
+      // skip for now
+      i++;
+      }
+    else if(arg.find("--find-package",0) == 0)
       {
       // skip for now
       i++;
@@ -2035,7 +2156,7 @@ int cmake::ActualConfigure()
   this->CleanupCommandsAndMacros();
 
   int res = 0;
-  if ( !this->ScriptMode )
+  if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     res = this->DoPreConfigureChecks();
     }
@@ -2223,7 +2344,7 @@ int cmake::ActualConfigure()
     this->CacheManager->RemoveCacheEntry("CMAKE_EXTRA_GENERATOR");
     }
   // only save the cache if there were no fatal errors
-  if ( !this->ScriptMode )
+  if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
     }
@@ -2289,7 +2410,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   // set the cmake command
   this->CMakeCommand = args[0];
 
-  if ( !this->ScriptMode )
+  if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     // load the cache
     if(this->LoadCache() < 0)
@@ -2310,7 +2431,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     }
 
   // In script mode we terminate after running the script.
-  if(this->ScriptMode)
+  if(this->GetWorkingMode() != NORMAL_MODE)
     {
     if(cmSystemTools::GetErrorOccuredFlag())
       {
@@ -2356,7 +2477,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   this->SetStartDirectory(this->GetHomeDirectory());
   this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
   int ret = this->Configure();
-  if (ret || this->ScriptMode)
+  if (ret || this->GetWorkingMode() != NORMAL_MODE)
     {
 #if defined(CMAKE_HAVE_VS_GENERATORS)
     if(!this->VSSolutionFile.empty() && this->GlobalGenerator)

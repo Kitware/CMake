@@ -1,0 +1,10 @@
+all: clean pngtest
+
+main.o: main.cpp
+	"@CMAKE_CXX_COMPILER@" $(CXXFLAGS) -c $(shell "@cmakeExecutable@" --find-package -DCMAKE_MODULE_PATH="@CMAKE_CURRENT_BINARY_DIR@" -DNAME=Foo -DLANGUAGE=CXX -DCOMPILER_ID=@CMAKE_CXX_COMPILER_ID@ -DMODE=COMPILE) main.cpp
+
+pngtest: main.o
+	"@CMAKE_CXX_COMPILER@" $(LDFLAGS) -o pngtest main.o $(shell "@cmakeExecutable@" --find-package -DCMAKE_MODULE_PATH="@CMAKE_CURRENT_BINARY_DIR@" -DNAME=Foo -DLANGUAGE=CXX -DCOMPILER_ID=@CMAKE_CXX_COMPILER_ID@ -DMODE=LINK)
+
+clean:
+	rm -f *.o pngtest
