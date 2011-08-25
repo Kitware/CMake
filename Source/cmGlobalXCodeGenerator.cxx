@@ -3409,7 +3409,14 @@ void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
     {
     if(*c == '\'')
       {
-      flags += "\\\\'";
+      if (this->XcodeVersion >= 40)
+        {
+        flags += "'\\\\''";
+        }
+      else
+        {
+        flags += "\\\\'";
+        }
       }
     else if(*c == '\\')
       {
