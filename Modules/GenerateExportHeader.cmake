@@ -1,6 +1,4 @@
-
 # - Function for generation of export macros for libraries
-#
 # This module provides the function GENERATE_EXPORT_HEADER() and the
 # accompanying ADD_COMPILER_EXPORT_FLAGS() function.
 #
