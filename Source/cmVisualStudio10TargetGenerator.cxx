@@ -437,7 +437,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
       (*this->BuildFileStream ) << sep << out;
       sep = ";";
       }
-    (*this->BuildFileStream ) << ";%(Outputs)</Outputs>\n";
+    (*this->BuildFileStream ) << "</Outputs>\n";
     }
   this->WriteString("</CustomBuild>\n", 2);
 }
