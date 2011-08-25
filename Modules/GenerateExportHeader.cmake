@@ -15,6 +15,9 @@
 #             [DEPRECATED_MACRO_NAME <deprecated_macro_name>]
 #             [NO_EXPORT_MACRO_NAME <no_export_macro_name>]
 #             [STATIC_DEFINE <static_define>]
+#             [NO_DEPRECATED_MACRO_NAME <no_deprecated_macro_name>]
+#             [DEFINE_NO_DEPRECATED]
+#             [PREFIX_NAME <prefix_name>]
 # )
 #
 # ADD_COMPILER_EXPORT_FLAGS( [FATAL_WARNINGS] )
@@ -97,6 +100,45 @@
 #   set_target_properties(static_variant PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 #
 # This will cause the export macros to expand to nothing when building the static library.
+#
+# If DEFINE_NO_DEPRECATED is specified, then a macro ${BASE_NAME}_NO_DEPRECATED will be defined
+# This macro can be used to remove deprecated code from preprocessor output.
+#
+#   option(EXCLUDE_DEPRECATED "Exclude deprecated parts of the library" FALSE)
+#
+#   if (EXCLUDE_DEPRECATED)
+#     set(NO_BUILD_DEPRECATED DEFINE_NO_DEPRECATED)
+#   endif()
+#
+#   generate_export_header(somelib ${NO_BUILD_DEPRECATED})
+#
+# And then in somelib:
+#
+#   \code
+#   class SOMELIB_EXPORT SomeClass
+#   {
+#   public:
+#   #ifndef SOMELIB_NO_DEPRECATED
+#     SOMELIB_DEPRECATED void oldMethod();
+#   #endif
+#   };
+#
+#   // ...
+#
+#   #ifndef SOMELIB_NO_DEPRECATED
+#   void SomeClass::oldMethod() {  }
+#   #endif
+#
+#   \endcode
+#
+# If PREFIX_NAME is specified, the argument will be used as a prefix to all
+# generated macros.
+#
+# For example:
+#
+#   generate_export_header(somelib PREFIX_NAME VTK_)
+#
+# Generates the macros VTK_SOMELIB_EXPORT etc.
 
 
 #=============================================================================
@@ -237,19 +279,19 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   string(TOLOWER ${BASE_NAME} BASE_NAME_LOWER)
 
   # Default options
-  set(EXPORT_MACRO_NAME "${PREFIX}${BASE_NAME_UPPER}_EXPORT")
-  set(NO_EXPORT_MACRO_NAME "${PREFIX}${BASE_NAME_UPPER}_NO_EXPORT")
+  set(EXPORT_MACRO_NAME "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_EXPORT")
+  set(NO_EXPORT_MACRO_NAME "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_NO_EXPORT")
   set(EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${BASE_NAME_LOWER}_export.h")
-  set(DEPRECATED_MACRO_NAME "${PREFIX}${BASE_NAME_UPPER}_DEPRECATED")
-  set(STATIC_DEFINE "${PREFIX}${BASE_NAME_UPPER}_STATIC_DEFINE")
-  set(NO_DEPRECATED_MACRO_NAME "${BASE_NAME_UPPER}_NO_DEPRECATED")
+  set(DEPRECATED_MACRO_NAME "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_DEPRECATED")
+  set(STATIC_DEFINE "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_STATIC_DEFINE")
+  set(NO_DEPRECATED_MACRO_NAME "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_NO_DEPRECATED")
 
   if(_GEH_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unknown keywords given to GENERATE_EXPORT_HEADER(): \"${_GEH_UNPARSED_ARGUMENTS}\"")
   endif()
 
   if(_GEH_EXPORT_MACRO_NAME)
-    set(EXPORT_MACRO_NAME ${PREFIX}${_GEH_EXPORT_MACRO_NAME})
+    set(EXPORT_MACRO_NAME ${_GEH_PREFIX_NAME}${_GEH_EXPORT_MACRO_NAME})
   endif()
   if(_GEH_EXPORT_FILE_NAME)
     if(IS_ABSOLUTE _GEH_EXPORT_FILE_NAME)
@@ -259,13 +301,13 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     endif()
   endif()
   if(_GEH_DEPRECATED_MACRO_NAME)
-    set(DEPRECATED_MACRO_NAME ${PREFIX}${_GEH_DEPRECATED_MACRO_NAME})
+    set(DEPRECATED_MACRO_NAME ${_GEH_PREFIX_NAME}${_GEH_DEPRECATED_MACRO_NAME})
   endif()
   if(_GEH_NO_EXPORT_MACRO_NAME)
-    set(NO_EXPORT_MACRO_NAME ${PREFIX}${_GEH_NO_EXPORT_MACRO_NAME})
+    set(NO_EXPORT_MACRO_NAME ${_GEH_PREFIX_NAME}${_GEH_NO_EXPORT_MACRO_NAME})
   endif()
   if(_GEH_STATIC_DEFINE)
-    set(STATIC_DEFINE ${PREFIX}${_GEH_STATIC_DEFINE})
+    set(STATIC_DEFINE ${_GEH_PREFIX_NAME}${_GEH_STATIC_DEFINE})
   endif()
 
   if (_GEH_DEFINE_NO_DEPRECATED)
@@ -273,10 +315,10 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   endif()
 
   if (_GEH_NO_DEPRECATED_MACRO_NAME)
-    set(NO_DEPRECATED_MACRO_NAME ${PREFIX}${_GEH_NO_DEPRECATED_MACRO_NAME})
+    set(NO_DEPRECATED_MACRO_NAME ${_GEH_PREFIX_NAME}${_GEH_NO_DEPRECATED_MACRO_NAME})
   endif()
 
-  set(INCLUDE_GUARD_NAME "${PREFIX}${EXPORT_MACRO_NAME}_H")
+  set(INCLUDE_GUARD_NAME "${EXPORT_MACRO_NAME}_H")
 
   get_target_property(EXPORT_IMPORT_CONDITION ${TARGET_LIBRARY} DEFINE_SYMBOL)
 
