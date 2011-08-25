@@ -21,8 +21,8 @@
 # ADD_COMPILER_EXPORT_FLAGS( [FATAL_WARNINGS] )
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
-# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS macro adds
-# -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on Windows
+# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS macro
+# adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on Windows
 # which does not need extra compiler flags for exporting support.
 #
 # This means that in the simplest case, users of these functions will be equivalent to:
