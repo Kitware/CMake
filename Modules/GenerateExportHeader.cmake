@@ -1,6 +1,4 @@
-
 # - Function for generation of export macros for libraries
-#
 # This module provides the function GENERATE_EXPORT_HEADER() and the
 # accompanying ADD_COMPILER_EXPORT_FLAGS() function.
 #
@@ -23,20 +21,16 @@
 # ADD_COMPILER_EXPORT_FLAGS( [FATAL_WARNINGS] )
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
-# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS macro adds
-# -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on Windows
+# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS macro
+# adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on Windows
 # which does not need extra compiler flags for exporting support.
 #
 # This means that in the simplest case, users of these functions will be equivalent to:
 #
 #   add_compiler_export_flags()
-#
 #   add_library(somelib someclass.cpp)
-#
 #   generate_export_header(somelib)
-#
 #   install(TARGETS somelib DESTINATION ${LIBRARY_INSTALL_DIR})
-#
 #   install(FILES
 #    someclass.h
 #    ${PROJECT_BINARY_DIR}/somelib_export.h DESTINATION ${INCLUDE_INSTALL_DIR}
@@ -44,13 +38,10 @@
 #
 # And in the ABI header files:
 #
-#   \code
 #   #include "somelib_export.h"
-#
 #   class SOMELIB_EXPORT SomeClass {
-#
+#     ...
 #   };
-#   \endcode
 #
 # The CMake fragment will generate a file in the ${CMAKE_CURRENT_BUILD_DIR} called
 # somelib_export.h containing the macros SOMELIB_EXPORT, SOMELIB_NO_EXPORT,
@@ -94,9 +85,7 @@
 #
 #   add_library(shared_variant SHARED ${lib_SRCS})
 #   add_library(static_variant ${lib_SRCS})
-#
 #   generate_export_header(shared_variant BASE_NAME libshared_and_static)
-#
 #   set_target_properties(static_variant PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 #
 # This will cause the export macros to expand to nothing when building the static library.
@@ -105,16 +94,13 @@
 # This macro can be used to remove deprecated code from preprocessor output.
 #
 #   option(EXCLUDE_DEPRECATED "Exclude deprecated parts of the library" FALSE)
-#
 #   if (EXCLUDE_DEPRECATED)
 #     set(NO_BUILD_DEPRECATED DEFINE_NO_DEPRECATED)
 #   endif()
-#
 #   generate_export_header(somelib ${NO_BUILD_DEPRECATED})
 #
 # And then in somelib:
 #
-#   \code
 #   class SOMELIB_EXPORT SomeClass
 #   {
 #   public:
@@ -123,13 +109,9 @@
 #   #endif
 #   };
 #
-#   // ...
-#
 #   #ifndef SOMELIB_NO_DEPRECATED
 #   void SomeClass::oldMethod() {  }
 #   #endif
-#
-#   \endcode
 #
 # If PREFIX_NAME is specified, the argument will be used as a prefix to all
 # generated macros.
