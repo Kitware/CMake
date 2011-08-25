@@ -18,6 +18,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
+#include "cmQtAutomoc.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmExportInstallFileGenerator.h"
@@ -269,7 +270,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     cmOStringStream windowsVersionString;
     windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
     windowsVersionString.str();
-    mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION", 
+    mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
                       windowsVersionString.str().c_str());
 #endif
     // Read the DetermineSystem file
@@ -618,8 +619,8 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
     if (sscanf(linkerPref, "%d", &preference)!=1)
       {
       // backward compatibility: before 2.6 LINKER_PREFERENCE
-      // was either "None" or "Prefered", and only the first character was 
-      // tested. So if there is a custom language out there and it is 
+      // was either "None" or "Prefered", and only the first character was
+      // tested. So if there is a custom language out there and it is
       // "Prefered", set its preference high
       if (linkerPref[0]=='P')
         {
@@ -832,6 +833,10 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
+  // Iterate through all targets and set up automoc for those which have
+  // the AUTOMOC property set
+  this->CreateAutomocTargets();
+
   // For each existing cmLocalGenerator
   unsigned int i;
 
@@ -950,6 +955,35 @@ bool cmGlobalGenerator::CheckTargets()
   return true;
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CreateAutomocTargets()
+{
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmTargets& targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget& target = ti->second;
+      if(target.GetType() == cmTarget::EXECUTABLE ||
+         target.GetType() == cmTarget::STATIC_LIBRARY ||
+         target.GetType() == cmTarget::SHARED_LIBRARY ||
+         target.GetType() == cmTarget::MODULE_LIBRARY)
+        {
+        if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
+          {
+          cmQtAutomoc automoc;
+          automoc.SetupAutomocTarget(&target);
+          }
+        }
+      }
+    }
+#endif
+}
+
+
 void cmGlobalGenerator::CheckLocalGenerators()
 {
   std::map<cmStdString, cmStdString> notFoundMap;
@@ -1019,9 +1053,9 @@ void cmGlobalGenerator::CheckLocalGenerators()
   if(notFoundMap.size())
     {
     std::string notFoundVars;
-    for(std::map<cmStdString, cmStdString>::const_iterator 
+    for(std::map<cmStdString, cmStdString>::const_iterator
         ii = notFoundMap.begin();
-        ii != notFoundMap.end(); 
+        ii != notFoundMap.end();
         ++ii)
       {
       notFoundVars += ii->first;
@@ -1057,7 +1091,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
       {
       this->FirstTimeProgress = 0.95f;
       }
-    this->CMakeInstance->UpdateProgress("Configuring", 
+    this->CMakeInstance->UpdateProgress("Configuring",
                                         this->FirstTimeProgress);
     }
 
@@ -1161,7 +1195,7 @@ int cmGlobalGenerator::Build(
     {
     outputPtr = &outputBuffer;
     }
-    
+
   // should we do a clean first?
   if (clean)
     {
@@ -1199,7 +1233,7 @@ int cmGlobalGenerator::Build(
   // now build
   std::string makeCommand =
     this->GenerateBuildCommand(makeCommandCSTR, projectName,
-                               extraOptions, target, 
+                               extraOptions, target,
                                config, false, fast);
   if(output)
     {
@@ -1272,8 +1306,8 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
     if(this->FirstTimeProgress > 0.95f)
       {
       this->FirstTimeProgress = 0.95f;
-      } 
-    this->CMakeInstance->UpdateProgress("Configuring", 
+      }
+    this->CMakeInstance->UpdateProgress("Configuring",
                                         this->FirstTimeProgress);
     return;
     }
@@ -1296,8 +1330,8 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     }
 }
 
-void cmGlobalGenerator::AddTargetToExports(const char* exportSetName, 
-                                           cmTarget* target, 
+void cmGlobalGenerator::AddTargetToExports(const char* exportSetName,
+                                           cmTarget* target,
                                            cmInstallTargetGenerator* archive,
                                            cmInstallTargetGenerator* runTime,
                                            cmInstallTargetGenerator* library,
@@ -1331,7 +1365,7 @@ void cmGlobalGenerator::ClearExportSets()
 const std::vector<cmTargetExport*>* cmGlobalGenerator::GetExportSet(
                                                         const char* name) const
 {
-  std::map<cmStdString, std::vector<cmTargetExport*> >::const_iterator 
+  std::map<cmStdString, std::vector<cmTargetExport*> >::const_iterator
                                      exportSetIt = this->ExportSets.find(name);
   if (exportSetIt != this->ExportSets.end())
     {
@@ -1443,7 +1477,7 @@ void cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang)
 
 int cmGlobalGenerator::GetLinkerPreference(const char* lang)
 {
-  std::map<cmStdString, int>::const_iterator it = 
+  std::map<cmStdString, int>::const_iterator it =
                                    this->LanguageToLinkerPreference.find(lang);
   if (it != this->LanguageToLinkerPreference.end())
     {

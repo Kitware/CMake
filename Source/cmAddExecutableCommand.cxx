@@ -58,7 +58,8 @@ bool cmAddExecutableCommand
     }
 
   // Special modifiers are not allowed with IMPORTED signature.
-  if(importTarget && (use_win32 || use_macbundle || excludeFromAll))
+  if(importTarget
+      && (use_win32 || use_macbundle || excludeFromAll))
     {
     if(use_win32)
       {
