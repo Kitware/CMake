@@ -191,7 +191,7 @@ macro(_test_compiler_has_deprecated)
   endif()
 endmacro()
 
-set(myDir ${CMAKE_CURRENT_LIST_DIR})
+set(myDir "${CMAKE_CURRENT_LIST_DIR}")
 
 macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_DEPRECATED)
@@ -284,7 +284,7 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     set(EXPORT_IMPORT_CONDITION ${TARGET_LIBRARY}_EXPORTS)
   endif()
 
-  configure_file(${myDir}/exportheader.cmake.in ${EXPORT_FILE_NAME} @ONLY)
+  configure_file("${myDir}/exportheader.cmake.in" "${EXPORT_FILE_NAME}" @ONLY)
 endmacro()
 
 function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
