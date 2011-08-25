@@ -23,6 +23,7 @@
 
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckLibraryExists)
+INCLUDE (CheckSymbolExists)
 SET(Threads_FOUND FALSE)
 
 # Do we have sproc?
@@ -44,33 +45,41 @@ ELSE()
     #
     SET(CMAKE_HAVE_THREADS_LIBRARY)
     IF(NOT THREADS_HAVE_PTHREAD_ARG)
-
-      # Do we have -lpthreads
-      CHECK_LIBRARY_EXISTS(pthreads pthread_create "" CMAKE_HAVE_PTHREADS_CREATE)
-      IF(CMAKE_HAVE_PTHREADS_CREATE)
-        SET(CMAKE_THREAD_LIBS_INIT "-lpthreads")
+      # Check if pthread functions are in normal C library
+      CHECK_SYMBOL_EXISTS(pthread_create pthread.h CMAKE_HAVE_LIBC_CREATE)
+      IF(CMAKE_HAVE_LIBC_CREATE)
+        SET(CMAKE_THREAD_LIBS_INIT "")
         SET(CMAKE_HAVE_THREADS_LIBRARY 1)
         SET(Threads_FOUND TRUE)
       ENDIF()
 
-      # Ok, how about -lpthread
-      CHECK_LIBRARY_EXISTS(pthread pthread_create "" CMAKE_HAVE_PTHREAD_CREATE)
-      IF(CMAKE_HAVE_PTHREAD_CREATE)
-        SET(CMAKE_THREAD_LIBS_INIT "-lpthread")
-        SET(Threads_FOUND TRUE)
-        SET(CMAKE_HAVE_THREADS_LIBRARY 1)
-      ENDIF()
-
-      IF(CMAKE_SYSTEM MATCHES "SunOS.*")
-        # On sun also check for -lthread
-        CHECK_LIBRARY_EXISTS(thread thr_create "" CMAKE_HAVE_THR_CREATE)
-        IF(CMAKE_HAVE_THR_CREATE)
-          SET(CMAKE_THREAD_LIBS_INIT "-lthread")
+      IF(NOT CMAKE_HAVE_THREADS_LIBRARY)
+        # Do we have -lpthreads
+        CHECK_LIBRARY_EXISTS(pthreads pthread_create "" CMAKE_HAVE_PTHREADS_CREATE)
+        IF(CMAKE_HAVE_PTHREADS_CREATE)
+          SET(CMAKE_THREAD_LIBS_INIT "-lpthreads")
           SET(CMAKE_HAVE_THREADS_LIBRARY 1)
           SET(Threads_FOUND TRUE)
         ENDIF()
-      ENDIF(CMAKE_SYSTEM MATCHES "SunOS.*")
 
+        # Ok, how about -lpthread
+        CHECK_LIBRARY_EXISTS(pthread pthread_create "" CMAKE_HAVE_PTHREAD_CREATE)
+        IF(CMAKE_HAVE_PTHREAD_CREATE)
+          SET(CMAKE_THREAD_LIBS_INIT "-lpthread")
+          SET(CMAKE_HAVE_THREADS_LIBRARY 1)
+          SET(Threads_FOUND TRUE)
+        ENDIF()
+
+        IF(CMAKE_SYSTEM MATCHES "SunOS.*")
+          # On sun also check for -lthread
+          CHECK_LIBRARY_EXISTS(thread thr_create "" CMAKE_HAVE_THR_CREATE)
+          IF(CMAKE_HAVE_THR_CREATE)
+            SET(CMAKE_THREAD_LIBS_INIT "-lthread")
+            SET(CMAKE_HAVE_THREADS_LIBRARY 1)
+            SET(Threads_FOUND TRUE)
+          ENDIF()
+        ENDIF(CMAKE_SYSTEM MATCHES "SunOS.*")
+      ENDIF(NOT CMAKE_HAVE_THREADS_LIBRARY)
     ENDIF(NOT THREADS_HAVE_PTHREAD_ARG)
 
     IF(NOT CMAKE_HAVE_THREADS_LIBRARY)
@@ -111,7 +120,7 @@ ELSE()
   ENDIF(CMAKE_HAVE_PTHREAD_H)
 ENDIF()
 
-IF(CMAKE_THREAD_LIBS_INIT)
+IF(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_CREATE)
   SET(CMAKE_USE_PTHREADS_INIT 1)
   SET(Threads_FOUND TRUE)
 ENDIF()
