@@ -302,7 +302,7 @@ FUNCTION(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
       IF(includeThisOne)
 
-        SET(_currentFeatureText "${_currentFeatureText}\n${_currentFeature}")
+        SET(_currentFeatureText "${_currentFeatureText}\n * ${_currentFeature}")
         GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_REQUIRED_VERSION)
         IF(_info)
           SET(_currentFeatureText "${_currentFeatureText} (required version ${_info})")
