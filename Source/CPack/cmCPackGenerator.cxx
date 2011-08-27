@@ -1000,6 +1000,7 @@ int cmCPackGenerator::DoPackage()
   std::string findExpr = tempDirectory;
   findExpr += "/*";
   gl.RecurseOn();
+  gl.SetRecurseThroughSymlinks(false);
   if ( !gl.FindFiles(findExpr) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
