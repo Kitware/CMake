@@ -92,6 +92,12 @@
 #                                BOOST_ROOT. Defaults to OFF.
 #                                  [Since CMake 2.8.3]
 #
+#   Boost_NO_BOOST_CMAKE         Do not do a find_package call in config mode
+#                                before searching for a regular boost install.
+#                                This will avoid finding boost-cmake installs.
+#                                Defaults to OFF.
+#                                  [Since CMake 2.8.6]
+#
 #   Boost_USE_STATIC_RUNTIME     If enabled, searches for boost libraries
 #                                linked against a static C++ standard library
 #                                ('s' ABI tag). This option should be set to
@@ -164,13 +170,27 @@
 
 #
 # These last three variables are available also as environment variables:
-# Also, note they are completely UPPERCASE.
+# Also, note they are completely UPPERCASE, except Boost_DIR.
 #
-#   BOOST_ROOT or BOOSTROOT      The preferred installation prefix for searching for
-#                                Boost.  Set this if the module has problems finding
-#                                the proper Boost installation.  To prevent falling
-#                                back on the system paths, set Boost_NO_SYSTEM_PATHS
-#                                to true.
+#   Boost_DIR or                 The preferred installation prefix for searching for
+#   BOOST_ROOT or BOOSTROOT      Boost.  Set this if the module has problems finding
+#                                the proper Boost installation.
+#
+#                                Note that Boost_DIR behaves exactly as <package>_DIR
+#                                variables are documented to behave in find_package's
+#                                Config mode.  That is, if it is set as a -D argument
+#                                to CMake, it must point to the location of the
+#                                BoostConfig.cmake or Boost-config.cmake file.  If it
+#                                is set as an environment variable, it must point to
+#                                the root of the boost installation.  BOOST_ROOT and
+#                                BOOSTROOT, on the other hand, will point to the root
+#                                in either case.
+#
+#                                To prevent falling back on the system paths, set
+#                                Boost_NO_SYSTEM_PATHS to true.
+#
+#                                To avoid finding boost-cmake installations, set
+#                                Boost_NO_BOOST_CMAKE to true.
 #
 #   BOOST_INCLUDEDIR             Set this to the include directory of Boost, if the
 #                                module has problems finding the proper Boost installation
@@ -236,6 +256,43 @@
 #=============================================================================
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
+
+
+#-------------------------------------------------------------------------------
+# Before we go searching, check whether boost-cmake is avaialble, unless the
+# user specifically asked NOT to search for boost-cmake.
+#
+# If Boost_DIR is set, this behaves as any find_package call would. If not,
+# it looks at BOOST_ROOT and BOOSTROOT to find Boost.
+#
+if (NOT Boost_NO_BOOST_CMAKE)
+  # If Boost_DIR is not set, look for BOOSTROOT and BOOST_ROOT as alternatives,
+  # since these are more conventional for Boost.
+  if ("$ENV{Boost_DIR}" STREQUAL "")
+    if (NOT "$ENV{BOOST_ROOT}" STREQUAL "")
+      set(ENV{Boost_DIR} $ENV{BOOST_ROOT})
+    elseif (NOT "$ENV{BOOSTROOT}" STREQUAL "")
+      set(ENV{Boost_DIR} $ENV{BOOSTROOT})
+    endif()
+  endif()
+
+  # Do the same find_package call but look specifically for the CMake version.
+  # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
+  # need to delegate them to this find_package call.
+  find_package(Boost QUIET NO_MODULE)
+
+  # If we found boost-cmake, then we're done.  Print out what we found.
+  # Otherwise let the rest of the module try to find it.
+  if (Boost_FOUND)
+    message("Boost ${Boost_FIND_VERSION} found.")
+    if (Boost_FIND_COMPONENTS)
+      message("Found Boost components:")
+      message("   ${Boost_FIND_COMPONENTS}")
+    endif()
+    return()
+  endif()
+endif()
+
 
 #-------------------------------------------------------------------------------
 #  FindBoost functions & macros
@@ -517,6 +574,11 @@ else(_boost_IN_CACHE)
   _Boost_CHECK_SPELLING(Boost_INCLUDEDIR)
 
   # If BOOST_ROOT was defined in the environment, use it.
+  if (NOT BOOST_ROOT AND NOT $ENV{Boost_DIR} STREQUAL "")
+    set(BOOST_ROOT $ENV{Boost_DIR})
+  endif()
+
+  # If BOOST_ROOT was defined in the environment, use it.
   if (NOT BOOST_ROOT AND NOT $ENV{BOOST_ROOT} STREQUAL "")
     set(BOOST_ROOT $ENV{BOOST_ROOT})
   endif()
@@ -573,35 +635,34 @@ else(_boost_IN_CACHE)
       ${BOOST_INCLUDEDIR} ${_boost_INCLUDE_SEARCH_DIRS})
   endif( BOOST_INCLUDEDIR )
 
-  # Build a list of path suffixes for each version.
-  set(_boost_PATH_SUFFIXES)
-  foreach(_boost_VER ${_boost_TEST_VERSIONS})
-    # Add in a path suffix, based on the required version, ideally
-    # we could read this from version.hpp, but for that to work we'd
-    # need to know the include dir already
-    set(_boost_BOOSTIFIED_VERSION)
-
-    # Transform 1.35 => 1_35 and 1.36.0 => 1_36_0
-    if(_boost_VER MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1_\\2_\\3"
-        _boost_BOOSTIFIED_VERSION ${_boost_VER})
-    elseif()
-      string(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2"
-        _boost_BOOSTIFIED_VERSION ${_boost_VER})
-    endif()
-
-    list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_VER}")
-    list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_VER}")
-    list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
-    list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
-  endforeach()
-
   # ------------------------------------------------------------------------
   #  Search for Boost include DIR
   # ------------------------------------------------------------------------
   # Try to find Boost by stepping backwards through the Boost versions
   # we know about.
   if( NOT Boost_INCLUDE_DIR )
+    # Build a list of path suffixes for each version.
+    set(_boost_PATH_SUFFIXES)
+    foreach(_boost_VER ${_boost_TEST_VERSIONS})
+      # Add in a path suffix, based on the required version, ideally
+      # we could read this from version.hpp, but for that to work we'd
+      # need to know the include dir already
+      set(_boost_BOOSTIFIED_VERSION)
+
+      # Transform 1.35 => 1_35 and 1.36.0 => 1_36_0
+      if(_boost_VER MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
+          string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1_\\2_\\3"
+            _boost_BOOSTIFIED_VERSION ${_boost_VER})
+      elseif(_boost_VER MATCHES "[0-9]+\\.[0-9]+")
+          string(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2"
+            _boost_BOOSTIFIED_VERSION ${_boost_VER})
+      endif()
+
+      list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
+      list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
+
+    endforeach(_boost_VER)
+
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "Include debugging info:")
@@ -917,7 +978,6 @@ else(_boost_IN_CACHE)
     find_library(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
         NAMES ${_boost_RELEASE_NAMES}
         HINTS ${_boost_LIBRARY_SEARCH_DIRS}
-        PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
         ${_boost_FIND_OPTIONS}
         DOC "${_boost_docstring_release}"
     )
@@ -950,7 +1010,6 @@ else(_boost_IN_CACHE)
     find_library(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
         NAMES ${_boost_DEBUG_NAMES}
         HINTS ${_boost_LIBRARY_SEARCH_DIRS}
-        PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
         ${_boost_FIND_OPTIONS}
         DOC "${_boost_docstring_debug}"
     )
