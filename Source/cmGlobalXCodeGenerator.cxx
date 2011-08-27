@@ -327,7 +327,9 @@ std::string
 cmGlobalXCodeGenerator::PostBuildMakeTarget(std::string const& tName,
                                             std::string const& configName)
 {
-  std::string out = "PostBuild." + tName;
+  std::string target = tName;
+  cmSystemTools::ReplaceString(target, " ", "_");
+  std::string out = "PostBuild." + target;
   if(this->XcodeVersion > 20)
     {
     out += "." + configName;
