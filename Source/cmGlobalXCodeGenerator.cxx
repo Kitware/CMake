@@ -770,7 +770,8 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
 bool cmGlobalXCodeGenerator::SpecialTargetEmitted(std::string const& tname)
 {
   if(tname == "ALL_BUILD" || tname == "XCODE_DEPEND_HELPER" ||
-     tname == "install" || tname == "package" || tname == "RUN_TESTS" )
+     tname == "install" || tname == "package" || tname == "RUN_TESTS" ||
+     tname == CMAKE_CHECK_BUILD_SYSTEM_TARGET )
     {
     if(this->TargetDoneSet.find(tname) != this->TargetDoneSet.end())
       {
