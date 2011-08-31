@@ -42,6 +42,8 @@
 include(CheckFunctionExists)
 include(CheckFortranFunctionExists)
 
+set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
 # Check the language being used
 get_property( _LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES )
 if( _LANGUAGES_ MATCHES Fortran )
@@ -89,13 +91,18 @@ foreach(_library ${_list})
   if(_libraries_work)
     if (BLA_STATIC)
       if (WIN32)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRRAY_SUFFIXES})
       endif ( WIN32 )
       if (APPLE)
-       set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRRAY_SUFFIXES})
       else (APPLE)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRRAY_SUFFIXES})
       endif (APPLE)
+    else (BLA_STATIC)
+      if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        # for ubuntu's libblas3gf and liblapack3gf packages
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRRAY_SUFFIXES} .so.3gf)
+      endif ()
     endif (BLA_STATIC)
     find_library(${_prefix}_${_library}_LIBRARY
       NAMES ${_library}
@@ -408,7 +415,7 @@ if(NOT BLAS_LIBRARIES)
   check_fortran_libraries(
   BLAS_LIBRARIES
   BLAS
-  cblas_dgemm
+  dgemm
   ""
   "Accelerate"
   ""
@@ -421,7 +428,7 @@ if (BLA_VENDOR STREQUAL "NAS" OR BLA_VENDOR STREQUAL "All")
     check_fortran_libraries(
     BLAS_LIBRARIES
     BLAS
-    cblas_dgemm
+    dgemm
     ""
     "vecLib"
     ""
@@ -613,3 +620,5 @@ else(BLA_F95)
     endif(BLAS_FOUND)
   endif(NOT BLAS_FIND_QUIETLY)
 endif(BLA_F95)
+
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})

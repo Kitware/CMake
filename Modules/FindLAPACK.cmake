@@ -36,6 +36,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
 if (NOT _LANGUAGES_ MATCHES Fortran)
 include(CheckFunctionExists)
@@ -45,6 +47,8 @@ endif (NOT _LANGUAGES_ MATCHES Fortran)
 
 set(LAPACK_FOUND FALSE)
 set(LAPACK95_FOUND FALSE)
+
+# TODO: move this stuff to separate module
 
 macro(Check_Lapack_Libraries LIBRARIES _prefix _name _flags _list _blas _threads)
 # This macro checks for the existence of the combination of fortran libraries
@@ -61,38 +65,38 @@ macro(Check_Lapack_Libraries LIBRARIES _prefix _name _flags _list _blas _threads
 set(_libraries_work TRUE)
 set(${LIBRARIES})
 set(_combined_name)
+if (NOT _libdir)
+  if (WIN32)
+    set(_libdir ENV LIB)
+  elseif (APPLE)
+    set(_libdir /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV DYLD_LIBRARY_PATH)
+  else ()
+    set(_libdir /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV LD_LIBRARY_PATH)
+  endif ()
+endif ()
 foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
 
   if(_libraries_work)
-  IF (WIN32)
-    if(BLA_STATIC)
-      set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib;.dll")
-    endif(BLA_STATIC)
+    if (BLA_STATIC)
+      if (WIN32)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRRAY_SUFFIXES})
+      endif ( WIN32 )
+      if (APPLE)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRRAY_SUFFIXES})
+      else (APPLE)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRRAY_SUFFIXES})
+      endif (APPLE)
+    else (BLA_STATIC)
+			if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        # for ubuntu's libblas3gf and liblapack3gf packages
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRRAY_SUFFIXES} .so.3gf)
+      endif ()
+    endif (BLA_STATIC)
     find_library(${_prefix}_${_library}_LIBRARY
-    NAMES ${_library}
-    PATHS ENV LIB
-    )
-  ENDIF (WIN32)
-
-  if(APPLE)
-    if(BLA_STATIC)
-      set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so;.dylib")
-    endif(BLA_STATIC)
-    find_library(${_prefix}_${_library}_LIBRARY
-    NAMES ${_library}
-    PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV DYLD_LIBRARY_PATH
-    )
-    else(APPLE)
-    if(BLA_STATIC)
-     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a;.so")
-    endif(BLA_STATIC)
-    find_library(${_prefix}_${_library}_LIBRARY
-    NAMES ${_library}
-    PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV LD_LIBRARY_PATH
-    )
-    endif(APPLE)
-
+      NAMES ${_library}
+      PATHS ${_libdir}
+      )
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
     set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -165,7 +169,7 @@ endif (BLA_VENDOR STREQUAL "Goto" OR BLA_VENDOR STREQUAL "All")
 
 
 #acml lapack
- if (BLA_VENDOR STREQUAL "ACML.*" OR BLA_VENDOR STREQUAL "All")
+ if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
    if (BLAS_LIBRARIES MATCHES ".+acml.+")
      set (LAPACK_LIBRARIES ${BLAS_LIBRARIES})
    endif ()
@@ -297,3 +301,5 @@ else(BLA_F95)
   endif(LAPACK_FOUND)
  endif(NOT LAPACK_FIND_QUIETLY)
 endif(BLA_F95)
+
+set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
