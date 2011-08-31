@@ -330,6 +330,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] =
 { 
   {"Preprocess", "fpp", "Run Preprocessor on files", "preprocessYes", 0}, 
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "true", 0},
+  {"SourceFileFormat", "fixed", "Use Fixed Format", "fileFormatFixed", 0},
+  {"SourceFileFormat", "free", "Use Free Format", "fileFormatFree", 0},
   {"DebugInformationFormat", "Zi", "full debug", "debugEnabled", 0},
   {"DebugInformationFormat", "debug:full", "full debug", "debugEnabled", 0},
   {"DebugInformationFormat", "Z7", "c7 compat", "debugOldStyleInfo", 0},
