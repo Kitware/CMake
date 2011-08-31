@@ -1569,8 +1569,15 @@ void cmLocalVisualStudio7Generator
              !fc.CompileDefs.empty() ||
              !fc.CompileDefsConfig.empty())
             {
-            Options fileOptions(this, this->Version, Options::Compiler,
-                                cmLocalVisualStudio7GeneratorFlagTable,
+            Options::Tool tool = Options::Compiler;
+            cmVS7FlagTable const* table =
+              cmLocalVisualStudio7GeneratorFlagTable;
+            if(this->FortranProject)
+              {
+              tool = Options::FortranCompiler;
+              table = cmLocalVisualStudio7GeneratorFortranFlagTable;
+              }
+            Options fileOptions(this, this->Version, tool, table,
                                 this->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
