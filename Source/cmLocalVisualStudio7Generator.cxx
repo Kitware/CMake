@@ -689,6 +689,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
     }
 
+  if(this->FortranProject)
+    {
+    switch(this->GetFortranFormat(target.GetProperty("Fortran_FORMAT")))
+      {
+      case FortranFormatFixed: flags += " -fixed"; break;
+      case FortranFormatFree: flags += " -free"; break;
+      default: break;
+      }
+    }
+
   // Add the target-specific flags.
   if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
     {
@@ -1362,6 +1372,21 @@ cmLocalVisualStudio7GeneratorFCInfo
       {
       fc.CompileFlags = cflags;
       needfc = true;
+      }
+    if(lg->FortranProject)
+      {
+      switch(lg->GetFortranFormat(sf.GetProperty("Fortran_FORMAT")))
+        {
+        case cmLocalGenerator::FortranFormatFixed:
+          fc.CompileFlags = "-fixed " + fc.CompileFlags;
+          needfc = true;
+          break;
+        case cmLocalGenerator::FortranFormatFree:
+          fc.CompileFlags = "-free " + fc.CompileFlags;
+          needfc = true;
+          break;
+        default: break;
+        }
       }
     if(const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS"))
       {

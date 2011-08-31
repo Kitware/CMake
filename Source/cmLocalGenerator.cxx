@@ -2917,6 +2917,31 @@ std::string cmLocalGenerator::EscapeForCMake(const char* str)
 }
 
 //----------------------------------------------------------------------------
+cmLocalGenerator::FortranFormat
+cmLocalGenerator::GetFortranFormat(const char* value)
+{
+  FortranFormat format = FortranFormatNone;
+  if(value && *value)
+    {
+    std::vector<std::string> fmt;
+    cmSystemTools::ExpandListArgument(value, fmt);
+    for(std::vector<std::string>::iterator fi = fmt.begin();
+        fi != fmt.end(); ++fi)
+      {
+      if(*fi == "FIXED")
+        {
+        format = FortranFormatFixed;
+        }
+      if(*fi == "FREE")
+        {
+        format = FortranFormatFree;
+        }
+      }
+    }
+  return format;
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
 {
