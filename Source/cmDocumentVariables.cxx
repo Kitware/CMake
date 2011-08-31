@@ -1049,6 +1049,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_Fortran_FORMAT", cmProperty::VARIABLE,
+     "Set to FIXED or FREE to indicate the Fortran source layout.",
+     "This variable is used to initialize the Fortran_FORMAT "
+     "property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_Fortran_MODULE_DIRECTORY", cmProperty::VARIABLE,
      "Fortran module output directory.",
      "This variable is used to initialize the "
