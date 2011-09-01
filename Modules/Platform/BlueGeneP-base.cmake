@@ -85,20 +85,23 @@ set(CMAKE_DL_LIBS "dl")
 macro(__BlueGeneP_set_dynamic_flags compiler_id lang)
   if (${compiler_id} STREQUAL XL)
     # Flags for XL compilers if we explicitly detected XL
-    set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-qpic")                            # -pic
-    set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-qmkshrobj -qnostaticlink") # -shared
-    set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-rpath,")               # -rpath
-    set(BGP_${lang}_DYNAMIC_EXE_FLAGS "-qnostaticlink -qnostaticlink=libgcc")
+    set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS           "-qpic")
+    set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS    "-qmkshrobj -qnostaticlink")
+    set(BGP_${lang}_DYNAMIC_EXE_FLAGS                "-qnostaticlink -qnostaticlink=libgcc")
   else()
     # Assume flags for GNU compilers (if the ID is GNU *or* anything else).
-    set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")               # -pic
-    set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")      # -shared
-    set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-rpath,")  # -rpath
-    set(BGP_${lang}_DYNAMIC_EXE_FLAGS "-dynamic")
+    set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS           "-fPIC")
+    set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS    "-shared")
+    set(BGP_${lang}_DYNAMIC_EXE_FLAGS                "-dynamic")
   endif()
 
-  set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS        "") # +s, flag for exe link to use shared lib
-  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":") # : or empty
+  # Both toolchains use the GNU linker on BG/P, so these options are shared.
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG      "-Wl,-rpath,")
+  set(CMAKE_SHARED_LIBRARY_RPATH_LINK_${lang}_FLAG   "-Wl,-rpath-link,")
+  set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG       "-Wl,-soname,")
+  set(CMAKE_EXE_EXPORTS_${lang}_FLAG                 "-Wl,--export-dynamic")
+  set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS        "")  # +s, flag for exe link to use shared lib
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP  ":") # : or empty
 
   set(BGP_${lang}_DEFAULT_EXE_FLAGS
     "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
