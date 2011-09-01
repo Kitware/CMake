@@ -126,7 +126,7 @@ ADD_CUSTOM_COMMAND(
 
 INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
 INSTALL_FILES(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
-INSTALL_FILES(share/aclocal FILES cmake.m4)
+INSTALL(FILES cmake.m4 DESTINATION share/aclocal)
 
 # Drive documentation generation.
 ADD_CUSTOM_TARGET(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
