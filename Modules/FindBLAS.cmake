@@ -91,17 +91,17 @@ foreach(_library ${_list})
   if(_libraries_work)
     if (BLA_STATIC)
       if (WIN32)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRRAY_SUFFIXES})
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
       endif ( WIN32 )
       if (APPLE)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRRAY_SUFFIXES})
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
       else (APPLE)
-        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRRAY_SUFFIXES})
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
       endif (APPLE)
     else (BLA_STATIC)
       if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         # for ubuntu's libblas3gf and liblapack3gf packages
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRRAY_SUFFIXES} .so.3gf)
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3gf)
       endif ()
     endif (BLA_STATIC)
     find_library(${_prefix}_${_library}_LIBRARY
@@ -356,7 +356,7 @@ if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
      BLAS_LIBRARIES
      BLAS
      sgemm
-     "" "acml_mp;acml_mv;CALBLAS" "" ${BLAS_ACML_GPU_LIB_DIRS}
+     "" "acml;acml_mv;CALBLAS" "" ${BLAS_ACML_GPU_LIB_DIRS}
    )
    if( BLAS_LIBRARIES )
     break()
@@ -368,7 +368,7 @@ if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
      BLAS_LIBRARIES
      BLAS
      sgemm
-     "" "acml_mp;acml_mv" "" ${BLAS_ACML_LIB_DIRS}
+     "" "acml;acml_mv" "" ${BLAS_ACML_LIB_DIRS}
    )
    if( BLAS_LIBRARIES )
     break()
