@@ -71,10 +71,12 @@ struct hash<const char*> {
   size_t operator()(const @KWSYS_NAMESPACE@_stl::string & __s) const { return _stl_hash_string(__s.c_str()); }
 };
 
+#if !defined(__BORLANDC__)
 @KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
   struct hash<const @KWSYS_NAMESPACE@_stl::string> {
   size_t operator()(const @KWSYS_NAMESPACE@_stl::string & __s) const { return _stl_hash_string(__s.c_str()); }
 };
+#endif
 
 @KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
 struct hash<char> {
