@@ -582,6 +582,13 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     {
     lg->AppendFlags(flags, cmtarget.GetProperty("COMPILE_FLAGS"));
     }
+  const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
+  switch(this->CurrentLocalGenerator->GetFortranFormat(srcfmt))
+    {
+    case cmLocalGenerator::FortranFormatFixed: flags="-fixed "+flags; break;
+    case cmLocalGenerator::FortranFormatFree: flags="-free "+flags; break;
+    default: break;
+    }
   lg->AppendFlags(flags, sf->GetProperty("COMPILE_FLAGS"));
 
   // Add per-source definitions.
@@ -1902,6 +1909,21 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     flags += defFlags;
     buildSettings->AddAttribute("OTHER_CFLAGS",
                                 this->CreateString(flags.c_str()));
+    }
+
+  // Add Fortran source format attribute if property is set.
+  const char* format = 0;
+  const char* tgtfmt = target.GetProperty("Fortran_FORMAT");
+  switch(this->CurrentLocalGenerator->GetFortranFormat(tgtfmt))
+    {
+    case cmLocalGenerator::FortranFormatFixed: format = "fixed"; break;
+    case cmLocalGenerator::FortranFormatFree: format = "free"; break;
+    default: break;
+    }
+  if(format)
+    {
+    buildSettings->AddAttribute("IFORT_LANG_SRCFMT",
+                                this->CreateString(format));
     }
 
   // Create the INSTALL_PATH attribute.
