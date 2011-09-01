@@ -34,7 +34,7 @@
 # Boost that contain header files only (e.g. foreach) you do not need to
 # specify COMPONENTS.
 #
-# You should provide a minimum version number that should be used. If you provide this 
+# You should provide a minimum version number that should be used. If you provide this
 # version number and specify the REQUIRED attribute, this module will fail if it
 # can't find the specified or a later version. If you specify a version number this is
 # automatically put into the considered list of version numbers and thus doesn't need
@@ -92,6 +92,12 @@
 #                                BOOST_ROOT. Defaults to OFF.
 #                                  [Since CMake 2.8.3]
 #
+#   Boost_NO_BOOST_CMAKE         Do not do a find_package call in config mode
+#                                before searching for a regular boost install.
+#                                This will avoid finding boost-cmake installs.
+#                                Defaults to OFF.
+#                                  [Since CMake 2.8.6]
+#
 #   Boost_USE_STATIC_RUNTIME     If enabled, searches for boost libraries
 #                                linked against a static C++ standard library
 #                                ('s' ABI tag). This option should be set to
@@ -134,7 +140,7 @@
 #                                unless this is set to TRUE or the REQUIRED
 #                                keyword is specified in find_package().
 #                                  [Since CMake 2.8.0]
-# 
+#
 #   Boost_COMPILER               Set this to the compiler suffix used by Boost
 #                                (e.g. "-gcc43") if FindBoost has problems finding
 #                                the proper Boost installation
@@ -164,13 +170,27 @@
 
 #
 # These last three variables are available also as environment variables:
-# Also, note they are completely UPPERCASE.
+# Also, note they are completely UPPERCASE, except Boost_DIR.
 #
-#   BOOST_ROOT or BOOSTROOT      The preferred installation prefix for searching for
-#                                Boost.  Set this if the module has problems finding
-#                                the proper Boost installation.  To prevent falling
-#                                back on the system paths, set Boost_NO_SYSTEM_PATHS
-#                                to true.
+#   Boost_DIR or                 The preferred installation prefix for searching for
+#   BOOST_ROOT or BOOSTROOT      Boost.  Set this if the module has problems finding
+#                                the proper Boost installation.
+#
+#                                Note that Boost_DIR behaves exactly as <package>_DIR
+#                                variables are documented to behave in find_package's
+#                                Config mode.  That is, if it is set as a -D argument
+#                                to CMake, it must point to the location of the
+#                                BoostConfig.cmake or Boost-config.cmake file.  If it
+#                                is set as an environment variable, it must point to
+#                                the root of the boost installation.  BOOST_ROOT and
+#                                BOOSTROOT, on the other hand, will point to the root
+#                                in either case.
+#
+#                                To prevent falling back on the system paths, set
+#                                Boost_NO_SYSTEM_PATHS to true.
+#
+#                                To avoid finding boost-cmake installations, set
+#                                Boost_NO_BOOST_CMAKE to true.
 #
 #   BOOST_INCLUDEDIR             Set this to the include directory of Boost, if the
 #                                module has problems finding the proper Boost installation
@@ -237,6 +257,43 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+
+#-------------------------------------------------------------------------------
+# Before we go searching, check whether boost-cmake is avaialble, unless the
+# user specifically asked NOT to search for boost-cmake.
+#
+# If Boost_DIR is set, this behaves as any find_package call would. If not,
+# it looks at BOOST_ROOT and BOOSTROOT to find Boost.
+#
+if (NOT Boost_NO_BOOST_CMAKE)
+  # If Boost_DIR is not set, look for BOOSTROOT and BOOST_ROOT as alternatives,
+  # since these are more conventional for Boost.
+  if ("$ENV{Boost_DIR}" STREQUAL "")
+    if (NOT "$ENV{BOOST_ROOT}" STREQUAL "")
+      set(ENV{Boost_DIR} $ENV{BOOST_ROOT})
+    elseif (NOT "$ENV{BOOSTROOT}" STREQUAL "")
+      set(ENV{Boost_DIR} $ENV{BOOSTROOT})
+    endif()
+  endif()
+
+  # Do the same find_package call but look specifically for the CMake version.
+  # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
+  # need to delegate them to this find_package call.
+  find_package(Boost QUIET NO_MODULE)
+
+  # If we found boost-cmake, then we're done.  Print out what we found.
+  # Otherwise let the rest of the module try to find it.
+  if (Boost_FOUND)
+    message("Boost ${Boost_FIND_VERSION} found.")
+    if (Boost_FIND_COMPONENTS)
+      message("Found Boost components:")
+      message("   ${Boost_FIND_COMPONENTS}")
+    endif()
+    return()
+  endif()
+endif()
+
+
 #-------------------------------------------------------------------------------
 #  FindBoost functions & macros
 #
@@ -287,7 +344,7 @@ macro(_Boost_ADJUST_LIB_VARS basename)
       set(Boost_${basename}_LIBRARY   ${Boost_${basename}_LIBRARY_RELEASE} )
       set(Boost_${basename}_LIBRARIES ${Boost_${basename}_LIBRARY_RELEASE} )
     endif()
-    
+
     if(Boost_${basename}_LIBRARY)
       set(Boost_${basename}_LIBRARY ${Boost_${basename}_LIBRARY} CACHE FILEPATH "The Boost ${basename} library")
 
@@ -372,7 +429,7 @@ endfunction()
 
 #
 # End functions/macros
-#  
+#
 #-------------------------------------------------------------------------------
 
 
@@ -515,6 +572,11 @@ else(_boost_IN_CACHE)
   _Boost_CHECK_SPELLING(Boost_ROOT)
   _Boost_CHECK_SPELLING(Boost_LIBRARYDIR)
   _Boost_CHECK_SPELLING(Boost_INCLUDEDIR)
+
+  # If BOOST_ROOT was defined in the environment, use it.
+  if (NOT BOOST_ROOT AND NOT $ENV{Boost_DIR} STREQUAL "")
+    set(BOOST_ROOT $ENV{Boost_DIR})
+  endif()
 
   # If BOOST_ROOT was defined in the environment, use it.
   if (NOT BOOST_ROOT AND NOT $ENV{BOOST_ROOT} STREQUAL "")
