@@ -2982,6 +2982,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     std::string errStr = "UPLOAD cannot stat file '";
     errStr += filename + "'.";
     this->SetError(errStr.c_str());
+    fclose(fin);
     return false;
     }
 
@@ -2991,6 +2992,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   if(!curl)
     {
     this->SetError("UPLOAD error initializing curl.");
+    fclose(fin);
     return false;
     }
 
