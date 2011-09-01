@@ -40,6 +40,7 @@
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 #include <@KWSYS_NAMESPACE@/FundamentalType.h>
 #include <@KWSYS_NAMESPACE@/cstddef>        // size_t
+#include <@KWSYS_NAMESPACE@/stl/string>     // string
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -63,6 +64,16 @@ struct hash<char*> {
 @KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
 struct hash<const char*> {
   size_t operator()(const char* __s) const { return _stl_hash_string(__s); }
+};
+
+@KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
+  struct hash<@KWSYS_NAMESPACE@_stl::string> {
+  size_t operator()(const @KWSYS_NAMESPACE@_stl::string & __s) const { return _stl_hash_string(__s.c_str()); }
+};
+
+@KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
+  struct hash<const @KWSYS_NAMESPACE@_stl::string> {
+  size_t operator()(const @KWSYS_NAMESPACE@_stl::string & __s) const { return _stl_hash_string(__s.c_str()); }
 };
 
 @KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
