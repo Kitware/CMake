@@ -146,10 +146,7 @@ MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   SET(CMAKE_Fortran_COMPILER_ID_RUN 1)
   SET(CMAKE_Fortran_PLATFORM_ID "Windows")
-
-  # TODO: Set the compiler id.  It is probably MSVC but
-  # the user may be using an integrated Intel compiler.
-  # SET(CMAKE_Fortran_COMPILER_ID "MSVC")
+  SET(CMAKE_Fortran_COMPILER_ID "Intel")
 ENDIF(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 
 IF(NOT CMAKE_Fortran_COMPILER_ID_RUN)
