@@ -1,3 +1,100 @@
+Changes in CMake 2.8.6-rc2 (since 2.8.6-rc1)
+--------------------------------------------
+Brad King (2):
+      KWSys: Add hash function for std::string
+      KWSys: Fix std::string hash function for Borland
+
+Clinton Stimpson (1):
+      qt4: also find QtUiTools when cross compiling with mingw.
+
+David Cole (3):
+      Xcode4: Requires more quoting of single quote char
+      cmake.m4: Use modern signature of install(FILES ...)
+      CMake Release Scripts: Changes for next release candidate...
+
+David Faure (1):
+      Don't use a variable name that might be used in other files.
+
+Stephen Kelly (73):
+      Create moc files in the current binary dir, not the top level.
+      Make the formatting of feature_summary output a little better.
+      Add the GenerateExportMacro with unit tests.
+      Handle the case where the user changes the DEFINE_SYMBOL property.
+      Add a newline at the end of the file.
+      Add a newline at the end of the file.
+      Add missing licence header.
+      Remove the fatal_warnings option which is no longer used.
+      Test for features, not specific compilers.
+      Simplify. We already know we have hidden visibility at this point.
+      Simplify the compiler feature check
+      Add some debug output.
+      Short-circuit the tests on unsupported compilers.
+      Test expected no-op instead of aborting the build.
+      Fix tests with clang.
+      Fix typo and tests failing as a result.
+      Only run the failure tests with gcc >= 4.2
+      Set the CMAKE_RUNTIME_OUTPUT_DIRECTORY for windows builds.
+      Only set the COMPILER_HAS_HIDDEN_VISIBILITY if GCC >= 4.2
+      Disable all export macros on Borland.
+      Another attempt to fix the tests on Borland.
+      Use the correct project name compiletest not compilefail
+      Fix off-by-not in test for Borland.
+      Another attempt at fixing Borland.
+      Add some debug output to narrow down deprecation test issues
+      Export deprecated free methods too.
+      Remember to surround the other deprecated test in the Borland check.
+      Only set the deprecated attribute if hidden visibilty is enabled.
+      Make sure the hidden visibility variables never get set on MINGW.
+      Don't use hidden visibility on non-mingw windows either.
+      Don't export methods on already exported classes.
+      Split the deprecated available check from setting macro values.
+      Test for compiler features, instead of for specific platforms.
+      Exclude the XL compiler from the hidden-visibility test.
+      Add the COMPILER_HAS_DEPRECATED only if it has a declspec variant
+      Don't change the expected build result based on the platform.
+      Expect the tests to pass if hidden visibilty is not enabled.
+      Test -Werror instead of enabling it per compiler.
+      Add some messaging output to make remaining issues findable.
+      Perform the -Werror test only once.
+      Test for deprecated attribute before declspec.
+      Try to error on deprecated on Intel and SunCC.
+      Borland can't do deprecated.
+      Fixup forgotten part of aed84517c942a4c40f493fcf997cdf6a047349f8
+      Disable testing of deprecated macros.
+      Don't enable deprecated on HP.
+      Don't enable deprecated on old GCC
+      Exclude cygwin from the hidden visibility feature.
+      Exclude PGI from exports and deprecated.
+      Start testing expected values for compiler flags.
+      Exclude win32 from hidden visibility checks.
+      Comment the test assertion for now
+      Test the correct cxx variable.
+      Fix the version extraction regex for clang.
+      Hopefully add version extraction for Intel.
+      Add some settings for non-truncation of test output.
+      Fix up the regex command for Intel.
+      Test for too-old-intel compilers.
+      Possibly fix test on HPUX.
+      Possibly fix configuration test on AIX.
+      Try to make the macros do almost nothing for Watcom.
+      More consistency in the macro options.
+      Add missing NO_EXPORT macro variant.
+      Look for errors reported by PGI too.
+      Quote paths in case there is a space in one of them.
+      Disable the tests for Watcom.
+      Fix Compiler id variable name.
+      Add quotes in case cmake is installed in a prefix with a space.
+      Fix the feature of using a specific prefix for macros.
+      Add documentation about the prefix and no_deprecated options.
+      Remove blank line at the start of the file.
+      Don't start a line with a dash(-)
+      Fix up verbatim code sections of the dox.
+
+Todd Gamblin (3):
+      FindBoost: Call find_package with NO_MODULE first
+      Fix XL compilers on non-AIX machines.
+      Fixed link bugs in BlueGeneP build.
+
 Changes in CMake 2.8.6-rc1 (since 2.8.5)
 --------------------------------------------
 Aaron C. Meadows (1):
