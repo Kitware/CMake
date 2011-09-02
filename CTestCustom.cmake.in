@@ -43,7 +43,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
   "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
   "ld: warning: directory not found for option .-(F|L)"
-  "qglobal.h.*warning.*This version of Mac OS X is unsupported"
+  "warning.*This version of Mac OS X is unsupported"
   )
 
 IF(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")
