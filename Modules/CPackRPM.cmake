@@ -491,11 +491,13 @@ ELSE(CPACK_RPM_PACKAGE_COMPONENT)
 ENDIF(CPACK_RPM_PACKAGE_COMPONENT)
 # Use files tree to construct files command (spec file)
 # We should not forget to include symlinks (thus -o -type l)
+# We should include directory as well (thus -type d)
+#   but not the main local dir "." (thus -a -not -name ".")
 # We must remove the './' due to the local search and escape the
 # file name by enclosing it between double quotes (thus the sed)
 # Then we must authorize any man pages extension (adding * at the end)
 # because rpmbuild may automatically compress those files
-EXECUTE_PROCESS(COMMAND find . -type f -o -type l
+EXECUTE_PROCESS(COMMAND find . -type f -o -type l -o (-type d -a -not -name ".")
                 COMMAND sed s:.*/man.*/.*:&*:
                 COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
                 WORKING_DIRECTORY "${WDIR}"
