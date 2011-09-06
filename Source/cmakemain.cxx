@@ -72,7 +72,7 @@ static const char * cmDocumentationOptions[][3] =
   {"-E", "CMake command mode.",
    "For true platform independence, CMake provides a list of commands "
    "that can be used on all systems. Run with -E help for the usage "
-   "information. Commands available are: build, chdir, compare_files, copy, "
+   "information. Commands available are: chdir, compare_files, copy, "
    "copy_directory, copy_if_different, echo, echo_append, environment, "
    "make_directory, md5sum, remove, remove_directory, rename, tar, time, "
    "touch, touch_nocreate. In addition, some platform specific commands "
