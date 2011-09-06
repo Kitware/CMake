@@ -180,7 +180,8 @@ bool cmArchiveWrite::AddPath(const char* path,
     {
     return false;
     }
-  if(!cmSystemTools::FileIsDirectory(path))
+  if(!cmSystemTools::FileIsDirectory(path) ||
+    cmSystemTools::FileIsSymlink(path))
     {
     return true;
     }
