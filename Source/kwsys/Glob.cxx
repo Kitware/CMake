@@ -259,26 +259,23 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
       }
 
     bool isDir = kwsys::SystemTools::FileIsDirectory(realname.c_str());
+    bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname.c_str());
 
-    if ( !isDir )
+    if ( isDir && (!isSymLink || this->RecurseThroughSymlinks) )
       {
-      if ( (this->Internals->Expressions.size() > 0) && 
+      if (isSymLink)
+        {
+        ++this->FollowedSymlinkCount;
+        }
+      this->RecurseDirectory(start+1, realname);
+      }
+    else
+      {
+      if ( (this->Internals->Expressions.size() > 0) &&
            this->Internals->Expressions[
              this->Internals->Expressions.size()-1].find(fname.c_str()) )
         {
         this->AddFile(this->Internals->Files, realname.c_str());
-        }
-      }
-    else
-      {
-      bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname.c_str());
-      if (!isSymLink || this->RecurseThroughSymlinks)
-        {
-        if (isSymLink)
-          {
-          ++this->FollowedSymlinkCount;
-          }
-        this->RecurseDirectory(start+1, realname);
         }
       }
     }
