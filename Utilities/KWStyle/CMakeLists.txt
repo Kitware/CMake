@@ -12,17 +12,34 @@
 
 #-----------------------------------------------------------------------------
 # CMake uses KWStyle for checking the coding style
-OPTION(CMAKE_USE_KWSTYLE "Run KWStyle in order to check for violations of the coding standard." OFF)
-MARK_AS_ADVANCED(CMAKE_USE_KWSTYLE)
 
-IF(CMAKE_USE_KWSTYLE)
-  FIND_PROGRAM(KWSTYLE_EXECUTABLE
+# Search for a built-from-source KWStyle under Dashboards/Support on a typical
+# dashboard machines:
+#
+SET(home "$ENV{HOME}")
+IF(NOT home)
+  STRING(REPLACE "\\" "/" home "$ENV{USERPROFILE}")
+ENDIF()
+
+FIND_PROGRAM(KWSTYLE_EXECUTABLE
   NAMES KWStyle 
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware Inc.\\KWStyle 1.0.0]/bin"
+  "${home}/Dashboards/Support/KWStyle/bin"
   )
-  MARK_AS_ADVANCED(KWSTYLE_EXECUTABLE)
+MARK_AS_ADVANCED(KWSTYLE_EXECUTABLE)
 
+SET(CMAKE_USE_KWSTYLE_DEFAULT OFF)
+IF(KWSTYLE_EXECUTABLE)
+  SET(CMAKE_USE_KWSTYLE_DEFAULT ON)
+ENDIF()
+
+OPTION(CMAKE_USE_KWSTYLE
+  "Add StyleCheck target and KWStyle test: run KWStyle to check for coding standard violations."
+  ${CMAKE_USE_KWSTYLE_DEFAULT})
+MARK_AS_ADVANCED(CMAKE_USE_KWSTYLE)
+
+IF(CMAKE_USE_KWSTYLE)
   OPTION(KWSTYLE_USE_VIM_FORMAT "Set KWStyle to generate errors with a VIM-compatible format." OFF)
   OPTION(KWSTYLE_USE_MSVC_FORMAT "Set KWStyle to generate errors with a VisualStudio-compatible format." OFF)
   MARK_AS_ADVANCED(KWSTYLE_USE_VIM_FORMAT)
@@ -59,4 +76,3 @@ IF(CMAKE_USE_KWSTYLE)
 
   ADD_CUSTOM_TARGET(StyleCheck DEPENDS ${CMake_BINARY_DIR}/KWStyleReport.txt)
 ENDIF(CMAKE_USE_KWSTYLE)
-
