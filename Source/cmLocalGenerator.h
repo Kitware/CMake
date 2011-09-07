@@ -244,6 +244,14 @@ public:
   /** Escape the given string as an argument in a CMake script.  */
   std::string EscapeForCMake(const char* str);
 
+  enum FortranFormat
+    {
+    FortranFormatNone,
+    FortranFormatFixed,
+    FortranFormatFree
+    };
+  FortranFormat GetFortranFormat(const char* value);
+
   /** Return the directories into which object files will be put.
    *  There maybe more than one for fat binary systems like OSX.
    */

@@ -919,6 +919,17 @@ void cmTarget::DefineProperties(cmake *cm)
       );
 
   cm->DefineProperty
+    ("Fortran_FORMAT", cmProperty::TARGET,
+     "Set to FIXED or FREE to indicate the Fortran source layout.",
+     "This property tells CMake whether the Fortran source files "
+     "in a target use fixed-format or free-format.  "
+     "CMake will pass the corresponding format flag to the compiler.  "
+     "Use the source-specific Fortran_FORMAT property to change the "
+     "format of a specific source file.  "
+     "If the variable CMAKE_Fortran_FORMAT is set when a target "
+     "is created its value is used to initialize this property.");
+
+  cm->DefineProperty
     ("Fortran_MODULE_DIRECTORY", cmProperty::TARGET,
      "Specify output directory for Fortran modules provided by the target.",
      "If the target contains Fortran source files that provide modules "
@@ -1138,6 +1149,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
+  this->SetPropertyDefault("Fortran_FORMAT", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);

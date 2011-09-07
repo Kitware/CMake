@@ -330,6 +330,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] =
 { 
   {"Preprocess", "fpp", "Run Preprocessor on files", "preprocessYes", 0}, 
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "true", 0},
+  {"SourceFileFormat", "fixed", "Use Fixed Format", "fileFormatFixed", 0},
+  {"SourceFileFormat", "free", "Use Free Format", "fileFormatFree", 0},
   {"DebugInformationFormat", "Zi", "full debug", "debugEnabled", 0},
   {"DebugInformationFormat", "debug:full", "full debug", "debugEnabled", 0},
   {"DebugInformationFormat", "Z7", "c7 compat", "debugOldStyleInfo", 0},
@@ -684,6 +686,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     if(strcmp(linkLanguage, "CXX") == 0)
       {
       flags += " /TP ";
+      }
+    }
+
+  if(this->FortranProject)
+    {
+    switch(this->GetFortranFormat(target.GetProperty("Fortran_FORMAT")))
+      {
+      case FortranFormatFixed: flags += " -fixed"; break;
+      case FortranFormatFree: flags += " -free"; break;
+      default: break;
       }
     }
 
@@ -1361,6 +1373,21 @@ cmLocalVisualStudio7GeneratorFCInfo
       fc.CompileFlags = cflags;
       needfc = true;
       }
+    if(lg->FortranProject)
+      {
+      switch(lg->GetFortranFormat(sf.GetProperty("Fortran_FORMAT")))
+        {
+        case cmLocalGenerator::FortranFormatFixed:
+          fc.CompileFlags = "-fixed " + fc.CompileFlags;
+          needfc = true;
+          break;
+        case cmLocalGenerator::FortranFormatFree:
+          fc.CompileFlags = "-free " + fc.CompileFlags;
+          needfc = true;
+          break;
+        default: break;
+        }
+      }
     if(const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS"))
       {
       fc.CompileDefs = cdefs;
@@ -1569,8 +1596,15 @@ void cmLocalVisualStudio7Generator
              !fc.CompileDefs.empty() ||
              !fc.CompileDefsConfig.empty())
             {
-            Options fileOptions(this, this->Version, Options::Compiler,
-                                cmLocalVisualStudio7GeneratorFlagTable,
+            Options::Tool tool = Options::Compiler;
+            cmVS7FlagTable const* table =
+              cmLocalVisualStudio7GeneratorFlagTable;
+            if(this->FortranProject)
+              {
+              tool = Options::FortranCompiler;
+              table = cmLocalVisualStudio7GeneratorFortranFlagTable;
+              }
+            Options fileOptions(this, this->Version, tool, table,
                                 this->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());

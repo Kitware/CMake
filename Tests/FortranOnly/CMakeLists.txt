@@ -4,6 +4,9 @@ message("CTEST_FULL_OUTPUT ")
 
 # create a library with hello and world functions
 add_library(FortranOnlylib hello.f world.f)
+set_property(TARGET FortranOnlylib PROPERTY Fortran_FORMAT FIXED)
+set_property(SOURCE world.f PROPERTY Fortran_FORMAT FREE)
+
 # create an executable that calls hello and world
 add_executable(FortranOnly testf.f)
 target_link_libraries(FortranOnly FortranOnlylib)
