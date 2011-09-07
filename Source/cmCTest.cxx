@@ -3096,6 +3096,7 @@ bool cmCTest::CompressString(std::string& str)
   ret = deflateInit(&strm, -1); //default compression level
   if (ret != Z_OK)
     {
+    delete[] out;
     return false;
     }
 
@@ -3109,6 +3110,7 @@ bool cmCTest::CompressString(std::string& str)
     {
     cmCTestLog(this, ERROR_MESSAGE, "Error during gzip compression."
       << std::endl);
+    delete[] out;
     return false;
     }
 
