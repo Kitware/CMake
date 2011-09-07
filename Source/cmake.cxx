@@ -1112,7 +1112,6 @@ void CMakeCommandUsage(const char* program)
   errorStream
     << "Usage: " << program << " -E [command] [arguments ...]\n"
     << "Available commands: \n"
-    << "  build build_dir           - build the project in build_dir.\n"
     << "  chdir dir cmd [args]...   - run command in a given directory\n"
     << "  compare_files file1 file2 - check if file1 is same as file2\n"
     << "  copy file destination     - copy file to destination (either file "
