@@ -179,7 +179,9 @@ public:
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
                                          const char* local = 0);
-  
+
+  virtual std::string ConvertToIncludeReference(std::string const& path);
+
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */, 
                                  bool /* verbose */) {}

@@ -1185,6 +1185,13 @@ cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
+{
+  return this->ConvertToOutputForExisting(path.c_str());
+}
+
+//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
                                               bool forResponseFile)
 {
@@ -1285,7 +1292,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
       }
     else
       {
-      includePath = this->ConvertToOutputForExisting(i->c_str());
+      includePath = this->ConvertToIncludeReference(*i);
       }
     if(quotePaths && includePath.size() && includePath[0] != '\"')
       {
