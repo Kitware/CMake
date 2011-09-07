@@ -2531,6 +2531,13 @@ int cmake::Generate()
     this->ReportUndefinedPropertyAccesses
       (this->GetProperty("REPORT_UNDEFINED_PROPERTIES"));
     }
+  // Save the cache again after a successful Generate so that any internal
+  // variables created during Generate are saved. (Specifically target GUIDs
+  // for the Visual Studio and Xcode generators.)
+  if ( this->GetWorkingMode() == NORMAL_MODE )
+    {
+    this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
+    }
   return 0;
 }
 
