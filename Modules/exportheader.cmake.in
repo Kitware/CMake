@@ -32,4 +32,4 @@
 # define @NO_DEPRECATED_MACRO_NAME@
 #endif
 
-#endif // @INCLUDE_GUARD_NAME@
+#endif
