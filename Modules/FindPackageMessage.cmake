@@ -34,6 +34,7 @@
 FUNCTION(FIND_PACKAGE_MESSAGE pkg msg details)
   # Avoid printing a message repeatedly for the same find result.
   IF(NOT ${pkg}_FIND_QUIETLY)
+    STRING(REGEX REPLACE "[\n]" "" details "${details}")
     SET(DETAILS_VAR FIND_PACKAGE_MESSAGE_DETAILS_${pkg})
     IF(NOT "${details}" STREQUAL "${${DETAILS_VAR}}")
       # The message has not yet been printed.
