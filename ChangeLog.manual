@@ -1,3 +1,61 @@
+Changes in CMake 2.8.6-rc3 (since 2.8.6-rc2)
+--------------------------------------------
+Alexey Ozeritsky (2):
+      FindBLAS/LAPACK fixes
+      FindBLAS/LAPACK fixes
+
+Andreas Schneider (1):
+      Modules: Add support for more java archives in add_jar().
+
+Björn Ricks (4):
+      Search for the installed python interpreter first
+      Determine python version
+      Update documentation of FindPythonInterp.cmake
+      Use FIND_PACKAGE_HANDLE_STANDARD_ARGS second mode
+
+Brad King (5):
+      VS: Map per-source Fortran flags to IDE options
+      VS: Map Fortran free- and fixed-format flags to IDE options
+      Fortran: Add support for free- and fixed-form flags
+      Xcode: Honor Fortran_FORMAT target and source file property
+      Set CMAKE_<lang>_COMPILER_ID for VS generators
+
+David Cole (8):
+      KWSys: Remove always-true dir_only parameter
+      KWSys: Add symlinks to directories as files (#12284)
+      FindPackageMessage: Eliminate new lines in cache entries
+      FindPackageMessage: Eliminate new lines using REGEX REPLACE
+      CMake: Add SaveCache at the end of successful Generate calls
+      Suppress Qt warning for dashmacmini5 builds
+      Suppress Qt warning for dashmacmini5 builds
+      Tests: Look for "Illegal" or "SegFault" in the output
+
+Eric NOULARD (2):
+      CPack  fix #12366 components RPM packages have the same package name
+      CPackRPM fix #12305, include directories in RPM package
+
+Johan Björk (5):
+      Xcode: No spaces in makefile target names (#12370)
+      CMake: Write symlinks to directories as files in archives (#12284)
+      CPack: Do not recurse through directory symlinks (#12284)
+      Xcode: Do not emit the ZERO_CHECK target more than once
+      Xcode: Honor -g0 to disable debugging (#12377)
+
+Johannes Stallkamp (1):
+      CTest: Fixed valgrind output parsing (#12260)
+
+Matt McCormick (1):
+      CMake: Remove documentation for -E build (#12446)
+
+Stephen Kelly (2):
+      Add some more unit tests.
+      Don't put what some compilers consider junk at the end of the line.
+
+Thomas Jarosch (3):
+      CTest: Fix memory leaks on error
+      Fix file() command descriptor leak on error
+      ccmake: Fix off-by-one memory access error
+
 Changes in CMake 2.8.6-rc2 (since 2.8.6-rc1)
 --------------------------------------------
 Brad King (2):
