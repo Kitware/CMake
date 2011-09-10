@@ -77,6 +77,13 @@ public:
                               cmMakefile *, bool optional);
 
   /**
+   * Resolve the CMAKE_<lang>_COMPILER setting for the given language.
+   * Intended to be called from EnableLanguage.
+   */
+  void ResolveLanguageCompiler(const std::string &lang, cmMakefile *mf,
+                               bool optional);
+
+  /**
    * Try to determine system infomation, get it from another generator
    */
   virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
