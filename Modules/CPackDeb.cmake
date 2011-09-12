@@ -20,7 +20,7 @@
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_VERSION
 #     The debian package version
-# CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+# CPACK_DEBIAN_PACKAGE_ARCHITECTURE
 #     Mandatory : YES
 #     Default   : Output of dpkg --print-architecture (or i386 if dpkg is not found)
 #     The debian package architecture
