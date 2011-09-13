@@ -2122,6 +2122,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command IncludeDirectories)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
+  IF(CMAKE_USE_KWSTYLE AND KWSTYLE_EXECUTABLE)
+    # The "make StyleCheck" command line as a test. If the test fails, look
+    # for lines like "Error #0 (624) Line length exceed 88 (max=79)" in the
+    # output to find where the style errors are...
+    ADD_TEST(KWStyle ${KWSTYLE_EXECUTABLE}
+      -xml ${CMake_BINARY_DIR}/CMake.kws.xml
+      -o ${CMake_SOURCE_DIR}/Utilities/KWStyle/CMakeOverwrite.txt
+      -v
+      -D ${CMake_BINARY_DIR}/CMakeKWSFiles.txt
+      )
+    SET_TESTS_PROPERTIES(KWStyle PROPERTIES
+      WORKING_DIRECTORY ${CMake_BINARY_DIR}/Utilities/KWStyle)
+  ENDIF()
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)
