@@ -5,7 +5,7 @@
 #   CPACK_INSTALL_CMAKE_PROJECTS        - For each project (path, name, component)
 #   CPACK_CMAKE_GENERATOR               - CMake Generator used for the projects
 #   CPACK_INSTALL_COMMANDS              - Extra commands to install components
-#   CPACK_INSTALL_DIRECTORIES           - Extra directories to install
+#   CPACK_INSTALLED_DIRECTORIES           - Extra directories to install
 #   CPACK_PACKAGE_DESCRIPTION_FILE      - Description file for the package
 #   CPACK_PACKAGE_DESCRIPTION_SUMMARY   - Summary of the package
 #   CPACK_PACKAGE_EXECUTABLES           - List of pairs of executables and labels
