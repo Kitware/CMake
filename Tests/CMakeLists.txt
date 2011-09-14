@@ -368,6 +368,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       dash2win64_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyMac
       dashmacmini2_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyMac64
+      dashmacmini5_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux
       magrathea_release.cmake)
   ENDIF(CMAKE_BUILD_NIGHTLY_RELEASES)
