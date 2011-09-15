@@ -22,6 +22,14 @@ bool cmTryRunCommand
     return false;
     }
 
+  if(this->Makefile->GetCMakeInstance()->GetWorkingMode() ==
+                                                      cmake::FIND_PACKAGE_MODE)
+    {
+    cmSystemTools::Error(
+            "The TRY_RUN() command is not supported in --find-package mode.");
+    return false;
+    }
+
   // build an arg list for TryCompile and extract the runArgs,
   std::vector<std::string> tryCompile;
 
