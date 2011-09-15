@@ -279,12 +279,7 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # Do the same find_package call but look specifically for the CMake version.
   # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
   # need to delegate them to this find_package call.
-  if (Boost_FIND_COMPONENTS)
-    # Have to do the components explicitly because CMake doesn't seem to delegate them properly
-    find_package(Boost QUIET COMPONENTS ${Boost_FIND_COMPONENTS} NO_MODULE)
-  else()
-    find_package(Boost QUIET ${_boost_find_components} NO_MODULE)
-  endif()
+  find_package(Boost QUIET NO_MODULE)
 
   # If we found boost-cmake, then we're done.  Print out what we found.
   # Otherwise let the rest of the module try to find it.
