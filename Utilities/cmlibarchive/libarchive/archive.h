@@ -52,7 +52,7 @@
 /* These should match the types used in 'struct stat' */
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #define __LA_INT64_T    __int64
-# if defined(_SSIZE_T_DEFINED)
+# if defined(_SSIZE_T_DEFINED) || defined(_SSIZE_T_)
 #  define __LA_SSIZE_T ssize_t
 # elif defined(_WIN64)
 #  define   __LA_SSIZE_T    __int64
