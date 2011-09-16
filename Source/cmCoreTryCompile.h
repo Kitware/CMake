@@ -28,27 +28,27 @@ public:
   /**
    * This is the core code for try compile. It is here so that other
    * commands, such as TryRun can access the same logic without
-   * duplication. 
+   * duplication.
    */
   int TryCompileCode(std::vector<std::string> const& argv);
 
-  /** 
-   * This deletes all the files created by TryCompileCode. 
+  /**
+   * This deletes all the files created by TryCompileCode.
    * This way we do not have to rely on the timing and
    * dependencies of makefiles.
    */
   void CleanupFiles(const char* binDir);
 
-  /** 
-   * This tries to find the (executable) file created by 
+  /**
+   * This tries to find the (executable) file created by
   TryCompileCode. The result is stored in OutputFile. If nothing is found,
   the error message is stored in FindErrorMessage.
    */
   void FindOutputFile(const char* targetName);
 
-  
+
   cmTypeMacro(cmCoreTryCompile, cmCommand);
-  
+
   std::string BinaryDirectory;
   std::string OutputFile;
   std::string FindErrorMessage;
