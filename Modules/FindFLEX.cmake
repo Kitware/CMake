@@ -5,6 +5,7 @@
 #  FLEX_EXECUTABLE - the path to the flex executable
 #  FLEX_VERSION - the version of flex
 #  FLEX_LIBRARIES - The flex libraries
+#  FLEX_INCLUDE_DIRS - The path to the flex headers
 #
 # The minimum required version of flex can be specified using the
 # standard syntax, e.g. FIND_PACKAGE(FLEX 2.5.13)
@@ -66,8 +67,14 @@ FIND_PROGRAM(FLEX_EXECUTABLE flex DOC "path to the flex executable")
 MARK_AS_ADVANCED(FLEX_EXECUTABLE)
 
 FIND_LIBRARY(FL_LIBRARY NAMES fl
-  DOC "path to the fl library")
-MARK_AS_ADVANCED(FL_LIBRARY)
+  DOC "Path to the fl library")
+
+FIND_PATH(FLEX_INCLUDE_DIR FlexLexer.h
+  DOC "Path to the flex headers")
+
+MARK_AS_ADVANCED(FL_LIBRARY FLEX_INCLUDE_DIR)
+
+SET(FLEX_INCLUDE_DIRS ${FLEX_INCLUDE_DIR})
 SET(FLEX_LIBRARIES ${FL_LIBRARY})
 
 IF(FLEX_EXECUTABLE)
