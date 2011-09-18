@@ -2,7 +2,7 @@
 #
 # This module provides the macros feature_summary(), set_package_properties() and
 # add_feature_info().
-# For compatiblity it also still provides set_package_info(), set_feature_info(),
+# For compatibility it also still provides set_package_info(), set_feature_info(),
 # print_enabled_features() and print_disabled_features().
 #
 # These macros can be used to generate a summary of enabled and disabled
@@ -130,13 +130,13 @@
 #                                             PURPOSE "Enables odt-export in MyWordProcessor")
 #
 #   find_package(DBUS)
-#   set_package_properties(LibXml2 PROPERTIES TYPE RUNTIME
+#   set_package_properties(DBUS PROPERTIES TYPE RUNTIME
 #                                             PURPOSE "Necessary to disable the screensaver during a presentation" )
 #
 #    ADD_FEATURE_INFO(<name> <enabled> <description>)
 # Use this macro to add information about a feature with the given <name>.
 # <enabled> contains whether this feature is enabled or not, <description>
-# is a text descibing the feature.
+# is a text describing the feature.
 # The information can be displayed using feature_summary() for ENABLED_FEATURES
 # and DISABLED_FEATURES respectively.
 #
@@ -344,7 +344,7 @@ FUNCTION(FEATURE_SUMMARY)
   ENDIF()
 
   IF(NOT _FS_WHAT)
-    MESSAGE(FATAL_ERROR "The call to FEATURE_SUMMAY() doesn't set the required WHAT argument.")
+    MESSAGE(FATAL_ERROR "The call to FEATURE_SUMMARY() doesn't set the required WHAT argument.")
   ENDIF()
 
   SET(validWhatParts "ENABLED_FEATURES"
