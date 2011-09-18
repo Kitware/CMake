@@ -209,7 +209,7 @@ FUNCTION(SET_PACKAGE_PROPERTIES _name _props)
 
   IF(_SPP_DESCRIPTION)
     GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION)
-    IF(_info)
+    IF(_info AND NOT "${_info}" STREQUAL "${_SPP_DESCRIPTION}")
       MESSAGE(STATUS "Warning: Property DESCRIPTION for package ${_name} already set to \"${_info}\", overriding it with \"${_SPP_DESCRIPTION}\"")
     ENDIF()
 
@@ -219,7 +219,7 @@ FUNCTION(SET_PACKAGE_PROPERTIES _name _props)
 
   IF(_SPP_URL)
     GET_PROPERTY(_info  GLOBAL PROPERTY _CMAKE_${_name}_URL)
-    IF(_info)
+    IF(_info AND NOT "${_info}" STREQUAL "${_SPP_URL}")
       MESSAGE(STATUS "Warning: Property URL already set to \"${_info}\", overriding it with \"${_SPP_URL}\"")
     ENDIF()
 
