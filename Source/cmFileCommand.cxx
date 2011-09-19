@@ -2755,6 +2755,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   // enable HTTP ERROR parsing
   res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+  check_curl_result(res, "DOWNLOAD cannot set http failure option: ");
 
   res = ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                            cmWriteToFileCallback);
