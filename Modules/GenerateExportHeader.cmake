@@ -1,6 +1,6 @@
 # - Function for generation of export macros for libraries
 # This module provides the function GENERATE_EXPORT_HEADER() and the
-# accompanying ADD_COMPILER_EXPORT_FLAGS() function.
+# accompanying ADD_COMPILER_EXPORT_FLAGS() macro.
 #
 # The GENERATE_EXPORT_HEADER function can be used to generate a file suitable
 # for preprocessor inclusion which contains EXPORT macros to be used in
@@ -22,8 +22,11 @@
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
 # determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS macro
-# adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on Windows
-# which does not need extra compiler flags for exporting support.
+# adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on
+# Windows which does not need extra compiler flags for exporting support. You
+# may optionally pass a single argument to ADD_COMPILER_EXPORT_FLAGS that will
+# be populated with the required CXX_FLAGS required to enable visibility support
+# for the compiler/architecture in use.
 #
 # This means that in the simplest case, users of these functions will be
 # equivalent to:
@@ -229,7 +232,8 @@ macro(_test_compiler_has_deprecated)
   endif()
 endmacro()
 
-get_filename_component(_GENERATE_EXPORT_HEADER_MODULE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+get_filename_component(_GENERATE_EXPORT_HEADER_MODULE_DIR
+  "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_DEPRECATED)
@@ -347,7 +351,7 @@ function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   _do_generate_export_header(${TARGET_LIBRARY} ${ARGN})
 endfunction()
 
-function(add_compiler_export_flags)
+macro(add_compiler_export_flags)
 
   _test_compiler_hidden_visibility()
   _test_compiler_has_deprecated()
@@ -362,5 +366,12 @@ function(add_compiler_export_flags)
   if(COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     set (EXTRA_FLAGS "${EXTRA_FLAGS} -fvisibility-inlines-hidden")
   endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}" PARENT_SCOPE)
-endfunction()
+
+  # Either return the extra flags needed in the supplied argument, or to the
+  # CMAKE_CXX_FLAGS if no argument is supplied.
+  if(ARGV0)
+    set(${ARGV0} "${EXTRA_FLAGS}")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+  endif()
+endmacro()
