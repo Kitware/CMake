@@ -25,7 +25,8 @@
 # adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on Windows
 # which does not need extra compiler flags for exporting support.
 #
-# This means that in the simplest case, users of these functions will be equivalent to:
+# This means that in the simplest case, users of these functions will be
+# equivalent to:
 #
 #   add_compiler_export_flags()
 #   add_library(somelib someclass.cpp)
@@ -43,8 +44,8 @@
 #     ...
 #   };
 #
-# The CMake fragment will generate a file in the ${CMAKE_CURRENT_BUILD_DIR} called
-# somelib_export.h containing the macros SOMELIB_EXPORT, SOMELIB_NO_EXPORT,
+# The CMake fragment will generate a file in the ${CMAKE_CURRENT_BUILD_DIR}
+# called somelib_export.h containing the macros SOMELIB_EXPORT, SOMELIB_NO_EXPORT,
 # SOMELIB_DEPRECATED, SOMELIB_DEPRECATED_EXPORT and SOMELIB_DEPRECATED_NO_EXPORT.
 # The resulting file should be installed with other headers in the library.
 #
@@ -86,11 +87,14 @@
 #   add_library(shared_variant SHARED ${lib_SRCS})
 #   add_library(static_variant ${lib_SRCS})
 #   generate_export_header(shared_variant BASE_NAME libshared_and_static)
-#   set_target_properties(static_variant PROPERTIES COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
+#   set_target_properties(static_variant PROPERTIES
+#     COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
 #
-# This will cause the export macros to expand to nothing when building the static library.
+# This will cause the export macros to expand to nothing when building the
+# static library.
 #
-# If DEFINE_NO_DEPRECATED is specified, then a macro ${BASE_NAME}_NO_DEPRECATED will be defined
+# If DEFINE_NO_DEPRECATED is specified, then a macro ${BASE_NAME}_NO_DEPRECATED
+# will be defined
 # This macro can be used to remove deprecated code from preprocessor output.
 #
 #   option(EXCLUDE_DEPRECATED "Exclude deprecated parts of the library" FALSE)
@@ -122,7 +126,6 @@
 #
 # Generates the macros VTK_SOMELIB_EXPORT etc.
 
-
 #=============================================================================
 # Copyright 2011 Stephen Kelly <steveire@gmail.com>
 #
@@ -139,10 +142,10 @@
 include(CMakeParseArguments)
 include(CheckCXXCompilerFlag)
 
-
 # TODO: Install this macro separately?
 macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
-  check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; } int main() { return somefunc();}" ${_RESULT}
+  check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
+    int main() { return somefunc();}" ${_RESULT}
     # Some compilers do not fail with a bad flag
     FAIL_REGEX "unrecognized .*option"                     # GNU
     FAIL_REGEX "ignoring unknown option"                   # MSVC
@@ -155,13 +158,16 @@ endmacro()
 
 macro(_test_compiler_hidden_visibility)
 
-  if (CMAKE_COMPILER_IS_GNUCXX)
-    exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
-    string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    exec_program(${CMAKE_C_COMPILER} ARGS --version
+      OUTPUT_VARIABLE _gcc_version_info)
+    string(REGEX MATCH "[345]\\.[0-9]\\.[0-9]"
+      _gcc_version "${_gcc_version_info}")
     # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
     # patch level, handle this here:
     if(NOT _gcc_version)
-      string (REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0" _gcc_version "${_gcc_version_info}")
+      string(REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0"
+        _gcc_version "${_gcc_version_info}")
     endif()
 
     if(${_gcc_version} VERSION_LESS "4.2")
@@ -171,8 +177,10 @@ macro(_test_compiler_hidden_visibility)
   endif()
 
   if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
-    exec_program(${CMAKE_CXX_COMPILER} ARGS -V OUTPUT_VARIABLE     _intel_version_info)
-    string (REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" "\\1" _intel_version "${_intel_version_info}")
+    exec_program(${CMAKE_CXX_COMPILER} ARGS -V
+      OUTPUT_VARIABLE _intel_version_info)
+    string(REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" "\\1"
+      _intel_version "${_intel_version_info}")
 
     if(${_intel_version} VERSION_LESS "12.0")
       set(_INTEL_TOO_OLD TRUE)
@@ -184,7 +192,7 @@ macro(_test_compiler_hidden_visibility)
   # Exclude XL here because it misinterprets -fvisibility=hidden even though
   # the check_cxx_compiler_flag passes
   # http://www.cdash.org/CDash/testDetails.php?test=109109951&build=1419259
-  if (NOT GCC_TOO_OLD
+  if(NOT GCC_TOO_OLD
       AND NOT _INTEL_TOO_OLD
       AND NOT WIN32
       AND NOT CYGWIN
@@ -192,8 +200,10 @@ macro(_test_compiler_hidden_visibility)
       AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
       AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
     check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
-    check_cxx_compiler_flag(-fvisibility-inlines-hidden COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
-    option(USE_COMPILER_HIDDEN_VISIBILITY "Use HIDDEN visibility support if available." ON)
+    check_cxx_compiler_flag(-fvisibility-inlines-hidden
+      COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
+    option(USE_COMPILER_HIDDEN_VISIBILITY
+      "Use HIDDEN visibility support if available." ON)
     mark_as_advanced(USE_COMPILER_HIDDEN_VISIBILITY)
   endif()
 endmacro()
@@ -204,13 +214,17 @@ macro(_test_compiler_has_deprecated)
       OR GCC_TOO_OLD
       OR "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
       OR "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
-    set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL "Compiler support for a deprecated attribute")
+    set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL
+      "Compiler support for a deprecated attribute")
   else()
-    _check_cxx_compiler_attribute("__attribute__((__deprecated__))" COMPILER_HAS_DEPRECATED_ATTR)
+    _check_cxx_compiler_attribute("__attribute__((__deprecated__))"
+      COMPILER_HAS_DEPRECATED_ATTR)
     if(COMPILER_HAS_DEPRECATED_ATTR)
-      set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_ATTR}" CACHE INTERNAL "Compiler support for a deprecated attribute")
+      set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_ATTR}"
+        CACHE INTERNAL "Compiler support for a deprecated attribute")
     else()
-      _check_cxx_compiler_attribute("__declspec(deprecated)" COMPILER_HAS_DEPRECATED)
+      _check_cxx_compiler_attribute("__declspec(deprecated)"
+        COMPILER_HAS_DEPRECATED)
     endif()
   endif()
 endmacro()
@@ -246,10 +260,13 @@ endmacro()
 macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   # Option overrides
   set(options DEFINE_NO_DEPRECATED)
-  set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME DEPRECATED_MACRO_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE NO_DEPRECATED_MACRO_NAME)
+  set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME
+    DEPRECATED_MACRO_NAME NO_EXPORT_MACRO_NAME STATIC_DEFINE
+    NO_DEPRECATED_MACRO_NAME)
   set(multiValueArgs)
 
-  cmake_parse_arguments(_GEH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_GEH "${options}" "${oneValueArgs}" "${multiValueArgs}"
+    ${ARGN})
 
   set(BASE_NAME "${TARGET_LIBRARY}")
 
@@ -266,7 +283,8 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   set(EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/${BASE_NAME_LOWER}_export.h")
   set(DEPRECATED_MACRO_NAME "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_DEPRECATED")
   set(STATIC_DEFINE "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_STATIC_DEFINE")
-  set(NO_DEPRECATED_MACRO_NAME "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_NO_DEPRECATED")
+  set(NO_DEPRECATED_MACRO_NAME
+    "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_NO_DEPRECATED")
 
   if(_GEH_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unknown keywords given to GENERATE_EXPORT_HEADER(): \"${_GEH_UNPARSED_ARGUMENTS}\"")
@@ -292,23 +310,25 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     set(STATIC_DEFINE ${_GEH_PREFIX_NAME}${_GEH_STATIC_DEFINE})
   endif()
 
-  if (_GEH_DEFINE_NO_DEPRECATED)
+  if(_GEH_DEFINE_NO_DEPRECATED)
     set(DEFINE_NO_DEPRECATED TRUE)
   endif()
 
-  if (_GEH_NO_DEPRECATED_MACRO_NAME)
-    set(NO_DEPRECATED_MACRO_NAME ${_GEH_PREFIX_NAME}${_GEH_NO_DEPRECATED_MACRO_NAME})
+  if(_GEH_NO_DEPRECATED_MACRO_NAME)
+    set(NO_DEPRECATED_MACRO_NAME
+      ${_GEH_PREFIX_NAME}${_GEH_NO_DEPRECATED_MACRO_NAME})
   endif()
 
   set(INCLUDE_GUARD_NAME "${EXPORT_MACRO_NAME}_H")
 
   get_target_property(EXPORT_IMPORT_CONDITION ${TARGET_LIBRARY} DEFINE_SYMBOL)
 
-  if (NOT EXPORT_IMPORT_CONDITION)
+  if(NOT EXPORT_IMPORT_CONDITION)
     set(EXPORT_IMPORT_CONDITION ${TARGET_LIBRARY}_EXPORTS)
   endif()
 
-  configure_file("${_GENERATE_EXPORT_HEADER_MODULE_DIR}/exportheader.cmake.in" "${EXPORT_FILE_NAME}" @ONLY)
+  configure_file("${_GENERATE_EXPORT_HEADER_MODULE_DIR}/exportheader.cmake.in"
+    "${EXPORT_FILE_NAME}" @ONLY)
 endmacro()
 
 function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
@@ -333,7 +353,7 @@ function(add_compiler_export_flags)
   _test_compiler_has_deprecated()
 
   if(NOT (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY))
-    message(WARNING "Compiler doesn't have hidden visibility")
+    # Just return if there are no flags to add.
     return()
   endif()
 
