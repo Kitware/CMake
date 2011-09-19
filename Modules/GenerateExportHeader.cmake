@@ -353,7 +353,7 @@ function(add_compiler_export_flags)
   _test_compiler_has_deprecated()
 
   if(NOT (USE_COMPILER_HIDDEN_VISIBILITY AND COMPILER_HAS_HIDDEN_VISIBILITY))
-    message(WARNING "Compiler doesn't have hidden visibility")
+    # Just return if there are no flags to add.
     return()
   endif()
 
