@@ -2753,6 +2753,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "DOWNLOAD cannot set url: ");
 
+  // enable HTTP ERROR parsing
+  res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+
   res = ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                            cmWriteToFileCallback);
   check_curl_result(res, "DOWNLOAD cannot set write function: ");
