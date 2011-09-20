@@ -1,6 +1,6 @@
 # - Function for generation of export macros for libraries
 # This module provides the function GENERATE_EXPORT_HEADER() and the
-# accompanying ADD_COMPILER_EXPORT_FLAGS() macro.
+# accompanying ADD_COMPILER_EXPORT_FLAGS() function.
 #
 # The GENERATE_EXPORT_HEADER function can be used to generate a file suitable
 # for preprocessor inclusion which contains EXPORT macros to be used in
@@ -21,7 +21,7 @@
 # ADD_COMPILER_EXPORT_FLAGS( [FATAL_WARNINGS] )
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
-# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS macro
+# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS function
 # adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on
 # Windows which does not need extra compiler flags for exporting support. You
 # may optionally pass a single argument to ADD_COMPILER_EXPORT_FLAGS that will
@@ -351,7 +351,7 @@ function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   _do_generate_export_header(${TARGET_LIBRARY} ${ARGN})
 endfunction()
 
-macro(add_compiler_export_flags)
+function(add_compiler_export_flags)
 
   _test_compiler_hidden_visibility()
   _test_compiler_has_deprecated()
@@ -370,8 +370,8 @@ macro(add_compiler_export_flags)
   # Either return the extra flags needed in the supplied argument, or to the
   # CMAKE_CXX_FLAGS if no argument is supplied.
   if(ARGV0)
-    set(${ARGV0} "${EXTRA_FLAGS}")
+    set(${ARGV0} "${EXTRA_FLAGS}" PARENT_SCOPE)
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}" PARENT_SCOPE)
   endif()
-endmacro()
+endfunction()
