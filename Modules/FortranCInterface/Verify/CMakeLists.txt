@@ -24,7 +24,9 @@ include(FortranCInterface)
 FortranCInterface_HEADER(VerifyFortran.h SYMBOLS VerifyFortran)
 include_directories(${VerifyFortranC_BINARY_DIR})
 
-add_executable(VerifyFortranC main.c VerifyC.c VerifyFortran.f ${VerifyCXX})
+add_library(VerifyFortran STATIC VerifyFortran.f)
+add_executable(VerifyFortranC main.c VerifyC.c ${VerifyCXX})
+target_link_libraries(VerifyFortranC VerifyFortran)
 
 if(NOT VERIFY_CXX)
   # The entry point (main) is defined in C; link with the C compiler.

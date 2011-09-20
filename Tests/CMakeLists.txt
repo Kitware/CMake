@@ -1928,29 +1928,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF()
 
-  # fortran does not work for IDE builds because
-  # CMAKE_STANDARD_LIBRARIES needs to be per language
-  IF(CMAKE_TEST_GENERATOR MATCHES "Make|KDevelop")
-    IF(CMAKE_Fortran_COMPILER)
-      ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
+  IF(CMAKE_Fortran_COMPILER)
+    ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Fortran"
+      "${CMake_BINARY_DIR}/Tests/Fortran"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project testf
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --test-command testf)
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
+
+    # FortranCInterface tests.
+    IF(UNIX)
+      CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/FortranC/Flags.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake @ONLY)
+      ADD_TEST(FortranC.Flags ${CMAKE_CMAKE_COMMAND} -P
+        ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake)
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC/Flags")
+    ELSE()
+      ADD_TEST(FortranC ${CMAKE_CTEST_COMMAND}
         --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/Fortran"
-        "${CMake_BINARY_DIR}/Tests/Fortran"
+        "${CMake_SOURCE_DIR}/Tests/FortranC"
+        "${CMake_BINARY_DIR}/Tests/FortranC"
         --build-generator ${CMAKE_TEST_GENERATOR}
-        --build-project testf
+        --build-project FortranC
         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
         --build-two-config
-        --test-command testf)
-      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
-
-      # FortranCInterface tests.
-      IF(UNIX)
-        CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/FortranC/Flags.cmake.in
-                       ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake @ONLY)
-        ADD_TEST(FortranC.Flags ${CMAKE_CMAKE_COMMAND} -P
-          ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake)
-        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC/Flags")
-      ENDIF()
+        --test-command CMakeFiles/FortranCInterface/FortranCInterface)
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC")
     ENDIF()
   ENDIF()
 
