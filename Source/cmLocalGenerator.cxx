@@ -1463,6 +1463,17 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += targetLinkFlags;
         linkFlags += " ";
         }
+      if(!buildType.empty())
+        {
+        std::string build = "STATIC_LIBRARY_FLAGS_";
+        build += buildType;
+        targetLinkFlags = target.GetProperty(build.c_str());
+        if(targetLinkFlags)
+          {
+          linkFlags += targetLinkFlags;
+          linkFlags += " ";
+          }
+        }
       }
       break; 
     case cmTarget::MODULE_LIBRARY:
@@ -1471,7 +1482,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       { 
       linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
       linkFlags += " ";
-      if(buildType.size())
+      if(!buildType.empty())
         {
         std::string build = libraryLinkVariable;
         build += "_";
@@ -1502,7 +1513,10 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         linkFlags += targetLinkFlags;
         linkFlags += " ";
-        std::string configLinkFlags = targetLinkFlags;
+        }
+      if(!buildType.empty())
+        {
+        std::string configLinkFlags = "LINK_FLAGS_";
         configLinkFlags += buildType;
         targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
         if(targetLinkFlags)
@@ -1521,7 +1535,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       linkFlags += 
         this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
       linkFlags += " ";
-      if(buildType.size())
+      if(!buildType.empty())
         {
         std::string build = "CMAKE_EXE_LINKER_FLAGS_";
         build += buildType;
@@ -1573,8 +1587,11 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
-        linkFlags += " ";  
-        std::string configLinkFlags = targetLinkFlags;
+        linkFlags += " ";
+        }
+      if(!buildType.empty())
+        {
+        std::string configLinkFlags = "LINK_FLAGS_";
         configLinkFlags += buildType;
         targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
         if(targetLinkFlags)
