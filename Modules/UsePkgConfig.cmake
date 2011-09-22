@@ -42,20 +42,20 @@ MACRO(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
     # and if the package of interest also exists for pkg-config, then get the information
     IF(NOT _return_VALUE)
 
-      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --variable=includedir 
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --variable=includedir
         OUTPUT_VARIABLE ${_include_DIR} )
       STRING(REGEX REPLACE "[\r\n]" " " ${_include_DIR} "${${_include_DIR}}")
-    
 
-      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --variable=libdir 
+
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --variable=libdir
         OUTPUT_VARIABLE ${_link_DIR} )
       STRING(REGEX REPLACE "[\r\n]" " " ${_link_DIR} "${${_link_DIR}}")
 
-      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --libs 
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --libs
         OUTPUT_VARIABLE ${_link_FLAGS} )
       STRING(REGEX REPLACE "[\r\n]" " " ${_link_FLAGS} "${${_link_FLAGS}}")
 
-      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --cflags 
+      EXEC_PROGRAM(${PKGCONFIG_EXECUTABLE} ARGS ${_package} --cflags
         OUTPUT_VARIABLE ${_cflags} )
       STRING(REGEX REPLACE "[\r\n]" " " ${_cflags} "${${_cflags}}")
 
@@ -64,10 +64,10 @@ MACRO(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
       MESSAGE(STATUS "PKGCONFIG() indicates that ${_package} is not installed (install the package which contains ${_package}.pc if you want to support this feature)")
 
     ENDIF(NOT _return_VALUE)
-    
+
   # if pkg-config has NOT been found, INFORM the user
   ELSE(PKGCONFIG_EXECUTABLE)
-  
+
     MESSAGE(STATUS "WARNING: PKGCONFIG() indicates that the tool pkg-config has not been found on your system. You should install it.")
 
   ENDIF(PKGCONFIG_EXECUTABLE)
