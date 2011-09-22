@@ -1,3 +1,46 @@
+Changes in CMake 2.8.6-rc4 (since 2.8.6-rc3)
+--------------------------------------------
+Alex Neundorf (3):
+      FindFLEX.cmake: also search the include dir
+      Fix typos in FeatureSummary.cmake (#12462)
+      Don't warn when setting a property multiple times to the same value #12464
+
+Bill Hoffman (2):
+      For VS Intel Fortran IDE builds, add a check to find the Fortran library PATH.
+      Enable Fortran tests for IDE builds.
+
+Brad King (5):
+      FortranCInterface: Compile separate Fortran lib in VerifyC[XX]
+      Move IntelVSImplicitPath project to better location
+      Simplify IntelVSImplicitPath detection project
+      libarchive: Fix ssize_t detection with mingwrt 3.20
+      Make file(DOWNLOAD) fail on http error
+
+David Cole (8):
+      Tests: Add a KWStyle test, equivalent to the make StyleCheck target
+      KWStyle Test: Activate by default if KWStyle is found
+      Xcode: Use EFFECTIVE_PLATFORM_NAME reference in ComputeOutputDir
+      Xcode: Add test to demonstrate iOS project in Xcode
+      CMake: Reference test targets only when BUILD_TESTING is ON
+      Tests: Add the more modern Mac64 nightly build
+      Release Scripts: Use Qt 4.7.4 on dashmacmini5 (#12460)
+      Revert "FindThreads: Try pthreads with no special option first (#11333)"
+
+Eric NOULARD (4):
+      CPack fix #12449 doc mispelled
+      CPack fix template too
+      CPackDeb fix #10325 automagically use fakeroot for DEB if fakeroot is found
+      CPackRPM authorize per-component pre/post-[un]install scripts (#0012063)
+
+Marcus D. Hanwell (4):
+      Just code style changes.
+      Don't warn when nothing to do in visibility function.
+      Made ADD_COMPILER_EXPORT_FLAGS into a macro.
+      Make add_compiler_export_flags a function again.
+
+Rolf Eike Beer (1):
+      remove stray brace in CPackDeb documentation
+
 Changes in CMake 2.8.6-rc3 (since 2.8.6-rc2)
 --------------------------------------------
 Alexey Ozeritsky (2):
