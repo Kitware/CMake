@@ -47,8 +47,8 @@ protected:
   void FilterPaths(std::vector<std::string>& paths,
                    const std::set<std::string>& ignore);
 
-  /** Add trailing slashes to all search paths.  */
-  void AddTrailingSlashes(std::vector<std::string>& paths);
+  /** Compute final search path list (reroot + trailing slash).  */
+  void ComputeFinalPaths();
 
   /** Compute the current default root path mode.  */
   void SelectDefaultRootPathMode();

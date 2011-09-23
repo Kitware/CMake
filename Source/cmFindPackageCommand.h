@@ -93,7 +93,6 @@ private:
   void AddPrefixesCMakeSystemVariable();
   void AddPrefixesUserGuess();
   void AddPrefixesUserHints();
-  void ComputeFinalPrefixes();
   void LoadPackageRegistryDir(std::string const& dir);
   void LoadPackageRegistryWinUser();
   void LoadPackageRegistryWinSystem();
