@@ -79,7 +79,6 @@ protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
 
   std::string PlatformToolset;
-private:
   bool ExpressEdition;
 };
 #endif

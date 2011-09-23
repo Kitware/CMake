@@ -68,6 +68,8 @@
 #    include "cmGlobalVisualStudio10Generator.h"
 #    include "cmGlobalVisualStudio10IA64Generator.h"
 #    include "cmGlobalVisualStudio10Win64Generator.h"
+#    include "cmGlobalVisualStudio11Generator.h"
+#    include "cmGlobalVisualStudio11Win64Generator.h"
 #    include "cmGlobalVisualStudio8Win64Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
@@ -2580,6 +2582,10 @@ void cmake::AddDefaultGenerators()
     &cmGlobalVisualStudio10IA64Generator::New;
   this->Generators[cmGlobalVisualStudio10Win64Generator::GetActualName()] =
     &cmGlobalVisualStudio10Win64Generator::New;
+  this->Generators[cmGlobalVisualStudio11Generator::GetActualName()] =
+    &cmGlobalVisualStudio11Generator::New;
+  this->Generators[cmGlobalVisualStudio11Win64Generator::GetActualName()] =
+    &cmGlobalVisualStudio11Win64Generator::New;
   this->Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
     &cmGlobalVisualStudio71Generator::New;
   this->Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
