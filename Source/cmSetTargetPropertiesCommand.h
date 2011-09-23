@@ -92,7 +92,7 @@ public:
         "If not set here then it is set to target_EXPORTS by default "
         "(with some substitutions if the target is not a valid C "
         "identifier). This is useful for headers to know whether they are "
-        "being included from inside their library our outside to properly "
+        "being included from inside their library or outside to properly "
         "setup dllexport/dllimport decorations. "
         "The COMPILE_FLAGS property sets additional compiler flags used "
         "to build sources within the target.  It may also be used to pass "
