@@ -299,11 +299,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   this->GetIgnoredPaths(ignored);
   this->FilterPaths(this->SearchPaths, ignored);
 
-  // Handle search root stuff.
-  this->RerootPaths(this->SearchPaths);
-
-  // Add a trailing slash to all prefixes to aid the search process.
-  this->AddTrailingSlashes(this->SearchPaths);
+  this->ComputeFinalPaths();
 
   return true;
 }
