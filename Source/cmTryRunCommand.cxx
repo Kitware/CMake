@@ -25,7 +25,7 @@ bool cmTryRunCommand
   if(this->Makefile->GetCMakeInstance()->GetWorkingMode() ==
                                                       cmake::FIND_PACKAGE_MODE)
     {
-    cmSystemTools::Error(
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
             "The TRY_RUN() command is not supported in --find-package mode.");
     return false;
     }
