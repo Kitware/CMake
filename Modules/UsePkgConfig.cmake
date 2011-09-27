@@ -1,4 +1,4 @@
-# - Osolete pkg-config module for CMake, use FindPkgConfig instead.
+# - Obsolete pkg-config module for CMake, use FindPkgConfig instead.
 #
 # This module defines the following macro:
 #
