@@ -473,13 +473,7 @@ void cmFindCommon::AddPathInternal(std::string const& in_path,
 //----------------------------------------------------------------------------
 void cmFindCommon::ComputeFinalPaths()
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-# define cmFindCommon_ComputeFinalPaths_WindowsPaths
-  std::vector<std::string> paths;
-  this->SearchPaths.swap(paths);
-#else
   std::vector<std::string>& paths = this->SearchPaths;
-#endif
 
   // Expand list of paths inside all search roots.
   this->RerootPaths(paths);
@@ -493,13 +487,6 @@ void cmFindCommon::ComputeFinalPaths()
       {
       p += "/";
       }
-#ifdef cmFindCommon_ComputeFinalPaths_WindowsPaths
-    // Exclude "root-relative" paths starting in a single slash.
-    if(p.size() >= 2 && (p[0] != '/' || p[1] == '/'))
-      {
-      this->SearchPaths.push_back(p);
-      }
-#endif
     }
 }
 
