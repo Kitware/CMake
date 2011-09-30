@@ -106,7 +106,7 @@ endforeach(_library ${_list})
 if(_libraries_work)
   # Test this combination of libraries.
   if(UNIX AND BLA_STATIC)
-    set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group ${${LIBRARIES}} ${_blas};-Wl,--end-group" ${_threads})
+    set(CMAKE_REQUIRED_LIBRARIES ${_flags} "-Wl,--start-group ${${LIBRARIES}} ${_blas} -Wl,--end-group" ${_threads})
   else(UNIX AND BLA_STATIC)
     set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas} ${_threads})
   endif(UNIX AND BLA_STATIC)
