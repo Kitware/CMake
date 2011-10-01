@@ -195,3 +195,14 @@ expect_pass(True True
   LIBS
     libC
 )
+
+file(WRITE
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+  "int main() { return 0; }
+"
+)
+
+add_executable(
+  target_link_libraries
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+)
