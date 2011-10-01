@@ -987,17 +987,26 @@ void cmExtraEclipseCDT4Generator
   // we need the "make" and the C (or C++) compiler which are used, Alex
   std::string make = makefile.GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler = makefile.GetSafeDefinition("CMAKE_C_COMPILER");
+  std::string arg1 = makefile.GetSafeDefinition("CMAKE_C_COMPILER_ARG1");
   if (compiler.empty())
     {
     compiler = makefile.GetSafeDefinition("CMAKE_CXX_COMPILER");
+    arg1 = makefile.GetSafeDefinition("CMAKE_CXX_COMPILER_ARG1");
     }
   if (compiler.empty())  //Hmm, what to do now ?
     {
     compiler = "gcc";
     }
 
-
   // the following right now hardcodes gcc behaviour :-/
+  std::string compilerArgs =
+                         "-E -P -v -dD ${plugin_state_location}/${specs_file}";
+  if (!arg1.empty())
+    {
+    arg1 += " ";
+    compilerArgs = arg1 + compilerArgs;
+    }
+
   fout <<
     "<storageModule moduleId=\"scannerConfiguration\">\n"
     "<autodiscovery enabled=\"true\" problemReportingEnabled=\"true\""
@@ -1007,7 +1016,7 @@ void cmExtraEclipseCDT4Generator
   cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile",
     true, "", true, "specsFile",
-    "-E -P -v -dD ${plugin_state_location}/${specs_file}",
+    compilerArgs,
     compiler, true, true);
   cmExtraEclipseCDT4Generator::AppendScannerProfile(fout,
     "org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile",
