@@ -619,6 +619,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "If the list is empty then no transitive link dependencies will be "
      "incorporated when this target is linked into another target even if "
      "the default set is non-empty.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_LINK_INTERFACE_LIBRARIES if it is set when a target is "
+     "created.  "
      "This property is ignored for STATIC libraries.");
 
   cm->DefineProperty
@@ -1153,6 +1156,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
+  this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
