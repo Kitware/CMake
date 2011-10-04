@@ -1,3 +1,32 @@
+Changes in CMake 2.8.6 (since 2.8.6-rc4)
+----------------------------------------
+Alex Neundorf (5):
+      Remove trailing whitespace
+      Minor improvements to the UsePkgConfig.cmake docs
+      Remove trailing whitespace
+      Improve behaviour of --find-package mode with try_run/try_compile
+      Use makefile->IssueMessage() for better error messages
+
+Bill Hoffman (2):
+      Use version 11.0 for 12.x and 9.10 for 10.x intel versions to fix 12.1 vsIDE.
+      Also, check for 11.x as an intel fortran version.
+
+Brad King (2):
+      Add Visual Studio 11 generator for x86 and x64 tools
+      Teach our tests about special cases for VS 11
+
+David Cole (1):
+      CTestCustom.cmake: Ignore clang's summary warning
+
+Philip Lowman (1):
+      FindBullet: Also search for _Debug postfixed library names
+
+Raphael Kubo da Costa (1):
+      Fix typo in set_target_properties' documentation.
+
+Rolf Eike Beer (1):
+      Fix typo in UsePkgConfig.cmake
+
 Changes in CMake 2.8.6-rc4 (since 2.8.6-rc3)
 --------------------------------------------
 Alex Neundorf (3):
