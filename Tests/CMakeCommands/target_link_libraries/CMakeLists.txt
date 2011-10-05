@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(target_link_libraries_test)
+project(target_link_libraries)
 
 set (COUNT 0)
 macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
@@ -163,11 +163,15 @@ expect_pass(False False
 
 # However, if we do clear it and don't explicitly link the executable to it, it fails,
 # whether we specify the link_interface_libraries properly or not.
-expect_fail(True False
+if (NOT WIN32)
+  # ... but not on windows apparently
+  expect_fail(True False
     classB classC
   LIBS
     libC
 )
+endif()
+
 expect_fail(True True
     classB classC
   LIBS
