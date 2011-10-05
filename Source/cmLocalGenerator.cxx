@@ -996,7 +996,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       }
     if(variable == "TARGET_TYPE")
       {
-      return cmTarget::TargetTypeNames[replaceValues.CMTarget->GetType()];
+      return cmTarget::GetTargetTypeName(replaceValues.CMTarget->GetType());
       }
     }
   if(replaceValues.Output)
@@ -1185,6 +1185,13 @@ cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
+{
+  return this->ConvertToOutputForExisting(path.c_str());
+}
+
+//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
                                               bool forResponseFile)
 {
@@ -1285,7 +1292,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
       }
     else
       {
-      includePath = this->ConvertToOutputForExisting(i->c_str());
+      includePath = this->ConvertToIncludeReference(*i);
       }
     if(quotePaths && includePath.size() && includePath[0] != '\"')
       {
@@ -1456,6 +1463,17 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += targetLinkFlags;
         linkFlags += " ";
         }
+      if(!buildType.empty())
+        {
+        std::string build = "STATIC_LIBRARY_FLAGS_";
+        build += buildType;
+        targetLinkFlags = target.GetProperty(build.c_str());
+        if(targetLinkFlags)
+          {
+          linkFlags += targetLinkFlags;
+          linkFlags += " ";
+          }
+        }
       }
       break; 
     case cmTarget::MODULE_LIBRARY:
@@ -1464,7 +1482,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       { 
       linkFlags = this->Makefile->GetSafeDefinition(libraryLinkVariable);
       linkFlags += " ";
-      if(buildType.size())
+      if(!buildType.empty())
         {
         std::string build = libraryLinkVariable;
         build += "_";
@@ -1495,7 +1513,10 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         linkFlags += targetLinkFlags;
         linkFlags += " ";
-        std::string configLinkFlags = targetLinkFlags;
+        }
+      if(!buildType.empty())
+        {
+        std::string configLinkFlags = "LINK_FLAGS_";
         configLinkFlags += buildType;
         targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
         if(targetLinkFlags)
@@ -1514,7 +1535,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       linkFlags += 
         this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
       linkFlags += " ";
-      if(buildType.size())
+      if(!buildType.empty())
         {
         std::string build = "CMAKE_EXE_LINKER_FLAGS_";
         build += buildType;
@@ -1566,8 +1587,11 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
-        linkFlags += " ";  
-        std::string configLinkFlags = targetLinkFlags;
+        linkFlags += " ";
+        }
+      if(!buildType.empty())
+        {
+        std::string configLinkFlags = "LINK_FLAGS_";
         configLinkFlags += buildType;
         targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
         if(targetLinkFlags)

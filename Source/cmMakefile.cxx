@@ -1379,7 +1379,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
         {
         cmOStringStream e;
         e << "Target \"" << lib << "\" of type "
-          << cmTarget::TargetTypeNames[static_cast<int>(tgt->GetType())]
+          << cmTarget::GetTargetTypeName(tgt->GetType())
           << " may not be linked into another target.  "
           << "One may link only to STATIC or SHARED libraries, or "
           << "to executables with the ENABLE_EXPORTS property set.";
