@@ -2,7 +2,9 @@
 #ifndef CLASS_A_H
 #define CLASS_A_H
 
-class classA
+#include "liba_export.h"
+
+class LIBA_EXPORT classA
 {
 public:
   classA();
