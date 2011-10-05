@@ -7,7 +7,7 @@ include(GenerateExportHeader)
 
 check_cxx_compiler_flag(-Wl,--no-undefined HAS_NO_UNDEFINED)
 
-if (HAS_NO_UNDEFINED)
+if (HAS_NO_UNDEFINED AND NOT APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
 endif()
 
