@@ -2,9 +2,11 @@
 #ifndef CLASS_B_H
 #define CLASS_B_H
 
+#include "libb_export.h"
+
 class classA;
 
-class classB
+class LIBB_EXPORT classB
 {
 public:
   classB();

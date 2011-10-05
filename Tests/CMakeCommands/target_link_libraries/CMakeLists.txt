@@ -51,6 +51,10 @@ macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
     "add_library(libB SHARED classB.cpp)\n"
     "add_library(libC SHARED classC.cpp)\n"
 
+    "generate_export_header(libA)\n"
+    "generate_export_header(libB)\n"
+    "generate_export_header(libC)\n"
+
     "add_executable(exec \"${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/main.cpp\")\n"
   )
 
