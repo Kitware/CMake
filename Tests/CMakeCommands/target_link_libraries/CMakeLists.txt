@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(target_link_libraries_test)
+project(target_link_libraries)
 
 set (COUNT 0)
 macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
