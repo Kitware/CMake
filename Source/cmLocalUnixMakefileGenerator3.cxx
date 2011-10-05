@@ -1559,7 +1559,7 @@ cmLocalUnixMakefileGenerator3
 
     // Create the scanner for this language
     cmDepends *scanner = 0;
-    if(lang == "C" || lang == "CXX" || lang == "RC")
+    if(lang == "C" || lang == "CXX" || lang == "RC" || lang == "ASM")
       {
       // TODO: Handle RC (resource files) dependencies correctly.
       scanner = new cmDependsC(this, targetDir, lang.c_str(), &validDeps);
