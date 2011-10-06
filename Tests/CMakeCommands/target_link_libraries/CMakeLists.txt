@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 2.8)
 
 project(target_link_libraries)
 
+file(WRITE
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+  "int main() { return 0; }
+"
+)
+
+add_executable(
+  target_link_libraries
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+)
+
+
 set (COUNT 0)
 macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
   math(EXPR COUNT "${COUNT} + 1" )
@@ -161,26 +173,26 @@ expect_pass(False False
     libC
 )
 
-# However, if we do clear it and don't explicitly link the executable to it, it fails,
-# whether we specify the link_interface_libraries properly or not.
-if (NOT APPLE)
-  # Apparently this doesn't work on APPLE either.
-  # http://www.cdash.org/CDash/testDetails.php?test=117927753&build=1596834
-  if (NOT WIN32)
-    # This does not work on windows apparently
-    expect_fail(True False
-      classB classC
-    LIBS
-      libC
-  )
-  endif()
-
-  expect_fail(True True
-      classB classC
-    LIBS
-      libC
-  )
-endif()
+# # However, if we do clear it and don't explicitly link the executable to it, it fails,
+# # whether we specify the link_interface_libraries properly or not.
+# if (NOT APPLE)
+#   # Apparently this doesn't work on APPLE either.
+#   # http://www.cdash.org/CDash/testDetails.php?test=117927753&build=1596834
+#   if (NOT WIN32)
+#     # This does not work on windows apparently
+#     expect_fail(True False
+#       classB classC
+#     LIBS
+#       libC
+#   )
+#   endif()
+#
+#   expect_fail(True True
+#       classB classC
+#     LIBS
+#       libC
+#   )
+# endif()
 
 # Then we can still link the executable to libA directly of course to pass
 expect_pass(True False
@@ -206,15 +218,4 @@ expect_pass(True True
     classA classC
   LIBS
     libC
-)
-
-file(WRITE
-  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-  "int main() { return 0; }
-"
-)
-
-add_executable(
-  target_link_libraries
-  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
 )
