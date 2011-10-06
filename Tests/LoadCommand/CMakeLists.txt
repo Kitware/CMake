@@ -12,12 +12,6 @@ INCLUDE (CheckFunctionExists)
 CHECK_FUNCTION_EXISTS(printf        HAVE_PRINTF)
 CHECK_FUNCTION_EXISTS(vsblabla      HAVE_VSBLABLA)
 
-INCLUDE (${CMAKE_ROOT}/Modules/CheckIncludeFile.cmake)
-CHECK_INCLUDE_FILE("sys/prctl.h"    HAVE_SYS_PRCTL_H)
-
-INCLUDE (${CMAKE_ROOT}/Modules/CheckLibraryExists.cmake)
-CHECK_LIBRARY_EXISTS(m ceil "" HAVE_LIBM)
-
 CONFIGURE_FILE(${LoadCommand_SOURCE_DIR}/LoadedCommand.h.in
                ${LoadCommand_BINARY_DIR}/LoadedCommand.h)
 
