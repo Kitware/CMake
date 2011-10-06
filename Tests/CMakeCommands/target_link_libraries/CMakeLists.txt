@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 2.8)
 
 project(target_link_libraries)
 
+file(WRITE
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+  "int main() { return 0; }
+"
+)
+
+add_executable(
+  target_link_libraries
+  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
+)
+
+
 set (COUNT 0)
 macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
   math(EXPR COUNT "${COUNT} + 1" )
@@ -206,15 +218,4 @@ expect_pass(True True
     classA classC
   LIBS
     libC
-)
-
-file(WRITE
-  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-  "int main() { return 0; }
-"
-)
-
-add_executable(
-  target_link_libraries
-  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
 )
