@@ -15,10 +15,14 @@ add_executable(
 
 
 set (COUNT 0)
-macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
+macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES
+                SPECIFY_LINK_INTERFACE_LIBRARIES)
   math(EXPR COUNT "${COUNT} + 1" )
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}"
+  )
 
   if (${CLEAR_LINK_INTERFACE_LIBRARIES})
     file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
@@ -67,7 +71,8 @@ macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES SPECIFY_LINK_INTERFACE_LIBRARIES)
     "generate_export_header(libB)\n"
     "generate_export_header(libC)\n"
 
-    "add_executable(exec \"${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/main.cpp\")\n"
+    "add_executable(exec \n"
+    "\"${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/main.cpp\")\n"
   )
 
   file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
@@ -156,8 +161,9 @@ all_pass(
     libA libB libC
 )
 
-# If we don't set the CMAKE_LINK_INTERFACE_LIBRARIES to empty and we don't explicitly
-# specify the LINK_INTERFACE_LIBRARIES, the executable can use all classes if linked
+# If we don't set the CMAKE_LINK_INTERFACE_LIBRARIES to empty and
+# we don't explicitly specify the LINK_INTERFACE_LIBRARIES, the
+# executable can use all classes if linked
 # indirectly to them
 expect_pass(False False
     classA classB
@@ -165,7 +171,8 @@ expect_pass(False False
     libB
 )
 
-# Although libC is linked to libA, libA is not part of the link interface of libC.
+# Although libC is linked to libA, libA is not part of the link interface of
+# libC.
 # Because we don't clear the CMAKE_LINK_INTERFACE_LIBRARIES it still works.
 expect_pass(False False
     classA classC
@@ -173,7 +180,8 @@ expect_pass(False False
     libC
 )
 
-# # However, if we do clear it and don't explicitly link the executable to it, it fails,
+# # However, if we do clear it and don't explicitly link the executable to it,
+# # it fails,
 # # whether we specify the link_interface_libraries properly or not.
 # if (NOT APPLE)
 #   # Apparently this doesn't work on APPLE either.
@@ -206,8 +214,8 @@ expect_pass(True True
     libC libA
 )
 
-# Also, if we clear and specify the link interface, we can use classes defined in
-# that interface without linking to the library directly
+# Also, if we clear and specify the link interface, we can use classes defined
+# in that interface without linking to the library directly
 expect_pass(True True
     classA classB
   LIBS
