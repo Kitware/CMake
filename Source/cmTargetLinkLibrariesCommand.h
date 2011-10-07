@@ -107,6 +107,23 @@ public:
       "Libraries specified as \"general\" (or without any keyword) are "
       "treated as if specified for both \"debug\" and \"optimized\"."
       "\n"
+      "  target_link_libraries(<target>\n"
+      "                        LINK_PUBLIC\n"
+      "                          [[debug|optimized|general] <lib>] ...\n"
+      "                        [LINK_PRIVATE\n"
+      "                          [[debug|optimized|general] <lib>] ...])\n"
+      "  target_link_libraries(<target>"
+      "                        LINK_PRIVATE\n"
+      "                          [[debug|optimized|general] <lib>] ...\n"
+      "                        [LINK_PUBLIC\n"
+      "                          [[debug|optimized|general] <lib>] ...])\n"
+      "The LINK_PUBLIC and LINK_PRIVATE modes can be used to specify both the"
+      "link dependencies and the link interface in one command.  "
+      "Libraries and targets following LINK_PUBLIC are linked to, and are "
+      "made part of the LINK_INTERFACE_LIBRARIES. Libraries and targets "
+      "following LINK_PRIVATE are linked to, but are not made part of the "
+      "LINK_INTERFACE_LIBRARIES.  "
+      "\n"
       "The library dependency graph is normally acyclic (a DAG), but in the "
       "case of mutually-dependent STATIC libraries CMake allows the graph "
       "to contain cycles (strongly connected components).  "
@@ -138,6 +155,9 @@ private:
 
   cmTarget* Target;
   bool DoingInterface;
+  bool DoingPublicInterface;
+  bool DoingPrivateInterface;
+  bool SpecifiesPublicAndPrivate;
 
   void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
 };
