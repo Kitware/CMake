@@ -149,9 +149,15 @@ private:
   static const char* LinkLibraryTypeNames[3];
 
   cmTarget* Target;
-  bool DoingInterface;
-  bool DoingPublicInterface;
-  bool DoingPrivateInterface;
+  enum ProcessingState {
+    ProcessingLinkLibraries,
+    ProcessingLinkInterface,
+    ProcessingPublicInterface,
+    ProcessingPrivateInterface
+  };
+
+  ProcessingState CurrentProcessingState;
+
   bool SpecifiesPublicAndPrivate;
 
   void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
