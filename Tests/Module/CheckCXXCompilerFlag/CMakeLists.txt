@@ -57,6 +57,11 @@ else()
   message("Unhandled Platform")
 endif()
 
+
+check_cxx_compiler_flag(-Wl,--no-undefined HAS_NO_UNDEFINED)
+
+message("HAS_NO_UNDEFINED: ${HAS_NO_UNDEFINED}\n\nCOMPILE OUTPUT:\n${OUTPUT}")
+
 #
 # This is a no-op executable... If this test is going to fail, it fails during
 # the configure step while cmake is configuring this CMakeLists.txt file...
