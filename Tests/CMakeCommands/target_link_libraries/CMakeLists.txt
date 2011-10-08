@@ -61,8 +61,8 @@ foreach(B1 ${Bools})
       "export(TARGETS libA libB libC FILE Targets.cmake)\n"
     )
 
-    try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/libs_build_${B1}_${B2}
-      ${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}
+    try_compile(Result "${CMAKE_CURRENT_BINARY_DIR}/libs_build_${B1}_${B2}"
+      "${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}"
       libs
       OUTPUT_VARIABLE Out
     )
@@ -87,13 +87,13 @@ macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES
   # Set local short variables to avoid long lines
   set(B1 ${CLEAR_LINK_INTERFACE_LIBRARIES})
   set(B2 ${SPECIFY_LINK_INTERFACE_LIBRARIES})
-  set(Libs_Build_Dir ${CMAKE_CURRENT_BINARY_DIR}/libs_build_${B1}_${B2})
+  set(Libs_Build_Dir "${CMAKE_CURRENT_BINARY_DIR}/libs_build_${B1}_${B2}")
 
   file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
-    "include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}\n"
-    "                    ${Libs_Build_Dir}\n"
+    "include_directories(\"${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}\"\n"
+    "                    \"${Libs_Build_Dir}\"\n"
     ")\n"
-    "include(${Libs_Build_Dir}/Targets.cmake)\n"
+    "include(\"${Libs_Build_Dir}/Targets.cmake\")\n"
   )
 
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/main.cpp"
@@ -154,8 +154,8 @@ macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES
     ")\n"
   )
 
-  try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/fail${COUNT}
-    ${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}
+  try_compile(Result "${CMAKE_CURRENT_BINARY_DIR}/fail${COUNT}"
+    "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}"
     src
     OUTPUT_VARIABLE Out
   )
