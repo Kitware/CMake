@@ -62,6 +62,27 @@ check_cxx_compiler_flag(-Wl,--no-undefined HAS_NO_UNDEFINED)
 
 message("HAS_NO_UNDEFINED: ${HAS_NO_UNDEFINED}\n\nCOMPILE OUTPUT:\n${OUTPUT}")
 
+try_compile(HAS_NO_UNDEFINED_SHARED_LIB
+  "${CMAKE_CURRENT_BINARY_DIR}/shared_lib_build"
+  "${CMAKE_CURRENT_SOURCE_DIR}/shared_lib"
+  shared_lib
+  OUTPUT_VARIABLE Out
+)
+message("HAS_NO_UNDEFINED_SHARED_LIB: ${HAS_NO_UNDEFINED_SHARED_LIB}\n"
+  "\nCOMPILE OUTPUT:\n${Out}"
+)
+
+try_compile(HAS_NO_UNDEFINED_STATIC_LIB
+  "${CMAKE_CURRENT_BINARY_DIR}/static_lib_build"
+  "${CMAKE_CURRENT_SOURCE_DIR}/static_lib"
+  static_lib
+  OUTPUT_VARIABLE Out
+)
+message("HAS_NO_UNDEFINED_STATIC_LIB: ${HAS_NO_UNDEFINED_STATIC_LIB}\n"
+  "\nCOMPILE OUTPUT:\n${Out}"
+)
+
+
 #
 # This is a no-op executable... If this test is going to fail, it fails during
 # the configure step while cmake is configuring this CMakeLists.txt file...
