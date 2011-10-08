@@ -13,6 +13,66 @@ add_executable(
   "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
 )
 
+set(Bools True False)
+
+foreach(B1 ${Bools})
+  foreach(B2 ${Bools})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_CURRENT_SOURCE_DIR}/libs"
+      "${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}"
+    )
+  endforeach()
+endforeach()
+
+foreach(B1 ${Bools})
+  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/libs_True_${B1}/CMakeLists.txt"
+    "set(CMAKE_LINK_INTERFACE_LIBRARIES \"\")\n"
+  )
+endforeach()
+
+foreach(B1 ${Bools})
+  foreach(B2 ${Bools})
+    file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}/CMakeLists.txt"
+
+      "add_library(libA SHARED classA.cpp)\n"
+      "add_library(libB SHARED classB.cpp)\n"
+      "add_library(libC SHARED classC.cpp)\n"
+
+      "generate_export_header(libA)\n"
+      "generate_export_header(libB)\n"
+      "generate_export_header(libC)\n"
+
+      "target_link_libraries(libB libA)\n"
+      "target_link_libraries(libC libA libB)\n"
+    )
+  endforeach()
+endforeach()
+
+foreach(B1 ${Bools})
+  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_True/CMakeLists.txt"
+      "target_link_libraries(libB LINK_INTERFACE_LIBRARIES libA)\n"
+      "target_link_libraries(libC LINK_INTERFACE_LIBRARIES libA)\n"
+    )
+endforeach()
+
+foreach(B1 ${Bools})
+  foreach(B2 ${Bools})
+    file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}/CMakeLists.txt"
+      "export(TARGETS libA libB libC FILE Targets.cmake)\n"
+    )
+
+    try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/libs_build_${B1}_${B2}
+      ${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}
+      libs
+      OUTPUT_VARIABLE Out
+    )
+    if (NOT Result)
+      message("Libs CLEAR_LINK_INTERFACE_LIBRARIES: ${B1}\n"
+              "Libs SPECIFY_LINK_INTERFACE_LIBRARIES: ${B2}\n\n\n${Out}")
+    endif()
+  endforeach()
+endforeach()
+
 
 set (COUNT 0)
 macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES
@@ -24,11 +84,17 @@ macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES
     "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}"
   )
 
-  if (${CLEAR_LINK_INTERFACE_LIBRARIES})
-    file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
-      "set(CMAKE_LINK_INTERFACE_LIBRARIES \"\")\n"
-    )
-  endif()
+  # Set local short variables to avoid long lines
+  set(B1 ${CLEAR_LINK_INTERFACE_LIBRARIES})
+  set(B2 ${SPECIFY_LINK_INTERFACE_LIBRARIES})
+  set(Libs_Build_Dir ${CMAKE_CURRENT_BINARY_DIR}/libs_build_${B1}_${B2})
+
+  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
+    "include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs_${B1}_${B2}\n"
+    "                    ${Libs_Build_Dir}\n"
+    ")\n"
+    "include(${Libs_Build_Dir}/Targets.cmake)\n"
+  )
 
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/main.cpp"
     ""
@@ -63,29 +129,9 @@ macro(_do_build CLEAR_LINK_INTERFACE_LIBRARIES
 
   file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
 
-    "add_library(libA SHARED classA.cpp)\n"
-    "add_library(libB SHARED classB.cpp)\n"
-    "add_library(libC SHARED classC.cpp)\n"
-
-    "generate_export_header(libA)\n"
-    "generate_export_header(libB)\n"
-    "generate_export_header(libC)\n"
-
     "add_executable(exec \n"
     "\"${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/main.cpp\")\n"
   )
-
-  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
-    "target_link_libraries(libB libA)\n"
-    "target_link_libraries(libC libA libB)\n"
-  )
-
-  if (${SPECIFY_LINK_INTERFACE_LIBRARIES})
-    file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
-      "target_link_libraries(libB LINK_INTERFACE_LIBRARIES libA)\n"
-      "target_link_libraries(libC LINK_INTERFACE_LIBRARIES libA)\n"
-    )
-  endif()
 
   file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
     "target_link_libraries(exec "
