@@ -8,5 +8,6 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/input.cpp"
   "int doNothing() { return 0; }\n"
 )
 
-add_definitions(-Wl,--noundefined)
+set(CMAKE_STATIC_LINKER_FLAGS "-Wl,--no-undefined")
+
 add_library(lib "${CMAKE_CURRENT_BINARY_DIR}/input.cpp")
