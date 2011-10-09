@@ -90,10 +90,6 @@ macro(_do_build Include Library LibrarySource Source)
     "  add_definitions(${ERROR_FLAG})\n"
     "endif()\n"
 
-    "if(MSVC)\n"
-    "  add_definitions(-DCOMPILER_IS_MSVC)\n"
-    "endif()\n"
-
     "add_subdirectory(\"${LibrarySource}\")\n"
 
     "include_directories(\"${LibrarySource}\" \"\${CMAKE_CURRENT_BINARY_DIR}/${LibrarySource}\")\n"
@@ -124,10 +120,6 @@ endmacro()
 include(GenerateExportHeader)
 
 add_compiler_export_flags()
-
-if (MSVC)
-  add_definitions(-DCOMPILER_IS_MSVC)
-endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
