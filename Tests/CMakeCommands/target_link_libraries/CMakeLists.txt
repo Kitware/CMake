@@ -229,7 +229,7 @@ expect_pass(False False
 # However, if we do clear it and don't explicitly link the executable to it,
 # it fails,
 # whether we specify the link_interface_libraries properly or not.
-if (APPLE)
+if (NOT APPLE)
   expect_fail(True False
     classB classC
   LIBS
