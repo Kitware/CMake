@@ -220,7 +220,8 @@ public:
 
   /** Get the manifest of all targets that will be built for each
       configuration.  This is valid during generation only.  */
-  cmTargetManifest const& GetTargetManifest() const { return this->TargetManifest; }
+  cmTargetManifest const& GetTargetManifest() const
+  { return this->TargetManifest; }
 
   /** Get the content of a directory.  Directory listings are loaded
       from disk at most once and cached.  During the generation step
@@ -231,12 +232,12 @@ public:
 
   void AddTarget(cmTargets::value_type &v);
 
-  virtual const char* GetAllTargetName()           const { return "ALL_BUILD"; }
+  virtual const char* GetAllTargetName()         const { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()       const { return "INSTALL"; }
   virtual const char* GetInstallLocalTargetName()  const { return 0; }
   virtual const char* GetInstallStripTargetName()  const { return 0; }
   virtual const char* GetPreinstallTargetName()    const { return 0; }
-  virtual const char* GetTestTargetName()          const { return "RUN_TESTS"; }
+  virtual const char* GetTestTargetName()        const { return "RUN_TESTS"; }
   virtual const char* GetPackageTargetName()       const { return "PACKAGE"; }
   virtual const char* GetPackageSourceTargetName() const { return 0; }
   virtual const char* GetEditCacheTargetName()     const { return 0; }
