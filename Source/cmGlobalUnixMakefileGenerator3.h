@@ -136,18 +136,18 @@ protected:
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmTarget const&);
 
-  // Setup target names
-  virtual const char* GetAllTargetName()           const { return "all"; }
-  virtual const char* GetInstallTargetName()       const { return "install"; }
-  virtual const char* GetInstallLocalTargetName()  const { return "install/local"; }
-  virtual const char* GetInstallStripTargetName()  const { return "install/strip"; }
-  virtual const char* GetPreinstallTargetName()    const { return "preinstall"; }
-  virtual const char* GetTestTargetName()          const { return "test"; }
-  virtual const char* GetPackageTargetName()       const { return "package"; }
-  virtual const char* GetPackageSourceTargetName() const { return "package_source"; }
-  virtual const char* GetEditCacheTargetName()     const { return "edit_cache"; }
-  virtual const char* GetRebuildCacheTargetName()  const { return "rebuild_cache"; }
-  virtual const char* GetCleanTargetName()         const { return "clean"; }
+  // Target name hooks for superclass.
+  const char* GetAllTargetName()           const { return "all"; }
+  const char* GetInstallTargetName()       const { return "install"; }
+  const char* GetInstallLocalTargetName()  const { return "install/local"; }
+  const char* GetInstallStripTargetName()  const { return "install/strip"; }
+  const char* GetPreinstallTargetName()    const { return "preinstall"; }
+  const char* GetTestTargetName()          const { return "test"; }
+  const char* GetPackageTargetName()       const { return "package"; }
+  const char* GetPackageSourceTargetName() const { return "package_source"; }
+  const char* GetEditCacheTargetName()     const { return "edit_cache"; }
+  const char* GetRebuildCacheTargetName()  const { return "rebuild_cache"; }
+  const char* GetCleanTargetName()         const { return "clean"; }
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
 
