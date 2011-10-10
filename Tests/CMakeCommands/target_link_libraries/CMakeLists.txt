@@ -226,27 +226,22 @@ expect_pass(False False
     libC
 )
 
-# # However, if we do clear it and don't explicitly link the executable to it,
-# # it fails,
-# # whether we specify the link_interface_libraries properly or not.
-# if (NOT APPLE)
-#   # Apparently this doesn't work on APPLE either.
-#   # http://www.cdash.org/CDash/testDetails.php?test=117927753&build=1596834
-#   if (NOT WIN32)
-#     # This does not work on windows apparently
-#     expect_fail(True False
-#       classB classC
-#     LIBS
-#       libC
-#   )
-#   endif()
-#
-#   expect_fail(True True
-#       classB classC
-#     LIBS
-#       libC
-#   )
-# endif()
+# However, if we do clear it and don't explicitly link the executable to it,
+# it fails,
+# whether we specify the link_interface_libraries properly or not.
+if (APPLE)
+  expect_fail(True False
+    classB classC
+  LIBS
+    libC
+  )
+  expect_fail(True True
+      classB classC
+    LIBS
+      libC
+  )
+endif()
+
 
 # Then we can still link the executable to libA directly of course to pass
 expect_pass(True False
