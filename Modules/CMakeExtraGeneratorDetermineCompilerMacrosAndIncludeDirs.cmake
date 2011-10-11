@@ -25,10 +25,12 @@ MACRO(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
 
   IF (${_lang} STREQUAL "c++")
     SET(_compilerExecutable "${CMAKE_CXX_COMPILER}")
+    SET(_arg1 "${CMAKE_CXX_COMPILER_ARG1}")
   ELSE ()
     SET(_compilerExecutable "${CMAKE_C_COMPILER}")
+    SET(_arg1 "${CMAKE_C_COMPILER_ARG1}")
   ENDIF ()
-  EXECUTE_PROCESS(COMMAND ${_compilerExecutable} -v -E -x ${_lang} -dD dummy
+  EXECUTE_PROCESS(COMMAND ${_compilerExecutable} ${_arg1} -v -E -x ${_lang} -dD dummy
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
                   ERROR_VARIABLE _gccOutput
                   OUTPUT_VARIABLE _gccStdout )
