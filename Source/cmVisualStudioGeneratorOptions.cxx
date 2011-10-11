@@ -86,14 +86,14 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   // to the generated project to disable logo suppression.  Otherwise
   // the GUI default is to enable suppression.
   //
-  // Avoid this on Visual Studio 10 (and later!) because it results in:
+  // On Visual Studio 10 (and later!), the value of this attribute should be
+  // an empty string, instead of "FALSE", in order to avoid a warning:
   //   "cl ... warning D9035: option 'nologo-' has been deprecated"
   //
   if(verbose &&
-     this->Version != 10 &&
      this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end())
     {
-    this->FlagMap["SuppressStartupBanner"] = "FALSE";
+    this->FlagMap["SuppressStartupBanner"] = this->Version < 10 ? "FALSE" : "";
     }
 }
 
