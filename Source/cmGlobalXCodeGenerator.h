@@ -194,8 +194,8 @@ private:
   void AppendFlag(std::string& flags, std::string const& flag);
 
 protected:
-  virtual const char* GetInstallTargetName()      { return "install"; }
-  virtual const char* GetPackageTargetName()      { return "package"; }
+  virtual const char* GetInstallTargetName() const { return "install"; }
+  virtual const char* GetPackageTargetName() const { return "package"; }
 
   unsigned int XcodeVersion;
   std::string VersionString;
