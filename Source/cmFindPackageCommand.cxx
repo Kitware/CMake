@@ -1243,7 +1243,7 @@ void cmFindPackageCommand::ComputePrefixes()
   this->AddPrefixesCMakeSystemVariable();
   this->AddPrefixesSystemRegistry();
   this->AddPrefixesUserGuess();
-  this->ComputeFinalPrefixes();
+  this->ComputeFinalPaths();
 }
 
 //----------------------------------------------------------------------------
@@ -1571,18 +1571,6 @@ void cmFindPackageCommand::AddPrefixesUserHints()
 {
   // Add hints specified by the caller.
   this->AddPathsInternal(this->UserHints, CMakePath);
-}
-
-//----------------------------------------------------------------------------
-void cmFindPackageCommand::ComputeFinalPrefixes()
-{
-  std::vector<std::string>& prefixes = this->SearchPaths;
-
-  // Construct the final set of prefixes.
-  this->RerootPaths(prefixes);
-
-  // Add a trailing slash to all prefixes to aid the search process.
-  this->AddTrailingSlashes(prefixes);
 }
 
 //----------------------------------------------------------------------------
