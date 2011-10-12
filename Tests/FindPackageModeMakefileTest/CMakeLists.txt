@@ -7,6 +7,7 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile")
   # is AFAIK a GNU make extension. Alex
   execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} -v
                   OUTPUT_VARIABLE makeVersionOutput
+                  ERROR_QUIET
                   TIMEOUT 10)
   string(TOUPPER "${makeVersionOutput}" MAKE_VERSION_OUTPUT)
   if("${MAKE_VERSION_OUTPUT}" MATCHES ".*GNU MAKE.*")
