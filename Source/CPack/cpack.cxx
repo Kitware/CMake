@@ -448,7 +448,7 @@ int main (int argc, char *argv[])
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
-    doc.SetSection("Options",cmDocumentationOptions);
+    doc.PrependSection("Options",cmDocumentationOptions);
 
     std::vector<cmDocumentationEntry> v;
     cmCPackGeneratorFactory::DescriptionsMap::const_iterator generatorIt;
