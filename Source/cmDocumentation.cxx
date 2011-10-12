@@ -21,7 +21,7 @@ static const char *cmDocumentationStandardOptions[][3] =
 {
   {"--copyright [file]", "Print the CMake copyright and exit.",
    "If a file is specified, the copyright is written into it."},
-  {"--help", "Print usage information and exit.",
+  {"--help,-help,-usage,-h,-H,/?", "Print usage information and exit.",
    "Usage describes the basic command line interface and its options."},
   {"--help-full [file]", "Print full help and exit.",
    "Full help displays most of the documentation provided by the UNIX "
