@@ -34,7 +34,8 @@ static const char *cmDocumentationStandardOptions[][3] =
   {"--help-man [file]", "Print full help as a UNIX man page and exit.",
    "This option is used by the cmake build to generate the UNIX man page.  "
    "If a file is specified, the help is written into it."},
-  {"--version [file]", "Show program name/version banner and exit.",
+  {"--version,-version,/V [file]",
+   "Show program name/version banner and exit.",
    "If a file is specified, the version is written into it."},
   {0,0,0}
 };
