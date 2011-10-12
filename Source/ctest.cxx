@@ -68,6 +68,10 @@ static const char * cmDocumentationOptions[][3] =
   {"-F", "Enable failover.", "This option allows ctest to resume a test "
    "set execution that was previously interrupted.  If no interruption "
    "occurred, the -F option will have no effect."},
+  {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the"
+   "given number of jobs.",
+   "This option tells ctest to run the tests in parallel using given "
+   "number of jobs."},
   {"-Q,--quiet", "Make ctest quiet.",
     "This option will suppress all the output. The output log file will "
     "still be generated if the --output-log is specified. Options such "
