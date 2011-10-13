@@ -68,6 +68,16 @@
 #   CLASS_DIR          The directory where the class files can be found. For
 #                      example to use them with javah.
 #
+# add_executable_jar(TARGET_NAME, ENTRY_POINT,
+#                    SRC1 SRC2 .. SRCN RCS1 RCS2 .. RCSN
+#                   )
+#
+# This command creates an executable <TARGET_NAME>.jar, by setting its
+# entry point to ENTRY_POINT. It compiles the given source files (SRC)
+# and adds the given resource files (RCS) to the jar file.
+# If only resource files are given then just a jar file is created.
+# Note: This command handles all add_jar()'s additionnal instructions.
+#
 # find_jar(<VAR>
 #          name | NAMES name1 [name2 ...]
 #          [PATHS path1 [path2 ... ENV var]]
