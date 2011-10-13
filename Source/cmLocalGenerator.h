@@ -33,19 +33,19 @@ class cmLocalGenerator
 public:
   cmLocalGenerator();
   virtual ~cmLocalGenerator();
-  
+
   /**
-   * Generate the makefile for this directory. 
+   * Generate the makefile for this directory.
    */
   virtual void Generate() {}
 
   /**
    * Process the CMakeLists files for this directory to fill in the
-   * Makefile ivar 
+   * Makefile ivar
    */
   virtual void Configure();
 
-  /** 
+  /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */
   virtual void TraceDependencies();
@@ -75,11 +75,11 @@ public:
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
     return this->Makefile; };
-  
+
   ///! Get the makefile for this generator, const version
     const cmMakefile *GetMakefile() const {
       return this->Makefile; };
-  
+
   ///! Get the GlobalGenerator this is associated with
   cmGlobalGenerator *GetGlobalGenerator() {
     return this->GlobalGenerator; };
@@ -89,10 +89,10 @@ public:
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
 
-  /** 
+  /**
    * Convert something to something else. This is a centralized coversion
    * routine used by the generators to handle relative paths and the like.
-   * The flags determine what is actually done. 
+   * The flags determine what is actually done.
    *
    * relative: treat the argument as a directory and convert it to make it
    * relative or full or unchanged. If relative (HOME, START etc) then that
@@ -117,7 +117,7 @@ public:
     * Get path for the specified relative root.
     */
   const char* GetRelativeRootPath(RelativeRoot relroot);
-  
+
   /**
    * Convert the given path to an output path that is optionally
    * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The
@@ -126,14 +126,14 @@ public:
    */
   std::string ConvertToOptionallyRelativeOutputPath(const char* remote);
 
-  ///! set/get the parent generator 
+  ///! set/get the parent generator
   cmLocalGenerator* GetParent(){return this->Parent;}
   void SetParent(cmLocalGenerator* g) { this->Parent = g; g->AddChild(this); }
 
   ///! set/get the children
   void AddChild(cmLocalGenerator* g) { this->Children.push_back(g); }
   std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; };
-    
+
 
   void AddArchitectureFlags(std::string& flags, cmTarget* target,
                             const char *lang, const char* config);
@@ -183,9 +183,9 @@ public:
   virtual std::string ConvertToIncludeReference(std::string const& path);
 
   /** Called from command-line hook to clear dependencies.  */
-  virtual void ClearDependencies(cmMakefile* /* mf */, 
+  virtual void ClearDependencies(cmMakefile* /* mf */,
                                  bool /* verbose */) {}
-  
+
   /** Called from command-line hook to update dependencies.  */
   virtual bool UpdateDependencies(const char* /* tgtInfo */,
                                   bool /*verbose*/,
@@ -259,11 +259,11 @@ public:
   /** Return the directories into which object files will be put.
    *  There maybe more than one for fat binary systems like OSX.
    */
-  virtual void 
+  virtual void
   GetTargetObjectFileDirectories(cmTarget* target,
-                                 std::vector<std::string>& 
+                                 std::vector<std::string>&
                                  dirs);
-  
+
   /**
    * Convert the given remote path to a relative path with respect to
    * the given local path.  The local path must be given in component
@@ -321,15 +321,15 @@ public:
 
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
-  void GetTargetFlags(std::string& linkLibs, 
+  void GetTargetFlags(std::string& linkLibs,
                       std::string& flags,
                       std::string& linkFlags,
                       cmTarget&target);
-  
+
 protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::ostream&, cmTarget&, bool relink);
-  
+
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
                            const RuleVariables& replaceValues);
@@ -341,13 +341,13 @@ protected:
   void InsertRuleLauncher(std::string& s, cmTarget* target,
                           const char* prop);
 
-  
-  /** Convert a target to a utility target for unsupported 
+
+  /** Convert a target to a utility target for unsupported
    *  languages of a generator */
   void AddBuildTargetRule(const char* llang, cmTarget& target);
-  ///! add a custom command to build a .o file that is part of a target 
-  void AddCustomCommandToCreateObject(const char* ofname, 
-                                      const char* lang, 
+  ///! add a custom command to build a .o file that is part of a target
+  void AddCustomCommandToCreateObject(const char* ofname,
+                                      const char* lang,
                                       cmSourceFile& source,
                                       cmTarget& target);
   // Create Custom Targets and commands for unsupported languages

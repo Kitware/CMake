@@ -180,8 +180,8 @@ static const char * cmDocumentationOptions[][3] =
   {"--build-project", "Specify the name of the project to build.", "" },
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
-  {"--build-config-sample", 
-   "A sample executable to use to determine the configuration", 
+  {"--build-config-sample",
+   "A sample executable to use to determine the configuration",
    "A sample executable to use to determine the configuration that "
    "should be used. e.g. Debug/Release/etc" },
   {"--build-options", "Add extra options to the build step.",
@@ -276,7 +276,7 @@ int main (int argc, char *argv[])
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
   // arguments to run tests.
-  if(argc > 1 || !(cmSystemTools::FileExists("CTestTestfile.cmake") || 
+  if(argc > 1 || !(cmSystemTools::FileExists("CTestTestfile.cmake") ||
                    cmSystemTools::FileExists("DartTestfile.txt")))
     {
     if(argc == 1)

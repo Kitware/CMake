@@ -235,24 +235,24 @@ cmDocumentation::cmDocumentation()
 
   sec = new cmDocumentationSection("See Also","SEE ALSO");
   sec->Append(cmDocumentationStandardSeeAlso);
-  this->AllSections["Standard See Also"] = sec;  
+  this->AllSections["Standard See Also"] = sec;
 
   sec = new cmDocumentationSection("Options","OPTIONS");
   sec->Append(cmDocumentationStandardOptions);
-  this->AllSections["Options"] = sec;  
+  this->AllSections["Options"] = sec;
 
   sec = new cmDocumentationSection("Properties","PROPERTIES");
   sec->Append(cmPropertiesDocumentationDescription);
-  this->AllSections["Properties Description"] = sec;  
+  this->AllSections["Properties Description"] = sec;
 
   sec = new cmDocumentationSection("Generators","GENERATORS");
   sec->Append(cmDocumentationGeneratorsHeader);
-  this->AllSections["Generators"] = sec;  
+  this->AllSections["Generators"] = sec;
 
   sec = new cmDocumentationSection("Compatibility Commands",
                                    "COMPATIBILITY COMMANDS");
   sec->Append(cmCompatCommandsDocumentationDescription);
-  this->AllSections["Compatibility Commands"] = sec;  
+  this->AllSections["Compatibility Commands"] = sec;
 
 
   this->PropertySections.push_back("Properties of Global Scope");
@@ -279,7 +279,7 @@ cmDocumentation::~cmDocumentation()
     {
     delete [] *i;
     }
-  for(std::map<std::string,cmDocumentationSection *>::iterator i = 
+  for(std::map<std::string,cmDocumentationSection *>::iterator i =
         this->AllSections.begin();
       i != this->AllSections.end(); ++i)
     {
@@ -314,7 +314,7 @@ bool cmDocumentation::PrintCopyright(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintVersion(std::ostream& os)
 {
-  os << this->GetNameString() << " version " 
+  os << this->GetNameString() << " version "
      << cmVersion::GetCMakeVersion() << "\n";
   return true;
 }
@@ -331,7 +331,7 @@ void cmDocumentation::AddSectionToPrint(const char *section)
 //----------------------------------------------------------------------------
 void cmDocumentation::ClearSections()
 {
-  this->PrintSections.erase(this->PrintSections.begin(), 
+  this->PrintSections.erase(this->PrintSections.begin(),
                             this->PrintSections.end());
   this->ModulesFound.clear();
 }
@@ -359,7 +359,7 @@ void cmDocumentation::AddDocumentIntroToPrint(const char* intro[2])
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
                                          const char* docname)
 {
-  if ((this->CurrentFormatter->GetForm() != HTMLForm) 
+  if ((this->CurrentFormatter->GetForm() != HTMLForm)
        && (this->CurrentFormatter->GetForm() != DocbookForm)
        && (this->CurrentFormatter->GetForm() != ManForm))
     {
@@ -394,8 +394,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
       this->PrintDocumentationList(os,"Commands");
       this->PrintDocumentationList(os,"Compatibility Commands");
       return true;
-    case cmDocumentation::ModuleList: 
-      // find the modules first, print the custom module docs only if 
+    case cmDocumentation::ModuleList:
+      // find the modules first, print the custom module docs only if
       // any custom modules have been found actually, Alex
       this->CreateCustomModulesSection();
       this->CreateModulesSection();
@@ -406,43 +406,43 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
         }
       this->PrintDocumentationList(os,"Modules");
       return true;
-    case cmDocumentation::PropertyList: 
+    case cmDocumentation::PropertyList:
       this->PrintDocumentationList(os,"Properties Description");
-      for (std::vector<std::string>::iterator i = 
+      for (std::vector<std::string>::iterator i =
              this->PropertySections.begin();
            i != this->PropertySections.end(); ++i)
         {
         this->PrintDocumentationList(os,i->c_str());
         }
       return true;
-    case cmDocumentation::VariableList: 
-      for (std::vector<std::string>::iterator i = 
+    case cmDocumentation::VariableList:
+      for (std::vector<std::string>::iterator i =
              this->VariableSections.begin();
            i != this->VariableSections.end(); ++i)
         {
         this->PrintDocumentationList(os,i->c_str());
         }
       return true;
-    case cmDocumentation::Full: 
+    case cmDocumentation::Full:
       return this->PrintDocumentationFull(os);
-    case cmDocumentation::Modules: 
+    case cmDocumentation::Modules:
       return this->PrintDocumentationModules(os);
-    case cmDocumentation::CustomModules: 
+    case cmDocumentation::CustomModules:
       return this->PrintDocumentationCustomModules(os);
-    case cmDocumentation::Policies: 
+    case cmDocumentation::Policies:
       return this->PrintDocumentationPolicies(os);
-    case cmDocumentation::Properties: 
+    case cmDocumentation::Properties:
       return this->PrintDocumentationProperties(os);
-    case cmDocumentation::Variables: 
+    case cmDocumentation::Variables:
       return this->PrintDocumentationVariables(os);
-    case cmDocumentation::Commands: 
+    case cmDocumentation::Commands:
       return this->PrintDocumentationCurrentCommands(os);
-    case cmDocumentation::CompatCommands: 
+    case cmDocumentation::CompatCommands:
       return this->PrintDocumentationCompatCommands(os);
 
-    case cmDocumentation::Copyright: 
+    case cmDocumentation::Copyright:
       return this->PrintCopyright(os);
-    case cmDocumentation::Version:   
+    case cmDocumentation::Version:
       return true;
     default: return false;
     }
@@ -451,7 +451,7 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
 //----------------------------------------------------------------------------
 bool cmDocumentation::CreateModulesSection()
 {
-  cmDocumentationSection *sec = 
+  cmDocumentationSection *sec =
     new cmDocumentationSection("Standard CMake Modules", "MODULES");
   this->AllSections["Modules"] = sec;
   std::string cmakeModules = this->CMakeRoot;
@@ -485,7 +485,7 @@ bool cmDocumentation::CreateCustomModulesSection()
       {
       if (!sectionHasHeader)
         {
-        cmDocumentationSection *sec = 
+        cmDocumentationSection *sec =
           new cmDocumentationSection("Custom CMake Modules","CUSTOM MODULES");
         this->AllSections["Custom CMake Modules"] = sec;
         sec->Append(cmDocumentationCustomModulesHeader[0]);
@@ -502,10 +502,10 @@ bool cmDocumentation::CreateCustomModulesSection()
 
 //----------------------------------------------------------------------------
 void cmDocumentation
-::CreateModuleDocsForDir(cmsys::Directory& dir, 
+::CreateModuleDocsForDir(cmsys::Directory& dir,
                          cmDocumentationSection &moduleSection)
 {
-  // sort the files alphabetically, so the docs for one module are easier 
+  // sort the files alphabetically, so the docs for one module are easier
   // to find than if they are in random order
   std::vector<std::string> sortedFiles;
   for(unsigned int i = 0; i < dir.GetNumberOfFiles(); ++i)
@@ -530,7 +530,7 @@ void cmDocumentation
           std::string path = dir.GetPath();
           path += "/";
           path += (*fname);
-          this->CreateSingleModule(path.c_str(), moduleName.c_str(), 
+          this->CreateSingleModule(path.c_str(), moduleName.c_str(),
                                    moduleSection);
           }
         }
@@ -539,7 +539,7 @@ void cmDocumentation
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::CreateSingleModule(const char* fname, 
+bool cmDocumentation::CreateSingleModule(const char* fname,
                                          const char* moduleName,
                                          cmDocumentationSection &moduleSection)
 {
@@ -548,7 +548,7 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
     {
     std::cerr << "Internal error: can not open module." << fname << std::endl;
     return false;
-    } 
+    }
   std::string line;
   std::string text;
   std::string brief;
@@ -561,14 +561,14 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
       // blank line
       if(line.size() <= 2)
         {
-        text += "\n"; 
+        text += "\n";
         newParagraph = true;
         }
-      else if(line[2] == '-') 
+      else if(line[2] == '-')
         {
         brief = line.c_str()+4;
         }
-      else 
+      else
         {
         // two spaces
         if(line[1] == ' ' && line[2] == ' ')
@@ -630,11 +630,11 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
 bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 {
   bool result = true;
-  
+
   // Loop over requested documentation types.
-  for(std::vector<RequestedHelpItem>::const_iterator 
+  for(std::vector<RequestedHelpItem>::const_iterator
       i = this->RequestedHelpItems.begin();
-      i != this->RequestedHelpItems.end(); 
+      i != this->RequestedHelpItems.end();
       ++i)
     {
     this->SetForm(i->HelpForm);
@@ -660,13 +660,13 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
         docname = cmSystemTools::GetFilenameWithoutLastExtension(i->Filename);
         }
       }
-    
+
     // Print this documentation type to the stream.
     if(!this->PrintDocumentation(i->HelpType, *s, docname.c_str()) || !*s)
       {
       result = false;
       }
-    
+
     // Close the file if we wrote one.
     if(fout)
       {
@@ -876,8 +876,8 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::UsageForm;
       }
-    else if((strcmp(argv[i], "--version") == 0) || 
-            (strcmp(argv[i], "-version") == 0) || 
+    else if((strcmp(argv[i], "--version") == 0) ||
+            (strcmp(argv[i], "-version") == 0) ||
             (strcmp(argv[i], "/V") == 0))
       {
       help.HelpType = cmDocumentation::Version;
@@ -904,14 +904,14 @@ void cmDocumentation::Print(Form f, std::ostream& os)
 //----------------------------------------------------------------------------
 void cmDocumentation::Print(std::ostream& os)
 {
-  // if the formatter supports it, print a master index for 
+  // if the formatter supports it, print a master index for
   // all sections
   this->CurrentFormatter->PrintIndex(os, this->PrintSections);
   for(unsigned int i=0; i < this->PrintSections.size(); ++i)
     {
     std::string name = this->PrintSections[i]->
       GetName((this->CurrentFormatter->GetForm()));
-    this->CurrentFormatter->PrintSection(os,*this->PrintSections[i], 
+    this->CurrentFormatter->PrintSection(os,*this->PrintSections[i],
                                          name.c_str());
     }
 }
@@ -929,7 +929,7 @@ void cmDocumentation::SetDocName(const char *docname)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetSection(const char *name, 
+void cmDocumentation::SetSection(const char *name,
                                  cmDocumentationSection *section)
 {
   if (this->AllSections.find(name) != this->AllSections.end())
@@ -940,22 +940,22 @@ void cmDocumentation::SetSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetSection(const char *name, 
+void cmDocumentation::SetSection(const char *name,
                                  std::vector<cmDocumentationEntry> &docs)
 {
-  cmDocumentationSection *sec = 
-    new cmDocumentationSection(name, 
+  cmDocumentationSection *sec =
+    new cmDocumentationSection(name,
                                cmSystemTools::UpperCase(name).c_str());
   sec->Append(docs);
   this->SetSection(name,sec);
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetSection(const char *name, 
+void cmDocumentation::SetSection(const char *name,
                                  const char *docs[][3])
 {
-  cmDocumentationSection *sec = 
-    new cmDocumentationSection(name, 
+  cmDocumentationSection *sec =
+    new cmDocumentationSection(name,
                                cmSystemTools::UpperCase(name).c_str());
   sec->Append(docs);
   this->SetSection(name,sec);
@@ -965,15 +965,15 @@ void cmDocumentation::SetSection(const char *name,
 void cmDocumentation
 ::SetSections(std::map<std::string,cmDocumentationSection *> &sections)
 {
-  for (std::map<std::string,cmDocumentationSection *>::const_iterator 
+  for (std::map<std::string,cmDocumentationSection *>::const_iterator
          it = sections.begin(); it != sections.end(); ++it)
     {
     this->SetSection(it->first.c_str(),it->second);
-    }    
+    }
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrependSection(const char *name, 
+void cmDocumentation::PrependSection(const char *name,
                                      const char *docs[][3])
 {
   cmDocumentationSection *sec = 0;
@@ -991,7 +991,7 @@ void cmDocumentation::PrependSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrependSection(const char *name, 
+void cmDocumentation::PrependSection(const char *name,
                                      std::vector<cmDocumentationEntry> &docs)
 {
   cmDocumentationSection *sec = 0;
@@ -1009,7 +1009,7 @@ void cmDocumentation::PrependSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::AppendSection(const char *name, 
+void cmDocumentation::AppendSection(const char *name,
                                     const char *docs[][3])
 {
   cmDocumentationSection *sec = 0;
@@ -1027,7 +1027,7 @@ void cmDocumentation::AppendSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::AppendSection(const char *name, 
+void cmDocumentation::AppendSection(const char *name,
                                     std::vector<cmDocumentationEntry> &docs)
 {
   cmDocumentationSection *sec = 0;
@@ -1045,7 +1045,7 @@ void cmDocumentation::AppendSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::AppendSection(const char *name, 
+void cmDocumentation::AppendSection(const char *name,
                                     cmDocumentationEntry &docs)
 {
 
@@ -1055,7 +1055,7 @@ void cmDocumentation::AppendSection(const char *name,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrependSection(const char *name, 
+void cmDocumentation::PrependSection(const char *name,
                                      cmDocumentationEntry &docs)
 {
 
@@ -1067,7 +1067,7 @@ void cmDocumentation::PrependSection(const char *name,
 //----------------------------------------------------------------------------
 void cmDocumentation::SetSeeAlsoList(const char *data[][3])
 {
-  cmDocumentationSection *sec = 
+  cmDocumentationSection *sec =
     new cmDocumentationSection("See Also", "SEE ALSO");
   this->AllSections["See Also"] = sec;
   this->SeeAlsoString = ".B ";
@@ -1075,7 +1075,7 @@ void cmDocumentation::SetSeeAlsoList(const char *data[][3])
   while(data[i][1])
     {
     this->SeeAlsoString += data[i][1];
-    this->SeeAlsoString += data[i+1][1]? "(1), ":"(1)";    
+    this->SeeAlsoString += data[i+1][1]? "(1), ":"(1)";
     ++i;
     }
   sec->Append(0,this->SeeAlsoString.c_str(),0);
@@ -1096,9 +1096,9 @@ bool cmDocumentation::PrintDocumentationGeneric(std::ostream& os,
     os << "Required argument missing.\n";
     return false;
     }
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     this->AllSections[section]->GetEntries();
-  for(std::vector<cmDocumentationEntry>::const_iterator ei = 
+  for(std::vector<cmDocumentationEntry>::const_iterator ei =
         entries.begin();
       ei != entries.end(); ++ei)
     {
@@ -1138,7 +1138,7 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
     os << "Argument --help-module needs a module name.\n";
     return false;
     }
-    
+
   std::string moduleName;
   // find the module
   std::vector<std::string> dirs;
@@ -1172,10 +1172,10 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 
   if(!moduleName.empty())
     {
-    cmDocumentationSection *sec = 
+    cmDocumentationSection *sec =
       new cmDocumentationSection("Standard CMake Modules", "MODULES");
     this->AllSections["Modules"] = sec;
-    if (this->CreateSingleModule(moduleName.c_str(), 
+    if (this->CreateSingleModule(moduleName.c_str(),
                                  this->CurrentArgument.c_str(),
                                  *this->AllSections["Modules"]))
       {
@@ -1204,7 +1204,7 @@ bool cmDocumentation::PrintDocumentationSingleModule(std::ostream& os)
 bool cmDocumentation::PrintDocumentationSingleProperty(std::ostream& os)
 {
   bool done = false;
-  for (std::vector<std::string>::iterator i = 
+  for (std::vector<std::string>::iterator i =
          this->PropertySections.begin();
        !done && i != this->PropertySections.end(); ++i)
     {
@@ -1241,7 +1241,7 @@ bool cmDocumentation::PrintDocumentationSinglePolicy(std::ostream& os)
 bool cmDocumentation::PrintDocumentationSingleVariable(std::ostream& os)
 {
   bool done = false;
-  for (std::vector<std::string>::iterator i = 
+  for (std::vector<std::string>::iterator i =
          this->VariableSections.begin();
        !done && i != this->VariableSections.end(); ++i)
     {
@@ -1270,9 +1270,9 @@ bool cmDocumentation::PrintDocumentationList(std::ostream& os,
     return false;
     }
 
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     this->AllSections[section]->GetEntries();
-  for(std::vector<cmDocumentationEntry>::const_iterator ei = 
+  for(std::vector<cmDocumentationEntry>::const_iterator ei =
         entries.begin();
       ei != entries.end(); ++ei)
     {
@@ -1364,7 +1364,7 @@ bool cmDocumentation::PrintDocumentationProperties(std::ostream& os)
   this->ClearSections();
   this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Properties));
   this->AddSectionToPrint("Properties Description");
-  for (std::vector<std::string>::iterator i = 
+  for (std::vector<std::string>::iterator i =
          this->PropertySections.begin();
        i != this->PropertySections.end(); ++i)
     {
@@ -1383,7 +1383,7 @@ bool cmDocumentation::PrintDocumentationVariables(std::ostream& os)
 {
   this->ClearSections();
   this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Variables));
-  for (std::vector<std::string>::iterator i = 
+  for (std::vector<std::string>::iterator i =
          this->VariableSections.begin();
        i != this->VariableSections.end(); ++i)
     {
@@ -1464,10 +1464,10 @@ void cmDocumentation::CreateFullDocumentation()
   this->AddSectionToPrint("Commands");
   emitted.insert("Commands");
 
-  
+
   this->AddSectionToPrint("Properties Description");
   emitted.insert("Properties Description");
-  for (std::vector<std::string>::iterator i = 
+  for (std::vector<std::string>::iterator i =
          this->PropertySections.begin();
        i != this->PropertySections.end(); ++i)
     {
@@ -1481,7 +1481,7 @@ void cmDocumentation::CreateFullDocumentation()
   emitted.insert("Author");
 
   // add any sections not yet written out, or to be written out
-  for (std::map<std::string, cmDocumentationSection*>::iterator i = 
+  for (std::map<std::string, cmDocumentationSection*>::iterator i =
          this->AllSections.begin();
        i != this->AllSections.end(); ++i)
     {
@@ -1579,6 +1579,6 @@ const char* cmDocumentation::GetDefaultDocName(Type ht) const
 //----------------------------------------------------------------------------
 bool cmDocumentation::IsOption(const char* arg) const
 {
-  return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) || 
+  return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) ||
           (strcmp(arg, "/?") == 0));
 }
