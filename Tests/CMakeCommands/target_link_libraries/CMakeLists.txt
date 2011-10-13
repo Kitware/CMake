@@ -13,6 +13,16 @@ add_executable(
   "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
 )
 
+try_compile(LINK_INTERFACE_LIBRARIES_FAILS
+  "${CMAKE_CURRENT_BINARY_DIR}/control_point"
+  "${CMAKE_CURRENT_SOURCE_DIR}/control_point"
+  control_point
+)
+
+if (LINK_INTERFACE_LIBRARIES_FAILS)
+  return()
+endif()
+
 set(Bools True False)
 
 foreach(B1 ${Bools})
