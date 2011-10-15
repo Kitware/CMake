@@ -34,6 +34,8 @@ cmExtraEclipseCDT4Generator
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+
+  this->SupportsVirtualFolders = true;
 }
 
 //----------------------------------------------------------------------------
@@ -56,6 +58,24 @@ void cmExtraEclipseCDT4Generator::Generate()
 {
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+
+  std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
+  cmsys::RegularExpression regex(".*([0-9]+\\.[0-9]+).*");
+  if (regex.find(eclipseVersion.c_str()))
+    {
+    unsigned int majorVersion = 0;
+    unsigned int minorVersion = 0;
+    int res=sscanf(regex.match(1).c_str(), "%u.%u", &majorVersion,
+                                                    &minorVersion);
+    if (res == 2)
+      {
+      int version = majorVersion * 1000 + minorVersion;
+      if (version < 3006) // 3.6 is Helios
+        {
+        this->SupportsVirtualFolders = false;
+        }
+      }
+    }
 
   // TODO: Decide if these are local or member variables
   this->HomeDirectory       = mf->GetHomeDirectory();

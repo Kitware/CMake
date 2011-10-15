@@ -107,6 +107,7 @@ private:
   std::string HomeOutputDirectory;
   bool IsOutOfSourceBuild;
   bool GenerateSourceProject;
+  bool SupportsVirtualFolders;
 
 };
 
