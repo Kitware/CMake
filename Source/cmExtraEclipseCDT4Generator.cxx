@@ -420,29 +420,32 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     }
 
-  // for each sub project create a linked resource to the source dir
-  // - only if it is an out-of-source build
-  this->AppendLinkedResource(fout, "[Subprojects]",
-                             "virtual:/virtual", true);
-
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
-       it = this->GlobalGenerator->GetProjectMap().begin();
-       it != this->GlobalGenerator->GetProjectMap().end();
-       ++it)
+  if (this->SupportsVirtualFolders)
     {
-    std::string linkSourceDirectory = this->GetEclipsePath(
-                            it->second[0]->GetMakefile()->GetStartDirectory());
-    // a linked resource must not point to a parent directory of .project or
-    // .project itself
-    if ((this->HomeOutputDirectory != linkSourceDirectory) &&
-        !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
-                                       linkSourceDirectory.c_str()))
+    // for each sub project create a linked resource to the source dir
+    // - only if it is an out-of-source build
+    this->AppendLinkedResource(fout, "[Subprojects]",
+                               "virtual:/virtual", true);
+
+    for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+         it = this->GlobalGenerator->GetProjectMap().begin();
+         it != this->GlobalGenerator->GetProjectMap().end();
+         ++it)
       {
-      std::string linkName = "[Subprojects]/";
-      linkName += it->first;
-      this->AppendLinkedResource(fout, linkName,
-                                 this->GetEclipsePath(linkSourceDirectory));
-      this->SrcLinkedResources.push_back(it->first);
+      std::string linkSourceDirectory = this->GetEclipsePath(
+                            it->second[0]->GetMakefile()->GetStartDirectory());
+      // a linked resource must not point to a parent directory of .project or
+      // .project itself
+      if ((this->HomeOutputDirectory != linkSourceDirectory) &&
+          !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                         linkSourceDirectory.c_str()))
+        {
+        std::string linkName = "[Subprojects]/";
+        linkName += it->first;
+        this->AppendLinkedResource(fout, linkName,
+                                   this->GetEclipsePath(linkSourceDirectory));
+        this->SrcLinkedResources.push_back(it->first);
+        }
       }
     }
 
