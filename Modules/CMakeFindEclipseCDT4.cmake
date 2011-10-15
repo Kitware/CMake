@@ -27,13 +27,6 @@ FUNCTION(_FIND_ECLIPSE_VERSION)
     ENDIF()
   ENDIF()
 
-  IF(_ECLIPSE_VERSION)
-    MESSAGE(STATUS "Found Eclipse version ${_ECLIPSE_VERSION}")
-  ELSE()
-    SET(_ECLIPSE_VERSION "3.6" )
-    MESSAGE(STATUS "Could not determine Eclipse version, assuming ${_ECLIPSE_VERSION}")
-  ENDIF()
-
   # Set up a map with the names of the Eclipse releases:
   SET(_ECLIPSE_VERSION_NAME_    "Unknown" )
   SET(_ECLIPSE_VERSION_NAME_3.2 "Callisto" )
@@ -42,6 +35,13 @@ FUNCTION(_FIND_ECLIPSE_VERSION)
   SET(_ECLIPSE_VERSION_NAME_3.5 "Galileo" )
   SET(_ECLIPSE_VERSION_NAME_3.6 "Helios" )
   SET(_ECLIPSE_VERSION_NAME_3.7 "Indigo" )
+
+  IF(_ECLIPSE_VERSION)
+    MESSAGE(STATUS "Found Eclipse version ${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}})")
+  ELSE()
+    SET(_ECLIPSE_VERSION "3.6" )
+    MESSAGE(STATUS "Could not determine Eclipse version, assuming at least ${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}}). Adjust CMAKE_ECLIPSE_VERSION if this is wrong.")
+  ENDIF()
 
   SET(CMAKE_ECLIPSE_VERSION "${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}})" CACHE STRING "The version of Eclipse. If Eclipse has not been found, 3.6 (Helios) is assumed.")
   SET_PROPERTY(CACHE CMAKE_ECLIPSE_VERSION PROPERTY STRINGS "3.2 (${_ECLIPSE_VERSION_NAME_3.2})"
