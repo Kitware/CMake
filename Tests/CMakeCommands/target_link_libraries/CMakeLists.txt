@@ -79,6 +79,7 @@ foreach(B1 ${Bools})
     if (NOT Result)
       message("Libs CLEAR_LINK_INTERFACE_LIBRARIES: ${B1}\n"
               "Libs SPECIFY_LINK_INTERFACE_LIBRARIES: ${B2}\n\n\n${Out}")
+      return()
     endif()
   endforeach()
 endforeach()
