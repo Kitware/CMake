@@ -20,6 +20,7 @@ try_compile(LINK_INTERFACE_LIBRARIES_FAILS
 )
 
 if (LINK_INTERFACE_LIBRARIES_FAILS)
+  message("\n\n#######################\nTHIS PLATFORM DOES NOT SUPPORT LINK_INTERFACE_LIBRARIES\n\n")
   return()
 endif()
 
@@ -79,6 +80,7 @@ foreach(B1 ${Bools})
     if (NOT Result)
       message("Libs CLEAR_LINK_INTERFACE_LIBRARIES: ${B1}\n"
               "Libs SPECIFY_LINK_INTERFACE_LIBRARIES: ${B2}\n\n\n${Out}")
+      message("\n\n#######################\nTHIS PLATFORM DOES NOT SUPPORT LINK_INTERFACE_LIBRARIES\n\n")
       return()
     endif()
   endforeach()
