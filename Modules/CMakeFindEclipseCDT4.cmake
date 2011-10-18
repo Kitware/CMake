@@ -17,6 +17,43 @@
 
 FIND_PROGRAM(CMAKE_ECLIPSE_EXECUTABLE NAMES eclipse DOC "The Eclipse executable")
 
+FUNCTION(_FIND_ECLIPSE_VERSION)
+  # This code is in a function so the variables used here have only local scope
+  IF(CMAKE_ECLIPSE_EXECUTABLE)
+    GET_FILENAME_COMPONENT(_ECLIPSE_DIR "${CMAKE_ECLIPSE_EXECUTABLE}" PATH)
+    FILE(GLOB _ECLIPSE_FEATURE_DIR "${_ECLIPSE_DIR}/features/org.eclipse.platform*")
+    IF("${_ECLIPSE_FEATURE_DIR}" MATCHES ".+org.eclipse.platform_([0-9]+\\.[0-9]+).+")
+      SET(_ECLIPSE_VERSION ${CMAKE_MATCH_1})
+    ENDIF()
+  ENDIF()
+
+  # Set up a map with the names of the Eclipse releases:
+  SET(_ECLIPSE_VERSION_NAME_    "Unknown" )
+  SET(_ECLIPSE_VERSION_NAME_3.2 "Callisto" )
+  SET(_ECLIPSE_VERSION_NAME_3.3 "Europa" )
+  SET(_ECLIPSE_VERSION_NAME_3.4 "Ganymede" )
+  SET(_ECLIPSE_VERSION_NAME_3.5 "Galileo" )
+  SET(_ECLIPSE_VERSION_NAME_3.6 "Helios" )
+  SET(_ECLIPSE_VERSION_NAME_3.7 "Indigo" )
+
+  IF(_ECLIPSE_VERSION)
+    MESSAGE(STATUS "Found Eclipse version ${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}})")
+  ELSE()
+    SET(_ECLIPSE_VERSION "3.6" )
+    MESSAGE(STATUS "Could not determine Eclipse version, assuming at least ${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}}). Adjust CMAKE_ECLIPSE_VERSION if this is wrong.")
+  ENDIF()
+
+  SET(CMAKE_ECLIPSE_VERSION "${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}})" CACHE STRING "The version of Eclipse. If Eclipse has not been found, 3.6 (Helios) is assumed.")
+  SET_PROPERTY(CACHE CMAKE_ECLIPSE_VERSION PROPERTY STRINGS "3.2 (${_ECLIPSE_VERSION_NAME_3.2})"
+                                                            "3.3 (${_ECLIPSE_VERSION_NAME_3.3})"
+                                                            "3.4 (${_ECLIPSE_VERSION_NAME_3.4})"
+                                                            "3.5 (${_ECLIPSE_VERSION_NAME_3.5})"
+                                                            "3.6 (${_ECLIPSE_VERSION_NAME_3.6})"
+                                                            "3.7 (${_ECLIPSE_VERSION_NAME_3.7})")
+ENDFUNCTION()
+
+_FIND_ECLIPSE_VERSION()
+
 # This variable is used by the Eclipse generator and appended to the make invocation commands.
 SET(CMAKE_ECLIPSE_MAKE_ARGUMENTS "" CACHE STRING "Additional command line arguments when Eclipse invokes make. Enter e.g. -j<some_number> to get parallel builds")
 

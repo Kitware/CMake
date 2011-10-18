@@ -34,6 +34,8 @@ cmExtraEclipseCDT4Generator
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+
+  this->SupportsVirtualFolders = true;
 }
 
 //----------------------------------------------------------------------------
@@ -56,6 +58,24 @@ void cmExtraEclipseCDT4Generator::Generate()
 {
   const cmMakefile* mf
     = this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
+
+  std::string eclipseVersion = mf->GetSafeDefinition("CMAKE_ECLIPSE_VERSION");
+  cmsys::RegularExpression regex(".*([0-9]+\\.[0-9]+).*");
+  if (regex.find(eclipseVersion.c_str()))
+    {
+    unsigned int majorVersion = 0;
+    unsigned int minorVersion = 0;
+    int res=sscanf(regex.match(1).c_str(), "%u.%u", &majorVersion,
+                                                    &minorVersion);
+    if (res == 2)
+      {
+      int version = majorVersion * 1000 + minorVersion;
+      if (version < 3006) // 3.6 is Helios
+        {
+        this->SupportsVirtualFolders = false;
+        }
+      }
+    }
 
   // TODO: Decide if these are local or member variables
   this->HomeDirectory       = mf->GetHomeDirectory();
@@ -400,29 +420,32 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     }
 
-  // for each sub project create a linked resource to the source dir
-  // - only if it is an out-of-source build
-  this->AppendLinkedResource(fout, "[Subprojects]",
-                             "virtual:/virtual", true);
-
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
-       it = this->GlobalGenerator->GetProjectMap().begin();
-       it != this->GlobalGenerator->GetProjectMap().end();
-       ++it)
+  if (this->SupportsVirtualFolders)
     {
-    std::string linkSourceDirectory = this->GetEclipsePath(
-                            it->second[0]->GetMakefile()->GetStartDirectory());
-    // a linked resource must not point to a parent directory of .project or
-    // .project itself
-    if ((this->HomeOutputDirectory != linkSourceDirectory) &&
-        !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
-                                       linkSourceDirectory.c_str()))
+    // for each sub project create a linked resource to the source dir
+    // - only if it is an out-of-source build
+    this->AppendLinkedResource(fout, "[Subprojects]",
+                               "virtual:/virtual", true);
+
+    for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+         it = this->GlobalGenerator->GetProjectMap().begin();
+         it != this->GlobalGenerator->GetProjectMap().end();
+         ++it)
       {
-      std::string linkName = "[Subprojects]/";
-      linkName += it->first;
-      this->AppendLinkedResource(fout, linkName,
-                                 this->GetEclipsePath(linkSourceDirectory));
-      this->SrcLinkedResources.push_back(it->first);
+      std::string linkSourceDirectory = this->GetEclipsePath(
+                            it->second[0]->GetMakefile()->GetStartDirectory());
+      // a linked resource must not point to a parent directory of .project or
+      // .project itself
+      if ((this->HomeOutputDirectory != linkSourceDirectory) &&
+          !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                         linkSourceDirectory.c_str()))
+        {
+        std::string linkName = "[Subprojects]/";
+        linkName += it->first;
+        this->AppendLinkedResource(fout, linkName,
+                                   this->GetEclipsePath(linkSourceDirectory));
+        this->SrcLinkedResources.push_back(it->first);
+        }
       }
     }
 
