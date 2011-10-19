@@ -25,6 +25,8 @@ class cmGeneratedFileStream;
 class cmExtraEclipseCDT4Generator : public cmExternalMakefileProjectGenerator
 {
 public:
+  enum LinkType {VirtualFolder, LinkToFolder, LinkToFile };
+
   cmExtraEclipseCDT4Generator();
 
   static cmExternalMakefileProjectGenerator* New() {
@@ -88,7 +90,7 @@ private:
   static void AppendLinkedResource (cmGeneratedFileStream& fout,
                                     const std::string&     name,
                                     const std::string&     path,
-                                    bool isVirtualFolder = false);
+                                    LinkType linkType);
 
   bool AppendOutLinkedResource(cmGeneratedFileStream& fout,
                                const std::string&     defname,

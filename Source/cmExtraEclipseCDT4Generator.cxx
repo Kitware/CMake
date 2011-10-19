@@ -17,6 +17,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmTarget.h"
+#include "cmSourceFile.h"
 
 #include "cmSystemTools.h"
 #include <stdlib.h>
@@ -414,7 +415,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
                                          linkSourceDirectory.c_str()))
       {
       this->AppendLinkedResource(fout, sourceLinkedResourceName,
-                                 this->GetEclipsePath(linkSourceDirectory));
+                                 this->GetEclipsePath(linkSourceDirectory),
+                                 LinkToFolder);
       this->SrcLinkedResources.push_back(sourceLinkedResourceName);
       }
 
@@ -425,7 +427,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     // for each sub project create a linked resource to the source dir
     // - only if it is an out-of-source build
     this->AppendLinkedResource(fout, "[Subprojects]",
-                               "virtual:/virtual", true);
+                               "virtual:/virtual", VirtualFolder);
 
     for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
          it = this->GlobalGenerator->GetProjectMap().begin();
@@ -443,8 +445,90 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
         std::string linkName = "[Subprojects]/";
         linkName += it->first;
         this->AppendLinkedResource(fout, linkName,
-                                   this->GetEclipsePath(linkSourceDirectory));
+                                   this->GetEclipsePath(linkSourceDirectory),
+                                   LinkToFolder
+                                  );
         this->SrcLinkedResources.push_back(it->first);
+        }
+      }
+
+    std::string linkName = "[Targets]";
+    this->AppendLinkedResource(fout, linkName, "virtual:/virtual",
+                               VirtualFolder);
+
+
+    for (std::vector<cmLocalGenerator*>::const_iterator
+         lgIt = this->GlobalGenerator->GetLocalGenerators().begin();
+         lgIt != this->GlobalGenerator->GetLocalGenerators().end();
+         ++lgIt)
+      {
+      cmMakefile* makefile = (*lgIt)->GetMakefile();
+      const cmTargets& targets = makefile->GetTargets();
+
+      for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end();++ti)
+        {
+        std::string linkName2 = linkName;
+        linkName2 += "/";
+        switch(ti->second.GetType())
+          {
+          case cmTarget::EXECUTABLE:
+          case cmTarget::STATIC_LIBRARY:
+          case cmTarget::SHARED_LIBRARY:
+          case cmTarget::MODULE_LIBRARY:
+            {
+            const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
+                                                          "[exe] " : "[lib] ");
+            linkName2 += prefix;
+            linkName2 += ti->first;
+            this->AppendLinkedResource(fout, linkName2, "virtual:/virtual",
+                                       VirtualFolder);
+            std::vector<cmSourceGroup> sourceGroups =
+                                                   makefile->GetSourceGroups();
+            // get the files from the source lists then add them to the groups
+            cmTarget* tgt = const_cast<cmTarget*>(&ti->second);
+            std::vector<cmSourceFile*>const & files = tgt->GetSourceFiles();
+            for(std::vector<cmSourceFile*>::const_iterator sfIt = files.begin();
+                sfIt != files.end();
+                sfIt++)
+              {
+              // Add the file to the list of sources.
+              std::string source = (*sfIt)->GetFullPath();
+              cmSourceGroup& sourceGroup =
+                makefile->FindSourceGroup(source.c_str(), sourceGroups);
+              sourceGroup.AssignSource(*sfIt);
+              }
+
+
+            for(std::vector<cmSourceGroup>::iterator sgIt=sourceGroups.begin();
+                sgIt != sourceGroups.end();
+                ++sgIt)
+              {
+              std::string linkName3 = linkName2;
+              linkName3 += "/";
+              linkName3 += sgIt->GetFullName();
+              this->AppendLinkedResource(fout, linkName3, "virtual:/virtual",
+                                         VirtualFolder);
+
+              std::vector<const cmSourceFile*> sFiles = sgIt->GetSourceFiles();
+              for(std::vector<const cmSourceFile*>::const_iterator fileIt =
+                                                                sFiles.begin();
+                  fileIt != sFiles.end();
+                  ++fileIt)
+                {
+                std::string linkName4 = linkName3;
+                linkName4 += "/";
+                linkName4 +=
+                      cmSystemTools::GetFilenameName((*fileIt)->GetFullPath());
+                this->AppendLinkedResource(fout, linkName4,
+                                         (*fileIt)->GetFullPath(), LinkToFile);
+                }
+              }
+            }
+            break;
+          // ignore all others:
+          default:
+            break;
+          }
         }
       }
     }
@@ -1115,12 +1199,17 @@ void cmExtraEclipseCDT4Generator
 ::AppendLinkedResource (cmGeneratedFileStream& fout,
                         const std::string&     name,
                         const std::string&     path,
-                        bool isVirtualFolder)
+                        LinkType linkType)
 {
   const char* locationTag = "location";
-  if (isVirtualFolder) // ... and not a linked folder
+  const char* typeTag = "2";
+  if (linkType == VirtualFolder) // ... and not a linked folder
     {
     locationTag = "locationURI";
+    }
+  if (linkType == LinkToFile)
+    {
+    typeTag = "1";
     }
 
   fout <<
@@ -1128,7 +1217,7 @@ void cmExtraEclipseCDT4Generator
     "\t\t\t<name>"
     << cmExtraEclipseCDT4Generator::EscapeForXML(name)
     << "</name>\n"
-    "\t\t\t<type>2</type>\n"
+    "\t\t\t<type>" << typeTag << "</type>\n"
     "\t\t\t<" << locationTag << ">"
     << cmExtraEclipseCDT4Generator::EscapeForXML(path)
     << "</" << locationTag << ">\n"
@@ -1177,7 +1266,7 @@ bool cmExtraEclipseCDT4Generator
   else
     {
     this->AppendLinkedResource(fout, name,
-                               this->GetEclipsePath(outputPath));
+                               this->GetEclipsePath(outputPath), LinkToFolder);
     this->OutLinkedResources.push_back(name);
     return true;
     }
