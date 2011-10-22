@@ -42,6 +42,7 @@
 
 #include "codeeditor.h"
 #include "calwidget.h"
+#include "foo.h"
 
 int main(int argv, char **args)
 {
@@ -53,6 +54,9 @@ int main(int argv, char **args)
 
   Window w;
   w.show();
+
+  Foo foo;
+  foo.doFoo();
 
   return app.exec();
 }
