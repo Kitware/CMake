@@ -492,7 +492,6 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   cmsys::RegularExpression mocIncludeRegExp(
               "[\n][ \t]*#[ \t]*include[ \t]+"
               "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
-  cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
   std::list<std::string> headerExtensions;
   headerExtensions.push_back(".h");
   headerExtensions.push_back(".hpp");
@@ -536,17 +535,13 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
       // the Q_OBJECT class declaration in a header file.
       // If the moc include is of the foo.moc style we need to look for
       // a Q_OBJECT macro in the current source file, if it contains the
-      // macro we generate the moc file from the source file, else from the
-      // header.
+      // macro we generate the moc file from the source file.
       // Q_OBJECT
-      if (moc_style || !qObjectRegExp.find(contentsString))
+      if (moc_style)
         {
-        if (moc_style)
-          {
-          // basename should be the part of the moc filename used for
-          // finding the correct header, so we need to remove the moc_ part
-          basename = basename.substr(4);
-          }
+        // basename should be the part of the moc filename used for
+        // finding the correct header, so we need to remove the moc_ part
+        basename = basename.substr(4);
 
         bool headerFound = false;
         for(std::list<std::string>::const_iterator ext =
