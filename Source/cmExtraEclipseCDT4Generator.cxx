@@ -695,6 +695,18 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   // - make it type 'src'
   // - and exclude it from type 'out'
   std::string excludeFromOut;
+/* I don't know what the pathentry kind="src" are good for, e.g. autocompletion
+ * works also without them. Done wrong, the indexer complains, see #12417
+ * and #12213.
+ * The CDT documentation is very terse on that:
+ * "CDT_SOURCE: Entry kind constant describing a path entry identifying a
+ * folder containing source code to be compiled."
+ * Also on the cdt-dev list didn't bring any information:
+ * http://web.archiveorange.com/archive/v/B4NlJDNIpYoOS1SbxFNy
+ * So I'm disabling them for now, hoping that somebody will report if something
+ * is not workging anymore.
+ * Alex */
+#ifdef DO_CREATE_SRC_PATH_ENTRIES
   for (std::vector<std::string>::const_iterator
        it = this->SrcLinkedResources.begin();
        it != this->SrcLinkedResources.end();
@@ -711,6 +723,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       excludeFromOut += this->EscapeForXML(*it) + "/|";
       }
     }
+#endif
   excludeFromOut += "**/CMakeFiles/";
   fout << "<pathentry excluding=\"" << excludeFromOut
        << "\" kind=\"out\" path=\"\"/>\n";
