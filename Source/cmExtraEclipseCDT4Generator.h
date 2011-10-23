@@ -104,7 +104,7 @@ private:
                         cmMakefile* mf);
 
   void CreateLinksToSubprojects(cmGeneratedFileStream& fout);
-
+  void CreateLinksForTargets(cmGeneratedFileStream& fout);
 
   std::vector<std::string> SrcLinkedResources;
   std::vector<std::string> OutLinkedResources;
