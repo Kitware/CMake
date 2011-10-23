@@ -25,6 +25,8 @@ class cmGeneratedFileStream;
 class cmExtraEclipseCDT4Generator : public cmExternalMakefileProjectGenerator
 {
 public:
+  enum LinkType {VirtualFolder, LinkToFolder, LinkToFile };
+
   cmExtraEclipseCDT4Generator();
 
   static cmExternalMakefileProjectGenerator* New() {
@@ -73,7 +75,8 @@ private:
                                     const std::string&     make,
                                     const std::string&     makeArguments,
                                     const std::string&     path,
-                                    const char* prefix = "");
+                                    const char* prefix = "",
+                                    const char* makeTarget = NULL);
   static void AppendScannerProfile (cmGeneratedFileStream& fout,
                                     const std::string&   profileID,
                                     bool                 openActionEnabled,
@@ -88,7 +91,7 @@ private:
   static void AppendLinkedResource (cmGeneratedFileStream& fout,
                                     const std::string&     name,
                                     const std::string&     path,
-                                    bool isVirtualFolder = false);
+                                    LinkType linkType);
 
   bool AppendOutLinkedResource(cmGeneratedFileStream& fout,
                                const std::string&     defname,
@@ -100,6 +103,9 @@ private:
 
   static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar,
                         cmMakefile* mf);
+
+  void CreateLinksToSubprojects(cmGeneratedFileStream& fout);
+  void CreateLinksForTargets(cmGeneratedFileStream& fout);
 
   std::vector<std::string> SrcLinkedResources;
   std::vector<std::string> OutLinkedResources;

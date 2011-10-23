@@ -54,8 +54,20 @@ ENDFUNCTION()
 
 _FIND_ECLIPSE_VERSION()
 
+# Try to find out how many CPUs we have and set the -j argument for make accordingly
+SET(_CMAKE_ECLIPSE_INITIAL_MAKE_ARGS "")
+
+INCLUDE(ProcessorCount)
+PROCESSORCOUNT(_CMAKE_ECLIPSE_PROCESSOR_COUNT)
+
+# Only set -j if we are under UNIX and if the make-tool used actually has "make" in the name
+# (we may also get here in the future e.g. for ninja)
+IF("${_CMAKE_ECLIPSE_PROCESSOR_COUNT}" GREATER 1  AND  UNIX  AND  "${CMAKE_MAKE_PROGRAM}" MATCHES make)
+  SET(_CMAKE_ECLIPSE_INITIAL_MAKE_ARGS "-j${_CMAKE_ECLIPSE_PROCESSOR_COUNT}")
+ENDIF()
+
 # This variable is used by the Eclipse generator and appended to the make invocation commands.
-SET(CMAKE_ECLIPSE_MAKE_ARGUMENTS "" CACHE STRING "Additional command line arguments when Eclipse invokes make. Enter e.g. -j<some_number> to get parallel builds")
+SET(CMAKE_ECLIPSE_MAKE_ARGUMENTS "${_CMAKE_ECLIPSE_INITIAL_MAKE_ARGS}" CACHE STRING "Additional command line arguments when Eclipse invokes make. Enter e.g. -j<some_number> to get parallel builds")
 
 # This variable is used by the Eclipse generator in out-of-source builds only.
 SET(ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT FALSE CACHE BOOL "If enabled, CMake will generate a source project for Eclipse in CMAKE_SOURCE_DIR")
