@@ -75,7 +75,8 @@ private:
                                     const std::string&     make,
                                     const std::string&     makeArguments,
                                     const std::string&     path,
-                                    const char* prefix = "");
+                                    const char* prefix = "",
+                                    const char* makeTarget = NULL);
   static void AppendScannerProfile (cmGeneratedFileStream& fout,
                                     const std::string&   profileID,
                                     bool                 openActionEnabled,

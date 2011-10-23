@@ -888,6 +888,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs = mf->GetSafeDefinition(
                                                "CMAKE_ECLIPSE_MAKE_ARGUMENTS");
+  const std::string cmake = mf->GetRequiredDefinition("CMAKE_COMMAND");
+
   cmGlobalGenerator* generator
     = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
 
@@ -976,6 +978,25 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
          std::string fastTarget = ti->first;
          fastTarget += "/fast";
          this->AppendTarget(fout, fastTarget, make, makeArgs, subdir, prefix);
+
+         // Add Build and Clean targets in the virtual folder of targets:
+         if (this->SupportsVirtualFolders)
+          {
+          std::string virtDir = "[Targets]/";
+          virtDir += prefix;
+          virtDir += ti->first;
+          this->AppendTarget(fout, "Build", make, makeArgs, virtDir, "",
+                             ti->first.c_str());
+
+          std::string cleanArgs = "-E chdir \"";
+          cleanArgs += makefile->GetCurrentOutputDirectory();
+          cleanArgs += "\" \"";
+          cleanArgs += cmake;
+          cleanArgs += "\" -P \"";
+          cleanArgs += (*it)->GetTargetDirectory(ti->second);
+          cleanArgs += "/cmake_clean.cmake\"";
+          this->AppendTarget(fout, "Clean", cmake, cleanArgs, virtDir, "", "");
+          }
          }
          break;
         // ignore these:
@@ -1160,9 +1181,17 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
                                                const std::string&     make,
                                                const std::string&     makeArgs,
                                                const std::string&     path,
-                                               const char* prefix)
+                                               const char* prefix,
+                                               const char* makeTarget
+                                              )
 {
   std::string targetXml = cmExtraEclipseCDT4Generator::EscapeForXML(target);
+  std::string makeTargetXml = targetXml;
+  if (makeTarget != NULL)
+    {
+    makeTargetXml = cmExtraEclipseCDT4Generator::EscapeForXML(makeTarget);
+    }
+  cmExtraEclipseCDT4Generator::EscapeForXML(target);
   std::string pathXml = cmExtraEclipseCDT4Generator::EscapeForXML(path);
   fout <<
     "<target name=\"" << prefix << targetXml << "\""
@@ -1172,7 +1201,7 @@ void cmExtraEclipseCDT4Generator::AppendTarget(cmGeneratedFileStream& fout,
     << cmExtraEclipseCDT4Generator::GetEclipsePath(make)
     << "</buildCommand>\n"
     "<buildArguments>"  << makeArgs << "</buildArguments>\n"
-    "<buildTarget>" << targetXml << "</buildTarget>\n"
+    "<buildTarget>" << makeTargetXml << "</buildTarget>\n"
     "<stopOnError>true</stopOnError>\n"
     "<useDefaultCommand>false</useDefaultCommand>\n"
     "</target>\n"
