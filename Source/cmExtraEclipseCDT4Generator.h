@@ -103,6 +103,9 @@ private:
   static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar,
                         cmMakefile* mf);
 
+  void CreateLinksToSubprojects(cmGeneratedFileStream& fout);
+
+
   std::vector<std::string> SrcLinkedResources;
   std::vector<std::string> OutLinkedResources;
   std::string HomeDirectory;

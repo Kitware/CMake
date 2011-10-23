@@ -424,33 +424,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   if (this->SupportsVirtualFolders)
     {
-    // for each sub project create a linked resource to the source dir
-    // - only if it is an out-of-source build
-    this->AppendLinkedResource(fout, "[Subprojects]",
-                               "virtual:/virtual", VirtualFolder);
-
-    for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
-         it = this->GlobalGenerator->GetProjectMap().begin();
-         it != this->GlobalGenerator->GetProjectMap().end();
-         ++it)
-      {
-      std::string linkSourceDirectory = this->GetEclipsePath(
-                            it->second[0]->GetMakefile()->GetStartDirectory());
-      // a linked resource must not point to a parent directory of .project or
-      // .project itself
-      if ((this->HomeOutputDirectory != linkSourceDirectory) &&
-          !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
-                                         linkSourceDirectory.c_str()))
-        {
-        std::string linkName = "[Subprojects]/";
-        linkName += it->first;
-        this->AppendLinkedResource(fout, linkName,
-                                   this->GetEclipsePath(linkSourceDirectory),
-                                   LinkToFolder
-                                  );
-        this->SrcLinkedResources.push_back(it->first);
-        }
-      }
+    this->CreateLinksToSubprojects(fout);
 
     std::string linkName = "[Targets]";
     this->AppendLinkedResource(fout, linkName, "virtual:/virtual",
@@ -549,6 +523,41 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   fout << "</projectDescription>\n";
 }
+
+
+//----------------------------------------------------------------------------
+void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
+                                                   cmGeneratedFileStream& fout)
+{
+  // for each sub project create a linked resource to the source dir
+  // - only if it is an out-of-source build
+  this->AppendLinkedResource(fout, "[Subprojects]",
+                             "virtual:/virtual", VirtualFolder);
+
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+       it = this->GlobalGenerator->GetProjectMap().begin();
+       it != this->GlobalGenerator->GetProjectMap().end();
+       ++it)
+    {
+    std::string linkSourceDirectory = this->GetEclipsePath(
+                            it->second[0]->GetMakefile()->GetStartDirectory());
+    // a linked resource must not point to a parent directory of .project or
+    // .project itself
+    if ((this->HomeOutputDirectory != linkSourceDirectory) &&
+        !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                       linkSourceDirectory.c_str()))
+      {
+      std::string linkName = "[Subprojects]/";
+      linkName += it->first;
+      this->AppendLinkedResource(fout, linkName,
+                                 this->GetEclipsePath(linkSourceDirectory),
+                                 LinkToFolder
+                                );
+      this->SrcLinkedResources.push_back(it->first);
+      }
+    }
+}
+
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
