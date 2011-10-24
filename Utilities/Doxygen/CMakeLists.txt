@@ -17,8 +17,6 @@ INCLUDE (${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 IF (BUILD_DOCUMENTATION)
 
-  INCLUDE (${CMAKE_ROOT}/Modules/FindVTK.cmake)
-
   #
   # Configure the script and the doxyfile, then add target
   #

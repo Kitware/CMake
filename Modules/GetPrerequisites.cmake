@@ -24,7 +24,7 @@
 # PARENT_SCOPE.
 #
 #  GET_PREREQUISITES(<target> <prerequisites_var> <exclude_system> <recurse>
-#                    <dirs>)
+#                    <exepath> <dirs>)
 # Get the list of shared library files required by <target>. The list in
 # the variable named <prerequisites_var> should be empty on first entry to
 # this function. On exit, <prerequisites_var> will contain the list of
