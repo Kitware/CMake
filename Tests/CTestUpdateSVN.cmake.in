@@ -63,7 +63,7 @@ update_content(user-source files_added files_removed dirs_added)
 if(dirs_added)
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
-    COMMAND ${SVNCMD} add ${dirs_added}
+    COMMAND ${SVNCMD} add --depth=empty ${dirs_added}
     )
 endif(dirs_added)
 run_child(
