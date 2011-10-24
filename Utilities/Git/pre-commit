@@ -19,5 +19,29 @@ die() {
   exit 1
 }
 
-# This is a placeholder for future pre-commit checks.
-exit 0
+if test -z "$HOOKS_ALLOW_KWSYS"; then
+  # Disallow changes to KWSys
+  files=$(git diff-index --name-only --cached HEAD -- Source/kwsys) &&
+  if test -n "$files"; then
+    die 'Changes to KWSys files
+
+'"$(echo "$files" | sed 's/^/  /')"'
+
+cannot be committed through Git.  KWSys is kept in a CVS repository
+shared by several projects.  A robot replays changes committed there
+into the Source/kwsys directory in CMake.  Please send changes to
+this directory separately.  Run
+
+  git reset HEAD -- Source/kwsys
+
+to unstage these changes and then
+
+  git diff -- Source/kwsys > kwsys.patch
+
+to construct the patch.  Alternatively, set environment variable
+
+  HOOKS_ALLOW_KWSYS=1
+
+to disable this check and commit the changes locally.'
+  fi
+fi
