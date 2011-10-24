@@ -1,4 +1,5 @@
 .gitattributes   export-ignore
+.hooks*          export-ignore
 
 bootstrap        crlf=input
 configure        crlf=input
