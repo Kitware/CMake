@@ -642,10 +642,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "If the list is empty then no transitive link dependencies will be "
      "incorporated when this target is linked into another target even if "
      "the default set is non-empty.  "
-     "This property is ignored for STATIC libraries.  "
      "This property is initialized by the value of the variable "
      "CMAKE_LINK_INTERFACE_LIBRARIES if it is set when a target is "
-     "created.");
+     "created.  "
+     "This property is ignored for STATIC libraries.");
 
   cm->DefineProperty
     ("LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
