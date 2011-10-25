@@ -1328,6 +1328,8 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
   cmSystemTools::ReplaceString(makecmd, "\\ ", "\\\\ ");
   buildphase->AddAttribute("shellScript",
                            this->CreateString(makecmd.c_str()));
+  buildphase->AddAttribute("showEnvVarsInLog",
+                           this->CreateString("0"));
 }
 
 //----------------------------------------------------------------------------
@@ -2065,6 +2067,9 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   shellBuildPhase->AddAttribute("shellScript",
                                 this->CreateString(
                                   "# shell script goes here\nexit 0"));
+  shellBuildPhase->AddAttribute("showEnvVarsInLog",
+                                this->CreateString("0"));
+
   cmXCodeObject* target =
     this->CreateObject(cmXCodeObject::PBXAggregateTarget);
   target->SetComment(cmtarget.GetName());
