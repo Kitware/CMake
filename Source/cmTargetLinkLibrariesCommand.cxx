@@ -95,8 +95,10 @@ bool cmTargetLinkLibrariesCommand
   bool haveLLT = false;
 
   // Start with primary linking and switch to link interface
-  // specification when the keyword is encountered.
-  this->DoingInterface = false;
+  // specification if the keyword is encountered as the first argument.
+  this->CurrentProcessingState = ProcessingLinkLibraries;
+
+  this->SpecifiesPublicAndPrivate = false;
 
   // add libraries, nothe that there is an optional prefix
   // of debug and optimized than can be used
@@ -104,7 +106,7 @@ bool cmTargetLinkLibrariesCommand
     {
     if(args[i] == "LINK_INTERFACE_LIBRARIES")
       {
-      this->DoingInterface = true;
+      this->CurrentProcessingState = ProcessingLinkInterface;
       if(i != 1)
         {
         this->Makefile->IssueMessage(
@@ -114,6 +116,40 @@ bool cmTargetLinkLibrariesCommand
           );
         return true;
         }
+      }
+    else if(args[i] == "LINK_PUBLIC")
+      {
+      if(i != 1 && this->CurrentProcessingState != ProcessingPrivateInterface)
+        {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          "The LINK_PUBLIC or LINK_PRIVATE option must appear as the second "
+          "argument, just after the target name."
+          );
+        return true;
+        }
+      if (this->CurrentProcessingState == ProcessingPrivateInterface)
+        {
+        this->SpecifiesPublicAndPrivate = true;
+        }
+      this->CurrentProcessingState = ProcessingPublicInterface;
+      }
+    else if(args[i] == "LINK_PRIVATE")
+      {
+      if(i != 1 && this->CurrentProcessingState != ProcessingPublicInterface)
+        {
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          "The LINK_PUBLIC or LINK_PRIVATE option must appear as the second "
+          "argument, just after the target name."
+          );
+        return true;
+        }
+      if (this->CurrentProcessingState == ProcessingPublicInterface)
+        {
+        this->SpecifiesPublicAndPrivate = true;
+        }
+      this->CurrentProcessingState = ProcessingPrivateInterface;
       }
     else if(args[i] == "debug")
       {
@@ -189,8 +225,10 @@ bool cmTargetLinkLibrariesCommand
   // If the INTERFACE option was given, make sure the
   // LINK_INTERFACE_LIBRARIES property exists.  This allows the
   // command to be used to specify an empty link interface.
-  if(this->DoingInterface &&
-     !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
+  if((this->CurrentProcessingState == ProcessingLinkInterface
+        || (this->CurrentProcessingState == ProcessingPrivateInterface
+          && !this->SpecifiesPublicAndPrivate))
+    && !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
     }
@@ -217,11 +255,15 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
   // Handle normal case first.
-  if(!this->DoingInterface)
+  if(this->CurrentProcessingState != ProcessingLinkInterface)
     {
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
-    return;
+    if (this->CurrentProcessingState != ProcessingPublicInterface
+        || this->CurrentProcessingState == ProcessingPrivateInterface)
+      {
+      return;
+      }
     }
 
   // Get the list of configurations considered to be DEBUG.
