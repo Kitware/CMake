@@ -2881,7 +2881,7 @@ int cmake::CheckBuildSystem()
     return 1;
     }
 
-  // Find find the newest dependency.
+  // Find the newest dependency.
   std::vector<std::string>::iterator dep = depends.begin();
   std::string dep_newest = *dep++;
   for(;dep != depends.end(); ++dep)
@@ -2907,7 +2907,7 @@ int cmake::CheckBuildSystem()
       }
     }
 
-  // Find find the oldest output.
+  // Find the oldest output.
   std::vector<std::string>::iterator out = outputs.begin();
   std::string out_oldest = *out++;
   for(;out != outputs.end(); ++out)

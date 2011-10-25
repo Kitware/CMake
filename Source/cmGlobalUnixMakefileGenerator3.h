@@ -36,7 +36,7 @@ class cmLocalUnixMakefileGenerator3;
  targets that are required to make the process work.
 
  Makefile2 in turn will recursively make targets in the correct order. Each
- target has its own directory <target>.dir and its own makefile build.make in
+ target has its own directory \<target\>.dir and its own makefile build.make in
  that directory. Also in that directory is a couple makefiles per source file
  used by the target. Typically these are named source.obj.build.make and
  source.obj.build.depend.make. The source.obj.build.make contains the rules
@@ -90,7 +90,7 @@ public:
   void WriteHelpRule(std::ostream& ruleFileStream,
                      cmLocalUnixMakefileGenerator3 *);
 
-  // write the top lvel target rules
+  // write the top level target rules
   void WriteConvenienceRules(std::ostream& ruleFileStream,
                              std::set<cmStdString> &emitted);
 
