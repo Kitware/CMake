@@ -59,14 +59,17 @@ UpdateType: @UPDATE_TYPE@
 # Compiler info
 Compiler: @CMAKE_CXX_COMPILER@
 
-# Dynamic analysis and coverage
+# Dynamic analysis (MemCheck)
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@
 MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
 MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@
+
+# Coverage
 CoverageCommand: @COVERAGE_COMMAND@
+CoverageExtraFlags: @COVERAGE_EXTRA_FLAGS@
 
 # Cluster commands
 SlurmBatchCommand: @SLURM_SBATCH_COMMAND@
