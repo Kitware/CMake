@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#=============================================================================
+# CMake - Cross Platform Makefile Generator
+# Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
+die() {
+  echo 'pre-commit hook failure' 1>&2
+  echo '-----------------------' 1>&2
+  echo '' 1>&2
+  echo "$@" 1>&2
+  exit 1
+}
+
+if test -z "$HOOKS_ALLOW_KWSYS"; then
+  # Disallow changes to KWSys
+  files=$(git diff-index --name-only --cached HEAD -- Source/kwsys) &&
+  if test -n "$files"; then
+    die 'Changes to KWSys files
+
+'"$(echo "$files" | sed 's/^/  /')"'
+
+cannot be committed through Git.  KWSys is kept in a CVS repository
+shared by several projects.  A robot replays changes committed there
+into the Source/kwsys directory in CMake.  Please send changes to
+this directory separately.  Run
+
+  git reset HEAD -- Source/kwsys
+
+to unstage these changes and then
+
+  git diff -- Source/kwsys > kwsys.patch
+
+to construct the patch.  Alternatively, set environment variable
+
+  HOOKS_ALLOW_KWSYS=1
+
+to disable this check and commit the changes locally.'
+  fi
+fi
