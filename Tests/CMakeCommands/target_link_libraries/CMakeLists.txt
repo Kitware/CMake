@@ -184,7 +184,7 @@ endmacro()
 macro(EXPECT_FAIL)
   _do_build(${ARGN})
   if (${Result})
-    message(SEND_ERROR "Failed! \n\n${Out} -- ${COUNT}")
+    message(SEND_ERROR "Failed! \n\n${Out}")
   endif()
 endmacro()
 
