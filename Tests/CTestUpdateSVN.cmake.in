@@ -23,6 +23,16 @@ file(MAKE_DIRECTORY ${TOP}/config)
 set(SVNCMD ${SVN} --config-dir ${TOP}/config)
 set(SVNUSER --username "test author" --non-interactive)
 
+# Configure for this svn version.
+execute_process(
+  COMMAND ${SVN} help add OUTPUT_VARIABLE help_add ERROR_VARIABLE help_add
+  )
+if("${help_add}" MATCHES "--depth")
+  set(depth_empty "--depth=empty")
+else()
+  set(depth_empty "")
+endif()
+
 #-----------------------------------------------------------------------------
 # Initialize the testing directory.
 message("Creating test directory...")
@@ -63,7 +73,7 @@ update_content(user-source files_added files_removed dirs_added)
 if(dirs_added)
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
-    COMMAND ${SVNCMD} add ${dirs_added}
+    COMMAND ${SVNCMD} add ${depth_empty} ${dirs_added}
     )
 endif(dirs_added)
 run_child(
