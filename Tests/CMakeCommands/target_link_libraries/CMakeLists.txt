@@ -13,6 +13,17 @@ add_executable(
   "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
 )
 
+try_compile(LINK_INTERFACE_LIBRARIES_FAILS
+  "${CMAKE_CURRENT_BINARY_DIR}/control_point"
+  "${CMAKE_CURRENT_SOURCE_DIR}/control_point"
+  control_point
+)
+
+if (LINK_INTERFACE_LIBRARIES_FAILS)
+  message("\n\n#######################\nTHIS PLATFORM DOES NOT SUPPORT LINK_INTERFACE_LIBRARIES\n\n")
+  return()
+endif()
+
 set(Bools True False)
 
 foreach(B1 ${Bools})
@@ -67,9 +78,10 @@ foreach(B1 ${Bools})
       OUTPUT_VARIABLE Out
     )
     if (NOT Result)
-      message(SEND_ERROR "Could not build shared library
-              Libs CLEAR_LINK_INTERFACE_LIBRARIES: ${B1}
-              Libs SPECIFY_LINK_INTERFACE_LIBRARIES: ${B2}\n\n\n${Out}")
+      message("Libs CLEAR_LINK_INTERFACE_LIBRARIES: ${B1}\n"
+              "Libs SPECIFY_LINK_INTERFACE_LIBRARIES: ${B2}\n\n\n${Out}")
+      message("\n\n#######################\nTHIS PLATFORM DOES NOT SUPPORT LINK_INTERFACE_LIBRARIES\n\n")
+      return()
     endif()
   endforeach()
 endforeach()
