@@ -1219,7 +1219,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Therefore a specific build configuration must be chosen even "
      "if the generated build system supports multiple configurations.",false,
      "Variables that Control the Build");
-
+  cm->DefineProperty
+    ("CMAKE_LINK_INTERFACE_LIBRARIES", cmProperty::VARIABLE,
+     "Default value for LINK_INTERFACE_LIBRARIES of targets.",
+     "This variable is used to initialize the "
+     "LINK_INTERFACE_LIBRARIES property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
 
 //   Variables defined when the a language is enabled These variables will
 // also be defined whenever CMake has loaded its support for compiling (LANG)
