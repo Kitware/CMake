@@ -1,3 +1,16 @@
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2004-2011 Kitware, Inc.
+  Copyright 2011 Alexander Neundorf (neundorf@kde.org)
+
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
+
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
+
 #ifndef cmQtAutomoc_h
 #define cmQtAutomoc_h
 
@@ -27,6 +40,9 @@ private:
                    const std::string& mocFileName);
   void ParseCppFile(const std::string& absFilename,
                     std::map<std::string, std::string>& includedMocs,
+                    std::set<std::string>& absHeaders);
+  void ParseHeaders(const std::set<std::string>& absHeaders,
+                    const std::map<std::string, std::string>& includedMocs,
                     std::map<std::string, std::string>& notIncludedMocs);
 
   void Init();
