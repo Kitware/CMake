@@ -1,9 +1,9 @@
 # this test creates a static library and an executable
-# the source to the library is then changed 
+# the source to the library is then changed
 # and the build is done on the executable and if things
 # are working the executable should relink with the new
 # value.  The subdir Project contains the CMakelists.txt
-# and source files for the test project. 
+# and source files for the test project.
 cmake_minimum_required (VERSION 2.6)
 project(BuildDepends)
 
@@ -42,7 +42,7 @@ list(APPEND _cmake_options "-DTEST_LINK_DEPENDS=${TEST_LINK_DEPENDS}")
 
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
-write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
+write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
   "const char* foo() { return \"foo\";}" )
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
@@ -57,19 +57,19 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
 help_xcode_depends()
 
 message("Building project first time")
-try_compile(RESULT 
+try_compile(RESULT
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   CMAKE_FLAGS ${_cmake_options}
   OUTPUT_VARIABLE OUTPUT)
 if(HELP_XCODE)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
@@ -82,20 +82,20 @@ if(NOT RESULT)
 endif(NOT RESULT)
 
 set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-  set(bar 
+  set(bar
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 set(zot ${BuildDepends_BINARY_DIR}/Project/zot${CMAKE_EXECUTABLE_SUFFIX})
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-  set(zot 
+  set(zot
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
 
 message("Running ${bar}  ")
@@ -144,7 +144,7 @@ endif()
 help_xcode_depends()
 
 message("Building project second time")
-try_compile(RESULT 
+try_compile(RESULT
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
@@ -153,12 +153,12 @@ try_compile(RESULT
 
 # Xcode is in serious need of help here
 if(HELP_XCODE)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
@@ -169,15 +169,15 @@ message("Output from second build:\n${OUTPUT}")
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project (2)!")
 endif(NOT RESULT)
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
 
 message("Running ${bar}  ")

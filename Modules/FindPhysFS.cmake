@@ -8,7 +8,7 @@
 # correspond to the ./configure --prefix=$PHYSFSDIR
 # used in building PHYSFS.
 #
-# Created by Eric Wing. 
+# Created by Eric Wing.
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.
@@ -23,7 +23,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
+find_path(PHYSFS_INCLUDE_DIR physfs.h
   HINTS
   $ENV{PHYSFSDIR}
   PATH_SUFFIXES include/physfs include
@@ -38,7 +38,7 @@ FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
   /opt
 )
 
-FIND_LIBRARY(PHYSFS_LIBRARY 
+find_library(PHYSFS_LIBRARY
   NAMES physfs
   HINTS
   $ENV{PHYSFSDIR}
@@ -56,6 +56,6 @@ FIND_LIBRARY(PHYSFS_LIBRARY
 
 # handle the QUIETLY and REQUIRED arguments and set PHYSFS_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PhysFS DEFAULT_MSG PHYSFS_LIBRARY PHYSFS_INCLUDE_DIR)
 

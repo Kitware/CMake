@@ -23,59 +23,59 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-SET (FLTK2_DIR $ENV{FLTK2_DIR} )
+set(FLTK2_DIR $ENV{FLTK2_DIR} )
 
 #  Platform dependent libraries required by FLTK2
-IF(WIN32)
-  IF(NOT CYGWIN)
-    IF(BORLAND)
-      SET( FLTK2_PLATFORM_DEPENDENT_LIBS import32 )
-    ELSE(BORLAND)
-      SET( FLTK2_PLATFORM_DEPENDENT_LIBS wsock32 comctl32 )
-    ENDIF(BORLAND)
-  ENDIF(NOT CYGWIN)
-ENDIF(WIN32)
+if(WIN32)
+  if(NOT CYGWIN)
+    if(BORLAND)
+      set( FLTK2_PLATFORM_DEPENDENT_LIBS import32 )
+    else(BORLAND)
+      set( FLTK2_PLATFORM_DEPENDENT_LIBS wsock32 comctl32 )
+    endif(BORLAND)
+  endif(NOT CYGWIN)
+endif(WIN32)
 
-IF(UNIX)
-  INCLUDE(${CMAKE_ROOT}/Modules/FindX11.cmake)
-  SET( FLTK2_PLATFORM_DEPENDENT_LIBS ${X11_LIBRARIES} -lm)
-ENDIF(UNIX)
+if(UNIX)
+  include(${CMAKE_ROOT}/Modules/FindX11.cmake)
+  set( FLTK2_PLATFORM_DEPENDENT_LIBS ${X11_LIBRARIES} -lm)
+endif(UNIX)
 
-IF(APPLE)
-  SET( FLTK2_PLATFORM_DEPENDENT_LIBS  "-framework Carbon -framework Cocoa -framework ApplicationServices -lz")
-ENDIF(APPLE)
+if(APPLE)
+  set( FLTK2_PLATFORM_DEPENDENT_LIBS  "-framework Carbon -framework Cocoa -framework ApplicationServices -lz")
+endif(APPLE)
 
 # If FLTK2_INCLUDE_DIR is already defined we assigne its value to FLTK2_DIR
-IF(FLTK2_INCLUDE_DIR)
-  SET(FLTK2_DIR ${FLTK2_INCLUDE_DIR})
-ELSE(FLTK2_INCLUDE_DIR)
-  SET(FLTK2_INCLUDE_DIR ${FLTK2_DIR})
-ENDIF(FLTK2_INCLUDE_DIR)
+if(FLTK2_INCLUDE_DIR)
+  set(FLTK2_DIR ${FLTK2_INCLUDE_DIR})
+else(FLTK2_INCLUDE_DIR)
+  set(FLTK2_INCLUDE_DIR ${FLTK2_DIR})
+endif(FLTK2_INCLUDE_DIR)
 
 
 # If FLTK2 has been built using CMake we try to find everything directly
-SET(FLTK2_DIR_STRING "directory containing FLTK2Config.cmake.  This is either the root of the build tree, or PREFIX/lib/fltk for an installation.")
+set(FLTK2_DIR_STRING "directory containing FLTK2Config.cmake.  This is either the root of the build tree, or PREFIX/lib/fltk for an installation.")
 
 # Search only if the location is not already known.
-IF(NOT FLTK2_DIR)
+if(NOT FLTK2_DIR)
   # Get the system search path as a list.
-  IF(UNIX)
-    STRING(REGEX MATCHALL "[^:]+" FLTK2_DIR_SEARCH1 "$ENV{PATH}")
-  ELSE(UNIX)
-    STRING(REGEX REPLACE "\\\\" "/" FLTK2_DIR_SEARCH1 "$ENV{PATH}")
-  ENDIF(UNIX)
-  STRING(REGEX REPLACE "/;" ";" FLTK2_DIR_SEARCH2 ${FLTK2_DIR_SEARCH1})
+  if(UNIX)
+    string(REGEX MATCHALL "[^:]+" FLTK2_DIR_SEARCH1 "$ENV{PATH}")
+  else(UNIX)
+    string(REGEX REPLACE "\\\\" "/" FLTK2_DIR_SEARCH1 "$ENV{PATH}")
+  endif(UNIX)
+  string(REGEX REPLACE "/;" ";" FLTK2_DIR_SEARCH2 ${FLTK2_DIR_SEARCH1})
 
   # Construct a set of paths relative to the system search path.
-  SET(FLTK2_DIR_SEARCH "")
-  FOREACH(dir ${FLTK2_DIR_SEARCH2})
-    SET(FLTK2_DIR_SEARCH ${FLTK2_DIR_SEARCH} "${dir}/../lib/fltk")
-  ENDFOREACH(dir)
+  set(FLTK2_DIR_SEARCH "")
+  foreach(dir ${FLTK2_DIR_SEARCH2})
+    set(FLTK2_DIR_SEARCH ${FLTK2_DIR_SEARCH} "${dir}/../lib/fltk")
+  endforeach(dir)
 
   #
   # Look for an installation or build tree.
   #
-  FIND_PATH(FLTK2_DIR FLTK2Config.cmake
+  find_path(FLTK2_DIR FLTK2Config.cmake
     # Look for an environment variable FLTK2_DIR.
     $ENV{FLTK2_DIR}
 
@@ -107,101 +107,101 @@ IF(NOT FLTK2_DIR)
     DOC "The ${FLTK2_DIR_STRING}"
     )
 
-  IF(NOT FLTK2_DIR)
-    FIND_PATH(FLTK2_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH})
-  ENDIF(NOT FLTK2_DIR)
+  if(NOT FLTK2_DIR)
+    find_path(FLTK2_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH})
+  endif(NOT FLTK2_DIR)
 
-ENDIF(NOT FLTK2_DIR)
+endif(NOT FLTK2_DIR)
 
 
 # If FLTK2 was found, load the configuration file to get the rest of the
 # settings.
-IF(FLTK2_DIR)
+if(FLTK2_DIR)
 
   # Check if FLTK2 was built using CMake
-  IF(EXISTS ${FLTK2_DIR}/FLTK2Config.cmake)
-    SET(FLTK2_BUILT_WITH_CMAKE 1)
-  ENDIF(EXISTS ${FLTK2_DIR}/FLTK2Config.cmake)
+  if(EXISTS ${FLTK2_DIR}/FLTK2Config.cmake)
+    set(FLTK2_BUILT_WITH_CMAKE 1)
+  endif(EXISTS ${FLTK2_DIR}/FLTK2Config.cmake)
 
-  IF(FLTK2_BUILT_WITH_CMAKE)
-    SET(FLTK2_FOUND 1)
-    INCLUDE(${FLTK2_DIR}/FLTK2Config.cmake)
+  if(FLTK2_BUILT_WITH_CMAKE)
+    set(FLTK2_FOUND 1)
+    include(${FLTK2_DIR}/FLTK2Config.cmake)
 
     # Fluid
-    IF(FLUID_COMMAND) 
-      SET(FLTK2_FLUID_EXECUTABLE ${FLUID_COMMAND} CACHE FILEPATH "Fluid executable")
-    ELSE(FLUID_COMMAND) 
-      FIND_PROGRAM(FLTK2_FLUID_EXECUTABLE fluid2 PATHS 
+    if(FLUID_COMMAND)
+      set(FLTK2_FLUID_EXECUTABLE ${FLUID_COMMAND} CACHE FILEPATH "Fluid executable")
+    else(FLUID_COMMAND)
+      find_program(FLTK2_FLUID_EXECUTABLE fluid2 PATHS
         ${FLTK2_EXECUTABLE_DIRS}
         ${FLTK2_EXECUTABLE_DIRS}/RelWithDebInfo
         ${FLTK2_EXECUTABLE_DIRS}/Debug
         ${FLTK2_EXECUTABLE_DIRS}/Release
         NO_SYSTEM_PATH)
-    ENDIF(FLUID_COMMAND)
+    endif(FLUID_COMMAND)
 
-    MARK_AS_ADVANCED(FLTK2_FLUID_EXECUTABLE)
-    SET( FLTK_FLUID_EXECUTABLE ${FLTK2_FLUID_EXECUTABLE} )
-
-    
+    mark_as_advanced(FLTK2_FLUID_EXECUTABLE)
+    set( FLTK_FLUID_EXECUTABLE ${FLTK2_FLUID_EXECUTABLE} )
 
 
-    SET(FLTK2_INCLUDE_DIR ${FLTK2_DIR})
-    LINK_DIRECTORIES(${FLTK2_LIBRARY_DIRS})
 
-    SET(FLTK2_BASE_LIBRARY fltk2)
-    SET(FLTK2_GL_LIBRARY fltk2_gl)
-    SET(FLTK2_IMAGES_LIBRARY fltk2_images)
+
+    set(FLTK2_INCLUDE_DIR ${FLTK2_DIR})
+    link_directories(${FLTK2_LIBRARY_DIRS})
+
+    set(FLTK2_BASE_LIBRARY fltk2)
+    set(FLTK2_GL_LIBRARY fltk2_gl)
+    set(FLTK2_IMAGES_LIBRARY fltk2_images)
 
     # Add the extra libraries
-    LOAD_CACHE(${FLTK2_DIR}
+    load_cache(${FLTK2_DIR}
       READ_WITH_PREFIX
       FL FLTK2_USE_SYSTEM_JPEG
       FL FLTK2_USE_SYSTEM_PNG
       FL FLTK2_USE_SYSTEM_ZLIB
       )
 
-    SET(FLTK2_IMAGES_LIBS "")
-    IF(FLFLTK2_USE_SYSTEM_JPEG)
-      SET(FLTK2_IMAGES_LIBS ${FLTK2_IMAGES_LIBS} fltk2_jpeg)
-    ENDIF(FLFLTK2_USE_SYSTEM_JPEG)
-    IF(FLFLTK2_USE_SYSTEM_PNG)
-      SET(FLTK2_IMAGES_LIBS ${FLTK2_IMAGES_LIBS} fltk2_png)
-    ENDIF(FLFLTK2_USE_SYSTEM_PNG)
-    IF(FLFLTK2_USE_SYSTEM_ZLIB)
-      SET(FLTK2_IMAGES_LIBS ${FLTK2_IMAGES_LIBS} fltk2_zlib)
-    ENDIF(FLFLTK2_USE_SYSTEM_ZLIB)
-    SET(FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}" CACHE INTERNAL
+    set(FLTK2_IMAGES_LIBS "")
+    if(FLFLTK2_USE_SYSTEM_JPEG)
+      set(FLTK2_IMAGES_LIBS ${FLTK2_IMAGES_LIBS} fltk2_jpeg)
+    endif(FLFLTK2_USE_SYSTEM_JPEG)
+    if(FLFLTK2_USE_SYSTEM_PNG)
+      set(FLTK2_IMAGES_LIBS ${FLTK2_IMAGES_LIBS} fltk2_png)
+    endif(FLFLTK2_USE_SYSTEM_PNG)
+    if(FLFLTK2_USE_SYSTEM_ZLIB)
+      set(FLTK2_IMAGES_LIBS ${FLTK2_IMAGES_LIBS} fltk2_zlib)
+    endif(FLFLTK2_USE_SYSTEM_ZLIB)
+    set(FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}" CACHE INTERNAL
       "Extra libraries for fltk2_images library.")
 
-  ELSE(FLTK2_BUILT_WITH_CMAKE)
+  else(FLTK2_BUILT_WITH_CMAKE)
 
     # if FLTK2 was not built using CMake
     # Find fluid executable.
-    FIND_PROGRAM(FLTK2_FLUID_EXECUTABLE fluid2 ${FLTK2_INCLUDE_DIR}/fluid)
+    find_program(FLTK2_FLUID_EXECUTABLE fluid2 ${FLTK2_INCLUDE_DIR}/fluid)
 
     # Use location of fluid to help find everything else.
-    SET(FLTK2_INCLUDE_SEARCH_PATH "")
-    SET(FLTK2_LIBRARY_SEARCH_PATH "")
-    IF(FLTK2_FLUID_EXECUTABLE)
-      SET( FLTK_FLUID_EXECUTABLE ${FLTK2_FLUID_EXECUTABLE} )
-      GET_FILENAME_COMPONENT(FLTK2_BIN_DIR "${FLTK2_FLUID_EXECUTABLE}" PATH)
-      SET(FLTK2_INCLUDE_SEARCH_PATH ${FLTK2_INCLUDE_SEARCH_PATH}
+    set(FLTK2_INCLUDE_SEARCH_PATH "")
+    set(FLTK2_LIBRARY_SEARCH_PATH "")
+    if(FLTK2_FLUID_EXECUTABLE)
+      set( FLTK_FLUID_EXECUTABLE ${FLTK2_FLUID_EXECUTABLE} )
+      get_filename_component(FLTK2_BIN_DIR "${FLTK2_FLUID_EXECUTABLE}" PATH)
+      set(FLTK2_INCLUDE_SEARCH_PATH ${FLTK2_INCLUDE_SEARCH_PATH}
         ${FLTK2_BIN_DIR}/../include ${FLTK2_BIN_DIR}/..)
-      SET(FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_LIBRARY_SEARCH_PATH}
+      set(FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_LIBRARY_SEARCH_PATH}
         ${FLTK2_BIN_DIR}/../lib)
-      SET(FLTK2_WRAP_UI 1)
-    ENDIF(FLTK2_FLUID_EXECUTABLE)
+      set(FLTK2_WRAP_UI 1)
+    endif(FLTK2_FLUID_EXECUTABLE)
 
-    SET(FLTK2_INCLUDE_SEARCH_PATH ${FLTK2_INCLUDE_SEARCH_PATH}
+    set(FLTK2_INCLUDE_SEARCH_PATH ${FLTK2_INCLUDE_SEARCH_PATH}
       /usr/local/include
       /usr/include
       /usr/local/fltk2
       /usr/X11R6/include
       )
 
-    FIND_PATH(FLTK2_INCLUDE_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH})
+    find_path(FLTK2_INCLUDE_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH})
 
-    SET(FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_LIBRARY_SEARCH_PATH}
+    set(FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_LIBRARY_SEARCH_PATH}
       /usr/lib
       /usr/local/lib
       /usr/local/fltk2/lib
@@ -209,69 +209,69 @@ IF(FLTK2_DIR)
       ${FLTK2_INCLUDE_DIR}/lib
       )
 
-    FIND_LIBRARY(FLTK2_BASE_LIBRARY NAMES fltk2
+    find_library(FLTK2_BASE_LIBRARY NAMES fltk2
       PATHS ${FLTK2_LIBRARY_SEARCH_PATH})
-    FIND_LIBRARY(FLTK2_GL_LIBRARY NAMES fltk2_gl 
+    find_library(FLTK2_GL_LIBRARY NAMES fltk2_gl
       PATHS ${FLTK2_LIBRARY_SEARCH_PATH})
-    FIND_LIBRARY(FLTK2_IMAGES_LIBRARY NAMES fltk2_images
+    find_library(FLTK2_IMAGES_LIBRARY NAMES fltk2_images
       PATHS ${FLTK2_LIBRARY_SEARCH_PATH})
 
     # Find the extra libraries needed for the fltk_images library.
-    IF(UNIX)
-      FIND_PROGRAM(FLTK2_CONFIG_SCRIPT fltk2-config PATHS ${FLTK2_BIN_DIR})
-      IF(FLTK2_CONFIG_SCRIPT)
-        EXEC_PROGRAM(${FLTK2_CONFIG_SCRIPT} ARGS --use-images --ldflags
+    if(UNIX)
+      find_program(FLTK2_CONFIG_SCRIPT fltk2-config PATHS ${FLTK2_BIN_DIR})
+      if(FLTK2_CONFIG_SCRIPT)
+        exec_program(${FLTK2_CONFIG_SCRIPT} ARGS --use-images --ldflags
           OUTPUT_VARIABLE FLTK2_IMAGES_LDFLAGS)
-        SET(FLTK2_LIBS_EXTRACT_REGEX ".*-lfltk2_images (.*) -lfltk2.*")
-        IF("${FLTK2_IMAGES_LDFLAGS}" MATCHES "${FLTK2_LIBS_EXTRACT_REGEX}")
-          STRING(REGEX REPLACE "${FLTK2_LIBS_EXTRACT_REGEX}" "\\1"
+        set(FLTK2_LIBS_EXTRACT_REGEX ".*-lfltk2_images (.*) -lfltk2.*")
+        if("${FLTK2_IMAGES_LDFLAGS}" MATCHES "${FLTK2_LIBS_EXTRACT_REGEX}")
+          string(REGEX REPLACE "${FLTK2_LIBS_EXTRACT_REGEX}" "\\1"
             FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LDFLAGS}")
-          STRING(REGEX REPLACE " +" ";" FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}")
+          string(REGEX REPLACE " +" ";" FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}")
           # The EXEC_PROGRAM will not be inherited into subdirectories from
           # the file that originally included this module.  Save the answer.
-          SET(FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}" CACHE INTERNAL
+          set(FLTK2_IMAGES_LIBS "${FLTK2_IMAGES_LIBS}" CACHE INTERNAL
             "Extra libraries for fltk_images library.")
-        ENDIF("${FLTK2_IMAGES_LDFLAGS}" MATCHES "${FLTK2_LIBS_EXTRACT_REGEX}")
-      ENDIF(FLTK2_CONFIG_SCRIPT)
-    ENDIF(UNIX)
+        endif("${FLTK2_IMAGES_LDFLAGS}" MATCHES "${FLTK2_LIBS_EXTRACT_REGEX}")
+      endif(FLTK2_CONFIG_SCRIPT)
+    endif(UNIX)
 
-  ENDIF(FLTK2_BUILT_WITH_CMAKE)
-ENDIF(FLTK2_DIR)
+  endif(FLTK2_BUILT_WITH_CMAKE)
+endif(FLTK2_DIR)
 
 
-SET(FLTK2_FOUND 1)
-FOREACH(var FLTK2_FLUID_EXECUTABLE FLTK2_INCLUDE_DIR
+set(FLTK2_FOUND 1)
+foreach(var FLTK2_FLUID_EXECUTABLE FLTK2_INCLUDE_DIR
     FLTK2_BASE_LIBRARY FLTK2_GL_LIBRARY
     FLTK2_IMAGES_LIBRARY)
-  IF(NOT ${var})
-    MESSAGE( STATUS "${var} not found" )
-    SET(FLTK2_FOUND 0)
-  ENDIF(NOT ${var})
-ENDFOREACH(var)
+  if(NOT ${var})
+    message( STATUS "${var} not found" )
+    set(FLTK2_FOUND 0)
+  endif(NOT ${var})
+endforeach(var)
 
 
-IF(FLTK2_FOUND)
-  SET(FLTK2_LIBRARIES ${FLTK2_IMAGES_LIBRARY} ${FLTK2_IMAGES_LIBS} ${FLTK2_BASE_LIBRARY} ${FLTK2_GL_LIBRARY} )
-  IF(APPLE)
-    SET(FLTK2_LIBRARIES ${FLTK2_PLATFORM_DEPENDENT_LIBS} ${FLTK2_LIBRARIES})
-  ELSE(APPLE)
-    SET(FLTK2_LIBRARIES ${FLTK2_LIBRARIES} ${FLTK2_PLATFORM_DEPENDENT_LIBS})
-  ENDIF(APPLE)
+if(FLTK2_FOUND)
+  set(FLTK2_LIBRARIES ${FLTK2_IMAGES_LIBRARY} ${FLTK2_IMAGES_LIBS} ${FLTK2_BASE_LIBRARY} ${FLTK2_GL_LIBRARY} )
+  if(APPLE)
+    set(FLTK2_LIBRARIES ${FLTK2_PLATFORM_DEPENDENT_LIBS} ${FLTK2_LIBRARIES})
+  else(APPLE)
+    set(FLTK2_LIBRARIES ${FLTK2_LIBRARIES} ${FLTK2_PLATFORM_DEPENDENT_LIBS})
+  endif(APPLE)
 
   # The following deprecated settings are for compatibility with CMake 1.4
-  SET (HAS_FLTK2 ${FLTK2_FOUND})
-  SET (FLTK2_INCLUDE_PATH ${FLTK2_INCLUDE_DIR})
-  SET (FLTK2_FLUID_EXE ${FLTK2_FLUID_EXECUTABLE})
-  SET (FLTK2_LIBRARY ${FLTK2_LIBRARIES})
-ELSE(FLTK2_FOUND)
+  set(HAS_FLTK2 ${FLTK2_FOUND})
+  set(FLTK2_INCLUDE_PATH ${FLTK2_INCLUDE_DIR})
+  set(FLTK2_FLUID_EXE ${FLTK2_FLUID_EXECUTABLE})
+  set(FLTK2_LIBRARY ${FLTK2_LIBRARIES})
+else(FLTK2_FOUND)
   # make FIND_PACKAGE friendly
-  IF(NOT FLTK2_FIND_QUIETLY)
-    IF(FLTK2_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR
+  if(NOT FLTK2_FIND_QUIETLY)
+    if(FLTK2_FIND_REQUIRED)
+      message(FATAL_ERROR
               "FLTK2 required, please specify its location with FLTK2_DIR.")
-    ELSE(FLTK2_FIND_REQUIRED)
-      MESSAGE(STATUS "FLTK2 was not found.")
-    ENDIF(FLTK2_FIND_REQUIRED)
-  ENDIF(NOT FLTK2_FIND_QUIETLY)
-ENDIF(FLTK2_FOUND)
+    else(FLTK2_FIND_REQUIRED)
+      message(STATUS "FLTK2 was not found.")
+    endif(FLTK2_FIND_REQUIRED)
+  endif(NOT FLTK2_FIND_QUIETLY)
+endif(FLTK2_FOUND)
 

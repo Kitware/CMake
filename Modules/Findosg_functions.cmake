@@ -85,7 +85,7 @@ function(OSG_FIND_LIBRARY module library)
       set(${module_uc}_LIBRARIES ${${module_uc}_LIBRARY} PARENT_SCOPE)
    else()
       # They really have a FOO_LIBRARY_DEBUG
-      set(${module_uc}_LIBRARIES 
+      set(${module_uc}_LIBRARIES
           optimized ${${module_uc}_LIBRARY}
           debug ${${module_uc}_LIBRARY_DEBUG}
           PARENT_SCOPE

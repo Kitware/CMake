@@ -23,7 +23,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(CMakeFindFrameworks)
+include(CMakeFindFrameworks)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 
@@ -33,17 +33,17 @@ set(_Python_VERSIONS
   ${Python_ADDITIONAL_VERSIONS}
   2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
 
-FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
-  STRING(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
-  IF(WIN32)
-    FIND_LIBRARY(PYTHON_DEBUG_LIBRARY
+foreach(_CURRENT_VERSION ${_Python_VERSIONS})
+  string(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
+  if(WIN32)
+    find_library(PYTHON_DEBUG_LIBRARY
       NAMES python${_CURRENT_VERSION_NO_DOTS}_d python
       PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs )
-  ENDIF(WIN32)
+  endif(WIN32)
 
-  FIND_LIBRARY(PYTHON_LIBRARY
+  find_library(PYTHON_LIBRARY
     NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
     PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
@@ -51,7 +51,7 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
     NO_SYSTEM_ENVIRONMENT_PATH
   )
   # Look for the static library in the Python config directory
-  FIND_LIBRARY(PYTHON_LIBRARY
+  find_library(PYTHON_LIBRARY
     NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
     # Avoid finding the .dll in the PATH.  We want the .lib.
     NO_SYSTEM_ENVIRONMENT_PATH
@@ -61,20 +61,20 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
 
   # For backward compatibility, honour value of PYTHON_INCLUDE_PATH, if
   # PYTHON_INCLUDE_DIR is not set.
-  IF(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
-    SET(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}" CACHE PATH
+  if(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
+    set(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}" CACHE PATH
       "Path to where Python.h is found" FORCE)
-  ENDIF(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
+  endif(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
 
-  SET(PYTHON_FRAMEWORK_INCLUDES)
-  IF(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
-    FOREACH(dir ${Python_FRAMEWORKS})
-      SET(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
+  set(PYTHON_FRAMEWORK_INCLUDES)
+  if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
+    foreach(dir ${Python_FRAMEWORKS})
+      set(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
         ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
-    ENDFOREACH(dir)
-  ENDIF(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
+    endforeach(dir)
+  endif(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
 
-  FIND_PATH(PYTHON_INCLUDE_DIR
+  find_path(PYTHON_INCLUDE_DIR
     NAMES Python.h
     PATHS
       ${PYTHON_FRAMEWORK_INCLUDES}
@@ -84,12 +84,12 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
   )
 
   # For backward compatibility, set PYTHON_INCLUDE_PATH, but make it internal.
-  SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL
+  set(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL
     "Path to where Python.h is found (deprecated)")
 
-ENDFOREACH(_CURRENT_VERSION)
+endforeach(_CURRENT_VERSION)
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   PYTHON_DEBUG_LIBRARY
   PYTHON_LIBRARY
   PYTHON_INCLUDE_DIR
@@ -99,63 +99,63 @@ MARK_AS_ADVANCED(
 # cache entries because they are meant to specify the location of a single
 # library. We now set the variables listed by the documentation for this
 # module.
-SET(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
-SET(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
-SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
+set(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
+set(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
+set(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
 
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs DEFAULT_MSG PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS)
 
 
 # PYTHON_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
 # PYTHON_WRITE_MODULES_HEADER(<filename>) writes a header file you can include
 # in your sources to initialize the static python modules
-FUNCTION(PYTHON_ADD_MODULE _NAME )
-  GET_PROPERTY(_TARGET_SUPPORTS_SHARED_LIBS
+function(PYTHON_ADD_MODULE _NAME )
+  get_property(_TARGET_SUPPORTS_SHARED_LIBS
     GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
-  OPTION(PYTHON_ENABLE_MODULE_${_NAME} "Add module ${_NAME}" TRUE)
-  OPTION(PYTHON_MODULE_${_NAME}_BUILD_SHARED
+  option(PYTHON_ENABLE_MODULE_${_NAME} "Add module ${_NAME}" TRUE)
+  option(PYTHON_MODULE_${_NAME}_BUILD_SHARED
     "Add module ${_NAME} shared" ${_TARGET_SUPPORTS_SHARED_LIBS})
 
   # Mark these options as advanced
-  MARK_AS_ADVANCED(PYTHON_ENABLE_MODULE_${_NAME}
+  mark_as_advanced(PYTHON_ENABLE_MODULE_${_NAME}
     PYTHON_MODULE_${_NAME}_BUILD_SHARED)
 
-  IF(PYTHON_ENABLE_MODULE_${_NAME})
-    IF(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
-      SET(PY_MODULE_TYPE MODULE)
-    ELSE(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
-      SET(PY_MODULE_TYPE STATIC)
-      SET_PROPERTY(GLOBAL  APPEND  PROPERTY  PY_STATIC_MODULES_LIST ${_NAME})
-    ENDIF(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+  if(PYTHON_ENABLE_MODULE_${_NAME})
+    if(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+      set(PY_MODULE_TYPE MODULE)
+    else(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+      set(PY_MODULE_TYPE STATIC)
+      set_property(GLOBAL  APPEND  PROPERTY  PY_STATIC_MODULES_LIST ${_NAME})
+    endif(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
 
-    SET_PROPERTY(GLOBAL  APPEND  PROPERTY  PY_MODULES_LIST ${_NAME})
-    ADD_LIBRARY(${_NAME} ${PY_MODULE_TYPE} ${ARGN})
-#    TARGET_LINK_LIBRARIES(${_NAME} ${PYTHON_LIBRARIES})
+    set_property(GLOBAL  APPEND  PROPERTY  PY_MODULES_LIST ${_NAME})
+    add_library(${_NAME} ${PY_MODULE_TYPE} ${ARGN})
+#    target_link_libraries(${_NAME} ${PYTHON_LIBRARIES})
 
-    IF(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
-      SET_TARGET_PROPERTIES(${_NAME} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}")
-      IF(WIN32 AND NOT CYGWIN)
-        SET_TARGET_PROPERTIES(${_NAME} PROPERTIES SUFFIX ".pyd")
-      ENDIF(WIN32 AND NOT CYGWIN)
-    ENDIF(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+    if(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+      set_target_properties(${_NAME} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}")
+      if(WIN32 AND NOT CYGWIN)
+        set_target_properties(${_NAME} PROPERTIES SUFFIX ".pyd")
+      endif(WIN32 AND NOT CYGWIN)
+    endif(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
 
-  ENDIF(PYTHON_ENABLE_MODULE_${_NAME})
-ENDFUNCTION(PYTHON_ADD_MODULE)
+  endif(PYTHON_ENABLE_MODULE_${_NAME})
+endfunction(PYTHON_ADD_MODULE)
 
-FUNCTION(PYTHON_WRITE_MODULES_HEADER _filename)
+function(PYTHON_WRITE_MODULES_HEADER _filename)
 
-  GET_PROPERTY(PY_STATIC_MODULES_LIST  GLOBAL  PROPERTY PY_STATIC_MODULES_LIST)
+  get_property(PY_STATIC_MODULES_LIST  GLOBAL  PROPERTY PY_STATIC_MODULES_LIST)
 
-  GET_FILENAME_COMPONENT(_name "${_filename}" NAME)
-  STRING(REPLACE "." "_" _name "${_name}")
-  STRING(TOUPPER ${_name} _nameUpper)
-  SET(_filename ${CMAKE_CURRENT_BINARY_DIR}/${_filename})
+  get_filename_component(_name "${_filename}" NAME)
+  string(REPLACE "." "_" _name "${_name}")
+  string(TOUPPER ${_name} _nameUpper)
+  set(_filename ${CMAKE_CURRENT_BINARY_DIR}/${_filename})
 
-  SET(_filenameTmp "${_filename}.in")
-  FILE(WRITE ${_filenameTmp} "/*Created by cmake, do not edit, changes will be lost*/\n")
-  FILE(APPEND ${_filenameTmp}
+  set(_filenameTmp "${_filename}.in")
+  file(WRITE ${_filenameTmp} "/*Created by cmake, do not edit, changes will be lost*/\n")
+  file(APPEND ${_filenameTmp}
 "#ifndef ${_nameUpper}
 #define ${_nameUpper}
 
@@ -167,11 +167,11 @@ extern \"C\" {
 
 ")
 
-  FOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
-    FILE(APPEND ${_filenameTmp} "extern void init${PYTHON_MODULE_PREFIX}${_currentModule}(void);\n\n")
-  ENDFOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
+  foreach(_currentModule ${PY_STATIC_MODULES_LIST})
+    file(APPEND ${_filenameTmp} "extern void init${PYTHON_MODULE_PREFIX}${_currentModule}(void);\n\n")
+  endforeach(_currentModule ${PY_STATIC_MODULES_LIST})
 
-  FILE(APPEND ${_filenameTmp}
+  file(APPEND ${_filenameTmp}
 "#ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -179,18 +179,18 @@ extern \"C\" {
 ")
 
 
-  FOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
-    FILE(APPEND ${_filenameTmp} "int ${_name}_${_currentModule}(void) \n{\n  static char name[]=\"${PYTHON_MODULE_PREFIX}${_currentModule}\"; return PyImport_AppendInittab(name, init${PYTHON_MODULE_PREFIX}${_currentModule});\n}\n\n")
-  ENDFOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
+  foreach(_currentModule ${PY_STATIC_MODULES_LIST})
+    file(APPEND ${_filenameTmp} "int ${_name}_${_currentModule}(void) \n{\n  static char name[]=\"${PYTHON_MODULE_PREFIX}${_currentModule}\"; return PyImport_AppendInittab(name, init${PYTHON_MODULE_PREFIX}${_currentModule});\n}\n\n")
+  endforeach(_currentModule ${PY_STATIC_MODULES_LIST})
 
-  FILE(APPEND ${_filenameTmp} "void ${_name}_LoadAllPythonModules(void)\n{\n")
-  FOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
-    FILE(APPEND ${_filenameTmp} "  ${_name}_${_currentModule}();\n")
-  ENDFOREACH(_currentModule ${PY_STATIC_MODULES_LIST})
-  FILE(APPEND ${_filenameTmp} "}\n\n")
-  FILE(APPEND ${_filenameTmp} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n  ${_name}_LoadAllPythonModules();\n}\n#endif\n\n#endif\n")
+  file(APPEND ${_filenameTmp} "void ${_name}_LoadAllPythonModules(void)\n{\n")
+  foreach(_currentModule ${PY_STATIC_MODULES_LIST})
+    file(APPEND ${_filenameTmp} "  ${_name}_${_currentModule}();\n")
+  endforeach(_currentModule ${PY_STATIC_MODULES_LIST})
+  file(APPEND ${_filenameTmp} "}\n\n")
+  file(APPEND ${_filenameTmp} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n  ${_name}_LoadAllPythonModules();\n}\n#endif\n\n#endif\n")
 
-# with CONFIGURE_FILE() cmake complains that you may not use a file created using FILE(WRITE) as input file for CONFIGURE_FILE()
-  EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
+# with configure_file() cmake complains that you may not use a file created using file(WRITE) as input file for configure_file()
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
 
-ENDFUNCTION(PYTHON_WRITE_MODULES_HEADER)
+endfunction(PYTHON_WRITE_MODULES_HEADER)

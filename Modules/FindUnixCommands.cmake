@@ -15,79 +15,79 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(FindCygwin)
+include(FindCygwin)
 
-FIND_PROGRAM(BASH
+find_program(BASH
   bash
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
-MARK_AS_ADVANCED(
+mark_as_advanced(
   BASH
 )
 
-FIND_PROGRAM(CP
+find_program(CP
   cp
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
-MARK_AS_ADVANCED(
+mark_as_advanced(
   CP
 )
 
-FIND_PROGRAM(GZIP
+find_program(GZIP
   gzip
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
-MARK_AS_ADVANCED(
+mark_as_advanced(
   GZIP
 )
 
-FIND_PROGRAM(MV
+find_program(MV
   mv
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
-MARK_AS_ADVANCED(
+mark_as_advanced(
   MV
 )
 
-FIND_PROGRAM(RM
+find_program(RM
   rm
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
-MARK_AS_ADVANCED(
+mark_as_advanced(
   RM
 )
 
-FIND_PROGRAM(TAR
-  NAMES 
-  tar 
+find_program(TAR
+  NAMES
+  tar
   gtar
   PATH
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
-MARK_AS_ADVANCED(
+mark_as_advanced(
   TAR
 )

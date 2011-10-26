@@ -3,7 +3,7 @@
 # In your CMakeLists.txt file do something like this:
 # ...
 # # PostgreSQL
-# FIND_PACKAGE(PostgreSQL)
+# find_package(PostgreSQL)
 # ...
 # if( PostgreSQL_FOUND )
 #   include_directories(${PostgreSQL_INCLUDE_DIRS})
@@ -44,7 +44,7 @@
 #
 # To use this variable just do something like this:
 # set(PostgreSQL_ADDITIONAL_VERSIONS "9.2" "8.4.4")
-# before calling FIND_PACKAGE(PostgreSQL) in your CMakeLists.txt file.
+# before calling find_package(PostgreSQL) in your CMakeLists.txt file.
 # This will mean that the versions you set here will be found first in the order
 # specified before the default ones are searched.
 #
@@ -70,7 +70,7 @@
 #    PostgreSQL_LIBRARY_DIR to wherever the library pq (or libpq in windows) is
 # 2) Use CMAKE_INCLUDE_PATH to set a path to <Your Path>/PostgreSQL<-version>. This will allow find_path()
 #    to locate PostgreSQL_INCLUDE_DIR by utilizing the PATH_SUFFIXES option. e.g. In your CMakeLists.txt file
-#    SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "<Your Path>/include")
+#    set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "<Your Path>/include")
 # 3) Set an environment variable called ${PostgreSQL_ROOT} that points to the root of where you have
 #    installed PostgreSQL, e.g. <Your Path>.
 #

@@ -12,9 +12,9 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM
+find_program(CMAKE_MAKE_PROGRAM
   NAMES xcodebuild
   PATHS
   /usr/bin
   )
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)

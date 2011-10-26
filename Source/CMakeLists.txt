@@ -9,33 +9,33 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-INCLUDE(CheckIncludeFile)
+include(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
 CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
-IF(HAVE_ELF_H)
-  SET(CMAKE_USE_ELF_PARSER 1)
-ELSE(HAVE_ELF_H)
-  SET(CMAKE_USE_ELF_PARSER)
-ENDIF(HAVE_ELF_H)
+if(HAVE_ELF_H)
+  set(CMAKE_USE_ELF_PARSER 1)
+else(HAVE_ELF_H)
+  set(CMAKE_USE_ELF_PARSER)
+endif(HAVE_ELF_H)
 
-SET(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
+set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 # configure the .h file
-CONFIGURE_FILE(
+configure_file(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
   "${CMake_BINARY_DIR}/Source/cmConfigure.h"
   )
-CONFIGURE_FILE(
+configure_file(
   "${CMake_SOURCE_DIR}/Source/cmVersionConfig.h.in"
   "${CMake_BINARY_DIR}/Source/cmVersionConfig.h"
   )
-CONFIGURE_FILE(
+configure_file(
   "${CMake_SOURCE_DIR}/Source/CPack/cmCPackConfigure.h.in"
   "${CMake_BINARY_DIR}/Source/CPack/cmCPackConfigure.h"
   )
 
 # add the include path to find the .h
-INCLUDE_DIRECTORIES(
+include_directories(
   "${CMake_BINARY_DIR}/Source"
   "${CMake_SOURCE_DIR}/Source"
   ${CMAKE_ZLIB_INCLUDES}
@@ -45,72 +45,72 @@ INCLUDE_DIRECTORIES(
   )
 
 # let cmake know it is supposed to use it
-ADD_DEFINITIONS(-DCMAKE_BUILD_WITH_CMAKE)
+add_definitions(-DCMAKE_BUILD_WITH_CMAKE)
 
-OPTION(CMAKE_REGENERATE_YACCLEX
+option(CMAKE_REGENERATE_YACCLEX
   "Regenerate YACC and LEXX files" OFF)
-MARK_AS_ADVANCED(CMAKE_REGENERATE_YACCLEX)
-IF(CMAKE_REGENERATE_YACCLEX)
-  SET(parsersLexers cmDependsFortran cmCommandArgument cmExpr)
-  FIND_PROGRAM(YACC_EXECUTABLE
+mark_as_advanced(CMAKE_REGENERATE_YACCLEX)
+if(CMAKE_REGENERATE_YACCLEX)
+  set(parsersLexers cmDependsFortran cmCommandArgument cmExpr)
+  find_program(YACC_EXECUTABLE
     NAMES yacc bison
     PATHS /usr/bin
     DOC "Yacc or Bison executable")
-  FIND_PROGRAM(FLEX_EXECUTABLE
+  find_program(FLEX_EXECUTABLE
     NAMES flex
     PATHS /usr/bin
     DOC "Flex executable")
-  MARK_AS_ADVANCED(YACC_EXECUTABLE FLEX_EXECUTABLE)
-  IF(YACC_EXECUTABLE)
-    SET(BISON_FLAGS)
-    IF(YACC_EXECUTABLE MATCHES "bison")
-      SET(BISON_FLAGS "--yacc")
-    ENDIF(YACC_EXECUTABLE MATCHES "bison")
-    SET(yacc_files)
-    FOREACH(name ${parsersLexers})
-      SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
-      SET(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Parser.cxx")
-      SET(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}ParserTokens.h")
-      ADD_CUSTOM_COMMAND(
+  mark_as_advanced(YACC_EXECUTABLE FLEX_EXECUTABLE)
+  if(YACC_EXECUTABLE)
+    set(BISON_FLAGS)
+    if(YACC_EXECUTABLE MATCHES "bison")
+      set(BISON_FLAGS "--yacc")
+    endif(YACC_EXECUTABLE MATCHES "bison")
+    set(yacc_files)
+    foreach(name ${parsersLexers})
+      set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
+      set(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Parser.cxx")
+      set(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}ParserTokens.h")
+      add_custom_command(
         OUTPUT "${dst}"
         DEPENDS "${src}"
         COMMAND
         ${YACC_EXECUTABLE}
         --name-prefix=${name}_yy --defines=${hdr} -o${dst} ${src}
         )
-      SET(yacc_files ${yacc_files} "${dst}")
-    ENDFOREACH(name)
-    ADD_CUSTOM_TARGET(RerunYacc DEPENDS ${yacc_files})
-  ENDIF(YACC_EXECUTABLE)
-  IF(FLEX_EXECUTABLE)
-    SET(lex_files)
-    FOREACH(name ${parsersLexers})
-      SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Lexer.in.l")
-      SET(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.cxx")
-      SET(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.h")
-      ADD_CUSTOM_COMMAND(
+      set(yacc_files ${yacc_files} "${dst}")
+    endforeach(name)
+    add_custom_target(RerunYacc DEPENDS ${yacc_files})
+  endif(YACC_EXECUTABLE)
+  if(FLEX_EXECUTABLE)
+    set(lex_files)
+    foreach(name ${parsersLexers})
+      set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Lexer.in.l")
+      set(dst "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.cxx")
+      set(hdr "${CMAKE_CURRENT_BINARY_DIR}/${name}Lexer.h")
+      add_custom_command(
         OUTPUT "${dst}"
         DEPENDS "${src}"
         COMMAND
         ${FLEX_EXECUTABLE}
         --prefix=${name}_yy --header-file=${hdr} -o${dst} ${src}
         )
-      SET(lex_files ${lex_files} "${dst}")
-    ENDFOREACH(name)
-    ADD_CUSTOM_TARGET(RerunLex DEPENDS ${lex_files})
-  ENDIF(FLEX_EXECUTABLE)
+      set(lex_files ${lex_files} "${dst}")
+    endforeach(name)
+    add_custom_target(RerunLex DEPENDS ${lex_files})
+  endif(FLEX_EXECUTABLE)
 
-ENDIF(CMAKE_REGENERATE_YACCLEX)
+endif(CMAKE_REGENERATE_YACCLEX)
 
 # Check if we can build the ELF parser.
-IF(CMAKE_USE_ELF_PARSER)
-  SET(ELF_SRCS cmELF.h cmELF.cxx)
-ENDIF(CMAKE_USE_ELF_PARSER)
+if(CMAKE_USE_ELF_PARSER)
+  set(ELF_SRCS cmELF.h cmELF.cxx)
+endif(CMAKE_USE_ELF_PARSER)
 
 #
 # Sources for CMakeLib
 #
-SET(SRCS
+set(SRCS
   cmStandardIncludes.cxx
   cmArchiveWrite.cxx
   cmBootstrapCommands.cxx
@@ -264,30 +264,30 @@ SET(SRCS
   )
 
 # Kdevelop only works on UNIX and not windows
-IF(UNIX)
-  SET(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
-ENDIF(UNIX)
+if(UNIX)
+  set(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
+endif(UNIX)
 
 # Xcode only works on Apple
-IF(APPLE)
-  SET(SRCS ${SRCS}
+if(APPLE)
+  set(SRCS ${SRCS}
     cmXCodeObject.cxx
     cmXCode21Object.cxx
     cmGlobalXCodeGenerator.cxx
     cmGlobalXCodeGenerator.h
     cmLocalXCodeGenerator.cxx
     cmLocalXCodeGenerator.h)
-ENDIF(APPLE)
+endif(APPLE)
 
 
-IF (WIN32)
-  SET(SRCS ${SRCS}
+if(WIN32)
+  set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
     )
 
-  IF(NOT UNIX)
-    SET(SRCS ${SRCS}
+  if(NOT UNIX)
+    set(SRCS ${SRCS}
       cmGlobalBorlandMakefileGenerator.cxx
       cmGlobalBorlandMakefileGenerator.h
       cmGlobalMSYSMakefileGenerator.cxx
@@ -343,30 +343,30 @@ IF (WIN32)
       cmWin32ProcessExecution.cxx
       cmWin32ProcessExecution.h
       )
-  ENDIF(NOT UNIX)
-ENDIF (WIN32)
+  endif(NOT UNIX)
+endif(WIN32)
 
 # create a library used by the command line and the GUI
-ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys
+add_library(CMakeLib ${SRCS})
+target_link_libraries(CMakeLib cmsys
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
   ${CMAKE_CURL_LIBRARIES} )
 
 # On Apple we need CoreFoundation
-IF(APPLE)
-  TARGET_LINK_LIBRARIES(CMakeLib "-framework CoreFoundation")
-ENDIF(APPLE)
+if(APPLE)
+  target_link_libraries(CMakeLib "-framework CoreFoundation")
+endif(APPLE)
 
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
-IF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
-  TARGET_LINK_LIBRARIES(CMakeLib rpcrt4)
-ENDIF(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
+if(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
+  target_link_libraries(CMakeLib rpcrt4)
+endif(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
 
 #
 # CTestLib
 #
-INCLUDE_DIRECTORIES(
+include_directories(
   "${CMake_SOURCE_DIR}/Source/CTest"
   ${CMAKE_XMLRPC_INCLUDES}
   ${CMAKE_CURL_INCLUDES}
@@ -374,7 +374,7 @@ INCLUDE_DIRECTORIES(
 #
 # Sources for CTestLib
 #
-SET(CTEST_SRCS cmCTest.cxx
+set(CTEST_SRCS cmCTest.cxx
   CTest/cmProcess.cxx
   CTest/cmCTestBatchTestHandler.cxx
   CTest/cmCTestBuildAndTestHandler.cxx
@@ -424,13 +424,13 @@ SET(CTEST_SRCS cmCTest.cxx
   )
 
 # Build CTestLib
-ADD_LIBRARY(CTestLib ${CTEST_SRCS})
-TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
+add_library(CTestLib ${CTEST_SRCS})
+target_link_libraries(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_LIBRARIES})
 
 #
 # Sources for CPack
 #
-SET(CPACK_SRCS
+set(CPACK_SRCS
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
   CPack/cmCPackGeneratorFactory.cxx
@@ -444,82 +444,82 @@ SET(CPACK_SRCS
   CPack/cmCPackZIPGenerator.cxx
   )
 
-IF(CYGWIN)
-  SET(CPACK_SRCS ${CPACK_SRCS}
+if(CYGWIN)
+  set(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackCygwinBinaryGenerator.cxx
     CPack/cmCPackCygwinSourceGenerator.cxx
     )
-ENDIF(CYGWIN)
+endif(CYGWIN)
 
-IF(UNIX)
-  SET(CPACK_SRCS ${CPACK_SRCS}
+if(UNIX)
+  set(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackDebGenerator.cxx
     CPack/cmCPackRPMGenerator.cxx
     )
-ENDIF(UNIX)
+endif(UNIX)
 
-IF(APPLE)
-  SET(CPACK_SRCS ${CPACK_SRCS}
+if(APPLE)
+  set(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackBundleGenerator.cxx
     CPack/cmCPackDragNDropGenerator.cxx
     CPack/cmCPackOSXX11Generator.cxx
     CPack/cmCPackPackageMakerGenerator.cxx
     )
-ENDIF(APPLE)
+endif(APPLE)
 
 # Build CPackLib
-ADD_LIBRARY(CPackLib ${CPACK_SRCS})
-TARGET_LINK_LIBRARIES(CPackLib CMakeLib)
+add_library(CPackLib ${CPACK_SRCS})
+target_link_libraries(CPackLib CMakeLib)
 
-IF(APPLE)
-  ADD_EXECUTABLE(cmakexbuild cmakexbuild.cxx)
-  TARGET_LINK_LIBRARIES(cmakexbuild CMakeLib)
-  ADD_EXECUTABLE(OSXScriptLauncher
+if(APPLE)
+  add_executable(cmakexbuild cmakexbuild.cxx)
+  target_link_libraries(cmakexbuild CMakeLib)
+  add_executable(OSXScriptLauncher
     CPack/OSXScriptLauncher.cxx)
-  TARGET_LINK_LIBRARIES(OSXScriptLauncher cmsys)
-  TARGET_LINK_LIBRARIES(OSXScriptLauncher "-framework CoreFoundation")
-ENDIF(APPLE)
+  target_link_libraries(OSXScriptLauncher cmsys)
+  target_link_libraries(OSXScriptLauncher "-framework CoreFoundation")
+endif(APPLE)
 
 # Build CMake executable
-ADD_EXECUTABLE(cmake cmakemain.cxx)
-TARGET_LINK_LIBRARIES(cmake CMakeLib)
+add_executable(cmake cmakemain.cxx)
+target_link_libraries(cmake CMakeLib)
 
 # Build special executable for running programs on Windows 98
-IF(WIN32)
-  IF(NOT UNIX)
-    ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
-    TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
-    INSTALL_TARGETS(/bin cmw9xcom)
-  ENDIF(NOT UNIX)
-ENDIF(WIN32)
+if(WIN32)
+  if(NOT UNIX)
+    add_executable(cmw9xcom cmw9xcom.cxx)
+    target_link_libraries(cmw9xcom CMakeLib)
+    install_targets(/bin cmw9xcom)
+  endif(NOT UNIX)
+endif(WIN32)
 
 # Build CTest executable
-ADD_EXECUTABLE(ctest ctest.cxx)
-TARGET_LINK_LIBRARIES(ctest CTestLib)
+add_executable(ctest ctest.cxx)
+target_link_libraries(ctest CTestLib)
 
 # Build CPack executable
-ADD_EXECUTABLE(cpack CPack/cpack.cxx)
-TARGET_LINK_LIBRARIES(cpack CPackLib)
+add_executable(cpack CPack/cpack.cxx)
+target_link_libraries(cpack CPackLib)
 
 # Curses GUI
-IF(BUILD_CursesDialog)
-  INCLUDE(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
-ENDIF(BUILD_CursesDialog)
+if(BUILD_CursesDialog)
+  include(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
+endif(BUILD_CursesDialog)
 
 # Qt GUI
-OPTION(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
-IF(BUILD_QtDialog)
-  SUBDIRS(QtDialog)
-ENDIF(BUILD_QtDialog)
+option(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
+if(BUILD_QtDialog)
+  subdirs(QtDialog)
+endif(BUILD_QtDialog)
 
-INCLUDE (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
-INCLUDE (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+include(${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
+include(${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 
-INSTALL_TARGETS(/bin cmake)
-INSTALL_TARGETS(/bin ctest)
-INSTALL_TARGETS(/bin cpack)
-IF(APPLE)
-  INSTALL_TARGETS(/bin cmakexbuild)
-ENDIF(APPLE)
+install_targets(/bin cmake)
+install_targets(/bin ctest)
+install_targets(/bin cpack)
+if(APPLE)
+  install_targets(/bin cmakexbuild)
+endif(APPLE)
 
-INSTALL_FILES(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)
+install_files(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)

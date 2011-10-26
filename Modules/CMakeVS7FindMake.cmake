@@ -12,7 +12,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM
+find_program(CMAKE_MAKE_PROGRAM
   NAMES devenv
   PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.0\\Setup\\VS;EnvironmentDirectory]
@@ -20,6 +20,6 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   "c:/Program Files/Microsoft Visual Studio.NET/Common7/IDE"
   "/Program Files/Microsoft Visual Studio .NET/Common7/IDE/"
   )
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
-SET(MSVC70 1)
-SET(MSVC_VERSION 1300)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)
+set(MSVC70 1)
+set(MSVC_VERSION 1300)

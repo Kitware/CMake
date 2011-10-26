@@ -9,17 +9,17 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-PROJECT(QtDialog)
-SET(QT_MIN_VERSION "4.3.0")
-FIND_PACKAGE(Qt4 REQUIRED)
+project(QtDialog)
+set(QT_MIN_VERSION "4.3.0")
+find_package(Qt4 REQUIRED)
 
-IF(NOT QT4_FOUND)
-  MESSAGE(SEND_ERROR "Failed to find Qt 4.3 or greater.")
-ELSE(NOT QT4_FOUND)
+if(NOT QT4_FOUND)
+  message(SEND_ERROR "Failed to find Qt 4.3 or greater.")
+else(NOT QT4_FOUND)
 
-  INCLUDE(${QT_USE_FILE})
-  SET(CMAKE_PACKAGE_QTGUI TRUE)
-  SET(SRCS
+  include(${QT_USE_FILE})
+  set(CMAKE_PACKAGE_QTGUI TRUE)
+  set(SRCS
     AddCacheEntry.cxx
     AddCacheEntry.h
     CMakeSetup.cxx
@@ -36,14 +36,14 @@ ELSE(NOT QT4_FOUND)
     QMacInstallDialog.cxx
     QMacInstallDialog.h
     )
-  QT4_WRAP_UI(UI_SRCS 
+  QT4_WRAP_UI(UI_SRCS
     CMakeSetupDialog.ui
     Compilers.ui
     CrossCompiler.ui
     AddCacheEntry.ui
     MacInstallDialog.ui
     )
-  QT4_WRAP_CPP(MOC_SRCS 
+  QT4_WRAP_CPP(MOC_SRCS
     AddCacheEntry.h
     Compilers.h
     CMakeSetupDialog.h
@@ -55,53 +55,53 @@ ELSE(NOT QT4_FOUND)
     )
   QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
 
-  SET(SRCS ${SRCS} ${UI_SRCS} ${MOC_SRCS} ${RC_SRCS})
-  IF(Q_WS_WIN)
-    SET(SRCS ${SRCS} CMakeSetup.rc)
-  ENDIF(Q_WS_WIN)
-  IF(Q_WS_MAC)
-    SET(SRCS ${SRCS} CMakeSetup.icns)
-    SET(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
-    SET_SOURCE_FILES_PROPERTIES(CMakeSetup.icns PROPERTIES
+  set(SRCS ${SRCS} ${UI_SRCS} ${MOC_SRCS} ${RC_SRCS})
+  if(Q_WS_WIN)
+    set(SRCS ${SRCS} CMakeSetup.rc)
+  endif(Q_WS_WIN)
+  if(Q_WS_MAC)
+    set(SRCS ${SRCS} CMakeSetup.icns)
+    set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
+    set_source_files_properties(CMakeSetup.icns PROPERTIES
       MACOSX_PACKAGE_LOCATION Resources)
-  ENDIF(Q_WS_MAC)
+  endif(Q_WS_MAC)
 
-  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-  ADD_EXECUTABLE(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
-  TARGET_LINK_LIBRARIES(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
-  IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
-    IF(APPLE)
-      SET_TARGET_PROPERTIES(cmake-gui PROPERTIES
+  add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
+  target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
+  if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+    if(APPLE)
+      set_target_properties(cmake-gui PROPERTIES
        OUTPUT_NAME ${CMAKE_BUNDLE_NAME})
-    ENDIF(APPLE)
-    SET(CMAKE_INSTALL_DESTINATION_ARGS 
+    endif(APPLE)
+    set(CMAKE_INSTALL_DESTINATION_ARGS
       BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
-  ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+  endif(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
 
-  INSTALL(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
+  install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
-  IF(UNIX)
+  if(UNIX)
     # install a desktop file so CMake appears in the application start menu
     # with an icon
-    INSTALL(FILES CMake.desktop DESTINATION share/applications )
-    INSTALL(FILES CMakeSetup32.png DESTINATION share/pixmaps )
-    INSTALL(FILES cmakecache.xml DESTINATION share/mime/packages )
-  ENDIF(UNIX)
+    install(FILES CMake.desktop DESTINATION share/applications )
+    install(FILES CMakeSetup32.png DESTINATION share/pixmaps )
+    install(FILES cmakecache.xml DESTINATION share/mime/packages )
+  endif(UNIX)
 
-  IF(APPLE)
-    SET(CMAKE_POSTFLIGHT_SCRIPT
+  if(APPLE)
+    set(CMAKE_POSTFLIGHT_SCRIPT
       "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
-    SET(CMAKE_POSTUPGRADE_SCRIPT
+    set(CMAKE_POSTUPGRADE_SCRIPT
       "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
     configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postflight.sh.in"
       "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
     configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postupgrade.sh.in"
       "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
-    INSTALL(CODE "execute_process(COMMAND ln -s \"../MacOS/${CMAKE_BUNDLE_NAME}\" cmake-gui
+    install(CODE "execute_process(COMMAND ln -s \"../MacOS/${CMAKE_BUNDLE_NAME}\" cmake-gui
                   WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
-  ENDIF(APPLE)
+  endif(APPLE)
 
   if(APPLE OR WIN32)
     # install rules for including 3rd party libs such as Qt
@@ -116,7 +116,7 @@ ELSE(NOT QT4_FOUND)
     ")
   endif(APPLE OR WIN32)
 
-  CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
-    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)    
-ENDIF(NOT QT4_FOUND)
+  configure_file("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
+    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)
+endif(NOT QT4_FOUND)
 

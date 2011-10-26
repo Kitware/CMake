@@ -3,8 +3,8 @@
 # How to build bsdtar_test
 #
 ############################################
-IF(ENABLE_TAR AND ENABLE_TEST)
-  SET(bsdtar_test_SOURCES
+if(ENABLE_TAR AND ENABLE_TEST)
+  set(bsdtar_test_SOURCES
     ../getdate.c
     main.c
     test.h
@@ -24,39 +24,39 @@ IF(ENABLE_TAR AND ENABLE_TEST)
     test_version.c
     test_windows.c
   )
-  IF(WIN32 AND NOT CYGWIN)
-    LIST(APPEND bsdtar_test_SOURCES ../bsdtar_windows.c)
-    LIST(APPEND bsdtar_test_SOURCES ../bsdtar_windows.h)
-  ENDIF(WIN32 AND NOT CYGWIN)
+  if(WIN32 AND NOT CYGWIN)
+    list(APPEND bsdtar_test_SOURCES ../bsdtar_windows.c)
+    list(APPEND bsdtar_test_SOURCES ../bsdtar_windows.h)
+  endif(WIN32 AND NOT CYGWIN)
 
   #
   # Generate the list.h
   #
   GENERATE_LIST_H(${CMAKE_CURRENT_BINARY_DIR}/list.h
     ${CMAKE_CURRENT_LIST_FILE} ${bsdtar_test_SOURCES})
-  SET_PROPERTY(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
+  set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_BINARY_DIR})
   #
   # Register target
   #
-  ADD_EXECUTABLE(bsdtar_test ${bsdtar_test_SOURCES})
-  SET_PROPERTY(TARGET bsdtar_test PROPERTY COMPILE_DEFINITIONS LIST_H)
+  add_executable(bsdtar_test ${bsdtar_test_SOURCES})
+  set_property(TARGET bsdtar_test PROPERTY COMPILE_DEFINITIONS LIST_H)
 
-  # ADD_TEST() for each separate test
-  SET(num 0)
-  FOREACH(test ${bsdtar_test_SOURCES})
-    IF(test MATCHES "^test_[^/]+[.]c$")
-      STRING(REGEX REPLACE "^(test_[^/]+)[.]c$" "\\1" testname ${test})
-      ADD_TEST("bsdtar_${testname}" bsdtar_test
+  # add_test() for each separate test
+  set(num 0)
+  foreach(test ${bsdtar_test_SOURCES})
+    if(test MATCHES "^test_[^/]+[.]c$")
+      string(REGEX REPLACE "^(test_[^/]+)[.]c$" "\\1" testname ${test})
+      add_test("bsdtar_${testname}" bsdtar_test
         -q -v -p ${BSDTAR} -r ${CMAKE_CURRENT_SOURCE_DIR} ${num})
-      MATH(EXPR num "${num} + 1")
-    ENDIF(test MATCHES "^test_[^/]+[.]c$")
-  ENDFOREACH(test)
+      math(EXPR num "${num} + 1")
+    endif(test MATCHES "^test_[^/]+[.]c$")
+  endforeach(test)
 
   # Experimental new test handling
-  ADD_CUSTOM_TARGET(run_bsdtar_test
+  add_custom_target(run_bsdtar_test
     COMMAND bsdtar_test -p ${BSDTAR} -r ${CMAKE_CURRENT_SOURCE_DIR})
-  ADD_DEPENDENCIES(run_bsdtar_test bsdtar)
-  ADD_DEPENDENCIES(run_all_tests run_bsdtar_test)
+  add_dependencies(run_bsdtar_test bsdtar)
+  add_dependencies(run_all_tests run_bsdtar_test)
 
-ENDIF (ENABLE_TAR AND ENABLE_TEST)
+endif(ENABLE_TAR AND ENABLE_TEST)

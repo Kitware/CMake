@@ -21,27 +21,27 @@
 #  License text for the above reference.)
 
 # use pkg-config to get the directories and then use these values
-# in the FIND_PATH() and FIND_LIBRARY() calls
-FIND_PACKAGE(PkgConfig)
+# in the find_path() and find_library() calls
+find_package(PkgConfig)
 PKG_CHECK_MODULES(PC_LIBXSLT libxslt)
-SET(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
+set(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
 
-FIND_PATH(LIBXSLT_INCLUDE_DIR NAMES libxslt/xslt.h
+find_path(LIBXSLT_INCLUDE_DIR NAMES libxslt/xslt.h
     HINTS
    ${PC_LIBXSLT_INCLUDEDIR}
    ${PC_LIBXSLT_INCLUDE_DIRS}
   )
 
-FIND_LIBRARY(LIBXSLT_LIBRARIES NAMES xslt libxslt
+find_library(LIBXSLT_LIBRARIES NAMES xslt libxslt
     HINTS
    ${PC_LIBXSLT_LIBDIR}
    ${PC_LIBXSLT_LIBRARY_DIRS}
   )
 
-# handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXslt DEFAULT_MSG LIBXSLT_LIBRARIES LIBXSLT_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(LIBXSLT_INCLUDE_DIR LIBXSLT_LIBRARIES)
+mark_as_advanced(LIBXSLT_INCLUDE_DIR LIBXSLT_LIBRARIES)
 

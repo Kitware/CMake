@@ -19,15 +19,15 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 
-INCLUDE(CheckCSourceCompiles)
+include(CheckCSourceCompiles)
 
-MACRO (CHECK_STRUCT_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
-   SET(_INCLUDE_FILES)
-   FOREACH (it ${_HEADER})
-      SET(_INCLUDE_FILES "${_INCLUDE_FILES}#include <${it}>\n")
-   ENDFOREACH (it)
+macro(CHECK_STRUCT_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
+   set(_INCLUDE_FILES)
+   foreach(it ${_HEADER})
+      set(_INCLUDE_FILES "${_INCLUDE_FILES}#include <${it}>\n")
+   endforeach(it)
 
-   SET(_CHECK_STRUCT_MEMBER_SOURCE_CODE "
+   set(_CHECK_STRUCT_MEMBER_SOURCE_CODE "
 ${_INCLUDE_FILES}
 int main()
 {
@@ -39,5 +39,5 @@ int main()
 ")
    CHECK_C_SOURCE_COMPILES("${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
 
-ENDMACRO (CHECK_STRUCT_MEMBER)
+endmacro(CHECK_STRUCT_MEMBER)
 

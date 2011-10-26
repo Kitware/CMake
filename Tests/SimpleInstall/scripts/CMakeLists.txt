@@ -1,1 +1,1 @@
-INSTALL_PROGRAMS(/MyTest/share/old3 "^sample_script(\\.bat)?$")
+install_programs(/MyTest/share/old3 "^sample_script(\\.bat)?$")

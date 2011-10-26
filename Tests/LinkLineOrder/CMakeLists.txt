@@ -1,4 +1,4 @@
-PROJECT( LinkLineOrder )
+project( LinkLineOrder )
 
 # This tests ensures that the order of libraries are preserved when
 # they don't have dependency information, even if they are deep in the
@@ -9,28 +9,28 @@ PROJECT( LinkLineOrder )
 # has no information about these libraries except for the order they
 # are specified in One. We must make sure we don't lose that.
 
-ADD_LIBRARY( NoDepA NoDepA.c )
-ADD_LIBRARY( NoDepB NoDepB.c )
-ADD_LIBRARY( NoDepC NoDepC.c )
-ADD_LIBRARY( NoDepE NoDepE.c )
-ADD_LIBRARY( NoDepF NoDepF.c )
+add_library( NoDepA NoDepA.c )
+add_library( NoDepB NoDepB.c )
+add_library( NoDepC NoDepC.c )
+add_library( NoDepE NoDepE.c )
+add_library( NoDepF NoDepF.c )
 
-ADD_LIBRARY( One One.c )
-TARGET_LINK_LIBRARIES( One NoDepC NoDepA NoDepB NoDepE NoDepF NoDepE )
+add_library( One One.c )
+target_link_libraries( One NoDepC NoDepA NoDepB NoDepE NoDepF NoDepE )
 
-ADD_EXECUTABLE( Exec1 Exec1.c )
-TARGET_LINK_LIBRARIES( Exec1 One )
+add_executable( Exec1 Exec1.c )
+target_link_libraries( Exec1 One )
 
 
 # Similar situation as One, except at a different level of the
 # dependency tree. This makes sure that the order is presevered
 # everywhere in the graph.
-ADD_LIBRARY( NoDepX NoDepX.c )
-ADD_LIBRARY( NoDepY NoDepY.c )
-ADD_LIBRARY( NoDepZ NoDepZ.c )
+add_library( NoDepX NoDepX.c )
+add_library( NoDepY NoDepY.c )
+add_library( NoDepZ NoDepZ.c )
 
-ADD_LIBRARY( Two Two.c )
-TARGET_LINK_LIBRARIES( Two One NoDepZ NoDepX NoDepY )
+add_library( Two Two.c )
+target_link_libraries( Two One NoDepZ NoDepX NoDepY )
 
-ADD_EXECUTABLE( Exec2 Exec2.c )
-TARGET_LINK_LIBRARIES( Exec2 Two )
+add_executable( Exec2 Exec2.c )
+target_link_libraries( Exec2 Two )

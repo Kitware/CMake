@@ -13,8 +13,8 @@ set(text "
 # options to avoid CMake warnings about unused variables
 #
 
-MESSAGE(\"Trilinos_ALLOW_NO_PACKAGES='\${Trilinos_ALLOW_NO_PACKAGES}'\")
-MESSAGE(\"Trilinos_WARNINGS_AS_ERRORS_FLAGS='\${Trilinos_WARNINGS_AS_ERRORS_FLAGS}'\")
+message(\"Trilinos_ALLOW_NO_PACKAGES='\${Trilinos_ALLOW_NO_PACKAGES}'\")
+message(\"Trilinos_WARNINGS_AS_ERRORS_FLAGS='\${Trilinos_WARNINGS_AS_ERRORS_FLAGS}'\")
 ")
 
 file(APPEND "${source_dir}/CMakeLists.txt" "${text}")

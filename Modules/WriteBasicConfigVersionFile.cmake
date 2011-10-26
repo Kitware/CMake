@@ -1,7 +1,7 @@
 #  WRITE_BASIC_CONFIG_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
 #
 # Writes a file for use as <package>ConfigVersion.cmake file to <filename>.
-# See the documentation of FIND_PACKAGE() for details on this.
+# See the documentation of find_package() for details on this.
 #    filename is the output filename, it should be in the build tree.
 #    major.minor.patch is the version number of the project to be installed
 # The COMPATIBILITY mode AnyNewerVersion means that the installed package version

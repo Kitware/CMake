@@ -48,7 +48,7 @@ endif(NOT HOST)
 if(NOT DEFINED MAKE)
   message(FATAL_ERROR "MAKE must be specified with -DMAKE=\"make -j2\"")
 endif(NOT DEFINED MAKE)
-  
+
 message("Creating CMake release ${CMAKE_CREATE_VERSION} on ${HOST} with parallel = ${PROCESSORS}")
 
 # define a macro to run a remote command
@@ -58,8 +58,8 @@ macro(remote_command comment command)
     message("ssh ${HOST} ${EXTRA_HOP} ${command}")
     execute_process(COMMAND ssh ${HOST} ${EXTRA_HOP} ${command} RESULT_VARIABLE result INPUT_FILE ${ARGV2})
   else(${ARGC} GREATER 2)
-    message("ssh ${HOST} ${EXTRA_HOP} ${command}") 
-    execute_process(COMMAND ssh ${HOST} ${EXTRA_HOP} ${command} RESULT_VARIABLE result) 
+    message("ssh ${HOST} ${EXTRA_HOP} ${command}")
+    execute_process(COMMAND ssh ${HOST} ${EXTRA_HOP} ${command} RESULT_VARIABLE result)
   endif(${ARGC} GREATER 2)
   if(${result} GREATER 0)
     message(FATAL_ERROR "Error running command: ${command}, return value = ${result}")
@@ -73,14 +73,14 @@ configure_file(${SCRIPT_PATH}/release_cmake.sh.in ${SCRIPT_FILE} @ONLY)
 
 # run the script by starting a shell on the remote machine
 # then using the script file as input to the shell
-IF(RUN_LOCAL)
+if(RUN_LOCAL)
   message(FATAL_ERROR "run this command: ${RUN_SHELL} ${SCRIPT_FILE}")
-ELSE(RUN_LOCAL)
+else(RUN_LOCAL)
   remote_command("run release_cmake-${HOST}.sh on server"
     "${RUN_SHELL}" ${SCRIPT_FILE})
-ENDIF(RUN_LOCAL)
+endif(RUN_LOCAL)
 
-# now figure out which types of packages were created 
+# now figure out which types of packages were created
 set(generators ${CPACK_BINARY_GENERATORS} ${CPACK_SOURCE_GENERATORS})
 separate_arguments(generators)
 foreach(gen ${generators})
@@ -114,9 +114,9 @@ endforeach(gen)
 set(PROJECT_PREFIX cmake-)
 foreach(suffix ${SUFFIXES})
   message("scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} .")
-  execute_process(COMMAND 
+  execute_process(COMMAND
     scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} .
-    RESULT_VARIABLE result)   
+    RESULT_VARIABLE result)
   if(${result} GREATER 0)
     message("error getting file back scp ${HOST}:${FINAL_PATH}/${PROJECT_PREFIX}${suffix} .")
   endif(${result} GREATER 0)
@@ -126,7 +126,7 @@ endforeach(suffix)
 if(extra_files)
   foreach(f ${extra_files})
     message("scp ${HOST}:${FINAL_PATH}/${f} .")
-    execute_process(COMMAND 
+    execute_process(COMMAND
       scp ${HOST}:${FINAL_PATH}/${f} .
       RESULT_VARIABLE result)
     if(${result} GREATER 0)

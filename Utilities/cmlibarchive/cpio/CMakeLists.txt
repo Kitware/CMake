@@ -3,9 +3,9 @@
 # How to build bsdcpio
 #
 ############################################
-IF(ENABLE_CPIO)
+if(ENABLE_CPIO)
 
-  SET(bsdcpio_SOURCES
+  set(bsdcpio_SOURCES
     cmdline.c
     cpio.c
     cpio.h
@@ -20,35 +20,35 @@ IF(ENABLE_CPIO)
     ../libarchive_fe/pathmatch.c
     ../libarchive_fe/pathmatch.h
   )
-  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../libarchive_fe)
-  IF(WIN32 AND NOT CYGWIN)
-    LIST(APPEND bsdcpio_SOURCES cpio_windows.c)
-    LIST(APPEND bsdcpio_SOURCES cpio_windows.h)
-  ENDIF(WIN32 AND NOT CYGWIN)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libarchive_fe)
+  if(WIN32 AND NOT CYGWIN)
+    list(APPEND bsdcpio_SOURCES cpio_windows.c)
+    list(APPEND bsdcpio_SOURCES cpio_windows.h)
+  endif(WIN32 AND NOT CYGWIN)
 
   # bsdcpio documentation
-  SET(bsdcpio_MANS bsdcpio.1)
+  set(bsdcpio_MANS bsdcpio.1)
 
   # How to build bsdcpio
-  ADD_EXECUTABLE(bsdcpio ${bsdcpio_SOURCES})
-  IF(ENABLE_CPIO_SHARED)
-    TARGET_LINK_LIBRARIES(bsdcpio archive ${ADDITIONAL_LIBS})
-  ELSE(ENABLE_CPIO_SHARED)
-    TARGET_LINK_LIBRARIES(bsdcpio archive_static ${ADDITIONAL_LIBS})
-  ENDIF(ENABLE_CPIO_SHARED)
+  add_executable(bsdcpio ${bsdcpio_SOURCES})
+  if(ENABLE_CPIO_SHARED)
+    target_link_libraries(bsdcpio archive ${ADDITIONAL_LIBS})
+  else(ENABLE_CPIO_SHARED)
+    target_link_libraries(bsdcpio archive_static ${ADDITIONAL_LIBS})
+  endif(ENABLE_CPIO_SHARED)
   # On Windows, DLL must end up in same dir with EXEs
-  IF(WIN32 AND NOT CYGWIN)
-    SET_TARGET_PROPERTIES(bsdcpio PROPERTIES
+  if(WIN32 AND NOT CYGWIN)
+    set_target_properties(bsdcpio PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-  ENDIF(WIN32 AND NOT CYGWIN)
+  endif(WIN32 AND NOT CYGWIN)
   # Full path to the compiled executable (used by test suite)
-  GET_TARGET_PROPERTY(BSDCPIO bsdcpio LOCATION)
+  get_target_property(BSDCPIO bsdcpio LOCATION)
 
   # Installation rules
-  INSTALL(TARGETS bsdcpio RUNTIME DESTINATION bin)
+  install(TARGETS bsdcpio RUNTIME DESTINATION bin)
   INSTALL_MAN(${bsdcpio_MANS})
 
-ENDIF(ENABLE_CPIO)
+endif(ENABLE_CPIO)
 
 # Test suite
 add_subdirectory(test)

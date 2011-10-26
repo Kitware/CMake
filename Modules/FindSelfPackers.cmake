@@ -18,27 +18,27 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(FindCygwin)
+include(FindCygwin)
 
-FIND_PROGRAM(SELF_PACKER_FOR_EXECUTABLE
+find_program(SELF_PACKER_FOR_EXECUTABLE
   upx
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
 
-FIND_PROGRAM(SELF_PACKER_FOR_SHARED_LIB
+find_program(SELF_PACKER_FOR_SHARED_LIB
   upx
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   SELF_PACKER_FOR_EXECUTABLE
   SELF_PACKER_FOR_SHARED_LIB
 )
@@ -46,23 +46,23 @@ MARK_AS_ADVANCED(
 #
 # Set flags
 #
-IF (SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
-  SET (SELF_PACKER_FOR_EXECUTABLE_FLAGS "-q" CACHE STRING 
+if(SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
+  set(SELF_PACKER_FOR_EXECUTABLE_FLAGS "-q" CACHE STRING
        "Flags for the executable self-packer.")
-ELSE (SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
-  SET (SELF_PACKER_FOR_EXECUTABLE_FLAGS "" CACHE STRING 
+else(SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
+  set(SELF_PACKER_FOR_EXECUTABLE_FLAGS "" CACHE STRING
        "Flags for the executable self-packer.")
-ENDIF (SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
+endif(SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
 
-IF (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
-  SET (SELF_PACKER_FOR_SHARED_LIB_FLAGS "-q" CACHE STRING 
+if(SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
+  set(SELF_PACKER_FOR_SHARED_LIB_FLAGS "-q" CACHE STRING
        "Flags for the shared lib self-packer.")
-ELSE (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
-  SET (SELF_PACKER_FOR_SHARED_LIB_FLAGS "" CACHE STRING 
+else(SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
+  set(SELF_PACKER_FOR_SHARED_LIB_FLAGS "" CACHE STRING
        "Flags for the shared lib self-packer.")
-ENDIF (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
+endif(SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   SELF_PACKER_FOR_EXECUTABLE_FLAGS
   SELF_PACKER_FOR_SHARED_LIB_FLAGS
 )

@@ -1,7 +1,7 @@
 # - Finds OpenMP support
 # This module can be used to detect OpenMP support in a compiler.
 # If the compiler supports OpenMP, the flags required to compile with
-# openmp support are set.  
+# openmp support are set.
 #
 # The following variables are set:
 #   OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
@@ -34,9 +34,9 @@ set(OpenMP_C_FLAG_CANDIDATES
   #Microsoft Visual Studio
   "/openmp"
   #Intel windows
-  "-Qopenmp" 
+  "-Qopenmp"
   #Intel
-  "-openmp" 
+  "-openmp"
   #Empty, if compiler automatically accepts openmp
   " "
   #Sun
@@ -51,12 +51,12 @@ set(OpenMP_C_FLAG_CANDIDATES
 set(OpenMP_CXX_FLAG_CANDIDATES ${OpenMP_C_FLAG_CANDIDATES})
 
 # sample openmp source code to test
-set(OpenMP_C_TEST_SOURCE 
+set(OpenMP_C_TEST_SOURCE
 "
 #include <omp.h>
-int main() { 
+int main() {
 #ifdef _OPENMP
-  return 0; 
+  return 0;
 #else
   breaks_on_purpose
 #endif
@@ -82,7 +82,7 @@ foreach(FLAG ${OpenMP_C_FLAG_CANDIDATES})
   if(OpenMP_FLAG_DETECTED)
     set(OpenMP_C_FLAGS_INTERNAL "${FLAG}")
     break()
-  endif(OpenMP_FLAG_DETECTED) 
+  endif(OpenMP_FLAG_DETECTED)
 endforeach(FLAG ${OpenMP_C_FLAG_CANDIDATES})
 
 # check cxx compiler
@@ -105,7 +105,7 @@ set(OpenMP_C_FLAGS "${OpenMP_C_FLAGS_INTERNAL}"
 set(OpenMP_CXX_FLAGS "${OpenMP_CXX_FLAGS_INTERNAL}"
   CACHE STRING "C++ compiler flags for OpenMP parallization")
 # handle the standard arguments for find_package
-find_package_handle_standard_args(OpenMP DEFAULT_MSG 
+find_package_handle_standard_args(OpenMP DEFAULT_MSG
   OpenMP_C_FLAGS OpenMP_CXX_FLAGS )
 
 mark_as_advanced(

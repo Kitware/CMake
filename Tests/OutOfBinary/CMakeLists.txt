@@ -1,2 +1,2 @@
-ADD_LIBRARY(outlib outlib.c)
+add_library(outlib outlib.c)
 

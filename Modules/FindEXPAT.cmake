@@ -19,20 +19,20 @@
 #  License text for the above reference.)
 
 # Look for the header file.
-FIND_PATH(EXPAT_INCLUDE_DIR NAMES expat.h)
+find_path(EXPAT_INCLUDE_DIR NAMES expat.h)
 
 # Look for the library.
-FIND_LIBRARY(EXPAT_LIBRARY NAMES expat libexpat)
+find_library(EXPAT_LIBRARY NAMES expat libexpat)
 
-# handle the QUIETLY and REQUIRED arguments and set EXPAT_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set EXPAT_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT DEFAULT_MSG EXPAT_LIBRARY EXPAT_INCLUDE_DIR)
 
 # Copy the results to the output variables.
-IF(EXPAT_FOUND)
-  SET(EXPAT_LIBRARIES ${EXPAT_LIBRARY})
-  SET(EXPAT_INCLUDE_DIRS ${EXPAT_INCLUDE_DIR})
-ENDIF(EXPAT_FOUND)
+if(EXPAT_FOUND)
+  set(EXPAT_LIBRARIES ${EXPAT_LIBRARY})
+  set(EXPAT_INCLUDE_DIRS ${EXPAT_INCLUDE_DIR})
+endif(EXPAT_FOUND)
 
-MARK_AS_ADVANCED(EXPAT_INCLUDE_DIR EXPAT_LIBRARY)
+mark_as_advanced(EXPAT_INCLUDE_DIR EXPAT_LIBRARY)

@@ -26,40 +26,40 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-MACRO(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
-  IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
-    SET(MACRO_CHECK_LIBRARY_EXISTS_DEFINITION 
+macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
+  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+    set(MACRO_CHECK_LIBRARY_EXISTS_DEFINITION
       "-DCHECK_FUNCTION_EXISTS=${FUNCTION} ${CMAKE_REQUIRED_FLAGS}")
-    MESSAGE(STATUS "Looking for ${FUNCTION} in ${LIBRARY}")
-    SET(CHECK_LIBRARY_EXISTS_LIBRARIES ${LIBRARY})
-    IF(CMAKE_REQUIRED_LIBRARIES)
-      SET(CHECK_LIBRARY_EXISTS_LIBRARIES 
+    message(STATUS "Looking for ${FUNCTION} in ${LIBRARY}")
+    set(CHECK_LIBRARY_EXISTS_LIBRARIES ${LIBRARY})
+    if(CMAKE_REQUIRED_LIBRARIES)
+      set(CHECK_LIBRARY_EXISTS_LIBRARIES
         ${CHECK_LIBRARY_EXISTS_LIBRARIES} ${CMAKE_REQUIRED_LIBRARIES})
-    ENDIF(CMAKE_REQUIRED_LIBRARIES)
-    TRY_COMPILE(${VARIABLE}
+    endif(CMAKE_REQUIRED_LIBRARIES)
+    try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
-      CMAKE_FLAGS 
+      CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_LIBRARY_EXISTS_DEFINITION}
       -DLINK_DIRECTORIES:STRING=${LOCATION}
       "-DLINK_LIBRARIES:STRING=${CHECK_LIBRARY_EXISTS_LIBRARIES}"
       OUTPUT_VARIABLE OUTPUT)
 
-    IF(${VARIABLE})
-      MESSAGE(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - found")
-      SET(${VARIABLE} 1 CACHE INTERNAL "Have library ${LIBRARY}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+    if(${VARIABLE})
+      message(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - found")
+      set(${VARIABLE} 1 CACHE INTERNAL "Have library ${LIBRARY}")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
         "passed with the following output:\n"
         "${OUTPUT}\n\n")
-    ELSE(${VARIABLE})
-      MESSAGE(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - not found")
-      SET(${VARIABLE} "" CACHE INTERNAL "Have library ${LIBRARY}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+    else(${VARIABLE})
+      message(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - not found")
+      set(${VARIABLE} "" CACHE INTERNAL "Have library ${LIBRARY}")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
         "failed with the following output:\n"
         "${OUTPUT}\n\n")
-    ENDIF(${VARIABLE})
-  ENDIF("${VARIABLE}" MATCHES "^${VARIABLE}$")
-ENDMACRO(CHECK_LIBRARY_EXISTS)
+    endif(${VARIABLE})
+  endif("${VARIABLE}" MATCHES "^${VARIABLE}$")
+endmacro(CHECK_LIBRARY_EXISTS)

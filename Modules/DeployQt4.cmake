@@ -267,8 +267,8 @@ function(install_qt4_executable executable)
         resolve_qt4_paths(dirs)
 
         install(CODE
-                " INCLUDE( \"${DeployQt4_cmake_dir}/DeployQt4.cmake\" )
-                SET( BU_CHMOD_BUNDLE_ITEMS TRUE )
+                " include( \"${DeployQt4_cmake_dir}/DeployQt4.cmake\" )
+                set( BU_CHMOD_BUNDLE_ITEMS TRUE )
                 FIXUP_QT4_EXECUTABLE( \"\${CMAKE_INSTALL_PREFIX}/${executable}\" \"\" \"${libs}\" \"${dirs}\" \"${plugins_dir}\" \"${request_qt_conf}\" ) "
         )
 endfunction()

@@ -1,6 +1,6 @@
 # Locate Lua library
 # This module defines
-#  LUA50_FOUND, if false, do not try to link to Lua 
+#  LUA50_FOUND, if false, do not try to link to Lua
 #  LUA_LIBRARIES, both lua and lualib
 #  LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
 #
@@ -24,7 +24,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(LUA_INCLUDE_DIR lua.h
+find_path(LUA_INCLUDE_DIR lua.h
   HINTS
   $ENV{LUA_DIR}
   PATH_SUFFIXES include/lua50 include/lua5.0 include/lua5 include/lua include
@@ -39,7 +39,7 @@ FIND_PATH(LUA_INCLUDE_DIR lua.h
   /opt
 )
 
-FIND_LIBRARY(LUA_LIBRARY_lua 
+find_library(LUA_LIBRARY_lua
   NAMES lua50 lua5.0 lua-5.0 lua5 lua
   HINTS
   $ENV{LUA_DIR}
@@ -57,10 +57,10 @@ FIND_LIBRARY(LUA_LIBRARY_lua
 
 # In an OS X framework, lualib is usually included as part of the framework
 # (like GLU in OpenGL.framework)
-IF(${LUA_LIBRARY_lua} MATCHES "framework")
-  SET( LUA_LIBRARIES "${LUA_LIBRARY_lua}" CACHE STRING "Lua framework")
-ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
-  FIND_LIBRARY(LUA_LIBRARY_lualib 
+if(${LUA_LIBRARY_lua} MATCHES "framework")
+  set( LUA_LIBRARIES "${LUA_LIBRARY_lua}" CACHE STRING "Lua framework")
+else(${LUA_LIBRARY_lua} MATCHES "framework")
+  find_library(LUA_LIBRARY_lualib
     NAMES lualib50 lualib5.0 lualib5 lualib
     HINTS
     $ENV{LUALIB_DIR}
@@ -74,23 +74,23 @@ ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
     /opt/csw
     /opt
   )
-  IF(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
+  if(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
     # include the math library for Unix
-    IF(UNIX AND NOT APPLE)
-      FIND_LIBRARY(MATH_LIBRARY_FOR_LUA m)
-      SET( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua};${MATH_LIBRARY_FOR_LUA}" CACHE STRING "This is the concatentation of lua and lualib libraries")
+    if(UNIX AND NOT APPLE)
+      find_library(MATH_LIBRARY_FOR_LUA m)
+      set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua};${MATH_LIBRARY_FOR_LUA}" CACHE STRING "This is the concatentation of lua and lualib libraries")
     # For Windows and Mac, don't need to explicitly include the math library
-    ELSE(UNIX AND NOT APPLE)
-      SET( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua}" CACHE STRING "This is the concatentation of lua and lualib libraries")
-    ENDIF(UNIX AND NOT APPLE)
-  ENDIF(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
-ENDIF(${LUA_LIBRARY_lua} MATCHES "framework")
+    else(UNIX AND NOT APPLE)
+      set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua}" CACHE STRING "This is the concatentation of lua and lualib libraries")
+    endif(UNIX AND NOT APPLE)
+  endif(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
+endif(${LUA_LIBRARY_lua} MATCHES "framework")
 
 
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
 # all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(LUA_INCLUDE_DIR LUA_LIBRARIES)
+mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES)
 

@@ -8,8 +8,8 @@
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
 #
-# Created by Eric Wing. This was influenced by the FindSDL.cmake 
-# module, but with modifications to recognize OS X frameworks and 
+# Created by Eric Wing. This was influenced by the FindSDL.cmake
+# module, but with modifications to recognize OS X frameworks and
 # additional Unix paths (FreeBSD, etc).
 
 #=============================================================================
@@ -25,7 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
+find_path(SDLNET_INCLUDE_DIR SDL_net.h
   HINTS
   $ENV{SDLNETDIR}
   $ENV{SDLDIR}
@@ -46,11 +46,11 @@ FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
   /opt/local/include/SDL # DarwinPorts
   /opt/local/include
   /opt/csw/include/SDL # Blastwave
-  /opt/csw/include 
+  /opt/csw/include
   /opt/include/SDL
   /opt/include
 )
-FIND_LIBRARY(SDLNET_LIBRARY 
+find_library(SDLNET_LIBRARY
   NAMES SDL_net
   HINTS
   $ENV{SDLNETDIR}
@@ -67,8 +67,8 @@ FIND_LIBRARY(SDLNET_LIBRARY
   /opt
 )
 
-SET(SDLNET_FOUND "NO")
-IF(SDLNET_LIBRARY AND SDLNET_INCLUDE_DIR)
-  SET(SDLNET_FOUND "YES")
-ENDIF(SDLNET_LIBRARY AND SDLNET_INCLUDE_DIR)
+set(SDLNET_FOUND "NO")
+if(SDLNET_LIBRARY AND SDLNET_INCLUDE_DIR)
+  set(SDLNET_FOUND "YES")
+endif(SDLNET_LIBRARY AND SDLNET_INCLUDE_DIR)
 

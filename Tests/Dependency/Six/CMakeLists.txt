@@ -2,11 +2,11 @@
 # use an all-encompassing LINK_LIBRARIES. And sometimes they don't
 # specify them in the correct order.
 
-LINK_LIBRARIES( Two )
-LINK_LIBRARIES( Five )
+link_libraries( Two )
+link_libraries( Five )
 
-ADD_LIBRARY( SixA SixASrc.c )
+add_library( SixA SixASrc.c )
 
-ADD_LIBRARY( SixB SixBSrc.c )
-TARGET_LINK_LIBRARIES( SixB Four )
+add_library( SixB SixBSrc.c )
+target_link_libraries( SixB Four )
 

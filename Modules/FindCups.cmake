@@ -4,7 +4,7 @@
 #  CUPS_FOUND - system has Cups
 #  CUPS_INCLUDE_DIR - the Cups include directory
 #  CUPS_LIBRARIES - Libraries needed to use Cups
-#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which 
+#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
 #  features this function (i.e. at least 1.1.19)
 
 #=============================================================================
@@ -21,36 +21,36 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(CheckLibraryExists)
+include(CheckLibraryExists)
 
-FIND_PATH(CUPS_INCLUDE_DIR cups/cups.h )
+find_path(CUPS_INCLUDE_DIR cups/cups.h )
 
-FIND_LIBRARY(CUPS_LIBRARIES NAMES cups )
+find_library(CUPS_LIBRARIES NAMES cups )
 
-IF (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
-   SET(CUPS_FOUND TRUE)
+if(CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
+   set(CUPS_FOUND TRUE)
 
    # ippDeleteAttribute is new in cups-1.1.19 (and used by kdeprint)
    CHECK_LIBRARY_EXISTS(cups ippDeleteAttribute "" CUPS_HAS_IPP_DELETE_ATTRIBUTE)
-   IF (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE AND NOT CUPS_HAS_IPP_DELETE_ATTRIBUTE)
-      SET(CUPS_FOUND FALSE)
-   ENDIF (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE AND NOT CUPS_HAS_IPP_DELETE_ATTRIBUTE)
+   if(CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE AND NOT CUPS_HAS_IPP_DELETE_ATTRIBUTE)
+      set(CUPS_FOUND FALSE)
+   endif(CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE AND NOT CUPS_HAS_IPP_DELETE_ATTRIBUTE)
 
-ELSE  (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
-   SET(CUPS_FOUND FALSE)
-ENDIF (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
+else(CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
+   set(CUPS_FOUND FALSE)
+endif(CUPS_INCLUDE_DIR AND CUPS_LIBRARIES)
 
-IF (CUPS_FOUND)
-   IF (NOT Cups_FIND_QUIETLY)
-      MESSAGE(STATUS "Found Cups: ${CUPS_LIBRARIES}")
-   ENDIF (NOT Cups_FIND_QUIETLY)
-ELSE (CUPS_FOUND)
-   SET(CUPS_LIBRARIES )
-   IF (Cups_FIND_REQUIRED)
-      MESSAGE(FATAL_ERROR "Could NOT find Cups")
-   ENDIF (Cups_FIND_REQUIRED)
-ENDIF (CUPS_FOUND)
-  
-  
-MARK_AS_ADVANCED(CUPS_INCLUDE_DIR CUPS_LIBRARIES)
-  
+if(CUPS_FOUND)
+   if(NOT Cups_FIND_QUIETLY)
+      message(STATUS "Found Cups: ${CUPS_LIBRARIES}")
+   endif(NOT Cups_FIND_QUIETLY)
+else(CUPS_FOUND)
+   set(CUPS_LIBRARIES )
+   if(Cups_FIND_REQUIRED)
+      message(FATAL_ERROR "Could NOT find Cups")
+   endif(Cups_FIND_REQUIRED)
+endif(CUPS_FOUND)
+
+
+mark_as_advanced(CUPS_INCLUDE_DIR CUPS_LIBRARIES)
+

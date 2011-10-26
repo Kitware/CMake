@@ -1,2 +1,2 @@
-SET(CMAKE_DL_LIBS "")
-INCLUDE(Platform/UnixPaths)
+set(CMAKE_DL_LIBS "")
+include(Platform/UnixPaths)

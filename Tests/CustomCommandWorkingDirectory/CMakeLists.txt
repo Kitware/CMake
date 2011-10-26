@@ -1,28 +1,28 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(TestWorkingDir)
+project(TestWorkingDir)
 
-ADD_CUSTOM_COMMAND(
+add_custom_command(
   OUTPUT "${TestWorkingDir_BINARY_DIR}/working.c"
   COMMAND "${CMAKE_COMMAND}" -E copy ./working.c.in "${TestWorkingDir_BINARY_DIR}/working.c"
   WORKING_DIRECTORY "${TestWorkingDir_SOURCE_DIR}"
   COMMENT "custom command"
 )
 
-SET_SOURCE_FILES_PROPERTIES(
+set_source_files_properties(
   "${TestWorkingDir_BINARY_DIR}/customTarget.c"
   "${TestWorkingDir_BINARY_DIR}/customTarget2.c"
   PROPERTIES GENERATED 1)
 
-ADD_EXECUTABLE(working "${TestWorkingDir_BINARY_DIR}/working.c" 
+add_executable(working "${TestWorkingDir_BINARY_DIR}/working.c"
   "${TestWorkingDir_BINARY_DIR}/customTarget.c")
 
-ADD_CUSTOM_TARGET(
+add_custom_target(
   Custom ALL
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different ./customTarget.c "${TestWorkingDir_BINARY_DIR}/customTarget.c"
   WORKING_DIRECTORY  "${TestWorkingDir_SOURCE_DIR}"
 )
 
-ADD_DEPENDENCIES(working Custom)
+add_dependencies(working Custom)
 
 file(MAKE_DIRECTORY ${TestWorkingDir_BINARY_DIR}/work)
 add_custom_command(

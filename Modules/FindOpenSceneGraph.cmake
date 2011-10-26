@@ -14,7 +14,7 @@
 #
 #    OpenSceneGraph_DEBUG - Enable debugging output
 #
-#    OpenSceneGraph_MARK_AS_ADVANCED - Mark cache variables as advanced 
+#    OpenSceneGraph_MARK_AS_ADVANCED - Mark cache variables as advanced
 #                                      automatically
 #
 # The following environment variables are also respected for finding the OSG
@@ -96,12 +96,12 @@ if(OSG_INCLUDE_DIR)
         message("[ FindOpenSceneGraph.cmake:${CMAKE_CURRENT_LIST_LINE} ] "
             "Detected OSG_INCLUDE_DIR = ${OSG_INCLUDE_DIR}")
     endif()
-    
+
     set(_osg_Version_file "${OSG_INCLUDE_DIR}/osg/Version")
     if("${OSG_INCLUDE_DIR}" MATCHES "\\.framework$" AND NOT EXISTS "${_osg_Version_file}")
         set(_osg_Version_file "${OSG_INCLUDE_DIR}/Headers/Version")
     endif()
-    
+
     if(EXISTS "${_osg_Version_file}")
       file(READ "${_osg_Version_file}" _osg_Version_contents)
     else()
@@ -149,7 +149,7 @@ if(OpenSceneGraph_FIND_VERSION AND OPENSCENEGRAPH_VERSION)
         endif()
     else()
         # version is too low
-        if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION} AND 
+        if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION} AND
                 NOT OPENSCENEGRAPH_VERSION VERSION_GREATER ${OpenSceneGraph_FIND_VERSION})
             set(_osg_version_not_high_enough TRUE)
         endif()
@@ -161,7 +161,7 @@ if(OpenSceneGraph_FIND_QUIETLY)
     set(_osg_quiet "QUIET")
 endif()
 #
-# Here we call FIND_PACKAGE() on all of the components
+# Here we call find_package() on all of the components
 #
 foreach(_osg_module ${_osg_modules_to_process})
     if(OpenSceneGraph_DEBUG)
@@ -182,7 +182,7 @@ endforeach()
 if(OPENSCENEGRAPH_INCLUDE_DIR)
     list(REMOVE_DUPLICATES OPENSCENEGRAPH_INCLUDE_DIR)
 endif()
-        
+
 #
 # Inform the users with an error message based on
 # what version they have vs. what version was
@@ -221,7 +221,7 @@ else()
                 set(_osg_missing_message "${_osg_missing_message} ${_osg_module}")
             endif()
         endforeach()
-    
+
         if(_osg_missing_nodekit_fail)
             message(FATAL_ERROR "ERROR: Missing the following osg "
                 "libraries: ${_osg_missing_message}.\n"

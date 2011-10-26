@@ -10,7 +10,7 @@
 # See the License for more information.
 #=============================================================================
 
-SET( CURSES_SRCS
+set( CURSES_SRCS
               CursesDialog/cmCursesBoolWidget
               CursesDialog/cmCursesCacheEntryComposite
               CursesDialog/cmCursesDummyWidget
@@ -25,13 +25,13 @@ SET( CURSES_SRCS
               CursesDialog/ccmake
    )
 
-INCLUDE_DIRECTORIES(${CMake_SOURCE_DIR}/Source/CursesDialog/form
+include_directories(${CMake_SOURCE_DIR}/Source/CursesDialog/form
                     ${CMake_BINARY_DIR}/Source/CursesDialog/form)
-INCLUDE_DIRECTORIES(${CURSES_INCLUDE_PATH})
+include_directories(${CURSES_INCLUDE_PATH})
 
 
-ADD_EXECUTABLE(ccmake ${CURSES_SRCS} )
-TARGET_LINK_LIBRARIES(ccmake CMakeLib)
-TARGET_LINK_LIBRARIES(ccmake cmForm)
+add_executable(ccmake ${CURSES_SRCS} )
+target_link_libraries(ccmake CMakeLib)
+target_link_libraries(ccmake cmForm)
 
-INSTALL_TARGETS(/bin ccmake)
+install_targets(/bin ccmake)

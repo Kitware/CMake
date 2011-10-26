@@ -20,19 +20,19 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(BZIP2_INCLUDE_DIR bzlib.h )
+find_path(BZIP2_INCLUDE_DIR bzlib.h )
 
-FIND_LIBRARY(BZIP2_LIBRARIES NAMES bz2 bzip2 )
+find_library(BZIP2_LIBRARIES NAMES bz2 bzip2 )
 
-# handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2 DEFAULT_MSG BZIP2_LIBRARIES BZIP2_INCLUDE_DIR)
 
-IF (BZIP2_FOUND)
-   INCLUDE(CheckLibraryExists)
+if(BZIP2_FOUND)
+   include(CheckLibraryExists)
    CHECK_LIBRARY_EXISTS(${BZIP2_LIBRARIES} BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
-ENDIF (BZIP2_FOUND)
+endif(BZIP2_FOUND)
 
-MARK_AS_ADVANCED(BZIP2_INCLUDE_DIR BZIP2_LIBRARIES)
+mark_as_advanced(BZIP2_INCLUDE_DIR BZIP2_LIBRARIES)
 

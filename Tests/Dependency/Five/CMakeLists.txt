@@ -1,3 +1,3 @@
-ADD_LIBRARY( Five FiveSrc.c )
-TARGET_LINK_LIBRARIES( Five Two )
+add_library( Five FiveSrc.c )
+target_link_libraries( Five Two )
 

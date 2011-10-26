@@ -12,7 +12,7 @@ add_custom_command (
   )
 
 set_source_files_properties (
-  mysqrt.cxx PROPERTIES 
+  mysqrt.cxx PROPERTIES
   OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Table.h
   )
 

@@ -1,13 +1,13 @@
 # Locate QuickTime
 # This module defines
 # QUICKTIME_LIBRARY
-# QUICKTIME_FOUND, if false, do not try to link to gdal 
+# QUICKTIME_FOUND, if false, do not try to link to gdal
 # QUICKTIME_INCLUDE_DIR, where to find the headers
 #
 # $QUICKTIME_DIR is an environment variable that would
 # correspond to the ./configure --prefix=$QUICKTIME_DIR
 #
-# Created by Eric Wing. 
+# Created by Eric Wing.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -25,23 +25,23 @@
 # QuickTime on OS X looks different than QuickTime for Windows,
 # so I am going to case the two.
 
-IF(APPLE)
-  FIND_PATH(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h)
-  FIND_LIBRARY(QUICKTIME_LIBRARY QuickTime)
-ELSE(APPLE)
-  FIND_PATH(QUICKTIME_INCLUDE_DIR QuickTime.h
+if(APPLE)
+  find_path(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h)
+  find_library(QUICKTIME_LIBRARY QuickTime)
+else(APPLE)
+  find_path(QUICKTIME_INCLUDE_DIR QuickTime.h
     HINTS
     $ENV{QUICKTIME_DIR}/include
     $ENV{QUICKTIME_DIR}
   )
-  FIND_LIBRARY(QUICKTIME_LIBRARY QuickTime
+  find_library(QUICKTIME_LIBRARY QuickTime
     HINTS
     $ENV{QUICKTIME_DIR}/lib
     $ENV{QUICKTIME_DIR}
   )
-ENDIF(APPLE)
+endif(APPLE)
 
 # handle the QUIETLY and REQUIRED arguments and set QUICKTIME_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(QuickTime DEFAULT_MSG QUICKTIME_LIBRARY QUICKTIME_INCLUDE_DIR)

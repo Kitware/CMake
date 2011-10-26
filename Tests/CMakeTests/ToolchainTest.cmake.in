@@ -1,7 +1,7 @@
 ############################################################
 # some preparations so that the CMakeDetermineXXX.cmake files will work in scripted mode
 
-# overwrite MARK_AS_ADVANCED(), since this is used in CMakeDetermineCCompiler.cmake
+# overwrite mark_as_advanced(), since this is used in CMakeDetermineCCompiler.cmake
 # which will complain that it can"t be used in script mode
 macro(MARK_AS_ADVANCED)
 endmacro(MARK_AS_ADVANCED)
@@ -55,7 +55,7 @@ set(CMAKE_HOST_SYSTEM_PROCESSOR)
 
 ############################################################
 
-# now define a toolchain file and check that everything is 
+# now define a toolchain file and check that everything is
 # detected correctly and nothing predefined is overwritten
 
 set(CMAKE_TOOLCHAIN_FILE "${MY_SOURCE_DIR}/DummyToolchain.cmake")

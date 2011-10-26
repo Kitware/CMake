@@ -1,13 +1,13 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(CrossCompile)
+project(CrossCompile)
 
-UNSET(run_result CACHE)
+unset(run_result CACHE)
 
 #Simulate the cross compile condition
-SET(CMAKE_CROSSCOMPILING ON)
+set(CMAKE_CROSSCOMPILING ON)
 
-ADD_EXECUTABLE(CrossCompile main.c)
+add_executable(CrossCompile main.c)
 
-TRY_RUN(run_result compile_result
-    ${CrossCompile_BINARY_DIR}  
+try_run(run_result compile_result
+    ${CrossCompile_BINARY_DIR}
     ${CrossCompile_SOURCE_DIR}/main.c)

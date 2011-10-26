@@ -22,26 +22,26 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-INCLUDE(CheckFunctionExists)
+include(CheckFunctionExists)
 
-MACRO (CHECK_FUNCTION_EXISTS_GLIBC _FUNC _FUNCVAR)
-  IF(NOT DEFINED ${_FUNCVAR})
-   SET(CHECK_STUB_FUNC_1 "__stub_${_FUNC}")
-   SET(CHECK_STUB_FUNC_2 "__stub___${_FUNC}")
-   CONFIGURE_FILE( ${libarchive_SOURCE_DIR}/build/cmake/CheckFuncs_stub.c.in
+macro(CHECK_FUNCTION_EXISTS_GLIBC _FUNC _FUNCVAR)
+  if(NOT DEFINED ${_FUNCVAR})
+   set(CHECK_STUB_FUNC_1 "__stub_${_FUNC}")
+   set(CHECK_STUB_FUNC_2 "__stub___${_FUNC}")
+   configure_file( ${libarchive_SOURCE_DIR}/build/cmake/CheckFuncs_stub.c.in
      ${CMAKE_BINARY_DIR}/cmake.tmp/CheckFuncs_stub.c IMMEDIATE)
-   TRY_COMPILE(__stub
+   try_compile(__stub
      ${CMAKE_BINARY_DIR}
      ${CMAKE_BINARY_DIR}/cmake.tmp/CheckFuncs_stub.c
      COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
      CMAKE_FLAGS
      -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILE_FLAGS}
      "${CHECK_INCLUDE_FILE_C_INCLUDE_DIRS}")
-   IF (__stub)
-     SET("${_FUNCVAR}" "" CACHE INTERNAL "Have function ${_FUNC}")
-   ELSE (__stub)
+   if(__stub)
+     set("${_FUNCVAR}" "" CACHE INTERNAL "Have function ${_FUNC}")
+   else(__stub)
      CHECK_FUNCTION_EXISTS("${_FUNC}" "${_FUNCVAR}")
-   ENDIF (__stub)
-   ENDIF(NOT DEFINED ${_FUNCVAR})
-ENDMACRO (CHECK_FUNCTION_EXISTS_GLIBC)
+   endif(__stub)
+   endif(NOT DEFINED ${_FUNCVAR})
+endmacro(CHECK_FUNCTION_EXISTS_GLIBC)
 
