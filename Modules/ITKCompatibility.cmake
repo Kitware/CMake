@@ -13,5 +13,5 @@
 #  License text for the above reference.)
 
 # work around an old bug in ITK prior to verison 3.0
-SET(TIFF_RIGHT_VERSION 1)
+set(TIFF_RIGHT_VERSION 1)
 

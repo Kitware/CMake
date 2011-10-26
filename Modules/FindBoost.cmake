@@ -48,7 +48,7 @@
 #     libraries with a few exceptions (Boost.Python is one).
 #
 #     Please see the section below near Boost_LIB_DIAGNOSTIC_DEFINITIONS for
-#     more details.  Adding a TARGET_LINK_LIBRARIES() as shown in the example
+#     more details.  Adding a target_link_libraries() as shown in the example
 #     above appears to cause VS to link dynamically if Boost_USE_STATIC_LIBS
 #     gets set to OFF.  It is suggested you avoid automatic linking since it
 #     will make your application less portable.

@@ -31,7 +31,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     else(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     endif(CMAKE_REQUIRED_LIBRARIES)
-    FILE(WRITE
+    file(WRITE
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
     "
       program TESTFortran
@@ -50,13 +50,13 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       message(STATUS "Looking for Fortran ${FUNCTION} - found")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the Fortran ${FUNCTION} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     else(${VARIABLE})
       message(STATUS "Looking for Fortran ${FUNCTION} - not found")
       set(${VARIABLE} "" CACHE INTERNAL "Have Fortran function ${FUNCTION}")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
         "${OUTPUT}\n\n")
     endif(${VARIABLE})

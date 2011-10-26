@@ -1,1 +1,1 @@
-ADD_EXECUTABLE(test test.cxx)
+add_executable(test test.cxx)

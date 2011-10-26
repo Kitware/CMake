@@ -1,10 +1,10 @@
-# OpenThreads is a C++ based threading library. Its largest userbase 
+# OpenThreads is a C++ based threading library. Its largest userbase
 # seems to OpenSceneGraph so you might notice I accept OSGDIR as an
 # environment path.
-# I consider this part of the Findosg* suite used to find OpenSceneGraph 
+# I consider this part of the Findosg* suite used to find OpenSceneGraph
 # components.
 # Each component is separate and you must opt in to each module.
-# 
+#
 # Locate OpenThreads
 # This module defines
 # OPENTHREADS_LIBRARY
@@ -34,8 +34,8 @@
 # #include <OpenThreads/Thread>
 
 # To make it easier for one-step automated configuration/builds,
-# we leverage environmental paths. This is preferable 
-# to the -DVAR=value switches because it insulates the 
+# we leverage environmental paths. This is preferable
+# to the -DVAR=value switches because it insulates the
 # users from changes we may make in this script.
 # It also offers a little more flexibility than setting
 # the CMAKE_*_PATH since we can target specific components.
@@ -71,8 +71,8 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
 )
 
 
-find_library(OPENTHREADS_LIBRARY 
-    NAMES OpenThreads OpenThreadsWin32 
+find_library(OPENTHREADS_LIBRARY
+    NAMES OpenThreads OpenThreadsWin32
     HINTS
         $ENV{OPENTHREADS_LIBRARY_DIR}
         $ENV{OPENTHREADS_DIR}
@@ -90,7 +90,7 @@ find_library(OPENTHREADS_LIBRARY
     PATH_SUFFIXES lib64 lib
 )
 
-find_library(OPENTHREADS_LIBRARY_DEBUG 
+find_library(OPENTHREADS_LIBRARY_DEBUG
     NAMES OpenThreadsd OpenThreadsWin32d
     HINTS
         $ENV{OPENTHREADS_DEBUG_LIBRARY_DIR}

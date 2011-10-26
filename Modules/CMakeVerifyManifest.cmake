@@ -4,7 +4,7 @@
 # side by side manifests for a project match.  To run this
 # script, cd to a directory and run the script with cmake -P.
 # On the command line you can pass in versions that are OK even
-# if not found in the .manifest files. For example, 
+# if not found in the .manifest files. For example,
 # cmake -Dallow_versions=8.0.50608.0 -PCmakeVerifyManifest.cmake
 # could be used to allow an embeded manifest of 8.0.50608.0
 # to be used in a project even if that version was not found
@@ -40,7 +40,7 @@ function(crt_version file list_var)
   foreach(s ${strings})
     set(has_match 1)
     string(REGEX
-      REPLACE ".*<assembly.*\"Microsoft.VC...CRT\".*version=\"([^\"]*)\".*</assembly>.*$" "\\1" 
+      REPLACE ".*<assembly.*\"Microsoft.VC...CRT\".*version=\"([^\"]*)\".*</assembly>.*$" "\\1"
       version "${s}")
     if(NOT "${version}" STREQUAL "")
       list(APPEND version_list ${version})
@@ -61,14 +61,14 @@ endfunction(crt_version)
 set(fatal_error FALSE)
 
 # check_version:
-# 
+#
 # test a file against the shipped manifest versions
 # for a directory
 function(check_version file manifest_versions)
   set(manifest_versions ${manifest_versions} ${allow_versions})
   # collect versions for a given file
   crt_version(${file} file_versions)
-  # see if the versions 
+  # see if the versions
   foreach(ver ${file_versions})
     list(FIND manifest_versions "${ver}" found_version)
     if("${found_version}" EQUAL -1)

@@ -7,16 +7,16 @@
 # that can be included to set the include directories, library directories,
 # and preprocessor macros.  In addition to the variables read from
 # ITKConfig.cmake, this find module also defines
-#  ITK_DIR  - The directory containing ITKConfig.cmake.  
-#             This is either the root of the build tree, 
-#             or the lib/InsightToolkit directory.  
+#  ITK_DIR  - The directory containing ITKConfig.cmake.
+#             This is either the root of the build tree,
+#             or the lib/InsightToolkit directory.
 #             This is the only cache entry.
-#   
-#  ITK_FOUND - Whether ITK was found.  If this is true, 
+#
+#  ITK_FOUND - Whether ITK was found.  If this is true,
 #              ITK_DIR is okay.
 #
-#  USE_ITK_FILE - The full path to the UseITK.cmake file.  
-#                 This is provided for backward 
+#  USE_ITK_FILE - The full path to the UseITK.cmake file.
+#                 This is provided for backward
 #                 compatability.  Use ITK_USE_FILE
 #                 instead.
 
@@ -36,22 +36,22 @@
 # Use the Config mode of the find_package() command to find ITKConfig.
 # If this succeeds (possibly because ITK_DIR is already set), the
 # command will have already loaded ITKConfig.cmake and set ITK_FOUND.
-IF(NOT ITK_FOUND)
-  SET(_ITK_REQUIRED "")
-  IF(ITK_FIND_REQUIRED)
-    SET(_ITK_REQUIRED REQUIRED)
-  ENDIF()
-  SET(_ITK_QUIET "")
-  IF(ITK_FIND_QUIETLY)
-    SET(_ITK_QUIET QUIET)
-  ENDIF()
-  FIND_PACKAGE(ITK ${_ITK_REQUIRED} ${_ITK_QUIET} NO_MODULE
+if(NOT ITK_FOUND)
+  set(_ITK_REQUIRED "")
+  if(ITK_FIND_REQUIRED)
+    set(_ITK_REQUIRED REQUIRED)
+  endif()
+  set(_ITK_QUIET "")
+  if(ITK_FIND_QUIETLY)
+    set(_ITK_QUIET QUIET)
+  endif()
+  find_package(ITK ${_ITK_REQUIRED} ${_ITK_QUIET} NO_MODULE
     NAMES ITK InsightToolkit
     CONFIGS ITKConfig.cmake
     )
-ENDIF()
+endif()
 
-IF(ITK_FOUND)
+if(ITK_FOUND)
   # Set USE_ITK_FILE for backward-compatability.
-  SET(USE_ITK_FILE ${ITK_USE_FILE})
-ENDIF()
+  set(USE_ITK_FILE ${ITK_USE_FILE})
+endif()

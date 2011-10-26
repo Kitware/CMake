@@ -48,7 +48,7 @@
 #           input_files_to_testgen  The list of header files containing the
 #                                   CxxTest::TestSuite's to be included in
 #                                   this runner
-#           
+#
 #       #==============
 #       Example Usage:
 #
@@ -66,13 +66,13 @@
 #              1. Invoke the testgen executable to autogenerate foo_test.cc in the
 #                 binary tree from "foo_test.h" in the current source directory.
 #              2. Create an executable and test called unittest_foo.
-#               
+#
 #      #=============
 #      Example foo_test.h:
 #
 #          #include <cxxtest/TestSuite.h>
-#          
-#          class MyTestSuite : public CxxTest::TestSuite 
+#
+#          class MyTestSuite : public CxxTest::TestSuite
 #          {
 #          public:
 #             void testAddition( void )

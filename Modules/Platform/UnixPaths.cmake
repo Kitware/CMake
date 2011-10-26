@@ -17,21 +17,21 @@
 # "CMakeSystemSpecificInformation.cmake" already included it.
 # The extra inclusion is a work-around documented next to the include()
 # call, so this can be removed when the work-around is removed.
-IF(__UNIX_PATHS_INCLUDED)
-  RETURN()
-ENDIF()
-SET(__UNIX_PATHS_INCLUDED 1)
+if(__UNIX_PATHS_INCLUDED)
+  return()
+endif()
+set(__UNIX_PATHS_INCLUDED 1)
 
-SET(UNIX 1)
+set(UNIX 1)
 
 # also add the install directory of the running cmake to the search directories
 # CMAKE_ROOT is CMAKE_INSTALL_PREFIX/share/cmake, so we need to go two levels up
-GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
-GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
+get_filename_component(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
+get_filename_component(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
 
 # List common installation prefixes.  These will be used for all
 # search types.
-LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Standard
   /usr/local /usr /
 
@@ -43,7 +43,7 @@ LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
   )
 
 # List common include file locations not under the common prefixes.
-LIST(APPEND CMAKE_SYSTEM_INCLUDE_PATH
+list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   # Windows API on Cygwin
   /usr/include/w32api
 
@@ -52,11 +52,11 @@ LIST(APPEND CMAKE_SYSTEM_INCLUDE_PATH
 
   # Other
   /usr/pkg/include
-  /opt/csw/include /opt/include  
+  /opt/csw/include /opt/include
   /usr/openwin/include
   )
 
-LIST(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
   # Windows API on Cygwin
   /usr/lib/w32api
 
@@ -65,24 +65,24 @@ LIST(APPEND CMAKE_SYSTEM_LIBRARY_PATH
 
   # Other
   /usr/pkg/lib
-  /opt/csw/lib /opt/lib 
+  /opt/csw/lib /opt/lib
   /usr/openwin/lib
   )
 
-LIST(APPEND CMAKE_SYSTEM_PROGRAM_PATH
+list(APPEND CMAKE_SYSTEM_PROGRAM_PATH
   /usr/pkg/bin
   )
 
-LIST(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
+list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
   /lib /usr/lib /usr/lib32 /usr/lib64
   )
 
-LIST(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
+list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
   /usr/include
   )
-LIST(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
+list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
   /usr/include
   )
 
 # Enable use of lib64 search path variants by default.
-SET_PROPERTY(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS TRUE)

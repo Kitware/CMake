@@ -1,1 +1,1 @@
-ADD_LIBRARY(jumpStatic STATIC jumpStatic.cxx)
+add_library(jumpStatic STATIC jumpStatic.cxx)

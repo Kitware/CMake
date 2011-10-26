@@ -12,5 +12,5 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM NAMES gmake make smake)
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
+find_program(CMAKE_MAKE_PROGRAM NAMES gmake make smake)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)

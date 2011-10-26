@@ -8,8 +8,8 @@
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
 #
-# Created by Eric Wing. This was influenced by the FindSDL.cmake 
-# module, but with modifications to recognize OS X frameworks and 
+# Created by Eric Wing. This was influenced by the FindSDL.cmake
+# module, but with modifications to recognize OS X frameworks and
 # additional Unix paths (FreeBSD, etc).
 
 #=============================================================================
@@ -25,7 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
+find_path(SDLMIXER_INCLUDE_DIR SDL_mixer.h
   HINTS
   $ENV{SDLMIXERDIR}
   $ENV{SDLDIR}
@@ -46,12 +46,12 @@ FIND_PATH(SDLMIXER_INCLUDE_DIR SDL_mixer.h
   /opt/local/include/SDL # DarwinPorts
   /opt/local/include
   /opt/csw/include/SDL # Blastwave
-  /opt/csw/include 
+  /opt/csw/include
   /opt/include/SDL
   /opt/include
 )
 
-FIND_LIBRARY(SDLMIXER_LIBRARY 
+find_library(SDLMIXER_LIBRARY
   NAMES SDL_mixer
   HINTS
   $ENV{SDLMIXERDIR}
@@ -68,8 +68,8 @@ FIND_LIBRARY(SDLMIXER_LIBRARY
   /opt
 )
 
-SET(SDLMIXER_FOUND "NO")
-IF(SDLMIXER_LIBRARY AND SDLMIXER_INCLUDE_DIR)
-  SET(SDLMIXER_FOUND "YES")
-ENDIF(SDLMIXER_LIBRARY AND SDLMIXER_INCLUDE_DIR)
+set(SDLMIXER_FOUND "NO")
+if(SDLMIXER_LIBRARY AND SDLMIXER_INCLUDE_DIR)
+  set(SDLMIXER_FOUND "YES")
+endif(SDLMIXER_LIBRARY AND SDLMIXER_INCLUDE_DIR)
 

@@ -17,10 +17,10 @@
 # "CMakeSystemSpecificInformation.cmake" already included it.
 # The extra inclusion is a work-around documented next to the include()
 # call, so this can be removed when the work-around is removed.
-IF(__WINDOWS_PATHS_INCLUDED)
-  RETURN()
-ENDIF()
-SET(__WINDOWS_PATHS_INCLUDED 1)
+if(__WINDOWS_PATHS_INCLUDED)
+  return()
+endif()
+set(__WINDOWS_PATHS_INCLUDED 1)
 
 # Add the program-files folder(s) to the list of installation
 # prefixes.
@@ -42,39 +42,39 @@ SET(__WINDOWS_PATHS_INCLUDED 1)
 #   ENV{ProgramFiles(x86)} = <not set>
 #   ENV{ProgramFiles} = [C:\Program Files (x86)]
 #   ENV{ProgramW6432} = [C:\Program Files]
-IF(DEFINED "ENV{ProgramW6432}")
+if(DEFINED "ENV{ProgramW6432}")
   # 32-bit binary on 64-bit windows.
   # The 64-bit program files are in ProgramW6432.
-  LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramW6432}")
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramW6432}")
 
   # The 32-bit program files are in ProgramFiles.
-  IF(DEFINED "ENV{ProgramFiles}")
-    LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
-  ENDIF()
-ELSE()
+  if(DEFINED "ENV{ProgramFiles}")
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
+  endif()
+else()
   # 64-bit binary, or 32-bit binary on 32-bit windows.
-  IF(DEFINED "ENV{ProgramFiles}")
-    LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
-  ENDIF()
-  IF(DEFINED "ENV{ProgramFiles(x86)}")
+  if(DEFINED "ENV{ProgramFiles}")
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
+  endif()
+  if(DEFINED "ENV{ProgramFiles(x86)}")
     # 64-bit binary.  32-bit program files are in ProgramFiles(x86).
-    LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles(x86)}")
-  ELSEIF(DEFINED "ENV{SystemDrive}")
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles(x86)}")
+  elseif(DEFINED "ENV{SystemDrive}")
     # Guess the 32-bit program files location.
-    IF(EXISTS "$ENV{SystemDrive}/Program Files (x86)")
-      LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
+    if(EXISTS "$ENV{SystemDrive}/Program Files (x86)")
+      list(APPEND CMAKE_SYSTEM_PREFIX_PATH
         "$ENV{SystemDrive}/Program Files (x86)")
-    ENDIF()
-  ENDIF()
-ENDIF()
+    endif()
+  endif()
+endif()
 
 # Add the CMake install location.
-GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
-GET_FILENAME_COMPONENT(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
-LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
+get_filename_component(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
+get_filename_component(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
 
 # Add other locations.
-LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Project install destination.
   "${CMAKE_INSTALL_PREFIX}"
 
@@ -82,15 +82,15 @@ LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
   /
   )
 
-LIST(APPEND CMAKE_SYSTEM_INCLUDE_PATH
+list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   )
 
 # mingw can also link against dlls which can also be in /bin, so list this too
-LIST(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
   "${CMAKE_INSTALL_PREFIX}/bin"
   "${_CMAKE_INSTALL_DIR}/bin"
   /bin
   )
 
-LIST(APPEND CMAKE_SYSTEM_PROGRAM_PATH
+list(APPEND CMAKE_SYSTEM_PROGRAM_PATH
   )

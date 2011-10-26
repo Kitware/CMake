@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(ConvLibrary)
 
 # create a source list
-set(foo_sources foo.cxx bar.c sub1/car.cxx) 
+set(foo_sources foo.cxx bar.c sub1/car.cxx)
 # create a library foo from the sources
 add_library(foo ${foo_sources})
 # get the object files from the target

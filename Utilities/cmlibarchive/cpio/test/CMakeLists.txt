@@ -3,8 +3,8 @@
 # How to build bsdcpio_test
 #
 ############################################
-IF(ENABLE_CPIO AND ENABLE_TEST)
-  SET(bsdcpio_test_SOURCES
+if(ENABLE_CPIO AND ENABLE_TEST)
+  set(bsdcpio_test_SOURCES
     ../cmdline.c
     ../../libarchive_fe/err.c
     ../../libarchive_fe/pathmatch.c
@@ -38,38 +38,38 @@ IF(ENABLE_CPIO AND ENABLE_TEST)
     test_passthrough_reverse.c
     test_pathmatch.c
   )
-  IF(WIN32 AND NOT CYGWIN)
-    LIST(APPEND bsdcpio_test_SOURCES ../cpio_windows.h)
-  ENDIF(WIN32 AND NOT CYGWIN)
+  if(WIN32 AND NOT CYGWIN)
+    list(APPEND bsdcpio_test_SOURCES ../cpio_windows.h)
+  endif(WIN32 AND NOT CYGWIN)
 
   #
   # Generate the list.h
   #
   GENERATE_LIST_H(${CMAKE_CURRENT_BINARY_DIR}/list.h
     ${CMAKE_CURRENT_LIST_FILE} ${bsdcpio_test_SOURCES})
-  SET_PROPERTY(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
+  set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_BINARY_DIR})
   #
   # Register target
   #
-  ADD_EXECUTABLE(bsdcpio_test ${bsdcpio_test_SOURCES})
-  SET_PROPERTY(TARGET bsdcpio_test PROPERTY COMPILE_DEFINITIONS LIST_H)
+  add_executable(bsdcpio_test ${bsdcpio_test_SOURCES})
+  set_property(TARGET bsdcpio_test PROPERTY COMPILE_DEFINITIONS LIST_H)
 
-  # ADD_TEST() for each separate test
-  SET(num 0)
-  FOREACH(test ${bsdcpio_test_SOURCES})
-    IF(test MATCHES "^test_[^/]+[.]c$")
-      STRING(REGEX REPLACE "^(test_[^/]+)[.]c$" "\\1" testname ${test})
-      ADD_TEST("bsdcpio_${testname}" bsdcpio_test
+  # add_test() for each separate test
+  set(num 0)
+  foreach(test ${bsdcpio_test_SOURCES})
+    if(test MATCHES "^test_[^/]+[.]c$")
+      string(REGEX REPLACE "^(test_[^/]+)[.]c$" "\\1" testname ${test})
+      add_test("bsdcpio_${testname}" bsdcpio_test
         -v -p ${BSDCPIO} -r ${CMAKE_CURRENT_SOURCE_DIR} ${num})
-      MATH(EXPR num "${num} + 1")
-    ENDIF(test MATCHES "^test_[^/]+[.]c$")
-  ENDFOREACH(test)
+      math(EXPR num "${num} + 1")
+    endif(test MATCHES "^test_[^/]+[.]c$")
+  endforeach(test)
 
   # Experimental new test handling
-  ADD_CUSTOM_TARGET(run_bsdcpio_test
+  add_custom_target(run_bsdcpio_test
     COMMAND bsdcpio_test -p ${BSDCPIO} -r ${CMAKE_CURRENT_SOURCE_DIR})
-  ADD_DEPENDENCIES(run_bsdcpio_test bsdcpio)
-  ADD_DEPENDENCIES(run_all_tests run_bsdcpio_test)
-ENDIF(ENABLE_CPIO AND ENABLE_TEST)
+  add_dependencies(run_bsdcpio_test bsdcpio)
+  add_dependencies(run_all_tests run_bsdcpio_test)
+endif(ENABLE_CPIO AND ENABLE_TEST)
 

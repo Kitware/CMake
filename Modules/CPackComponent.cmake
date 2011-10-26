@@ -218,84 +218,84 @@
 #  License text for the above reference.)
 
 # Define var in order to avoid multiple inclusion
-IF(NOT CPackComponent_CMake_INCLUDED)
-SET(CPackComponent_CMake_INCLUDED 1)
+if(NOT CPackComponent_CMake_INCLUDED)
+set(CPackComponent_CMake_INCLUDED 1)
 
 # Argument-parsing macro from http://www.cmake.org/Wiki/CMakeMacroParseArguments
-MACRO(cpack_parse_arguments prefix arg_names option_names)
-  SET(${prefix}_DEFAULT_ARGS)
-  FOREACH(arg_name ${arg_names})
-    SET(${prefix}_${arg_name})
-  ENDFOREACH(arg_name)
-  FOREACH(option ${option_names})
-    SET(${prefix}_${option} FALSE)
-  ENDFOREACH(option)
+macro(cpack_parse_arguments prefix arg_names option_names)
+  set(${prefix}_DEFAULT_ARGS)
+  foreach(arg_name ${arg_names})
+    set(${prefix}_${arg_name})
+  endforeach(arg_name)
+  foreach(option ${option_names})
+    set(${prefix}_${option} FALSE)
+  endforeach(option)
 
-  SET(current_arg_name DEFAULT_ARGS)
-  SET(current_arg_list)
-  FOREACH(arg ${ARGN})
-    SET(larg_names ${arg_names})
-    LIST(FIND larg_names "${arg}" is_arg_name)
-    IF (is_arg_name GREATER -1)
-      SET(${prefix}_${current_arg_name} ${current_arg_list})
-      SET(current_arg_name ${arg})
-      SET(current_arg_list)
-    ELSE (is_arg_name GREATER -1)
-      SET(loption_names ${option_names})
-      LIST(FIND loption_names "${arg}" is_option)
-      IF (is_option GREATER -1)
-        SET(${prefix}_${arg} TRUE)
-      ELSE (is_option GREATER -1)
-        SET(current_arg_list ${current_arg_list} ${arg})
-      ENDIF (is_option GREATER -1)
-    ENDIF (is_arg_name GREATER -1)
-  ENDFOREACH(arg)
-  SET(${prefix}_${current_arg_name} ${current_arg_list})
-ENDMACRO(cpack_parse_arguments)
+  set(current_arg_name DEFAULT_ARGS)
+  set(current_arg_list)
+  foreach(arg ${ARGN})
+    set(larg_names ${arg_names})
+    list(FIND larg_names "${arg}" is_arg_name)
+    if(is_arg_name GREATER -1)
+      set(${prefix}_${current_arg_name} ${current_arg_list})
+      set(current_arg_name ${arg})
+      set(current_arg_list)
+    else(is_arg_name GREATER -1)
+      set(loption_names ${option_names})
+      list(FIND loption_names "${arg}" is_option)
+      if(is_option GREATER -1)
+        set(${prefix}_${arg} TRUE)
+      else(is_option GREATER -1)
+        set(current_arg_list ${current_arg_list} ${arg})
+      endif(is_option GREATER -1)
+    endif(is_arg_name GREATER -1)
+  endforeach(arg)
+  set(${prefix}_${current_arg_name} ${current_arg_list})
+endmacro(cpack_parse_arguments)
 
 # Macro that appends a SET command for the given variable name (var)
 # to the macro named strvar, but only if the variable named "var"
 # has been defined. The string will eventually be appended to a CPack
 # configuration file.
-MACRO(cpack_append_variable_set_command var strvar)
-  IF (DEFINED ${var})
-    SET(${strvar} "${${strvar}}SET(${var}")
-    FOREACH(APPENDVAL ${${var}})
-      SET(${strvar} "${${strvar}} ${APPENDVAL}")
-    ENDFOREACH(APPENDVAL)
-    SET(${strvar} "${${strvar}})\n")
-  ENDIF (DEFINED ${var})
-ENDMACRO(cpack_append_variable_set_command)
+macro(cpack_append_variable_set_command var strvar)
+  if(DEFINED ${var})
+    set(${strvar} "${${strvar}}set(${var}")
+    foreach(APPENDVAL ${${var}})
+      set(${strvar} "${${strvar}} ${APPENDVAL}")
+    endforeach(APPENDVAL)
+    set(${strvar} "${${strvar}})\n")
+  endif(DEFINED ${var})
+endmacro(cpack_append_variable_set_command)
 
 # Macro that appends a SET command for the given variable name (var)
 # to the macro named strvar, but only if the variable named "var"
 # has been defined and is a string. The string will eventually be
 # appended to a CPack configuration file.
-MACRO(cpack_append_string_variable_set_command var strvar)
-  IF (DEFINED ${var})
-    LIST(LENGTH ${var} CPACK_APP_VALUE_LEN)
-    IF(${CPACK_APP_VALUE_LEN} EQUAL 1)
-      SET(${strvar} "${${strvar}}SET(${var} \"${${var}}\")\n")
-    ENDIF(${CPACK_APP_VALUE_LEN} EQUAL 1)
-  ENDIF (DEFINED ${var})
-ENDMACRO(cpack_append_string_variable_set_command)
+macro(cpack_append_string_variable_set_command var strvar)
+  if(DEFINED ${var})
+    list(LENGTH ${var} CPACK_APP_VALUE_LEN)
+    if(${CPACK_APP_VALUE_LEN} EQUAL 1)
+      set(${strvar} "${${strvar}}set(${var} \"${${var}}\")\n")
+    endif(${CPACK_APP_VALUE_LEN} EQUAL 1)
+  endif(DEFINED ${var})
+endmacro(cpack_append_string_variable_set_command)
 
 # Macro that appends a SET command for the given variable name (var)
 # to the macro named strvar, but only if the variable named "var"
 # has been set to true. The string will eventually be
 # appended to a CPack configuration file.
-MACRO(cpack_append_option_set_command var strvar)
-  IF (${var})
-    LIST(LENGTH ${var} CPACK_APP_VALUE_LEN)
-    IF(${CPACK_APP_VALUE_LEN} EQUAL 1)
-      SET(${strvar} "${${strvar}}SET(${var} TRUE)\n")
-    ENDIF(${CPACK_APP_VALUE_LEN} EQUAL 1)
-  ENDIF (${var})
-ENDMACRO(cpack_append_option_set_command)
+macro(cpack_append_option_set_command var strvar)
+  if(${var})
+    list(LENGTH ${var} CPACK_APP_VALUE_LEN)
+    if(${CPACK_APP_VALUE_LEN} EQUAL 1)
+      set(${strvar} "${${strvar}}set(${var} TRUE)\n")
+    endif(${CPACK_APP_VALUE_LEN} EQUAL 1)
+  endif(${var})
+endmacro(cpack_append_option_set_command)
 
 # Macro that adds a component to the CPack installer
-MACRO(cpack_add_component compname)
-  STRING(TOUPPER ${compname} CPACK_ADDCOMP_UNAME)
+macro(cpack_add_component compname)
+  string(TOUPPER ${compname} CPACK_ADDCOMP_UNAME)
   cpack_parse_arguments(CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}
     "DISPLAY_NAME;DESCRIPTION;GROUP;DEPENDS;INSTALL_TYPES;ARCHIVE_FILE"
     "HIDDEN;REQUIRED;DISABLED;DOWNLOADED"
@@ -303,25 +303,25 @@ MACRO(cpack_add_component compname)
     )
 
   if (CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DOWNLOADED)
-    SET(CPACK_ADDCOMP_STR "\n# Configuration for downloaded component \"${compname}\"\n")
+    set(CPACK_ADDCOMP_STR "\n# Configuration for downloaded component \"${compname}\"\n")
   else ()
-    SET(CPACK_ADDCOMP_STR "\n# Configuration for component \"${compname}\"\n")
+    set(CPACK_ADDCOMP_STR "\n# Configuration for component \"${compname}\"\n")
   endif ()
 
-  IF(NOT CPACK_MONOLITHIC_INSTALL)
+  if(NOT CPACK_MONOLITHIC_INSTALL)
     # If the user didn't set CPACK_COMPONENTS_ALL explicitly, update the
     # value of CPACK_COMPONENTS_ALL in the configuration file. This will
     # take care of any components that have been added after the CPack
     # moduled was included.
-    IF(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
-      GET_CMAKE_PROPERTY(CPACK_ADDCOMP_COMPONENTS COMPONENTS)
-      SET(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR}\nSET(CPACK_COMPONENTS_ALL")
-      FOREACH(COMP ${CPACK_ADDCOMP_COMPONENTS})
-       SET(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR} ${COMP}")
-      ENDFOREACH(COMP)
-      SET(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR})\n")
-    ENDIF(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
-  ENDIF(NOT CPACK_MONOLITHIC_INSTALL)
+    if(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
+      get_cmake_property(CPACK_ADDCOMP_COMPONENTS COMPONENTS)
+      set(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR}\nSET(CPACK_COMPONENTS_ALL")
+      foreach(COMP ${CPACK_ADDCOMP_COMPONENTS})
+       set(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR} ${COMP}")
+      endforeach(COMP)
+      set(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR})\n")
+    endif(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
+  endif(NOT CPACK_MONOLITHIC_INSTALL)
 
   cpack_append_string_variable_set_command(
     CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DISPLAY_NAME
@@ -357,21 +357,21 @@ MACRO(cpack_add_component compname)
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
-  IF(CPack_CMake_INCLUDED)
-    FILE(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_ADDCOMP_STR}")
-  ENDIF(CPack_CMake_INCLUDED)
-ENDMACRO(cpack_add_component)
+  if(CPack_CMake_INCLUDED)
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_ADDCOMP_STR}")
+  endif(CPack_CMake_INCLUDED)
+endmacro(cpack_add_component)
 
 # Macro that adds a component group to the CPack installer
-MACRO(cpack_add_component_group grpname)
-  STRING(TOUPPER ${grpname} CPACK_ADDGRP_UNAME)
+macro(cpack_add_component_group grpname)
+  string(TOUPPER ${grpname} CPACK_ADDGRP_UNAME)
   cpack_parse_arguments(CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}
     "DISPLAY_NAME;DESCRIPTION"
     "EXPANDED;BOLD_TITLE"
     ${ARGN}
     )
 
-  SET(CPACK_ADDGRP_STR "\n# Configuration for component group \"${grpname}\"\n")
+  set(CPACK_ADDGRP_STR "\n# Configuration for component group \"${grpname}\"\n")
   cpack_append_string_variable_set_command(
     CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_DISPLAY_NAME
     CPACK_ADDGRP_STR)
@@ -388,24 +388,24 @@ MACRO(cpack_add_component_group grpname)
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
-  IF(CPack_CMake_INCLUDED)
-    FILE(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_ADDGRP_STR}")
-  ENDIF(CPack_CMake_INCLUDED)
-ENDMACRO(cpack_add_component_group)
+  if(CPack_CMake_INCLUDED)
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_ADDGRP_STR}")
+  endif(CPack_CMake_INCLUDED)
+endmacro(cpack_add_component_group)
 
 # Macro that adds an installation type to the CPack installer
-MACRO(cpack_add_install_type insttype)
-  STRING(TOUPPER ${insttype} CPACK_INSTTYPE_UNAME)
+macro(cpack_add_install_type insttype)
+  string(TOUPPER ${insttype} CPACK_INSTTYPE_UNAME)
   cpack_parse_arguments(CPACK_INSTALL_TYPE_${CPACK_INSTTYPE_UNAME}
     "DISPLAY_NAME"
     ""
     ${ARGN}
     )
 
-  SET(CPACK_INSTTYPE_STR
+  set(CPACK_INSTTYPE_STR
     "\n# Configuration for installation type \"${insttype}\"\n")
-  SET(CPACK_INSTTYPE_STR
-    "${CPACK_INSTTYPE_STR}LIST(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
+  set(CPACK_INSTTYPE_STR
+    "${CPACK_INSTTYPE_STR}list(APPEND CPACK_ALL_INSTALL_TYPES ${insttype})\n")
   cpack_append_string_variable_set_command(
     CPACK_INSTALL_TYPE_${CPACK_INSTTYPE_UNAME}_DISPLAY_NAME
     CPACK_INSTTYPE_STR)
@@ -413,22 +413,22 @@ MACRO(cpack_add_install_type insttype)
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
-  IF(CPack_CMake_INCLUDED)
-    FILE(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_INSTTYPE_STR}")
-  ENDIF(CPack_CMake_INCLUDED)
-ENDMACRO(cpack_add_install_type)
+  if(CPack_CMake_INCLUDED)
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_INSTTYPE_STR}")
+  endif(CPack_CMake_INCLUDED)
+endmacro(cpack_add_install_type)
 
-MACRO(cpack_configure_downloads site)
+macro(cpack_configure_downloads site)
   cpack_parse_arguments(CPACK_DOWNLOAD
     "UPLOAD_DIRECTORY"
     "ALL;ADD_REMOVE;NO_ADD_REMOVE"
     ${ARGN}
     )
 
-  SET(CPACK_CONFIG_DL_STR
+  set(CPACK_CONFIG_DL_STR
     "\n# Downloaded components configuration\n")
-  SET(CPACK_UPLOAD_DIRECTORY ${CPACK_DOWNLOAD_UPLOAD_DIRECTORY})
-  SET(CPACK_DOWNLOAD_SITE ${site})
+  set(CPACK_UPLOAD_DIRECTORY ${CPACK_DOWNLOAD_UPLOAD_DIRECTORY})
+  set(CPACK_DOWNLOAD_SITE ${site})
   cpack_append_string_variable_set_command(
     CPACK_DOWNLOAD_SITE
     CPACK_CONFIG_DL_STR)
@@ -438,10 +438,10 @@ MACRO(cpack_configure_downloads site)
   cpack_append_option_set_command(
     CPACK_DOWNLOAD_ALL
     CPACK_CONFIG_DL_STR)
-  IF (${CPACK_DOWNLOAD_ALL} AND NOT ${CPACK_DOWNLOAD_NO_ADD_REMOVE})
-    SET(CPACK_DOWNLOAD_ADD_REMOVE ON)
-  ENDIF (${CPACK_DOWNLOAD_ALL} AND NOT ${CPACK_DOWNLOAD_NO_ADD_REMOVE})
-  SET(CPACK_ADD_REMOVE ${CPACK_DOWNLOAD_ADD_REMOVE})
+  if(${CPACK_DOWNLOAD_ALL} AND NOT ${CPACK_DOWNLOAD_NO_ADD_REMOVE})
+    set(CPACK_DOWNLOAD_ADD_REMOVE ON)
+  endif(${CPACK_DOWNLOAD_ALL} AND NOT ${CPACK_DOWNLOAD_NO_ADD_REMOVE})
+  set(CPACK_ADD_REMOVE ${CPACK_DOWNLOAD_ADD_REMOVE})
   cpack_append_option_set_command(
     CPACK_ADD_REMOVE
     CPACK_CONFIG_DL_STR)
@@ -449,8 +449,8 @@ MACRO(cpack_configure_downloads site)
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
-  IF(CPack_CMake_INCLUDED)
-    FILE(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_CONFIG_DL_STR}")
-  ENDIF(CPack_CMake_INCLUDED)
-ENDMACRO(cpack_configure_downloads)
-ENDIF(NOT CPackComponent_CMake_INCLUDED)
+  if(CPack_CMake_INCLUDED)
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_CONFIG_DL_STR}")
+  endif(CPack_CMake_INCLUDED)
+endmacro(cpack_configure_downloads)
+endif(NOT CPackComponent_CMake_INCLUDED)

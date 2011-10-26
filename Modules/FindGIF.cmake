@@ -5,7 +5,7 @@
 # GIF_VERSION, reports either version 4 or 3 (for everything before version 4)
 #
 # The minimum required version of giflib can be specified using the
-# standard syntax, e.g. FIND_PACKAGE(GIF 4)
+# standard syntax, e.g. find_package(GIF 4)
 #
 # $GIF_DIR is an environment variable that would
 # correspond to the ./configure --prefix=$GIF_DIR
@@ -26,7 +26,7 @@
 # Created by Eric Wing.
 # Modifications by Alexander Neundorf
 
-FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
+find_path(GIF_INCLUDE_DIR gif_lib.h
   HINTS
   $ENV{GIF_DIR}
   PATH_SUFFIXES include
@@ -36,9 +36,9 @@ FIND_PATH(GIF_INCLUDE_DIR gif_lib.h
 )
 
 # the gif library can have many names :-/
-SET(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib giflib4)
+set(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib giflib4)
 
-FIND_LIBRARY(GIF_LIBRARY
+find_library(GIF_LIBRARY
   NAMES ${POTENTIAL_GIF_LIBS}
   HINTS
   $ENV{GIF_DIR}
@@ -49,7 +49,7 @@ FIND_LIBRARY(GIF_LIBRARY
 )
 
 # see readme.txt
-SET(GIF_LIBRARIES ${GIF_LIBRARY})
+set(GIF_LIBRARIES ${GIF_LIBRARY})
 
 # Very basic version detection.
 # The GIF_LIB_VERSION string in gif_lib.h seems to be unreliable, since it seems
@@ -57,24 +57,24 @@ SET(GIF_LIBRARIES ${GIF_LIBRARY})
 # In version 4 the member UserData was added to GifFileType, so we check for this
 # one.
 # http://giflib.sourcearchive.com/documentation/4.1.4/files.html
-IF(GIF_INCLUDE_DIR)
-  INCLUDE(CMakePushCheckState)
-  INCLUDE(CheckStructHasMember)
+if(GIF_INCLUDE_DIR)
+  include(CMakePushCheckState)
+  include(CheckStructHasMember)
   CMAKE_PUSH_CHECK_STATE()
-  SET(GIF_VERSION 3)
-  SET(CMAKE_REQUIRED_INCLUDES "${GIF_INCLUDE_DIR}")
+  set(GIF_VERSION 3)
+  set(CMAKE_REQUIRED_INCLUDES "${GIF_INCLUDE_DIR}")
   CHECK_STRUCT_HAS_MEMBER(GifFileType UserData gif_lib.h GIF_GifFileType_UserData )
-  IF(GIF_GifFileType_UserData)
-    SET(GIF_VERSION 4)
-  ENDIF()
+  if(GIF_GifFileType_UserData)
+    set(GIF_VERSION 4)
+  endif()
   CMAKE_POP_CHECK_STATE()
-ENDIF()
+endif()
 
 
 # handle the QUIETLY and REQUIRED arguments and set GIF_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
                                        VERSION_VAR GIF_VERSION )
 
-MARK_AS_ADVANCED(GIF_INCLUDE_DIR GIF_LIBRARY)
+mark_as_advanced(GIF_INCLUDE_DIR GIF_LIBRARY)

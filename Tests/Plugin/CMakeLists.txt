@@ -1,43 +1,43 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(Plugin)
+project(Plugin)
 
 # Test per-target output directory properties.
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/bin)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/plugin)
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/static)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/plugin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${Plugin_BINARY_DIR}/lib/static)
 
 # We need the dynamic loader support from KWSys to load the plugin in
 # the executable.
-SET(KWSYS_NAMESPACE kwsys)
-SET(KWSYS_HEADER_ROOT ${Plugin_BINARY_DIR}/include)
-SET(KWSYS_USE_DynamicLoader 1)
-ADD_SUBDIRECTORY(${Plugin_SOURCE_DIR}/../../Source/kwsys src/kwsys)
+set(KWSYS_NAMESPACE kwsys)
+set(KWSYS_HEADER_ROOT ${Plugin_BINARY_DIR}/include)
+set(KWSYS_USE_DynamicLoader 1)
+add_subdirectory(${Plugin_SOURCE_DIR}/../../Source/kwsys src/kwsys)
 
 # Configure the location of plugins.
-CONFIGURE_FILE(${Plugin_SOURCE_DIR}/src/example_exe.h.in
+configure_file(${Plugin_SOURCE_DIR}/src/example_exe.h.in
                ${Plugin_BINARY_DIR}/include/example_exe.h @ONLY)
 
 # We need to include headers from the source tree and configured
 # headers in the build tree.
-INCLUDE_DIRECTORIES(
+include_directories(
   ${Plugin_BINARY_DIR}/include
   ${Plugin_SOURCE_DIR}/include
   )
 
 # Create an executable that exports an API for use by plugins.
-ADD_EXECUTABLE(example_exe src/example_exe.cxx)
-SET_TARGET_PROPERTIES(example_exe PROPERTIES
+add_executable(example_exe src/example_exe.cxx)
+set_target_properties(example_exe PROPERTIES
   ENABLE_EXPORTS 1
   OUTPUT_NAME example
   # Test placing exe import library in unique directory.
   ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/exe
   )
-TARGET_LINK_LIBRARIES(example_exe kwsys)
+target_link_libraries(example_exe kwsys)
 
 # Create a plugin that uses the API provided by the executable.
 # This module "links" to the executable to use the symbols.
-ADD_LIBRARY(example_mod_1 MODULE src/example_mod_1.c)
-TARGET_LINK_LIBRARIES(example_mod_1 example_exe)
+add_library(example_mod_1 MODULE src/example_mod_1.c)
+target_link_libraries(example_mod_1 example_exe)
 
 # TODO:
 #  - create a plugin that links to a static lib

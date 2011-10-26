@@ -19,25 +19,25 @@
 #  License text for the above reference.)
 
 # Look for the header file.
-FIND_PATH(CURL_INCLUDE_DIR NAMES curl/curl.h)
-MARK_AS_ADVANCED(CURL_INCLUDE_DIR)
+find_path(CURL_INCLUDE_DIR NAMES curl/curl.h)
+mark_as_advanced(CURL_INCLUDE_DIR)
 
 # Look for the library.
-FIND_LIBRARY(CURL_LIBRARY NAMES 
+find_library(CURL_LIBRARY NAMES
     curl
   # Windows MSVC prebuilts:
     curllib
     libcurl_imp
     curllib_static
 )
-MARK_AS_ADVANCED(CURL_LIBRARY)
+mark_as_advanced(CURL_LIBRARY)
 
-# handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL DEFAULT_MSG CURL_LIBRARY CURL_INCLUDE_DIR)
 
-IF(CURL_FOUND)
-  SET(CURL_LIBRARIES ${CURL_LIBRARY})
-  SET(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
-ENDIF(CURL_FOUND)
+if(CURL_FOUND)
+  set(CURL_LIBRARIES ${CURL_LIBRARY})
+  set(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
+endif(CURL_FOUND)

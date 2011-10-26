@@ -38,14 +38,14 @@ if(ZLIB_FOUND)
 
   if (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
       # png.h includes zlib.h. Sigh.
-      SET(PNG_INCLUDE_DIR ${PNG_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} )
-      SET(PNG_LIBRARIES ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+      set(PNG_INCLUDE_DIR ${PNG_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} )
+      set(PNG_LIBRARIES ${PNG_LIBRARY} ${ZLIB_LIBRARY})
 
       if (CYGWIN)
         if(BUILD_SHARED_LIBS)
            # No need to define PNG_USE_DLL here, because it's default for Cygwin.
         else(BUILD_SHARED_LIBS)
-          SET (PNG_DEFINITIONS -DPNG_STATIC)
+          set(PNG_DEFINITIONS -DPNG_STATIC)
         endif(BUILD_SHARED_LIBS)
       endif (CYGWIN)
 

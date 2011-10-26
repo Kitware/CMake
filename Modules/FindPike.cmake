@@ -20,18 +20,18 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FILE(GLOB PIKE_POSSIBLE_INCLUDE_PATHS
+file(GLOB PIKE_POSSIBLE_INCLUDE_PATHS
   /usr/include/pike/*
   /usr/local/include/pike/*)
 
-FIND_PATH(PIKE_INCLUDE_PATH program.h
+find_path(PIKE_INCLUDE_PATH program.h
   ${PIKE_POSSIBLE_INCLUDE_PATHS})
 
-FIND_PROGRAM(PIKE_EXECUTABLE
+find_program(PIKE_EXECUTABLE
   NAMES pike7.4
   )
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   PIKE_EXECUTABLE
   PIKE_INCLUDE_PATH
   )

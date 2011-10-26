@@ -22,32 +22,32 @@
 #  License text for the above reference.)
 
 # use pkg-config to get the directories and then use these values
-# in the FIND_PATH() and FIND_LIBRARY() calls
-FIND_PACKAGE(PkgConfig)
+# in the find_path() and find_library() calls
+find_package(PkgConfig)
 PKG_CHECK_MODULES(PC_LIBXML libxml-2.0 QUIET)
-SET(LIBXML2_DEFINITIONS ${PC_LIBXML_CFLAGS_OTHER})
+set(LIBXML2_DEFINITIONS ${PC_LIBXML_CFLAGS_OTHER})
 
-FIND_PATH(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
+find_path(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
    HINTS
    ${PC_LIBXML_INCLUDEDIR}
    ${PC_LIBXML_INCLUDE_DIRS}
    PATH_SUFFIXES libxml2
    )
 
-FIND_LIBRARY(LIBXML2_LIBRARIES NAMES xml2 libxml2
+find_library(LIBXML2_LIBRARIES NAMES xml2 libxml2
    HINTS
    ${PC_LIBXML_LIBDIR}
    ${PC_LIBXML_LIBRARY_DIRS}
    )
 
-FIND_PROGRAM(LIBXML2_XMLLINT_EXECUTABLE xmllint)
+find_program(LIBXML2_XMLLINT_EXECUTABLE xmllint)
 # for backwards compat. with KDE 4.0.x:
-SET(XMLLINT_EXECUTABLE "${LIBXML2_XMLLINT_EXECUTABLE}")
+set(XMLLINT_EXECUTABLE "${LIBXML2_XMLLINT_EXECUTABLE}")
 
-# handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXml2 DEFAULT_MSG LIBXML2_LIBRARIES LIBXML2_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(LIBXML2_INCLUDE_DIR LIBXML2_LIBRARIES LIBXML2_XMLLINT_EXECUTABLE)
+mark_as_advanced(LIBXML2_INCLUDE_DIR LIBXML2_LIBRARIES LIBXML2_XMLLINT_EXECUTABLE)
 

@@ -1,123 +1,123 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.6.3 FATAL_ERROR)
 #
 #
-PROJECT(libarchive C)
+project(libarchive C)
 #
-SET(CMAKE_MODULE_PATH "${libarchive_SOURCE_DIR}/build/cmake")
+set(CMAKE_MODULE_PATH "${libarchive_SOURCE_DIR}/build/cmake")
 
 # We use CHECK_TYPE_SIZE for existence tests, so use only one arch.
-LIST(LENGTH CMAKE_OSX_ARCHITECTURES NUM_ARCHS)
-IF(${NUM_ARCHS} GREATER 1)
-  LIST(GET CMAKE_OSX_ARCHITECTURES 0 CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
-ENDIF()
+list(LENGTH CMAKE_OSX_ARCHITECTURES NUM_ARCHS)
+if(${NUM_ARCHS} GREATER 1)
+  list(GET CMAKE_OSX_ARCHITECTURES 0 CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
+endif()
 
 #
 # Version - read from 'version' file.
 #
-FILE(STRINGS ${libarchive_SOURCE_DIR}/build/version _version)
-STRING(REGEX REPLACE
+file(STRINGS ${libarchive_SOURCE_DIR}/build/version _version)
+string(REGEX REPLACE
  "^([0-9])[0-9][0-9][0-9][0-9][0-9][0-9][a-z]?$" "\\1" _major ${_version})
-STRING(REGEX REPLACE
+string(REGEX REPLACE
  "^[0-9]([0-9][0-9][0-9])[0-9][0-9][0-9][a-z]?$" "\\1" _minor ${_version})
-STRING(REGEX REPLACE
+string(REGEX REPLACE
  "^[0-9][0-9][0-9][0-9]([0-9][0-9][0-9])[a-z]?$" "\\1" _revision ${_version})
-STRING(REGEX REPLACE
+string(REGEX REPLACE
  "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9]([a-z]?)$" "\\1" _quality ${_version})
-SET(_version_number ${_major}${_minor}${_revision})
-STRING(REGEX REPLACE "[0]*([^0][0-9]*)$" "\\1" _minor ${_minor})
-STRING(REGEX REPLACE "[0]*([^0][0-9]*)$" "\\1" _revision ${_revision})
+set(_version_number ${_major}${_minor}${_revision})
+string(REGEX REPLACE "[0]*([^0][0-9]*)$" "\\1" _minor ${_minor})
+string(REGEX REPLACE "[0]*([^0][0-9]*)$" "\\1" _revision ${_revision})
 #
-SET(VERSION                    "${_major}.${_minor}.${_revision}${_quality}")
-SET(BSDCPIO_VERSION_STRING     "${VERSION}")
-SET(BSDTAR_VERSION_STRING      "${VERSION}")
-SET(LIBARCHIVE_VERSION_NUMBER  "${_version_number}")
-SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
+set(VERSION                    "${_major}.${_minor}.${_revision}${_quality}")
+set(BSDCPIO_VERSION_STRING     "${VERSION}")
+set(BSDTAR_VERSION_STRING      "${VERSION}")
+set(LIBARCHIVE_VERSION_NUMBER  "${_version_number}")
+set(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 # Shared library number
-SET(SOVERSION                   8)
+set(SOVERSION                   8)
 
-OPTION(ENABLE_TAR "Enable tar building" ON)
-OPTION(ENABLE_TAR_SHARED "Enable dynamic build of tar" OFF)
-OPTION(ENABLE_CPIO "Enable cpio building" ON)
-OPTION(ENABLE_CPIO_SHARED "Enable dynamic build of cpio" OFF)
-OPTION(ENABLE_XATTR "Enable extended attribute support" ON)
-OPTION(ENABLE_ACL "Enable ACL support" OFF)
-OPTION(ENABLE_TEST "Enable unit and regression tests" OFF)
+option(ENABLE_TAR "Enable tar building" ON)
+option(ENABLE_TAR_SHARED "Enable dynamic build of tar" OFF)
+option(ENABLE_CPIO "Enable cpio building" ON)
+option(ENABLE_CPIO_SHARED "Enable dynamic build of cpio" OFF)
+option(ENABLE_XATTR "Enable extended attribute support" ON)
+option(ENABLE_ACL "Enable ACL support" OFF)
+option(ENABLE_TEST "Enable unit and regression tests" OFF)
 
-IF(ENABLE_TEST)
-    ENABLE_TESTING()
-ENDIF(ENABLE_TEST)
-IF(WIN32 AND NOT CYGWIN)
+if(ENABLE_TEST)
+    enable_testing()
+endif(ENABLE_TEST)
+if(WIN32 AND NOT CYGWIN)
   # Currently, dynamic build only.
-  SET(ENABLE_TAR_SHARED ON)
-  SET(ENABLE_CPIO_SHARED ON)
-ENDIF(WIN32 AND NOT CYGWIN)
+  set(ENABLE_TAR_SHARED ON)
+  set(ENABLE_CPIO_SHARED ON)
+endif(WIN32 AND NOT CYGWIN)
 
-IF(WIN32)
-  SET(_WIN32_WINNT 0x0500 CACHE INTERNAL "Setting _WIN32_WINNT to 0x0500 for Windows 2000 APIs")
-  SET(WINVER 0x0500 CACHE INTERNAL "Setting WINVER to 0x0500 for Windows 2000 APIs")
-ENDIF(WIN32)
+if(WIN32)
+  set(_WIN32_WINNT 0x0500 CACHE INTERNAL "Setting _WIN32_WINNT to 0x0500 for Windows 2000 APIs")
+  set(WINVER 0x0500 CACHE INTERNAL "Setting WINVER to 0x0500 for Windows 2000 APIs")
+endif(WIN32)
 
 #
-INCLUDE(CheckCSourceRuns)
-INCLUDE(CheckFileOffsetBits)
-INCLUDE(CheckFuncs)
-INCLUDE(CheckHeaderDirent)
-INCLUDE(CheckIncludeFile)
-INCLUDE(CheckIncludeFiles)
-INCLUDE(CheckLibraryExists)
-INCLUDE(CheckStructMember)
-INCLUDE(CheckSymbolExists)
-INCLUDE(CheckTypeExists)
-INCLUDE(CheckTypeSize)
+include(CheckCSourceRuns)
+include(CheckFileOffsetBits)
+include(CheckFuncs)
+include(CheckHeaderDirent)
+include(CheckIncludeFile)
+include(CheckIncludeFiles)
+include(CheckLibraryExists)
+include(CheckStructMember)
+include(CheckSymbolExists)
+include(CheckTypeExists)
+include(CheckTypeSize)
 
 #
 # Generate list.h
 #
-MACRO (GENERATE_LIST_H _listfile _cmlist __list_sources)
-  SET(_argv ${ARGV})
+macro(GENERATE_LIST_H _listfile _cmlist __list_sources)
+  set(_argv ${ARGV})
   # Remove _listfile and _cmlist from _argv
-  LIST(REMOVE_AT _argv 0 1)
-  IF (NOT EXISTS "${_listfile}" OR
+  list(REMOVE_AT _argv 0 1)
+  if(NOT EXISTS "${_listfile}" OR
      ${_cmlist} IS_NEWER_THAN "${_listfile}")
 
-    MESSAGE(STATUS "Generating ${_listfile}")
-    FILE(WRITE ${_listfile} "")
-    FOREACH (testfile ${_argv})
-      IF (testfile MATCHES "^test_[^/]+[.]c$")
-        FILE(STRINGS ${testfile} testvar REGEX "^DEFINE_TEST")
-        FOREACH (deftest ${testvar})
-          FILE(APPEND ${_listfile} "${deftest}\n")
-        ENDFOREACH (deftest)
-      ENDIF (testfile MATCHES "^test_[^/]+[.]c$")
-    ENDFOREACH (testfile)
+    message(STATUS "Generating ${_listfile}")
+    file(WRITE ${_listfile} "")
+    foreach(testfile ${_argv})
+      if(testfile MATCHES "^test_[^/]+[.]c$")
+        file(STRINGS ${testfile} testvar REGEX "^DEFINE_TEST")
+        foreach(deftest ${testvar})
+          file(APPEND ${_listfile} "${deftest}\n")
+        endforeach(deftest)
+      endif(testfile MATCHES "^test_[^/]+[.]c$")
+    endforeach(testfile)
 
-  ENDIF (NOT EXISTS "${_listfile}" OR
+  endif(NOT EXISTS "${_listfile}" OR
      ${_cmlist} IS_NEWER_THAN "${_listfile}")
-ENDMACRO (GENERATE_LIST_H)
+endmacro(GENERATE_LIST_H)
 #
 # Generate installation rules for man pages.
 #
-MACRO (INSTALL_MAN __mans)
-  FOREACH (_man ${ARGV})
-    STRING(REGEX REPLACE "^.+[.]([1-9])" "\\1" _mansect ${_man})
-    INSTALL(FILES ${_man} DESTINATION "share/man/man${_mansect}")
-  ENDFOREACH (_man)
-ENDMACRO (INSTALL_MAN __mans)
+macro(INSTALL_MAN __mans)
+  foreach(_man ${ARGV})
+    string(REGEX REPLACE "^.+[.]([1-9])" "\\1" _mansect ${_man})
+    install(FILES ${_man} DESTINATION "share/man/man${_mansect}")
+  endforeach(_man)
+endmacro(INSTALL_MAN __mans)
 
 #
 # Check compress/decompress libraries
 #
-IF(WIN32 AND NOT CMAKE_CL_64 AND NOT CYGWIN)
+if(WIN32 AND NOT CMAKE_CL_64 AND NOT CYGWIN)
   # GnuWin32 is only for Win32, not Win64.
-  SET(__GNUWIN32PATH "C:/Program Files/GnuWin32")
-ENDIF(WIN32 AND NOT CMAKE_CL_64 AND NOT CYGWIN)
-IF(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
+  set(__GNUWIN32PATH "C:/Program Files/GnuWin32")
+endif(WIN32 AND NOT CMAKE_CL_64 AND NOT CYGWIN)
+if(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
   # You have to add a path availabel DLL file into PATH environment variable.
   # Maybe DLL path is "C:/Program Files/GnuWin32/bin".
   # The zlib and the bzip2 Setup program have installed programs and DLLs into
   # "C:/Program Files/GnuWin32" by default.
   # This is convenience setting for Windows.
-  SET(CMAKE_PREFIX_PATH ${__GNUWIN32PATH} $(CMAKE_PREFIX_PATH))
+  set(CMAKE_PREFIX_PATH ${__GNUWIN32PATH} $(CMAKE_PREFIX_PATH))
   #
   # If you didn't use Setup program or installed into nonstandard path,
   # cmake cannot find out your zlib or bzip2 libraries and include files,
@@ -129,7 +129,7 @@ IF(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
   #--- zconf.h.orig 2005-07-21 00:40:26.000000000
   #+++ zconf.h  2009-01-19 11:39:10.093750000
   #@@ -286,7 +286,7 @@
-  # 
+  #
   # #if 1           /* HAVE_UNISTD_H -- this line is updated by ./configure */
   # #  include <sys/types.h> /* for off_t */
   #-#  include <unistd.h>    /* for SEEK_* and off_t */
@@ -137,84 +137,84 @@ IF(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
   # #  ifdef VMS
   # #    include <unixio.h>   /* for off_t */
   # #  endif
-ENDIF(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
+endif(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
 
-SET(ADDITIONAL_LIBS "")
+set(ADDITIONAL_LIBS "")
 
 #
 # Find ZLIB
 #
-FIND_PACKAGE(ZLIB)
-IF(ZLIB_FOUND)
-  SET(HAVE_LIBZ 1)
-  SET(HAVE_ZLIB_H 1)
-  INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+find_package(ZLIB)
+if(ZLIB_FOUND)
+  set(HAVE_LIBZ 1)
+  set(HAVE_ZLIB_H 1)
+  include_directories(${ZLIB_INCLUDE_DIR})
   # if building inside cmake do not add this lib
   # as it will not exist at try compile time
-  IF(NOT "${ZLIB_LIBRARIES}" MATCHES cmzlib)
-    LIST(APPEND ADDITIONAL_LIBS ${ZLIB_LIBRARIES})
-  ENDIF(NOT "${ZLIB_LIBRARIES}" MATCHES cmzlib)
-ENDIF(ZLIB_FOUND)
-MARK_AS_ADVANCED(CLEAR ZLIB_INCLUDE_DIR)
-MARK_AS_ADVANCED(CLEAR ZLIB_LIBRARY)
+  if(NOT "${ZLIB_LIBRARIES}" MATCHES cmzlib)
+    list(APPEND ADDITIONAL_LIBS ${ZLIB_LIBRARIES})
+  endif(NOT "${ZLIB_LIBRARIES}" MATCHES cmzlib)
+endif(ZLIB_FOUND)
+mark_as_advanced(CLEAR ZLIB_INCLUDE_DIR)
+mark_as_advanced(CLEAR ZLIB_LIBRARY)
 #
 # Find BZip2
 #
-FIND_PACKAGE(BZip2)
-IF(BZIP2_FOUND)
-  SET(HAVE_LIBBZ2 1)
-  SET(HAVE_BZLIB_H 1)
-  INCLUDE_DIRECTORIES(${BZIP2_INCLUDE_DIR})
+find_package(BZip2)
+if(BZIP2_FOUND)
+  set(HAVE_LIBBZ2 1)
+  set(HAVE_BZLIB_H 1)
+  include_directories(${BZIP2_INCLUDE_DIR})
   # if building inside cmake do not add this lib
   # as it will not exist at try compile time
-  IF(NOT "${BZIP2_LIBRARIES}" MATCHES cmbzip2)
-    LIST(APPEND ADDITIONAL_LIBS ${BZIP2_LIBRARIES})
-  ENDIF()
-ENDIF(BZIP2_FOUND)
-MARK_AS_ADVANCED(CLEAR BZIP2_INCLUDE_DIR)
-MARK_AS_ADVANCED(CLEAR BZIP2_LIBRARIES)
+  if(NOT "${BZIP2_LIBRARIES}" MATCHES cmbzip2)
+    list(APPEND ADDITIONAL_LIBS ${BZIP2_LIBRARIES})
+  endif()
+endif(BZIP2_FOUND)
+mark_as_advanced(CLEAR BZIP2_INCLUDE_DIR)
+mark_as_advanced(CLEAR BZIP2_LIBRARIES)
 #
 # Find LZMA
 #
-IF(BUILD_ARCHIVE_WITHIN_CMAKE)
-  # do not depend on external library 
+if(BUILD_ARCHIVE_WITHIN_CMAKE)
+  # do not depend on external library
   # for internal CMake build
-  SET(LZMA_FOUND FALSE)
-ELSE(BUILD_ARCHIVE_WITHIN_CMAKE)
-  FIND_PACKAGE(LZMA)
-ENDIF(BUILD_ARCHIVE_WITHIN_CMAKE)
+  set(LZMA_FOUND FALSE)
+else(BUILD_ARCHIVE_WITHIN_CMAKE)
+  find_package(LZMA)
+endif(BUILD_ARCHIVE_WITHIN_CMAKE)
 
-IF(LZMA_FOUND)
-  SET(HAVE_LIBLZMA 1)
-  SET(HAVE_LZMA_H 1)
-  INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
-  LIST(APPEND ADDITIONAL_LIBS ${LZMA_LIBRARIES})
-  MARK_AS_ADVANCED(CLEAR LZMA_INCLUDE_DIR)
-  MARK_AS_ADVANCED(CLEAR LZMA_LIBRARY)
-ELSEIF(LZMADEC_FOUND)
-  SET(HAVE_LIBLZMADEC 1)
-  SET(HAVE_LZMADEC_H 1)
-  INCLUDE_DIRECTORIES(${LZMADEC_INCLUDE_DIR})
-  LIST(APPEND ADDITIONAL_LIBS ${LZMADEC_LIBRARIES})
-  MARK_AS_ADVANCED(CLEAR LZMADEC_INCLUDE_DIR)
-  MARK_AS_ADVANCED(CLEAR LZMADEC_LIBRARY)
-ELSE(LZMA_FOUND)
-  MARK_AS_ADVANCED(CLEAR LZMA_INCLUDE_DIR)
-  MARK_AS_ADVANCED(CLEAR LZMA_LIBRARY)
-ENDIF(LZMA_FOUND)
+if(LZMA_FOUND)
+  set(HAVE_LIBLZMA 1)
+  set(HAVE_LZMA_H 1)
+  include_directories(${LZMA_INCLUDE_DIR})
+  list(APPEND ADDITIONAL_LIBS ${LZMA_LIBRARIES})
+  mark_as_advanced(CLEAR LZMA_INCLUDE_DIR)
+  mark_as_advanced(CLEAR LZMA_LIBRARY)
+elseif(LZMADEC_FOUND)
+  set(HAVE_LIBLZMADEC 1)
+  set(HAVE_LZMADEC_H 1)
+  include_directories(${LZMADEC_INCLUDE_DIR})
+  list(APPEND ADDITIONAL_LIBS ${LZMADEC_LIBRARIES})
+  mark_as_advanced(CLEAR LZMADEC_INCLUDE_DIR)
+  mark_as_advanced(CLEAR LZMADEC_LIBRARY)
+else(LZMA_FOUND)
+  mark_as_advanced(CLEAR LZMA_INCLUDE_DIR)
+  mark_as_advanced(CLEAR LZMA_LIBRARY)
+endif(LZMA_FOUND)
 
 #
 # Check headers
 #
 CHECK_HEADER_DIRENT()
 
-SET(INCLUDES "")
-MACRO (LA_CHECK_INCLUDE_FILE header var)
+set(INCLUDES "")
+macro(LA_CHECK_INCLUDE_FILE header var)
       CHECK_INCLUDE_FILES("${INCLUDES};${header}" ${var})
-      IF (${var})
-         SET(INCLUDES ${INCLUDES} ${header})
-      ENDIF (${var})
-ENDMACRO (LA_CHECK_INCLUDE_FILE)
+      if(${var})
+         set(INCLUDES ${INCLUDES} ${header})
+      endif(${var})
+endmacro(LA_CHECK_INCLUDE_FILE)
 
 # Few headers that must precede other headers
 # Must precede sys/extattr.h on FreeBSD
@@ -274,15 +274,15 @@ LA_CHECK_INCLUDE_FILE("windows.h" HAVE_WINDOWS_H)
 #
 # Find OpenSSL
 #
-IF(CMAKE_USE_OPENSSL)
-  FIND_PACKAGE(OpenSSL)
-ELSE()
-  SET(OPENSSL_FOUND 0)
-ENDIF()
-IF(OPENSSL_FOUND)
-  INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
-  LIST(APPEND ADDITIONAL_LIBS ${OPENSSL_LIBRARIES})
-ENDIF(OPENSSL_FOUND)
+if(CMAKE_USE_OPENSSL)
+  find_package(OpenSSL)
+else()
+  set(OPENSSL_FOUND 0)
+endif()
+if(OPENSSL_FOUND)
+  include_directories(${OPENSSL_INCLUDE_DIR})
+  list(APPEND ADDITIONAL_LIBS ${OPENSSL_LIBRARIES})
+endif(OPENSSL_FOUND)
 #
 # Check MD5/RMD160/SHA headers
 #
@@ -300,63 +300,63 @@ LA_CHECK_INCLUDE_FILE("sha256.h" HAVE_SHA256_H)
 #
 # Find MD5/RMD160/SHA library
 #
-IF(CMAKE_USE_OPENSSL)
-  FIND_LIBRARY(CRYPTO_LIBRARY NAMES crypto)
-ELSE()
-  SET(CRYPTO_LIBRARY "")
-ENDIF()
-IF(CRYPTO_LIBRARY)
-  LIST(APPEND ADDITIONAL_LIBS ${CRYPTO_LIBRARY})
-ELSE(CRYPTO_LIBRARY)
-  IF(NOT OPENSSL_FOUND)
-    FIND_LIBRARY(MD_LIBRARY NAMES md)
-    IF(MD_LIBRARY)
-      LIST(APPEND ADDITIONAL_LIBS ${MD_LIBRARY})
-    ENDIF(MD_LIBRARY)
-  ENDIF(NOT OPENSSL_FOUND)
-ENDIF(CRYPTO_LIBRARY)
+if(CMAKE_USE_OPENSSL)
+  find_library(CRYPTO_LIBRARY NAMES crypto)
+else()
+  set(CRYPTO_LIBRARY "")
+endif()
+if(CRYPTO_LIBRARY)
+  list(APPEND ADDITIONAL_LIBS ${CRYPTO_LIBRARY})
+else(CRYPTO_LIBRARY)
+  if(NOT OPENSSL_FOUND)
+    find_library(MD_LIBRARY NAMES md)
+    if(MD_LIBRARY)
+      list(APPEND ADDITIONAL_LIBS ${MD_LIBRARY})
+    endif(MD_LIBRARY)
+  endif(NOT OPENSSL_FOUND)
+endif(CRYPTO_LIBRARY)
 #
 # Check MD5/RMD160/SHA functions
 #
-SET(CMAKE_REQUIRED_LIBRARIES ${ADDITIONAL_LIBS})
+set(CMAKE_REQUIRED_LIBRARIES ${ADDITIONAL_LIBS})
 CHECK_FUNCTION_EXISTS(MD5_Init HAVE_MD5_Init)
-IF(NOT HAVE_MD5_Init)
+if(NOT HAVE_MD5_Init)
   CHECK_FUNCTION_EXISTS(MD5Init HAVE_MD5Init)
-  IF(HAVE_MD5Init)
-    SET(MD5_Init, "MD5Init")
-    SET(MD5_Update, "MD5Update")
-    SET(MD5_Final, "MD5Final")
-  ENDIF(HAVE_MD5Init)
-ENDIF(NOT HAVE_MD5_Init)
-IF(HAVE_MD5_Init OR HAVE_MD5Init)
-  SET(HAVE_MD5 1)
-ENDIF(HAVE_MD5_Init OR HAVE_MD5Init)
+  if(HAVE_MD5Init)
+    set(MD5_Init, "MD5Init")
+    set(MD5_Update, "MD5Update")
+    set(MD5_Final, "MD5Final")
+  endif(HAVE_MD5Init)
+endif(NOT HAVE_MD5_Init)
+if(HAVE_MD5_Init OR HAVE_MD5Init)
+  set(HAVE_MD5 1)
+endif(HAVE_MD5_Init OR HAVE_MD5Init)
 #
 CHECK_FUNCTION_EXISTS(RIPEMD160_Init HAVE_RIPEMD160_Init)
-IF(NOT HAVE_RIPEMD160_Init)
+if(NOT HAVE_RIPEMD160_Init)
   CHECK_FUNCTION_EXISTS(RMD160Init HAVE_RMD160Init)
-  IF(HAVE_RMD160Init)
-    SET(RIPEMD160_Init, "RMD160Init")
-    SET(RIPEMD160_Update, "RMD160Update")
-    SET(RIPEMD160_Final, "RMD160Final")
-  ENDIF(HAVE_RMD160Init)
-ENDIF(NOT HAVE_RIPEMD160_Init)
-IF(HAVE_RIPEMD160_Init OR HAVE_RMD160Init)
-  SET(HAVE_RMD160 1)
-ENDIF(HAVE_RIPEMD160_Init OR HAVE_RMD160Init)
+  if(HAVE_RMD160Init)
+    set(RIPEMD160_Init, "RMD160Init")
+    set(RIPEMD160_Update, "RMD160Update")
+    set(RIPEMD160_Final, "RMD160Final")
+  endif(HAVE_RMD160Init)
+endif(NOT HAVE_RIPEMD160_Init)
+if(HAVE_RIPEMD160_Init OR HAVE_RMD160Init)
+  set(HAVE_RMD160 1)
+endif(HAVE_RIPEMD160_Init OR HAVE_RMD160Init)
 #
 CHECK_FUNCTION_EXISTS(SHA1_Init HAVE_SHA1_Init)
-IF(NOT HAVE_SHA1_Init)
+if(NOT HAVE_SHA1_Init)
   CHECK_FUNCTION_EXISTS(SHA1Init HAVE_SHA1Init)
-  IF(HAVE_SHA1Init)
-    SET(SHA1_Init, "SHA1Init")
-    SET(SHA1_Update, "SHA1Update")
-    SET(SHA1_Final, "SHA1Final")
-  ENDIF(HAVE_SHA1Init)
-ENDIF(NOT HAVE_SHA1_Init)
-IF(HAVE_SHA1_Init OR HAVE_SHA1Init)
-  SET(HAVE_SHA1 1)
-ENDIF(HAVE_SHA1_Init OR HAVE_SHA1Init)
+  if(HAVE_SHA1Init)
+    set(SHA1_Init, "SHA1Init")
+    set(SHA1_Update, "SHA1Update")
+    set(SHA1_Final, "SHA1Final")
+  endif(HAVE_SHA1Init)
+endif(NOT HAVE_SHA1_Init)
+if(HAVE_SHA1_Init OR HAVE_SHA1Init)
+  set(HAVE_SHA1 1)
+endif(HAVE_SHA1_Init OR HAVE_SHA1Init)
 #
 CHECK_FUNCTION_EXISTS(SHA256_Init HAVE_SHA256)
 CHECK_FUNCTION_EXISTS(SHA384_Init HAVE_SHA384)
@@ -417,7 +417,7 @@ CHECK_FUNCTION_EXISTS_GLIBC(wctomb HAVE_WCTOMB)
 CHECK_SYMBOL_EXISTS(wmemcmp "wchar.h" HAVE_WMEMCMP)
 CHECK_SYMBOL_EXISTS(wmemcpy "wchar.h" HAVE_WMEMCPY)
 
-SET(CMAKE_REQUIRED_LIBRARIES "")
+set(CMAKE_REQUIRED_LIBRARIES "")
 CHECK_SYMBOL_EXISTS(fseeko           "stdio.h"    HAVE_FSEEKO)
 CHECK_SYMBOL_EXISTS(strerror_r       "string.h"   HAVE_STRERROR_R)
 CHECK_SYMBOL_EXISTS(strftime         "time.h"     HAVE_STRFTIME)
@@ -430,20 +430,20 @@ CHECK_C_SOURCE_COMPILES(
   "#include <sys/sysmacros.h>\nint main() { return major(256); }"
   MAJOR_IN_SYSMACROS)
 
-IF(HAVE_STRERROR_R)
-  SET(HAVE_DECL_STRERROR_R 1)
-ENDIF(HAVE_STRERROR_R)
+if(HAVE_STRERROR_R)
+  set(HAVE_DECL_STRERROR_R 1)
+endif(HAVE_STRERROR_R)
 
 #
 # Check defines
 #
-SET(headers "limits.h")
-IF(HAVE_STDINT_H)
-  LIST(APPEND headers "stdint.h")
-ENDIF(HAVE_STDINT_H)
-IF(HAVE_INTTYPES_H)
-  LIST(APPEND headers "inttypes.h")
-ENDIF(HAVE_INTTYPES_H)
+set(headers "limits.h")
+if(HAVE_STDINT_H)
+  list(APPEND headers "stdint.h")
+endif(HAVE_STDINT_H)
+if(HAVE_INTTYPES_H)
+  list(APPEND headers "inttypes.h")
+endif(HAVE_INTTYPES_H)
 CHECK_SYMBOL_EXISTS(EFTYPE           "errno.h"    HAVE_EFTYPE)
 CHECK_SYMBOL_EXISTS(EILSEQ           "errno.h"    HAVE_EILSEQ)
 CHECK_SYMBOL_EXISTS(D_MD_ORDER       "langinfo.h" HAVE_D_MD_ORDER)
@@ -498,133 +498,133 @@ CHECK_TYPE_SIZE("unsigned long long int"   UNSIGNED_LONG_LONG_INT)
 
 #
 CHECK_TYPE_SIZE(dev_t       DEV_T)
-IF(NOT HAVE_DEV_T)
-  SET(dev_t "unsigned int")
-ENDIF(NOT HAVE_DEV_T)
+if(NOT HAVE_DEV_T)
+  set(dev_t "unsigned int")
+endif(NOT HAVE_DEV_T)
 #
 CHECK_TYPE_SIZE(gid_t       GID_T)
-IF(NOT HAVE_GID_T)
-  IF(WIN32)
-    SET(gid_t "short")
-  ELSE(WIN32)
-    SET(gid_t "unsigned int")
-  ENDIF(WIN32)
-ENDIF(NOT HAVE_GID_T)
+if(NOT HAVE_GID_T)
+  if(WIN32)
+    set(gid_t "short")
+  else(WIN32)
+    set(gid_t "unsigned int")
+  endif(WIN32)
+endif(NOT HAVE_GID_T)
 #
 CHECK_TYPE_SIZE(id_t        ID_T)
-IF(NOT HAVE_ID_T)
-  IF(WIN32)
-    SET(id_t "short")
-  ELSE(WIN32)
-    SET(id_t "unsigned int")
-  ENDIF(WIN32)
-ENDIF(NOT HAVE_ID_T)
+if(NOT HAVE_ID_T)
+  if(WIN32)
+    set(id_t "short")
+  else(WIN32)
+    set(id_t "unsigned int")
+  endif(WIN32)
+endif(NOT HAVE_ID_T)
 #
 CHECK_TYPE_SIZE(int64_t     INT64_T)
-IF(NOT HAVE_INT64_T)
-  IF(WIN32)
-    SET(int64_t "__int64")
-  ELSE(WIN32)
-    SET(int64_t "long long")
-  ENDIF(WIN32)
-ENDIF(NOT HAVE_INT64_T)
+if(NOT HAVE_INT64_T)
+  if(WIN32)
+    set(int64_t "__int64")
+  else(WIN32)
+    set(int64_t "long long")
+  endif(WIN32)
+endif(NOT HAVE_INT64_T)
 #
 CHECK_TYPE_SIZE(intmax_t    INTMAX_T)
-IF(NOT HAVE_INTMAX_T)
-  SET(intmax_t "int64_t")
-ENDIF(NOT HAVE_INTMAX_T)
+if(NOT HAVE_INTMAX_T)
+  set(intmax_t "int64_t")
+endif(NOT HAVE_INTMAX_T)
 #
 CHECK_TYPE_SIZE(mode_t      MODE_T)
-IF(NOT HAVE_MODE_T)
-  IF(WIN32)
-    SET(mode_t "unsigned short")
-  ELSE(WIN32)
-    SET(mode_t "int")
-  ENDIF(WIN32)
-ENDIF(NOT HAVE_MODE_T)
+if(NOT HAVE_MODE_T)
+  if(WIN32)
+    set(mode_t "unsigned short")
+  else(WIN32)
+    set(mode_t "int")
+  endif(WIN32)
+endif(NOT HAVE_MODE_T)
 #
 CHECK_TYPE_SIZE(off_t       OFF_T)
-IF(NOT HAVE_OFF_T)
-  SET(off_t "__int64")
-ENDIF(NOT HAVE_OFF_T)
+if(NOT HAVE_OFF_T)
+  set(off_t "__int64")
+endif(NOT HAVE_OFF_T)
 #
 CHECK_TYPE_SIZE(size_t      SIZE_T)
-IF(NOT HAVE_SIZE_T)
-  IF("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-    SET(size_t "uint64_t")
-  ELSE("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-    SET(size_t   "uint32_t")
-  ENDIF("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-ENDIF(NOT HAVE_SIZE_T)
+if(NOT HAVE_SIZE_T)
+  if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+    set(size_t "uint64_t")
+  else("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+    set(size_t   "uint32_t")
+  endif("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+endif(NOT HAVE_SIZE_T)
 #
 CHECK_TYPE_SIZE(ssize_t     SSIZE_T)
-IF(NOT HAVE_SSIZE_T)
-  IF("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-    SET(ssize_t "int64_t")
-  ELSE("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-    SET(ssize_t "long")
-  ENDIF("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-ENDIF(NOT HAVE_SSIZE_T)
+if(NOT HAVE_SSIZE_T)
+  if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+    set(ssize_t "int64_t")
+  else("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+    set(ssize_t "long")
+  endif("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+endif(NOT HAVE_SSIZE_T)
 #
 CHECK_TYPE_SIZE(uid_t       UID_T)
-IF(NOT HAVE_UID_T)
-  IF(WIN32)
-    SET(uid_t "short")
-  ELSE(WIN32)
-    SET(uid_t "unsigned int")
-  ENDIF(WIN32)
-ENDIF(NOT HAVE_UID_T)
+if(NOT HAVE_UID_T)
+  if(WIN32)
+    set(uid_t "short")
+  else(WIN32)
+    set(uid_t "unsigned int")
+  endif(WIN32)
+endif(NOT HAVE_UID_T)
 #
 CHECK_TYPE_SIZE(uint16_t    UINT16_T)
-IF(NOT HAVE_UINT16_T)
-  SET(uint16_t "unsigned short")
-ENDIF(NOT HAVE_UINT16_T)
+if(NOT HAVE_UINT16_T)
+  set(uint16_t "unsigned short")
+endif(NOT HAVE_UINT16_T)
 #
 CHECK_TYPE_SIZE(uint32_t    UINT32_T)
-IF(NOT HAVE_UINT32_T)
-  SET(uint32_t "unsigned int")
-ENDIF(NOT HAVE_UINT32_T)
+if(NOT HAVE_UINT32_T)
+  set(uint32_t "unsigned int")
+endif(NOT HAVE_UINT32_T)
 CHECK_TYPE_SIZE(int32_t    INT32_T)
-IF(NOT HAVE_INT32_T)
-  SET(int32_t "int")
-ENDIF(NOT HAVE_INT32_T)
+if(NOT HAVE_INT32_T)
+  set(int32_t "int")
+endif(NOT HAVE_INT32_T)
 #
 CHECK_TYPE_SIZE(uint64_t    UINT64_T)
-IF(NOT HAVE_UINT64_T)
-  IF(WIN32)
-    SET(uint64_t "unsigned __int64")
-  ELSE(WIN32)
-    SET(uint64_t "unsigned long long")
-  ENDIF(WIN32)
-ENDIF(NOT HAVE_UINT64_T)
+if(NOT HAVE_UINT64_T)
+  if(WIN32)
+    set(uint64_t "unsigned __int64")
+  else(WIN32)
+    set(uint64_t "unsigned long long")
+  endif(WIN32)
+endif(NOT HAVE_UINT64_T)
 #
 CHECK_TYPE_SIZE(uintmax_t   UINTMAX_T)
-IF(NOT HAVE_UINTMAX_T)
-  SET(uintmax_t "uint64_t")
-ENDIF(NOT HAVE_UINTMAX_T)
+if(NOT HAVE_UINTMAX_T)
+  set(uintmax_t "uint64_t")
+endif(NOT HAVE_UINTMAX_T)
 #
 CHECK_TYPE_SIZE(intptr_t   INTPTR_T)
-IF(NOT HAVE_INTPTR_T)
-  IF("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-    SET(intptr_t "int64_t")
-  ELSE()
-    SET(intptr_t "int32_t")
-  ENDIF()
-ENDIF(NOT HAVE_INTPTR_T)
+if(NOT HAVE_INTPTR_T)
+  if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+    set(intptr_t "int64_t")
+  else()
+    set(intptr_t "int32_t")
+  endif()
+endif(NOT HAVE_INTPTR_T)
 #
 CHECK_TYPE_SIZE(uintptr_t   UINTPTR_T)
-IF(NOT HAVE_UINTPTR_T)
-  IF("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-    SET(uintptr_t "uint64_t")
-  ELSE()
-    SET(uintptr_t "uint32_t")
-  ENDIF()
-ENDIF(NOT HAVE_UINTPTR_T)
+if(NOT HAVE_UINTPTR_T)
+  if("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+    set(uintptr_t "uint64_t")
+  else()
+    set(uintptr_t "uint32_t")
+  endif()
+endif(NOT HAVE_UINTPTR_T)
 #
 CHECK_TYPE_SIZE(wchar_t     SIZEOF_WCHAR_T)
-IF(HAVE_SIZEOF_WCHAR_T)
-  SET(HAVE_WCHAR_T 1)
-ENDIF(HAVE_SIZEOF_WCHAR_T)
+if(HAVE_SIZEOF_WCHAR_T)
+  set(HAVE_WCHAR_T 1)
+endif(HAVE_SIZEOF_WCHAR_T)
 #
 # Check if _FILE_OFFSET_BITS macro needed for large files
 #
@@ -635,13 +635,13 @@ CHECK_FILE_OFFSET_BITS()
 #
 # Check for Extended Attribute libraries, headers, and functions
 #
-IF(ENABLE_XATTR)
+if(ENABLE_XATTR)
   LA_CHECK_INCLUDE_FILE(attr/xattr.h     HAVE_ATTR_XATTR_H)
   LA_CHECK_INCLUDE_FILE(sys/xattr.h      HAVE_SYS_XATTR_H)
   CHECK_LIBRARY_EXISTS(attr "setxattr" "" HAVE_ATTR_LIB)
-  IF(HAVE_ATTR_LIB)
-    SET(CMAKE_REQUIRED_LIBRARIES "attr")
-  ENDIF(HAVE_ATTR_LIB)
+  if(HAVE_ATTR_LIB)
+    set(CMAKE_REQUIRED_LIBRARIES "attr")
+  endif(HAVE_ATTR_LIB)
   CHECK_FUNCTION_EXISTS_GLIBC(extattr_get_file HAVE_EXTATTR_GET_FILE)
   CHECK_FUNCTION_EXISTS_GLIBC(extattr_list_file HAVE_EXTATTR_LIST_FILE)
   CHECK_FUNCTION_EXISTS_GLIBC(extattr_set_fd HAVE_EXTATTR_SET_FD)
@@ -652,7 +652,7 @@ IF(ENABLE_XATTR)
   CHECK_FUNCTION_EXISTS_GLIBC(listxattr HAVE_LISTXATTR)
   CHECK_FUNCTION_EXISTS_GLIBC(llistxattr HAVE_LLISTXATTR)
   CHECK_FUNCTION_EXISTS_GLIBC(lsetxattr HAVE_LSETXATTR)
-ENDIF(ENABLE_XATTR)
+endif(ENABLE_XATTR)
 
 #
 # Check for ACL libraries, headers, and functions
@@ -662,13 +662,13 @@ ENDIF(ENABLE_XATTR)
 # platforms.  Worse, some systems have completely non-POSIX acl functions,
 # which makes the following checks rather more complex than I would like.
 #
-IF(ENABLE_ACL)
+if(ENABLE_ACL)
   CHECK_LIBRARY_EXISTS(acl "acl_get_file" "" HAVE_ACL_LIB)
-  IF(HAVE_ACL_LIB)
-    SET(CMAKE_REQUIRED_LIBRARIES "acl")
-    FIND_LIBRARY(ACL_LIBRARY NAMES acl)
-    LIST(APPEND ADDITIONAL_LIBS ${ACL_LIBRARY})
-  ENDIF(HAVE_ACL_LIB)
+  if(HAVE_ACL_LIB)
+    set(CMAKE_REQUIRED_LIBRARIES "acl")
+    find_library(ACL_LIBRARY NAMES acl)
+    list(APPEND ADDITIONAL_LIBS ${ACL_LIBRARY})
+  endif(HAVE_ACL_LIB)
   #
   CHECK_FUNCTION_EXISTS_GLIBC(acl_create_entry HAVE_ACL_CREATE_ENTRY)
   CHECK_FUNCTION_EXISTS_GLIBC(acl_init HAVE_ACL_INIT)
@@ -690,48 +690,48 @@ IF(ENABLE_ACL)
   # MacOS has an acl.h that isn't POSIX.  It can be detected by
   # checking for ACL_USER
   CHECK_SYMBOL_EXISTS(ACL_USER "${INCLUDES}" HAVE_ACL_USER)
-ENDIF(ENABLE_ACL)
+endif(ENABLE_ACL)
 
 # Generate "config.h" from "build/cmake/config.h.in"
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/config.h.in
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
+add_definitions(-DHAVE_CONFIG_H)
 
 #
 # Register installation of PDF documents.
 #
-IF(WIN32 AND NOT CYGWIN)
+if(WIN32 AND NOT CYGWIN)
   #
   # On Windows platform, It's better that we install PDF documents
   # on one's computer.
   # These PDF documents are available in the release package.
   #
-  IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf)
-    INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf
             DESTINATION share/man
             FILES_MATCHING PATTERN "*.pdf"
     )
-  ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf)
-ENDIF(WIN32 AND NOT CYGWIN)
+  endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf)
+endif(WIN32 AND NOT CYGWIN)
 #
 #
 #
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/libarchive)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libarchive)
 #
-IF(MSVC)
-  ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
-ENDIF(MSVC)
+if(MSVC)
+  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+endif(MSVC)
 # Especially for early development, we want to be a little
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
-#IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
-#  ADD_DEFINITIONS(-Wall -Werror)
-#ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+#if("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+#  add_definitions(-Wall -Werror)
+#endif("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
 
-IF(ENABLE_TEST)
-ADD_CUSTOM_TARGET(run_all_tests)
-ENDIF(ENABLE_TEST)
+if(ENABLE_TEST)
+add_custom_target(run_all_tests)
+endif(ENABLE_TEST)
 
 add_subdirectory(libarchive)
 #add_subdirectory(tar)

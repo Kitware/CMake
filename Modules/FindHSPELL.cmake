@@ -24,20 +24,20 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(HSPELL_INCLUDE_DIR hspell.h)
+find_path(HSPELL_INCLUDE_DIR hspell.h)
 
-FIND_LIBRARY(HSPELL_LIBRARIES NAMES hspell)
+find_library(HSPELL_LIBRARIES NAMES hspell)
 
-IF (HSPELL_INCLUDE_DIR)
-    FILE(READ "${HSPELL_INCLUDE_DIR}/hspell.h" HSPELL_H)
-    STRING(REGEX REPLACE ".*#define HSPELL_VERSION_MAJOR ([0-9]+).*" "\\1" HSPELL_VERSION_MAJOR "${HSPELL_H}")
-    STRING(REGEX REPLACE ".*#define HSPELL_VERSION_MINOR ([0-9]+).*" "\\1" HSPELL_VERSION_MINOR "${HSPELL_H}")
-ENDIF()
+if(HSPELL_INCLUDE_DIR)
+    file(READ "${HSPELL_INCLUDE_DIR}/hspell.h" HSPELL_H)
+    string(REGEX REPLACE ".*#define HSPELL_VERSION_MAJOR ([0-9]+).*" "\\1" HSPELL_VERSION_MAJOR "${HSPELL_H}")
+    string(REGEX REPLACE ".*#define HSPELL_VERSION_MINOR ([0-9]+).*" "\\1" HSPELL_VERSION_MINOR "${HSPELL_H}")
+endif()
 
-# handle the QUIETLY and REQUIRED arguments and set HSPELL_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set HSPELL_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(HSPELL DEFAULT_MSG HSPELL_LIBRARIES HSPELL_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(HSPELL_INCLUDE_DIR HSPELL_LIBRARIES)
+mark_as_advanced(HSPELL_INCLUDE_DIR HSPELL_LIBRARIES)
 
