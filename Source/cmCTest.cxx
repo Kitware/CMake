@@ -2526,6 +2526,8 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
   cmSystemTools::ExpandListArgument(dval, slist);
   std::vector<std::string>::iterator it;
 
+  vec.clear();
+
   for ( it = slist.begin(); it != slist.end(); ++it )
     {
     cmCTestLog(this, DEBUG, "  -- " << it->c_str() << std::endl);
