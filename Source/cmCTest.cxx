@@ -655,10 +655,26 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     }
 
   cmMakefile* mf = command->GetMakefile();
-  std::string fname = src_dir;
-  fname += "/CTestConfig.cmake";
-  cmSystemTools::ConvertToUnixSlashes(fname);
-  if ( cmSystemTools::FileExists(fname.c_str()) )
+  std::string fname;
+
+  std::string src_dir_fname = src_dir;
+  src_dir_fname += "/CTestConfig.cmake";
+  cmSystemTools::ConvertToUnixSlashes(src_dir_fname);
+
+  std::string bld_dir_fname = bld_dir;
+  bld_dir_fname += "/CTestConfig.cmake";
+  cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
+
+  if ( cmSystemTools::FileExists(bld_dir_fname.c_str()) )
+    {
+    fname = bld_dir_fname;
+    }
+  else if ( cmSystemTools::FileExists(src_dir_fname.c_str()) )
+    {
+    fname = src_dir_fname;
+    }
+
+  if ( !fname.empty() )
     {
     cmCTestLog(this, OUTPUT, "   Reading ctest configuration file: "
       << fname.c_str() << std::endl);
@@ -674,8 +690,12 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     }
   else
     {
-    cmCTestLog(this, WARNING, "Cannot locate CTest configuration: "
-      << fname.c_str() << std::endl);
+    cmCTestLog(this, WARNING,
+      "Cannot locate CTest configuration: in BuildDirectory: "
+      << bld_dir_fname.c_str() << std::endl);
+    cmCTestLog(this, WARNING,
+      "Cannot locate CTest configuration: in SourceDirectory: "
+      << src_dir_fname.c_str() << std::endl);
     }
 
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
