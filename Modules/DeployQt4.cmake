@@ -56,7 +56,7 @@
 # (or <plugins_dir>) relative to <executable> and store the result in
 # <installed_plugin_path_var>. See documentation of INSTALL_QT4_PLUGIN_PATH.
 #
-#  INSTALL_QT4_EXECUTABLE(<executable> <qtplugins> [<libs> <dirs> <plugins_dir> <request_qt_conf>])
+#  INSTALL_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
 # Installs Qt plugins, writes a Qt configuration file (if needed) and fixes up
 # a Qt4 executable using BundleUtilities so it is standalone and can be
 # drag-and-drop copied to another machine as long as all of the system
@@ -106,7 +106,8 @@ function(resolve_qt4_paths paths_var)
         set(${paths_var} ${paths_resolved} PARENT_SCOPE)
 endfunction()
 
-function(fixup_qt4_executable executable qtplugins)
+function(fixup_qt4_executable executable)
+        set(qtplugins ${ARGV1})
         set(libs ${ARGV2})
         set(dirs ${ARGV3})
         set(plugins_dir ${ARGV4})
