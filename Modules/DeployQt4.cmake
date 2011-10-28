@@ -151,7 +151,6 @@ function(fixup_qt4_executable executable)
         endforeach()
 
         resolve_qt4_paths(libs "${executable_path}")
-        resolve_qt4_paths(dirs "${executable_path}")
 
         if(write_qt_conf)
                 set(qt_conf_contents "[Paths]\nPlugins = ${plugins_dir}")
@@ -265,7 +264,6 @@ function(install_qt4_executable executable)
         endforeach()
 
         resolve_qt4_paths(libs)
-        resolve_qt4_paths(dirs)
 
         install(CODE
                 " INCLUDE( \"${DeployQt4_cmake_dir}/DeployQt4.cmake\" )
