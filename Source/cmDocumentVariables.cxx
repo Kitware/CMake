@@ -126,7 +126,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This variable is set to the program that will be"
      " needed to build the output of CMake.   If the "
      "generator selected was Visual Studio 6, the "
-     "CMAKE_MAKE_PROGRAM will be set to msdev, for "
+     "CMAKE_BUILD_TOOL will be set to msdev, for "
      "Unix makefiles it will be set to make or gmake, "
      "and for Visual Studio 7 it set to devenv.  For "
      "Nmake Makefiles the value is nmake. This can be "
