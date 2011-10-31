@@ -24,7 +24,7 @@ class cmCTestLaunch
 {
 public:
   /** Entry point from ctest executable main().  */
-  static int Main(int argc, const char* const* argv);
+  static int Main(int argc, const char* const argv[]);
 private:
   // Initialize the launcher from its command line.
   cmCTestLaunch(int argc, const char* const* argv);

@@ -68,6 +68,10 @@ static const char * cmDocumentationOptions[][3] =
   {"-F", "Enable failover.", "This option allows ctest to resume a test "
    "set execution that was previously interrupted.  If no interruption "
    "occurred, the -F option will have no effect."},
+  {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the"
+   "given number of jobs.",
+   "This option tells ctest to run the tests in parallel using given "
+   "number of jobs."},
   {"-Q,--quiet", "Make ctest quiet.",
     "This option will suppress all the output. The output log file will "
     "still be generated if the --output-log is specified. Options such "
@@ -180,8 +184,8 @@ static const char * cmDocumentationOptions[][3] =
   {"--build-project", "Specify the name of the project to build.", "" },
   {"--build-makeprogram", "Specify the make program to use.", "" },
   {"--build-noclean", "Skip the make clean step.", "" },
-  {"--build-config-sample", 
-   "A sample executable to use to determine the configuration", 
+  {"--build-config-sample",
+   "A sample executable to use to determine the configuration",
    "A sample executable to use to determine the configuration that "
    "should be used. e.g. Debug/Release/etc" },
   {"--build-options", "Add extra options to the build step.",
@@ -276,7 +280,7 @@ int main (int argc, char *argv[])
   // If there is a testing input file, check for documentation options
   // only if there are actually arguments.  We want running without
   // arguments to run tests.
-  if(argc > 1 || !(cmSystemTools::FileExists("CTestTestfile.cmake") || 
+  if(argc > 1 || !(cmSystemTools::FileExists("CTestTestfile.cmake") ||
                    cmSystemTools::FileExists("DartTestfile.txt")))
     {
     if(argc == 1)
@@ -301,7 +305,7 @@ int main (int argc, char *argv[])
       doc.SetSection("Name",cmDocumentationName);
       doc.SetSection("Usage",cmDocumentationUsage);
       doc.SetSection("Description",cmDocumentationDescription);
-      doc.SetSection("Options",cmDocumentationOptions);
+      doc.PrependSection("Options",cmDocumentationOptions);
       doc.SetSection("Commands",commands);
       doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #ifdef cout

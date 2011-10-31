@@ -612,7 +612,7 @@ public:
    * Up to 'length' bytes are read from the file, if more than 'percent_bin' %
    * of the bytes are non-textual elements, the file is considered binary,
    * otherwise textual. Textual elements are bytes in the ASCII [0x20, 0x7E]
-   * range, but also \n, \r, \t.
+   * range, but also \\n, \\r, \\t.
    * The algorithm is simplistic, and should probably check for usual file
    * extensions, 'magic' signature, unicode, etc.
    */
@@ -812,7 +812,7 @@ public:
    * Convert windows-style arguments given as a command-line string
    * into more traditional argc/argv arguments.
    * Note that argv[0] will be assigned the executable name using
-   * the ::GetModuleFileName function.
+   * the GetModuleFileName() function.
    */
   static void ConvertWindowsCommandLineToUnixArguments(
     const char *cmd_line, int *argc, char ***argv);

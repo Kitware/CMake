@@ -18,7 +18,7 @@
  * \brief Helper class for CTest
  *
  * Submit testing results
- * 
+ *
  */
 class cmCTestSubmitHandler : public cmCTestGenericHandler
 {
@@ -47,35 +47,37 @@ private:
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingFTP(const cmStdString& localprefix, 
+  bool SubmitUsingFTP(const cmStdString& localprefix,
                       const std::set<cmStdString>& files,
-                      const cmStdString& remoteprefix, 
+                      const cmStdString& remoteprefix,
                       const cmStdString& url);
-  bool SubmitUsingHTTP(const cmStdString& localprefix, 
+  bool SubmitUsingHTTP(const cmStdString& localprefix,
                        const std::set<cmStdString>& files,
-                       const cmStdString& remoteprefix, 
+                       const cmStdString& remoteprefix,
                        const cmStdString& url);
   bool SubmitUsingSCP(const cmStdString& scp_command,
-                      const cmStdString& localprefix, 
+                      const cmStdString& localprefix,
                       const std::set<cmStdString>& files,
-                      const cmStdString& remoteprefix, 
+                      const cmStdString& remoteprefix,
                       const cmStdString& url);
 
-  bool SubmitUsingCP( const cmStdString& localprefix, 
+  bool SubmitUsingCP( const cmStdString& localprefix,
                       const std::set<cmStdString>& files,
-                      const cmStdString& remoteprefix, 
+                      const cmStdString& remoteprefix,
                       const cmStdString& url);
 
   bool TriggerUsingHTTP(const std::set<cmStdString>& files,
-                        const cmStdString& remoteprefix, 
+                        const cmStdString& remoteprefix,
                         const cmStdString& url);
 
-  bool SubmitUsingXMLRPC(const cmStdString& localprefix, 
+  bool SubmitUsingXMLRPC(const cmStdString& localprefix,
                        const std::set<cmStdString>& files,
-                       const cmStdString& remoteprefix, 
+                       const cmStdString& remoteprefix,
                        const cmStdString& url);
 
-  void ParseResponse(std::vector<char>);
+  typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
+
+  void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
 
   std::string GetSubmitResultsPrefix();
 

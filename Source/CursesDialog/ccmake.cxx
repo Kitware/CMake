@@ -76,11 +76,11 @@ void onsig(int)
   if (cmCursesForm::CurrentForm)
     {
     endwin();
-    initscr(); /* Initialization */ 
-    noecho(); /* Echo off */ 
-    cbreak(); /* nl- or cr not needed */ 
-    keypad(stdscr,TRUE); /* Use key symbols as 
-                            KEY_DOWN*/ 
+    initscr(); /* Initialization */
+    noecho(); /* Echo off */
+    cbreak(); /* nl- or cr not needed */
+    keypad(stdscr,TRUE); /* Use key symbols as
+                            KEY_DOWN*/
     refresh();
     int x,y;
     getmaxyx(stdscr, y, x);
@@ -89,7 +89,7 @@ void onsig(int)
     }
   signal(SIGWINCH, onsig);
 }
- 
+
 }
 
 void CMakeErrorHandler(const char* message, const char* title, bool&, void* clientData)
@@ -116,13 +116,13 @@ int main(int argc, char** argv)
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
     doc.SetSection("Generators",generators);
-    doc.SetSection("Options",cmDocumentationOptions);
+    doc.PrependSection("Options",cmDocumentationOptions);
     doc.SetSection("Command",commands);
     doc.SetSection("Compatibility Commands",compatCommands);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
-    }  
-  
+    }
+
   bool debug = false;
   unsigned int i;
   int j;
@@ -156,22 +156,22 @@ int main(int argc, char** argv)
     cmCursesForm::DebugStart();
     }
 
-  initscr(); /* Initialization */ 
-  noecho(); /* Echo off */ 
-  cbreak(); /* nl- or cr not needed */ 
-  keypad(stdscr,TRUE); /* Use key symbols as 
-                          KEY_DOWN*/ 
+  initscr(); /* Initialization */
+  noecho(); /* Echo off */
+  cbreak(); /* nl- or cr not needed */
+  keypad(stdscr,TRUE); /* Use key symbols as
+                          KEY_DOWN*/
 
   signal(SIGWINCH, onsig);
 
   int x,y;
   getmaxyx(stdscr, y, x);
-  if ( x < cmCursesMainForm::MIN_WIDTH  || 
+  if ( x < cmCursesMainForm::MIN_WIDTH  ||
        y < cmCursesMainForm::MIN_HEIGHT )
     {
     endwin();
     std::cerr << "Window is too small. A size of at least "
-              << cmCursesMainForm::MIN_WIDTH << " x " 
+              << cmCursesMainForm::MIN_WIDTH << " x "
               <<  cmCursesMainForm::MIN_HEIGHT
               << " is required to run ccmake." <<  std::endl;
     return 1;
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
     myform->Render(1, 1, x, y);
     myform->HandleInput();
     }
-  
+
   // Need to clean-up better
   curses_clear();
   touchwin(stdscr);
@@ -210,7 +210,7 @@ int main(int argc, char** argv)
   cmCursesForm::CurrentForm = 0;
 
   std::cout << std::endl << std::endl;
-  
+
   return 0;
 
 }

@@ -244,7 +244,7 @@ int main (int argc, char *argv[])
     // find out which system cpack is running on, so it can setup the search
     // paths, so FIND_XXX() commands can be used in scripts
     cminst.AddCMakePaths();
-    std::string systemFile = 
+    std::string systemFile =
       globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
     if (!globalMF->ReadListFile(0, systemFile.c_str()))
       {
@@ -253,7 +253,7 @@ int main (int argc, char *argv[])
       return 1;
       }
 
-    systemFile = 
+    systemFile =
       globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
     if (!globalMF->ReadListFile(0, systemFile.c_str()))
       {
@@ -264,7 +264,7 @@ int main (int argc, char *argv[])
 
     if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
-      cpackConfigFile = 
+      cpackConfigFile =
         cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
         "Read CPack configuration file: " << cpackConfigFile.c_str()
@@ -410,7 +410,7 @@ int main (int argc, char *argv[])
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: "
               << projName << std::endl);
 
-            const char* projVersion = 
+            const char* projVersion =
               mf->GetDefinition("CPACK_PACKAGE_VERSION");
             if ( !projVersion )
               {
@@ -423,7 +423,7 @@ int main (int argc, char *argv[])
               cmOStringStream ostr;
               ostr << projVersionMajor << "." << projVersionMinor << "."
                 << projVersionPatch;
-              mf->AddDefinition("CPACK_PACKAGE_VERSION", 
+              mf->AddDefinition("CPACK_PACKAGE_VERSION",
                                 ostr.str().c_str());
               }
 
@@ -448,7 +448,7 @@ int main (int argc, char *argv[])
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
-    doc.SetSection("Options",cmDocumentationOptions);
+    doc.PrependSection("Options",cmDocumentationOptions);
 
     std::vector<cmDocumentationEntry> v;
     cmCPackGeneratorFactory::DescriptionsMap::const_iterator generatorIt;

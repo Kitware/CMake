@@ -41,7 +41,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
       cmSystemTools::CollapseFullPath(
-       this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY")).c_str());
+       this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY")).c_str());
     }
 
   if ( this->Values[ct_SOURCE] )
@@ -54,7 +54,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     {
     this->CTest->SetCTestConfiguration("SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
+        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
     }
 
   if ( this->CTest->GetCTestConfiguration("BuildDirectory").empty() )

@@ -55,6 +55,29 @@ else()
   endif()
 endif()
 
+set(DEPS
+  libshared
+  libstatic
+  lib_shared_and_static
+)
+
+foreach(DEP ${DEPS})
+  try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/${DEP}_build
+    ${CMAKE_CURRENT_SOURCE_DIR}/${DEP}
+    ${DEP}
+    OUTPUT_VARIABLE Out
+  )
+  if (NOT Result)
+    message("OUTPUT: ${Out}")
+  endif()
+endforeach()
+
+# The _do_build macro is called from a child scope, where
+# the current source and binary dir are different. Save them here
+# for use in the macro.
+set(TEST_TOP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(TEST_TOP_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
 
 # We seem to get race conditions is writing this stuff to the same file at least on MinGW
 # So to write to separate source and build directories, we use a count to differentiate.
@@ -66,8 +89,6 @@ macro(_do_build Include Library LibrarySource Source)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/src.cpp" "#include \"${Include}\"\n"
     "int main() { ${Source}; }\n"
   )
-
-  file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/../${LibrarySource}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}")
 
   if ("${Library}" STREQUAL "static_variant")
     set(CONDITIONAL_STATIC_DEFINE "add_definitions(-DLIBSHARED_AND_STATIC_STATIC_DEFINE)\n")
@@ -90,13 +111,10 @@ macro(_do_build Include Library LibrarySource Source)
     "  add_definitions(${ERROR_FLAG})\n"
     "endif()\n"
 
-    "if(MSVC)\n"
-    "  add_definitions(-DCOMPILER_IS_MSVC)\n"
-    "endif()\n"
+    "include(\"${TEST_TOP_BINARY_DIR}/${LibrarySource}_build/Targets.cmake\")\n"
 
-    "add_subdirectory(\"${LibrarySource}\")\n"
-
-    "include_directories(\"${LibrarySource}\" \"\${CMAKE_CURRENT_BINARY_DIR}/${LibrarySource}\")\n"
+    "include_directories(\"${TEST_TOP_SOURCE_DIR}/${LibrarySource}\"\n"
+    "                    \"${TEST_TOP_BINARY_DIR}/${LibrarySource}_build\")\n"
 
     "${CONDITIONAL_STATIC_DEFINE}"
 
@@ -124,10 +142,6 @@ endmacro()
 include(GenerateExportHeader)
 
 add_compiler_export_flags()
-
-if (MSVC)
-  add_definitions(-DCOMPILER_IS_MSVC)
-endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 

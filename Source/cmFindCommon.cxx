@@ -471,8 +471,13 @@ void cmFindCommon::AddPathInternal(std::string const& in_path,
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddTrailingSlashes(std::vector<std::string>& paths)
+void cmFindCommon::ComputeFinalPaths()
 {
+  std::vector<std::string>& paths = this->SearchPaths;
+
+  // Expand list of paths inside all search roots.
+  this->RerootPaths(paths);
+
   // Add a trailing slash to all paths to aid the search process.
   for(std::vector<std::string>::iterator i = paths.begin();
       i != paths.end(); ++i)

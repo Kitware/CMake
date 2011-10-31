@@ -25,12 +25,35 @@
 #include <queue>
 #include <stdlib.h> // required for atof
 #include <assert.h>
-const char* cmTarget::TargetTypeNames[] = {
-  "EXECUTABLE", "STATIC_LIBRARY",
-  "SHARED_LIBRARY", "MODULE_LIBRARY", "UTILITY", "GLOBAL_TARGET",
-  "INSTALL_FILES", "INSTALL_PROGRAMS", "INSTALL_DIRECTORY",
-  "UNKNOWN_LIBRARY"
-};
+
+const char* cmTarget::GetTargetTypeName(TargetType targetType)
+{
+  switch( targetType )
+    {
+      case cmTarget::STATIC_LIBRARY:
+        return "STATIC_LIBRARY";
+      case cmTarget::MODULE_LIBRARY:
+        return "MODULE_LIBRARY";
+      case cmTarget::SHARED_LIBRARY:
+        return "SHARED_LIBRARY";
+      case cmTarget::EXECUTABLE:
+        return "EXECUTABLE";
+      case cmTarget::UTILITY:
+        return "UTILITY";
+      case cmTarget::GLOBAL_TARGET:
+        return "GLOBAL_TARGET";
+      case cmTarget::INSTALL_FILES:
+        return "INSTALL_FILES";
+      case cmTarget::INSTALL_PROGRAMS:
+        return "INSTALL_PROGRAMS";
+      case cmTarget::INSTALL_DIRECTORY:
+        return "INSTALL_DIRECTORY";
+      case cmTarget::UNKNOWN_LIBRARY:
+        return "UNKNOWN_LIBRARY";
+    }
+  assert(0 && "Unexpected target type");
+  return 0;
+}
 
 //----------------------------------------------------------------------------
 struct cmTarget::OutputInfo
@@ -619,6 +642,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "If the list is empty then no transitive link dependencies will be "
      "incorporated when this target is linked into another target even if "
      "the default set is non-empty.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_LINK_INTERFACE_LIBRARIES if it is set when a target is "
+     "created.  "
      "This property is ignored for STATIC libraries.");
 
   cm->DefineProperty
@@ -1153,6 +1179,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
+  this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -2346,7 +2373,7 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config)
     std::string msg = "cmTarget::GetOutputInfo called for ";
     msg += this->GetName();
     msg += " which has type ";
-    msg += cmTarget::TargetTypeNames[this->GetType()];
+    msg += cmTarget::GetTargetTypeName(this->GetType());
     this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
     abort();
     return 0;
@@ -2645,40 +2672,7 @@ const char *cmTarget::GetProperty(const char* prop,
   // the type property returns what type the target is
   if (!strcmp(prop,"TYPE"))
     {
-    switch( this->GetType() )
-      {
-      case cmTarget::STATIC_LIBRARY:
-        return "STATIC_LIBRARY";
-        // break; /* unreachable */
-      case cmTarget::MODULE_LIBRARY:
-        return "MODULE_LIBRARY";
-        // break; /* unreachable */
-      case cmTarget::SHARED_LIBRARY:
-        return "SHARED_LIBRARY";
-        // break; /* unreachable */
-      case cmTarget::EXECUTABLE:
-        return "EXECUTABLE";
-        // break; /* unreachable */
-      case cmTarget::UTILITY:
-        return "UTILITY";
-        // break; /* unreachable */
-      case cmTarget::GLOBAL_TARGET:
-        return "GLOBAL_TARGET";
-        // break; /* unreachable */
-      case cmTarget::INSTALL_FILES:
-        return "INSTALL_FILES";
-        // break; /* unreachable */
-      case cmTarget::INSTALL_PROGRAMS:
-        return "INSTALL_PROGRAMS";
-        // break; /* unreachable */
-      case cmTarget::INSTALL_DIRECTORY:
-        return "INSTALL_DIRECTORY";
-        // break; /* unreachable */
-      case cmTarget::UNKNOWN_LIBRARY:
-        return "UNKNOWN_LIBRARY";
-        // break; /* unreachable */
-      }
-    return 0;
+    return cmTarget::GetTargetTypeName(this->GetType());
     }
   bool chain = false;
   const char *retVal =

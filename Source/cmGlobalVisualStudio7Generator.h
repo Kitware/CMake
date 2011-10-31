@@ -26,9 +26,9 @@ class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
   cmGlobalVisualStudio7Generator();
-  static cmGlobalGenerator* New() { 
+  static cmGlobalGenerator* New() {
     return new cmGlobalVisualStudio7Generator; }
-  
+
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalVisualStudio7Generator::GetActualName();}
@@ -39,21 +39,21 @@ public:
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-  
+
   /**
    * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.  
+   * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, 
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
 
   /**
-   * Try running cmake and building a file. This is used for dynalically
+   * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
   virtual std::string GenerateBuildCommand(const char* makeProgram,
-                                           const char *projectName, 
-                                           const char* additionalOptions, 
+                                           const char *projectName,
+                                           const char* additionalOptions,
                                            const char *targetName,
                                            const char* config,
                                            bool ignoreErrors,
@@ -62,7 +62,7 @@ public:
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.  
+   * requests that they Generate.
    */
   virtual void Generate();
 
@@ -75,7 +75,7 @@ public:
    * Get the list of configurations
    */
   std::vector<std::string> *GetConfigurations();
-  
+
   ///! Create a GUID or get an existing one.
   void CreateGUID(const char* name);
   std::string GetGUID(const char* name);
@@ -97,13 +97,13 @@ protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 
   static cmIDEFlagTable const* GetExtraFlagTableVS7();
-  virtual void OutputSLNFile(cmLocalGenerator* root, 
+  virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
-  virtual void WriteProject(std::ostream& fout, 
+  virtual void WriteProject(std::ostream& fout,
                             const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectDepends(std::ostream& fout, 
+  virtual void WriteProjectDepends(std::ostream& fout,
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
@@ -124,11 +124,11 @@ protected:
     std::ostream& fout,
     cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets);
-  
+
   void GenerateConfigurations(cmMakefile* mf);
 
-  virtual void WriteExternalProject(std::ostream& fout, 
-                                    const char* name, 
+  virtual void WriteExternalProject(std::ostream& fout,
+                                    const char* name,
                                     const char* path,
                                     const std::set<cmStdString>&
                                     dependencies);

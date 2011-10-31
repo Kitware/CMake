@@ -32,7 +32,7 @@ void cmGlobalVisualStudio11Generator::AddPlatformDefinitions(cmMakefile* mf)
 void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-  fout << "# Visual Studio 2011\n";
+  fout << "# Visual Studio 11\n";
 }
 
 //----------------------------------------------------------------------------

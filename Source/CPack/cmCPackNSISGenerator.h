@@ -46,10 +46,10 @@ protected:
 
   virtual bool SupportsComponentInstallation() const;
 
-  /// Produce a string that contains the NSIS code to describe a 
-  /// particular component. Any added macros will be emitted via 
+  /// Produce a string that contains the NSIS code to describe a
+  /// particular component. Any added macros will be emitted via
   /// macrosOut.
-  std::string 
+  std::string
   CreateComponentDescription(cmCPackComponent *component,
                              cmOStringStream& macrosOut);
 
@@ -65,14 +65,14 @@ protected:
                 (cmCPackComponent *component,
                  std::set<cmCPackComponent *>& visited);
 
-  /// Produce a string that contains the NSIS code to describe a 
+  /// Produce a string that contains the NSIS code to describe a
   /// particular component group, including its components. Any
   /// added macros will be emitted via macrosOut.
-  std::string 
+  std::string
   CreateComponentGroupDescription(cmCPackComponentGroup *group,
                                   cmOStringStream& macrosOut);
 
-  /// Translations any newlines found in the string into \r\n, so that the 
+  /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.
   static std::string TranslateNewlines(std::string str);
 };
