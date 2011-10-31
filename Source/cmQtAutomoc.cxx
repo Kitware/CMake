@@ -124,21 +124,22 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
       }
     }
 
-  std::string _moc_incs = makefile->GetProperty("INCLUDE_DIRECTORIES");
-  std::string _moc_defs = makefile->GetProperty("DEFINITIONS");
-  std::string _moc_compile_defs = makefile->GetProperty("COMPILE_DEFINITIONS");
+  const char* _moc_incs = makefile->GetProperty("INCLUDE_DIRECTORIES");
+  const char* _moc_defs = makefile->GetProperty("DEFINITIONS");
+  const char* _moc_compile_defs = makefile->GetProperty("COMPILE_DEFINITIONS");
   // forget the variables added here afterwards again:
   cmMakefile::ScopePushPop varScope(makefile);
   static_cast<void>(varScope);
 
   makefile->AddDefinition("_moc_target_name", automocTargetName.c_str());
-  makefile->AddDefinition("_moc_incs", _moc_incs.c_str());
-  makefile->AddDefinition("_moc_defs", _moc_defs.c_str());
-  makefile->AddDefinition("_moc_compile_defs", _moc_compile_defs.c_str());
+  makefile->AddDefinition("_moc_incs", _moc_incs!=0 ? _moc_incs : "");
+  makefile->AddDefinition("_moc_defs", _moc_defs!=0 ? _moc_defs : "");
+  makefile->AddDefinition("_moc_compile_defs",
+                          _moc_compile_defs!=0 ? _moc_compile_defs : "");
   makefile->AddDefinition("_moc_files", _moc_files.c_str());
   makefile->AddDefinition("_moc_headers", _moc_headers.c_str());
 
-  const char* cmakeRoot = makefile->GetDefinition("CMAKE_ROOT");
+  const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
   inputFile += "/Modules/AutomocInfo.cmake.in";
   std::string outputFile = targetDir;
