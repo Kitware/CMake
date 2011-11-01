@@ -1811,11 +1811,18 @@ void cmLocalVisualStudio7Generator::WriteProjectSCC(std::ostream& fout,
   const char* vsProjectname = target.GetProperty("VS_SCC_PROJECTNAME");
   const char* vsLocalpath = target.GetProperty("VS_SCC_LOCALPATH");
   const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
+
   if(vsProvider && vsLocalpath && vsProjectname)
     {
     fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
          << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
          << "\tSccProvider=\"" << vsProvider << "\"\n";
+
+    const char* vsAuxPath = target.GetProperty("VS_SCC_AUXPATH");
+    if(vsAuxPath)
+      {
+      fout << "\tSccAuxPath=\"" << vsAuxPath << "\"\n";
+      }
     }
 }
 
