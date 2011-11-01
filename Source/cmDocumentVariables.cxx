@@ -1103,6 +1103,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_AUTOMOC_MOC_OPTIONS", cmProperty::VARIABLE,
+     "Additional options for moc when using automoc (see CMAKE_AUTOMOC).",
+     "This variable is used to initialize the "
+     "AUTOMOC_MOC_OPTIONS property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_DEBUG_POSTFIX", cmProperty::VARIABLE,
      "See variable CMAKE_<CONFIG>_POSTFIX.",
      "This variable is a special case of the more-general "
