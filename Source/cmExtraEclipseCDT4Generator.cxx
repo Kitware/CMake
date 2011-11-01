@@ -87,6 +87,16 @@ void cmExtraEclipseCDT4Generator::Generate()
   this->GenerateSourceProject = (this->IsOutOfSourceBuild &&
                             mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"));
 
+  if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                    this->HomeDirectory.c_str()))
+    {
+    mf->IssueMessage(cmake::WARNING, "The build directory is a subdirectory "
+                     "of the source directory.\n"
+                     "This is not supported well by Eclipse. It is strongly "
+                     "recommended to use a build directory which is a "
+                     "sibling of the source directory.");
+    }
+
   // NOTE: This is not good, since it pollutes the source tree. However,
   //       Eclipse doesn't allow CVS/SVN to work when the .project is not in
   //       the cvs/svn root directory. Hence, this is provided as an option.
