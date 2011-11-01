@@ -4,7 +4,10 @@
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by
-# the specifics CPACK_RPM_XXX variables.
+# the specifics CPACK_RPM_XXX variables. CPackRPM is a component aware
+# generator so when CPACK_RPM_COMPONENT_INSTALL is ON some more
+# CPACK_RPM_<ComponentName>_XXXX variables may be used in order
+# to have component specific values.
 # Usually those vars correspond to RPM spec file entities, one may find
 # information about spec files here http://www.rpm.org/wiki/Docs.
 # You'll find a detailed usage of CPackRPM on the wiki:
@@ -388,9 +391,33 @@ if(CPACK_RPM_PACKAGE_RELOCATABLE)
   endif(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
 endif(CPACK_RPM_PACKAGE_RELOCATABLE)
 
-# check if additional fields for RPM spec header are given
+# Check if additional fields for RPM spec header are given
+# There may be some COMPONENT specific variables as well
 FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV)
-  IF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+    IF(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
+    ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+    if(CPACK_RPM_PACKAGE_COMPONENT)
+        if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER})
+            IF(CPACK_RPM_PACKAGE_DEBUG)
+              message("CPackRPM:Debug: using CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}")
+            ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}})
+        else()
+            IF(CPACK_RPM_PACKAGE_DEBUG)
+              message("CPackRPM:Debug: CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER} not defined")
+              message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
+            ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+        endif()
+    else()
+        IF(CPACK_RPM_PACKAGE_DEBUG)
+          message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
+        ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+        set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+    endif()
+
+  IF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
     STRING(LENGTH ${_RPM_SPEC_HEADER} _PACKAGE_HEADER_STRLENGTH)
     MATH(EXPR _PACKAGE_HEADER_STRLENGTH "${_PACKAGE_HEADER_STRLENGTH} - 1")
     STRING(SUBSTRING ${_RPM_SPEC_HEADER} 1 ${_PACKAGE_HEADER_STRLENGTH} _PACKAGE_HEADER_TAIL)
@@ -398,10 +425,10 @@ FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLIC
     STRING(SUBSTRING ${_RPM_SPEC_HEADER} 0 1 _PACKAGE_HEADER_NAME)
     SET(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}${_PACKAGE_HEADER_TAIL}")
     IF(CPACK_RPM_PACKAGE_DEBUG)
-      MESSAGE("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}}")
+      MESSAGE("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
     ENDIF(CPACK_RPM_PACKAGE_DEBUG)
-    SET(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}}")
-  ENDIF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+    SET(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
+ENDIF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
 ENDFOREACH(_RPM_SPEC_HEADER)
 
 # CPACK_RPM_SPEC_INSTALL_POST
