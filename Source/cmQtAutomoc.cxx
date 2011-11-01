@@ -51,7 +51,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   const char* targetName = target->GetName();
   // don't do anything if there is no Qt4:
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion != "4")
+  if (qtMajorVersion != "4" && qtMajorVersion != "5")
     {
     return;
     }
@@ -174,7 +174,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
 
   this->Init();
 
-  if (this->QtMajorVersion == "4")
+  if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
     this->RunAutomocQt4();
     }
