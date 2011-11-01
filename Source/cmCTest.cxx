@@ -2801,7 +2801,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
     }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "SetCTestConfigurationFromCMakeVariable:"
-             << dconfig << ":" << cmake_var);
+             << dconfig << ":" << cmake_var << std::endl);
   this->SetCTestConfiguration(dconfig, ctvar);
   return true;
 }
