@@ -1206,6 +1206,27 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MakeClean")
   ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
 
+  if(NOT DEFINED CTEST_RUN_MFC)
+    set(CTEST_RUN_MFC OFF)
+    if(MSVC)
+      set(CTEST_RUN_MFC ON)
+    endif()
+  endif()
+
+  if(CTEST_RUN_MFC)
+    add_test(MFC ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/MFC"
+      "${CMake_BINARY_DIR}/Tests/MFC"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project mfc_driver
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command ${CMAKE_CTEST_COMMAND}
+        -C \${CTEST_CONFIGURATION_TYPE} -VV)
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MFC")
+  endif()
+
   IF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
       --build-and-test
