@@ -130,6 +130,8 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   std::string _moc_defs = (tmp!=0 ? tmp : "");
   tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
   std::string _moc_compile_defs = (tmp!=0 ? tmp : "");
+  tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
+  std::string _moc_options = (tmp!=0 ? tmp : "");
 
   // forget the variables added here afterwards again:
   cmMakefile::ScopePushPop varScope(makefile);
@@ -139,6 +141,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   makefile->AddDefinition("_moc_incs", _moc_incs.c_str());
   makefile->AddDefinition("_moc_defs", _moc_defs.c_str());
   makefile->AddDefinition("_moc_compile_defs", _moc_compile_defs.c_str());
+  makefile->AddDefinition("_moc_options", _moc_options.c_str());
   makefile->AddDefinition("_moc_files", _moc_files.c_str());
   makefile->AddDefinition("_moc_headers", _moc_headers.c_str());
 
@@ -230,6 +233,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
                                                  "AM_MOC_COMPILE_DEFINITIONS");
   this->MocDefinitionsStr = makefile->GetSafeDefinition("AM_MOC_DEFINITIONS");
   this->MocIncludesStr = makefile->GetSafeDefinition("AM_MOC_INCLUDES");
+  this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
@@ -305,6 +309,8 @@ void cmQtAutomoc::Init()
         }
       }
     }
+
+  cmSystemTools::ExpandListArgument(this->MocOptionsStr, this->MocOptions);
 
   std::vector<std::string> incPaths;
   cmSystemTools::ExpandListArgument(this->MocIncludesStr, incPaths);
@@ -711,6 +717,12 @@ bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
       }
     for(std::list<std::string>::const_iterator it=this->MocDefinitions.begin();
         it != this->MocDefinitions.end();
+        ++it)
+      {
+      command.push_back(*it);
+      }
+    for(std::vector<std::string>::const_iterator it=this->MocOptions.begin();
+        it != this->MocOptions.end();
         ++it)
       {
       command.push_back(*it);
