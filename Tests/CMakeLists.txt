@@ -1210,6 +1210,30 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     set(CTEST_RUN_MFC OFF)
     if(MSVC)
       set(CTEST_RUN_MFC ON)
+
+      # Look for evidence that this is a VCExpress build. If so, avoid
+      # the MFC test by default.
+      string(TOLOWER "${CMAKE_TEST_MAKEPROGRAM}" mkprog)
+      if(mkprog MATCHES "vcexpress")
+        message(STATUS
+          "CMAKE_TEST_MAKEPROGRAM indicates vcexpress, avoiding MFC test")
+        set(CTEST_RUN_MFC OFF)
+      endif()
+
+      # Since MSBuild might also be the "makeprogram" for a VCExpress
+      # build tree, use one more heuristic, too. The string representing
+      # the .vcproj file type contains "VCExpress" on machines where an
+      # express edition of VS was installed last:
+      if(CTEST_RUN_MFC)
+        execute_process(COMMAND cmd /c assoc .vcproj
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          OUTPUT_VARIABLE ov)
+        if(ov MATCHES "VCExpress")
+          message(STATUS
+            ".vcproj file association indicates VCExpress, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        endif()
+      endif()
     endif()
   endif()
 
