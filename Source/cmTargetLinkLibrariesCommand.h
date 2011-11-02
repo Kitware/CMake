@@ -19,7 +19,7 @@
  *
  * cmTargetLinkLibrariesCommand is used to specify a list of libraries to link
  * into executable(s) or shared objects. The names of the libraries
- * should be those defined by the LIBRARY(library) command(s).  
+ * should be those defined by the LIBRARY(library) command(s).
  */
 class cmTargetLinkLibrariesCommand : public cmCommand
 {
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmTargetLinkLibrariesCommand;
     }
@@ -47,12 +47,12 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
-    return 
+    return
       "Link a target to given libraries.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -142,7 +142,7 @@ public:
       ")"
       ;
     }
-  
+
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
 private:
   void LinkLibraryTypeSpecifierWarning(int left, int right);
@@ -157,8 +157,6 @@ private:
   };
 
   ProcessingState CurrentProcessingState;
-
-  bool SpecifiesPublicAndPrivate;
 
   void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
 };

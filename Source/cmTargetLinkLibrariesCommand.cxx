@@ -98,8 +98,6 @@ bool cmTargetLinkLibrariesCommand
   // specification if the keyword is encountered as the first argument.
   this->CurrentProcessingState = ProcessingLinkLibraries;
 
-  this->SpecifiesPublicAndPrivate = false;
-
   // add libraries, nothe that there is an optional prefix
   // of debug and optimized than can be used
   for(unsigned int i=1; i < args.size(); ++i)
@@ -128,10 +126,6 @@ bool cmTargetLinkLibrariesCommand
           );
         return true;
         }
-      if (this->CurrentProcessingState == ProcessingPrivateInterface)
-        {
-        this->SpecifiesPublicAndPrivate = true;
-        }
       this->CurrentProcessingState = ProcessingPublicInterface;
       }
     else if(args[i] == "LINK_PRIVATE")
@@ -144,10 +138,6 @@ bool cmTargetLinkLibrariesCommand
           "argument, just after the target name."
           );
         return true;
-        }
-      if (this->CurrentProcessingState == ProcessingPublicInterface)
-        {
-        this->SpecifiesPublicAndPrivate = true;
         }
       this->CurrentProcessingState = ProcessingPrivateInterface;
       }
@@ -222,12 +212,12 @@ bool cmTargetLinkLibrariesCommand
     cmSystemTools::SetFatalErrorOccured();
     }
 
-  // If the INTERFACE option was given, make sure the
-  // LINK_INTERFACE_LIBRARIES property exists.  This allows the
-  // command to be used to specify an empty link interface.
-  if((this->CurrentProcessingState == ProcessingLinkInterface
-        || (this->CurrentProcessingState == ProcessingPrivateInterface
-          && !this->SpecifiesPublicAndPrivate))
+  // If any of the LINK_ options were given, make sure the
+  // LINK_INTERFACE_LIBRARIES target property exists.
+  // Use of any of the new keywords implies awareness of
+  // this property. And if no libraries are named, it should
+  // result in an empty link interface.
+  if((this->CurrentProcessingState != ProcessingLinkInterface)
     && !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
