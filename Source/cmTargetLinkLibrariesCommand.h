@@ -158,8 +158,6 @@ private:
 
   ProcessingState CurrentProcessingState;
 
-  bool SpecifiesPublicAndPrivate;
-
   void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
 };
 
