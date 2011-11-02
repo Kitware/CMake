@@ -217,7 +217,7 @@ bool cmTargetLinkLibrariesCommand
   // Use of any of the new keywords implies awareness of
   // this property. And if no libraries are named, it should
   // result in an empty link interface.
-  if((this->CurrentProcessingState != ProcessingLinkInterface)
+  if((this->CurrentProcessingState != ProcessingLinkLibraries)
     && !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
