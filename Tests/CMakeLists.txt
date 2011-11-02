@@ -1574,6 +1574,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -P "${CMake_SOURCE_DIR}/Tests/CMakeCommands/build_command/RunCMake.cmake"
   )
 
+  ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake"
