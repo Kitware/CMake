@@ -340,6 +340,7 @@ protected:
   void CheckMultipleOutputs(bool verbose);
 
 private:
+  std::string ConvertShellCommand(std::string const& cmd, RelativeRoot root);
   std::string MakeLauncher(const cmCustomCommand& cc, cmTarget* target,
                            RelativeRoot relative);
 
