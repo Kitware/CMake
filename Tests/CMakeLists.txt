@@ -1208,6 +1208,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   if(NOT DEFINED CTEST_RUN_MFC)
     set(CTEST_RUN_MFC OFF)
+
     if(MSVC)
       set(CTEST_RUN_MFC ON)
 
@@ -1231,6 +1232,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         if(ov MATCHES "VCExpress")
           message(STATUS
             ".vcproj file association indicates VCExpress, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        endif()
+      endif()
+
+      # For the Watcom WMake generator, avoid the MFC test by default.
+      if(CTEST_RUN_MFC)
+        if("${CMAKE_TEST_GENERATOR}" MATCHES "WMake")
+          message(STATUS
+            "using the Watcom WMake generator, avoiding MFC test")
           set(CTEST_RUN_MFC OFF)
         endif()
       endif()
