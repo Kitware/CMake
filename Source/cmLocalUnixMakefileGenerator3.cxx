@@ -697,7 +697,7 @@ cmLocalUnixMakefileGenerator3
   // This should be the first target except for the default_target in
   // the interface Makefile.
   this->WriteMakeRule(
-    makefileStream, "Disable implicit rules so canoncical targets will work.",
+    makefileStream, "Disable implicit rules so canonical targets will work.",
     ".SUFFIXES", no_depends, no_commands, false);
 
   if(!this->NMake && !this->WatcomWMake && !this->BorlandMakeCurlyHack)
