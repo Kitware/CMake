@@ -290,16 +290,24 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       }
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2); 
+
     const char* mfcFlag = 
       this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
-    if(mfcFlag)
+    std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
+
+    std::string useOfMfcValue = "false";
+    if(mfcFlagValue == "1")
       {
-      this->WriteString("<UseOfMfc>true</UseOfMfc>\n", 2);
+      useOfMfcValue = "Static";
       }
-    else
+    else if(mfcFlagValue == "2")
       {
-      this->WriteString("<UseOfMfc>false</UseOfMfc>\n", 2);
+      useOfMfcValue = "Dynamic";
       }
+    std::string mfcLine = "<UseOfMfc>";
+    mfcLine += useOfMfcValue + "</UseOfMfc>\n";
+    this->WriteString(mfcLine.c_str(), 2);
+
     if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
        this->ClOptions[*i]->UsingUnicode())
       {
