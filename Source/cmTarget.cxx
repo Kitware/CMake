@@ -4609,6 +4609,41 @@ cmTarget::GetLinkInformation(const char* config)
   return i->second;
 }
 
+void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const char* config)
+{
+  std::vector<std::string> targetIncludes;
+  const char *incs = this->GetProperty("INCLUDE_DIRECTORIES");
+  if (incs)
+    {
+    cmSystemTools::ExpandListArgument(incs, targetIncludes);
+    }
+
+  std::string defPropName = "INCLUDE_DIRECTORIES_";
+  defPropName += cmSystemTools::UpperCase(config);
+
+  const char* config_incs = this->GetProperty(defPropName.c_str());
+  if (config_incs)
+    {
+    cmSystemTools::ExpandListArgument(config_incs, targetIncludes);
+    }
+
+  std::set<cmStdString> emitted;
+  for(std::vector<std::string>::const_iterator
+        li = includes.begin(); li != includes.end(); ++li)
+    {
+      emitted.insert(*li);
+    }
+
+  for(std::vector<std::string>::const_iterator
+        li = targetIncludes.begin(); li != targetIncludes.end(); ++li)
+    {
+    if (emitted.insert(*li).second)
+      {
+        includes.push_back(*li);
+      }
+    }
+}
+
 //----------------------------------------------------------------------------
 cmTargetLinkInformationMap
 ::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()

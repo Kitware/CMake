@@ -450,6 +450,8 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
+  void GetIncludeDirectories(std::vector<std::string> &includes, const char *config);
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
