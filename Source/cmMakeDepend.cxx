@@ -54,16 +54,20 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
     this->Makefile->IncludeFileRegularExpression.c_str());
   this->ComplainFileRegularExpression.compile(
     this->Makefile->ComplainFileRegularExpression.c_str());
-  
-  // Now extract any include paths from the makefile flags
-  const std::vector<std::string>& includes =
-    this->Makefile->GetIncludeDirectories();
-  for(std::vector<std::string>::const_iterator j = includes.begin();
-      j != includes.end(); ++j)
+
+  // Now extract any include paths from the targets
+  cmTargets & targets = this->Makefile->GetTargets();
+  for (cmTargets::iterator l = targets.begin(); l != targets.end(); ++l)
     {
-    std::string path = *j;
-    this->Makefile->ExpandVariablesInString(path);
-    this->AddSearchPath(path.c_str());
+    const std::vector<std::string>& includes =
+      l->second.GetIncludeDirectories();
+    for(std::vector<std::string>::const_iterator j = includes.begin();
+        j != includes.end(); ++j)
+      {
+      std::string path = *j;
+      this->Makefile->ExpandVariablesInString(path);
+      this->AddSearchPath(path.c_str());
+      }
     }
 }
 

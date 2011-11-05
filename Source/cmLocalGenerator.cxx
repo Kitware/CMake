@@ -556,7 +556,7 @@ void cmLocalGenerator::GenerateTargetManifest()
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       const char* lang,
                                                       cmSourceFile& source,
-                                                      cmTarget& )
+                                                      cmTarget& target)
 {
   std::string objectDir = cmSystemTools::GetFilenamePath(std::string(ofname));
   objectDir = this->Convert(objectDir.c_str(),START_OUTPUT,SHELL);
@@ -576,7 +576,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += " ";
     {
     std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, lang);
+    this->GetIncludeDirectories(includes, &target, lang);
     flags += this->GetIncludeFlags(includes, lang);
     }
   flags += this->Makefile->GetDefineFlags();
@@ -1313,6 +1313,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
+                                             cmTarget* target,
                                              const char* lang)
 {
   // Need to decide whether to automatically include the source and
@@ -1398,9 +1399,12 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       }
     }
 
-  // Get the project-specified include directories.
-  const std::vector<std::string>& includes =
-    this->Makefile->GetIncludeDirectories();
+  // Get the target-specific include directories.
+  std::vector<std::string> includes;
+  if(target)
+    {
+    includes = target->GetIncludeDirectories();
+    }
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.

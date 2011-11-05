@@ -1067,9 +1067,9 @@ void cmGlobalGenerator::CheckLocalGenerators()
     {
     manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
     this->LocalGenerators[i]->ConfigureFinalPass();
-    const cmTargets & targets =
+    cmTargets & targets =
       this->LocalGenerators[i]->GetMakefile()->GetTargets();
-    for (cmTargets::const_iterator l = targets.begin();
+    for (cmTargets::iterator l = targets.begin();
          l != targets.end(); l++)
       {
       const cmTarget::LinkLibraryVectorType& libs =
@@ -1095,27 +1095,28 @@ void cmGlobalGenerator::CheckLocalGenerators()
           notFoundMap[varName] = text;
           }
         }
-      }
-    const std::vector<std::string>& incs =
-      this->LocalGenerators[i]->GetMakefile()->GetIncludeDirectories();
+      std::vector<std::string> incs;
+      this->LocalGenerators[i]->GetIncludeDirectories(incs, &l->second);
 
-    for( std::vector<std::string>::const_iterator incDir = incs.begin();
-          incDir != incs.end(); ++incDir)
-      {
-      if(incDir->size() > 9 &&
-          cmSystemTools::IsNOTFOUND(incDir->c_str()))
+      for( std::vector<std::string>::const_iterator incDir = incs.begin();
+            incDir != incs.end(); ++incDir)
         {
-        std::string varName = incDir->substr(0, incDir->size()-9);
-        cmCacheManager::CacheIterator it =
-          manager->GetCacheIterator(varName.c_str());
-        if(it.GetPropertyAsBool("ADVANCED"))
+        if(incDir->size() > 9 &&
+            cmSystemTools::IsNOTFOUND(incDir->c_str()))
           {
-          varName += " (ADVANCED)";
+          std::string varName = incDir->substr(0, incDir->size()-9);
+          cmCacheManager::CacheIterator it =
+            manager->GetCacheIterator(varName.c_str());
+          if(it.GetPropertyAsBool("ADVANCED"))
+            {
+            varName += " (ADVANCED)";
+            }
+          std::string text = notFoundMap[varName];
+          text += "\n   used as include directory in directory ";
+          text += this->LocalGenerators[i]
+                      ->GetMakefile()->GetCurrentDirectory();
+          notFoundMap[varName] = text;
           }
-        std::string text = notFoundMap[varName];
-        text += "\n   used as include directory in directory ";
-        text += this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
-        notFoundMap[varName] = text;
         }
       }
     this->CMakeInstance->UpdateProgress

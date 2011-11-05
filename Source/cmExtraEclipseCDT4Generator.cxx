@@ -893,9 +893,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->GlobalGenerator->GetLocalGenerators().end();
        ++it)
     {
-    const std::vector<std::string>& includeDirs
-      = (*it)->GetMakefile()->GetIncludeDirectories();
-    this->AppendIncludeDirectories(fout, includeDirs, emmited);
+    cmTargets & targets = (*it)->GetMakefile()->GetTargets();
+    for (cmTargets::iterator l = targets.begin(); l != targets.end(); ++l)
+      {
+      std::vector<std::string> includeDirs;
+      (*it)->GetIncludeDirectories(includeDirs, &l->second);
+      this->AppendIncludeDirectories(fout, includeDirs, emmited);
+      }
     }
   // now also the system include directories, in case we found them in
   // CMakeSystemSpecificInformation.cmake. This makes Eclipse find the
