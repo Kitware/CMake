@@ -574,7 +574,11 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   std::string flags;
   flags += this->Makefile->GetSafeDefinition(varString.c_str());
   flags += " ";
-  flags += this->GetIncludeFlags(lang);
+    {
+    std::vector<std::string> includes;
+    this->GetIncludeDirectories(includes, lang);
+    flags += this->GetIncludeFlags(includes, lang);
+    }
   flags += this->Makefile->GetDefineFlags();
 
   // Construct the command lines.
@@ -1192,8 +1196,8 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
 }
 
 //----------------------------------------------------------------------------
-const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
-                                              bool forResponseFile)
+const char* cmLocalGenerator::GetIncludeFlags(const std::vector<std::string> &includes,
+                                              const char* lang, bool forResponseFile)
 {
   if(!lang)
     {
@@ -1207,9 +1211,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
     }
 
   cmOStringStream includeFlags;
-  std::vector<std::string> includes;
-  this->GetIncludeDirectories(includes, lang);
-  std::vector<std::string>::iterator i;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
@@ -1251,6 +1252,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
 #ifdef __APPLE__
   emitted.insert("/System/Library/Frameworks");
 #endif
+  std::vector<std::string>::const_iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     if(this->Makefile->IsOn("APPLE")

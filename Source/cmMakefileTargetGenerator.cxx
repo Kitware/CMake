@@ -275,7 +275,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     // Add shared-library flags if needed.
     this->LocalGenerator->AddSharedFlags(flags, lang, shared);
 
-    // Add include directory flags.
+    // Add include directory and target include flags.
     this->AddIncludeFlags(flags, lang);
 
     // Append old-style preprocessor definition flags.
@@ -1812,8 +1812,13 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
   responseVar += "_USE_RESPONSE_FILE_FOR_INCLUDES";
   bool useResponseFile = this->Makefile->IsOn(responseVar.c_str());
 
+
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes, lang);
+  this->Target->GetIncludeDirectories(includes, this->ConfigName);
+
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(lang, useResponseFile);
+    this->LocalGenerator->GetIncludeFlags(includes, lang, useResponseFile);
   if(includeFlags.empty())
     {
     return;
