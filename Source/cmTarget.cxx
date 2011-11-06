@@ -25,6 +25,7 @@
 #include <queue>
 #include <stdlib.h> // required for atof
 #include <assert.h>
+#include <numeric> // For std::accumulate
 
 const char* cmTarget::GetTargetTypeName(TargetType targetType)
 {
@@ -4608,6 +4609,81 @@ cmTarget::GetLinkInformation(const char* config)
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
+}
+
+void cmTarget::AddIncludeDirectory(const char* inc, bool before, const char *config)
+{
+  // if there is a newline then break it into multiple arguments
+  if (!inc)
+    {
+    return;
+    }
+
+  std::string propertyName = "INCLUDE_DIRECTORIES";
+  std::string configTypeUpper;
+
+  if (config)
+    {
+    propertyName += "_";
+    configTypeUpper = cmSystemTools::UpperCase(config);
+    propertyName += configTypeUpper;
+    }
+
+  std::vector<std::string> IncludeDirectories;
+  const char *incs = this->GetProperty(propertyName.c_str());
+  if (incs)
+    {
+    cmSystemTools::ExpandListArgument(incs, IncludeDirectories);
+    }
+
+  // Don't add an include directory that is already present.  Yes,
+  // this linear search results in n^2 behavior, but n won't be
+  // getting much bigger than 20.  We cannot use a set because of
+  // order dependency of the include path.
+  std::vector<std::string>::iterator i =
+    std::find(IncludeDirectories.begin(),
+              IncludeDirectories.end(), inc);
+
+  if(i == IncludeDirectories.end())
+    {
+    if (before)
+      {
+      // WARNING: this *is* expensive (linear time) since it's a vector
+      IncludeDirectories.insert(IncludeDirectories.begin(), inc);
+      ++(config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset);
+      }
+    else
+      {
+      IncludeDirectories.push_back(inc);
+      }
+    }
+  else
+    {
+    if(before)
+      {
+      // Find it. If it's before (config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset)'
+      // Then don't change that variable. Otherwise increase it.
+
+      std::vector<std::string>::iterator endOfBefore = IncludeDirectories.begin()
+                  + (config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset);
+      if (i > endOfBefore)
+        ++(config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset);
+
+      // if this before and already in the path then remove it
+      IncludeDirectories.erase(i);
+      // WARNING: this *is* expensive (linear time) since it's a vector
+      IncludeDirectories.insert(IncludeDirectories.begin(), inc);
+      }
+    }
+  // TODO: Store the vector in cmTarget instead of all this conversion
+  std::vector<std::string>::iterator dirs = IncludeDirectories.begin();
+  std::string propertyValue = *dirs;
+  ++dirs;
+  if (dirs != IncludeDirectories.end())
+    {
+    propertyValue += std::accumulate(dirs, IncludeDirectories.end(), std::string(";"));
+    }
+  this->SetProperty(propertyName.c_str(), propertyValue.c_str());
 }
 
 void cmTarget::GetIncludeDirectoriesBefore(std::vector<std::string> &includes, const char* config)
