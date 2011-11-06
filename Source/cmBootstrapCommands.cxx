@@ -87,6 +87,7 @@
 #include "cmSiteNameCommand.cxx"
 #include "cmStringCommand.cxx"
 #include "cmSubdirCommand.cxx"
+#include "cmTargetIncludeDirectoriesCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
 #include "cmTryCompileCommand.cxx"
 #include "cmTryRunCommand.cxx"
@@ -160,6 +161,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmSiteNameCommand);
   commands.push_back(new cmStringCommand);
   commands.push_back(new cmSubdirCommand);
+  commands.push_back(new cmTargetIncludeDirectoriesCommand);
   commands.push_back(new cmTargetLinkLibrariesCommand);
   commands.push_back(new cmTryCompileCommand);
   commands.push_back(new cmTryRunCommand);
