@@ -4610,6 +4610,56 @@ cmTarget::GetLinkInformation(const char* config)
   return i->second;
 }
 
+void cmTarget::GetIncludeDirectoriesBefore(std::vector<std::string> &includes, const char* config)
+{
+  std::string configTypeUpper;
+  if (config)
+    {
+    configTypeUpper = cmSystemTools::UpperCase(config);
+    }
+  std::vector<std::string> targetIncludes;
+  const char *incs = this->GetProperty("INCLUDE_DIRECTORIES");
+  if (incs)
+    {
+    cmSystemTools::ExpandListArgument(incs, targetIncludes);
+    }
+
+  std::string defPropName = "INCLUDE_DIRECTORIES_";
+  defPropName += configTypeUpper;
+
+  std::vector<std::string> configTargetIncludes;
+  const char* config_incs = this->GetProperty(defPropName.c_str());
+  if (config_incs)
+    {
+    cmSystemTools::ExpandListArgument(config_incs, configTargetIncludes);
+    }
+
+  std::set<cmStdString> emitted;
+  for(std::vector<std::string>::const_iterator
+        li = includes.begin(); li != includes.end(); ++li)
+    {
+      emitted.insert(*li);
+    }
+
+  for(std::vector<std::string>::const_iterator li = targetIncludes.begin();
+        li != targetIncludes.end() && li != targetIncludes.begin() + this->DirectoriesBeforeOffset + 1; ++li)
+    {
+    if (emitted.insert(*li).second)
+      {
+        includes.push_back(*li);
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator li = configTargetIncludes.begin();
+        li != configTargetIncludes.end() && li != configTargetIncludes.begin() + this->ConfigDirectories[configTypeUpper] + 1; ++li)
+    {
+    if (emitted.insert(*li).second)
+      {
+        includes.push_back(*li);
+      }
+    }
+}
+
 void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const char* config)
 {
   std::vector<std::string> targetIncludes;

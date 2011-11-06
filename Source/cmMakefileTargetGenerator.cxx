@@ -1814,6 +1814,7 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
 
   std::vector<std::string> includes;
+  this->Target->GetIncludeDirectoriesBefore(includes, this->ConfigName);
   this->LocalGenerator->GetIncludeDirectories(includes, lang);
   this->Target->GetIncludeDirectories(includes, this->ConfigName);
 

@@ -450,6 +450,7 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
+  void GetIncludeDirectoriesBefore(std::vector<std::string> &includes, const char *config);
   void GetIncludeDirectories(std::vector<std::string> &includes, const char *config);
 
 private:
