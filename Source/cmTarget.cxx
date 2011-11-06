@@ -4618,13 +4618,20 @@ void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const c
     cmSystemTools::ExpandListArgument(incs, targetIncludes);
     }
 
-  std::string defPropName = "INCLUDE_DIRECTORIES_";
-  defPropName += cmSystemTools::UpperCase(config);
+  std::string configTypeUpper;
+  if (config)
+    {
+    configTypeUpper = cmSystemTools::UpperCase(config);
+    }
 
+  std::string defPropName = "INCLUDE_DIRECTORIES_";
+  defPropName += configTypeUpper;
+
+  std::vector<std::string> configTargetIncludes;
   const char* config_incs = this->GetProperty(defPropName.c_str());
   if (config_incs)
     {
-    cmSystemTools::ExpandListArgument(config_incs, targetIncludes);
+    cmSystemTools::ExpandListArgument(config_incs, configTargetIncludes);
     }
 
   std::set<cmStdString> emitted;
@@ -4636,6 +4643,16 @@ void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const c
 
   for(std::vector<std::string>::const_iterator
         li = targetIncludes.begin(); li != targetIncludes.end(); ++li)
+    {
+    if (emitted.insert(*li).second)
+      {
+        includes.push_back(*li);
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator
+        li = configTargetIncludes.begin();
+        li != configTargetIncludes.end(); ++li)
     {
     if (emitted.insert(*li).second)
       {
