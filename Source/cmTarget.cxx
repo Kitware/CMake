@@ -132,6 +132,7 @@ cmTarget::cmTarget()
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsImportedTarget = false;
+  this->DirectoriesBeforeOffset = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -4642,7 +4643,8 @@ void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const c
     }
 
   for(std::vector<std::string>::const_iterator
-        li = targetIncludes.begin(); li != targetIncludes.end(); ++li)
+        li = targetIncludes.begin() + this->DirectoriesBeforeOffset;
+        li != targetIncludes.end(); ++li)
     {
     if (emitted.insert(*li).second)
       {
@@ -4651,7 +4653,7 @@ void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const c
     }
 
   for(std::vector<std::string>::const_iterator
-        li = configTargetIncludes.begin();
+        li = configTargetIncludes.begin() + this->ConfigDirectories[configTypeUpper];
         li != configTargetIncludes.end(); ++li)
     {
     if (emitted.insert(*li).second)

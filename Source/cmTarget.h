@@ -560,6 +560,8 @@ private:
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
   bool IsImportedTarget;
+  std::vector<std::string>::difference_type DirectoriesBeforeOffset;
+  std::map<cmStdString, std::vector<std::string>::difference_type> ConfigDirectories;
 
   // Cache target output paths for each configuration.
   struct OutputInfo;
