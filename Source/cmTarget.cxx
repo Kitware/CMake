@@ -4679,9 +4679,10 @@ void cmTarget::AddIncludeDirectory(const char* inc, bool before, const char *con
   std::vector<std::string>::iterator dirs = IncludeDirectories.begin();
   std::string propertyValue = *dirs;
   ++dirs;
-  if (dirs != IncludeDirectories.end())
+  while(dirs != IncludeDirectories.end())
     {
-    propertyValue += std::accumulate(dirs, IncludeDirectories.end(), std::string(";"));
+    propertyValue += std::string(";") + *dirs;
+    ++dirs;
     }
   this->SetProperty(propertyName.c_str(), propertyValue.c_str());
 }
