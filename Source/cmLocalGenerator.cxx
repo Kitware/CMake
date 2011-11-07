@@ -1207,7 +1207,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const std::vector<std::string> &in
   key += forResponseFile? "@" : "";
   if(this->LanguageToIncludeFlags.count(key))
     {
-    return this->LanguageToIncludeFlags[key].c_str();
+//     return this->LanguageToIncludeFlags[key].c_str();
     }
 
   cmOStringStream includeFlags;
