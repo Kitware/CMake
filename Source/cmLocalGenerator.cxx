@@ -1207,7 +1207,9 @@ const char* cmLocalGenerator::GetIncludeFlags(const std::vector<std::string> &in
   key += forResponseFile? "@" : "";
   if(this->LanguageToIncludeFlags.count(key))
     {
-    return this->LanguageToIncludeFlags[key].c_str();
+      // Introduced to cmLocalUnixMakefileGenerator in 692ba48c4e5762b370f2999e902b8bd677c77161
+      // It seems to just be memoization. Can it be removed?
+//     return this->LanguageToIncludeFlags[key].c_str();
     }
 
   cmOStringStream includeFlags;
