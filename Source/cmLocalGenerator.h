@@ -146,7 +146,7 @@ public:
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   ///! Get the include flags for the current makefile and language
-  const char* GetIncludeFlags(const std::vector<std::string> &includes,
+  std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               const char* lang, bool forResponseFile = false);
 
   /**
@@ -392,7 +392,6 @@ protected:
   std::vector<std::string> StartOutputDirectoryComponents;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
-  std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<cmStdString> ObjectMaxPathViolations;

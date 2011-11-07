@@ -1196,19 +1196,13 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
 }
 
 //----------------------------------------------------------------------------
-const char* cmLocalGenerator::GetIncludeFlags(
+std::string cmLocalGenerator::GetIncludeFlags(
                                      const std::vector<std::string> &includes,
                                      const char* lang, bool forResponseFile)
 {
   if(!lang)
     {
     return "";
-    }
-  std::string key = lang;
-  key += forResponseFile? "@" : "";
-  if(this->LanguageToIncludeFlags.count(key))
-    {
-    return this->LanguageToIncludeFlags[key].c_str();
     }
 
   cmOStringStream includeFlags;
@@ -1314,12 +1308,7 @@ const char* cmLocalGenerator::GetIncludeFlags(
     {
     flags[flags.size()-1] = ' ';
     }
-  this->LanguageToIncludeFlags[key] = flags;
-
-  // Use this temorary variable for the return value to work-around a
-  // bogus GCC 2.95 warning.
-  const char* ret = this->LanguageToIncludeFlags[key].c_str();
-  return ret;
+  return flags;
 }
 
 //----------------------------------------------------------------------------
