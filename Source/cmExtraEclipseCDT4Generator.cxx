@@ -1008,7 +1008,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           std::string virtDir = "[Targets]/";
           virtDir += prefix;
           virtDir += ti->first;
-          this->AppendTarget(fout, "Build", make, makeArgs, virtDir, "",
+          std::string buildArgs = "-C \"";
+          buildArgs += makefile->GetHomeOutputDirectory();
+          buildArgs += "\" ";
+          buildArgs += makeArgs;
+          this->AppendTarget(fout, "Build", make, buildArgs, virtDir, "",
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";
