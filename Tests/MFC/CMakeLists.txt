@@ -48,3 +48,14 @@ add_test(
   COMMAND ${CMAKE_COMMAND}
     -P "${CMAKE_CURRENT_BINARY_DIR}/ValidateBuild.cmake"
   )
+
+
+add_test(
+  NAME environment
+  COMMAND ${CMAKE_COMMAND} -E environment
+  )
+
+
+message(STATUS "===== environment =====")
+execute_process(COMMAND ${CMAKE_COMMAND} -E environment)
+message(STATUS "===== /environment =====")
