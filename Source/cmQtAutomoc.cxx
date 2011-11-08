@@ -67,7 +67,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   targetDir += ".dir/";
 
   cmCustomCommandLine currentLine;
-  currentLine.push_back(makefile->GetCMakeInstance()->GetCMakeCommand());
+  currentLine.push_back(makefile->GetSafeDefinition("CMAKE_COMMAND"));
   currentLine.push_back("-E");
   currentLine.push_back("cmake_automoc");
   currentLine.push_back(targetDir);
