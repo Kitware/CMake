@@ -1011,7 +1011,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "provider property.");
   cm->DefineProperty
     ("VS_SCC_LOCALPATH", cmProperty::TARGET,
-     "Visual Studio Source Code Control Provider.",
+     "Visual Studio Source Code Control Local Path.",
      "Can be set to change the visual studio source code control "
      "local path property.");
   cm->DefineProperty
@@ -1019,6 +1019,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "Visual Studio Source Code Control Project.",
      "Can be set to change the visual studio source code control "
      "project name property.");
+  cm->DefineProperty
+    ("VS_SCC_AUXPATH", cmProperty::TARGET,
+     "Visual Studio Source Code Control Aux Path.",
+     "Can be set to change the visual studio source code control "
+     "auxpath property.");
   cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",
