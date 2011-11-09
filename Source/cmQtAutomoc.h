@@ -35,7 +35,7 @@ private:
                                  const char* targetDirectory);
   void WriteOldMocDefinitionsFile(const char* targetDirectory);
 
-  bool RunAutomocQt4();
+  bool RunAutomoc();
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
   void ParseCppFile(const std::string& absFilename,
