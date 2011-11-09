@@ -108,6 +108,7 @@ IF (UNIX)
   FIND_PATH(X11_XShm_INCLUDE_PATH X11/extensions/XShm.h              ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xrandr_INCLUDE_PATH X11/extensions/Xrandr.h          ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xrender_INCLUDE_PATH X11/extensions/Xrender.h        ${X11_INC_SEARCH_PATH})
+  FIND_PATH(X11_XRes_INCLUDE_PATH X11/extensions/XRes.h              ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xscreensaver_INCLUDE_PATH X11/extensions/scrnsaver.h ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xshape_INCLUDE_PATH X11/extensions/shape.h           ${X11_INC_SEARCH_PATH})
   FIND_PATH(X11_Xutil_INCLUDE_PATH X11/Xutil.h                       ${X11_INC_SEARCH_PATH})
@@ -136,6 +137,7 @@ IF (UNIX)
   FIND_LIBRARY(X11_Xpm_LIB Xpm               ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrandr_LIB Xrandr         ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xrender_LIB Xrender       ${X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(X11_XRes_LIB XRes             ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xscreensaver_LIB Xss      ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xt_LIB Xt                 ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_XTest_LIB Xtst            ${X11_LIB_SEARCH_PATH})
@@ -249,6 +251,11 @@ IF (UNIX)
      SET(X11_Xrender_FOUND TRUE)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_Xrender_INCLUDE_PATH})
   ENDIF (X11_Xrender_INCLUDE_PATH AND X11_Xrender_LIB)
+
+  IF (X11_XRes_INCLUDE_PATH AND X11_XRes_LIB)
+     SET(X11_XRes_FOUND TRUE)
+     SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_XRes_INCLUDE_PATH})
+  ENDIF (X11_XRes_INCLUDE_PATH AND X11_XRes_LIB)
 
   IF (X11_Xrandr_INCLUDE_PATH AND X11_Xrandr_LIB)
      SET(X11_Xrandr_FOUND TRUE)
@@ -424,6 +431,8 @@ IF (UNIX)
     X11_Xdamage_INCLUDE_PATH
     X11_Xrender_LIB
     X11_Xrender_INCLUDE_PATH
+    X11_XRes_LIB
+    X11_XRes_INCLUDE_PATH
     X11_Xxf86misc_LIB
     X11_xf86misc_INCLUDE_PATH
     X11_xf86vmode_INCLUDE_PATH
