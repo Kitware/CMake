@@ -49,8 +49,12 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
-  // don't do anything if there is no Qt4:
+  // don't do anything if there is no Qt4 or Qt5SrcTools (which contains moc):
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion == "")
+    {
+      qtMajorVersion = makefile->GetSafeDefinition("Qt5SrcTools_VERSION_MAJOR");
+    }
   if (qtMajorVersion != "4" && qtMajorVersion != "5")
     {
     return;
@@ -179,7 +183,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    this->RunAutomocQt4();
+    this->RunAutomoc();
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
@@ -222,6 +226,10 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
     }
 
   this->QtMajorVersion = makefile->GetSafeDefinition("AM_QT_VERSION_MAJOR");
+  if (this->QtMajorVersion == "")
+    {
+    this->QtMajorVersion = makefile->GetSafeDefinition("AM_Qt5SrcTools_VERSION_MAJOR");
+    }
   this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
   this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
   this->IncludeProjectDirsBefore = makefile->IsOn(
@@ -382,7 +390,7 @@ void cmQtAutomoc::Init()
 }
 
 
-bool cmQtAutomoc::RunAutomocQt4()
+bool cmQtAutomoc::RunAutomoc()
 {
   if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
     || (this->OldMocDefinitionsStr != this->Join(this->MocDefinitions, ' ')))
