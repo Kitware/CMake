@@ -53,7 +53,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
   if (qtMajorVersion == "")
     {
-      qtMajorVersion = makefile->GetSafeDefinition("Qt5SrcTools_VERSION_MAJOR");
+    qtMajorVersion = makefile->GetSafeDefinition("Qt5SrcTools_VERSION_MAJOR");
     }
   if (qtMajorVersion != "4" && qtMajorVersion != "5")
     {
@@ -221,7 +221,8 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->QtMajorVersion = makefile->GetSafeDefinition("AM_QT_VERSION_MAJOR");
   if (this->QtMajorVersion == "")
     {
-    this->QtMajorVersion = makefile->GetSafeDefinition("AM_Qt5SrcTools_VERSION_MAJOR");
+    this->QtMajorVersion = makefile->GetSafeDefinition(
+                                     "AM_Qt5SrcTools_VERSION_MAJOR");
     }
   this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
   this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
