@@ -545,64 +545,57 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         // finding the correct header, so we need to remove the moc_ part
         basename = basename.substr(4);
 
-        bool headerFound = false;
+        std::string mocSubDir;
+        if (currentMoc.find_first_of('/') != std::string::npos)
+          {
+          mocSubDir = absPath
+                       + cmsys::SystemTools::GetFilenamePath(currentMoc) + '/';
+          }
+
+        std::string headerToMoc;
         for(std::list<std::string>::const_iterator ext =
                                                       headerExtensions.begin();
             ext != headerExtensions.end();
             ++ext)
           {
-          const std::string &sourceFilePath = absPath + basename + (*ext);
+          std::string sourceFilePath = absPath + basename + (*ext);
           if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
             {
-            headerFound = true;
-            includedMocs[sourceFilePath] = currentMoc;
+            headerToMoc = sourceFilePath;
             break;
             }
-          }
-        if (!headerFound)
-          {
-          // the moc file is in a subdir => look for the header in the
-          // same subdir
-          if (currentMoc.find_first_of('/') != std::string::npos)
+          if (!mocSubDir.empty())
             {
-            const std::string &filepath = absPath
-                    + cmsys::SystemTools::GetFilenamePath(currentMoc)
-                    + '/' + basename;
+            sourceFilePath = mocSubDir + basename + (*ext);
+            if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
+              {
+              headerToMoc = sourceFilePath;
+              break;
+              }
+            }
+          }
 
-            for(std::list<std::string>::const_iterator ext =
-                                                      headerExtensions.begin();
-                ext != headerExtensions.end();
-                ++ext)
-              {
-              const std::string &sourceFilePath = filepath + (*ext);
-              if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
-                {
-                headerFound = true;
-                includedMocs[sourceFilePath] = currentMoc;
-                break;
-                }
-              }
-            if (!headerFound)
-              {
-              std::cerr << "AUTOMOC: The file \"" << absFilename
-                        << "\" includes the moc file \"" << currentMoc
-                        << "\", but neither \"" << absPath << basename
-                        << '{' << this->Join(headerExtensions, ',')
-                        << "}\" nor \"" << filepath << '{'
-                        << this->Join(headerExtensions, ',') << '}'
-                        << "\" exist." << std::endl;
-              ::exit(EXIT_FAILURE);
-              }
+        if (!headerToMoc.empty())
+          {
+          includedMocs[headerToMoc] = currentMoc;
+          }
+        else
+          {
+          std::cerr << "AUTOMOC: The file \"" << absFilename
+                    << "\" includes the moc file \"" << currentMoc
+                    << "\", but could not find header \"" << basename
+                    << '{' << this->Join(headerExtensions, ',') << "}\" ";
+          if (mocSubDir.empty())
+            {
+            std::cerr << "in " << absPath << std::endl;
             }
           else
             {
-            std::cerr << "AUTOMOC: The file \"" << absFilename
-                      << "\" includes the moc file \"" << currentMoc
-                      << "\", but \"" << absPath << basename << '{'
-                      << this->Join(headerExtensions, ',') << '}'
-                      << "\" does not exist." << std::endl;
-            ::exit(EXIT_FAILURE);
+            std::cerr << "neither in " << absPath
+                      << " nor in " << mocSubDir << std::endl;
             }
+
+          ::exit(EXIT_FAILURE);
           }
         }
       else
