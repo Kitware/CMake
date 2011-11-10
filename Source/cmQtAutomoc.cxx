@@ -512,7 +512,8 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   const std::string contentsString = this->ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOMOC: empty source file: " << absFilename << std::endl;
+    std::cerr << "AUTOMOC: warning: " << absFilename << ": file is empty"
+              << std::endl;
     return;
     }
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
@@ -592,9 +593,9 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
           }
         else
           {
-          std::cerr << "AUTOMOC: The file \"" << absFilename
-                    << "\" includes the moc file \"" << currentMoc
-                    << "\", but could not find header \"" << basename
+          std::cerr << "AUTOMOC: error: " << absFilename << " The file "
+                    << "includes the moc file \"" << currentMoc << "\", "
+                    << "but could not find header \"" << basename
                     << '{' << this->Join(headerExtensions, ',') << "}\" ";
           if (mocSubDir.empty())
             {
@@ -613,8 +614,8 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         {
         if (basename != scannedFileBasename)
           {
-          std::cerr << "AUTOMOC: The file \"" << absFilename
-                    << "\" includes the moc file \"" << currentMoc
+          std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
+                    << "includes the moc file \"" << currentMoc
                     << "\", which seems to be the moc file from a different "
                     << "source file. This is not supported. "
                     << "Include \"" << scannedFileBasename << ".moc\" to run "
@@ -637,12 +638,12 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
     cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
     if (qObjectRegExp.find(contentsString))
       {
-      std::cerr << "AUTOMOC: The file \"" << absFilename
-                << "\" contains a Q_OBJECT macro, but does not include "
+      std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+                << "contains a Q_OBJECT macro, but does not include "
                 << "\"" << scannedFileBasename << ".moc\", but instead includes "
                 << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
                 << "\"" << absFilename << "\" ! Better include \""
-                << scannedFileBasename << ".moc\" to get a robust build."
+                << scannedFileBasename << ".moc\" for a robust build."
                 << std::endl;
       includedMocs[absFilename] = ownMocUnderscoreFile;
       includedMocs.erase(ownMocHeaderFile);
@@ -772,7 +773,7 @@ bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
     bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
     if (!result || retVal)
       {
-      std::cerr << "AUTOMOC: process for " << mocFilePath << " failed:\n"
+      std::cerr << "AUTOMOC: error: process for " << mocFilePath <<" failed:\n"
                 << output << std::endl;
       this->RunMocFailed = true;
       cmSystemTools::RemoveFile(mocFilePath.c_str());
