@@ -527,7 +527,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   std::string ownMocHeaderFile;
 
   std::string::size_type matchOffset = 0;
-  if (mocIncludeRegExp.find(contentsString.c_str()))
+  if (mocIncludeRegExp.find(contentsString))
     {
     // for every moc include in the file
     do
