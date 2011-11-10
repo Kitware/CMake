@@ -17,9 +17,24 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
-# include <cmsys/Terminal.h>
+#include <cmsys/Terminal.h>
+
+#include <string.h>
 
 #include "cmQtAutomoc.h"
+
+
+static bool containsQ_OBJECT(const std::string& text)
+{
+  // this simple check is much much faster than the regexp
+  if (strstr(text.c_str(), "Q_OBJECT") == NULL)
+    {
+    return false;
+    }
+
+  cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+  return qObjectRegExp.find(text);
+}
 
 
 cmQtAutomoc::cmQtAutomoc()
@@ -527,7 +542,11 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   std::string ownMocHeaderFile;
 
   std::string::size_type matchOffset = 0;
-  if (mocIncludeRegExp.find(contentsString))
+  // first a simply string check for "moc" is *much* faster than the regexp,
+  // and if the string search already fails, we don't have to try the
+  // expensive regexp
+  if ((strstr(contentsString.c_str(), "moc") != NULL)
+                                    && (mocIncludeRegExp.find(contentsString)))
     {
     // for every moc include in the file
     do
@@ -635,8 +654,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   // But warn, since this is not how it is supposed to be used.
   if ((dotMocIncluded == false) && (mocUnderscoreIncluded == true))
     {
-    cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
-    if (qObjectRegExp.find(contentsString))
+    if (containsQ_OBJECT(contentsString))
       {
       std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
                 << "contains a Q_OBJECT macro, but does not include "
@@ -683,7 +701,6 @@ void cmQtAutomoc::ParseHeaders(const std::set<std::string>& absHeaders,
                         const std::map<std::string, std::string>& includedMocs,
                         std::map<std::string, std::string>& notIncludedMocs)
 {
-  cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
   for(std::set<std::string>::const_iterator hIt=absHeaders.begin();
       hIt!=absHeaders.end();
       ++hIt)
@@ -702,7 +719,7 @@ void cmQtAutomoc::ParseHeaders(const std::set<std::string>& absHeaders,
 
       const std::string currentMoc = "moc_" + basename + ".cpp";
       const std::string contents = this->ReadAll(headerName);
-      if (qObjectRegExp.find(contents))
+      if (containsQ_OBJECT(contents))
         {
         //std::cout << "header contains Q_OBJECT macro";
         notIncludedMocs[headerName] = currentMoc;
