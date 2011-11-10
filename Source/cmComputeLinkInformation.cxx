@@ -1318,8 +1318,9 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   this->AddFrameworkPath(this->SplitFramework.match(1));
 
   // Add the item using the -framework option.
-  std::string fw = "-framework ";
-  fw += this->SplitFramework.match(2);
+  this->Items.push_back(Item("-framework", false));
+  std::string fw = this->SplitFramework.match(2);
+  fw = this->LocalGenerator->EscapeForShell(fw.c_str());
   this->Items.push_back(Item(fw, false));
 }
 

@@ -157,7 +157,20 @@ void cmTarget::DefineProperties(cmake *cm)
      "files are included in a generated <targetname>_automoc.cpp file, "
      "which is compiled as part of the target."
      "This property is initialized by the value of the variable "
-     "CMAKE_AUTOMOC if it is set when a target is created.");
+     "CMAKE_AUTOMOC if it is set when a target is created.\n"
+     "Additional command line options for moc can be set via the "
+     "AUTOMOC_MOC_OPTIONS property."
+    );
+
+  cm->DefineProperty
+    ("AUTOMOC_MOC_OPTIONS", cmProperty::TARGET,
+    "Additional options for moc when using automoc (see the AUTOMOC property)",
+     "This property is only used if the AUTOMOC property is set to TRUE for "
+     "this target. In this case, it holds additional command line options "
+     "which will be used when moc is executed during the build, i.e. it is "
+     "equivalent to the optional OPTIONS argument of the qt4_wrap_cpp() "
+     "macro.\n"
+     "By default it is empty.");
 
   cm->DefineProperty
     ("BUILD_WITH_INSTALL_RPATH", cmProperty::TARGET,
@@ -1011,7 +1024,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "provider property.");
   cm->DefineProperty
     ("VS_SCC_LOCALPATH", cmProperty::TARGET,
-     "Visual Studio Source Code Control Provider.",
+     "Visual Studio Source Code Control Local Path.",
      "Can be set to change the visual studio source code control "
      "local path property.");
   cm->DefineProperty
@@ -1019,6 +1032,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "Visual Studio Source Code Control Project.",
      "Can be set to change the visual studio source code control "
      "project name property.");
+  cm->DefineProperty
+    ("VS_SCC_AUXPATH", cmProperty::TARGET,
+     "Visual Studio Source Code Control Aux Path.",
+     "Can be set to change the visual studio source code control "
+     "auxpath property.");
   cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",
@@ -1179,6 +1197,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
+  this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
 
   // Collect the set of configuration types.

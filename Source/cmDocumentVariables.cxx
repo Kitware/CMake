@@ -126,7 +126,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This variable is set to the program that will be"
      " needed to build the output of CMake.   If the "
      "generator selected was Visual Studio 6, the "
-     "CMAKE_MAKE_PROGRAM will be set to msdev, for "
+     "CMAKE_BUILD_TOOL will be set to msdev, for "
      "Unix makefiles it will be set to make or gmake, "
      "and for Visual Studio 7 it set to devenv.  For "
      "Nmake Makefiles the value is nmake. This can be "
@@ -1098,6 +1098,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Whether to handle moc automatically for Qt targets.",
      "This variable is used to initialize the "
      "AUTOMOC property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_AUTOMOC_MOC_OPTIONS", cmProperty::VARIABLE,
+     "Additional options for moc when using automoc (see CMAKE_AUTOMOC).",
+     "This variable is used to initialize the "
+     "AUTOMOC_MOC_OPTIONS property on all the targets. "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");

@@ -4,7 +4,12 @@
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # However CPackRPM has specific features which are controlled by
-# the specifics CPACK_RPM_XXX variables.
+# the specifics CPACK_RPM_XXX variables. CPackRPM is a component aware
+# generator so when CPACK_RPM_COMPONENT_INSTALL is ON some more
+# CPACK_RPM_<ComponentName>_XXXX variables may be used in order
+# to have component specific values. Note however that <componentName>
+# refers to the **grouping name**. This may be either a component name
+# or a component GROUP name.
 # Usually those vars correspond to RPM spec file entities, one may find
 # information about spec files here http://www.rpm.org/wiki/Docs.
 # You'll find a detailed usage of CPackRPM on the wiki:
@@ -98,9 +103,11 @@
 #     If CPACK_SET_DESTDIR is set then you will get a warning message
 #     but if there is file installed with absolute path you'll get
 #     unexpected behavior.
-#  CPACK_RPM_SPEC_INSTALL_POST
+#  CPACK_RPM_SPEC_INSTALL_POST [deprecated]
 #     Mandatory : NO
 #     Default   : -
+#     This way of specifying post-install script is deprecated use
+#     CPACK_RPM_POST_INSTALL_SCRIPT_FILE
 #     May be used to set an RPM post-install command inside the spec file.
 #     For example setting it to "/bin/true" may be used to prevent
 #     rpmbuild to strip binaries.
@@ -158,7 +165,7 @@
 #     Mandatory : NO
 #     Default   : -
 #     May be used to embed a changelog in the spec file.
-#     The refered file will be read and directly  put after the %changelog
+#     The refered file will be read and directly put after the %changelog
 #     section.
 
 #=============================================================================
@@ -388,9 +395,33 @@ if(CPACK_RPM_PACKAGE_RELOCATABLE)
   endif(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
 endif(CPACK_RPM_PACKAGE_RELOCATABLE)
 
-# check if additional fields for RPM spec header are given
+# Check if additional fields for RPM spec header are given
+# There may be some COMPONENT specific variables as well
 FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV)
-  IF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+    IF(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
+    ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+    if(CPACK_RPM_PACKAGE_COMPONENT)
+        if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER})
+            IF(CPACK_RPM_PACKAGE_DEBUG)
+              message("CPackRPM:Debug: using CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}")
+            ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}})
+        else()
+            IF(CPACK_RPM_PACKAGE_DEBUG)
+              message("CPackRPM:Debug: CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER} not defined")
+              message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
+            ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+        endif()
+    else()
+        IF(CPACK_RPM_PACKAGE_DEBUG)
+          message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
+        ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+        set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+    endif()
+
+  IF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
     STRING(LENGTH ${_RPM_SPEC_HEADER} _PACKAGE_HEADER_STRLENGTH)
     MATH(EXPR _PACKAGE_HEADER_STRLENGTH "${_PACKAGE_HEADER_STRLENGTH} - 1")
     STRING(SUBSTRING ${_RPM_SPEC_HEADER} 1 ${_PACKAGE_HEADER_STRLENGTH} _PACKAGE_HEADER_TAIL)
@@ -398,10 +429,10 @@ FOREACH(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLIC
     STRING(SUBSTRING ${_RPM_SPEC_HEADER} 0 1 _PACKAGE_HEADER_NAME)
     SET(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}${_PACKAGE_HEADER_TAIL}")
     IF(CPACK_RPM_PACKAGE_DEBUG)
-      MESSAGE("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}}")
+      MESSAGE("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
     ENDIF(CPACK_RPM_PACKAGE_DEBUG)
-    SET(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}}")
-  ENDIF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+    SET(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
+ENDIF(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
 ENDFOREACH(_RPM_SPEC_HEADER)
 
 # CPACK_RPM_SPEC_INSTALL_POST
@@ -435,20 +466,31 @@ else(CPACK_RPM_PACKAGE_COMPONENT)
   set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
   set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
 endif(CPACK_RPM_PACKAGE_COMPONENT)
+
+# Handle post-install file if it has been specified
 if(CPACK_RPM_POST_INSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
     file(READ ${CPACK_RPM_POST_INSTALL_READ_FILE} CPACK_RPM_SPEC_POSTINSTALL)
   else(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
+else(CPACK_RPM_POST_INSTALL_READ_FILE)
+  # reset SPEC var value if no post install file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_POSTINSTALL "")
 endif(CPACK_RPM_POST_INSTALL_READ_FILE)
 
+# Handle post-uninstall file if it has been specified
 if(CPACK_RPM_POST_UNINSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
     file(READ ${CPACK_RPM_POST_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
   else(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
+else(CPACK_RPM_POST_UNINSTALL_READ_FILE)
+  # reset SPEC var value if no post uninstall file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_POSTUNINSTALL "")
 endif(CPACK_RPM_POST_UNINSTALL_READ_FILE)
 
 # CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
@@ -471,20 +513,31 @@ else(CPACK_RPM_PACKAGE_COMPONENT)
   set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
   set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
 endif(CPACK_RPM_PACKAGE_COMPONENT)
+
+# Handle pre-install file if it has been specified
 if(CPACK_RPM_PRE_INSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
     file(READ ${CPACK_RPM_PRE_INSTALL_READ_FILE} CPACK_RPM_SPEC_PREINSTALL)
   else(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
+else(CPACK_RPM_PRE_INSTALL_READ_FILE)
+  # reset SPEC var value if no pre-install file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_PREINSTALL "")
 endif(CPACK_RPM_PRE_INSTALL_READ_FILE)
 
+# Handle pre-uninstall file if it has been specified
 if(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
     file(READ ${CPACK_RPM_PRE_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
   else(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
+else(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
+  # reset SPEC var value if no pre-uninstall file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_PREUNINSTALL "")
 endif(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
 
 # CPACK_RPM_CHANGELOG_FILE
