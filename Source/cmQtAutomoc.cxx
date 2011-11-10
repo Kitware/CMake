@@ -520,6 +520,11 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   const std::string scannedFileBasename = cmsys::SystemTools::
                                   GetFilenameWithoutLastExtension(absFilename);
 
+  bool dotMocIncluded = false;
+  bool mocUnderscoreIncluded = false;
+  std::string ownMocUnderscoreFile;
+  std::string ownMocHeaderFile;
+
   std::string::size_type matchOffset = 0;
   if (mocIncludeRegExp.find(contentsString.c_str()))
     {
@@ -578,6 +583,12 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         if (!headerToMoc.empty())
           {
           includedMocs[headerToMoc] = currentMoc;
+          if (basename == scannedFileBasename)
+            {
+            mocUnderscoreIncluded = true;
+            ownMocUnderscoreFile = currentMoc;
+            ownMocHeaderFile = headerToMoc;
+            }
           }
         else
           {
@@ -611,9 +622,31 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
           ::exit(EXIT_FAILURE);
           }
         includedMocs[absFilename] = currentMoc;
+        dotMocIncluded = true;
         }
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
+    }
+
+  // In this case, check whether the scanned file itself contains a Q_OBJECT.
+  // If this is the case, the moc_foo.cpp should probably be generated from
+  // foo.cpp instead of foo.h, because otherwise it won't build.
+  // But warn, since this is not how it is supposed to be used.
+  if ((dotMocIncluded == false) && (mocUnderscoreIncluded == true))
+    {
+    cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
+    if (qObjectRegExp.find(contentsString))
+      {
+      std::cerr << "AUTOMOC: The file \"" << absFilename
+                << "\" contains a Q_OBJECT macro, but does not include "
+                << "\"" << scannedFileBasename << ".moc\", but instead includes "
+                << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
+                << "\"" << absFilename << "\" ! Better include \""
+                << scannedFileBasename << ".moc\" to get a robust build."
+                << std::endl;
+      includedMocs[absFilename] = ownMocUnderscoreFile;
+      includedMocs.erase(ownMocHeaderFile);
+      }
     }
 
   // search for header files and private header files we may need to moc:
