@@ -517,6 +517,8 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
     }
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
+  const std::string scannedFileBasename = cmsys::SystemTools::
+                                  GetFilenameWithoutLastExtension(absFilename);
 
   std::string::size_type matchOffset = 0;
   if (mocIncludeRegExp.find(contentsString.c_str()))
@@ -605,6 +607,16 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         }
       else
         {
+        if (basename != scannedFileBasename)
+          {
+          std::cerr << "AUTOMOC: The file \"" << absFilename
+                    << "\" includes the moc file \"" << currentMoc
+                    << "\", which seems to be the moc file from a different "
+                    << "source file. This is not supported. "
+                    << "Include \"" << scannedFileBasename << ".moc\" to run "
+                    << "moc on this source file." << std::endl;
+          ::exit(EXIT_FAILURE);
+          }
         includedMocs[absFilename] = currentMoc;
         }
       matchOffset += mocIncludeRegExp.end();
