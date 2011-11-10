@@ -21,7 +21,8 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator()
+cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator():
+  cmLocalVisualStudioGenerator(VS6)
 {
 }
 

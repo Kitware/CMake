@@ -29,7 +29,18 @@ class cmCustomCommand;
 class cmLocalVisualStudioGenerator : public cmLocalGenerator
 {
 public:
-  cmLocalVisualStudioGenerator();
+  /** Known versions of Visual Studio.  */
+  enum VSVersion
+  {
+    VS6 = 60,
+    VS7 = 70,
+    VS71 = 71,
+    VS8 = 80,
+    VS9 = 90,
+    VS10 = 100
+  };
+
+  cmLocalVisualStudioGenerator(VSVersion v);
   virtual ~cmLocalVisualStudioGenerator();
 
   /** Construct a script from the given list of command lines.  */
@@ -40,6 +51,9 @@ public:
   /** Label to which to jump in a batch file after a failed step in a
       sequence of custom commands. */
   const char* GetReportErrorLabel() const;
+
+  /** Version of Visual Studio.  */
+  VSVersion GetVersion() const { return this->Version; }
 
 protected:
   virtual const char* ReportErrorLabel() const;
@@ -58,6 +72,8 @@ protected:
                              std::map<cmStdString, int>& count);
   std::set<const cmSourceFile*> NeedObjectName;
   friend class cmVisualStudio10TargetGenerator;
+
+  VSVersion Version;
 };
 
 #endif

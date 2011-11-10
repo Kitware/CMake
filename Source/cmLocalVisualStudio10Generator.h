@@ -25,7 +25,7 @@ class cmLocalVisualStudio10Generator : public cmLocalVisualStudio7Generator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalVisualStudio10Generator();
+  cmLocalVisualStudio10Generator(VSVersion v);
 
   virtual ~cmLocalVisualStudio10Generator();
 

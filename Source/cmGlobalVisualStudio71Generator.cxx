@@ -26,8 +26,8 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator()
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 {
-  cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
-  lg->SetVersion71();
+  cmLocalVisualStudio7Generator *lg =
+    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS71);
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;
