@@ -24,6 +24,12 @@ IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
     MATH(EXPR MAXPATH "${MAXPATH} - 46")
   ENDIF()
 
+  # Ninja imposes a maximum path component count of 30.  Permit more
+  # path components in the source path.
+  IF(${CMAKE_GENERATOR} MATCHES "Ninja")
+    MATH(EXPR MAXPATH "${MAXPATH} - 44")
+  ENDIF()
+
   # MAXPATH less 25 for last /and/deeper/simple.cxx part and small safety
   MATH(EXPR MAXPATH "${MAXPATH} - 25")
   STRING(LENGTH "${DEEPDIR}" DEEPDIR_LEN)

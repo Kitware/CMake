@@ -84,6 +84,10 @@
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 
+#ifdef CMAKE_USE_NINJA
+#  include "cmGlobalNinjaGenerator.h"
+#endif
+
 #if defined(CMAKE_HAVE_VS_GENERATORS)
 #include "cmCallVisualStudioMacro.h"
 #endif
@@ -2614,6 +2618,10 @@ void cmake::AddDefaultGenerators()
 #endif
   this->Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
     &cmGlobalUnixMakefileGenerator3::New;
+#ifdef CMAKE_USE_NINJA
+  this->Generators[cmGlobalNinjaGenerator::GetActualName()] =
+    &cmGlobalNinjaGenerator::New;
+#endif
 #ifdef CMAKE_USE_XCODE
   this->Generators[cmGlobalXCodeGenerator::GetActualName()] =
     &cmGlobalXCodeGenerator::New;
