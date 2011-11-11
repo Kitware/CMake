@@ -1583,6 +1583,16 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
         linkFlags += " ";
         }
+      if (target.IsExecutableWithExports())
+        {
+        std::string exportFlagVar = "CMAKE_EXE_EXPORTS_";
+        exportFlagVar += linkLanguage;
+        exportFlagVar += "_FLAG";
+
+        linkFlags +=
+          this->Makefile->GetSafeDefinition(exportFlagVar.c_str());
+        linkFlags += " ";
+        }
       const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
       if(targetLinkFlags)
         {
