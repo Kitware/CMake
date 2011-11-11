@@ -49,6 +49,11 @@ public:
   ///! Escape quotes in a string.
   static std::string EscapeQuotes(const char* str);
 
+  /**
+   * Returns a string that has whitespace removed from the start and the end.
+   */
+  static std::string TrimWhitespace(const std::string& s);
+
   typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
   /**
    *  Set the function used by GUI's to display error messages

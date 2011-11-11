@@ -196,6 +196,20 @@ std::string cmSystemTools::EscapeQuotes(const char* str)
   return result;
 }
 
+std::string cmSystemTools::TrimWhitespace(const std::string& s)
+{
+  std::string::const_iterator start = s.begin();
+  while(start != s.end() && *start == ' ')
+    ++start;
+  if (start == s.end())
+    return "";
+
+  std::string::const_iterator stop = s.end()-1;
+  while(*stop == ' ')
+    --stop;
+  return std::string(start, stop+1);
+}
+
 void cmSystemTools::Error(const char* m1, const char* m2,
                           const char* m3, const char* m4)
 {
