@@ -56,6 +56,11 @@ protected:
   void GenerateImportPropertyCode(std::ostream& os, const char* config,
                                   cmTarget* target,
                                   ImportPropertyMap const& properties);
+  void GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
+                                      ImportPropertyMap const& properties,
+                               const std::set<std::string>& importedLocations);
+  void GenerateImportedFileCheckLoop(std::ostream& os);
+
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
