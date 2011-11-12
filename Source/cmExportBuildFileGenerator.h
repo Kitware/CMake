@@ -52,7 +52,8 @@ protected:
   void SetImportLocationProperty(const char* config,
                                  std::string const& suffix,
                                  cmTarget* target,
-                                 ImportPropertyMap& properties);
+                                 ImportPropertyMap& properties,
+                                 std::set<std::string>& importedLocations);
 
   std::vector<cmTarget*> const* Exports;
   cmExportCommand* ExportCommand;

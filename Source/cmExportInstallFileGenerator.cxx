@@ -167,16 +167,17 @@ cmExportInstallFileGenerator
     // Collect import properties for this target.
     cmTargetExport* te = *tei;
     ImportPropertyMap properties;
+    std::set<std::string> importedLocations;
+    this->SetImportLocationProperty(config, suffix, te->ArchiveGenerator,
+                                    properties, importedLocations);
+    this->SetImportLocationProperty(config, suffix, te->LibraryGenerator,
+                                    properties, importedLocations);
     this->SetImportLocationProperty(config, suffix,
-                                    te->ArchiveGenerator, properties);
-    this->SetImportLocationProperty(config, suffix,
-                                    te->LibraryGenerator, properties);
-    this->SetImportLocationProperty(config, suffix,
-                                    te->RuntimeGenerator, properties);
-    this->SetImportLocationProperty(config, suffix,
-                                    te->FrameworkGenerator, properties);
-    this->SetImportLocationProperty(config, suffix,
-                                    te->BundleGenerator, properties);
+                                    te->RuntimeGenerator, properties, importedLocations);
+    this->SetImportLocationProperty(config, suffix, te->FrameworkGenerator,
+                                    properties, importedLocations);
+    this->SetImportLocationProperty(config, suffix, te->BundleGenerator,
+                                    properties, importedLocations);
 
     // If any file location was set for the target add it to the
     // import file.
@@ -194,6 +195,8 @@ cmExportInstallFileGenerator
 
       // Generate code in the export file.
       this->GenerateImportPropertyCode(os, config, te->Target, properties);
+      this->GenerateImportedFileChecksCode(os, te->Target, properties,
+                                           importedLocations);
       }
     }
 
@@ -211,7 +214,9 @@ void
 cmExportInstallFileGenerator
 ::SetImportLocationProperty(const char* config, std::string const& suffix,
                             cmInstallTargetGenerator* itgen,
-                            ImportPropertyMap& properties)
+                            ImportPropertyMap& properties,
+                            std::set<std::string>& importedLocations
+                           )
 {
   // Skip rules that do not match this configuration.
   if(!(itgen && itgen->InstallsForConfig(config)))
@@ -249,6 +254,7 @@ cmExportInstallFileGenerator
 
     // Store the property.
     properties[prop] = value;
+    importedLocations.insert(prop);
     }
   else
     {
@@ -291,6 +297,7 @@ cmExportInstallFileGenerator
 
     // Store the property.
     properties[prop] = value;
+    importedLocations.insert(prop);
     }
 }
 

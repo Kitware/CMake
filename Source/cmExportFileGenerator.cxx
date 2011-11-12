@@ -368,3 +368,49 @@ cmExportFileGenerator
   os << "  )\n"
      << "\n";
 }
+
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator
+::GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
+                                 ImportPropertyMap const& properties,
+                                const std::set<std::string>& importedLocations)
+{
+  // Construct the imported target name.
+  std::string targetName = this->Namespace;
+  targetName += target->GetName();
+
+  // Add code which verifies at cmake time that the file which is being
+  // imported actually exists on disk. This should in theory always be theory
+  // case, but still when packages are split into normal and development
+  // packages this might get broken (e.g. the Config.cmake could be part of
+  // the non-development package, something similar happened to me without
+  // on SUSE with a mysql pkg-config file, which claimed everything is fine,
+  // but the development package was not installed.).
+  for(std::set<std::string>::const_iterator li = importedLocations.begin();
+      li != importedLocations.end();
+      ++li)
+    {
+    ImportPropertyMap::const_iterator pi = properties.find(*li);
+    if (pi != properties.end())
+      {
+      std::string filename = pi->second;
+      os << "IF(NOT EXISTS \"" << filename << "\" )\n"
+            "  MESSAGE(FATAL_ERROR \"The file \\\"" << filename << "\\\" "
+            "for the imported target \\\"" << targetName <<"\\\" "
+            "does not exist.\n"
+            "There are multiple possible reasons:\n"
+            " * the file \\\"" << filename << "\\\" has been manually "
+            "deleted, renamed or moved to another location\n"
+            " * a previous install or uninstall procedure did not run "
+            " successfully to its end\n"
+            " * the installation package was faulty, and contained \\\""
+        << cmSystemTools::GetFilenameName(this->MainImportFile)
+        << "\\\", but not \\\" " << filename
+        << "\\\", which must always be installed together.\n"
+            "\")\n"
+            "ENDIF()"<< "\n\n";
+      }
+    }
+}

@@ -68,7 +68,9 @@ cmExportBuildFileGenerator
     // Collect import properties for this target.
     cmTarget* target = *tei;
     ImportPropertyMap properties;
-    this->SetImportLocationProperty(config, suffix, target, properties);
+    std::set<std::string> importedLocations;
+    this->SetImportLocationProperty(config, suffix, target, properties,
+                                    importedLocations);
     if(!properties.empty())
       {
       // Get the rest of the target details.
@@ -83,6 +85,8 @@ cmExportBuildFileGenerator
 
       // Generate code in the export file.
       this->GenerateImportPropertyCode(os, config, target, properties);
+      this->GenerateImportedFileChecksCode(os, target, properties,
+                                           importedLocations);
       }
     }
 }
@@ -91,7 +95,8 @@ cmExportBuildFileGenerator
 void
 cmExportBuildFileGenerator
 ::SetImportLocationProperty(const char* config, std::string const& suffix,
-                            cmTarget* target, ImportPropertyMap& properties)
+                            cmTarget* target, ImportPropertyMap& properties,
+                            std::set<std::string>& importedLocations)
 {
   // Get the makefile in which to lookup target information.
   cmMakefile* mf = target->GetMakefile();
@@ -110,6 +115,7 @@ cmExportBuildFileGenerator
     value = target->GetFullPath(config, false, true);
     }
   properties[prop] = value;
+  importedLocations.insert(prop);
   }
 
   // Check whether this is a DLL platform.
@@ -126,6 +132,7 @@ cmExportBuildFileGenerator
     prop += suffix;
     std::string value = target->GetFullPath(config, true);
     properties[prop] = value;
+    importedLocations.insert(prop);
     }
 }
 
