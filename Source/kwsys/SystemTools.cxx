@@ -371,7 +371,7 @@ bool SystemTools::GetEnv(const char* key, kwsys_stl::string& result)
     }
 }
 
-#ifdef INTEL_COMPILER
+#ifdef __INTEL_COMPILER
 #pragma warning disable 444
 #endif
 
@@ -402,11 +402,6 @@ bool SystemTools::PutEnv(const char* value)
   localEnvironment.push_back(envVar);
   return ret == 0;
 }
-
-#ifdef INTEL_COMPILER
-#pragma warning restore 444
-#endif
-
 
 const char* SystemTools::GetExecutableExtension()
 {
