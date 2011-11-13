@@ -191,6 +191,9 @@ An includer may test the following macros after inclusion:
 #endif
 
 #if defined(__INTEL_COMPILER)
+# if defined(_WIN32)
+#  define @KWIML@_INT__NO_SCN8
+# endif
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # define @KWIML@_INT__NO_SCN8
 #elif defined(__HP_cc) || defined(__HP_aCC)
