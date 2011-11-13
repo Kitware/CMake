@@ -64,6 +64,7 @@ int main(int argc, char** argv)
   // check docs first so that X is not need to get docs
   // do docs, if args were given
   cmDocumentation doc;
+  doc.addCMakeStandardDocSections();
   if(argc >1 && doc.CheckOptions(argc, argv))
     {
     // Construct and print requested documentation.

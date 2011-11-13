@@ -52,12 +52,12 @@ _cmake()
             return 0
             ;;
         --help-command)
-            local running=$(for x in `cmake --help-command-list`; do echo ${x} ; done )
+            local running=$(for x in `cmake --help-command-list | grep -v "cmake version"`; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
         --help-module)
-            local running=$(for x in `cmake --help-module-list`; do echo ${x} ; done )
+            local running=$(for x in `cmake --help-module-list | grep -v "cmake version"`; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
@@ -67,12 +67,12 @@ _cmake()
             return 0
             ;;
          --help-property)
-            local running=$(for x in `cmake --help-property-list`; do echo ${x} ; done )
+            local running=$(for x in `cmake --help-property-list | grep -v "cmake version"`; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
          --help-variable)
-            local running=$(for x in `cmake --help-variable-list`; do echo ${x} ; done )
+            local running=$(for x in `cmake --help-variable-list | grep -v "cmake version"`; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
@@ -123,19 +123,29 @@ _cpack()
             COMPREPLY=( $(compgen -f ${cur}) )
             return 0
             ;;
+        --help-variable)
+            local running=$(for x in `cpack --help-variable-list | grep -v "cpack version" `; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
+        --help-command)
+            local running=$(for x in `cmake --help-command-list | grep -v "cpack version" `; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
         *)
             ;;
     esac
 
     #
-    # Complete the option (Level 0 - right after cmake)
+    # Complete the option (Level 0 - right after cpack)
     #
     COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 } &&
 complete -F _cpack -o default cpack
 
 #
-# cmake command
+# ctest command
 #
 # have ctest &&
 _ctest()
@@ -156,11 +166,11 @@ _ctest()
     #
     case "${prev}" in
         --help-command)
-            local running=$(for x in `ctest --help-command-list`; do echo ${x} ; done )
+            local running=$(for x in `ctest --help-command-list | grep -v "ctest version" `; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
-        -R)
+        -R|-E)
             local running=$(for x in `ctest -N 2> /dev/null | grep "^  Test" | cut -d: -f 2`; do echo ${x} ; done )
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
