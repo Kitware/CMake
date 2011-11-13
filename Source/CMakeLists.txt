@@ -442,6 +442,8 @@ SET(CPACK_SRCS
   CPack/cmCPackTarBZip2Generator.cxx
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
+  CPack/cmCPackDocumentVariables.cxx
+  CPack/cmCPackDocumentMacros.cxx
   )
 
 IF(CYGWIN)

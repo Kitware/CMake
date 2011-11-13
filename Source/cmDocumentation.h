@@ -119,6 +119,18 @@ public:
   
   static Form GetFormFromFilename(const std::string& filename);
 
+  /** Add common (to all tools) documentation section(s) */
+  void addCommonStandardDocSections();
+
+  /** Add the CMake standard documentation section(s) */
+  void addCMakeStandardDocSections();
+
+  /** Add the CTest standard documentation section(s) */
+  void addCTestStandardDocSections();
+
+  /** Add the CPack standard documentation section(s) */
+  void addCPackStandardDocSections();
+
 private:
   void SetForm(Form f);
   void SetDocName(const char* docname);
