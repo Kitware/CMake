@@ -65,6 +65,7 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
       this->FlagMap["ExceptionHandling"] = "FALSE";
       break;
     case cmLocalVisualStudioGenerator::VS10:
+    case cmLocalVisualStudioGenerator::VS11:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -211,7 +212,7 @@ cmVisualStudioGeneratorOptions
     {
     return;
     }
-  if(this->Version == cmLocalVisualStudioGenerator::VS10)
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     // if there are configuration specifc flags, then
     // use the configuration specific tag for PreprocessorDefinitions
@@ -239,7 +240,7 @@ cmVisualStudioGeneratorOptions
     {
     // Escape the definition for the compiler.
     std::string define;
-    if(this->Version != cmLocalVisualStudioGenerator::VS10)
+    if(this->Version < cmLocalVisualStudioGenerator::VS10)
       {
       define =
         this->LocalGenerator->EscapeForShell(di->c_str(), true);
@@ -249,7 +250,7 @@ cmVisualStudioGeneratorOptions
       define = *di;
       }
     // Escape this flag for the IDE.
-    if(this->Version == cmLocalVisualStudioGenerator::VS10)
+    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
       {
       define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
 
@@ -266,7 +267,7 @@ cmVisualStudioGeneratorOptions
     fout << sep << define;
     sep = ";";
     }
-  if(this->Version == cmLocalVisualStudioGenerator::VS10)
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     fout <<  ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
     }
@@ -281,7 +282,7 @@ void
 cmVisualStudioGeneratorOptions
 ::OutputFlagMap(std::ostream& fout, const char* indent)
 {
-  if(this->Version == cmLocalVisualStudioGenerator::VS10)
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     for(std::map<cmStdString, cmStdString>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
@@ -326,7 +327,7 @@ cmVisualStudioGeneratorOptions
 {
   if(!this->FlagString.empty())
     {
-    if(this->Version == cmLocalVisualStudioGenerator::VS10)
+    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
       { 
       fout << prefix;
       if(this->Configuration.size())
