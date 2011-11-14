@@ -913,7 +913,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       hasFlags = true;
       cmVisualStudioGeneratorOptions 
         clOptions(this->LocalGenerator,
-                  10, cmVisualStudioGeneratorOptions::Compiler,
+                  cmVisualStudioGeneratorOptions::Compiler,
                   cmVS10CLFlagTable, 0, this);
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
@@ -1098,7 +1098,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // TODO: Integrate code below with cmLocalVisualStudio7Generator.
 
   cmsys::auto_ptr<Options> pOptions(
-    new Options(this->LocalGenerator, 10, Options::Compiler,
+    new Options(this->LocalGenerator, Options::Compiler,
                 cmVS10CLFlagTable));
   Options& clOptions = *pOptions;
 
@@ -1253,7 +1253,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     {
     this->WriteString("<Lib>\n", 2);
     cmVisualStudioGeneratorOptions
-      libOptions(this->LocalGenerator, 10,
+      libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
                  cmVS10LibFlagTable, 0, this);
     libOptions.Parse(libflags?libflags:"");
@@ -1333,7 +1333,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     flags += flagsConfig;
     }
   cmVisualStudioGeneratorOptions
-    linkOptions(this->LocalGenerator, 10,
+    linkOptions(this->LocalGenerator,
                 cmVisualStudioGeneratorOptions::Linker,
                 cmVS10LinkFlagTable, 0, this);
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )

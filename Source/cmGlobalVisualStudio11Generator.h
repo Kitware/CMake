@@ -35,6 +35,9 @@ public:
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
+  ///! create the correct local generator
+  virtual cmLocalGenerator *CreateLocalGenerator();
+
   /** TODO: VS 11 user macro support. */
   virtual std::string GetUserMacrosDirectory() { return ""; }
 protected:
