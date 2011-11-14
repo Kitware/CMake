@@ -56,3 +56,13 @@ set_property(TARGET ${KWIML}_test PROPERTY
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(${KWIML}.test ${CMAKE_CURRENT_BINARY_DIR}/${KWIML}_test)
 set_property(TEST ${KWIML}.test PROPERTY LABELS ${KWIML_LABELS_TEST})
+
+# Xcode 2.x forgets to create the output directory before linking
+# the individual architectures.
+if(CMAKE_OSX_ARCHITECTURES AND XCODE
+    AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
+  add_custom_command(
+    TARGET ${KWIML}_test
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
+    )
+endif()
