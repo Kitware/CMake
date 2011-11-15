@@ -5,12 +5,6 @@ void cmCPackDocumentVariables::DefineVariables(cmake* cm)
 {
   // Subsection: variables defined/used by cpack,
   // which are common to all CPack generators
-  cm->DefineProperty
-    ("CPACK_PACKAGE_NAME", cmProperty::VARIABLE,
-     "The name of the package (or application).",
-     "If not specified, defaults to the project name."
-     "", false,
-     "Variables common to all CPack generators");
 
   cm->DefineProperty
       ("CPACK_PACKAGE_VENDOR", cmProperty::VARIABLE,

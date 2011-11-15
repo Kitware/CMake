@@ -511,6 +511,8 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
     {
     if(line.size() && line[0] == '#')
       {
+      /* line beginnings with ## are mark-up ignore them */
+      if (line[1] == '#') continue;
       // blank line
       if(line.size() <= 2)
         {
@@ -741,6 +743,175 @@ void cmDocumentation::addCPackStandardDocSections()
             "Variables common to all CPack generators");
     this->VariableSections.push_back(
             "Variables specific to a CPack generator");
+}
+
+//----------------------------------------------------------------------------
+static void trim(std::string& s)
+{
+  std::string::size_type pos = s.find_last_not_of(' ');
+  if(pos != std::string::npos) {
+    s.erase(pos + 1);
+    pos = s.find_first_not_of(' ');
+    if(pos != std::string::npos) s.erase(0, pos);
+  }
+  else s.erase(s.begin(), s.end());
+}
+
+int cmDocumentation::getStructuredDocFromFile(
+        const char* fname,
+        std::vector<cmDocumentationEntry>& commands,
+        cmake* cm,
+        const char *docSection)
+{
+    typedef enum sdoce {
+        SDOC_NONE, SDOC_MACRO,
+        SDOC_PARAM, SDOC_VARIABLE,
+        SDOC_UNKNOWN} sdoc_t;
+    int nbDocItemFound = 0;
+    int docCtxIdx      = 0;
+    std::vector<int> docContextStack(60);
+    docContextStack[docCtxIdx]=SDOC_NONE;
+    cmDocumentationEntry e;
+    std::ifstream fin(fname);
+    if(!fin)
+      {
+      //std::cerr << "Internal error: can not open script file: <" << fname <<">."<< std::endl;
+      return nbDocItemFound;
+      }
+    std::string name;
+    std::string full;
+    std::string brief;
+    std::string line;
+    bool newCtx  = false;
+    bool inBrief = false;
+    brief = "";
+    full  = "";
+    bool newParagraph = true;
+    while ( fin && cmSystemTools::GetLineFromStream(fin, line) )
+      {
+      if(line.size() && line[0] == '#')
+        {
+        /* handle structured doc context */
+        if (line[1]=='#') {
+            std::string mkword = line.substr(2,std::string::npos);
+            if (mkword=="macro")
+            {
+               docCtxIdx++;
+               docContextStack[docCtxIdx]=SDOC_MACRO;
+               newCtx = true;
+            }
+            else if (mkword=="variable")
+            {
+               docCtxIdx++;
+               docContextStack[docCtxIdx]=SDOC_VARIABLE;
+               newCtx = true;
+            }
+            else if (mkword.substr(0,3)=="end")
+            {
+               ;
+               switch (docContextStack[docCtxIdx]) {
+               case SDOC_MACRO:
+                   commands.push_back(cmDocumentationEntry(name.c_str(),
+                           brief.c_str(),full.c_str()));
+                   break;
+               case SDOC_VARIABLE:
+                   cm->DefineProperty
+                       (name.c_str(), cmProperty::VARIABLE,
+                        brief.c_str(),
+                        full.c_str(),false,
+                        docSection);
+                   break;
+               }
+               docCtxIdx--;
+               newCtx = false;
+            }
+            else
+            {
+                // error out unhandled context
+                std::cerr << "Internal error: unknown markup context <"
+                          << mkword <<"> found in:" << fname << std::endl;
+                return nbDocItemFound;
+            }
+            /* context is set go to next doc line */
+            continue;
+        }
+
+        // Now parse the text attached to the context
+
+        // The first line after the context mark-up contains::
+        //  name - brief until. (brief is dot terminated or
+        //                       followed by a blank line)
+        if (newCtx)
+        {
+            name = line.substr(1,line.find("-")-1);
+            trim(name);
+            brief = "";
+            line = line.substr(line.find("- ")+1,std::string::npos);
+            inBrief = true;
+            full = "";
+        }
+        // blank line
+        if(line.size() <= 2)
+        {
+            inBrief = false;
+            full += "\n";
+            newParagraph = true;
+        }
+        // brief terminated by .
+        else if (inBrief && line[line.length()-1]=='.')
+        {
+            inBrief = false;
+            brief += line.c_str()+1;
+        }
+        // we handle full text or multi-line brief.
+        else
+          {
+          std::string* text;
+          if (inBrief) {
+              text = &brief;
+          } else {
+              text = &full;
+          }
+          // two spaces
+          if(line[1] == ' ' && line[2] == ' ')
+            {
+            if(!newParagraph)
+              {
+
+                *text += "\n";
+                newParagraph = true;
+              }
+            // Skip #, and leave space for preformatted
+            *text += line.c_str()+1;
+            *text += "\n";
+            }
+          else if(line[1] == ' ')
+            {
+            if(!newParagraph)
+              {
+              *text += " ";
+              }
+            newParagraph = false;
+            // skip # and space
+            *text += line.c_str()+2;
+            }
+          else
+            {
+            if(!newParagraph)
+              {
+              *text += " ";
+              }
+            newParagraph = false;
+            // skip #
+            *text += line.c_str()+1;
+            }
+          }
+        }
+      /* next line is not the first context line */
+      newCtx = false;
+      }
+
+    return nbDocItemFound;
 }
 
 //----------------------------------------------------------------------------

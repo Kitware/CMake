@@ -74,5 +74,5 @@ void cmCPackDocumentMacros::GetMacrosDocumentation(
           "information."
 );
 
-    v.push_back(e);
+   //v.push_back(e);
 }

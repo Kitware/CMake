@@ -49,21 +49,33 @@
 # there are a variety of variables that can be set to customize
 # the resulting installers. The most commonly-used variables are:
 #
+##variable
 #   CPACK_PACKAGE_NAME - The name of the package (or application). If
 #   not specified, defaults to the project name.
+##end
 #
+##variable
 #   CPACK_PACKAGE_VENDOR - The name of the package vendor (e.g.,
 #   "Kitware").
+##end
 #
+##variable
 #   CPACK_PACKAGE_VERSION_MAJOR - Package major Version
+##end
 #
+##variable
 #   CPACK_PACKAGE_VERSION_MINOR - Package minor Version
+##end
 #
+##variable
 #   CPACK_PACKAGE_VERSION_PATCH - Package patch Version
+##end
 #
+##variable
 #   CPACK_PACKAGE_DESCRIPTION_FILE - A text file used to describe the
 #   project. Used, for example, the introduction screen of a
 #   CPack-generated Windows installer to describe the project.
+##end
 #
 #   CPACK_PACKAGE_DESCRIPTION_SUMMARY - Short description of the
 #   project (only a few words).

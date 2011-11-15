@@ -520,11 +520,41 @@ int main (int argc, char *argv[])
     doc.PrependSection("Options",cmDocumentationOptions);
 
     cmCPackDocumentVariables::DefineVariables(&cminst);
+
+    std::vector<cmDocumentationEntry> commands;
+
+    cminst.AddCMakePaths();
+    std::string systemFile =
+            globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
+    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    {
+        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                "Error reading CMakeDetermineSystem.cmake" << std::endl);
+        return 1;
+    }
+
+    systemFile =
+            globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
+    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    {
+        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                "Error reading CMakeSystemSpecificInformation.cmake"
+                << std::endl);
+        return 1;
+    }
+    std::string cpFile = globalMF->GetModulesFile("CPack.cmake");
+    doc.getStructuredDocFromFile(cpFile.c_str(),
+            commands,&cminst,"Variables common to all CPack generators");
+    cpFile = globalMF->GetModulesFile("CPackComponent.cmake");
+    doc.getStructuredDocFromFile(cpFile.c_str(),
+                commands,&cminst,"Variables common to all CPack generators");
+    cpFile = globalMF->GetModulesFile("CPackRPM.cmake");
+        doc.getStructuredDocFromFile(cpFile.c_str(),
+                    commands,&cminst,"Variables specific to a CPack generator");
+
     std::map<std::string,cmDocumentationSection *> propDocs;
     cminst.GetPropertiesDocumentation(propDocs);
     doc.SetSections(propDocs);
-
-    std::vector<cmDocumentationEntry> commands;
     cminst.GetCommandDocumentation(commands);
     cmCPackDocumentMacros::GetMacrosDocumentation(commands);
     doc.SetSection("Commands",commands);
