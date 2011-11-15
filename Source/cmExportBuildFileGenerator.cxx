@@ -89,6 +89,8 @@ cmExportBuildFileGenerator
                                            importedLocations);
       }
     }
+
+  this->GenerateImportedFileCheckLoop(os);
 }
 
 //----------------------------------------------------------------------------

@@ -200,6 +200,8 @@ cmExportInstallFileGenerator
       }
     }
 
+  this->GenerateImportedFileCheckLoop(os);
+
   // Cleanup the import prefix variable.
   if(!this->ImportPrefix.empty())
     {
