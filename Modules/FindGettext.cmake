@@ -134,7 +134,8 @@ FUNCTION(GETTEXT_PROCESS_PO_FILES _lang)
    CMAKE_PARSE_ARGUMENTS(_parsedArguments "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
 
    FOREACH(_current_PO_FILE ${_parsedArguments_PO_FILES})
-      GET_FILENAME_COMPONENT(_basename ${_current_PO_FILE} NAME_WE)
+      GET_FILENAME_COMPONENT(_name ${_current_PO_FILE} NAME)
+      STRING(REGEX REPLACE "^(.+)(\\.[^.]+)$" "\\1" _basename ${_name})
       SET(_gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.gmo)
       ADD_CUSTOM_COMMAND(OUTPUT ${_gmoFile}
             COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${_gmoFile} ${_current_PO_FILE}
