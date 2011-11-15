@@ -17,7 +17,7 @@ ExternalProject_Add(mfcShared
   PATCH_COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeLists.SharedMfcDll.txt
     <SOURCE_DIR>/CMakeLists.txt
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   )
 
 
@@ -33,7 +33,7 @@ ExternalProject_Add(mfcStatic
   PATCH_COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeLists.StaticMfcLib.txt
     <SOURCE_DIR>/CMakeLists.txt
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
   )
 
 
@@ -48,3 +48,14 @@ add_test(
   COMMAND ${CMAKE_COMMAND}
     -P "${CMAKE_CURRENT_BINARY_DIR}/ValidateBuild.cmake"
   )
+
+
+add_test(
+  NAME environment
+  COMMAND ${CMAKE_COMMAND} -E environment
+  )
+
+
+message(STATUS "===== environment =====")
+execute_process(COMMAND ${CMAKE_COMMAND} -E environment)
+message(STATUS "===== /environment =====")
