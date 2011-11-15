@@ -28,7 +28,9 @@
 #define KWIML_HEADER1(x) <x>
 
 /* Quiet MS standard library deprecation warnings.  */
-#define _CRT_SECURE_NO_DEPRECATE
+#ifndef _CRT_SECURE_NO_DEPRECATE
+# define _CRT_SECURE_NO_DEPRECATE
+#endif
 
 #else
 # error "test.h included multiple times."

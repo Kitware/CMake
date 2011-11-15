@@ -18,6 +18,13 @@ set_property(DIRECTORY
   "KWIML_HEADER(%)=<${KWIML}/%>"
   )
 
+# Suppress printf/scanf format warnings; we test if the sizes match.
+foreach(lang C CXX)
+  if(KWIML_LANGUAGE_${lang} AND "${CMAKE_${lang}_COMPILER_ID}" STREQUAL GNU)
+    set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -Wno-format")
+  endif()
+endforeach()
+
 if(KWIML_LANGUAGE_C)
   set(test_srcs test.c)
 else()
@@ -49,3 +56,13 @@ set_property(TARGET ${KWIML}_test PROPERTY
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 add_test(${KWIML}.test ${CMAKE_CURRENT_BINARY_DIR}/${KWIML}_test)
 set_property(TEST ${KWIML}.test PROPERTY LABELS ${KWIML_LABELS_TEST})
+
+# Xcode 2.x forgets to create the output directory before linking
+# the individual architectures.
+if(CMAKE_OSX_ARCHITECTURES AND XCODE
+    AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
+  add_custom_command(
+    TARGET ${KWIML}_test
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
+    )
+endif()
