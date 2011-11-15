@@ -40,6 +40,8 @@ if("${CMAKE_GENERATOR}" MATCHES "Make")
 endif()
 list(APPEND _cmake_options "-DTEST_LINK_DEPENDS=${TEST_LINK_DEPENDS}")
 
+list(APPEND _cmake_options "-DCMAKE_FORCE_DEPFILES=1")
+
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
