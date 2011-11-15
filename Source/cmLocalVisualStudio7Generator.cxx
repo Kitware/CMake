@@ -45,9 +45,9 @@ private:
 extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
+cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(VSVersion v):
+  cmLocalVisualStudioGenerator(v)
 {
-  this->Version = 7;
   this->PlatformName = "Win32";
   this->ExtraFlagTable = 0;
   this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
@@ -719,7 +719,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     t = Options::FortranCompiler;
     table = cmLocalVisualStudio7GeneratorFortranFlagTable;
     }
-  Options targetOptions(this, this->Version, t, 
+  Options targetOptions(this, t,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
@@ -888,7 +888,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // end of <Tool Name=VCMIDLTool
 
   // Check if we need the FAT32 workaround.
-  if(targetBuilds && this->Version >= 8)
+  if(targetBuilds && this->Version >= VS8)
     {
     // Check the filesystem type where the target will be written.
     if(cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
@@ -975,7 +975,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-  Options linkOptions(this, this->Version, Options::Linker,
+  Options linkOptions(this, Options::Linker,
                       cmLocalVisualStudio7GeneratorLinkFlagTable);
   linkOptions.Parse(extraLinkOptions.c_str());
   if(!this->ModuleDefinitionFile.empty())
@@ -1604,7 +1604,7 @@ void cmLocalVisualStudio7Generator
               tool = Options::FortranCompiler;
               table = cmLocalVisualStudio7GeneratorFortranFlagTable;
               }
-            Options fileOptions(this, this->Version, tool, table,
+            Options fileOptions(this, tool, table,
                                 this->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
@@ -1920,13 +1920,13 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
-  if(this->Version == 71)
+  if(this->Version == VS71)
     {
     fout << "\tVersion=\"7.10\"\n";
     }
   else
     {
-    fout <<  "\tVersion=\"" << this->Version << ".00\"\n";
+    fout <<  "\tVersion=\"" << (this->Version/10) << ".00\"\n";
     }
   const char* projLabel = target.GetProperty("PROJECT_LABEL");
   if(!projLabel)
@@ -1941,7 +1941,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
-  if(this->Version >= 8)
+  if(this->Version >= VS8)
     {
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
     }

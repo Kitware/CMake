@@ -35,7 +35,7 @@ class cmLocalVisualStudio7Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalVisualStudio7Generator();
+  cmLocalVisualStudio7Generator(VSVersion v);
 
   virtual ~cmLocalVisualStudio7Generator();
 
@@ -53,9 +53,6 @@ public:
    */
   void SetBuildType(BuildType,const char *name);
 
-  void SetVersion71() {this->Version = 71;}
-  void SetVersion8() {this->Version = 8;}
-  void SetVersion9() {this->Version = 9;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
@@ -130,7 +127,6 @@ private:
 
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
-  int Version;
   bool FortranProject;
   std::string PlatformName; // Win32 or x64 
   cmLocalVisualStudio7GeneratorInternals* Internal;

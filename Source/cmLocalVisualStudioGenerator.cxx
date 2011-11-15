@@ -18,10 +18,11 @@
 #include "windows.h"
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator()
+cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(VSVersion v)
 {
   this->WindowsShell = true;
   this->WindowsVSIDE = true;
+  this->Version = v;
 }
 
 //----------------------------------------------------------------------------
