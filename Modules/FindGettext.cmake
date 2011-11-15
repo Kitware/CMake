@@ -1,5 +1,5 @@
 # - Find GNU gettext tools
-# This module looks for the GNU gettext tools. This module defines the 
+# This module looks for the GNU gettext tools. This module defines the
 # following values:
 #  GETTEXT_MSGMERGE_EXECUTABLE: the full path to the msgmerge tool.
 #  GETTEXT_MSGFMT_EXECUTABLE: the full path to the msgfmt tool.
@@ -7,8 +7,8 @@
 #
 # Additionally it provides the following macros:
 # GETTEXT_CREATE_TRANSLATIONS ( outputFile [ALL] file1 ... fileN )
-#    This will create a target "translations" which will convert the 
-#    given input po files into the binary output mo file. If the 
+#    This will create a target "translations" which will convert the
+#    given input po files into the binary output mo file. If the
 #    ALL option is used, the translations will also be created when
 #    building the default target.
 # GETTEXT_PROCESS_POT( <potfile> [ALL] [INSTALL_DESTINATION <destdir>] LANGUAGES <lang1> <lang2> ... )
