@@ -671,19 +671,30 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   // If this is the case, the moc_foo.cpp should probably be generated from
   // foo.cpp instead of foo.h, because otherwise it won't build.
   // But warn, since this is not how it is supposed to be used.
-  if ((dotMocIncluded == false) && (mocUnderscoreIncluded == true))
+  if ((dotMocIncluded == false) && (containsQ_OBJECT(contentsString)))
     {
-    if (containsQ_OBJECT(contentsString))
+    if ((this->QtMajorVersion == "4") && (mocUnderscoreIncluded == true))
       {
+      // this is for KDE4 compatibility:
       std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
                 << "contains a Q_OBJECT macro, but does not include "
-                << "\"" << scannedFileBasename << ".moc\", but instead includes "
+                << "\"" << scannedFileBasename << ".moc\", but instead "
+                   "includes "
                 << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
                 << "\"" << absFilename << "\" ! Better include \""
                 << scannedFileBasename << ".moc\" for a robust build."
                 << std::endl;
       includedMocs[absFilename] = ownMocUnderscoreFile;
       includedMocs.erase(ownMocHeaderFile);
+      }
+    else
+      {
+      // otherwise always error out since it will not compile:
+      std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
+                << "contains a Q_OBJECT macro, but does not include "
+                << "\"" << scannedFileBasename << ".moc\" !"
+                << std::endl;
+      ::exit(EXIT_FAILURE);
       }
     }
 
