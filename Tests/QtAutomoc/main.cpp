@@ -43,6 +43,8 @@
 #include "codeeditor.h"
 #include "calwidget.h"
 #include "foo.h"
+#include "blub.h"
+#include "sub/bar.h"
 
 int main(int argv, char **args)
 {
@@ -57,6 +59,12 @@ int main(int argv, char **args)
 
   Foo foo;
   foo.doFoo();
+
+  Blub b;
+  b.blubber();
+
+  Bar bar;
+  bar.doBar();
 
   return app.exec();
 }
