@@ -12,6 +12,16 @@ set(Copy-NoDest-RESULT 1)
 set(Copy-NoDest-STDERR "given no DESTINATION")
 set(Copy-NoFile-RESULT 1)
 set(Copy-NoFile-STDERR "COPY cannot find.*/does_not_exist\\.txt")
+set(MD5-NoFile-RESULT 1)
+set(MD5-NoFile-STDERR "file MD5 failed to read file")
+set(MD5-BadArg1-RESULT 1)
+set(MD5-BadArg1-STDERR "file must be called with at least two arguments")
+set(MD5-BadArg2-RESULT 1)
+set(MD5-BadArg2-STDERR "file MD5 requires a file name and output variable")
+set(MD5-BadArg4-RESULT 1)
+set(MD5-BadArg4-STDERR "file MD5 requires a file name and output variable")
+set(MD5-Works-RESULT 0)
+set(MD5-Works-STDERR "a28a44fb5b58a6acf0cbec46557bc775")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(File
@@ -22,6 +32,11 @@ check_cmake_test(File
   Copy-LateArg
   Copy-NoDest
   Copy-NoFile
+  MD5-NoFile
+  MD5-BadArg1
+  MD5-BadArg2
+  MD5-BadArg4
+  MD5-Works
   )
 
 # Also execute each test listed in FileTestScript.cmake:
