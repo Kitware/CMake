@@ -96,6 +96,7 @@ bool cmStringCommand
 //----------------------------------------------------------------------------
 bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   if(args.size() != 3)
     {
     cmOStringStream e;
@@ -112,6 +113,12 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
     return true;
     }
   return false;
+#else
+  cmOStringStream e;
+  e << args[0] << " not available during bootstrap";
+  this->SetError(e.str().c_str());
+  return false;
+#endif
 }
 
 //----------------------------------------------------------------------------
