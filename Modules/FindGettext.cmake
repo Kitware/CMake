@@ -52,7 +52,8 @@ MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
    SET(_firstPoFile "${_firstPoFileArg}")
 
    SET(_gmoFiles)
-   GET_FILENAME_COMPONENT(_potBasename ${_potFile} NAME_WE)
+   GET_FILENAME_COMPONENT(_potName ${_potFile} NAME)
+   STRING(REGEX REPLACE "^(.+)(\\.[^.]+)$" "\\1" _potBasename ${_potName})
    GET_FILENAME_COMPONENT(_absPotFile ${_potFile} ABSOLUTE)
 
    SET(_addToAll)
@@ -92,7 +93,8 @@ FUNCTION(GETTEXT_PROCESS_POT_FILE _potFile)
 
    CMAKE_PARSE_ARGUMENTS(_parsedArguments "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
 
-   GET_FILENAME_COMPONENT(_potBasename ${_potFile} NAME_WE)
+   GET_FILENAME_COMPONENT(_potName ${_potFile} NAME)
+   STRING(REGEX REPLACE "^(.+)(\\.[^.]+)$" "\\1" _potBasename ${_potName})
    GET_FILENAME_COMPONENT(_absPotFile ${_potFile} ABSOLUTE)
 
    FOREACH (_lang ${_parsedArguments_LANGUAGES})
