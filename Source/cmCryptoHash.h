@@ -19,6 +19,7 @@
 class cmCryptoHash
 {
 public:
+  virtual ~cmCryptoHash() {}
   static cmsys::auto_ptr<cmCryptoHash> New(const char* algo);
   std::string HashString(const char* input);
   std::string HashFile(const char* file);
