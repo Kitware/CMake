@@ -368,3 +368,67 @@ cmExportFileGenerator
   os << "  )\n"
      << "\n";
 }
+
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator::GenerateImportedFileCheckLoop(std::ostream& os)
+{
+  // Add code which verifies at cmake time that the file which is being
+  // imported actually exists on disk. This should in theory always be theory
+  // case, but still when packages are split into normal and development
+  // packages this might get broken (e.g. the Config.cmake could be part of
+  // the non-development package, something similar happened to me without
+  // on SUSE with a mysql pkg-config file, which claimed everything is fine,
+  // but the development package was not installed.).
+  os << "# Loop over all imported files and verify that they actually exist\n"
+        "FOREACH(target ${_IMPORT_CHECK_TARGETS} )\n"
+        "  FOREACH(file ${_IMPORT_CHECK_FILES_FOR_${target}} )\n"
+        "    IF(NOT EXISTS \"${file}\" )\n"
+        "      MESSAGE(FATAL_ERROR \"The file \\\"${file}\\\" "
+        "for the imported target \\\"${target}\\\" does not exist.\n"
+        "There are multiple possible reasons:\n"
+        " * the file \\\"${file}\\\" has been manually "
+        "deleted, renamed or moved to another location\n"
+        " * a previous install or uninstall procedure did not run "
+        " successfully to its end\n"
+        " * the installation package was faulty, and contained \\\""
+        "${CMAKE_CURRENT_LIST_FILE}\\\", but not \\\"${file}\\\", which "
+        "must always be installed together.\\n\"\n"
+        "             )\n"
+        "    ENDIF()\n"
+        "  ENDFOREACH()\n"
+        "  UNSET(_IMPORT_CHECK_FILES_FOR_${target})\n"
+        "ENDFOREACH()\n"
+        "UNSET(_IMPORT_CHECK_TARGETS)\n"
+        "\n";
+}
+
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator
+::GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
+                                 ImportPropertyMap const& properties,
+                                const std::set<std::string>& importedLocations)
+{
+  // Construct the imported target name.
+  std::string targetName = this->Namespace;
+  targetName += target->GetName();
+
+  os << "LIST(APPEND _IMPORT_CHECK_TARGETS " << targetName << " )\n"
+        "LIST(APPEND _IMPORT_CHECK_FILES_FOR_" << targetName << " ";
+
+  for(std::set<std::string>::const_iterator li = importedLocations.begin();
+      li != importedLocations.end();
+      ++li)
+    {
+    ImportPropertyMap::const_iterator pi = properties.find(*li);
+    if (pi != properties.end())
+      {
+      os << "\"" << pi->second << "\" ";
+      }
+    }
+
+  os << ")\n\n";
+}
