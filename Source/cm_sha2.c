@@ -228,7 +228,7 @@ void SHA512_Internal_Transform(SHA_CTX*, const sha_word64*);
 #define K1_60_TO_79	0xca62c1d6UL
 
 /* Initial hash value H for SHA-1: */
-const static sha_word32 sha1_initial_hash_value[5] = {
+static const sha_word32 sha1_initial_hash_value[5] = {
 	0x67452301UL,
 	0xefcdab89UL,
 	0x98badcfeUL,
@@ -237,7 +237,7 @@ const static sha_word32 sha1_initial_hash_value[5] = {
 };
 
 /* Hash constant words K for SHA-224 and SHA-256: */
-const static sha_word32 K256[64] = {
+static const sha_word32 K256[64] = {
 	0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL,
 	0x3956c25bUL, 0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL,
 	0xd807aa98UL, 0x12835b01UL, 0x243185beUL, 0x550c7dc3UL,
@@ -257,7 +257,7 @@ const static sha_word32 K256[64] = {
 };
 
 /* Initial hash value H for SHA-224: */
-const static sha_word32 sha224_initial_hash_value[8] = {
+static const sha_word32 sha224_initial_hash_value[8] = {
 	0xc1059ed8UL,
 	0x367cd507UL,
 	0x3070dd17UL,
@@ -269,7 +269,7 @@ const static sha_word32 sha224_initial_hash_value[8] = {
 };
 
 /* Initial hash value H for SHA-256: */
-const static sha_word32 sha256_initial_hash_value[8] = {
+static const sha_word32 sha256_initial_hash_value[8] = {
 	0x6a09e667UL,
 	0xbb67ae85UL,
 	0x3c6ef372UL,
@@ -281,7 +281,7 @@ const static sha_word32 sha256_initial_hash_value[8] = {
 };
 
 /* Hash constant words K for SHA-384 and SHA-512: */
-const static sha_word64 K512[80] = {
+static const sha_word64 K512[80] = {
 	0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL,
 	0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL,
 	0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL,
@@ -325,7 +325,7 @@ const static sha_word64 K512[80] = {
 };
 
 /* Initial hash value H for SHA-384 */
-const static sha_word64 sha384_initial_hash_value[8] = {
+static const sha_word64 sha384_initial_hash_value[8] = {
 	0xcbbb9d5dc1059ed8ULL,
 	0x629a292a367cd507ULL,
 	0x9159015a3070dd17ULL,
@@ -337,7 +337,7 @@ const static sha_word64 sha384_initial_hash_value[8] = {
 };
 
 /* Initial hash value H for SHA-512 */
-const static sha_word64 sha512_initial_hash_value[8] = {
+static const sha_word64 sha512_initial_hash_value[8] = {
 	0x6a09e667f3bcc908ULL,
 	0xbb67ae8584caa73bULL,
 	0x3c6ef372fe94f82bULL,
