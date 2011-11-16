@@ -352,6 +352,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
   if(args.size() != 3)
     {
     cmOStringStream e;
@@ -375,6 +376,12 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
     this->SetError(e.str().c_str());
     }
   return false;
+#else
+  cmOStringStream e;
+  e << args[0] << " not available during bootstrap";
+  this->SetError(e.str().c_str());
+  return false;
+#endif
 }
 
 //----------------------------------------------------------------------------
