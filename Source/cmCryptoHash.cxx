@@ -15,6 +15,25 @@
 #include "cm_sha2.h"
 
 //----------------------------------------------------------------------------
+cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
+{
+  if(strcmp(algo,"MD5") == 0)
+    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashMD5); }
+  else if(strcmp(algo,"SHA1") == 0)
+    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA1); }
+  else if(strcmp(algo,"SHA224") == 0)
+    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA224); }
+  else if(strcmp(algo,"SHA256") == 0)
+    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA256); }
+  else if(strcmp(algo,"SHA384") == 0)
+    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA384); }
+  else if(strcmp(algo,"SHA512") == 0)
+    { return cmsys::auto_ptr<cmCryptoHash>(new cmCryptoHashSHA512); }
+  else
+    { return cmsys::auto_ptr<cmCryptoHash>(0); }
+}
+
+//----------------------------------------------------------------------------
 std::string cmCryptoHash::HashString(const char* input)
 {
   this->Initialize();

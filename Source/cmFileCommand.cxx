@@ -360,19 +360,7 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  cmsys::auto_ptr<cmCryptoHash> hash;
-  if(args[0] == "MD5")
-    { hash.reset(new cmCryptoHashMD5); }
-  else if(args[0] == "SHA1")
-    { hash.reset(new cmCryptoHashSHA1); }
-  else if(args[0] == "SHA224")
-    { hash.reset(new cmCryptoHashSHA224); }
-  else if(args[0] == "SHA256")
-    { hash.reset(new cmCryptoHashSHA256); }
-  else if(args[0] == "SHA384")
-    { hash.reset(new cmCryptoHashSHA384); }
-  else if(args[0] == "SHA512")
-    { hash.reset(new cmCryptoHashSHA512); }
+  cmsys::auto_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
   if(hash.get())
     {
     std::string out = hash->HashFile(args[1].c_str());
