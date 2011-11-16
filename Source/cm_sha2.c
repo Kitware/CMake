@@ -103,6 +103,9 @@ typedef cm_sha2_uint32_t sha_word32;	/* Exactly 4 bytes */
 typedef cm_sha2_uint64_t sha_word64;	/* Exactly 8 bytes */
 #define SHA_UINT32_C(x) cmIML_INT_UINT32_C(x)
 #define SHA_UINT64_C(x) cmIML_INT_UINT64_C(x)
+#if defined(__BORLANDC__)
+# pragma warn -8004 /* variable assigned value that is never used */
+#endif
 
 /*** ENDIAN REVERSAL MACROS *******************************************/
 #if BYTE_ORDER == LITTLE_ENDIAN
