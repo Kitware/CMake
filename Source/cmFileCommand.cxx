@@ -85,7 +85,12 @@ bool cmFileCommand
     {
     return this->HandleReadCommand(args);
     }
-  else if ( subCommand == "MD5" )
+  else if ( subCommand == "MD5" ||
+            subCommand == "SHA1" ||
+            subCommand == "SHA224" ||
+            subCommand == "SHA256" ||
+            subCommand == "SHA384" ||
+            subCommand == "SHA512" )
     {
     return this->HandleHashCommand(args);
     }
@@ -358,6 +363,16 @@ bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
   cmsys::auto_ptr<cmCryptoHash> hash;
   if(args[0] == "MD5")
     { hash.reset(new cmCryptoHashMD5); }
+  else if(args[0] == "SHA1")
+    { hash.reset(new cmCryptoHashSHA1); }
+  else if(args[0] == "SHA224")
+    { hash.reset(new cmCryptoHashSHA224); }
+  else if(args[0] == "SHA256")
+    { hash.reset(new cmCryptoHashSHA256); }
+  else if(args[0] == "SHA384")
+    { hash.reset(new cmCryptoHashSHA384); }
+  else if(args[0] == "SHA512")
+    { hash.reset(new cmCryptoHashSHA512); }
   if(hash.get())
     {
     std::string out = hash->HashFile(args[1].c_str());

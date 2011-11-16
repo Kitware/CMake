@@ -12,6 +12,7 @@
 #include "cmCryptoHash.h"
 
 #include <cmsys/MD5.h>
+#include "cm_sha2.h"
 
 //----------------------------------------------------------------------------
 std::string cmCryptoHash::HashString(const char* input)
@@ -88,3 +89,23 @@ std::string cmCryptoHashMD5::Finalize()
   cmsysMD5_FinalizeHex(this->MD5, md5out);
   return std::string(md5out, 32);
 }
+
+
+#define cmCryptoHash_SHA_CLASS_IMPL(SHA) \
+cmCryptoHash##SHA::cmCryptoHash##SHA(): SHA(new SHA_CTX) {} \
+cmCryptoHash##SHA::~cmCryptoHash##SHA() { delete this->SHA; } \
+void cmCryptoHash##SHA::Initialize() { SHA##_Init(this->SHA); } \
+void cmCryptoHash##SHA::Append(unsigned char const* buf, int sz) \
+{ SHA##_Update(this->SHA, buf, sz); } \
+std::string cmCryptoHash##SHA::Finalize() \
+{ \
+  char out[SHA##_DIGEST_STRING_LENGTH]; \
+  SHA##_End(this->SHA, out); \
+  return std::string(out, SHA##_DIGEST_STRING_LENGTH-1); \
+}
+
+cmCryptoHash_SHA_CLASS_IMPL(SHA1)
+cmCryptoHash_SHA_CLASS_IMPL(SHA224)
+cmCryptoHash_SHA_CLASS_IMPL(SHA256)
+cmCryptoHash_SHA_CLASS_IMPL(SHA384)
+cmCryptoHash_SHA_CLASS_IMPL(SHA512)
