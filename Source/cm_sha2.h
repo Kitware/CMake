@@ -102,31 +102,36 @@ void SHA1_Init(SHA_CTX*);
 void SHA1_Update(SHA_CTX*, const cm_sha2_uint8_t*, size_t);
 void SHA1_Final(cm_sha2_uint8_t[SHA1_DIGEST_LENGTH], SHA_CTX*);
 char* SHA1_End(SHA_CTX*, char[SHA1_DIGEST_STRING_LENGTH]);
-char* SHA1_Data(const cm_sha2_uint8_t*, size_t, char[SHA1_DIGEST_STRING_LENGTH]);
+char* SHA1_Data(const cm_sha2_uint8_t*, size_t,
+		char[SHA1_DIGEST_STRING_LENGTH]);
 
 void SHA224_Init(SHA_CTX*);
 void SHA224_Update(SHA_CTX*, const cm_sha2_uint8_t*, size_t);
 void SHA224_Final(cm_sha2_uint8_t[SHA224_DIGEST_LENGTH], SHA_CTX*);
 char* SHA224_End(SHA_CTX*, char[SHA224_DIGEST_STRING_LENGTH]);
-char* SHA224_Data(const cm_sha2_uint8_t*, size_t, char[SHA224_DIGEST_STRING_LENGTH]);
+char* SHA224_Data(const cm_sha2_uint8_t*, size_t,
+		  char[SHA224_DIGEST_STRING_LENGTH]);
 
 void SHA256_Init(SHA_CTX*);
 void SHA256_Update(SHA_CTX*, const cm_sha2_uint8_t*, size_t);
 void SHA256_Final(cm_sha2_uint8_t[SHA256_DIGEST_LENGTH], SHA_CTX*);
 char* SHA256_End(SHA_CTX*, char[SHA256_DIGEST_STRING_LENGTH]);
-char* SHA256_Data(const cm_sha2_uint8_t*, size_t, char[SHA256_DIGEST_STRING_LENGTH]);
+char* SHA256_Data(const cm_sha2_uint8_t*, size_t,
+		  char[SHA256_DIGEST_STRING_LENGTH]);
 
 void SHA384_Init(SHA_CTX*);
 void SHA384_Update(SHA_CTX*, const cm_sha2_uint8_t*, size_t);
 void SHA384_Final(cm_sha2_uint8_t[SHA384_DIGEST_LENGTH], SHA_CTX*);
 char* SHA384_End(SHA_CTX*, char[SHA384_DIGEST_STRING_LENGTH]);
-char* SHA384_Data(const cm_sha2_uint8_t*, size_t, char[SHA384_DIGEST_STRING_LENGTH]);
+char* SHA384_Data(const cm_sha2_uint8_t*, size_t,
+		  char[SHA384_DIGEST_STRING_LENGTH]);
 
 void SHA512_Init(SHA_CTX*);
 void SHA512_Update(SHA_CTX*, const cm_sha2_uint8_t*, size_t);
 void SHA512_Final(cm_sha2_uint8_t[SHA512_DIGEST_LENGTH], SHA_CTX*);
 char* SHA512_End(SHA_CTX*, char[SHA512_DIGEST_STRING_LENGTH]);
-char* SHA512_Data(const cm_sha2_uint8_t*, size_t, char[SHA512_DIGEST_STRING_LENGTH]);
+char* SHA512_Data(const cm_sha2_uint8_t*, size_t,
+		  char[SHA512_DIGEST_STRING_LENGTH]);
 
 #ifdef    __cplusplus
 }
