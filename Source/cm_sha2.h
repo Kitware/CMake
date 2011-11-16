@@ -36,6 +36,8 @@
 #ifndef __SHA2_H__
 #define __SHA2_H__
 
+#include "cm_sha2_mangle.h"
+
 /* CMake modification: use integer types from cmIML.  */
 #include "cmIML/INT.h"
 typedef cmIML_INT_uint8_t cm_sha2_uint8_t;

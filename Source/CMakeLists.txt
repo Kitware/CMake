@@ -261,6 +261,8 @@ SET(SRCS
   cmakewizard.cxx
   cmakewizard.h
 
+  cm_sha2.h
+  cm_sha2.c
   cm_utf8.h
   cm_utf8.c
   )
