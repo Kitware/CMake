@@ -37,4 +37,25 @@ protected:
   virtual std::string Finalize();
 };
 
+#define cmCryptoHash_SHA_CLASS_DECL(SHA) \
+  class cmCryptoHash##SHA: public cmCryptoHash \
+  { \
+    union _SHA_CTX* SHA; \
+  public: \
+    cmCryptoHash##SHA(); \
+    ~cmCryptoHash##SHA(); \
+  protected: \
+    virtual void Initialize(); \
+    virtual void Append(unsigned char const* buf, int sz); \
+    virtual std::string Finalize(); \
+  }
+
+cmCryptoHash_SHA_CLASS_DECL(SHA1);
+cmCryptoHash_SHA_CLASS_DECL(SHA224);
+cmCryptoHash_SHA_CLASS_DECL(SHA256);
+cmCryptoHash_SHA_CLASS_DECL(SHA384);
+cmCryptoHash_SHA_CLASS_DECL(SHA512);
+
+#undef cmCryptoHash_SHA_CLASS_DECL
+
 #endif
