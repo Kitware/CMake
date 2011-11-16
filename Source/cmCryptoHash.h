@@ -14,9 +14,12 @@
 
 #include "cmStandardIncludes.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 class cmCryptoHash
 {
 public:
+  static cmsys::auto_ptr<cmCryptoHash> New(const char* algo);
   std::string HashString(const char* input);
   std::string HashFile(const char* file);
 protected:
