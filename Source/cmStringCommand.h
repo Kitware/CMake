@@ -76,6 +76,8 @@ public:
       "  string(REPLACE <match_string>\n"
       "         <replace_string> <output variable>\n"
       "         <input> [<input>...])\n"
+      "  string(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512>\n"
+      "         <output variable> <input>)\n"
       "  string(COMPARE EQUAL <string1> <string2> <output variable>)\n"
       "  string(COMPARE NOTEQUAL <string1> <string2> <output variable>)\n"
       "  string(COMPARE LESS <string1> <string2> <output variable>)\n"
@@ -103,6 +105,8 @@ public:
       "backslash through argument parsing.\n"
       "REPLACE will replace all occurrences of match_string in the input with "
       "replace_string and store the result in the output.\n"
+      "MD5, SHA1, SHA224, SHA256, SHA384, and SHA512 "
+      "will compute a cryptographic hash of the input string.\n"
       "COMPARE EQUAL/NOTEQUAL/LESS/GREATER will compare the strings and "
       "store true or false in the output variable.\n"
       "ASCII will convert all numbers into corresponding ASCII characters.\n"
@@ -150,6 +154,7 @@ protected:
   bool RegexMatch(std::vector<std::string> const& args);
   bool RegexMatchAll(std::vector<std::string> const& args);
   bool RegexReplace(std::vector<std::string> const& args);
+  bool HandleHashCommand(std::vector<std::string> const& args);
   bool HandleToUpperLowerCommand(std::vector<std::string> const& args,
                                  bool toUpper);
   bool HandleCompareCommand(std::vector<std::string> const& args);
