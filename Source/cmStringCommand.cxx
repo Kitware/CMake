@@ -10,6 +10,8 @@
   See the License for more information.
 ============================================================================*/
 #include "cmStringCommand.h"
+#include "cmCryptoHash.h"
+
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
 
@@ -35,6 +37,15 @@ bool cmStringCommand
   else if(subCommand == "REPLACE")
     {
     return this->HandleReplaceCommand(args);
+    }
+  else if ( subCommand == "MD5" ||
+            subCommand == "SHA1" ||
+            subCommand == "SHA224" ||
+            subCommand == "SHA256" ||
+            subCommand == "SHA384" ||
+            subCommand == "SHA512" )
+    {
+    return this->HandleHashCommand(args);
     }
   else if(subCommand == "TOLOWER")
     {
@@ -80,6 +91,34 @@ bool cmStringCommand
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  if(args.size() != 3)
+    {
+    cmOStringStream e;
+    e << args[0] << " requires an output variable and an input string";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  cmsys::auto_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  if(hash.get())
+    {
+    std::string out = hash->HashString(args[2].c_str());
+    this->Makefile->AddDefinition(args[1].c_str(), out.c_str());
+    return true;
+    }
+  return false;
+#else
+  cmOStringStream e;
+  e << args[0] << " not available during bootstrap";
+  this->SetError(e.str().c_str());
+  return false;
+#endif
 }
 
 //----------------------------------------------------------------------------

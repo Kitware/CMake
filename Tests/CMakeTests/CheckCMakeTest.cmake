@@ -12,7 +12,7 @@ function(check_cmake_test prefix)
       )
     string(REGEX REPLACE "\n" "\n out> " out " out> ${stdout}")
     string(REGEX REPLACE "\n" "\n err> " err " err> ${stderr}")
-    if(NOT "${result}" STREQUAL ${${test}-RESULT})
+    if(NOT "${result}" STREQUAL "${${test}-RESULT}")
       message(FATAL_ERROR
         "Test ${test} result is [${result}], not [${${test}-RESULT}].\n"
         "Test ${test} output:\n"

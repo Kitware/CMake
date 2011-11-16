@@ -12,6 +12,26 @@ set(Copy-NoDest-RESULT 1)
 set(Copy-NoDest-STDERR "given no DESTINATION")
 set(Copy-NoFile-RESULT 1)
 set(Copy-NoFile-STDERR "COPY cannot find.*/does_not_exist\\.txt")
+set(MD5-NoFile-RESULT 1)
+set(MD5-NoFile-STDERR "file MD5 failed to read file")
+set(MD5-BadArg1-RESULT 1)
+set(MD5-BadArg1-STDERR "file must be called with at least two arguments")
+set(MD5-BadArg2-RESULT 1)
+set(MD5-BadArg2-STDERR "file MD5 requires a file name and output variable")
+set(MD5-BadArg4-RESULT 1)
+set(MD5-BadArg4-STDERR "file MD5 requires a file name and output variable")
+set(MD5-Works-RESULT 0)
+set(MD5-Works-STDERR "a28a44fb5b58a6acf0cbec46557bc775")
+set(SHA1-Works-RESULT 0)
+set(SHA1-Works-STDERR "e0ce452a7e34e9c705b46e4e7c9cd959082c0777")
+set(SHA224-Works-RESULT 0)
+set(SHA224-Works-STDERR "d1f1c9db3df73586a5a200014505ef03b70da5e0539eb35c11b4ef6f")
+set(SHA256-Works-RESULT 0)
+set(SHA256-Works-STDERR "bb38de1c34713f750a4f84404ef5fb1efb93cf815cb09182db457ba91de19195")
+set(SHA384-Works-RESULT 0)
+set(SHA384-Works-STDERR "2f01d58436bd04a40ec2c938a15f2bb661bf1bf1560a5f2d40a3ebbb716a58e400ab2992c23ba19fa96dc519e0042c26")
+set(SHA512-Works-RESULT 0)
+set(SHA512-Works-STDERR "349d02e347ddb133afb4557c9e541163f54b6eaa9eb345672bfd7bbce90c9872bf1fad9c6662248eb7b092aef719e4b8c3b8bb1cf47f287abbde12360c073686")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(File
@@ -22,6 +42,16 @@ check_cmake_test(File
   Copy-LateArg
   Copy-NoDest
   Copy-NoFile
+  MD5-NoFile
+  MD5-BadArg1
+  MD5-BadArg2
+  MD5-BadArg4
+  MD5-Works
+  SHA1-Works
+  SHA224-Works
+  SHA256-Works
+  SHA384-Works
+  SHA512-Works
   )
 
 # Also execute each test listed in FileTestScript.cmake:

@@ -65,6 +65,7 @@ public:
       "  file(WRITE filename \"message to write\"... )\n"
       "  file(APPEND filename \"message to write\"... )\n"
       "  file(READ filename variable [LIMIT numBytes] [OFFSET offset] [HEX])\n"
+      "  file(<MD5|SHA1|SHA224|SHA256|SHA384|SHA512> filename variable)\n"
       "  file(STRINGS filename variable [LIMIT_COUNT num]\n"
       "       [LIMIT_INPUT numBytes] [LIMIT_OUTPUT numBytes]\n"
       "       [LENGTH_MINIMUM numBytes] [LENGTH_MAXIMUM numBytes]\n"
@@ -94,6 +95,8 @@ public:
       "variable. It will start at the given offset and read up to numBytes. "
       "If the argument HEX is given, the binary data will be converted to "
       "hexadecimal representation and this will be stored in the variable.\n"
+      "MD5, SHA1, SHA224, SHA256, SHA384, and SHA512 "
+      "will compute a cryptographic hash of the content of a file.\n"
       "STRINGS will parse a list of ASCII strings from a file and "
       "store it in a variable. Binary data in the file are ignored. Carriage "
       "return (CR) characters are ignored. It works also for Intel Hex and "
@@ -227,6 +230,7 @@ protected:
   bool HandleRemove(std::vector<std::string> const& args, bool recurse);
   bool HandleWriteCommand(std::vector<std::string> const& args, bool append);
   bool HandleReadCommand(std::vector<std::string> const& args);
+  bool HandleHashCommand(std::vector<std::string> const& args);
   bool HandleStringsCommand(std::vector<std::string> const& args);
   bool HandleGlobCommand(std::vector<std::string> const& args, bool recurse);
   bool HandleMakeDirectoryCommand(std::vector<std::string> const& args);

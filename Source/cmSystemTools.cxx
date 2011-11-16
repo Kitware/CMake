@@ -54,7 +54,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #  include <memory> // auto_ptr
 #  include <fcntl.h>
-#  include <cmsys/MD5.h>
+#  include "cmCryptoHash.h"
 #endif
 
 #if defined(CMAKE_USE_ELF_PARSER)
@@ -1197,48 +1197,10 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  if(!cmSystemTools::FileExists(source))
-    {
-    return false;
-    }
-
-  // Open files
-#if defined(_WIN32) || defined(__CYGWIN__)
-  cmsys_ios::ifstream fin(source, cmsys_ios::ios::binary | cmsys_ios::ios::in);
-#else
-  cmsys_ios::ifstream fin(source);
-#endif
-  if(!fin)
-    {
-    return false;
-    }
-
-  cmsysMD5* md5 = cmsysMD5_New();
-  cmsysMD5_Initialize(md5);
-
-  // Should be efficient enough on most system:
-  const int bufferSize = 4096;
-  char buffer[bufferSize];
-  unsigned char const* buffer_uc =
-    reinterpret_cast<unsigned char const*>(buffer);
-  // This copy loop is very sensitive on certain platforms with
-  // slightly broken stream libraries (like HPUX).  Normally, it is
-  // incorrect to not check the error condition on the fin.read()
-  // before using the data, but the fin.gcount() will be zero if an
-  // error occurred.  Therefore, the loop should be safe everywhere.
-  while(fin)
-    {
-    fin.read(buffer, bufferSize);
-    if(int gcount = static_cast<int>(fin.gcount()))
-      {
-      cmsysMD5_Append(md5, buffer_uc, gcount);
-      }
-    }
-  cmsysMD5_FinalizeHex(md5, md5out);
-  cmsysMD5_Delete(md5);
-
-  fin.close();
-  return true;
+  cmCryptoHashMD5 md5;
+  std::string str = md5.HashFile(source);
+  strncpy(md5out, str.c_str(), 32);
+  return !str.empty();
 #else
   (void)source;
   (void)md5out;
@@ -1250,13 +1212,8 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 std::string cmSystemTools::ComputeStringMD5(const char* input)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  char md5out[32];
-  cmsysMD5* md5 = cmsysMD5_New();
-  cmsysMD5_Initialize(md5);
-  cmsysMD5_Append(md5, reinterpret_cast<unsigned char const*>(input), -1);
-  cmsysMD5_FinalizeHex(md5, md5out);
-  cmsysMD5_Delete(md5);
-  return std::string(md5out, 32);
+  cmCryptoHashMD5 md5;
+  return md5.HashString(input);
 #else
   (void)input;
   cmSystemTools::Message("md5sum not supported in bootstrapping mode","Error");
