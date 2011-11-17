@@ -106,6 +106,9 @@ typedef cm_sha2_uint64_t sha_word64;	/* Exactly 8 bytes */
 #if defined(__BORLANDC__)
 # pragma warn -8004 /* variable assigned value that is never used */
 #endif
+#if defined(__clang__)
+# pragma clang diagnostic ignored "-Wcast-align"
+#endif
 
 /*** ENDIAN REVERSAL MACROS *******************************************/
 #if BYTE_ORDER == LITTLE_ENDIAN
