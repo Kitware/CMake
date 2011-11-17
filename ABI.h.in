@@ -216,7 +216,8 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 # endif
 #endif
 #if !defined(@KWIML@_ABI_SIZEOF_LONG_LONG)
-# if defined(_LONGLONG) /* SGI, some GNU, perhaps others.  */
+# if defined(_LONGLONG) /* SGI, some GNU, perhaps others.  */ \
+  && !defined(_MSC_VER)
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # elif defined(_LONG_LONG) /* IBM XL, perhaps others.  */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
