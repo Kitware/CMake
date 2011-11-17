@@ -85,12 +85,9 @@ cmExportBuildFileGenerator
 
       // Generate code in the export file.
       this->GenerateImportPropertyCode(os, config, target, properties);
-      this->GenerateImportedFileChecksCode(os, target, properties,
-                                           importedLocations);
       }
     }
 
-  this->GenerateImportedFileCheckLoop(os);
 }
 
 //----------------------------------------------------------------------------
