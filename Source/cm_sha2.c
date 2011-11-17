@@ -106,6 +106,9 @@ typedef cm_sha2_uint64_t sha_word64;	/* Exactly 8 bytes */
 #if defined(__BORLANDC__)
 # pragma warn -8004 /* variable assigned value that is never used */
 #endif
+#if defined(__clang__)
+# pragma clang diagnostic ignored "-Wcast-align"
+#endif
 
 /*** ENDIAN REVERSAL MACROS *******************************************/
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -652,7 +655,7 @@ void SHA1_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 	/* Sanity check: */
 	assert(context != (SHA_CTX*)0 && data != (sha_byte*)0);
 
-	usedspace = (context->s1.bitcount >> 3) % 64;
+	usedspace = (unsigned int)((context->s1.bitcount >> 3) % 64);
 	if (usedspace > 0) {
 		/* Calculate how much free space is available in the buffer */
 		freespace = 64 - usedspace;
@@ -705,7 +708,7 @@ void SHA1_Final(sha_byte digest[], SHA_CTX* context) {
 		return;
 	}
 
-	usedspace = (context->s1.bitcount >> 3) % 64;
+	usedspace = (unsigned int)((context->s1.bitcount >> 3) % 64);
 	if (usedspace == 0) {
 		/* Set-up for the last transform: */
 		MEMSET_BZERO(context->s1.buffer, 56);
@@ -992,7 +995,7 @@ void SHA256_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 	/* Sanity check: */
 	assert(context != (SHA_CTX*)0 && data != (sha_byte*)0);
 
-	usedspace = (context->s256.bitcount >> 3) % 64;
+	usedspace = (unsigned int)((context->s256.bitcount >> 3) % 64);
 	if (usedspace > 0) {
 		/* Calculate how much free space is available in the buffer */
 		freespace = 64 - usedspace;
@@ -1032,7 +1035,7 @@ void SHA256_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 void SHA256_Internal_Last(SHA_CTX* context) {
 	unsigned int	usedspace;
 
-	usedspace = (context->s256.bitcount >> 3) % 64;
+	usedspace = (unsigned int)((context->s256.bitcount >> 3) % 64);
 #if BYTE_ORDER == LITTLE_ENDIAN
 	/* Convert FROM host byte order */
 	REVERSE64(context->s256.bitcount,context->s256.bitcount);
@@ -1399,7 +1402,7 @@ void SHA512_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 	/* Sanity check: */
 	assert(context != (SHA_CTX*)0 && data != (sha_byte*)0);
 
-	usedspace = (context->s512.bitcount[0] >> 3) % 128;
+	usedspace = (unsigned int)((context->s512.bitcount[0] >> 3) % 128);
 	if (usedspace > 0) {
 		/* Calculate how much free space is available in the buffer */
 		freespace = 128 - usedspace;
@@ -1439,7 +1442,7 @@ void SHA512_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 void SHA512_Internal_Last(SHA_CTX* context) {
 	unsigned int	usedspace;
 
-	usedspace = (context->s512.bitcount[0] >> 3) % 128;
+	usedspace = (unsigned int)((context->s512.bitcount[0] >> 3) % 128);
 #if BYTE_ORDER == LITTLE_ENDIAN
 	/* Convert FROM host byte order */
 	REVERSE64(context->s512.bitcount[0],context->s512.bitcount[0]);
