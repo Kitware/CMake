@@ -35,6 +35,7 @@ if(KWIML_LANGUAGE_C)
   list(APPEND test_srcs
     test_ABI_C.c
     test_INT_C.c
+    test_include_C.c
     )
 endif()
 if(KWIML_LANGUAGE_CXX)
@@ -42,6 +43,7 @@ if(KWIML_LANGUAGE_CXX)
   list(APPEND test_srcs
     test_ABI_CXX.cxx
     test_INT_CXX.cxx
+    test_include_CXX.cxx
     )
 endif()
 
