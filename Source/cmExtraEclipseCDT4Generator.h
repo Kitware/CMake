@@ -46,7 +46,7 @@ public:
 
 private:
   // create .project file in the source tree
-  void CreateSourceProjectFile() const;
+  void CreateSourceProjectFile();
 
   // create .project file
   void CreateProjectFile();
@@ -104,7 +104,8 @@ private:
   static void AddEnvVar(cmGeneratedFileStream& fout, const char* envVar,
                         cmMakefile* mf);
 
-  void CreateLinksToSubprojects(cmGeneratedFileStream& fout);
+  void CreateLinksToSubprojects(cmGeneratedFileStream& fout,
+                                const std::string& baseDir);
   void CreateLinksForTargets(cmGeneratedFileStream& fout);
 
   std::vector<std::string> SrcLinkedResources;
