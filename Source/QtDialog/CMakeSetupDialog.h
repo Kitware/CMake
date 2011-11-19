@@ -105,6 +105,8 @@ protected:
   QTextCharFormat ErrorFormat;
   QTextCharFormat MessageFormat;
 
+  QStringList AddVariableCompletions;
+
   QEventLoop LocalLoop;
 
   float ProgressOffset;
