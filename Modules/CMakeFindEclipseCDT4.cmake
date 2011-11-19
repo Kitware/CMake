@@ -70,8 +70,8 @@ ENDIF()
 SET(CMAKE_ECLIPSE_MAKE_ARGUMENTS "${_CMAKE_ECLIPSE_INITIAL_MAKE_ARGS}" CACHE STRING "Additional command line arguments when Eclipse invokes make. Enter e.g. -j<some_number> to get parallel builds")
 
 # This variable is used by the Eclipse generator in out-of-source builds only.
-SET(ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT FALSE CACHE BOOL "If enabled, CMake will generate a source project for Eclipse in CMAKE_SOURCE_DIR")
-MARK_AS_ADVANCED(ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT)
+SET(CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT FALSE CACHE BOOL "If enabled, CMake will generate a source project for Eclipse in CMAKE_SOURCE_DIR")
+MARK_AS_ADVANCED(CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT)
 
 # Determine builtin macros and include dirs:
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/CMakeExtraGeneratorDetermineCompilerMacrosAndIncludeDirs.cmake)

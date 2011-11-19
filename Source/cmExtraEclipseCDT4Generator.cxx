@@ -85,7 +85,16 @@ void cmExtraEclipseCDT4Generator::Generate()
   this->IsOutOfSourceBuild = (this->HomeDirectory!=this->HomeOutputDirectory);
 
   this->GenerateSourceProject = (this->IsOutOfSourceBuild &&
-                            mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"));
+                            mf->IsOn("CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT"));
+
+  if ((this->GenerateSourceProject == false)
+    && (mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT")))
+    {
+    mf->IssueMessage(cmake::WARNING,
+              "ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT is set to TRUE, "
+              "but this variable is not supported anymore since CMake 2.8.7.\n"
+              "Enable CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT instead.");
+    }
 
   if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
                                     this->HomeDirectory.c_str()))
