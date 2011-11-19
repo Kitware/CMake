@@ -14,11 +14,11 @@
 #include <QMetaProperty>
 
 static const int NumTypes = 4;
-static const QString TypeStrings[NumTypes] = 
+static const QString TypeStrings[NumTypes] =
   { "BOOL", "PATH", "FILEPATH", "STRING" };
-static const QCMakeProperty::PropertyType Types[NumTypes] = 
-  { QCMakeProperty::BOOL, QCMakeProperty::PATH, 
-    QCMakeProperty::FILEPATH, QCMakeProperty::STRING}; 
+static const QCMakeProperty::PropertyType Types[NumTypes] =
+  { QCMakeProperty::BOOL, QCMakeProperty::PATH,
+    QCMakeProperty::FILEPATH, QCMakeProperty::STRING};
 
 AddCacheEntry::AddCacheEntry(QWidget* p)
   : QWidget(p)
