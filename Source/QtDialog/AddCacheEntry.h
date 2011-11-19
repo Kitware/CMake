@@ -15,6 +15,7 @@
 
 #include <QWidget>
 #include <QCheckBox>
+#include <QStringList>
 
 #include "QCMake.h"
 #include "ui_AddCacheEntry.h"
@@ -23,7 +24,7 @@ class AddCacheEntry : public QWidget, public Ui::AddCacheEntry
 {
   Q_OBJECT
 public:
-  AddCacheEntry(QWidget* p);
+  AddCacheEntry(QWidget* p, const QStringList& completions);
 
   QString name() const;
   QVariant value() const;
