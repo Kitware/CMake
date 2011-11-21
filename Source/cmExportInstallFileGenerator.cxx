@@ -173,7 +173,8 @@ cmExportInstallFileGenerator
     this->SetImportLocationProperty(config, suffix, te->LibraryGenerator,
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix,
-                                    te->RuntimeGenerator, properties, importedLocations);
+                                    te->RuntimeGenerator, properties,
+                                    importedLocations);
     this->SetImportLocationProperty(config, suffix, te->FrameworkGenerator,
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->BundleGenerator,
