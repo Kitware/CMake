@@ -1441,6 +1441,43 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 }
 
 //----------------------------------------------------------------------
+std::string cmCTest::SafeBuildIdField(const std::string& value)
+{
+  std::string safevalue(value);
+
+  if (safevalue != "")
+    {
+    // Disallow non-filename and non-space whitespace characters.
+    // If they occur, replace them with ""
+    //
+    const char *disallowed = "\\/:*?\"<>|\n\r\t\f\v";
+
+    if (safevalue.find_first_of(disallowed) != value.npos)
+      {
+      std::string::size_type i = 0;
+      std::string::size_type n = strlen(disallowed);
+      char replace[2];
+      replace[1] = 0;
+
+      for (i= 0; i<n; ++i)
+        {
+        replace[0] = disallowed[i];
+        cmSystemTools::ReplaceString(safevalue, replace, "");
+        }
+      }
+
+    safevalue = cmXMLSafe(safevalue).str();
+    }
+
+  if (safevalue == "")
+    {
+    safevalue = "(empty)";
+    }
+
+  return safevalue;
+}
+
+//----------------------------------------------------------------------
 void cmCTest::StartXML(std::ostream& ostr, bool append)
 {
   if(this->CurrentTag.empty())
@@ -1450,19 +1487,27 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
                " NightlStartTime was not set correctly." << std::endl);
     cmSystemTools::SetFatalErrorOccured();
     }
+
   // find out about the system
   cmsys::SystemInformation info;
   info.RunCPUCheck();
   info.RunOSCheck();
   info.RunMemoryCheck();
+
+  std::string buildname = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("BuildName"));
+  std::string stamp = cmCTest::SafeBuildIdField(
+    this->CurrentTag + "-" + this->GetTestModelString());
+  std::string site = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("Site"));
+
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-       << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
-       << "\"\n\tBuildStamp=\"" << this->CurrentTag << "-"
-       << this->GetTestModelString() << "\"\n\tName=\""
-       << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest-"
-       << cmVersion::GetCMakeVersion()  << "\"\n"
+       << "<Site BuildName=\"" << buildname << "\"\n"
+       << "\tBuildStamp=\"" << stamp << "\"\n"
+       << "\tName=\"" << site << "\"\n"
+       << "\tGenerator=\"ctest-" << cmVersion::GetCMakeVersion() << "\"\n"
        << (append? "\tAppend=\"true\"\n":"")
-       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler") 
+       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler")
        << "\"\n"
 #ifdef _COMPILER_VERSION
        << "\tCompilerVersion=\"_COMPILER_VERSION\"\n"
