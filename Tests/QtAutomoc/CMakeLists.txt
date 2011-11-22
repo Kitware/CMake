@@ -13,7 +13,7 @@ add_definitions(-DFOO)
 # create an executable and a library target, both requiring automoc:
 add_library(codeeditorLib STATIC codeeditor.cpp)
 
-add_executable(foo main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp)
+add_executable(foo main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp xyz.cpp)
 
 set_target_properties(foo codeeditorLib PROPERTIES AUTOMOC TRUE)
 
