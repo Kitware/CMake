@@ -650,13 +650,38 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         {
         if (basename != scannedFileBasename)
           {
-          std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
-                    << "includes the moc file \"" << currentMoc
-                    << "\", which seems to be the moc file from a different "
-                    << "source file. This is not supported. "
-                    << "Include \"" << scannedFileBasename << ".moc\" to run "
-                    << "moc on this source file." << std::endl;
-          ::exit(EXIT_FAILURE);
+          bool fail = true;
+          if ((this->QtMajorVersion == "4")
+                                    && (basename == scannedFileBasename +"_p"))
+            {
+            std::string mocSubDir = extractSubDir(absPath, currentMoc);
+            std::string headerToMoc = findMatchingHeader(
+                               absPath, mocSubDir, basename, headerExtensions);
+            if (!headerToMoc.empty())
+              {
+              // this is for KDE4 compatibility:
+              fail = false;
+              includedMocs[headerToMoc] = currentMoc;
+              std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+                           "includes the moc file \"" << currentMoc <<
+                           "\" instead of \"moc_" << basename << ".cpp\". "
+                           "Running moc on "
+                        << "\"" << headerToMoc << "\" ! Better include \"moc_"
+                        << basename << ".cpp\" for a robust build."
+                        << std::endl;
+              }
+            }
+
+          if (fail)
+            {
+            std::cerr <<"AUTOMOC: error: " << absFilename << ": The file "
+                        "includes the moc file \"" << currentMoc <<
+                        "\", which seems to be the moc file from a different "
+                        "source file. This is not supported. "
+                        "Include \"" << scannedFileBasename << ".moc\" to run "
+                        "moc on this source file." << std::endl;
+            ::exit(EXIT_FAILURE);
+            }
           }
         includedMocs[absFilename] = currentMoc;
         dotMocIncluded = true;
