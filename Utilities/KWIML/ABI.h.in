@@ -148,6 +148,8 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 #  define @KWIML@_ABI_CHAR_IS_SIGNED 1
 # elif defined(_SGI_COMPILER_VERSION) /* SGI MIPSpro default */
 #  define @KWIML@_ABI_CHAR_IS_UNSIGNED 1
+# elif defined(__PGIC__) /* PGI default */
+#  define @KWIML@_ABI_CHAR_IS_SIGNED 1
 # elif defined(_MSC_VER) /* MSVC default */
 #  define @KWIML@_ABI_CHAR_IS_SIGNED 1
 # elif defined(__WATCOMC__) /* Watcom default */
@@ -216,7 +218,8 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 # endif
 #endif
 #if !defined(@KWIML@_ABI_SIZEOF_LONG_LONG)
-# if defined(_LONGLONG) /* SGI, some GNU, perhaps others.  */
+# if defined(_LONGLONG) /* SGI, some GNU, perhaps others.  */ \
+  && !defined(_MSC_VER)
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # elif defined(_LONG_LONG) /* IBM XL, perhaps others.  */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
@@ -229,6 +232,8 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 # elif defined(__SUNPRO_C) || defined(__SUNPRO_CC) /* SunPro */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # elif defined(__HP_cc) || defined(__HP_aCC) /* HP */
+#  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
+# elif defined(__PGIC__) /* PGI */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # elif defined(__WATCOMC__) /* Watcom */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
