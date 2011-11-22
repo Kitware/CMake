@@ -11,39 +11,20 @@
   See the License for more information.
 ============================================================================*/
 
+#ifndef ABC_P_H
+#define ABC_P_H
 
-#include "abc.h"
-#include "abc_p.h"
+#include <QObject>
 
 #include <stdio.h>
 
-class PrintAbc : public QObject
+class AbcP : public QObject
 {
   Q_OBJECT
   public:
-    PrintAbc():QObject() {}
+    AbcP() {}
   public slots:
-    void print() const { printf("abc\n"); }
+    void doAbcP() { printf("I am private abc !\n"); }
 };
 
-Abc::Abc()
-:QObject()
-{
-}
-
-
-void Abc::doAbc()
-{
-  PrintAbc pa;
-  pa.print();
-  AbcP abcP;
-  abcP.doAbcP();
-}
-
-// check that including the moc file for the cpp file and the header works:
-#include "abc.moc"
-#include "moc_abc.cpp"
-#include "moc_abc_p.cpp"
-
-// check that including a moc file from another header works:
-#include "moc_xyz.cpp"
+#endif
