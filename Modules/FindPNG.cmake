@@ -1,14 +1,18 @@
 # - Find the native PNG includes and library
 #
-# This module defines
-#  PNG_INCLUDE_DIR, where to find png.h, etc.
+# This module searches libpng, the library for working with PNG images.
+#
+# It defines the following variables
+#  PNG_INCLUDE_DIRS, where to find png.h, etc.
 #  PNG_LIBRARIES, the libraries to link against to use PNG.
 #  PNG_DEFINITIONS - You should add_definitons(${PNG_DEFINITIONS}) before compiling code that includes png library files.
 #  PNG_FOUND, If false, do not try to use PNG.
-# also defined, but not for general use are
+# Also defined, but not for general use are
 #  PNG_LIBRARY, where to find the PNG library.
-# None of the above will be defined unles zlib can be found.
-# PNG depends on Zlib
+# For backward compatiblity the variable PNG_INCLUDE_DIR is also set. It has the same value as PNG_INCLUDE_DIRS.
+#
+# Since PNG depends on the ZLib compression library, none of the above will be
+# defined unless ZLib can be found.
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
@@ -38,7 +42,8 @@ if(ZLIB_FOUND)
 
   if (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
       # png.h includes zlib.h. Sigh.
-      SET(PNG_INCLUDE_DIR ${PNG_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} )
+      SET(PNG_INCLUDE_DIRS ${PNG_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR} )
+      SET(PNG_INCLUDE_DIR ${PNG_INCLUDE_DIRS} ) # for backward compatiblity
       SET(PNG_LIBRARIES ${PNG_LIBRARY} ${ZLIB_LIBRARY})
 
       if (CYGWIN)
