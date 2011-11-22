@@ -45,6 +45,8 @@
 #include "foo.h"
 #include "blub.h"
 #include "sub/bar.h"
+#include "abc.h"
+#include "xyz.h"
 
 int main(int argv, char **args)
 {
@@ -65,6 +67,12 @@ int main(int argv, char **args)
 
   Bar bar;
   bar.doBar();
+
+  Abc abc;
+  abc.doAbc();
+
+  Xyz xyz;
+  xyz.doXyz();
 
   return app.exec();
 }
