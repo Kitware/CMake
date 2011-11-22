@@ -12,34 +12,17 @@
 ============================================================================*/
 
 
-#include "abc.h"
+#include "xyz.h"
 
 #include <stdio.h>
 
-class PrintAbc : public QObject
-{
-  Q_OBJECT
-  public:
-    PrintAbc():QObject() {}
-  public slots:
-    void print() const { printf("abc\n"); }
-};
-
-Abc::Abc()
+Xyz::Xyz()
 :QObject()
 {
 }
 
 
-void Abc::doAbc()
+void Xyz::doXyz()
 {
-  PrintAbc pa;
-  pa.print();
+  printf("This is xyz !\n");
 }
-
-// check that including the moc file for the cpp file and the header works:
-#include "abc.moc"
-#include "moc_abc.cpp"
-
-// check that including a moc file from another header works:
-#include "moc_xyz.cpp"

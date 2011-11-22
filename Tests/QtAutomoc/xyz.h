@@ -11,35 +11,18 @@
   See the License for more information.
 ============================================================================*/
 
+#ifndef XYZ_H
+#define XYZ_H
 
-#include "abc.h"
+#include <QObject>
 
-#include <stdio.h>
-
-class PrintAbc : public QObject
+class Xyz : public QObject
 {
   Q_OBJECT
   public:
-    PrintAbc():QObject() {}
+    Xyz();
   public slots:
-    void print() const { printf("abc\n"); }
+    void doXyz();
 };
 
-Abc::Abc()
-:QObject()
-{
-}
-
-
-void Abc::doAbc()
-{
-  PrintAbc pa;
-  pa.print();
-}
-
-// check that including the moc file for the cpp file and the header works:
-#include "abc.moc"
-#include "moc_abc.cpp"
-
-// check that including a moc file from another header works:
-#include "moc_xyz.cpp"
+#endif
