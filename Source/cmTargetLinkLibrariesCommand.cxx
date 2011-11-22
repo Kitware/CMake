@@ -217,8 +217,8 @@ bool cmTargetLinkLibrariesCommand
   // Use of any of the new keywords implies awareness of
   // this property. And if no libraries are named, it should
   // result in an empty link interface.
-  if((this->CurrentProcessingState != ProcessingLinkLibraries)
-    && !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
+  if(this->CurrentProcessingState != ProcessingLinkLibraries &&
+     !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
     }
@@ -249,9 +249,9 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     {
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
-    if (this->CurrentProcessingState != ProcessingPublicInterface
-        || this->CurrentProcessingState == ProcessingPrivateInterface)
+    if (this->CurrentProcessingState != ProcessingPublicInterface)
       {
+      // Not LINK_INTERFACE_LIBRARIES or LINK_PUBLIC, do not add to interface.
       return;
       }
     }
