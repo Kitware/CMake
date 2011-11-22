@@ -37,6 +37,50 @@ static bool containsQ_OBJECT(const std::string& text)
 }
 
 
+static std::string findMatchingHeader(const std::string& absPath,
+                                      const std::string& mocSubDir,
+                                      const std::string& basename,
+                                const std::list<std::string>& headerExtensions)
+{
+  std::string header;
+  for(std::list<std::string>::const_iterator ext = headerExtensions.begin();
+      ext != headerExtensions.end();
+      ++ext)
+    {
+    std::string sourceFilePath = absPath + basename + (*ext);
+    if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
+      {
+      header = sourceFilePath;
+      break;
+      }
+    if (!mocSubDir.empty())
+      {
+      sourceFilePath = mocSubDir + basename + (*ext);
+      if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
+        {
+        header = sourceFilePath;
+        break;
+        }
+      }
+    }
+
+  return header;
+}
+
+
+static std::string extractSubDir(const std::string& absPath,
+                                 const std::string& currentMoc)
+{
+  std::string subDir;
+  if (currentMoc.find_first_of('/') != std::string::npos)
+    {
+    subDir = absPath
+                  + cmsys::SystemTools::GetFilenamePath(currentMoc) + '/';
+    }
+  return subDir;
+}
+
+
 cmQtAutomoc::cmQtAutomoc()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,ColorOutput(true)
@@ -569,36 +613,9 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         // basename should be the part of the moc filename used for
         // finding the correct header, so we need to remove the moc_ part
         basename = basename.substr(4);
-
-        std::string mocSubDir;
-        if (currentMoc.find_first_of('/') != std::string::npos)
-          {
-          mocSubDir = absPath
-                       + cmsys::SystemTools::GetFilenamePath(currentMoc) + '/';
-          }
-
-        std::string headerToMoc;
-        for(std::list<std::string>::const_iterator ext =
-                                                      headerExtensions.begin();
-            ext != headerExtensions.end();
-            ++ext)
-          {
-          std::string sourceFilePath = absPath + basename + (*ext);
-          if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
-            {
-            headerToMoc = sourceFilePath;
-            break;
-            }
-          if (!mocSubDir.empty())
-            {
-            sourceFilePath = mocSubDir + basename + (*ext);
-            if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
-              {
-              headerToMoc = sourceFilePath;
-              break;
-              }
-            }
-          }
+        std::string mocSubDir = extractSubDir(absPath, currentMoc);
+        std::string headerToMoc = findMatchingHeader(
+                               absPath, mocSubDir, basename, headerExtensions);
 
         if (!headerToMoc.empty())
           {
