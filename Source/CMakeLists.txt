@@ -129,6 +129,8 @@ SET(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmCryptoHash.cxx
+  cmCryptoHash.h
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
@@ -259,6 +261,8 @@ SET(SRCS
   cmakewizard.cxx
   cmakewizard.h
 
+  cm_sha2.h
+  cm_sha2.c
   cm_utf8.h
   cm_utf8.c
   )
