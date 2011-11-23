@@ -75,7 +75,9 @@ protected:
   void SetImportLocationProperty(const char* config,
                                  std::string const& suffix,
                                  cmInstallTargetGenerator* itgen,
-                                 ImportPropertyMap& properties);
+                                 ImportPropertyMap& properties,
+                                 std::set<std::string>& importedLocations
+                                );
 
   void ComplainAboutImportPrefix(cmInstallTargetGenerator* itgen);
 
