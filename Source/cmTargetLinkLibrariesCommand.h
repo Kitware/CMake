@@ -19,7 +19,7 @@
  *
  * cmTargetLinkLibrariesCommand is used to specify a list of libraries to link
  * into executable(s) or shared objects. The names of the libraries
- * should be those defined by the LIBRARY(library) command(s).  
+ * should be those defined by the LIBRARY(library) command(s).
  */
 class cmTargetLinkLibrariesCommand : public cmCommand
 {
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmTargetLinkLibrariesCommand;
     }
@@ -47,12 +47,12 @@ public:
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation()
     {
-    return 
+    return
       "Link a target to given libraries.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -107,6 +107,18 @@ public:
       "Libraries specified as \"general\" (or without any keyword) are "
       "treated as if specified for both \"debug\" and \"optimized\"."
       "\n"
+      "  target_link_libraries(<target>\n"
+      "                        <LINK_PRIVATE|LINK_PUBLIC>\n"
+      "                          [[debug|optimized|general] <lib>] ...\n"
+      "                        [<LINK_PRIVATE|LINK_PUBLIC>\n"
+      "                          [[debug|optimized|general] <lib>] ...])\n"
+      "The LINK_PUBLIC and LINK_PRIVATE modes can be used to specify both "
+      "the link dependencies and the link interface in one command.  "
+      "Libraries and targets following LINK_PUBLIC are linked to, and are "
+      "made part of the LINK_INTERFACE_LIBRARIES. Libraries and targets "
+      "following LINK_PRIVATE are linked to, but are not made part of the "
+      "LINK_INTERFACE_LIBRARIES.  "
+      "\n"
       "The library dependency graph is normally acyclic (a DAG), but in the "
       "case of mutually-dependent STATIC libraries CMake allows the graph "
       "to contain cycles (strongly connected components).  "
@@ -130,14 +142,21 @@ public:
       ")"
       ;
     }
-  
+
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
 private:
   void LinkLibraryTypeSpecifierWarning(int left, int right);
   static const char* LinkLibraryTypeNames[3];
 
   cmTarget* Target;
-  bool DoingInterface;
+  enum ProcessingState {
+    ProcessingLinkLibraries,
+    ProcessingLinkInterface,
+    ProcessingPublicInterface,
+    ProcessingPrivateInterface
+  };
+
+  ProcessingState CurrentProcessingState;
 
   void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
 };
