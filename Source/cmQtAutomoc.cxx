@@ -49,11 +49,11 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
-  // don't do anything if there is no Qt4 or Qt5SrcTools (which contains moc):
+  // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
   if (qtMajorVersion == "")
     {
-    qtMajorVersion = makefile->GetSafeDefinition("Qt5SrcTools_VERSION_MAJOR");
+    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
     }
   if (qtMajorVersion != "4" && qtMajorVersion != "5")
     {
@@ -229,7 +229,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   if (this->QtMajorVersion == "")
     {
     this->QtMajorVersion = makefile->GetSafeDefinition(
-                                     "AM_Qt5SrcTools_VERSION_MAJOR");
+                                     "AM_Qt5Core_VERSION_MAJOR");
     }
   this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
   this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
