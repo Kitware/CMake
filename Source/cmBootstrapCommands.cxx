@@ -12,7 +12,7 @@
 // This file is used to compile all the commands
 // that CMake knows about at compile time.
 // This is sort of a boot strapping approach since you would
-// like to have CMake to build CMake.   
+// like to have CMake to build CMake.
 #include "cmCommands.h"
 #include "cmAddCustomCommandCommand.cxx"
 #include "cmAddCustomTargetCommand.cxx"
@@ -111,7 +111,7 @@ void GetBootstrapCommands(std::list<cmCommand*>& commands)
   commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseCommand);
   commands.push_back(new cmEnableLanguageCommand);
-  commands.push_back(new cmEnableTestingCommand);  
+  commands.push_back(new cmEnableTestingCommand);
   commands.push_back(new cmEndForEachCommand);
   commands.push_back(new cmEndFunctionCommand);
   commands.push_back(new cmEndIfCommand);
