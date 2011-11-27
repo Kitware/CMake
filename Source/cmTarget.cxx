@@ -25,7 +25,6 @@
 #include <queue>
 #include <stdlib.h> // required for atof
 #include <assert.h>
-#include <numeric> // For std::accumulate
 
 const char* cmTarget::GetTargetTypeName(TargetType targetType)
 {
@@ -133,7 +132,6 @@ cmTarget::cmTarget()
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsImportedTarget = false;
-  this->DirectoriesBeforeOffset = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -4609,185 +4607,6 @@ cmTarget::GetLinkInformation(const char* config)
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
-}
-
-void cmTarget::AddIncludeDirectory(const char* inc, bool before, const char *config)
-{
-  // if there is a newline then break it into multiple arguments
-  if (!inc)
-    {
-    return;
-    }
-
-  std::string propertyName = "INCLUDE_DIRECTORIES";
-  std::string configTypeUpper;
-
-  if (config)
-    {
-    propertyName += "_";
-    configTypeUpper = cmSystemTools::UpperCase(config);
-    propertyName += configTypeUpper;
-    }
-
-  std::vector<std::string> IncludeDirectories;
-  const char *incs = this->GetProperty(propertyName.c_str());
-  if (incs)
-    {
-    cmSystemTools::ExpandListArgument(incs, IncludeDirectories);
-    }
-
-  // Don't add an include directory that is already present.  Yes,
-  // this linear search results in n^2 behavior, but n won't be
-  // getting much bigger than 20.  We cannot use a set because of
-  // order dependency of the include path.
-  std::vector<std::string>::iterator i =
-    std::find(IncludeDirectories.begin(),
-              IncludeDirectories.end(), inc);
-
-  if(i == IncludeDirectories.end())
-    {
-    if (before)
-      {
-      // WARNING: this *is* expensive (linear time) since it's a vector
-      IncludeDirectories.insert(IncludeDirectories.begin(), inc);
-      ++(config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset);
-      }
-    else
-      {
-      IncludeDirectories.push_back(inc);
-      }
-    }
-  else
-    {
-    if(before)
-      {
-      // Find it. If it's before (config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset)'
-      // Then don't change that variable. Otherwise increase it.
-
-      std::vector<std::string>::iterator endOfBefore = IncludeDirectories.begin()
-                  + (config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset);
-      if (i > endOfBefore)
-        ++(config ? this->ConfigDirectories[configTypeUpper] : this->DirectoriesBeforeOffset);
-
-      // if this before and already in the path then remove it
-      IncludeDirectories.erase(i);
-      // WARNING: this *is* expensive (linear time) since it's a vector
-      IncludeDirectories.insert(IncludeDirectories.begin(), inc);
-      }
-    }
-  // TODO: Store the vector in cmTarget instead of all this conversion
-  std::vector<std::string>::iterator dirs = IncludeDirectories.begin();
-  std::string propertyValue = *dirs;
-  ++dirs;
-  while(dirs != IncludeDirectories.end())
-    {
-    propertyValue += std::string(";") + *dirs;
-    ++dirs;
-    }
-  this->SetProperty(propertyName.c_str(), propertyValue.c_str());
-}
-
-void cmTarget::GetIncludeDirectoriesBefore(std::vector<std::string> &includes, const char* config)
-{
-  std::string configTypeUpper;
-  if (config)
-    {
-    configTypeUpper = cmSystemTools::UpperCase(config);
-    }
-  std::vector<std::string> targetIncludes;
-  const char *incs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if (incs)
-    {
-    cmSystemTools::ExpandListArgument(incs, targetIncludes);
-    }
-
-  std::string defPropName = "INCLUDE_DIRECTORIES_";
-  defPropName += configTypeUpper;
-
-  std::vector<std::string> configTargetIncludes;
-  const char* config_incs = this->GetProperty(defPropName.c_str());
-  if (config_incs)
-    {
-    cmSystemTools::ExpandListArgument(config_incs, configTargetIncludes);
-    }
-
-  std::set<cmStdString> emitted;
-  for(std::vector<std::string>::const_iterator
-        li = includes.begin(); li != includes.end(); ++li)
-    {
-      emitted.insert(*li);
-    }
-
-  for(std::vector<std::string>::const_iterator li = targetIncludes.begin();
-        li != targetIncludes.end() && li != targetIncludes.begin() + this->DirectoriesBeforeOffset + 1; ++li)
-    {
-    if (emitted.insert(*li).second)
-      {
-        includes.push_back(*li);
-      }
-    }
-
-  for(std::vector<std::string>::const_iterator li = configTargetIncludes.begin();
-        li != configTargetIncludes.end() && li != configTargetIncludes.begin() + this->ConfigDirectories[configTypeUpper] + 1; ++li)
-    {
-    if (emitted.insert(*li).second)
-      {
-        includes.push_back(*li);
-      }
-    }
-}
-
-void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const char* config)
-{
-  std::vector<std::string> targetIncludes;
-  const char *incs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if (incs)
-    {
-    cmSystemTools::ExpandListArgument(incs, targetIncludes);
-    }
-
-  std::string configTypeUpper;
-  if (config)
-    {
-    configTypeUpper = cmSystemTools::UpperCase(config);
-    }
-
-  std::string defPropName = "INCLUDE_DIRECTORIES_";
-  defPropName += configTypeUpper;
-
-  std::vector<std::string> configTargetIncludes;
-  const char* config_incs = this->GetProperty(defPropName.c_str());
-  if (config_incs)
-    {
-    cmSystemTools::ExpandListArgument(config_incs, configTargetIncludes);
-    }
-
-  std::set<cmStdString> emitted;
-  for(std::vector<std::string>::const_iterator
-        li = includes.begin(); li != includes.end(); ++li)
-    {
-      emitted.insert(*li);
-    }
-
-  for(std::vector<std::string>::const_iterator
-        li = targetIncludes.begin() + this->DirectoriesBeforeOffset;
-        li != targetIncludes.end(); ++li)
-    {
-    if (emitted.insert(*li).second)
-      {
-        includes.push_back(*li);
-      }
-    }
-
-  for(std::vector<std::string>::const_iterator
-        li = configTargetIncludes.begin() + this->ConfigDirectories[configTypeUpper];
-        li != configTargetIncludes.end(); ++li)
-    {
-    if (emitted.insert(*li).second)
-      {
-        includes.push_back(*li);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------
