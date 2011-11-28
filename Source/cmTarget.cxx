@@ -1238,12 +1238,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
 
-  // Initialize the list of include directories
-  std::vector<std::string> makefileIncludes =
-    this->Makefile->GetIncludeDirectories();
-  this->IncludeDirectories.insert(this->IncludeDirectories.end(),
-    makefileIncludes.begin(), makefileIncludes.end());
-
   // Record current policies for later use.
   this->PolicyStatusCMP0003 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0003);
@@ -2281,22 +2275,6 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     return;
     }
 
-  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
-    {
-    std::vector<std::string> newIncludes;
-    cmSystemTools::ExpandListArgument(value, newIncludes);
-    this->IncludeDirectories = newIncludes;
-    return;
-    }
-  if(strncmp(prop,"INCLUDE_DIRECTORIES_", 20) == 0)
-    {
-    std::string configName = prop + 20;
-    std::vector<std::string> newIncludes;
-    cmSystemTools::ExpandListArgument(value, newIncludes);
-    this->ConfigDirectories[configName] = newIncludes;
-    return;
-    }
-
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -2309,26 +2287,6 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     {
     return;
     }
-
-  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
-    {
-    std::vector<std::string> newIncludes;
-    cmSystemTools::ExpandListArgument(value, newIncludes);
-    this->IncludeDirectories.insert(this->IncludeDirectories.end(),
-                                    newIncludes.begin(), newIncludes.end());
-    return;
-    }
-  if(strncmp(prop,"INCLUDE_DIRECTORIES_", 20) == 0)
-    {
-    std::string configName = prop + 20;
-    std::vector<std::string> newIncludes;
-    cmSystemTools::ExpandListArgument(value, newIncludes);
-    this->ConfigDirectories[configName].insert(
-                                    this->ConfigDirectories[configName].end(),
-                                    newIncludes.begin(), newIncludes.end());
-    return;
-    }
-
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -2728,45 +2686,6 @@ const char *cmTarget::GetProperty(const char* prop,
       ss << sname;
       }
     this->SetProperty("SOURCES", ss.str().c_str());
-    }
-
-  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
-    {
-    cmOStringStream str;
-    for (std::vector<std::string>::const_iterator
-         it = this->IncludeDirectories.begin();
-         it != this->IncludeDirectories.end();
-         ++ it )
-      {
-      if ( it != this->IncludeDirectories.begin())
-        {
-        str << ";";
-        }
-      str << it->c_str();
-      }
-    std::string output = str.str();
-    return output.c_str();
-    }
-  if(strncmp(prop,"INCLUDE_DIRECTORIES_", 20) == 0)
-    {
-    std::string configName = prop + 20;
-    std::vector<std::string> ConfigIncludeDirectories =
-                                this->ConfigDirectories[configName];
-
-    cmOStringStream str;
-    for (std::vector<std::string>::const_iterator
-         it = ConfigIncludeDirectories.begin();
-         it != ConfigIncludeDirectories.end();
-         ++ it )
-      {
-      if ( it != ConfigIncludeDirectories.begin())
-        {
-        str << ";";
-        }
-      str << it->c_str();
-      }
-    std::string output = str.str();
-    return output.c_str();
     }
 
   // the type property returns what type the target is
@@ -4707,33 +4626,6 @@ cmTarget::GetLinkInformation(const char* config)
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
-}
-
-void cmTarget::GetIncludeDirectories(std::vector<std::string> &includes, const char* config)
-{
-  std::vector<std::string> targetIncludes;
-
-  targetIncludes.insert(targetIncludes.end(), this->IncludeDirectories.begin(), this->IncludeDirectories.end());
-
-  std::string configName = cmSystemTools::UpperCase(config);
-  std::vector<std::string> configIncludes = this->ConfigDirectories[configName];
-  targetIncludes.insert(targetIncludes.end(), configIncludes.begin(), configIncludes.end());
-
-  std::set<cmStdString> emitted;
-  for(std::vector<std::string>::const_iterator
-        li = includes.begin(); li != includes.end(); ++li)
-    {
-      emitted.insert(*li);
-    }
-
-  for(std::vector<std::string>::const_iterator
-        li = targetIncludes.begin(); li != targetIncludes.end(); ++li)
-    {
-    if (emitted.insert(*li).second)
-      {
-        includes.push_back(*li);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------

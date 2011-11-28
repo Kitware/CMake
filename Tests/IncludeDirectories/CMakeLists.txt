@@ -45,5 +45,3 @@ else()
   set_target_properties(IncludeDirectories
     PROPERTIES COMPILE_FLAGS "-ITarProp")
 endif()
-
-add_subdirectory(TargetIncludeDirectories)
