@@ -178,6 +178,15 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
+  const char* vsProjectTypes =
+    this->Target->GetProperty("VS_GLOBAL_PROJECT_TYPES");
+  if(vsProjectTypes)
+    {
+    this->WriteString("<ProjectTypes>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsProjectTypes) <<
+      "</ProjectTypes>\n";
+    }
+
   const char* vsProjectName = this->Target->GetProperty("VS_SCC_PROJECTNAME");
   const char* vsLocalPath = this->Target->GetProperty("VS_SCC_LOCALPATH");
   const char* vsProvider = this->Target->GetProperty("VS_SCC_PROVIDER");
@@ -203,7 +212,19 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
     }
 
-  this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+  const char* vsGlobalKeyword =
+    this->Target->GetProperty("VS_GLOBAL_KEYWORD");
+  if(!vsGlobalKeyword)
+    {
+    this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+    }
+  else
+    {
+    this->WriteString("<Keyword>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsGlobalKeyword) <<
+      "</Keyword>\n";
+    }
+
   this->WriteString("<Platform>", 2);
   (*this->BuildFileStream) << this->Platform << "</Platform>\n";
   const char* projLabel = this->Target->GetProperty("PROJECT_LABEL");
@@ -233,6 +254,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteCustomCommands();
   this->WriteObjSources();
   this->WriteCLSources();
+  this->WriteDotNetReferences();
   this->WriteProjectReferences();
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
@@ -242,6 +264,39 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("</Project>", 0);
   // The groups are stored in a separate file for VS 10
   this->WriteGroups();
+}
+
+void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
+{
+  const char* vsDotNetReferences
+    = this->Target->GetProperty("VS_DOTNET_REFERENCES");
+  if(vsDotNetReferences)
+    {
+    std::string references(vsDotNetReferences);
+    std::string::size_type position = 0;
+
+    this->WriteString("<ItemGroup>\n", 1);
+    while(references.length() > 0)
+      {
+      if((position = references.find(";")) == std::string::npos)
+        {
+        position = references.length() + 1;
+        }
+
+      this->WriteString("<Reference Include=\"", 2);
+      (*this->BuildFileStream) <<
+        cmVS10EscapeXML(references.substr(0, position)) << "\">\n";
+      this->WriteString("<CopyLocalSatelliteAssemblies>true"
+                        "</CopyLocalSatelliteAssemblies>\n", 3);
+      this->WriteString("<ReferenceOutputAssembly>true"
+                        "</ReferenceOutputAssembly>\n", 3);
+      this->WriteString("</Reference>\n", 2);
+
+      references.erase(0, position + 1);
+      }
+
+    this->WriteString("</ItemGroup>\n", 1);
+    }
 }
 
 // ConfigurationType Application, Utility StaticLibrary DynamicLibrary
