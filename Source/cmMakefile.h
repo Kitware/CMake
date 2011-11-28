@@ -19,6 +19,7 @@
 #include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmNewLineStyle.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -703,7 +704,9 @@ public:
    * Copy file but change lines acording to ConfigureString
    */
   int ConfigureFile(const char* infile, const char* outfile,
-                    bool copyonly, bool atOnly, bool escapeQuotes);
+                    bool copyonly, bool atOnly, bool escapeQuotes,
+                    const cmNewLineStyle& = cmNewLineStyle());
+
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
