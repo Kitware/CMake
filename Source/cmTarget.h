@@ -450,8 +450,6 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
-  void GetIncludeDirectories(std::vector<std::string> &includes, const char *config);
-
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -560,8 +558,6 @@ private:
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
   bool IsImportedTarget;
-  std::vector<std::string> IncludeDirectories;
-  std::map<cmStdString, std::vector<std::string> > ConfigDirectories;
 
   // Cache target output paths for each configuration.
   struct OutputInfo;

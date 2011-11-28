@@ -574,11 +574,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   std::string flags;
   flags += this->Makefile->GetSafeDefinition(varString.c_str());
   flags += " ";
-    {
-    std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, lang);
-    flags += this->GetIncludeFlags(includes, lang);
-    }
+  flags += this->GetIncludeFlags(lang);
   flags += this->Makefile->GetDefineFlags();
 
   // Construct the command lines.
@@ -1196,8 +1192,8 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
 }
 
 //----------------------------------------------------------------------------
-const char* cmLocalGenerator::GetIncludeFlags(const std::vector<std::string> &includes,
-                                              const char* lang, bool forResponseFile)
+const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
+                                              bool forResponseFile)
 {
   if(!lang)
     {
@@ -1207,12 +1203,13 @@ const char* cmLocalGenerator::GetIncludeFlags(const std::vector<std::string> &in
   key += forResponseFile? "@" : "";
   if(this->LanguageToIncludeFlags.count(key))
     {
-      // Introduced to cmLocalUnixMakefileGenerator in 692ba48c4e5762b370f2999e902b8bd677c77161
-      // It seems to just be memoization. Can it be removed?
-//     return this->LanguageToIncludeFlags[key].c_str();
+    return this->LanguageToIncludeFlags[key].c_str();
     }
 
   cmOStringStream includeFlags;
+  std::vector<std::string> includes;
+  this->GetIncludeDirectories(includes, lang);
+  std::vector<std::string>::iterator i;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
@@ -1254,7 +1251,6 @@ const char* cmLocalGenerator::GetIncludeFlags(const std::vector<std::string> &in
 #ifdef __APPLE__
   emitted.insert("/System/Library/Frameworks");
 #endif
-  std::vector<std::string>::const_iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     if(this->Makefile->IsOn("APPLE")
