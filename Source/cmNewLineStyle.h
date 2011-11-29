@@ -28,7 +28,7 @@ public:
                // LF = '\n', 0x0A, 10
                // CR = '\r', 0x0D, 13
     LF,        // Unix
-    CRLF,      // Dos
+    CRLF       // Dos
   };
 
   void SetStyle(Style);
