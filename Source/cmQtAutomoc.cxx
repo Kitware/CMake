@@ -585,7 +585,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   const std::string contentsString = this->ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOMOC: warning: " << absFilename << ": file is empty"
+    std::cerr << "AUTOMOC: warning: " << absFilename << ": file is empty\n"
               << std::endl;
     return;
     }
@@ -650,12 +650,12 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                     << '{' << this->Join(headerExtensions, ',') << "}\" ";
           if (mocSubDir.empty())
             {
-            std::cerr << "in " << absPath << std::endl;
+            std::cerr << "in " << absPath << "\n" << std::endl;
             }
           else
             {
             std::cerr << "neither in " << absPath
-                      << " nor in " << mocSubDir << std::endl;
+                      << " nor in " << mocSubDir << "\n" << std::endl;
             }
 
           ::exit(EXIT_FAILURE);
@@ -682,7 +682,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                            "\" instead of \"moc_" << basename << ".cpp\". "
                            "Running moc on "
                         << "\"" << headerToMoc << "\" ! Better include \"moc_"
-                        << basename << ".cpp\" for a robust build."
+                        << basename << ".cpp\" for a robust build.\n"
                         << std::endl;
               }
             }
@@ -694,7 +694,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                         "\", which seems to be the moc file from a different "
                         "source file. This is not supported. "
                         "Include \"" << scannedFileBasename << ".moc\" to run "
-                        "moc on this source file." << std::endl;
+                        "moc on this source file.\n" << std::endl;
             ::exit(EXIT_FAILURE);
             }
           }
@@ -724,7 +724,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                    "includes "
                 << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
                 << "\"" << absFilename << "\" ! Better include \""
-                << scannedFileBasename << ".moc\" for a robust build."
+                << scannedFileBasename << ".moc\" for a robust build.\n"
                 << std::endl;
       includedMocs[absFilename] = ownMocUnderscoreFile;
       includedMocs.erase(ownMocHeaderFile);
@@ -734,7 +734,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
       // otherwise always error out since it will not compile:
       std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
                 << "contains a Q_OBJECT macro, but does not include "
-                << "\"" << scannedFileBasename << ".moc\" !"
+                << "\"" << scannedFileBasename << ".moc\" !\n"
                 << std::endl;
       ::exit(EXIT_FAILURE);
       }
@@ -761,7 +761,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                   << "Q_PRIVATE_SLOT macro. "
                   << "Running moc on " << "\"" << absFilename << "\" ! "
                   << "Better include \"moc_" << scannedFileBasename << ".cpp\""
-                  << " for a robust build."
+                  << " for a robust build.\n"
                   << std::endl;
         includedMocs[ownHeader] = ownDotMocFile;
         includedMocs.erase(absFilename);
