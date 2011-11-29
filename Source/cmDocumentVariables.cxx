@@ -1515,6 +1515,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_COMPILER_ID_RUN",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_ABI_FILES",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_CREATE_ASSEMBLY_SOURCE",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_CREATE_PREPROCESSED_SOURCE",
