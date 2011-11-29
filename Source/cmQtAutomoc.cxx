@@ -37,6 +37,20 @@ static bool containsQ_OBJECT(const std::string& text)
 }
 
 
+static bool containsQ_PRIVATE_SLOT(const std::string& text)
+{
+  // this simple check is much much faster than the regexp
+  if (strstr(text.c_str(), "Q_PRIVATE_SLOT") == NULL)
+    {
+    return false;
+    }
+
+  cmsys::RegularExpression qPrivateSlotRegExp(
+                                      "[\n][ \t]*Q_PRIVATE_SLOT[^a-zA-Z0-9_]");
+  return qPrivateSlotRegExp.find(text);
+}
+
+
 static std::string findMatchingHeader(const std::string& absPath,
                                       const std::string& mocSubDir,
                                       const std::string& basename,
@@ -583,6 +597,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   bool dotMocIncluded = false;
   bool mocUnderscoreIncluded = false;
   std::string ownMocUnderscoreFile;
+  std::string ownDotMocFile;
   std::string ownMocHeaderFile;
 
   std::string::size_type matchOffset = 0;
@@ -683,8 +698,12 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
             ::exit(EXIT_FAILURE);
             }
           }
+        else
+          {
+          dotMocIncluded = true;
+          ownDotMocFile = currentMoc;
+          }
         includedMocs[absFilename] = currentMoc;
-        dotMocIncluded = true;
         }
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
@@ -718,6 +737,36 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                 << "\"" << scannedFileBasename << ".moc\" !"
                 << std::endl;
       ::exit(EXIT_FAILURE);
+      }
+    }
+
+  // if only the .moc file is included and we are in compatibility mode,
+  // check whether maybe the header must actually be mocced, e.g. because it
+  // might use the Q_PRIVATE_SLOT macro:
+  if ((dotMocIncluded == true) && (mocUnderscoreIncluded == false)
+                               && (this->QtMajorVersion == "4"))
+    {
+    std::string ownHeader=findMatchingHeader(absPath, "", scannedFileBasename,
+                                             headerExtensions);
+
+    if (ownHeader.size() > 0)
+      {
+      const std::string ownHeaderContents = this->ReadAll(ownHeader);
+      if (containsQ_PRIVATE_SLOT(ownHeaderContents))
+        {
+        // this is for KDE4 compatibility:
+        std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+                  << "includes \"" << ownDotMocFile << "\", but the "
+                  << "header \"" << ownHeader << "\" contains a "
+                  << "Q_PRIVATE_SLOT macro. "
+                  << "Running moc on " << "\"" << absFilename << "\" ! "
+                  << "Better include \"moc_" << scannedFileBasename << ".cpp\""
+                  << " for a robust build."
+                  << std::endl;
+        includedMocs[ownHeader] = ownDotMocFile;
+        includedMocs.erase(absFilename);
+        }
+
       }
     }
 
