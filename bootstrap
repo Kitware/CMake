@@ -215,6 +215,7 @@ CMAKE_CXX_SOURCES="\
   cmMakefileLibraryTargetGenerator \
   cmMakefileTargetGenerator \
   cmMakefileUtilityTargetGenerator \
+  cmNewLineStyle \
   cmBootstrapCommands \
   cmCommands \
   cmTarget \
