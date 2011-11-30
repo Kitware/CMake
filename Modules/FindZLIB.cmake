@@ -20,7 +20,6 @@
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
-# Copyright 2011      Andreas Schneider <asn@cryptomilk.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -32,36 +31,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-SET(_ZLIB_ROOT_HINTS
+FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/include"
-)
-
-SET(_ZLIB_ROOT_PATHS
-    "$ENV{PROGRAMFILES}/zlib"
-)
-
-SET(_ZLIB_ROOT_HINTS_AND_PATHS
-    HINTS ${_ZLIB_ROOT_HINTS}
-    PATHS ${_ZLIB_ROOT_PATHS}
-)
-
-FIND_PATH(ZLIB_ROOT_DIR
-    NAMES
-      include/zlib.h
-    HINTS
-      ${_ZLIB_ROOT_HINTS}
-    PATHS
-      ${_ZLIB_ROOT_PATHS}
-)
-MARK_AS_ADVANCED(ZLIB_ROOT_DIR)
-
-FIND_PATH(ZLIB_INCLUDE_DIR
-    NAMES
-        zlib.h
-    HINTS
-        ${_ZLIB_ROOT_HINTS_AND_PATHS}
-    PATH_SUFFIXES
-        include
 )
 
 SET(ZLIB_NAMES z zlib zdll zlib1 zlibd zlibd1)
@@ -69,9 +40,9 @@ FIND_LIBRARY(ZLIB_LIBRARY
     NAMES
         ${ZLIB_NAMES}
     PATHS
-        ${ZLIB_ROOT_DIR}/lib
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/lib"
 )
-MARK_AS_ADVANCED(ZLIB_LIBRARY)
+MARK_AS_ADVANCED(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
 
 IF(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
     FILE(STRINGS "${ZLIB_INCLUDE_DIR}/zlib.h" ZLIB_H REGEX "^#define ZLIB_VERSION \"[^\"]*\"$")
