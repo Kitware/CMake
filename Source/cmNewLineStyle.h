@@ -12,9 +12,7 @@
 #ifndef cmNewLineStyle_h
 #define cmNewLineStyle_h
 
-#include <string>
-#include <vector>
-
+#include "cmStandardIncludes.h"
 
 class cmNewLineStyle
 {
