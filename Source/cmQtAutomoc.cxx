@@ -663,6 +663,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         }
       else
         {
+        std::string fileToMoc = absFilename;
         if (basename != scannedFileBasename)
           {
           bool fail = true;
@@ -676,7 +677,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
               {
               // this is for KDE4 compatibility:
               fail = false;
-              includedMocs[headerToMoc] = currentMoc;
+              fileToMoc = headerToMoc;
               std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
                            "includes the moc file \"" << currentMoc <<
                            "\" instead of \"moc_" << basename << ".cpp\". "
@@ -703,7 +704,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
           dotMocIncluded = true;
           ownDotMocFile = currentMoc;
           }
-        includedMocs[absFilename] = currentMoc;
+        includedMocs[fileToMoc] = currentMoc;
         }
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
