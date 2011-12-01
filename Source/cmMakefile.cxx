@@ -3213,7 +3213,8 @@ void cmMakefile::ConfigureString(const std::string& input,
 }
 
 int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
-                              bool copyonly, bool atOnly, bool escapeQuotes)
+                              bool copyonly, bool atOnly, bool escapeQuotes,
+                              const cmNewLineStyle& newLine)
 {
   int res = 1;
   if ( !this->CanIWriteThisFile(outfile) )
@@ -3239,7 +3240,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     std::string path = soutfile.substr(0, pos);
     cmSystemTools::MakeDirectory(path.c_str());
     }
-
+  
   if(copyonly)
     {
     if ( !cmSystemTools::CopyFileIfDifferent(sinfile.c_str(),
@@ -3250,9 +3251,20 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
   else
     {
+    std::string newLineCharacters;
+    std::ios_base::openmode omode = std::ios_base::out | std::ios_base::trunc;
+    if (newLine.IsValid())
+      {
+      newLineCharacters = newLine.GetCharacters();
+      omode |= std::ios::binary;
+      }
+    else
+      {
+      newLineCharacters = "\n";
+      }
     std::string tempOutputFile = soutfile;
     tempOutputFile += ".tmp";
-    std::ofstream fout(tempOutputFile.c_str());
+    std::ofstream fout(tempOutputFile.c_str(), omode);
     if(!fout)
       {
       cmSystemTools::Error(
@@ -3277,7 +3289,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       {
       outLine = "";
       this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
-      fout << outLine.c_str() << "\n";
+      fout << outLine.c_str() << newLineCharacters;
       }
     // close the files before attempting to copy
     fin.close();

@@ -56,7 +56,8 @@ public:
     {
       return
         "  configure_file(<input> <output>\n"
-        "                 [COPYONLY] [ESCAPE_QUOTES] [@ONLY])\n"
+        "                 [COPYONLY] [ESCAPE_QUOTES] [@ONLY] \n"
+        "                 [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])\n"
         "Copies a file <input> to file <output> and substitutes variable "
         "values referenced in the file content.  "
         "If <input> is a relative path it is evaluated with respect to "
@@ -81,14 +82,20 @@ public:
         "either #define VAR or /* #undef VAR */ depending on "
         "the setting of VAR in CMake. Any occurrences of #cmakedefine01 VAR "
         "will be replaced with either #define VAR 1 or #define VAR 0 "
-        "depending on whether VAR evaluates to TRUE or FALSE in CMake";
+        "depending on whether VAR evaluates to TRUE or FALSE in CMake.\n"
+        "With NEWLINE_STYLE the line ending could be adjusted: \n"
+        "    'UNIX' or 'LF' for \\n, 'DOS', 'WIN32' or 'CRLF' for \\r\\n.\n"
+        "COPYONLY must not be used with NEWLINE_STYLE.\n";
     }
 
   virtual void FinalPass();
   virtual bool HasFinalPass() const { return !this->Immediate; }
+
 private:
   int ConfigureFile();
   
+  cmNewLineStyle NewLineStyle;
+
   std::string InputFile;
   std::string OutputFile;
   bool CopyOnly;
