@@ -132,6 +132,7 @@ cmTarget::cmTarget()
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
+  this->IsApple = false;
   this->IsImportedTarget = false;
 }
 
@@ -1198,6 +1199,9 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
                        this->Makefile->IsOn("CYGWIN") ||
                        this->Makefile->IsOn("MINGW"));
+
+  // Check whether we are targeting an Apple platform.
+  this->IsApple = this->Makefile->IsOn("APPLE");
 
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
@@ -3340,7 +3344,11 @@ void cmTarget::GetLibraryNames(std::string& name,
     // the library version as the soversion.
     soversion = version;
     }
-  bool isApple = this->Makefile->IsOn("APPLE");
+  if(!version && soversion)
+    {
+    // Use the soversion as the library version.
+    version = soversion;
+    }
 
   // Get the components of the library name.
   std::string prefix;
@@ -3352,47 +3360,12 @@ void cmTarget::GetLibraryNames(std::string& name,
   name = prefix+base+suffix;
 
   // The library's soname.
-  if(isApple)
-    {
-    soName = prefix+base;
-    }
-  else
-    {
-    soName = name;
-    }
-  if(soversion)
-    {
-    soName += ".";
-    soName += soversion;
-    }
-  if(isApple)
-    {
-    soName += suffix;
-    }
+  this->ComputeVersionedName(soName, prefix, base, suffix,
+                             name, soversion);
 
   // The library's real name on disk.
-  if(isApple)
-    {
-    realName = prefix+base;
-    }
-  else
-    {
-  realName = name;
-    }
-  if(version)
-    {
-    realName += ".";
-    realName += version;
-    }
-  else if(soversion)
-    {
-    realName += ".";
-    realName += soversion;
-    }
-  if(isApple)
-    {
-    realName += suffix;
-    }
+  this->ComputeVersionedName(realName, prefix, base, suffix,
+                             name, version);
 
   // The import library name.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -3407,6 +3380,23 @@ void cmTarget::GetLibraryNames(std::string& name,
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ComputeVersionedName(std::string& vName,
+                                    std::string const& prefix,
+                                    std::string const& base,
+                                    std::string const& suffix,
+                                    std::string const& name,
+                                    const char* version)
+{
+  vName = this->IsApple? (prefix+base) : name;
+  if(version)
+    {
+    vName += ".";
+    vName += version;
+    }
+  vName += this->IsApple? suffix : std::string();
 }
 
 //----------------------------------------------------------------------------
