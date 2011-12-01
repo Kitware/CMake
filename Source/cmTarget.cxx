@@ -1038,6 +1038,29 @@ void cmTarget::DefineProperties(cmake *cm)
      "Can be set to change the visual studio source code control "
      "auxpath property.");
   cm->DefineProperty
+    ("VS_GLOBAL_PROJECT_TYPES", cmProperty::TARGET,
+     "Visual Studio project type(s).",
+     "Can be set to one or more UUIDs recognized by Visual Studio "
+     "to indicate the type of project. This value is copied "
+     "verbatim into the generated project file. Example for a "
+     "managed C++ unit testing project: \""
+     "{3AC096D0-A1C2-E12C-1390-A8335801FDAB};"
+     "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\". UUIDs are "
+     "semicolon-delimited.");
+  cm->DefineProperty
+    ("VS_GLOBAL_KEYWORD", cmProperty::TARGET,
+     "Visual Studio project keyword.",
+     "Sets the \"keyword\" attribute for a generated Visual Studio "
+     "project. Defaults to \"Win32Proj\". You may wish to override "
+     "this value with \"ManagedCProj\", for example, in a Visual "
+     "Studio managed C++ unit test project.");
+  cm->DefineProperty
+    ("VS_DOTNET_REFERENCES", cmProperty::TARGET,
+     "Visual Studio managed project .NET references",
+     "Adds one or more semicolon-delimited .NET references to a "
+     "generated Visual Studio project. For example, \"System;"
+     "System.Windows.Forms\".");
+  cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",
      "Tell the Visual Studio generator to set the global variable "
