@@ -65,6 +65,12 @@ bool cmConfigureFileCommand
     cmSystemTools::SetFatalErrorOccured();
     return false;
     }
+  std::string errorMessage;
+  if (!this->NewLineStyle.ReadFromArguments(args, errorMessage))
+    {
+    this->SetError(errorMessage.c_str());
+    return false;
+    }
   this->CopyOnly = false;
   this->EscapeQuotes = false;
 
@@ -78,6 +84,12 @@ bool cmConfigureFileCommand
     if(args[i] == "COPYONLY")
       {
       this->CopyOnly = true;
+      if (this->NewLineStyle.IsValid())
+        {
+        this->SetError("COPYONLY could not be used in combination "
+                       "with NEWLINE_STYLE");
+        return false;
+        }
       }
     else if(args[i] == "ESCAPE_QUOTES")
       {
@@ -122,7 +134,8 @@ int cmConfigureFileCommand::ConfigureFile()
     this->OutputFile.c_str(),
     this->CopyOnly,
     this->AtOnly,
-    this->EscapeQuotes);
+    this->EscapeQuotes,
+    this->NewLineStyle);
 }
 
 
