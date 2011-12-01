@@ -17,6 +17,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
 #include <cmsys/RegularExpression.hxx>
@@ -584,15 +585,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "value is the default.  "
      "See documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables.");
 
-#define CM_LOCATION_UNDEFINED_BEHAVIOR \
-  "\n" \
-  "Do not set properties that affect the location of the target after " \
-  "reading this property.  These include properties whose names match " \
-  "\"(RUNTIME|LIBRARY|ARCHIVE)_OUTPUT_(NAME|DIRECTORY)(_<CONFIG>)?\" " \
-  "or \"(IMPLIB_)?(PREFIX|SUFFIX)\".  " \
-  "Failure to follow this rule is not diagnosed and leaves the location " \
-  "of the target undefined."
-
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
      "Read-only location of a target on disk.",
@@ -612,7 +604,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "In CMake 2.8.4 and above add_custom_command recognizes generator "
      "expressions to refer to target locations anywhere in the command.  "
      "Therefore this property is not needed for creating custom commands."
-     CM_LOCATION_UNDEFINED_BEHAVIOR);
+     CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
     ("LOCATION_<CONFIG>", cmProperty::TARGET,
@@ -626,7 +618,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "arbitrary available configuration.  "
      "Use the MAP_IMPORTED_CONFIG_<CONFIG> property to map imported "
      "configurations explicitly."
-     CM_LOCATION_UNDEFINED_BEHAVIOR);
+     CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
     ("LINK_DEPENDS", cmProperty::TARGET,
