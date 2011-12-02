@@ -469,6 +469,23 @@ bool cmQtAutomoc::RunAutomocQt4()
   std::vector<std::string> sourceFiles;
   cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
 
+  std::list<std::string> headerExtensions;
+  headerExtensions.push_back(".h");
+  headerExtensions.push_back(".hpp");
+  headerExtensions.push_back(".hxx");
+#if defined(_WIN32)
+  // not case sensitive, don't add ".H"
+#elif defined(__APPLE__)
+  // detect case-sensitive filesystem
+  long caseSensitive = pathconf(this->Srcdir.c_str(), _PC_CASE_SENSITIVE);
+  if (caseSensitive == 1)
+  {
+    headerExtensions.push_back(".H");
+  }
+#else
+  headerExtensions.push_back(".H");
+#endif
+
   for (std::vector<std::string>::const_iterator it = sourceFiles.begin();
        it != sourceFiles.end();
        ++it)
@@ -478,7 +495,8 @@ bool cmQtAutomoc::RunAutomocQt4()
       {
       std::cout << "AUTOMOC: Checking " << absFilename << std::endl;
       }
-    this->ParseCppFile(absFilename, includedMocs, headerFiles);
+    this->ParseCppFile(absFilename, headerExtensions, includedMocs);
+    this->SearchHeadersForCppFile(absFilename, headerExtensions, headerFiles);
     }
 
   std::vector<std::string> headerFilesVec;
@@ -559,28 +577,12 @@ bool cmQtAutomoc::RunAutomocQt4()
 
 
 void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
-                           std::map<std::string, std::string>& includedMocs,
-                           std::set<std::string>& absHeaders)
+                              const std::list<std::string>& headerExtensions,
+                              std::map<std::string, std::string>& includedMocs)
 {
   cmsys::RegularExpression mocIncludeRegExp(
               "[\n][ \t]*#[ \t]*include[ \t]+"
               "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
-  std::list<std::string> headerExtensions;
-  headerExtensions.push_back(".h");
-  headerExtensions.push_back(".hpp");
-  headerExtensions.push_back(".hxx");
-#if defined(_WIN32)
-  // not case sensitive, don't add ".H"
-#elif defined(__APPLE__)
-  // detect case-sensitive filesystem
-  long caseSensitive = pathconf(this->Srcdir.c_str(), _PC_CASE_SENSITIVE);
-  if (caseSensitive == 1)
-  {
-    headerExtensions.push_back(".H");
-  }
-#else
-  headerExtensions.push_back(".H");
-#endif
 
   const std::string contentsString = this->ReadAll(absFilename);
   if (contentsString.empty())
@@ -771,9 +773,19 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
       }
     }
 
+}
+
+
+void cmQtAutomoc::SearchHeadersForCppFile(const std::string& absFilename,
+                                const std::list<std::string>& headerExtensions,
+                                std::set<std::string>& absHeaders)
+{
   // search for header files and private header files we may need to moc:
   const std::string basename =
               cmsys::SystemTools::GetFilenameWithoutLastExtension(absFilename);
+  const std::string absPath = cmsys::SystemTools::GetFilenamePath(
+                   cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
+
   for(std::list<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
