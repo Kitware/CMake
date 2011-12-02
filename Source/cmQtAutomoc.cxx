@@ -675,28 +675,22 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         std::string fileToMoc = absFilename;
         if (basename != scannedFileBasename)
           {
-          bool fail = true;
-          if (basename == scannedFileBasename+"_p")
+          std::string mocSubDir = extractSubDir(absPath, currentMoc);
+          std::string headerToMoc = findMatchingHeader(
+                              absPath, mocSubDir, basename, headerExtensions);
+          if (!headerToMoc.empty())
             {
-            std::string mocSubDir = extractSubDir(absPath, currentMoc);
-            std::string headerToMoc = findMatchingHeader(
-                               absPath, mocSubDir, basename, headerExtensions);
-            if (!headerToMoc.empty())
-              {
-              // this is for KDE4 compatibility:
-              fail = false;
-              fileToMoc = headerToMoc;
-              std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
-                           "includes the moc file \"" << currentMoc <<
-                           "\" instead of \"moc_" << basename << ".cpp\". "
-                           "Running moc on "
-                        << "\"" << headerToMoc << "\" ! Better include \"moc_"
-                        << basename << ".cpp\" for a robust build.\n"
-                        << std::endl;
-              }
+            // this is for KDE4 compatibility:
+            fileToMoc = headerToMoc;
+            std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+                          "includes the moc file \"" << currentMoc <<
+                          "\" instead of \"moc_" << basename << ".cpp\". "
+                          "Running moc on "
+                      << "\"" << headerToMoc << "\" ! Better include \"moc_"
+                      << basename << ".cpp\" for a robust build.\n"
+                      << std::endl;
             }
-
-          if (fail)
+          else
             {
             std::cerr <<"AUTOMOC: error: " << absFilename << ": The file "
                         "includes the moc file \"" << currentMoc <<
