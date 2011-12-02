@@ -495,7 +495,14 @@ bool cmQtAutomoc::RunAutomocQt4()
       {
       std::cout << "AUTOMOC: Checking " << absFilename << std::endl;
       }
-    this->ParseCppFile(absFilename, headerExtensions, includedMocs);
+    if (this->QtMajorVersion == "4")
+      {
+      this->ParseCppFile(absFilename, headerExtensions, includedMocs);
+      }
+    else if (this->QtMajorVersion == "5")
+      {
+      this->StrictParseCppFile(absFilename, headerExtensions, includedMocs);
+      }
     this->SearchHeadersForCppFile(absFilename, headerExtensions, headerFiles);
     }
 
@@ -669,8 +676,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         if (basename != scannedFileBasename)
           {
           bool fail = true;
-          if ((this->QtMajorVersion == "4")
-                                    && (basename == scannedFileBasename +"_p"))
+          if (basename == scannedFileBasename+"_p")
             {
             std::string mocSubDir = extractSubDir(absPath, currentMoc);
             std::string headerToMoc = findMatchingHeader(
@@ -718,7 +724,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   // But warn, since this is not how it is supposed to be used.
   if ((dotMocIncluded == false) && (containsQ_OBJECT(contentsString)))
     {
-    if ((this->QtMajorVersion == "4") && (mocUnderscoreIncluded == true))
+    if (mocUnderscoreIncluded == true)
       {
       // this is for KDE4 compatibility:
       std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
@@ -746,8 +752,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   // if only the .moc file is included and we are in compatibility mode,
   // check whether maybe the header must actually be mocced, e.g. because it
   // might use the Q_PRIVATE_SLOT macro:
-  if ((dotMocIncluded == true) && (mocUnderscoreIncluded == false)
-                               && (this->QtMajorVersion == "4"))
+  if ((dotMocIncluded == true) && (mocUnderscoreIncluded == false))
     {
     std::string ownHeader=findMatchingHeader(absPath, "", scannedFileBasename,
                                              headerExtensions);
@@ -771,6 +776,117 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
         }
 
       }
+    }
+
+}
+
+
+void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
+                              const std::list<std::string>& headerExtensions,
+                              std::map<std::string, std::string>& includedMocs)
+{
+  cmsys::RegularExpression mocIncludeRegExp(
+              "[\n][ \t]*#[ \t]*include[ \t]+"
+              "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
+
+  const std::string contentsString = this->ReadAll(absFilename);
+  if (contentsString.empty())
+    {
+    std::cerr << "AUTOMOC: warning: " << absFilename << ": file is empty\n"
+              << std::endl;
+    return;
+    }
+  const std::string absPath = cmsys::SystemTools::GetFilenamePath(
+                   cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
+  const std::string scannedFileBasename = cmsys::SystemTools::
+                                  GetFilenameWithoutLastExtension(absFilename);
+
+  bool dotMocIncluded = false;
+
+  std::string::size_type matchOffset = 0;
+  // first a simply string check for "moc" is *much* faster than the regexp,
+  // and if the string search already fails, we don't have to try the
+  // expensive regexp
+  if ((strstr(contentsString.c_str(), "moc") != NULL)
+                                    && (mocIncludeRegExp.find(contentsString)))
+    {
+    // for every moc include in the file
+    do
+      {
+      const std::string currentMoc = mocIncludeRegExp.match(1);
+
+      std::string basename = cmsys::SystemTools::
+                                   GetFilenameWithoutLastExtension(currentMoc);
+      const bool mocUnderscoreStyle = this->StartsWith(basename, "moc_");
+
+      // If the moc include is of the moc_foo.cpp style we expect
+      // the Q_OBJECT class declaration in a header file.
+      // If the moc include is of the foo.moc style we need to look for
+      // a Q_OBJECT macro in the current source file, if it contains the
+      // macro we generate the moc file from the source file.
+      if (mocUnderscoreStyle)
+        {
+        // basename should be the part of the moc filename used for
+        // finding the correct header, so we need to remove the moc_ part
+        basename = basename.substr(4);
+        std::string mocSubDir = extractSubDir(absPath, currentMoc);
+        std::string headerToMoc = findMatchingHeader(
+                               absPath, mocSubDir, basename, headerExtensions);
+
+        if (!headerToMoc.empty())
+          {
+          includedMocs[headerToMoc] = currentMoc;
+          }
+        else
+          {
+          std::cerr << "AUTOMOC: error: " << absFilename << " The file "
+                    << "includes the moc file \"" << currentMoc << "\", "
+                    << "but could not find header \"" << basename
+                    << '{' << this->Join(headerExtensions, ',') << "}\" ";
+          if (mocSubDir.empty())
+            {
+            std::cerr << "in " << absPath << "\n" << std::endl;
+            }
+          else
+            {
+            std::cerr << "neither in " << absPath
+                      << " nor in " << mocSubDir << "\n" << std::endl;
+            }
+
+          ::exit(EXIT_FAILURE);
+          }
+        }
+      else
+        {
+        if (basename != scannedFileBasename)
+          {
+          std::cerr <<"AUTOMOC: error: " << absFilename << ": The file "
+                      "includes the moc file \"" << currentMoc <<
+                      "\", which seems to be the moc file from a different "
+                      "source file. This is not supported. "
+                      "Include \"" << scannedFileBasename << ".moc\" to run "
+                      "moc on this source file.\n" << std::endl;
+          ::exit(EXIT_FAILURE);
+          }
+        dotMocIncluded = true;
+        includedMocs[absFilename] = currentMoc;
+        }
+      matchOffset += mocIncludeRegExp.end();
+      } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
+    }
+
+  // In this case, check whether the scanned file itself contains a Q_OBJECT.
+  // If this is the case, the moc_foo.cpp should probably be generated from
+  // foo.cpp instead of foo.h, because otherwise it won't build.
+  // But warn, since this is not how it is supposed to be used.
+  if ((dotMocIncluded == false) && (containsQ_OBJECT(contentsString)))
+    {
+    // otherwise always error out since it will not compile:
+    std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
+              << "contains a Q_OBJECT macro, but does not include "
+              << "\"" << scannedFileBasename << ".moc\" !\n"
+              << std::endl;
+    ::exit(EXIT_FAILURE);
     }
 
 }
