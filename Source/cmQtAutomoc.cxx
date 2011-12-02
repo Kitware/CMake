@@ -115,6 +115,12 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     return;
     }
 
+  bool strictMode = (qtMajorVersion == "5");
+  if (makefile->IsDefinitionSet("CMAKE_AUTOMOC_STRICT_MODE"))
+    {
+    strictMode = makefile->IsOn("CMAKE_AUTOMOC_STRICT_MODE");
+    }
+
   // create a custom target for running automoc at buildtime:
   std::string automocTargetName = targetName;
   automocTargetName += "_automoc";
@@ -196,6 +202,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   makefile->AddDefinition("_moc_compile_defs", _moc_compile_defs.c_str());
   makefile->AddDefinition("_moc_files", _moc_files.c_str());
   makefile->AddDefinition("_moc_headers", _moc_headers.c_str());
+  makefile->AddDefinition("_moc_strict_mode", strictMode ? "TRUE" : "FALSE");
 
   const char* cmakeRoot = makefile->GetDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
@@ -288,6 +295,8 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
+
+  this->StrictMode = makefile->IsOn("AM_STRICT_MODE");
 
   return true;
 }
@@ -481,11 +490,11 @@ bool cmQtAutomoc::RunAutomocQt4()
       {
       std::cout << "AUTOMOC: Checking " << absFilename << std::endl;
       }
-    if (this->QtMajorVersion == "4")
+    if (this->StrictMode == false)
       {
       this->ParseCppFile(absFilename, headerExtensions, includedMocs);
       }
-    else if (this->QtMajorVersion == "5")
+    else
       {
       this->StrictParseCppFile(absFilename, headerExtensions, includedMocs);
       }
