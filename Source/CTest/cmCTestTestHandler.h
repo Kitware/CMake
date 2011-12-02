@@ -125,7 +125,16 @@ public:
     cmCTestTestProperties* Properties;
   };
 
-  // add configuraitons to a search path for an executable
+  struct cmCTestTestResultLess
+  {
+    bool operator() (const cmCTestTestResult &lhs,
+                     const cmCTestTestResult &rhs) const
+    {
+    return lhs.TestCount < rhs.TestCount;
+    }
+  };
+
+  // add configurations to a search path for an executable
   static void AddConfigurations(cmCTest *ctest,
                                 std::vector<std::string> &attempted,
                                 std::vector<std::string> &attemptedConfigs,
@@ -141,7 +150,7 @@ public:
 
   typedef std::vector<cmCTestTestProperties> ListOfTests;
 protected:
-  // comput a final test list
+  // compute a final test list
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<std::string>& args);

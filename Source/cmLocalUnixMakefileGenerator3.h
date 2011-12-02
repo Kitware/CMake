@@ -38,21 +38,21 @@ public:
 
   /**
    * Process the CMakeLists files for this directory to fill in the
-   * Makefile ivar 
+   * Makefile ivar
    */
   virtual void Configure();
 
   /**
-   * Generate the makefile for this directory. 
+   * Generate the makefile for this directory.
    */
   virtual void Generate();
 
-  
+
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
   const std::string &GetHomeRelativeOutputPath();
 
-  // Write out a make rule 
+  // Write out a make rule
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
                      const char* target,
@@ -60,7 +60,7 @@ public:
                      const std::vector<std::string>& commands,
                      bool symbolic,
                      bool in_help = false);
-  
+
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
 
@@ -71,7 +71,7 @@ public:
    */
   void SetPassMakeflags(bool s){this->PassMakeflags = s;}
   bool GetPassMakeflags() { return this->PassMakeflags; }
-  
+
   /**
    * Set the flag used to keep the make program silent.
    */
@@ -115,7 +115,7 @@ public:
   void SetDefineWindowsNULL(bool v)  {this->DefineWindowsNULL = v;}
 
   /**
-   * If set to true, cd dir && command is used to 
+   * If set to true, cd dir && command is used to
    * run commands in a different directory.
    */
   void SetUnixCD(bool v)  {this->UnixCD = v;}
@@ -161,15 +161,15 @@ public:
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
 
-  /** creates the common disclainer text at the top of each makefile */
+  /** creates the common disclaimer text at the top of each makefile */
   void WriteDisclaimer(std::ostream& os);
 
   // write a  comment line #====... in the stream
   void WriteDivider(std::ostream& os);
 
   /** used to create a recursive make call */
-  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);    
-  
+  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);
+
   // append flags to a string
   virtual void AppendFlags(std::string& flags, const char* newFlags);
 
@@ -185,7 +185,7 @@ public:
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
 
     // create a command that cds to the start dir then runs the commands
-  void CreateCDCommand(std::vector<std::string>& commands, 
+  void CreateCDCommand(std::vector<std::string>& commands,
                        const char *targetDir,
                        cmLocalGenerator::RelativeRoot returnDir);
 
@@ -200,7 +200,7 @@ public:
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* mf, bool verbose);
-  
+
   /** write some extra rules such as make test etc */
   void WriteSpecialTargetsTop(std::ostream& makefileStream);
   void WriteSpecialTargetsBottom(std::ostream& makefileStream);
@@ -224,7 +224,7 @@ public:
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
-  
+
   struct LocalObjectEntry
   {
     cmTarget* Target;
@@ -238,7 +238,7 @@ public:
     bool HasSourceExtension;
     bool HasPreprocessRule;
     bool HasAssembleRule;
-    LocalObjectInfo():HasSourceExtension(false), HasPreprocessRule(false), 
+    LocalObjectInfo():HasSourceExtension(false), HasPreprocessRule(false),
                       HasAssembleRule(false) {}
   };
   std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
@@ -261,15 +261,15 @@ public:
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& dirs);
 
-  // Fill the vector with the target names for the object files, 
-  // preprocessed files and assembly files. Currently only used by the 
+  // Fill the vector with the target names for the object files,
+  // preprocessed files and assembly files. Currently only used by the
   // Eclipse generator.
   void GetIndividualFileTargets(std::vector<std::string>& targets);
-  
+
 protected:
   void WriteLocalMakefile();
-  
-  
+
+
   // write the target rules for the local Makefile into the stream
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
                                  std::set<cmStdString> &emitted);
@@ -278,17 +278,17 @@ protected:
   void WriteDirectoryInformationFile();
 
 
-  // write the depend info 
+  // write the depend info
   void WriteDependLanguageInfo(std::ostream& cmakefileStream, cmTarget &tgt);
-  
+
   // write the local help rule
   void WriteHelpRule(std::ostream& ruleFileStream);
-  
+
   // this converts a file name that is relative to the StartOuputDirectory
   // into a full path
   std::string ConvertToFullPath(const std::string& localPath);
 
-  
+
   void WriteConvenienceRule(std::ostream& ruleFileStream,
                             const char* realTarget,
                             const char* helpTarget);
@@ -304,7 +304,7 @@ protected:
   void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
                                   const char* comment, const char* output,
                                   LocalObjectInfo const& info);
-  
+
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
                                 std::string* nameWithoutTargetDir = 0,
@@ -340,6 +340,7 @@ protected:
   void CheckMultipleOutputs(bool verbose);
 
 private:
+  std::string ConvertShellCommand(std::string const& cmd, RelativeRoot root);
   std::string MakeLauncher(const cmCustomCommand& cc, cmTarget* target,
                            RelativeRoot relative);
 

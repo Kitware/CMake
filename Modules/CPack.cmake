@@ -215,7 +215,7 @@
 #
 #   CPACK_INSTALL_COMMANDS - Extra commands to install components.
 #
-#   CPACK_INSTALL_DIRECTORIES - Extra directories to install.
+#   CPACK_INSTALLED_DIRECTORIES - Extra directories to install.
 #
 
 #=============================================================================

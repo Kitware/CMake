@@ -36,7 +36,7 @@ class cmLocalUnixMakefileGenerator3;
  targets that are required to make the process work.
 
  Makefile2 in turn will recursively make targets in the correct order. Each
- target has its own directory <target>.dir and its own makefile build.make in
+ target has its own directory \<target\>.dir and its own makefile build.make in
  that directory. Also in that directory is a couple makefiles per source file
  used by the target. Typically these are named source.obj.build.make and
  source.obj.build.depend.make. The source.obj.build.make contains the rules
@@ -90,7 +90,7 @@ public:
   void WriteHelpRule(std::ostream& ruleFileStream,
                      cmLocalUnixMakefileGenerator3 *);
 
-  // write the top lvel target rules
+  // write the top level target rules
   void WriteConvenienceRules(std::ostream& ruleFileStream,
                              std::set<cmStdString> &emitted);
 
@@ -136,18 +136,18 @@ protected:
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmTarget const&);
 
-  // Setup target names
-  virtual const char* GetAllTargetName()          { return "all"; }
-  virtual const char* GetInstallTargetName()      { return "install"; }
-  virtual const char* GetInstallLocalTargetName() { return "install/local"; }
-  virtual const char* GetInstallStripTargetName() { return "install/strip"; }
-  virtual const char* GetPreinstallTargetName()   { return "preinstall"; }
-  virtual const char* GetTestTargetName()         { return "test"; }
-  virtual const char* GetPackageTargetName()      { return "package"; }
-  virtual const char* GetPackageSourceTargetName(){ return "package_source"; }
-  virtual const char* GetEditCacheTargetName()    { return "edit_cache"; }
-  virtual const char* GetRebuildCacheTargetName() { return "rebuild_cache"; }
-  virtual const char* GetCleanTargetName()        { return "clean"; }
+  // Target name hooks for superclass.
+  const char* GetAllTargetName()           const { return "all"; }
+  const char* GetInstallTargetName()       const { return "install"; }
+  const char* GetInstallLocalTargetName()  const { return "install/local"; }
+  const char* GetInstallStripTargetName()  const { return "install/strip"; }
+  const char* GetPreinstallTargetName()    const { return "preinstall"; }
+  const char* GetTestTargetName()          const { return "test"; }
+  const char* GetPackageTargetName()       const { return "package"; }
+  const char* GetPackageSourceTargetName() const { return "package_source"; }
+  const char* GetEditCacheTargetName()     const { return "edit_cache"; }
+  const char* GetRebuildCacheTargetName()  const { return "rebuild_cache"; }
+  const char* GetCleanTargetName()         const { return "clean"; }
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
 

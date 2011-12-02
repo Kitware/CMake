@@ -1,3 +1,437 @@
+Changes in CMake 2.8.6 (since 2.8.6-rc4)
+----------------------------------------
+Alex Neundorf (5):
+      Remove trailing whitespace
+      Minor improvements to the UsePkgConfig.cmake docs
+      Remove trailing whitespace
+      Improve behaviour of --find-package mode with try_run/try_compile
+      Use makefile->IssueMessage() for better error messages
+
+Bill Hoffman (2):
+      Use version 11.0 for 12.x and 9.10 for 10.x intel versions to fix 12.1 vsIDE.
+      Also, check for 11.x as an intel fortran version.
+
+Brad King (2):
+      Add Visual Studio 11 generator for x86 and x64 tools
+      Teach our tests about special cases for VS 11
+
+David Cole (1):
+      CTestCustom.cmake: Ignore clang's summary warning
+
+Philip Lowman (1):
+      FindBullet: Also search for _Debug postfixed library names
+
+Raphael Kubo da Costa (1):
+      Fix typo in set_target_properties' documentation.
+
+Rolf Eike Beer (1):
+      Fix typo in UsePkgConfig.cmake
+
+Changes in CMake 2.8.6-rc4 (since 2.8.6-rc3)
+--------------------------------------------
+Alex Neundorf (3):
+      FindFLEX.cmake: also search the include dir
+      Fix typos in FeatureSummary.cmake (#12462)
+      Don't warn when setting a property multiple times to the same value #12464
+
+Bill Hoffman (2):
+      For VS Intel Fortran IDE builds, add a check to find the Fortran library PATH.
+      Enable Fortran tests for IDE builds.
+
+Brad King (5):
+      FortranCInterface: Compile separate Fortran lib in VerifyC[XX]
+      Move IntelVSImplicitPath project to better location
+      Simplify IntelVSImplicitPath detection project
+      libarchive: Fix ssize_t detection with mingwrt 3.20
+      Make file(DOWNLOAD) fail on http error
+
+David Cole (8):
+      Tests: Add a KWStyle test, equivalent to the make StyleCheck target
+      KWStyle Test: Activate by default if KWStyle is found
+      Xcode: Use EFFECTIVE_PLATFORM_NAME reference in ComputeOutputDir
+      Xcode: Add test to demonstrate iOS project in Xcode
+      CMake: Reference test targets only when BUILD_TESTING is ON
+      Tests: Add the more modern Mac64 nightly build
+      Release Scripts: Use Qt 4.7.4 on dashmacmini5 (#12460)
+      Revert "FindThreads: Try pthreads with no special option first (#11333)"
+
+Eric NOULARD (4):
+      CPack fix #12449 doc mispelled
+      CPack fix template too
+      CPackDeb fix #10325 automagically use fakeroot for DEB if fakeroot is found
+      CPackRPM authorize per-component pre/post-[un]install scripts (#0012063)
+
+Marcus D. Hanwell (4):
+      Just code style changes.
+      Don't warn when nothing to do in visibility function.
+      Made ADD_COMPILER_EXPORT_FLAGS into a macro.
+      Make add_compiler_export_flags a function again.
+
+Rolf Eike Beer (1):
+      remove stray brace in CPackDeb documentation
+
+Changes in CMake 2.8.6-rc3 (since 2.8.6-rc2)
+--------------------------------------------
+Alexey Ozeritsky (2):
+      FindBLAS/LAPACK fixes
+      FindBLAS/LAPACK fixes
+
+Andreas Schneider (1):
+      Modules: Add support for more java archives in add_jar().
+
+Björn Ricks (4):
+      Search for the installed python interpreter first
+      Determine python version
+      Update documentation of FindPythonInterp.cmake
+      Use FIND_PACKAGE_HANDLE_STANDARD_ARGS second mode
+
+Brad King (5):
+      VS: Map per-source Fortran flags to IDE options
+      VS: Map Fortran free- and fixed-format flags to IDE options
+      Fortran: Add support for free- and fixed-form flags
+      Xcode: Honor Fortran_FORMAT target and source file property
+      Set CMAKE_<lang>_COMPILER_ID for VS generators
+
+David Cole (8):
+      KWSys: Remove always-true dir_only parameter
+      KWSys: Add symlinks to directories as files (#12284)
+      FindPackageMessage: Eliminate new lines in cache entries
+      FindPackageMessage: Eliminate new lines using REGEX REPLACE
+      CMake: Add SaveCache at the end of successful Generate calls
+      Suppress Qt warning for dashmacmini5 builds
+      Suppress Qt warning for dashmacmini5 builds
+      Tests: Look for "Illegal" or "SegFault" in the output
+
+Eric NOULARD (2):
+      CPack  fix #12366 components RPM packages have the same package name
+      CPackRPM fix #12305, include directories in RPM package
+
+Johan Björk (5):
+      Xcode: No spaces in makefile target names (#12370)
+      CMake: Write symlinks to directories as files in archives (#12284)
+      CPack: Do not recurse through directory symlinks (#12284)
+      Xcode: Do not emit the ZERO_CHECK target more than once
+      Xcode: Honor -g0 to disable debugging (#12377)
+
+Johannes Stallkamp (1):
+      CTest: Fixed valgrind output parsing (#12260)
+
+Matt McCormick (1):
+      CMake: Remove documentation for -E build (#12446)
+
+Stephen Kelly (2):
+      Add some more unit tests.
+      Don't put what some compilers consider junk at the end of the line.
+
+Thomas Jarosch (3):
+      CTest: Fix memory leaks on error
+      Fix file() command descriptor leak on error
+      ccmake: Fix off-by-one memory access error
+
+Changes in CMake 2.8.6-rc2 (since 2.8.6-rc1)
+--------------------------------------------
+Brad King (2):
+      KWSys: Add hash function for std::string
+      KWSys: Fix std::string hash function for Borland
+
+Clinton Stimpson (1):
+      qt4: also find QtUiTools when cross compiling with mingw.
+
+David Cole (3):
+      Xcode4: Requires more quoting of single quote char
+      cmake.m4: Use modern signature of install(FILES ...)
+      CMake Release Scripts: Changes for next release candidate...
+
+David Faure (1):
+      Don't use a variable name that might be used in other files.
+
+Stephen Kelly (73):
+      Create moc files in the current binary dir, not the top level.
+      Make the formatting of feature_summary output a little better.
+      Add the GenerateExportMacro with unit tests.
+      Handle the case where the user changes the DEFINE_SYMBOL property.
+      Add a newline at the end of the file.
+      Add a newline at the end of the file.
+      Add missing licence header.
+      Remove the fatal_warnings option which is no longer used.
+      Test for features, not specific compilers.
+      Simplify. We already know we have hidden visibility at this point.
+      Simplify the compiler feature check
+      Add some debug output.
+      Short-circuit the tests on unsupported compilers.
+      Test expected no-op instead of aborting the build.
+      Fix tests with clang.
+      Fix typo and tests failing as a result.
+      Only run the failure tests with gcc >= 4.2
+      Set the CMAKE_RUNTIME_OUTPUT_DIRECTORY for windows builds.
+      Only set the COMPILER_HAS_HIDDEN_VISIBILITY if GCC >= 4.2
+      Disable all export macros on Borland.
+      Another attempt to fix the tests on Borland.
+      Use the correct project name compiletest not compilefail
+      Fix off-by-not in test for Borland.
+      Another attempt at fixing Borland.
+      Add some debug output to narrow down deprecation test issues
+      Export deprecated free methods too.
+      Remember to surround the other deprecated test in the Borland check.
+      Only set the deprecated attribute if hidden visibilty is enabled.
+      Make sure the hidden visibility variables never get set on MINGW.
+      Don't use hidden visibility on non-mingw windows either.
+      Don't export methods on already exported classes.
+      Split the deprecated available check from setting macro values.
+      Test for compiler features, instead of for specific platforms.
+      Exclude the XL compiler from the hidden-visibility test.
+      Add the COMPILER_HAS_DEPRECATED only if it has a declspec variant
+      Don't change the expected build result based on the platform.
+      Expect the tests to pass if hidden visibilty is not enabled.
+      Test -Werror instead of enabling it per compiler.
+      Add some messaging output to make remaining issues findable.
+      Perform the -Werror test only once.
+      Test for deprecated attribute before declspec.
+      Try to error on deprecated on Intel and SunCC.
+      Borland can't do deprecated.
+      Fixup forgotten part of aed84517c942a4c40f493fcf997cdf6a047349f8
+      Disable testing of deprecated macros.
+      Don't enable deprecated on HP.
+      Don't enable deprecated on old GCC
+      Exclude cygwin from the hidden visibility feature.
+      Exclude PGI from exports and deprecated.
+      Start testing expected values for compiler flags.
+      Exclude win32 from hidden visibility checks.
+      Comment the test assertion for now
+      Test the correct cxx variable.
+      Fix the version extraction regex for clang.
+      Hopefully add version extraction for Intel.
+      Add some settings for non-truncation of test output.
+      Fix up the regex command for Intel.
+      Test for too-old-intel compilers.
+      Possibly fix test on HPUX.
+      Possibly fix configuration test on AIX.
+      Try to make the macros do almost nothing for Watcom.
+      More consistency in the macro options.
+      Add missing NO_EXPORT macro variant.
+      Look for errors reported by PGI too.
+      Quote paths in case there is a space in one of them.
+      Disable the tests for Watcom.
+      Fix Compiler id variable name.
+      Add quotes in case cmake is installed in a prefix with a space.
+      Fix the feature of using a specific prefix for macros.
+      Add documentation about the prefix and no_deprecated options.
+      Remove blank line at the start of the file.
+      Don't start a line with a dash(-)
+      Fix up verbatim code sections of the dox.
+
+Todd Gamblin (3):
+      FindBoost: Call find_package with NO_MODULE first
+      Fix XL compilers on non-AIX machines.
+      Fixed link bugs in BlueGeneP build.
+
+Changes in CMake 2.8.6-rc1 (since 2.8.5)
+--------------------------------------------
+Aaron C. Meadows (1):
+      FindSubversion: Invoke svn non-interactively (#12304)
+
+Alex Neundorf (92):
+      Add a switch to disable a find_package() call completely
+      Add documentation for the CMAKE_DISABLE_FIND_PACKAGE_<Name> switch
+      Add a basic test for CMAKE_DISABLE_FIND_PACKAGE_<package>
+      Add macros cmake_push/pop_check_state() as discussed on the list.
+      Fix copyright notice test
+      Add CheckCXXSymbolExists.cmake, so this can be used also for C++
+      Minor fix to try_compile() docs (#12333)
+      Fix #12342: Add APPEND_STRING option to set_property()
+      Extend FeatureSummary: add PURPOSE of package and TYPE
+      FeatureSummary.cmake: remove "comment" field
+      FeatureSummary.cmake: add INCLUDE_QUIET_PACKAGES keyword
+      FeatureSummary.cmake: error out when a REQUIRED package is missing
+      FeatureSummary.cmake: only higher TYPEs can override previous TYPEs
+      FeatureSummary.cmake: cosmetics
+      FeatureSummary.cmake: update documentation
+      Remove debug output from CheckSymbolExists
+      Don't put files from CMAKE_ROOT into CodeBlocks projects (#12110)
+      More PATH_SUFFIXES for finding Postgresql and also search catalog/pg_type.h
+      Use FPHSA(), remove unnecessary stuff and don't recommend link_directories()
+      Mark the results from find() as advanced
+      FindPostgreSQL: fix PATH_SUFFIXES, better output for FPHSA
+      Strip trailing whitespace
+      FindGIF/FindFreetype.cmake: remove standard search paths from find-calls
+      FindGif: add giflib4 as one more name for the library under Windows
+      Add basic version check for giflib
+      Patch by Campbell Barton: puts definitions into C::B project file
+      Remove useless line of code
+      Also put builtin include dirs into CodeBlocks project file
+      Remove trailing whitespace
+      Also search for libxkbfile, XSync and SM include dir
+      Provide macro write_basic_config_version_file()
+      Add example to documentation
+      Add some tests for write_basic_config_version_file()
+      Fix copyright notice
+      Really fix copyright notice
+      Set UNSUITABLE instead of not COMPATIBLE
+      Improve documentation for WriteBasicConfigVersionFile.cmake
+      Add macros GETTEXT_PROCESS_POT() and GETTEXT_PROCESS_PO_FILES()
+      Support REQUIRED in FindGettext.cmake (using FPHSA.cmake)
+      Fix #12358: make optionally enabling ASM work again
+      Start work on automoc: add empty cmQtAutomoc class
+      Start implementing skeleton for automoc in cmake
+      Add actual automoc code from automoc
+      Remove the need to check for .h/.cxx during buildtime
+      Add the cmake module required currently for automoc
+      Add AUTOMOC to the add_library() command
+      Fix line lengths
+      Move code for parsing a cpp-file from the big loop to separate function
+      Initialize verbose based onb the env.var.
+      Color output when running moc
+      Add the generated automoc.cpp file to the cleaned files
+      Use cout instead of printf()
+      Remove trailing whitespace
+      Refactor SetupAutomocTarget() so it can be run after creating the target
+      Remove trailing whitespace
+      Move automoc processing from add_executable/library to cmGlobalGenerator
+      Nicer progress message for the automoc target
+      Add a test for automoc
+      Add documentation for AUTOMOC, add initialization via CMAKE_AUTOMOC
+      Fix logic which decides when to execute automoc test
+      Automoc.cmake is not needed anymore
+      Fix build: non-void function must return a value
+      Fix warnings
+      Fix bootstrap test with automoc
+      Only enable the automoc test after checking that Qt4 works
+      Fix build: use std::ios::out|ios::trunc instead of std::ios_base::out
+      Silence warning in automoc: use long instead of int
+      Fix automoc with VS builds: apply patch from Bill
+      Make clLocalGenerator::GetTargetFlags() public
+      Add find-package mode, which does nothing yet
+      Implement find-package mode of cmake
+      Replace cmake::GetScriptMode() with GetWorkingMode()
+      Fix copyright notice in new CMakeFindPackageMode.cmake
+      Better support for lib64 and Debian multiarch
+      Use the file-utility to test for 64bit if there is no /usr/lib64
+      Add a cmake.m4 for using cmake in autoconf projects instead of pkgconfig
+      Improve documentation for --find-package mode
+      Add a test for the new --find-package mode
+      Only run the test if we are using a makefile generator under UNIX
+      The makefile for the test was kindof wrong
+      Fix test on OpenBSD with BSD make
+      Rename helper macros print_compile_flags() to set_compile_flags_var()
+      Dont check for -isysroot and -mmacosx-version on OSX in --find-package mode
+      Disable any STATUS output in --find-package mode
+      Much improved test, should now be executed on all UNIXes
+      Make the --find-package test harder
+      Make the test harder by always having a space in the include dirs
+      Only enable the test when using GNU make
+      Fix line length
+      Use $(CXXFLAGS) and $(LDFLAGS) in the --find-package test Makefile
+      Require the current cmake version in --find-package mode
+      Fix --find-package mode on Cygwin, where enable_language(RC) is called
+
+Alexey Ozeritsky (5):
+      fixed: search of acml libraries
+      gotoblas supported
+      ACML-GPU supported
+      ACML-GPU supportede
+      fixed: search of ATLAS library for C/C++-only projects
+
+Andreas Schneider (6):
+      FindJava: Find missing java development executables.
+      Modules: Added CMake Java support.
+      Tests: Java tests should test UseJava.cmake
+      Tests: Check for the new Java exeutable variables.
+      Java: Use set_property/get_property for target variables.
+      Java: Fix documentation format and indentation
+
+Arnaud Gelas (1):
+      Search for the ASPELL executable
+
+Bill Hoffman (5):
+      Only pay for unused variable checking if it is on.
+      Initial support for Intel Fortran VS2010.
+      Fix custom commands in VS2010 Fortran projects using CFG_INTDIR and test.
+      Use MSBuild when devenv is not around, since VCExpress seems broken.
+      Fix for bug #12413, nmake did not handle targets with + in the name.
+
+Brad King (13):
+      MinGW: Remove old workaround and use native echo (#12283)
+      Document caveat of custom commands in multiple targets (#12311)
+      cmSystemTools: Remove trailing whitespace
+      RunSingleCommand: Fix indentation
+      RunSingleCommand: Avoid assignment in condition
+      Documentation: WIN32 not defined on Cygwin (#12334)
+      KWSys: Simplify SystemTools::GetTime implementation (#12261)
+      KWSys: Avoid conversion warning in SystemTools::GetTime
+      KWSys: Fix using long long and __int64 with hash_(set|map)
+      KWSys: __int64 and long long may be same type in specialization
+      XL: Fix old VisualAge branding of Fortran compiler
+      Do not crash when an imported target depends on a missing target
+      Fix CHECK_(C|CXX)_COMPILER_FLAG for Clang (#12394)
+
+Clinton Stimpson (5):
+      Add -DQT_NO_DEBUG if no build type is specified so Qt plugins will work.
+      Add qt4/QtCore to help find Qt headers when cross-compiling.
+      Qt4: Fix reference of undefined variable when detecting frameworks on Mac OS X
+      Remove C compiler requirement from FindQt4.cmake
+      CPack/NSIS: Fix reinstall and multiple install issues when using components.
+
+David Cole (26):
+      Begin post-2.8.5 development
+      Fix Architecture test to work with Xcode 4
+      Fix BuildDepends test to work with Xcode 4
+      Base architecture choice logic on Xcode version
+      Use correct default multiple architecture values in test
+      Add use of EFFECTIVE_PLATFORM_NAME to generated Xcode projects.
+      Correct KWStyle line too long error
+      Add fail regex to detect supported warning flags correctly.
+      Add support for Visual Studio project-specific globals (#8707)
+      Fix machine-specific UpdateGIT test failures
+      Ensure libgmp-10.dll is in the PATH for CMakeTestAllGenerators
+      Watcom: Add -c flag to wlib calls (#12245)
+      Add Watcom support to InstallRequiredSystemLibraries (#11866)
+      Watcom: Use correct args for execute_process call (#11866)
+      CTest: print failed tests in index order (#11746)
+      Fix line too long style violation
+      Documentation: Fix comments in the source code (#10941)
+      Add more find_path locations for DCMTK header files (#12323)
+      VS9: Add include_directories to midl command lines
+      KWSys: Remove translation path for "/tmp_mnt/" (#10595)
+      VS10: Avoid unnecessary rebuilds for custom commands
+      QtAutomoc test: Pass QT_QMAKE_EXECUTABLE
+      QtAutomoc: Eliminate compiler warning
+      CheckSymbolExists: Use IMMEDIATE flag for configure_file (#11333)
+      Xcode: Suppress same-old warning again.
+      Xcode: Save object id values in CMakeCache.txt (#11690)
+
+Johan Björk (5):
+      Xcode: Remove PREBINDING attribute for Xcode 4 and above
+      RunSingleCommand: Replace verbose boolean with enum
+      RunSingleCommand: Add a OUTPUT_NORMAL flag.
+      Xcode: Quote ',' in Xcode string values (#12259)
+      Xcode: Rearrange CMakeReRun to enable parallel builds
+
+Matej Hribernik (2):
+      VS: Factor Find64BitTools out of Win64 generator to parent
+      Add VisualStudio 9 and 10 generators for Itanium platform
+
+Modestas Vainius (1):
+      multiarch: Treat lib/<arch> as implicit link dir (#12326)
+
+Oliver Buchtala (3):
+      Java: Create java_class_filelist only if it does't exist.
+      Java: Added some dependency magic to avoid recompilations.
+      Java: Create correct jar archive dependencies.
+
+Rolf Eike Beer (2):
+      remove extra output message from FindJava.cmake
+      FindThreads: Try pthreads with no special option first (#11333)
+
+Steven Velez (1):
+      VS10: Add SCC support
+
+Todd Gamblin (2):
+      Try regular compiler when no MPI compiler.
+      Fix issues with removing try_compile input file.
+
+Will Dicharry (1):
+      Added HDF5 high level Fortran bindings to available components.
+
 Changes in CMake 2.8.5 (since 2.8.5-rc3)
 --------------------------------------------
 Brad King (1):

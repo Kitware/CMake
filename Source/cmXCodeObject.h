@@ -83,6 +83,10 @@ public:
     {
       return this->Id.c_str();
     }
+  void SetId(const char* id)
+    {
+      this->Id = id;
+    }
   cmTarget* GetTarget()
     {
       return this->Target;

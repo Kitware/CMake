@@ -25,14 +25,13 @@ inline std::string cmVisualStudioGeneratorOptionsEscapeForXML(const char* s)
 
 //----------------------------------------------------------------------------
 cmVisualStudioGeneratorOptions
-::cmVisualStudioGeneratorOptions(cmLocalGenerator* lg,
-                                 int version,
+::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
                                  Tool tool,
                                  cmVS7FlagTable const* table,
                                  cmVS7FlagTable const* extraTable,
                                  cmVisualStudio10TargetGenerator* g):
   cmIDEOptions(),
-  LocalGenerator(lg), Version(version), CurrentTool(tool),
+  LocalGenerator(lg), Version(lg->GetVersion()), CurrentTool(tool),
   TargetGenerator(g)
 {
   // Store the given flag tables.
@@ -61,11 +60,12 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // remove the flag we need to override the IDE default of on.
   switch (this->Version)
     {
-    case 7:
-    case 71:
+    case cmLocalVisualStudioGenerator::VS7:
+    case cmLocalVisualStudioGenerator::VS71:
       this->FlagMap["ExceptionHandling"] = "FALSE";
       break;
-    case 10:
+    case cmLocalVisualStudioGenerator::VS10:
+    case cmLocalVisualStudioGenerator::VS11:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -86,14 +86,15 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   // to the generated project to disable logo suppression.  Otherwise
   // the GUI default is to enable suppression.
   //
-  // Avoid this on Visual Studio 10 (and later!) because it results in:
+  // On Visual Studio 10 (and later!), the value of this attribute should be
+  // an empty string, instead of "FALSE", in order to avoid a warning:
   //   "cl ... warning D9035: option 'nologo-' has been deprecated"
   //
   if(verbose &&
-     this->Version != 10 &&
      this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end())
     {
-    this->FlagMap["SuppressStartupBanner"] = "FALSE";
+    this->FlagMap["SuppressStartupBanner"] =
+      this->Version < cmLocalVisualStudioGenerator::VS10 ? "FALSE" : "";
     }
 }
 
@@ -211,7 +212,7 @@ cmVisualStudioGeneratorOptions
     {
     return;
     }
-  if(this->Version == 10)
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     // if there are configuration specifc flags, then
     // use the configuration specific tag for PreprocessorDefinitions
@@ -239,7 +240,7 @@ cmVisualStudioGeneratorOptions
     {
     // Escape the definition for the compiler.
     std::string define;
-    if(this->Version != 10)
+    if(this->Version < cmLocalVisualStudioGenerator::VS10)
       {
       define =
         this->LocalGenerator->EscapeForShell(di->c_str(), true);
@@ -249,7 +250,7 @@ cmVisualStudioGeneratorOptions
       define = *di;
       }
     // Escape this flag for the IDE.
-    if(this->Version == 10)
+    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
       {
       define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
 
@@ -266,7 +267,7 @@ cmVisualStudioGeneratorOptions
     fout << sep << define;
     sep = ";";
     }
-  if(this->Version == 10)
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     fout <<  ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
     }
@@ -281,7 +282,7 @@ void
 cmVisualStudioGeneratorOptions
 ::OutputFlagMap(std::ostream& fout, const char* indent)
 {
-  if(this->Version == 10)
+  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
     for(std::map<cmStdString, cmStdString>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
@@ -326,7 +327,7 @@ cmVisualStudioGeneratorOptions
 {
   if(!this->FlagString.empty())
     {
-    if(this->Version == 10)
+    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
       { 
       fout << prefix;
       if(this->Configuration.size())

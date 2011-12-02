@@ -133,7 +133,8 @@ std::string cmGlobalVisualStudio7Generator
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 {
-  cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
+  cmLocalVisualStudio7Generator *lg =
+    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS7);
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;
@@ -737,18 +738,6 @@ void cmGlobalVisualStudio7Generator
   entry.Name = this->GetName();
   entry.Brief = "Generates Visual Studio .NET 2002 project files.";
   entry.Full = "";
-}
-
-// make sure "special" targets have GUID's
-void cmGlobalVisualStudio7Generator::Configure()
-{
-  cmGlobalGenerator::Configure();
-  this->CreateGUID("ALL_BUILD");
-  this->CreateGUID("INSTALL");
-  this->CreateGUID("RUN_TESTS");
-  this->CreateGUID("EDIT_CACHE");
-  this->CreateGUID("REBUILD_CACHE");
-  this->CreateGUID("PACKAGE");
 }
 
 //----------------------------------------------------------------------------

@@ -214,6 +214,12 @@ ENDMACRO(CMAKE_SET_TARGET_FOLDER)
 #-----------------------------------------------------------------------
 MACRO (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
+  # Create the KWIML library for CMake.
+  SET(KWIML cmIML)
+  SET(KWIML_HEADER_ROOT ${CMake_BINARY_DIR}/Utilities)
+  ADD_SUBDIRECTORY(Utilities/KWIML)
+
+  #---------------------------------------------------------------------
   # Create the kwsys library for CMake.
   SET(KWSYS_NAMESPACE cmsys)
   SET(KWSYS_USE_SystemTools 1)
@@ -231,11 +237,13 @@ MACRO (CMAKE_BUILD_UTILITIES)
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}_c "${kwsys_folder}")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}EncodeExecutable "${kwsys_folder}")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}ProcessFwd9x "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestDynload "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestProcess "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsC "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsCxx "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestSharedForward "${kwsys_folder}")
+  if(BUILD_TESTING)
+    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestDynload "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestProcess "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsC "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestsCxx "${kwsys_folder}")
+    CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestSharedForward "${kwsys_folder}")
+  endif()
 
   #---------------------------------------------------------------------
   # Setup third-party libraries.
@@ -416,7 +424,7 @@ ENDIF()
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 8)
-SET(CMake_VERSION_PATCH 5)
+SET(CMake_VERSION_PATCH 6)
 #SET(CMake_VERSION_TWEAK 0)
 #SET(CMake_VERSION_RC 1)
 
@@ -598,7 +606,9 @@ ADD_SUBDIRECTORY(Source)
 ADD_SUBDIRECTORY(Utilities)
 ADD_SUBDIRECTORY(Tests)
 
-CMAKE_SET_TARGET_FOLDER(CMakeLibTests "Tests")
+if(BUILD_TESTING)
+  CMAKE_SET_TARGET_FOLDER(CMakeLibTests "Tests")
+endif()
 CMAKE_SET_TARGET_FOLDER(cmw9xcom "Utilities/Win9xCompat")
 CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
 

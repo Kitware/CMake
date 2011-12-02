@@ -65,7 +65,12 @@ public:
       "For historical reasons, relative paths given to this command are "
       "passed to the linker unchanged "
       "(unlike many CMake commands which interpret them relative to the "
-      "current source directory)."
+      "current source directory).\n"
+      "Note that this command is rarely necessary.  Library locations "
+      "returned by find_package() and find_library() are absolute paths.  "
+      "Pass these absolute library file paths directly to the "
+      "target_link_libraries() command.  CMake will ensure the linker finds "
+      "them."
       ;
     }
   

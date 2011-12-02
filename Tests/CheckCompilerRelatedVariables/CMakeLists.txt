@@ -34,6 +34,9 @@ endif()
 if(DEFINED MSVC10)
   math(EXPR msvc_total "${msvc_total} + 1")
 endif()
+if(DEFINED MSVC11)
+  math(EXPR msvc_total "${msvc_total} + 1")
+endif()
 
 echo_var(MSVC)
 echo_var(MSVC60)
@@ -42,6 +45,7 @@ echo_var(MSVC71)
 echo_var(MSVC80)
 echo_var(MSVC90)
 echo_var(MSVC10)
+echo_var(MSVC11)
 
 if(MSVC)
   #

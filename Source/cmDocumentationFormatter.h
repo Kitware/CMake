@@ -16,7 +16,7 @@
 
 /** This is just a helper class to make it build with MSVC 6.0.
 Actually the enums and internal classes could directly go into
-cmDocumentation, but then MSVC6 complains in RequestedHelpItem that 
+cmDocumentation, but then MSVC6 complains in RequestedHelpItem that
 cmDocumentation is an undefined type and so it doesn't know the enums.
 Moving the enums to a class which is then already completely parsed helps
 against this. */
@@ -24,10 +24,10 @@ class cmDocumentationEnums
 {
 public:
   /** Types of help provided.  */
-  enum Type 
+  enum Type
   { None, Usage, Single, SingleModule, SingleProperty, SingleVariable,
     List, ModuleList, PropertyList, VariableList,
-    Full, Properties, Variables, Modules, CustomModules, Commands, 
+    Full, Properties, Variables, Modules, CustomModules, Commands,
     CompatCommands, Copyright, Version, Policies, SinglePolicy };
 
   /** Forms of documentation output.  */
@@ -36,7 +36,7 @@ public:
 
 class cmDocumentationSection;
 
-/** Base class for printing the documentation in the various supported 
+/** Base class for printing the documentation in the various supported
    formats. */
 class cmDocumentationFormatter
 {
@@ -46,7 +46,7 @@ public:
   void PrintFormatted(std::ostream& os, const char* text);
 
   virtual cmDocumentationEnums::Form GetForm() const = 0;
-  
+
   virtual void PrintHeader(const char* /*docname*/,
                            const char* /*appname*/,
                            std::ostream& /*os*/) {}
@@ -60,7 +60,7 @@ public:
                           std::vector<const cmDocumentationSection *>&)
     {}
 
-  /** Compute a prefix for links into a section (#<prefix>_SOMETHING).  */
+  /** Compute a prefix for links into a section (#\<prefix\>_SOMETHING). */
   std::string ComputeSectionLinkPrefix(std::string const& name);
 };
 

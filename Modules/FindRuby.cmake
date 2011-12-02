@@ -137,7 +137,7 @@ IF(RUBY_EXECUTABLE  AND NOT  RUBY_MAJOR_VERSION)
      )
 ENDIF(RUBY_EXECUTABLE  AND NOT  RUBY_MAJOR_VERSION)
 
-# In case RUBY_EXECUTABLE could not be executed (e.g. cross compiling) 
+# In case RUBY_EXECUTABLE could not be executed (e.g. cross compiling)
 # try to detect which version we found. This is not too good.
 IF(NOT RUBY_VERSION_MAJOR)
    # by default assume 1.8.0
@@ -170,9 +170,9 @@ SET(RUBY_INCLUDE_DIRS ${RUBY_INCLUDE_DIR} )
 IF( ${Ruby_FIND_VERSION_SHORT_NODOT} GREATER 18  OR  ${_RUBY_VERSION_SHORT_NODOT} GREATER 18  OR  RUBY_HDR_DIR)
    FIND_PATH(RUBY_CONFIG_INCLUDE_DIR
      NAMES ruby/config.h  config.h
-     HINTS 
+     HINTS
      ${RUBY_HDR_DIR}/${RUBY_ARCH}
-     ${RUBY_ARCH_DIR} 
+     ${RUBY_ARCH_DIR}
      )
 
    SET(RUBY_INCLUDE_DIRS ${RUBY_INCLUDE_DIRS} ${RUBY_CONFIG_INCLUDE_DIR} )
@@ -180,7 +180,7 @@ ENDIF( ${Ruby_FIND_VERSION_SHORT_NODOT} GREATER 18  OR  ${_RUBY_VERSION_SHORT_NO
 
 
 # Determine the list of possible names for the ruby library
-SET(_RUBY_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_RUBY_VERSION_SHORT})
+SET(_RUBY_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_RUBY_VERSION_SHORT} ruby${_RUBY_VERSION_SHORT_NODOT})
 
 IF(WIN32)
    SET( _RUBY_MSVC_RUNTIME "" )
@@ -202,7 +202,7 @@ IF(WIN32)
 
    LIST(APPEND _RUBY_POSSIBLE_LIB_NAMES
                "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}"
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static" 
+               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static"
                "msvcrt-ruby${_RUBY_NODOT_VERSION}"
                "msvcrt-ruby${_RUBY_NODOT_VERSION}-static" )
 ENDIF(WIN32)

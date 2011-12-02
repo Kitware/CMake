@@ -129,6 +129,8 @@ SET(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmCryptoHash.cxx
+  cmCryptoHash.h
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
@@ -214,6 +216,8 @@ SET(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmNewLineStyle.h
+  cmNewLineStyle.cxx
   cmOrderDirectories.cxx
   cmOrderDirectories.h
   cmPolicies.h
@@ -228,6 +232,8 @@ SET(SRCS
   cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
+  cmQtAutomoc.cxx
+  cmQtAutomoc.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx
@@ -257,6 +263,8 @@ SET(SRCS
   cmakewizard.cxx
   cmakewizard.h
 
+  cm_sha2.h
+  cm_sha2.c
   cm_utf8.h
   cm_utf8.c
   )
@@ -322,6 +330,10 @@ IF (WIN32)
       cmGlobalVisualStudio10Win64Generator.cxx
       cmGlobalVisualStudio10IA64Generator.h
       cmGlobalVisualStudio10IA64Generator.cxx
+      cmGlobalVisualStudio11Generator.h
+      cmGlobalVisualStudio11Generator.cxx
+      cmGlobalVisualStudio11Win64Generator.h
+      cmGlobalVisualStudio11Win64Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

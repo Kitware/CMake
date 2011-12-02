@@ -45,9 +45,9 @@ private:
 extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator()
+cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(VSVersion v):
+  cmLocalVisualStudioGenerator(v)
 {
-  this->Version = 7;
   this->PlatformName = "Win32";
   this->ExtraFlagTable = 0;
   this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
@@ -68,6 +68,27 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
   lang.insert("DEF");
   lang.insert("Fortran");
   this->CreateCustomTargetsAndCommands(lang);
+
+  // Now create GUIDs for targets
+  cmTargets &tgts = this->Makefile->GetTargets();
+
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
+  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
+    {
+    const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
+    if(path)
+      {
+      this->ReadAndStoreExternalGUID(
+        l->second.GetName(), path);
+      }
+    else
+      {
+      gg->CreateGUID(l->first.c_str());
+      }
+    }
+
+
   this->FixGlobalTargets();
 }
 
@@ -309,6 +330,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] =
 { 
   {"Preprocess", "fpp", "Run Preprocessor on files", "preprocessYes", 0}, 
   {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "true", 0},
+  {"SourceFileFormat", "fixed", "Use Fixed Format", "fileFormatFixed", 0},
+  {"SourceFileFormat", "free", "Use Free Format", "fileFormatFree", 0},
   {"DebugInformationFormat", "Zi", "full debug", "debugEnabled", 0},
   {"DebugInformationFormat", "debug:full", "full debug", "debugEnabled", 0},
   {"DebugInformationFormat", "Z7", "c7 compat", "debugOldStyleInfo", 0},
@@ -666,6 +689,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
     }
 
+  if(this->FortranProject)
+    {
+    switch(this->GetFortranFormat(target.GetProperty("Fortran_FORMAT")))
+      {
+      case FortranFormatFixed: flags += " -fixed"; break;
+      case FortranFormatFree: flags += " -free"; break;
+      default: break;
+      }
+    }
+
   // Add the target-specific flags.
   if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
     {
@@ -686,7 +719,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     t = Options::FortranCompiler;
     table = cmLocalVisualStudio7GeneratorFortranFlagTable;
     }
-  Options targetOptions(this, this->Version, t, 
+  Options targetOptions(this, t,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
@@ -825,6 +858,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     tool = "VFMIDLTool";
     }
   fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n";
+  fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
+  for(i = includes.begin(); i != includes.end(); ++i)
+    {
+    std::string ipath = this->ConvertToXMLOutputPath(i->c_str());
+    fout << ipath << ";";
+    }
+  fout << "\"\n";
   fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
   if( this->PlatformName == "x64" )
     {
@@ -848,7 +888,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // end of <Tool Name=VCMIDLTool
 
   // Check if we need the FAT32 workaround.
-  if(targetBuilds && this->Version >= 8)
+  if(targetBuilds && this->Version >= VS8)
     {
     // Check the filesystem type where the target will be written.
     if(cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
@@ -935,7 +975,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-  Options linkOptions(this, this->Version, Options::Linker,
+  Options linkOptions(this, Options::Linker,
                       cmLocalVisualStudio7GeneratorLinkFlagTable);
   linkOptions.Parse(extraLinkOptions.c_str());
   if(!this->ModuleDefinitionFile.empty())
@@ -1333,6 +1373,21 @@ cmLocalVisualStudio7GeneratorFCInfo
       fc.CompileFlags = cflags;
       needfc = true;
       }
+    if(lg->FortranProject)
+      {
+      switch(lg->GetFortranFormat(sf.GetProperty("Fortran_FORMAT")))
+        {
+        case cmLocalGenerator::FortranFormatFixed:
+          fc.CompileFlags = "-fixed " + fc.CompileFlags;
+          needfc = true;
+          break;
+        case cmLocalGenerator::FortranFormatFree:
+          fc.CompileFlags = "-free " + fc.CompileFlags;
+          needfc = true;
+          break;
+        default: break;
+        }
+      }
     if(const char* cdefs = sf.GetProperty("COMPILE_DEFINITIONS"))
       {
       fc.CompileDefs = cdefs;
@@ -1541,8 +1596,15 @@ void cmLocalVisualStudio7Generator
              !fc.CompileDefs.empty() ||
              !fc.CompileDefsConfig.empty())
             {
-            Options fileOptions(this, this->Version, Options::Compiler,
-                                cmLocalVisualStudio7GeneratorFlagTable,
+            Options::Tool tool = Options::Compiler;
+            cmVS7FlagTable const* table =
+              cmLocalVisualStudio7GeneratorFlagTable;
+            if(this->FortranProject)
+              {
+              tool = Options::FortranCompiler;
+              table = cmLocalVisualStudio7GeneratorFortranFlagTable;
+              }
+            Options fileOptions(this, tool, table,
                                 this->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
@@ -1622,6 +1684,10 @@ WriteCustomRule(std::ostream& fout,
       }
 
     std::string script = this->ConstructScript(command, i->c_str());
+    if(this->FortranProject)
+      {
+      cmSystemTools::ReplaceString(script, "$(Configuration)", i->c_str());
+      }
     fout << "\t\t\t\t\t<Tool\n"
          << "\t\t\t\t\tName=\"" << customTool << "\"\n"
          << "\t\t\t\t\tDescription=\"" 
@@ -1745,11 +1811,18 @@ void cmLocalVisualStudio7Generator::WriteProjectSCC(std::ostream& fout,
   const char* vsProjectname = target.GetProperty("VS_SCC_PROJECTNAME");
   const char* vsLocalpath = target.GetProperty("VS_SCC_LOCALPATH");
   const char* vsProvider = target.GetProperty("VS_SCC_PROVIDER");
+
   if(vsProvider && vsLocalpath && vsProjectname)
     {
     fout << "\tSccProjectName=\"" << vsProjectname << "\"\n"
          << "\tSccLocalPath=\"" << vsLocalpath << "\"\n"
          << "\tSccProvider=\"" << vsProvider << "\"\n";
+
+    const char* vsAuxPath = target.GetProperty("VS_SCC_AUXPATH");
+    if(vsAuxPath)
+      {
+      fout << "\tSccAuxPath=\"" << vsAuxPath << "\"\n";
+      }
     }
 }
 
@@ -1770,14 +1843,14 @@ cmLocalVisualStudio7Generator
   vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
   cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
                                    cmSystemTools::KeyWOW64_32);
-  if (intelVersion == "12.0")
+  if (intelVersion.find("12") == 0 || (intelVersion.find("11") == 0))
     {
-    // Version 12 actually uses 11.0 in project files!
+    // Version 11.x and 12.x actually use 11.0 in project files!
     intelVersion = "11.0" ;
     }
-  else if(intelVersion == "10.1")
+  else if(intelVersion.find("10") == 0)
     {
-    // Version 10.1 actually uses 9.10 in project files!
+    // Version 10.x actually uses 9.10 in project files!
     intelVersion = "9.10";
     }
 
@@ -1847,13 +1920,13 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
-  if(this->Version == 71)
+  if(this->Version == VS71)
     {
     fout << "\tVersion=\"7.10\"\n";
     }
   else
     {
-    fout <<  "\tVersion=\"" << this->Version << ".00\"\n";
+    fout <<  "\tVersion=\"" << (this->Version/10) << ".00\"\n";
     }
   const char* projLabel = target.GetProperty("PROJECT_LABEL");
   if(!projLabel)
@@ -1868,7 +1941,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
-  if(this->Version >= 8)
+  if(this->Version >= VS8)
     {
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
     }
@@ -2020,29 +2093,6 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
                   cmCacheManager::INTERNAL);
 }
 
-
-void cmLocalVisualStudio7Generator::ConfigureFinalPass()
-{
-  cmLocalGenerator::ConfigureFinalPass();
-  cmTargets &tgts = this->Makefile->GetTargets();
-
-  cmGlobalVisualStudio7Generator* gg =
-    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
-  for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
-    {
-    const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
-    if(path)
-      {
-      this->ReadAndStoreExternalGUID(
-        l->second.GetName(), path);
-      }
-    else
-      {
-      gg->CreateGUID(l->first.c_str());
-      }
-    }
-
-}
 
 //----------------------------------------------------------------------------
 std::string cmLocalVisualStudio7Generator

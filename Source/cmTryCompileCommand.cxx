@@ -20,6 +20,14 @@ bool cmTryCompileCommand
     return false;
     }
 
+  if(this->Makefile->GetCMakeInstance()->GetWorkingMode() ==
+                                                      cmake::FIND_PACKAGE_MODE)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+         "The TRY_COMPILE() command is not supported in --find-package mode.");
+    return false;
+    }
+
   this->TryCompileCode(argv);
 
   // if They specified clean then we clean up what we can
@@ -32,4 +40,3 @@ bool cmTryCompileCommand
     }
   return true;
 }
-

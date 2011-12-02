@@ -19,6 +19,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmTarget.h"
 #include "cmSystemTools.h"
+#include "cmXMLSafe.h"
 
 #include <cmsys/SystemTools.hxx>
 
@@ -592,7 +593,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       for(std::vector<std::string>::const_iterator di = defs.begin();
           di != defs.end(); ++di)
         {
-        fout <<"            <Add option=\"-D" << di->c_str() << "\" />\n";
+        cmXMLSafe safedef(di->c_str());
+        fout <<"            <Add option=\"-D" << safedef.str() << "\" />\n";
         }
       }
 

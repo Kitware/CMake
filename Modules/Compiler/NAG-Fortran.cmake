@@ -30,3 +30,5 @@ endif()
 
 set(CMAKE_Fortran_MODDIR_FLAG "-mdir ")
 set(CMAKE_SHARED_LIBRARY_Fortran_FLAGS "-PIC")
+set(CMAKE_Fortran_FORMAT_FIXED_FLAG "-fixed")
+set(CMAKE_Fortran_FORMAT_FREE_FLAG "-free")

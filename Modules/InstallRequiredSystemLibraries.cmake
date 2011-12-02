@@ -141,36 +141,46 @@ IF(MSVC)
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
   ENDIF(MSVC90)
 
-  IF(MSVC10)
+  MACRO(MSVCRT_FILES_FOR_VERSION version)
+    SET(v "${version}")
+
     # Find the runtime library redistribution directory.
     GET_FILENAME_COMPONENT(msvc_install_dir
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]" ABSOLUTE)
-    FIND_PATH(MSVC10_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC100.CRT
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${v}.0;InstallDir]" ABSOLUTE)
+    FIND_PATH(MSVC${v}_REDIST_DIR NAMES ${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.CRT
       PATHS
         "${msvc_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
-        "$ENV{ProgramFiles}/Microsoft Visual Studio 10.0/VC/redist"
-        "$ENV{ProgramFiles(x86)}/Microsoft Visual Studio 10.0/VC/redist"
+        "$ENV{ProgramFiles}/Microsoft Visual Studio ${v}.0/VC/redist"
+        "$ENV{ProgramFiles(x86)}/Microsoft Visual Studio ${v}.0/VC/redist"
       )
-    MARK_AS_ADVANCED(MSVC10_REDIST_DIR)
-    SET(MSVC10_CRT_DIR "${MSVC10_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC100.CRT")
+    MARK_AS_ADVANCED(MSVC${v}_REDIST_DIR)
+    SET(MSVC${v}_CRT_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.CRT")
 
     IF(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       SET(__install__libs
-        "${MSVC10_CRT_DIR}/msvcp100.dll"
-        "${MSVC10_CRT_DIR}/msvcr100.dll"
+        "${MSVC${v}_CRT_DIR}/msvcp${v}0.dll"
+        "${MSVC${v}_CRT_DIR}/msvcr${v}0.dll"
         )
     ENDIF(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
 
     IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
-      SET(MSVC10_CRT_DIR
-        "${MSVC10_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC100.DebugCRT")
+      SET(MSVC${v}_CRT_DIR
+        "${MSVC${v}_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.DebugCRT")
       SET(__install__libs ${__install__libs}
-        "${MSVC10_CRT_DIR}/msvcp100d.dll"
-        "${MSVC10_CRT_DIR}/msvcr100d.dll"
+        "${MSVC${v}_CRT_DIR}/msvcp${v}0d.dll"
+        "${MSVC${v}_CRT_DIR}/msvcr${v}0d.dll"
         )
     ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
-  ENDIF(MSVC10)
+  ENDMACRO()
+
+  IF(MSVC10)
+    MSVCRT_FILES_FOR_VERSION(10)
+  ENDIF()
+
+  IF(MSVC11)
+    MSVCRT_FILES_FOR_VERSION(11)
+  ENDIF()
 
   IF(CMAKE_INSTALL_MFC_LIBRARIES)
     IF(MSVC70)
@@ -273,42 +283,52 @@ IF(MSVC)
         )
     ENDIF(MSVC90)
 
-    IF(MSVC10)
+    MACRO(MFC_FILES_FOR_VERSION version)
+      SET(v "${version}")
+
       IF(CMAKE_INSTALL_DEBUG_LIBRARIES)
-        SET(MSVC10_MFC_DIR
-          "${MSVC10_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC100.DebugMFC")
+        SET(MSVC${v}_MFC_DIR
+          "${MSVC${v}_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.DebugMFC")
         SET(__install__libs ${__install__libs}
-          "${MSVC10_MFC_DIR}/mfc100d.dll"
-          "${MSVC10_MFC_DIR}/mfc100ud.dll"
-          "${MSVC10_MFC_DIR}/mfcm100d.dll"
-          "${MSVC10_MFC_DIR}/mfcm100ud.dll"
+          "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll"
+          "${MSVC${v}_MFC_DIR}/mfc${v}0ud.dll"
+          "${MSVC${v}_MFC_DIR}/mfcm${v}0d.dll"
+          "${MSVC${v}_MFC_DIR}/mfcm${v}0ud.dll"
           )
       ENDIF(CMAKE_INSTALL_DEBUG_LIBRARIES)
 
-      SET(MSVC10_MFC_DIR "${MSVC10_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC100.MFC")
+      SET(MSVC${v}_MFC_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.MFC")
       IF(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         SET(__install__libs ${__install__libs}
-          "${MSVC10_MFC_DIR}/mfc100.dll"
-          "${MSVC10_MFC_DIR}/mfc100u.dll"
-          "${MSVC10_MFC_DIR}/mfcm100.dll"
-          "${MSVC10_MFC_DIR}/mfcm100u.dll"
+          "${MSVC${v}_MFC_DIR}/mfc${v}0.dll"
+          "${MSVC${v}_MFC_DIR}/mfc${v}0u.dll"
+          "${MSVC${v}_MFC_DIR}/mfcm${v}0.dll"
+          "${MSVC${v}_MFC_DIR}/mfcm${v}0u.dll"
           )
       ENDIF(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
 
-      # include the language dll's for vs10 as well as the actuall dll's
-      SET(MSVC10_MFCLOC_DIR "${MSVC10_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC100.MFCLOC")
+      # include the language dll's as well as the actuall dll's
+      SET(MSVC${v}_MFCLOC_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.MFCLOC")
       SET(__install__libs ${__install__libs}
-        "${MSVC10_MFCLOC_DIR}/mfc100chs.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100cht.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100enu.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100esp.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100deu.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100fra.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100ita.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100jpn.dll"
-        "${MSVC10_MFCLOC_DIR}/mfc100kor.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0chs.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0cht.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0enu.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0esp.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0deu.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0fra.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0ita.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0jpn.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0kor.dll"
         )
-    ENDIF(MSVC10)
+    ENDMACRO()
+
+    IF(MSVC10)
+      MFC_FILES_FOR_VERSION(10)
+    ENDIF()
+
+    IF(MSVC11)
+      MFC_FILES_FOR_VERSION(11)
+    ENDIF()
   ENDIF(CMAKE_INSTALL_MFC_LIBRARIES)
 
   FOREACH(lib

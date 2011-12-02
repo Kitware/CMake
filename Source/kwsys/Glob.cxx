@@ -215,7 +215,7 @@ kwsys_stl::string Glob::PatternToRegex(const kwsys_stl::string& pattern,
 
 //----------------------------------------------------------------------------
 void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
-  const kwsys_stl::string& dir, bool dir_only)
+  const kwsys_stl::string& dir)
 {
   kwsys::Directory d;
   if ( !d.Load(dir.c_str()) )
@@ -258,25 +258,24 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
       fullname = dir + "/" + fname;
       }
 
-    if ( !dir_only || !kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
+    bool isDir = kwsys::SystemTools::FileIsDirectory(realname.c_str());
+    bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname.c_str());
+
+    if ( isDir && (!isSymLink || this->RecurseThroughSymlinks) )
       {
-      if ( (this->Internals->Expressions.size() > 0) && 
+      if (isSymLink)
+        {
+        ++this->FollowedSymlinkCount;
+        }
+      this->RecurseDirectory(start+1, realname);
+      }
+    else
+      {
+      if ( (this->Internals->Expressions.size() > 0) &&
            this->Internals->Expressions[
              this->Internals->Expressions.size()-1].find(fname.c_str()) )
         {
         this->AddFile(this->Internals->Files, realname.c_str());
-        }
-      }
-    if ( kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
-      {
-      bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname.c_str());
-      if (!isSymLink || this->RecurseThroughSymlinks)
-        {
-        if (isSymLink)
-          {
-          ++this->FollowedSymlinkCount;
-          }
-        this->RecurseDirectory(start+1, realname, dir_only);
         }
       }
     }
@@ -284,13 +283,13 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
 
 //----------------------------------------------------------------------------
 void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
-  const kwsys_stl::string& dir, bool dir_only)
+  const kwsys_stl::string& dir)
 {
   //kwsys_ios::cout << "ProcessDirectory: " << dir << kwsys_ios::endl;
   bool last = ( start == this->Internals->Expressions.size()-1 );
   if ( last && this->Recurse )
     {
-    this->RecurseDirectory(start, dir, dir_only);
+    this->RecurseDirectory(start, dir);
     return;
     }
 
@@ -345,7 +344,7 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     // << this->Internals->TextExpressions[start].c_str() << kwsys_ios::endl;
     //kwsys_ios::cout << "Full name: " << fullname << kwsys_ios::endl;
 
-    if ( (!dir_only || !last) &&
+    if ( !last &&
       !kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
       {
       continue;
@@ -359,7 +358,7 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
         }
       else
         {
-        this->ProcessDirectory(start+1, realname + "/", dir_only);
+        this->ProcessDirectory(start+1, realname + "/");
         }
       }
     }
@@ -462,12 +461,11 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
   // Handle network paths
   if ( skip > 0 )
     {
-    this->ProcessDirectory(0, fexpr.substr(0, skip) + "/",
-      true);
+    this->ProcessDirectory(0, fexpr.substr(0, skip) + "/");
     }
   else
     {
-    this->ProcessDirectory(0, "/", true);
+    this->ProcessDirectory(0, "/");
     }
   return true;
 }

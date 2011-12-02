@@ -123,6 +123,8 @@ private:
                                 );
   
   cmXCodeObject* FindXCodeTarget(cmTarget*);
+  std::string GetOrCreateId(const char* name, const char* id);
+
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in this->XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
@@ -192,14 +194,16 @@ private:
   void AppendFlag(std::string& flags, std::string const& flag);
 
 protected:
-  virtual const char* GetInstallTargetName()      { return "install"; }
-  virtual const char* GetPackageTargetName()      { return "package"; }
+  virtual const char* GetInstallTargetName() const { return "install"; }
+  virtual const char* GetPackageTargetName() const { return "package"; }
 
   unsigned int XcodeVersion;
   std::string VersionString;
+  std::set<cmStdString> XCodeObjectIDs;
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  void addObject(cmXCodeObject *obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
   cmXCodeObject* MainGroupChildren;

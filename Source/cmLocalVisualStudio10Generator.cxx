@@ -61,7 +61,8 @@ class cmVS10XMLParser : public cmXMLParser
 
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudio10Generator::cmLocalVisualStudio10Generator()
+cmLocalVisualStudio10Generator::cmLocalVisualStudio10Generator(VSVersion v):
+  cmLocalVisualStudio7Generator(v)
 {
 }
 
@@ -93,10 +94,18 @@ void cmLocalVisualStudio10Generator::Generate()
 
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
     {
-    cmVisualStudio10TargetGenerator tg(
-      &l->second, static_cast<cmGlobalVisualStudio10Generator*>(
-        this->GetGlobalGenerator()));
-    tg.Generate();
+    if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
+       ->TargetIsFortranOnly(l->second))
+      {
+      this->CreateSingleVCProj(l->first.c_str(),l->second);
+      }
+    else
+      {
+      cmVisualStudio10TargetGenerator tg(
+        &l->second, static_cast<cmGlobalVisualStudio10Generator*>(
+          this->GetGlobalGenerator()));
+      tg.Generate();
+      }
     }
   this->WriteStampFiles();
 }

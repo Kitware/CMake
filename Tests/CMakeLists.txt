@@ -16,6 +16,8 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
 
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
+
 # Fake a user home directory to avoid polluting the real one.
 IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)
   SET(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
@@ -45,6 +47,8 @@ IF(BUILD_TESTING)
   ENDIF()
 
   ADD_SUBDIRECTORY(CMakeLib)
+
+  ADD_SUBDIRECTORY(FindPackageModeMakefileTest)
 
   # Collect a list of all test build directories.
   SET(TEST_BUILD_DIRS)
@@ -155,6 +159,9 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   SET_TESTS_PROPERTIES(MissingSourceFile PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
+  IF(CMAKE_Fortran_COMPILER)
+    ADD_TEST_MACRO(FortranOnly FortranOnly)
+  ENDIF()
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(IPO COnly/COnly)
@@ -220,6 +227,10 @@ IF(BUILD_TESTING)
   LIST(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
+
+  ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
+
+  ADD_TEST_MACRO(Module.CheckCXXCompilerFlag CheckCXXCompilerFlag)
 
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
@@ -357,6 +368,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       dash2win64_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyMac
       dashmacmini2_release.cmake)
+    ADD_NIGHTLY_BUILD_TEST(CMakeNightlyMac64
+      dashmacmini5_release.cmake)
     ADD_NIGHTLY_BUILD_TEST(CMakeNightlyLinux
       magrathea_release.cmake)
   ENDIF(CMAKE_BUILD_NIGHTLY_RELEASES)
@@ -840,6 +853,45 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
 
+  IF(NOT QT4_FOUND)
+    FIND_PACKAGE(Qt4)
+  ENDIF(NOT QT4_FOUND)
+
+  IF(QT4_FOUND)
+    # test whether the Qt4 which has been found works, on some machines
+    # which run nightly builds there were errors like "wrong file format"
+    # for libQtCore.so. So first check it works, and only if it does add
+    # the automoc test.
+    INCLUDE(CheckCXXSourceCompiles)
+    SET(_save_CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+    SET(_save_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
+
+    SET(CMAKE_REQUIRED_INCLUDES ${QT_INCLUDES})
+    SET(CMAKE_REQUIRED_LIBRARIES ${QT_QTCORE_LIBRARIES})
+
+    CHECK_CXX_SOURCE_COMPILES("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
+                              QT4_WORKS_FOR_AUTOMOC_TEST)
+
+    SET(CMAKE_REQUIRED_INCLUDES "${_save_CMAKE_REQUIRED_INCLUDES}")
+    SET(CMAKE_REQUIRED_LIBRARIES "${_save_CMAKE_REQUIRED_LIBRARIES}")
+
+    IF(QT4_WORKS_FOR_AUTOMOC_TEST)
+      ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
+        "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project QtAutomoc
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+        --force-new-ctest-process
+        --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+        --test-command ${CMAKE_CTEST_COMMAND} -V
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
+    ENDIF()
+  ENDIF()
+
   ADD_TEST(ExternalProject ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalProject"
@@ -1153,6 +1205,61 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MakeClean")
   ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
+
+  if(NOT DEFINED CTEST_RUN_MFC)
+    set(CTEST_RUN_MFC OFF)
+
+    if(MSVC)
+      set(CTEST_RUN_MFC ON)
+
+      # Look for evidence that this is a VCExpress build. If so, avoid
+      # the MFC test by default.
+      string(TOLOWER "${CMAKE_TEST_MAKEPROGRAM}" mkprog)
+      if(mkprog MATCHES "vcexpress")
+        message(STATUS
+          "CMAKE_TEST_MAKEPROGRAM indicates vcexpress, avoiding MFC test")
+        set(CTEST_RUN_MFC OFF)
+      endif()
+
+      # Since MSBuild might also be the "makeprogram" for a VCExpress
+      # build tree, use one more heuristic, too. The string representing
+      # the .vcproj file type contains "VCExpress" on machines where an
+      # express edition of VS was installed last:
+      if(CTEST_RUN_MFC)
+        execute_process(COMMAND cmd /c assoc .vcproj
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          OUTPUT_VARIABLE ov)
+        if(ov MATCHES "VCExpress")
+          message(STATUS
+            ".vcproj file association indicates VCExpress, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        endif()
+      endif()
+
+      # For the Watcom WMake generator, avoid the MFC test by default.
+      if(CTEST_RUN_MFC)
+        if("${CMAKE_TEST_GENERATOR}" MATCHES "WMake")
+          message(STATUS
+            "using the Watcom WMake generator, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        endif()
+      endif()
+    endif()
+  endif()
+
+  if(CTEST_RUN_MFC)
+    add_test(MFC ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/MFC"
+      "${CMake_BINARY_DIR}/Tests/MFC"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project mfc_driver
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command ${CMAKE_CTEST_COMMAND}
+        -C \${CTEST_CONFIGURATION_TYPE} -VV)
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MFC")
+  endif()
 
   IF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
@@ -1479,6 +1586,35 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   SET_TESTS_PROPERTIES(CTestTestUpload PROPERTIES
     PASS_REGULAR_EXPRESSION "Upload\\.xml")
 
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestConfigFileInBuildDir/test1.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir1/test1.cmake"
+    @ONLY ESCAPE_QUOTES)
+  ADD_TEST(CTestTestConfigFileInBuildDir1 ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir1/test1.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir1/testOut1.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestConfigFileInBuildDir1 PROPERTIES DEPENDS CTestTestNoBuild
+    PASS_REGULAR_EXPRESSION
+      "Reading ctest configuration file: ${CMake_SOURCE_DIR}.Tests.CTestTestConfigFileInBuildDir.CTestConfig.cmake")
+
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestConfigFileInBuildDir/test2.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir2/test2.cmake"
+    @ONLY ESCAPE_QUOTES)
+  CONFIGURE_FILE(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestConfigFileInBuildDir/CTestConfig.cmake"
+    "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir2/CTestConfig.cmake"
+    @ONLY ESCAPE_QUOTES COPYONLY)
+  ADD_TEST(CTestTestConfigFileInBuildDir2 ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir2/test2.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir2/testOut2.log"
+    )
+  SET_TESTS_PROPERTIES(CTestTestConfigFileInBuildDir2 PROPERTIES DEPENDS CTestTestNoBuild
+    REQUIRED_FILES ${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir2/CTestConfig.cmake
+    PASS_REGULAR_EXPRESSION
+      "Reading ctest configuration file: ${CMake_BINARY_DIR}.Tests.CTestTestConfigFileInBuildDir2.CTestConfig.cmake")
+
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.
@@ -1522,6 +1658,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -P "${CMake_SOURCE_DIR}/Tests/CMakeCommands/build_command/RunCMake.cmake"
   )
 
+  ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
+
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake"
@@ -1536,7 +1674,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       PASS_REGULAR_EXPRESSION "Failed")
   ELSE(CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
     SET_TESTS_PROPERTIES(CTestTestCrash PROPERTIES
-      PASS_REGULAR_EXPRESSION "SegFault")
+      PASS_REGULAR_EXPRESSION "(Illegal|SegFault)")
   ENDIF(CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
 
   CONFIGURE_FILE(
@@ -1876,30 +2014,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ENDIF ("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
   ENDIF()
 
-  # fortran does not work for IDE builds because
-  # CMAKE_STANDARD_LIBRARIES needs to be per language
-  IF(CMAKE_TEST_GENERATOR MATCHES "Make|KDevelop")
-    INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
-    IF(CMAKE_Fortran_COMPILER)
-      ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
+  IF(CMAKE_Fortran_COMPILER)
+    ADD_TEST(Fortran ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Fortran"
+      "${CMake_BINARY_DIR}/Tests/Fortran"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project testf
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --test-command testf)
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
+
+    # FortranCInterface tests.
+    IF(UNIX)
+      CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/FortranC/Flags.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake @ONLY)
+      ADD_TEST(FortranC.Flags ${CMAKE_CMAKE_COMMAND} -P
+        ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake)
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC/Flags")
+    ELSE()
+      ADD_TEST(FortranC ${CMAKE_CTEST_COMMAND}
         --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/Fortran"
-        "${CMake_BINARY_DIR}/Tests/Fortran"
+        "${CMake_SOURCE_DIR}/Tests/FortranC"
+        "${CMake_BINARY_DIR}/Tests/FortranC"
         --build-generator ${CMAKE_TEST_GENERATOR}
-        --build-project testf
+        --build-project FortranC
         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
         --build-two-config
-        --test-command testf)
-      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
-
-      # FortranCInterface tests.
-      IF(UNIX)
-        CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/FortranC/Flags.cmake.in
-                       ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake @ONLY)
-        ADD_TEST(FortranC.Flags ${CMAKE_CMAKE_COMMAND} -P
-          ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake)
-        LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC/Flags")
-      ENDIF()
+        --test-command CMakeFiles/FortranCInterface/FortranCInterface)
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC")
     ENDIF()
   ENDIF()
 
@@ -2073,6 +2217,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command IncludeDirectories)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
+  IF(CMAKE_USE_KWSTYLE AND KWSTYLE_EXECUTABLE)
+    # The "make StyleCheck" command line as a test. If the test fails, look
+    # for lines like "Error #0 (624) Line length exceed 88 (max=79)" in the
+    # output to find where the style errors are...
+    ADD_TEST(KWStyle ${KWSTYLE_EXECUTABLE}
+      -xml ${CMake_BINARY_DIR}/CMake.kws.xml
+      -o ${CMake_SOURCE_DIR}/Utilities/KWStyle/CMakeOverwrite.txt
+      -v
+      -D ${CMake_BINARY_DIR}/CMakeKWSFiles.txt
+      )
+    SET_TESTS_PROPERTIES(KWStyle PROPERTIES
+      WORKING_DIRECTORY ${CMake_BINARY_DIR}/Utilities/KWStyle)
+  ENDIF()
 ENDIF(BUILD_TESTING)
 
 SUBDIRS(CMakeTests)

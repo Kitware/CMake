@@ -259,6 +259,10 @@ public:
     std::string* stdOut, std::string* stdErr,
     int* retVal = 0, const char* dir = 0, double timeout = 0.0);
 
+  //! Clean/make safe for xml the given value such that it may be used as
+  // one of the key fields by CDash when computing the buildid.
+  static std::string SafeBuildIdField(const std::string& value);
+
   //! Start CTest XML output file
   void StartXML(std::ostream& ostr, bool append);
 

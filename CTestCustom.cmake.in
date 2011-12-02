@@ -42,6 +42,12 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "warning:.*is.*misused, please use.*"
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
   "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
+  "ld: warning: directory not found for option .-(F|L)"
+  "warning.*This version of Mac OS X is unsupported"
+
+  # Ignore clang's summary warning, assuming prior text has matched some
+  # other warning expression:
+  "[0-9,]+ warnings? generated."
   )
 
 IF(NOT "@CMAKE_GENERATOR@" MATCHES "Xcode")

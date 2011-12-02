@@ -83,12 +83,12 @@ public:
 protected:
   //! Process directory
   void ProcessDirectory(kwsys_stl::string::size_type start,
-    const kwsys_stl::string& dir, bool dir_only);
+    const kwsys_stl::string& dir);
 
   //! Process last directory, but only when recurse flags is on. That is
   // effectively like saying: /path/to/file/**/file
   void RecurseDirectory(kwsys_stl::string::size_type start,
-    const kwsys_stl::string& dir, bool dir_only);
+    const kwsys_stl::string& dir);
 
   //! Add regular expression
   void AddExpression(const char* expr);

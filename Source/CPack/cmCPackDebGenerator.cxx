@@ -392,7 +392,10 @@ int cmCPackDebGenerator::createDeb()
     }
 
   std::string cmd;
-  cmd = "\"";
+  if (NULL != this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE")) {
+      cmd += this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
+  }
+  cmd += " \"";
   cmd += cmakeExecutable;
   cmd += "\" -E tar cfz data.tar.gz ";
 

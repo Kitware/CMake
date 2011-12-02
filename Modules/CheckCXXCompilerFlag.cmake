@@ -28,11 +28,14 @@ MACRO (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    CHECK_CXX_SOURCE_COMPILES("int main() { return 0;}" ${_RESULT}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "unrecognized .*option"                     # GNU
+     FAIL_REGEX "unknown .*option"                          # Clang
      FAIL_REGEX "ignoring unknown option"                   # MSVC
      FAIL_REGEX "warning D9002"                             # MSVC, any lang
      FAIL_REGEX "[Uu]nknown option"                         # HP
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
+     FAIL_REGEX "not supported in this configuration; ignored"       # AIX
+     FAIL_REGEX "File with unknown suffix passed to linker" # PGI
      )
    SET (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 ENDMACRO (CHECK_CXX_COMPILER_FLAG)

@@ -191,6 +191,9 @@ void cmFindPackageCommand::GenerateDocumentation()
     "\"<config-file>-version.cmake\" or \"<config-file>Version.cmake\".  "
     "If no such version file is available then the configuration file "
     "is assumed to not be compatible with any requested version.  "
+    "A basic version file containing generic version matching code can be "
+    "created using the macro write_basic_config_version_file(), see its "
+    "documentation for more details.  "
     "When a version file is found it is loaded to check the requested "
     "version number.  "
     "The version file is loaded in a nested scope in which the following "
@@ -1240,7 +1243,7 @@ void cmFindPackageCommand::ComputePrefixes()
   this->AddPrefixesCMakeSystemVariable();
   this->AddPrefixesSystemRegistry();
   this->AddPrefixesUserGuess();
-  this->ComputeFinalPrefixes();
+  this->ComputeFinalPaths();
 }
 
 //----------------------------------------------------------------------------
@@ -1568,18 +1571,6 @@ void cmFindPackageCommand::AddPrefixesUserHints()
 {
   // Add hints specified by the caller.
   this->AddPathsInternal(this->UserHints, CMakePath);
-}
-
-//----------------------------------------------------------------------------
-void cmFindPackageCommand::ComputeFinalPrefixes()
-{
-  std::vector<std::string>& prefixes = this->SearchPaths;
-
-  // Construct the final set of prefixes.
-  this->RerootPaths(prefixes);
-
-  // Add a trailing slash to all prefixes to aid the search process.
-  this->AddTrailingSlashes(prefixes);
 }
 
 //----------------------------------------------------------------------------

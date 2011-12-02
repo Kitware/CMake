@@ -39,7 +39,11 @@
 #   target_link_libraries(bar ${PROTOBUF_LIBRARIES})
 #
 # NOTE: You may need to link against pthreads, depending
-# on the platform.
+#       on the platform.
+#
+# NOTE: The PROTOBUF_GENERATE_CPP macro & add_executable() or add_library()
+#       calls only work properly within the same directory.
+#
 #  ====================================================================
 #
 # PROTOBUF_GENERATE_CPP (public function)

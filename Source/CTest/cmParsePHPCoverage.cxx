@@ -159,6 +159,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::ifstream& in)
     // read open quote
     if(in.get(c) && c != '"')
       {
+      delete[] s;
       return false;
       }
     // read the string data

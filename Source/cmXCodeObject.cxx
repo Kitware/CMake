@@ -12,6 +12,8 @@
 #include "cmXCodeObject.h"
 #include "cmSystemTools.h"
 
+#include <CoreFoundation/CoreFoundation.h> // CFUUIDCreate
+
 //----------------------------------------------------------------------------
 const char* cmXCodeObject::PBXTypeNames[] = {
     "PBXGroup", "PBXBuildStyle", "PBXProject", "PBXHeadersBuildPhase", 
@@ -39,35 +41,35 @@ cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
   this->PBXTargetDependencyValue = 0;
   this->Target = 0;
   this->Object =0;
-  
+
   this->IsA = ptype;
+
   if(type == OBJECT)
     {
-    cmOStringStream str;
-    str << (void*)this;
-    str << (void*)this;
-    str << (void*)this;
-    this->Id = str.str();
+    // Set the Id of an Xcode object to a unique string for each instance.
+    // However the Xcode user file references certain Ids: for those cases,
+    // override the generated Id using SetId().
+    //
+    char cUuid[40] = {0};
+    CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
+    CFStringRef s = CFUUIDCreateString(kCFAllocatorDefault, uuid);
+    CFStringGetCString(s, cUuid, sizeof(cUuid), kCFStringEncodingUTF8);
+    this->Id = cUuid;
+    CFRelease(s);
+    CFRelease(uuid);
     }
   else
     {
-    this->Id = 
-      "Temporary cmake object, should not be refered to in xcode file";
+    this->Id =
+      "Temporary cmake object, should not be referred to in Xcode file";
     }
-  cmSystemTools::ReplaceString(this->Id, "0x", "");
-  this->Id = cmSystemTools::UpperCase(this->Id);
-  if(this->Id.size() < 24)
-    {
-    int diff = 24 - this->Id.size();
-    for(int i =0; i < diff; ++i)
-      {
-      this->Id += "0";
-      }
-    }
+
+  cmSystemTools::ReplaceString(this->Id, "-", "");
   if(this->Id.size() > 24)
     {
-    this->Id = this->Id.substr(0,24);
+    this->Id = this->Id.substr(0, 24);
     }
+
   this->TypeValue = type;
   if(this->TypeValue == OBJECT)
     {
@@ -241,7 +243,7 @@ void cmXCodeObject::PrintString(std::ostream& os,cmStdString String)
   // considered special by the Xcode project file parser.
   bool needQuote =
     (String.empty() ||
-     String.find_first_of(" <>.+-=@$[]") != String.npos);
+     String.find_first_of(" <>.+-=@$[],") != String.npos);
   const char* quote = needQuote? "\"" : "";
 
   // Print the string, quoted and escaped as necessary.

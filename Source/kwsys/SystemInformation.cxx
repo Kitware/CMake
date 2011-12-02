@@ -72,7 +72,7 @@
 # include <ctype.h> // int isdigit(int c);
 # include <errno.h> // extern int errno;
 # include <sys/time.h>
-#elif __hpux
+#elif defined( __hpux )
 # include <sys/param.h>
 # include <sys/pstat.h>
 #endif
@@ -1454,7 +1454,7 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 {
   bool retrieved = false;
 
-#if _WIN32
+#if defined(_WIN32)
   // First of all we check to see if the RDTSC (0x0F, 0x31) instruction is
   // supported. If not, we fallback to trying to read this value from the
   // registry:
@@ -2389,7 +2389,7 @@ int SystemInformationImplementation::QueryMemory()
   this->AvailablePhysicalMemory = 0;
 #ifdef __CYGWIN__
   return 0;
-#elif _WIN32
+#elif defined(_WIN32)
 #if  _MSC_VER < 1300
   MEMORYSTATUS ms;
   unsigned long tv, tp, av, ap;
@@ -2415,7 +2415,7 @@ int SystemInformationImplementation::QueryMemory()
   this->AvailableVirtualMemory = av>>10>>10;
   this->AvailablePhysicalMemory = ap>>10>>10;
   return 1;
-#elif __linux
+#elif defined(__linux)
   unsigned long tv=0;
   unsigned long tp=0;
   unsigned long av=0;
@@ -2532,7 +2532,7 @@ int SystemInformationImplementation::QueryMemory()
     }
   fclose( fd );
   return 1;
-#elif __hpux
+#elif defined(__hpux)
   unsigned long tv=0;
   unsigned long tp=0;
   unsigned long av=0;
@@ -2639,7 +2639,7 @@ LongLong SystemInformationImplementation::GetCyclesDifference (DELAY_FUNC DelayF
 /** Compute the delay overhead */
 void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 {
-#if _WIN32
+#if defined(_WIN32)
   LARGE_INTEGER Frequency, StartCounter, EndCounter;
   __int64 x;
 
@@ -2664,10 +2664,19 @@ void SystemInformationImplementation::DelayOverhead(unsigned int uiMS)
 /** Return the number of logical CPU per physical CPUs Works only for windows */
 unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 {
+#ifdef __APPLE__
+  size_t len = 4;
+  int cores_per_package = 0;
+  int err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package, &len, NULL, 0);
+  if (err != 0)
+    {
+      return 1; // That name was not found, default to 1
+    }
+  return static_cast<unsigned char>(cores_per_package);
+#else
   unsigned int Regebx = 0;
-
 #if USE_ASM_INSTRUCTIONS
-  if (!this->IsHyperThreadingSupported()) 
+  if (!this->IsHyperThreadingSupported())
     {
     return static_cast<unsigned char>(1);  // HT not supported
     }
@@ -2678,22 +2687,8 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
     mov Regebx, ebx
     }
 #endif
-
-#ifdef __APPLE__
-    size_t len = 4;
-    int cores_per_package = 0;
-    int err = sysctlbyname("machdep.cpu.cores_per_package", &cores_per_package, &len, NULL, 0);
-    if (err != 0)
-    {
-      return 1; // That name was not found, default to 1
-    }
-    else
-    {
-      return static_cast<unsigned char>(cores_per_package);
-    }
-#endif
-
   return static_cast<unsigned char> ((Regebx & NUM_LOGICAL_BITS) >> 16);
+#endif
 }
 
 
@@ -2769,7 +2764,7 @@ unsigned char SystemInformationImplementation::GetAPICId()
 /** Count the number of CPUs. Works only on windows. */
 int SystemInformationImplementation::CPUCount()
 {
-#if _WIN32
+#if defined(_WIN32)
   unsigned char StatusFlag  = 0;
   SYSTEM_INFO info;
 
@@ -3359,7 +3354,7 @@ bool SystemInformationImplementation::QueryQNXProcessor()
 /** Query the operating system information */
 bool SystemInformationImplementation::QueryOSInformation()
 {
-#if _WIN32
+#if defined(_WIN32)
 
   this->OSName = "Windows";
 

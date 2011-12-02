@@ -161,6 +161,11 @@ extern int putenv (char *__string) __THROW;
 #define for if(false) {} else for
 #endif
 
+// Provide std::ios_base on ancient GCC 2.9x
+#if defined(__GNUC__) && __GNUC__ < 3
+namespace std { typedef ios ios_base; }
+#endif
+
 // check for the 720 compiler on the SGI
 // which has some strange properties that I don't think are worth
 // checking for in a general way in configure

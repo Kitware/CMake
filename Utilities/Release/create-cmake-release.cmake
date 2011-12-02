@@ -7,9 +7,9 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/logs)
 
 set(RELEASE_SCRIPTS_BATCH_1
   dash2win64_release.cmake    # Windows
-  dashmacmini2_release.cmake  # Mac Darwin universal
+  dashmacmini2_release.cmake  # Mac Darwin universal ppc;i386
+  dashmacmini5_release.cmake  # Mac Darwin64 universal x86_64;i386
   magrathea_release.cmake     # Linux
-  dashsun1_release.cmake      # SunOS
   v20n250_aix_release.cmake   # AIX 5.3
   ferrari_sgi64_release.cmake # IRIX 64
   ferrari_sgi_release.cmake   # IRIX

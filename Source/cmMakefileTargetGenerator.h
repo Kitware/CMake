@@ -112,6 +112,8 @@ protected:
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags();
 
+  void AppendFortranFormatFlags(std::string& flags, cmSourceFile& source);
+
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 

@@ -20,7 +20,7 @@
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_VERSION
 #     The debian package version
-# CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+# CPACK_DEBIAN_PACKAGE_ARCHITECTURE
 #     Mandatory : YES
 #     Default   : Output of dpkg --print-architecture (or i386 if dpkg is not found)
 #     The debian package architecture
@@ -132,6 +132,11 @@ ENDIF(NOT UNIX)
 IF(NOT DEFINED CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
   SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS OFF)
 ENDIF(NOT DEFINED CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
+
+FIND_PROGRAM(FAKEROOT_EXECUTABLE fakeroot)
+IF(FAKEROOT_EXECUTABLE)
+  SET(CPACK_DEBIAN_FAKEROOT_EXECUTABLE ${FAKEROOT_EXECUTABLE})
+ENDIF(FAKEROOT_EXECUTABLE)
 
 IF(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
   # dpkg-shlibdeps is a Debian utility for generating dependency list

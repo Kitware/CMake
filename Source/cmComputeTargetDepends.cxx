@@ -276,9 +276,11 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     for(std::set<cmStdString>::const_iterator i = utils.begin();
         i != utils.end(); ++i)
       {
-      cmTarget* transitive_dependee =
-        dependee->GetMakefile()->FindTargetToUse(i->c_str());
-      this->AddTargetDepend(depender_index, transitive_dependee, false);
+      if(cmTarget* transitive_dependee =
+         dependee->GetMakefile()->FindTargetToUse(i->c_str()))
+        {
+        this->AddTargetDepend(depender_index, transitive_dependee, false);
+        }
       }
     }
   else
@@ -402,7 +404,7 @@ cmComputeTargetDepends
 
     // Describe the depender.
     e << "  \"" << depender->GetName() << "\" of type "
-      << cmTarget::TargetTypeNames[depender->GetType()] << "\n";
+      << cmTarget::GetTargetTypeName(depender->GetType()) << "\n";
 
     // List its dependencies that are inside the component.
     EdgeList const& nl = this->InitialGraph[i];

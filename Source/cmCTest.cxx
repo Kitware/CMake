@@ -655,10 +655,26 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     }
 
   cmMakefile* mf = command->GetMakefile();
-  std::string fname = src_dir;
-  fname += "/CTestConfig.cmake";
-  cmSystemTools::ConvertToUnixSlashes(fname);
-  if ( cmSystemTools::FileExists(fname.c_str()) )
+  std::string fname;
+
+  std::string src_dir_fname = src_dir;
+  src_dir_fname += "/CTestConfig.cmake";
+  cmSystemTools::ConvertToUnixSlashes(src_dir_fname);
+
+  std::string bld_dir_fname = bld_dir;
+  bld_dir_fname += "/CTestConfig.cmake";
+  cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
+
+  if ( cmSystemTools::FileExists(bld_dir_fname.c_str()) )
+    {
+    fname = bld_dir_fname;
+    }
+  else if ( cmSystemTools::FileExists(src_dir_fname.c_str()) )
+    {
+    fname = src_dir_fname;
+    }
+
+  if ( !fname.empty() )
     {
     cmCTestLog(this, OUTPUT, "   Reading ctest configuration file: "
       << fname.c_str() << std::endl);
@@ -674,8 +690,12 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     }
   else
     {
-    cmCTestLog(this, WARNING, "Cannot locate CTest configuration: "
-      << fname.c_str() << std::endl);
+    cmCTestLog(this, WARNING,
+      "Cannot locate CTest configuration: in BuildDirectory: "
+      << bld_dir_fname.c_str() << std::endl);
+    cmCTestLog(this, WARNING,
+      "Cannot locate CTest configuration: in SourceDirectory: "
+      << src_dir_fname.c_str() << std::endl);
     }
 
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
@@ -1421,6 +1441,43 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 }
 
 //----------------------------------------------------------------------
+std::string cmCTest::SafeBuildIdField(const std::string& value)
+{
+  std::string safevalue(value);
+
+  if (safevalue != "")
+    {
+    // Disallow non-filename and non-space whitespace characters.
+    // If they occur, replace them with ""
+    //
+    const char *disallowed = "\\/:*?\"<>|\n\r\t\f\v";
+
+    if (safevalue.find_first_of(disallowed) != value.npos)
+      {
+      std::string::size_type i = 0;
+      std::string::size_type n = strlen(disallowed);
+      char replace[2];
+      replace[1] = 0;
+
+      for (i= 0; i<n; ++i)
+        {
+        replace[0] = disallowed[i];
+        cmSystemTools::ReplaceString(safevalue, replace, "");
+        }
+      }
+
+    safevalue = cmXMLSafe(safevalue).str();
+    }
+
+  if (safevalue == "")
+    {
+    safevalue = "(empty)";
+    }
+
+  return safevalue;
+}
+
+//----------------------------------------------------------------------
 void cmCTest::StartXML(std::ostream& ostr, bool append)
 {
   if(this->CurrentTag.empty())
@@ -1430,19 +1487,27 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
                " NightlStartTime was not set correctly." << std::endl);
     cmSystemTools::SetFatalErrorOccured();
     }
+
   // find out about the system
   cmsys::SystemInformation info;
   info.RunCPUCheck();
   info.RunOSCheck();
   info.RunMemoryCheck();
+
+  std::string buildname = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("BuildName"));
+  std::string stamp = cmCTest::SafeBuildIdField(
+    this->CurrentTag + "-" + this->GetTestModelString());
+  std::string site = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("Site"));
+
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-       << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
-       << "\"\n\tBuildStamp=\"" << this->CurrentTag << "-"
-       << this->GetTestModelString() << "\"\n\tName=\""
-       << this->GetCTestConfiguration("Site") << "\"\n\tGenerator=\"ctest-"
-       << cmVersion::GetCMakeVersion()  << "\"\n"
+       << "<Site BuildName=\"" << buildname << "\"\n"
+       << "\tBuildStamp=\"" << stamp << "\"\n"
+       << "\tName=\"" << site << "\"\n"
+       << "\tGenerator=\"ctest-" << cmVersion::GetCMakeVersion() << "\"\n"
        << (append? "\tAppend=\"true\"\n":"")
-       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler") 
+       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler")
        << "\"\n"
 #ifdef _COMPILER_VERSION
        << "\tCompilerVersion=\"_COMPILER_VERSION\"\n"
@@ -2526,6 +2591,8 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
   cmSystemTools::ExpandListArgument(dval, slist);
   std::vector<std::string>::iterator it;
 
+  vec.clear();
+
   for ( it = slist.begin(); it != slist.end(); ++it )
     {
     cmCTestLog(this, DEBUG, "  -- " << it->c_str() << std::endl);
@@ -2801,7 +2868,7 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
     }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "SetCTestConfigurationFromCMakeVariable:"
-             << dconfig << ":" << cmake_var);
+             << dconfig << ":" << cmake_var << std::endl);
   this->SetCTestConfiguration(dconfig, ctvar);
   return true;
 }
@@ -3096,6 +3163,7 @@ bool cmCTest::CompressString(std::string& str)
   ret = deflateInit(&strm, -1); //default compression level
   if (ret != Z_OK)
     {
+    delete[] out;
     return false;
     }
 
@@ -3109,6 +3177,7 @@ bool cmCTest::CompressString(std::string& str)
     {
     cmCTestLog(this, ERROR_MESSAGE, "Error during gzip compression."
       << std::endl);
+    delete[] out;
     return false;
     }
 

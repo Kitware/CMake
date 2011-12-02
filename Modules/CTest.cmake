@@ -189,6 +189,8 @@ IF(BUILD_TESTING)
   FIND_PROGRAM(COVERAGE_COMMAND gcov DOC 
     "Path to the coverage program that CTest uses for performing coverage inspection"
     )
+  SET(COVERAGE_EXTRA_FLAGS "-l" CACHE STRING
+    "Extra command line flags to pass to the coverage tool")
 
   # set the site name
   SITE_NAME(SITE)
@@ -257,6 +259,7 @@ IF(BUILD_TESTING)
     BZRCOMMAND
     BZR_UPDATE_OPTIONS
     COVERAGE_COMMAND
+    COVERAGE_EXTRA_FLAGS
     CTEST_SUBMIT_RETRY_DELAY
     CTEST_SUBMIT_RETRY_COUNT
     CVSCOMMAND

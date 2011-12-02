@@ -68,7 +68,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
     }
   else
     {
-    width = cmCursesMainForm::MAX_WIDTH;
+    width = cmCursesMainForm::MAX_WIDTH-1;
     }
 
   bar[width] = '\0';

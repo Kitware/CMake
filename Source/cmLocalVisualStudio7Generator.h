@@ -35,7 +35,7 @@ class cmLocalVisualStudio7Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalVisualStudio7Generator();
+  cmLocalVisualStudio7Generator(VSVersion v);
 
   virtual ~cmLocalVisualStudio7Generator();
 
@@ -53,11 +53,7 @@ public:
    */
   void SetBuildType(BuildType,const char *name);
 
-  void SetVersion71() {this->Version = 71;}
-  void SetVersion8() {this->Version = 8;}
-  void SetVersion9() {this->Version = 9;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
-  virtual void ConfigureFinalPass();
   void GetTargetObjectFileDirectories(cmTarget* target,
                                       std::vector<std::string>& 
                                       dirs); 
@@ -75,6 +71,8 @@ public:
 
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);
+protected:
+  void CreateSingleVCProj(const char *lname, cmTarget &tgt);
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
@@ -85,7 +83,6 @@ private:
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout, cmTarget &target);
-  void CreateSingleVCProj(const char *lname, cmTarget &tgt);
   void WriteVCProjFile(std::ostream& fout, const char *libName, 
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
@@ -130,7 +127,6 @@ private:
 
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
-  int Version;
   bool FortranProject;
   std::string PlatformName; // Win32 or x64 
   cmLocalVisualStudio7GeneratorInternals* Internal;

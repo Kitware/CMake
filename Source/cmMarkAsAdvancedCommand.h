@@ -15,9 +15,9 @@
 #include "cmCommand.h"
 
 /** \class cmMarkAsAdvancedCommand
- * \brief MarkAsAdvanced a CMAKE variable
+ * \brief mark_as_advanced command
  *
- * cmMarkAsAdvancedCommand sets a variable to a value with expansion.  
+ * cmMarkAsAdvancedCommand implements the mark_as_advanced CMake command
  */
 class cmMarkAsAdvancedCommand : public cmCommand
 {

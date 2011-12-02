@@ -93,6 +93,7 @@ void cmCTestRunTest::CompressOutput()
   ret = deflateInit(&strm, -1); //default compression level
   if (ret != Z_OK)
     {
+    delete[] out;
     return;
     }
 
@@ -106,6 +107,7 @@ void cmCTestRunTest::CompressOutput()
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error during output "
       "compression. Sending uncompressed output." << std::endl);
+    delete[] out;
     return;
     }
 
