@@ -1378,8 +1378,12 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Store the automatic include paths.
   if(includeBinaryDir)
     {
-    dirs.push_back(this->Makefile->GetStartOutputDirectory());
-    emitted.insert(this->Makefile->GetStartOutputDirectory());
+    if(emitted.find(
+                this->Makefile->GetStartOutputDirectory()) == emitted.end())
+      {
+      dirs.push_back(this->Makefile->GetStartOutputDirectory());
+      emitted.insert(this->Makefile->GetStartOutputDirectory());
+      }
     }
   if(includeSourceDir)
     {
