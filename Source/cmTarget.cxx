@@ -1279,6 +1279,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
 
+  // Initialize the INCLUDE_DIRECTORIES property based on the current value
+  // of the same directory property:
+  this->SetProperty("INCLUDE_DIRECTORIES",
+                    this->Makefile->GetProperty("INCLUDE_DIRECTORIES"));
+
   // Record current policies for later use.
   this->PolicyStatusCMP0003 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0003);
