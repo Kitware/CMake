@@ -1829,8 +1829,12 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
   responseVar += "_USE_RESPONSE_FILE_FOR_INCLUDES";
   bool useResponseFile = this->Makefile->IsOn(responseVar.c_str());
 
+
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes, lang);
+
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(lang, useResponseFile);
+    this->LocalGenerator->GetIncludeFlags(includes, lang, useResponseFile);
   if(includeFlags.empty())
     {
     return;
