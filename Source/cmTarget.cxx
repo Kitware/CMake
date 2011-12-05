@@ -973,6 +973,23 @@ void cmTarget::DefineProperties(cmake *cm)
      "is created its value is used to initialize this property.");
 
   cm->DefineProperty
+    ("GNUtoMS", cmProperty::TARGET,
+     "Convert GNU import library (.dll.a) to MS format (.lib).",
+     "When linking a shared library or executable that exports symbols "
+     "using GNU tools on Windows (MinGW/MSYS) with Visual Studio installed "
+     "convert the import library (.dll.a) from GNU to MS format (.lib).  "
+     "Both import libraries will be installed by install(TARGETS) and "
+     "exported by install(EXPORT) and export() to be linked by applications "
+     "with either GNU- or MS-compatible tools."
+     "\n"
+     "If the variable CMAKE_GNUtoMS is set when a target "
+     "is created its value is used to initialize this property.  "
+     "The variable must be set prior to the first command that enables "
+     "a language such as project() or enable_language().  "
+     "CMake provides the variable as an option to the user automatically "
+     "when configuring on Windows with GNU tools.");
+
+  cm->DefineProperty
     ("XCODE_ATTRIBUTE_<an-attribute>", cmProperty::TARGET,
      "Set Xcode target attributes directly.",
      "Tell the Xcode generator to set '<an-attribute>' to a given value "
@@ -1214,6 +1231,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_FORMAT", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
+  this->SetPropertyDefault("GNUtoMS", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
@@ -3459,6 +3477,26 @@ void cmTarget::GetExecutableNames(std::string& name,
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::HasImplibGNUtoMS()
+{
+  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
+                                std::string& out, const char* newExt)
+{
+  if(this->HasImplibGNUtoMS() &&
+     gnuName.size() > 6 && gnuName.substr(gnuName.size()-6) == ".dll.a")
+    {
+    out = gnuName.substr(0, gnuName.size()-6);
+    out += newExt? newExt : ".lib";
+    return true;
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

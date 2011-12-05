@@ -241,6 +241,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     exeCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
+    std::string implib;
+    if(this->Target->GetImplibGNUtoMS(targetFullPathImport, implib))
+      {
+      exeCleanFiles.push_back(this->Convert(implib.c_str(),
+                                            cmLocalGenerator::START_OUTPUT,
+                                            cmLocalGenerator::UNCHANGED));
+      }
     }
 
   // List the PDB for cleaning only when the whole target is
@@ -270,8 +277,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_LINK_EXECUTABLE";
-  std::string linkRule =
-    this->Makefile->GetRequiredDefinition(linkRuleVar.c_str());
+  std::string linkRule = this->GetLinkRule(linkRuleVar.c_str());
   std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
   if(this->Target->IsExecutableWithExports())
