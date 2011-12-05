@@ -772,7 +772,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   else
     {
     // Get the set of commands.
-    std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
+    std::string linkRule = this->GetLinkRule(linkRuleVar);
     cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
 
     // Expand placeholders.

@@ -1634,6 +1634,13 @@ void cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
+std::string cmMakefileTargetGenerator::GetLinkRule(const char* linkRuleVar)
+{
+  std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
+  return linkRule;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
 ::CloseFileStreams()
 {
