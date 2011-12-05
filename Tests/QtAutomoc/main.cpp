@@ -47,6 +47,7 @@
 #include "sub/bar.h"
 #include "abc.h"
 #include "xyz.h"
+#include "yaf.h"
 
 int main(int argv, char **args)
 {
@@ -73,6 +74,9 @@ int main(int argv, char **args)
 
   Xyz xyz;
   xyz.doXyz();
+
+  Yaf yaf;
+  yaf.doYaf();
 
   return app.exec();
 }
