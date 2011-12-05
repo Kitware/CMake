@@ -1279,6 +1279,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
+    ("CMAKE_<LANG>_COMPILER_VERSION", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "Compiler version in major[.minor[.patch[.tweak]]] format.  "
+     "This variable is reserved for internal use by CMake and is not "
+     "guaranteed to be set.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
     ("CMAKE_INTERNAL_PLATFORM_ABI", cmProperty::VARIABLE,
      "An internal variable subject to change.",
      "This is used in determining the compiler ABI and is subject to change.",

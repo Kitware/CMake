@@ -96,6 +96,9 @@ int main(int argc, char* argv[])
   int require = 0;
   require += info_compiler[argc];
   require += info_platform[argc];
+#ifdef COMPILER_VERSION_MAJOR
+  require += info_version[argc];
+#endif
   (void)argv;
   return require;
 }
