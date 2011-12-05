@@ -1637,6 +1637,16 @@ void cmMakefileTargetGenerator
 std::string cmMakefileTargetGenerator::GetLinkRule(const char* linkRuleVar)
 {
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
+  if(this->Target->HasImplibGNUtoMS())
+    {
+    std::string ruleVar = "CMAKE_";
+    ruleVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    ruleVar += "_GNUtoMS_RULE";
+    if(const char* rule = this->Makefile->GetDefinition(ruleVar.c_str()))
+      {
+      linkRule += rule;
+      }
+    }
   return linkRule;
 }
 

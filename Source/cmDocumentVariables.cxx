@@ -1112,6 +1112,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_GNUtoMS", cmProperty::VARIABLE,
+     "Convert GNU import libraries (.dll.a) to MS format (.lib).",
+     "This variable is used to initialize the GNUtoMS property on targets "
+     "when they are created.  "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_DEBUG_POSTFIX", cmProperty::VARIABLE,
      "See variable CMAKE_<CONFIG>_POSTFIX.",
      "This variable is a special case of the more-general "

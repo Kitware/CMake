@@ -8,6 +8,7 @@ configure        crlf=input
 *.sh.in          crlf=input
 
 *.bat           -crlf
+*.bat.in        -crlf
 *.dsp           -crlf
 *.dsptemplate   -crlf
 *.dsw           -crlf

@@ -241,6 +241,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     exeCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
+    std::string implib;
+    if(this->Target->GetImplibGNUtoMS(targetFullPathImport, implib))
+      {
+      exeCleanFiles.push_back(this->Convert(implib.c_str(),
+                                            cmLocalGenerator::START_OUTPUT,
+                                            cmLocalGenerator::UNCHANGED));
+      }
     }
 
   // List the PDB for cleaning only when the whole target is
