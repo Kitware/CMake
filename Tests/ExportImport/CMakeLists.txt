@@ -22,6 +22,11 @@ else(CMAKE_CONFIGURATION_TYPES)
   endif(CMAKE_BUILD_TYPE)
 endif(CMAKE_CONFIGURATION_TYPES)
 
+if(MINGW OR MSYS)
+  # Test CMAKE_GNUtoMS whether we have VS or not.
+  set(ExportImport_GNUtoMS 1)
+endif()
+
 configure_file(${ExportImport_SOURCE_DIR}/InitialCache.cmake.in
                ${ExportImport_BINARY_DIR}/InitialCache.cmake @ONLY)
 
