@@ -55,6 +55,11 @@
 
 #elif defined(__GNUC__)
 # define COMPILER_ID "GNU"
+# define COMPILER_VERSION_MAJOR DEC(__GNUC__)
+# define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
+# if defined(__GNUC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
 
 #elif defined(_MSC_VER)
 # define COMPILER_ID "MSVC"
