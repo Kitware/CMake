@@ -53,6 +53,11 @@
 
 #elif defined(__PGI)
 # define COMPILER_ID "PGI"
+# define COMPILER_VERSION_MAJOR DEC(__PGIC__)
+# define COMPILER_VERSION_MINOR DEC(__PGIC_MINOR__)
+# if defined(__PGIC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PGIC_PATCHLEVEL__)
+# endif
 
 #elif defined(__PATHSCALE__)
 # define COMPILER_ID "PathScale"
