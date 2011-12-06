@@ -20,6 +20,8 @@
 
 #elif defined(__BORLANDC__)
 # define COMPILER_ID "Borland"
+# define COMPILER_VERSION_MAJOR HEX(__BORLANDC__>>8)
+# define COMPILER_VERSION_MINOR HEX(__BORLANDC__ & 0xFF)
 
 #elif defined(__WATCOMC__)
 # define COMPILER_ID "Watcom"
