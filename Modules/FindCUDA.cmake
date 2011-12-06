@@ -339,6 +339,8 @@ macro(CUDA_INCLUDE_NVCC_DEPENDENCIES dependency_file)
   # output depend on the dependency file itself, which should cause the
   # rule to re-run.
   if(CUDA_NVCC_DEPEND_REGENERATE)
+    set(CUDA_NVCC_DEPEND ${dependency_file})
+    #message("Generating an empty dependency_file: ${dependency_file}")
     file(WRITE ${dependency_file} "#FindCUDA.cmake generated file.  Do not edit.\n")
   endif(CUDA_NVCC_DEPEND_REGENERATE)
 
