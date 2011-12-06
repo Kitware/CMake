@@ -173,6 +173,12 @@ ELSE(STAGE2)
   TARGET_LINK_LIBRARIES(SimpleInstall test1 test2 test4)
   SET(install_target SimpleInstall)
 
+  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstExe)
+  # Disable VERSION test until it is implemented in the Xcode generator.
+  IF(NOT XCODE)
+    SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES VERSION 1.2)
+  ENDIF(NOT XCODE)
+
   # Make sure the test executable can run from the install tree.
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/MyTest/lib)
@@ -293,11 +299,6 @@ ELSE(STAGE2)
     ADDITIONAL_MAKE_CLEAN_FILES
     "${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake;${CMAKE_INSTALL_PREFIX}/InstallScript4Out.cmake")
 
-  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES OUTPUT_NAME SimpleInstExe)
-  # Disable VERSION test until it is implemented in the Xcode generator.
-  IF(NOT XCODE)
-    SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES VERSION 1.2)
-  ENDIF(NOT XCODE)
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES PRE_INSTALL_SCRIPT 
     ${CMAKE_CURRENT_SOURCE_DIR}/PreInstall.cmake)
   SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES POST_INSTALL_SCRIPT 

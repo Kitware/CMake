@@ -13,6 +13,7 @@
 #define cmExportCommand_h
 
 #include "cmCommand.h"
+#include "cmDocumentLocationUndefined.h"
 
 class cmExportBuildFileGenerator;
 
@@ -80,6 +81,7 @@ public:
       "should never be installed.  "
       "See the install(EXPORT) command to export targets from an "
       "installation tree."
+      CM_LOCATION_UNDEFINED_BEHAVIOR("passing it to this command")
       "\n"
       "  export(PACKAGE <name>)\n"
       "Store the current build directory in the CMake user package registry "

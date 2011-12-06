@@ -162,6 +162,7 @@ SET(SRCS
   cmDocumentationSection.cxx
   cmDocumentCompileDefinitions.h
   cmDocumentGeneratorExpressions.h
+  cmDocumentLocationUndefined.h
   cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
