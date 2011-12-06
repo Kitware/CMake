@@ -707,7 +707,7 @@ find_package_handle_standard_args(CUDA
 # Add include directories to pass to the nvcc command.
 macro(CUDA_INCLUDE_DIRECTORIES)
   foreach(dir ${ARGN})
-    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER "-I${dir}")
+    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER -I${dir})
   endforeach(dir ${ARGN})
 endmacro(CUDA_INCLUDE_DIRECTORIES)
 
@@ -736,13 +736,13 @@ macro(CUDA_GET_SOURCES_AND_OPTIONS _sources _cmake_options _options)
         arg STREQUAL "SHARED" OR
         arg STREQUAL "MODULE"
         )
-      list(APPEND ${_cmake_options} "${arg}")
+      list(APPEND ${_cmake_options} ${arg})
     else()
       if ( _found_options )
-        list(APPEND ${_options} "${arg}")
+        list(APPEND ${_options} ${arg})
       else()
         # Assume this is a file
-        list(APPEND ${_sources} "${arg}")
+        list(APPEND ${_sources} ${arg})
       endif()
     endif()
   endforeach()
@@ -890,7 +890,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   get_directory_property(CUDA_NVCC_INCLUDE_DIRECTORIES INCLUDE_DIRECTORIES)
   if(CUDA_NVCC_INCLUDE_DIRECTORIES)
     foreach(dir ${CUDA_NVCC_INCLUDE_DIRECTORIES})
-      list(APPEND CUDA_NVCC_INCLUDE_ARGS "-I${dir}")
+      list(APPEND CUDA_NVCC_INCLUDE_ARGS -I${dir})
     endforeach()
   endif()
 
@@ -956,7 +956,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
     # like it is currently), we can remove the quotes around the
     # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};;${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
+    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
 
   if(compile_to_ptx)
