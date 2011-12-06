@@ -44,6 +44,12 @@ IF (NOT _INCLUDED_FILE)
   INCLUDE(Platform/${CMAKE_SYSTEM_NAME} OPTIONAL)
 ENDIF (NOT _INCLUDED_FILE)
 
+IF(CMAKE_Fortran_SIZEOF_DATA_PTR)
+  FOREACH(f ${CMAKE_Fortran_ABI_FILES})
+    INCLUDE(${f})
+  ENDFOREACH()
+  UNSET(CMAKE_Fortran_ABI_FILES)
+ENDIF()
 
 # This should be included before the _INIT variables are
 # used to initialize the cache.  Since the rule variables 
