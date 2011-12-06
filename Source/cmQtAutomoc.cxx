@@ -696,7 +696,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
             {
             // this is for KDE4 compatibility:
             fileToMoc = headerToMoc;
-            if ((cppContainsQ_OBJECT==false) && (basename == scannedFileBasename))
+            if ((cppContainsQ_OBJECT==false) &&(basename==scannedFileBasename))
               {
               std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
                             "includes the moc file \"" << currentMoc <<
