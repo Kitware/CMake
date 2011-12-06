@@ -19,6 +19,9 @@
 
 #elif defined(__clang__)
 # define COMPILER_ID "Clang"
+# define COMPILER_VERSION_MAJOR DEC(__clang_major__)
+# define COMPILER_VERSION_MINOR DEC(__clang_minor__)
+# define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
 
 #elif defined(__BORLANDC__)
 # define COMPILER_ID "Borland"
