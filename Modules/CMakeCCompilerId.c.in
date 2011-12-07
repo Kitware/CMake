@@ -28,6 +28,8 @@
 
 #elif defined(__WATCOMC__)
 # define COMPILER_ID "Watcom"
+# define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
+# define COMPILER_VERSION_MINOR DEC(__WATCOMC__ % 100)
 
 #elif defined(__SUNPRO_C)
 # define COMPILER_ID "SunPro"
