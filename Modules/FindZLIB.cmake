@@ -17,9 +17,12 @@
 #  ZLIB_MAJOR_VERSION  - The major version of zlib
 #  ZLIB_MINOR_VERSION  - The minor version of zlib
 #  ZLIB_PATCH_VERSION  - The patch version of zlib
+#
+# An includer may set ZLIB_ROOT to a zlib installation root to tell
+# this module where to look.
 
 #=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
+# Copyright 2001-2011 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -31,17 +34,29 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/include"
-)
+SET(_ZLIB_SEARCHES)
+
+# Search ZLIB_ROOT first if it is set.
+IF(ZLIB_ROOT)
+  SET(_ZLIB_SEARCH_ROOT PATHS ${ZLIB_ROOT} NO_DEFAULT_PATH)
+  LIST(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_ROOT)
+ENDIF()
+
+# Normal search.
+SET(_ZLIB_SEARCH_NORMAL
+  PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]"
+        "$ENV{PROGRAMFILES}/zlib"
+  )
+LIST(APPEND _ZLIB_SEARCHES _ZLIB_SEARCH_NORMAL)
 
 SET(ZLIB_NAMES z zlib zdll zlib1 zlibd zlibd1)
-FIND_LIBRARY(ZLIB_LIBRARY
-    NAMES
-        ${ZLIB_NAMES}
-    PATHS
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Zlib;InstallPath]/lib"
-)
+
+# Try each search configuration.
+FOREACH(search ${_ZLIB_SEARCHES})
+  FIND_PATH(ZLIB_INCLUDE_DIR NAMES zlib.h        ${${search}} PATH_SUFFIXES include)
+  FIND_LIBRARY(ZLIB_LIBRARY  NAMES ${ZLIB_NAMES} ${${search}} PATH_SUFFIXES lib)
+ENDFOREACH()
+
 MARK_AS_ADVANCED(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
 
 IF(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")

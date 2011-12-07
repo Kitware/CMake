@@ -1206,6 +1206,61 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MakeClean")
   ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
 
+  if(NOT DEFINED CTEST_RUN_MFC)
+    set(CTEST_RUN_MFC OFF)
+
+    if(MSVC)
+      set(CTEST_RUN_MFC ON)
+
+      # Look for evidence that this is a VCExpress build. If so, avoid
+      # the MFC test by default.
+      string(TOLOWER "${CMAKE_TEST_MAKEPROGRAM}" mkprog)
+      if(mkprog MATCHES "vcexpress")
+        message(STATUS
+          "CMAKE_TEST_MAKEPROGRAM indicates vcexpress, avoiding MFC test")
+        set(CTEST_RUN_MFC OFF)
+      endif()
+
+      # Since MSBuild might also be the "makeprogram" for a VCExpress
+      # build tree, use one more heuristic, too. The string representing
+      # the .vcproj file type contains "VCExpress" on machines where an
+      # express edition of VS was installed last:
+      if(CTEST_RUN_MFC)
+        execute_process(COMMAND cmd /c assoc .vcproj
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          OUTPUT_VARIABLE ov)
+        if(ov MATCHES "VCExpress")
+          message(STATUS
+            ".vcproj file association indicates VCExpress, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        endif()
+      endif()
+
+      # For the Watcom WMake generator, avoid the MFC test by default.
+      if(CTEST_RUN_MFC)
+        if("${CMAKE_TEST_GENERATOR}" MATCHES "WMake")
+          message(STATUS
+            "using the Watcom WMake generator, avoiding MFC test")
+          set(CTEST_RUN_MFC OFF)
+        endif()
+      endif()
+    endif()
+  endif()
+
+  if(CTEST_RUN_MFC)
+    add_test(MFC ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/MFC"
+      "${CMake_BINARY_DIR}/Tests/MFC"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project mfc_driver
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --test-command ${CMAKE_CTEST_COMMAND}
+        -C \${CTEST_CONFIGURATION_TYPE} -VV)
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MFC")
+  endif()
+
   IF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -1602,6 +1657,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -Dgen=${CMAKE_TEST_GENERATOR}
     -P "${CMake_SOURCE_DIR}/Tests/CMakeCommands/build_command/RunCMake.cmake"
   )
+
+  ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
 
   CONFIGURE_FILE(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"

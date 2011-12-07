@@ -35,7 +35,7 @@ private:
                                  const char* targetDirectory);
   void WriteOldMocDefinitionsFile(const char* targetDirectory);
 
-  bool RunAutomocQt4();
+  bool RunAutomoc();
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
   void ParseCppFile(const std::string& absFilename,
@@ -69,6 +69,7 @@ private:
   std::string MocCompileDefinitionsStr;
   std::string MocDefinitionsStr;
   std::string MocIncludesStr;
+  std::string MocOptionsStr;
   std::string ProjectBinaryDir;
   std::string ProjectSourceDir;
   std::string TargetName;
@@ -78,6 +79,7 @@ private:
   std::string OutMocCppFilename;
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
+  std::vector<std::string> MocOptions;
 
   bool Verbose;
   bool ColorOutput;

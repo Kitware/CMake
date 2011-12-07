@@ -36,7 +36,7 @@ public slots:
   void setBinaryDirectory(const QString& dir);
   void setSourceDirectory(const QString& dir);
 
-protected slots: 
+protected slots:
   void initialize();
   void doConfigure();
   void doGenerate();
@@ -46,7 +46,7 @@ protected slots:
   void doInterrupt();
   void error(const QString& message);
   void message(const QString& message);
-  
+
   void doSourceBrowse();
   void doBinaryBrowse();
   void doReloadCache();
@@ -105,6 +105,8 @@ protected:
   QTextCharFormat ErrorFormat;
   QTextCharFormat MessageFormat;
 
+  QStringList AddVariableCompletions;
+
   QEventLoop LocalLoop;
 
   float ProgressOffset;
@@ -118,8 +120,8 @@ class QCMakeThread : public QThread
 public:
   QCMakeThread(QObject* p);
   QCMake* cmakeInstance() const;
-  
-signals:  
+
+signals:
   void cmakeInitialized();
 
 protected:

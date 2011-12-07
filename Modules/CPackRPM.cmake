@@ -7,7 +7,9 @@
 # the specifics CPACK_RPM_XXX variables. CPackRPM is a component aware
 # generator so when CPACK_RPM_COMPONENT_INSTALL is ON some more
 # CPACK_RPM_<ComponentName>_XXXX variables may be used in order
-# to have component specific values.
+# to have component specific values. Note however that <componentName>
+# refers to the **grouping name**. This may be either a component name
+# or a component GROUP name.
 # Usually those vars correspond to RPM spec file entities, one may find
 # information about spec files here http://www.rpm.org/wiki/Docs.
 # You'll find a detailed usage of CPackRPM on the wiki:
@@ -101,9 +103,11 @@
 #     If CPACK_SET_DESTDIR is set then you will get a warning message
 #     but if there is file installed with absolute path you'll get
 #     unexpected behavior.
-#  CPACK_RPM_SPEC_INSTALL_POST
+#  CPACK_RPM_SPEC_INSTALL_POST [deprecated]
 #     Mandatory : NO
 #     Default   : -
+#     This way of specifying post-install script is deprecated use
+#     CPACK_RPM_POST_INSTALL_SCRIPT_FILE
 #     May be used to set an RPM post-install command inside the spec file.
 #     For example setting it to "/bin/true" may be used to prevent
 #     rpmbuild to strip binaries.
@@ -161,7 +165,7 @@
 #     Mandatory : NO
 #     Default   : -
 #     May be used to embed a changelog in the spec file.
-#     The refered file will be read and directly  put after the %changelog
+#     The refered file will be read and directly put after the %changelog
 #     section.
 
 #=============================================================================
@@ -462,20 +466,31 @@ else(CPACK_RPM_PACKAGE_COMPONENT)
   set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
   set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
 endif(CPACK_RPM_PACKAGE_COMPONENT)
+
+# Handle post-install file if it has been specified
 if(CPACK_RPM_POST_INSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
     file(READ ${CPACK_RPM_POST_INSTALL_READ_FILE} CPACK_RPM_SPEC_POSTINSTALL)
   else(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
+else(CPACK_RPM_POST_INSTALL_READ_FILE)
+  # reset SPEC var value if no post install file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_POSTINSTALL "")
 endif(CPACK_RPM_POST_INSTALL_READ_FILE)
 
+# Handle post-uninstall file if it has been specified
 if(CPACK_RPM_POST_UNINSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
     file(READ ${CPACK_RPM_POST_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
   else(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
+else(CPACK_RPM_POST_UNINSTALL_READ_FILE)
+  # reset SPEC var value if no post uninstall file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_POSTUNINSTALL "")
 endif(CPACK_RPM_POST_UNINSTALL_READ_FILE)
 
 # CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
@@ -498,20 +513,31 @@ else(CPACK_RPM_PACKAGE_COMPONENT)
   set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
   set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
 endif(CPACK_RPM_PACKAGE_COMPONENT)
+
+# Handle pre-install file if it has been specified
 if(CPACK_RPM_PRE_INSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
     file(READ ${CPACK_RPM_PRE_INSTALL_READ_FILE} CPACK_RPM_SPEC_PREINSTALL)
   else(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
+else(CPACK_RPM_PRE_INSTALL_READ_FILE)
+  # reset SPEC var value if no pre-install file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_PREINSTALL "")
 endif(CPACK_RPM_PRE_INSTALL_READ_FILE)
 
+# Handle pre-uninstall file if it has been specified
 if(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
   if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
     file(READ ${CPACK_RPM_PRE_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
   else(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
     message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_READ_FILE}> does not exists - ignoring")
   endif(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
+else(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
+  # reset SPEC var value if no pre-uninstall file has been specified
+  # (either globally or component-wise)
+  set(CPACK_RPM_SPEC_PREUNINSTALL "")
 endif(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
 
 # CPACK_RPM_CHANGELOG_FILE

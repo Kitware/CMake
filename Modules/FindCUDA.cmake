@@ -339,6 +339,8 @@ macro(CUDA_INCLUDE_NVCC_DEPENDENCIES dependency_file)
   # output depend on the dependency file itself, which should cause the
   # rule to re-run.
   if(CUDA_NVCC_DEPEND_REGENERATE)
+    set(CUDA_NVCC_DEPEND ${dependency_file})
+    #message("Generating an empty dependency_file: ${dependency_file}")
     file(WRITE ${dependency_file} "#FindCUDA.cmake generated file.  Do not edit.\n")
   endif(CUDA_NVCC_DEPEND_REGENERATE)
 
@@ -443,7 +445,10 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
   # Search in the CUDA_BIN_PATH first.
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
-    PATHS ENV CUDA_BIN_PATH
+    PATHS
+      ENV CUDA_PATH
+      ENV CUDA_BIN_PATH
+    PATH_SUFFIXES bin bin64
     DOC "Toolkit location."
     NO_DEFAULT_PATH
     )
@@ -472,9 +477,10 @@ endif (NOT CUDA_TOOLKIT_ROOT_DIR)
 # CUDA_NVCC_EXECUTABLE
 find_program(CUDA_NVCC_EXECUTABLE
   NAMES nvcc
-  PATHS "${CUDA_TOOLKIT_ROOT_DIR}/bin"
-        "${CUDA_TOOLKIT_ROOT_DIR}/bin64"
+  PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+  ENV CUDA_PATH
   ENV CUDA_BIN_PATH
+  PATH_SUFFIXES bin bin64
   NO_DEFAULT_PATH
   )
 # Search default search paths, after we search our own set of paths.
@@ -500,8 +506,10 @@ set(CUDA_VERSION_STRING "${CUDA_VERSION}")
 # CUDA_TOOLKIT_INCLUDE
 find_path(CUDA_TOOLKIT_INCLUDE
   device_functions.h # Header included in toolkit
-  PATHS "${CUDA_TOOLKIT_ROOT_DIR}/include"
+  PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+  ENV CUDA_PATH
   ENV CUDA_INC_PATH
+  PATH_SUFFIXES include
   NO_DEFAULT_PATH
   )
 # Search default search paths, after we search our own set of paths.
@@ -516,19 +524,16 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # CUDA 3.2+ on Windows moved the library directoryies, so we need the new
     # and old paths.
-    set(_cuda_64bit_lib_dir
-      "${CUDA_TOOLKIT_ROOT_DIR}/lib/x64"
-      "${CUDA_TOOLKIT_ROOT_DIR}/lib64"
-      )
+    set(_cuda_64bit_lib_dir "lib/x64" "lib64" )
   endif()
   # CUDA 3.2+ on Windows moved the library directories, so we need to new
   # (lib/Win32) and the old path (lib).
   find_library(${_var}
     NAMES ${_names}
-    PATHS ${_cuda_64bit_lib_dir}
-          "${CUDA_TOOLKIT_ROOT_DIR}/lib/Win32"
-          "${CUDA_TOOLKIT_ROOT_DIR}/lib"
+    PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+    ENV CUDA_PATH
     ENV CUDA_LIB_PATH
+    PATH_SUFFIXES ${_cuda_64bit_lib_dir} "lib/Win32" "lib"
     DOC ${_doc}
     NO_DEFAULT_PATH
     )
@@ -707,7 +712,7 @@ find_package_handle_standard_args(CUDA
 # Add include directories to pass to the nvcc command.
 macro(CUDA_INCLUDE_DIRECTORIES)
   foreach(dir ${ARGN})
-    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER "-I${dir}")
+    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER -I${dir})
   endforeach(dir ${ARGN})
 endmacro(CUDA_INCLUDE_DIRECTORIES)
 
@@ -736,13 +741,13 @@ macro(CUDA_GET_SOURCES_AND_OPTIONS _sources _cmake_options _options)
         arg STREQUAL "SHARED" OR
         arg STREQUAL "MODULE"
         )
-      list(APPEND ${_cmake_options} "${arg}")
+      list(APPEND ${_cmake_options} ${arg})
     else()
       if ( _found_options )
-        list(APPEND ${_options} "${arg}")
+        list(APPEND ${_options} ${arg})
       else()
         # Assume this is a file
-        list(APPEND ${_sources} "${arg}")
+        list(APPEND ${_sources} ${arg})
       endif()
     endif()
   endforeach()
@@ -890,7 +895,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   get_directory_property(CUDA_NVCC_INCLUDE_DIRECTORIES INCLUDE_DIRECTORIES)
   if(CUDA_NVCC_INCLUDE_DIRECTORIES)
     foreach(dir ${CUDA_NVCC_INCLUDE_DIRECTORIES})
-      list(APPEND CUDA_NVCC_INCLUDE_ARGS "-I${dir}")
+      list(APPEND CUDA_NVCC_INCLUDE_ARGS -I${dir})
     endforeach()
   endif()
 
@@ -956,7 +961,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
     # like it is currently), we can remove the quotes around the
     # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};;${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
+    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
 
   if(compile_to_ptx)

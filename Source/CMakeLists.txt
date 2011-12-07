@@ -129,6 +129,8 @@ SET(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmCryptoHash.cxx
+  cmCryptoHash.h
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
@@ -160,6 +162,7 @@ SET(SRCS
   cmDocumentationSection.cxx
   cmDocumentCompileDefinitions.h
   cmDocumentGeneratorExpressions.h
+  cmDocumentLocationUndefined.h
   cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
@@ -214,6 +217,8 @@ SET(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmNewLineStyle.h
+  cmNewLineStyle.cxx
   cmOrderDirectories.cxx
   cmOrderDirectories.h
   cmPolicies.h
@@ -259,6 +264,8 @@ SET(SRCS
   cmakewizard.cxx
   cmakewizard.h
 
+  cm_sha2.h
+  cm_sha2.c
   cm_utf8.h
   cm_utf8.c
   )

@@ -17,6 +17,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
 #include <cmsys/RegularExpression.hxx>
@@ -158,9 +159,21 @@ void cmTarget::DefineProperties(cmake *cm)
      "which is compiled as part of the target."
      "This property is initialized by the value of the variable "
      "CMAKE_AUTOMOC if it is set when a target is created.\n"
+     "Additional command line options for moc can be set via the "
+     "AUTOMOC_MOC_OPTIONS property.\n"
      "By setting the CMAKE_AUTOMOC_STRICT_MODE variable to FALSE the rules "
      "for searching the files which will be processed by moc can be relaxed. "
      "See the documentation for this variable for more details.");
+
+  cm->DefineProperty
+    ("AUTOMOC_MOC_OPTIONS", cmProperty::TARGET,
+    "Additional options for moc when using automoc (see the AUTOMOC property)",
+     "This property is only used if the AUTOMOC property is set to TRUE for "
+     "this target. In this case, it holds additional command line options "
+     "which will be used when moc is executed during the build, i.e. it is "
+     "equivalent to the optional OPTIONS argument of the qt4_wrap_cpp() "
+     "macro.\n"
+     "By default it is empty.");
 
   cm->DefineProperty
     ("BUILD_WITH_INSTALL_RPATH", cmProperty::TARGET,
@@ -574,15 +587,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "value is the default.  "
      "See documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables.");
 
-#define CM_LOCATION_UNDEFINED_BEHAVIOR \
-  "\n" \
-  "Do not set properties that affect the location of the target after " \
-  "reading this property.  These include properties whose names match " \
-  "\"(RUNTIME|LIBRARY|ARCHIVE)_OUTPUT_(NAME|DIRECTORY)(_<CONFIG>)?\" " \
-  "or \"(IMPLIB_)?(PREFIX|SUFFIX)\".  " \
-  "Failure to follow this rule is not diagnosed and leaves the location " \
-  "of the target undefined."
-
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
      "Read-only location of a target on disk.",
@@ -602,7 +606,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "In CMake 2.8.4 and above add_custom_command recognizes generator "
      "expressions to refer to target locations anywhere in the command.  "
      "Therefore this property is not needed for creating custom commands."
-     CM_LOCATION_UNDEFINED_BEHAVIOR);
+     CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
     ("LOCATION_<CONFIG>", cmProperty::TARGET,
@@ -616,7 +620,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "arbitrary available configuration.  "
      "Use the MAP_IMPORTED_CONFIG_<CONFIG> property to map imported "
      "configurations explicitly."
-     CM_LOCATION_UNDEFINED_BEHAVIOR);
+     CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
     ("LINK_DEPENDS", cmProperty::TARGET,
@@ -970,6 +974,23 @@ void cmTarget::DefineProperties(cmake *cm)
      "is created its value is used to initialize this property.");
 
   cm->DefineProperty
+    ("GNUtoMS", cmProperty::TARGET,
+     "Convert GNU import library (.dll.a) to MS format (.lib).",
+     "When linking a shared library or executable that exports symbols "
+     "using GNU tools on Windows (MinGW/MSYS) with Visual Studio installed "
+     "convert the import library (.dll.a) from GNU to MS format (.lib).  "
+     "Both import libraries will be installed by install(TARGETS) and "
+     "exported by install(EXPORT) and export() to be linked by applications "
+     "with either GNU- or MS-compatible tools."
+     "\n"
+     "If the variable CMAKE_GNUtoMS is set when a target "
+     "is created its value is used to initialize this property.  "
+     "The variable must be set prior to the first command that enables "
+     "a language such as project() or enable_language().  "
+     "CMake provides the variable as an option to the user automatically "
+     "when configuring on Windows with GNU tools.");
+
+  cm->DefineProperty
     ("XCODE_ATTRIBUTE_<an-attribute>", cmProperty::TARGET,
      "Set Xcode target attributes directly.",
      "Tell the Xcode generator to set '<an-attribute>' to a given value "
@@ -1014,7 +1035,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "provider property.");
   cm->DefineProperty
     ("VS_SCC_LOCALPATH", cmProperty::TARGET,
-     "Visual Studio Source Code Control Provider.",
+     "Visual Studio Source Code Control Local Path.",
      "Can be set to change the visual studio source code control "
      "local path property.");
   cm->DefineProperty
@@ -1022,6 +1043,34 @@ void cmTarget::DefineProperties(cmake *cm)
      "Visual Studio Source Code Control Project.",
      "Can be set to change the visual studio source code control "
      "project name property.");
+  cm->DefineProperty
+    ("VS_SCC_AUXPATH", cmProperty::TARGET,
+     "Visual Studio Source Code Control Aux Path.",
+     "Can be set to change the visual studio source code control "
+     "auxpath property.");
+  cm->DefineProperty
+    ("VS_GLOBAL_PROJECT_TYPES", cmProperty::TARGET,
+     "Visual Studio project type(s).",
+     "Can be set to one or more UUIDs recognized by Visual Studio "
+     "to indicate the type of project. This value is copied "
+     "verbatim into the generated project file. Example for a "
+     "managed C++ unit testing project: \""
+     "{3AC096D0-A1C2-E12C-1390-A8335801FDAB};"
+     "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\". UUIDs are "
+     "semicolon-delimited.");
+  cm->DefineProperty
+    ("VS_GLOBAL_KEYWORD", cmProperty::TARGET,
+     "Visual Studio project keyword.",
+     "Sets the \"keyword\" attribute for a generated Visual Studio "
+     "project. Defaults to \"Win32Proj\". You may wish to override "
+     "this value with \"ManagedCProj\", for example, in a Visual "
+     "Studio managed C++ unit test project.");
+  cm->DefineProperty
+    ("VS_DOTNET_REFERENCES", cmProperty::TARGET,
+     "Visual Studio managed project .NET references",
+     "Adds one or more semicolon-delimited .NET references to a "
+     "generated Visual Studio project. For example, \"System;"
+     "System.Windows.Forms\".");
   cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",
@@ -1180,8 +1229,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_FORMAT", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
+  this->SetPropertyDefault("GNUtoMS", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
+  this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
 
   // Collect the set of configuration types.
@@ -3438,6 +3489,26 @@ void cmTarget::GetExecutableNames(std::string& name,
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::HasImplibGNUtoMS()
+{
+  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
+                                std::string& out, const char* newExt)
+{
+  if(this->HasImplibGNUtoMS() &&
+     gnuName.size() > 6 && gnuName.substr(gnuName.size()-6) == ".dll.a")
+    {
+    out = gnuName.substr(0, gnuName.size()-6);
+    out += newExt? newExt : ".lib";
+    return true;
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

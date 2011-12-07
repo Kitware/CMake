@@ -178,11 +178,20 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
+  const char* vsProjectTypes =
+    this->Target->GetProperty("VS_GLOBAL_PROJECT_TYPES");
+  if(vsProjectTypes)
+    {
+    this->WriteString("<ProjectTypes>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsProjectTypes) <<
+      "</ProjectTypes>\n";
+    }
+
   const char* vsProjectName = this->Target->GetProperty("VS_SCC_PROJECTNAME");
   const char* vsLocalPath = this->Target->GetProperty("VS_SCC_LOCALPATH");
   const char* vsProvider = this->Target->GetProperty("VS_SCC_PROVIDER");
 
-  if ( vsProjectName && vsLocalPath && vsProvider)
+  if( vsProjectName && vsLocalPath && vsProvider )
     {
     this->WriteString("<SccProjectName>", 2);
     (*this->BuildFileStream) << cmVS10EscapeXML(vsProjectName) <<
@@ -193,9 +202,29 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteString("<SccProvider>", 2);
     (*this->BuildFileStream) << cmVS10EscapeXML(vsProvider) <<
       "</SccProvider>\n";
+
+    const char* vsAuxPath = this->Target->GetProperty("VS_SCC_AUXPATH");
+    if( vsAuxPath )
+      {
+      this->WriteString("<SccAuxPath>", 2);
+       (*this->BuildFileStream) << cmVS10EscapeXML(vsAuxPath) <<
+         "</SccAuxPath>\n";
+      }
     }
 
-  this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+  const char* vsGlobalKeyword =
+    this->Target->GetProperty("VS_GLOBAL_KEYWORD");
+  if(!vsGlobalKeyword)
+    {
+    this->WriteString("<Keyword>Win32Proj</Keyword>\n", 2);
+    }
+  else
+    {
+    this->WriteString("<Keyword>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsGlobalKeyword) <<
+      "</Keyword>\n";
+    }
+
   this->WriteString("<Platform>", 2);
   (*this->BuildFileStream) << this->Platform << "</Platform>\n";
   const char* projLabel = this->Target->GetProperty("PROJECT_LABEL");
@@ -225,6 +254,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteCustomCommands();
   this->WriteObjSources();
   this->WriteCLSources();
+  this->WriteDotNetReferences();
   this->WriteProjectReferences();
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
@@ -234,6 +264,39 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("</Project>", 0);
   // The groups are stored in a separate file for VS 10
   this->WriteGroups();
+}
+
+void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
+{
+  const char* vsDotNetReferences
+    = this->Target->GetProperty("VS_DOTNET_REFERENCES");
+  if(vsDotNetReferences)
+    {
+    std::string references(vsDotNetReferences);
+    std::string::size_type position = 0;
+
+    this->WriteString("<ItemGroup>\n", 1);
+    while(references.length() > 0)
+      {
+      if((position = references.find(";")) == std::string::npos)
+        {
+        position = references.length() + 1;
+        }
+
+      this->WriteString("<Reference Include=\"", 2);
+      (*this->BuildFileStream) <<
+        cmVS10EscapeXML(references.substr(0, position)) << "\">\n";
+      this->WriteString("<CopyLocalSatelliteAssemblies>true"
+                        "</CopyLocalSatelliteAssemblies>\n", 3);
+      this->WriteString("<ReferenceOutputAssembly>true"
+                        "</ReferenceOutputAssembly>\n", 3);
+      this->WriteString("</Reference>\n", 2);
+
+      references.erase(0, position + 1);
+      }
+
+    this->WriteString("</ItemGroup>\n", 1);
+    }
 }
 
 // ConfigurationType Application, Utility StaticLibrary DynamicLibrary
@@ -290,16 +353,24 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       }
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2); 
+
     const char* mfcFlag = 
       this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
-    if(mfcFlag)
+    std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
+
+    std::string useOfMfcValue = "false";
+    if(mfcFlagValue == "1")
       {
-      this->WriteString("<UseOfMfc>true</UseOfMfc>\n", 2);
+      useOfMfcValue = "Static";
       }
-    else
+    else if(mfcFlagValue == "2")
       {
-      this->WriteString("<UseOfMfc>false</UseOfMfc>\n", 2);
+      useOfMfcValue = "Dynamic";
       }
+    std::string mfcLine = "<UseOfMfc>";
+    mfcLine += useOfMfcValue + "</UseOfMfc>\n";
+    this->WriteString(mfcLine.c_str(), 2);
+
     if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
        this->ClOptions[*i]->UsingUnicode())
       {
@@ -897,7 +968,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       hasFlags = true;
       cmVisualStudioGeneratorOptions 
         clOptions(this->LocalGenerator,
-                  10, cmVisualStudioGeneratorOptions::Compiler,
+                  cmVisualStudioGeneratorOptions::Compiler,
                   cmVS10CLFlagTable, 0, this);
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
@@ -1082,7 +1153,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // TODO: Integrate code below with cmLocalVisualStudio7Generator.
 
   cmsys::auto_ptr<Options> pOptions(
-    new Options(this->LocalGenerator, 10, Options::Compiler,
+    new Options(this->LocalGenerator, Options::Compiler,
                 cmVS10CLFlagTable));
   Options& clOptions = *pOptions;
 
@@ -1237,7 +1308,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     {
     this->WriteString("<Lib>\n", 2);
     cmVisualStudioGeneratorOptions
-      libOptions(this->LocalGenerator, 10,
+      libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
                  cmVS10LibFlagTable, 0, this);
     libOptions.Parse(libflags?libflags:"");
@@ -1317,7 +1388,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
     flags += flagsConfig;
     }
   cmVisualStudioGeneratorOptions
-    linkOptions(this->LocalGenerator, 10,
+    linkOptions(this->LocalGenerator,
                 cmVisualStudioGeneratorOptions::Linker,
                 cmVS10LinkFlagTable, 0, this);
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )

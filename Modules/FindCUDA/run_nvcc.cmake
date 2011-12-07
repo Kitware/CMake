@@ -55,25 +55,25 @@ if(NOT generated_file)
 endif()
 
 # Set these up as variables to make reading the generated file easier
-set(CMAKE_COMMAND "@CMAKE_COMMAND@")
-set(source_file "@source_file@")
-set(NVCC_generated_dependency_file "@NVCC_generated_dependency_file@")
-set(cmake_dependency_file "@cmake_dependency_file@")
-set(CUDA_make2cmake "@CUDA_make2cmake@")
-set(CUDA_parse_cubin "@CUDA_parse_cubin@")
-set(build_cubin @build_cubin@)
+set(CMAKE_COMMAND "@CMAKE_COMMAND@") # path
+set(source_file "@source_file@") # path
+set(NVCC_generated_dependency_file "@NVCC_generated_dependency_file@") # path
+set(cmake_dependency_file "@cmake_dependency_file@") # path
+set(CUDA_make2cmake "@CUDA_make2cmake@") # path
+set(CUDA_parse_cubin "@CUDA_parse_cubin@") # path
+set(build_cubin @build_cubin@) # bool
 # We won't actually use these variables for now, but we need to set this, in
 # order to force this file to be run again if it changes.
-set(generated_file_path "@generated_file_path@")
-set(generated_file_internal "@generated_file@")
-set(generated_cubin_file_internal "@generated_cubin_file@")
+set(generated_file_path "@generated_file_path@") # path
+set(generated_file_internal "@generated_file@") # path
+set(generated_cubin_file_internal "@generated_cubin_file@") # path
 
-set(CUDA_NVCC_EXECUTABLE "@CUDA_NVCC_EXECUTABLE@")
-set(CUDA_NVCC_FLAGS "@CUDA_NVCC_FLAGS@;;@CUDA_WRAP_OPTION_NVCC_FLAGS@")
+set(CUDA_NVCC_EXECUTABLE "@CUDA_NVCC_EXECUTABLE@") # path
+set(CUDA_NVCC_FLAGS @CUDA_NVCC_FLAGS@ ;; @CUDA_WRAP_OPTION_NVCC_FLAGS@) # list
 @CUDA_NVCC_FLAGS_CONFIG@
-set(nvcc_flags "@nvcc_flags@")
-set(CUDA_NVCC_INCLUDE_ARGS "@CUDA_NVCC_INCLUDE_ARGS@")
-set(format_flag "@format_flag@")
+set(nvcc_flags @nvcc_flags@) # list
+set(CUDA_NVCC_INCLUDE_ARGS "@CUDA_NVCC_INCLUDE_ARGS@") # list (needs to be in quotes to handle spaces properly).
+set(format_flag "@format_flag@") # string
 
 if(build_cubin AND NOT generated_cubin_file)
   message(FATAL_ERROR "You must specify generated_cubin_file on the command line")

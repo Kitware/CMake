@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmGlobalVisualStudio11Generator.h"
+#include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 
 //----------------------------------------------------------------------------
@@ -33,6 +34,16 @@ void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
   fout << "# Visual Studio 11\n";
+}
+
+//----------------------------------------------------------------------------
+cmLocalGenerator *cmGlobalVisualStudio11Generator::CreateLocalGenerator()
+{
+  cmLocalVisualStudio10Generator* lg =
+    new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS11);
+  lg->SetPlatformName(this->GetPlatformName());
+  lg->SetGlobalGenerator(this);
+  return lg;
 }
 
 //----------------------------------------------------------------------------

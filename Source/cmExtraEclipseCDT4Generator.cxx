@@ -85,7 +85,26 @@ void cmExtraEclipseCDT4Generator::Generate()
   this->IsOutOfSourceBuild = (this->HomeDirectory!=this->HomeOutputDirectory);
 
   this->GenerateSourceProject = (this->IsOutOfSourceBuild &&
-                            mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT"));
+                            mf->IsOn("CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT"));
+
+  if ((this->GenerateSourceProject == false)
+    && (mf->IsOn("ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT")))
+    {
+    mf->IssueMessage(cmake::WARNING,
+              "ECLIPSE_CDT4_GENERATE_SOURCE_PROJECT is set to TRUE, "
+              "but this variable is not supported anymore since CMake 2.8.7.\n"
+              "Enable CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT instead.");
+    }
+
+  if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                    this->HomeDirectory.c_str()))
+    {
+    mf->IssueMessage(cmake::WARNING, "The build directory is a subdirectory "
+                     "of the source directory.\n"
+                     "This is not supported well by Eclipse. It is strongly "
+                     "recommended to use a build directory which is a "
+                     "sibling of the source directory.");
+    }
 
   // NOTE: This is not good, since it pollutes the source tree. However,
   //       Eclipse doesn't allow CVS/SVN to work when the .project is not in
@@ -103,7 +122,7 @@ void cmExtraEclipseCDT4Generator::Generate()
   this->CreateCProjectFile();
 }
 
-void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
+void cmExtraEclipseCDT4Generator::CreateSourceProjectFile()
 {
   assert(this->HomeDirectory != this->HomeOutputDirectory);
 
@@ -131,6 +150,16 @@ void cmExtraEclipseCDT4Generator::CreateSourceProjectFile() const
     "\t</buildSpec>\n"
     "\t<natures>\n"
     "\t</natures>\n"
+    "\t<linkedResources>\n";
+
+  if (this->SupportsVirtualFolders)
+    {
+    this->CreateLinksToSubprojects(fout, this->HomeDirectory);
+    this->SrcLinkedResources.clear();
+    }
+
+  fout <<
+    "\t</linkedResources>\n"
     "</projectDescription>\n"
     ;
 }
@@ -424,7 +453,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   if (this->SupportsVirtualFolders)
     {
-    this->CreateLinksToSubprojects(fout);
+    this->CreateLinksToSubprojects(fout, this->HomeOutputDirectory);
 
     this->CreateLinksForTargets(fout);
     }
@@ -531,7 +560,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
-                                                   cmGeneratedFileStream& fout)
+                       cmGeneratedFileStream& fout, const std::string& baseDir)
 {
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
@@ -547,8 +576,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
                             it->second[0]->GetMakefile()->GetStartDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
-    if ((this->HomeOutputDirectory != linkSourceDirectory) &&
-        !cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+    if ((baseDir != linkSourceDirectory) &&
+        !cmSystemTools::IsSubDirectory(baseDir.c_str(),
                                        linkSourceDirectory.c_str()))
       {
       std::string linkName = "[Subprojects]/";
@@ -998,7 +1027,11 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           std::string virtDir = "[Targets]/";
           virtDir += prefix;
           virtDir += ti->first;
-          this->AppendTarget(fout, "Build", make, makeArgs, virtDir, "",
+          std::string buildArgs = "-C \"";
+          buildArgs += makefile->GetHomeOutputDirectory();
+          buildArgs += "\" ";
+          buildArgs += makeArgs;
+          this->AppendTarget(fout, "Build", make, buildArgs, virtDir, "",
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";

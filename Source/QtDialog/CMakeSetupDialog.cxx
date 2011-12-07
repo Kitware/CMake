@@ -68,6 +68,9 @@ CMakeSetupDialog::CMakeSetupDialog()
   int w = settings.value("Width", 700).toInt();
   this->resize(w, h);
 
+  this->AddVariableCompletions = settings.value("AddVariableCompletionEntries",
+                           QStringList("CMAKE_INSTALL_PREFIX")).toStringList();
+
   QWidget* cont = new QWidget(this);
   this->setupUi(cont);
   this->Splitter->setStretchFactor(0, 3);
@@ -1008,7 +1011,7 @@ void CMakeSetupDialog::addCacheEntry()
   dialog.resize(400, 200);
   dialog.setWindowTitle(tr("Add Cache Entry"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
-  AddCacheEntry* w = new AddCacheEntry(&dialog);
+  AddCacheEntry* w = new AddCacheEntry(&dialog, this->AddVariableCompletions);
   QDialogButtonBox* btns = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
       Qt::Horizontal, &dialog);
@@ -1021,6 +1024,26 @@ void CMakeSetupDialog::addCacheEntry()
     {
     QCMakeCacheModel* m = this->CacheValues->cacheModel();
     m->insertProperty(w->type(), w->name(), w->description(), w->value(), false);
+
+    // only add variable names to the completion which are new
+    if (!this->AddVariableCompletions.contains(w->name()))
+      {
+      this->AddVariableCompletions << w->name();
+      // limit to at most 100 completion items
+      if (this->AddVariableCompletions.size() > 100)
+        {
+        this->AddVariableCompletions.removeFirst();
+        }
+      // make sure CMAKE_INSTALL_PREFIX is always there
+      if (!this->AddVariableCompletions.contains("CMAKE_INSTALL_PREFIX"))
+        {
+        this->AddVariableCompletions << QString("CMAKE_INSTALL_PREFIX");
+        }
+      QSettings settings;
+      settings.beginGroup("Settings/StartPath");
+      settings.setValue("AddVariableCompletionEntries",
+                        this->AddVariableCompletions);
+      }
     }
 }
 

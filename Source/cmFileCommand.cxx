@@ -13,6 +13,7 @@
 #include "cmake.h"
 #include "cmHexFileConverter.h"
 #include "cmFileTimeComparison.h"
+#include "cmCryptoHash.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_curl.h"
@@ -22,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <cmsys/auto_ptr.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
@@ -82,6 +84,15 @@ bool cmFileCommand
   else if ( subCommand == "READ" )
     {
     return this->HandleReadCommand(args);
+    }
+  else if ( subCommand == "MD5" ||
+            subCommand == "SHA1" ||
+            subCommand == "SHA224" ||
+            subCommand == "SHA256" ||
+            subCommand == "SHA384" ||
+            subCommand == "SHA512" )
+    {
+    return this->HandleHashCommand(args);
     }
   else if ( subCommand == "STRINGS" )
     {
@@ -336,6 +347,41 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     }
   this->Makefile->AddDefinition(variable.c_str(), output.c_str());
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleHashCommand(std::vector<std::string> const& args)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  if(args.size() != 3)
+    {
+    cmOStringStream e;
+    e << args[0] << " requires a file name and output variable";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  cmsys::auto_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0].c_str()));
+  if(hash.get())
+    {
+    std::string out = hash->HashFile(args[1].c_str());
+    if(!out.empty())
+      {
+      this->Makefile->AddDefinition(args[2].c_str(), out.c_str());
+      return true;
+      }
+    cmOStringStream e;
+    e << args[0] << " failed to read file \"" << args[1] << "\": "
+      << cmSystemTools::GetLastSystemError();
+    this->SetError(e.str().c_str());
+    }
+  return false;
+#else
+  cmOStringStream e;
+  e << args[0] << " not available during bootstrap";
+  this->SetError(e.str().c_str());
+  return false;
+#endif
 }
 
 //----------------------------------------------------------------------------

@@ -18,10 +18,11 @@
 #include "windows.h"
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator()
+cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(VSVersion v)
 {
   this->WindowsShell = true;
   this->WindowsVSIDE = true;
+  this->Version = v;
 }
 
 //----------------------------------------------------------------------------
@@ -249,6 +250,20 @@ cmLocalVisualStudioGenerator
 
     // Add this command line.
     std::string cmd = ccg.GetCommand(c);
+
+    // Use "call " before any invocations of .bat or .cmd files
+    // invoked as custom commands.
+    //
+    std::string suffix;
+    if (cmd.size() > 4)
+      {
+      suffix = cmSystemTools::LowerCase(cmd.substr(cmd.size()-4));
+      if (suffix == ".bat" || suffix == ".cmd")
+        {
+        script += "call ";
+        }
+      }
+
     script += this->Convert(cmd.c_str(), relativeRoot, SHELL);
     ccg.AppendArguments(c, script);
 
