@@ -33,6 +33,9 @@
 
 #elif defined(__SUNPRO_C)
 # define COMPILER_ID "SunPro"
+# define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>8)
+# define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xF)
+# define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
 
 #elif defined(__HP_cc)
 # define COMPILER_ID "HP"
