@@ -565,6 +565,7 @@ private:
   cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
+  bool IsApple;
   bool IsImportedTarget;
 
   // Cache target output paths for each configuration.
@@ -603,6 +604,12 @@ private:
   cmTargetInternalPointer Internal;
 
   void ConstructSourceFileFlags();
+  void ComputeVersionedName(std::string& vName,
+                            std::string const& prefix,
+                            std::string const& base,
+                            std::string const& suffix,
+                            std::string const& name,
+                            const char* version);
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;
