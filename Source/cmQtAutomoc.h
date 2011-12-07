@@ -39,8 +39,15 @@ private:
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
   void ParseCppFile(const std::string& absFilename,
-                    std::map<std::string, std::string>& includedMocs,
-                    std::set<std::string>& absHeaders);
+                    const std::list<std::string>& headerExtensions,
+                    std::map<std::string, std::string>& includedMocs);
+  void StrictParseCppFile(const std::string& absFilename,
+                          const std::list<std::string>& headerExtensions,
+                          std::map<std::string, std::string>& includedMocs);
+  void SearchHeadersForCppFile(const std::string& absFilename,
+                               const std::list<std::string>& headerExtensions,
+                               std::set<std::string>& absHeaders);
+
   void ParseHeaders(const std::set<std::string>& absHeaders,
                     const std::map<std::string, std::string>& includedMocs,
                     std::map<std::string, std::string>& notIncludedMocs);
@@ -78,6 +85,7 @@ private:
   bool ColorOutput;
   bool RunMocFailed;
   bool GenerateAll;
+  bool StrictMode;
 
 };
 
