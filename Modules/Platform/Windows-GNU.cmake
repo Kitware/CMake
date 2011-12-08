@@ -175,7 +175,7 @@ macro(__windows_compiler_gnu_abi lang)
   if(CMAKE_GNUtoMS)
     # Teach CMake how to create a MS import library at link time.
     set(CMAKE_${lang}_GNUtoMS_RULE " -Wl,--output-def,<TARGET_NAME>.def"
-      "<CMAKE_COMMAND> -Dlib=\"${CMAKE_GNUtoMS_LIB}\" -Ddef=\"<TARGET_NAME>.def\" -Ddll=\"<TARGET>\" -Dimp=\"<TARGET_IMPLIB>\" -P \"${CMAKE_ROOT}/Modules/Platform/GNUtoMS_lib.cmake\""
+      "<CMAKE_COMMAND> -Dlib=\"${CMAKE_GNUtoMS_LIB}\" -Ddef=<TARGET_NAME>.def -Ddll=<TARGET> -Dimp=<TARGET_IMPLIB> -P \"${CMAKE_ROOT}/Modules/Platform/GNUtoMS_lib.cmake\""
       )
   endif()
 endmacro()
