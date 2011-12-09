@@ -458,8 +458,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   std::vector<std::string>::iterator new_end =
     std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
-  std::string dir = mf->GetHomeOutputDirectory();
-  this->CurrentReRunCMakeMakefile = dir;
+  this->CurrentReRunCMakeMakefile = mf->GetStartOutputDirectory();
   this->CurrentReRunCMakeMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile.c_str());
   this->CurrentReRunCMakeMakefile += "/ReRunCMake.make";
