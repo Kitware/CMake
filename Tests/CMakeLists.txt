@@ -163,6 +163,15 @@ IF(BUILD_TESTING)
   IF(CMAKE_Fortran_COMPILER)
     ADD_TEST_MACRO(FortranOnly FortranOnly)
   ENDIF()
+  # test Visual Studio GNU Fortran mixing with cmake_add_fortran_subdirectory
+  # run this project if we have a working fortran compiler or
+  # the test is enabled with CMAKE_TEST_CMAKE_ADD_FORTRAN cache variable.
+  # If you enable the test, CMake should find the MinGW fortran install,
+  # or in some cases you might need to set the PATH so that cmake can find
+  # the gfortran from mingw.
+  IF(CMAKE_Fortran_COMPILER OR CMAKE_TEST_CMAKE_ADD_FORTRAN)
+    ADD_TEST_MACRO(VSGNUFortran ${CMAKE_COMMAND} -P runtest.cmake)
+  ENDIF()
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(IPO COnly/COnly)
