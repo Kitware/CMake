@@ -1,0 +1,8 @@
+set(ENV{PATH} "@MINGW_PATH@\;$ENV{PATH}")
+execute_process(
+  COMMAND "@CMAKE_COMMAND@" "-GMinGW Makefiles"
+  -DCMAKE_Fortran_COMPILER:PATH=@MINGW_GFORTRAN@
+  -DBUILD_SHARED_LIBS=ON
+  -DCMAKE_GNUtoMS=ON
+  @ARGS_CMAKE_COMMAND_LINE@
+  "@source_dir@")

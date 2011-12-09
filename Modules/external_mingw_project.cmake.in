@@ -1,0 +1,54 @@
+include(ExternalProject)
+
+set(LAPACK_BUILD_DIR "${fortranc_BINARY_DIR}/lapack-build")
+find_program(MINGW_GFORTRAN gfortran
+  c:/MinGW/bin
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin")
+if(NOT MINGW_GFORTRAN)
+  message(FATAL_ERROR
+    "gfortran not found, please install MinGW with the gfortran option."
+    " This is required to build blas/lapack")
+endif()
+get_filename_component(MINGW_PATH ${MINGW_GFORTRAN} PATH)
+file(TO_NATIVE_PATH "${MINGW_PATH}" MINGW_PATH)
+string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
+configure_file(${fortranc_SOURCE_DIR}/config_mingw.cmake.in
+  ${fortranc_BINARY_DIR}/config_mingw.cmake @ONLY)
+configure_file(${fortranc_SOURCE_DIR}/build_mingw.cmake.in
+  ${fortranc_BINARY_DIR}/build_mingw.cmake @ONLY)
+
+externalproject_add(LAPACK
+  SOURCE_DIR ${fortranc_SOURCE_DIR}/lapack
+  BINARY_DIR ${fortranc_BINARY_DIR}/lapack-build
+  CONFIGURE_COMMAND ${CMAKE_COMMAND}
+  -P ${fortranc_BINARY_DIR}/config_mingw.cmake
+  BUILD_COMMAND ${CMAKE_COMMAND}
+  -P ${fortranc_BINARY_DIR}/build_mingw.cmake
+  INSTALL_COMMAND ""
+)
+
+externalproject_add_step(LAPACK forcebuild
+  COMMAND ${CMAKE_COMMAND}
+  -E remove ${CMAKE_CURRENT_BUILD_DIR}/lapack-prefix/src/lapack-stamp/lapack-build
+  DEPENDEES configure
+  DEPENDERS build
+  ALWAYS 1
+)
+
+add_library(blas SHARED IMPORTED)
+add_library(lapack SHARED IMPORTED)
+# Import target "blas" for configuration ""
+set_property(TARGET blas APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
+set_target_properties(blas PROPERTIES
+  IMPORTED_IMPLIB_NOCONFIG "${LAPACK_BUILD_DIR}/lib/libblas.lib"
+  IMPORTED_LOCATION_NOCONFIG "${LAPACK_BUILD_DIR}/bin/libblas.dll"
+  )
+
+# Import target "lapack" for configuration ""
+set_property(TARGET lapack APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
+set_target_properties(lapack PROPERTIES
+  IMPORTED_IMPLIB_NOCONFIG "${LAPACK_BUILD_DIR}/lib/liblapack.lib"
+  IMPORTED_LINK_INTERFACE_LIBRARIES_NOCONFIG "blas"
+  IMPORTED_LOCATION_NOCONFIG "${LAPACK_BUILD_DIR}/bin/liblapack.dll"
+  )
+add_dependencies(lapack LAPACK)
