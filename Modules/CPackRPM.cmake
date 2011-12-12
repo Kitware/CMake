@@ -161,6 +161,15 @@
 #     CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE
 #     One may verify which scriptlet has been included with
 #      rpm -qp --scripts  package.rpm
+#  CPACK_RPM_USER_FILELIST
+#  CPACK_RPM_<COMPONENT>_USER_FILELIST
+#     Mandatory : NO
+#     Default   : -
+#     May be used to explicitely specify %(<directive>) file line
+#     in the spec file. Like %config(noreplace) or any other directive
+#     that be found in the %files section. Since CPackRPM is generating
+#     the list of files (and directories) the user specified files of
+#     the CPACK_RPM_<COMPONENT>_USER_FILELIST list will be removed from the generated list.
 #  CPACK_RPM_CHANGELOG_FILE
 #     Mandatory : NO
 #     Default   : -
@@ -594,23 +603,89 @@ EXECUTE_PROCESS(COMMAND find . -type f -o -type l -o (-type d -a -not -name ".")
                 WORKING_DIRECTORY "${WDIR}"
                 OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
 
-# In component case, replace CPACK_ABSOLUTE_DESTINATION_FILES
-#        with the content of CPACK_ABSOLUTE_DESTINATION_FILES_<COMPONENT>
-# This must be done BEFORE the CPACK_ABSOLUTE_DESTINATION_FILES handling
+# In component case, put CPACK_ABSOLUTE_DESTINATION_FILES_<COMPONENT>
+#                   into CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
+#         otherwise, put CPACK_ABSOLUTE_DESTINATION_FILES
+# This must be done BEFORE the CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL handling
 if(CPACK_RPM_PACKAGE_COMPONENT)
   if(CPACK_ABSOLUTE_DESTINATION_FILES)
    set(COMPONENT_FILES_TAG "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}")
-   set(CPACK_ABSOLUTE_DESTINATION_FILES "${${COMPONENT_FILES_TAG}}")
+   set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${${COMPONENT_FILES_TAG}}")
    if(CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: Handling Absolute Destination Files ${CPACK_ABSOLUTE_DESTINATION_FILES}")
+     message("CPackRPM:Debug: Handling Absolute Destination Files: <${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}>")
      message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
    endif(CPACK_RPM_PACKAGE_DEBUG)
   endif()
+else()
+  if(CPACK_ABSOLUTE_DESTINATION_FILES)
+    set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${CPACK_ABSOLUTE_DESTINATION_FILES}")
+  endif()
 endif()
 
-if (CPACK_ABSOLUTE_DESTINATION_FILES)
+# In component case, set CPACK_RPM_USER_FILELIST_INTERNAL with CPACK_RPM_<COMPONENT>_USER_FILELIST.
+if(CPACK_RPM_PACKAGE_COMPONENT)
+  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST)
+    set(CPACK_RPM_USER_FILELIST_INTERNAL ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST})
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
+      message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
+    endif(CPACK_RPM_PACKAGE_DEBUG)
+  else()
+    set(CPACK_RPM_USER_FILELIST_INTERNAL "")
+  endif()
+else()
+  if(CPACK_RPM_USER_FILELIST)
+    set(CPACK_RPM_USER_FILELIST_INTERNAL "${CPACK_RPM_USER_FILELIST}")
+  else()
+    set(CPACK_RPM_USER_FILELIST_INTERNAL "")
+  endif()
+endif()
+
+# Handle user specified file line list in CPACK_RPM_USER_FILELIST_INTERNAL
+# Remove those files from CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
+#                      or CPACK_RPM_INSTALL_FILES,
+# hence it must be done before these auto-generated lists are processed.
+if(CPACK_RPM_USER_FILELIST_INTERNAL)
   IF(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: Handling Absolute Destination Files: ${CPACK_ABSOLUTE_DESTINATION_FILES}")
+    message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
+  ENDIF(CPACK_RPM_PACKAGE_DEBUG)
+
+  # Create CMake list from CPACK_RPM_INSTALL_FILES
+  string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
+  string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST
+                          "${CPACK_RPM_INSTALL_FILES_LIST}")
+  string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST
+                          "${CPACK_RPM_INSTALL_FILES_LIST}")
+
+  set(CPACK_RPM_USER_INSTALL_FILES "")
+  foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
+    string(REGEX REPLACE "%[A-Za-z\(\)]* " "" F_PATH ${F})
+    string(REGEX MATCH "%[A-Za-z\(\)]*" F_PREFIX ${F})
+
+    if(F_PREFIX)
+        set(F_PREFIX "${F_PREFIX} ")
+    endif()
+    # Rebuild the user list file
+    set(CPACK_RPM_USER_INSTALL_FILES "${CPACK_RPM_USER_INSTALL_FILES}${F_PREFIX}\"${F_PATH}\"\n")
+
+    # Remove from CPACK_RPM_INSTALL_FILES and CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
+    list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${F_PATH})
+    list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
+
+  endforeach()
+
+  # Rebuild CPACK_RPM_INSTALL_FILES
+  set(CPACK_RPM_INSTALL_FILES "")
+  foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
+    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+  endforeach(F)
+else()
+  set(CPACK_RPM_USER_INSTALL_FILES "")
+endif()
+
+if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+  IF(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: Handling Absolute Destination Files: ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}")
   ENDIF(CPACK_RPM_PACKAGE_DEBUG)
   # Remove trailing space
   string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
@@ -619,7 +694,7 @@ if (CPACK_ABSOLUTE_DESTINATION_FILES)
   # Remove unecessary quotes
   string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
   # Remove ABSOLUTE install file from INSTALL FILE LIST
-  list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${CPACK_ABSOLUTE_DESTINATION_FILES})
+  list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL})
   # Rebuild INSTALL_FILES
   set(CPACK_RPM_INSTALL_FILES "")
   foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
@@ -627,14 +702,17 @@ if (CPACK_ABSOLUTE_DESTINATION_FILES)
   endforeach(F)
   # Build ABSOLUTE_INSTALL_FILES
   set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
-  foreach(F IN LISTS CPACK_ABSOLUTE_DESTINATION_FILES)
+  foreach(F IN LISTS CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
     set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "${CPACK_RPM_ABSOLUTE_INSTALL_FILES}%config \"${F}\"\n")
   endforeach(F)
   IF(CPACK_RPM_PACKAGE_DEBUG)
     message("CPackRPM:Debug: CPACK_RPM_ABSOLUTE_INSTALL_FILES=${CPACK_RPM_ABSOLUTE_INSTALL_FILES}")
     message("CPackRPM:Debug: CPACK_RPM_INSTALL_FILES=${CPACK_RPM_INSTALL_FILES}")
   ENDIF(CPACK_RPM_PACKAGE_DEBUG)
-endif(CPACK_ABSOLUTE_DESTINATION_FILES)
+else()
+  # reset vars in order to avoid leakage of value(s) from one component to another
+  set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
+endif(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
 
 # The name of the final spec file to be used by rpmbuild
 SET(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.spec")
@@ -724,6 +802,7 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 ${CPACK_RPM_INSTALL_FILES}
 ${CPACK_RPM_ABSOLUTE_INSTALL_FILES}
+${CPACK_RPM_USER_INSTALL_FILES}
 
 %changelog
 \@CPACK_RPM_SPEC_CHANGELOG\@
