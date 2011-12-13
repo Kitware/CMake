@@ -85,7 +85,7 @@ private:
   bool ColorOutput;
   bool RunMocFailed;
   bool GenerateAll;
-  bool StrictMode;
+  bool RelaxedMode;
 
 };
 

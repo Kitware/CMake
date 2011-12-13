@@ -10,6 +10,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_definitions(-DFOO)
 
+# enable relaxed mode so automoc can handle all the special cases:
+set(CMAKE_AUTOMOC_RELAXED_MODE TRUE)
+
 # create an executable and a library target, both requiring automoc:
 add_library(codeeditorLib STATIC codeeditor.cpp)
 

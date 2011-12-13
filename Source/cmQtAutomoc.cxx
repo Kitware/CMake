@@ -119,11 +119,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     return;
     }
 
-  bool strictMode = (qtMajorVersion == "5");
-  if (makefile->IsDefinitionSet("CMAKE_AUTOMOC_STRICT_MODE"))
-    {
-    strictMode = makefile->IsOn("CMAKE_AUTOMOC_STRICT_MODE");
-    }
+  bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
 
   // create a custom target for running automoc at buildtime:
   std::string automocTargetName = targetName;
@@ -213,7 +209,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   makefile->AddDefinition("_moc_options", _moc_options.c_str());
   makefile->AddDefinition("_moc_files", _moc_files.c_str());
   makefile->AddDefinition("_moc_headers", _moc_headers.c_str());
-  makefile->AddDefinition("_moc_strict_mode", strictMode ? "TRUE" : "FALSE");
+  makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
@@ -313,7 +309,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
 
-  this->StrictMode = makefile->IsOn("AM_STRICT_MODE");
+  this->RelaxedMode = makefile->IsOn("AM_RELAXED_MODE");
 
   return true;
 }
@@ -509,7 +505,7 @@ bool cmQtAutomoc::RunAutomoc()
       {
       std::cout << "AUTOMOC: Checking " << absFilename << std::endl;
       }
-    if (this->StrictMode == false)
+    if (this->RelaxedMode)
       {
       this->ParseCppFile(absFilename, headerExtensions, includedMocs);
       }

@@ -508,16 +508,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
     cm->DefineProperty
-    ("CMAKE_AUTOMOC_STRICT_MODE",  cmProperty::VARIABLE,
+    ("CMAKE_AUTOMOC_RELAXED_MODE",  cmProperty::VARIABLE,
      "Switch between strict and relaxed automoc mode.",
-     "When TRUE, automoc behaves exactly as described in the documentation "
+     "By default, automoc behaves exactly as described in the documentation "
      "of the AUTOMOC target property.  "
-     "When set to FALSE, it accepts more input and tries to find the correct "
+     "When set to TRUE, it accepts more input and tries to find the correct "
      "input file for moc even if it differs from the documented behaviour. "
      "In this mode it e.g. also checks whether a header file is intended to "
      "be processed by moc when a \"foo.moc\" file has been included.\n"
-     "When using Qt4, CMAKE_AUTOMOC_STRICT_MODE is initialized to FALSE. "
-     "It also has to be set to FALSE for KDE4 compatibility.",
+     "Relaxed mode has to be enabled for KDE4 compatibility.",
      false,
      "Variables That Change Behavior");
 

@@ -162,7 +162,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "CMAKE_AUTOMOC if it is set when a target is created.\n"
      "Additional command line options for moc can be set via the "
      "AUTOMOC_MOC_OPTIONS property.\n"
-     "By setting the CMAKE_AUTOMOC_STRICT_MODE variable to FALSE the rules "
+     "By setting the CMAKE_AUTOMOC_RELAXED_MODE variable to TRUE the rules "
      "for searching the files which will be processed by moc can be relaxed. "
      "See the documentation for this variable for more details.");
 
