@@ -204,6 +204,8 @@ function(install_qt4_plugin_path plugin executable copy installed_plugin_path_va
                 else()
                         if(configurations AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
                                 set(configurations CONFIGURATIONS ${configurations})
+                        else()
+                                unset(configurations)
                         endif()
                         if(component)
                                 set(component COMPONENT ${component})
