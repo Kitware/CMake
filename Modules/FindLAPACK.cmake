@@ -123,7 +123,7 @@ if(_libraries_work)
 endif(_libraries_work)
 
  if(_libraries_work)
-   set(${LIBRARIES} ${${LIBRARIES}} ${_blas})
+   set(${LIBRARIES} ${${LIBRARIES}} ${_blas} ${_threads})
  else(_libraries_work)
     set(${LIBRARIES} FALSE)
  endif(_libraries_work)
