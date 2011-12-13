@@ -1,12 +1,22 @@
 cmake_minimum_required(VERSION 2.8)
 project(VSGNUFortran)
-
-set(EXECUTABLE_OUTPUT_PATH ${VSGNUFortran_BINARY_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${VSGNUFortran_BINARY_DIR}/bin)
+# force the executable to be put out of Debug/Release dir
+# because gmake build of fortran will not be in a config
+# directory, and for easier testing we want the exe and .dll
+# to be in the same directory.
+if(CMAKE_CONFIGURATION_TYPES)
+  foreach(config ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER "${config}" config)
+    set(ARCHIVE_OUTPUT_DIRECTORY_${config}
+      "${PROJECT_BINARY_DIR}/bin")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config}
+      "${PROJECT_BINARY_DIR}/bin")
+  endforeach()
+endif()
 
 include(CMakeAddFortranSubdirectory)
-# add the lapack subdirectory as a fortran project
-# the subdir is lapack, the project is LAPACK
+# add the fortran subdirectory as a fortran project
+# the subdir is fortran, the project is FortranHello
 cmake_add_fortran_subdirectory(fortran
   PROJECT FortranHello  # project name in toplevel CMakeLists.txt
   ARCHIVE_DIR ../bin # .lib location relative to root binary tree
