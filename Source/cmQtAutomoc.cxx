@@ -698,8 +698,9 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                             "includes the moc file \"" << currentMoc <<
                             "\", but does not contain a Q_OBJECT macro. "
                             "Running moc on "
-                        << "\"" << headerToMoc << "\" ! Better include \"moc_"
-                        << basename << ".cpp\" for a robust build.\n"
+                        << "\"" << headerToMoc << "\" ! Include \"moc_"
+                        << basename << ".cpp\" for a compatiblity with "
+                           "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
                         << std::endl;
               }
             else
@@ -708,8 +709,9 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                             "includes the moc file \"" << currentMoc <<
                             "\" instead of \"moc_" << basename << ".cpp\". "
                             "Running moc on "
-                        << "\"" << headerToMoc << "\" ! Better include \"moc_"
-                        << basename << ".cpp\" for a robust build.\n"
+                        << "\"" << headerToMoc << "\" ! Include \"moc_"
+                        << basename << ".cpp\" for compatiblity with "
+                           "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
                         << std::endl;
               }
             }
@@ -749,7 +751,8 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                    "includes "
                 << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
                 << "\"" << absFilename << "\" ! Better include \""
-                << scannedFileBasename << ".moc\" for a robust build.\n"
+                << scannedFileBasename << ".moc\" for compatiblity with "
+                   "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
                 << std::endl;
       includedMocs[absFilename] = ownMocUnderscoreFile;
       includedMocs.erase(ownMocHeaderFile);
