@@ -7,11 +7,14 @@ project(VSGNUFortran)
 if(CMAKE_CONFIGURATION_TYPES)
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER "${config}" config)
-    set(ARCHIVE_OUTPUT_DIRECTORY_${config}
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${config}
       "${PROJECT_BINARY_DIR}/bin")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config}
       "${PROJECT_BINARY_DIR}/bin")
   endforeach()
+else()
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 endif()
 
 include(CMakeAddFortranSubdirectory)
