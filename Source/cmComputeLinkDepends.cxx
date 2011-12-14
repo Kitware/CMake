@@ -419,6 +419,12 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
 
+  // Skip dependencies known to not be shared libraries.
+  if(entry.Target && entry.Target->GetType() != cmTarget::SHARED_LIBRARY)
+    {
+    return;
+    }
+
   // This shared library dependency must follow the item that listed
   // it.
   this->EntryConstraintGraph[dep.DependerIndex].push_back(index);
