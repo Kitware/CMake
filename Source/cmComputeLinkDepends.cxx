@@ -429,7 +429,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     if(cmTarget::LinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config))
       {
-      // We use just the shared dependencies, not the interface.
+      // Follow public and private dependencies transitively.
+      this->QueueSharedDependencies(index, iface->Libraries);
       this->QueueSharedDependencies(index, iface->SharedDeps);
       }
     }
