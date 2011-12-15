@@ -13,14 +13,17 @@
 # cmake_add_fortran_subdirectory(
 #   <subdir>                 # name of subdirectory
 #    PROJECT <project_name>  # project name in sbudir toplevel CMakeLists.txt
-#  ARCHIVE_DIR <dir>         # .lib location relative to root binary tree (lib)
-#  RUNTIME_DIR <dir>         # .dll location relative to root binary tree (bin)
+#  ARCHIVE_DIR <dir>         # dir where project places .lib files
+#  RUNTIME_DIR <dir>         # dir where project places .dll files
 #  LIBRARIES lib2 lib2    # names of libraries created and exported
 #  LINK_LIBRARIES            # link interface libraries for LIBRARIES
 #   LINK_LIBS <lib1>  <dep1> <dep2> ... <depN>
 #   LINK_LIBS <lib2> <dep1> <dep2> ... <depN>
 #  CMAKE_COMMAND_LINE        # extra command line flags to pass to cmake
 #   )
+# Relative paths in ARCHIVE_DIR and RUNTIME_DIR are interpreted with respect
+# to the build directory corresponding to the source directory in which the
+# function is invoked.
 #
 
 #=============================================================================
@@ -97,6 +100,12 @@ function(cmake_add_fortran_subdirectory subdir)
   set(libraries ${ARGS_LIBRARIES})
   # use the same directory that add_subdirectory would have used
   set(build_dir "${CMAKE_CURRENT_BINARY_DIR}/${subdir}")
+  foreach(dir_var library_dir binary_dir)
+    if(NOT IS_ABSOLUTE "${${dir_var}}")
+      get_filename_component(${dir_var}
+        "${CMAKE_CURRENT_BINARY_DIR}/${${dir_var}}" ABSOLUTE)
+    endif()
+  endforeach()
   # create build and configure wrapper scripts
   _setup_mingw_config_and_build(${source_dir})
   # create the external project
@@ -123,10 +132,8 @@ function(cmake_add_fortran_subdirectory subdir)
     add_library(${lib} SHARED IMPORTED)
     set_property(TARGET ${lib} APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
     set_target_properties(${lib} PROPERTIES
-      IMPORTED_IMPLIB_NOCONFIG
-      "${build_dir}/${library_dir}/lib${lib}.lib"
-      IMPORTED_LOCATION_NOCONFIG
-      "${build_dir}/${binary_dir}/lib${lib}.dll"
+      IMPORTED_IMPLIB_NOCONFIG   "${library_dir}/lib${lib}.lib"
+      IMPORTED_LOCATION_NOCONFIG "${binary_dir}/lib${lib}.dll"
       )
     add_dependencies(${lib} ${project_name}_build)
   endforeach()
