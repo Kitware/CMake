@@ -57,12 +57,28 @@ function(_setup_mingw_config_and_build source_dir)
       "Or set the cache variable MINGW_GFORTRAN to the full path. "
       " This is required to build")
   endif()
-  execute_process(COMMAND ${MINGW_GFORTRAN} -v ERROR_VARIABLE out)
-  if(NOT "${out}" MATCHES "Target:.*mingw32")
-    message(FATAL_ERROR "Non-MinGW gfortran found: ${MINGW_GFORTRAN}\n"
-      "output from -v [${out}]\n"
-      "set MINGW_GFORTRAN to the path to MinGW fortran.")
+
+  # Validate the MinGW gfortran we found.
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(_mingw_target "Target:.*64.*mingw")
+  else()
+    set(_mingw_target "Target:.*mingw32")
   endif()
+  execute_process(COMMAND "${MINGW_GFORTRAN}" -v
+    ERROR_VARIABLE out ERROR_STRIP_TRAILING_WHITESPACE)
+  if(NOT "${out}" MATCHES "${_mingw_target}")
+    string(REPLACE "\n" "\n  " out "  ${out}")
+    message(FATAL_ERROR
+      "MINGW_GFORTRAN is set to\n"
+      "  ${MINGW_GFORTRAN}\n"
+      "which is not a MinGW gfortran for this architecture.  "
+      "The output from -v does not match \"${_mingw_target}\":\n"
+      "${out}\n"
+      "Set MINGW_GFORTRAN to a proper MinGW gfortran for this architecture."
+      )
+  endif()
+
+  # Configure scripts to run MinGW tools with the proper PATH.
   get_filename_component(MINGW_PATH ${MINGW_GFORTRAN} PATH)
   file(TO_NATIVE_PATH "${MINGW_PATH}" MINGW_PATH)
   string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
