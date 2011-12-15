@@ -187,7 +187,7 @@ IF(XCODE)
   SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
 ENDIF(XCODE)
 
-IF(_CURRENT_OSX_VERSION STREQUAL "10.4")
+IF("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
   # Need to list dependent shared libraries on link line.  When building
   # with -isysroot (for universal binaries), the linker always looks for
   # dependent libraries under the sysroot.  Listing them on the link
