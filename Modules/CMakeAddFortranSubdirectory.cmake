@@ -7,27 +7,25 @@
 # an external project to build with the MinGW tools.  It will also
 # create imported targets for the libraries created.  This will only
 # work if the fortran code is built into a dll, so BUILD_SHARED_LIBS
-# is turned on in the project.  In addition the GNUtoMS option is set
-# to on, so that the MS .lib files are created.
+# is turned on in the project.  In addition the CMAKE_GNUtoMS option
+# is set to on, so that the MS .lib files are created.
 # Usage is as follows:
-# cmake_add_fortran_subdirectory(
-#   <subdir>                 # name of subdirectory
-#    PROJECT <project_name>  # project name in sbudir toplevel CMakeLists.txt
-#  ARCHIVE_DIR <dir>         # dir where project places .lib files
-#  RUNTIME_DIR <dir>         # dir where project places .dll files
-#  LIBRARIES lib2 lib2    # names of libraries created and exported
-#  LINK_LIBRARIES            # link interface libraries for LIBRARIES
-#   LINK_LIBS <lib1>  <dep1> <dep2> ... <depN>
-#   LINK_LIBS <lib2> <dep1> <dep2> ... <depN>
-#  CMAKE_COMMAND_LINE        # extra command line flags to pass to cmake
+#  cmake_add_fortran_subdirectory(
+#   <subdir>                # name of subdirectory
+#   PROJECT <project_name>  # project name in subdir top CMakeLists.txt
+#   ARCHIVE_DIR <dir>       # dir where project places .lib files
+#   RUNTIME_DIR <dir>       # dir where project places .dll files
+#   LIBRARIES <lib>...      # names of library targets to import
+#   LINK_LIBRARIES          # link interface libraries for LIBRARIES
+#    [LINK_LIBS <lib> <dep>...]...
+#   CMAKE_COMMAND_LINE ...  # extra command line flags to pass to cmake
 #   )
 # Relative paths in ARCHIVE_DIR and RUNTIME_DIR are interpreted with respect
 # to the build directory corresponding to the source directory in which the
 # function is invoked.
-#
 
 #=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
+# Copyright 2011 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
