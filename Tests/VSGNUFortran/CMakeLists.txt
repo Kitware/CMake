@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(VSGNUFortran)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+
 # force the executable to be put out of Debug/Release dir
 # because gmake build of fortran will not be in a config
 # directory, and for easier testing we want the exe and .dll
@@ -7,14 +12,9 @@ project(VSGNUFortran)
 if(CMAKE_CONFIGURATION_TYPES)
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER "${config}" config)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${config}
-      "${PROJECT_BINARY_DIR}/bin")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config}
-      "${PROJECT_BINARY_DIR}/bin")
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   endforeach()
-else()
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 endif()
 
 include(CMakeAddFortranSubdirectory)
@@ -22,11 +22,13 @@ include(CMakeAddFortranSubdirectory)
 # the subdir is fortran, the project is FortranHello
 cmake_add_fortran_subdirectory(fortran
   PROJECT FortranHello  # project name in toplevel CMakeLists.txt
-  ARCHIVE_DIR ../bin # .lib location relative to root binary tree
-  RUNTIME_DIR ../bin # .dll location relative to root binary tree
+  ARCHIVE_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+  RUNTIME_DIR bin # ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   LIBRARIES hello world # target libraries created
-  CMAKE_COMMAND_LINE -DEXECUTABLE_OUTPUT_PATH=../bin
-                     -DLIBRARY_OUTPUT_PATH=../bin
+  CMAKE_COMMAND_LINE
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
   LINK_LIBRARIES  # link interface libraries
    LINK_LIBS hello world  # hello needs world to link
    )
