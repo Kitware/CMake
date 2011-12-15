@@ -44,10 +44,13 @@ include(ExternalProject)
 include(CMakeParseArguments)
 
 function(_setup_mingw_config_and_build source_dir)
-  find_program(MINGW_GFORTRAN NAMES gfortran
-    HINTS
-    c:/MinGW/bin
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin" )
+  # Look for a MinGW gfortran.
+  find_program(MINGW_GFORTRAN
+    NAMES gfortran
+    PATHS
+      c:/MinGW/bin
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
+    )
   if(NOT MINGW_GFORTRAN)
     message(FATAL_ERROR
       "gfortran not found, please install MinGW with the gfortran option."
