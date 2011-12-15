@@ -120,7 +120,7 @@ function(cmake_add_fortran_subdirectory subdir)
   externalproject_add_step(${project_name}_build forcebuild
     COMMAND ${CMAKE_COMMAND}
     -E remove
-    ${CMAKE_CURRENT_BUILD_DIR}/${project_name}-prefix/src/${project_name}-stamp/lapack-build
+    ${CMAKE_CURRENT_BUILD_DIR}/${project_name}-prefix/src/${project_name}-stamp/${project_name}-build
     DEPENDEES configure
     DEPENDERS build
     ALWAYS 1
