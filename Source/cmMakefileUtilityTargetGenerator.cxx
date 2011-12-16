@@ -34,6 +34,20 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   *this->BuildFileStream
     << "# Utility rule file for " << this->Target->GetName() << ".\n\n";
 
+  if(!this->NoRuleMessages)
+    {
+    const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")?
+                      "$(CMAKE_BINARY_DIR)/" : "");
+    // Include the progress variables for the target.
+    *this->BuildFileStream
+      << "# Include the progress variables for this target.\n"
+      << this->LocalGenerator->IncludeDirective << " " << root
+      << this->Convert(this->ProgressFileNameFull.c_str(),
+                       cmLocalGenerator::HOME_OUTPUT,
+                       cmLocalGenerator::MAKEFILE)
+      << "\n\n";
+    }
+
   // write the custom commands for this target
   this->WriteTargetBuildRules();
 
