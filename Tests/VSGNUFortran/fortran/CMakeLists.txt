@@ -10,3 +10,6 @@ FortranCInterface_HEADER(HelloWorldFCMangle.h
 add_library(hello SHARED hello.f)
 add_library(world SHARED world.f)
 target_link_libraries(hello world)
+if(CMAKE_Fortran_COMPILER_ID MATCHES SunPro)
+  target_link_libraries(hello fsu)
+endif()
