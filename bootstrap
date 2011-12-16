@@ -1,7 +1,7 @@
 #!/bin/sh
 #=============================================================================
 # CMake - Cross Platform Makefile Generator
-# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+# Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -337,7 +337,7 @@ Directory and file names:
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  echo "CMake ${cmake_version}, Copyright 2000-2009 Kitware, Inc."
+  echo "CMake ${cmake_version}, Copyright 2000-2011 Kitware, Inc."
 }
 
 # Display CMake bootstrap error, display the log file and exit
