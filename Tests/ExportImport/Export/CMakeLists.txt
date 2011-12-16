@@ -23,8 +23,13 @@ add_library(testLib1 STATIC testLib1.c)
 add_library(testLib2 STATIC testLib2.c)
 target_link_libraries(testLib2 testLib1)
 
+# Test library with empty link interface.  Link it to an implementation
+# dependency that itself links to dependencies publicly.
+add_library(testLib3ImpDep SHARED testLib3ImpDep.c)
+set_property(TARGET testLib3ImpDep PROPERTY LIBRARY_OUTPUT_DIRECTORY impl/dep)
 add_library(testLib3Imp SHARED testLib3Imp.c)
 set_property(TARGET testLib3Imp PROPERTY LIBRARY_OUTPUT_DIRECTORY impl)
+target_link_libraries(testLib3Imp testLib3ImpDep)
 add_library(testLib3 SHARED testLib3.c)
 target_link_libraries(testLib3 testLib3Imp)
 set_property(TARGET testLib3 PROPERTY LINK_INTERFACE_LIBRARIES "")
@@ -105,6 +110,14 @@ install(
   ARCHIVE DESTINATION lib/impl
   )
 install(
+  TARGETS
+  testLib3ImpDep
+  EXPORT exp
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib/impl/dep
+  ARCHIVE DESTINATION lib/impl/dep
+  )
+install(
   TARGETS testLib5
   EXPORT exp
   # Leave out RUNTIME DESTINATION to test implib-only export.
@@ -120,7 +133,7 @@ endif(WIN32)
 
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
-  testExe2libImp testLib3Imp
+  testExe2libImp testLib3Imp testLib3ImpDep
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
