@@ -229,10 +229,20 @@ IF(BUILD_TESTING)
 
   SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
   SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/CMakeBuildCOnly")
+  SET(CMAKE_BUILD_TEST_EXE COnly)
   CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CMakeBuildTest.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake" @ONLY)
   ADD_TEST(CMakeBuildTest ${CMAKE_CMAKE_COMMAND} -P
     "${CMake_BINARY_DIR}/Tests/CMakeBuildTest.cmake")
+  LIST(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
+  # now do it again for a project that has two project commands
+  SET(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/DoubleProject")
+  SET(CMAKE_BUILD_TEST_BINARY_DIR "${CMake_BINARY_DIR}/Tests/DoubleProject")
+  SET(CMAKE_BUILD_TEST_EXE just_silly)
+  CONFIGURE_FILE("${CMake_SOURCE_DIR}/Tests/CMakeBuildTest.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CMakeBuildDoubleProjectTest.cmake" @ONLY)
+  ADD_TEST(CMakeDoubleProject ${CMAKE_CMAKE_COMMAND} -P
+    "${CMake_BINARY_DIR}/Tests/CMakeBuildDoubleProjectTest.cmake")
   LIST(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
