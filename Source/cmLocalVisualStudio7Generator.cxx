@@ -223,6 +223,14 @@ void cmLocalVisualStudio7Generator
   this->FortranProject =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
     ->TargetIsFortranOnly(target);
+
+  // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
+  VSVersion realVersion = this->Version;
+  if(this->FortranProject && this->Version >= VS10)
+    {
+    this->Version = VS9;
+    }
+
   // add to the list of projects
   std::string pname = lname;
   target.SetProperty("GENERATOR_FILE_NAME",lname);
@@ -250,6 +258,8 @@ void cmLocalVisualStudio7Generator
     {
     this->GlobalGenerator->FileReplacedDuringGenerate(fname);
     }
+
+  this->Version = realVersion;
 }
 
 //----------------------------------------------------------------------------
