@@ -116,6 +116,14 @@ endforeach()
 #-----------------------------------------------------------------------------
 set(FortranCInterface_SOURCE_DIR ${CMAKE_ROOT}/Modules/FortranCInterface)
 
+# MinGW's make tool does not always like () in the path
+if("${CMAKE_GENERATOR}" MATCHES "MinGW" AND
+    "${FortranCInterface_SOURCE_DIR}" MATCHES "[()]")
+  file(COPY ${FortranCInterface_SOURCE_DIR}/
+    DESTINATION ${CMAKE_BINARY_DIR}/CMakeFiles/FortranCInterfaceMinGW)
+  set(FortranCInterface_SOURCE_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/FortranCInterfaceMinGW)
+endif()
+
 # Create the interface detection project if it does not exist.
 if(NOT FortranCInterface_BINARY_DIR)
   set(FortranCInterface_BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/FortranCInterface)
