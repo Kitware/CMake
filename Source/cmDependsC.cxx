@@ -465,6 +465,9 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
       // that this check does not account for the possibility of two
       // headers with the same name in different directories when one
       // is included by double-quotes and the other by angle brackets.
+      // It also does not work properly if two header files with the same
+      // name exist in different directories, and both are included from a
+      // file their own directory by simply using "filename.h" (#12619)
       // This kind of problem will be fixed when a more
       // preprocessor-like implementation of this scanner is created.
       if (this->IncludeRegexScan.find(entry.FileName.c_str()))
