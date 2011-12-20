@@ -147,24 +147,6 @@ IF(WIN32 AND NOT CYGWIN)
   LIST(APPEND libarchive_SOURCES filter_fork_windows.c)
 ENDIF(WIN32 AND NOT CYGWIN)
 
-# Libarchive is a shared library
-ADD_LIBRARY(archive SHARED ${libarchive_SOURCES} ${include_HEADERS})
-TARGET_LINK_LIBRARIES(archive ${ADDITIONAL_LIBS})
-SET_TARGET_PROPERTIES(archive PROPERTIES SOVERSION ${SOVERSION})
-
-# archive_static is a static library
-ADD_LIBRARY(archive_static STATIC ${libarchive_SOURCES} ${include_HEADERS})
-SET_TARGET_PROPERTIES(archive_static PROPERTIES COMPILE_DEFINITIONS
-  LIBARCHIVE_STATIC)
-# On Posix systems, libarchive.so and libarchive.a can co-exist.
-IF(NOT WIN32 OR CYGWIN)
-  SET_TARGET_PROPERTIES(archive_static PROPERTIES OUTPUT_NAME archive)
-ENDIF(NOT WIN32 OR CYGWIN)
-
-# How to install the libraries
-INSTALL(TARGETS archive archive_static
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-INSTALL_MAN(${libarchive_MANS})
-INSTALL(FILES ${include_HEADERS} DESTINATION include)
+# CMake needs just one static "cmlibarchive" library.
+ADD_LIBRARY(cmlibarchive STATIC ${libarchive_SOURCES} ${include_HEADERS})
+TARGET_LINK_LIBRARIES(cmlibarchive ${ADDITIONAL_LIBS})
