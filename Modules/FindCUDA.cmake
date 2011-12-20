@@ -216,6 +216,18 @@
 #  CUDA_CUBLAS_LIBRARIES -- Device or emulation library for the Cuda BLAS
 #                           implementation (alterative to:
 #                           CUDA_ADD_CUBLAS_TO_TARGET macro).
+#  CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
+#                           Only available for CUDA version 3.2+.
+#  CUDA_cusparse_LIBRARY -- CUDA Sparse Matrix library.
+#                           Only available for CUDA version 3.2+.
+#  CUDA_npp_LIBRARY      -- NVIDIA Performance Primitives library.
+#                           Only available for CUDA version 4.0+.
+#  CUDA_nvcuvenc_LIBRARY -- CUDA Video Encoder library.
+#                           Only available for CUDA version 3.2+.
+#                           Windows only.
+#  CUDA_nvcuvid_LIBRARY  -- CUDA Video Decoder library.
+#                           Only available for CUDA version 3.2+.
+#                           Windows only.
 #
 #
 #  James Bigler, NVIDIA Corp (nvidia.com - jbigler)
@@ -430,6 +442,11 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_cublasemu_LIBRARY CACHE)
   unset(CUDA_cufft_LIBRARY CACHE)
   unset(CUDA_cufftemu_LIBRARY CACHE)
+  unset(CUDA_curand_LIBRARY CACHE)
+  unset(CUDA_cusparse_LIBRARY CACHE)
+  unset(CUDA_npp_LIBRARY CACHE)
+  unset(CUDA_nvcuvenc_LIBRARY CACHE)
+  unset(CUDA_nvcuvid_LIBRARY CACHE)
 endif()
 
 if(NOT "${CUDA_SDK_ROOT_DIR}" STREQUAL "${CUDA_SDK_ROOT_DIR_INTERNAL}")
@@ -600,7 +617,7 @@ if(CUDA_VERSION VERSION_GREATER "3.0")
   endif()
 endif()
 
-# Search for cufft and cublas libraries.
+# Search for additional CUDA toolkit libraries.
 if(CUDA_VERSION VERSION_LESS "3.1")
   # Emulation libraries aren't available in version 3.1 onward.
   find_cuda_helper_libs(cufftemu)
@@ -608,6 +625,18 @@ if(CUDA_VERSION VERSION_LESS "3.1")
 endif()
 find_cuda_helper_libs(cufft)
 find_cuda_helper_libs(cublas)
+if(NOT CUDA_VERSION VERSION_LESS "3.2")
+  # cusparse showed up in version 3.2
+  find_cuda_helper_libs(cusparse)
+  find_cuda_helper_libs(curand)
+  if (WIN32)
+    find_cuda_helper_libs(nvcuvenc)
+    find_cuda_helper_libs(nvcuvid)
+  endif()
+endif()
+if(NOT CUDA_VERSION VERSION_LESS "4.0")
+  find_cuda_helper_libs(npp)
+endif()
 
 if (CUDA_BUILD_EMULATION)
   set(CUDA_CUFFT_LIBRARIES ${CUDA_cufftemu_LIBRARY})
