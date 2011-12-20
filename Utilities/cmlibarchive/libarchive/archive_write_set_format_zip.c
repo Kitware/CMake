@@ -63,7 +63,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_zip.c 201168 20
 #include <string.h>
 #endif
 #ifdef HAVE_ZLIB_H
-#include <zlib.h>
+#include <cm_zlib.h>
 #endif
 
 #include "archive.h"

@@ -32,7 +32,7 @@
 #include <time.h>
 #include <limits.h>
 #ifdef HAVE_ZLIB_H
-#include <zlib.h> /* crc32 */
+#include <cm_zlib.h> /* crc32 */
 #endif
 
 #include "archive.h"
