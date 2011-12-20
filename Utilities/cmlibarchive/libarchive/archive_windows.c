@@ -64,6 +64,23 @@
 
 #define EPOC_TIME ARCHIVE_LITERAL_ULL(116444736000000000)
 
+#if defined(__LA_LSEEK_NEEDED)
+static BOOL SetFilePointerEx_perso(HANDLE hFile,
+				   LARGE_INTEGER liDistanceToMove,
+				   PLARGE_INTEGER lpNewFilePointer,
+				   DWORD dwMoveMethod)
+{
+	LARGE_INTEGER li;
+	li.QuadPart = liDistanceToMove.QuadPart;
+	li.LowPart = SetFilePointer(
+		hFile, li.LowPart, &li.HighPart, dwMoveMethod);
+	if(lpNewFilePointer) {
+		lpNewFilePointer->QuadPart = li.QuadPart;
+	}
+	return li.LowPart != -1 || GetLastError() == NO_ERROR;
+}
+#endif
+
 struct ustat {
 	int64_t		st_atime;
 	uint32_t	st_atime_nsec;
@@ -249,6 +266,40 @@ __la_fcntl(int fd, int cmd, int val)
 	errno = EINVAL;
 	return (-1);
 }
+
+#if defined(__LA_LSEEK_NEEDED)
+__int64
+__la_lseek(int fd, __int64 offset, int whence)
+{
+	LARGE_INTEGER distance;
+	LARGE_INTEGER newpointer;
+	HANDLE handle;
+
+	if (fd < 0) {
+		errno = EBADF;
+		return (-1);
+	}
+	handle = (HANDLE)_get_osfhandle(fd);
+	if (GetFileType(handle) != FILE_TYPE_DISK) {
+		errno = EBADF;
+		return (-1);
+	}
+	distance.QuadPart = offset;
+	if (!SetFilePointerEx_perso(handle, distance, &newpointer, whence)) {
+		DWORD lasterr;
+
+		lasterr = GetLastError();
+		if (lasterr == ERROR_BROKEN_PIPE)
+			return (0);
+		if (lasterr == ERROR_ACCESS_DENIED)
+			errno = EBADF;
+		else
+			la_dosmaperr(lasterr);
+		return (-1);
+	}
+	return (newpointer.QuadPart);
+}
+#endif
 
 /* This can exceed MAX_PATH limitation. */
 int

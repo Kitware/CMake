@@ -95,7 +95,12 @@
 #define	fileno		_fileno
 #endif
 #define	fstat		__la_fstat
+#if !defined(__BORLANDC__)
 #define	lseek		_lseeki64
+#else
+#define	lseek		__la_lseek
+#define __LA_LSEEK_NEEDED
+#endif
 #define	lstat		__la_stat
 #define	open		__la_open
 #define	read		__la_read
@@ -246,6 +251,9 @@
 extern int	 __la_fcntl(int fd, int cmd, int val);
 extern int	 __la_fstat(int fd, struct stat *st);
 extern int	 __la_lstat(const char *path, struct stat *st);
+#if defined(__LA_LSEEK_NEEDED)
+extern __int64	 __la_lseek(int fd, __int64 offset, int whence);
+#endif
 extern int	 __la_open(const char *path, int flags, ...);
 extern ssize_t	 __la_read(int fd, void *buf, size_t nbytes);
 extern int	 __la_stat(const char *path, struct stat *st);
