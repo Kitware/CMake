@@ -1,4 +1,7 @@
 /* config.h.  Generated from build/cmake/config.h.in by cmake configure */
+#if defined(__osf__)
+# define _OSF_SOURCE
+#endif
 
 /*
  * Ensure we have C99-style int64_t, etc, all defined.

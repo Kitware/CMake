@@ -47,7 +47,7 @@
  */
 #if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux) || defined(__BORLANDC__)
 #define	inline
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) || defined(__osf__)
 #define inline __inline
 #endif
 

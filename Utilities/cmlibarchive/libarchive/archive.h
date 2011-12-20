@@ -41,7 +41,7 @@
  */
 #if defined(__BORLANDC__) && __BORLANDC__ >= 0x560
 # include <stdint.h>
-#elif !defined(__WATCOMC__) && !defined(_MSC_VER) && !defined(__INTERIX) && !defined(__BORLANDC__) && !defined(_SCO_DS)
+#elif !defined(__WATCOMC__) && !defined(_MSC_VER) && !defined(__INTERIX) && !defined(__BORLANDC__) && !defined(_SCO_DS) && !defined(__osf__)
 # include <inttypes.h>
 #endif
 
@@ -65,7 +65,7 @@
 # endif
 #else
 # include <unistd.h>  /* ssize_t, uid_t, and gid_t */
-# if defined(_SCO_DS)
+# if defined(_SCO_DS) || defined(__osf__)
 #  define	__LA_INT64_T	long long
 # else
 #  define	__LA_INT64_T	int64_t

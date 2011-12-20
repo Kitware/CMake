@@ -64,7 +64,7 @@
 # endif
 #else
 #include <unistd.h>
-# if defined(_SCO_DS)
+# if defined(_SCO_DS) || defined(__osf__)
 #  define	__LA_INT64_T	long long
 # else
 #  define	__LA_INT64_T	int64_t
