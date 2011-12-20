@@ -11,7 +11,7 @@
 #  SYSCONFDIR       - read-only single-machine data (etc)
 #  SHAREDSTATEDIR   - modifiable architecture-independent data (com)
 #  LOCALSTATEDIR    - modifiable single-machine data (var)
-#  LIBDIR           - object code libraries (lib or lib64)
+#  LIBDIR           - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
 #  INCLUDEDIR       - C header files (include)
 #  OLDINCLUDEDIR    - C header files for non-gcc (/usr/include)
 #  DATAROOTDIR      - read-only architecture-independent data root (share)
@@ -75,18 +75,24 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   #  - we are NOT on debian
   #  - we are on a 64 bits system
   # reason is: amd64 ABI: http://www.x86-64.org/documentation/abi.pdf
-  # Note that the future of multi-arch handling may be even
-  # more complicated than that: http://wiki.debian.org/Multiarch
+  # For Debian with multiarch, use 'lib/${CMAKE_LIBRARY_ARCHITECTURE}' if
+  # CMAKE_LIBRARY_ARCHITECTURE is set (which contains e.g. "i386-linux-gnu"
+  # See http://wiki.debian.org/Multiarch
   if(CMAKE_SYSTEM_NAME MATCHES "Linux"
-      AND NOT CMAKE_CROSSCOMPILING
-      AND NOT EXISTS "/etc/debian_version")
-    if(NOT DEFINED CMAKE_SIZEOF_VOID_P)
-      message(AUTHOR_WARNING
-        "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known. "
-        "Please enable at least one language before including GNUInstallDirs.")
-    else()
-      if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-        set(_LIBDIR_DEFAULT "lib64")
+      AND NOT CMAKE_CROSSCOMPILING)
+    if (EXISTS "/etc/debian_version") # is this a debian system ?
+       if(CMAKE_LIBRARY_ARCHITECTURE)
+         set(_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
+       endif()
+    else() # not debian, rely on CMAKE_SIZEOF_VOID_P:
+      if(NOT DEFINED CMAKE_SIZEOF_VOID_P)
+        message(AUTHOR_WARNING
+          "Unable to determine default CMAKE_INSTALL_LIBDIR directory because no target architecture is known. "
+          "Please enable at least one language before including GNUInstallDirs.")
+      else()
+        if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+          set(_LIBDIR_DEFAULT "lib64")
+        endif()
       endif()
     endif()
   endif()
