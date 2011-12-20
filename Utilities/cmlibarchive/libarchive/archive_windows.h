@@ -271,5 +271,9 @@ extern wchar_t *__la_win_permissive_name_w(const wchar_t *wname);
 extern void __la_dosmaperr(unsigned long e);
 #define la_dosmaperr(e) __la_dosmaperr(e)
 
+#if defined(HAVE_WCRTOMB) && defined(__BORLANDC__)
+typedef int mbstate_t;
+size_t wcrtomb(char *, wchar_t, mbstate_t *);
+#endif
 
 #endif /* LIBARCHIVE_ARCHIVE_WINDOWS_H_INCLUDED */
