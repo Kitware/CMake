@@ -82,10 +82,14 @@ function(_setup_mingw_config_and_build source_dir)
   get_filename_component(MINGW_PATH ${MINGW_GFORTRAN} PATH)
   file(TO_NATIVE_PATH "${MINGW_PATH}" MINGW_PATH)
   string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
-  configure_file(${_MS_MINGW_SOURCE_DIR}/config_mingw.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/config_mingw.cmake @ONLY)
-  configure_file(${_MS_MINGW_SOURCE_DIR}/build_mingw.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/build_mingw.cmake @ONLY)
+  configure_file(
+    ${_MS_MINGW_SOURCE_DIR}/AddFortranSubdirectory/config_mingw.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/config_mingw.cmake
+    @ONLY)
+  configure_file(
+    ${_MS_MINGW_SOURCE_DIR}/AddFortranSubdirectory/build_mingw.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/build_mingw.cmake
+    @ONLY)
 endfunction()
 
 function(_add_fortran_library_link_interface library depend_library)
