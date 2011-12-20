@@ -1254,6 +1254,56 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
           set(CTEST_RUN_MFC OFF)
         endif()
       endif()
+
+      # Last resort, after quick checks are done. Do a try_compile, and avoid
+      # the MFC test if the simplest possible MFC app cannot be compiled.
+      if(CTEST_RUN_MFC AND NOT DEFINED HAVE_MFC)
+        configure_file(
+          ${CMAKE_CURRENT_SOURCE_DIR}/MFC/try_compile/CMakeLists.txt
+          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/CMakeLists.txt
+          COPYONLY
+          )
+        configure_file(
+          ${CMAKE_CURRENT_SOURCE_DIR}/MFC/mfc1/stdafx.cpp
+          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/stdafx.cpp
+          COPYONLY
+          )
+        configure_file(
+          ${CMAKE_CURRENT_SOURCE_DIR}/MFC/mfc1/stdafx.h
+          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/stdafx.h
+          COPYONLY
+          )
+
+        message(STATUS "Looking for MFC")
+
+        try_compile(HAVE_MFC
+          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile/build
+          ${CMAKE_CURRENT_BINARY_DIR}/MFC/try_compile
+          try_compile_mfc
+          OUTPUT_VARIABLE HAVE_MFC_OUTPUT)
+
+        if(HAVE_MFC)
+          message(STATUS "Looking for MFC - found")
+          set(HAVE_MFC 1 CACHE INTERNAL "Have MFC")
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "Determining if MFC exists passed with the following output:\n"
+            "${HAVE_MFC_OUTPUT}\n\n")
+        else()
+          message(STATUS "Looking for MFC - not found")
+          set(HAVE_MFC "" CACHE INTERNAL "Have MFC")
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if MFC exists failed with the following output:\n"
+            "${HAVE_MFC_OUTPUT}\n\n")
+        endif()
+      endif()
+
+      if(CTEST_RUN_MFC AND NOT HAVE_MFC)
+        message(STATUS
+          "cannot compile simplest ever MFC app, avoiding MFC test")
+        set(CTEST_RUN_MFC OFF)
+      endif()
     endif()
   endif()
 
