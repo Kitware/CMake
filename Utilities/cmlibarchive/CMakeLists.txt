@@ -46,14 +46,6 @@ math(EXPR INTERFACE_VERSION  "11 + ${_minor}")
 # ?? Should there be more here ??
 SET(SOVERSION "${INTERFACE_VERSION}")
 
-# Especially for early development, we want to be a little
-# aggressive about diagnosing build problems; this can get
-# relaxed somewhat in final shipping versions.
-IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
-  ADD_DEFINITIONS(-Wall -Werror)
-  SET(CMAKE_REQUIRED_FLAGS "-Wall -Werror")
-ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
-
 # Enable CTest/CDash support
 include(CTest)
 
