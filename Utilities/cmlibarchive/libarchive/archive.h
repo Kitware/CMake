@@ -45,6 +45,13 @@
 # include <inttypes.h>
 #endif
 
+/* Borland symbols are case-insensitive.  This workaround only works
+   within CMake because we do not mix compilers.  */
+#if defined(__BORLANDC__)
+# define archive_read_open_FILE archive_read_open_FILE_
+# define archive_write_open_FILE archive_write_open_FILE_
+#endif
+
 /* Get appropriate definitions of standard POSIX-style types. */
 /* These should match the types used in 'struct stat' */
 #if defined(_WIN32) && !defined(__CYGWIN__)
