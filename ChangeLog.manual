@@ -1,3 +1,55 @@
+Changes in CMake 2.8.7-rc2 (since 2.8.7-rc1)
+--------------------------------------------
+Alex Neundorf (5):
+      automoc: default to strict mode, use CMAKE_AUTOMOC_RELAXED_MODE
+      automoc: improved warning message in relaxed mode
+      Remove trailing whitespace
+      Add comment about one more problem of the C depency scanner.
+      fix #12262: dependency scanning for ASM files
+
+Bill Hoffman (1):
+      Fix the case where cmake --build failed with two project cmds in one file.
+
+Brad King (11):
+      KWSys: Correctly handle empty environment variables
+      FortranCInterface: Work around mingw32-make trouble with parens
+      Xcode: Create separate rerun dependencies for subprojects (#12616)
+      Fix Intel Fortran .vfproj files for VS 10
+      HP: Drive shared library linking with compiler front end
+      Follow all dependencies of shared library private dependencies
+      Do not link private dependent shared libraries on OS X > 10.4
+      Avoid clobbering variable 'OUTPUT' in compiler tests (#12628)
+      Fix and simplify Fortran test compiler compatibility check
+      CTest: Recognize Intel errors without space before colon (#12627)
+      Windows-GNU: Remove extra quotes in GNUtoMS rule variable
+
+David Cole (4):
+      Release: Increase timeout for slow-testing cygwin build
+      Modules: Use "windres" as rc compiler base name for cross-compiles (#12480)
+      Tests: Only really run MFC test if we can build MFC apps (#11213)
+      FindBoost: Quote possibly empty string argument (#12273)
+
+Eric NOULARD (1):
+      CPackRPM fix #0012608 and unoticed related bug
+
+Johan Fänge (1):
+      CMake: Fix progress reporting for custom targets (#12441)
+
+Mike McQuaid (2):
+      Unset configurations variable when no build type.
+      Improve component support and output indentation.
+
+Raphael Kubo da Costa (2):
+      Remove the apparently outdated README in Source/QtDialog.
+      QtDialog: Set Ctrl+Q as the shortcut for quitting the program.
+
+Tim Gallagher (2):
+      FindLAPACK: Correct CMAKE_FIND_LIBRARY_SUFFIXES spelling (#12624)
+      FindLAPACK: List thread libs to avoid link errors (#12625)
+
+Valat Sébastien (1):
+      CTest: Do not get CDash version without drop site (#12618)
+
 Changes in CMake 2.8.7-rc1 (since 2.8.6)
 ----------------------------------------
 Aaron Ten Clay (1):
