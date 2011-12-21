@@ -7774,7 +7774,7 @@ zisofs_extract_init(struct archive_write *a, struct zisofs_extract *zisofs,
 
 	/* Allocate block pointers buffer. */
 	ceil = (zisofs->pz_uncompressed_size +
-		(1LL << zisofs->pz_log2_bs) - 1)
+		(((int64_t)1) << zisofs->pz_log2_bs) - 1)
 		>> zisofs->pz_log2_bs;
 	xsize = (ceil + 1) * 4;
 	if (zisofs->block_pointers == NULL) {
