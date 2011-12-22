@@ -2287,7 +2287,6 @@ invalid_mbs(const void *_p, size_t n, struct archive_string_conv *sc)
 	const char *p = (const char *)_p;
 	size_t r;
 
-	(void)sc; /* UNUSED */
 #if HAVE_MBRTOWC
 	mbstate_t shift_state;
 
@@ -2311,6 +2310,7 @@ invalid_mbs(const void *_p, size_t n, struct archive_string_conv *sc)
 		p += r;
 		n -= r;
 	}
+	(void)sc; /* UNUSED */
 	return (0); /* All Okey. */
 }
 
