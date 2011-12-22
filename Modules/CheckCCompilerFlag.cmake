@@ -7,7 +7,7 @@
 # that can modify the build.
 
 #=============================================================================
-# Copyright 2006-2010 Kitware, Inc.
+# Copyright 2006-2011 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
@@ -27,8 +27,7 @@ MACRO (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
    SET(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
    CHECK_C_SOURCE_COMPILES("int main(void) { return 0; }" ${_RESULT}
      # Some compilers do not fail with a bad flag
-     FAIL_REGEX "warning: command line option .* is valid for .* but not for C"
-                                                            # Apple gcc
+     FAIL_REGEX "command line option .* is valid for .* but not for C" # GNU
      FAIL_REGEX "unrecognized .*option"                     # GNU
      FAIL_REGEX "unknown .*option"                          # Clang
      FAIL_REGEX "ignoring unknown option"                   # MSVC
