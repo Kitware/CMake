@@ -46,6 +46,14 @@ math(EXPR INTERFACE_VERSION  "11 + ${_minor}")
 # ?? Should there be more here ??
 SET(SOVERSION "${INTERFACE_VERSION}")
 
+# Disable warnings to avoid changing 3rd party code.
+IF("${CMAKE_C_COMPILER_ID}" MATCHES
+    "^(GNU|Clang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+ELSEIF(BORLAND)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
+ENDIF()
+
 # Enable CTest/CDash support
 include(CTest)
 

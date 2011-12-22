@@ -73,7 +73,8 @@
 
 #if defined(_MSC_VER)
 /* TODO: Fix the code, don't suppress the warnings. */
-#pragma warning(disable:4244)   /* 'conversion' conversion from 'type1' to 'type2', possible loss of data */
+#pragma warning(push,1)
+#pragma warning(disable:4761)   /* integral size mismatch in argument; conversion supplied */
 #endif
 #if defined(__BORLANDC__)
 #pragma warn -8068	/* Constant out of range in comparison. */
