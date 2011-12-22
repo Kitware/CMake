@@ -149,14 +149,14 @@ struct archive_entry;
  * portable values to platform-native values when entries are read from
  * or written to disk.
  */
-#define	AE_IFMT		0170000
-#define	AE_IFREG	0100000
-#define	AE_IFLNK	0120000
-#define	AE_IFSOCK	0140000
-#define	AE_IFCHR	0020000
-#define	AE_IFBLK	0060000
-#define	AE_IFDIR	0040000
-#define	AE_IFIFO	0010000
+#define AE_IFMT		((__LA_MODE_T)0170000)
+#define AE_IFREG	((__LA_MODE_T)0100000)
+#define AE_IFLNK	((__LA_MODE_T)0120000)
+#define AE_IFSOCK	((__LA_MODE_T)0140000)
+#define AE_IFCHR	((__LA_MODE_T)0020000)
+#define AE_IFBLK	((__LA_MODE_T)0060000)
+#define AE_IFDIR	((__LA_MODE_T)0040000)
+#define AE_IFIFO	((__LA_MODE_T)0010000)
 
 /*
  * Basic object manipulation
