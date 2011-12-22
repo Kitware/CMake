@@ -312,7 +312,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
 
     # Find wxWidgets multilib libraries.
     FOREACH(LIB core adv aui html media xrc dbgrid gl qa richtext
-                stc ribbon propgrid)
+                stc ribbon propgrid webview)
       FIND_LIBRARY(WX_${LIB}${_DBG}
         NAMES
         wxmsw${_UNV}29${_UCD}${_DBG}_${LIB}
