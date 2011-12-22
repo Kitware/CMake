@@ -799,6 +799,12 @@ CHECK_STRUCT_MEMBER("struct stat" st_blksize
 # Check for st_flags in struct stat (BSD fflags)
 CHECK_STRUCT_MEMBER("struct stat" st_flags
     "sys/types.h;sys/stat.h" HAVE_STRUCT_STAT_ST_FLAGS)
+
+IF(HAVE_SYS_STATVFS_H)
+  CHECK_STRUCT_MEMBER("struct statvfs" f_iosize
+    "sys/types.h;sys/statvfs.h" HAVE_STRUCT_STATVFS_F_IOSIZE)
+ENDIF()
+
 #
 #
 CHECK_STRUCT_MEMBER("struct tm" tm_sec
