@@ -11,12 +11,17 @@ extern "C" {
 }
 #ifdef COMPLEX_TEST_CMAKELIB
 #include "cmStandardIncludes.h"
-#include "cmSystemTools.h"
 #else
 #include <vector>
 #include <string>
 #include <iostream>
 #include <string.h>
+#endif
+
+#include <stdio.h>
+#include <sys/stat.h>
+#if !defined(S_ISDIR)
+# define S_ISDIR(mode) ((mode) & _S_IFDIR)
 #endif
 
 #ifdef COMPLEX_TEST_LINK_STATIC
@@ -69,13 +74,14 @@ void cmPassed(const char* Message, const char* m2="")
 
 void TestAndRemoveFile(const char* filename) 
 {
-  if (!cmSystemTools::FileExists(filename))
+  struct stat st;
+  if(stat(filename, &st) < 0)
     {
     cmFailed("Could not find file: ", filename);
     }
   else
     {
-    if (!cmSystemTools::RemoveFile(filename))
+    if (remove(filename) < 0)
       {
       cmFailed("Unable to remove file. It does not imply that this test failed, but it *will* be corrupted thereafter if this file is not removed: ", filename);
       }
@@ -90,20 +96,14 @@ void TestAndRemoveFile(const char* filename)
 
 void TestDir(const char* filename) 
 {
-  if (!cmSystemTools::FileExists(filename))
+  struct stat st;
+  if(stat(filename, &st) < 0 || !S_ISDIR(st.st_mode))
     {
     cmFailed("Could not find dir: ", filename);
     }
   else
     {
-    if (!cmSystemTools::FileIsDirectory(filename))
-      {
-      cmFailed("Unable to check if file is a directory: ", filename);
-      }
-    else
-      {
-      cmPassed("Find dir: ", filename);
-      }
+    cmPassed("Find dir: ", filename);
     }
 }
 
