@@ -149,20 +149,6 @@ extern "C" int NameConflictTest2();
 
 int main()
 {
-#ifdef COMPLEX_TEST_CMAKELIB  
-    // ----------------------------------------------------------------------
-  // Test cmSystemTools::UpperCase
-  std::string str = "abc";
-  std::string strupper = "ABC";
-  if(cmSystemTools::UpperCase(str) == strupper)
-    {
-    cmPassed("cmSystemTools::UpperCase is working");
-    }
-  else
-    {
-    cmFailed("cmSystemTools::UpperCase is working");
-    }    
-#endif
 #if 0
   if(NameConflictTest1() == 0 && NameConflictTest2() == 0)
     {
