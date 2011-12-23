@@ -11,8 +11,6 @@ extern "C" {
 #ifdef COMPLEX_TEST_CMAKELIB
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include "cmSystemTools.h"
-#include "cmGeneratedFileStream.h"
 #else
 #include <vector>
 #include <string>
@@ -108,86 +106,6 @@ void TestDir(const char* filename)
     }
 }
 
-// ======================================================================
-
-void TestCMGeneratedFileSTream()
-{
-  cmGeneratedFileStream gm;
-  std::string file1 = std::string(BINARY_DIR) + std::string("/generatedFile1");
-  std::string file2 = std::string(BINARY_DIR) + std::string("/generatedFile2");
-  std::string file3 = std::string(BINARY_DIR) + std::string("/generatedFile3");
-  std::string file4 = std::string(BINARY_DIR) + std::string("/generatedFile4");
-  std::string file1tmp = file1 + ".tmp";
-  std::string file2tmp = file2 + ".tmp";
-  std::string file3tmp = file3 + ".tmp";
-  std::string file4tmp = file4 + ".tmp";
-  gm.Open(file1.c_str());
-  gm << "This is generated file 1";
-  gm.Close();
-  gm.Open(file2.c_str());
-  gm << "This is generated file 2";
-  gm.Close();
-  gm.Open(file3.c_str());
-  gm << "This is generated file 3";
-  gm.Close();
-  gm.Open(file4.c_str());
-  gm << "This is generated file 4";
-  gm.Close();
-  if ( cmSystemTools::FileExists(file1.c_str()) )
-    {
-    if ( cmSystemTools::FileExists(file2.c_str()) )
-      {
-      if ( cmSystemTools::FileExists(file3.c_str()) )
-        {
-        if ( cmSystemTools::FileExists(file4.c_str()) )
-          {
-          if ( cmSystemTools::FileExists(file1tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file1tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file2tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file2tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file3tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file3tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file4tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file4tmp.c_str());
-            }
-          else
-            {
-            cmPassed("cmGeneratedFileStream works.");
-            }
-          }
-        else
-          {
-          cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file4.c_str());
-          }
-        }
-      else
-        {
-        cmFailed("Something wrong with cmGeneratedFileStream. Found file: ", file3.c_str());
-        }
-      }
-    else
-      {
-      cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file2.c_str());
-      }
-    }
-  else
-    {
-    cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file1.c_str());
-    }
-  cmSystemTools::RemoveFile(file1.c_str());
-  cmSystemTools::RemoveFile(file2.c_str());
-  cmSystemTools::RemoveFile(file3.c_str());
-  cmSystemTools::RemoveFile(file1tmp.c_str());
-  cmSystemTools::RemoveFile(file2tmp.c_str());
-  cmSystemTools::RemoveFile(file3tmp.c_str());
-}
 #endif
 
 // Here is a stupid function that tries to use std::string methods
@@ -1133,11 +1051,6 @@ int main()
   cmFailed("CMake SET CACHE FORCE");
 #else
   cmPassed("CMake SET CACHE FORCE");
-#endif
-
-#ifdef COMPLEX_TEST_CMAKELIB
-  // Test the generated file stream.
-  TestCMGeneratedFileSTream();
 #endif
 
 #ifdef COMPLEX_TEST_LINK_STATIC

@@ -61,7 +61,7 @@ ADD_EXECUTABLE(complex complex testcflags.c )
 ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx
   complex_nobuild.c)
 IF(COMPLEX_TEST_CMAKELIB)
-  TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmlibarchive cmbzip2 cmcurl)
+  TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmlibarchive cmcurl cmexpat cmzlib cmbzip2)
 ENDIF(COMPLEX_TEST_CMAKELIB)
 
 IF (UNIX)

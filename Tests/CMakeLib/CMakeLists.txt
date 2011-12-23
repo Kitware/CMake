@@ -5,6 +5,7 @@ include_directories(
   )
 
 set(CMakeLib_TESTS
+  testGeneratedFileStream
   testUTF8
   testXMLParser
   testXMLSafe
