@@ -9,14 +9,10 @@
 extern "C" {
 #include "testConly.h"
 }
-#ifdef COMPLEX_TEST_CMAKELIB
-#include "cmStandardIncludes.h"
-#else
 #include <vector>
 #include <string>
 #include <iostream>
 #include <string.h>
-#endif
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -69,7 +65,6 @@ void cmPassed(const char* Message, const char* m2="")
 # error Per-configuration directory-level definition not inherited.
 #endif
 
-#ifdef COMPLEX_TEST_CMAKELIB
 // ======================================================================
 
 void TestAndRemoveFile(const char* filename) 
@@ -106,8 +101,6 @@ void TestDir(const char* filename)
     cmPassed("Find dir: ", filename);
     }
 }
-
-#endif
 
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
@@ -792,7 +785,6 @@ int main()
     }
 #endif
 
-#ifdef COMPLEX_TEST_CMAKELIB  
   // ----------------------------------------------------------------------
   // Some pre-build/pre-link/post-build custom-commands have been
   // attached to the lib (see Library/).
@@ -838,7 +830,6 @@ int main()
   // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Executable/Temp/complex-required.txt");
-#endif
 
   // ----------------------------------------------------------------------
   // Test FIND_LIBRARY
