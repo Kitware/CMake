@@ -11,10 +11,8 @@ extern "C" {
 #ifdef COMPLEX_TEST_CMAKELIB
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
-#include "cmDynamicLoader.h"
 #include "cmSystemTools.h"
 #include "cmGeneratedFileStream.h"
-#include <cmsys/DynamicLoader.hxx>
 #else
 #include <vector>
 #include <string>
@@ -232,12 +230,6 @@ extern "C" int NameConflictTest2();
 
 int main()
 {
-  std::string lib = BINARY_DIR;
-  lib += "/lib/";
-#ifdef  CMAKE_INTDIR
-  lib += CMAKE_INTDIR;
-  lib += "/";
-#endif
   std::string exe = BINARY_DIR;
   exe += "/bin/";
 #ifdef  CMAKE_INTDIR
@@ -273,59 +265,7 @@ int main()
     {
     cmPassed("run Single Character executable A returned 10 as expected.");
     }
-  
-  lib += CMAKE_SHARED_MODULE_PREFIX;
-  lib += "CMakeTestModule";
-  lib += CMAKE_SHARED_MODULE_SUFFIX;
-  cmsys::DynamicLoader::LibraryHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
-  if(!handle)
-    {
-    std::string err = "Can not open CMakeTestModule:\n";
-    err += lib;
-    cmFailed(err.c_str());
-    }
-  else
-    {
-    cmsys::DynamicLoader::SymbolPointer fun = 
-      cmsys::DynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
-    if(!fun)
-      {
-      fun = cmsys::DynamicLoader::GetSymbolAddress(handle, "_ModuleFunction");
-      }
-    typedef int (*TEST_FUNCTION)();
-    TEST_FUNCTION testFun = (TEST_FUNCTION)fun;
-    if(!testFun)
-      {
-      cmFailed("Could not find symbol ModuleFunction in library ");
-      }
-    else
-      {
-        int ret = (*testFun)();
-        if(!ret)
-          {
-          cmFailed("ModuleFunction call did not return valid return.");
-          }
-        cmPassed("Module loaded and ModuleFunction called correctly.");
-      }
-    }
-  cmDynamicLoader::FlushCache(); // fix memory leaks 
-  if(sharedFunction() != 1)
-    {
-    cmFailed("Call to sharedFunction from shared library failed.");
-    }
-  else
-    {
-    cmPassed("Call to sharedFunction from shared library worked.");
-    }
-  if(CsharedFunction() != 1)
-    {
-    cmFailed("Call to C sharedFunction from shared library failed.");
-    }
-  else
-    {
-    cmPassed("Call to C sharedFunction from shared library worked.");
-    }
-  
+
     // ----------------------------------------------------------------------
   // Test cmSystemTools::UpperCase
   std::string str = "abc";
