@@ -49,10 +49,17 @@ LINK_LIBRARIES(${COMPLEX_LIBS})
 SET_SOURCE_FILES_PROPERTIES(complex_nobuild.cxx PROPERTIES
   HEADER_FILE_ONLY 1)
 
+# Test forcing a .c file to not build.
+# This makes sure a mixed language library is created
+# with header file only sources
+SET_SOURCE_FILES_PROPERTIES(complex_nobuild.c PROPERTIES
+  HEADER_FILE_ONLY 1)
+
 ADD_EXECUTABLE(A A.cxx A.hh A.h A.txt)
 ADD_EXECUTABLE(complex complex testcflags.c )
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
-ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx)
+ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx
+  complex_nobuild.c)
 IF(COMPLEX_TEST_CMAKELIB)
   TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmlibarchive cmbzip2 cmcurl)
 ENDIF(COMPLEX_TEST_CMAKELIB)
