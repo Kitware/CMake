@@ -839,8 +839,7 @@ int main()
          "FILENAME_VAR_PATH_NAME is not defined.");
 #else
   if((strcmp(FILENAME_VAR_PATH_NAME, "Complex") == 0) ||
-     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexOneConfig") == 0) ||
-     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexRelativePaths") == 0))
+     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexOneConfig") == 0))
     {
     cmPassed("FILENAME_VAR_PATH_NAME == ", FILENAME_VAR_PATH_NAME);
     }
@@ -901,8 +900,7 @@ int main()
          "PATH_VAR_NAME is not defined.");
 #else
   if((strcmp(PATH_VAR_NAME, "Complex") == 0) ||
-     (strcmp(PATH_VAR_NAME, "ComplexOneConfig") == 0) ||
-     (strcmp(PATH_VAR_NAME, "ComplexRelativePaths") == 0))
+     (strcmp(PATH_VAR_NAME, "ComplexOneConfig") == 0))
     {
     cmPassed("PATH_VAR_NAME == ", PATH_VAR_NAME);
     }

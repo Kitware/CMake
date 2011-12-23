@@ -814,18 +814,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 #        --build-project ConvLibrary
 #        --test-command bartest)
 
-
-#    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
-#      --build-and-test
-#      "${CMake_SOURCE_DIR}/Tests/ComplexRelativePaths"
-#      "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths"
-#      --build-generator ${CMAKE_TEST_GENERATOR}
-#      --build-project complex
-#      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-#      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths/bin"
-#      --build-options -DCMAKE_USE_RELATIVE_PATHS:BOOL=ON
-#      --test-command complex)
-
   ENDIF(NOT COMPILER_IS_COMO)
 
   ADD_TEST(Example ${CMAKE_CTEST_COMMAND}
