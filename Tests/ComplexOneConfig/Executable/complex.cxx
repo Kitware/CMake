@@ -3,6 +3,7 @@
 #include "cmTestGeneratedHeader.h"
 #include "cmVersion.h"
 #include "ExtraSources/file1.h"
+#include "Aout.h"
 #include "file2.h"
 #include "sharedFile.h"
 extern "C" {
@@ -148,42 +149,7 @@ extern "C" int NameConflictTest2();
 
 int main()
 {
-  std::string exe = BINARY_DIR;
-  exe += "/bin/";
-#ifdef  CMAKE_INTDIR
-  exe += CMAKE_INTDIR;
-  exe += "/";
-#endif
-
 #ifdef COMPLEX_TEST_CMAKELIB  
-  // Test a single character executable to test a: in makefiles
-  exe += "A";
-  exe += cmSystemTools::GetExecutableExtension();
-  int ret;
-  std::string errorMessage; 
-  exe = cmSystemTools::ConvertToRunCommandPath(exe.c_str());
-  if(cmSystemTools::RunSingleCommand(exe.c_str(), 0, &ret))
-    {
-    if(ret != 10)
-      {
-      errorMessage += exe;
-      errorMessage += " did not return 10";
-      }
-    }
-  else
-    {
-    errorMessage += exe;
-    errorMessage += ": failed to run.";
-    }
-  if(errorMessage.size())
-    {
-    cmFailed(errorMessage.c_str());
-    }
-  else
-    {
-    cmPassed("run Single Character executable A returned 10 as expected.");
-    }
-
     // ----------------------------------------------------------------------
   // Test cmSystemTools::UpperCase
   std::string str = "abc";
@@ -1062,6 +1028,12 @@ int main()
     {
     cmFailed("Link to static over shared failed.");
     }
+#endif
+
+#if defined(A_VALUE) && A_VALUE == 10
+  cmPassed("Single-character executable A worked.");
+#else
+  cmFailed("Single-character executable A failed.");
 #endif
 
   // ----------------------------------------------------------------------

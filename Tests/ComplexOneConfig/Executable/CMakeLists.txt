@@ -55,8 +55,10 @@ SET_SOURCE_FILES_PROPERTIES(complex_nobuild.cxx PROPERTIES
 SET_SOURCE_FILES_PROPERTIES(complex_nobuild.c PROPERTIES
   HEADER_FILE_ONLY 1)
 
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ADD_EXECUTABLE(A A.cxx A.hh A.h A.txt)
-ADD_EXECUTABLE(complex complex testcflags.c )
+ADD_CUSTOM_COMMAND(OUTPUT Aout.h COMMAND A > Aout.h VERBATIM)
+ADD_EXECUTABLE(complex complex testcflags.c Aout.h)
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx
   complex_nobuild.c)
