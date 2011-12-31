@@ -246,7 +246,7 @@ archive_read_disk_entry_from_file(struct archive *_a,
 	return (r);
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(HAVE_COPYFILE_H)
 /*
  * The Mac OS "copyfile()" API copies the extended metadata for a
  * file into a separate file in AppleDouble format (see RFC 1740).

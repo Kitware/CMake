@@ -1321,9 +1321,11 @@ setup_current_filesystem(struct archive_read_disk *a)
 		t->current_filesystem->synthetic = 0;
 #endif
 
+#if defined(MNT_NOATIME)
 	if (sfs.f_flags & MNT_NOATIME)
 		t->current_filesystem->noatime = 1;
 	else
+#endif
 		t->current_filesystem->noatime = 0;
 
 #if defined(HAVE_READDIR_R)

@@ -2,12 +2,12 @@
 #
 PROJECT(libarchive C)
 #
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${libarchive_BINARY_DIR}/bin)
 endif()
-SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_BUILD_TYPE "Release")
 
 # On MacOS, prefer MacPorts libraries to system libraries.
 # I haven't come up with a compelling argument for this to be conditional.
@@ -38,9 +38,10 @@ SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 # INTERFACE_VERSION increments with every release
 # libarchive 2.7 == interface version 9 = 2 + 7 
 # libarchive 2.8 == interface version 10 = 2 + 8
-# libarchive 3.0 == interface version 11
-# libarchive 3.x == interface version 11 + x
-math(EXPR INTERFACE_VERSION  "11 + ${_minor}")
+# libarchive 2.9 == interface version 11 = 2 + 9
+# libarchive 3.0 == interface version 12
+# libarchive 3.x == interface version 12 + x
+math(EXPR INTERFACE_VERSION  "12 + ${_minor}")
 
 # Set SOVERSION == Interface version
 # ?? Should there be more here ??
@@ -50,16 +51,12 @@ SET(SOVERSION "${INTERFACE_VERSION}")
 # aggressive about diagnosing build problems; this can get
 # relaxed somewhat in final shipping versions.
 IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
-  ADD_DEFINITIONS(-Wall -Werror)
-  SET(CMAKE_REQUIRED_FLAGS "-Wall -Werror")
+  ADD_DEFINITIONS(-Wall)
+  SET(CMAKE_REQUIRED_FLAGS "-Wall")
 ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
 
 # Enable CTest/CDash support
 include(CTest)
-
-# Provide ADD_TEST_28 macro to approximate CMake 2.8 ADD_TEST(NAME).
-# TODO: Require CMake 2.8 and drop this workaround (perhaps late 2010).
-INCLUDE(AddTest28)
 
 OPTION(ENABLE_NETTLE "Enable use of Nettle" ON)
 OPTION(ENABLE_OPENSSL "Enable use of OpenSSL" ON)

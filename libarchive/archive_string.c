@@ -212,7 +212,7 @@ static struct archive_string *
 archive_string_append(struct archive_string *as, const char *p, size_t s)
 {
 	if (archive_string_ensure(as, as->length + s + 1) == NULL)
-		__archive_errx(1, "Out of memory");
+		return (NULL);
 	memcpy(as->s + as->length, p, s);
 	as->length += s;
 	as->s[as->length] = 0;
@@ -223,7 +223,7 @@ static struct archive_wstring *
 archive_wstring_append(struct archive_wstring *as, const wchar_t *p, size_t s)
 {
 	if (archive_wstring_ensure(as, as->length + s + 1) == NULL)
-		__archive_errx(1, "Out of memory");
+		return (NULL);
 	wmemcpy(as->s + as->length, p, s);
 	as->length += s;
 	as->s[as->length] = 0;
@@ -233,13 +233,15 @@ archive_wstring_append(struct archive_wstring *as, const wchar_t *p, size_t s)
 void
 archive_string_concat(struct archive_string *dest, struct archive_string *src)
 {
-	archive_string_append(dest, src->s, src->length);
+	if (archive_string_append(dest, src->s, src->length) == NULL)
+		__archive_errx(1, "Out of memory");
 }
 
 void
 archive_wstring_concat(struct archive_wstring *dest, struct archive_wstring *src)
 {
-	archive_wstring_append(dest, src->s, src->length);
+	if (archive_wstring_append(dest, src->s, src->length) == NULL)
+		__archive_errx(1, "Out of memory");
 }
 
 void
@@ -346,7 +348,9 @@ archive_strncat(struct archive_string *as, const void *_p, size_t n)
 		pp++;
 		s++;
 	}
-	return (archive_string_append(as, p, s));
+	if ((as = archive_string_append(as, p, s)) == NULL)
+		__archive_errx(1, "Out of memory");
+	return (as);
 }
 
 struct archive_wstring *
@@ -362,7 +366,9 @@ archive_wstrncat(struct archive_wstring *as, const wchar_t *p, size_t n)
 		pp++;
 		s++;
 	}
-	return (archive_wstring_append(as, p, s));
+	if ((as = archive_wstring_append(as, p, s)) == NULL)
+		__archive_errx(1, "Out of memory");
+	return (as);
 }
 
 struct archive_string *
@@ -387,13 +393,17 @@ archive_wstrcat(struct archive_wstring *as, const wchar_t *p)
 struct archive_string *
 archive_strappend_char(struct archive_string *as, char c)
 {
-	return (archive_string_append(as, &c, 1));
+	if ((as = archive_string_append(as, &c, 1)) == NULL)
+		__archive_errx(1, "Out of memory");
+	return (as);
 }
 
 struct archive_wstring *
 archive_wstrappend_wchar(struct archive_wstring *as, wchar_t c)
 {
-	return (archive_wstring_append(as, &c, 1));
+	if ((as = archive_wstring_append(as, &c, 1)) == NULL)
+		__archive_errx(1, "Out of memory");
+	return (as);
 }
 
 /*
@@ -2080,14 +2090,8 @@ archive_strncat_in_locale(struct archive_string *as, const void *_p, size_t n,
 	 */
 	if (sc == NULL) {
 		length = mbsnbytes(_p, n);
-		/*
-		 * archive_string_append() will call archive_string_ensure()
-		 * but we cannot know if that call is failed or not. so
-		 * we call archive_string_ensure() here.
-		 */
-		if (archive_string_ensure(as, as->length + length + 1) == NULL)
-			return (-1);
-		archive_string_append(as, _p, length);
+		if (archive_string_append(as, _p, length) == NULL)
+			return (-1);/* No memory */
 		return (0);
 	}
 
@@ -2338,7 +2342,8 @@ best_effort_strncat_in_locale(struct archive_string *as, const void *_p,
 	 * And then this checks all copied MBS can be WCS if so returns 0.
 	 */
 	if (sc->same) {
-		archive_string_append(as, _p, length);
+		if (archive_string_append(as, _p, length) == NULL)
+			return (-1);/* No memory */
 		return (invalid_mbs(_p, length, sc));
 	}
 
@@ -4115,10 +4120,14 @@ archive_mstring_copy_mbs_len_l(struct archive_mstring *aes,
 	 * characters because Windows platform cannot make locale UTF-8.
 	 */
 	if (sc == NULL) {
-		archive_string_append(&(aes->aes_mbs),
-		    mbs, mbsnbytes(mbs, len));
-		aes->aes_set = AES_SET_MBS;
-		r = 0;
+		if (archive_string_append(&(aes->aes_mbs),
+			mbs, mbsnbytes(mbs, len)) == NULL) {
+			aes->aes_set = 0;
+			r = -1;
+		} else {
+			aes->aes_set = AES_SET_MBS;
+			r = 0;
+		}
 #if defined(HAVE_ICONV)
 	} else if (sc != NULL && sc->cd_w != (iconv_t)-1) {
 		/*

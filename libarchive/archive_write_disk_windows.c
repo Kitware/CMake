@@ -542,11 +542,36 @@ la_CreateHardLinkW(wchar_t *linkname, wchar_t *target)
 {
 	static BOOLEAN (WINAPI *f)(LPWSTR, LPWSTR, LPSECURITY_ATTRIBUTES);
 	static int set;
+	BOOL ret;
+
 	if (!set) {
 		set = 1;
 		f = la_GetFunctionKernel32("CreateHardLinkW");
 	}
-	return f == NULL ? 0 : (*f)(linkname, target, NULL);
+	if (!f)
+		return (0);
+	ret = (*f)(linkname, target, NULL);
+	if (!ret) {
+		/* Under windows 2000, it is necessary to remove
+		 * the "\\?\" prefix. */
+#define IS_UNC(name)	((name[0] == L'U' || name[0] == L'u') &&	\
+			 (name[1] == L'N' || name[1] == L'n') &&	\
+			 (name[2] == L'C' || name[2] == L'c') &&	\
+			 name[3] == L'\\')
+		if (!wcsncmp(linkname,L"\\\\?\\", 4)) {
+			linkname += 4;
+			if (IS_UNC(linkname))
+				linkname += 4;
+		}
+		if (!wcsncmp(target,L"\\\\?\\", 4)) {
+			target += 4;
+			if (IS_UNC(target))
+				target += 4;
+		}
+#undef IS_UNC
+		ret = (*f)(linkname, target, NULL);
+	}
+	return (ret);
 }
 
 static int
@@ -2207,6 +2232,7 @@ create_dir(struct archive_write_disk *a, wchar_t *path)
 			le->fixup |=TODO_MODE_BASE;
 			le->mode = mode_final;
 		}
+		free(full);
 		return (ARCHIVE_OK);
 	} else {
 		la_dosmaperr(GetLastError());

@@ -25,15 +25,12 @@
 .\" $FreeBSD$
 .\"
 .Dd March 22, 2011
-.Dt archive_read_data 3
+.Dt ARCHIVE_READ_DATA 3
 .Os
 .Sh NAME
 .Nm archive_read_data
 .Nm archive_read_data_block ,
 .Nm archive_read_data_skip ,
-.\" #if ARCHIVE_API_VERSION < 3
-.Nm archive_read_data_into_buffer ,
-.\" #endif
 .Nm archive_read_data_into_fd
 .Nd functions for reading streaming archives
 .Sh SYNOPSIS
@@ -49,10 +46,6 @@
 .Fc
 .Ft int
 .Fn archive_read_data_skip "struct archive *"
-.\" #if ARCHIVE_API_VERSION < 3
-.Ft int
-.Fn archive_read_data_into_buffer "struct archive *" "void *" "ssize_t len"
-.\" #endif
 .Ft int
 .Fn archive_read_data_into_fd "struct archive *" "int fd"
 .\"
@@ -84,13 +77,6 @@ to skip all of the data for this archive entry.
 Note that this function is invoked automatically by
 .Fn archive_read_next_header2
 if the previous entry was not completely consumed.
-.\" #if ARCHIVE_API_VERSION < 3
-.It Fn archive_read_data_into_buffer
-This function is deprecated and will be removed.
-Use
-.Fn archive_read_data
-instead.
-.\" #endif
 .It Fn archive_read_data_into_fd
 A convenience function that repeatedly calls
 .Fn archive_read_data_block
