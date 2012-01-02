@@ -63,6 +63,8 @@ QCMake::QCMake(QObject* p)
 #endif
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
 
+  cmSystemTools::SetInterruptCallback(QCMake::interruptCallback, this);
+
   std::vector<std::string> generators;
   this->CMakeInstance->GetRegisteredGenerators(generators);
   std::vector<std::string>::iterator iter;
@@ -170,6 +172,7 @@ void QCMake::configure()
   this->CMakeInstance->SetWarnUnused(this->WarnUnusedMode);
   this->CMakeInstance->PreLoadCMakeFiles();
 
+  InterruptFlag = 0;
   cmSystemTools::ResetErrorOccuredFlag();
 
   int err = this->CMakeInstance->Configure();
@@ -188,7 +191,9 @@ void QCMake::generate()
   UINT lastErrorMode = SetErrorMode(0);
 #endif
 
+  InterruptFlag = 0;
   cmSystemTools::ResetErrorOccuredFlag();
+
   int err = this->CMakeInstance->Generate();
 
 #ifdef Q_OS_WIN
@@ -337,7 +342,13 @@ QCMakePropertyList QCMake::properties() const
   
 void QCMake::interrupt()
 {
-  cmSystemTools::SetFatalErrorOccured();
+  this->InterruptFlag.ref();
+}
+
+bool QCMake::interruptCallback(void* cd)
+{
+  QCMake* self = reinterpret_cast<QCMake*>(cd);
+  return self->InterruptFlag;
 }
 
 void QCMake::progressCallback(const char* msg, float percent, void* cd)

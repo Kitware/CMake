@@ -554,8 +554,7 @@ void CMakeSetupDialog::doHelp()
 void CMakeSetupDialog::doInterrupt()
 {
   this->enterState(Interrupting);
-  QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
-    "interrupt", Qt::QueuedConnection);
+  this->CMakeThread->cmakeInstance()->interrupt();
 }
 
 void CMakeSetupDialog::doSourceBrowse()

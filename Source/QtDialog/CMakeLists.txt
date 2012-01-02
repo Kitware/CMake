@@ -10,11 +10,11 @@
 # See the License for more information.
 #=============================================================================
 PROJECT(QtDialog)
-SET(QT_MIN_VERSION "4.3.0")
+SET(QT_MIN_VERSION "4.4.0")
 FIND_PACKAGE(Qt4 REQUIRED)
 
 IF(NOT QT4_FOUND)
-  MESSAGE(SEND_ERROR "Failed to find Qt 4.3 or greater.")
+  MESSAGE(SEND_ERROR "Failed to find Qt 4.4 or greater.")
 ELSE(NOT QT4_FOUND)
 
   INCLUDE(${QT_USE_FILE})
