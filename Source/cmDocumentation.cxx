@@ -757,15 +757,14 @@ static void trim(std::string& s)
   else s.erase(s.begin(), s.end());
 }
 
-int cmDocumentation::getStructuredDocFromFile(
+int cmDocumentation::GetStructuredDocFromFile(
         const char* fname,
         std::vector<cmDocumentationEntry>& commands,
         cmake* cm,
         const char *docSection)
 {
     typedef enum sdoce {
-        SDOC_NONE, SDOC_MACRO,
-        SDOC_PARAM, SDOC_VARIABLE,
+        SDOC_NONE, SDOC_MODULE, SDOC_MACRO, SDOC_FUNCTION, SDOC_VARIABLE,
         SDOC_UNKNOWN} sdoc_t;
     int nbDocItemFound = 0;
     int docCtxIdx      = 0;
@@ -775,15 +774,16 @@ int cmDocumentation::getStructuredDocFromFile(
     std::ifstream fin(fname);
     if(!fin)
       {
-      //std::cerr << "Internal error: can not open script file: <" << fname <<">."<< std::endl;
       return nbDocItemFound;
       }
     std::string name;
     std::string full;
     std::string brief;
     std::string line;
-    bool newCtx  = false;
-    bool inBrief = false;
+    bool newCtx  = false; /* we've just entered ##<beginkey> context */
+    bool inBrief = false; /* we are currently parsing brief desc. */
+    bool inFullFirstParagraph = false; /* we are currently parsing full
+                                          desc. first paragraph */
     brief = "";
     full  = "";
     bool newParagraph = true;
@@ -806,11 +806,24 @@ int cmDocumentation::getStructuredDocFromFile(
                docContextStack[docCtxIdx]=SDOC_VARIABLE;
                newCtx = true;
             }
+            else if (mkword=="function")
+            {
+               docCtxIdx++;
+               docContextStack[docCtxIdx]=SDOC_FUNCTION;
+               newCtx = true;
+            }
+            else if (mkword=="module")
+            {
+               docCtxIdx++;
+               docContextStack[docCtxIdx]=SDOC_MODULE;
+               newCtx = true;
+            }
             else if (mkword.substr(0,3)=="end")
             {
-               ;
                switch (docContextStack[docCtxIdx]) {
                case SDOC_MACRO:
+                   /* for now MACRO and FUNCTION are handled in the same way */
+               case SDOC_FUNCTION:
                    commands.push_back(cmDocumentationEntry(name.c_str(),
                            brief.c_str(),full.c_str()));
                    break;
@@ -821,15 +834,20 @@ int cmDocumentation::getStructuredDocFromFile(
                         full.c_str(),false,
                         docSection);
                    break;
+               case SDOC_MODULE:
+                   /*  not implemented */
+                   break;
+               default:
+                   /* ignore other cases */
+                   break;
                }
                docCtxIdx--;
                newCtx = false;
+               ++nbDocItemFound;
             }
             else
             {
                 // error out unhandled context
-                std::cerr << "Internal error: unknown markup context <"
-                          << mkword <<"> found in:" << fname << std::endl;
                 return nbDocItemFound;
             }
             /* context is set go to next doc line */
@@ -843,47 +861,106 @@ int cmDocumentation::getStructuredDocFromFile(
         //                       followed by a blank line)
         if (newCtx)
         {
-            name = line.substr(1,line.find("-")-1);
-            trim(name);
-            brief = "";
-            line = line.substr(line.find("- ")+1,std::string::npos);
-            inBrief = true;
-            full = "";
+            // no brief (for easy variable definition)
+            if (line.find("-")==std::string::npos)
+            {
+                name = line.substr(1,std::string::npos);
+                trim(name);
+                brief   = "";
+                inBrief = false;
+                full = "";
+            }
+            // here we have a name and brief beginning
+            else
+            {
+                name = line.substr(1,line.find("-")-1);
+                trim(name);
+                // we are parsing the brief context
+                brief = line.substr(line.find("-")+1,std::string::npos);
+                trim(brief);
+                // Brief may already be terminated on the first line
+                if (brief.find('.')!=std::string::npos)
+                {
+                   inBrief = false;
+                   full    = brief.substr(brief.find('.')+1,std::string::npos);
+                   trim(full);
+                   inFullFirstParagraph = true;
+                   brief   = brief.substr(0,brief.find('.'));
+                }
+                // brief is continued on following lines
+                else
+                {
+                    inBrief = true;
+                    full = "";
+                }
+            }
+            newCtx = false;
+            continue;
         }
         // blank line
         if(line.size() <= 2)
         {
-            inBrief = false;
-            full += "\n";
+            if (inBrief) {
+              inBrief = false;
+              full    = "";
+            } else {
+              full += "\n";
+              // the first paragraph of full has ended
+              inFullFirstParagraph = false;
+            }
             newParagraph = true;
         }
-        // brief terminated by .
-        else if (inBrief && line[line.length()-1]=='.')
+        // brief is terminated by '.'
+        else if (inBrief && (line.find('.')!=std::string::npos))
         {
+            /* the brief just ended */
             inBrief = false;
-            brief += line.c_str()+1;
+            std::string endBrief  = line.substr(1,line.find('.'));
+            trim(endBrief);
+            trim(brief);
+            brief  += " " + endBrief;
+            full   += line.substr(line.find('.')+1,std::string::npos);
+            trim(full);
+            inFullFirstParagraph = true;
         }
         // we handle full text or multi-line brief.
         else
           {
           std::string* text;
-          if (inBrief) {
-              text = &brief;
-          } else {
-              text = &full;
-          }
+          if (inBrief)
+            {
+            text = &brief;
+            }
+          else
+            {
+            text = &full;
+            }
           // two spaces
           if(line[1] == ' ' && line[2] == ' ')
             {
-            if(!newParagraph)
+            // there is no "full first paragraph at all."
+            if (line[3] == ' ')
               {
-
-                *text += "\n";
-                newParagraph = true;
+              inFullFirstParagraph = false;
               }
-            // Skip #, and leave space for preformatted
-            *text += line.c_str()+1;
-            *text += "\n";
+
+            if(!newParagraph && !inFullFirstParagraph)
+              {
+              *text += "\n";
+              newParagraph = true;
+              }
+              // Skip #, and leave space for pre-formatted
+              if (inFullFirstParagraph)
+                {
+                std::string temp = line.c_str()+1;
+                trim(temp);
+                *text += " " + temp;
+                }
+              else
+                {
+                *text += line.c_str()+1;
+                *text += "\n";
+                }
             }
           else if(line[1] == ' ')
             {
@@ -910,7 +987,6 @@ int cmDocumentation::getStructuredDocFromFile(
       /* next line is not the first context line */
       newCtx = false;
       }
-
     return nbDocItemFound;
 }
 

@@ -303,29 +303,30 @@ int main (int argc, char *argv[])
       help = false;
     }
 
+  // find out which system cpack is running on, so it can setup the search
+  // paths, so FIND_XXX() commands can be used in scripts
+  // This part is used for cpack documentation lookup as well.
+  cminst.AddCMakePaths();
+  std::string systemFile =
+    globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
+  if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    {
+    cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+      "Error reading CMakeDetermineSystem.cmake" << std::endl);
+    return 1;
+    }
+
+  systemFile =
+    globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
+  if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    {
+    cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+      "Error reading CMakeSystemSpecificInformation.cmake" << std::endl);
+    return 1;
+    }
+
   if ( parsed && !help )
     {
-    // find out which system cpack is running on, so it can setup the search
-    // paths, so FIND_XXX() commands can be used in scripts
-    cminst.AddCMakePaths();
-    std::string systemFile =
-      globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
-      {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-        "Error reading CMakeDetermineSystem.cmake" << std::endl);
-      return 1;
-      }
-
-    systemFile =
-      globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
-      {
-      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-        "Error reading CMakeSystemSpecificInformation.cmake" << std::endl);
-      return 1;
-      }
-
     if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
       cpackConfigFile =
@@ -519,43 +520,47 @@ int main (int argc, char *argv[])
     doc.SetSection("Description",cmDocumentationDescription);
     doc.PrependSection("Options",cmDocumentationOptions);
 
+    // statically (in C++ code) defined variables
     cmCPackDocumentVariables::DefineVariables(&cminst);
 
     std::vector<cmDocumentationEntry> commands;
 
-    cminst.AddCMakePaths();
-    std::string systemFile =
-            globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
-    {
-        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                "Error reading CMakeDetermineSystem.cmake" << std::endl);
-        return 1;
-    }
+    typedef std::pair<std::string,std::string> docModuleSectionPair_t;
+    typedef std::list<docModuleSectionPair_t>  docedModulesList_t;
+    docedModulesList_t docedModList;
+    docModuleSectionPair_t docPair;
+    std::string            docedFile;
 
-    systemFile =
-            globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
-    {
-        cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-                "Error reading CMakeSystemSpecificInformation.cmake"
-                << std::endl);
-        return 1;
-    }
-    std::string cpFile = globalMF->GetModulesFile("CPack.cmake");
-    doc.getStructuredDocFromFile(cpFile.c_str(),
-            commands,&cminst,"Variables common to all CPack generators");
-    cpFile = globalMF->GetModulesFile("CPackComponent.cmake");
-    doc.getStructuredDocFromFile(cpFile.c_str(),
-                commands,&cminst,"Variables common to all CPack generators");
-    cpFile = globalMF->GetModulesFile("CPackRPM.cmake");
-        doc.getStructuredDocFromFile(cpFile.c_str(),
-                    commands,&cminst,"Variables specific to a CPack generator");
+    // build the list of files to be parsed for documentation
+    // extraction
+    docPair.first  = "CPack.cmake";
+    docPair.second = "Variables common to all CPack generators";
+    docedModList.push_back(docPair);
+    docPair.first  = "CPackComponent.cmake";
+    docedModList.push_back(docPair);
+    docPair.first  = "CPackRPM.cmake";
+    docPair.second = "Variables specific to a CPack generator";
+    docedModList.push_back(docPair);
+    docPair.first  = "CPackDeb.cmake";
+    docedModList.push_back(docPair);
+
+    // parse the files for documentation.
+    for (docedModulesList_t::iterator it = docedModList.begin();
+         it!= docedModList.end(); ++it)
+      {
+      docedFile = globalMF->GetModulesFile((it->first).c_str());
+      if (docedFile.length()!=0)
+        {
+          doc.GetStructuredDocFromFile(docedFile.c_str(),
+                                       commands,&cminst,(it->second).c_str());
+        }
+     }
 
     std::map<std::string,cmDocumentationSection *> propDocs;
     cminst.GetPropertiesDocumentation(propDocs);
     doc.SetSections(propDocs);
-    cminst.GetCommandDocumentation(commands);
+    cminst.GetCommandDocumentation(commands,true,false);
+    // statically (in C++ code) defined macros/commands
     cmCPackDocumentMacros::GetMacrosDocumentation(commands);
     doc.SetSection("Commands",commands);
 

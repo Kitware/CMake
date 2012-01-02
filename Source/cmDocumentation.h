@@ -133,23 +133,26 @@ public:
   void addCPackStandardDocSections();
 
   /**
-   * Get the documentation of macros and variable documented
+   * Get the documentation of macros, functions and variable documented
    * with CMake structured documentation in a CMake script.
+   * (in fact it may be in any file which follow the structured doc format)
    * Structured documentation begin with
    * ## (double sharp) in column 1 & 2 immediately followed
    * by a markup. Those ## are ignored by the legacy module
    * documentation parser @see CreateSingleModule.
-   * Current markup are ##macro, ##param, ##variable and ##end
-   * which is closing either of the previous ones.
+   * Current markup are ##macro, ##function, ##variable and ##end.
+   * ##end is closing either of the previous ones.
    * @param[in] fname the script file name to be parsed for documentation
    * @param[in,out] commands the vector of command/macros documentation
    *                entry found in the script file.
    * @param[in,out] the cmake object instance to which variable documentation
    *                will be attached (using @see cmake::DefineProperty)
+   * @param[in] the documentation section in which the property will be
+   *            inserted.
    * @return the number of documented items (command and variable)
    *         found in the file.
    */
-  int getStructuredDocFromFile(const char* fname,
+  int GetStructuredDocFromFile(const char* fname,
                                std::vector<cmDocumentationEntry>& commands,
                                cmake* cm,
                                const char *docSection);
