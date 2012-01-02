@@ -11,6 +11,7 @@
 #
 #   DOXYGEN_EXECUTABLE     = The path to the doxygen command.
 #   DOXYGEN_FOUND          = Was Doxygen found or not?
+#   DOXYGEN_VERSION        = The version reported by doxygen --version
 #
 #   DOXYGEN_DOT_EXECUTABLE = The path to the dot program used by doxygen.
 #   DOXYGEN_DOT_FOUND      = Was Dot found or not?
@@ -76,8 +77,12 @@ FIND_PROGRAM(DOXYGEN_EXECUTABLE
   DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
 )
 
+IF(DOXYGEN_EXECUTABLE)
+  EXECUTE_PROCESS(COMMAND ${DOXYGEN_EXECUTABLE} "--version" OUTPUT_VARIABLE DOXYGEN_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+ENDIF()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen DEFAULT_MSG DOXYGEN_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen REQUIRED_VARS DOXYGEN_EXECUTABLE VERSION_VAR DOXYGEN_VERSION)
 
 #
 # Find Dot...
