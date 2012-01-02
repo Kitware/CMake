@@ -131,6 +131,8 @@ void (*cmSystemTools::s_ErrorCallback)(const char*, const char*,
 void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
 void* cmSystemTools::s_ErrorCallbackClientData = 0;
 void* cmSystemTools::s_StdoutCallbackClientData = 0;
+bool (*cmSystemTools::s_InterruptCallback)(void*);
+void* cmSystemTools::s_InterruptCallbackClientData = 0;
 
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
@@ -220,6 +222,20 @@ void cmSystemTools::Error(const char* m1, const char* m2,
   cmSystemTools::Message(message.c_str(),"Error");
 }
 
+void cmSystemTools::SetInterruptCallback(InterruptCallback f, void* clientData)
+{
+  s_InterruptCallback = f;
+  s_InterruptCallbackClientData = clientData;
+}
+
+bool cmSystemTools::GetInterruptFlag()
+{
+  if(s_InterruptCallback)
+    {
+    return (*s_InterruptCallback)(s_InterruptCallbackClientData);
+    }
+  return false;
+}
 
 void cmSystemTools::SetErrorCallback(ErrorCallback f, void* clientData)
 {
