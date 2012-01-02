@@ -7,3 +7,7 @@ macro(add_CMakeOnly_test test)
     -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
     )
 endmacro()
+
+add_CMakeOnly_test(CheckSymbolExists)
+
+add_CMakeOnly_test(CheckCXXSymbolExists)
