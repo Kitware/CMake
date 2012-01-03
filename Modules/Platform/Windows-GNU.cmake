@@ -108,6 +108,8 @@ macro(__windows_compiler_gnu lang)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 
+  list(APPEND CMAKE_${lang}_ABI_FILES "Platform/Windows-GNU-${lang}-ABI")
+
   # Support very long lists of object files.
   if("${CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG}" STREQUAL "@")
     foreach(rule CREATE_SHARED_MODULE CREATE_SHARED_LIBRARY LINK_EXECUTABLE)
@@ -123,5 +125,57 @@ macro(__windows_compiler_gnu lang)
         "${CMAKE_${lang}_${rule}}"
         )
     endforeach()
+  endif()
+endmacro()
+
+macro(__windows_compiler_gnu_abi lang)
+  if(CMAKE_NO_GNUtoMS)
+    set(CMAKE_GNUtoMS 0)
+  else()
+    option(CMAKE_GNUtoMS "Convert GNU import libraries to MS format (requires Visual Studio)" OFF)
+  endif()
+
+  if(CMAKE_GNUtoMS AND NOT CMAKE_GNUtoMS_LIB)
+    # Find MS development environment setup script for this architecture.
+    if("${CMAKE_SIZEOF_VOID_P}" EQUAL 4)
+      find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvars32.bat
+        DOC "Visual Studio vcvars32.bat"
+        PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC;ProductDir]/bin"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/bin"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir]/bin"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir]/bin"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\7.1\\Setup\\VC;ProductDir]/bin"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup\\Microsoft Visual C++;ProductDir]/bin"
+        )
+      set(CMAKE_GNUtoMS_ARCH x86)
+    elseif("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
+      find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvarsamd64.bat
+        DOC "Visual Studio vcvarsamd64.bat"
+        PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC;ProductDir]/bin/amd64"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/bin/amd64"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir]/bin/amd64"
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\Setup\\VC;ProductDir]/bin/amd64"
+        )
+      set(CMAKE_GNUtoMS_ARCH amd64)
+    endif()
+    set_property(CACHE CMAKE_GNUtoMS_VCVARS PROPERTY ADVANCED 1)
+    if(CMAKE_GNUtoMS_VCVARS)
+      # Create helper script to run lib.exe from MS environment.
+      string(REPLACE "/" "\\" CMAKE_GNUtoMS_BAT "${CMAKE_GNUtoMS_VCVARS}")
+      set(CMAKE_GNUtoMS_LIB ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeGNUtoMS_lib.bat)
+      configure_file(${CMAKE_ROOT}/Modules/Platform/GNUtoMS_lib.bat.in ${CMAKE_GNUtoMS_LIB})
+    else()
+      message(WARNING "Disabling CMAKE_GNUtoMS option because CMAKE_GNUtoMS_VCVARS is not set.")
+      set(CMAKE_GNUtoMS 0)
+    endif()
+  endif()
+
+  if(CMAKE_GNUtoMS)
+    # Teach CMake how to create a MS import library at link time.
+    set(CMAKE_${lang}_GNUtoMS_RULE " -Wl,--output-def,<TARGET_NAME>.def"
+      "<CMAKE_COMMAND> -Dlib=\"${CMAKE_GNUtoMS_LIB}\" -Ddef=<TARGET_NAME>.def -Ddll=<TARGET> -Dimp=<TARGET_IMPLIB> -P \"${CMAKE_ROOT}/Modules/Platform/GNUtoMS_lib.cmake\""
+      )
   endif()
 endmacro()

@@ -508,6 +508,19 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
     cm->DefineProperty
+    ("CMAKE_AUTOMOC_RELAXED_MODE",  cmProperty::VARIABLE,
+     "Switch between strict and relaxed automoc mode.",
+     "By default, automoc behaves exactly as described in the documentation "
+     "of the AUTOMOC target property.  "
+     "When set to TRUE, it accepts more input and tries to find the correct "
+     "input file for moc even if it differs from the documented behaviour. "
+     "In this mode it e.g. also checks whether a header file is intended to "
+     "be processed by moc when a \"foo.moc\" file has been included.\n"
+     "Relaxed mode has to be enabled for KDE4 compatibility.",
+     false,
+     "Variables That Change Behavior");
+
+    cm->DefineProperty
     ("CMAKE_FIND_LIBRARY_PREFIXES",  cmProperty::VARIABLE,
      "Prefixes to prepend when looking for libraries.",
      "This specifies what prefixes to add to library names when "
@@ -1112,6 +1125,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_GNUtoMS", cmProperty::VARIABLE,
+     "Convert GNU import libraries (.dll.a) to MS format (.lib).",
+     "This variable is used to initialize the GNUtoMS property on targets "
+     "when they are created.  "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_DEBUG_POSTFIX", cmProperty::VARIABLE,
      "See variable CMAKE_<CONFIG>_POSTFIX.",
      "This variable is a special case of the more-general "
@@ -1514,6 +1536,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_<LANG>_COMPILER_ENV_VAR",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_COMPILER_ID_RUN",
+                     cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_ABI_FILES",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_CREATE_ASSEMBLY_SOURCE",
                      cmProperty::VARIABLE,0,0);

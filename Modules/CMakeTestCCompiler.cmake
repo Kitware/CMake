@@ -35,7 +35,7 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
     "{ (void)argv; return argc-1;}\n")
   TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
-    OUTPUT_VARIABLE OUTPUT) 
+    OUTPUT_VARIABLE __CMAKE_C_COMPILER_OUTPUT)
   SET(C_TEST_WAS_RUN 1)
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 
@@ -43,7 +43,7 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
   PrintTestCompilerStatus("C" " -- broken")
   FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the C compiler works failed with "
-    "the following output:\n${OUTPUT}\n\n")
+    "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")
   # if the compiler is broken make sure to remove the platform file
   # since Windows-cl configures both c/cxx files both need to be removed
   # when c or c++ fails
@@ -51,14 +51,14 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
   FILE(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake )
   MESSAGE(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
     "is not able to compile a simple test program.\nIt fails "
-    "with the following output:\n ${OUTPUT}\n\n"
+    "with the following output:\n ${__CMAKE_C_COMPILER_OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_C_COMPILER_WORKS)
   IF(C_TEST_WAS_RUN)
     PrintTestCompilerStatus("C" " -- works")
     FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the C compiler works passed with "
-      "the following output:\n${OUTPUT}\n\n") 
+      "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")
   ENDIF(C_TEST_WAS_RUN)
   SET(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
@@ -76,5 +76,12 @@ ELSE(NOT CMAKE_C_COMPILER_WORKS)
       )
     INCLUDE(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake)
   ENDIF(CMAKE_C_COMPILER_FORCED)
+  IF(CMAKE_C_SIZEOF_DATA_PTR)
+    FOREACH(f ${CMAKE_C_ABI_FILES})
+      INCLUDE(${f})
+    ENDFOREACH()
+    UNSET(CMAKE_C_ABI_FILES)
+  ENDIF()
 ENDIF(NOT CMAKE_C_COMPILER_WORKS)
 
+UNSET(__CMAKE_C_COMPILER_OUTPUT)

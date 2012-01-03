@@ -17,6 +17,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
 #include <cmsys/RegularExpression.hxx>
@@ -131,6 +132,7 @@ cmTarget::cmTarget()
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
+  this->IsApple = false;
   this->IsImportedTarget = false;
 }
 
@@ -159,8 +161,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is initialized by the value of the variable "
      "CMAKE_AUTOMOC if it is set when a target is created.\n"
      "Additional command line options for moc can be set via the "
-     "AUTOMOC_MOC_OPTIONS property."
-    );
+     "AUTOMOC_MOC_OPTIONS property.\n"
+     "By setting the CMAKE_AUTOMOC_RELAXED_MODE variable to TRUE the rules "
+     "for searching the files which will be processed by moc can be relaxed. "
+     "See the documentation for this variable for more details.");
 
   cm->DefineProperty
     ("AUTOMOC_MOC_OPTIONS", cmProperty::TARGET,
@@ -584,15 +588,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "value is the default.  "
      "See documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables.");
 
-#define CM_LOCATION_UNDEFINED_BEHAVIOR \
-  "\n" \
-  "Do not set properties that affect the location of the target after " \
-  "reading this property.  These include properties whose names match " \
-  "\"(RUNTIME|LIBRARY|ARCHIVE)_OUTPUT_(NAME|DIRECTORY)(_<CONFIG>)?\" " \
-  "or \"(IMPLIB_)?(PREFIX|SUFFIX)\".  " \
-  "Failure to follow this rule is not diagnosed and leaves the location " \
-  "of the target undefined."
-
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
      "Read-only location of a target on disk.",
@@ -612,7 +607,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "In CMake 2.8.4 and above add_custom_command recognizes generator "
      "expressions to refer to target locations anywhere in the command.  "
      "Therefore this property is not needed for creating custom commands."
-     CM_LOCATION_UNDEFINED_BEHAVIOR);
+     CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
     ("LOCATION_<CONFIG>", cmProperty::TARGET,
@@ -626,7 +621,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "arbitrary available configuration.  "
      "Use the MAP_IMPORTED_CONFIG_<CONFIG> property to map imported "
      "configurations explicitly."
-     CM_LOCATION_UNDEFINED_BEHAVIOR);
+     CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
     ("LINK_DEPENDS", cmProperty::TARGET,
@@ -980,6 +975,23 @@ void cmTarget::DefineProperties(cmake *cm)
      "is created its value is used to initialize this property.");
 
   cm->DefineProperty
+    ("GNUtoMS", cmProperty::TARGET,
+     "Convert GNU import library (.dll.a) to MS format (.lib).",
+     "When linking a shared library or executable that exports symbols "
+     "using GNU tools on Windows (MinGW/MSYS) with Visual Studio installed "
+     "convert the import library (.dll.a) from GNU to MS format (.lib).  "
+     "Both import libraries will be installed by install(TARGETS) and "
+     "exported by install(EXPORT) and export() to be linked by applications "
+     "with either GNU- or MS-compatible tools."
+     "\n"
+     "If the variable CMAKE_GNUtoMS is set when a target "
+     "is created its value is used to initialize this property.  "
+     "The variable must be set prior to the first command that enables "
+     "a language such as project() or enable_language().  "
+     "CMake provides the variable as an option to the user automatically "
+     "when configuring on Windows with GNU tools.");
+
+  cm->DefineProperty
     ("XCODE_ATTRIBUTE_<an-attribute>", cmProperty::TARGET,
      "Set Xcode target attributes directly.",
      "Tell the Xcode generator to set '<an-attribute>' to a given value "
@@ -1207,6 +1219,9 @@ void cmTarget::SetMakefile(cmMakefile* mf)
                        this->Makefile->IsOn("CYGWIN") ||
                        this->Makefile->IsOn("MINGW"));
 
+  // Check whether we are targeting an Apple platform.
+  this->IsApple = this->Makefile->IsOn("APPLE");
+
   // Setup default property values.
   this->SetPropertyDefault("INSTALL_NAME_DIR", "");
   this->SetPropertyDefault("INSTALL_RPATH", "");
@@ -1218,6 +1233,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_FORMAT", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
+  this->SetPropertyDefault("GNUtoMS", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
@@ -3348,7 +3364,11 @@ void cmTarget::GetLibraryNames(std::string& name,
     // the library version as the soversion.
     soversion = version;
     }
-  bool isApple = this->Makefile->IsOn("APPLE");
+  if(!version && soversion)
+    {
+    // Use the soversion as the library version.
+    version = soversion;
+    }
 
   // Get the components of the library name.
   std::string prefix;
@@ -3360,47 +3380,12 @@ void cmTarget::GetLibraryNames(std::string& name,
   name = prefix+base+suffix;
 
   // The library's soname.
-  if(isApple)
-    {
-    soName = prefix+base;
-    }
-  else
-    {
-    soName = name;
-    }
-  if(soversion)
-    {
-    soName += ".";
-    soName += soversion;
-    }
-  if(isApple)
-    {
-    soName += suffix;
-    }
+  this->ComputeVersionedName(soName, prefix, base, suffix,
+                             name, soversion);
 
   // The library's real name on disk.
-  if(isApple)
-    {
-    realName = prefix+base;
-    }
-  else
-    {
-  realName = name;
-    }
-  if(version)
-    {
-    realName += ".";
-    realName += version;
-    }
-  else if(soversion)
-    {
-    realName += ".";
-    realName += soversion;
-    }
-  if(isApple)
-    {
-    realName += suffix;
-    }
+  this->ComputeVersionedName(realName, prefix, base, suffix,
+                             name, version);
 
   // The import library name.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -3415,6 +3400,23 @@ void cmTarget::GetLibraryNames(std::string& name,
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ComputeVersionedName(std::string& vName,
+                                    std::string const& prefix,
+                                    std::string const& base,
+                                    std::string const& suffix,
+                                    std::string const& name,
+                                    const char* version)
+{
+  vName = this->IsApple? (prefix+base) : name;
+  if(version)
+    {
+    vName += ".";
+    vName += version;
+    }
+  vName += this->IsApple? suffix : std::string();
 }
 
 //----------------------------------------------------------------------------
@@ -3477,6 +3479,26 @@ void cmTarget::GetExecutableNames(std::string& name,
 
   // The program database file name.
   pdbName = prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::HasImplibGNUtoMS()
+{
+  return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
+                                std::string& out, const char* newExt)
+{
+  if(this->HasImplibGNUtoMS() &&
+     gnuName.size() > 6 && gnuName.substr(gnuName.size()-6) == ".dll.a")
+    {
+    out = gnuName.substr(0, gnuName.size()-6);
+    out += newExt? newExt : ".lib";
+    return true;
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

@@ -28,7 +28,7 @@ IF(NOT CMAKE_CXX_COMPILER_WORKS)
     "int main(){return 0;}\n")
   TRY_COMPILE(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
-    OUTPUT_VARIABLE OUTPUT)
+    OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
   SET(CXX_TEST_WAS_RUN 1)
 ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)
 
@@ -41,17 +41,17 @@ IF(NOT CMAKE_CXX_COMPILER_WORKS)
   FILE(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake )
   FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the CXX compiler works failed with "
-    "the following output:\n${OUTPUT}\n\n")
+    "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
   MESSAGE(FATAL_ERROR "The C++ compiler \"${CMAKE_CXX_COMPILER}\" "
     "is not able to compile a simple test program.\nIt fails "
-    "with the following output:\n ${OUTPUT}\n\n"
+    "with the following output:\n ${__CMAKE_CXX_COMPILER_OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
 ELSE(NOT CMAKE_CXX_COMPILER_WORKS)
   IF(CXX_TEST_WAS_RUN)
     PrintTestCompilerStatus("CXX" " -- works")
     FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler works passed with "
-      "the following output:\n${OUTPUT}\n\n")
+      "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
   ENDIF(CXX_TEST_WAS_RUN)
   SET(CMAKE_CXX_COMPILER_WORKS 1 CACHE INTERNAL "")
 
@@ -69,4 +69,12 @@ ELSE(NOT CMAKE_CXX_COMPILER_WORKS)
       )
     INCLUDE(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake)
   ENDIF(CMAKE_CXX_COMPILER_FORCED)
+  IF(CMAKE_CXX_SIZEOF_DATA_PTR)
+    FOREACH(f ${CMAKE_CXX_ABI_FILES})
+      INCLUDE(${f})
+    ENDFOREACH()
+    UNSET(CMAKE_CXX_ABI_FILES)
+  ENDIF()
 ENDIF(NOT CMAKE_CXX_COMPILER_WORKS)
+
+UNSET(__CMAKE_CXX_COMPILER_OUTPUT)

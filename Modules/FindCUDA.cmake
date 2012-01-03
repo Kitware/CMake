@@ -266,17 +266,17 @@ macro(CUDA_FIND_HELPER_FILE _name _extension)
   # processed.  Using this variable, we can pull out the current path, and
   # provide a way to get access to the other files we need local to here.
   get_filename_component(CMAKE_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-  find_file(CUDA_${_name} ${_full_name} PATHS ${CMAKE_CURRENT_LIST_DIR}/FindCUDA NO_DEFAULT_PATH)
-  if(NOT CUDA_${_name})
-    set(error_message "${_full_name} not found in CMAKE_MODULE_PATH")
+  set(CUDA_${_name} "${CMAKE_CURRENT_LIST_DIR}/FindCUDA/${_full_name}")
+  if(NOT EXISTS "${CUDA_${_name}}")
+    set(error_message "${_full_name} not found in ${CMAKE_CURRENT_LIST_DIR}/FindCUDA")
     if(CUDA_FIND_REQUIRED)
       message(FATAL_ERROR "${error_message}")
-    else(CUDA_FIND_REQUIRED)
+    else()
       if(NOT CUDA_FIND_QUIETLY)
         message(STATUS "${error_message}")
-      endif(NOT CUDA_FIND_QUIETLY)
-    endif(CUDA_FIND_REQUIRED)
-  endif(NOT CUDA_${_name})
+      endif()
+    endif()
+  endif()
   # Set this variable as internal, so the user isn't bugged with it.
   set(CUDA_${_name} ${CUDA_${_name}} CACHE INTERNAL "Location of ${_full_name}" FORCE)
 endmacro(CUDA_FIND_HELPER_FILE)
@@ -320,9 +320,9 @@ macro(CUDA_INCLUDE_NVCC_DEPENDENCIES dependency_file)
 #     message("CUDA_NVCC_DEPEND NOT set")
 #   endif()
   if(CUDA_NVCC_DEPEND)
-    #message("CUDA_NVCC_DEPEND true")
+    #message("CUDA_NVCC_DEPEND found")
     foreach(f ${CUDA_NVCC_DEPEND})
-      #message("searching for ${f}")
+      # message("searching for ${f}")
       if(NOT EXISTS ${f})
         #message("file ${f} not found")
         set(CUDA_NVCC_DEPEND_REGENERATE TRUE)
@@ -339,6 +339,8 @@ macro(CUDA_INCLUDE_NVCC_DEPENDENCIES dependency_file)
   # output depend on the dependency file itself, which should cause the
   # rule to re-run.
   if(CUDA_NVCC_DEPEND_REGENERATE)
+    set(CUDA_NVCC_DEPEND ${dependency_file})
+    #message("Generating an empty dependency_file: ${dependency_file}")
     file(WRITE ${dependency_file} "#FindCUDA.cmake generated file.  Do not edit.\n")
   endif(CUDA_NVCC_DEPEND_REGENERATE)
 
@@ -415,13 +417,14 @@ endforeach()
 # if they have then clear the cache variables, so that will be detected again.
 if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_NVCC_EXECUTABLE CACHE)
-  unset(CUDA_VERSION CACHE)
   unset(CUDA_TOOLKIT_INCLUDE CACHE)
   unset(CUDA_CUDART_LIBRARY CACHE)
+  # Make sure you run this before you unset CUDA_VERSION.
   if(CUDA_VERSION VERSION_EQUAL "3.0")
     # This only existed in the 3.0 version of the CUDA toolkit
     unset(CUDA_CUDARTEMU_LIBRARY CACHE)
   endif()
+  unset(CUDA_VERSION CACHE)
   unset(CUDA_CUDA_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
@@ -443,7 +446,10 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR)
   # Search in the CUDA_BIN_PATH first.
   find_path(CUDA_TOOLKIT_ROOT_DIR
     NAMES nvcc nvcc.exe
-    PATHS ENV CUDA_BIN_PATH
+    PATHS
+      ENV CUDA_PATH
+      ENV CUDA_BIN_PATH
+    PATH_SUFFIXES bin bin64
     DOC "Toolkit location."
     NO_DEFAULT_PATH
     )
@@ -472,9 +478,10 @@ endif (NOT CUDA_TOOLKIT_ROOT_DIR)
 # CUDA_NVCC_EXECUTABLE
 find_program(CUDA_NVCC_EXECUTABLE
   NAMES nvcc
-  PATHS "${CUDA_TOOLKIT_ROOT_DIR}/bin"
-        "${CUDA_TOOLKIT_ROOT_DIR}/bin64"
+  PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+  ENV CUDA_PATH
   ENV CUDA_BIN_PATH
+  PATH_SUFFIXES bin bin64
   NO_DEFAULT_PATH
   )
 # Search default search paths, after we search our own set of paths.
@@ -500,8 +507,10 @@ set(CUDA_VERSION_STRING "${CUDA_VERSION}")
 # CUDA_TOOLKIT_INCLUDE
 find_path(CUDA_TOOLKIT_INCLUDE
   device_functions.h # Header included in toolkit
-  PATHS "${CUDA_TOOLKIT_ROOT_DIR}/include"
+  PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+  ENV CUDA_PATH
   ENV CUDA_INC_PATH
+  PATH_SUFFIXES include
   NO_DEFAULT_PATH
   )
 # Search default search paths, after we search our own set of paths.
@@ -516,19 +525,16 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # CUDA 3.2+ on Windows moved the library directoryies, so we need the new
     # and old paths.
-    set(_cuda_64bit_lib_dir
-      "${CUDA_TOOLKIT_ROOT_DIR}/lib/x64"
-      "${CUDA_TOOLKIT_ROOT_DIR}/lib64"
-      )
+    set(_cuda_64bit_lib_dir "lib/x64" "lib64" )
   endif()
   # CUDA 3.2+ on Windows moved the library directories, so we need to new
   # (lib/Win32) and the old path (lib).
   find_library(${_var}
     NAMES ${_names}
-    PATHS ${_cuda_64bit_lib_dir}
-          "${CUDA_TOOLKIT_ROOT_DIR}/lib/Win32"
-          "${CUDA_TOOLKIT_ROOT_DIR}/lib"
+    PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+    ENV CUDA_PATH
     ENV CUDA_LIB_PATH
+    PATH_SUFFIXES ${_cuda_64bit_lib_dir} "lib/Win32" "lib"
     DOC ${_doc}
     NO_DEFAULT_PATH
     )
@@ -707,7 +713,7 @@ find_package_handle_standard_args(CUDA
 # Add include directories to pass to the nvcc command.
 macro(CUDA_INCLUDE_DIRECTORIES)
   foreach(dir ${ARGN})
-    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER "-I${dir}")
+    list(APPEND CUDA_NVCC_INCLUDE_ARGS_USER -I${dir})
   endforeach(dir ${ARGN})
 endmacro(CUDA_INCLUDE_DIRECTORIES)
 
@@ -736,13 +742,13 @@ macro(CUDA_GET_SOURCES_AND_OPTIONS _sources _cmake_options _options)
         arg STREQUAL "SHARED" OR
         arg STREQUAL "MODULE"
         )
-      list(APPEND ${_cmake_options} "${arg}")
+      list(APPEND ${_cmake_options} ${arg})
     else()
       if ( _found_options )
-        list(APPEND ${_options} "${arg}")
+        list(APPEND ${_options} ${arg})
       else()
         # Assume this is a file
-        list(APPEND ${_sources} "${arg}")
+        list(APPEND ${_sources} ${arg})
       endif()
     endif()
   endforeach()
@@ -806,6 +812,43 @@ function(CUDA_BUILD_SHARED_LIBRARY shared_flag)
     endif()
   endif()
   set(${shared_flag} ${_cuda_build_shared_libs} PARENT_SCOPE)
+endfunction()
+
+##############################################################################
+# Helper to avoid clashes of files with the same basename but different paths.
+# This doesn't attempt to do exactly what CMake internals do, which is to only
+# add this path when there is a conflict, since by the time a second collision
+# in names is detected it's already too late to fix the first one.  For
+# consistency sake the relative path will be added to all files.
+function(CUDA_COMPUTE_BUILD_PATH path build_path)
+  #message("CUDA_COMPUTE_BUILD_PATH([${path}] ${build_path})")
+  # Only deal with CMake style paths from here on out
+  file(TO_CMAKE_PATH "${path}" bpath)
+  if (IS_ABSOLUTE "${bpath}")
+    # Absolute paths are generally unnessary, especially if something like
+    # FILE(GLOB_RECURSE) is used to pick up the files.
+    file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+  endif()
+
+  # This recipie is from cmLocalGenerator::CreateSafeUniqueObjectFileName in the
+  # CMake source.
+
+  # Remove leading /
+  string(REGEX REPLACE "^[/]+" "" bpath "${bpath}")
+  # Avoid absolute paths by removing ':'
+  string(REPLACE ":" "_" bpath "${bpath}")
+  # Avoid relative paths that go up the tree
+  string(REPLACE "../" "__/" bpath "${bpath}")
+  # Avoid spaces
+  string(REPLACE " " "_" bpath "${bpath}")
+
+  # Strip off the filename.  I wait until here to do it, since removin the
+  # basename can make a path that looked like path/../basename turn into
+  # path/.. (notice the trailing slash).
+  get_filename_component(bpath "${bpath}" PATH)
+
+  set(${build_path} "${bpath}" PARENT_SCOPE)
+  #message("${build_path} = ${bpath}")
 endfunction()
 
 ##############################################################################
@@ -890,7 +933,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   get_directory_property(CUDA_NVCC_INCLUDE_DIRECTORIES INCLUDE_DIRECTORIES)
   if(CUDA_NVCC_INCLUDE_DIRECTORIES)
     foreach(dir ${CUDA_NVCC_INCLUDE_DIRECTORIES})
-      list(APPEND CUDA_NVCC_INCLUDE_ARGS "-I${dir}")
+      list(APPEND CUDA_NVCC_INCLUDE_ARGS -I${dir})
     endforeach()
   endif()
 
@@ -956,7 +999,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
     # like it is currently), we can remove the quotes around the
     # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} \"${CUDA_NVCC_FLAGS_${config_upper}};;${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}}\")")
+    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
 
   if(compile_to_ptx)
@@ -977,13 +1020,6 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     list(APPEND nvcc_flags "-D${cuda_target}_EXPORTS")
   endif()
 
-  # Determine output directory
-  if(CUDA_GENERATED_OUTPUT_DIR)
-    set(cuda_compile_output_dir "${CUDA_GENERATED_OUTPUT_DIR}")
-  else()
-    set(cuda_compile_output_dir "${CMAKE_CURRENT_BINARY_DIR}")
-  endif()
-
   # Reset the output variable
   set(_cuda_wrap_generated_files "")
 
@@ -993,6 +1029,19 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
     if(${file} MATCHES ".*\\.cu$" AND NOT _is_header)
+
+      # Determine output directory
+      cuda_compute_build_path("${file}" cuda_build_path)
+      set(cuda_compile_intermediate_directory "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${cuda_target}.dir/${cuda_build_path}")
+      if(CUDA_GENERATED_OUTPUT_DIR)
+        set(cuda_compile_output_dir "${CUDA_GENERATED_OUTPUT_DIR}")
+      else()
+        if ( compile_to_ptx )
+          set(cuda_compile_output_dir "${CMAKE_CURRENT_BINARY_DIR}")
+        else()
+          set(cuda_compile_output_dir "${cuda_compile_intermediate_directory}")
+        endif()
+      endif()
 
       # Add a custom target to generate a c or ptx file. ######################
 
@@ -1013,10 +1062,10 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       # argument, so that the ${CMAKE_CFG_INTDIR} gets expanded at run time
       # instead of configure time.
       set(generated_file "${generated_file_path}/${generated_file_basename}")
-      set(cmake_dependency_file "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${generated_file_basename}.depend")
-      set(NVCC_generated_dependency_file "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${generated_file_basename}.NVCC-depend")
+      set(cmake_dependency_file "${cuda_compile_intermediate_directory}/${generated_file_basename}.depend")
+      set(NVCC_generated_dependency_file "${cuda_compile_intermediate_directory}/${generated_file_basename}.NVCC-depend")
       set(generated_cubin_file "${generated_file_path}/${generated_file_basename}.cubin.txt")
-      set(custom_target_script "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${generated_file_basename}.cmake")
+      set(custom_target_script "${cuda_compile_intermediate_directory}/${generated_file_basename}.cmake")
 
       # Setup properties for obj files:
       if( NOT compile_to_ptx )
@@ -1096,6 +1145,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
           -D "generated_file:STRING=${generated_file}"
           -D "generated_cubin_file:STRING=${generated_cubin_file}"
           -P "${custom_target_script}"
+        WORKING_DIRECTORY "${cuda_compile_intermediate_directory}"
         COMMENT "${cuda_build_comment_string}"
         )
 

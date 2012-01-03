@@ -343,13 +343,6 @@ endif()
 # Only do svn tests with svn >= version 1.2
 #
 if(do_svn_tests)
-  execute_process(COMMAND ${Subversion_SVN_EXECUTABLE} --version
-    OUTPUT_VARIABLE Subversion_VERSION_SVN
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  string(REGEX REPLACE "^(.*\n)?svn, version ([.0-9]+).*"
-    "\\2" Subversion_VERSION_SVN "${Subversion_VERSION_SVN}")
-  message(STATUS "Subversion_VERSION_SVN='${Subversion_VERSION_SVN}'")
-
   if(Subversion_VERSION_SVN VERSION_LESS 1.2)
     message(STATUS "No ExternalProject svn tests with svn client less than version 1.2")
     set(do_svn_tests 0)

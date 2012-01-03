@@ -369,6 +369,14 @@ public:
                           std::string& impName,
                           std::string& pdbName, const char* config);
 
+  /** Does this target have a GNU implib to convert to MS format?  */
+  bool HasImplibGNUtoMS();
+
+  /** Convert the given GNU import library name (.dll.a) to a name with a new
+      extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
+  bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
+                        const char* newExt = 0);
+
   /** Add the target output files to the global generator manifest.  */
   void GenerateTargetManifest(const char* config);
 
@@ -557,6 +565,7 @@ private:
   cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
+  bool IsApple;
   bool IsImportedTarget;
 
   // Cache target output paths for each configuration.
@@ -595,6 +604,12 @@ private:
   cmTargetInternalPointer Internal;
 
   void ConstructSourceFileFlags();
+  void ComputeVersionedName(std::string& vName,
+                            std::string const& prefix,
+                            std::string const& base,
+                            std::string const& suffix,
+                            std::string const& name,
+                            const char* version);
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;

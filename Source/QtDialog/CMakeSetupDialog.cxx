@@ -26,6 +26,7 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QShortcut>
+#include <QKeySequence>
 #include <QMacInstallDialog.h>
 
 #include "QCMake.h"
@@ -99,6 +100,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(this->DeleteCacheAction, SIGNAL(triggered(bool)),
                    this, SLOT(doDeleteCache()));
   this->ExitAction = FileMenu->addAction(tr("E&xit"));
+  this->ExitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
   QObject::connect(this->ExitAction, SIGNAL(triggered(bool)),
                    this, SLOT(close()));
 

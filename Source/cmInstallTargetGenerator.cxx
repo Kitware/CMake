@@ -101,6 +101,13 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       std::string to1 = toDir + targetNameImport;
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
+      std::string targetNameImportLib;
+      if(this->Target->GetImplibGNUtoMS(targetNameImport,
+                                        targetNameImportLib))
+        {
+        filesFrom.push_back(fromDirConfig + targetNameImportLib);
+        filesTo.push_back(toDir + targetNameImportLib);
+        }
 
       // An import library looks like a static library.
       type = cmTarget::STATIC_LIBRARY;
@@ -157,6 +164,13 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       std::string to1 = toDir + targetNameImport;
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
+      std::string targetNameImportLib;
+      if(this->Target->GetImplibGNUtoMS(targetNameImport,
+                                        targetNameImportLib))
+        {
+        filesFrom.push_back(fromDirConfig + targetNameImportLib);
+        filesTo.push_back(toDir + targetNameImportLib);
+        }
 
       // An import library looks like a static library.
       type = cmTarget::STATIC_LIBRARY;
@@ -314,7 +328,11 @@ std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
     if(nameType == NameImplib)
       {
       // Use the import library name.
-      fname = targetNameImport;
+      if(!target->GetImplibGNUtoMS(targetNameImport, fname,
+                                   "${CMAKE_IMPORT_LIBRARY_SUFFIX}"))
+        {
+        fname = targetNameImport;
+        }
       }
     else if(nameType == NameReal)
       {
@@ -339,7 +357,11 @@ std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
     if(nameType == NameImplib)
       {
       // Use the import library name.
-      fname = targetNameImport;
+      if(!target->GetImplibGNUtoMS(targetNameImport, fname,
+                                   "${CMAKE_IMPORT_LIBRARY_SUFFIX}"))
+        {
+        fname = targetNameImport;
+        }
       }
     else if(nameType == NameSO)
       {

@@ -32,21 +32,21 @@ set(CMAKE_CONFIGURATION_TYPES @CMAKE_CONFIGURATION_TYPES@)
 # run the executable out of the Debug directory if there 
 # are configuration types
 if(CMAKE_CONFIGURATION_TYPES)
-  set(RUN_TEST "@CMAKE_BUILD_TEST_BINARY_DIR@/Debug/COnly")
+  set(RUN_TEST "@CMAKE_BUILD_TEST_BINARY_DIR@/Debug/@CMAKE_BUILD_TEST_EXE@")
 else(CMAKE_CONFIGURATION_TYPES)
-  set(RUN_TEST "@CMAKE_BUILD_TEST_BINARY_DIR@/COnly")
+  set(RUN_TEST "@CMAKE_BUILD_TEST_BINARY_DIR@/@CMAKE_BUILD_TEST_EXE@")
 endif(CMAKE_CONFIGURATION_TYPES)
 # run the test results
 message("running [${RUN_TEST}]")
 execute_process(COMMAND "${RUN_TEST}" RESULT_VARIABLE RESULT)
 if(RESULT)
-  message(FATAL_ERROR "Error running test COnly")
+  message(FATAL_ERROR "Error running test @CMAKE_BUILD_TEST_EXE@")
 endif(RESULT)
 
-# build it again with clean and only COnly target
+# build it again with clean and only @CMAKE_BUILD_TEST_EXE@ target
 execute_process(COMMAND "${CMAKE_COMMAND}" 
   --build "@CMAKE_BUILD_TEST_BINARY_DIR@" --config Debug 
-  --clean-first --target COnly
+  --clean-first --target @CMAKE_BUILD_TEST_EXE@
   RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running cmake --build")
@@ -55,5 +55,5 @@ endif(RESULT)
 # run it again after clean 
 execute_process(COMMAND "${RUN_TEST}" RESULT_VARIABLE RESULT)
 if(RESULT)
-  message(FATAL_ERROR "Error running test COnly after clean ")
+  message(FATAL_ERROR "Error running test @CMAKE_BUILD_TEST_EXE@ after clean ")
 endif(RESULT)

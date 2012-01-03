@@ -56,11 +56,12 @@
 # (or <plugins_dir>) relative to <executable> and store the result in
 # <installed_plugin_path_var>. See documentation of INSTALL_QT4_PLUGIN_PATH.
 #
-#  INSTALL_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
+#  INSTALL_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
 # Installs Qt plugins, writes a Qt configuration file (if needed) and fixes up
 # a Qt4 executable using BundleUtilities so it is standalone and can be
 # drag-and-drop copied to another machine as long as all of the system
 # libraries are compatible. The executable will be fixed-up at install time.
+# <component> is the COMPONENT used for bundle fixup and plugin installation.
 # See documentation of FIXUP_QT4_BUNDLE.
 
 #=============================================================================
@@ -204,9 +205,8 @@ function(install_qt4_plugin_path plugin executable copy installed_plugin_path_va
                 else()
                         if(configurations AND (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
                                 set(configurations CONFIGURATIONS ${configurations})
-                        endif()
-                        if(component)
-                                set(component COMPONENT ${component})
+                        else()
+                                unset(configurations)
                         endif()
                         install(FILES "${plugin}" DESTINATION "${plugins_path}" ${configurations} ${component})
                 endif()
@@ -244,9 +244,14 @@ function(install_qt4_executable executable)
         set(dirs ${ARGV3})
         set(plugins_dir ${ARGV4})
         set(request_qt_conf ${ARGV5})
-        set(plugin_component ${ARGV6})
+        set(component ${ARGV6})
         if(QT_LIBRARY_DIR)
                 list(APPEND dirs "${QT_LIBRARY_DIR}")
+        endif()
+        if(component)
+                set(component COMPONENT ${component})
+        else()
+                unset(component)
         endif()
 
         get_filename_component(executable_absolute "${executable}" ABSOLUTE)
@@ -265,15 +270,16 @@ function(install_qt4_executable executable)
 
         foreach(plugin ${qtplugins})
                 set(installed_plugin_paths "")
-                install_qt4_plugin("${plugin}" "${executable}" 0 installed_plugin_paths "${plugins_dir}" "${plugin_component}")
+                install_qt4_plugin("${plugin}" "${executable}" 0 installed_plugin_paths "${plugins_dir}" "${component}")
                 list(APPEND libs ${installed_plugin_paths})
         endforeach()
 
         resolve_qt4_paths(libs)
 
         install(CODE
-                " INCLUDE( \"${DeployQt4_cmake_dir}/DeployQt4.cmake\" )
-                SET( BU_CHMOD_BUNDLE_ITEMS TRUE )
-                FIXUP_QT4_EXECUTABLE( \"\${CMAKE_INSTALL_PREFIX}/${executable}\" \"\" \"${libs}\" \"${dirs}\" \"${plugins_dir}\" \"${request_qt_conf}\" ) "
+  "INCLUDE(\"${DeployQt4_cmake_dir}/DeployQt4.cmake\")
+  SET(BU_CHMOD_BUNDLE_ITEMS TRUE)
+  FIXUP_QT4_EXECUTABLE(\"\${CMAKE_INSTALL_PREFIX}/${executable}\" \"\" \"${libs}\" \"${dirs}\" \"${plugins_dir}\" \"${request_qt_conf}\")"
+                ${component}
         )
 endfunction()

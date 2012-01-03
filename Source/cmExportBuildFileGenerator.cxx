@@ -125,6 +125,8 @@ cmExportBuildFileGenerator
     std::string prop = "IMPORTED_IMPLIB";
     prop += suffix;
     std::string value = target->GetFullPath(config, true);
+    target->GetImplibGNUtoMS(value, value,
+                             "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
     properties[prop] = value;
     }
 }

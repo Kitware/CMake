@@ -1,3 +1,322 @@
+Changes in CMake 2.8.7 (since 2.8.7-rc2)
+--------------------------------------------
+None
+
+Changes in CMake 2.8.7-rc2 (since 2.8.7-rc1)
+--------------------------------------------
+Alex Neundorf (5):
+      automoc: default to strict mode, use CMAKE_AUTOMOC_RELAXED_MODE
+      automoc: improved warning message in relaxed mode
+      Remove trailing whitespace
+      Add comment about one more problem of the C depency scanner.
+      fix #12262: dependency scanning for ASM files
+
+Bill Hoffman (1):
+      Fix the case where cmake --build failed with two project cmds in one file.
+
+Brad King (11):
+      KWSys: Correctly handle empty environment variables
+      FortranCInterface: Work around mingw32-make trouble with parens
+      Xcode: Create separate rerun dependencies for subprojects (#12616)
+      Fix Intel Fortran .vfproj files for VS 10
+      HP: Drive shared library linking with compiler front end
+      Follow all dependencies of shared library private dependencies
+      Do not link private dependent shared libraries on OS X > 10.4
+      Avoid clobbering variable 'OUTPUT' in compiler tests (#12628)
+      Fix and simplify Fortran test compiler compatibility check
+      CTest: Recognize Intel errors without space before colon (#12627)
+      Windows-GNU: Remove extra quotes in GNUtoMS rule variable
+
+David Cole (4):
+      Release: Increase timeout for slow-testing cygwin build
+      Modules: Use "windres" as rc compiler base name for cross-compiles (#12480)
+      Tests: Only really run MFC test if we can build MFC apps (#11213)
+      FindBoost: Quote possibly empty string argument (#12273)
+
+Eric NOULARD (1):
+      CPackRPM fix #0012608 and unoticed related bug
+
+Johan Fänge (1):
+      CMake: Fix progress reporting for custom targets (#12441)
+
+Mike McQuaid (2):
+      Unset configurations variable when no build type.
+      Improve component support and output indentation.
+
+Raphael Kubo da Costa (2):
+      Remove the apparently outdated README in Source/QtDialog.
+      QtDialog: Set Ctrl+Q as the shortcut for quitting the program.
+
+Tim Gallagher (2):
+      FindLAPACK: Correct CMAKE_FIND_LIBRARY_SUFFIXES spelling (#12624)
+      FindLAPACK: List thread libs to avoid link errors (#12625)
+
+Valat Sébastien (1):
+      CTest: Do not get CDash version without drop site (#12618)
+
+Changes in CMake 2.8.7-rc1 (since 2.8.6)
+----------------------------------------
+Aaron Ten Clay (1):
+      VS: Add support for three new project properties (#12586)
+
+Alex Neundorf (60):
+      fix #12392: handle CMAKE_CXX_COMPILER_ARG1 for Eclipse projects
+      fix #12262: use the C dependency scanner also for ASM files
+      fix #12465: detect the masm compiler ID ("MSVC")
+      Silence make on OpenBSD in FindPackageModeTest(#12508)
+      Remove trailing whitespace
+      Find Ruby on OpenBSD when installed from ports (#12507)
+      Eclipse generator: detect Eclipse version
+      Detect whether the current Eclipse version supports VirtualFolders
+      Eclipse: don't create VirtualFolders if not supported
+      Eclipse: better message when Eclipse version could not be determined
+      automoc:run moc on the header if the source file contains include "foo.moc"
+      Add copyright notices
+      automoc: always run moc on the cpp file if there is a foo.moc included
+      Eclipse: add virtual folder for each target
+      Eclipse: move code for generating links to projects into separate function
+      Eclipse: move code for generating links to targets into separate function
+      Eclipse: add Build and Clean targets to targets
+      Eclipse: detect number of CPUs, set CMAKE_ECLIPSE_MAKE_ARGUMENTS accordigly
+      Eclipse: fix #12417, don't create wrong src pathentries
+      FindLibXslt: also search libexslt and xsltproc
+      don't crash in automoc with empty COMPILE_DEFINITIONS property
+      Automoc: fix the fix, need to use std::string, not just char* pointer
+      automoc: fix #12541, support moc options
+      add documentation for the AUTOMOC_MOC_OPTIONS property
+      Eclipse: warn if CMAKE_BINARY_DIR is subdir of CMAKE_SOURCE_DIR
+      Eclipse: make targets work from any directory
+      Eclipse: quote the build dir (to make it work with spaces)
+      make automoc work when using ccmake via PATH (#12551)
+      Strip trailing whitespace
+      -make GETTEXT_PROCESS_PO_FILES() work with files with multiple dots
+      FindGettext: two more fixes for files with multiple dots
+      FindPNG: provide PNG_INCLUDE_DIRS, as the readme.txt says (#11312)
+      Eclipse: create links to subprojects also in the source-project (#12579)
+      Eclipse: use new variable CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT
+      install(EXPORT): Enforce existence of imported target files
+      Remove trailing whitespace
+      cmake-gui: add completion for the names when adding cache entries
+      automoc: stricter checking for what file is included
+      automoc: rework the checking for the matching header, to give better warnings
+      automoc: handle the case when the developer includes the wrong mocfile
+      automoc: add more test cases
+      automoc: improved diagnostics
+      automoc: minor optimization
+      automoc: another runtime optimization
+      Automoc: modified handling of included .moc files
+      automoc: add a test for including both abc.moc and moc_abc.cpp
+      automoc: add test for including the moc file from another header
+      automoc: add test for including a moc_abc_p.cpp file
+      automoc: move some code from the big parsing loop into separate functions
+      automoc: add special handling for including basename_p.moc, with test
+      automoc: add extra check whether the header contains Q_PRIVATE_SLOT
+      automoc: some more linebreaks for the warnings for better readability
+      automoc: fix handling of included _p.moc files
+      automoc: move the code for finding headers into separate function
+      automoc: add a StrictParseCppFile(), which is only qmake-compatible
+      automoc: also accept other files when .moc is included in non-strict mode
+      automoc: accept even more .moc files in non-strict mode
+      automoc: add variable CMAKE_AUTOMOC_STRICT_MODE, to enable strict parsing
+      automoc: fix line length
+      automoc: add documentation for CMAKE_AUTOMOC_STRICT_MODE
+
+Alexey Ozeritsky (1):
+      FindLAPACK: Fix linking to static LAPACK on Unix (#12477)
+
+Bernhard Walle (1):
+      Source/cmCTest.cxx: Add missing newline (#12538)
+
+Brad King (65):
+      Refactor find_* command final path list computation
+      Constify XCode generator getters to match cmGlobalGenerator
+      Fix line-too-long style violations
+      KWSys: Fix Doxygen warnings
+      Add pre-commit|commit-msg|prepare-commit-msg hook placeholders
+      pre-commit: Reject changes to KWSys through Git
+      Fix CTest.UpdateSVN with Subversion 1.7 (#12535)
+      Teach CTest.UpdateSVN to detect svn add --depth before using it
+      KWSys: Address Intel compiler remarks
+      Fix linking to OS X Frameworks named with spaces (#12550)
+      Watcom: Use shortpath to CMake if full path has parens (#12548)
+      KWSys: Remove trailing whitespace in SystemTools.cxx
+      KWSys: Fix wrong spelling of __INTEL_COMPILER
+      Update main Copyright.txt year range for 2011
+      KWIML: The Kitware Information Macro Library
+      Configure KWIML inside CMake as cmIML
+      KWIML: Avoid redefining _CRT_SECURE_NO_DEPRECATE in test.h
+      KWIML: Suppress printf/scanf format warnings in test
+      KWIML: No INT_SCN*8 on SunPro compiler
+      KWIML: No INT_SCN*8 on Intel for Windows
+      KWIML: Create test output dir for Xcode
+      Order VS local generator Version ivar values consistently
+      Enumerate VS11 version explicitly in local generators
+      KWIML: Test header inclusion after system headers
+      KWIML: Ignore _LONGLONG on MS compiler
+      KWIML: Teach ABI.h about PGI compiler
+      KWIML: Avoid MSVC linker warning about not using C++ runtime
+      Factor Compute(File|String)MD5 into cmCryptoHash helper
+      Add file(MD5) command to compute cryptographic hash
+      Import sha2 implementation 1.0 from Aaron D. Gifford
+      Import sha2 implementation 1.1 from Aaron D. Gifford
+      sha2: Use KWIML fixed-size integer types and endian-ness
+      sha2: Build as part of CMakeLib
+      Add file(SHA*) commands to compute cryptographic hashes
+      sha2: Use "static const" instead of "const static" declarations
+      cmCryptoHash: Provide factory "New" method
+      Add string(MD5) and string(SHA*) commands to compute hashes
+      sha2: Use KWIML fixed-size integer constant macros
+      sha2: Suppress Borland warnings in third-party code
+      Disable file() and string() hash commands during bootstrap
+      sha2: Wrap long lines in third-party declarations
+      Fix CMake.File hash test for CRLF checkouts
+      cmCryptoHash: Add virtual destructor
+      sha2: Cast safe conversions to smaller integer types
+      sha2: Suppress -Wcast-align warning from Clang
+      sha2: Zero entire SHA_CTX structure during cleanup
+      target_link_libraries: Add missing space in documentation
+      target_link_libraries: Simplify argument processing state tests
+      install(EXPORT): Improve target import failure message format
+      Remove trailing whitespace from cmLocalGenerator
+      bootstrap: Include cmNewLineStyle in build
+      cmNewLineStyle: Remove trailing comma in enum
+      cmNewLineStyle: Use cmStandardIncludes.h
+      Provide std::ios_base typedef on GCC < 3
+      FindZLIB: Search under ZLIB_ROOT if it is set
+      Factor out target location undefined behavior helper macro
+      export(): Document undefined behavior of location properties
+      Recognize the Tiny C Compiler (#12605)
+      TinyCC: Add compiler info for shared libs on Linux (#12605)
+      Fortran: Detect pointer size in gfortran on MinGW
+      Load platform files that need to know the ABI when possible
+      Factor makefile generator link rule lookup into helper function
+      Add CMAKE_GNUtoMS option to convert GNU .dll.a to MS .lib
+      Test CMAKE_GNUtoMS option in ExportImport on MinGW and MSys
+      cmTarget: Create helper method for versioned library names
+
+Clinton Stimpson (2):
+      Fix XML safety issue with adding preprocessor defines in CodeBlocks project.
+      Qt4: Fix dependencies of QtDeclartive.
+
+Dan Kegel (1):
+      Modules: Add XRes to FindX11.cmake
+
+David Cole (17):
+      Begin post-2.8.6 development
+      CTest: Fix crash when variables are not defined
+      VS11: Fix comment generated at the top of *.sln files
+      CTest: Add COVERAGE_EXTRA_FLAGS cache variable (#12490)
+      CTest: Clear custom vectors before populating (#12383)
+      Tests: Add the MFC test (#11213)
+      Tests: Avoid MFC test automatically for VCExpress builds (#11213)
+      Tests: Fix MFC test w/ Make-based generators (#11213)
+      Tests: Fix MFC test for old vs6 dashboards (#11213)
+      Tests: Avoid MFC test automatically for Watcom WMake builds (#11213)
+      Tests: Fix MFC test to work with VS 10 and later (#11213)
+      VS10: Use expected values for UseOfMfc (#11213)
+      Tests: Add environment logging to the MFC test (#11213)
+      VS11: Update InstallRequiredSystemLibraries.cmake for VS11 (#11213)
+      Tests: Nudge MFC test to pass on VS 6 dashboards (#11213)
+      VS: Use "call " keyword with .cmd and .bat file custom commands (#12445)
+      CTest: Disallow problem chars in build and site names (#11792)
+
+Eric NOULARD (3):
+      CPackRPM support component specific variables for spec files
+      Fix old reference to CMAKE_MAKE_PROGRAM inside CMAKE_BUILD_TOOL doc.
+      CPackRPM fix #12556 and enhance documentation
+
+James Bigler (6):
+      Added support for CUDA_PATH which is present in the CUDA toolkit 3.2 onward.
+      Reset dependency file list when a dependency disappeared.
+      Add work around for CUDA in UNC paths.
+      Fixes for handling quotes in args and other places (Fix Bug 11726 and 12099).
+      Make CUDA working directory unique for each target.
+      Miscellaneous fixes.
+
+Jean-Christophe Fillion-Robin (1):
+      CTest: Look for CTestConfig.cmake in build dir first, then source dir
+
+Johan Bjork (1):
+      Xcode: Avoid spewing the environment on every script run (#12522)
+
+Mateusz Loskot (1):
+      FindBoost: Use MSVC11 to find Boost on Windows (#12568)
+
+Mathieu Malaterre (1):
+      TinyCC: Add default compilation flags (#12605)
+
+Mike McQuaid (6):
+      Add QT_LIBRARIES_PLUGINS variable to UseQt4.
+      Add DeployQt4 module.
+      Match fixup_qt4_executable with documentation.
+      Don't resolve directories; are never relative.
+      Check plugin variables are defined before warning.
+      Check QtCore without warning.
+
+Nicolas Despres (17):
+      Refactor TargetTypeNames.
+      Add const versions of some getters.
+      Constify many getters of cmGlobalGenerator.
+      Remove trailing white-spaces.
+      Fix typo.
+      Doxygen: Improve code documentation.
+      Doxygen: Generate call graph and relationships.
+      Doxygen: Fix warnings.
+      Doxygen: Remove dependency on VTK when building doxygen.
+      Usage: Document -j|--parallel option in help message.
+      Usage: Document all options printing usage information.
+      Usage: Document all options printing the version number.
+      Usage: Print help, version and copyright options in usage information.
+      Usage: Add missing exepath argument in get_prerequisites documentation.
+      ccmake: Align 'g' and 'q' key instructions.
+      ccmake: Document '/' key.
+      ccmake: Factor toggle key help instructions.
+
+Niels Dekker (1):
+      Fix CMAKE_VERBOSE_MAKEFILE for VS10 vcxproj files (#12504)
+
+Ondrej Balaz (1):
+      FindBISON: Fix bison++ version parsing to avoid "Offending entry"
+
+Peter Collingbourne (4):
+      Make cmLocalGenerator::ConvertToLinkReference virtual
+      Introduce a cmLocalGenerator::ConvertToIncludeReference function
+      Introduce a cmGlobalGenerator::ResolveLanguageCompiler function
+      Fix configuration-dependent flag lookup in cmLocalGenerator::GetTargetFlags
+
+Peter Kuemmel (1):
+      Add NEWLINE_STYLE option to configure_file (#3957)
+
+Philip Lowman (1):
+      FindProtoBuf: Documented limitation of the public macro
+
+Pierre-Francois Laquerre (1):
+      Fix path quoting in Qt4 macros
+
+Robert Dailey (1):
+      VS: Add VS_SCC_AUXPATH target property (#12549)
+
+Rolf Eike Beer (4):
+      libarchive: fix typo in CheckFileOffsetBits.cmake
+      Tell people that link_directories() is not what they are searching for
+      FindBISON: Fix matching output of "bison --version"
+      Tests: ExternalProject: Remove unnecessary 'svn --version' call
+
+Stephen Kelly (13):
+      Add features from KDE for arguments to qdbusxml2cpp.
+      Remove unused define.
+      Build each library only once instead of once for each test.
+      Initialize LINK_INTERFACE_LIBRARIES target property with a variable
+      Also run moc automatically with Qt5.
+      Fix typo.
+      Don't assume the existence of QT_MAJOR_VERSION.
+      Update comments and method names to not be Qt4 specific.
+      Fix style.
+      target_link_libraries: Trim trailing whitespace
+      target_link_libraries: Add LINK_(PUBLIC|PRIVATE) options
+      moc is now part of the Qt5Core module
+      Add a test case for the use of Q_PRIVATE_SLOT.
+
 Changes in CMake 2.8.6 (since 2.8.6-rc4)
 ----------------------------------------
 Alex Neundorf (5):
