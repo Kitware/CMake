@@ -24,71 +24,124 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: src/lib/libarchive/archive_virtual.c,v 1.1 2007/03/03 07:37:36 kientzle Exp $");
+__FBSDID("$FreeBSD: head/lib/libarchive/archive_virtual.c 201098 2009-12-28 02:58:14Z kientzle $");
 
 #include "archive.h"
 #include "archive_entry.h"
 #include "archive_private.h"
 
 int
+archive_filter_code(struct archive *a, int n)
+{
+	return ((a->vtable->archive_filter_code)(a, n));
+}
+
+int
+archive_filter_count(struct archive *a)
+{
+	return ((a->vtable->archive_filter_count)(a));
+}
+
+const char *
+archive_filter_name(struct archive *a, int n)
+{
+	return ((a->vtable->archive_filter_name)(a, n));
+}
+
+int64_t
+archive_filter_bytes(struct archive *a, int n)
+{
+	return ((a->vtable->archive_filter_bytes)(a, n));
+}
+
+int
 archive_write_close(struct archive *a)
 {
-    return ((a->vtable->archive_close)(a));
+	return ((a->vtable->archive_close)(a));
 }
 
 int
 archive_read_close(struct archive *a)
 {
-    return ((a->vtable->archive_close)(a));
+	return ((a->vtable->archive_close)(a));
 }
 
-#if ARCHIVE_API_VERSION > 1
+int
+archive_write_free(struct archive *a)
+{
+	return ((a->vtable->archive_free)(a));
+}
+
+#if ARCHIVE_VERSION_NUMBER < 4000000
+/* For backwards compatibility; will be removed with libarchive 4.0. */
 int
 archive_write_finish(struct archive *a)
 {
-    return ((a->vtable->archive_finish)(a));
-}
-#else
-/* Temporarily allow library to compile with either 1.x or 2.0 API. */
-void
-archive_write_finish(struct archive *a)
-{
-    (void)(a->vtable->archive_finish)(a);
+	return ((a->vtable->archive_free)(a));
 }
 #endif
 
 int
+archive_read_free(struct archive *a)
+{
+	return ((a->vtable->archive_free)(a));
+}
+
+#if ARCHIVE_VERSION_NUMBER < 4000000
+/* For backwards compatibility; will be removed with libarchive 4.0. */
+int
 archive_read_finish(struct archive *a)
 {
-    return ((a->vtable->archive_finish)(a));
+	return ((a->vtable->archive_free)(a));
 }
+#endif
 
 int
 archive_write_header(struct archive *a, struct archive_entry *entry)
 {
-    ++a->file_count;
-    return ((a->vtable->archive_write_header)(a, entry));
+	++a->file_count;
+	return ((a->vtable->archive_write_header)(a, entry));
 }
 
 int
 archive_write_finish_entry(struct archive *a)
 {
-    return ((a->vtable->archive_write_finish_entry)(a));
+	return ((a->vtable->archive_write_finish_entry)(a));
 }
 
-#if ARCHIVE_API_VERSION > 1
 ssize_t
-#else
-/* Temporarily allow library to compile with either 1.x or 2.0 API. */
-int
-#endif
 archive_write_data(struct archive *a, const void *buff, size_t s)
 {
-    return ((a->vtable->archive_write_data)(a, buff, s));
+	return ((a->vtable->archive_write_data)(a, buff, s));
 }
 
 ssize_t
-archive_write_data_block(struct archive *a, const void *buff, size_t s, off_t o)
+archive_write_data_block(struct archive *a, const void *buff, size_t s, int64_t o)
 {
-    return ((a->vtable->archive_write_data_block)(a, buff, s, o));
+	if (a->vtable->archive_write_data_block == NULL) {
+		archive_set_error(a, ARCHIVE_ERRNO_MISC,
+		    "archive_write_data_block not supported");
+		a->state = ARCHIVE_STATE_FATAL;
+		return (ARCHIVE_FATAL);
+	}
+	return ((a->vtable->archive_write_data_block)(a, buff, s, o));
+}
+
+int
+archive_read_next_header(struct archive *a, struct archive_entry **entry)
+{
+	return ((a->vtable->archive_read_next_header)(a, entry));
+}
+
+int
+archive_read_next_header2(struct archive *a, struct archive_entry *entry)
+{
+	return ((a->vtable->archive_read_next_header2)(a, entry));
+}
+
+int
+archive_read_data_block(struct archive *a,
+    const void **buff, size_t *s, int64_t *o)
+{
+	return ((a->vtable->archive_read_data_block)(a, buff, s, o));
 }

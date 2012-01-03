@@ -24,7 +24,7 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: src/lib/libarchive/archive_write_set_format_by_name.c,v 1.9 2008/09/01 02:50:53 kientzle Exp $");
+__FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_by_name.c 201168 2009-12-29 06:15:32Z kientzle $");
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44,33 +44,43 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_write_set_format_by_name.c,v 1.9 
 static
 struct { const char *name; int (*setter)(struct archive *); } names[] =
 {
-    { "ar",     archive_write_set_format_ar_bsd },
-    { "arbsd",  archive_write_set_format_ar_bsd },
-    { "argnu",  archive_write_set_format_ar_svr4 },
-    { "arsvr4", archive_write_set_format_ar_svr4 },
-    { "cpio",   archive_write_set_format_cpio },
-    { "mtree",  archive_write_set_format_mtree },
-    { "newc",   archive_write_set_format_cpio_newc },
-    { "odc",    archive_write_set_format_cpio },
-    { "pax",    archive_write_set_format_pax },
-    { "posix",  archive_write_set_format_pax },
-    { "shar",   archive_write_set_format_shar },
-    { "shardump",   archive_write_set_format_shar_dump },
-    { "ustar",  archive_write_set_format_ustar },
-    { "zip",    archive_write_set_format_zip },
-    { NULL,     NULL }
+	{ "7zip",	archive_write_set_format_7zip },
+	{ "ar",		archive_write_set_format_ar_bsd },
+	{ "arbsd",	archive_write_set_format_ar_bsd },
+	{ "argnu",	archive_write_set_format_ar_svr4 },
+	{ "arsvr4",	archive_write_set_format_ar_svr4 },
+	{ "bsdtar",	archive_write_set_format_pax_restricted },
+	{ "cd9660",	archive_write_set_format_iso9660 },
+	{ "cpio",	archive_write_set_format_cpio },
+	{ "gnutar",	archive_write_set_format_gnutar },
+	{ "iso",	archive_write_set_format_iso9660 },
+	{ "iso9660",	archive_write_set_format_iso9660 },
+	{ "mtree",	archive_write_set_format_mtree },
+	{ "newc",	archive_write_set_format_cpio_newc },
+	{ "odc",	archive_write_set_format_cpio },
+	{ "pax",	archive_write_set_format_pax },
+	{ "paxr",	archive_write_set_format_pax_restricted },
+	{ "posix",	archive_write_set_format_pax },
+	{ "rpax",	archive_write_set_format_pax_restricted },
+	{ "shar",	archive_write_set_format_shar },
+	{ "shardump",	archive_write_set_format_shar_dump },
+	{ "ustar",	archive_write_set_format_ustar },
+	{ "xar",	archive_write_set_format_xar },
+	{ "zip",	archive_write_set_format_zip },
+	{ NULL,		NULL }
 };
 
 int
 archive_write_set_format_by_name(struct archive *a, const char *name)
 {
-    int i;
+	int i;
 
-    for (i = 0; names[i].name != NULL; i++) {
-        if (strcmp(name, names[i].name) == 0)
-            return ((names[i].setter)(a));
-    }
+	for (i = 0; names[i].name != NULL; i++) {
+		if (strcmp(name, names[i].name) == 0)
+			return ((names[i].setter)(a));
+	}
 
-    archive_set_error(a, EINVAL, "No such format '%s'", name);
-    return (ARCHIVE_FATAL);
+	archive_set_error(a, EINVAL, "No such format '%s'", name);
+	a->state = ARCHIVE_STATE_FATAL;
+	return (ARCHIVE_FATAL);
 }
