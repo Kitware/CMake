@@ -14,8 +14,6 @@
 // Need these for documentation support.
 #include "cmake.h"
 #include "cmDocumentation.h"
-#include "cmCPackDocumentVariables.h"
-#include "cmCPackDocumentMacros.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackGenerator.h"
 #include "cmake.h"
@@ -92,40 +90,6 @@ static const char * cmDocumentationOptions[][3] =
      "If vendor is not specified on cpack command line "
      "(or inside CMakeLists.txt) then"
      "CPack.cmake defines it with a default value"},
-    {"--help-command cmd [file]", "Print help for a single command and exit.",
-    "Full documentation specific to the given command is displayed. "
-    "If a file is specified, the documentation is written into and the output "
-    "format is determined depending on the filename suffix. Supported are man "
-    "page, HTML, DocBook and plain text."},
-    {"--help-command-list [file]", "List available commands and exit.",
-     "The list contains all commands for which help may be obtained by using "
-     "the --help-command argument followed by a command name. "
-    "If a file is specified, the documentation is written into and the output "
-    "format is determined depending on the filename suffix. Supported are man "
-    "page, HTML, DocBook and plain text."},
-    {"--help-commands [file]", "Print help for all commands and exit.",
-     "Full documentation specific for all current command is displayed."
-    "If a file is specified, the documentation is written into and the output "
-    "format is determined depending on the filename suffix. Supported are man "
-    "page, HTML, DocBook and plain text."},
-    {"--help-variable var [file]",
-     "Print help for a single variable and exit.",
-     "Full documentation specific to the given variable is displayed."
-    "If a file is specified, the documentation is written into and the output "
-    "format is determined depending on the filename suffix. Supported are man "
-    "page, HTML, DocBook and plain text."},
-    {"--help-variable-list [file]", "List documented variables and exit.",
-     "The list contains all variables for which help may be obtained by using "
-     "the --help-variable argument followed by a variable name.  If a file is "
-     "specified, the help is written into it."
-    "If a file is specified, the documentation is written into and the output "
-    "format is determined depending on the filename suffix. Supported are man "
-     "page, HTML, DocBook and plain text."},
-    {"--help-variables [file]", "Print help for all variables and exit.",
-     "Full documentation for all variables is displayed."
-    "If a file is specified, the documentation is written into and the output "
-    "format is determined depending on the filename suffix. Supported are man "
-    "page, HTML, DocBook and plain text."},
     {0,0,0}
 };
 
@@ -173,15 +137,12 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   return 1;
 }
 
-
 //----------------------------------------------------------------------------
 // this is CPack.
 int main (int argc, char *argv[])
 {
   cmSystemTools::FindExecutableDirectory(argv[0]);
   cmCPackLog log;
-  int nocwd = 0;
-
   log.SetErrorPrefix("CPack Error: ");
   log.SetWarningPrefix("CPack Warning: ");
   log.SetOutputPrefix("CPack: ");
@@ -193,7 +154,6 @@ int main (int argc, char *argv[])
     {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
       "Current working directory cannot be established." << std::endl);
-    nocwd = 1;
     }
 
   std::string generator;
@@ -219,6 +179,7 @@ int main (int argc, char *argv[])
 
   cpackConfigFile = "";
 
+  cmDocumentation doc;
   cmsys::CommandLineArguments arg;
   arg.Initialize(argc, argv);
   typedef cmsys::CommandLineArguments argT;
@@ -291,16 +252,10 @@ int main (int argc, char *argv[])
   generators.SetLogger(&log);
   cmCPackGenerator* cpackGenerator = 0;
 
-  cmDocumentation doc;
-  doc.addCPackStandardDocSections();
-  /* Were we invoked to display doc or to do some work ? */
-  if(doc.CheckOptions(argc, argv,"-G") || nocwd)
+  if ( !helpFull.empty() || !helpMAN.empty() ||
+    !helpHTML.empty() || helpVersion )
     {
-      help = true;
-    }
-  else
-    {
-      help = false;
+    help = true;
     }
 
   if ( parsed && !help )
@@ -510,24 +465,13 @@ int main (int argc, char *argv[])
    */
   if ( help )
     {
+    doc.CheckOptions(argc, argv);
     // Construct and print requested documentation.
-    std::vector<cmDocumentationEntry> variables;
-
     doc.SetName("cpack");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
     doc.SetSection("Description",cmDocumentationDescription);
     doc.PrependSection("Options",cmDocumentationOptions);
-
-    cmCPackDocumentVariables::DefineVariables(&cminst);
-    std::map<std::string,cmDocumentationSection *> propDocs;
-    cminst.GetPropertiesDocumentation(propDocs);
-    doc.SetSections(propDocs);
-
-    std::vector<cmDocumentationEntry> commands;
-    cminst.GetCommandDocumentation(commands);
-    cmCPackDocumentMacros::GetMacrosDocumentation(commands);
-    doc.SetSection("Commands",commands);
 
     std::vector<cmDocumentationEntry> v;
     cmCPackGeneratorFactory::DescriptionsMap::const_iterator generatorIt;
