@@ -174,6 +174,8 @@ IF(ZLIB_FOUND)
     CHECK_C_SOURCE_Runs(
       "#ifndef ZLIB_WINAPI\n#define ZLIB_WINAPI\n#endif\n#include <zlib.h>\nint main() {uLong f = zlibCompileFlags(); return (f&(1U<<10))?0:-1; }"
       ZLIB_WINAPI)
+    SET(CMAKE_REQUIRED_INCLUDES)
+    SET(CMAKE_REQUIRED_LIBRARIES)
   ENDIF(WIN32 AND NOT CYGWIN)
 ELSE(ZLIB_FOUND)
   MESSAGE(FATAL_ERROR "CMake requires zlib to be available to libarchive")
