@@ -722,7 +722,7 @@ void cmDocumentation::addCMakeStandardDocSections()
 //----------------------------------------------------------------------------
 void cmDocumentation::addCTestStandardDocSections()
 {
-    //cmDocumentationSection *sec;
+    cmDocumentationSection *sec;
     // This is currently done for backward compatibility reason
     // We may suppress some of these.
     addCMakeStandardDocSections();
