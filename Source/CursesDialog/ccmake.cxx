@@ -102,7 +102,6 @@ int main(int argc, char** argv)
 {
   cmSystemTools::FindExecutableDirectory(argv[0]);
   cmDocumentation doc;
-  doc.addCMakeStandardDocSections();
   if(doc.CheckOptions(argc, argv))
     {
     cmake hcm;
