@@ -8,7 +8,7 @@
 #                              for libraries and binaries.
 #
 #   PROTOBUF_IMPORT_DIRS     - List of additional directories to be searched for
-#                              imported .proto files. (New in CMake 2.8.7)
+#                              imported .proto files. (New in CMake 2.8.8)
 #
 # Defines the following variables:
 #
