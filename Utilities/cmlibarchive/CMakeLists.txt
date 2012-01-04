@@ -75,6 +75,10 @@ IF(WIN32)
   SET(_WIN32_WINNT ${WINVER})
 ENDIF(WIN32)
 
+IF("${CMAKE_C_PLATFORM_ID}" MATCHES "^(HP-UX)$")
+  ADD_DEFINITIONS(-D_XOPEN_SOURCE=500) # Ask wchar.h for mbstate_t
+ENDIF()
+
 #
 INCLUDE(CheckCSourceCompiles)
 INCLUDE(CheckCSourceRuns)
