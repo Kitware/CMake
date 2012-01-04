@@ -73,6 +73,9 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_read_disk_entry_from_file.c 2010
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
+#endif
 #ifdef HAVE_LINUX_FIEMAP_H
 #include <linux/fiemap.h>
 #endif
