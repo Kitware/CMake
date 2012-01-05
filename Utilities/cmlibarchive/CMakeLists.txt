@@ -37,9 +37,10 @@ SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 # INTERFACE_VERSION increments with every release
 # libarchive 2.7 == interface version 9 = 2 + 7 
 # libarchive 2.8 == interface version 10 = 2 + 8
-# libarchive 3.0 == interface version 11
-# libarchive 3.x == interface version 11 + x
-math(EXPR INTERFACE_VERSION  "11 + ${_minor}")
+# libarchive 2.9 == interface version 11 = 2 + 9
+# libarchive 3.0 == interface version 12
+# libarchive 3.x == interface version 12 + x
+math(EXPR INTERFACE_VERSION  "12 + ${_minor}")
 
 # Set SOVERSION == Interface version
 # ?? Should there be more here ??
@@ -57,10 +58,6 @@ ENDIF()
 
 # Enable CTest/CDash support
 include(CTest)
-
-# Provide ADD_TEST_28 macro to approximate CMake 2.8 ADD_TEST(NAME).
-# TODO: Require CMake 2.8 and drop this workaround (perhaps late 2010).
-INCLUDE(AddTest28)
 
 OPTION(ENABLE_NETTLE "Enable use of Nettle" ON)
 OPTION(ENABLE_OPENSSL "Enable use of OpenSSL" ON)

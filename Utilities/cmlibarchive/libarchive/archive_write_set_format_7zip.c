@@ -96,7 +96,7 @@ enum la_zaction {
 };
 
 /*
- * Universal zstream.
+ * A stream object of universal compressor.
  */
 struct la_zstream {
 	const uint8_t		*next_in;
@@ -154,8 +154,8 @@ struct file {
 #define HAS_STREAM	(1<<4)
 
 	struct {
-		time_t			 time;
-		long			 time_ns;
+		time_t		 time;
+		long		 time_ns;
 	}			 times[3];
 #define MTIME 0
 #define ATIME 1
@@ -455,6 +455,7 @@ _7z_write_header(struct archive_write *a, struct archive_entry *entry)
 	zip->total_number_entry++;
 	zip->total_bytes_entry_name += file->name_len + 2;
 	if (file->size == 0) {
+		/* Count up the number of empty files. */
 		zip->total_number_empty_entry++;
 		if (file->dir)
 			zip->total_number_dir_entry++;
@@ -488,6 +489,9 @@ _7z_write_header(struct archive_write *a, struct archive_entry *entry)
 	zip->entry_bytes_remaining = file->size;
 	zip->entry_crc32 = 0;
 
+	/*
+	 * Store a symbolic link name as file contents.
+	 */
 	if (archive_entry_filetype(entry) == AE_IFLNK) {
 		ssize_t bytes;
 		const void *p = (const void *)archive_entry_symlink(entry);
@@ -501,6 +505,9 @@ _7z_write_header(struct archive_write *a, struct archive_entry *entry)
 	return (r);
 }
 
+/*
+ * Write data to a temporary file.
+ */
 static int
 write_to_temp(struct archive_write *a, const void *buff, size_t s)
 {
@@ -719,19 +726,22 @@ _7z_close(struct archive_write *a)
 		zip->total_number_nonempty_entry =
 		    zip->total_number_entry - zip->total_number_empty_entry;
 
+		/* Connect an empty file list. */
 		*zip->file_list.last = zip->empty_list.first;
 		zip->file_list.last = zip->empty_list.last;
+		/* Connect a directory file list. */
 		ARCHIVE_RB_TREE_FOREACH(n, &(zip->rbtree)) {
 			file_register(zip, (struct file *)n);
 		}
 
 		/*
 		 * NOTE: 7z command supports just LZMA1, LZMA2 and COPY for
-		 * the header.
+		 * the compression type for encoding the header.
 		 */
 #if HAVE_LZMA_H
 		header_compression = _7Z_LZMA1;
-		/* If the stored file is only one, do not encode the header. */
+		/* If the stored file is only one, do not encode the header.
+		 * This is the same way 7z command does. */
 		if (zip->total_number_entry == 1)
 			header_compression = _7Z_COPY;
 #else
@@ -823,6 +833,9 @@ _7z_close(struct archive_write *a)
 	return (r);
 }
 
+/*
+ * Encode 64 bits value into 7-Zip's encoded UINT64 value.
+ */
 static int
 enc_uint64(struct archive_write *a, uint64_t val)
 {
@@ -1586,6 +1599,9 @@ compression_unsupported_encoder(struct archive *a,
 }
 #endif
 
+/*
+ * _7_COPY compressor.
+ */
 static int
 compression_init_encoder_copy(struct archive *a, struct la_zstream *lastrm)
 {
@@ -1631,6 +1647,9 @@ compression_end_copy(struct archive *a, struct la_zstream *lastrm)
 	return (ARCHIVE_OK);
 }
 
+/*
+ * _7_DEFLATE compressor.
+ */
 #ifdef HAVE_ZLIB_H
 static int
 compression_init_encoder_deflate(struct archive *a,
@@ -1741,6 +1760,9 @@ compression_init_encoder_deflate(struct archive *a,
 }
 #endif
 
+/*
+ * _7_BZIP2 compressor.
+ */
 #if defined(HAVE_BZLIB_H) && defined(BZ_CONFIG_ERROR)
 static int
 compression_init_encoder_bzip2(struct archive *a,
@@ -1860,6 +1882,9 @@ compression_init_encoder_bzip2(struct archive *a,
 }
 #endif
 
+/*
+ * _7_LZMA1, _7_LZMA2 compressor.
+ */
 #if defined(HAVE_LZMA_H)
 static int
 compression_init_encoder_lzma(struct archive *a,
@@ -2047,7 +2072,7 @@ compression_init_encoder_lzma2(struct archive *a,
 #endif
 
 /*
- * PPMd compression.
+ * _7_PPMD compressor.
  */
 static void *
 ppmd_alloc(void *p, size_t size)
@@ -2201,6 +2226,9 @@ compression_end_ppmd(struct archive *a, struct la_zstream *lastrm)
 	return (ARCHIVE_OK);
 }
 
+/*
+ * Universal compressor initializer.
+ */
 static int
 _7z_compression_init_encoder(struct archive_write *a, unsigned compression,
     int compression_level)

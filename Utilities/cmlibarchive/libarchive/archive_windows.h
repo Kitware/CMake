@@ -91,7 +91,7 @@
 
 /* Alias the Windows _function to the POSIX equivalent. */
 #define	close		_close
-#define	fcntl		__la_fcntl
+#define	fcntl(fd, cmd, flg)	/* No operation. */		
 #ifndef fileno
 #define	fileno		_fileno
 #endif
@@ -249,7 +249,6 @@
 
 
 /* Replacement POSIX function */
-extern int	 __la_fcntl(int fd, int cmd, int val);
 extern int	 __la_fstat(int fd, struct stat *st);
 extern int	 __la_lstat(const char *path, struct stat *st);
 #if defined(__LA_LSEEK_NEEDED)
