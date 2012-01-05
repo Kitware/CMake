@@ -263,6 +263,9 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckCXXCompilerFlag CheckCXXCompilerFlag)
 
+  ADD_SUBDIRECTORY(Module/CheckSymbolExists)
+  ADD_SUBDIRECTORY(Module/CheckCXXSymbolExists)
+
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
