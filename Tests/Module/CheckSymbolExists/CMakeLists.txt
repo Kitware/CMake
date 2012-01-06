@@ -7,7 +7,7 @@
 # If you change this test do not forget to change the CheckCXXSymbolExists
 # test, too.
 
-PROJECT(CheckSymbolExistsTest C)
+PROJECT(CheckSymbolExists C)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
 
