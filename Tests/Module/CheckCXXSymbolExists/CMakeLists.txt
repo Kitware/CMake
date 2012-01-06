@@ -18,7 +18,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.in"
 ADD_TEST(CheckCXXSymbolExists
   ${CMAKE_CMAKE_COMMAND}
     -G "${CMAKE_GENERATOR}"
-    --debug-trycompile
     "${_test_dir}"
   )
 set_tests_properties(CheckCXXSymbolExists PROPERTIES
