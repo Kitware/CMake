@@ -7,17 +7,64 @@
 # If you change this test do not forget to change the CheckSymbolExists
 # test, too.
 
-cmake_minimum_required(VERSION 2.8)
+PROJECT(CheckCXXSymbolExistsTest CXX)
 
-set(_test_dir "${CMAKE_CURRENT_BINARY_DIR}/symbol_cxx")
-set(_test_build_dir "${CMAKE_CURRENT_BINARY_DIR}/symbol_build")
-file(MAKE_DIRECTORY "${_test_dir}" "${_test_build_dir}")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.in"
-  "${_test_dir}/CMakeLists.txt" @ONLY)
-ADD_TEST(CheckCXXSymbolExists
-  ${CMAKE_CMAKE_COMMAND}
-    -G "${CMAKE_GENERATOR}"
-    "${_test_dir}"
-  )
-set_tests_properties(CheckCXXSymbolExists PROPERTIES
-  WORKING_DIRECTORY "${_test_build_dir}")
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
+
+SET(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/../CheckSymbolExists")
+
+INCLUDE(CheckCXXSymbolExists)
+
+foreach(_config_type Release RelWithDebInfo MinSizeRel Debug)
+  set(CMAKE_TRY_COMPILE_CONFIGURATION ${_config_type})
+  unset(CSE_RESULT_${_config_type} CACHE)
+  MESSAGE(STATUS "Testing configuration ${_config_type}")
+  check_cxx_symbol_exists(non_existent_function_for_symbol_test "cm_cse.h" CSE_RESULT_${_config_type})
+
+  IF (CSE_RESULT_${_config_type})
+    MESSAGE(SEND_ERROR "CheckCXXSymbolExists reported a nonexistent symbol as existing in configuration ${_config_type}")
+  ELSE (CSE_RESULT_${_config_type})
+    MESSAGE(STATUS "Nonexistent symbol was not found")
+  ENDIF (CSE_RESULT_${_config_type})
+endforeach()
+
+set(CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE})
+unset(CSE_RESULT_ERRNO_CERRNO CACHE)
+
+MESSAGE(STATUS "Checking <cerrno>")
+
+check_cxx_symbol_exists(errno "cerrno" CSE_RESULT_ERRNO_CERRNO)
+
+IF (NOT CSE_RESULT_ERRNO_CERRNO)
+  unset(CSE_RESULT_ERRNO_ERRNOH CACHE)
+
+  MESSAGE(STATUS "Checking <errno.h>")
+
+  check_cxx_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO_ERRNOH)
+
+  IF (NOT CSE_RESULT_ERRNO_ERRNOH)
+    MESSAGE(SEND_ERROR "CheckCXXSymbolExists did not find errno in <cerrno> and <errno.h>")
+  ELSE (NOT CSE_RESULT_ERRNO_ERRNOH)
+    MESSAGE(STATUS "errno found in <errno.h>")
+  ENDIF (NOT CSE_RESULT_ERRNO_ERRNOH)
+ELSE (NOT CSE_RESULT_ERRNO_CERRNO)
+  MESSAGE(STATUS "errno found in <cerrno>")
+ENDIF (NOT CSE_RESULT_ERRNO_CERRNO)
+
+IF (CMAKE_COMPILER_IS_GNUCXX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  unset(CSE_RESULT_O3 CACHE)
+  MESSAGE(STATUS "Testing with optimization -O3")
+
+  check_cxx_symbol_exists(non_existent_function_for_symbol_test "cm_cse.h" CSE_RESULT_O3)
+
+  IF (CSE_RESULT_O3)
+    MESSAGE(SEND_ERROR "CheckCXXSymbolExists reported a nonexistent symbol as existing with optimization -O3")
+  ELSE (CSE_RESULT_O3)
+    MESSAGE(STATUS "Nonexistent symbol was not found")
+  ENDIF (CSE_RESULT_O3)
+ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/errno.cxx.in" "${CMAKE_CURRENT_BINARY_DIR}/errno.cxx" @ONLY)
+
+add_executable(CheckCXXSymbolExists "${CMAKE_CURRENT_BINARY_DIR}/errno.cxx")
