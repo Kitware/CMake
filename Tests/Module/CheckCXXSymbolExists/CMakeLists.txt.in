@@ -8,6 +8,7 @@ INCLUDE(CheckCXXSymbolExists)
 
 foreach(_config_type Release RelWithDebInfo MinSizeRel Debug)
   set(CMAKE_TRY_COMPILE_CONFIGURATION ${_config_type})
+  unset(CSE_RESULT_${_config_type} CACHE)
   MESSAGE(STATUS "Testing configuration ${_config_type}")
   check_cxx_symbol_exists(non_existent_function_for_symbol_test "cm_cse.h" CSE_RESULT_${_config_type})
 
@@ -19,17 +20,29 @@ foreach(_config_type Release RelWithDebInfo MinSizeRel Debug)
 endforeach()
 
 set(CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE})
+unset(CSE_RESULT_ERRNO CACHE)
 
-check_cxx_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO)
+MESSAGE(STATUS "Checking <cerrno>")
+
+check_cxx_symbol_exists(errno "cerrno" CSE_RESULT_ERRNO)
 
 IF (NOT CSE_RESULT_ERRNO)
-  MESSAGE(FATAL_ERROR "CheckCXXSymbolExists did not find errno in <errno.h>")
+  MESSAGE(STATUS "Checking <errno.h>")
+
+  check_cxx_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO)
+
+  IF (NOT CSE_RESULT_ERRNO)
+    MESSAGE(SEND_ERROR "CheckCXXSymbolExists did not find errno in <cerrno> and <errno.h>")
+  ELSE (NOT CSE_RESULT_ERRNO)
+    MESSAGE(STATUS "errno found in <errno.h>")
+  ENDIF (NOT CSE_RESULT_ERRNO)
 ELSE (NOT CSE_RESULT_ERRNO)
-  MESSAGE(STATUS "errno found as expected")
+  MESSAGE(STATUS "errno found in <cerrno>")
 ENDIF (NOT CSE_RESULT_ERRNO)
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  unset(CSE_RESULT_O3 CACHE)
   MESSAGE(STATUS "Testing with optimization -O3")
 
   check_cxx_symbol_exists(non_existent_function_for_symbol_test "cm_cse.h" CSE_RESULT_O3)
