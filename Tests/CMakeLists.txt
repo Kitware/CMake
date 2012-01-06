@@ -243,7 +243,10 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Module.CheckCXXCompilerFlag CheckCXXCompilerFlag)
 
   ADD_SUBDIRECTORY(Module/CheckSymbolExists)
+  LIST(APPEND TEST_BUILD_DIRS ${CMAKE_CURRENT_BINARY_DIR}/Module/CheckSymbolExists/symbol_build)
+
   ADD_SUBDIRECTORY(Module/CheckCXXSymbolExists)
+  LIST(APPEND TEST_BUILD_DIRS ${CMAKE_CURRENT_BINARY_DIR}/Module/CheckCXXSymbolExists/symbol_build)
 
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
