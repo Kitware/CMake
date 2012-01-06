@@ -23,7 +23,7 @@ set(CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE})
 check_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO)
 
 IF (NOT CSE_RESULT_ERRNO)
-  MESSAGE(FATAL_ERROR "CheckSymbolExists did not find errno in <errno.h>")
+  MESSAGE(SEND_ERROR "CheckSymbolExists did not find errno in <errno.h>")
 ELSE (NOT CSE_RESULT_ERRNO)
   MESSAGE(STATUS "errno found as expected")
 ENDIF (NOT CSE_RESULT_ERRNO)

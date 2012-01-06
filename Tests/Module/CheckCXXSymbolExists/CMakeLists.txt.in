@@ -20,12 +20,22 @@ endforeach()
 
 set(CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE})
 
-check_cxx_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO)
+MESSAGE(STATUS "Checking <cerrno>")
+
+check_cxx_symbol_exists(errno "cerrno" CSE_RESULT_ERRNO)
 
 IF (NOT CSE_RESULT_ERRNO)
-  MESSAGE(FATAL_ERROR "CheckCXXSymbolExists did not find errno in <errno.h>")
+  MESSAGE(STATUS "Checking <errno.h>")
+
+  check_cxx_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO)
+
+  IF (NOT CSE_RESULT_ERRNO)
+    MESSAGE(SEND_ERROR "CheckCXXSymbolExists did not find errno in <cerrno> and <errno.h>")
+  ELSE (NOT CSE_RESULT_ERRNO)
+    MESSAGE(STATUS "errno found in <errno.h>")
+  ENDIF (NOT CSE_RESULT_ERRNO)
 ELSE (NOT CSE_RESULT_ERRNO)
-  MESSAGE(STATUS "errno found as expected")
+  MESSAGE(STATUS "errno found in <cerrno>")
 ENDIF (NOT CSE_RESULT_ERRNO)
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
