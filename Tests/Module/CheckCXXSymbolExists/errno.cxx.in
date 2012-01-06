@@ -1,0 +1,13 @@
+#cmakedefine CSE_RESULT_ERRNO_ERRNOH
+#cmakedefine CSE_RESULT_ERRNO_CERRNO
+
+#ifdef CSE_RESULT_ERRNO_CERRNO
+#include <cerrno>
+#else
+#include <errno.h>
+#endif
+
+int main()
+{
+  return errno;
+}
