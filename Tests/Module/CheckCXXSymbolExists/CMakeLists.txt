@@ -11,7 +11,6 @@ cmake_minimum_required(VERSION 2.8)
 
 set(_test_dir "${CMAKE_CURRENT_BINARY_DIR}/symbol_cxx")
 set(_test_build_dir "${CMAKE_CURRENT_BINARY_DIR}/symbol_build")
-file(REMOVE_RECURSE "${_test_build_dir}")
 file(MAKE_DIRECTORY "${_test_dir}" "${_test_build_dir}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt.in"
   "${_test_dir}/CMakeLists.txt" @ONLY)
