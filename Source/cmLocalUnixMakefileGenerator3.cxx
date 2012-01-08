@@ -232,6 +232,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
       if(ei->Language == "C" || ei->Language == "CXX")
         {
         lang_is_c_or_cxx = true;
+        break;
         }
       }
 
