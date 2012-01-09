@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libarchive/archive_platform.h,v 1.32 2008/12/06 05:53:05 kientzle Exp $
+ * $FreeBSD: head/lib/libarchive/archive_platform.h 201090 2009-12-28 02:22:04Z kientzle $
  */
 
 /* !!ONLY FOR USE INTERNALLY TO LIBARCHIVE!! */
@@ -36,10 +36,10 @@
  */
 
 #ifndef ARCHIVE_PLATFORM_H_INCLUDED
-#define ARCHIVE_PLATFORM_H_INCLUDED
+#define	ARCHIVE_PLATFORM_H_INCLUDED
 
 /* archive.h and archive_entry.h require this. */
-#define __LIBARCHIVE_BUILD 1
+#define	__LIBARCHIVE_BUILD 1
 
 #if defined(PLATFORM_CONFIG_H)
 /* Use hand-built config.h in environments that need it. */
@@ -52,14 +52,6 @@
 #error Oops: No config.h and no pre-built configuration in archive_platform.h.
 #endif
 
-/* Try to get standard C99-style integer type definitions. */
-#if HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-#if HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
 /* It should be possible to get rid of this by extending the feature-test
  * macros to cover Windows API functions, probably along with non-trivial
  * refactoring of code to find structures that sit more cleanly on top of
@@ -68,66 +60,68 @@
 #include "archive_windows.h"
 #endif
 
-#if defined(__HAIKU__)
-#include "archive_haiku.h"
-#endif
-
 /*
  * The config files define a lot of feature macros.  The following
  * uses those macros to select/define replacements and include key
  * headers as required.
  */
 
-/* No non-FreeBSD platform will have __FBSDID, so just define it here. */
-#ifdef __FreeBSD__
-#include <sys/cdefs.h>  /* For __FBSDID */
-#else
-/* Just leaving this macro replacement empty leads to a dangling semicolon. */
-#define __FBSDID(a)     struct _undefined_hack
+/* Get a real definition for __FBSDID if we can */
+#if HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#endif
+
+/* If not, define it so as to avoid dangling semicolons. */
+#ifndef __FBSDID
+#define	__FBSDID(a)     struct _undefined_hack
+#endif
+
+/* Try to get standard C99-style integer type definitions. */
+#if HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+#if HAVE_STDINT_H
+#include <stdint.h>
 #endif
 
 /* Borland warns about its own constants!  */
 #if defined(__BORLANDC__)
 # if HAVE_DECL_UINT64_MAX
-#  undef UINT64_MAX
-#  undef HAVE_DECL_UINT64_MAX
-#  define HAVE_DECL_UINT64_MAX 0
+#  undef	UINT64_MAX
+#  undef	HAVE_DECL_UINT64_MAX
 # endif
 # if HAVE_DECL_UINT64_MIN
-#  undef UINT64_MIN
-#  undef HAVE_DECL_UINT64_MIN
-#  define HAVE_DECL_UINT64_MIN 0
+#  undef	UINT64_MIN
+#  undef	HAVE_DECL_UINT64_MIN
 # endif
 # if HAVE_DECL_INT64_MAX
-#  undef INT64_MAX
-#  undef HAVE_DECL_INT64_MAX
-#  define HAVE_DECL_INT64_MAX 0
+#  undef	INT64_MAX
+#  undef	HAVE_DECL_INT64_MAX
 # endif
 # if HAVE_DECL_INT64_MIN
-#  undef INT64_MIN
-#  undef HAVE_DECL_INT64_MIN
-#  define HAVE_DECL_INT64_MIN 0
+#  undef	INT64_MIN
+#  undef	HAVE_DECL_INT64_MIN
 # endif
 #endif
 
 /* Some platforms lack the standard *_MAX definitions. */
 #if !HAVE_DECL_SIZE_MAX
-#define SIZE_MAX (~(size_t)0)
+#define	SIZE_MAX (~(size_t)0)
 #endif
 #if !HAVE_DECL_SSIZE_MAX
-#define SSIZE_MAX ((ssize_t)(SIZE_MAX >> 1))
+#define	SSIZE_MAX ((ssize_t)(SIZE_MAX >> 1))
 #endif
 #if !HAVE_DECL_UINT32_MAX
-#define UINT32_MAX (~(uint32_t)0)
+#define	UINT32_MAX (~(uint32_t)0)
 #endif
 #if !HAVE_DECL_UINT64_MAX
-#define UINT64_MAX (~(uint64_t)0)
+#define	UINT64_MAX (~(uint64_t)0)
 #endif
 #if !HAVE_DECL_INT64_MAX
-#define INT64_MAX ((int64_t)(UINT64_MAX >> 1))
+#define	INT64_MAX ((int64_t)(UINT64_MAX >> 1))
 #endif
 #if !HAVE_DECL_INT64_MIN
-#define INT64_MIN ((int64_t)(~INT64_MAX))
+#define	INT64_MIN ((int64_t)(~INT64_MAX))
 #endif
 
 /*
@@ -136,7 +130,7 @@
  * POSIX.1e draft functions used in archive_read_extract.c.
  */
 #if HAVE_SYS_ACL_H && HAVE_ACL_CREATE_ENTRY && HAVE_ACL_INIT && HAVE_ACL_SET_FILE && HAVE_ACL_USER
-#define HAVE_POSIX_ACL  1
+#define	HAVE_POSIX_ACL	1
 #endif
 
 /*
@@ -144,28 +138,28 @@
  * for compatibility's sake, close files before trying to restore metadata.
  */
 #if defined(HAVE_FCHMOD) || defined(HAVE_FUTIMES) || defined(HAVE_ACL_SET_FD) || defined(HAVE_ACL_SET_FD_NP) || defined(HAVE_FCHOWN)
-#define CAN_RESTORE_METADATA_FD
+#define	CAN_RESTORE_METADATA_FD
 #endif
 
 /* Set up defaults for internal error codes. */
 #ifndef ARCHIVE_ERRNO_FILE_FORMAT
 #if HAVE_EFTYPE
-#define ARCHIVE_ERRNO_FILE_FORMAT EFTYPE
+#define	ARCHIVE_ERRNO_FILE_FORMAT EFTYPE
 #else
 #if HAVE_EILSEQ
-#define ARCHIVE_ERRNO_FILE_FORMAT EILSEQ
+#define	ARCHIVE_ERRNO_FILE_FORMAT EILSEQ
 #else
-#define ARCHIVE_ERRNO_FILE_FORMAT EINVAL
+#define	ARCHIVE_ERRNO_FILE_FORMAT EINVAL
 #endif
 #endif
 #endif
 
 #ifndef ARCHIVE_ERRNO_PROGRAMMER
-#define ARCHIVE_ERRNO_PROGRAMMER EINVAL
+#define	ARCHIVE_ERRNO_PROGRAMMER EINVAL
 #endif
 
 #ifndef ARCHIVE_ERRNO_MISC
-#define ARCHIVE_ERRNO_MISC (-1)
+#define	ARCHIVE_ERRNO_MISC (-1)
 #endif
 
 #endif /* !ARCHIVE_PLATFORM_H_INCLUDED */

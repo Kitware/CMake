@@ -1,0 +1,2 @@
+*.h              whitespace=indent-with-non-tab,-blank-at-eol
+*.c              whitespace=indent-with-non-tab,-blank-at-eol

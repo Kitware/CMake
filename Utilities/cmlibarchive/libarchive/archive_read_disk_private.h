@@ -23,7 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $FreeBSD$
+ * $FreeBSD: head/lib/libarchive/archive_read_disk_private.h 201105 2009-12-28 03:20:54Z kientzle $
  */
 
 #ifndef __LIBARCHIVE_BUILD
@@ -33,30 +33,39 @@
 #ifndef ARCHIVE_READ_DISK_PRIVATE_H_INCLUDED
 #define ARCHIVE_READ_DISK_PRIVATE_H_INCLUDED
 
+struct tree;
+
 struct archive_read_disk {
-    struct archive  archive;
+	struct archive	archive;
 
-    /*
-     * Symlink mode is one of 'L'ogical, 'P'hysical, or 'H'ybrid,
-     * following an old BSD convention.  'L' follows all symlinks,
-     * 'P' follows none, 'H' follows symlinks only for the first
-     * item.
-     */
-    char    symlink_mode;
+	/*
+	 * Symlink mode is one of 'L'ogical, 'P'hysical, or 'H'ybrid,
+	 * following an old BSD convention.  'L' follows all symlinks,
+	 * 'P' follows none, 'H' follows symlinks only for the first
+	 * item.
+	 */
+	char	symlink_mode;
 
-    /*
-     * Since symlink interaction changes, we need to track whether
-     * we're following symlinks for the current item.  'L' mode above
-     * sets this true, 'P' sets it false, 'H' changes it as we traverse.
-     */
-    char    follow_symlinks;  /* Either 'L' or 'P'. */
+	/*
+	 * Since symlink interaction changes, we need to track whether
+	 * we're following symlinks for the current item.  'L' mode above
+	 * sets this true, 'P' sets it false, 'H' changes it as we traverse.
+	 */
+	char	follow_symlinks;  /* Either 'L' or 'P'. */
 
-    const char * (*lookup_gname)(void *private, gid_t gid);
-    void    (*cleanup_gname)(void *private);
-    void     *lookup_gname_data;
-    const char * (*lookup_uname)(void *private, gid_t gid);
-    void    (*cleanup_uname)(void *private);
-    void     *lookup_uname_data;
+	/* Directory traversals. */
+	struct tree *tree;
+
+	/* Set 1 if users request to restore atime . */
+	int		 restore_time;
+	int		 entry_wd_fd;
+
+	const char * (*lookup_gname)(void *private, int64_t gid);
+	void	(*cleanup_gname)(void *private);
+	void	 *lookup_gname_data;
+	const char * (*lookup_uname)(void *private, int64_t uid);
+	void	(*cleanup_uname)(void *private);
+	void	 *lookup_uname_data;
 };
 
 #endif
