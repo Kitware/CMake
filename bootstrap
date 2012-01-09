@@ -1,7 +1,7 @@
 #!/bin/sh
 #=============================================================================
 # CMake - Cross Platform Makefile Generator
-# Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+# Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -10,6 +10,10 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
+
+die() {
+  echo "$@" 1>&2 ; exit 1
+}
 
 # Version number extraction function.
 cmake_version_component()
@@ -292,7 +296,7 @@ KWSYS_IOS_FILES="
 cmake_usage()
 {
 echo '
-Usage: '"$0"' [options]
+Usage: '"$0"' [<options>...] [-- <cmake-options>...]
 Options: [defaults in brackets after descriptions]
 Configuration:
   --help                  print this message
@@ -337,7 +341,7 @@ Directory and file names:
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  echo "CMake ${cmake_version}, Copyright 2000-2009 Kitware, Inc."
+  echo "CMake ${cmake_version}, Copyright 2000-2011 Kitware, Inc."
 }
 
 # Display CMake bootstrap error, display the log file and exit
@@ -527,63 +531,31 @@ cmake_verbose=
 cmake_parallel_make=
 cmake_ccache_enabled=
 cmake_prefix_dir="${cmake_default_prefix}"
-for a in "$@"; do
-  if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
-    cmake_prefix_dir=`echo $a | sed "s/^--prefix=//"`
-    cmake_prefix_dir=`cmake_fix_slashes "${cmake_prefix_dir}"`
-  fi
-  if echo $a | grep "^--parallel=" > /dev/null 2> /dev/null; then
-    cmake_parallel_make=`echo $a | sed "s/^--parallel=//" | grep "[0-9][0-9]*"`
-  fi
-  if echo $a | grep "^--datadir=" > /dev/null 2> /dev/null; then
-    cmake_data_dir=`echo $a | sed "s/^--datadir=//"`
-  fi
-  if echo $a | grep "^--docdir=" > /dev/null 2> /dev/null; then
-    cmake_doc_dir=`echo $a | sed "s/^--docdir=//"`
-  fi
-  if echo $a | grep "^--mandir=" > /dev/null 2> /dev/null; then
-    cmake_man_dir=`echo $a | sed "s/^--mandir=//"`
-  fi
-  if echo $a | grep "^--init=" > /dev/null 2> /dev/null; then
-    cmake_init_file=`echo $a | sed "s/^--init=//"`
-  fi
-  for lib in bzip2 curl expat libarchive zlib; do
-    if echo $a | grep "^--system-${lib}" > /dev/null 2> /dev/null; then
-      cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper ${lib}`=1"
-      break
-    elif echo $a | grep "^--no-system-${lib}" > /dev/null 2> /dev/null; then
-      cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper ${lib}`=0"
-      break
-    fi
-  done
-  if echo $a | grep "^--system-libs" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1"
-  fi
-  if echo $a | grep "^--no-system-libs" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0"
-  fi
-  if echo $a | grep "^--qt-gui" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_qt_gui="1"
-  fi
-  if echo $a | grep "^--no-qt-gui" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_qt_gui="0"
-  fi
-  if echo $a | grep "^--qt-qmake=" > /dev/null 2> /dev/null; then
-    cmake_bootstrap_qt_qmake=`echo $a | sed "s/^--qt-qmake=//"`
-  fi
-  if echo $a | grep "^--help" > /dev/null 2> /dev/null; then
-    cmake_usage
-  fi
-  if echo $a | grep "^--version" > /dev/null 2> /dev/null; then
-    cmake_version_display
-    exit 2
-  fi
-  if echo $a | grep "^--verbose" > /dev/null 2> /dev/null; then
-    cmake_verbose=TRUE
-  fi
-  if echo $a | grep "^--enable-ccache" > /dev/null 2> /dev/null; then
-    cmake_ccache_enabled=TRUE
-  fi
+while test $# != 0; do
+  case "$1" in
+  --prefix=*) cmake_prefix_dir=`cmake_fix_slashes "${1#*=}"` ;;
+  --parallel=*) cmake_parallel_make="${1#*=}" ;;
+  --datadir=*) cmake_data_dir="${1#*=}" ;;
+  --docdir=*) cmake_doc_dir="${1#*=}" ;;
+  --mandir=*) cmake_man_dir="${1#*=}" ;;
+  --init=*) cmake_init_file="${1#*=}" ;;
+  --system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1" ;;
+  --no-system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0" ;;
+  --system-bzip2|--system-curl|--system-expat|--system-libarchive|--system-zlib)
+    cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper ${1#--system-}`=1" ;;
+  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-libarchive|--no-system-zlib)
+    cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper ${1#--no-system-}`=0" ;;
+  --qt-gui) cmake_bootstrap_qt_gui="1" ;;
+  --no-qt-gui) cmake_bootstrap_qt_gui="0" ;;
+  --qt-qmake=*) cmake_bootstrap_qt_qmake="${1#*=}" ;;
+  --help) cmake_usage ;;
+  --version) cmake_version_display ; exit 2 ;;
+  --verbose) cmake_verbose=TRUE ;;
+  --enable-ccache) cmake_ccache_enabled=TRUE ;;
+  --) shift; break ;;
+  *) die "Unknown option: $1" ;;
+  esac
+  shift
 done
 
 # If verbose, display some information about bootstrap
@@ -1533,7 +1505,7 @@ cmake_options="-DCMAKE_BOOTSTRAP=1"
 if [ -n "${cmake_verbose}" ]; then
   cmake_options="${cmake_options} -DCMAKE_VERBOSE_MAKEFILE=1"
 fi
-"${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}" "-C${cmake_bootstrap_dir}/InitialCacheFlags.cmake" "-G${cmake_bootstrap_generator}" ${cmake_options} ${cmake_bootstrap_system_libs}
+"${cmake_bootstrap_dir}/cmake" "${cmake_source_dir}" "-C${cmake_bootstrap_dir}/InitialCacheFlags.cmake" "-G${cmake_bootstrap_generator}" ${cmake_options} ${cmake_bootstrap_system_libs} "$@"
 RES=$?
 if [ "${RES}" -ne "0" ]; then
   cmake_error 11 "Problem while running initial CMake"
