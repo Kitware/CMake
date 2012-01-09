@@ -3,23 +3,21 @@
 #include "cmTestGeneratedHeader.h"
 #include "cmVersion.h"
 #include "ExtraSources/file1.h"
+#include "Aout.h"
 #include "file2.h"
 #include "sharedFile.h"
 extern "C" {
 #include "testConly.h"
 }
-#ifdef COMPLEX_TEST_CMAKELIB
-#include "cmStandardIncludes.h"
-#include "cmSystemTools.h"
-#include "cmDynamicLoader.h"
-#include "cmSystemTools.h"
-#include "cmGeneratedFileStream.h"
-#include <cmsys/DynamicLoader.hxx>
-#else
 #include <vector>
 #include <string>
 #include <iostream>
 #include <string.h>
+
+#include <stdio.h>
+#include <sys/stat.h>
+#if !defined(S_ISDIR)
+# define S_ISDIR(mode) ((mode) & _S_IFDIR)
 #endif
 
 #ifdef COMPLEX_TEST_LINK_STATIC
@@ -67,18 +65,18 @@ void cmPassed(const char* Message, const char* m2="")
 # error Per-configuration directory-level definition not inherited.
 #endif
 
-#ifdef COMPLEX_TEST_CMAKELIB
 // ======================================================================
 
 void TestAndRemoveFile(const char* filename) 
 {
-  if (!cmSystemTools::FileExists(filename))
+  struct stat st;
+  if(stat(filename, &st) < 0)
     {
     cmFailed("Could not find file: ", filename);
     }
   else
     {
-    if (!cmSystemTools::RemoveFile(filename))
+    if (remove(filename) < 0)
       {
       cmFailed("Unable to remove file. It does not imply that this test failed, but it *will* be corrupted thereafter if this file is not removed: ", filename);
       }
@@ -93,104 +91,16 @@ void TestAndRemoveFile(const char* filename)
 
 void TestDir(const char* filename) 
 {
-  if (!cmSystemTools::FileExists(filename))
+  struct stat st;
+  if(stat(filename, &st) < 0 || !S_ISDIR(st.st_mode))
     {
     cmFailed("Could not find dir: ", filename);
     }
   else
     {
-    if (!cmSystemTools::FileIsDirectory(filename))
-      {
-      cmFailed("Unable to check if file is a directory: ", filename);
-      }
-    else
-      {
-      cmPassed("Find dir: ", filename);
-      }
+    cmPassed("Find dir: ", filename);
     }
 }
-
-// ======================================================================
-
-void TestCMGeneratedFileSTream()
-{
-  cmGeneratedFileStream gm;
-  std::string file1 = std::string(BINARY_DIR) + std::string("/generatedFile1");
-  std::string file2 = std::string(BINARY_DIR) + std::string("/generatedFile2");
-  std::string file3 = std::string(BINARY_DIR) + std::string("/generatedFile3");
-  std::string file4 = std::string(BINARY_DIR) + std::string("/generatedFile4");
-  std::string file1tmp = file1 + ".tmp";
-  std::string file2tmp = file2 + ".tmp";
-  std::string file3tmp = file3 + ".tmp";
-  std::string file4tmp = file4 + ".tmp";
-  gm.Open(file1.c_str());
-  gm << "This is generated file 1";
-  gm.Close();
-  gm.Open(file2.c_str());
-  gm << "This is generated file 2";
-  gm.Close();
-  gm.Open(file3.c_str());
-  gm << "This is generated file 3";
-  gm.Close();
-  gm.Open(file4.c_str());
-  gm << "This is generated file 4";
-  gm.Close();
-  if ( cmSystemTools::FileExists(file1.c_str()) )
-    {
-    if ( cmSystemTools::FileExists(file2.c_str()) )
-      {
-      if ( cmSystemTools::FileExists(file3.c_str()) )
-        {
-        if ( cmSystemTools::FileExists(file4.c_str()) )
-          {
-          if ( cmSystemTools::FileExists(file1tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file1tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file2tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file2tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file3tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file3tmp.c_str());
-            }
-          else if ( cmSystemTools::FileExists(file4tmp.c_str()) )
-            {
-            cmFailed("Something wrong with cmGeneratedFileStream. Temporary file is still here: ", file4tmp.c_str());
-            }
-          else
-            {
-            cmPassed("cmGeneratedFileStream works.");
-            }
-          }
-        else
-          {
-          cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file4.c_str());
-          }
-        }
-      else
-        {
-        cmFailed("Something wrong with cmGeneratedFileStream. Found file: ", file3.c_str());
-        }
-      }
-    else
-      {
-      cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file2.c_str());
-      }
-    }
-  else
-    {
-    cmFailed("Something wrong with cmGeneratedFileStream. Cannot find file: ", file1.c_str());
-    }
-  cmSystemTools::RemoveFile(file1.c_str());
-  cmSystemTools::RemoveFile(file2.c_str());
-  cmSystemTools::RemoveFile(file3.c_str());
-  cmSystemTools::RemoveFile(file1tmp.c_str());
-  cmSystemTools::RemoveFile(file2tmp.c_str());
-  cmSystemTools::RemoveFile(file3tmp.c_str());
-}
-#endif
 
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
@@ -232,113 +142,6 @@ extern "C" int NameConflictTest2();
 
 int main()
 {
-  std::string lib = BINARY_DIR;
-  lib += "/lib/";
-#ifdef  CMAKE_INTDIR
-  lib += CMAKE_INTDIR;
-  lib += "/";
-#endif
-  std::string exe = BINARY_DIR;
-  exe += "/bin/";
-#ifdef  CMAKE_INTDIR
-  exe += CMAKE_INTDIR;
-  exe += "/";
-#endif
-
-#ifdef COMPLEX_TEST_CMAKELIB  
-  // Test a single character executable to test a: in makefiles
-  exe += "A";
-  exe += cmSystemTools::GetExecutableExtension();
-  int ret;
-  std::string errorMessage; 
-  exe = cmSystemTools::ConvertToRunCommandPath(exe.c_str());
-  if(cmSystemTools::RunSingleCommand(exe.c_str(), 0, &ret))
-    {
-    if(ret != 10)
-      {
-      errorMessage += exe;
-      errorMessage += " did not return 10";
-      }
-    }
-  else
-    {
-    errorMessage += exe;
-    errorMessage += ": failed to run.";
-    }
-  if(errorMessage.size())
-    {
-    cmFailed(errorMessage.c_str());
-    }
-  else
-    {
-    cmPassed("run Single Character executable A returned 10 as expected.");
-    }
-  
-  lib += CMAKE_SHARED_MODULE_PREFIX;
-  lib += "CMakeTestModule";
-  lib += CMAKE_SHARED_MODULE_SUFFIX;
-  cmsys::DynamicLoader::LibraryHandle handle = cmDynamicLoader::OpenLibrary(lib.c_str());
-  if(!handle)
-    {
-    std::string err = "Can not open CMakeTestModule:\n";
-    err += lib;
-    cmFailed(err.c_str());
-    }
-  else
-    {
-    cmsys::DynamicLoader::SymbolPointer fun = 
-      cmsys::DynamicLoader::GetSymbolAddress(handle, "ModuleFunction"); 
-    if(!fun)
-      {
-      fun = cmsys::DynamicLoader::GetSymbolAddress(handle, "_ModuleFunction");
-      }
-    typedef int (*TEST_FUNCTION)();
-    TEST_FUNCTION testFun = (TEST_FUNCTION)fun;
-    if(!testFun)
-      {
-      cmFailed("Could not find symbol ModuleFunction in library ");
-      }
-    else
-      {
-        int ret = (*testFun)();
-        if(!ret)
-          {
-          cmFailed("ModuleFunction call did not return valid return.");
-          }
-        cmPassed("Module loaded and ModuleFunction called correctly.");
-      }
-    }
-  cmDynamicLoader::FlushCache(); // fix memory leaks 
-  if(sharedFunction() != 1)
-    {
-    cmFailed("Call to sharedFunction from shared library failed.");
-    }
-  else
-    {
-    cmPassed("Call to sharedFunction from shared library worked.");
-    }
-  if(CsharedFunction() != 1)
-    {
-    cmFailed("Call to C sharedFunction from shared library failed.");
-    }
-  else
-    {
-    cmPassed("Call to C sharedFunction from shared library worked.");
-    }
-  
-    // ----------------------------------------------------------------------
-  // Test cmSystemTools::UpperCase
-  std::string str = "abc";
-  std::string strupper = "ABC";
-  if(cmSystemTools::UpperCase(str) == strupper)
-    {
-    cmPassed("cmSystemTools::UpperCase is working");
-    }
-  else
-    {
-    cmFailed("cmSystemTools::UpperCase is working");
-    }    
-#endif
 #if 0
   if(NameConflictTest1() == 0 && NameConflictTest2() == 0)
     {
@@ -839,8 +642,7 @@ int main()
          "FILENAME_VAR_PATH_NAME is not defined.");
 #else
   if((strcmp(FILENAME_VAR_PATH_NAME, "Complex") == 0) ||
-     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexOneConfig") == 0) ||
-     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexRelativePaths") == 0))
+     (strcmp(FILENAME_VAR_PATH_NAME, "ComplexOneConfig") == 0))
     {
     cmPassed("FILENAME_VAR_PATH_NAME == ", FILENAME_VAR_PATH_NAME);
     }
@@ -901,8 +703,7 @@ int main()
          "PATH_VAR_NAME is not defined.");
 #else
   if((strcmp(PATH_VAR_NAME, "Complex") == 0) ||
-     (strcmp(PATH_VAR_NAME, "ComplexOneConfig") == 0) ||
-     (strcmp(PATH_VAR_NAME, "ComplexRelativePaths") == 0))
+     (strcmp(PATH_VAR_NAME, "ComplexOneConfig") == 0))
     {
     cmPassed("PATH_VAR_NAME == ", PATH_VAR_NAME);
     }
@@ -984,7 +785,6 @@ int main()
     }
 #endif
 
-#ifdef COMPLEX_TEST_CMAKELIB  
   // ----------------------------------------------------------------------
   // Some pre-build/pre-link/post-build custom-commands have been
   // attached to the lib (see Library/).
@@ -1030,7 +830,6 @@ int main()
   // only created during a build.
 
   TestAndRemoveFile(BINARY_DIR "/Executable/Temp/complex-required.txt");
-#endif
 
   // ----------------------------------------------------------------------
   // Test FIND_LIBRARY
@@ -1197,11 +996,6 @@ int main()
   cmPassed("CMake SET CACHE FORCE");
 #endif
 
-#ifdef COMPLEX_TEST_CMAKELIB
-  // Test the generated file stream.
-  TestCMGeneratedFileSTream();
-#endif
-
 #ifdef COMPLEX_TEST_LINK_STATIC
   if(TestLinkGetType())
     {
@@ -1211,6 +1005,12 @@ int main()
     {
     cmFailed("Link to static over shared failed.");
     }
+#endif
+
+#if defined(A_VALUE) && A_VALUE == 10
+  cmPassed("Single-character executable A worked.");
+#else
+  cmFailed("Single-character executable A failed.");
 #endif
 
   // ----------------------------------------------------------------------

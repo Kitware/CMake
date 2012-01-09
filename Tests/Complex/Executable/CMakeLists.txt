@@ -5,25 +5,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 
-IF(COMPLEX_TEST_CMAKELIB)
-  # Link to CMake lib
-  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source)
-  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Source/kwsys)
-  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmexpat)
-  LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmzlib)
-  # prefer the new curl if it is around
-  IF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0)
-    LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0/lib)
-  ENDIF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl-7.19.0)
-  IF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl)
-    LINK_DIRECTORIES(${Complex_BINARY_DIR}/../../Utilities/cmcurl)
-  ENDIF(EXISTS ${Complex_BINARY_DIR}/../../Utilities/cmcurl)
-  LINK_DIRECTORIES(
-  ${Complex_BINARY_DIR}/../../Utilities/cmlibarchive/libarchive
-  ${Complex_BINARY_DIR}/../../Utilities/cmbzip2
-  )
-ENDIF(COMPLEX_TEST_CMAKELIB)
-
 # Create an imported target for if(TARGET) test below.
 ADD_LIBRARY(ExeImportedTarget UNKNOWN IMPORTED)
 
@@ -55,14 +36,13 @@ SET_SOURCE_FILES_PROPERTIES(complex_nobuild.cxx PROPERTIES
 SET_SOURCE_FILES_PROPERTIES(complex_nobuild.c PROPERTIES
   HEADER_FILE_ONLY 1)
 
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ADD_EXECUTABLE(A A.cxx A.hh A.h A.txt)
-ADD_EXECUTABLE(complex complex testcflags.c )
+ADD_CUSTOM_COMMAND(OUTPUT Aout.h COMMAND A > Aout.h VERBATIM)
+ADD_EXECUTABLE(complex complex testcflags.c Aout.h)
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
 ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx
   complex_nobuild.c)
-IF(COMPLEX_TEST_CMAKELIB)
-  TARGET_LINK_LIBRARIES(complex CMakeLib cmsys cmexpat cmzlib cmlibarchive cmbzip2 cmcurl)
-ENDIF(COMPLEX_TEST_CMAKELIB)
 
 IF (UNIX)
   TARGET_LINK_LIBRARIES(complex ${CMAKE_DL_LIBS})

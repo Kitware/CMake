@@ -772,13 +772,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     SET(COMPILER_IS_COMO 1)
   ENDIF(CMAKE_BASE_NAME MATCHES "^como$")
   IF(NOT COMPILER_IS_COMO)
-    SET(COMPLEX_TEST_CMAKELIB 1)
-    IF(CMAKE_TEST_DIFFERENT_GENERATOR OR CMAKE_TEST_SYSTEM_LIBRARIES)
-      SET(COMPLEX_TEST_CMAKELIB 0)
-    ENDIF(CMAKE_TEST_DIFFERENT_GENERATOR OR CMAKE_TEST_SYSTEM_LIBRARIES)
-    IF(BORLAND)
-      SET(COMPLEX_TEST_CMAKELIB 0)
-    ENDIF(BORLAND)
     ADD_TEST(complex  ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Complex"
@@ -790,7 +783,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
       --build-options
-      -DCOMPLEX_TEST_CMAKELIB:BOOL=${COMPLEX_TEST_CMAKELIB}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
       --test-command complex
       )
@@ -805,7 +797,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
       --build-options
-      -DCOMPLEX_TEST_CMAKELIB:BOOL=${COMPLEX_TEST_CMAKELIB}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
       --test-command complex)
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
@@ -823,18 +814,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 #        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
 #        --build-project ConvLibrary
 #        --test-command bartest)
-
-
-#    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
-#      --build-and-test
-#      "${CMake_SOURCE_DIR}/Tests/ComplexRelativePaths"
-#      "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths"
-#      --build-generator ${CMAKE_TEST_GENERATOR}
-#      --build-project complex
-#      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-#      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexRelativePaths/bin"
-#      --build-options -DCMAKE_USE_RELATIVE_PATHS:BOOL=ON
-#      --test-command complex)
 
   ENDIF(NOT COMPILER_IS_COMO)
 
