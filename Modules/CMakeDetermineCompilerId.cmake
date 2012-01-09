@@ -55,8 +55,13 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   # Display the final identification result.
   IF(CMAKE_${lang}_COMPILER_ID)
+    IF(CMAKE_${lang}_COMPILER_VERSION)
+      SET(_version " ${CMAKE_${lang}_COMPILER_VERSION}")
+    ELSE()
+      SET(_version "")
+    ENDIF()
     MESSAGE(STATUS "The ${lang} compiler identification is "
-      "${CMAKE_${lang}_COMPILER_ID}")
+      "${CMAKE_${lang}_COMPILER_ID}${_version}")
   ELSE(CMAKE_${lang}_COMPILER_ID)
     MESSAGE(STATUS "The ${lang} compiler identification is unknown")
   ENDIF(CMAKE_${lang}_COMPILER_ID)
@@ -65,6 +70,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
   SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
+  SET(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID)
 
 #-----------------------------------------------------------------------------
@@ -177,9 +183,10 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   IF(NOT CMAKE_${lang}_COMPILER_ID)
     # Read the compiler identification string from the executable file.
     SET(COMPILER_ID)
+    SET(COMPILER_VERSION)
     SET(PLATFORM_ID)
     FILE(STRINGS ${file}
-      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 3 REGEX "INFO:")
+      CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 4 REGEX "INFO:")
     SET(HAVE_COMPILER_TWICE 0)
     FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
       IF("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
@@ -197,6 +204,11 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         STRING(REGEX REPLACE ".*INFO:arch\\[([^]]*)\\].*" "\\1"
           ARCHITECTURE_ID "${info}")
       ENDIF("${info}" MATCHES ".*INFO:arch\\[([^]\"]*)\\].*")
+      IF("${info}" MATCHES ".*INFO:compiler_version\\[([^]\"]*)\\].*")
+        STRING(REGEX REPLACE ".*INFO:compiler_version\\[([^]]*)\\].*" "\\1" COMPILER_VERSION "${info}")
+        STRING(REGEX REPLACE "^0+([0-9])" "\\1" COMPILER_VERSION "${COMPILER_VERSION}")
+        STRING(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION "${COMPILER_VERSION}")
+      ENDIF("${info}" MATCHES ".*INFO:compiler_version\\[([^]\"]*)\\].*")
     ENDFOREACH(info)
 
     # Check if a valid compiler and platform were found.
@@ -204,6 +216,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
       SET(CMAKE_${lang}_COMPILER_ID "${COMPILER_ID}")
       SET(CMAKE_${lang}_PLATFORM_ID "${PLATFORM_ID}")
       SET(MSVC_${lang}_ARCHITECTURE_ID "${ARCHITECTURE_ID}")
+      SET(CMAKE_${lang}_COMPILER_VERSION "${COMPILER_VERSION}")
     ENDIF(COMPILER_ID AND NOT COMPILER_ID_TWICE)
 
     # Check the compiler identification string.
@@ -251,6 +264,7 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
   SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
+  SET(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
   SET(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
 ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
 
