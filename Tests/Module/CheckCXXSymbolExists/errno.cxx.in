@@ -7,6 +7,11 @@
 #include <errno.h>
 #endif
 
+// This is required for the Borland compiler, but should be right for all
+// others, too. To avoid breaking older compilers we don't simply use
+// std::errno.
+using namespace std;
+
 int main()
 {
   return errno;
