@@ -8,8 +8,9 @@
 #  BZIP2_VERSION_STRING - the version of BZip2 found (since CMake 2.8.8)
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
+# Copyright 2006-2012 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -23,7 +24,13 @@
 
 FIND_PATH(BZIP2_INCLUDE_DIR bzlib.h )
 
-FIND_LIBRARY(BZIP2_LIBRARIES NAMES bz2 bzip2 )
+IF (NOT BZIP2_LIBRARIES)
+    FIND_LIBRARY(BZIP2_LIBRARY_RELEASE NAMES bz2 bzip2 )
+    FIND_LIBRARY(BZIP2_LIBRARY_DEBUG NAMES bzip2d )
+
+    INCLUDE(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+    SELECT_LIBRARY_CONFIGURATIONS(BZIP2)
+ENDIF (NOT BZIP2_LIBRARIES)
 
 IF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
     FILE(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
@@ -39,8 +46,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
 
 IF (BZIP2_FOUND)
    INCLUDE(CheckLibraryExists)
-   CHECK_LIBRARY_EXISTS(${BZIP2_LIBRARIES} BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
+   CHECK_LIBRARY_EXISTS("${BZIP2_LIBRARIES}" BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
 ENDIF (BZIP2_FOUND)
 
-MARK_AS_ADVANCED(BZIP2_INCLUDE_DIR BZIP2_LIBRARIES)
-
+MARK_AS_ADVANCED(BZIP2_INCLUDE_DIR)
