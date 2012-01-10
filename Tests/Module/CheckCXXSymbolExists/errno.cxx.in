@@ -11,12 +11,11 @@
 // others, too. To avoid breaking older compilers we don't simply use
 // std::errno.
 
-#cmakedefine NO_STD_NAMESPACE_FOR_ERRNO
+// but of course there are compilers where this doesn't work,
+// like MIPSpro and MSVC6
+namespace std { }
 
-#if !defined(NO_STD_NAMESPACE_FOR_ERRNO)
-// but of course there are compilers where this doesn't work
 using namespace std;
-#endif
 
 int main()
 {
