@@ -8,8 +8,9 @@
 #  BZIP2_VERSION_STRING - the version of BZip2 found (x.y.z)
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
+# Copyright 2006-2012 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -23,12 +24,21 @@
 
 FIND_PATH(BZIP2_INCLUDE_DIR bzlib.h )
 
-FIND_LIBRARY(BZIP2_LIBRARIES NAMES bz2 bzip2 )
+IF (NOT BZIP2_LIBRARIES)
+    FIND_LIBRARY(BZIP2_LIBRARIES_RELEASE NAMES bz2 bzip2 )
+    FIND_LIBRARY(BZIP2_LIBRARIES_DEBUG NAMES bzip2d bz2 bzip2 )
 
-IF(BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
+    IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        SET(BZIP2_LIBRARIES optimized "${BZIP2_LIBRARIES_RELEASE}" debug "${BZIP2_LIBRARIES_DEBUG}")
+    ELSE (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+        SET(BZIP2_LIBRARIES "${BZIP2_LIBRARIES_RELEASE}")
+    ENDIF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+ENDIF (NOT BZIP2_LIBRARIES)
+
+IF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
     FILE(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
     STRING(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
-ENDIF(BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
+ENDIF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
 
 # handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if 
 # all listed variables are TRUE
@@ -39,8 +49,14 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
 
 IF (BZIP2_FOUND)
    INCLUDE(CheckLibraryExists)
-   CHECK_LIBRARY_EXISTS(${BZIP2_LIBRARIES} BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
+   # Make sure there is always a library to do the compile test.
+   # If the user chooses a build configuration without a compatible library
+   # this is a different problem.
+   IF (BZIP2_LIBRARIES_DEBUG AND NOT BZIP2_LIBRARIES_RELEASE)
+       CHECK_LIBRARY_EXISTS("${BZIP2_LIBRARIES_DEBUG}" BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
+   ELSE (BZIP2_LIBRARIES_DEBUG AND NOT BZIP2_LIBRARIES_RELEASE)
+       CHECK_LIBRARY_EXISTS("${BZIP2_LIBRARIES}" BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
+   ENDIF (BZIP2_LIBRARIES_DEBUG AND NOT BZIP2_LIBRARIES_RELEASE)
 ENDIF (BZIP2_FOUND)
 
-MARK_AS_ADVANCED(BZIP2_INCLUDE_DIR BZIP2_LIBRARIES)
-
+MARK_AS_ADVANCED(BZIP2_INCLUDE_DIR BZIP2_LIBRARIES_DEBUG BZIP2_LIBRARIES_RELEASE)
