@@ -33,9 +33,15 @@
 
 #elif defined(__SUNPRO_C)
 # define COMPILER_ID "SunPro"
-# define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>8)
-# define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xF)
-# define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# if __SUNPRO_C >= 0x5100
+#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>12)
+#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xFF)
+#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# else
+#  define COMPILER_VERSION_MAJOR HEX(__SUNPRO_C>>8)
+#  define COMPILER_VERSION_MINOR HEX(__SUNPRO_C>>4 & 0xF)
+#  define COMPILER_VERSION_PATCH HEX(__SUNPRO_C    & 0xF)
+# endif
 
 #elif defined(__HP_cc)
 # define COMPILER_ID "HP"
