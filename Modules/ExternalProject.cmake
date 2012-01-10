@@ -144,7 +144,7 @@
 #   set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 
 #=============================================================================
-# Copyright 2008-2009 Kitware, Inc.
+# Copyright 2008-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
