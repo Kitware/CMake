@@ -5,6 +5,7 @@
 #  BZIP2_INCLUDE_DIR - the BZip2 include directory
 #  BZIP2_LIBRARIES - Link these to use BZip2
 #  BZIP2_NEED_PREFIX - this is set if the functions are prefixed with BZ2_
+#  BZIP2_VERSION_STRING - the version of BZip2 found (x.y.z)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -24,10 +25,17 @@ FIND_PATH(BZIP2_INCLUDE_DIR bzlib.h )
 
 FIND_LIBRARY(BZIP2_LIBRARIES NAMES bz2 bzip2 )
 
+IF(BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
+    FILE(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
+    STRING(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
+ENDIF(BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
+
 # handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2 DEFAULT_MSG BZIP2_LIBRARIES BZIP2_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
+                                  REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
+                                  VERSION_VAR BZIP2_VERSION_STRING)
 
 IF (BZIP2_FOUND)
    INCLUDE(CheckLibraryExists)
