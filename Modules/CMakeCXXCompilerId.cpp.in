@@ -47,6 +47,9 @@
 
 #elif defined(__HP_aCC)
 # define COMPILER_ID "HP"
+# define COMPILER_VERSION_MAJOR DEC(__HP_aCC/10000)
+# define COMPILER_VERSION_MINOR DEC(__HP_aCC/100 % 100)
+# define COMPILER_VERSION_PATCH DEC(__HP_aCC     % 100)
 
 #elif defined(__DECCXX)
 # define COMPILER_ID "Compaq"
