@@ -954,6 +954,7 @@ function(_ep_get_git_version git_EXECUTABLE git_version_var)
     execute_process(
       COMMAND "${git_EXECUTABLE}" --version
       OUTPUT_VARIABLE ov
+      ERROR_VARIABLE ev
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
     string(REGEX REPLACE "^git version (.+)$" "\\1" version "${ov}")
