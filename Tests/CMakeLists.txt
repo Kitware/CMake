@@ -47,6 +47,7 @@ IF(BUILD_TESTING)
   ENDIF()
 
   ADD_SUBDIRECTORY(CMakeLib)
+  ADD_SUBDIRECTORY(CMakeOnly)
 
   ADD_SUBDIRECTORY(FindPackageModeMakefileTest)
 

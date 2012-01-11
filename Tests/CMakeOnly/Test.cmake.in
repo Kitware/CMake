@@ -1,0 +1,12 @@
+set(source_dir "@CMAKE_CURRENT_SOURCE_DIR@/${TEST}")
+set(binary_dir "@CMAKE_CURRENT_BINARY_DIR@/${TEST}-build")
+file(REMOVE_RECURSE "${binary_dir}")
+file(MAKE_DIRECTORY "${binary_dir}")
+execute_process(
+  COMMAND ${CMAKE_COMMAND} "${source_dir}" -G "@CMAKE_TEST_GENERATOR@"
+  WORKING_DIRECTORY "${binary_dir}"
+  RESULT_VARIABLE result
+  )
+if(result)
+  message(FATAL_ERROR "CMake failed to configure ${TEST}")
+endif()
