@@ -264,10 +264,6 @@ function(install_qt4_executable executable)
                 set(qt_plugins_dir "")
         endif()
 
-        if(NOT qtplugins AND QT_LIBRARIES_PLUGINS)
-                set(qtplugins "${QT_LIBRARIES_PLUGINS}")
-        endif()
-
         foreach(plugin ${qtplugins})
                 set(installed_plugin_paths "")
                 install_qt4_plugin("${plugin}" "${executable}" 0 installed_plugin_paths "${plugins_dir}" "${component}")
