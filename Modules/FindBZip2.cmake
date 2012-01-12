@@ -33,12 +33,12 @@ IF (NOT BZIP2_LIBRARIES)
     ELSE (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         SET(BZIP2_LIBRARIES "${BZIP2_LIBRARIES_RELEASE}")
     ENDIF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-
-    IF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
-        FILE(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
-        STRING(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
-    ENDIF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
 ENDIF (NOT BZIP2_LIBRARIES)
+
+IF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
+    FILE(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
+    STRING(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
+ENDIF (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
 
 # handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if 
 # all listed variables are TRUE
