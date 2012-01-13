@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+  Copyright 2000-2012 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -9,15 +9,15 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmThirdParty_h
-#define __cmThirdParty_h
+#ifndef __cm_bzlib_h
+#define __cm_bzlib_h
 
-/* Whether CMake is using its own utility libraries.  */
-#cmakedefine CMAKE_USE_SYSTEM_CURL
-#cmakedefine CMAKE_USE_SYSTEM_EXPAT
-#cmakedefine CMAKE_USE_SYSTEM_ZLIB
-#cmakedefine CMAKE_USE_SYSTEM_BZIP2
-#cmakedefine CMAKE_USE_SYSTEM_LIBARCHIVE
-#cmakedefine CTEST_USE_XMLRPC
+/* Use the bzip2 library configured for CMake.  */
+#include "cmThirdParty.h"
+#ifdef CMAKE_USE_SYSTEM_BZIP2
+# include <bzlib.h>
+#else
+# include <cmbzip2/bzlib.h>
+#endif
 
 #endif

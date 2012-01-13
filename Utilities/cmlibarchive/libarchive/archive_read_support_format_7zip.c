@@ -33,7 +33,7 @@ __FBSDID("$FreeBSD$");
 #include <stdlib.h>
 #endif
 #ifdef HAVE_BZLIB_H
-#include <bzlib.h>
+#include <cm_bzlib.h>
 #endif
 #ifdef HAVE_LZMA_H
 #include <lzma.h>
