@@ -37,7 +37,7 @@ __FBSDID("$FreeBSD$");
 #include <libxml/xmlwriter.h>
 #endif
 #ifdef HAVE_BZLIB_H
-#include <bzlib.h>
+#include <cm_bzlib.h>
 #endif
 #if HAVE_LZMA_H
 #include <lzma.h>
