@@ -714,6 +714,25 @@ else()
   set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
 endif(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
 
+# Prepend directories in ${CPACK_RPM_INSTALL_FILES} with %dir
+# This is necessary to avoid duplicate files since rpmbuild do
+# recursion on its own when encountering a pathname which is a directory
+# which is not flagged as %dir
+string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
+string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST
+                        "${CPACK_RPM_INSTALL_FILES_LIST}")
+string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST
+                        "${CPACK_RPM_INSTALL_FILES_LIST}")
+set(CPACK_RPM_INSTALL_FILES "")
+foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
+  if(IS_DIRECTORY "${WDIR}/${F}")
+    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}%dir \"${F}\"\n")
+  else()
+    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+  endif()
+endforeach(F)
+set(CPACK_RPM_INSTALL_FILES_LIST "")
+
 # The name of the final spec file to be used by rpmbuild
 SET(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.spec")
 
