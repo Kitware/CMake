@@ -141,7 +141,7 @@ function(fixup_qt4_executable executable)
 
         foreach(plugin ${qtplugins})
                 set(installed_plugin_path "")
-                install_qt4_plugin("${plugin}" "${plugins_dir}" "${executable}" 1 installed_plugin_path)
+                install_qt4_plugin("${plugin}" "${executable}" 1 installed_plugin_path)
                 list(APPEND libs ${installed_plugin_path})
         endforeach()
 
