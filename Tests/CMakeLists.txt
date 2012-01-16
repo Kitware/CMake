@@ -269,10 +269,6 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckCXXCompilerFlag CheckCXXCompilerFlag)
 
-  ADD_TEST_MACRO(Module.CheckSymbolExists CheckSymbolExists)
-
-  ADD_TEST_MACRO(Module.CheckCXXSymbolExists CheckCXXSymbolExists)
-
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
