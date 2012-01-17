@@ -105,6 +105,10 @@ private:
     int DependerIndex;
   };
   std::queue<SharedDepEntry> SharedDepQueue;
+  std::set<int> SharedDepFollowed;
+  void FollowSharedDeps(int depender_index,
+                        cmTarget::LinkInterface const* iface,
+                        bool follow_interface = false);
   void QueueSharedDependencies(int depender_index,
                                std::vector<std::string> const& deps);
   void HandleSharedDependency(SharedDepEntry const& dep);

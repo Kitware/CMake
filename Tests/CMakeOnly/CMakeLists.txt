@@ -7,3 +7,6 @@ macro(add_CMakeOnly_test test)
     -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
     )
 endmacro()
+
+add_CMakeOnly_test(LinkInterfaceLoop)
+set_property(TEST CMakeOnly.LinkInterfaceLoop PROPERTY TIMEOUT 90)
