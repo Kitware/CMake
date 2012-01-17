@@ -5,6 +5,9 @@ if (POLICY CMP0017)
   cmake_policy(SET CMP0017 NEW)
 endif ()
 
+# Avoid ctest truncation of output
+message(STATUS "CTEST_FULL_OUTPUT")
+
 file(GLOB FIND_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../Modules/Find*.cmake" )
 
 foreach(FIND_MODULE ${FIND_MODULES})
