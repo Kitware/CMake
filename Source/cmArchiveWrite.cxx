@@ -247,10 +247,14 @@ bool cmArchiveWrite::AddFile(const char* file,
     return false;
     }
 
-  // Content.
-  if(size_t size = static_cast<size_t>(archive_entry_size(e)))
+  // do not copy content of symlink
+  if (!archive_entry_symlink(e))
     {
-    return this->AddData(file, size);
+    // Content.
+    if(size_t size = static_cast<size_t>(archive_entry_size(e)))
+      {
+      return this->AddData(file, size);
+      }
     }
   return true;
 }
