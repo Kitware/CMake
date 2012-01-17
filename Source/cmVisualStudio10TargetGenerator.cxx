@@ -1490,7 +1490,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   imLib += targetNameImport;
 
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
-  linkOptions.AddFlag("ProgramDataBaseFileName", pdb.c_str());
+  linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
   if(!this->ModuleDefinitionFile.empty())
     {
