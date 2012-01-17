@@ -602,11 +602,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         break;
       }
 
-    // These well-known sets of files are installed *automatically* for FRAMEWORK
-    // SHARED library targets on the Mac as part of installing the FRAMEWORK.
-    // For other target types or on other platforms, they are not installed
-    // automatically and so we need to create install files generators for them.
-    //
+    // These well-known sets of files are installed *automatically* for
+    // FRAMEWORK SHARED library targets on the Mac as part of installing the
+    // FRAMEWORK.  For other target types or on other platforms, they are not
+    // installed automatically and so we need to create install files
+    // generators for them.
     bool createInstallGeneratorsForTargetFileSets = true;
 
     if(target.IsFrameworkOnApple())
@@ -630,8 +630,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Create the files install generator.
         if (!privateHeaderArgs.GetDestination().empty())
           {
-          privateHeaderGenerator = CreateInstallFilesGenerator(absFiles,
-                                                      privateHeaderArgs, false);
+          privateHeaderGenerator =
+            CreateInstallFilesGenerator(absFiles, privateHeaderArgs, false);
           }
         else
           {
@@ -656,8 +656,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         // Create the files install generator.
         if (!publicHeaderArgs.GetDestination().empty())
           {
-          publicHeaderGenerator = CreateInstallFilesGenerator(absFiles,
-                                                        publicHeaderArgs, false);
+          publicHeaderGenerator =
+            CreateInstallFilesGenerator(absFiles, publicHeaderArgs, false);
           }
         else
           {
