@@ -26,14 +26,51 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+unset(_Python_NAMES)
+
+set(_PYTHON1_VERSIONS 1.6 1.5)
+set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
+set(_PYTHON3_VERSIONS 3.3 3.2 3.1 3.0)
+
+if(PythonInterp_FIND_VERSION)
+    if(PythonInterp_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+        string(REGEX REPLACE "^([0-9]+\\.[0-9]+).*" "\\1" _PYTHON_FIND_MAJ_MIN "${PythonInterp_FIND_VERSION}")
+        string(REGEX REPLACE "^([0-9]+).*" "\\1" _PYTHON_FIND_MAJ "${_PYTHON_FIND_MAJ_MIN}")
+        list(APPEND _Python_NAMES python${_PYTHON_FIND_MAJ_MIN} python${_PYTHON_FIND_MAJ})
+        unset(_PYTHON_FIND_OTHER_VERSIONS)
+        if(NOT PythonInterp_FIND_VERSION_EXACT)
+            foreach(_PYTHON_V ${_PYTHON${_PYTHON_FIND_MAJ}_VERSIONS})
+                if(NOT _PYTHON_V VERSION_LESS _PYTHON_FIND_MAJ_MIN)
+                    list(APPEND _PYTHON_FIND_OTHER_VERSIONS ${_PYTHON_V})
+                endif()
+             endforeach()
+        endif(NOT PythonInterp_FIND_VERSION_EXACT)
+        unset(_PYTHON_FIND_MAJ_MIN)
+        unset(_PYTHON_FIND_MAJ)
+    else(PythonInterp_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+        list(APPEND _Python_NAMES python${PythonInterp_FIND_VERSION})
+        set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON${PythonInterp_FIND_VERSION}_VERSIONS})
+    endif(PythonInterp_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+else(PythonInterp_FIND_VERSION)
+    set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
+endif(PythonInterp_FIND_VERSION)
+
+list(APPEND _Python_NAMES python)
+
 # Search for the current active python version first
-find_program(PYTHON_EXECUTABLE NAMES python)
+find_program(PYTHON_EXECUTABLE NAMES ${_Python_NAMES})
 
 # Set up the versions we know about, in the order we will search. Always add
 # the user supplied additional versions to the front.
 set(_Python_VERSIONS
   ${Python_ADDITIONAL_VERSIONS}
-  2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
+  ${_PYTHON_FIND_OTHER_VERSIONS}
+  )
+
+unset(_PYTHON_FIND_OTHER_VERSIONS)
+unset(_PYTHON1_VERSIONS)
+unset(_PYTHON2_VERSIONS)
+unset(_PYTHON3_VERSIONS)
 
 # Search for newest python version if python executable isn't found
 if(NOT PYTHON_EXECUTABLE)
