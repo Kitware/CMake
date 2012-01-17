@@ -10,3 +10,7 @@ endmacro()
 
 add_CMakeOnly_test(LinkInterfaceLoop)
 set_property(TEST CMakeOnly.LinkInterfaceLoop PROPERTY TIMEOUT 90)
+
+add_CMakeOnly_test(CheckSymbolExists)
+
+add_CMakeOnly_test(CheckCXXSymbolExists)
