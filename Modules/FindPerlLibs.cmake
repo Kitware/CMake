@@ -55,19 +55,6 @@ if (PERL_EXECUTABLE)
     string(REGEX REPLACE "prefix='([^']+)'.*" "\\1" PERL_PREFIX ${PERL_PREFIX_OUTPUT_VARIABLE})
   endif (NOT PERL_PREFIX_RESULT_VARIABLE)
 
-  ### PERL_VERSION
-  execute_process(
-    COMMAND
-      ${PERL_EXECUTABLE} -V:version
-      OUTPUT_VARIABLE
-        PERL_VERSION_OUTPUT_VARIABLE
-      RESULT_VARIABLE
-        PERL_VERSION_RESULT_VARIABLE
-  )
-  if (NOT PERL_VERSION_RESULT_VARIABLE)
-    string(REGEX REPLACE "version='([^']+)'.*" "\\1" PERL_VERSION ${PERL_VERSION_OUTPUT_VARIABLE})
-  endif (NOT PERL_VERSION_RESULT_VARIABLE)
-
   ### PERL_ARCHNAME
   execute_process(
     COMMAND
@@ -206,19 +193,19 @@ if (PERL_EXECUTABLE)
   ### PERL_POSSIBLE_INCLUDE_PATHS
   set(PERL_POSSIBLE_INCLUDE_PATHS
     ${PERL_ARCHLIB}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/CORE
-    /usr/lib/perl/${PERL_VERSION}/CORE
+    /usr/lib/perl5/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+    /usr/lib/perl/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+    /usr/lib/perl5/${PERL_VERSION_STRING}/CORE
+    /usr/lib/perl/${PERL_VERSION_STRING}/CORE
     )
 
   ### PERL_POSSIBLE_LIB_PATHS
   set(PERL_POSSIBLE_LIB_PATHS
     ${PERL_ARCHLIB}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/CORE
-    /usr/lib/perl/${PERL_VERSION}/CORE
+    /usr/lib/perl5/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+    /usr/lib/perl/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+    /usr/lib/perl5/${PERL_VERSION_STRING}/CORE
+    /usr/lib/perl/${PERL_VERSION_STRING}/CORE
   )
 
   ### PERL_POSSIBLE_LIBRARY_NAME
@@ -249,7 +236,7 @@ if (PERL_EXECUTABLE)
   find_library(PERL_LIBRARY
     NAMES
       ${PERL_POSSIBLE_LIBRARY_NAME}
-      perl${PERL_VERSION}
+      perl${PERL_VERSION_STRING}
       perl
     PATHS
       ${PERL_POSSIBLE_LIB_PATHS}
@@ -261,7 +248,7 @@ endif (PERL_EXECUTABLE)
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLUDE_PATH
-                                           VERSION_VAR PERL_VERSION)
+                                           VERSION_VAR PERL_VERSION_STRING)
 
 # Introduced after CMake 2.6.4 to bring module into compliance
 set(PERL_INCLUDE_DIR  ${PERL_INCLUDE_PATH})
