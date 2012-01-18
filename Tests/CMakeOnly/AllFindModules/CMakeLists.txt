@@ -10,6 +10,11 @@ message(STATUS "CTEST_FULL_OUTPUT")
 
 file(GLOB FIND_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../Modules/Find*.cmake" )
 
+macro(do_find MODULE_NAME)
+    message(STATUS "   Checking Find${MODULE_NAME}")
+    find_package(${MODULE_NAME})
+endmacro(do_find)
+
 foreach(FIND_MODULE ${FIND_MODULES})
     string(REGEX REPLACE ".*/Find(.*)\\.cmake$" "\\1" MODULE_NAME "${FIND_MODULE}")
 
@@ -21,8 +26,14 @@ foreach(FIND_MODULE ${FIND_MODULES})
     if (NOT MODULE_NAME STREQUAL "Qt" AND
         NOT MODULE_NAME STREQUAL "Qt3" AND
         NOT MODULE_NAME STREQUAL "KDE3")
-        message(STATUS "   Checking Find${MODULE_NAME}")
-        find_package(${MODULE_NAME})
+        do_find(${MODULE_NAME})
     endif ()
 
 endforeach(FIND_MODULE)
+
+# Qt4 is not present, so we can check Qt3
+if(NOT QT4_FOUND)
+    foreach(FIND_MODULE "Qt3" "Qt" "KDE3")
+        do_find(${FIND_MODULE})
+    endforeach(FIND_MODULE)
+endif(NOT QT4_FOUND)
