@@ -22,12 +22,17 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+include("${CMAKE_CURRENT_LIST_DIR}/HandleImportedTargetsInCMakeRequiredLibraries.cmake")
+
+
 macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
   if(NOT DEFINED ${VARIABLE})
     message(STATUS "Looking for Fortran ${FUNCTION}")
     if(CMAKE_REQUIRED_LIBRARIES)
+      # this one translates potentially used imported library targets to their files on disk
+      handle_imported_targets_in_cmake_required_libraries(_ADJUSTED_CMAKE_REQUIRED_LIBRARES)
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
-        "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+        "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
     else(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     endif(CMAKE_REQUIRED_LIBRARIES)

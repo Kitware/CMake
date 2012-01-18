@@ -34,7 +34,10 @@
 #  License text for the above reference.)
 #
 
+include("${CMAKE_CURRENT_LIST_DIR}/HandleImportedTargetsInCMakeRequiredLibraries.cmake")
+
 get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
 
 function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 
@@ -43,8 +46,10 @@ function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
 
     set(CHECK_PROTOTYPE_DEFINITION_FLAGS ${CMAKE_REQUIRED_FLAGS})
     if (CMAKE_REQUIRED_LIBRARIES)
+      # this one translates potentially used imported library targets to their files on disk
+      handle_imported_targets_in_cmake_required_libraries(_ADJUSTED_CMAKE_REQUIRED_LIBRARES)
       set(CHECK_PROTOTYPE_DEFINITION_LIBS
-        "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+        "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
     else(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_PROTOTYPE_DEFINITION_LIBS)
     endif(CMAKE_REQUIRED_LIBRARIES)
