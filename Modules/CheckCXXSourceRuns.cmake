@@ -26,7 +26,7 @@
 
 MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
   IF("${VAR}" MATCHES "^${VAR}$")
-    SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
+    SET(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     IF(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES
@@ -62,9 +62,9 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
     IF("${${VAR}_EXITCODE}" EQUAL 0)
       SET(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
       MESSAGE(STATUS "Performing Test ${VAR} - Success")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C++ SOURCE FILE Test ${VAR} succeded with the following output:\n"
-        "${OUTPUT}\n" 
+        "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
         "Source file was:\n${SOURCE}\n")
     ELSE("${${VAR}_EXITCODE}" EQUAL 0)
@@ -75,9 +75,9 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       ENDIF(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
 
       MESSAGE(STATUS "Performing Test ${VAR} - Failed")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C++ SOURCE FILE Test ${VAR} failed with the following output:\n"
-        "${OUTPUT}\n"  
+        "${OUTPUT}\n"
         "Return value: ${${VAR}_EXITCODE}\n"
         "Source file was:\n${SOURCE}\n")
     ENDIF("${${VAR}_EXITCODE}" EQUAL 0)

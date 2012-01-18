@@ -29,7 +29,7 @@
 
 MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
-    SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
+    SET(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-DCHECK_FUNCTION_EXISTS=${FUNCTION} ${CMAKE_REQUIRED_FLAGS}")
     MESSAGE(STATUS "Looking for ${FUNCTION}")
     IF(CMAKE_REQUIRED_LIBRARIES)
@@ -55,13 +55,13 @@ MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     IF(${VARIABLE})
       SET(${VARIABLE} 1 CACHE INTERNAL "Have function ${FUNCTION}")
       MESSAGE(STATUS "Looking for ${FUNCTION} - found")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the function ${FUNCTION} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${FUNCTION} - not found")
       SET(${VARIABLE} "" CACHE INTERNAL "Have function ${FUNCTION}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the function ${FUNCTION} exists failed with the following output:\n"
         "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})
