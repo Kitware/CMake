@@ -33,9 +33,9 @@
 # messages include information about the required version and the version
 # which has been actually found, both if the version is ok or not.
 # Use the option CONFIG_MODE if your FindXXX.cmake module is a wrapper for
-# a find_package(... NO_MODULE) call, in this case all the information
-# provided by the config-mode of find_package() will be evaluated
-# automatically.
+# a find_package(... NO_MODULE) call.  In this case VERSION_VAR will be set
+# to <NAME>_VERSION and the macro will automatically check whether the
+# Config module was found.
 # Via FAIL_MESSAGE a custom failure message can be specified, if this is not
 # used, the default message will be displayed.
 #
