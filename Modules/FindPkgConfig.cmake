@@ -85,14 +85,12 @@
 
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
-set(PKG_CONFIG_FOUND   0)
 
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
-if(PKG_CONFIG_EXECUTABLE)
-  set(PKG_CONFIG_FOUND 1)
-endif(PKG_CONFIG_EXECUTABLE)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+find_package_handle_standard_args(PkgConfig DEFAULT_MSG PKG_CONFIG_EXECUTABLE)
 
 
 # Unsets the given variables
