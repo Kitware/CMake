@@ -910,6 +910,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
   if (newArgs.size() != 1)
     {
     errorString = "Unknown arguments specified";
+    status = cmake::FATAL_ERROR;
     return false;
     }
 
