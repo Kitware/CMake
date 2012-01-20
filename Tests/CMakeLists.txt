@@ -227,12 +227,16 @@ IF(BUILD_TESTING)
 
   LIST(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
 
+  IF(NOT QT4_FOUND)
+    FIND_PACKAGE(Qt4)
+  ENDIF(NOT QT4_FOUND)
 
   # run test for BundleUtilities on supported platforms/compilers
   if(MSVC OR
      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
      CMAKE_SYSTEM_NAME MATCHES "Darwin")
   if(NOT "${CMAKE_TEST_GENERATOR}" STREQUAL "Watcom WMake")
+
     ADD_TEST(BundleUtilities ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/BundleUtilities"
@@ -242,6 +246,23 @@ IF(BUILD_TESTING)
       --build-project BundleUtilities
       )
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleUtilities")
+
+    # run test for DeployQt4 on supported platforms/compilers (which depends on BundleUtilities)
+    # this test also depends on the existence of the standard qtiff plugin
+    if(QT4_FOUND)
+      ADD_TEST(Qt4Deploy ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Qt4Deploy"
+        "${CMake_BINARY_DIR}/Tests/Qt4Deploy"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-project Qt4Deploy
+        --build-options
+        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        )
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Deploy")
+    endif()
+
   endif()
   endif()
 
