@@ -84,7 +84,7 @@ add_custom_target(testbundleutils2_test  ALL
 add_dependencies(testbundleutils2_test testbundleutils2)
 
 
-if(APPLE AND CMAKE_SYSTEM_VERSION VERSION_GREATER 8.0)
+if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
 ######  Test a Bundle application using dependencies
 ######  and @rpaths on Mac OS X 10.5 or greater
 
