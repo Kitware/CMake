@@ -106,7 +106,7 @@ if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
   # a loadable module (depends on shared2)
   # testbundleutils1 will load this at runtime
   add_library(module3 MODULE module.cpp module.h)
-  set_target_properties(module3 PROPERTIES PREFIX "" LINK_FLAGS "-Wl,-rpath,${CMAKE_CURRENT_BINARY_DIR}/testdir3")
+  set_target_properties(module3 PROPERTIES PREFIX "" LINK_FLAGS "-Wl,-rpath,@loader_path/")
   get_target_property(module_loc module3 LOCATION)
   target_link_libraries(module3 shared2-3)
 
@@ -116,7 +116,7 @@ if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
   get_target_property(loc testbundleutils3 LOCATION)
 
   set_target_properties(testbundleutils3 module3 PROPERTIES
-                        LINK_FLAGS "-Wl,-rpath,${CMAKE_CURRENT_BINARY_DIR}/testdir3")
+                        LINK_FLAGS "-Wl,-rpath,@loader_path/")
 
   # add custom target to install and test the app
   add_custom_target(testbundleutils3_test  ALL
