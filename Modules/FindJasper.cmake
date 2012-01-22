@@ -3,11 +3,13 @@
 #
 #  JASPER_FOUND - system has Jasper
 #  JASPER_INCLUDE_DIR - the Jasper include directory
-#  JASPER_LIBRARIES - The libraries needed to use Jasper
+#  JASPER_LIBRARIES - the libraries needed to use Jasper
+#  JASPER_VERSION_STRING - the version of Jasper found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -34,10 +36,18 @@ IF (NOT JASPER_LIBRARIES)
     ENDIF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
 ENDIF (NOT JASPER_LIBRARIES)
 
+IF (JASPER_INCLUDE_DIR AND EXISTS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h")
+    FILE(STRINGS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h" jasper_version_str REGEX "^#define[\t ]+JAS_VERSION[\t ]+\".*\".*")
+
+    STRING(REGEX REPLACE "^#define[\t ]+JAS_VERSION[\t ]+\"([^\"]+)\".*" "\\1" JASPER_VERSION_STRING "${jasper_version_str}")
+ENDIF (JASPER_INCLUDE_DIR AND EXISTS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h")
+
 # handle the QUIETLY and REQUIRED arguments and set JASPER_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Jasper DEFAULT_MSG JASPER_LIBRARIES JASPER_INCLUDE_DIR JPEG_LIBRARIES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Jasper
+                                  REQUIRED_VARS JASPER_LIBRARIES JASPER_INCLUDE_DIR JPEG_LIBRARIES
+                                  VERSION_VAR JASPER_VERSION_STRING)
 
 IF (JASPER_FOUND)
    SET(JASPER_LIBRARIES ${JASPER_LIBRARIES} ${JPEG_LIBRARIES} )
