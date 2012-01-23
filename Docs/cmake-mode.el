@@ -99,6 +99,7 @@ set the path with these commands:
     (setq region (buffer-substring-no-properties (point) point-start))
     (while (and (not (bobp))
                 (or (looking-at cmake-regex-blank)
+                    (cmake-line-starts-inside-string)
                     (not (and (string-match cmake-regex-indented region)
                               (= (length region) (match-end 0))))))
       (forward-line -1)
