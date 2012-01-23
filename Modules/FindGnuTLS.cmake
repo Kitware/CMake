@@ -35,8 +35,8 @@ IF (NOT WIN32)
    # try using pkg-config to get the directories and then use these values
    # in the FIND_PATH() and FIND_LIBRARY() calls
    # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
-   FIND_PACKAGE(PkgConfig)
-   PKG_CHECK_MODULES(PC_GNUTLS gnutls)
+   FIND_PACKAGE(PkgConfig QUIET)
+   PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
    SET(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
 ENDIF (NOT WIN32)
 

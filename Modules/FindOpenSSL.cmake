@@ -25,10 +25,8 @@
 #  License text for the above reference.)
 
 if (UNIX)
-  find_package(PkgConfig)
-  if (PKG_CONFIG_FOUND)
-    pkg_check_modules(_OPENSSL openssl)
-  endif (PKG_CONFIG_FOUND)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(_OPENSSL QUIET openssl)
 endif (UNIX)
 
 # http://www.slproweb.com/products/Win32OpenSSL.html
