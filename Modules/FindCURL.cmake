@@ -1,12 +1,14 @@
 # - Find curl
 # Find the native CURL headers and libraries.
 #
-#  CURL_INCLUDE_DIRS - where to find curl/curl.h, etc.
-#  CURL_LIBRARIES    - List of libraries when using curl.
-#  CURL_FOUND        - True if curl found.
+#  CURL_INCLUDE_DIRS   - where to find curl/curl.h, etc.
+#  CURL_LIBRARIES      - List of libraries when using curl.
+#  CURL_FOUND          - True if curl found.
+#  CURL_VERSION_STRING - the version of curl found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -32,10 +34,19 @@ FIND_LIBRARY(CURL_LIBRARY NAMES
 )
 MARK_AS_ADVANCED(CURL_LIBRARY)
 
+IF(CURL_INCLUDE_DIR AND EXISTS "${CURL_INCLUDE_DIR}/curl/curlver.h")
+  FILE(STRINGS "${CURL_INCLUDE_DIR}/curl/curlver.h" curl_version_str REGEX "^#define[\t ]+LIBCURL_VERSION[\t ]+\".*\"")
+
+  STRING(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION_STRING "${curl_version_str}")
+  UNSET(curl_version_str)
+ENDIF()
+
 # handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL DEFAULT_MSG CURL_LIBRARY CURL_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL
+                                  REQUIRED_VARS CURL_LIBRARY CURL_INCLUDE_DIR
+                                  VERSION_VAR CURL_VERSION_STRING)
 
 IF(CURL_FOUND)
   SET(CURL_LIBRARIES ${CURL_LIBRARY})
