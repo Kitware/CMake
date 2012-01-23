@@ -24,6 +24,8 @@
 #  ImageMagick_EXECUTABLE_DIR         - Full path to executables directory.
 #  ImageMagick_<component>_FOUND      - TRUE if <component> is found.
 #  ImageMagick_<component>_EXECUTABLE - Full path to <component> executable.
+#  ImageMagick_VERSION_STRING         - the version of ImageMagick found
+#                                       (since CMake 2.8.8)
 #
 # There are also components for the following ImageMagick APIs:
 #
@@ -53,6 +55,7 @@
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
 # Copyright 2007-2008 Miguel A. Figueroa-Villanueva <miguelf at ieee dot org>
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -134,7 +137,8 @@ FIND_PATH(ImageMagick_EXECUTABLE_DIR
 # Find each component. Search for all tools in same dir
 # <ImageMagick_EXECUTABLE_DIR>; otherwise they should be found
 # independently and not in a cohesive module such as this one.
-SET(ImageMagick_FOUND TRUE)
+UNSET(ImageMagick_REQUIRED_VARS)
+UNSET(ImageMagick_DEFAULT_EXECUTABLES)
 FOREACH(component ${ImageMagick_FIND_COMPONENTS}
     # DEPRECATED: forced components for backward compatibility
     convert mogrify import montage composite
@@ -143,37 +147,65 @@ FOREACH(component ${ImageMagick_FIND_COMPONENTS}
     FIND_IMAGEMAGICK_API(Magick++ Magick++.h
       Magick++ CORE_RL_Magick++_
       )
+    LIST(APPEND ImageMagick_REQUIRED_VARS ImageMagick_Magick++_LIBRARY)
   ELSEIF(component STREQUAL "MagickWand")
     FIND_IMAGEMAGICK_API(MagickWand wand/MagickWand.h
       Wand MagickWand CORE_RL_wand_
       )
+    LIST(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickWand_LIBRARY)
   ELSEIF(component STREQUAL "MagickCore")
     FIND_IMAGEMAGICK_API(MagickCore magick/MagickCore.h
       Magick MagickCore CORE_RL_magick_
       )
+    LIST(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickCore_LIBRARY)
   ELSE(component STREQUAL "Magick++")
     IF(ImageMagick_EXECUTABLE_DIR)
       FIND_IMAGEMAGICK_EXE(${component})
     ENDIF(ImageMagick_EXECUTABLE_DIR)
+
+    IF(ImageMagick_FIND_COMPONENTS)
+      LIST(FIND ImageMagick_FIND_COMPONENTS ${component} is_requested)
+      IF(is_requested GREATER -1)
+        LIST(APPEND ImageMagick_REQUIRED_VARS ImageMagick_${component}_EXECUTABLE)
+      ENDIF(is_requested GREATER -1)
+    ELSEIF(ImageMagick_${component}_EXECUTABLE)
+      # if no components were requested explicitely put all (default) executables
+      # in the list
+      LIST(APPEND ImageMagick_DEFAULT_EXECUTABLES "${ImageMagick_${component}_EXECUTABLE}")
+    ENDIF(ImageMagick_FIND_COMPONENTS)
   ENDIF(component STREQUAL "Magick++")
-  
-  IF(NOT ImageMagick_${component}_FOUND)
-    LIST(FIND ImageMagick_FIND_COMPONENTS ${component} is_requested)
-    IF(is_requested GREATER -1)
-      SET(ImageMagick_FOUND FALSE)
-    ENDIF(is_requested GREATER -1)
-  ENDIF(NOT ImageMagick_${component}_FOUND)
 ENDFOREACH(component)
+
+IF(NOT ImageMagick_FIND_COMPONENTS AND NOT ImageMagick_DEFAULT_EXECUTABLES)
+  # No components were requested, and none of the default components were
+  # found. Just insert mogrify into the list of the default components to
+  # find so FPHSA below has something to check
+  LIST(APPEND ImageMagick_REQUIRED_VARS ImageMagick_mogrify_EXECUTABLE)
+ELSEIF(ImageMagick_DEFAULT_EXECUTABLES)
+  LIST(APPEND ImageMagick_REQUIRED_VARS ${ImageMagick_DEFAULT_EXECUTABLES})
+ENDIF()
 
 SET(ImageMagick_INCLUDE_DIRS ${ImageMagick_INCLUDE_DIRS})
 SET(ImageMagick_LIBRARIES ${ImageMagick_LIBRARIES})
+
+IF(ImageMagick_mogrify_EXECUTABLE)
+  EXECUTE_PROCESS(COMMAND ${ImageMagick_mogrify_EXECUTABLE} -version
+                  OUTPUT_VARIABLE imagemagick_version
+                  ERROR_QUIET
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  IF(imagemagick_version MATCHES "^Version: ImageMagick [0-9]")
+    STRING(REGEX REPLACE "^Version: ImageMagick ([-0-9\\.]+).*" "\\1" ImageMagick_VERSION_STRING "${imagemagick_version}")
+  ENDIF()
+  UNSET(imagemagick_version)
+ENDIF(ImageMagick_mogrify_EXECUTABLE)
 
 #---------------------------------------------------------------------
 # Standard Package Output
 #---------------------------------------------------------------------
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(
-  ImageMagick DEFAULT_MSG ImageMagick_FOUND
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ImageMagick
+                                  REQUIRED_VARS ${ImageMagick_REQUIRED_VARS}
+                                  VERSION_VAR ImageMagick_VERSION_STRING
   )
 # Maintain consistency with all other variables.
 SET(ImageMagick_FOUND ${IMAGEMAGICK_FOUND})
