@@ -25,7 +25,7 @@
 
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
-FIND_PACKAGE(PkgConfig)
+FIND_PACKAGE(PkgConfig QUIET)
 PKG_CHECK_MODULES(PC_LIBXSLT QUIET libxslt)
 SET(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
 

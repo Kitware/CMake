@@ -23,8 +23,8 @@
 
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
-FIND_PACKAGE(PkgConfig)
-PKG_CHECK_MODULES(PC_LIBXML libxml-2.0 QUIET)
+FIND_PACKAGE(PkgConfig QUIET)
+PKG_CHECK_MODULES(PC_LIBXML QUIET libxml-2.0)
 SET(LIBXML2_DEFINITIONS ${PC_LIBXML_CFLAGS_OTHER})
 
 FIND_PATH(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
