@@ -724,7 +724,6 @@ void cmDocumentation::addCMakeStandardDocSections()
 //----------------------------------------------------------------------------
 void cmDocumentation::addCTestStandardDocSections()
 {
-    cmDocumentationSection *sec;
     // This is currently done for backward compatibility reason
     // We may suppress some of these.
     addCMakeStandardDocSections();
@@ -749,12 +748,16 @@ void cmDocumentation::addCPackStandardDocSections()
 static void trim(std::string& s)
 {
   std::string::size_type pos = s.find_last_not_of(' ');
-  if(pos != std::string::npos) {
+  if(pos != std::string::npos)
+    {
     s.erase(pos + 1);
     pos = s.find_first_not_of(' ');
     if(pos != std::string::npos) s.erase(0, pos);
-  }
-  else s.erase(s.begin(), s.end());
+    }
+  else
+    {
+    s.erase(s.begin(), s.end());
+    }
 }
 
 int cmDocumentation::GetStructuredDocFromFile(
@@ -792,7 +795,8 @@ int cmDocumentation::GetStructuredDocFromFile(
       if(line.size() && line[0] == '#')
         {
         /* handle structured doc context */
-        if (line[1]=='#') {
+        if (line[1]=='#')
+        {
             std::string mkword = line.substr(2,std::string::npos);
             if (mkword=="macro")
             {
@@ -904,7 +908,10 @@ int cmDocumentation::GetStructuredDocFromFile(
               inBrief = false;
               full    = "";
             } else {
-              full += "\n";
+              if (full.length()>0)
+                {
+                full += "\n";
+                }
               // the first paragraph of full has ended
               inFullFirstParagraph = false;
             }
@@ -949,18 +956,18 @@ int cmDocumentation::GetStructuredDocFromFile(
               *text += "\n";
               newParagraph = true;
               }
-              // Skip #, and leave space for pre-formatted
-              if (inFullFirstParagraph)
-                {
-                std::string temp = line.c_str()+1;
-                trim(temp);
-                *text += " " + temp;
-                }
-              else
-                {
-                *text += line.c_str()+1;
-                *text += "\n";
-                }
+            // Skip #, and leave space for pre-formatted
+            if (inFullFirstParagraph)
+              {
+              std::string temp = line.c_str()+1;
+              trim(temp);
+              *text += " " + temp;
+              }
+            else
+              {
+              *text += line.c_str()+1;
+              *text += "\n";
+              }
             }
           else if(line[1] == ' ')
             {
