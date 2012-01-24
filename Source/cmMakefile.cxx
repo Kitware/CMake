@@ -116,7 +116,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Targets = mf.Targets;
   this->SourceFiles = mf.SourceFiles;
   this->Tests = mf.Tests;
-  this->IncludeDirectories = mf.IncludeDirectories;
   this->LinkDirectories = mf.LinkDirectories;
   this->SystemIncludeDirectories = mf.SystemIncludeDirectories;
   this->ListFiles = mf.ListFiles;
@@ -278,8 +277,6 @@ void cmMakefile::Print()
     this->cmHomeDirectory.c_str() << std::endl;
   std::cout << " this->ProjectName; "
             <<  this->ProjectName.c_str() << std::endl;
-  this->PrintStringVector("this->IncludeDirectories;",
-                          this->IncludeDirectories);
   this->PrintStringVector("this->LinkDirectories", this->LinkDirectories);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   for( std::vector<cmSourceGroup>::const_iterator i =
@@ -1478,7 +1475,8 @@ void cmMakefile::InitializeFromParent()
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
   // copy include paths
-  this->IncludeDirectories = parent->IncludeDirectories;
+  this->SetProperty("INCLUDE_DIRECTORIES",
+                    parent->GetProperty("INCLUDE_DIRECTORIES"));
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
   // define flags
@@ -1603,43 +1601,77 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
     }
 }
 
+//----------------------------------------------------------------------------
+void AddStringToProperty(cmProperty *prop, const char* name, const char* s,
+                         bool before)
+{
+  if (!prop)
+    {
+    return;
+    }
+
+  // Don't worry about duplicates at this point. We eliminate them when
+  // we convert the property to a vector in GetIncludeDirectories.
+
+  if (before)
+    {
+    const char *val = prop->GetValue();
+    cmOStringStream oss;
+
+    if(val && *val)
+      {
+      oss << s << ";" << val;
+      }
+    else
+      {
+      oss << s;
+      }
+
+    std::string newVal = oss.str();
+    prop->Set(name, newVal.c_str());
+    }
+  else
+    {
+    prop->Append(name, s);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
-  // if there is a newline then break it into multiple arguments
   if (!inc)
     {
     return;
     }
 
-  // Don't add an include directory that is already present.  Yes,
-  // this linear search results in n^2 behavior, but n won't be
-  // getting much bigger than 20.  We cannot use a set because of
-  // order dependency of the include path.
-  std::vector<std::string>::iterator i =
-    std::find(this->IncludeDirectories.begin(),
-              this->IncludeDirectories.end(), inc);
-  if(i == this->IncludeDirectories.end())
+  // Directory property:
+  cmProperty *prop =
+    this->GetProperties().GetOrCreateProperty("INCLUDE_DIRECTORIES");
+  AddStringToProperty(prop, "INCLUDE_DIRECTORIES", inc, before);
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmMakefile::GetIncludeDirectories()
+{
+  std::vector<std::string> includes;
+  const char *val = this->GetProperty("INCLUDE_DIRECTORIES");
+  if(val)
     {
-    if (before)
+    cmSystemTools::ExpandListArgument(val, includes);
+    }
+
+  std::set<std::string> uniqueIncludes;
+  std::vector<std::string> orderedAndUniqueIncludes;
+  for(std::vector<std::string>::const_iterator
+      li = includes.begin(); li != includes.end(); ++li)
+    {
+    if(uniqueIncludes.insert(*li).second)
       {
-      // WARNING: this *is* expensive (linear time) since it's a vector
-      this->IncludeDirectories.insert(this->IncludeDirectories.begin(), inc);
-      }
-    else
-      {
-      this->IncludeDirectories.push_back(inc);
+      orderedAndUniqueIncludes.push_back(*li);
       }
     }
-  else
-    {
-    if(before)
-      {
-      // if this before and already in the path then remove it
-      this->IncludeDirectories.erase(i);
-      // WARNING: this *is* expensive (linear time) since it's a vector
-      this->IncludeDirectories.insert(this->IncludeDirectories.begin(), inc);
-      }
-    }
+
+  return orderedAndUniqueIncludes;
 }
 
 //----------------------------------------------------------------------------
@@ -2093,17 +2125,23 @@ void cmMakefile::AddExtraDirectory(const char* dir)
 }
 
 
-// expance CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
+// expand CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
 // include and library directories.
 
 void cmMakefile::ExpandVariables()
 {
   // Now expand variables in the include and link strings
-  for(std::vector<std::string>::iterator d = this->IncludeDirectories.begin();
-      d != this->IncludeDirectories.end(); ++d)
+
+  // May not be necessary anymore... But may need a policy for strict
+  // backwards compatibility
+  const char *includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
+  if (includeDirs)
     {
-    this->ExpandVariablesInString(*d, true, true);
+    std::string dirs = includeDirs;
+    this->ExpandVariablesInString(dirs, true, true);
+    this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
     }
+
   for(std::vector<std::string>::iterator d = this->LinkDirectories.begin();
       d != this->LinkDirectories.end(); ++d)
     {
@@ -3317,16 +3355,6 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
 
   // handle special props
   std::string propname = prop;
-  if ( propname == "INCLUDE_DIRECTORIES" )
-    {
-    std::vector<std::string> varArgsExpanded;
-    if(value)
-      {
-      cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-      }
-    this->SetIncludeDirectories(varArgsExpanded);
-    return;
-    }
 
   if ( propname == "LINK_DIRECTORIES" )
     {
@@ -3368,17 +3396,6 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
 
   // handle special props
   std::string propname = prop;
-  if ( propname == "INCLUDE_DIRECTORIES" )
-    {
-    std::vector<std::string> varArgsExpanded;
-    cmSystemTools::ExpandListArgument(value, varArgsExpanded);
-    for(std::vector<std::string>::const_iterator vi = varArgsExpanded.begin();
-        vi != varArgsExpanded.end(); ++vi)
-      {
-      this->AddIncludeDirectory(vi->c_str());
-      }
-    return;
-    }
 
   if ( propname == "LINK_DIRECTORIES" )
     {
@@ -3472,23 +3489,6 @@ const char *cmMakefile::GetProperty(const char* prop,
   else if (!strcmp("DEFINITIONS",prop))
     {
     output += this->DefineFlagsOrig;
-    return output.c_str();
-    }
-  else if (!strcmp("INCLUDE_DIRECTORIES",prop) )
-    {
-    cmOStringStream str;
-    for (std::vector<std::string>::const_iterator
-         it = this->GetIncludeDirectories().begin();
-         it != this->GetIncludeDirectories().end();
-         ++ it )
-      {
-      if ( it != this->GetIncludeDirectories().begin())
-        {
-        str << ";";
-        }
-      str << it->c_str();
-      }
-    output = str.str();
     return output.c_str();
     }
   else if (!strcmp("LINK_DIRECTORIES",prop))

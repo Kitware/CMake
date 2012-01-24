@@ -524,18 +524,7 @@ public:
   /**
    * Get a list of include directories in the build.
    */
-  std::vector<std::string>& GetIncludeDirectories()
-    {
-      return this->IncludeDirectories;
-    }
-  const std::vector<std::string>& GetIncludeDirectories() const
-    {
-      return this->IncludeDirectories;
-    }
-  void SetIncludeDirectories(const std::vector<std::string>& vec)
-    {
-      this->IncludeDirectories = vec;
-    }
+  std::vector<std::string> GetIncludeDirectories();
 
   /**
    * Mark include directories as system directories.
@@ -880,9 +869,7 @@ protected:
   // Tests
   std::map<cmStdString, cmTest*> Tests;
 
-  // The include and link-library paths.  These may have order
-  // dependency, so they must be vectors (not set).
-  std::vector<std::string> IncludeDirectories;
+  // The link-library paths.  Order matters, use std::vector (not std::set).
   std::vector<std::string> LinkDirectories;
 
   // The set of include directories that are marked as system include

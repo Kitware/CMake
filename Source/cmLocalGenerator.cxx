@@ -1399,7 +1399,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
 
   // Get the project-specified include directories.
-  std::vector<std::string>& includes =
+  const std::vector<std::string>& includes =
     this->Makefile->GetIncludeDirectories();
 
   // Support putting all the in-project include directories first if
@@ -1408,7 +1408,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     {
     const char* topSourceDir = this->Makefile->GetHomeDirectory();
     const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
-    for(std::vector<std::string>::iterator i = includes.begin();
+    for(std::vector<std::string>::const_iterator i = includes.begin();
         i != includes.end(); ++i)
       {
       // Emit this directory only if it is a subdirectory of the
@@ -1427,7 +1427,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
 
   // Construct the final ordered include directory list.
-  for(std::vector<std::string>::iterator i = includes.begin();
+  for(std::vector<std::string>::const_iterator i = includes.begin();
       i != includes.end(); ++i)
     {
     if(emitted.insert(*i).second)
