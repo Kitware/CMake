@@ -33,10 +33,19 @@ find_library(ALSA_LIBRARY NAMES asound
           DOC "The ALSA (asound) library"
 )
 
+if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/version.h")
+  file(STRINGS "${ALSA_INCLUDE_DIR}/version.h" alsa_version_str REGEX "^#define[\t ]+SND_LIB_VERSION_STR[\t ]+\".*\"")
+
+  string(REGEX REPLACE "^.*SND_LIB_VERSION_STR[\t ]+\"([^\"]*)\".*$" "\\1" ALSA_VERSION_STRING "${alsa_version_str}")
+  unset(alsa_version_str)
+endif()
+
 # handle the QUIETLY and REQUIRED arguments and set ALSA_FOUND to TRUE if 
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALSA DEFAULT_MSG ALSA_LIBRARY ALSA_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ALSA
+                                  REQUIRED_VARS ALSA_LIBRARY ALSA_INCLUDE_DIR
+                                  VERSION_VAR ALSA_VERSION_STRING)
 
 if(ALSA_FOUND)
   set( ALSA_LIBRARIES ${ALSA_LIBRARY} )
