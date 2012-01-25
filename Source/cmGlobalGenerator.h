@@ -230,7 +230,7 @@ public:
   std::set<cmStdString> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
 
-  void AddTarget(cmTargets::value_type &v);
+  void AddTarget(cmTarget* t);
 
   virtual const char* GetAllTargetName()         const { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()       const { return "INSTALL"; }
@@ -333,6 +333,7 @@ protected:
 
   // All targets in the entire project.
   std::map<cmStdString,cmTarget *> TotalTargets;
+  std::map<cmStdString,cmTarget *> ImportedTargets;
 
   virtual const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();
