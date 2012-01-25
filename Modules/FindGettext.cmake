@@ -4,6 +4,7 @@
 #  GETTEXT_MSGMERGE_EXECUTABLE: the full path to the msgmerge tool.
 #  GETTEXT_MSGFMT_EXECUTABLE: the full path to the msgfmt tool.
 #  GETTEXT_FOUND: True if gettext has been found.
+#  GETTEXT_VERSION_STRING: the version of gettext found (since CMake 2.8.8)
 #
 # Additionally it provides the following macros:
 # GETTEXT_CREATE_TRANSLATIONS ( outputFile [ALL] file1 ... fileN )
@@ -42,8 +43,21 @@ FIND_PROGRAM(GETTEXT_MSGMERGE_EXECUTABLE msgmerge)
 
 FIND_PROGRAM(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
 
+IF(GETTEXT_MSGMERGE_EXECUTABLE)
+   EXECUTE_PROCESS(COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --version
+                  OUTPUT_VARIABLE gettext_version
+                  ERROR_QUIET
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+   IF (gettext_version MATCHES "^msgmerge \\(.*\\) [0-9]")
+      STRING(REGEX REPLACE "^msgmerge \\([^\\)]*\\) ([0-9\\.]+[^ \n]*).*" "\\1" GETTEXT_VERSION_STRING "${gettext_version}")
+   ENDIF()
+   UNSET(gettext_version)
+ENDIF(GETTEXT_MSGMERGE_EXECUTABLE)
+
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext  REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
+                                  REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
+                                  VERSION_VAR GETTEXT_VERSION_STRING)
 
 INCLUDE(CMakeParseArguments)
 
