@@ -5,14 +5,14 @@ set(INSTALL_PREFIX /)
 set(HOST dashmacmini2)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j2")
-set(CPACK_BINARY_GENERATORS "PackageMaker TGZ TZ") 
+set(CPACK_BINARY_GENERATORS "PackageMaker TGZ TZ")
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_OSX_ARCHITECTURES:STRING=ppc;i386
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CPACK_SYSTEM_NAME:STRING=Darwin-universal
 BUILD_QtDialog:BOOL=TRUE
-QT_QMAKE_EXECUTABLE:FILEPATH=/Users/kitware/Software/QtBinUniversal/bin/qmake
+QT_QMAKE_EXECUTABLE:FILEPATH=/Users/kitware/Dashboards/Support/qt-4.6.3/bin/bin/qmake
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)
