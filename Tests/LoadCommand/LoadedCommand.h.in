@@ -5,9 +5,3 @@
 /* Check for functions */
 #cmakedefine HAVE_PRINTF
 #cmakedefine HAVE_VSBLABLA
-
-/* Check for headers */
-#cmakedefine HAVE_SYS_PRCTL_H
-
-/* Check for libraries */
-#cmakedefine HAVE_LIBM
