@@ -29,6 +29,7 @@ bool cmAddExecutableCommand
   bool use_macbundle = false;
   bool excludeFromAll = false;
   bool importTarget = false;
+  bool importGlobal = false;
   while ( s != args.end() )
     {
     if (*s == "WIN32")
@@ -51,6 +52,11 @@ bool cmAddExecutableCommand
      ++s;
      importTarget = true;
      }
+    else if(importTarget && *s == "GLOBAL")
+      {
+      ++s;
+      importGlobal = true;
+      }
     else
       {
       break;
@@ -92,7 +98,8 @@ bool cmAddExecutableCommand
       }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(exename.c_str(), cmTarget::EXECUTABLE);
+    this->Makefile->AddImportedTarget(exename.c_str(), cmTarget::EXECUTABLE,
+                                      importGlobal);
     return true;
     }
 
