@@ -7,7 +7,7 @@
 #  OPENSSL_FOUND - system has the OpenSSL library
 #  OPENSSL_INCLUDE_DIR - the OpenSSL include directory
 #  OPENSSL_LIBRARIES - The libraries needed to use OpenSSL
-#  OPENSSL_VERSION - This is set to $major.$minor.$revision (eg. 0.9.8)
+#  OPENSSL_VERSION - This is set to $major.$minor.$revision$path (eg. 0.9.8s)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -216,16 +216,40 @@ ELSE(WIN32 AND NOT CYGWIN)
 ENDIF(WIN32 AND NOT CYGWIN)
 
 if (OPENSSL_INCLUDE_DIR)
-  file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9][0-9][0-9][0-9].*")
+  if (_OPENSSL_VERSION)
+    set(OPENSSL_VERSION "${_OPENSSL_VERSION}")
+  elseif(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
+    file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str
+         REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])+.*")
 
-  string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9]).*$" "\\1" OPENSSL_VERSION_MAJOR "${openssl_version_str}")
-  string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9]([0-9][0-9]).*$" "\\1" OPENSSL_VERSION_MINOR  "${openssl_version_str}")
-  string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x[0-9][0-9][0-9]([0-9][0-9]).*$" "\\1" OPENSSL_VERSION_PATCH "${openssl_version_str}")
+    # The version number is encoded as 0xMNNFFPPS: major minor fix patch status
+    # The status gives if this is a developer or prerelease and is ignored here.
+    # Major, minor, and fix directly translate into the version numbers shown in
+    # the string. The patch field translates to the single character suffix that
+    # indicates the bug fix state, which 00 -> nothing, 01 -> a, 02 -> b and so
+    # on.
 
-  string(REGEX REPLACE "^0" "" OPENSSL_VERSION_MINOR "${OPENSSL_VERSION_MINOR}")
-  string(REGEX REPLACE "^0" "" OPENSSL_VERSION_PATCH "${OPENSSL_VERSION_PATCH}")
+    string(REGEX REPLACE "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F]).*$"
+           "\\1;\\2;\\3;\\4;\\5" OPENSSL_VERSION_LIST "${openssl_version_str}")
+    list(GET OPENSSL_VERSION_LIST 0 OPENSSL_VERSION_MAJOR)
+    list(GET OPENSSL_VERSION_LIST 1 OPENSSL_VERSION_MINOR)
+    list(GET OPENSSL_VERSION_LIST 2 OPENSSL_VERSION_FIX)
+    list(GET OPENSSL_VERSION_LIST 3 OPENSSL_VERSION_PATCH)
 
-  set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_PATCH}")
+    string(REGEX REPLACE "^0(.)" "\\1" OPENSSL_VERSION_MINOR "${OPENSSL_VERSION_MINOR}")
+    string(REGEX REPLACE "^0(.)" "\\1" OPENSSL_VERSION_FIX "${OPENSSL_VERSION_FIX}")
+
+    if (NOT OPENSSL_VERSION_PATCH STREQUAL "00")
+      # 96 is the ASCII code of 'a' minus 1
+      math(EXPR OPENSSL_VERSION_PATCH_ASCII "${OPENSSL_VERSION_PATCH} + 96")
+      # Once anyone knows how OpenSSL would call the patch versions beyond 'z'
+      # this should be updated to handle that, too. This has not happened yet
+      # so it is simply ignored here for now.
+      string(ASCII "${OPENSSL_VERSION_PATCH_ASCII}" OPENSSL_VERSION_PATCH_STRING)
+    endif (NOT OPENSSL_VERSION_PATCH STREQUAL "00")
+
+    set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
+  endif (_OPENSSL_VERSION)
 endif (OPENSSL_INCLUDE_DIR)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
