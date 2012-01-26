@@ -21,12 +21,17 @@ endmacro(do_find)
 # is therefore also blocked
 set(NO_QT4_MODULES "Qt3" "KDE3")
 
+# These modules are named Find*.cmake, but are nothing that works in
+# find_package().
+set(NO_FIND_MODULES "PackageHandleStandardArgs" "PackageMessage")
+
 set(DESIRED_QT_VERSION 4)
 foreach(FIND_MODULE ${FIND_MODULES})
     string(REGEX REPLACE ".*/Find(.*)\\.cmake$" "\\1" MODULE_NAME "${FIND_MODULE}")
 
     list(FIND NO_QT4_MODULES ${MODULE_NAME} NO_QT4_INDEX)
-    if (NO_QT4_INDEX EQUAL -1)
+    list(FIND NO_FIND_MODULES ${MODULE_NAME} NO_FIND_INDEX)
+    if (NO_QT4_INDEX EQUAL -1 AND NO_FIND_INDEX EQUAL -1)
         do_find(${MODULE_NAME})
     endif ()
 
