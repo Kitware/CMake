@@ -19,8 +19,9 @@ endmacro(do_find)
 # Since FindQt will complain if both are found we explicitely
 # filter out this and FindQt3. FindKDE3 also depends on Qt3 and
 # is therefore also blocked
-set(NO_QT4_MODULES "Qt" "Qt3" "KDE3")
+set(NO_QT4_MODULES "Qt3" "KDE3")
 
+set(DESIRED_QT_VERSION 4)
 foreach(FIND_MODULE ${FIND_MODULES})
     string(REGEX REPLACE ".*/Find(.*)\\.cmake$" "\\1" MODULE_NAME "${FIND_MODULE}")
 
@@ -33,7 +34,8 @@ endforeach(FIND_MODULE)
 
 # Qt4 is not present, so we can check Qt3
 if (NOT QT4_FOUND)
-    foreach(FIND_MODULE ${NO_QT4_MODULES})
+    set(DESIRED_QT_VERSION 3)
+    foreach(FIND_MODULE ${NO_QT4_MODULES} "Qt")
         do_find(${FIND_MODULE})
     endforeach(FIND_MODULE)
 endif (NOT QT4_FOUND)
