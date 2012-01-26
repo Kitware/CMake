@@ -1,20 +1,11 @@
 # - Find the PostgreSQL installation.
-# Usage:
-# In your CMakeLists.txt file do something like this:
-# ...
-# # PostgreSQL
-# FIND_PACKAGE(PostgreSQL)
-# ...
-# if( PostgreSQL_FOUND )
-#   include_directories(${PostgreSQL_INCLUDE_DIRS})
-# endif( PostgreSQL_FOUND )
-# ...
-# Remember to include ${PostgreSQL_LIBRARIES} in the target_link_libraries() statement.
-#
-#
 # In Windows, we make the assumption that, if the PostgreSQL files are installed, the default directory
 # will be C:\Program Files\PostgreSQL.
 #
+# This module defines
+#  PostgreSQL_LIBRARIES - the PostgreSQL libraries needed for linking
+#  PostgreSQL_INCLUDE_DIRS - the directories of the PostgreSQL headers
+#  PostgreSQL_VERSION_STRING - the version of PostgreSQL found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
@@ -150,11 +141,20 @@ find_library( PostgreSQL_LIBRARY
 )
 get_filename_component(PostgreSQL_LIBRARY_DIR ${PostgreSQL_LIBRARY} PATH)
 
+if (PostgreSQL_INCLUDE_DIR AND EXISTS "${PostgreSQL_INCLUDE_DIR}/pg_config.h")
+  file(STRINGS "${PostgreSQL_INCLUDE_DIR}/pg_config.h" pgsql_version_str
+       REGEX "^#define[\t ]+PG_VERSION[\t ]+\".*\"")
+
+  string(REGEX REPLACE "^#define[\t ]+PG_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
+         PostgreSQL_VERSION_STRING "${pgsql_version_str}")
+  unset(pgsql_version_str)
+endif()
+
 # Did we find anything?
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(PostgreSQL DEFAULT_MSG
-                                  PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR)
-
+find_package_handle_standard_args(PostgreSQL
+                                  REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR
+                                  VERSION_VAR PostgreSQL_VERSION_STRING)
 set( PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
 # Now try to get the include and library path.
