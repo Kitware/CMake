@@ -45,15 +45,22 @@ FIND_PROGRAM(LIBXML2_XMLLINT_EXECUTABLE xmllint)
 # for backwards compat. with KDE 4.0.x:
 SET(XMLLINT_EXECUTABLE "${LIBXML2_XMLLINT_EXECUTABLE}")
 
+IF(PC_LIBXML_VERSION)
+    SET(LIBXML2_VERSION_STRING ${PC_LIBXML_VERSION})
+ELSEIF(LIBXML2_INCLUDE_DIR AND EXISTS "${LIBXML2_INCLUDE_DIR}/libxml/xmlversion.h")
+    FILE(STRINGS "${LIBXML2_INCLUDE_DIR}/libxml/xmlversion.h" libxml2_version_str
+         REGEX "^#define[\t ]+LIBXML_DOTTED_VERSION[\t ]+\".*\"")
+
+    STRING(REGEX REPLACE "^#define[\t ]+LIBXML_DOTTED_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
+           LIBXML2_VERSION_STRING "${libxml2_version_str}")
+    UNSET(libxml2_version_str)
+ENDIF()
+
 # handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXml2
                                   REQUIRED_VARS LIBXML2_LIBRARIES LIBXML2_INCLUDE_DIR
-                                  VERSION_VAR PC_LIBXML_VERSION)
-
-IF(LIBXML2_FOUND)
-    SET(LIBXML2_VERSION_STRING ${PC_LIBXML_VERSION})
-ENDIF()
+                                  VERSION_VAR LIBXML2_VERSION_STRING)
 
 MARK_AS_ADVANCED(LIBXML2_INCLUDE_DIR LIBXML2_LIBRARIES LIBXML2_XMLLINT_EXECUTABLE)
