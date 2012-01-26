@@ -25,10 +25,21 @@ FIND_PATH(TIFF_INCLUDE_DIR tiff.h)
 SET(TIFF_NAMES ${TIFF_NAMES} tiff libtiff tiff3 libtiff3)
 FIND_LIBRARY(TIFF_LIBRARY NAMES ${TIFF_NAMES} )
 
+IF(TIFF_INCLUDE_DIR AND EXISTS "${TIFF_INCLUDE_DIR}/tiffvers.h")
+    FILE(STRINGS "${TIFF_INCLUDE_DIR}/tiffvers.h" tiff_version_str
+         REGEX "^#define[\t ]+TIFFLIB_VERSION_STR[\t ]+\"LIBTIFF, Version .*")
+
+    STRING(REGEX REPLACE "^#define[\t ]+TIFFLIB_VERSION_STR[\t ]+\"LIBTIFF, Version +([^ \\n]*).*"
+           "\\1" TIFF_VERSION_STRING "${tiff_version_str}")
+    UNSET(tiff_version_str)
+ENDIF()
+
 # handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF  DEFAULT_MSG  TIFF_LIBRARY  TIFF_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF
+                                  REQUIRED_VARS TIFF_LIBRARY TIFF_INCLUDE_DIR
+                                  VERSION_VAR TIFF_VERSION_STRING)
 
 IF(TIFF_FOUND)
   SET( TIFF_LIBRARIES ${TIFF_LIBRARY} )
