@@ -77,6 +77,8 @@ IF(BISON_EXECUTABLE)
         BISON_VERSION "${BISON_version_output}")
     ELSE()
       SET(BISON_VERSION "unknown")
+message(AUTHOR_WARNING "Module Version ##DEBUGGING##")
+message(AUTHOR_WARNING "version output was: '${BISON_version_output}'")
     ENDIF()
   ENDIF()
 
