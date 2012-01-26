@@ -246,6 +246,13 @@ if (OPENSSL_INCLUDE_DIR)
       string(ASCII "${OPENSSL_VERSION_PATCH_ASCII}" OPENSSL_VERSION_PATCH_STRING)
     endif (NOT OPENSSL_VERSION_PATCH STREQUAL "00")
 
+# debug why there is strange output on one test machine
+if (OPENSSL_VERSION_PATCH_STRING AND NOT OPENSSL_VERSION_PATCH_STRING MATCHES "[a-z]")
+message(AUTHOR_WARNING "Module Version ##DEBUGGING##")
+message(AUTHOR_WARNING "string from header was: '${openssl_version_str}'")
+message(AUTHOR_WARNING "parsed patch version number was: '${OPENSSL_VERSION_PATCH}' ascii num '${OPENSSL_VERSION_PATCH_ASCII}'")
+endif()
+
     set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
   endif (_OPENSSL_VERSION)
 endif (OPENSSL_INCLUDE_DIR)
