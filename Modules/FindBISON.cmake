@@ -76,7 +76,7 @@ IF(BISON_EXECUTABLE)
       STRING(REGEX REPLACE "^bison \\(GNU Bison\\) ([^\n]+)\n.*" "\\1"
         BISON_VERSION "${BISON_version_output}")
     ELSEIF("${BISON_version_output}" MATCHES "^GNU Bison ")
-      STRING(REGEX REPLACE "^GNU Bison (version )?([^\n]+)\n.*" "\\2"
+      STRING(REGEX REPLACE "^GNU Bison (version )?([^\n]+).*" "\\2"
         BISON_VERSION "${BISON_version_output}")
     ENDIF()
   ENDIF()
