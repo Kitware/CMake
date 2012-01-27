@@ -25,7 +25,7 @@
 # function is invoked.
 
 #=============================================================================
-# Copyright 2011 Kitware, Inc.
+# Copyright 2011-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -151,7 +151,7 @@ function(cmake_add_fortran_subdirectory subdir)
     )
   # create imported targets for all libraries
   foreach(lib ${libraries})
-    add_library(${lib} SHARED IMPORTED)
+    add_library(${lib} SHARED IMPORTED GLOBAL)
     set_property(TARGET ${lib} APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
     set_target_properties(${lib} PROPERTIES
       IMPORTED_IMPLIB_NOCONFIG   "${library_dir}/lib${lib}.lib"
