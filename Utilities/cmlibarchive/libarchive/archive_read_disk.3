@@ -22,10 +22,10 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" $FreeBSD$
+.\" $FreeBSD: head/lib/libarchive/archive_read_disk.3 190957 2009-04-12 05:04:02Z kientzle $
 .\"
 .Dd March 10, 2009
-.Dt archive_read_disk 3
+.Dt ARCHIVE_READ_DISK 3
 .Os
 .Sh NAME
 .Nm archive_read_disk_new ,
@@ -39,7 +39,8 @@
 .Nm archive_read_disk_set_gname_lookup ,
 .Nm archive_read_disk_set_standard_lookup ,
 .Nm archive_read_close ,
-.Nm archive_read_finish
+.Nm archive_read_finish ,
+.Nm archive_read_free
 .Nd functions for reading objects from disk
 .Sh SYNOPSIS
 .In archive.h
@@ -82,6 +83,8 @@
 .Fn archive_read_close "struct archive *"
 .Ft int
 .Fn archive_read_finish "struct archive *"
+.Ft int
+.Fn archive_read_free "struct archive *"
 .Sh DESCRIPTION
 These functions provide an API for reading information about
 objects on disk.
@@ -133,16 +136,16 @@ object is destroyed or when new lookup functions are registered.
 This convenience function installs a standard set of user
 and group name lookup functions.
 These functions use
-.Xr getpwid 3
+.Xr getpwuid 3
 and
-.Xr getgrid 3
+.Xr getgrgid 3
 to convert ids to names, defaulting to NULL if the names cannot
 be looked up.
 These functions also implement a simple memory cache to reduce
 the number of calls to
-.Xr getpwid 3
+.Xr getpwuid 3
 and
-.Xr getgrid 3 .
+.Xr getgrgid 3 .
 .It Fn archive_read_disk_entry_from_file
 Populates a
 .Tn struct archive_entry
@@ -177,10 +180,15 @@ This affects the file ownership fields and ACL values in the
 .Tn struct archive_entry
 object.
 .It Fn archive_read_close
-This currently does nothing.
-.It Fn archive_write_finish
+Does nothing for
+.Tn archive_read_disk
+handles.
+.It Fn archive_read_finish
+This is a deprecated synonym for
+.Fn archive_read_free .
+.It Fn archive_read_free
 Invokes
-.Fn archive_write_close
+.Fn archive_read_close
 if it was not invoked manually, then releases all resources.
 .El
 More information about the
@@ -207,13 +215,13 @@ file_to_archive(struct archive *a, const char *name)
   fd = open(name, O_RDONLY);
   if (fd < 0)
      return;
-  archive_entry_copy_sourcepath(entry, name);
+  archive_entry_copy_pathname(entry, name);
   archive_read_disk_entry_from_file(ard, entry, fd, NULL);
   archive_write_header(a, entry);
   while ((bytes_read = read(fd, buff, sizeof(buff))) > 0)
     archive_write_data(a, buff, bytes_read);
   archive_write_finish_entry(a);
-  archive_read_finish(ard);
+  archive_read_free(ard);
   archive_entry_free(entry);
 }
 .Ed
@@ -229,15 +237,6 @@ for operations that might succeed if retried,
 for unusual conditions that do not prevent further operations, and
 .Cm ARCHIVE_FATAL
 for serious errors that make remaining operations impossible.
-The
-.Xr archive_errno 3
-and
-.Xr archive_error_string 3
-functions can be used to retrieve an appropriate error code and a
-textual error message.
-(See
-.Xr archive_util 3
-for details.)
 .Pp
 .Fn archive_read_disk_new
 returns a pointer to a newly-allocated
@@ -253,9 +252,17 @@ pointers to the textual name or NULL if the lookup failed for any reason.
 The returned pointer points to internal storage that
 may be reused on the next call to either of these functions;
 callers should copy the string if they need to continue accessing it.
-.Pp
+.\"
+.Sh ERRORS
+Detailed error codes and textual descriptions are available from the
+.Fn archive_errno
+and
+.Fn archive_error_string
+functions.
+.\"
 .Sh SEE ALSO
 .Xr archive_read 3 ,
+.Xr archive_util 3 ,
 .Xr archive_write 3 ,
 .Xr archive_write_disk 3 ,
 .Xr tar 1 ,
@@ -276,14 +283,14 @@ and first appeared in
 The
 .Nm libarchive
 library was written by
-.An Tim Kientzle Aq kientzle@freebsd.org .
+.An Tim Kientzle Aq kientzle@FreeBSD.org .
 .Sh BUGS
 The
 .Dq standard
 user name and group name lookup functions are not the defaults because
-.Xr getgrid 3
+.Xr getgrgid 3
 and
-.Xr getpwid 3
+.Xr getpwuid 3
 are sometimes too large for particular applications.
 The current design allows the application author to use a more
 compact implementation when appropriate.

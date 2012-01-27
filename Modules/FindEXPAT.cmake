@@ -24,10 +24,32 @@ FIND_PATH(EXPAT_INCLUDE_DIR NAMES expat.h)
 # Look for the library.
 FIND_LIBRARY(EXPAT_LIBRARY NAMES expat libexpat)
 
+if (EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
+    file(STRINGS "${EXPAT_INCLUDE_DIR}/expat.h" expat_version_str
+         REGEX "^#[\t ]*define[\t ]+XML_(MAJOR|MINOR|MICRO)_VERSION[\t ]+[0-9]+$")
+
+    unset(EXPAT_VERSION_STRING)
+    foreach(VPART MAJOR MINOR MICRO)
+        foreach(VLINE ${expat_version_str})
+            if(VLINE MATCHES "^#[\t ]*define[\t ]+XML_${VPART}_VERSION")
+                string(REGEX REPLACE "^#[\t ]*define[\t ]+XML_${VPART}_VERSION[\t ]+([0-9]+)$" "\\1"
+                       EXPAT_VERSION_PART "${VLINE}")
+                if(EXPAT_VERSION_STRING)
+                    set(EXPAT_VERSION_STRING "${EXPAT_VERSION_STRING}.${EXPAT_VERSION_PART}")
+                else(EXPAT_VERSION_STRING)
+                    set(EXPAT_VERSION_STRING "${EXPAT_VERSION_PART}")
+                endif(EXPAT_VERSION_STRING)
+            endif()
+        endforeach(VLINE)
+    endforeach(VPART)
+endif (EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
+
 # handle the QUIETLY and REQUIRED arguments and set EXPAT_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT DEFAULT_MSG EXPAT_LIBRARY EXPAT_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT
+                                  REQUIRED_VARS EXPAT_LIBRARY EXPAT_INCLUDE_DIR
+                                  VERSION_VAR EXPAT_VERSION_STRING)
 
 # Copy the results to the output variables.
 IF(EXPAT_FOUND)

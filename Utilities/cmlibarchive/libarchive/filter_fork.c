@@ -29,9 +29,9 @@
 #if defined(HAVE_PIPE) && defined(HAVE_FCNTL) && \
     (defined(HAVE_FORK) || defined(HAVE_VFORK))
 
-__FBSDID("$FreeBSD: src/lib/libarchive/filter_fork.c,v 1.5 2008/09/12 05:33:00 kientzle Exp $");
+__FBSDID("$FreeBSD: head/lib/libarchive/filter_fork.c 182958 2008-09-12 05:33:00Z kientzle $");
 
-#if defined(HAVE_POLL)
+#if defined(HAVE_POLL) && (defined(HAVE_POLL_H) || defined(HAVE_SYS_POLL_H))
 #  if defined(HAVE_POLL_H)
 #    include <poll.h>
 #  elif defined(HAVE_SYS_POLL_H)
@@ -56,105 +56,105 @@ __FBSDID("$FreeBSD: src/lib/libarchive/filter_fork.c,v 1.5 2008/09/12 05:33:00 k
 pid_t
 __archive_create_child(const char *path, int *child_stdin, int *child_stdout)
 {
-    pid_t child;
-    int stdin_pipe[2], stdout_pipe[2], tmp;
+	pid_t child;
+	int stdin_pipe[2], stdout_pipe[2], tmp;
 
-    if (pipe(stdin_pipe) == -1)
-        goto state_allocated;
-    if (stdin_pipe[0] == 1 /* stdout */) {
-        if ((tmp = dup(stdin_pipe[0])) == -1)
-            goto stdin_opened;
-        close(stdin_pipe[0]);
-        stdin_pipe[0] = tmp;
-    }
-    if (pipe(stdout_pipe) == -1)
-        goto stdin_opened;
-    if (stdout_pipe[1] == 0 /* stdin */) {
-        if ((tmp = dup(stdout_pipe[1])) == -1)
-            goto stdout_opened;
-        close(stdout_pipe[1]);
-        stdout_pipe[1] = tmp;
-    }
+	if (pipe(stdin_pipe) == -1)
+		goto state_allocated;
+	if (stdin_pipe[0] == 1 /* stdout */) {
+		if ((tmp = dup(stdin_pipe[0])) == -1)
+			goto stdin_opened;
+		close(stdin_pipe[0]);
+		stdin_pipe[0] = tmp;
+	}
+	if (pipe(stdout_pipe) == -1)
+		goto stdin_opened;
+	if (stdout_pipe[1] == 0 /* stdin */) {
+		if ((tmp = dup(stdout_pipe[1])) == -1)
+			goto stdout_opened;
+		close(stdout_pipe[1]);
+		stdout_pipe[1] = tmp;
+	}
 
 #if HAVE_VFORK
-    switch ((child = vfork())) {
+	switch ((child = vfork())) {
 #else
-    switch ((child = fork())) {
+	switch ((child = fork())) {
 #endif
-    case -1:
-        goto stdout_opened;
-    case 0:
-        close(stdin_pipe[1]);
-        close(stdout_pipe[0]);
-        if (dup2(stdin_pipe[0], 0 /* stdin */) == -1)
-            _exit(254);
-        if (stdin_pipe[0] != 0 /* stdin */)
-            close(stdin_pipe[0]);
-        if (dup2(stdout_pipe[1], 1 /* stdout */) == -1)
-            _exit(254);
-        if (stdout_pipe[1] != 1 /* stdout */)
-            close(stdout_pipe[1]);
-        execlp(path, path, (char *)NULL);
-        _exit(254);
-    default:
-        close(stdin_pipe[0]);
-        close(stdout_pipe[1]);
+	case -1:
+		goto stdout_opened;
+	case 0:
+		close(stdin_pipe[1]);
+		close(stdout_pipe[0]);
+		if (dup2(stdin_pipe[0], 0 /* stdin */) == -1)
+			_exit(254);
+		if (stdin_pipe[0] != 0 /* stdin */)
+			close(stdin_pipe[0]);
+		if (dup2(stdout_pipe[1], 1 /* stdout */) == -1)
+			_exit(254);
+		if (stdout_pipe[1] != 1 /* stdout */)
+			close(stdout_pipe[1]);
+		execlp(path, path, (char *)NULL);
+		_exit(254);
+	default:
+		close(stdin_pipe[0]);
+		close(stdout_pipe[1]);
 
-        *child_stdin = stdin_pipe[1];
-        fcntl(*child_stdin, F_SETFL, O_NONBLOCK);
-        *child_stdout = stdout_pipe[0];
-        fcntl(*child_stdout, F_SETFL, O_NONBLOCK);
-    }
+		*child_stdin = stdin_pipe[1];
+		fcntl(*child_stdin, F_SETFL, O_NONBLOCK);
+		*child_stdout = stdout_pipe[0];
+		fcntl(*child_stdout, F_SETFL, O_NONBLOCK);
+	}
 
-    return child;
+	return child;
 
 stdout_opened:
-    close(stdout_pipe[0]);
-    close(stdout_pipe[1]);
+	close(stdout_pipe[0]);
+	close(stdout_pipe[1]);
 stdin_opened:
-    close(stdin_pipe[0]);
-    close(stdin_pipe[1]);
+	close(stdin_pipe[0]);
+	close(stdin_pipe[1]);
 state_allocated:
-    return -1;
+	return -1;
 }
 
 void
 __archive_check_child(int in, int out)
 {
-#if defined(HAVE_POLL)
-    struct pollfd fds[2];
-    int idx;
+#if defined(HAVE_POLL) && (defined(HAVE_POLL_H) || defined(HAVE_SYS_POLL_H))
+	struct pollfd fds[2];
+	int idx;
 
-    idx = 0;
-    if (in != -1) {
-        fds[idx].fd = in;
-        fds[idx].events = POLLOUT;
-        ++idx;
-    }
-    if (out != -1) {
-        fds[idx].fd = out;
-        fds[idx].events = POLLIN;
-        ++idx;
-    }
+	idx = 0;
+	if (in != -1) {
+		fds[idx].fd = in;
+		fds[idx].events = POLLOUT;
+		++idx;
+	}
+	if (out != -1) {
+		fds[idx].fd = out;
+		fds[idx].events = POLLIN;
+		++idx;
+	}
 
-    poll(fds, idx, -1); /* -1 == INFTIM, wait forever */
+	poll(fds, idx, -1); /* -1 == INFTIM, wait forever */
 #elif defined(HAVE_SELECT)
-    fd_set fds_in, fds_out, fds_error;
+	fd_set fds_in, fds_out, fds_error;
 
-    FD_ZERO(&fds_in);
-    FD_ZERO(&fds_out);
-    FD_ZERO(&fds_error);
-    if (out != -1) {
-        FD_SET(out, &fds_in);
-        FD_SET(out, &fds_error);
-    }
-    if (in != -1) {
-        FD_SET(in, &fds_out);
-        FD_SET(in, &fds_error);
-    }
-    select(in < out ? out + 1 : in + 1, &fds_in, &fds_out, &fds_error, NULL);
+	FD_ZERO(&fds_in);
+	FD_ZERO(&fds_out);
+	FD_ZERO(&fds_error);
+	if (out != -1) {
+		FD_SET(out, &fds_in);
+		FD_SET(out, &fds_error);
+	}
+	if (in != -1) {
+		FD_SET(in, &fds_out);
+		FD_SET(in, &fds_error);
+	}
+	select(in < out ? out + 1 : in + 1, &fds_in, &fds_out, &fds_error, NULL);
 #else
-    sleep(1);
+	sleep(1);
 #endif
 }
 

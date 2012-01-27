@@ -1666,6 +1666,11 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name)
       {
       return i->second;
       }
+    i = this->ImportedTargets.find(name);
+    if ( i != this->ImportedTargets.end() )
+      {
+      return i->second;
+      }
     }
   return 0;
 }
@@ -2046,10 +2051,16 @@ cmGlobalGenerator::GetTargetDirectDepends(cmTarget & target)
   return this->TargetDependencies[&target];
 }
 
-void cmGlobalGenerator::AddTarget(cmTargets::value_type &v)
+void cmGlobalGenerator::AddTarget(cmTarget* t)
 {
-  assert(!v.second.IsImported());
-  this->TotalTargets[v.first] = &v.second;
+  if(t->IsImported())
+    {
+    this->ImportedTargets[t->GetName()] = t;
+    }
+  else
+    {
+    this->TotalTargets[t->GetName()] = t;
+    }
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(

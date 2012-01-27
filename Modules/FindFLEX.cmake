@@ -91,8 +91,12 @@ IF(FLEX_EXECUTABLE)
       MESSAGE("Command \"${FLEX_EXECUTABLE} --version\" failed with output:\n${FLEX_version_output}\n${FLEX_version_error}\nFLEX_VERSION will not be available")
     ENDIF()
   ELSE()
-    STRING(REGEX REPLACE "^flex (.*)$" "\\1"
+    # older versions of flex printed "/full/path/to/executable version X.Y"
+    # newer versions use "basename(executable) X.Y"
+    GET_FILENAME_COMPONENT(FLEX_EXE_NAME "${FLEX_EXECUTABLE}" NAME)
+    STRING(REGEX REPLACE "^.*${FLEX_EXE_NAME}\"? (version )?([0-9]+[^ ]*)$" "\\2"
       FLEX_VERSION "${FLEX_version_output}")
+    UNSET(FLEX_EXE_NAME)
   ENDIF()
 
   #============================================================

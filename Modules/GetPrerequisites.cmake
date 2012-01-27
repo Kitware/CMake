@@ -304,6 +304,26 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif(NOT resolved)
 
   if(NOT resolved)
+    if(item MATCHES "@rpath")
+      #
+      # @rpath references are relative to the paths built into the binaries with -rpath
+      # We handle this case like we do for other Unixes
+      #
+      string(REPLACE "@rpath/" "" norpath_item "${item}")
+
+      set(ri "ri-NOTFOUND")
+      find_file(ri "${norpath_item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
+      if(ri)
+        #message(STATUS "info: 'find_file' in exepath/dirs (${ri})")
+        set(resolved 1)
+        set(resolved_item "${ri}")
+        set(ri "ri-NOTFOUND")
+      endif(ri)
+
+    endif(item MATCHES "@rpath")
+  endif(NOT resolved)
+
+  if(NOT resolved)
     set(ri "ri-NOTFOUND")
     find_file(ri "${item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
     find_file(ri "${item}" ${exepath} ${dirs} /usr/lib)
@@ -461,6 +481,15 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
       get_filename_component(path "${lower}" PATH)
       if("${original_path}" STREQUAL "${path}")
         set(is_local 1)
+      else()
+        string(LENGTH "${original_path}/" original_length)
+        string(LENGTH "${lower}" path_length)
+        if(${path_length} GREATER ${original_length})
+          string(SUBSTRING "${lower}" 0 ${original_length} path)
+          if("${original_path}/" STREQUAL "${path}")
+            set(is_embedded 1)
+          endif()
+        endif()
       endif()
     endif()
   endif()

@@ -440,8 +440,12 @@ std::string cmCTest::GetCDashVersion()
   std::string cdashUri = this->GetCTestConfiguration("DropLocation");
   cdashUri = cdashUri.substr(0, cdashUri.find("/submit.php"));
 
-  url += cdashUri + "/api/getversion.php";
-  int res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response, "", "", 3);
+  int res = 1;
+  if ( ! cdashUri.empty() )
+  {
+    url += cdashUri + "/api/getversion.php";
+    res = cmCTest::HTTPRequest(url, cmCTest::HTTP_GET, response, "", "", 3);
+  }
 
   return res ? this->GetCTestConfiguration("CDashVersion") : response;
 #else

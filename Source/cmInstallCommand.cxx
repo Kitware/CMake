@@ -350,33 +350,33 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       targetIt!=targetList.GetVector().end();
       ++targetIt)
     {
-      // Lookup this target in the current directory.
-      if(cmTarget* target=this->Makefile->FindTarget(targetIt->c_str()))
+    // Lookup this target in the current directory.
+    if(cmTarget* target=this->Makefile->FindTarget(targetIt->c_str()))
+      {
+      // Found the target.  Check its type.
+      if(target->GetType() != cmTarget::EXECUTABLE &&
+         target->GetType() != cmTarget::STATIC_LIBRARY &&
+         target->GetType() != cmTarget::SHARED_LIBRARY &&
+         target->GetType() != cmTarget::MODULE_LIBRARY)
         {
-        // Found the target.  Check its type.
-        if(target->GetType() != cmTarget::EXECUTABLE &&
-           target->GetType() != cmTarget::STATIC_LIBRARY &&
-           target->GetType() != cmTarget::SHARED_LIBRARY &&
-           target->GetType() != cmTarget::MODULE_LIBRARY)
-          {
-          cmOStringStream e;
-          e << "TARGETS given target \"" << (*targetIt)
-            << "\" which is not an executable, library, or module.";
-          this->SetError(e.str().c_str());
-          return false;
-          }
-        // Store the target in the list to be installed.
-        targets.push_back(target);
-        }
-      else
-        {
-        // Did not find the target.
         cmOStringStream e;
         e << "TARGETS given target \"" << (*targetIt)
-          << "\" which does not exist in this directory.";
+          << "\" which is not an executable, library, or module.";
         this->SetError(e.str().c_str());
         return false;
         }
+      // Store the target in the list to be installed.
+      targets.push_back(target);
+      }
+    else
+      {
+      // Did not find the target.
+      cmOStringStream e;
+      e << "TARGETS given target \"" << (*targetIt)
+        << "\" which does not exist in this directory.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   // Keep track of whether we will be performing an installation of
@@ -602,98 +602,98 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         break;
       }
 
-  // These well-known sets of files are installed *automatically* for FRAMEWORK
-  // SHARED library targets on the Mac as part of installing the FRAMEWORK.
-  // For other target types or on other platforms, they are not installed
-  // automatically and so we need to create install files generators for them.
-  //
-  bool createInstallGeneratorsForTargetFileSets = true;
+    // These well-known sets of files are installed *automatically* for
+    // FRAMEWORK SHARED library targets on the Mac as part of installing the
+    // FRAMEWORK.  For other target types or on other platforms, they are not
+    // installed automatically and so we need to create install files
+    // generators for them.
+    bool createInstallGeneratorsForTargetFileSets = true;
 
-  if(target.IsFrameworkOnApple())
-    {
-    createInstallGeneratorsForTargetFileSets = false;
-    }
-
-  if(createInstallGeneratorsForTargetFileSets && !namelinkOnly)
-    {
-    const char* files = target.GetProperty("PRIVATE_HEADER");
-    if ((files) && (*files))
+    if(target.IsFrameworkOnApple())
       {
-      std::vector<std::string> relFiles;
-      cmSystemTools::ExpandListArgument(files, relFiles);
-      std::vector<std::string> absFiles;
-      if (!this->MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles))
-        {
-        return false;
-        }
-
-      // Create the files install generator.
-      if (!privateHeaderArgs.GetDestination().empty())
-        {
-        privateHeaderGenerator = CreateInstallFilesGenerator(absFiles, 
-                                                     privateHeaderArgs, false);
-        }
-      else
-        {
-        cmOStringStream e;
-        e << "INSTALL TARGETS - target " << target.GetName() << " has "
-          << "PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.";
-        cmSystemTools::Message(e.str().c_str(), "Warning");
-        }
+      createInstallGeneratorsForTargetFileSets = false;
       }
 
-    files = target.GetProperty("PUBLIC_HEADER");
-    if ((files) && (*files))
+    if(createInstallGeneratorsForTargetFileSets && !namelinkOnly)
       {
-      std::vector<std::string> relFiles;
-      cmSystemTools::ExpandListArgument(files, relFiles);
-      std::vector<std::string> absFiles;
-      if (!this->MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles))
+      const char* files = target.GetProperty("PRIVATE_HEADER");
+      if ((files) && (*files))
         {
-        return false;
+        std::vector<std::string> relFiles;
+        cmSystemTools::ExpandListArgument(files, relFiles);
+        std::vector<std::string> absFiles;
+        if (!this->MakeFilesFullPath("PRIVATE_HEADER", relFiles, absFiles))
+          {
+          return false;
+          }
+
+        // Create the files install generator.
+        if (!privateHeaderArgs.GetDestination().empty())
+          {
+          privateHeaderGenerator =
+            CreateInstallFilesGenerator(absFiles, privateHeaderArgs, false);
+          }
+        else
+          {
+          cmOStringStream e;
+          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+            << "PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.";
+          cmSystemTools::Message(e.str().c_str(), "Warning");
+          }
         }
 
-      // Create the files install generator.
-      if (!publicHeaderArgs.GetDestination().empty())
+      files = target.GetProperty("PUBLIC_HEADER");
+      if ((files) && (*files))
         {
-        publicHeaderGenerator = CreateInstallFilesGenerator(absFiles, 
-                                                      publicHeaderArgs, false);
+        std::vector<std::string> relFiles;
+        cmSystemTools::ExpandListArgument(files, relFiles);
+        std::vector<std::string> absFiles;
+        if (!this->MakeFilesFullPath("PUBLIC_HEADER", relFiles, absFiles))
+          {
+          return false;
+          }
+
+        // Create the files install generator.
+        if (!publicHeaderArgs.GetDestination().empty())
+          {
+          publicHeaderGenerator =
+            CreateInstallFilesGenerator(absFiles, publicHeaderArgs, false);
+          }
+        else
+          {
+          cmOStringStream e;
+          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+            << "PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.";
+          cmSystemTools::Message(e.str().c_str(), "Warning");
+          }
         }
-      else
+
+      files = target.GetProperty("RESOURCE");
+      if ((files) && (*files))
         {
-        cmOStringStream e;
-        e << "INSTALL TARGETS - target " << target.GetName() << " has "
-          << "PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.";
-        cmSystemTools::Message(e.str().c_str(), "Warning");
+        std::vector<std::string> relFiles;
+        cmSystemTools::ExpandListArgument(files, relFiles);
+        std::vector<std::string> absFiles;
+        if (!this->MakeFilesFullPath("RESOURCE", relFiles, absFiles))
+          {
+          return false;
+          }
+
+        // Create the files install generator.
+        if (!resourceArgs.GetDestination().empty())
+          {
+          resourceGenerator = CreateInstallFilesGenerator(absFiles,
+                                                          resourceArgs, false);
+          }
+        else
+          {
+          cmOStringStream e;
+          e << "INSTALL TARGETS - target " << target.GetName() << " has "
+            << "RESOURCE files but no RESOURCE DESTINATION.";
+          cmSystemTools::Message(e.str().c_str(), "Warning");
+          }
         }
       }
-
-    files = target.GetProperty("RESOURCE");
-    if ((files) && (*files))
-      {
-      std::vector<std::string> relFiles;
-      cmSystemTools::ExpandListArgument(files, relFiles);
-      std::vector<std::string> absFiles;
-      if (!this->MakeFilesFullPath("RESOURCE", relFiles, absFiles))
-        {
-        return false;
-        }
-
-      // Create the files install generator.
-      if (!resourceArgs.GetDestination().empty())
-        {
-        resourceGenerator = CreateInstallFilesGenerator(absFiles, 
-                                                        resourceArgs, false);
-        }
-      else
-        {
-        cmOStringStream e;
-        e << "INSTALL TARGETS - target " << target.GetName() << " has "
-          << "RESOURCE files but no RESOURCE DESTINATION.";
-        cmSystemTools::Message(e.str().c_str(), "Warning");
-        }
-      }
-    }
 
     // Keep track of whether we're installing anything in each category
     installsArchive = installsArchive || archiveGenerator != 0;

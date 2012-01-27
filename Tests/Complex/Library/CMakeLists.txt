@@ -43,7 +43,6 @@ ENDIF(WIN32)
 #
 SET(SharedLibrarySources sharedFile)
 ADD_LIBRARY(CMakeTestLibraryShared SHARED ${SharedLibrarySources})
-ADD_LIBRARY(CMakeTestModule MODULE moduleFile.c)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 ADD_LIBRARY(CMakeTestCLibraryShared SHARED testConly.c)
 DEFINE_PROPERTY(

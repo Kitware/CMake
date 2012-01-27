@@ -12,21 +12,22 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-
 #INCLUDE(CheckCXXSourceCompiles)
 
-MACRO (CHECK_FILE_OFFSET_BITS)
+GET_FILENAME_COMPONENT(_selfdir_CheckFileOffsetBits
+	 "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
+MACRO (CHECK_FILE_OFFSET_BITS)
   IF(NOT DEFINED _FILE_OFFSET_BITS)
     MESSAGE(STATUS "Checking _FILE_OFFSET_BITS for large files")
     TRY_COMPILE(__WITHOUT_FILE_OFFSET_BITS_64
-      ${CMAKE_BINARY_DIR}
-      ${libarchive_SOURCE_DIR}/build/cmake/CheckFileOffsetBits.c
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${_selfdir_CheckFileOffsetBits}/CheckFileOffsetBits.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS})
     IF(NOT __WITHOUT_FILE_OFFSET_BITS_64)
       TRY_COMPILE(__WITH_FILE_OFFSET_BITS_64
-        ${CMAKE_BINARY_DIR}
-        ${libarchive_SOURCE_DIR}/build/cmake/CheckFileOffsetBits.c
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${_selfdir_CheckFileOffsetBits}/CheckFileOffsetBits.c
         COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -D_FILE_OFFSET_BITS=64)
     ENDIF(NOT __WITHOUT_FILE_OFFSET_BITS_64)
 

@@ -113,16 +113,8 @@ endfunction()
 
 # if the id's match or the compilers are compatible, then
 # call the test_fortran_c_interface_module function
-if(("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
-    AND 
-    ("${CMAKE_C_COMPILER_ID}" MATCHES "MSVC")
-    )
-  set(COMPATABLE_COMPILERS TRUE)
-endif()
-if("${CMAKE_Fortran_COMPILER_ID}:${CMAKE_C_COMPILER_ID}" MATCHES "Absoft:GNU")
-  set(COMPATABLE_COMPILERS TRUE)
-endif()
-if(COMPATABLE_COMPILERS
+if("${CMAKE_Fortran_COMPILER_ID}:${CMAKE_C_COMPILER_ID}" MATCHES
+    "(Intel:MSVC|Absoft:GNU)"
     OR ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "${CMAKE_C_COMPILER_ID}" ))
   test_fortran_c_interface_module()
 else()

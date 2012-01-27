@@ -187,11 +187,13 @@ IF(XCODE)
   SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
 ENDIF(XCODE)
 
-# Need to list dependent shared libraries on link line.  When building
-# with -isysroot (for universal binaries), the linker always looks for
-# dependent libraries under the sysroot.  Listing them on the link
-# line works around the problem.
-SET(CMAKE_LINK_DEPENDENT_LIBRARY_FILES 1)
+IF("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
+  # Need to list dependent shared libraries on link line.  When building
+  # with -isysroot (for universal binaries), the linker always looks for
+  # dependent libraries under the sysroot.  Listing them on the link
+  # line works around the problem.
+  SET(CMAKE_LINK_DEPENDENT_LIBRARY_FILES 1)
+ENDIF()
 
 SET(CMAKE_C_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS -w)
 SET(CMAKE_CXX_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS -w)

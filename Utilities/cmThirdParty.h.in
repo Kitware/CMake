@@ -16,6 +16,7 @@
 #cmakedefine CMAKE_USE_SYSTEM_CURL
 #cmakedefine CMAKE_USE_SYSTEM_EXPAT
 #cmakedefine CMAKE_USE_SYSTEM_ZLIB
+#cmakedefine CMAKE_USE_SYSTEM_BZIP2
 #cmakedefine CMAKE_USE_SYSTEM_LIBARCHIVE
 #cmakedefine CTEST_USE_XMLRPC
 

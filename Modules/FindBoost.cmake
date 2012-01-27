@@ -405,7 +405,7 @@ endfunction()
 #
 function(_Boost_PREPEND_LIST_WITH_THREADAPI _output)
   set(_orig_libnames ${ARGN})
-  string(REPLACE "thread" "thread_${Boost_THREADAPI}" _threadapi_libnames ${_orig_libnames})
+  string(REPLACE "thread" "thread_${Boost_THREADAPI}" _threadapi_libnames "${_orig_libnames}")
   set(${_output} ${_threadapi_libnames} ${_orig_libnames} PARENT_SCOPE)
 endfunction()
 

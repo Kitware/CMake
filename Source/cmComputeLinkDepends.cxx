@@ -358,7 +358,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
       this->AddLinkEntries(depender_index, iface->Libraries);
 
       // Handle dependent shared libraries.
-      this->QueueSharedDependencies(depender_index, iface->SharedDeps);
+      this->FollowSharedDeps(depender_index, iface);
 
       // Support for CMP0003.
       for(std::vector<std::string>::const_iterator
@@ -373,6 +373,23 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     {
     // Follow the old-style dependency list.
     this->AddVarLinkEntries(depender_index, qe.LibDepends);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmComputeLinkDepends
+::FollowSharedDeps(int depender_index, cmTarget::LinkInterface const* iface,
+                   bool follow_interface)
+{
+  // Follow dependencies if we have not followed them already.
+  if(this->SharedDepFollowed.insert(depender_index).second)
+    {
+    if(follow_interface)
+      {
+      this->QueueSharedDependencies(depender_index, iface->Libraries);
+      }
+    this->QueueSharedDependencies(depender_index, iface->SharedDeps);
     }
 }
 
@@ -429,8 +446,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     if(cmTarget::LinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config))
       {
-      // We use just the shared dependencies, not the interface.
-      this->QueueSharedDependencies(index, iface->SharedDeps);
+      // Follow public and private dependencies transitively.
+      this->FollowSharedDeps(index, iface, true);
       }
     }
 }

@@ -508,6 +508,19 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
     cm->DefineProperty
+    ("CMAKE_AUTOMOC_RELAXED_MODE",  cmProperty::VARIABLE,
+     "Switch between strict and relaxed automoc mode.",
+     "By default, automoc behaves exactly as described in the documentation "
+     "of the AUTOMOC target property.  "
+     "When set to TRUE, it accepts more input and tries to find the correct "
+     "input file for moc even if it differs from the documented behaviour. "
+     "In this mode it e.g. also checks whether a header file is intended to "
+     "be processed by moc when a \"foo.moc\" file has been included.\n"
+     "Relaxed mode has to be enabled for KDE4 compatibility.",
+     false,
+     "Variables That Change Behavior");
+
+    cm->DefineProperty
     ("CMAKE_FIND_LIBRARY_PREFIXES",  cmProperty::VARIABLE,
      "Prefixes to prepend when looking for libraries.",
      "This specifies what prefixes to add to library names when "
@@ -1284,6 +1297,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_COMPILER_ABI", cmProperty::VARIABLE,
      "An internal variable subject to change.",
      "This is used in determining the compiler ABI and is subject to change.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_COMPILER_VERSION", cmProperty::VARIABLE,
+     "An internal variable subject to change.",
+     "Compiler version in major[.minor[.patch[.tweak]]] format.  "
+     "This variable is reserved for internal use by CMake and is not "
+     "guaranteed to be set.",
      false,
      "Variables for Languages");
 

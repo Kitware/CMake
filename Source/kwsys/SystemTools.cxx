@@ -326,7 +326,7 @@ void SystemTools::GetPath(kwsys_stl::vector<kwsys_stl::string>& path, const char
   kwsys_stl::string pathEnv = cpathEnv;
 
   // A hack to make the below algorithm work.
-  if(pathEnv[pathEnv.length()-1] != ':')
+  if(!pathEnv.empty() && pathEnv[pathEnv.length()-1] != pathSep[0])
     {
     pathEnv += pathSep;
     }

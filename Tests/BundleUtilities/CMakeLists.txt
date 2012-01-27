@@ -82,3 +82,52 @@ add_custom_target(testbundleutils2_test  ALL
   DEPENDS testbundleutils1 module2
   )
 add_dependencies(testbundleutils2_test testbundleutils2)
+
+
+if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
+######  Test a Bundle application using dependencies
+######  and @rpaths on Mac OS X 10.5 or greater
+
+  # a shared library
+  add_library(shared-3 SHARED shared.cpp shared.h)
+
+  # another shared library
+  add_library(shared2-3 SHARED shared2.cpp shared2.h)
+
+  # a framework library
+  add_library(framework-3 SHARED framework.cpp framework.h)
+  set_target_properties(framework-3 PROPERTIES FRAMEWORK 1)
+
+  # build dependencies with @rpath install name
+  set_target_properties(shared-3 shared2-3 framework-3 PROPERTIES
+                        INSTALL_NAME_DIR "@rpath"
+                        BUILD_WITH_INSTALL_RPATH 1)
+
+  # a loadable module (depends on shared2)
+  # testbundleutils1 will load this at runtime
+  add_library(module3 MODULE module.cpp module.h)
+  set_target_properties(module3 PROPERTIES PREFIX "" LINK_FLAGS "-Wl,-rpath,@loader_path/")
+  get_target_property(module_loc module3 LOCATION)
+  target_link_libraries(module3 shared2-3)
+
+  # a non-bundle application
+  add_executable(testbundleutils3 testbundleutils3.cpp)
+  target_link_libraries(testbundleutils3 shared-3 framework-3 ${CMAKE_DL_LIBS})
+  get_target_property(loc testbundleutils3 LOCATION)
+
+  set_target_properties(testbundleutils3 module3 PROPERTIES
+                        LINK_FLAGS "-Wl,-rpath,@loader_path/")
+
+  # add custom target to install and test the app
+  add_custom_target(testbundleutils3_test  ALL
+    COMMAND ${CMAKE_COMMAND}
+    "-DINPUT=${loc}"
+    "-DMODULE=${module_loc}"
+    "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
+    "-DOUTPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/testdir3"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
+    DEPENDS testbundleutils3 module3
+    )
+
+  add_dependencies(testbundleutils3_test testbundleutils3)
+endif()

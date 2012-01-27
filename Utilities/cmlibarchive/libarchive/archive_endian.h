@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libarchive/archive_endian.h,v 1.4 2008/12/06 06:12:24 kientzle Exp $
+ * $FreeBSD: head/lib/libarchive/archive_endian.h 201085 2009-12-28 02:17:15Z kientzle $
  *
  * Borrowed from FreeBSD's <sys/endian.h>
  */
@@ -43,11 +43,10 @@
  * Disabling inline keyword for compilers known to choke on it:
  * - Watcom C++ in C code.  (For any version?)
  * - SGI MIPSpro
- * - SunPro C
  * - Microsoft Visual C++ 6.0 (supposedly newer versions too)
  */
-#if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux) || defined(__BORLANDC__) || defined(__SUNPRO_C)
-#define inline
+#if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux) || defined(__BORLANDC__)
+#define	inline
 #elif defined(_MSC_VER) || defined(__osf__)
 #define inline __inline
 #endif
@@ -57,107 +56,107 @@
 static inline uint16_t
 archive_be16dec(const void *pp)
 {
-    unsigned char const *p = (unsigned char const *)pp;
+	unsigned char const *p = (unsigned char const *)pp;
 
-    return ((p[0] << 8) | p[1]);
+	return ((p[0] << 8) | p[1]);
 }
 
 static inline uint32_t
 archive_be32dec(const void *pp)
 {
-    unsigned char const *p = (unsigned char const *)pp;
+	unsigned char const *p = (unsigned char const *)pp;
 
-    return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]);
+	return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]);
 }
 
 static inline uint64_t
 archive_be64dec(const void *pp)
 {
-    unsigned char const *p = (unsigned char const *)pp;
+	unsigned char const *p = (unsigned char const *)pp;
 
-    return (((uint64_t)archive_be32dec(p) << 32) | archive_be32dec(p + 4));
+	return (((uint64_t)archive_be32dec(p) << 32) | archive_be32dec(p + 4));
 }
 
 static inline uint16_t
 archive_le16dec(const void *pp)
 {
-    unsigned char const *p = (unsigned char const *)pp;
+	unsigned char const *p = (unsigned char const *)pp;
 
-    return ((p[1] << 8) | p[0]);
+	return ((p[1] << 8) | p[0]);
 }
 
 static inline uint32_t
 archive_le32dec(const void *pp)
 {
-    unsigned char const *p = (unsigned char const *)pp;
+	unsigned char const *p = (unsigned char const *)pp;
 
-    return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
+	return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
 }
 
 static inline uint64_t
 archive_le64dec(const void *pp)
 {
-    unsigned char const *p = (unsigned char const *)pp;
+	unsigned char const *p = (unsigned char const *)pp;
 
-    return (((uint64_t)archive_le32dec(p + 4) << 32) | archive_le32dec(p));
+	return (((uint64_t)archive_le32dec(p + 4) << 32) | archive_le32dec(p));
 }
 
 static inline void
 archive_be16enc(void *pp, uint16_t u)
 {
-    unsigned char *p = (unsigned char *)pp;
+	unsigned char *p = (unsigned char *)pp;
 
-    p[0] = (u >> 8) & 0xff;
-    p[1] = u & 0xff;
+	p[0] = (u >> 8) & 0xff;
+	p[1] = u & 0xff;
 }
 
 static inline void
 archive_be32enc(void *pp, uint32_t u)
 {
-    unsigned char *p = (unsigned char *)pp;
+	unsigned char *p = (unsigned char *)pp;
 
-    p[0] = (u >> 24) & 0xff;
-    p[1] = (u >> 16) & 0xff;
-    p[2] = (u >> 8) & 0xff;
-    p[3] = u & 0xff;
+	p[0] = (u >> 24) & 0xff;
+	p[1] = (u >> 16) & 0xff;
+	p[2] = (u >> 8) & 0xff;
+	p[3] = u & 0xff;
 }
 
 static inline void
 archive_be64enc(void *pp, uint64_t u)
 {
-    unsigned char *p = (unsigned char *)pp;
+	unsigned char *p = (unsigned char *)pp;
 
-    archive_be32enc(p, u >> 32);
-    archive_be32enc(p + 4, u & 0xffffffff);
+	archive_be32enc(p, u >> 32);
+	archive_be32enc(p + 4, u & 0xffffffff);
 }
 
 static inline void
 archive_le16enc(void *pp, uint16_t u)
 {
-    unsigned char *p = (unsigned char *)pp;
+	unsigned char *p = (unsigned char *)pp;
 
-    p[0] = u & 0xff;
-    p[1] = (u >> 8) & 0xff;
+	p[0] = u & 0xff;
+	p[1] = (u >> 8) & 0xff;
 }
 
 static inline void
 archive_le32enc(void *pp, uint32_t u)
 {
-    unsigned char *p = (unsigned char *)pp;
+	unsigned char *p = (unsigned char *)pp;
 
-    p[0] = u & 0xff;
-    p[1] = (u >> 8) & 0xff;
-    p[2] = (u >> 16) & 0xff;
-    p[3] = (u >> 24) & 0xff;
+	p[0] = u & 0xff;
+	p[1] = (u >> 8) & 0xff;
+	p[2] = (u >> 16) & 0xff;
+	p[3] = (u >> 24) & 0xff;
 }
 
 static inline void
 archive_le64enc(void *pp, uint64_t u)
 {
-    unsigned char *p = (unsigned char *)pp;
+	unsigned char *p = (unsigned char *)pp;
 
-    archive_le32enc(p, u & 0xffffffff);
-    archive_le32enc(p + 4, u >> 32);
+	archive_le32enc(p, u & 0xffffffff);
+	archive_le32enc(p + 4, u >> 32);
 }
 
 #endif

@@ -26,51 +26,50 @@
 #include "archive_platform.h"
 __FBSDID("$FreeBSD$");
 
+#include "archive_private.h"
 #include "archive_entry.h"
 
-#if defined(_WIN32) && !defined(__CYGWIN__) 
-#if defined(__BORLANDC__) || (defined(_MSC_VER) &&  _MSC_VER <= 1300)
-# define EPOC_TIME   (116444736000000000UI64)
-#else
-# define EPOC_TIME   (116444736000000000ULL)
-#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
 
+#define EPOC_TIME ARCHIVE_LITERAL_ULL(116444736000000000)
 
 __inline static void
 fileTimeToUtc(const FILETIME *filetime, time_t *time, long *ns)
 {
-    ULARGE_INTEGER utc;
+	ULARGE_INTEGER utc;
 
-    utc.HighPart = filetime->dwHighDateTime;
-    utc.LowPart  = filetime->dwLowDateTime;
-    if (utc.QuadPart >= EPOC_TIME) {
-        utc.QuadPart -= EPOC_TIME;
-        *time = (time_t)(utc.QuadPart / 10000000);  /* milli seconds base */
-        *ns = (long)(utc.QuadPart % 10000000) * 100;/* nano seconds base */
-    } else {
-        *time = 0;
-        *ns = 0;
-    }
+	utc.HighPart = filetime->dwHighDateTime;
+	utc.LowPart  = filetime->dwLowDateTime;
+	if (utc.QuadPart >= EPOC_TIME) {
+		utc.QuadPart -= EPOC_TIME;
+		*time = (time_t)(utc.QuadPart / 10000000);	/* milli seconds base */
+		*ns = (long)(utc.QuadPart % 10000000) * 100;/* nano seconds base */
+	} else {
+		*time = 0;
+		*ns = 0;
+	}
 }
 
 void
 archive_entry_copy_bhfi(struct archive_entry *entry,
-            BY_HANDLE_FILE_INFORMATION *bhfi)
+			BY_HANDLE_FILE_INFORMATION *bhfi)
 {
-    time_t secs;
-    long nsecs;
+	time_t secs;
+	long nsecs;
 
-    fileTimeToUtc(&bhfi->ftLastAccessTime, &secs, &nsecs);
-    archive_entry_set_atime(entry, secs, nsecs);
-    fileTimeToUtc(&bhfi->ftLastWriteTime, &secs, &nsecs);
-    archive_entry_set_mtime(entry, secs, nsecs);
-    fileTimeToUtc(&bhfi->ftCreationTime, &secs, &nsecs);
-    archive_entry_set_birthtime(entry, secs, nsecs);
-    archive_entry_set_dev(entry, bhfi->dwVolumeSerialNumber);
-    archive_entry_set_ino64(entry, (((int64_t)bhfi->nFileIndexHigh) << 32)
-        + bhfi->nFileIndexLow);
-    archive_entry_set_nlink(entry, bhfi->nNumberOfLinks);
-    archive_entry_set_size(entry, (((int64_t)bhfi->nFileSizeHigh) << 32)
-        + bhfi->nFileSizeLow);
+	fileTimeToUtc(&bhfi->ftLastAccessTime, &secs, &nsecs);
+	archive_entry_set_atime(entry, secs, nsecs);
+	fileTimeToUtc(&bhfi->ftLastWriteTime, &secs, &nsecs);
+	archive_entry_set_mtime(entry, secs, nsecs);
+	fileTimeToUtc(&bhfi->ftCreationTime, &secs, &nsecs);
+	archive_entry_set_birthtime(entry, secs, nsecs);
+	archive_entry_set_ctime(entry, secs, nsecs);
+	archive_entry_set_dev(entry, bhfi->dwVolumeSerialNumber);
+	archive_entry_set_ino64(entry, (((int64_t)bhfi->nFileIndexHigh) << 32)
+		+ bhfi->nFileIndexLow);
+	archive_entry_set_nlink(entry, bhfi->nNumberOfLinks);
+	archive_entry_set_size(entry, (((int64_t)bhfi->nFileSizeHigh) << 32)
+		+ bhfi->nFileSizeLow);
+	/* archive_entry_set_mode(entry, st->st_mode); */
 }
 #endif

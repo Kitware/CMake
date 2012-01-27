@@ -71,6 +71,25 @@ static const char * cmDocumentationOptions[][3] =
     {"--config <config file>", "Specify the config file.",
     "Specify the config file to use to create the package. By default "
       "CPackConfig.cmake in the current directory will be used." },
+    {"--verbose,-V","enable verbose output","Run cpack with verbose output."},
+    {"--debug","enable debug output (for CPack developers)",
+     "Run cpack with debug output (for CPack developers)."},
+    {"-P <package name>","override/define CPACK_PACKAGE_NAME",
+     "If the package name is not specified on cpack commmand line then"
+     "CPack.cmake defines it as CMAKE_PROJECT_NAME"},
+    {"-R <package version>","override/define CPACK_PACKAGE_VERSION",
+     "If version is not specified on cpack command line then"
+     "CPack.cmake defines it from CPACK_PACKAGE_VERSION_[MAJOR|MINOR|PATCH]"
+     "look into CPack.cmake for detail"},
+    {"-B <package directory>","override/define CPACK_PACKAGE_DIRECTORY",
+     "The directory where CPack will be doing its packaging work."
+     "The resulting package will be found there. Inside this directory"
+     "CPack creates '_CPack_Packages' sub-directory which is the"
+     "CPack temporary directory."},
+    {"--vendor <vendor name>","override/define CPACK_PACKAGE_VENDOR",
+     "If vendor is not specified on cpack command line "
+     "(or inside CMakeLists.txt) then"
+     "CPack.cmake defines it with a default value"},
     {0,0,0}
 };
 
@@ -440,6 +459,10 @@ int main (int argc, char *argv[])
       }
     }
 
+  /* In this case we are building the documentation object
+   * instance in order to create appropriate structure
+   * in order to satisfy the appropriate --help-xxx request
+   */
   if ( help )
     {
     doc.CheckOptions(argc, argv);

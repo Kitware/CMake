@@ -23,12 +23,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _XOPEN_SOURCE
-# define _XOPEN_SOURCE 500 /* getpwnam_r and getgrnam_r signatures */
-#endif
-
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: src/lib/libarchive/archive_write_disk_set_standard_lookup.c,v 1.4 2007/05/29 01:00:19 kientzle Exp $");
+__FBSDID("$FreeBSD: head/lib/libarchive/archive_write_disk_set_standard_lookup.c 201083 2009-12-28 02:09:57Z kientzle $");
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -55,16 +51,16 @@ __FBSDID("$FreeBSD: src/lib/libarchive/archive_write_disk_set_standard_lookup.c,
 #include "archive_write_disk_private.h"
 
 struct bucket {
-    char    *name;
-    int  hash;
-    id_t     id;
+	char	*name;
+	int	 hash;
+	id_t	 id;
 };
 
 static const size_t cache_size = 127;
-static unsigned int hash(const char *);
-static gid_t    lookup_gid(void *, const char *uname, gid_t);
-static uid_t    lookup_uid(void *, const char *uname, uid_t);
-static void cleanup(void *);
+static unsigned int	hash(const char *);
+static int64_t	lookup_gid(void *, const char *uname, int64_t);
+static int64_t	lookup_uid(void *, const char *uname, int64_t);
+static void	cleanup(void *);
 
 /*
  * Installs functions that use getpwnam()/getgrnam()---along with
@@ -88,160 +84,179 @@ static void cleanup(void *);
 int
 archive_write_disk_set_standard_lookup(struct archive *a)
 {
-    struct bucket *ucache = malloc(cache_size * sizeof(struct bucket));
-    struct bucket *gcache = malloc(cache_size * sizeof(struct bucket));
-    memset(ucache, 0, cache_size * sizeof(struct bucket));
-    memset(gcache, 0, cache_size * sizeof(struct bucket));
-    archive_write_disk_set_group_lookup(a, gcache, lookup_gid, cleanup);
-    archive_write_disk_set_user_lookup(a, ucache, lookup_uid, cleanup);
-    return (ARCHIVE_OK);
+	struct bucket *ucache = malloc(cache_size * sizeof(struct bucket));
+	struct bucket *gcache = malloc(cache_size * sizeof(struct bucket));
+	memset(ucache, 0, cache_size * sizeof(struct bucket));
+	memset(gcache, 0, cache_size * sizeof(struct bucket));
+	archive_write_disk_set_group_lookup(a, gcache, lookup_gid, cleanup);
+	archive_write_disk_set_user_lookup(a, ucache, lookup_uid, cleanup);
+	return (ARCHIVE_OK);
 }
 
-static gid_t
-lookup_gid(void *private_data, const char *gname, gid_t gid)
+static int64_t
+lookup_gid(void *private_data, const char *gname, int64_t gid)
 {
-    int h;
-    struct bucket *b;
-    struct bucket *gcache = (struct bucket *)private_data;
+	int h;
+	struct bucket *b;
+	struct bucket *gcache = (struct bucket *)private_data;
 
-    /* If no gname, just use the gid provided. */
-    if (gname == NULL || *gname == '\0')
-        return (gid);
+	/* If no gname, just use the gid provided. */
+	if (gname == NULL || *gname == '\0')
+		return (gid);
 
-    /* Try to find gname in the cache. */
-    h = hash(gname);
-    b = &gcache[h % cache_size ];
-    if (b->name != NULL && b->hash == h && strcmp(gname, b->name) == 0)
-        return ((gid_t)b->id);
+	/* Try to find gname in the cache. */
+	h = hash(gname);
+	b = &gcache[h % cache_size ];
+	if (b->name != NULL && b->hash == h && strcmp(gname, b->name) == 0)
+		return ((gid_t)b->id);
 
-    /* Free the cache slot for a new entry. */
-    if (b->name != NULL)
-        free(b->name);
-    b->name = strdup(gname);
-    /* Note: If strdup fails, that's okay; we just won't cache. */
-    b->hash = h;
+	/* Free the cache slot for a new entry. */
+	if (b->name != NULL)
+		free(b->name);
+	b->name = strdup(gname);
+	/* Note: If strdup fails, that's okay; we just won't cache. */
+	b->hash = h;
 #if HAVE_GRP_H
-    {
-        char _buffer[128];
-        size_t bufsize = 128;
-        char *buffer = _buffer;
-        struct group    grent, *result;
-        int r;
+#  if HAVE_GETGRNAM_R
+	{
+		char _buffer[128];
+		size_t bufsize = 128;
+		char *buffer = _buffer;
+		struct group	grent, *result;
+		int r;
 
-        for (;;) {
-            result = &grent; /* Old getgrnam_r ignores last argument.  */
-            r = getgrnam_r(gname, &grent, buffer, bufsize, &result);
-            if (r == 0)
-                break;
-            if (r != ERANGE)
-                break;
-            bufsize *= 2;
-            if (buffer != _buffer)
-                free(buffer);
-            buffer = malloc(bufsize);
-            if (buffer == NULL)
-                break;
-        }
-        if (result != NULL)
-            gid = result->gr_gid;
-        if (buffer != _buffer)
-            free(buffer);
-    }
+		for (;;) {
+			result = &grent; /* Old getgrnam_r ignores last arg. */
+			r = getgrnam_r(gname, &grent, buffer, bufsize, &result);
+			if (r == 0)
+				break;
+			if (r != ERANGE)
+				break;
+			bufsize *= 2;
+			if (buffer != _buffer)
+				free(buffer);
+			buffer = malloc(bufsize);
+			if (buffer == NULL)
+				break;
+		}
+		if (result != NULL)
+			gid = result->gr_gid;
+		if (buffer != _buffer)
+			free(buffer);
+	}
+#  else /* HAVE_GETGRNAM_R */
+	{
+		struct group *result;
+
+		result = getgrnam(gname);
+		if (result != NULL)
+			gid = result->gr_gid;
+	}
+#  endif /* HAVE_GETGRNAM_R */
 #elif defined(_WIN32) && !defined(__CYGWIN__)
-    /* TODO: do a gname->gid lookup for Windows. */
+	/* TODO: do a gname->gid lookup for Windows. */
 #else
-    #error No way to perform gid lookups on this platform
+	#error No way to perform gid lookups on this platform
 #endif
-    b->id = gid;
+	b->id = gid;
 
-    return (gid);
+	return (gid);
 }
 
-static uid_t
-lookup_uid(void *private_data, const char *uname, uid_t uid)
+static int64_t
+lookup_uid(void *private_data, const char *uname, int64_t uid)
 {
-    int h;
-    struct bucket *b;
-    struct bucket *ucache = (struct bucket *)private_data;
+	int h;
+	struct bucket *b;
+	struct bucket *ucache = (struct bucket *)private_data;
 
-    /* If no uname, just use the uid provided. */
-    if (uname == NULL || *uname == '\0')
-        return (uid);
+	/* If no uname, just use the uid provided. */
+	if (uname == NULL || *uname == '\0')
+		return (uid);
 
-    /* Try to find uname in the cache. */
-    h = hash(uname);
-    b = &ucache[h % cache_size ];
-    if (b->name != NULL && b->hash == h && strcmp(uname, b->name) == 0)
-        return ((uid_t)b->id);
+	/* Try to find uname in the cache. */
+	h = hash(uname);
+	b = &ucache[h % cache_size ];
+	if (b->name != NULL && b->hash == h && strcmp(uname, b->name) == 0)
+		return ((uid_t)b->id);
 
-    /* Free the cache slot for a new entry. */
-    if (b->name != NULL)
-        free(b->name);
-    b->name = strdup(uname);
-    /* Note: If strdup fails, that's okay; we just won't cache. */
-    b->hash = h;
+	/* Free the cache slot for a new entry. */
+	if (b->name != NULL)
+		free(b->name);
+	b->name = strdup(uname);
+	/* Note: If strdup fails, that's okay; we just won't cache. */
+	b->hash = h;
 #if HAVE_PWD_H
-    {
-        char _buffer[128];
-        size_t bufsize = 128;
-        char *buffer = _buffer;
-        struct passwd   pwent, *result;
-        int r;
+#  if HAVE_GETPWNAM_R
+	{
+		char _buffer[128];
+		size_t bufsize = 128;
+		char *buffer = _buffer;
+		struct passwd	pwent, *result;
+		int r;
 
-        for (;;) {
-            result = &pwent; /* Old getpwnam_r ignores last argument.  */
-            r = getpwnam_r(uname, &pwent, buffer, bufsize, &result);
-            if (r == 0)
-                break;
-            if (r != ERANGE)
-                break;
-            bufsize *= 2;
-            if (buffer != _buffer)
-                free(buffer);
-            buffer = malloc(bufsize);
-            if (buffer == NULL)
-                break;
-        }
-        if (result != NULL)
-            uid = result->pw_uid;
-        if (buffer != _buffer)
-            free(buffer);
-    }
+		for (;;) {
+			result = &pwent; /* Old getpwnam_r ignores last arg. */
+			r = getpwnam_r(uname, &pwent, buffer, bufsize, &result);
+			if (r == 0)
+				break;
+			if (r != ERANGE)
+				break;
+			bufsize *= 2;
+			if (buffer != _buffer)
+				free(buffer);
+			buffer = malloc(bufsize);
+			if (buffer == NULL)
+				break;
+		}
+		if (result != NULL)
+			uid = result->pw_uid;
+		if (buffer != _buffer)
+			free(buffer);
+	}
+#  else /* HAVE_GETPWNAM_R */
+	{
+		struct passwd *result;
+
+		result = getpwnam(uname);
+		if (result != NULL)
+			uid = result->pw_uid;
+	}
+#endif	/* HAVE_GETPWNAM_R */
 #elif defined(_WIN32) && !defined(__CYGWIN__)
-    /* TODO: do a uname->uid lookup for Windows. */
+	/* TODO: do a uname->uid lookup for Windows. */
 #else
-    #error No way to look up uids on this platform
+	#error No way to look up uids on this platform
 #endif
-    b->id = uid;
+	b->id = uid;
 
-    return (uid);
+	return (uid);
 }
 
 static void
 cleanup(void *private)
 {
-    size_t i;
-    struct bucket *cache = (struct bucket *)private;
+	size_t i;
+	struct bucket *cache = (struct bucket *)private;
 
-    for (i = 0; i < cache_size; i++)
-        free(cache[i].name);
-    free(cache);
+	for (i = 0; i < cache_size; i++)
+		free(cache[i].name);
+	free(cache);
 }
 
 
 static unsigned int
 hash(const char *p)
 {
-    /* A 32-bit version of Peter Weinberger's (PJW) hash algorithm,
-       as used by ELF for hashing function names. */
-    unsigned g, h = 0;
-    while (*p != '\0') {
-        h = ( h << 4 ) + *p++;
-        g = h & 0xF0000000;
-        if (g) {
-            h ^= g >> 24;
-            h &= 0x0FFFFFFF;
-        }
-    }
-    return h;
+	/* A 32-bit version of Peter Weinberger's (PJW) hash algorithm,
+	   as used by ELF for hashing function names. */
+	unsigned g, h = 0;
+	while (*p != '\0') {
+		h = (h << 4) + *p++;
+		if ((g = h & 0xF0000000) != 0) {
+			h ^= g >> 24;
+			h &= 0x0FFFFFFF;
+		}
+	}
+	return h;
 }

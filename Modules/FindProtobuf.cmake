@@ -7,6 +7,9 @@
 #                              (vsprojects/Debug & vsprojects/Release) will be searched
 #                              for libraries and binaries.
 #
+#   PROTOBUF_IMPORT_DIRS     - List of additional directories to be searched for
+#                              imported .proto files. (New in CMake 2.8.8)
+#
 # Defines the following variables:
 #
 #   PROTOBUF_FOUND - Found the Google Protocol Buffers library (libprotobuf & header files)
@@ -89,6 +92,16 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     endforeach()
   else()
     set(_protobuf_include_path -I ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+
+  if(DEFINED PROTOBUF_IMPORT_DIRS)
+    foreach(DIR ${PROTOBUF_IMPORT_DIRS})
+      get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
+      list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
+      if(${_contains_already} EQUAL -1)
+          list(APPEND _protobuf_include_path -I ${ABS_PATH})
+      endif()
+    endforeach()
   endif()
 
   set(${SRCS})

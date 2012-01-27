@@ -1,4 +1,4 @@
-.\" Copyright (c) 2003-2007 Tim Kientzle
+.\" Copyright (c) 2003-2009 Tim Kientzle
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -22,10 +22,10 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" $FreeBSD: src/lib/libarchive/libarchive-formats.5,v 1.16 2008/05/26 17:00:23 kientzle Exp $
+.\" $FreeBSD: head/lib/libarchive/libarchive-formats.5 201077 2009-12-28 01:50:23Z kientzle $
 .\"
-.Dd July 17, 2009
-.Dt libarchive-formats 5
+.Dd December 27, 2009
+.Dt LIBARCHIVE-FORMATS 5
 .Os
 .Sh NAME
 .Nm libarchive-formats
@@ -132,21 +132,30 @@ This name is limited to 100 bytes.
 Extended attributes, file flags, and other extended
 security information cannot be stored.
 .It
-Archive entries are limited to 2 gigabytes in size.
+Archive entries are limited to 8 gigabytes in size.
 .El
 Note that the pax interchange format has none of these restrictions.
 .El
+.Pp
+The libarchive library also reads a variety of commonly-used extensions to
+the basic tar format.
+These extensions are recognized automatically whenever they appear.
+.Bl -tag -width indent
+.It Numeric extensions.
+The POSIX standards require fixed-length numeric fields to be written with
+some character position reserved for terminators.
+Libarchive allows these fields to be written without terminator characters.
+This extends the allowable range; in particular, ustar archives with this
+extension can support entries up to 64 gigabytes in size.
+Libarchive also recognizes base-256 values in most numeric fields.
+This essentially removes all limitations on file size, modification time,
+and device numbers.
 .It Solaris extensions
 Libarchive recognizes ACL and extended attribute records written
 by Solaris tar.
 Currently, libarchive only has support for old-style ACLs; the
 newer NFSv4 ACLs are recognized but discarded.
-.Pp
-The libarchive library can also read a variety of commonly-used extensions to
-the basic tar format.
-In particular, it supports base-256 values in certain numeric fields.
-This essentially removes the limitations on file size, modification time,
-and device numbers.
+.El
 .Pp
 The first tar program appeared in Seventh Edition Unix in 1979.
 The first official standard for the tar file format was the
@@ -333,6 +342,12 @@ using libarchive.
 If it cannot locate and open the file on disk, libarchive
 will return an error for any attempt to read the entry
 body.
+.Ss RAR
+libarchive has limited support to read files in RAR format. Currently,
+libarchive can read single RAR files in RARv3 format which have been either
+created uncompressed, or compressed using any of the compression methods
+supported by the RARv3 format. libarchive can also extract RAR files which have
+been created as self-extracting RAR files.
 .Sh SEE ALSO
 .Xr ar 1 ,
 .Xr cpio 1 ,
