@@ -150,7 +150,7 @@ function(cmake_add_fortran_subdirectory subdir)
     )
   # create imported targets for all libraries
   foreach(lib ${libraries})
-    add_library(${lib} SHARED IMPORTED)
+    add_library(${lib} SHARED IMPORTED GLOBAL)
     set_property(TARGET ${lib} APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
     set_target_properties(${lib} PROPERTIES
       IMPORTED_IMPLIB_NOCONFIG   "${library_dir}/lib${lib}.lib"
