@@ -4,6 +4,7 @@
 #
 #  GNUPLOT_FOUND - system has Gnuplot
 #  GNUPLOT_EXECUTABLE - the Gnuplot executable
+#  GNUPLOT_VERSION_STRING - the version of Gnuplot found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
