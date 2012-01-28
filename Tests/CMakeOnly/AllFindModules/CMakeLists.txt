@@ -48,7 +48,7 @@ endif (NOT QT4_FOUND)
 # If any of these modules reported that it was found a version number should have been
 # reported.
 set(VERSIONS_REQUIRED
-    BISON BZIP2 CUPS CURL DOXYGEN EXPAT FLEX GETTEXT GIF GIT GNUTLS
+    BISON BZIP2 CUPS CURL DOXYGEN EXPAT FLEX GETTEXT GIF GIT GNUPLOT
     LIBXML2 PERL PostgreSQL SWIG ZLIB)
 
 foreach(VTEST ${VERSIONS_REQUIRED})
