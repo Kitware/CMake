@@ -8,14 +8,13 @@
 #                              for libraries and binaries.
 #
 #   PROTOBUF_IMPORT_DIRS     - List of additional directories to be searched for
-#                              imported .proto files. (New in CMake 2.8.8)
+#                              imported .proto files.
 #
 # Defines the following variables:
 #
 #   PROTOBUF_FOUND - Found the Google Protocol Buffers library (libprotobuf & header files)
 #   PROTOBUF_INCLUDE_DIRS - Include directories for Google Protocol Buffers
 #   PROTOBUF_LIBRARIES - The protobuf libraries
-# [New in CMake 2.8.5]
 #   PROTOBUF_PROTOC_LIBRARIES - The protoc libraries
 #   PROTOBUF_LITE_LIBRARIES - The protobuf-lite libraries
 #
@@ -24,7 +23,6 @@
 #   PROTOBUF_PROTOC_LIBRARY   - The protoc library
 #   PROTOBUF_INCLUDE_DIR - The include directory for protocol buffers
 #   PROTOBUF_PROTOC_EXECUTABLE - The protoc compiler
-# [New in CMake 2.8.5]
 #   PROTOBUF_LIBRARY_DEBUG - The protobuf library (debug)
 #   PROTOBUF_PROTOC_LIBRARY_DEBUG   - The protoc library (debug)
 #   PROTOBUF_LITE_LIBRARY - The protobuf lite library
