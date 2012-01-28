@@ -2204,8 +2204,10 @@ int cmake::ActualConfigure()
       std::string installedCompiler;
       // Try to find the newest VS installed on the computer and
       // use that as a default if -G is not specified
-      std::string vsregBase =
-        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
+      const std::string vsregBase = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\";
+      std::vector<std::string> vsVerions;
+      vsVerions.push_back("VisualStudio\\");
+      vsVerions.push_back("VCExpress\\");
       struct VSRegistryEntryName
       {
         const char* MSVersion;
@@ -2219,14 +2221,17 @@ int cmake::ActualConfigure()
         {"9.0", "Visual Studio 9 2008"},
         {"10.0", "Visual Studio 10"},
         {0, 0}};
-      for(int i =0; version[i].MSVersion != 0; i++)
+      for (size_t b = 0; b < vsVerions.size() && installedCompiler.empty(); b++)
         {
-        std::string reg = vsregBase + version[i].MSVersion;
-        reg += ";InstallDir]";
-        cmSystemTools::ExpandRegistryValues(reg);
-        if (!(reg == "/registry"))
+        for(int i =0; version[i].MSVersion != 0; i++)
           {
-          installedCompiler = version[i].GeneratorName;
+          std::string reg = vsregBase + vsVerions[b] + version[i].MSVersion;
+          reg += ";InstallDir]";
+          cmSystemTools::ExpandRegistryValues(reg, cmSystemTools::KeyWOW64_32);
+          if (!(reg == "/registry"))
+            {
+            installedCompiler = version[i].GeneratorName;
+            }
           }
         }
       cmGlobalGenerator* gen
