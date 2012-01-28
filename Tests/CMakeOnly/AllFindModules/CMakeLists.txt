@@ -48,17 +48,17 @@ endif (NOT QT4_FOUND)
 # If any of these modules reported that it was found a version number should have been
 # reported.
 set(VERSIONS_REQUIRED
-    BISON BZIP2 CUPS CURL DOXYGEN EXPAT FLEX GETTEXT GIF GIT GNUTLS
+    BISON BZIP2 CUPS CURL DOXYGEN EXPAT FLEX GETTEXT GIF GIT GNUPLOT
     LIBXML2 PERL PostgreSQL SWIG ZLIB)
 
 foreach(VTEST ${VERSIONS_REQUIRED})
     if (${VTEST}_FOUND)
         if (DEFINED ${VTEST}_VERSION)
-            if (NOT ${VTEST}_VERSION MATCHES "^[0-9]([0-9A-Za-z\\.]*)$")
+            if (NOT ${VTEST}_VERSION MATCHES "^[0-9][0-9\\.]*[A-Za-z]*[0-9\\.]*$")
                 message(SEND_ERROR "${VTEST}_VERSION has unexpected content ${${VTEST}_VERSION}")
             endif()
         elseif (DEFINED ${VTEST}_VERSION_STRING)
-            if (NOT ${VTEST}_VERSION_STRING MATCHES "^[0-9][0-9\\.]*[A-Za-z]*$")
+            if (NOT ${VTEST}_VERSION_STRING MATCHES "^[0-9][0-9\\.]*[A-Za-z]*[0-9\\.]*$")
                 message(SEND_ERROR "${VTEST}_VERSION_STRING has unexpected content ${${VTEST}_VERSION_STRING}")
             endif()
         else()
