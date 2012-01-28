@@ -8,6 +8,7 @@
 #
 #     ALSA_INCLUDE_DIR - where to find asoundlib.h, etc.
 #     ALSA_LIBRARY     - the asound library
+#     ALSA_VERSION_STRING - the version of alsa found (since CMake 2.8.8)
 #
 
 #=============================================================================
