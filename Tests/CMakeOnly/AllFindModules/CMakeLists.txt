@@ -44,3 +44,25 @@ if (NOT QT4_FOUND)
         do_find(${FIND_MODULE})
     endforeach(FIND_MODULE)
 endif (NOT QT4_FOUND)
+
+# If any of these modules reported that it was found a version number should have been
+# reported.
+set(VERSIONS_REQUIRED
+    ALSA BISON BZIP2 CUPS CURL DOXYGEN EXPAT FLEX GETTEXT GIF GIT GNUPLOT
+    ImageMagick JASPER LibArchive LIBXML2 PERL PostgreSQL SWIG TIFF ZLIB)
+
+foreach(VTEST ${VERSIONS_REQUIRED})
+    if (${VTEST}_FOUND)
+        if (DEFINED ${VTEST}_VERSION)
+            if (NOT ${VTEST}_VERSION MATCHES "^[0-9][0-9\\.]*[A-Za-z_]*[0-9\\.]*$")
+                message(SEND_ERROR "${VTEST}_VERSION has unexpected content ${${VTEST}_VERSION}")
+            endif()
+        elseif (DEFINED ${VTEST}_VERSION_STRING)
+            if (NOT ${VTEST}_VERSION_STRING MATCHES "^[0-9][0-9\\.]*[A-Za-z_]*[0-9\\.]*$")
+                message(SEND_ERROR "${VTEST}_VERSION_STRING has unexpected content ${${VTEST}_VERSION_STRING}")
+            endif()
+        else()
+            message(SEND_ERROR "${VTEST}_FOUND is set but no version number is defined")
+        endif()
+    endif(${VTEST}_FOUND)
+endforeach(VTEST)
