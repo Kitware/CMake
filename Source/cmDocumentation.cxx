@@ -512,7 +512,7 @@ bool cmDocumentation::CreateSingleModule(const char* fname,
     if(line.size() && line[0] == '#')
       {
       /* line beginnings with ## are mark-up ignore them */
-      if (line[1] == '#') continue;
+      if (line.size()>=2 && line[1] == '#') continue;
       // blank line
       if(line.size() <= 2)
         {
