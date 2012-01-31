@@ -2682,7 +2682,9 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
       j != this->Commands.end(); ++j)
     {
     if (((  withCompatCommands == false) && ( (*j).second->IsDiscouraged()))
-        || ((withCurrentCommands == false) && (!(*j).second->IsDiscouraged())))
+        || ((withCurrentCommands == false) && (!(*j).second->IsDiscouraged()))
+        || (!((*j).second->ShouldAppearInDocumentation()))
+        )
       {
       continue;
       }
