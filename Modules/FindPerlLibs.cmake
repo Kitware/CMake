@@ -254,6 +254,8 @@ find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLU
 set(PERL_INCLUDE_DIR  ${PERL_INCLUDE_PATH})
 set(PERL_INCLUDE_DIRS ${PERL_INCLUDE_PATH})
 set(PERL_LIBRARIES    ${PERL_LIBRARY})
+# For backward compatibility with CMake before 2.8.7
+set(PER_VERSION ${PERL_VERSION_STRING})
 
 mark_as_advanced(
   PERL_INCLUDE_PATH
