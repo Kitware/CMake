@@ -15,7 +15,6 @@
 # basename_LIBRARY and basename_LIBRARIES will take only the release values.
 
 #=============================================================================
-# Copyright 2009 Kitware, Inc.
 # Copyright 2009 Will Dicharry <wdicharry@stellarscience.com>
 # Copyright 2005-2009 Kitware, Inc.
 #
@@ -49,7 +48,8 @@ macro( select_library_configurations basename )
     # if only the debug version was found, set the release value to be the
     # debug value.
     _set_library_name( ${basename} DEBUG RELEASE )
-    if (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE )
+    if (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE AND
+           NOT ${basename}_LIBRARY_DEBUG STREQUAL ${basename}_LIBRARY_RELEASE)
         # if the generator supports configuration types or CMAKE_BUILD_TYPE
         # is set, then set optimized and debug options.
         if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
@@ -65,7 +65,7 @@ macro( select_library_configurations basename )
             set( ${basename}_LIBRARY ${${basename}_LIBRARY_RELEASE} )
             set( ${basename}_LIBRARIES ${${basename}_LIBRARY_RELEASE} )
         endif( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-    endif( ${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE )
+    endif()
 
     set( ${basename}_LIBRARY ${${basename}_LIBRARY} CACHE FILEPATH 
         "The ${basename} library" )
@@ -79,4 +79,3 @@ macro( select_library_configurations basename )
         ${basename}_LIBRARY_DEBUG
     )
 endmacro( select_library_configurations )
-
