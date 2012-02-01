@@ -58,7 +58,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
   // Change to local toplevel
   cmSystemTools::ChangeDirectory(localToplevel.c_str());
   std::string filePrefix;
-  if (this->IsOn("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))
+  if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY"))
     {
     filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
     filePrefix += "/";
