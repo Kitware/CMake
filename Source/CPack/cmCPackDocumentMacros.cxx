@@ -1,7 +1,7 @@
 #include "cmCPackDocumentMacros.h"
 
 void cmCPackDocumentMacros::GetMacrosDocumentation(
-        std::vector<cmDocumentationEntry>& v)
+        std::vector<cmDocumentationEntry>& )
 {
    // avoid compiler warning
    (int)v.size();

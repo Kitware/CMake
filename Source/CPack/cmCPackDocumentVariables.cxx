@@ -1,7 +1,7 @@
 #include "cmCPackDocumentVariables.h"
 #include "cmake.h"
 
-void cmCPackDocumentVariables::DefineVariables(cmake* cm)
+void cmCPackDocumentVariables::DefineVariables(cmake* )
 {
   // avoid compiler warning
   (void*)cm;
