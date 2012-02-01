@@ -1937,7 +1937,7 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
   cmTarget& target = it->second;
   target.SetType(type, name);
   target.SetMakefile(this);
-  this->LocalGenerator->GetGlobalGenerator()->AddTarget(*it);
+  this->LocalGenerator->GetGlobalGenerator()->AddTarget(&it->second);
   return &it->second;
 }
 
@@ -3894,7 +3894,8 @@ void cmMakefile::DefineProperties(cmake *cm)
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type)
+cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
+                              bool global)
 {
   // Create the target.
   cmsys::auto_ptr<cmTarget> target(new cmTarget);
@@ -3904,6 +3905,10 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type)
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();
+  if(global)
+    {
+    this->LocalGenerator->GetGlobalGenerator()->AddTarget(target.get());
+    }
 
   // Transfer ownership to this cmMakefile object.
   this->ImportedTargetsOwned.push_back(target.get());

@@ -203,7 +203,8 @@ public:
   void RemoveDefineFlag(const char* definition);
 
   /** Create a new imported target with the name and type given.  */
-  cmTarget* AddImportedTarget(const char* name, cmTarget::TargetType type);
+  cmTarget* AddImportedTarget(const char* name, cmTarget::TargetType type,
+                              bool global);
 
   cmTarget* AddNewTarget(cmTarget::TargetType type, const char* name);
 

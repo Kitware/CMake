@@ -31,6 +31,7 @@ bool cmAddLibraryCommand
     }
   bool excludeFromAll = false;
   bool importTarget = false;
+  bool importGlobal = false;
 
   std::vector<std::string>::const_iterator s = args.begin();
 
@@ -79,6 +80,11 @@ bool cmAddLibraryCommand
       ++s;
       importTarget = true;
       }
+    else if(importTarget && *s == "GLOBAL")
+      {
+      ++s;
+      importGlobal = true;
+      }
     else
       {
       break;
@@ -124,7 +130,7 @@ bool cmAddLibraryCommand
       }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(libName.c_str(), type);
+    this->Makefile->AddImportedTarget(libName.c_str(), type, importGlobal);
     return true;
     }
 
