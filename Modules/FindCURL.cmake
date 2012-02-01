@@ -34,11 +34,16 @@ FIND_LIBRARY(CURL_LIBRARY NAMES
 )
 MARK_AS_ADVANCED(CURL_LIBRARY)
 
-IF(CURL_INCLUDE_DIR AND EXISTS "${CURL_INCLUDE_DIR}/curl/curlver.h")
-  FILE(STRINGS "${CURL_INCLUDE_DIR}/curl/curlver.h" curl_version_str REGEX "^#define[\t ]+LIBCURL_VERSION[\t ]+\".*\"")
+IF(CURL_INCLUDE_DIR)
+  FOREACH(_curl_version_header curlver.h curl.h)
+    IF(EXISTS "${CURL_INCLUDE_DIR}/curl/${_curl_version_header}")
+      FILE(STRINGS "${CURL_INCLUDE_DIR}/curl/${_curl_version_header}" curl_version_str REGEX "^#define[\t ]+LIBCURL_VERSION[\t ]+\".*\"")
 
-  STRING(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION_STRING "${curl_version_str}")
-  UNSET(curl_version_str)
+      STRING(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION_STRING "${curl_version_str}")
+      UNSET(curl_version_str)
+      BREAK()
+    ENDIF()
+  ENDFOREACH(_curl_version_header)
 ENDIF()
 
 # handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if 
