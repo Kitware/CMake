@@ -156,7 +156,6 @@ public:
                                std::vector<cmDocumentationEntry>& commands,
                                cmake* cm,
                                const char *docSection);
-  ;
 private:
   void SetForm(Form f);
   void SetDocName(const char* docname);
