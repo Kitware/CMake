@@ -1,10 +1,8 @@
 #include "cmCPackDocumentVariables.h"
 #include "cmake.h"
 
-void cmCPackDocumentVariables::DefineVariables(cmake* cm)
+void cmCPackDocumentVariables::DefineVariables(cmake* )
 {
-  // avoid compiler warning
-  (void*)cm;
   // Subsection: variables defined/used by cpack,
   // which are common to all CPack generators
 
