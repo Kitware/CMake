@@ -56,19 +56,3 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 else()
   message("Unhandled Platform")
 endif()
-
-#
-# This is a no-op executable... If this test is going to fail, it fails during
-# the configure step while cmake is configuring this CMakeLists.txt file...
-#
-
-file(WRITE
-  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-  "int main() { return 0; }
-"
-)
-
-add_executable(
-  CheckCXXCompilerFlag
-  "${CMAKE_CURRENT_BINARY_DIR}/main.cxx"
-)

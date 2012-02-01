@@ -15,6 +15,8 @@ add_CMakeOnly_test(CheckSymbolExists)
 
 add_CMakeOnly_test(CheckCXXSymbolExists)
 
+add_CMakeOnly_test(CheckCXXCompilerFlag)
+
 add_CMakeOnly_test(AllFindModules)
 
 add_CMakeOnly_test(TargetScope)
