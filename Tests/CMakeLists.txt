@@ -360,6 +360,15 @@ IF(BUILD_TESTING)
       --build-target car
       --test-command car
       )
+
+    IF(${CMAKE_TEST_GENERATOR} MATCHES "Ninja")
+      # The Ninja generator does not create a recursive build system.  Start
+      # from the root directory.
+      SET(SubProject_SUBDIR)
+    ELSE()
+      SET(SubProject_SUBDIR "/foo")
+    ENDIF()
+
     # For stage 2, do not run cmake again.
     # Then build the foo sub project which should build
     # the bar library which should be referenced because
@@ -367,13 +376,14 @@ IF(BUILD_TESTING)
     # directly in the foo sub project
     ADD_TEST(SubProject-Stage2  ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/SubProject/foo"
-      "${CMake_BINARY_DIR}/Tests/SubProject/foo"
+      "${CMake_SOURCE_DIR}/Tests/SubProject${SubProject_SUBDIR}"
+      "${CMake_BINARY_DIR}/Tests/SubProject${SubProject_SUBDIR}"
       --build-generator ${CMAKE_TEST_GENERATOR}
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-nocmake
       --build-project foo
       --build-target foo
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubProject/foo"
       --test-command foo
       )
     SET_TESTS_PROPERTIES ( SubProject-Stage2 PROPERTIES DEPENDS SubProject)
