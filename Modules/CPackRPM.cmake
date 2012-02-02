@@ -1,5 +1,7 @@
-# - The builtin (binary) CPack RPM generator (Unix only)
+##section Variables specific to a CPack generator
+##end
 ##module
+# - The builtin (binary) CPack RPM generator (Unix only)
 # CPackRPM may be used to create RPM package using CPack.
 # CPackRPM is a CPack generator thus it uses the CPACK_XXX variables
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration

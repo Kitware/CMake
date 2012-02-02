@@ -1,3 +1,6 @@
+##section Variables common to all CPack generators
+##end
+##module
 # - Build binary and source package installers.
 # The CPack module generates binary and source installers in a variety
 # of formats using the cpack program. Inclusion of the CPack module
@@ -28,16 +31,16 @@
 # on a per-generator basis. It only need contain overrides.
 #
 # Here's how it works:
-# - cpack runs
-# - it includes CPackConfig.cmake
-# - it iterates over the generators listed in that file's
-#     CPACK_GENERATOR list variable (unless told to use just a
-#     specific one via -G on the command line...)
+#  - cpack runs
+#  - it includes CPackConfig.cmake
+#  - it iterates over the generators listed in that file's
+#    CPACK_GENERATOR list variable (unless told to use just a
+#    specific one via -G on the command line...)
 #
-# - foreach generator, it then
-#   - sets CPACK_GENERATOR to the one currently being iterated
-#   - includes the CPACK_PROJECT_CONFIG_FILE
-#   - produces the package for that generator
+#  - foreach generator, it then
+#    - sets CPACK_GENERATOR to the one currently being iterated
+#    - includes the CPACK_PROJECT_CONFIG_FILE
+#    - produces the package for that generator
 #
 # This is the key: For each generator listed in CPACK_GENERATOR
 # in CPackConfig.cmake, cpack will *reset* CPACK_GENERATOR
@@ -47,6 +50,7 @@
 # Before including this CPack module in your CMakeLists.txt file,
 # there are a variety of variables that can be set to customize
 # the resulting installers. The most commonly-used variables are:
+##end
 #
 ##variable
 #   CPACK_PACKAGE_NAME - The name of the package (or application). If
