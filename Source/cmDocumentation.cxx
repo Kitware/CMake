@@ -768,6 +768,7 @@ int cmDocumentation::GetStructuredDocFromFile(
 {
     typedef enum sdoce {
         SDOC_NONE, SDOC_MODULE, SDOC_MACRO, SDOC_FUNCTION, SDOC_VARIABLE,
+        SDOC_SECTION,
         SDOC_UNKNOWN} sdoc_t;
     int nbDocItemFound = 0;
     int docCtxIdx      = 0;
@@ -795,9 +796,13 @@ int cmDocumentation::GetStructuredDocFromFile(
       if(line.size() && line[0] == '#')
         {
         /* handle structured doc context */
-        if (line[1]=='#')
+        if ((line.size()>=2) && line[1]=='#')
         {
-            std::string mkword = line.substr(2,std::string::npos);
+            /* markup word is following '##' stopping at first space
+             * Some markup word like 'section' may have more characters
+             * following but we don't handle those here.
+             */
+            std::string mkword = line.substr(2,line.find(' ',2)-2);
             if (mkword=="macro")
             {
                docCtxIdx++;
@@ -822,6 +827,14 @@ int cmDocumentation::GetStructuredDocFromFile(
                docContextStack[docCtxIdx]=SDOC_MODULE;
                newCtx = true;
             }
+            else if (mkword=="section")
+            {
+               docCtxIdx++;
+               docContextStack[docCtxIdx]=SDOC_SECTION;
+               /* drop the rest of the line */
+               line.clear();
+               newCtx = true;
+            }
             else if (mkword.substr(0,3)=="end")
             {
                switch (docContextStack[docCtxIdx]) {
@@ -839,6 +852,9 @@ int cmDocumentation::GetStructuredDocFromFile(
                         docSection);
                    break;
                case SDOC_MODULE:
+                   /*  not implemented */
+                   break;
+               case SDOC_SECTION:
                    /*  not implemented */
                    break;
                default:

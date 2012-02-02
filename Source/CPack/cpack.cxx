@@ -26,6 +26,8 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/CommandLineArguments.hxx>
+#include <cmsys/Glob.hxx>
+#include <cmsys/SystemTools.hxx>
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
@@ -527,22 +529,54 @@ int main (int argc, char *argv[])
 
     typedef std::pair<std::string,std::string> docModuleSectionPair_t;
     typedef std::list<docModuleSectionPair_t>  docedModulesList_t;
-    docedModulesList_t docedModList;
+    docedModulesList_t     docedModList;
     docModuleSectionPair_t docPair;
     std::string            docedFile;
 
-    // build the list of files to be parsed for documentation
-    // extraction
-    docPair.first  = "CPack.cmake";
-    docPair.second = "Variables common to all CPack generators";
-    docedModList.push_back(docPair);
-    docPair.first  = "CPackComponent.cmake";
-    docedModList.push_back(docPair);
-    docPair.first  = "CPackRPM.cmake";
-    docPair.second = "Variables specific to a CPack generator";
-    docedModList.push_back(docPair);
-    docPair.first  = "CPackDeb.cmake";
-    docedModList.push_back(docPair);
+    cmsys::Glob gl;
+    std::string findExpr;
+    std::vector<std::string> files;
+    std::string line;
+    docedFile = globalMF->GetModulesFile("CPack.cmake");
+    if (docedFile.length()!=0)
+      {
+      findExpr += cmSystemTools::GetFilenamePath(docedFile.c_str());
+      findExpr += "/CPack*.cmake";
+      if (gl.FindFiles(findExpr))
+        {
+        files = gl.GetFiles();
+        for (std::vector<std::string>::iterator itf=files.begin();
+             itf!=files.end();++itf)
+          {
+          std::ifstream fin((*itf).c_str());
+          if (!fin) continue;
+          if (cmSystemTools::GetLineFromStream(fin, line))
+            {
+            if (line.find("##section")!=std::string::npos)
+              {
+              docPair.first = cmSystemTools::GetFilenameName(*itf);
+              // 10 is the size of '##section' + 1
+              docPair.second = line.substr(10,std::string::npos);
+              docedModList.push_back(docPair);
+              }
+            }
+          else
+            {
+            line.clear();
+            }
+          }
+        }
+      else
+        {
+        // build the list of files to be parsed for documentation
+        // extraction
+        docPair.first  = "CPack.cmake";
+        docPair.second = "Variables common to all CPack generators";
+        docedModList.push_back(docPair);
+        docPair.first  = "CPackComponent.cmake";
+        docedModList.push_back(docPair);
+        }
+      }
 
     // parse the files for documentation.
     for (docedModulesList_t::iterator it = docedModList.begin();
