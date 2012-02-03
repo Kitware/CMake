@@ -269,63 +269,49 @@ void cmVisualStudio10TargetGenerator::Generate()
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 {
-  const char* vsDotNetReferences
-    = this->Target->GetProperty("VS_DOTNET_REFERENCES");
-  if(vsDotNetReferences)
+  std::vector<std::string> references;
+  if(const char* vsDotNetReferences =
+     this->Target->GetProperty("VS_DOTNET_REFERENCES"))
     {
-    std::string references(vsDotNetReferences);
-    std::string::size_type position = 0;
-
+    cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
+    }
+  if(!references.empty())
+    {
     this->WriteString("<ItemGroup>\n", 1);
-    while(references.length() > 0)
+    for(std::vector<std::string>::iterator ri = references.begin();
+        ri != references.end(); ++ri)
       {
-      if((position = references.find(";")) == std::string::npos)
-        {
-        position = references.length() + 1;
-        }
-
       this->WriteString("<Reference Include=\"", 2);
-      (*this->BuildFileStream) <<
-        cmVS10EscapeXML(references.substr(0, position)) << "\">\n";
+      (*this->BuildFileStream) << cmVS10EscapeXML(*ri) << "\">\n";
       this->WriteString("<CopyLocalSatelliteAssemblies>true"
                         "</CopyLocalSatelliteAssemblies>\n", 3);
       this->WriteString("<ReferenceOutputAssembly>true"
                         "</ReferenceOutputAssembly>\n", 3);
       this->WriteString("</Reference>\n", 2);
-
-      references.erase(0, position + 1);
       }
-
     this->WriteString("</ItemGroup>\n", 1);
     }
 }
 
 void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
 {
-  const char* vsWinRTReferences
-    = this->Target->GetProperty("VS_WINRT_REFERENCES");
-  if(vsWinRTReferences)
+  std::vector<std::string> references;
+  if(const char* vsWinRTReferences =
+     this->Target->GetProperty("VS_WINRT_REFERENCES"))
     {
-    std::string references(vsWinRTReferences);
-    std::string::size_type position = 0;
-
+    cmSystemTools::ExpandListArgument(vsWinRTReferences, references);
+    }
+  if(!references.empty())
+    {
     this->WriteString("<ItemGroup>\n", 1);
-    while(references.length() > 0)
+    for(std::vector<std::string>::iterator ri = references.begin();
+        ri != references.end(); ++ri)
       {
-      if((position = references.find(";")) == std::string::npos)
-        {
-        position = references.length() + 1;
-        }
-
       this->WriteString("<Reference Include=\"", 2);
-      (*this->BuildFileStream) <<
-        cmVS10EscapeXML(references.substr(0, position)) << "\">\n";
+      (*this->BuildFileStream) << cmVS10EscapeXML(*ri) << "\">\n";
       this->WriteString("<IsWinMDFile>true</IsWinMDFile>\n", 3);
       this->WriteString("</Reference>\n", 2);
-
-      references.erase(0, position + 1);
       }
-
     this->WriteString("</ItemGroup>\n", 1);
     }
 }
