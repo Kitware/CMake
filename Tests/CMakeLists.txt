@@ -765,56 +765,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
 
-  # Como does not seem to support shared libraries.
-  GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
-  IF(CMAKE_BASE_NAME MATCHES "^como$")
-    SET(COMPILER_IS_COMO 1)
-  ENDIF(CMAKE_BASE_NAME MATCHES "^como$")
-  IF(NOT COMPILER_IS_COMO)
-    ADD_TEST(complex  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Complex"
-      "${CMake_BINARY_DIR}/Tests/Complex"
-      --build-two-config
-      --build-config-sample "${CMAKE_CTEST_COMMAND}"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project Complex
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
-      --build-options
-      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-      --test-command complex
-      )
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Complex")
+  ADD_TEST(complex  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Complex"
+    "${CMake_BINARY_DIR}/Tests/Complex"
+    --build-two-config
+    --build-config-sample "${CMAKE_CTEST_COMMAND}"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project Complex
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
+    --build-options
+    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    --test-command complex
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Complex")
 
-    ADD_TEST(complexOneConfig  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
-      "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project Complex
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
-      --build-options
-      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-      --test-command complex)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
-    # because of the registry write these tests depend on each other
-    SET_TESTS_PROPERTIES ( complex PROPERTIES DEPENDS complexOneConfig)
-
-# This fails on VS 70
-# works on Xcode and makefiles
-#      ADD_TEST(ConvLibrary ${CMAKE_CTEST_COMMAND}
-#        --build-and-test
-#        "${CMake_SOURCE_DIR}/Tests/ConvLibrary"
-#        "${CMake_BINARY_DIR}/Tests/ConvLibrary"
-#        --build-two-config
-#        --build-generator ${CMAKE_TEST_GENERATOR}
-#        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-#        --build-project ConvLibrary
-#        --test-command bartest)
-
-  ENDIF(NOT COMPILER_IS_COMO)
+  ADD_TEST(complexOneConfig  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
+    "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project Complex
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
+    --build-options
+    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    --test-command complex)
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
+  # because of the registry write these tests depend on each other
+  SET_TESTS_PROPERTIES ( complex PROPERTIES DEPENDS complexOneConfig)
 
   ADD_TEST(Example ${CMAKE_CTEST_COMMAND}
     --build-and-test
