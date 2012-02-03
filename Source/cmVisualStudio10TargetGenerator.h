@@ -48,6 +48,7 @@ private:
   void WriteProjectConfigurationValues();
   void WriteCLSources();
   void WriteDotNetReferences();
+  void WriteWinRTReferences();
   void WriteObjSources();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();

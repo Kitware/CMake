@@ -255,6 +255,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteObjSources();
   this->WriteCLSources();
   this->WriteDotNetReferences();
+  this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
@@ -290,6 +291,36 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
                         "</CopyLocalSatelliteAssemblies>\n", 3);
       this->WriteString("<ReferenceOutputAssembly>true"
                         "</ReferenceOutputAssembly>\n", 3);
+      this->WriteString("</Reference>\n", 2);
+
+      references.erase(0, position + 1);
+      }
+
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
+{
+  const char* vsWinRTReferences
+    = this->Target->GetProperty("VS_WINRT_REFERENCES");
+  if(vsWinRTReferences)
+    {
+    std::string references(vsWinRTReferences);
+    std::string::size_type position = 0;
+
+    this->WriteString("<ItemGroup>\n", 1);
+    while(references.length() > 0)
+      {
+      if((position = references.find(";")) == std::string::npos)
+        {
+        position = references.length() + 1;
+        }
+
+      this->WriteString("<Reference Include=\"", 2);
+      (*this->BuildFileStream) <<
+        cmVS10EscapeXML(references.substr(0, position)) << "\">\n";
+      this->WriteString("<IsWinMDFile>true</IsWinMDFile>\n", 3);
       this->WriteString("</Reference>\n", 2);
 
       references.erase(0, position + 1);
@@ -372,7 +403,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     this->WriteString(mfcLine.c_str(), 2);
 
     if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
-       this->ClOptions[*i]->UsingUnicode())
+       this->ClOptions[*i]->UsingUnicode() ||
+       this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
       this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
       }
@@ -386,6 +418,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       pts += toolset;
       pts += "</PlatformToolset>\n";
       this->WriteString(pts.c_str(), 2);
+      }
+    if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+      {
+      this->WriteString("<Immersive>true</Immersive>\n", 2);
       }
     this->WriteString("</PropertyGroup>\n", 1);
     }
