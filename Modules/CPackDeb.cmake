@@ -1,3 +1,6 @@
+##section Variables specific to a CPack generator
+##end
+##module
 # - The builtin (binary) CPack Deb generator (Unix only)
 # CPackDeb may be used to create Deb package using CPack.
 # CPackDeb is a CPack generator thus it uses the CPACK_XXX variables
@@ -11,6 +14,7 @@
 # the wiki:
 #  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
 # However as a handy reminder here comes the list of specific variables:
+##end
 #
 ##variable
 # CPACK_DEBIAN_PACKAGE_NAME

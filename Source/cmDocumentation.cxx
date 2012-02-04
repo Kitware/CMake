@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include <cmsys/Directory.hxx>
+#include <cmsys/Glob.hxx>
 
 
 //----------------------------------------------------------------------------
@@ -745,6 +746,60 @@ void cmDocumentation::addCPackStandardDocSections()
 }
 
 //----------------------------------------------------------------------------
+int cmDocumentation::getDocumentedModulesListInDir(
+          std::string path,
+          std::string globExpr,
+          documentedModulesList_t& docedModuleList)
+{
+  cmsys::Glob gl;
+  std::string findExpr;
+  std::vector<std::string> files;
+  std::string line;
+  documentedModuleSectionPair_t docPair;
+  int nbDocumentedModules = 0;
+
+  findExpr = path + "/" + globExpr;
+  if (gl.FindFiles(findExpr))
+    {
+    files = gl.GetFiles();
+    for (std::vector<std::string>::iterator itf=files.begin();
+        itf!=files.end();++itf)
+      {
+      std::ifstream fin((*itf).c_str());
+      // file access trouble ignore it (ignore this kind of error)
+      if (!fin) continue;
+      /* read first line in order to get doc section */
+      if (cmSystemTools::GetLineFromStream(fin, line))
+        {
+        /* Doc section indicates that
+         * this file has structured doc in it.
+         */
+        if (line.find("##section")!=std::string::npos)
+          {
+          // ok found one more documented module
+          ++nbDocumentedModules;
+          docPair.first = *itf;
+          // 10 is the size of '##section' + 1
+          docPair.second = line.substr(10,std::string::npos);
+          docedModuleList.push_back(docPair);
+          }
+        // No else if no section is found (undocumented module)
+        }
+      // No else cannot read first line (ignore this kind of error)
+      line.clear();
+      }
+    }
+  if (nbDocumentedModules>0)
+    {
+    return 0;
+    }
+  else
+    {
+    return 1;
+    }
+}
+
+//----------------------------------------------------------------------------
 static void trim(std::string& s)
 {
   std::string::size_type pos = s.find_last_not_of(' ');
@@ -768,6 +823,7 @@ int cmDocumentation::GetStructuredDocFromFile(
 {
     typedef enum sdoce {
         SDOC_NONE, SDOC_MODULE, SDOC_MACRO, SDOC_FUNCTION, SDOC_VARIABLE,
+        SDOC_SECTION,
         SDOC_UNKNOWN} sdoc_t;
     int nbDocItemFound = 0;
     int docCtxIdx      = 0;
@@ -795,9 +851,13 @@ int cmDocumentation::GetStructuredDocFromFile(
       if(line.size() && line[0] == '#')
         {
         /* handle structured doc context */
-        if (line[1]=='#')
+        if ((line.size()>=2) && line[1]=='#')
         {
-            std::string mkword = line.substr(2,std::string::npos);
+            /* markup word is following '##' stopping at first space
+             * Some markup word like 'section' may have more characters
+             * following but we don't handle those here.
+             */
+            std::string mkword = line.substr(2,line.find(' ',2)-2);
             if (mkword=="macro")
             {
                docCtxIdx++;
@@ -822,6 +882,14 @@ int cmDocumentation::GetStructuredDocFromFile(
                docContextStack[docCtxIdx]=SDOC_MODULE;
                newCtx = true;
             }
+            else if (mkword=="section")
+            {
+               docCtxIdx++;
+               docContextStack[docCtxIdx]=SDOC_SECTION;
+               /* drop the rest of the line */
+               line.clear();
+               newCtx = true;
+            }
             else if (mkword.substr(0,3)=="end")
             {
                switch (docContextStack[docCtxIdx]) {
@@ -839,6 +907,9 @@ int cmDocumentation::GetStructuredDocFromFile(
                         docSection);
                    break;
                case SDOC_MODULE:
+                   /*  not implemented */
+                   break;
+               case SDOC_SECTION:
                    /*  not implemented */
                    break;
                default:

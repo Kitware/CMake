@@ -26,6 +26,7 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/CommandLineArguments.hxx>
+#include <cmsys/SystemTools.hxx>
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
@@ -525,36 +526,26 @@ int main (int argc, char *argv[])
 
     std::vector<cmDocumentationEntry> commands;
 
-    typedef std::pair<std::string,std::string> docModuleSectionPair_t;
-    typedef std::list<docModuleSectionPair_t>  docedModulesList_t;
-    docedModulesList_t docedModList;
-    docModuleSectionPair_t docPair;
-    std::string            docedFile;
+    std::string                              docedFile;
+    std::string                              docPath;
+    cmDocumentation::documentedModulesList_t docedModList;
 
-    // build the list of files to be parsed for documentation
-    // extraction
-    docPair.first  = "CPack.cmake";
-    docPair.second = "Variables common to all CPack generators";
-    docedModList.push_back(docPair);
-    docPair.first  = "CPackComponent.cmake";
-    docedModList.push_back(docPair);
-    docPair.first  = "CPackRPM.cmake";
-    docPair.second = "Variables specific to a CPack generator";
-    docedModList.push_back(docPair);
-    docPair.first  = "CPackDeb.cmake";
-    docedModList.push_back(docPair);
+    docedFile = globalMF->GetModulesFile("CPack.cmake");
+    if (docedFile.length()!=0)
+      {
+      docPath = cmSystemTools::GetFilenamePath(docedFile.c_str());
+      doc.getDocumentedModulesListInDir(docPath,"CPack*.cmake",docedModList);
+      }
 
     // parse the files for documentation.
-    for (docedModulesList_t::iterator it = docedModList.begin();
-         it!= docedModList.end(); ++it)
+    cmDocumentation::documentedModulesList_t::iterator docedIt;
+    for (docedIt = docedModList.begin();
+         docedIt!= docedModList.end(); ++docedIt)
       {
-      docedFile = globalMF->GetModulesFile((it->first).c_str());
-      if (docedFile.length()!=0)
-        {
-          doc.GetStructuredDocFromFile(docedFile.c_str(),
-                                       commands,&cminst,(it->second).c_str());
-        }
-     }
+          doc.GetStructuredDocFromFile(
+              (docedIt->first).c_str(),
+              commands,&cminst,(docedIt->second).c_str());
+      }
 
     std::map<std::string,cmDocumentationSection *> propDocs;
     cminst.GetPropertiesDocumentation(propDocs);
