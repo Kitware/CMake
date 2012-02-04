@@ -35,6 +35,21 @@ public:
   cmDocumentation();
   
   ~cmDocumentation();
+
+  /**
+   * An helper type pair for [structured] documented modules.
+   * The comment of those module contains structure markup
+   * which makes it possible to retrieve the documentation
+   * of variables, macros and functions defined in the module.
+   * - first is the filename of the module
+   * - second is the section of the doc the module belongs too
+   */
+  typedef std::pair<std::string,std::string> documentedModuleSectionPair_t;
+  /**
+   * A list of documented module(s).
+   */
+  typedef std::list<documentedModuleSectionPair_t>  documentedModulesList_t;
+
   // High-level interface for standard documents:
   
   /**
@@ -133,6 +148,21 @@ public:
   void addCPackStandardDocSections();
 
   /**
+   * Retrieve the list of documented module located in
+   * path which match the globing expression globExpr.
+   * @param[in] path, directory where to start the search
+   *                  we will recurse into it.
+   * @param[in] globExpr, the globing expression used to
+   *                      match the file in path.
+   * @param[out] the list of obtained pairs (may be empty)
+   * @return 0 on success 1 on error or empty list
+   */
+  int getDocumentedModulesListInDir(
+          std::string path,
+          std::string globExpr,
+          documentedModulesList_t& docModuleList);
+
+  /**
    * Get the documentation of macros, functions and variable documented
    * with CMake structured documentation in a CMake script.
    * (in fact it may be in any file which follow the structured doc format)
@@ -140,7 +170,8 @@ public:
    * ## (double sharp) in column 1 & 2 immediately followed
    * by a markup. Those ## are ignored by the legacy module
    * documentation parser @see CreateSingleModule.
-   * Current markup are ##macro, ##function, ##variable and ##end.
+   * Current markup are ##section, ##module,
+   * ##macro, ##function, ##variable and ##end.
    * ##end is closing either of the previous ones.
    * @param[in] fname the script file name to be parsed for documentation
    * @param[in,out] commands the vector of command/macros documentation
