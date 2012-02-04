@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include <cmsys/Directory.hxx>
+#include <cmsys/Glob.hxx>
 
 
 //----------------------------------------------------------------------------
@@ -742,6 +743,60 @@ void cmDocumentation::addCPackStandardDocSections()
             "Variables common to all CPack generators");
     this->VariableSections.push_back(
             "Variables specific to a CPack generator");
+}
+
+//----------------------------------------------------------------------------
+int cmDocumentation::getDocumentedModulesListInDir(
+          std::string path,
+          std::string globExpr,
+          documentedModulesList_t& docedModuleList)
+{
+  cmsys::Glob gl;
+  std::string findExpr;
+  std::vector<std::string> files;
+  std::string line;
+  documentedModuleSectionPair_t docPair;
+  int nbDocumentedModules = 0;
+
+  findExpr = path + "/" + globExpr;
+  if (gl.FindFiles(findExpr))
+    {
+    files = gl.GetFiles();
+    for (std::vector<std::string>::iterator itf=files.begin();
+        itf!=files.end();++itf)
+      {
+      std::ifstream fin((*itf).c_str());
+      // file access trouble ignore it (ignore this kind of error)
+      if (!fin) continue;
+      /* read first line in order to get doc section */
+      if (cmSystemTools::GetLineFromStream(fin, line))
+        {
+        /* Doc section indicates that
+         * this file has structured doc in it.
+         */
+        if (line.find("##section")!=std::string::npos)
+          {
+          // ok found one more documented module
+          ++nbDocumentedModules;
+          docPair.first = *itf;
+          // 10 is the size of '##section' + 1
+          docPair.second = line.substr(10,std::string::npos);
+          docedModuleList.push_back(docPair);
+          }
+        // No else if no section is found (undocumented module)
+        }
+      // No else cannot read first line (ignore this kind of error)
+      line.clear();
+      }
+    }
+  if (nbDocumentedModules>0)
+    {
+    return 0;
+    }
+  else
+    {
+    return 1;
+    }
 }
 
 //----------------------------------------------------------------------------
