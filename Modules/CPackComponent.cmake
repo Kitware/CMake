@@ -1,3 +1,6 @@
+##section Variables common to all CPack generators
+##end
+##module
 # - Build binary and source package installers
 #
 # The CPackComponent module is the module which handles
@@ -20,6 +23,7 @@
 # components are identified by the COMPONENT argument of CMake's
 # INSTALL commands, and should be further described by the following
 # CPack commands:
+##end
 #
 ##macro
 #   cpack_add_component - Describes a CPack installation component
