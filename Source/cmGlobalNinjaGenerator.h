@@ -255,7 +255,7 @@ private:
 
   void AddDependencyToAll(cmTarget* target);
 
-  void WriteAssumedSourceDependencies(std::ostream& os);
+  void WriteAssumedSourceDependencies();
 
   void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
   void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);

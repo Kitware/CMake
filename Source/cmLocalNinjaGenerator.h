@@ -97,8 +97,8 @@ private:
 
   struct map_to_ninja_path {
     cmLocalNinjaGenerator *LocalGenerator;
-    map_to_ninja_path(cmLocalNinjaGenerator *LocalGenerator)
-      : LocalGenerator(LocalGenerator) {}
+    map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
+      : LocalGenerator(LocalGen) {}
     std::string operator()(const std::string &path) {
       return LocalGenerator->ConvertToNinjaPath(path.c_str());
     }

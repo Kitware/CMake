@@ -281,6 +281,7 @@ cmNinjaNormalTargetGenerator
     default:
       assert(0 && "Unexpected target type");
   }
+  return std::vector<std::string>();
 }
 
 void cmNinjaNormalTargetGenerator::WriteLinkStatement()

@@ -367,7 +367,7 @@ void cmGlobalNinjaGenerator::Generate()
 
   this->cmGlobalGenerator::Generate();
 
-  this->WriteAssumedSourceDependencies(*this->BuildFileStream);
+  this->WriteAssumedSourceDependencies();
   this->WriteTargetAliases(*this->BuildFileStream);
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
@@ -591,15 +591,16 @@ void cmGlobalNinjaGenerator::AddDependencyToAll(cmTarget* target)
   this->AppendTargetOutputs(target, this->AllDependencies);
 }
 
-void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies(std::ostream& os)
+void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 {
   for (std::map<std::string, std::set<std::string> >::iterator
        i = this->AssumedSourceDependencies.begin();
        i != this->AssumedSourceDependencies.end(); ++i) {
+    cmNinjaDeps deps;
+    std::copy(i->second.begin(), i->second.end(), std::back_inserter(deps));
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
-                            cmNinjaDeps(1, i->first),
-                            cmNinjaDeps(i->second.begin(), i->second.end()));
+                            cmNinjaDeps(1, i->first), deps);
   }
 }
 
@@ -653,7 +654,7 @@ cmGlobalNinjaGenerator
     // Global targets only depend on other utilities, which may not appear in
     // the TargetDepends set (e.g. "all").
     std::set<cmStdString> const& utils = target->GetUtilities();
-    outputs.insert(outputs.end(), utils.begin(), utils.end());
+    std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
     cmTargetDependSet const& targetDeps =
       this->GetTargetDirectDepends(*target);
@@ -767,8 +768,5 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   WritePhonyBuild(os,
                   "A missing CMake input file is not an error.",
                   implicitDeps,
-                  cmNinjaDeps(),
-                  cmNinjaDeps(),
-                  cmNinjaDeps(),
-                  cmNinjaVars());
+                  cmNinjaDeps());
 }
