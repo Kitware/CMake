@@ -39,8 +39,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
       this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
 
       // Depend on all custom command outputs.
-      const std::vector<std::string>& outputs = cc->GetOutputs();
-      std::transform(outputs.begin(), outputs.end(),
+      const std::vector<std::string>& ccOutputs = cc->GetOutputs();
+      std::transform(ccOutputs.begin(), ccOutputs.end(),
                      std::back_inserter(deps), MapToNinjaPath());
       }
     }
