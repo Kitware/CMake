@@ -88,10 +88,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
     cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
                                             "",
                                             outputs,
-                                            cmNinjaDeps(1, utilCommandName),
-                                            cmNinjaDeps(),
-                                            cmNinjaDeps(),
-                                            cmNinjaVars());
+                                            cmNinjaDeps(1, utilCommandName));
   }
 
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
