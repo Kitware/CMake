@@ -300,7 +300,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   // want to use a link.txt file because I will lose the benefit of the
   // $in variables. A discussion about dealing with multiple commands in
   // a rule is started here:
-  // http://groups.google.com/group/ninja-build/browse_thread/thread/d515f23a78986008
+  // groups.google.com/group/ninja-build/browse_thread/thread/d515f23a78986008
   std::ostringstream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
        li != cmdLines.end(); ++li) {
