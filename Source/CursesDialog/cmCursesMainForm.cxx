@@ -410,7 +410,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
   if (process)
     {
     const char* clearLine =
-      "                                                               ";
+      "                                                                    ";
     strcpy(firstLine, clearLine);
     strcpy(secondLine, clearLine);
     strcpy(thirdLine, clearLine);
