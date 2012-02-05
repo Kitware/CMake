@@ -344,9 +344,9 @@ int cmCPackNSISGenerator::InitializeInternal()
   if ( cmSystemTools::IsOn(this->GetOption(
         "CPACK_INCLUDE_TOPLEVEL_DIRECTORY")) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY. "
-      "This option will be ignored."
+    cmCPackLogger(cmCPackLog::LOG_WARNING,
+      "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY set. "
+      "This option will be reset to 0 (for this generator only)."
       << std::endl);
     this->SetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY", 0);
     }
