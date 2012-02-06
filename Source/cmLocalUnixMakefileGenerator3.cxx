@@ -561,6 +561,21 @@ cmLocalUnixMakefileGenerator3
     space = " ";
     }
 
+  // Warn about paths not supported by Make tools.
+  std::string::size_type pos = tgt.find_first_of("=");
+  if(pos != std::string::npos)
+    {
+    cmOStringStream m;
+    m <<
+      "Make rule for\n"
+      "  " << tgt << "\n"
+      "has '=' on left hand side.  "
+      "The make tool may not support this.";
+    cmListFileBacktrace bt;
+    this->GlobalGenerator->GetCMakeInstance()
+      ->IssueMessage(cmake::WARNING, m.str(), bt);
+    }
+
   // Mark the rule as symbolic if requested.
   if(symbolic)
     {
