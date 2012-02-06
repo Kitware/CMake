@@ -786,7 +786,7 @@ int cmDocumentation::getDocumentedModulesListInDir(
         // No else if no section is found (undocumented module)
         }
       // No else cannot read first line (ignore this kind of error)
-      line.clear();
+      line = "";
       }
     }
   if (nbDocumentedModules>0)
@@ -887,7 +887,7 @@ int cmDocumentation::GetStructuredDocFromFile(
                docCtxIdx++;
                docContextStack[docCtxIdx]=SDOC_SECTION;
                /* drop the rest of the line */
-               line.clear();
+               line = "";
                newCtx = true;
             }
             else if (mkword.substr(0,3)=="end")
