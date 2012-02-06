@@ -591,24 +591,14 @@ int cmCTestCoverageHandler::ProcessHandler()
       continue;
       }
     int untested = 0;
-    int lineNr = 0;
     std::string line;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Actually performing coverage for: " << i->c_str() << std::endl);
     while (cmSystemTools::GetLineFromStream(ifs, line))
       {
-      covLogFile << "\t\t<Line Number=\"" << lineNr << "\" Count=\"";
-      lineNr ++;
-      if ( line.empty() )
-        {
-        covLogFile << "-1\">";
-        }
-      else
-        {
-        covLogFile << "0\">" << cmXMLSafe(line);
-        untested ++;
-        }
-      covLogFile << "</Line>" << std::endl;
+      covLogFile << "\t\t<Line Number=\"" << untested << "\" Count=\"0\">"
+        << cmXMLSafe(line) << "</Line>" << std::endl;
+      untested ++;
       }
     covLogFile << "\t\t</Report>\n\t</File>" << std::endl;
 
