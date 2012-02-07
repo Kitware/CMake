@@ -312,11 +312,13 @@ function(add_jar _TARGET_NAME)
     endif (_JAVA_COMPILE_FILES)
 
     # create the jar file
+    set(_JAVA_JAR_OUTPUT_PATH
+      ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME})
     if (CMAKE_JNI_TARGET)
         add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+            OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                -cf ${_JAVA_JAR_OUTPUT_PATH}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}
@@ -325,7 +327,7 @@ function(add_jar _TARGET_NAME)
                 -P ${_JAVA_SYMLINK_SCRIPT}
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}
-                -D_JAVA_TARGET_OUTPUT_NAME=${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_JAR_OUTPUT_PATH}
                 -D_JAVA_TARGET_OUTPUT_LINK=${_JAVA_TARGET_OUTPUT_LINK}
                 -P ${_JAVA_SYMLINK_SCRIPT}
             DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
@@ -334,9 +336,9 @@ function(add_jar _TARGET_NAME)
         )
     else ()
         add_custom_command(
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+            OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                -cf ${_JAVA_JAR_OUTPUT_PATH}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}
@@ -350,14 +352,14 @@ function(add_jar _TARGET_NAME)
     endif (CMAKE_JNI_TARGET)
 
     # Add the target and make sure we have the latest resource files.
-    add_custom_target(${_TARGET_NAME} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME})
+    add_custom_target(${_TARGET_NAME} ALL DEPENDS ${_JAVA_JAR_OUTPUT_PATH})
 
     set_property(
         TARGET
             ${_TARGET_NAME}
         PROPERTY
             INSTALL_FILES
-                ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                ${_JAVA_JAR_OUTPUT_PATH}
     )
 
     if (_JAVA_TARGET_OUTPUT_LINK)
@@ -366,7 +368,7 @@ function(add_jar _TARGET_NAME)
                 ${_TARGET_NAME}
             PROPERTY
                 INSTALL_FILES
-                    ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                    ${_JAVA_JAR_OUTPUT_PATH}
                     ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
         )
 
@@ -386,7 +388,7 @@ function(add_jar _TARGET_NAME)
             ${_TARGET_NAME}
         PROPERTY
             JAR_FILE
-                ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                ${_JAVA_JAR_OUTPUT_PATH}
     )
 
     set_property(
