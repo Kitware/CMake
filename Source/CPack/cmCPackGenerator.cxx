@@ -691,6 +691,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           //  one install directory for each component.
           tempInstallDirectory +=
             GetComponentInstallDirNameSuffix(installComponent);
+          if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY"))
+            {
+            tempInstallDirectory += "/";
+            tempInstallDirectory += this->GetOption("CPACK_PACKAGE_FILE_NAME");
+            }
           }
 
         if (!setDestDir)
