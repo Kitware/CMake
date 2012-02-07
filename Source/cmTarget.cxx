@@ -1065,6 +1065,16 @@ void cmTarget::DefineProperties(cmake *cm)
      "generated Visual Studio project. For example, \"System;"
      "System.Windows.Forms\".");
   cm->DefineProperty
+    ("VS_WINRT_EXTENSIONS", cmProperty::TARGET,
+     "Visual Studio project C++/CX language extensions for Windows Runtime",
+     "Can be set to enable C++/CX language extensions.");
+  cm->DefineProperty
+    ("VS_WINRT_REFERENCES", cmProperty::TARGET,
+     "Visual Studio project Windows Runtime Metadata references",
+     "Adds one or more semicolon-delimited WinRT references to a "
+     "generated Visual Studio project. For example, \"Windows;"
+     "Windows.UI.Core\".");
+  cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",
      "Tell the Visual Studio generator to set the global variable "
