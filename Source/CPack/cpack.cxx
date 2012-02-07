@@ -304,30 +304,31 @@ int main (int argc, char *argv[])
       help = false;
     }
 
-  // find out which system cpack is running on, so it can setup the search
-  // paths, so FIND_XXX() commands can be used in scripts
   // This part is used for cpack documentation lookup as well.
   cminst.AddCMakePaths();
-  std::string systemFile =
-    globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
-  if (!globalMF->ReadListFile(0, systemFile.c_str()))
-    {
-    cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-      "Error reading CMakeDetermineSystem.cmake" << std::endl);
-    return 1;
-    }
-
-  systemFile =
-    globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-  if (!globalMF->ReadListFile(0, systemFile.c_str()))
-    {
-    cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-      "Error reading CMakeSystemSpecificInformation.cmake" << std::endl);
-    return 1;
-    }
 
   if ( parsed && !help )
     {
+    // find out which system cpack is running on, so it can setup the search
+    // paths, so FIND_XXX() commands can be used in scripts
+    std::string systemFile =
+      globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
+    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+      {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+        "Error reading CMakeDetermineSystem.cmake" << std::endl);
+      return 1;
+      }
+
+    systemFile =
+      globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
+    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+      {
+      cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+        "Error reading CMakeSystemSpecificInformation.cmake" << std::endl);
+      return 1;
+      }
+
     if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
       cpackConfigFile =
