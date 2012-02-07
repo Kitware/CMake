@@ -30,6 +30,10 @@
 #
 #       set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/bin)
 #
+#   To define an entry point in your jar you can set it with:
+#
+#       set(CMAKE_JAVA_JAR_ENTRY_POINT com/examples/MyProject/Main)
+#
 #   To add a VERSION to the target output name you can set it using
 #   CMAKE_JAVA_TARGET_VERSION. This will create a jar file with the name
 #   shibboleet-1.0.0.jar and will create a symlink shibboleet.jar
@@ -207,6 +211,11 @@ function(add_jar _TARGET_NAME)
       set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
     endif(NOT DEFINED CMAKE_JAVA_TARGET_OUTPUT_DIR)
 
+    if (CMAKE_JAVA_JAR_ENTRY_POINT)
+      set(_ENTRY_POINT_OPTION e)
+      set(_ENTRY_POINT_VALUE ${CMAKE_JAVA_JAR_ENTRY_POINT})
+    endif (CMAKE_JAVA_JAR_ENTRY_POINT)
+
     if (LIBRARY_OUTPUT_PATH)
         set(CMAKE_JAVA_LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH})
     else (LIBRARY_OUTPUT_PATH)
@@ -327,7 +336,7 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf ${_JAVA_JAR_OUTPUT_PATH}
+                -cf${_ENTRY_POINT_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_JAVA_TARGET_OUTPUT_DIR}
@@ -347,7 +356,7 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf ${_JAVA_JAR_OUTPUT_PATH}
+                -cf${_ENTRY_POINT_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_JAVA_TARGET_OUTPUT_DIR}
