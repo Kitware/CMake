@@ -99,6 +99,11 @@ endfunction()
 
 
 function(cmake_add_fortran_subdirectory subdir)
+  # Parse arguments to function
+  set(oneValueArgs PROJECT ARCHIVE_DIR RUNTIME_DIR)
+  set(multiValueArgs LIBRARIES LINK_LIBRARIES CMAKE_COMMAND_LINE)
+  cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
   # if we are not using MSVC without fortran support
   # then just use the usual add_subdirectory to build
   # the fortran library
@@ -111,10 +116,6 @@ function(cmake_add_fortran_subdirectory subdir)
   # if we have MSVC without Intel fortran then setup
   # external projects to build with mingw fortran
 
-  # Parse arguments to function
-  set(oneValueArgs PROJECT ARCHIVE_DIR RUNTIME_DIR)
-  set(multiValueArgs LIBRARIES LINK_LIBRARIES CMAKE_COMMAND_LINE)
-  cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}/${subdir}")
   set(project_name "${ARGS_PROJECT}")
   set(library_dir "${ARGS_ARCHIVE_DIR}")
