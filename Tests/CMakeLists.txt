@@ -16,7 +16,7 @@ MACRO(ADD_TEST_MACRO NAME COMMAND)
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 ENDMACRO(ADD_TEST_MACRO)
 
-INCLUDE(${CMake_SOURCE_DIR}/Modules/CheckFortran.cmake)
+INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
 
 # Fake a user home directory to avoid polluting the real one.
 IF(DEFINED ENV{HOME} AND NOT CTEST_NO_TEST_HOME)

@@ -39,7 +39,7 @@
 
 
 set(_MS_MINGW_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
-include(CheckFortran)
+include(CheckLanguage)
 include(ExternalProject)
 include(CMakeParseArguments)
 
@@ -102,6 +102,7 @@ function(cmake_add_fortran_subdirectory subdir)
   # if we are not using MSVC without fortran support
   # then just use the usual add_subdirectory to build
   # the fortran library
+  check_language(Fortran)
   if(NOT (MSVC AND (NOT CMAKE_Fortran_COMPILER)))
     add_subdirectory(${subdir})
     return()
