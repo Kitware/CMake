@@ -19,13 +19,20 @@
 #   LINK_LIBRARIES          # link interface libraries for LIBRARIES
 #    [LINK_LIBS <lib> <dep>...]...
 #   CMAKE_COMMAND_LINE ...  # extra command line flags to pass to cmake
+#   NO_EXTERNAL_INSTALL     # skip installation of external project
 #   )
 # Relative paths in ARCHIVE_DIR and RUNTIME_DIR are interpreted with respect
 # to the build directory corresponding to the source directory in which the
 # function is invoked.
+#
+# Limitations:
+#
+# NO_EXTERNAL_INSTALL is required for forward compatibility with a
+# future version that supports installation of the external project
+# binaries during "make install".
 
 #=============================================================================
-# Copyright 2011 Kitware, Inc.
+# Copyright 2011-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -39,7 +46,7 @@
 
 
 set(_MS_MINGW_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
-include(CheckFortran)
+include(CheckLanguage)
 include(ExternalProject)
 include(CMakeParseArguments)
 
@@ -83,11 +90,11 @@ function(_setup_mingw_config_and_build source_dir)
   file(TO_NATIVE_PATH "${MINGW_PATH}" MINGW_PATH)
   string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
   configure_file(
-    ${_MS_MINGW_SOURCE_DIR}/AddFortranSubdirectory/config_mingw.cmake.in
+    ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/config_mingw.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/config_mingw.cmake
     @ONLY)
   configure_file(
-    ${_MS_MINGW_SOURCE_DIR}/AddFortranSubdirectory/build_mingw.cmake.in
+    ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/build_mingw.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/build_mingw.cmake
     @ONLY)
 endfunction()
@@ -99,9 +106,22 @@ endfunction()
 
 
 function(cmake_add_fortran_subdirectory subdir)
+  # Parse arguments to function
+  set(options NO_EXTERNAL_INSTALL)
+  set(oneValueArgs PROJECT ARCHIVE_DIR RUNTIME_DIR)
+  set(multiValueArgs LIBRARIES LINK_LIBRARIES CMAKE_COMMAND_LINE)
+  cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(NOT ARGS_NO_EXTERNAL_INSTALL)
+    message(FATAL_ERROR
+      "Option NO_EXTERNAL_INSTALL is required (for forward compatibility) "
+      "but was not given."
+      )
+  endif()
+
   # if we are not using MSVC without fortran support
   # then just use the usual add_subdirectory to build
   # the fortran library
+  check_language(Fortran)
   if(NOT (MSVC AND (NOT CMAKE_Fortran_COMPILER)))
     add_subdirectory(${subdir})
     return()
@@ -110,10 +130,6 @@ function(cmake_add_fortran_subdirectory subdir)
   # if we have MSVC without Intel fortran then setup
   # external projects to build with mingw fortran
 
-  # Parse arguments to function
-  set(oneValueArgs PROJECT ARCHIVE_DIR RUNTIME_DIR)
-  set(multiValueArgs LIBRARIES LINK_LIBRARIES CMAKE_COMMAND_LINE)
-  cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   set(source_dir "${CMAKE_CURRENT_SOURCE_DIR}/${subdir}")
   set(project_name "${ARGS_PROJECT}")
   set(library_dir "${ARGS_ARCHIVE_DIR}")
