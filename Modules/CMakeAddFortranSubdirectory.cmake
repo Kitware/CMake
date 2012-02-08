@@ -83,11 +83,11 @@ function(_setup_mingw_config_and_build source_dir)
   file(TO_NATIVE_PATH "${MINGW_PATH}" MINGW_PATH)
   string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
   configure_file(
-    ${_MS_MINGW_SOURCE_DIR}/AddFortranSubdirectory/config_mingw.cmake.in
+    ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/config_mingw.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/config_mingw.cmake
     @ONLY)
   configure_file(
-    ${_MS_MINGW_SOURCE_DIR}/AddFortranSubdirectory/build_mingw.cmake.in
+    ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/build_mingw.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/build_mingw.cmake
     @ONLY)
 endfunction()
