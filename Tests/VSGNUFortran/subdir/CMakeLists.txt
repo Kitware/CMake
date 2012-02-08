@@ -12,4 +12,5 @@ cmake_add_fortran_subdirectory(fortran
     -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
   LINK_LIBRARIES  # link interface libraries
    LINK_LIBS hello world  # hello needs world to link
-   )
+  NO_EXTERNAL_INSTALL
+  )
