@@ -19,10 +19,17 @@
 #   LINK_LIBRARIES          # link interface libraries for LIBRARIES
 #    [LINK_LIBS <lib> <dep>...]...
 #   CMAKE_COMMAND_LINE ...  # extra command line flags to pass to cmake
+#   NO_EXTERNAL_INSTALL     # skip installation of external project
 #   )
 # Relative paths in ARCHIVE_DIR and RUNTIME_DIR are interpreted with respect
 # to the build directory corresponding to the source directory in which the
 # function is invoked.
+#
+# Limitations:
+#
+# NO_EXTERNAL_INSTALL is required for forward compatibility with a
+# future version that supports installation of the external project
+# binaries during "make install".
 
 #=============================================================================
 # Copyright 2011-2012 Kitware, Inc.
@@ -100,9 +107,16 @@ endfunction()
 
 function(cmake_add_fortran_subdirectory subdir)
   # Parse arguments to function
+  set(options NO_EXTERNAL_INSTALL)
   set(oneValueArgs PROJECT ARCHIVE_DIR RUNTIME_DIR)
   set(multiValueArgs LIBRARIES LINK_LIBRARIES CMAKE_COMMAND_LINE)
-  cmake_parse_arguments(ARGS "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(NOT ARGS_NO_EXTERNAL_INSTALL)
+    message(FATAL_ERROR
+      "Option NO_EXTERNAL_INSTALL is required (for forward compatibility) "
+      "but was not given."
+      )
+  endif()
 
   # if we are not using MSVC without fortran support
   # then just use the usual add_subdirectory to build
