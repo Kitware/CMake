@@ -1,1 +1,3 @@
 .git*            export-ignore
+
+tips             eol=lf         whitespace=indent-with-non-tab
