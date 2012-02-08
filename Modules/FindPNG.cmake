@@ -7,6 +7,7 @@
 #  PNG_LIBRARIES, the libraries to link against to use PNG.
 #  PNG_DEFINITIONS - You should add_definitons(${PNG_DEFINITIONS}) before compiling code that includes png library files.
 #  PNG_FOUND, If false, do not try to use PNG.
+#  PNG_VERSION_STRING - the version of the PNG library found (since CMake 2.8.8)
 # Also defined, but not for general use are
 #  PNG_LIBRARY, where to find the PNG library.
 # For backward compatiblity the variable PNG_INCLUDE_DIR is also set. It has the same value as PNG_INCLUDE_DIRS.
@@ -56,11 +57,19 @@ if(ZLIB_FOUND)
 
   endif (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
 
+  if (PNG_PNG_INCLUDE_DIR AND EXISTS "${PNG_PNG_INCLUDE_DIR}/png.h")
+      file(STRINGS "${PNG_PNG_INCLUDE_DIR}/png.h" png_version_str REGEX "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\".+\"")
+
+      string(REGEX REPLACE "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\"([^\"]+)\".*" "\\1" PNG_VERSION_STRING "${png_version_str}")
+      unset(png_version_str)
+  endif (PNG_PNG_INCLUDE_DIR AND EXISTS "${PNG_PNG_INCLUDE_DIR}/png.h")
 endif(ZLIB_FOUND)
 
 # handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(PNG  DEFAULT_MSG  PNG_LIBRARY PNG_PNG_INCLUDE_DIR)
+find_package_handle_standard_args(PNG
+                                  REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR
+                                  VERSION_VAR PNG_VERSION_STRING)
 
 mark_as_advanced(PNG_PNG_INCLUDE_DIR PNG_LIBRARY )

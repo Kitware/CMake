@@ -323,7 +323,8 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("IMPORTED_CONFIGURATIONS", cmProperty::TARGET,
      "Configurations provided for an IMPORTED target.",
-     "Lists configuration names available for an IMPORTED target.  "
+     "Set this to the list of configuration names available for an "
+     "IMPORTED target.  "
      "The names correspond to configurations defined in the project from "
      "which the target is imported.  "
      "If the importing project uses a different set of configurations "
@@ -334,14 +335,12 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("IMPORTED_IMPLIB", cmProperty::TARGET,
      "Full path to the import library for an IMPORTED target.",
-     "Specifies the location of the \".lib\" part of a windows DLL.  "
+     "Set this to the location of the \".lib\" part of a windows DLL.  "
      "Ignored for non-imported targets.");
 
   cm->DefineProperty
     ("IMPORTED_IMPLIB_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_IMPLIB property.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_IMPLIB property.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.");
 
@@ -351,8 +350,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "Shared libraries may be linked to other shared libraries as part "
      "of their implementation.  On some platforms the linker searches "
      "for the dependent libraries of shared libraries they are including "
-     "in the link.  This property lists "
-     "the dependent shared libraries of an imported library.  The list "
+     "in the link.  "
+     "Set this property to the list of dependent shared libraries of an "
+     "imported library.  "
+     "The list "
      "should be disjoint from the list of interface libraries in the "
      "IMPORTED_LINK_INTERFACE_LIBRARIES property.  On platforms requiring "
      "dependent shared libraries to be found at link time CMake uses this "
@@ -361,9 +362,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("IMPORTED_LINK_DEPENDENT_LIBRARIES_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_LINK_DEPENDENT_LIBRARIES.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_LINK_DEPENDENT_LIBRARIES.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.  "
      "If set, this property completely overrides the generic property "
@@ -372,8 +371,8 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LIBRARIES", cmProperty::TARGET,
      "Transitive link interface of an IMPORTED target.",
-     "Lists libraries whose interface is included when an IMPORTED library "
-     "target is linked to another target.  "
+     "Set this to the list of libraries whose interface is included when "
+     "an IMPORTED library target is linked to another target.  "
      "The libraries will be included on the link line for the target.  "
      "Unlike the LINK_INTERFACE_LIBRARIES property, this property applies "
      "to all imported target types, including STATIC libraries.  "
@@ -381,9 +380,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LIBRARIES_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_LINK_INTERFACE_LIBRARIES.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_LINK_INTERFACE_LIBRARIES.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.  "
      "If set, this property completely overrides the generic property "
@@ -392,8 +389,8 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LANGUAGES", cmProperty::TARGET,
      "Languages compiled into an IMPORTED static library.",
-     "Lists languages of soure files compiled to produce a STATIC IMPORTED "
-     "library (such as \"C\" or \"CXX\").  "
+     "Set this to the list of languages of source files compiled to "
+     "produce a STATIC IMPORTED library (such as \"C\" or \"CXX\").  "
      "CMake accounts for these languages when computing how to link a "
      "target to the imported library.  "
      "For example, when a C executable links to an imported C++ static "
@@ -405,9 +402,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_LANGUAGES_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_LINK_INTERFACE_LANGUAGES.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_LINK_INTERFACE_LANGUAGES.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.  "
      "If set, this property completely overrides the generic property "
@@ -419,16 +414,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "This is LINK_INTERFACE_MULTIPLICITY for IMPORTED targets.");
   cm->DefineProperty
     ("IMPORTED_LINK_INTERFACE_MULTIPLICITY_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration repetition count for cycles of IMPORTED archives.",
-     "This is the configuration-specific version of "
-     "IMPORTED_LINK_INTERFACE_MULTIPLICITY.  "
+     "<CONFIG>-specific version of IMPORTED_LINK_INTERFACE_MULTIPLICITY.",
      "If set, this property completely overrides the generic property "
      "for the named configuration.");
 
   cm->DefineProperty
     ("IMPORTED_LOCATION", cmProperty::TARGET,
      "Full path to the main file on disk for an IMPORTED target.",
-     "Specifies the location of an IMPORTED target file on disk.  "
+     "Set this to the location of an IMPORTED target file on disk.  "
      "For executables this is the location of the executable file.  "
      "For bundles on OS X this is the location of the executable file "
      "inside Contents/MacOS under the application bundle folder.  "
@@ -440,28 +433,29 @@ void cmTarget::DefineProperties(cmake *cm)
      "symlink just inside the framework folder.  "
      "For DLLs this is the location of the \".dll\" part of the library.  "
      "For UNKNOWN libraries this is the location of the file to be linked.  "
-     "Ignored for non-imported targets.");
+     "Ignored for non-imported targets."
+     "\n"
+     "Projects may skip IMPORTED_LOCATION if the configuration-specific "
+     "property IMPORTED_LOCATION_<CONFIG> is set.  "
+     "To get the location of an imported target read one of the "
+     "LOCATION or LOCATION_<CONFIG> properties.");
 
   cm->DefineProperty
     ("IMPORTED_LOCATION_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_LOCATION property.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_LOCATION property.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.");
 
   cm->DefineProperty
     ("IMPORTED_SONAME", cmProperty::TARGET,
      "The \"soname\" of an IMPORTED target of shared library type.",
-     "Specifies the \"soname\" embedded in an imported shared library.  "
+     "Set this to the \"soname\" embedded in an imported shared library.  "
      "This is meaningful only on platforms supporting the feature.  "
      "Ignored for non-imported targets.");
 
   cm->DefineProperty
     ("IMPORTED_SONAME_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_SONAME property.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_SONAME property.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.");
 
@@ -477,9 +471,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("IMPORTED_NO_SONAME_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of IMPORTED_NO_SONAME property.",
-     "This property is used when loading settings for the <CONFIG> "
-     "configuration of an imported target.  "
+     "<CONFIG>-specific version of IMPORTED_NO_SONAME property.",
      "Configuration names correspond to those provided by the project "
      "from which the target is imported.");
 
@@ -685,8 +677,8 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("MAP_IMPORTED_CONFIG_<CONFIG>", cmProperty::TARGET,
      "Map from project configuration to IMPORTED target's configuration.",
-     "List configurations of an imported target that may be used for "
-     "the current project's <CONFIG> configuration.  "
+     "Set this to the list of configurations of an imported target that "
+     "may be used for the current project's <CONFIG> configuration.  "
      "Targets imported from another project may not provide the same set "
      "of configuration names available in the current project.  "
      "Setting this property tells CMake what imported configurations are "
@@ -1072,6 +1064,16 @@ void cmTarget::DefineProperties(cmake *cm)
      "Adds one or more semicolon-delimited .NET references to a "
      "generated Visual Studio project. For example, \"System;"
      "System.Windows.Forms\".");
+  cm->DefineProperty
+    ("VS_WINRT_EXTENSIONS", cmProperty::TARGET,
+     "Visual Studio project C++/CX language extensions for Windows Runtime",
+     "Can be set to enable C++/CX language extensions.");
+  cm->DefineProperty
+    ("VS_WINRT_REFERENCES", cmProperty::TARGET,
+     "Visual Studio project Windows Runtime Metadata references",
+     "Adds one or more semicolon-delimited WinRT references to a "
+     "generated Visual Studio project. For example, \"Windows;"
+     "Windows.UI.Core\".");
   cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",

@@ -409,12 +409,11 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
   char thirdLine[512]="";
   if (process)
     {
-    sprintf(firstLine,
-            "                                                               ");
-    sprintf(secondLine,
-            "                                                               ");
-    sprintf(thirdLine,
-            "                                                               ");
+    const char* clearLine =
+      "                                                                    ";
+    strcpy(firstLine, clearLine);
+    strcpy(secondLine, clearLine);
+    strcpy(thirdLine, clearLine);
     }
   else
     {
