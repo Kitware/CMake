@@ -1,7 +1,7 @@
 # - Finds OpenMP support
 # This module can be used to detect OpenMP support in a compiler.
 # If the compiler supports OpenMP, the flags required to compile with
-# openmp support are set.  
+# openmp support are set.
 #
 # The following variables are set:
 #   OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
@@ -13,6 +13,7 @@
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
 # Copyright 2008-2009 André Rigland Brodtkorb <Andre.Brodtkorb@ifi.uio.no>
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -31,27 +32,51 @@ unset(_ENABLED_LANGUAGES)
 
 set(_OPENMP_REQUIRED_VARS)
 
-set(OpenMP_C_FLAG_CANDIDATES
-  #Gnu
-  "-fopenmp"
-  #Microsoft Visual Studio
-  "/openmp"
-  #Intel windows
-  "-Qopenmp" 
-  #Intel
-  "-openmp" 
-  #Empty, if compiler automatically accepts openmp
-  " "
-  #Sun
-  "-xopenmp"
-  #HP
-  "+Oopenmp"
-  #IBM XL C/c++
-  "-qsmp"
-  #Portland Group
-  "-mp"
-)
-set(OpenMP_CXX_FLAG_CANDIDATES ${OpenMP_C_FLAG_CANDIDATES})
+function(_OPENMP_FLAG_CANDIDATES LANG)
+  set(OpenMP_FLAG_CANDIDATES
+    #GNU
+    "-fopenmp"
+    #Microsoft Visual Studio
+    "/openmp"
+    #Intel windows
+    "-Qopenmp"
+    #Intel
+    "-openmp"
+    #Empty, if compiler automatically accepts openmp
+    " "
+    #Sun
+    "-xopenmp"
+    #HP
+    "+Oopenmp"
+    #IBM XL C/c++
+    "-qsmp"
+    #Portland Group
+    "-mp"
+  )
+
+  set(OMP_FLAG_GNU "-fopenmp")
+  set(OMP_FLAG_MSVC "/openmp")
+  if(WIN32)
+    set(OMP_FLAG_Intel "-Qopenmp")
+  else()
+    set(OMP_FLAG_Intel "-openmp")
+  endif()
+  set(OMP_FLAG_SunPro "-xopenmp")
+  set(OMP_FLAG_HP "+Oopenmp")
+  set(OMP_FLAG_XL "-qsmp")
+  set(OMP_FLAG_MIPSpro "-mp")
+  set(OMP_FLAG_PGI "-mp")
+
+  # Move the flag that matches the compiler to the head of the list,
+  # this is faster and doesn't clutter the output that much. If that
+  # flag doesn't work we will still try all.
+  if(OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
+    list(REMOVE_ITEM OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
+    list(INSERT OpenMP_FLAG_CANDIDATES 0 "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
+  endif()
+
+  set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
+endfunction(_OPENMP_FLAG_CANDIDATES)
 
 # sample openmp source code to test
 set(OpenMP_C_TEST_SOURCE 
@@ -65,16 +90,17 @@ int main() {
 #endif
 }
 ")
-# if these are set then do not try to find them again,
-# by avoiding any try_compiles for the flags
-if(DEFINED OpenMP_C_FLAGS AND DEFINED OpenMP_CXX_FLAGS)
-  set(OpenMP_C_FLAG_CANDIDATES)
-  set(OpenMP_CXX_FLAG_CANDIDATES)
-endif(DEFINED OpenMP_C_FLAGS AND DEFINED OpenMP_CXX_FLAGS)
 
 # check c compiler
 if(NOT _HAVE_LANGUAGE_C EQUAL -1)
-  include(CheckCSourceCompiles)
+  # if these are set then do not try to find them again,
+  # by avoiding any try_compiles for the flags
+  if(OpenMP_C_FLAGS)
+    unset(OpenMP_C_FLAG_CANDIDATES)
+  else()
+    _OPENMP_FLAG_CANDIDATES("C")
+    include(CheckCSourceCompiles)
+  endif()
 
   foreach(FLAG ${OpenMP_C_FLAG_CANDIDATES})
     set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
@@ -98,9 +124,17 @@ endif()
 
 # check cxx compiler
 if(NOT _HAVE_LANGUAGE_CXX EQUAL -1)
-  include(CheckCXXSourceCompiles)
-  # use the same source for CXX as C for now
-  set(OpenMP_CXX_TEST_SOURCE ${OpenMP_C_TEST_SOURCE})
+  # if these are set then do not try to find them again,
+  # by avoiding any try_compiles for the flags
+  if(OpenMP_CXX_FLAGS)
+    unset(OpenMP_CXX_FLAG_CANDIDATES)
+  else()
+    _OPENMP_FLAG_CANDIDATES("CXX")
+    include(CheckCXXSourceCompiles)
+
+    # use the same source for CXX as C for now
+    set(OpenMP_CXX_TEST_SOURCE ${OpenMP_C_TEST_SOURCE})
+  endif()
 
   foreach(FLAG ${OpenMP_CXX_FLAG_CANDIDATES})
     set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
