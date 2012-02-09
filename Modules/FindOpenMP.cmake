@@ -64,6 +64,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
   set(OMP_FLAG_SunPro "-xopenmp")
   set(OMP_FLAG_HP "+Oopenmp")
   set(OMP_FLAG_XL "-qsmp")
+  set(OMP_FLAG_MIPSpro "-mp")
   set(OMP_FLAG_PGI "-mp")
 
   # Move the flag that matches the compiler to the head of the list,
