@@ -588,8 +588,9 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     SET(QT_LIBRARY_DIR ${QT_LIBRARY_DIR_TMP} CACHE INTERNAL "Qt library dir" FORCE)
     SET(QT_QTCORE_FOUND 1)
   ELSE()
-    MESSAGE("Warning: QT_QMAKE_EXECUTABLE reported QT_INSTALL_LIBS as ${QT_LIBRARY_DIR_TMP}")
-    MESSAGE("Warning: But QtCore couldn't be found.  Qt must NOT be installed correctly, or it wasn't found for cross compiling.")
+    MESSAGE(WARNING "${QT_QMAKE_EXECUTABLE} reported QT_INSTALL_LIBS as \"${QT_LIBRARY_DIR_TMP}\" "
+                    "but QtCore could not be found there.  "
+                    "Qt is NOT installed correctly for the target build environment.")
     IF(Qt4_FIND_REQUIRED)
       MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
     ENDIF(Qt4_FIND_REQUIRED)
