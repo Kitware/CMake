@@ -76,6 +76,11 @@
 #define	__FBSDID(a)     struct _undefined_hack
 #endif
 
+/* Old glibc mbsnrtowcs fails assertions in our use case.  */
+#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ <= 1
+# undef HAVE_MBSNRTOWCS
+#endif
+
 /* Try to get standard C99-style integer type definitions. */
 #if HAVE_INTTYPES_H
 #include <inttypes.h>
