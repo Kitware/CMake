@@ -12,8 +12,8 @@
 #
 
 #=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2009-2011 Kitware, Inc.
+# Copyright 2009-2011 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -25,8 +25,9 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_path(ALSA_INCLUDE_DIR NAMES asoundlib.h
-          PATH_SUFFIXES alsa
+# Try to find asoundlib.h both in <PREFIX>/include/alsa and <PREFIX>/include
+# since older versions of ALSA put it in include directly
+find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h asoundlib.h
           DOC "The ALSA (asound) include directory"
 )
 
