@@ -25,9 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# Try to find asoundlib.h both in <PREFIX>/include/alsa and <PREFIX>/include
-# since older versions of ALSA put it in include directly
-find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h asoundlib.h
+find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h
           DOC "The ALSA (asound) include directory"
 )
 
@@ -35,8 +33,8 @@ find_library(ALSA_LIBRARY NAMES asound
           DOC "The ALSA (asound) library"
 )
 
-if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/version.h")
-  file(STRINGS "${ALSA_INCLUDE_DIR}/version.h" alsa_version_str REGEX "^#define[\t ]+SND_LIB_VERSION_STR[\t ]+\".*\"")
+if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/alsa/version.h")
+  file(STRINGS "${ALSA_INCLUDE_DIR}/alsa/version.h" alsa_version_str REGEX "^#define[\t ]+SND_LIB_VERSION_STR[\t ]+\".*\"")
 
   string(REGEX REPLACE "^.*SND_LIB_VERSION_STR[\t ]+\"([^\"]*)\".*$" "\\1" ALSA_VERSION_STRING "${alsa_version_str}")
   unset(alsa_version_str)
