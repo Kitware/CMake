@@ -163,6 +163,32 @@ IF(BUILD_TESTING)
   IF(CMAKE_Fortran_COMPILER)
     ADD_TEST_MACRO(FortranOnly FortranOnly)
   ENDIF()
+  # test Visual Studio GNU Fortran mixing with cmake_add_fortran_subdirectory
+  # run this project if we have a working fortran compiler or
+  # the test is enabled with CMAKE_TEST_CMAKE_ADD_FORTRAN cache variable.
+  # If you enable the test, CMake should find the MinGW fortran install,
+  # or in some cases you might need to set the PATH so that cmake can find
+  # the gfortran from mingw.
+  IF(CMAKE_Fortran_COMPILER OR CMAKE_TEST_CMAKE_ADD_FORTRAN)
+    SET(CMAKE_SKIP_VSGNUFortran FALSE)
+    # disable test for apple builds using ifort if they are building
+    # more than one architecture, as ifort does not support that.
+    IF(APPLE AND (CMAKE_Fortran_COMPILER MATCHES ifort))
+      LIST(LENGTH CMAKE_OSX_ARCHITECTURES len)
+      IF("${len}" GREATER 1)
+        MESSAGE(STATUS "Skip VSGNUFortran for ifort dual cpu mac build")
+        SET(CMAKE_SKIP_VSGNUFortran TRUE)
+      ENDIF()
+    ENDIF()
+    IF((CMAKE_C_COMPILER MATCHES lsb)
+        AND (CMAKE_Fortran_COMPILER MATCHES ifort))
+      MESSAGE(STATUS "Skip VSGNUFortran for ifort and lsb compilers")
+      SET(CMAKE_SKIP_VSGNUFortran TRUE)
+    ENDIF()
+    IF(NOT CMAKE_SKIP_VSGNUFortran)
+      ADD_TEST_MACRO(VSGNUFortran ${CMAKE_COMMAND} -P runtest.cmake)
+    ENDIF()
+  ENDIF()
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(IPO COnly/COnly)
