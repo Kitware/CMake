@@ -68,6 +68,16 @@
 #   CLASS_DIR          The directory where the class files can be found. For
 #                      example to use them with javah.
 #
+# add_executable_jar(TARGET_NAME, ENTRY_POINT,
+#                    SRC1 SRC2 .. SRCN RCS1 RCS2 .. RCSN
+#                   )
+#
+# This command creates an executable <TARGET_NAME>.jar, by setting its
+# entry point to ENTRY_POINT. It compiles the given source files (SRC)
+# and adds the given resource files (RCS) to the jar file.
+# If only resource files are given then just a jar file is created.
+# Note: This command handles all add_jar()'s additionnal instructions.
+#
 # find_jar(<VAR>
 #          name | NAMES name1 [name2 ...]
 #          [PATHS path1 [path2 ... ENV var]]
@@ -195,6 +205,22 @@ endfunction (__java_copy_file src dest comment)
 set(_JAVA_CLASS_FILELIST_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaClassFilelist.cmake)
 set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaSymlinks.cmake)
 
+function(add_executable_jar _TARGET_NAME _ENTRY_POINT)
+    set(_JAVA_ENTRY_POINT_OPTION e)
+    set(_JAVA_ENTRY_POINT_VALUE ${_ENTRY_POINT})
+
+    add_jar(${_TARGET_NAME} ${ARGN})
+
+    # Just to avoid unwanted vars reuse in such case:
+    # add_executable_jar(hello.jar, com.hello.Main,
+    #                    com/hello/Main.java,
+    #                    com/hello/Hello.java)
+    # add_jar(hello.jar,
+    #         com/hello/Hello.java)
+    unset(_JAVA_ENTRY_POINT_OPTION)
+    unset(_JAVA_ENTRY_POINT_VALUE)
+endfunction(add_executable_jar)
+
 function(add_jar _TARGET_NAME)
     set(_JAVA_SOURCE_FILES ${ARGN})
 
@@ -316,7 +342,8 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                -cf${_JAVA_ENTRY_POINT_OPTION} ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                ${_JAVA_ENTRY_POINT_VALUE}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}
@@ -336,7 +363,8 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                -cf${_JAVA_ENTRY_POINT_OPTION} ${CMAKE_CURRENT_BINARY_DIR}/${_JAVA_TARGET_OUTPUT_NAME}
+                ${_JAVA_ENTRY_POINT_VALUE}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}
