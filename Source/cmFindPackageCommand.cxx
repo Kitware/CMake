@@ -1226,6 +1226,15 @@ void cmFindPackageCommand::AppendSuccessInformation()
     }
   this->Makefile->GetCMakeInstance()->SetProperty(versionInfoPropName.c_str(),
                                                   versionInfo.c_str());
+  if (this->Required)
+    {
+    std::string requiredInfoPropName = "_CMAKE_";
+    requiredInfoPropName += this->Name;
+    requiredInfoPropName += "_TYPE";
+    this->Makefile->GetCMakeInstance()->SetProperty(
+                                     requiredInfoPropName.c_str(), "REQUIRED");
+    }
+
 
   // Restore original state of "_FIND_" variables we set.
   this->RestoreFindDefinitions();
