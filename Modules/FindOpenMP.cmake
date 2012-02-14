@@ -78,8 +78,6 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
   set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
 endfunction(_OPENMP_FLAG_CANDIDATES)
 
-set(OpenMP_CXX_FLAG_CANDIDATES ${OpenMP_C_FLAG_CANDIDATES})
-
 # sample openmp source code to test
 set(OpenMP_C_TEST_SOURCE 
 "
