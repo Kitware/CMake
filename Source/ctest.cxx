@@ -291,6 +291,7 @@ int main (int argc, char *argv[])
         << "*********************************" << std::endl);
       }
     cmDocumentation doc;
+    doc.addCTestStandardDocSections();
     if(doc.CheckOptions(argc, argv) || nocwd)
       {
       // Construct and print requested documentation.

@@ -1,3 +1,6 @@
+##section Variables common to all CPack generators
+##end
+##module
 # - Build binary and source package installers
 #
 # The CPackComponent module is the module which handles
@@ -20,7 +23,9 @@
 # components are identified by the COMPONENT argument of CMake's
 # INSTALL commands, and should be further described by the following
 # CPack commands:
+##end
 #
+##macro
 #   cpack_add_component - Describes a CPack installation component
 #   named by the COMPONENT argument to a CMake INSTALL command.
 #
@@ -90,7 +95,9 @@
 #   create a file with some name based on CPACK_PACKAGE_FILE_NAME and
 #   the name of the component. See cpack_configure_downloads for more
 #   information.
+##end
 #
+##macro
 #   cpack_add_component_group - Describes a group of related CPack
 #   installation components.
 #
@@ -134,7 +141,9 @@
 #
 #   BOLD_TITLE indicates that the group title should appear in bold,
 #   to call the user's attention to the group.
+##end
 #
+##macro
 #   cpack_add_install_type - Add a new installation type containing a
 #   set of predefined component selections to the graphical installer.
 #
@@ -153,7 +162,9 @@
 #   DISPLAY_NAME is the displayed name of the install type, which will
 #   typically show up in a drop-down box within a graphical
 #   installer. This value can be any string.
+##end
 #
+##macro
 #   cpack_configure_downloads - Configure CPack to download selected
 #   components on-the-fly as part of the installation process.
 #
@@ -203,6 +214,7 @@
 #   that can be called from Windows' Add/Remove Programs dialog (via the
 #   "Modify" button) to change the set of installed components. NO_ADD_REMOVE
 #   turns off this behavior. This option is ignored on Mac OS X.
+##endmacro
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

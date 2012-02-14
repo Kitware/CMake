@@ -111,6 +111,17 @@ public:
     }
 
   /**
+   * This is used to avoid including this command
+   * in documentation. This is mainly used by
+   * cmMacroHelperCommand and cmFunctionHelperCommand
+   * which cannot provide appropriate documentation.
+   */
+  virtual bool ShouldAppearInDocumentation()
+    {
+    return true;
+    }
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() = 0;
