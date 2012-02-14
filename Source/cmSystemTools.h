@@ -78,6 +78,11 @@ public:
   ///! Send a string to stderr. Stdout callbacks will not be invoced.
   static void Stderr(const char* s, int length);
 
+
+  typedef bool (*InterruptCallback)(void*);
+  static void SetInterruptCallback(InterruptCallback f, void* clientData=0);
+  static bool GetInterruptFlag();
+
   ///! Return true if there was an error at any point.
   static bool GetErrorOccuredFlag()
     {
@@ -96,7 +101,7 @@ public:
  ///! Return true if there was an error at any point.
   static bool GetFatalErrorOccured()
     {
-      return cmSystemTools::s_FatalErrorOccured;
+      return cmSystemTools::s_FatalErrorOccured || GetInterruptFlag();
     }
 
   ///! Set the error occured flag and fatal error back to false
@@ -467,8 +472,10 @@ private:
   static bool s_DisableRunCommandOutput;
   static ErrorCallback s_ErrorCallback;
   static StdoutCallback s_StdoutCallback;
+  static InterruptCallback s_InterruptCallback;
   static void* s_ErrorCallbackClientData;
   static void* s_StdoutCallbackClientData;
+  static void* s_InterruptCallbackClientData;
 
   static std::string s_Windows9xComspecSubstitute;
 };

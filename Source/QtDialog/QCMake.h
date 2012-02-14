@@ -23,6 +23,7 @@
 #include <QList>
 #include <QStringList>
 #include <QMetaType>
+#include <QAtomicInt>
 
 class cmake;
 
@@ -78,7 +79,7 @@ public slots:
   void generate();
   /// set the property values
   void setProperties(const QCMakePropertyList&);
-  /// interrupt the configure or generate process
+  /// interrupt the configure or generate process (if connecting, make a direct connection)
   void interrupt();
   /// delete the cache in binary directory
   void deleteCache();
@@ -133,6 +134,7 @@ signals:
 protected:
   cmake* CMakeInstance;
 
+  static bool interruptCallback(void*);
   static void progressCallback(const char* msg, float percent, void* cd);
   static void errorCallback(const char* msg, const char* title, 
                             bool&, void* cd);
@@ -145,6 +147,7 @@ protected:
   QString Generator;
   QStringList AvailableGenerators;
   QString CMakeExecutable;
+  QAtomicInt InterruptFlag;
 };
 
 #endif // __QCMake_h
