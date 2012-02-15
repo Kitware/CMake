@@ -354,13 +354,23 @@ void cmFindLibraryHelper::RegexFromList(std::string& out,
 //----------------------------------------------------------------------------
 bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
 {
-  // Check if the given name ends in a valid library suffix.
   for(std::vector<std::string>::const_iterator si = this->Suffixes.begin();
       si != this->Suffixes.end(); ++si)
     {
-    std::string const& suffix = *si;
-    if(name.length() > suffix.length() &&
-       name.substr(name.size()-suffix.length()) == suffix)
+    std::string suffix = *si;
+    if(name.length() <= suffix.length())
+      {
+      continue;
+      }
+    // Check if the given name ends in a valid library suffix.
+    if(name.substr(name.size()-suffix.length()) == suffix)
+      {
+      return true;
+      }
+    // Check if a valid library suffix is somewhere in the name,
+    // this may happen e.g. for versioned shared libraries: libfoo.so.2
+    suffix += ".";
+    if(name.find(suffix) != name.npos)
       {
       return true;
       }
