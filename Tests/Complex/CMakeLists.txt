@@ -199,7 +199,7 @@ CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
   COPYONLY IMMEDIATE)
-FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl)
+FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl;.so.2)
   CONFIGURE_FILE(
     ${Complex_SOURCE_DIR}/Library/dummy
     ${Complex_BINARY_DIR}/Library/libdummylib${ext}
@@ -215,6 +215,12 @@ FIND_LIBRARY(FIND_DUMMY_LIB
              NAMES dummylib dummylib2
              PATHS
              ${Complex_BINARY_DIR}/Library DOC "find dummy lib")
+
+FIND_LIBRARY(FIND_DUMMY_LIB_VERSIONED
+             NAMES libdummylib.so.2
+             PATHS ${Complex_BINARY_DIR}/Library
+             DOC "find versioned dummy lib"
+             NO_DEFAULT_PATH)
 
 #
 # Test SET_SOURCE_FILES_PROPERTIES 
