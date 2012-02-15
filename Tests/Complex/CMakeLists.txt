@@ -199,7 +199,7 @@ CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
   COPYONLY IMMEDIATE)
-FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl;${CMAKE_SHARED_LIBRARY_SUFFIX}.2)
+FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl;so.2)
   CONFIGURE_FILE(
     ${Complex_SOURCE_DIR}/Library/dummy
     ${Complex_BINARY_DIR}/Library/libdummylib${ext}
@@ -216,15 +216,17 @@ FIND_LIBRARY(FIND_DUMMY_LIB
              PATHS
              ${Complex_BINARY_DIR}/Library DOC "find dummy lib")
 
-FIND_LIBRARY(FIND_DUMMY_LIB_VERSIONED
-             NAMES libdummylib${CMAKE_SHARED_LIBRARY_SUFFIX}.2
-             PATHS ${Complex_BINARY_DIR}/Library
-             DOC "find versioned dummy lib"
-             NO_DEFAULT_PATH)
+IF(CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL ".so")
+  FIND_LIBRARY(FIND_DUMMY_LIB_VERSIONED
+               NAMES libdummylib.so.2
+               PATHS ${Complex_BINARY_DIR}/Library
+               DOC "find versioned dummy lib"
+               NO_DEFAULT_PATH)
 
-IF(NOT FIND_DUMMY_LIB_VERSIONED MATCHES "/libdummylib${CMAKE_SHARED_LIBRARY_SUFFIX}.2")
-  MESSAGE(SEND_ERROR "FIND_DUMMY_LIB_VERSIONED is not set correctly: "
-          "${FIND_DUMMY_LIB_VERSIONED}")
+  IF(NOT FIND_DUMMY_LIB_VERSIONED MATCHES "/libdummylib.so.2")
+    MESSAGE(SEND_ERROR "FIND_DUMMY_LIB_VERSIONED is not set correctly: "
+            "${FIND_DUMMY_LIB_VERSIONED}")
+  ENDIF()
 ENDIF()
 
 #
