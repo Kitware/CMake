@@ -849,23 +849,6 @@ int main()
     }
 #endif
 
-#ifndef FIND_DUMMY_LIB_VERSIONED
-  cmFailed("the CONFIGURE_FILE command is broken, "
-         "FIND_DUMMY_LIB_VERSIONED is not defined.");
-#else
-  const char *libmatch = strstr(FIND_DUMMY_LIB_VERSIONED,
-                                "/libdummylib.so.2");
-  if(libmatch == NULL || strlen(libmatch) != strlen("/libdummylib.so.2"))
-    {
-    cmFailed("the FIND_LIBRARY or CONFIGURE_FILE command is broken, "
-           "FIND_DUMMY_LIB_VERSIONED == ", FIND_DUMMY_LIB_VERSIONED);
-    }
-  else
-    {
-    cmPassed("FIND_DUMMY_LIB_VERSIONED == ", FIND_DUMMY_LIB_VERSIONED);
-    }
-#endif
-
   // ----------------------------------------------------------------------
   // Test SET_SOURCE_FILES_PROPERTIES
 
