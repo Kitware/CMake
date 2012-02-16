@@ -1,13 +1,19 @@
-# CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN)
+# CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN
+#                                     [CONFIGURATION <config>] )
 #
 # CMAKE_EXPAND_IMPORTED_TARGETS() takes a list of libraries and replaces
 # all imported targets contained in this list with their actual file paths
 # of the referenced libraries on disk, including the libraries from their
 # link interfaces.
+# If a CONFIGURATION is given, it uses the respective configuration of the
+# imported targets if it exists. If no CONFIGURATION is given, it uses
+# the first configuration from ${CMAKE_CONFIGURATION_TYPES} if set, otherwise
+# ${CMAKE_BUILD_TYPE}.
 # This macro is used by all Check*.cmake files which use
 # TRY_COMPILE() or TRY_RUN() and support CMAKE_REQUIRED_LIBRARIES , so that
 # these checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
-#    cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} )
+#    cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
+#                                               CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
 
 
 #=============================================================================
@@ -24,16 +30,31 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+include(CMakeParseArguments)
 
-function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT _LIB)
+function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
 
-   if(NOT "${_LIB}" STREQUAL "LIBRARIES")
-      message(FATAL_ERROR "cmake_expand_imported_targets() called with bad second argument \"${_LIB}\", expected keyword \"LIBRARIES\".")
+   set(options )
+   set(oneValueArgs CONFIGURATION )
+   set(multiValueArgs LIBRARIES )
+
+   cmake_parse_arguments(CEIT "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
+
+   if(CEIT_UNPARSED_ARGUMENTS)
+      message(FATAL_ERROR "Unknown keywords given to CMAKE_EXPAND_IMPORTED_TARGETS(): \"${CEIT_UNPARSED_ARGUMENTS}\"")
+   endif()
+
+   if(NOT CEIT_CONFIGURATION)
+      if(CMAKE_CONFIGURATION_TYPES)
+         list(GET CMAKE_CONFIGURATION_TYPES 0 CEIT_CONFIGURATION)
+      else()
+         set(CEIT_CONFIGURATION ${CMAKE_BUILD_TYPE})
+      endif()
    endif()
 
    # handle imported library targets
 
-   set(_CCSR_REQ_LIBS ${ARGN})
+   set(_CCSR_REQ_LIBS ${CEIT_LIBRARIES})
 
    set(_CHECK_FOR_IMPORTED_TARGETS TRUE)
    set(_CCSR_LOOP_COUNTER 0)
@@ -61,7 +82,7 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT _LIB)
 
             # if one of the imported configurations equals ${CMAKE_TRY_COMPILE_CONFIGURATION},
             # use it, otherwise simply use the first one:
-            list(FIND _importedConfigs "${CMAKE_TRY_COMPILE_CONFIGURATION}" _configIndexToUse)
+            list(FIND _importedConfigs "${CEIT_CONFIGURATION}" _configIndexToUse)
             if("${_configIndexToUse}" EQUAL -1)
               set(_configIndexToUse 0)
             endif("${_configIndexToUse}" EQUAL -1)
