@@ -1,7 +1,6 @@
 
-# This is a helper function used by CheckCXXSourceRuns.cmake and
-# CheckCXXSourceCompiles.cmake. Actually it should be used by all macros which
-# use TRY_COMPILE() or TRY_RUN().
+# This is a helper function used by all Check*.cmake files which use
+# TRY_COMPILE() or TRY_RUN() and support CMAKE_REQUIRED_LIBRARIES .
 # It takes the CMAKE_REQUIRED_LIBRARY variable and searches it for imported
 # (library) targets. Since the project created by TRY_COMPILE() (and TRY_RUN())
 # does not know about these imported targets, this macro here replaces these
@@ -9,12 +8,20 @@
 # adds the libraries from the link interface of these imported targets.
 # E.g the imported target KDE4__kdeui is replaced on my system with /opt/kdelibs/lib/libkdeui.so
 # and the link interface libraries, which includes e.g. /opt/kdelibs/lib/libkdecore.so.
-# This way imported targets work also when used with CHECK_CXX_SOURCE_COMPILES/RUNS().
 
-# Copyright (c) 2009, Alexander Neundorf, <neundorf@kde.org>
+#=============================================================================
+# Copyright 2012 Kitware, Inc.
+# Copyright 2009-2012 Alexander Neundorf <neundorf@kde.org>
 #
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 FUNCTION(HANDLE_IMPORTED_TARGETS_IN_CMAKE_REQUIRED_LIBRARIES _RESULT)
 # handle imported library targets
