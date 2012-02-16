@@ -110,7 +110,6 @@ foreach(_library ${_list})
       NAMES ${_library}
       PATHS ${_libdir}
       )
-#    message(FATAL " -> found ${${_prefix}_${_library}_LIBRARY}")
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
     set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -541,8 +540,8 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
     endif ()
   endif (BLA_F95)
 
-  foreach (SEARCH_LIBS ${BLAS_SEARCH_LIBS})
-    string(REPLACE " " ";" SEARCH_LIBS ${SEARCH_LIBS})
+  foreach (IT ${BLAS_SEARCH_LIBS})
+    string(REPLACE " " ";" SEARCH_LIBS ${IT})
     if (${_LIBRARIES})
     else ()
       check_fortran_libraries(
