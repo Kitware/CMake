@@ -142,6 +142,7 @@ target_link_libraries(imp_lib1b bld_testLib2)
 # Test that handling imported targets, including transitive dependencies,
 # works in CheckFunctionExists (...and hopefully all other try_compile() checks
 include(CheckFunctionExists)
+unset(HAVE_TESTLIB1_FUNCTION CACHE)
 set(CMAKE_REQUIRED_LIBRARIES exp_testLib2)
 check_function_exists(testLib1 HAVE_TESTLIB1_FUNCTION)
 if (NOT HAVE_TESTLIB1_FUNCTION)
