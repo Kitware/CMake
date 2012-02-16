@@ -47,7 +47,7 @@ function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
     set(CHECK_PROTOTYPE_DEFINITION_FLAGS ${CMAKE_REQUIRED_FLAGS})
     if (CMAKE_REQUIRED_LIBRARIES)
       # this one translates potentially used imported library targets to their files on disk
-      handle_imported_targets_in_cmake_required_libraries(_ADJUSTED_CMAKE_REQUIRED_LIBRARES)
+      handle_imported_targets_in_cmake_required_libraries(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_PROTOTYPE_DEFINITION_LIBS
         "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
     else(CMAKE_REQUIRED_LIBRARIES)
