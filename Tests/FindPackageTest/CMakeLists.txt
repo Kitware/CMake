@@ -335,11 +335,9 @@ endif()
 #-----------------------------------------------------------------------------
 # Test write_basic_config_version_file().
 
-include(WriteBasicConfigVersionFile)
-
-write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake
-                                VERSION 1.2.3
-                                COMPATIBILITY AnyNewerVersion)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake
+                                 VERSION 1.2.3
+                                 COMPATIBILITY AnyNewerVersion)
 
 set(PACKAGE_FIND_VERSION 2.3.4)
 include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
@@ -373,6 +371,7 @@ endif()
 
 
 #######################
+include(WriteBasicConfigVersionFile)
 
 write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.cmake
                                 VERSION 1.2.3
