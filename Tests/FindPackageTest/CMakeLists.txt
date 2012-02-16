@@ -305,6 +305,34 @@ STRING(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
 FIND_PACKAGE(CMakeTestExportPackage 1.${version} EXACT REQUIRED)
 
 #-----------------------------------------------------------------------------
+# Test configure_package_config_file().
+
+include(CMakePackageConfigHelpers)
+
+set(INCLUDE_INSTALL_DIR include )
+set(SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/" )
+set(CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
+
+configure_package_config_file(RelocatableConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake"
+                              INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}"
+                              PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+                             )
+
+include("${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake")
+
+if(NOT "${RELOC_INCLUDE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/include")
+  message(SEND_ERROR "RELOC_INCLUDE_DIR set by configure_package_config_file() is set to \"${RELOC_INCLUDE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/include\")")
+endif()
+
+if(NOT "${RELOC_SHARE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/share/")
+  message(SEND_ERROR "RELOC_SHARE_DIR set by configure_package_config_file() is set to \"${RELOC_SHARE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/share/\")")
+endif()
+
+if(NOT "${RELOC_BUILD_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+  message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to \"${RELOC_BUILD_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}\")")
+endif()
+
+#-----------------------------------------------------------------------------
 # Test write_basic_config_version_file().
 
 include(WriteBasicConfigVersionFile)
