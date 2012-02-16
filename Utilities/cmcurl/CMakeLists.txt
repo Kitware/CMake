@@ -33,12 +33,7 @@ INCLUDE (CheckIncludeFile)
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckLibraryExists)
 INCLUDE (CheckSymbolExists)
-IF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4
-    AND CMake_SOURCE_DIR)
-  INCLUDE (${CMake_SOURCE_DIR}/Modules/CheckTypeSize.cmake)
-ELSE()
-  INCLUDE (CheckTypeSize)
-ENDIF()
+INCLUDE (CheckTypeSize)
 
 SET(libCurl_SRCS
   #  amigaos.c - does not build on AmigaOS
