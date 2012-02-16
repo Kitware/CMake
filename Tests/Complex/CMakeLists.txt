@@ -199,7 +199,7 @@ CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
   COPYONLY IMMEDIATE)
-FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl;so.2)
+FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl;.so.2)
   CONFIGURE_FILE(
     ${Complex_SOURCE_DIR}/Library/dummy
     ${Complex_BINARY_DIR}/Library/libdummylib${ext}
