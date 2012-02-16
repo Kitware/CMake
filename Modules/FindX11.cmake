@@ -20,7 +20,7 @@
 #                X11_XShm_INCLUDE_PATH,         (in X11_Xext_LIB),  X11_XShm_FOUND
 #                X11_Xshape_INCLUDE_PATH,       (in X11_Xext_LIB),  X11_Xshape_FOUND
 #                X11_xf86misc_INCLUDE_PATH,     X11_Xxf86misc_LIB,  X11_xf86misc_FOUND
-#                X11_xf86vmode_INCLUDE_PATH,                        X11_xf86vmode_FOUND
+#                X11_xf86vmode_INCLUDE_PATH,    X11_Xxf86vm_LIB     X11_xf86vmode_FOUND
 #                X11_Xfixes_INCLUDE_PATH,       X11_Xfixes_LIB,     X11_Xfixes_FOUND
 #                X11_Xft_INCLUDE_PATH,          X11_Xft_LIB,        X11_Xft_FOUND
 #                X11_Xi_INCLUDE_PATH,           X11_Xi_LIB,         X11_Xi_FOUND
@@ -146,6 +146,7 @@ IF (UNIX)
   FIND_LIBRARY(X11_XTest_LIB Xtst            ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xv_LIB Xv                 ${X11_LIB_SEARCH_PATH})
   FIND_LIBRARY(X11_Xxf86misc_LIB Xxf86misc   ${X11_LIB_SEARCH_PATH})
+  FIND_LIBRARY(X11_Xxf86vm_LIB Xxf86vm       ${X11_LIB_SEARCH_PATH})
 
   SET(X11_LIBRARY_DIR "")
   IF(X11_X11_LIB)
@@ -270,10 +271,10 @@ IF (UNIX)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_xf86misc_INCLUDE_PATH})
   ENDIF (X11_xf86misc_INCLUDE_PATH  AND X11_Xxf86misc_LIB)
 
-  IF (X11_xf86vmode_INCLUDE_PATH)
+  IF (X11_xf86vmode_INCLUDE_PATH AND X11_Xxf86vm_LIB)
      SET(X11_xf86vmode_FOUND TRUE)
      SET(X11_INCLUDE_DIR ${X11_INCLUDE_DIR} ${X11_xf86vmode_INCLUDE_PATH})
-  ENDIF (X11_xf86vmode_INCLUDE_PATH)
+  ENDIF (X11_xf86vmode_INCLUDE_PATH AND X11_Xxf86vm_LIB)
 
   IF (X11_Xcursor_INCLUDE_PATH AND X11_Xcursor_LIB)
      SET(X11_Xcursor_FOUND TRUE)
@@ -443,6 +444,7 @@ IF (UNIX)
     X11_XRes_INCLUDE_PATH
     X11_Xxf86misc_LIB
     X11_xf86misc_INCLUDE_PATH
+    X11_Xxf86vm_LIB
     X11_xf86vmode_INCLUDE_PATH
     X11_Xi_LIB
     X11_Xi_INCLUDE_PATH
