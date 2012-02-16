@@ -50,7 +50,7 @@ include(CheckLanguage)
 include(ExternalProject)
 include(CMakeParseArguments)
 
-function(_setup_mingw_config_and_build source_dir)
+function(_setup_mingw_config_and_build source_dir build_dir)
   # Look for a MinGW gfortran.
   find_program(MINGW_GFORTRAN
     NAMES gfortran
@@ -91,11 +91,11 @@ function(_setup_mingw_config_and_build source_dir)
   string(REPLACE "\\" "\\\\" MINGW_PATH "${MINGW_PATH}")
   configure_file(
     ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/config_mingw.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/config_mingw.cmake
+    ${build_dir}/config_mingw.cmake
     @ONLY)
   configure_file(
     ${_MS_MINGW_SOURCE_DIR}/CMakeAddFortranSubdirectory/build_mingw.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/build_mingw.cmake
+    ${build_dir}/build_mingw.cmake
     @ONLY)
 endfunction()
 
@@ -144,15 +144,15 @@ function(cmake_add_fortran_subdirectory subdir)
     endif()
   endforeach()
   # create build and configure wrapper scripts
-  _setup_mingw_config_and_build(${source_dir})
+  _setup_mingw_config_and_build("${source_dir}" "${build_dir}")
   # create the external project
   externalproject_add(${project_name}_build
     SOURCE_DIR ${source_dir}
     BINARY_DIR ${build_dir}
     CONFIGURE_COMMAND ${CMAKE_COMMAND}
-    -P ${CMAKE_CURRENT_BINARY_DIR}/config_mingw.cmake
+    -P ${build_dir}/config_mingw.cmake
     BUILD_COMMAND ${CMAKE_COMMAND}
-    -P ${CMAKE_CURRENT_BINARY_DIR}/build_mingw.cmake
+    -P ${build_dir}/build_mingw.cmake
     INSTALL_COMMAND ""
     )
   # make the external project always run make with each build
