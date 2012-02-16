@@ -23,10 +23,17 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-function(HANDLE_IMPORTED_TARGETS_IN_CMAKE_REQUIRED_LIBRARIES _RESULT)
-# handle imported library targets
-   set(_CCSR_IMP_TARGETS_MAP)
-   set(_CCSR_REQ_LIBS ${CMAKE_REQUIRED_LIBRARIES})
+
+function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT _LIB)
+
+   if(NOT "${_LIB}" STREQUAL "LIBRARIES")
+      message(FATAL_ERROR "cmake_expand_imported_targets() called with bad second argument \"${_LIB}\", expected keyword \"LIBRARIES\".")
+   endif()
+
+   # handle imported library targets
+
+   set(_CCSR_REQ_LIBS ${ARGN})
+
    set(_CHECK_FOR_IMPORTED_TARGETS TRUE)
    set(_CCSR_LOOP_COUNTER 0)
    while(_CHECK_FOR_IMPORTED_TARGETS)
@@ -97,4 +104,4 @@ function(HANDLE_IMPORTED_TARGETS_IN_CMAKE_REQUIRED_LIBRARIES _RESULT)
 #   message(STATUS "setting -${_RESULT}- to -${_CCSR_NEW_REQ_LIBS}-")
    set(${_RESULT} "${_CCSR_NEW_REQ_LIBS}" PARENT_SCOPE)
 
-endfunction(HANDLE_IMPORTED_TARGETS_IN_CMAKE_REQUIRED_LIBRARIES _CCSR_REQ_LIBS)
+endfunction()

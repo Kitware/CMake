@@ -24,7 +24,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/HandleImportedTargetsInCMakeRequiredLibraries.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/CMakeExpandImportedTargets.cmake")
 
 
 MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
@@ -33,7 +33,7 @@ MACRO(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     IF(CMAKE_REQUIRED_LIBRARIES)
       # this one translates potentially used imported library targets to their files on disk
-      HANDLE_IMPORTED_TARGETS_IN_CMAKE_REQUIRED_LIBRARIES(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES)
+      CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} )
       SET(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
     ELSE(CMAKE_REQUIRED_LIBRARIES)
