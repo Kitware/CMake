@@ -192,7 +192,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "If no such version file is available then the configuration file "
     "is assumed to not be compatible with any requested version.  "
     "A basic version file containing generic version matching code can be "
-    "created using the macro write_basic_config_version_file(), see its "
+    "created using the macro write_basic_package_version_file(), see its "
     "documentation for more details.  "
     "When a version file is found it is loaded to check the requested "
     "version number.  "

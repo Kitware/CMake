@@ -58,7 +58,32 @@
 # When using the NO_SET_AND_CHECK_MACRO, this macro is not generated into the
 # FooConfig.cmake file.
 #
-# Example:
+# For an example see below the documentation for WRITE_BASIC_PACKAGE_VERSION_FILE().
+#
+#
+#  WRITE_BASIC_PACKAGE_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
+#
+# Writes a file for use as <package>ConfigVersion.cmake file to <filename>.
+# See the documentation of FIND_PACKAGE() for details on this.
+#    filename is the output filename, it should be in the build tree.
+#    major.minor.patch is the version number of the project to be installed
+# The COMPATIBILITY mode AnyNewerVersion means that the installed package version
+# will be considered compatible if it is newer or exactly the same as the requested version.
+# If SameMajorVersion is used instead, then the behaviour differs from AnyNewerVersion
+# in that the major version number must be the same as requested, e.g. version 2.0 will
+# not be considered compatible if 1.0 is requested.
+# If your project has more elaborated version matching rules, you will need to write your
+# own custom ConfigVersion.cmake file instead of using this macro.
+#
+# Internally, this macro executes configure_file() to create the resulting
+# version file. Depending on the COMPATIBLITY, either the file
+# BasicConfigVersion-SameMajorVersion.cmake.in or BasicConfigVersion-AnyNewerVersion.cmake.in
+# is used. Please note that these two files are internal to CMake and you should
+# not call configure_file() on them yourself, but they can be used as starting
+# point to create more sophisticted custom ConfigVersion.cmake files.
+#
+#
+# Example using both configure_package_config_file() and write_basic_package_version_file():
 # CMakeLists.txt:
 #   set(INCLUDE_INSTALL_DIR include/ ... CACHE )
 #   set(LIB_INSTALL_DIR lib/ ... CACHE )
@@ -68,9 +93,13 @@
 #   configure_package_config_file(FooConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
 #                                 INSTALL_DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake
 #                                 PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
-#  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake )
+#   write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
+#                                    VERSION 1.2.3
+#                                    COMPATIBILITY SameMajorVersion )
+#   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
+#           DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake )
 #
-# FooConfig.cmake.in:
+# With a FooConfig.cmake.in:
 #   set(FOO_VERSION x.y.z)
 #   ...
 #   @PACKAGE_HELPER_INIT@
@@ -93,6 +122,12 @@
 #  License text for the above reference.)
 
 include(CMakeParseArguments)
+
+include(WriteBasicConfigVersionFile)
+
+macro(WRITE_BASIC_PACKAGE_VERSION_FILE)
+  write_basic_config_version_file(${ARGN})
+endmacro()
 
 
 function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
