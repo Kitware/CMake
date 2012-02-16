@@ -1,13 +1,14 @@
+# CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN)
+#
+# CMAKE_EXPAND_IMPORTED_TARGETS() takes a list of libraries and replaces
+# all imported targets contained in this list with their actual file paths
+# of the referenced libraries on disk, including the libraries from their
+# link interfaces.
+# This macro is used by all Check*.cmake files which use
+# TRY_COMPILE() or TRY_RUN() and support CMAKE_REQUIRED_LIBRARIES , so that
+# these checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
+#    cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} )
 
-# This is a helper function used by all Check*.cmake files which use
-# TRY_COMPILE() or TRY_RUN() and support CMAKE_REQUIRED_LIBRARIES .
-# It takes the CMAKE_REQUIRED_LIBRARY variable and searches it for imported
-# (library) targets. Since the project created by TRY_COMPILE() (and TRY_RUN())
-# does not know about these imported targets, this macro here replaces these
-# imported targets with the actual library files on disk and it also
-# adds the libraries from the link interface of these imported targets.
-# E.g the imported target KDE4__kdeui is replaced on my system with /opt/kdelibs/lib/libkdeui.so
-# and the link interface libraries, which includes e.g. /opt/kdelibs/lib/libkdecore.so.
 
 #=============================================================================
 # Copyright 2012 Kitware, Inc.
