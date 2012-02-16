@@ -43,12 +43,19 @@ FUNCTION(HANDLE_IMPORTED_TARGETS_IN_CMAKE_REQUIRED_LIBRARIES _RESULT)
 #                   MESSAGE(STATUS "********* aborting loop, counter : ${_CCSR_LOOP_COUNTER}")
             ENDIF ("${_CCSR_LOOP_COUNTER}" LESS 100)
 
-            LIST(GET _importedConfigs 0 _firstImportedConfig)
-            GET_TARGET_PROPERTY(_firstImportedLocation "${_CURRENT_LIB}" IMPORTED_LOCATION_${_firstImportedConfig})
-            GET_TARGET_PROPERTY(_linkInterfaceLibs "${_CURRENT_LIB}" IMPORTED_LINK_INTERFACE_LIBRARIES_${_firstImportedConfig} )
+            # if one of the imported configurations equals ${CMAKE_TRY_COMPILE_CONFIGURATION},
+            # use it, otherwise simply use the first one:
+            LIST(FIND _importedConfigs "${CMAKE_TRY_COMPILE_CONFIGURATION}" _configIndexToUse)
+            IF("${_configIndexToUse}" EQUAL -1)
+              SET(_configIndexToUse 0)
+            ENDIF("${_configIndexToUse}" EQUAL -1)
+            LIST(GET _importedConfigs ${_configIndexToUse} _importedConfigToUse)
 
-            LIST(APPEND _CCSR_NEW_REQ_LIBS  "${_firstImportedLocation}")
-#                MESSAGE(STATUS "Appending lib ${_CURRENT_LIB} as ${_firstImportedLocation}")
+            GET_TARGET_PROPERTY(_importedLocation "${_CURRENT_LIB}" IMPORTED_LOCATION_${_importedConfigToUse})
+            GET_TARGET_PROPERTY(_linkInterfaceLibs "${_CURRENT_LIB}" IMPORTED_LINK_INTERFACE_LIBRARIES_${_importedConfigToUse} )
+
+            LIST(APPEND _CCSR_NEW_REQ_LIBS  "${_importedLocation}")
+#                MESSAGE(STATUS "Appending lib ${_CURRENT_LIB} as ${_importedLocation}")
             IF(_linkInterfaceLibs)
                FOREACH(_currentLinkInterfaceLib ${_linkInterfaceLibs})
 #                   MESSAGE(STATUS "Appending link interface lib ${_currentLinkInterfaceLib}")
