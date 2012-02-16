@@ -117,6 +117,20 @@ bool cmVisualStudioGeneratorOptions::UsingUnicode()
     }
   return false;
 }
+//----------------------------------------------------------------------------
+bool cmVisualStudioGeneratorOptions::UsingSBCS()
+{
+  // Look for the a _SBCS definition.
+  for(std::vector<std::string>::const_iterator di = this->Defines.begin();
+      di != this->Defines.end(); ++di)
+    {
+    if(*di == "_SBCS")
+      {
+      return true;
+      }
+    }
+  return false;
+}
 
 //----------------------------------------------------------------------------
 void cmVisualStudioGeneratorOptions::Parse(const char* flags)
