@@ -916,31 +916,31 @@ bool cmFindPackageCommand::HandlePackageMode()
         {
         e << "module Find" << this->Name << ".cmake or ";
         }
-      e << "a configuration file for package " << this->Name << ".\n";
-      if(!this->NoModule)
-        {
-        e << "Adjust CMAKE_MODULE_PATH to find Find"
-          << this->Name << ".cmake or set ";
-        }
-      else
-        {
-        e << "Set ";
-        }
-      e << this->Variable << " to the directory containing a CMake "
-        << "configuration file for " << this->Name << ".  ";
       if(this->Configs.size() == 1)
         {
-        e << "The file will be called " << this->Configs[0];
+        e << "a configuration file named " << this->Configs[0]
+          << " for package " << this->Name << ".\n";
         }
       else
         {
-        e << "The file will have one of the following names:\n";
+        e << "a configuration file for package " << this->Name
+          << " with one of the following names:\n";
         for(std::vector<std::string>::const_iterator ci=this->Configs.begin();
             ci != this->Configs.end(); ++ci)
           {
           e << "  " << *ci << "\n";
           }
         }
+
+      if(!this->NoModule)
+        {
+        e << "Adjust CMAKE_MODULE_PATH to find Find"
+          << this->Name << ".cmake. ";
+        }
+      e << "To find the configuration file, set CMAKE_PREFIX_PATH to the "
+        << "installation prefix of " << this->Name
+        << ", or set " << this->Variable << " to the directory containing a "
+        << "CMake configuration file for " << this->Name << ".  ";
       }
 
 
