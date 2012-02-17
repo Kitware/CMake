@@ -26,6 +26,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   const char* sourceDirectory = argv[2].c_str();
   const char* projectName = 0;
   const char* targetName = 0;
+  char targetNameBuf[64];
   int extraArgs = 0;
 
   // look for CMAKE_FLAGS and store them
@@ -281,16 +282,20 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       cmakeFlags.push_back(flag);
       }
 
+    /* Use a random file name to avoid rapid creation and deletion
+       of the same executable name (some filesystems fail on that).  */
+    sprintf(targetNameBuf, "cmTryCompileExec%u",
+            cmSystemTools::RandomSeed());
+    targetName = targetNameBuf;
+
     /* Put the executable at a known location (for COPY_FILE).  */
     fprintf(fout, "SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"%s\")\n",
             this->BinaryDirectory.c_str());
     /* Create the actual executable.  */
-    fprintf(fout, "ADD_EXECUTABLE(cmTryCompileExec \"%s\")\n",source.c_str());
-    fprintf(fout,
-            "TARGET_LINK_LIBRARIES(cmTryCompileExec ${LINK_LIBRARIES})\n");
+    fprintf(fout, "ADD_EXECUTABLE(%s \"%s\")\n", targetName, source.c_str());
+    fprintf(fout, "TARGET_LINK_LIBRARIES(%s ${LINK_LIBRARIES})\n",targetName);
     fclose(fout);
     projectName = "CMAKE_TRY_COMPILE";
-    targetName = "cmTryCompileExec";
     // if the source is not in CMakeTmp
     if(source.find("CMakeTmp") == source.npos)
       {
