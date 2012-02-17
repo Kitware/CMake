@@ -133,7 +133,7 @@ private:
   bool Quiet;
   bool Required;
   bool Compatibility_1_6;
-  bool NoModule;
+  bool UseFindModules;
   bool NoUserRegistry;
   bool NoSystemRegistry;
   bool NoBuilds;

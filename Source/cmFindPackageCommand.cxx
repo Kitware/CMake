@@ -57,7 +57,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->NoUserRegistry = false;
   this->NoSystemRegistry = false;
   this->NoBuilds = false;
-  this->NoModule = false;
+  this->UseFindModules = true;
   this->DebugMode = false;
   this->UseLib64Paths = false;
   this->PolicyScope = true;
@@ -425,7 +425,7 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "NO_MODULE")
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       doing = DoingNone;
       }
     else if(args[i] == "REQUIRED")
@@ -440,31 +440,31 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "NAMES")
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingNames;
       }
     else if(args[i] == "PATHS")
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingPaths;
       }
     else if(args[i] == "HINTS")
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingHints;
       }
     else if(args[i] == "PATH_SUFFIXES")
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingPathSuffixes;
       }
     else if(args[i] == "CONFIGS")
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingConfigs;
       }
@@ -477,27 +477,27 @@ bool cmFindPackageCommand
     else if(args[i] == "NO_CMAKE_PACKAGE_REGISTRY")
       {
       this->NoUserRegistry = true;
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_SYSTEM_PACKAGE_REGISTRY")
       {
       this->NoSystemRegistry = true;
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_BUILDS_PATH")
       {
       this->NoBuilds = true;
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(this->CheckCommonArgument(args[i]))
       {
-      this->NoModule = true;
+      this->UseFindModules = false;
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
@@ -636,7 +636,7 @@ bool cmFindPackageCommand
   this->SetModuleVariables(components);
 
   // See if there is a Find<package>.cmake module.
-  if(!this->NoModule)
+  if(this->UseFindModules)
     {
     bool foundModule = false;
     if(!this->FindModule(foundModule))
@@ -913,12 +913,12 @@ bool cmFindPackageCommand::HandlePackageMode()
     else
       {
       e << "Could not find ";
-      if(!this->NoModule)
+      if(this->UseFindModules)
         {
         e << "module Find" << this->Name << ".cmake or ";
         }
       e << "a configuration file for package " << this->Name << ".\n";
-      if(!this->NoModule)
+      if(this->UseFindModules)
         {
         e << "Adjust CMAKE_MODULE_PATH to find Find"
           << this->Name << ".cmake or set ";
