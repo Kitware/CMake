@@ -962,6 +962,14 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     else
       {
+      std::string requestedVersionString;
+      if(!this->Version.empty())
+        {
+        requestedVersionString = " (requested version ";
+        requestedVersionString += this->Version;
+        requestedVersionString += ")";
+        }
+
       if (this->UseConfigFiles)
         {
         if(this->UseFindModules)
@@ -976,12 +984,13 @@ bool cmFindPackageCommand::HandlePackageMode()
           {
           e << "Could not find a package configuration file named \""
             << this->Configs[0] << "\" provided by package \""
-            << this->Name << "\".\n";
+            << this->Name << "\"" << requestedVersionString <<".\n";
           }
         else
           {
           e << "Could not find a package configuration file provided by \""
-            << this->Name << "\" with any of the following names:\n";
+            << this->Name << "\"" << requestedVersionString
+            << " with any of the following names:\n";
           for(std::vector<std::string>::const_iterator ci =
                 this->Configs.begin();
               ci != this->Configs.end(); ++ci)
