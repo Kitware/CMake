@@ -1,2 +1,2 @@
-include(Platform/Windows-Borland)
-__borland_language(CXX)
+include(Platform/Windows-Embarcadero)
+__embarcadero_language(CXX)

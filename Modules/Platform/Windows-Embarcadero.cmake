@@ -13,10 +13,10 @@
 #  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
-if(__WINDOWS_BORLAND)
+if(__WINDOWS_EMBARCADERO)
   return()
 endif()
-set(__WINDOWS_BORLAND 1)
+set(__WINDOWS_EMBARCADERO 1)
 
 SET(BORLAND 1)
 
@@ -67,7 +67,7 @@ SET (CMAKE_MODULE_LINKER_FLAGS_INIT ${CMAKE_SHARED_LINKER_FLAGS_INIT})
 SET (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT})
 SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT})
 
-macro(__borland_language lang)
+macro(__embarcadero_language lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-tWD")
 
   # compile a source file into an object file
