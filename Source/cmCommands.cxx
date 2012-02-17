@@ -14,7 +14,6 @@
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
 #include "cmElseIfCommand.cxx"
-#include "cmEndWhileCommand.cxx"
 #include "cmExportCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
@@ -34,7 +33,6 @@
 #include "cmVariableRequiresCommand.cxx"
 #include "cmVariableWatchCommand.cxx"
 
-#include "cmWhileCommand.cxx"
 #include "cmWriteFileCommand.cxx"
 
 // This one must be last because it includes windows.h and
@@ -53,7 +51,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmElseIfCommand);
-  commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExportCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
@@ -73,7 +70,6 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVariableRequiresCommand);
   commands.push_back(new cmVariableWatchCommand);
-  commands.push_back(new cmWhileCommand);
   commands.push_back(new cmWriteFileCommand);
 #endif
 }
