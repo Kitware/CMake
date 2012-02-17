@@ -22,3 +22,11 @@ add_CMakeOnly_test(CheckLanguage)
 add_CMakeOnly_test(AllFindModules)
 
 add_CMakeOnly_test(TargetScope)
+
+add_CMakeOnly_test(ProjectInclude)
+
+add_test(CMakeOnly.ProjectInclude ${CMAKE_CMAKE_COMMAND}
+  -DTEST=ProjectInclude
+  -DCMAKE_ARGS=-DCMAKE_PROJECT_ProjectInclude_INCLUDE=${CMAKE_CURRENT_SOURCE_DIR}/ProjectInclude/include.cmake
+  -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
+  )
