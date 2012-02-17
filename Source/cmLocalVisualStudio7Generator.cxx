@@ -774,6 +774,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\tCharacterSet=\"1\">\n";
     }
+  else if(targetOptions.UsingSBCS())
+    {
+    fout << "\t\t\tCharacterSet=\"0\">\n";
+    }
   else
     {
     fout << "\t\t\tCharacterSet=\"2\">\n";
