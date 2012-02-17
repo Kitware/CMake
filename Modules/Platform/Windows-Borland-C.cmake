@@ -1,2 +1,1 @@
-include(Platform/Windows-Embarcadero)
-__embarcadero_language(C)
+include(Platform/Windows-Embarcadero-C)

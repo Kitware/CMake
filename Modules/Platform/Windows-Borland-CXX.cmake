@@ -1,2 +1,1 @@
-include(Platform/Windows-Embarcadero)
-__embarcadero_language(CXX)
+include(Platform/Windows-Embarcadero-CXX)
