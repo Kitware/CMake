@@ -3,6 +3,7 @@
 #  FREETYPE_LIBRARIES, the library to link against
 #  FREETYPE_FOUND, if false, do not try to link to FREETYPE
 #  FREETYPE_INCLUDE_DIRS, where to find headers.
+#  FREETYPE_VERSION_STRING, the version of freetype found (since CMake 2.8.8)
 #  This is the concatenation of the paths:
 #  FREETYPE_INCLUDE_DIR_ft2build
 #  FREETYPE_INCLUDE_DIR_freetype2
@@ -77,10 +78,33 @@ IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
 ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
 SET(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
 
+IF(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+    FILE(STRINGS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h" freetype_version_str
+         REGEX "^#[\t ]*define[\t ]+FREETYPE_(MAJOR|MINOR|PATCH)[\t ]+[0-9]+$")
+
+    UNSET(FREETYPE_VERSION_STRING)
+    FOREACH(VPART MAJOR MINOR PATCH)
+        FOREACH(VLINE ${freetype_version_str})
+            IF(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}")
+                STRING(REGEX REPLACE "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$" "\\1"
+                       FREETYPE_VERSION_PART "${VLINE}")
+                IF(FREETYPE_VERSION_STRING)
+                    SET(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_STRING}.${FREETYPE_VERSION_PART}")
+                ELSE(FREETYPE_VERSION_STRING)
+                    SET(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_PART}")
+                ENDIF(FREETYPE_VERSION_STRING)
+                UNSET(FREETYPE_VERSION_PART)
+            ENDIF()
+        ENDFOREACH(VLINE)
+    ENDFOREACH(VPART)
+ENDIF(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+
+
 # handle the QUIETLY and REQUIRED arguments and set FREETYPE_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype  DEFAULT_MSG  FREETYPE_LIBRARY  FREETYPE_INCLUDE_DIRS)
-
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype
+                                  REQUIRED_VARS FREETYPE_LIBRARY FREETYPE_INCLUDE_DIRS
+                                  VERSION_VAR FREETYPE_VERSION_STRING)
 
 MARK_AS_ADVANCED(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR_freetype2 FREETYPE_INCLUDE_DIR_ft2build)
