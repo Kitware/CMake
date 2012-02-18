@@ -13,14 +13,17 @@
 # When the 'QUIET' argument is set, no status messages will be printed.
 #
 # It sets the following variables:
-#   PKG_CONFIG_FOUND         ... true if pkg-config works on the system
-#   PKG_CONFIG_EXECUTABLE    ... pathname of the pkg-config program
-#   <PREFIX>_FOUND           ... set to 1 if module(s) exist
+#   PKG_CONFIG_FOUND          ... true if pkg-config works on the system
+#   PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
+#   PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
+#                                 (since CMake 2.8.8)
+#   PKG_CONFIG_FOUND          ... if pkg-config executable was found
 #
 # For the following variables two sets of values exist; first one is the
 # common one and has the given PREFIX. The second set contains flags
 # which are given out when pkgconfig was called with the '--static'
 # option.
+#   <XPREFIX>_FOUND          ... set to 1 if module(s) exist
 #   <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
 #   <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
 #   <XPREFIX>_LDFLAGS        ... all required linker flags
@@ -89,9 +92,17 @@ set(PKG_CONFIG_VERSION 1)
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(PkgConfig DEFAULT_MSG PKG_CONFIG_EXECUTABLE)
+if (PKG_CONFIG_EXECUTABLE)
+  execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} --version
+    OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif (PKG_CONFIG_EXECUTABLE)
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+find_package_handle_standard_args(PkgConfig
+                                  REQUIRED_VARS PKG_CONFIG_EXECUTABLE
+                                  VERSION_VAR PKG_CONFIG_VERSION_STRING)
 
 # Unsets the given variables
 macro(_pkgconfig_unset var)
