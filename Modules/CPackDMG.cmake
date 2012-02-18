@@ -4,7 +4,7 @@
 # - DragNDrop CPack generator (Mac OS X).
 # The following variables are specific to the DragNDrop installers
 # built on Mac OS X:
-#end
+##end
 #
 ##variable
 #   CPACK_DMG_VOLUME_NAME - The volume name of the generated disk
