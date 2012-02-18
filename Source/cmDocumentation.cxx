@@ -16,6 +16,7 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
 
+#include <algorithm>
 
 //----------------------------------------------------------------------------
 static const char *cmDocumentationStandardOptions[][3] =
@@ -746,9 +747,9 @@ void cmDocumentation::addCPackStandardDocSections()
 void cmDocumentation::addAutomaticVariableSections(const std::string& section)
 {
   std::vector<std::string>::iterator it;
-  it = find(this->VariableSections.begin(),
-            this->VariableSections.end(),
-            section);
+  it = std::find(this->VariableSections.begin(),
+                 this->VariableSections.end(),
+                 section);
   /* if the section does not exist then add it */
   if (it==this->VariableSections.end())
     {
