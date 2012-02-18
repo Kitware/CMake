@@ -147,6 +147,9 @@ public:
   /** Add the CPack standard documentation section(s) */
   void addCPackStandardDocSections();
 
+  /** Add automatic variables sections */
+  void addAutomaticVariableSections(const std::string& section);
+
   /**
    * Retrieve the list of documented module located in
    * path which match the globing expression globExpr.
@@ -185,8 +188,7 @@ public:
    */
   int GetStructuredDocFromFile(const char* fname,
                                std::vector<cmDocumentationEntry>& commands,
-                               cmake* cm,
-                               const char *docSection);
+                               cmake* cm);
 private:
   void SetForm(Form f);
   void SetDocName(const char* docname);

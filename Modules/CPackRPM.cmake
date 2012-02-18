@@ -1,4 +1,4 @@
-##section Variables specific to a CPack generator
+##section Variables specific to CPack RPM generator
 ##end
 ##module
 # - The builtin (binary) CPack RPM generator (Unix only)

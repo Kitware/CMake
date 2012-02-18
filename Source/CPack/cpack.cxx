@@ -514,7 +514,6 @@ int main (int argc, char *argv[])
   if ( help )
     {
     // Construct and print requested documentation.
-    std::vector<cmDocumentationEntry> variables;
 
     doc.SetName("cpack");
     doc.SetSection("Name",cmDocumentationName);
@@ -545,7 +544,7 @@ int main (int argc, char *argv[])
       {
           doc.GetStructuredDocFromFile(
               (docedIt->first).c_str(),
-              commands,&cminst,(docedIt->second).c_str());
+              commands,&cminst);
       }
 
     std::map<std::string,cmDocumentationSection *> propDocs;
