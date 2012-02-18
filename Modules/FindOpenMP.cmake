@@ -40,7 +40,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     "/openmp"
     #Intel windows
     "-Qopenmp"
-    #Intel
+    #PathScale, Intel
     "-openmp"
     #Empty, if compiler automatically accepts openmp
     " "
@@ -50,22 +50,23 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     "+Oopenmp"
     #IBM XL C/c++
     "-qsmp"
-    #Portland Group
+    #Portland Group, MIPSpro
     "-mp"
   )
 
   set(OMP_FLAG_GNU "-fopenmp")
-  set(OMP_FLAG_MSVC "/openmp")
+  set(OMP_FLAG_HP "+Oopenmp")
   if(WIN32)
     set(OMP_FLAG_Intel "-Qopenmp")
   else()
     set(OMP_FLAG_Intel "-openmp")
   endif()
-  set(OMP_FLAG_SunPro "-xopenmp")
-  set(OMP_FLAG_HP "+Oopenmp")
-  set(OMP_FLAG_XL "-qsmp")
   set(OMP_FLAG_MIPSpro "-mp")
+  set(OMP_FLAG_MSVC "/openmp")
+  set(OMP_FLAG_PathScale "-openmp")
   set(OMP_FLAG_PGI "-mp")
+  set(OMP_FLAG_SunPro "-xopenmp")
+  set(OMP_FLAG_XL "-qsmp")
 
   # Move the flag that matches the compiler to the head of the list,
   # this is faster and doesn't clutter the output that much. If that
