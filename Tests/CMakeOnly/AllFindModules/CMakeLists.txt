@@ -16,16 +16,16 @@ macro(do_find MODULE_NAME)
 endmacro(do_find)
 
 # It is only possible to use either Qt3 or Qt4 in one project.
-# Since FindQt will complain if both are found we explicitely
-# filter out this and FindQt3. FindKDE3 also depends on Qt3 and
+# Since FindQt will complain if both are found we explicitly request Qt4 here
+# and filter out FindQt3. FindKDE3 also depends on Qt3 and
 # is therefore also blocked
+set(DESIRED_QT_VERSION 4)
 set(NO_QT4_MODULES "Qt3" "KDE3")
 
 # These modules are named Find*.cmake, but are nothing that works in
 # find_package().
 set(NO_FIND_MODULES "PackageHandleStandardArgs" "PackageMessage")
 
-set(DESIRED_QT_VERSION 4)
 foreach(FIND_MODULE ${FIND_MODULES})
     string(REGEX REPLACE ".*/Find(.*)\\.cmake$" "\\1" MODULE_NAME "${FIND_MODULE}")
 
