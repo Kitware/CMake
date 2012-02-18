@@ -172,6 +172,10 @@ cmNinjaNormalTargetGenerator
         i != linkCmds.end();
         ++i)
       {
+#ifdef _WIN32
+       // HACK: no TARGET_IMPLIB here???
+       cmSystemTools::ReplaceString(*i, "/implib:", "");
+#endif
       this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
       }
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
