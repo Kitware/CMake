@@ -1,4 +1,4 @@
-##section Variables common to all CPack generators
+##section Variables concerning CPack Components
 ##end
 ##module
 # - Build binary and source package installers
@@ -25,6 +25,51 @@
 # CPack commands:
 ##end
 #
+##variable
+#  CPACK_COMPONENTS_ALL - The list of component to install.
+#
+#  The default value of this variable is computed by CPack
+#  and contains all components defined by the project. The
+#  user may set it to only include the specified components.
+##end
+#
+##variable
+#  CPACK_<GENNAME>_COMPONENT_INSTALL - Enable/Disable component install for
+#  CPack generator <GENNAME>.
+#
+#  Each CPack Generator (RPM, DEB, ARCHIVE, NSIS, DMG, etc...) has a legacy
+#  default behavior. e.g. RPM builds monolithic whereas NSIS builds component.
+#  One can change the default behavior by setting this variable to 0/1 or OFF/ON.
+##end
+##variable
+#  CPACK_COMPONENTS_GROUPING - Specify how components are grouped for multi-package
+#  component-aware CPack generators.
+#
+#  Some generators like RPM or ARCHIVE family (TGZ, ZIP, ...) generates several
+#  packages files when asked for component packaging. They group the component
+#  differently depending on the value of this variable:
+#     - ONE_PER_GROUP (default): creates one package file per component group
+#     - ALL_COMPONENTS_IN_ONE : creates a single package with all (requested) component
+#     - IGNORE : creates one package per component, i.e. IGNORE component group
+#  One can specify different grouping for different CPack generator by using
+#  a CPACK_PROJECT_CONFIG_FILE.
+##end
+##variable
+#  CPACK_COMPONENT_<compName>_DISPLAY_NAME - The name to be displayed for a component.
+##end
+##variable
+#  CPACK_COMPONENT_<compName>_DESCRIPTION - The description of a component.
+##end
+##variable
+#  CPACK_COMPONENT_<compName>_GROUP - The group of a component.
+##end
+##variable
+#  CPACK_COMPONENT_<compName>_DEPENDS - The dependencies (list of components)
+#  on which this component depends.
+##end
+##variable
+#  CPACK_COMPONENT_<compName>_REQUIRED - True is this component is required.
+##end
 ##macro
 #   cpack_add_component - Describes a CPack installation component
 #   named by the COMPONENT argument to a CMake INSTALL command.
