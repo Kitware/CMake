@@ -741,8 +741,6 @@ void cmDocumentation::addCPackStandardDocSections()
 
     this->VariableSections.push_back(
             "Variables common to all CPack generators");
-    this->VariableSections.push_back(
-            "Variables specific to a CPack generator");
 }
 
 void cmDocumentation::addAutomaticVariableSections(const std::string& section)
