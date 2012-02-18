@@ -1,4 +1,4 @@
-##section Variables specific to CPack Debian (DEB) generator
+##section Variables specific to CPack NSIS generator
 ##end
 ##module
 # - CPack NSIS generator specific options
