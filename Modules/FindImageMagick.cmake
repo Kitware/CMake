@@ -169,7 +169,7 @@ FOREACH(component ${ImageMagick_FIND_COMPONENTS}
         LIST(APPEND ImageMagick_REQUIRED_VARS ImageMagick_${component}_EXECUTABLE)
       ENDIF(is_requested GREATER -1)
     ELSEIF(ImageMagick_${component}_EXECUTABLE)
-      # if no components were requested explicitely put all (default) executables
+      # if no components were requested explicitly put all (default) executables
       # in the list
       LIST(APPEND ImageMagick_DEFAULT_EXECUTABLES "${ImageMagick_${component}_EXECUTABLE}")
     ENDIF(ImageMagick_FIND_COMPONENTS)

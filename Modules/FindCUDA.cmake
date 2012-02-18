@@ -906,7 +906,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS: '${format}'.  Use OBJ or PTX.")
   endif()
 
-  # Set up all the command line flags here, so that they can be overriden on a per target basis.
+  # Set up all the command line flags here, so that they can be overridden on a per target basis.
 
   set(nvcc_flags "")
 
