@@ -1,4 +1,4 @@
-##section Variables specific to a CPack generator
+##section Variables specific to CPack Debian (DEB) generator
 ##end
 ##module
 # - The builtin (binary) CPack Deb generator (Unix only)

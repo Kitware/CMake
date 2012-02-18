@@ -745,6 +745,18 @@ void cmDocumentation::addCPackStandardDocSections()
             "Variables specific to a CPack generator");
 }
 
+void cmDocumentation::addAutomaticVariableSections(const std::string& section)
+{
+  std::vector<std::string>::iterator it;
+  it = find(this->VariableSections.begin(),
+            this->VariableSections.end(),
+            section);
+  /* if the section does not exist then add it */
+  if (it==this->VariableSections.end())
+    {
+    this->VariableSections.push_back(section);
+    }
+}
 //----------------------------------------------------------------------------
 int cmDocumentation::getDocumentedModulesListInDir(
           std::string path,
@@ -818,8 +830,7 @@ static void trim(std::string& s)
 int cmDocumentation::GetStructuredDocFromFile(
         const char* fname,
         std::vector<cmDocumentationEntry>& commands,
-        cmake* cm,
-        const char *docSection)
+        cmake* cm)
 {
     typedef enum sdoce {
         SDOC_NONE, SDOC_MODULE, SDOC_MACRO, SDOC_FUNCTION, SDOC_VARIABLE,
@@ -835,6 +846,7 @@ int cmDocumentation::GetStructuredDocFromFile(
       {
       return nbDocItemFound;
       }
+    std::string section;
     std::string name;
     std::string full;
     std::string brief;
@@ -886,6 +898,8 @@ int cmDocumentation::GetStructuredDocFromFile(
             {
                docCtxIdx++;
                docContextStack[docCtxIdx]=SDOC_SECTION;
+               // 10 is the size of '##section' + 1
+               section = line.substr(10,std::string::npos);
                /* drop the rest of the line */
                line = "";
                newCtx = true;
@@ -900,11 +914,12 @@ int cmDocumentation::GetStructuredDocFromFile(
                            brief.c_str(),full.c_str()));
                    break;
                case SDOC_VARIABLE:
+                   this->addAutomaticVariableSections(section);
                    cm->DefineProperty
                        (name.c_str(), cmProperty::VARIABLE,
                         brief.c_str(),
                         full.c_str(),false,
-                        docSection);
+                        section.c_str());
                    break;
                case SDOC_MODULE:
                    /*  not implemented */
