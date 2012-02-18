@@ -56,7 +56,8 @@ static bool IsIdentChar(char c)
     ('a' <= c && c <= 'z') ||
     ('+' <= c && c <= '9') ||  // +,-./ and numbers
     ('A' <= c && c <= 'Z') ||
-    (c == '_') || (c == '$') || (c == '\\');
+    (c == '_') || (c == '$') || (c == '\\') ||
+    (c == ' ') || (c == ':');
 }
 
 std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
@@ -69,7 +70,10 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
   } else {
-    return ident;
+    std::string result = ident;
+    cmSystemTools::ReplaceString(result, " ", "$ ");
+    cmSystemTools::ReplaceString(result, ":", "$:");
+    return result;
   }
 }
 
