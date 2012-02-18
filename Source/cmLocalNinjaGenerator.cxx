@@ -294,7 +294,11 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   // This happens when building a POST_BUILD value for link targets that
   // don't use POST_BUILD.
   if (cmdLines.empty())
+#ifdef _WIN32
+    return "cd.";
+#else
     return ":";
+#endif
 
   // TODO: This will work only on Unix platforms. I don't
   // want to use a link.txt file because I will lose the benefit of the

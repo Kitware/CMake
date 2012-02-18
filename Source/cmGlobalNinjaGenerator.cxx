@@ -59,6 +59,7 @@ static bool IsIdentChar(char c)
     (c == '_') || (c == '$') || (c == '\\');
 }
 
+
 std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
                                                 std::ostream &vars) {
   if (std::find_if(ident.begin(), ident.end(),
@@ -69,14 +70,19 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
   } else {
-    return ident;
+    return EncodeLiteral(ident);
   }
 }
+
 
 std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string &lit)
 {
   std::string result = lit;
   cmSystemTools::ReplaceString(result, "$", "$$");
+  cmSystemTools::ReplaceString(result, ":", "$:");
+#ifdef _WIN32
+  cmSystemTools::ReplaceString(result, "/", "\\");
+#endif
   return result;
 }
 
@@ -200,7 +206,8 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
   this->AddCustomCommandRule();
 
   cmNinjaVars vars;
-  vars["COMMAND"] = command;
+
+  vars["COMMAND"] = EncodeLiteral(command);
   vars["DESC"] = EncodeLiteral(description);
 
   cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
