@@ -334,7 +334,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
     cmdLines.push_back(cdCmd.str());
   }
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
-    cmdLines.push_back(ccg.GetCommand(i));
+    cmdLines.push_back(this->ConvertToOutputFormat(ccg.GetCommand(i).c_str(),
+                                                   SHELL));
     std::string& cmd = cmdLines.back();
     ccg.AppendArguments(i, cmd);
   }
