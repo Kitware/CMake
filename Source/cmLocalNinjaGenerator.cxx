@@ -28,6 +28,9 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator()
   , HomeRelativeOutputPath("")
 {
   this->IsMakefileGenerator = true;
+#ifdef _WIN32
+  this->WindowsShell = true;
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -256,9 +259,11 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 
 std::string cmLocalNinjaGenerator::ConvertToNinjaPath(const char *path)
 {
-  return this->Convert(path,
-                       cmLocalGenerator::HOME_OUTPUT,
-                       cmLocalGenerator::MAKEFILE);
+  std::string convPath = this->Convert(path, cmLocalGenerator::HOME_OUTPUT);
+#ifdef _WIN32
+  cmSystemTools::ReplaceString(convPath, "/", "\\");
+#endif
+  return convPath;
 }
 
 void

@@ -75,7 +75,9 @@ protected:
   std::string ComputeDefines(cmSourceFile *source,
                              const std::string& language);
 
-  std::string ConvertToNinjaPath(const char *path) const;
+  std::string ConvertToNinjaPath(const char *path) const {
+    return this->GetLocalGenerator()->ConvertToNinjaPath(path);
+  }
   cmLocalNinjaGenerator::map_to_ninja_path MapToNinjaPath() const {
     return this->GetLocalGenerator()->MapToNinjaPath();
   }

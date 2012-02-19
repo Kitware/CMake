@@ -84,6 +84,15 @@ std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string &lit)
   return result;
 }
 
+std::string cmGlobalNinjaGenerator::EncodePath(const std::string &path)
+{
+  std::string result = path;
+#ifdef _WIN32
+  cmSystemTools::ReplaceString(result, "/", "\\");
+#endif
+  return EncodeLiteral(result);
+}
+
 void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                         const std::string& comment,
                                         const std::string& rule,
@@ -122,7 +131,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   for(cmNinjaDeps::const_iterator i = outputs.begin();
       i != outputs.end();
       ++i)
-    builds << " " << EncodeIdent(*i, os);
+    builds << " " << EncodeIdent(EncodePath(*i), os);
   builds << ":";
 
   // Write the rule.
@@ -132,7 +141,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   for(cmNinjaDeps::const_iterator i = explicitDeps.begin();
       i != explicitDeps.end();
       ++i)
-    builds  << " " << EncodeIdent(*i, os);
+    builds  << " " << EncodeIdent(EncodePath(*i), os);
 
   // Write implicit dependencies.
   if(!implicitDeps.empty())
@@ -141,7 +150,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     for(cmNinjaDeps::const_iterator i = implicitDeps.begin();
         i != implicitDeps.end();
         ++i)
-      builds  << " " << EncodeIdent(*i, os);
+      builds  << " " << EncodeIdent(EncodePath(*i), os);
     }
 
   // Write order-only dependencies.
@@ -151,7 +160,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     for(cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
         i != orderOnlyDeps.end();
         ++i)
-      builds  << " " << EncodeIdent(*i, os);
+      builds  << " " << EncodeIdent(EncodePath(*i), os);
     }
 
   builds << "\n";
