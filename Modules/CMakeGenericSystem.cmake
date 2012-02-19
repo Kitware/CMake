@@ -39,6 +39,8 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
 SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
+SET (CMAKE_SKIP_INSTALL_RPATH "NO" CACHE BOOL
+     "If set, runtime paths are not added when installing shared libraries, but are added when building.")
 
 SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.") 
 
@@ -168,5 +170,6 @@ ENDIF(CMAKE_HOST_UNIX)
 
 MARK_AS_ADVANCED(
   CMAKE_SKIP_RPATH
+  CMAKE_SKIP_INSTALL_RPATH
   CMAKE_VERBOSE_MAKEFILE
 )
