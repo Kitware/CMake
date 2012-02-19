@@ -172,10 +172,6 @@ cmNinjaNormalTargetGenerator
         i != linkCmds.end();
         ++i)
       {
-#ifdef _WIN32
-       // TODO TARGET_IMPLIB is empty
-       cmSystemTools::ReplaceString(*i, "/implib:", "");
-#endif
       this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
       }
     linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
@@ -314,6 +310,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     this->GetTarget()->GetFullPath(this->GetConfigName(),
                                    /*implib=*/false,
                                    /*realpath=*/true).c_str());
+  std::string targetOutputImplib = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/true).c_str());
 
   // Compute the comment.
   std::ostringstream comment;
@@ -355,6 +354,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
             cmLocalGenerator::NONE,
             cmLocalGenerator::SHELL, false);
     }
+  }
+
+  if (!this->TargetNameImport.empty()) {
+    vars["TARGET_IMPLIB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+      targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
   }
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
@@ -432,6 +436,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                          emptyDeps,
                                          symlinkVars);
     }
+  }
+
+  if (!this->TargetNameImport.empty()) {
+    // Since using multiple outputs would mess up the $out variable, use an
+    // alias for the import library.
+    cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
+                                            "Alias for import library.",
+                                            cmNinjaDeps(1, targetOutputImplib),
+                                            cmNinjaDeps(1, targetOutputReal));
   }
 
   // Add aliases for the file name and the target name.

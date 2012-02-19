@@ -31,6 +31,7 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator()
 #ifdef _WIN32
   this->WindowsShell = true;
 #endif
+  this->TargetImplib = "$TARGET_IMPLIB";
 }
 
 //----------------------------------------------------------------------------

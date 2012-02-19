@@ -223,22 +223,9 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   if(!cli)
     return cmNinjaDeps();
 
-
-#ifndef _WIN32
   const std::vector<std::string> &deps = cli->GetDepends();
   cmNinjaDeps result(deps.size());
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
-#else
-  // TODO The ninja generator misses a lot on Windows.
-  //      This hack avoids a problem when a Dll is build:
-  //      It builds the .dll but uses the .lib which is then unknown to ninja.
-  cmNinjaDeps result;
-  for(unsigned i = 0; i < cli->GetItems().size(); ++i) {
-    if( cli->GetItems()[i].Target ) {
-      result.push_back( cli->GetItems()[i].Target->GetName() );
-    }
-  }
-#endif
   return result;
 }
 
