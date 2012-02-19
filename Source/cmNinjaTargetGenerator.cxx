@@ -223,9 +223,19 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   if(!cli)
     return cmNinjaDeps();
 
+
+#ifndef ENABLE_WIN32_NINJA_HACKS
   const std::vector<std::string> &deps = cli->GetDepends();
   cmNinjaDeps result(deps.size());
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
+#else
+  cmNinjaDeps result;
+  for(unsigned i = 0; i < cli->GetItems().size(); ++i) {
+    if( cli->GetItems()[i].Target ) {
+      result.push_back( cli->GetItems()[i].Target->GetName() );
+    }
+  }
+#endif
   return result;
 }
 

@@ -367,6 +367,10 @@ SET(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.h
   )
 ADD_DEFINITIONS(-DCMAKE_USE_NINJA)
+IF(WIN32)
+  # TODO remove
+  ADD_DEFINITIONS(-DENABLE_WIN32_NINJA_HACKS)
+endif()
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
