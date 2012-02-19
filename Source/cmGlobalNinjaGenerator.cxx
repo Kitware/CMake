@@ -743,12 +743,19 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 {
-  cmMakefile* mfRoot = this->LocalGenerators[0]->GetMakefile();
+  cmLocalGenerator *lg = this->LocalGenerators[0];
+  cmMakefile* mfRoot = lg->GetMakefile();
 
   std::ostringstream cmd;
-  cmd << mfRoot->GetRequiredDefinition("CMAKE_COMMAND")
-      << " -H" << mfRoot->GetHomeDirectory()
-      << " -B" << mfRoot->GetHomeOutputDirectory();
+  cmd << lg->ConvertToOutputFormat(
+           mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
+           cmLocalGenerator::SHELL)
+      << " -H"
+      << lg->ConvertToOutputFormat(mfRoot->GetHomeDirectory(),
+                                   cmLocalGenerator::SHELL)
+      << " -B"
+      << lg->ConvertToOutputFormat(mfRoot->GetHomeOutputDirectory(),
+                                   cmLocalGenerator::SHELL);
   WriteRule(*this->RulesFileStream,
             "RERUN_CMAKE",
             cmd.str(),
