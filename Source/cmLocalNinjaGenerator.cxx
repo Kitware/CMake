@@ -325,12 +325,12 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
 {
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
   if (ccg.GetNumberOfCommands() > 0) {
+    const char* wd = cc->GetWorkingDirectory();
+    if (!wd)
+      wd = this->GetMakefile()->GetStartOutputDirectory();
+
     std::ostringstream cdCmd;
-    cdCmd << "cd ";
-    if (const char* wd = cc->GetWorkingDirectory())
-      cdCmd << wd;
-    else
-      cdCmd << this->GetMakefile()->GetStartOutputDirectory();
+    cdCmd << "cd " << this->ConvertToOutputFormat(wd, SHELL);
     cmdLines.push_back(cdCmd.str());
   }
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
