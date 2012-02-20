@@ -1,6 +1,6 @@
 
 #=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
+# Copyright 2002-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -13,26 +13,33 @@
 #  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
-if(__WINDOWS_BORLAND)
+if(__WINDOWS_EMBARCADERO)
   return()
 endif()
-set(__WINDOWS_BORLAND 1)
+set(__WINDOWS_EMBARCADERO 1)
 
 SET(BORLAND 1)
 
-# Borland target type flags (bcc32 -h -t):
-#  -tW     GUI App         (implies -U__CONSOLE__)
-#  -tWC    Console App     (implies -D__CONSOLE__=1)
-#  -tWD    Build a DLL     (implies -D__DLL__=1 -D_DLL=1)
-#  -tWM    Enable threads  (implies -D__MT__=1 -D_MT=1)
-#  -tWR    Use DLL runtime (implies -D_RTLDLL, and '-tW' too!!)
-#
-# Notes:
-#  - The flags affect linking so we pass them to the linker.
-#  - The flags affect preprocessing so we pass them to the compiler.
-#  - Since '-tWR' implies '-tW' we use '-tWR -tW-' instead.
-#  - Since '-tW-' disables '-tWD' we use '-tWR -tW- -tWD' for DLLs.
-set(_RTLDLL "-tWR -tW-")
+if("${CMAKE_${_lang}_COMPILER_VERSION}" VERSION_LESS 6.30)
+  # Borland target type flags (bcc32 -h -t):
+  set(_tW "-tW")       # -tW  GUI App         (implies -U__CONSOLE__)
+  set(_tC "-tWC")      # -tWC Console App     (implies -D__CONSOLE__=1)
+  set(_tD "-tWD")      # -tWD Build a DLL     (implies -D__DLL__=1 -D_DLL=1)
+  set(_tM "-tWM")      # -tWM Enable threads  (implies -D__MT__=1 -D_MT=1)
+  set(_tR "-tWR -tW-") # -tWR Use DLL runtime (implies -D_RTLDLL, and '-tW' too!!)
+  # Notes:
+  #  - The flags affect linking so we pass them to the linker.
+  #  - The flags affect preprocessing so we pass them to the compiler.
+  #  - Since '-tWR' implies '-tW' we use '-tWR -tW-' instead.
+  #  - Since '-tW-' disables '-tWD' we use '-tWR -tW- -tWD' for DLLs.
+else()
+  set(EMBARCADERO 1)
+  set(_tC "-tC") # Target is a console application
+  set(_tD "-tD") # Target is a shared library
+  set(_tM "-tM") # Target is multi-threaded
+  set(_tR "-tR") # Target uses the dynamic RTL
+  set(_tW "-tW") # Target is a Windows application
+endif()
 set(_COMPILE_C "-c")
 set(_COMPILE_CXX "-P -c")
 
@@ -50,14 +57,14 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES "-bcc.lib" ".lib")
 SET (CMAKE_MANGLE_OBJECT_FILE_NAMES "ON")
 
 # extra flags for a win32 exe
-SET(CMAKE_CREATE_WIN32_EXE "-tW" )
+SET(CMAKE_CREATE_WIN32_EXE "${_tW}" )
 # extra flags for a console app
-SET(CMAKE_CREATE_CONSOLE_EXE "-tWC" )
+SET(CMAKE_CREATE_CONSOLE_EXE "${_tC}" )
 
 SET (CMAKE_BUILD_TYPE Debug CACHE STRING
      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel.")
 
-SET (CMAKE_EXE_LINKER_FLAGS_INIT "-tWM -lS:10000000 -lSc:10000000 ")
+SET (CMAKE_EXE_LINKER_FLAGS_INIT "${_tM} -lS:10000000 -lSc:10000000 ")
 SET (CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT "-v")
 SET (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT "-v")
 SET (CMAKE_SHARED_LINKER_FLAGS_INIT ${CMAKE_EXE_LINKER_FLAGS_INIT})
@@ -67,18 +74,19 @@ SET (CMAKE_MODULE_LINKER_FLAGS_INIT ${CMAKE_SHARED_LINKER_FLAGS_INIT})
 SET (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT})
 SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT})
 
-macro(__borland_language lang)
-  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-tWD")
+
+macro(__embarcadero_language lang)
+  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "${_tD}")
 
   # compile a source file into an object file
   # place <DEFINES> outside the response file because Borland refuses
   # to parse quotes from the response file.
   set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> ${_RTLDLL} <DEFINES> ${CMAKE_START_TEMP_FILE}-DWIN32 -o<OBJECT> <FLAGS> ${_COMPILE_${lang}} <SOURCE>${CMAKE_END_TEMP_FILE}"
+    "<CMAKE_${lang}_COMPILER> ${_tR} <DEFINES> ${CMAKE_START_TEMP_FILE}-DWIN32 -o<OBJECT> <FLAGS> ${_COMPILE_${lang}} <SOURCE>${CMAKE_END_TEMP_FILE}"
     )
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
-    "<CMAKE_${lang}_COMPILER> ${_RTLDLL} -e<TARGET> ${CMAKE_START_TEMP_FILE}<LINK_FLAGS> <FLAGS> <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
+    "<CMAKE_${lang}_COMPILER> ${_tR} -e<TARGET> ${CMAKE_START_TEMP_FILE}<LINK_FLAGS> <FLAGS> <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
     # "implib -c -w <TARGET_IMPLIB> <TARGET>"
     )
 
@@ -91,7 +99,7 @@ macro(__borland_language lang)
 
   # Create a module library.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
-    "<CMAKE_${lang}_COMPILER> ${_RTLDLL} -tWD ${CMAKE_START_TEMP_FILE}-e<TARGET> <LINK_FLAGS> <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
+    "<CMAKE_${lang}_COMPILER> ${_tR} ${_tD} ${CMAKE_START_TEMP_FILE}-e<TARGET> <LINK_FLAGS> <LINK_LIBRARIES> <OBJECTS>${CMAKE_END_TEMP_FILE}"
     )
 
   # Create an import library for another target.
@@ -112,7 +120,7 @@ macro(__borland_language lang)
     )
 
   # Initial configuration flags.
-  set(CMAKE_${lang}_FLAGS_INIT "-tWM")
+  set(CMAKE_${lang}_FLAGS_INIT "${_tM}")
   set(CMAKE_${lang}_FLAGS_DEBUG_INIT "-Od -v")
   set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "-O1 -DNDEBUG")
   set(CMAKE_${lang}_FLAGS_RELEASE_INIT "-O2 -DNDEBUG")

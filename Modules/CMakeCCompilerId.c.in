@@ -26,6 +26,12 @@
 # define COMPILER_VERSION_MINOR DEC(__clang_minor__)
 # define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
 
+#elif defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)
+# define COMPILER_ID "Embarcadero"
+# define COMPILER_VERSION_MAJOR HEX(__CODEGEARC_VERSION__>>24 & 0x00FF)
+# define COMPILER_VERSION_MINOR HEX(__CODEGEARC_VERSION__>>16 & 0x00FF)
+# define COMPILER_VERSION_PATCH HEX(__CODEGEARC_VERSION__     & 0xFFFF)
+
 #elif defined(__BORLANDC__)
 # define COMPILER_ID "Borland"
   /* __BORLANDC__ = 0xVRR */
