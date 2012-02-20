@@ -57,6 +57,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->NoUserRegistry = false;
   this->NoSystemRegistry = false;
   this->NoBuilds = false;
+  this->UseConfigFiles = true;
   this->UseFindModules = true;
   this->DebugMode = false;
   this->UseLib64Paths = false;
@@ -86,7 +87,7 @@ void cmFindPackageCommand::GenerateDocumentation()
   cmSystemTools::ReplaceString(this->GenericDocumentationPathsOrder,
                                "FIND_XXX", "find_package");
   this->CommandDocumentation =
-    "  find_package(<package> [version] [EXACT] [QUIET]\n"
+    "  find_package(<package> [version] [EXACT] [QUIET] [MODULE]\n"
     "               [[REQUIRED|COMPONENTS] [components...]]\n"
     "               [NO_POLICY_SCOPE])\n"
     "Finds and loads settings from an external project.  "
@@ -94,6 +95,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "When the package is found package-specific information is provided "
     "through variables documented by the package itself.  "
     "The QUIET option disables messages if the package cannot be found.  "
+    "The MODULE option disables the second signature documented below.  "
     "The REQUIRED option stops processing with an error message if the "
     "package cannot be found.  "
     "A package-specific list of components may be listed after the "
@@ -124,7 +126,8 @@ void cmFindPackageCommand::GenerateDocumentation()
     "and producing any needed messages.  "
     "Many find-modules provide limited or no support for versioning; "
     "check the module documentation.  "
-    "If no module is found the command proceeds to Config mode.\n"
+    "If no module is found and the MODULE option is not given the command "
+    "proceeds to Config mode.\n"
     "The complete Config mode command signature is:\n"
     "  find_package(<package> [version] [EXACT] [QUIET]\n"
     "               [[REQUIRED|COMPONENTS] [components...]] [NO_MODULE]\n"
@@ -410,6 +413,7 @@ bool cmFindPackageCommand
   Doing doing = DoingNone;
   cmsys::RegularExpression version("^[0-9.]+$");
   bool haveVersion = false;
+  std::string haveModeString = "";
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "QUIET")
@@ -423,10 +427,35 @@ bool cmFindPackageCommand
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
+    else if(args[i] == "MODULE")
+      {
+      if(!haveModeString.empty())
+        {
+        cmOStringStream e;
+        e << "given " << args[i] << ", but mode is already set to "
+          << haveModeString << ".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      this->UseConfigFiles = false;
+      doing = DoingNone;
+      haveModeString = args[i];
+      }
     else if(args[i] == "NO_MODULE")
       {
+      if(!haveModeString.empty())
+        {
+        cmOStringStream e;
+        e << "given " << args[i] << ", but mode is already set to "
+          << haveModeString << ".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
       this->UseFindModules = false;
       doing = DoingNone;
+      haveModeString = args[i];
       }
     else if(args[i] == "REQUIRED")
       {
@@ -831,41 +860,44 @@ bool cmFindPackageCommand::HandlePackageMode()
 
   // Try to load the config file if the directory is known
   bool fileFound = false;
-  if(!cmSystemTools::IsOff(def))
+  if (this->UseConfigFiles)
     {
-    // Get the directory from the variable value.
-    std::string dir = def;
-    cmSystemTools::ConvertToUnixSlashes(dir);
-
-    // Treat relative paths with respect to the current source dir.
-    if(!cmSystemTools::FileIsFullPath(dir.c_str()))
+    if(!cmSystemTools::IsOff(def))
       {
-      dir = "/" + dir;
-      dir = this->Makefile->GetCurrentDirectory() + dir;
+      // Get the directory from the variable value.
+      std::string dir = def;
+      cmSystemTools::ConvertToUnixSlashes(dir);
+
+      // Treat relative paths with respect to the current source dir.
+      if(!cmSystemTools::FileIsFullPath(dir.c_str()))
+        {
+        dir = "/" + dir;
+        dir = this->Makefile->GetCurrentDirectory() + dir;
+        }
+      // The file location was cached.  Look for the correct file.
+      std::string file;
+      if (this->FindConfigFile(dir, file))
+        {
+        this->FileFound = file;
+        fileFound = true;
+        }
+      def = this->Makefile->GetDefinition(this->Variable.c_str());
       }
-    // The file location was cached.  Look for the correct file.
-    std::string file;
-    if (this->FindConfigFile(dir, file))
+
+    // Search for the config file if it is not already found.
+    if(cmSystemTools::IsOff(def) || !fileFound)
       {
-      this->FileFound = file;
-      fileFound = true;
+      fileFound = this->FindConfig();
+      def = this->Makefile->GetDefinition(this->Variable.c_str());
       }
-    def = this->Makefile->GetDefinition(this->Variable.c_str());
-    }
 
-  // Search for the config file if it is not already found.
-  if(cmSystemTools::IsOff(def) || !fileFound)
-    {
-    fileFound = this->FindConfig();
-    def = this->Makefile->GetDefinition(this->Variable.c_str());
-    }
-
-  // Sanity check.
-  if(fileFound && this->FileFound.empty())
-    {
-    this->Makefile->IssueMessage(
-      cmake::INTERNAL_ERROR, "fileFound is true but FileFound is empty!");
-    fileFound = false;
+    // Sanity check.
+    if(fileFound && this->FileFound.empty())
+      {
+      this->Makefile->IssueMessage(
+        cmake::INTERNAL_ERROR, "fileFound is true but FileFound is empty!");
+      fileFound = false;
+      }
     }
 
   // If the directory for the config file was found, try to read the file.
@@ -893,6 +925,7 @@ bool cmFindPackageCommand::HandlePackageMode()
     {
     // The variable is not set.
     cmOStringStream e;
+    cmOStringStream aw;
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.
     if (this->ConsideredConfigs.size() > 0)
@@ -912,40 +945,67 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     else
       {
-      if(this->UseFindModules)
+      if (this->UseConfigFiles)
         {
-        e << "By not providing \"Find" << this->Name << ".cmake\" in "
-             "CMAKE_MODULE_PATH this project has asked CMake to find a "
-             "package configuration file provided by \""<<this->Name<< "\", "
-             "but CMake did not find one.\n";
-        }
-
-      if(this->Configs.size() == 1)
-        {
-        e << "Could not find a package configuration file named \""
-          << this->Configs[0] << "\" provided by package \"" << this->Name << "\".\n";
-        }
-      else
-        {
-        e << "Could not find a package configuration file provided by \""
-          << this->Name << "\" with any of the following names:\n";
-        for(std::vector<std::string>::const_iterator ci =
-                                                       this->Configs.begin();
-            ci != this->Configs.end(); ++ci)
+        if(this->UseFindModules)
           {
-          e << "  " << *ci << "\n";
+          e << "By not providing \"Find" << this->Name << ".cmake\" in "
+               "CMAKE_MODULE_PATH this project has asked CMake to find a "
+               "package configuration file provided by \""<<this->Name<< "\", "
+               "but CMake did not find one.\n";
           }
-        }
 
-      e << "Add the installation prefix of \"" << this->Name << "\" to "
-        "CMAKE_PREFIX_PATH or set \"" << this->Variable << "\" to a "
-        "directory containing one of the above files. "
-        "If \"" << this->Name << "\" provides a separate development "
-        "package or SDK, be sure it has been installed.";
+        if(this->Configs.size() == 1)
+          {
+          e << "Could not find a package configuration file named \""
+            << this->Configs[0] << "\" provided by package \""
+            << this->Name << "\".\n";
+          }
+        else
+          {
+          e << "Could not find a package configuration file provided by \""
+            << this->Name << "\" with any of the following names:\n";
+          for(std::vector<std::string>::const_iterator ci =
+                this->Configs.begin();
+              ci != this->Configs.end(); ++ci)
+            {
+            e << "  " << *ci << "\n";
+            }
+          }
+
+        e << "Add the installation prefix of \"" << this->Name << "\" to "
+          "CMAKE_PREFIX_PATH or set \"" << this->Variable << "\" to a "
+          "directory containing one of the above files. "
+          "If \"" << this->Name << "\" provides a separate development "
+          "package or SDK, be sure it has been installed.";
+        }
+      else // if(!this->UseFindModules && !this->UseConfigFiles)
+        {
+        e << "No \"Find" << this->Name << ".cmake\" found in "
+          << "CMAKE_MODULE_PATH.";
+
+        aw<< "Find"<< this->Name <<".cmake must either be part of this "
+             "project itself, in this case adjust CMAKE_MODULE_PATH so that "
+             "it points to the correct location inside its source tree.\n"
+             "Or it must be installed by a package which has already been "
+             "found via find_package().  In this case make sure that "
+             "package has indeed been found and adjust CMAKE_MODULE_PATH to "
+             "contain the location where that package has installed "
+             "Find" << this->Name << ".cmake.  This must be a location "
+             "provided by that package.  This error in general means that "
+             "the buildsystem of this project is relying on a Find-module "
+             "without ensuring that it is actually available.\n";
+        }
       }
+
 
     this->Makefile->IssueMessage(
       this->Required? cmake::FATAL_ERROR : cmake::WARNING, e.str());
+
+    if (!aw.str().empty())
+      {
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,aw.str());
+      }
     }
 
   // Set a variable marking whether the package was found.
