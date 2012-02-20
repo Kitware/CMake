@@ -130,7 +130,8 @@ void cmFindPackageCommand::GenerateDocumentation()
     "proceeds to Config mode.\n"
     "The complete Config mode command signature is:\n"
     "  find_package(<package> [version] [EXACT] [QUIET]\n"
-    "               [[REQUIRED|COMPONENTS] [components...]] [NO_MODULE]\n"
+    "               [[REQUIRED|COMPONENTS] [components...]]\n"
+    "               [CONFIG|NO_MODULE]\n"
     "               [NO_POLICY_SCOPE]\n"
     "               [NAMES name1 [name2 ...]]\n"
     "               [CONFIGS config1 [config2 ...]]\n"
@@ -148,9 +149,10 @@ void cmFindPackageCommand::GenerateDocumentation()
     "               [CMAKE_FIND_ROOT_PATH_BOTH |\n"
     "                ONLY_CMAKE_FIND_ROOT_PATH |\n"
     "                NO_CMAKE_FIND_ROOT_PATH])\n"
-    "The NO_MODULE option may be used to skip Module mode explicitly.  "
-    "It is also implied by use of options not specified in the reduced "
-    "signature.  "
+    "The CONFIG option may be used to skip Module mode explicitly and "
+    "switch to Config mode.  It is synonymous to using NO_MODULE.  "
+    "Config mode is also implied by use of options not specified in the "
+    "reduced signature.  "
     "\n"
     "Config mode attempts to locate a configuration file provided by the "
     "package to be found.  A cache entry called <package>_DIR is created to "
@@ -439,6 +441,21 @@ bool cmFindPackageCommand
         }
 
       this->UseConfigFiles = false;
+      doing = DoingNone;
+      haveModeString = args[i];
+      }
+    else if(args[i] == "CONFIG")
+      {
+      if(!haveModeString.empty())
+        {
+        cmOStringStream e;
+        e << "given " << args[i] << ", but mode is already set to "
+          << haveModeString << ".";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+
+      this->UseFindModules = false;
       doing = DoingNone;
       haveModeString = args[i];
       }
