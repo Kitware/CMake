@@ -183,11 +183,14 @@ ENDIF(QT_UIC_EXECUTABLE)
 
 IF (WIN32)
   FIND_LIBRARY(QT_QTMAIN_LIBRARY qtmain
+    HINTS
+    $ENV{QTDIR}/lib
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
     "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/lib"
+    PATHS
     "$ENV{ProgramFiles}/qt/lib"
-    $ENV{QTDIR}/lib "C:/Program Files/qt/lib"
+    "C:/Program Files/qt/lib"
     DOC "This Library is only needed by and included with Qt3 on MSWindows. It should be NOTFOUND, undefined or IGNORE otherwise."
     )
 ENDIF (WIN32)
