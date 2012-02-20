@@ -353,8 +353,7 @@ IF (WIN32)
   ENDIF(NOT UNIX)
 ENDIF (WIN32)
 
-# Ninja only works on UNIX.
-IF(UNIX)
+if(NOT WIN32)
   SET(SRCS ${SRCS}
     cmGlobalNinjaGenerator.cxx
     cmGlobalNinjaGenerator.h
@@ -369,7 +368,7 @@ IF(UNIX)
     cmNinjaUtilityTargetGenerator.h
     )
   ADD_DEFINITIONS(-DCMAKE_USE_NINJA)
-ENDIF(UNIX)
+endif()
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})

@@ -59,6 +59,7 @@ public:
 
   static std::string EncodeIdent(const std::string &ident, std::ostream &vars);
   static std::string EncodeLiteral(const std::string &lit);
+  static std::string EncodePath(const std::string &path);
 
   /**
    * Write the given @a comment to the output stream @a os. It

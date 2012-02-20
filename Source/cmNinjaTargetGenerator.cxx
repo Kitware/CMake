@@ -212,13 +212,6 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
   return defines;
 }
 
-std::string cmNinjaTargetGenerator::ConvertToNinjaPath(const char *path) const
-{
-  return this->LocalGenerator->Convert(path,
-                                       cmLocalGenerator::HOME_OUTPUT,
-                                       cmLocalGenerator::MAKEFILE);
-}
-
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 {
   // Static libraries never depend on other targets for linking.

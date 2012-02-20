@@ -56,7 +56,8 @@ static bool IsIdentChar(char c)
     ('a' <= c && c <= 'z') ||
     ('+' <= c && c <= '9') ||  // +,-./ and numbers
     ('A' <= c && c <= 'Z') ||
-    (c == '_') || (c == '$') || (c == '\\');
+    (c == '_') || (c == '$') || (c == '\\') ||
+    (c == ' ') || (c == ':');
 }
 
 std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
@@ -69,7 +70,10 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
   } else {
-    return ident;
+    std::string result = ident;
+    cmSystemTools::ReplaceString(result, " ", "$ ");
+    cmSystemTools::ReplaceString(result, ":", "$:");
+    return result;
   }
 }
 
@@ -78,6 +82,15 @@ std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string &lit)
   std::string result = lit;
   cmSystemTools::ReplaceString(result, "$", "$$");
   return result;
+}
+
+std::string cmGlobalNinjaGenerator::EncodePath(const std::string &path)
+{
+  std::string result = path;
+#ifdef _WIN32
+  cmSystemTools::ReplaceString(result, "/", "\\");
+#endif
+  return EncodeLiteral(result);
 }
 
 void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
@@ -118,7 +131,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   for(cmNinjaDeps::const_iterator i = outputs.begin();
       i != outputs.end();
       ++i)
-    builds << " " << EncodeIdent(*i, os);
+    builds << " " << EncodeIdent(EncodePath(*i), os);
   builds << ":";
 
   // Write the rule.
@@ -128,7 +141,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   for(cmNinjaDeps::const_iterator i = explicitDeps.begin();
       i != explicitDeps.end();
       ++i)
-    builds  << " " << EncodeIdent(*i, os);
+    builds  << " " << EncodeIdent(EncodePath(*i), os);
 
   // Write implicit dependencies.
   if(!implicitDeps.empty())
@@ -137,7 +150,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     for(cmNinjaDeps::const_iterator i = implicitDeps.begin();
         i != implicitDeps.end();
         ++i)
-      builds  << " " << EncodeIdent(*i, os);
+      builds  << " " << EncodeIdent(EncodePath(*i), os);
     }
 
   // Write order-only dependencies.
@@ -147,7 +160,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     for(cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
         i != orderOnlyDeps.end();
         ++i)
-      builds  << " " << EncodeIdent(*i, os);
+      builds  << " " << EncodeIdent(EncodePath(*i), os);
     }
 
   builds << "\n";
@@ -730,12 +743,19 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
 
 void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
 {
-  cmMakefile* mfRoot = this->LocalGenerators[0]->GetMakefile();
+  cmLocalGenerator *lg = this->LocalGenerators[0];
+  cmMakefile* mfRoot = lg->GetMakefile();
 
   std::ostringstream cmd;
-  cmd << mfRoot->GetRequiredDefinition("CMAKE_COMMAND")
-      << " -H" << mfRoot->GetHomeDirectory()
-      << " -B" << mfRoot->GetHomeOutputDirectory();
+  cmd << lg->ConvertToOutputFormat(
+           mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
+           cmLocalGenerator::SHELL)
+      << " -H"
+      << lg->ConvertToOutputFormat(mfRoot->GetHomeDirectory(),
+                                   cmLocalGenerator::SHELL)
+      << " -B"
+      << lg->ConvertToOutputFormat(mfRoot->GetHomeOutputDirectory(),
+                                   cmLocalGenerator::SHELL);
   WriteRule(*this->RulesFileStream,
             "RERUN_CMAKE",
             cmd.str(),
