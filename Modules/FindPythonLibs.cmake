@@ -8,7 +8,10 @@
 #  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
 #  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
 #  PYTHON_DEBUG_LIBRARIES     - path to the debug library
-#  Python_ADDITIONAL_VERSIONS - list of additional Python versions to search for
+#
+# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
+# version numbers that should be taken into account when searching for Python.
+# You need to set this variable before calling find_package(PythonLibs).
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
