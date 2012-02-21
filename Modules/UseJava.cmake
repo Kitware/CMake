@@ -121,7 +121,7 @@
 #                [VERSION TRUE|FALSE]
 #               )
 #
-# Create jave documentation based on files or packages. For more
+# Create java documentation based on files or packages. For more
 # details please read the javadoc manpage.
 #
 # There are two main signatures for create_javadoc. The first

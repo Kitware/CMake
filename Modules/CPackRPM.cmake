@@ -183,7 +183,7 @@
 #     The refered script file(s) will be read and directly
 #     put after the %pre or %preun section
 #     If CPACK_RPM_COMPONENT_INSTALL is set to ON the (un)install script for
-#     each component can be overriden with
+#     each component can be overridden with
 #     CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE and
 #     CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE
 #     One may verify which scriptlet has been included with
@@ -198,7 +198,7 @@
 #     The refered script file(s) will be read and directly
 #     put after the %post or %postun section
 #     If CPACK_RPM_COMPONENT_INSTALL is set to ON the (un)install script for
-#     each component can be overriden with
+#     each component can be overridden with
 #     CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE and
 #     CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE
 #     One may verify which scriptlet has been included with
@@ -209,7 +209,7 @@
 #  CPACK_RPM_<COMPONENT>_USER_FILELIST
 #     Mandatory : NO
 #     Default   : -
-#     May be used to explicitely specify %(<directive>) file line
+#     May be used to explicitly specify %(<directive>) file line
 #     in the spec file. Like %config(noreplace) or any other directive
 #     that be found in the %files section. Since CPackRPM is generating
 #     the list of files (and directories) the user specified files of
