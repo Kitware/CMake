@@ -30,11 +30,42 @@ INCLUDE(CMakeFindFrameworks)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 
+SET(_PYTHON1_VERSIONS 1.6 1.5)
+SET(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
+SET(_PYTHON3_VERSIONS 3.3 3.2 3.1 3.0)
+
+IF(PythonLibs_FIND_VERSION)
+    IF(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+        STRING(REGEX REPLACE "^([0-9]+\\.[0-9]+).*" "\\1" _PYTHON_FIND_MAJ_MIN "${PythonLibs_FIND_VERSION}")
+        STRING(REGEX REPLACE "^([0-9]+).*" "\\1" _PYTHON_FIND_MAJ "${_PYTHON_FIND_MAJ_MIN}")
+        UNSET(_PYTHON_FIND_OTHER_VERSIONS)
+        IF(NOT PythonLibs_FIND_VERSION_EXACT)
+            FOREACH(_PYTHON_V ${_PYTHON${_PYTHON_FIND_MAJ}_VERSIONS})
+                IF(NOT _PYTHON_V VERSION_LESS _PYTHON_FIND_MAJ_MIN)
+                    LIST(APPEND _PYTHON_FIND_OTHER_VERSIONS ${_PYTHON_V})
+                ENDIF()
+             ENDFOREACH()
+        ENDIF(NOT PythonLibs_FIND_VERSION_EXACT)
+        UNSET(_PYTHON_FIND_MAJ_MIN)
+        UNSET(_PYTHON_FIND_MAJ)
+    ELSE(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+        SET(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON${PythonLibs_FIND_VERSION}_VERSIONS})
+    ENDIF(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+ELSE(PythonLibs_FIND_VERSION)
+    SET(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
+ENDIF(PythonLibs_FIND_VERSION)
+
 # Set up the versions we know about, in the order we will search. Always add
 # the user supplied additional versions to the front.
-set(_Python_VERSIONS
+SET(_Python_VERSIONS
   ${Python_ADDITIONAL_VERSIONS}
-  2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
+  ${_PYTHON_FIND_OTHER_VERSIONS}
+  )
+
+UNSET(_PYTHON_FIND_OTHER_VERSIONS)
+UNSET(_PYTHON1_VERSIONS)
+UNSET(_PYTHON2_VERSIONS)
+UNSET(_PYTHON3_VERSIONS)
 
 FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
   STRING(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
