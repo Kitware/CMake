@@ -61,6 +61,17 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
 
 INCLUDE(CMakeParseArguments)
 
+FUNCTION(_GETTEXT_GET_UNIQUE_TARGET_NAME _name _unique_name)
+   SET(propertyName "_GETTEXT_UNIQUE_COUNTER_${_name}")
+   GET_PROPERTY(currentCounter GLOBAL PROPERTY "${propertyName}")
+   IF(NOT currentCounter)
+      SET(currentCounter 1)
+   ENDIF()
+   SET(${_unique_name} "${_name}_${currentCounter}" PARENT_SCOPE)
+   MATH(EXPR currentCounter "${currentCounter} + 1")
+   SET_PROPERTY(GLOBAL PROPERTY ${propertyName} ${currentCounter} )
+ENDFUNCTION()
+
 MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
    # make it a real variable, so we can modify it here
    SET(_firstPoFile "${_firstPoFileArg}")
@@ -94,7 +105,15 @@ MACRO(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
 
    ENDFOREACH (_currentPoFile )
 
-   ADD_CUSTOM_TARGET(translations ${_addToAll} DEPENDS ${_gmoFiles})
+   IF(NOT TARGET translations)
+      ADD_CUSTOM_TARGET(translations)
+   ENDIF()
+
+  _GETTEXT_GET_UNIQUE_TARGET_NAME(translations uniqueTargetName)
+
+   ADD_CUSTOM_TARGET(${uniqueTargetName} ${_addToAll} DEPENDS ${_gmoFiles})
+
+   ADD_DEPENDENCIES(translations ${uniqueTargetName})
 
 ENDMACRO(GETTEXT_CREATE_TRANSLATIONS )
 
@@ -133,11 +152,20 @@ FUNCTION(GETTEXT_PROCESS_POT_FILE _potFile)
       LIST(APPEND _gmoFiles ${_gmoFile})
    ENDFOREACH (_lang )
 
+  IF(NOT TARGET potfiles)
+     ADD_CUSTOM_TARGET(potfiles)
+  ENDIF()
+
+  _GETTEXT_GET_UNIQUE_TARGET_NAME( potfiles uniqueTargetName)
+
    IF(_parsedArguments_ALL)
-      ADD_CUSTOM_TARGET(potfiles ALL DEPENDS ${_gmoFiles})
+      ADD_CUSTOM_TARGET(${uniqueTargetName} ALL DEPENDS ${_gmoFiles})
    ELSE(_parsedArguments_ALL)
-      ADD_CUSTOM_TARGET(potfiles DEPENDS ${_gmoFiles})
+      ADD_CUSTOM_TARGET(${uniqueTargetName} DEPENDS ${_gmoFiles})
    ENDIF(_parsedArguments_ALL)
+
+   ADD_DEPENDENCIES(potfiles ${uniqueTargetName})
+
 ENDFUNCTION(GETTEXT_PROCESS_POT_FILE)
 
 
@@ -165,11 +193,21 @@ FUNCTION(GETTEXT_PROCESS_PO_FILES _lang)
       LIST(APPEND _gmoFiles ${_gmoFile})
    ENDFOREACH(_current_PO_FILE)
 
+
+  IF(NOT TARGET pofiles)
+     ADD_CUSTOM_TARGET(pofiles)
+  ENDIF()
+
+  _GETTEXT_GET_UNIQUE_TARGET_NAME( pofiles uniqueTargetName)
+
    IF(_parsedArguments_ALL)
-      ADD_CUSTOM_TARGET(pofiles ALL DEPENDS ${_gmoFiles})
+      ADD_CUSTOM_TARGET(${uniqueTargetName} ALL DEPENDS ${_gmoFiles})
    ELSE(_parsedArguments_ALL)
-      ADD_CUSTOM_TARGET(pofiles DEPENDS ${_gmoFiles})
+      ADD_CUSTOM_TARGET(${uniqueTargetName} DEPENDS ${_gmoFiles})
    ENDIF(_parsedArguments_ALL)
+
+   ADD_DEPENDENCIES(pofiles ${uniqueTargetName})
+
 ENDFUNCTION(GETTEXT_PROCESS_PO_FILES)
 
 IF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
