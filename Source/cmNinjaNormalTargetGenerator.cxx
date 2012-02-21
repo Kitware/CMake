@@ -136,6 +136,7 @@ cmNinjaNormalTargetGenerator
     vars.Target = "$out";
     vars.TargetSOName = "$SONAME";
     vars.TargetInstallNameDir = "$INSTALLNAME_DIR";
+    vars.TargetPDB = "$TARGET_PDB";
 
     // Setup the target version.
     std::string targetVersionMajor;
@@ -360,6 +361,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["TARGET_IMPLIB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
       targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
   }
+
+  vars["TARGET_PDB"] = this->GetTargetPDB();
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
     &this->GetTarget()->GetPreBuildCommands(),

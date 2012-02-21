@@ -270,6 +270,23 @@ std::string cmNinjaTargetGenerator::GetTargetName() const
   return this->Target->GetName();
 }
 
+std::string cmNinjaTargetGenerator::GetTargetPDB() const
+{
+  std::string targetFullPathPDB;
+  if(this->Target->GetType() == cmTarget::EXECUTABLE ||
+     this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+     this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    targetFullPathPDB = this->Target->GetDirectory(this->GetConfigName());
+    targetFullPathPDB += "/";
+    targetFullPathPDB += this->Target->GetPDBName(this->GetConfigName());
+    }
+
+  return ConvertToNinjaPath(targetFullPathPDB.c_str());
+}
+
+
 void
 cmNinjaTargetGenerator
 ::WriteLanguageRules(const std::string& language)
@@ -293,6 +310,7 @@ cmNinjaTargetGenerator
   vars.Object = "$out";
   std::string flags = "$FLAGS";
   vars.Defines = "$DEFINES";
+  vars.TargetPDB = "$TARGET_PDB";
 
   std::string depfile;
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
@@ -426,6 +444,7 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
+  vars["TARGET_PDB"] = this->GetTargetPDB();
 
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment,
