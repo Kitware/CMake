@@ -63,6 +63,9 @@
 #   For example, you would set this to 'exec' if your executables are
 #   in an exec directory.
 #
+#   CPACK_NSIS_MENU_LINKS - A list of pairs of type <shortcut target>
+#   <shortcut label> which will be created in the Windows start menu.
+#
 #   CPACK_NSIS_MUI_FINISHPAGE_RUN - Specify an executable to add an option
 #   to run on the finish page of the NSIS installer.
 
