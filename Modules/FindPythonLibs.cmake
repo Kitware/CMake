@@ -7,7 +7,7 @@
 #  PYTHON_LIBRARIES           - path to the python library
 #  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
 #  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
-#  PYTHON_DEBUG_LIBRARIES     - path to the debug library
+#  PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
 #  PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
 #
 # The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
@@ -148,9 +148,14 @@ MARK_AS_ADVANCED(
 # library. We now set the variables listed by the documentation for this
 # module.
 SET(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
-SET(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
 SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
+# These variables have been historically named in this module different from
+# what SELECT_LIBRARY_CONFIGURATIONS() expects.
+SET(PYTHON_LIBRARY_DEBUG "${PYTHON_DEBUG_LIBRARY}")
+SET(PYTHON_LIBRARY_RELEASE "${PYTHON_LIBRARY}")
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+SELECT_LIBRARY_CONFIGURATIONS(PYTHON)
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
