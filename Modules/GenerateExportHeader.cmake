@@ -173,7 +173,7 @@ macro(_test_compiler_hidden_visibility)
         _gcc_version "${_gcc_version_info}")
     endif()
 
-    if(${_gcc_version} VERSION_LESS "4.2")
+    if("${_gcc_version}" VERSION_LESS "4.2")
       set(GCC_TOO_OLD TRUE)
       message(WARNING "GCC version older than 4.2")
     endif()
