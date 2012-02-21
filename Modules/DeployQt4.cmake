@@ -210,7 +210,7 @@ function(install_qt4_plugin_path plugin executable copy installed_plugin_path_va
                         endif()
                         install(FILES "${plugin}" DESTINATION "${plugins_path}" ${configurations} ${component})
                 endif()
-                set(${installed_plugin_path_var} ${${installed_path_var}} "${plugins_path}/${plugin_name}" PARENT_SCOPE)
+                set(${installed_plugin_path_var} "${plugins_path}/${plugin_name}" PARENT_SCOPE)
         endif()
 endfunction()
 
@@ -235,7 +235,7 @@ function(install_qt4_plugin plugin executable copy installed_plugin_path_var)
                 install_qt4_plugin_path("${plugin_release}" "${executable}" "${copy}" "${installed_plugin_path_var}" "${plugins_dir}" "${component}" "Release|RelWithDebInfo|MinSizeRel")
                 install_qt4_plugin_path("${plugin_debug}" "${executable}" "${copy}" "${installed_plugin_path_var}" "${plugins_dir}" "${component}" "Debug")
         endif()
-        set(installed_plugin_path_var "${installed_plugin_path_var}" PARENT_SCOPE)
+        set(installed_plugin_paths ${${installed_plugin_path_var}} PARENT_SCOPE)
 endfunction()
 
 function(install_qt4_executable executable)
