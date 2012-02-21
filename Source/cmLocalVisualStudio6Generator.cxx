@@ -1605,11 +1605,13 @@ void cmLocalVisualStudio6Generator
       flagsDebugRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
       }
-    
-    // if unicode is not found, then add -D_MBCS
+
+    // if _UNICODE and _SBCS are not found, then add -D_MBCS
     std::string defs = this->Makefile->GetDefineFlags();
     if(flags.find("D_UNICODE") == flags.npos &&
-       defs.find("D_UNICODE") == flags.npos) 
+       defs.find("D_UNICODE") == flags.npos &&
+       flags.find("D_SBCS") == flags.npos &&
+       defs.find("D_SBCS") == flags.npos)
       {
       flags += " /D \"_MBCS\"";
       }
