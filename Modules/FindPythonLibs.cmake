@@ -8,6 +8,7 @@
 #  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
 #  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
 #  PYTHON_DEBUG_LIBRARIES     - path to the debug library
+#  PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
 #
 # The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
 # version numbers that should be taken into account when searching for Python.
@@ -126,6 +127,14 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
   SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL
     "Path to where Python.h is found (deprecated)")
 
+  IF(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
+    FILE(STRINGS "${PYTHON_INCLUDE_DIR}/patchlevel.h" python_version_str
+         REGEX "^#define[ \t]+PY_VERSION[ \t]+\"[^\"]+\"")
+    STRING(REGEX REPLACE "^#define[ \t]+PY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
+                         PYTHONLIBS_VERSION_STRING "${python_version_str}")
+    UNSET(python_version_str)
+  ENDIF(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
+
 ENDFOREACH(_CURRENT_VERSION)
 
 MARK_AS_ADVANCED(
@@ -144,8 +153,9 @@ SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs DEFAULT_MSG PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS)
-
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
+                                  REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS
+                                  VERSION_VAR PYTHONLIBS_VERSION_STRING)
 
 # PYTHON_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
 # PYTHON_WRITE_MODULES_HEADER(<filename>) writes a header file you can include
