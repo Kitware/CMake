@@ -199,7 +199,9 @@ CONFIGURE_FILE(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
   COPYONLY IMMEDIATE)
-FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl)
+FOREACH (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl
+         ${CMAKE_SHARED_LIBRARY_SUFFIX}.2
+         ${CMAKE_STATIC_LIBRARY_SUFFIX}.2)
   CONFIGURE_FILE(
     ${Complex_SOURCE_DIR}/Library/dummy
     ${Complex_BINARY_DIR}/Library/libdummylib${ext}
@@ -215,6 +217,34 @@ FIND_LIBRARY(FIND_DUMMY_LIB
              NAMES dummylib dummylib2
              PATHS
              ${Complex_BINARY_DIR}/Library DOC "find dummy lib")
+
+# This doesn't work for platforms that have a shared library and an import
+# library, like Windows with .dll and .lib. Limit is to ".so" now because it's
+# known to work there.
+IF(CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL ".so")
+  FIND_LIBRARY(FIND_DUMMY_SHLIB_VERSIONED
+               NAMES libdummylib${CMAKE_SHARED_LIBRARY_SUFFIX}.2
+               PATHS ${Complex_BINARY_DIR}/Library
+               DOC "find versioned dummy shared lib"
+               NO_DEFAULT_PATH)
+
+  IF(NOT FIND_DUMMY_SHLIB_VERSIONED MATCHES "/libdummylib${CMAKE_SHARED_LIBRARY_SUFFIX}.2")
+    MESSAGE(SEND_ERROR "FIND_DUMMY_SHLIB_VERSIONED is not set correctly: "
+            "${FIND_DUMMY_SHLIB_VERSIONED}")
+  ENDIF()
+ENDIF()
+
+# Static library, should work everywhere
+FIND_LIBRARY(FIND_DUMMY_STLIB_VERSIONED
+             NAMES libdummylib${CMAKE_STATIC_LIBRARY_SUFFIX}.2
+             PATHS ${Complex_BINARY_DIR}/Library
+             DOC "find versioned dummy static lib"
+             NO_DEFAULT_PATH)
+
+IF(NOT FIND_DUMMY_STLIB_VERSIONED MATCHES "/libdummylib${CMAKE_STATIC_LIBRARY_SUFFIX}.2")
+  MESSAGE(SEND_ERROR "FIND_DUMMY_STLIB_VERSIONED is not set correctly: "
+          "${FIND_DUMMY_STLIB_VERSIONED}")
+ENDIF()
 
 #
 # Test SET_SOURCE_FILES_PROPERTIES 
