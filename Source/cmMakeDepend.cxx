@@ -56,6 +56,8 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
     this->Makefile->ComplainFileRegularExpression.c_str());
 
   // Now extract any include paths from the targets
+  std::set<std::string> uniqueIncludes;
+  std::vector<std::string> orderedAndUniqueIncludes;
   cmTargets & targets = this->Makefile->GetTargets();
   for (cmTargets::iterator l = targets.begin(); l != targets.end(); ++l)
     {
@@ -66,8 +68,19 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
       {
       std::string path = *j;
       this->Makefile->ExpandVariablesInString(path);
-      this->AddSearchPath(path.c_str());
+      if(uniqueIncludes.insert(path).second)
+        {
+        orderedAndUniqueIncludes.push_back(path);
+        }
       }
+    }
+
+  for(std::vector<std::string>::const_iterator
+    it = orderedAndUniqueIncludes.begin();
+    it != orderedAndUniqueIncludes.end();
+    ++it)
+    {
+    this->AddSearchPath(it->c_str());
     }
 }
 
