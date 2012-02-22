@@ -2127,6 +2127,20 @@ void cmMakefile::ExpandVariables()
     this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
     }
 
+  // Also for each target's INCLUDE_DIRECTORIES property:
+  for (cmTargets::iterator l = this->Targets.begin();
+       l != this->Targets.end(); ++l)
+    {
+    cmTarget &t = l->second;
+    const char *includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
+    if (includeDirs)
+      {
+      std::string dirs = includeDirs;
+      this->ExpandVariablesInString(dirs, true, true);
+      t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+      }
+    }
+
   for(std::vector<std::string>::iterator d = this->LinkDirectories.begin();
       d != this->LinkDirectories.end(); ++d)
     {
