@@ -145,8 +145,11 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // TODO: Handle response file.
   // Add include directory flags.
   {
+  std::vector<std::string> includes;
+  this->LocalGenerator->GetIncludeDirectories(includes, this->Target,
+                                              language.c_str());
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(language.c_str(), false);
+    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(), false);
   this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
   }
 
