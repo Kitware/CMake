@@ -25,11 +25,6 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-get_property(_ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
-list(FIND _ENABLED_LANGUAGES "C" _HAVE_LANGUAGE_C)
-list(FIND _ENABLED_LANGUAGES "CXX" _HAVE_LANGUAGE_CXX)
-unset(_ENABLED_LANGUAGES)
-
 set(_OPENMP_REQUIRED_VARS)
 
 function(_OPENMP_FLAG_CANDIDATES LANG)
@@ -93,7 +88,7 @@ int main() {
 ")
 
 # check c compiler
-if(NOT _HAVE_LANGUAGE_C EQUAL -1)
+if(CMAKE_C_COMPILER_LOADED)
   # if these are set then do not try to find them again,
   # by avoiding any try_compiles for the flags
   if(OpenMP_C_FLAGS)
@@ -124,7 +119,7 @@ if(NOT _HAVE_LANGUAGE_C EQUAL -1)
 endif()
 
 # check cxx compiler
-if(NOT _HAVE_LANGUAGE_CXX EQUAL -1)
+if(CMAKE_CXX_COMPILER_LOADED)
   # if these are set then do not try to find them again,
   # by avoiding any try_compiles for the flags
   if(OpenMP_CXX_FLAGS)
@@ -157,9 +152,6 @@ if(NOT _HAVE_LANGUAGE_CXX EQUAL -1)
   unset(OpenMP_CXX_FLAG_CANDIDATES)
   unset(OpenMP_CXX_TEST_SOURCE)
 endif()
-
-unset(_HAVE_LANGUAGE_C)
-unset(_HAVE_LANGUAGE_CXX)
 
 if(_OPENMP_REQUIRED_VARS)
   include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
