@@ -452,28 +452,6 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
       << "\n";
     }
 
-  // Store the include search path for this directory.
-  infoFileStream
-    << "# The C and CXX include file search paths:\n";
-  infoFileStream
-    << "SET(CMAKE_C_INCLUDE_PATH\n";
-  std::vector<std::string> includeDirs;
-  this->GetIncludeDirectories(includeDirs);
-  for(std::vector<std::string>::iterator i = includeDirs.begin();
-      i != includeDirs.end(); ++i)
-    {
-    infoFileStream
-      << "  \"" << this->Convert(i->c_str(),HOME_OUTPUT).c_str() << "\"\n";
-    }
-  infoFileStream
-    << "  )\n";
-  infoFileStream
-    << "SET(CMAKE_CXX_INCLUDE_PATH ${CMAKE_C_INCLUDE_PATH})\n";
-  infoFileStream
-    << "SET(CMAKE_Fortran_INCLUDE_PATH ${CMAKE_C_INCLUDE_PATH})\n";
-  infoFileStream
-    << "SET(CMAKE_ASM_INCLUDE_PATH ${CMAKE_C_INCLUDE_PATH})\n";
-
   // Store the include regular expressions for this directory.
   infoFileStream
     << "\n"
@@ -560,6 +538,21 @@ cmLocalUnixMakefileGenerator3
     // Add a space before the ":" to avoid drive letter confusion on
     // Windows.
     space = " ";
+    }
+
+  // Warn about paths not supported by Make tools.
+  std::string::size_type pos = tgt.find_first_of("=");
+  if(pos != std::string::npos)
+    {
+    cmOStringStream m;
+    m <<
+      "Make rule for\n"
+      "  " << tgt << "\n"
+      "has '=' on left hand side.  "
+      "The make tool may not support this.";
+    cmListFileBacktrace bt;
+    this->GlobalGenerator->GetCMakeInstance()
+      ->IssueMessage(cmake::WARNING, m.str(), bt);
     }
 
   // Mark the rule as symbolic if requested.

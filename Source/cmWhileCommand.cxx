@@ -25,7 +25,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
   else if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endwhile"))
     {
     // if this is the endwhile for this while loop then execute
-    if (!this->Depth) 
+    if (!this->Depth)
       {
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
@@ -33,16 +33,16 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       if(!fb.get()) { return false; }
 
       std::string errorString;
-    
+
       std::vector<std::string> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
       cmake::MessageType messageType;
-      bool isTrue = 
+      bool isTrue =
         cmIfCommand::IsTrue(expandedArguments,errorString,
                             &mf, messageType);
 
       while (isTrue)
-        {      
+        {
         if (errorString.size())
           {
           std::string err = "had incorrect arguments: ";
@@ -86,7 +86,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
           }
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
-        isTrue = 
+        isTrue =
           cmIfCommand::IsTrue(expandedArguments,errorString,
                               &mf, messageType);
         }
@@ -101,7 +101,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
 
   // record the command
   this->Functions.push_back(lff);
-  
+
   // always return true
   return true;
 }
@@ -123,7 +123,7 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
 }
 
 bool cmWhileCommand
-::InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
+::InvokeInitialPass(const std::vector<cmListFileArgument>& args,
                     cmExecutionStatus &)
 {
   if(args.size() < 1)
@@ -131,12 +131,12 @@ bool cmWhileCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   // create a function blocker
   cmWhileFunctionBlocker *f = new cmWhileFunctionBlocker();
   f->Args = args;
   this->Makefile->AddFunctionBlocker(f);
-  
+
   return true;
 }
 

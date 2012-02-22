@@ -14,7 +14,7 @@ CMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.5
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CPACK_SYSTEM_NAME:STRING=Darwin64-universal
 BUILD_QtDialog:BOOL=TRUE
-QT_QMAKE_EXECUTABLE:FILEPATH=/Users/kitware/Support/qt-4.7.4/install/bin/qmake
+QT_QMAKE_EXECUTABLE:FILEPATH=/Users/kitware/Support/qt-4.8.0/install/bin/qmake
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include(${path}/release_cmake.cmake)

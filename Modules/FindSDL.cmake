@@ -81,7 +81,6 @@ FIND_PATH(SDL_INCLUDE_DIR SDL.h
   /opt/csw # Blastwave
   /opt
 )
-#MESSAGE("SDL_INCLUDE_DIR is ${SDL_INCLUDE_DIR}")
 
 # SDL-1.1 is the name used by FreeBSD ports...
 # don't confuse it for the version number.
@@ -96,8 +95,6 @@ FIND_LIBRARY(SDL_LIBRARY_TEMP
   /opt/csw
   /opt
 )
-
-#MESSAGE("SDL_LIBRARY_TEMP is ${SDL_LIBRARY_TEMP}")
 
 IF(NOT SDL_BUILDING_LIBRARY)
   IF(NOT ${SDL_INCLUDE_DIR} MATCHES ".framework")
@@ -134,7 +131,6 @@ IF(MINGW)
   SET(MINGW32_LIBRARY mingw32 CACHE STRING "mwindows for MinGW")
 ENDIF(MINGW)
 
-SET(SDL_FOUND "NO")
 IF(SDL_LIBRARY_TEMP)
   # For SDLmain
   IF(NOT SDL_BUILDING_LIBRARY)
@@ -169,9 +165,9 @@ IF(SDL_LIBRARY_TEMP)
   SET(SDL_LIBRARY ${SDL_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
   # Set the temp variable to INTERNAL so it is not seen in the CMake GUI
   SET(SDL_LIBRARY_TEMP "${SDL_LIBRARY_TEMP}" CACHE INTERNAL "")
-
-  SET(SDL_FOUND "YES")
 ENDIF(SDL_LIBRARY_TEMP)
 
-#MESSAGE("SDL_LIBRARY is ${SDL_LIBRARY}")
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL
+                                  REQUIRED_VARS SDL_LIBRARY SDL_INCLUDE_DIR)

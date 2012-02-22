@@ -219,40 +219,69 @@ if (BLA_VENDOR STREQUAL "Generic" OR
   endif ( NOT LAPACK_LIBRARIES )
 endif ()
 #intel lapack
- if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+  if (NOT WIN32)
+    set(LM "-lm")
+  endif ()
   if (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
-   if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+    if(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
       find_PACKAGE(Threads)
-   else(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-       find_package(Threads REQUIRED)
-   endif(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
-   if (BLA_F95)
-    if(NOT LAPACK95_LIBRARIES)
-     check_lapack_libraries(
-     LAPACK95_LIBRARIES
-     LAPACK
-     cheev
-     ""
-     "mkl_lapack95"
-     "${BLAS95_LIBRARIES}"
-     "${CMAKE_THREAD_LIBS_INIT}"
-     )
-    endif(NOT LAPACK95_LIBRARIES)
-   else(BLA_F95)
-    if(NOT LAPACK_LIBRARIES)
-     check_lapack_libraries(
-     LAPACK_LIBRARIES
-     LAPACK
-     cheev
-     ""
-     "mkl_lapack"
-     "${BLAS_LIBRARIES}"
-     "${CMAKE_THREAD_LIBS_INIT}"
-     )
-    endif(NOT LAPACK_LIBRARIES)
-   endif(BLA_F95)
+    else(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+      find_package(Threads REQUIRED)
+    endif(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
+    if (BLA_F95)
+      if(NOT LAPACK95_LIBRARIES)
+        # old
+        check_lapack_libraries(
+          LAPACK95_LIBRARIES
+          LAPACK
+          cheev
+          ""
+          "mkl_lapack95"
+          "${BLAS95_LIBRARIES}"
+          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          )
+      endif(NOT LAPACK95_LIBRARIES)
+      if(NOT LAPACK95_LIBRARIES)
+        # new >= 10.3
+        check_lapack_libraries(
+          LAPACK95_LIBRARIES
+          LAPACK
+          CHEEV
+          ""
+          "mkl_intel_lp64"
+          "${BLAS95_LIBRARIES}"
+          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          )
+      endif(NOT LAPACK95_LIBRARIES)
+    else(BLA_F95)
+      if(NOT LAPACK_LIBRARIES)
+        # old
+        check_lapack_libraries(
+          LAPACK_LIBRARIES
+          LAPACK
+          cheev
+          ""
+          "mkl_lapack"
+          "${BLAS_LIBRARIES}"
+          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          )
+      endif(NOT LAPACK_LIBRARIES)
+      if(NOT LAPACK_LIBRARIES)
+        # new >= 10.3
+        check_lapack_libraries(
+          LAPACK_LIBRARIES
+          LAPACK
+          cheev
+          ""
+          "mkl_gf_lp64"
+          "${BLAS_LIBRARIES}"
+          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          )
+      endif(NOT LAPACK_LIBRARIES)
+    endif(BLA_F95)
   endif (_LANGUAGES_ MATCHES C OR _LANGUAGES_ MATCHES CXX)
- endif(BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+endif(BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
 else(BLAS_FOUND)
   message(STATUS "LAPACK requires BLAS")
 endif(BLAS_FOUND)

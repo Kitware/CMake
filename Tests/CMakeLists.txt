@@ -163,6 +163,32 @@ IF(BUILD_TESTING)
   IF(CMAKE_Fortran_COMPILER)
     ADD_TEST_MACRO(FortranOnly FortranOnly)
   ENDIF()
+  # test Visual Studio GNU Fortran mixing with cmake_add_fortran_subdirectory
+  # run this project if we have a working fortran compiler or
+  # the test is enabled with CMAKE_TEST_CMAKE_ADD_FORTRAN cache variable.
+  # If you enable the test, CMake should find the MinGW fortran install,
+  # or in some cases you might need to set the PATH so that cmake can find
+  # the gfortran from mingw.
+  IF(CMAKE_Fortran_COMPILER OR CMAKE_TEST_CMAKE_ADD_FORTRAN)
+    SET(CMAKE_SKIP_VSGNUFortran FALSE)
+    # disable test for apple builds using ifort if they are building
+    # more than one architecture, as ifort does not support that.
+    IF(APPLE AND (CMAKE_Fortran_COMPILER MATCHES ifort))
+      LIST(LENGTH CMAKE_OSX_ARCHITECTURES len)
+      IF("${len}" GREATER 1)
+        MESSAGE(STATUS "Skip VSGNUFortran for ifort dual cpu mac build")
+        SET(CMAKE_SKIP_VSGNUFortran TRUE)
+      ENDIF()
+    ENDIF()
+    IF((CMAKE_C_COMPILER MATCHES lsb)
+        AND (CMAKE_Fortran_COMPILER MATCHES ifort))
+      MESSAGE(STATUS "Skip VSGNUFortran for ifort and lsb compilers")
+      SET(CMAKE_SKIP_VSGNUFortran TRUE)
+    ENDIF()
+    IF(NOT CMAKE_SKIP_VSGNUFortran)
+      ADD_TEST_MACRO(VSGNUFortran ${CMAKE_COMMAND} -P runtest.cmake)
+    ENDIF()
+  ENDIF()
   ADD_TEST_MACRO(COnly COnly)
   ADD_TEST_MACRO(CxxOnly CxxOnly)
   ADD_TEST_MACRO(IPO COnly/COnly)
@@ -569,6 +595,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
   set(CTEST_RUN_CPackComponentsForAll ${CTEST_TEST_CPACK})
 
+  if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+    find_program(RPMBUILD NAMES rpmbuild)
+  endif(CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+  # Do not try to build RPM
+  if (NOT RPMBUILD)
+    set(CPACK_BINARY_RPM OFF)
+  endif(NOT RPMBUILD)
+
   find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
     PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
     DOC "makensis program location"
@@ -775,56 +809,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
 
-  # Como does not seem to support shared libraries.
-  GET_FILENAME_COMPONENT(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
-  IF(CMAKE_BASE_NAME MATCHES "^como$")
-    SET(COMPILER_IS_COMO 1)
-  ENDIF(CMAKE_BASE_NAME MATCHES "^como$")
-  IF(NOT COMPILER_IS_COMO)
-    ADD_TEST(complex  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/Complex"
-      "${CMake_BINARY_DIR}/Tests/Complex"
-      --build-two-config
-      --build-config-sample "${CMAKE_CTEST_COMMAND}"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project Complex
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
-      --build-options
-      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-      --test-command complex
-      )
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Complex")
+  ADD_TEST(complex  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Complex"
+    "${CMake_BINARY_DIR}/Tests/Complex"
+    --build-two-config
+    --build-config-sample "${CMAKE_CTEST_COMMAND}"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project Complex
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
+    --build-options
+    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    --test-command complex
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Complex")
 
-    ADD_TEST(complexOneConfig  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
-      "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project Complex
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
-      --build-options
-      -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-      --test-command complex)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
-    # because of the registry write these tests depend on each other
-    SET_TESTS_PROPERTIES ( complex PROPERTIES DEPENDS complexOneConfig)
-
-# This fails on VS 70
-# works on Xcode and makefiles
-#      ADD_TEST(ConvLibrary ${CMAKE_CTEST_COMMAND}
-#        --build-and-test
-#        "${CMake_SOURCE_DIR}/Tests/ConvLibrary"
-#        "${CMake_BINARY_DIR}/Tests/ConvLibrary"
-#        --build-two-config
-#        --build-generator ${CMAKE_TEST_GENERATOR}
-#        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-#        --build-project ConvLibrary
-#        --test-command bartest)
-
-  ENDIF(NOT COMPILER_IS_COMO)
+  ADD_TEST(complexOneConfig  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
+    "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project Complex
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
+    --build-options
+    -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+    --test-command complex)
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
+  # because of the registry write these tests depend on each other
+  SET_TESTS_PROPERTIES ( complex PROPERTIES DEPENDS complexOneConfig)
 
   ADD_TEST(Example ${CMAKE_CTEST_COMMAND}
     --build-and-test

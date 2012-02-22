@@ -9,6 +9,7 @@
 #=============================================================================
 # Copyright 2006-2011 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>
+# Copyright 2011 Matthias Kretz <kretz@kde.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -35,6 +36,7 @@ MACRO (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
      FAIL_REGEX "[Uu]nknown option"                         # HP
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
+     FAIL_REGEX "WARNING: unknown flag:"                    # Open64
      )
    SET (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 ENDMACRO (CHECK_C_COMPILER_FLAG)

@@ -255,6 +255,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteObjSources();
   this->WriteCLSources();
   this->WriteDotNetReferences();
+  this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
@@ -268,33 +269,49 @@ void cmVisualStudio10TargetGenerator::Generate()
 
 void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 {
-  const char* vsDotNetReferences
-    = this->Target->GetProperty("VS_DOTNET_REFERENCES");
-  if(vsDotNetReferences)
+  std::vector<std::string> references;
+  if(const char* vsDotNetReferences =
+     this->Target->GetProperty("VS_DOTNET_REFERENCES"))
     {
-    std::string references(vsDotNetReferences);
-    std::string::size_type position = 0;
-
+    cmSystemTools::ExpandListArgument(vsDotNetReferences, references);
+    }
+  if(!references.empty())
+    {
     this->WriteString("<ItemGroup>\n", 1);
-    while(references.length() > 0)
+    for(std::vector<std::string>::iterator ri = references.begin();
+        ri != references.end(); ++ri)
       {
-      if((position = references.find(";")) == std::string::npos)
-        {
-        position = references.length() + 1;
-        }
-
       this->WriteString("<Reference Include=\"", 2);
-      (*this->BuildFileStream) <<
-        cmVS10EscapeXML(references.substr(0, position)) << "\">\n";
+      (*this->BuildFileStream) << cmVS10EscapeXML(*ri) << "\">\n";
       this->WriteString("<CopyLocalSatelliteAssemblies>true"
                         "</CopyLocalSatelliteAssemblies>\n", 3);
       this->WriteString("<ReferenceOutputAssembly>true"
                         "</ReferenceOutputAssembly>\n", 3);
       this->WriteString("</Reference>\n", 2);
-
-      references.erase(0, position + 1);
       }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+}
 
+void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
+{
+  std::vector<std::string> references;
+  if(const char* vsWinRTReferences =
+     this->Target->GetProperty("VS_WINRT_REFERENCES"))
+    {
+    cmSystemTools::ExpandListArgument(vsWinRTReferences, references);
+    }
+  if(!references.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<std::string>::iterator ri = references.begin();
+        ri != references.end(); ++ri)
+      {
+      this->WriteString("<Reference Include=\"", 2);
+      (*this->BuildFileStream) << cmVS10EscapeXML(*ri) << "\">\n";
+      this->WriteString("<IsWinMDFile>true</IsWinMDFile>\n", 3);
+      this->WriteString("</Reference>\n", 2);
+      }
     this->WriteString("</ItemGroup>\n", 1);
     }
 }
@@ -372,7 +389,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     this->WriteString(mfcLine.c_str(), 2);
 
     if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
-       this->ClOptions[*i]->UsingUnicode())
+       this->ClOptions[*i]->UsingUnicode() ||
+       this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
       this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
       }
@@ -386,6 +404,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       pts += toolset;
       pts += "</PlatformToolset>\n";
       this->WriteString(pts.c_str(), 2);
+      }
+    if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+      {
+      this->WriteString("<Immersive>true</Immersive>\n", 2);
       }
     this->WriteString("</PropertyGroup>\n", 1);
     }
@@ -1564,7 +1586,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes);
+  this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {

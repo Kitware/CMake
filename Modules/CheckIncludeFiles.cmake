@@ -44,7 +44,7 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     CONFIGURE_FILE("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY IMMEDIATE)
 
-    MESSAGE(STATUS "Looking for include files ${VARIABLE}")
+    MESSAGE(STATUS "Looking for include files ${INCLUDE}")
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c
@@ -54,15 +54,15 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
       OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
-      MESSAGE(STATUS "Looking for include files ${VARIABLE} - found")
-      SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${VARIABLE}")
+      MESSAGE(STATUS "Looking for include files ${INCLUDE} - found")
+      SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if files ${INCLUDE} "
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
-      MESSAGE(STATUS "Looking for include files ${VARIABLE} - not found.")
-      SET(${VARIABLE} "" CACHE INTERNAL "Have includes ${VARIABLE}")
+      MESSAGE(STATUS "Looking for include files ${INCLUDE} - not found.")
+      SET(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining if files ${INCLUDE} "
         "exist failed with the following output:\n"

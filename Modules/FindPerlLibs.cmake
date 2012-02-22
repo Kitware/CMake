@@ -55,19 +55,6 @@ if (PERL_EXECUTABLE)
     string(REGEX REPLACE "prefix='([^']+)'.*" "\\1" PERL_PREFIX ${PERL_PREFIX_OUTPUT_VARIABLE})
   endif (NOT PERL_PREFIX_RESULT_VARIABLE)
 
-  ### PERL_VERSION
-  execute_process(
-    COMMAND
-      ${PERL_EXECUTABLE} -V:version
-      OUTPUT_VARIABLE
-        PERL_VERSION_OUTPUT_VARIABLE
-      RESULT_VARIABLE
-        PERL_VERSION_RESULT_VARIABLE
-  )
-  if (NOT PERL_VERSION_RESULT_VARIABLE)
-    string(REGEX REPLACE "version='([^']+)'.*" "\\1" PERL_VERSION ${PERL_VERSION_OUTPUT_VARIABLE})
-  endif (NOT PERL_VERSION_RESULT_VARIABLE)
-
   ### PERL_ARCHNAME
   execute_process(
     COMMAND
@@ -107,6 +94,7 @@ if (PERL_EXECUTABLE)
   )
   if (NOT PERL_SITESEARCH_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_SITESEARCH ${PERL_SITESEARCH_OUTPUT_VARIABLE})
+    file(TO_CMAKE_PATH "${PERL_SITESEARCH}" PERL_SITESEARCH)
   endif (NOT PERL_SITESEARCH_RESULT_VARIABLE)
 
   ### PERL_SITELIB
@@ -120,6 +108,7 @@ if (PERL_EXECUTABLE)
   )
   if (NOT PERL_SITELIB_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_SITELIB ${PERL_SITELIB_OUTPUT_VARIABLE})
+    file(TO_CMAKE_PATH "${PERL_SITELIB}" PERL_SITELIB)
   endif (NOT PERL_SITELIB_RESULT_VARIABLE)
 
   ### PERL_VENDORARCH
@@ -133,6 +122,7 @@ if (PERL_EXECUTABLE)
     )
   if (NOT PERL_VENDORARCH_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_VENDORARCH ${PERL_VENDORARCH_OUTPUT_VARIABLE})
+    file(TO_CMAKE_PATH "${PERL_VENDORARCH}" PERL_VENDORARCH)
   endif (NOT PERL_VENDORARCH_RESULT_VARIABLE)
 
   ### PERL_VENDORLIB
@@ -146,6 +136,7 @@ if (PERL_EXECUTABLE)
   )
   if (NOT PERL_VENDORLIB_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_VENDORLIB ${PERL_VENDORLIB_OUTPUT_VARIABLE})
+    file(TO_CMAKE_PATH "${PERL_VENDORLIB}" PERL_VENDORLIB)
   endif (NOT PERL_VENDORLIB_RESULT_VARIABLE)
 
   macro(perl_adjust_darwin_lib_variable varname)
@@ -186,6 +177,7 @@ if (PERL_EXECUTABLE)
   if (NOT PERL_ARCHLIB_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_ARCHLIB ${PERL_ARCHLIB_OUTPUT_VARIABLE})
     perl_adjust_darwin_lib_variable( ARCHLIB )
+    file(TO_CMAKE_PATH "${PERL_ARCHLIB}" PERL_ARCHLIB)
   endif (NOT PERL_ARCHLIB_RESULT_VARIABLE)
 
   ### PERL_PRIVLIB
@@ -200,28 +192,10 @@ if (PERL_EXECUTABLE)
   if (NOT PERL_PRIVLIB_RESULT_VARIABLE)
     string(REGEX REPLACE "install[a-z]+='([^']+)'.*" "\\1" PERL_PRIVLIB ${PERL_PRIVLIB_OUTPUT_VARIABLE})
     perl_adjust_darwin_lib_variable( PRIVLIB )
+    file(TO_CMAKE_PATH "${PERL_PRIVLIB}" PERL_PRIVLIB)
   endif (NOT PERL_PRIVLIB_RESULT_VARIABLE)
 
-
-  ### PERL_POSSIBLE_INCLUDE_PATHS
-  set(PERL_POSSIBLE_INCLUDE_PATHS
-    ${PERL_ARCHLIB}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/CORE
-    /usr/lib/perl/${PERL_VERSION}/CORE
-    )
-
-  ### PERL_POSSIBLE_LIB_PATHS
-  set(PERL_POSSIBLE_LIB_PATHS
-    ${PERL_ARCHLIB}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl/${PERL_VERSION}/${PERL_ARCHNAME}/CORE
-    /usr/lib/perl5/${PERL_VERSION}/CORE
-    /usr/lib/perl/${PERL_VERSION}/CORE
-  )
-
-  ### PERL_POSSIBLE_LIBRARY_NAME
+  ### PERL_POSSIBLE_LIBRARY_NAMES
   execute_process(
     COMMAND
       ${PERL_EXECUTABLE} -V:libperl
@@ -231,10 +205,9 @@ if (PERL_EXECUTABLE)
       PERL_LIBRARY_RESULT_VARIABLE
   )
   if (NOT PERL_LIBRARY_RESULT_VARIABLE)
-    foreach(_perl_lib_path ${PERL_POSSIBLE_LIB_PATHS})
-      string(REGEX REPLACE "libperl='([^']+)'" "\\1" PERL_LIBRARY_OUTPUT_VARIABLE ${PERL_LIBRARY_OUTPUT_VARIABLE})
-      set(PERL_POSSIBLE_LIBRARY_NAME ${PERL_POSSIBLE_LIBRARY_NAME} "${_perl_lib_path}/${PERL_LIBRARY_OUTPUT_VARIABLE}")
-    endforeach(_perl_lib_path ${PERL_POSSIBLE_LIB_PATHS})
+    string(REGEX REPLACE "libperl='([^']+)'.*" "\\1" PERL_POSSIBLE_LIBRARY_NAMES ${PERL_LIBRARY_OUTPUT_VARIABLE})
+  else (NOT PERL_LIBRARY_RESULT_VARIABLE)
+    set(PERL_POSSIBLE_LIBRARY_NAMES perl${PERL_VERSION_STRING} perl)
   endif (NOT PERL_LIBRARY_RESULT_VARIABLE)
 
   ### PERL_INCLUDE_PATH
@@ -242,17 +215,23 @@ if (PERL_EXECUTABLE)
     NAMES
       perl.h
     PATHS
-      ${PERL_POSSIBLE_INCLUDE_PATHS}
+      ${PERL_ARCHLIB}/CORE
+      /usr/lib/perl5/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+      /usr/lib/perl/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+      /usr/lib/perl5/${PERL_VERSION_STRING}/CORE
+      /usr/lib/perl/${PERL_VERSION_STRING}/CORE
   )
-  
+
   ### PERL_LIBRARY
   find_library(PERL_LIBRARY
     NAMES
-      ${PERL_POSSIBLE_LIBRARY_NAME}
-      perl${PERL_VERSION}
-      perl
+      ${PERL_POSSIBLE_LIBRARY_NAMES}
     PATHS
-      ${PERL_POSSIBLE_LIB_PATHS}
+      ${PERL_ARCHLIB}/CORE
+      /usr/lib/perl5/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+      /usr/lib/perl/${PERL_VERSION_STRING}/${PERL_ARCHNAME}/CORE
+      /usr/lib/perl5/${PERL_VERSION_STRING}/CORE
+      /usr/lib/perl/${PERL_VERSION_STRING}/CORE
   )
 
 endif (PERL_EXECUTABLE)
@@ -261,15 +240,16 @@ endif (PERL_EXECUTABLE)
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLUDE_PATH
-                                           VERSION_VAR PERL_VERSION)
+                                           VERSION_VAR PERL_VERSION_STRING)
 
 # Introduced after CMake 2.6.4 to bring module into compliance
 set(PERL_INCLUDE_DIR  ${PERL_INCLUDE_PATH})
 set(PERL_INCLUDE_DIRS ${PERL_INCLUDE_PATH})
 set(PERL_LIBRARIES    ${PERL_LIBRARY})
+# For backward compatibility with CMake before 2.8.8
+set(PERL_VERSION ${PERL_VERSION_STRING})
 
 mark_as_advanced(
   PERL_INCLUDE_PATH
-  PERL_EXECUTABLE
   PERL_LIBRARY
 )

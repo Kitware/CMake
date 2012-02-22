@@ -1,3 +1,6 @@
+##section Variables specific to CPack RPM generator
+##end
+##module
 # - The builtin (binary) CPack RPM generator (Unix only)
 # CPackRPM may be used to create RPM package using CPack.
 # CPackRPM is a CPack generator thus it uses the CPACK_XXX variables
@@ -15,52 +18,67 @@
 # You'll find a detailed usage of CPackRPM on the wiki:
 #  http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#RPM_.28Unix_Only.29
 # However as a handy reminder here comes the list of specific variables:
+##end
 #
-#  CPACK_RPM_PACKAGE_SUMMARY
+##variable
+#  CPACK_RPM_PACKAGE_SUMMARY - The RPM package summary.
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
-#     The RPM package summary
-#  CPACK_RPM_PACKAGE_NAME
+##end
+##variable
+#  CPACK_RPM_PACKAGE_NAME - The RPM package name.
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_NAME
-#     The RPM package name
-#  CPACK_RPM_PACKAGE_VERSION
+##end
+##variable
+#  CPACK_RPM_PACKAGE_VERSION - The RPM package version.
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_VERSION
-#     The RPM package version
-#  CPACK_RPM_PACKAGE_ARCHITECTURE
+##end
+##variable
+#  CPACK_RPM_PACKAGE_ARCHITECTURE - The RPM package architecture.
 #     Mandatory : NO
 #     Default   : -
-#     The RPM package architecture. This may be set to "noarch" if you
+#     This may be set to "noarch" if you
 #     know you are building a noarch package.
-#  CPACK_RPM_PACKAGE_RELEASE
+##end
+##variable
+#  CPACK_RPM_PACKAGE_RELEASE - The RPM package release.
 #     Mandatory : YES
 #     Default   : 1
-#     The RPM package release. This is the numbering of the RPM package
+#     This is the numbering of the RPM package
 #     itself, i.e. the version of the packaging and not the version of the
 #     content (see CPACK_RPM_PACKAGE_VERSION). One may change the default
 #     value if the previous packaging was buggy and/or you want to put here
 #     a fancy Linux distro specific numbering.
-#  CPACK_RPM_PACKAGE_LICENSE
+##end
+##variable
+#  CPACK_RPM_PACKAGE_LICENSE - The RPM package license policy.
 #     Mandatory : YES
 #     Default   : "unknown"
-#     The RPM package license policy.
-#  CPACK_RPM_PACKAGE_GROUP
+##end
+##variable
+#  CPACK_RPM_PACKAGE_GROUP - The RPM package group.
 #     Mandatory : YES
 #     Default   : "unknown"
-#     The RPM package group.
-#  CPACK_RPM_PACKAGE_VENDOR
+##end
+##variable
+#  CPACK_RPM_PACKAGE_VENDOR - The RPM package vendor.
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_VENDOR if set or "unknown"
-#     The RPM package vendor.
-#  CPACK_RPM_PACKAGE_URL
+##end
+##variable
+#  CPACK_RPM_PACKAGE_URL - The projects URL.
 #     Mandatory : NO
 #     Default   : -
-#     The projects URL.
-#  CPACK_RPM_PACKAGE_DESCRIPTION
+##end
+##variable
+#  CPACK_RPM_PACKAGE_DESCRIPTION - RPM package description.
 #     Mandatory : YES
 #     Default   : CPACK_PACKAGE_DESCRIPTION_FILE if set or "no package description available"
-#  CPACK_RPM_COMPRESSION_TYPE
+##end
+##variable
+#  CPACK_RPM_COMPRESSION_TYPE - RPM compression type.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to override RPM compression type to be used
@@ -68,7 +86,9 @@
 #     to lzma or xz compression whereas older cannot use such RPM.
 #     Using this one can enforce compression type to be used.
 #     Possible value are: lzma, xz, bzip2 and gzip.
-#  CPACK_RPM_PACKAGE_REQUIRES
+##end
+##variable
+#  CPACK_RPM_PACKAGE_REQUIRES - RPM spec requires field.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM dependencies (requires).
@@ -77,22 +97,30 @@
 #     set(CPACK_RPM_PACKAGE_REQUIRES "python >= 2.5.0, cmake >= 2.8")
 #     The required package list of an RPM file could be printed with
 #     rpm -qp --requires file.rpm
-#  CPACK_RPM_PACKAGE_SUGGESTS
+##end
+##variable
+#  CPACK_RPM_PACKAGE_SUGGESTS - RPM spec suggest field.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set weak RPM dependencies (suggests).
 #     Note that you must enclose the complete requires string between quotes.
-#  CPACK_RPM_PACKAGE_PROVIDES
+##end
+##variable
+#  CPACK_RPM_PACKAGE_PROVIDES - RPM spec provides field.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM dependencies (provides).
 #     The provided package list of an RPM file could be printed with
 #     rpm -qp --provides file.rpm
-#  CPACK_RPM_PACKAGE_OBSOLETES
+##end
+##variable
+#  CPACK_RPM_PACKAGE_OBSOLETES - RPM spec obsoletes field.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to set RPM packages that are obsoleted by this one.
-#  CPACK_RPM_PACKAGE_RELOCATABLE
+##end
+##variable
+#  CPACK_RPM_PACKAGE_RELOCATABLE - build a relocatable RPM.
 #     Mandatory : NO
 #     Default   : CPACK_PACKAGE_RELOCATABLE
 #     If this variable is set to TRUE or ON CPackRPM will try
@@ -103,7 +131,9 @@
 #     If CPACK_SET_DESTDIR is set then you will get a warning message
 #     but if there is file installed with absolute path you'll get
 #     unexpected behavior.
-#  CPACK_RPM_SPEC_INSTALL_POST [deprecated]
+##end
+##variable
+#  CPACK_RPM_SPEC_INSTALL_POST - [deprecated].
 #     Mandatory : NO
 #     Default   : -
 #     This way of specifying post-install script is deprecated use
@@ -111,23 +141,31 @@
 #     May be used to set an RPM post-install command inside the spec file.
 #     For example setting it to "/bin/true" may be used to prevent
 #     rpmbuild to strip binaries.
-#  CPACK_RPM_SPEC_MORE_DEFINE
+##end
+##variable
+#  CPACK_RPM_SPEC_MORE_DEFINE - RPM extended spec definitions lines.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to add any %define lines to the generated spec file.
-#  CPACK_RPM_PACKAGE_DEBUG
+##end
+##variable
+#  CPACK_RPM_PACKAGE_DEBUG - Toggle CPackRPM debug output.
 #     Mandatory : NO
 #     Default   : -
 #     May be set when invoking cpack in order to trace debug information
 #     during CPack RPM run. For example you may launch CPack like this
 #     cpack -D CPACK_RPM_PACKAGE_DEBUG=1 -G RPM
-#  CPACK_RPM_USER_BINARY_SPECFILE
+##end
+##variable
+#  CPACK_RPM_USER_BINARY_SPECFILE - A user provided spec file.
 #     Mandatory : NO
 #     Default   : -
 #     May be set by the user in order to specify a USER binary spec file
 #     to be used by CPackRPM instead of generating the file.
 #     The specified file will be processed by CONFIGURE_FILE( @ONLY).
-#  CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
+##end
+##variable
+#  CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE - Spec file template.
 #     Mandatory : NO
 #     Default   : -
 #     If set CPack will generate a template for USER specified binary
@@ -135,6 +173,8 @@
 #     cpack -D CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE=1 -G RPM
 #     The user may then use this file in order to hand-craft is own
 #     binary spec file which may be used with CPACK_RPM_USER_BINARY_SPECFILE.
+##end
+##variable
 #  CPACK_RPM_PRE_INSTALL_SCRIPT_FILE
 #  CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE
 #     Mandatory : NO
@@ -143,11 +183,13 @@
 #     The refered script file(s) will be read and directly
 #     put after the %pre or %preun section
 #     If CPACK_RPM_COMPONENT_INSTALL is set to ON the (un)install script for
-#     each component can be overriden with
+#     each component can be overridden with
 #     CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE and
 #     CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE
 #     One may verify which scriptlet has been included with
 #      rpm -qp --scripts  package.rpm
+##end
+##variable
 #  CPACK_RPM_POST_INSTALL_SCRIPT_FILE
 #  CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE
 #     Mandatory : NO
@@ -156,26 +198,31 @@
 #     The refered script file(s) will be read and directly
 #     put after the %post or %postun section
 #     If CPACK_RPM_COMPONENT_INSTALL is set to ON the (un)install script for
-#     each component can be overriden with
+#     each component can be overridden with
 #     CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE and
 #     CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE
 #     One may verify which scriptlet has been included with
 #      rpm -qp --scripts  package.rpm
+##end
+##variable
 #  CPACK_RPM_USER_FILELIST
 #  CPACK_RPM_<COMPONENT>_USER_FILELIST
 #     Mandatory : NO
 #     Default   : -
-#     May be used to explicitely specify %(<directive>) file line
+#     May be used to explicitly specify %(<directive>) file line
 #     in the spec file. Like %config(noreplace) or any other directive
 #     that be found in the %files section. Since CPackRPM is generating
 #     the list of files (and directories) the user specified files of
 #     the CPACK_RPM_<COMPONENT>_USER_FILELIST list will be removed from the generated list.
-#  CPACK_RPM_CHANGELOG_FILE
+##end
+##variable
+#  CPACK_RPM_CHANGELOG_FILE - RPM changelog file.
 #     Mandatory : NO
 #     Default   : -
 #     May be used to embed a changelog in the spec file.
 #     The refered file will be read and directly put after the %changelog
 #     section.
+##end
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

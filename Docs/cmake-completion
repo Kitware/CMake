@@ -130,6 +130,16 @@ _cpack()
             COMPREPLY=( $(compgen -f ${cur}) )
             return 0
             ;;
+        --help-variable)
+            local running=$(for x in `cpack --help-variable-list | grep -v "cpack version" `; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
+        --help-command)
+            local running=$(for x in `cpack --help-command-list | grep -v "cpack version" `; do echo ${x} ; done )
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
         *)
             ;;
     esac

@@ -600,15 +600,16 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 
       // the include directories for this target
       std::set<std::string> uniqIncludeDirs;
-      const std::vector<std::string>& incDirs =
-          target->GetMakefile()->GetIncludeDirectories();
-      for(std::vector<std::string>::const_iterator dirIt=incDirs.begin();
-          dirIt != incDirs.end();
+
+      std::vector<std::string> includes;
+      target->GetMakefile()->GetLocalGenerator()->
+        GetIncludeDirectories(includes, target);
+      for(std::vector<std::string>::const_iterator dirIt=includes.begin();
+          dirIt != includes.end();
           ++dirIt)
         {
         uniqIncludeDirs.insert(*dirIt);
         }
-
 
       std::string systemIncludeDirs = makefile->GetSafeDefinition(
                                 "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
