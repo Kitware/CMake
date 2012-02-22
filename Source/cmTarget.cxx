@@ -486,6 +486,26 @@ void cmTarget::DefineProperties(cmake *cm)
      "undefined behavior.");
 
   cm->DefineProperty
+    ("INCLUDE_DIRECTORIES", cmProperty::TARGET,
+     "List of preprocessor include file search directories.",
+     "This property specifies the list of directories given "
+     "so far to the include_directories command. "
+     "This property exists on directories and targets. "
+     "In addition to accepting values from the include_directories "
+     "command, values may be set directly on any directory or any "
+     "target using the set_property command. "
+     "A target gets its initial value for this property from the value "
+     "of the directory property. "
+     "A directory gets its initial value from its parent directory if "
+     "it has one. "
+     "Both directory and target property values are adjusted by calls "
+     "to the include_directories command."
+     "\n"
+     "The target property values are used by the generators to set "
+     "the include paths for the compiler. "
+     "See also the include_directories command.");
+
+  cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,
      "Mac OSX directory name for installed targets.",
      "INSTALL_NAME_DIR is a string specifying the "
@@ -1278,6 +1298,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
+
+  // Initialize the INCLUDE_DIRECTORIES property based on the current value
+  // of the same directory property:
+  this->SetProperty("INCLUDE_DIRECTORIES",
+                    this->Makefile->GetProperty("INCLUDE_DIRECTORIES"));
 
   // Record current policies for later use.
   this->PolicyStatusCMP0003 =
@@ -4673,6 +4698,30 @@ cmTarget::GetLinkInformation(const char* config)
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmTarget::GetIncludeDirectories()
+{
+  std::vector<std::string> includes;
+  const char *prop = this->GetProperty("INCLUDE_DIRECTORIES");
+  if(prop)
+    {
+    cmSystemTools::ExpandListArgument(prop, includes);
+    }
+
+  std::set<std::string> uniqueIncludes;
+  std::vector<std::string> orderedAndUniqueIncludes;
+  for(std::vector<std::string>::const_iterator
+      li = includes.begin(); li != includes.end(); ++li)
+    {
+    if(uniqueIncludes.insert(*li).second)
+      {
+      orderedAndUniqueIncludes.push_back(*li);
+      }
+    }
+
+  return orderedAndUniqueIncludes;
 }
 
 //----------------------------------------------------------------------------

@@ -103,52 +103,9 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       }
     }
 
-  // Setup /I and /LIBPATH options for the resulting DSP file.  VS 6
-  // truncates long include paths so make it as short as possible if
-  // the length threatens this problem.
-  unsigned int maxIncludeLength = 3000;
-  bool useShortPath = false;
-  for(int j=0; j < 2; ++j)
-    {
-    std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes);
-    std::vector<std::string>::iterator i;
-    for(i = includes.begin(); i != includes.end(); ++i)
-      {
-      std::string tmp = 
-        this->ConvertToOptionallyRelativeOutputPath(i->c_str());
-      if(useShortPath)
-        {
-        cmSystemTools::GetShortPath(tmp.c_str(), tmp);
-        }
-      this->IncludeOptions +=  " /I ";
-
-      // quote if not already quoted
-      if (tmp[0] != '"')
-        {
-        this->IncludeOptions += "\"";
-        this->IncludeOptions += tmp;
-        this->IncludeOptions += "\"";
-        }
-      else
-        {
-        this->IncludeOptions += tmp;
-        }
-      }
-    if(j == 0 && this->IncludeOptions.size() > maxIncludeLength)
-      {
-      this->IncludeOptions = "";
-      useShortPath = true;
-      }
-    else
-      {
-      break;
-      }
-    }
-  
   // Create the DSP or set of DSP's for libraries and executables
 
-  cmTargets &tgts = this->Makefile->GetTargets(); 
+  cmTargets &tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); 
       l != tgts.end(); l++)
     {
@@ -895,6 +852,61 @@ inline std::string removeQuotes(const std::string& s)
   return s;
 }
 
+
+std::string
+cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target)
+{
+  std::string includeOptions;
+
+  // Setup /I and /LIBPATH options for the resulting DSP file.  VS 6
+  // truncates long include paths so make it as short as possible if
+  // the length threatens this problem.
+  unsigned int maxIncludeLength = 3000;
+  bool useShortPath = false;
+  for(int j=0; j < 2; ++j)
+    {
+    std::vector<std::string> includes;
+    this->GetIncludeDirectories(includes, &target);
+
+    std::vector<std::string>::iterator i;
+    for(i = includes.begin(); i != includes.end(); ++i)
+      {
+      std::string tmp =
+        this->ConvertToOptionallyRelativeOutputPath(i->c_str());
+      if(useShortPath)
+        {
+        cmSystemTools::GetShortPath(tmp.c_str(), tmp);
+        }
+      includeOptions +=  " /I ";
+
+      // quote if not already quoted
+      if (tmp[0] != '"')
+        {
+        includeOptions += "\"";
+        includeOptions += tmp;
+        includeOptions += "\"";
+        }
+      else
+        {
+        includeOptions += tmp;
+        }
+      }
+
+    if(j == 0 && includeOptions.size() > maxIncludeLength)
+      {
+      includeOptions = "";
+      useShortPath = true;
+      }
+    else
+      {
+      break;
+      }
+    }
+
+  return includeOptions;
+}
+
+
 // Code in blocks surrounded by a test for this definition is needed
 // only for compatibility with user project's replacement DSP
 // templates.  The CMake templates no longer use them.
@@ -1131,6 +1143,9 @@ void cmLocalVisualStudio6Generator
       }
     }
 #endif
+
+  // Get include options for this target.
+  std::string includeOptions = this->GetTargetIncludeOptions(target);
 
   // Get extra linker options for this target type.
   std::string extraLinkOptions;
@@ -1510,7 +1525,7 @@ void cmLocalVisualStudio6Generator
                                  optionsRelWithDebInfo.c_str());
 
     cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
-                                 this->IncludeOptions.c_str());
+                                 includeOptions.c_str());
     cmSystemTools::ReplaceString(line, "TARGET_VERSION_FLAG",
                                  targetVersionFlag.c_str());
     cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_DEBUG",

@@ -458,6 +458,9 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
+  /** Get the include directories for this target.  */
+  std::vector<std::string> GetIncludeDirectories();
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.

@@ -1591,7 +1591,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes);
+  this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {

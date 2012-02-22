@@ -146,8 +146,8 @@ public:
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   ///! Get the include flags for the current makefile and language
-  const char* GetIncludeFlags(const char* lang,
-                              bool forResponseFile = false);
+  std::string GetIncludeFlags(const std::vector<std::string> &includes,
+                              const char* lang, bool forResponseFile = false);
 
   /**
    * Encode a list of preprocessor definitions for the compiler
@@ -195,6 +195,7 @@ public:
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
+                             cmTarget* target,
                              const char* lang = "C");
 
   /** Compute the language used to compile the given source file.  */
@@ -392,7 +393,6 @@ protected:
   std::vector<std::string> StartOutputDirectoryComponents;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
-  std::map<cmStdString, cmStdString> LanguageToIncludeFlags;
   std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<cmStdString> ObjectMaxPathViolations;
