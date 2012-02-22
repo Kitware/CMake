@@ -266,7 +266,8 @@ void cmDepends::SetIncludePathFromLanguage(const char* lang)
   includePathVar += lang;
   includePathVar += "_TARGET_INCLUDE_PATH";
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  if(includePath = mf->GetDefinition(includePathVar.c_str()))
+  includePath = mf->GetDefinition(includePathVar.c_str());
+  if(includePath)
     {
     cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
     }
@@ -276,7 +277,8 @@ void cmDepends::SetIncludePathFromLanguage(const char* lang)
     includePathVar = "CMAKE_";
     includePathVar += lang;
     includePathVar += "_INCLUDE_PATH";
-    if(includePath = mf->GetDefinition(includePathVar.c_str()))
+    includePath = mf->GetDefinition(includePathVar.c_str());
+    if(includePath)
       {
       cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
       }
