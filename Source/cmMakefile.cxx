@@ -1660,30 +1660,6 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmMakefile::GetIncludeDirectories()
-{
-  std::vector<std::string> includes;
-  const char *val = this->GetProperty("INCLUDE_DIRECTORIES");
-  if(val)
-    {
-    cmSystemTools::ExpandListArgument(val, includes);
-    }
-
-  std::set<std::string> uniqueIncludes;
-  std::vector<std::string> orderedAndUniqueIncludes;
-  for(std::vector<std::string>::const_iterator
-      li = includes.begin(); li != includes.end(); ++li)
-    {
-    if(uniqueIncludes.insert(*li).second)
-      {
-      orderedAndUniqueIncludes.push_back(*li);
-      }
-    }
-
-  return orderedAndUniqueIncludes;
-}
-
-//----------------------------------------------------------------------------
 void cmMakefile::AddSystemIncludeDirectory(const char* dir)
 {
   this->SystemIncludeDirectories.insert(dir);

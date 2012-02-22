@@ -522,11 +522,6 @@ public:
   cmTarget* FindTargetToUse(const char* name);
 
   /**
-   * Get a list of include directories in the build.
-   */
-  std::vector<std::string> GetIncludeDirectories();
-
-  /**
    * Mark include directories as system directories.
    */
   void AddSystemIncludeDirectory(const char* dir);
