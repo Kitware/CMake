@@ -27,14 +27,19 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/CMakeExpandImportedTargets.cmake")
+
+
 MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
   IF("${VARIABLE}" MATCHES "^${VARIABLE}$")
-    SET(MACRO_CHECK_FUNCTION_DEFINITIONS 
+    SET(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-DCHECK_FUNCTION_EXISTS=${FUNCTION} ${CMAKE_REQUIRED_FLAGS}")
     MESSAGE(STATUS "Looking for ${FUNCTION}")
     IF(CMAKE_REQUIRED_LIBRARIES)
+      # this one translates potentially used imported library targets to their files on disk
+      CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}")
       SET(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
-        "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
+        "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
     ELSE(CMAKE_REQUIRED_LIBRARIES)
       SET(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     ENDIF(CMAKE_REQUIRED_LIBRARIES)
@@ -55,13 +60,13 @@ MACRO(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     IF(${VARIABLE})
       SET(${VARIABLE} 1 CACHE INTERNAL "Have function ${FUNCTION}")
       MESSAGE(STATUS "Looking for ${FUNCTION} - found")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the function ${FUNCTION} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${FUNCTION} - not found")
       SET(${VARIABLE} "" CACHE INTERNAL "Have function ${FUNCTION}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the function ${FUNCTION} exists failed with the following output:\n"
         "${OUTPUT}\n\n")
     ENDIF(${VARIABLE})

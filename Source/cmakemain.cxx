@@ -355,6 +355,7 @@ int do_cmake(int ac, char** av)
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
+  doc.addCMakeStandardDocSections();
   if(doc.CheckOptions(ac, av, "-E") || nocwd)
     { 
     // Construct and print requested documentation.

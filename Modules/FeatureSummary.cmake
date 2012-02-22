@@ -125,7 +125,7 @@
 #
 #   set_package_properties(LibXml2 PROPERTIES TYPE RECOMMENDED
 #                                             PURPOSE "Enables HTML-import in MyWordProcessor")
-# ...
+#   ...
 #   set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL
 #                                             PURPOSE "Enables odt-export in MyWordProcessor")
 #

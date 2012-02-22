@@ -556,7 +556,7 @@ void cmLocalGenerator::GenerateTargetManifest()
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                       const char* lang,
                                                       cmSourceFile& source,
-                                                      cmTarget& )
+                                                      cmTarget& target)
 {
   std::string objectDir = cmSystemTools::GetFilenamePath(std::string(ofname));
   objectDir = this->Convert(objectDir.c_str(),START_OUTPUT,SHELL);
@@ -574,7 +574,11 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   std::string flags;
   flags += this->Makefile->GetSafeDefinition(varString.c_str());
   flags += " ";
-  flags += this->GetIncludeFlags(lang);
+    {
+    std::vector<std::string> includes;
+    this->GetIncludeDirectories(includes, &target, lang);
+    flags += this->GetIncludeFlags(includes, lang);
+    }
   flags += this->Makefile->GetDefineFlags();
 
   // Construct the command lines.
@@ -1192,24 +1196,16 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
 }
 
 //----------------------------------------------------------------------------
-const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
-                                              bool forResponseFile)
+std::string cmLocalGenerator::GetIncludeFlags(
+                                     const std::vector<std::string> &includes,
+                                     const char* lang, bool forResponseFile)
 {
   if(!lang)
     {
     return "";
     }
-  std::string key = lang;
-  key += forResponseFile? "@" : "";
-  if(this->LanguageToIncludeFlags.count(key))
-    {
-    return this->LanguageToIncludeFlags[key].c_str();
-    }
 
   cmOStringStream includeFlags;
-  std::vector<std::string> includes;
-  this->GetIncludeDirectories(includes, lang);
-  std::vector<std::string>::iterator i;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
@@ -1251,6 +1247,7 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
 #ifdef __APPLE__
   emitted.insert("/System/Library/Frameworks");
 #endif
+  std::vector<std::string>::const_iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
     if(this->Makefile->IsOn("APPLE")
@@ -1311,16 +1308,12 @@ const char* cmLocalGenerator::GetIncludeFlags(const char* lang,
     {
     flags[flags.size()-1] = ' ';
     }
-  this->LanguageToIncludeFlags[key] = flags;
-
-  // Use this temorary variable for the return value to work-around a
-  // bogus GCC 2.95 warning.
-  const char* ret = this->LanguageToIncludeFlags[key].c_str();
-  return ret;
+  return flags;
 }
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
+                                             cmTarget* target,
                                              const char* lang)
 {
   // Need to decide whether to automatically include the source and
@@ -1375,8 +1368,12 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Store the automatic include paths.
   if(includeBinaryDir)
     {
-    dirs.push_back(this->Makefile->GetStartOutputDirectory());
-    emitted.insert(this->Makefile->GetStartOutputDirectory());
+    if(emitted.find(
+                this->Makefile->GetStartOutputDirectory()) == emitted.end())
+      {
+      dirs.push_back(this->Makefile->GetStartOutputDirectory());
+      emitted.insert(this->Makefile->GetStartOutputDirectory());
+      }
     }
   if(includeSourceDir)
     {
@@ -1402,9 +1399,12 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       }
     }
 
-  // Get the project-specified include directories.
-  std::vector<std::string>& includes =
-    this->Makefile->GetIncludeDirectories();
+  // Get the target-specific include directories.
+  std::vector<std::string> includes;
+  if(target)
+    {
+    includes = target->GetIncludeDirectories();
+    }
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.
@@ -1412,7 +1412,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     {
     const char* topSourceDir = this->Makefile->GetHomeDirectory();
     const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
-    for(std::vector<std::string>::iterator i = includes.begin();
+    for(std::vector<std::string>::const_iterator i = includes.begin();
         i != includes.end(); ++i)
       {
       // Emit this directory only if it is a subdirectory of the
@@ -1431,7 +1431,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
 
   // Construct the final ordered include directory list.
-  for(std::vector<std::string>::iterator i = includes.begin();
+  for(std::vector<std::string>::const_iterator i = includes.begin();
       i != includes.end(); ++i)
     {
     if(emitted.insert(*i).second)

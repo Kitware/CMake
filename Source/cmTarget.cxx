@@ -486,6 +486,26 @@ void cmTarget::DefineProperties(cmake *cm)
      "undefined behavior.");
 
   cm->DefineProperty
+    ("INCLUDE_DIRECTORIES", cmProperty::TARGET,
+     "List of preprocessor include file search directories.",
+     "This property specifies the list of directories given "
+     "so far to the include_directories command. "
+     "This property exists on directories and targets. "
+     "In addition to accepting values from the include_directories "
+     "command, values may be set directly on any directory or any "
+     "target using the set_property command. "
+     "A target gets its initial value for this property from the value "
+     "of the directory property. "
+     "A directory gets its initial value from its parent directory if "
+     "it has one. "
+     "Both directory and target property values are adjusted by calls "
+     "to the include_directories command."
+     "\n"
+     "The target property values are used by the generators to set "
+     "the include paths for the compiler. "
+     "See also the include_directories command.");
+
+  cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,
      "Mac OSX directory name for installed targets.",
      "INSTALL_NAME_DIR is a string specifying the "
@@ -1047,10 +1067,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "Can be set to one or more UUIDs recognized by Visual Studio "
      "to indicate the type of project. This value is copied "
      "verbatim into the generated project file. Example for a "
-     "managed C++ unit testing project: \""
-     "{3AC096D0-A1C2-E12C-1390-A8335801FDAB};"
-     "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\". UUIDs are "
-     "semicolon-delimited.");
+     "managed C++ unit testing project:\n"
+     " {3AC096D0-A1C2-E12C-1390-A8335801FDAB};"
+     "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\n"
+     "UUIDs are semicolon-delimited.");
   cm->DefineProperty
     ("VS_GLOBAL_KEYWORD", cmProperty::TARGET,
      "Visual Studio project keyword.",
@@ -1064,6 +1084,16 @@ void cmTarget::DefineProperties(cmake *cm)
      "Adds one or more semicolon-delimited .NET references to a "
      "generated Visual Studio project. For example, \"System;"
      "System.Windows.Forms\".");
+  cm->DefineProperty
+    ("VS_WINRT_EXTENSIONS", cmProperty::TARGET,
+     "Visual Studio project C++/CX language extensions for Windows Runtime",
+     "Can be set to enable C++/CX language extensions.");
+  cm->DefineProperty
+    ("VS_WINRT_REFERENCES", cmProperty::TARGET,
+     "Visual Studio project Windows Runtime Metadata references",
+     "Adds one or more semicolon-delimited WinRT references to a "
+     "generated Visual Studio project. For example, \"Windows;"
+     "Windows.UI.Core\".");
   cm->DefineProperty
     ("VS_GLOBAL_<variable>", cmProperty::TARGET,
      "Visual Studio project-specific global variable.",
@@ -1268,6 +1298,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
+
+  // Initialize the INCLUDE_DIRECTORIES property based on the current value
+  // of the same directory property:
+  this->SetProperty("INCLUDE_DIRECTORIES",
+                    this->Makefile->GetProperty("INCLUDE_DIRECTORIES"));
 
   // Record current policies for later use.
   this->PolicyStatusCMP0003 =
@@ -4663,6 +4698,30 @@ cmTarget::GetLinkInformation(const char* config)
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmTarget::GetIncludeDirectories()
+{
+  std::vector<std::string> includes;
+  const char *prop = this->GetProperty("INCLUDE_DIRECTORIES");
+  if(prop)
+    {
+    cmSystemTools::ExpandListArgument(prop, includes);
+    }
+
+  std::set<std::string> uniqueIncludes;
+  std::vector<std::string> orderedAndUniqueIncludes;
+  for(std::vector<std::string>::const_iterator
+      li = includes.begin(); li != includes.end(); ++li)
+    {
+    if(uniqueIncludes.insert(*li).second)
+      {
+      orderedAndUniqueIncludes.push_back(*li);
+      }
+    }
+
+  return orderedAndUniqueIncludes;
 }
 
 //----------------------------------------------------------------------------

@@ -128,6 +128,7 @@ private:
   cmsys::RegularExpression ExtractSharedLibraryName;
   cmsys::RegularExpression ExtractAnyLibraryName;
   std::string SharedRegexString;
+  bool OpenBSD;
   void AddLinkPrefix(const char* p);
   void AddLinkExtension(const char* e, LinkType type);
   std::string CreateExtensionRegex(std::vector<std::string> const& exts);

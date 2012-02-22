@@ -19,3 +19,5 @@ if("${LANG}" STREQUAL "C")
 else("${LANG}" STREQUAL "C")
   message(FATAL_ERROR "Bad language for file conly.c")
 endif("${LANG}" STREQUAL "C")
+
+add_library(testCModule MODULE testCModule.c)

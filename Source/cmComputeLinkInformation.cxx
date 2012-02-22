@@ -248,6 +248,10 @@ cmComputeLinkInformation
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
+  // Check whether to recognize OpenBSD-style library versioned names.
+  this->OpenBSD = this->Makefile->GetCMakeInstance()
+    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
+
   // The configuration being linked.
   this->Config = config;
 
@@ -973,7 +977,15 @@ cmComputeLinkInformation
     }
 
   // Finish the list.
-  libext += ")$";
+  libext += ")";
+
+  // Add an optional OpenBSD version component.
+  if(this->OpenBSD)
+    {
+    libext += "(\\.[0-9]+\\.[0-9]+)?";
+    }
+
+  libext += "$";
   return libext;
 }
 

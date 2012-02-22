@@ -57,13 +57,20 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
   std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
   // Change to local toplevel
   cmSystemTools::ChangeDirectory(localToplevel.c_str());
+  std::string filePrefix;
+  if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY"))
+    {
+    filePrefix = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    filePrefix += "/";
+    }
   std::vector<std::string>::const_iterator fileIt;
   for (fileIt = component->Files.begin(); fileIt != component->Files.end();
        ++fileIt )
     {
+    std::string rp = filePrefix + *fileIt;
     cmCPackLogger(cmCPackLog::LOG_DEBUG,"Adding file: "
-                  << (*fileIt) << std::endl);
-    archive.Add(*fileIt);
+                  << rp << std::endl);
+    archive.Add(rp);
     if (!archive)
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "ERROR while packaging files: "

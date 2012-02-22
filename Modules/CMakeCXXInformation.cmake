@@ -93,12 +93,6 @@ IF(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX)
 ENDIF()
 
 
-# for most systems a module is the same as a shared library
-# so unless the variable CMAKE_MODULE_EXISTS is set just
-# copy the values from the LIBRARY variables
-IF(NOT CMAKE_MODULE_EXISTS)
-  SET(CMAKE_SHARED_MODULE_CXX_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
-ENDIF(NOT CMAKE_MODULE_EXISTS)
 # Create a set of shared library variable specific to C++
 # For 90% of the systems, these are the same flags as the C versions
 # so if these are not set just copy the flags from the c version
@@ -157,6 +151,14 @@ ENDIF(NOT CMAKE_INCLUDE_FLAG_CXX)
 IF(NOT CMAKE_INCLUDE_FLAG_SEP_CXX)
   SET(CMAKE_INCLUDE_FLAG_SEP_CXX ${CMAKE_INCLUDE_FLAG_SEP_C})
 ENDIF(NOT CMAKE_INCLUDE_FLAG_SEP_CXX)
+
+# for most systems a module is the same as a shared library
+# so unless the variable CMAKE_MODULE_EXISTS is set just
+# copy the values from the LIBRARY variables
+IF(NOT CMAKE_MODULE_EXISTS)
+  SET(CMAKE_SHARED_MODULE_CXX_FLAGS ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+  SET(CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS})
+ENDIF(NOT CMAKE_MODULE_EXISTS)
 
 # repeat for modules
 IF(NOT CMAKE_SHARED_MODULE_CREATE_CXX_FLAGS)

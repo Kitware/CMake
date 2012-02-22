@@ -12,8 +12,8 @@
 #
 
 #=============================================================================
-# Copyright 2009 Kitware, Inc.
-# Copyright 2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2009-2011 Kitware, Inc.
+# Copyright 2009-2011 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -25,8 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_path(ALSA_INCLUDE_DIR NAMES asoundlib.h
-          PATH_SUFFIXES alsa
+find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h
           DOC "The ALSA (asound) include directory"
 )
 
@@ -34,8 +33,8 @@ find_library(ALSA_LIBRARY NAMES asound
           DOC "The ALSA (asound) library"
 )
 
-if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/version.h")
-  file(STRINGS "${ALSA_INCLUDE_DIR}/version.h" alsa_version_str REGEX "^#define[\t ]+SND_LIB_VERSION_STR[\t ]+\".*\"")
+if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/alsa/version.h")
+  file(STRINGS "${ALSA_INCLUDE_DIR}/alsa/version.h" alsa_version_str REGEX "^#define[\t ]+SND_LIB_VERSION_STR[\t ]+\".*\"")
 
   string(REGEX REPLACE "^.*SND_LIB_VERSION_STR[\t ]+\"([^\"]*)\".*$" "\\1" ALSA_VERSION_STRING "${alsa_version_str}")
   unset(alsa_version_str)

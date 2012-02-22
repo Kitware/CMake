@@ -23,6 +23,17 @@ public:
   ~cmFunctionHelperCommand() {};
 
   /**
+   * This is used to avoid including this command
+   * in documentation. This is mainly used by
+   * cmMacroHelperCommand and cmFunctionHelperCommand
+   * which cannot provide appropriate documentation.
+   */
+  virtual bool ShouldAppearInDocumentation()
+    {
+    return false;
+    }
+
+  /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone()

@@ -1,3 +1,7 @@
+SET(CTEST_CUSTOM_ERROR_MATCH
+  ${CTEST_CUSTOM_ERROR_MATCH}
+  "ERROR:")
+
 SET(CTEST_CUSTOM_WARNING_EXCEPTION
   ${CTEST_CUSTOM_WARNING_EXCEPTION}
   "xtree.[0-9]+. : warning C4702: unreachable code"
@@ -44,6 +48,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
   "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
   "ld: warning: directory not found for option .-(F|L)"
   "warning.*This version of Mac OS X is unsupported"
+  "clang.*: warning: argument unused during compilation: .-g"
 
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:
