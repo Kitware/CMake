@@ -42,6 +42,11 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
                             this->TargetNameImport,
                             this->TargetNamePDB,
                             GetLocalGenerator()->GetConfigName());
+
+  // on Windows the output dir is already needed at compile time
+  // ensure the directory exists (OutDir test)
+  std::string outpath = target->GetDirectory(this->GetConfigName());
+  cmSystemTools::MakeDirectory(outpath.c_str());
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
