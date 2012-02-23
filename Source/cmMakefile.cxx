@@ -2132,7 +2132,7 @@ void cmMakefile::ExpandVariables()
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    const char *includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
+    includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
     if (includeDirs)
       {
       std::string dirs = includeDirs;
