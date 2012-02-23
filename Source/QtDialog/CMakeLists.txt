@@ -57,10 +57,10 @@ QT4_WRAP_CPP(MOC_SRCS
 QT4_ADD_RESOURCES(RC_SRCS CMakeSetup.qrc)
 
 set(SRCS ${SRCS} ${UI_SRCS} ${MOC_SRCS} ${RC_SRCS})
-if(Q_WS_WIN)
+if(WIN32)
   set(SRCS ${SRCS} CMakeSetup.rc)
 endif()
-if(Q_WS_MAC)
+if(APPLE)
   set(SRCS ${SRCS} CMakeSetup.icns)
   set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
   set_source_files_properties(CMakeSetup.icns PROPERTIES
