@@ -9,16 +9,33 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-project(QtDialog)
-set(QT_MIN_VERSION "4.4.0")
-find_package(Qt4 REQUIRED)
 
-if(NOT QT4_FOUND)
-  message(SEND_ERROR "Failed to find Qt 4.4 or greater.")
-  return()
+project(QtDialog)
+find_package(Qt5Widgets QUIET)
+if (Qt5Widgets_FOUND)
+  include_directories(${Qt5Widgets_INCLUDE_DIRS})
+  add_definitions(${Qt5Widgets_DEFINITONS})
+  macro(qt4_wrap_ui)
+    qt5_wrap_ui(${ARGN})
+  endmacro()
+  macro(qt4_wrap_cpp)
+    qt5_wrap_cpp(${ARGN})
+  endmacro()
+  macro(qt4_add_resources)
+    qt5_add_resources(${ARGN})
+  endmacro()
+  set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+else()
+  set(QT_MIN_VERSION "4.4.0")
+  find_package(Qt4 REQUIRED)
+  if(NOT QT4_FOUND)
+    message(SEND_ERROR "Failed to find Qt 4.4 or greater.")
+    return()
+  endif()
+
+  include(${QT_USE_FILE})
 endif()
 
-include(${QT_USE_FILE})
 set(SRCS
   AddCacheEntry.cxx
   AddCacheEntry.h
