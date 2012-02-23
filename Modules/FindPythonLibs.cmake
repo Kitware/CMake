@@ -159,6 +159,10 @@ SET(PYTHON_LIBRARY_DEBUG "${PYTHON_DEBUG_LIBRARY}")
 SET(PYTHON_LIBRARY_RELEASE "${PYTHON_LIBRARY}")
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 SELECT_LIBRARY_CONFIGURATIONS(PYTHON)
+# SELECT_LIBRARY_CONFIGURATIONS() sets ${PREFIX}_FOUND if it has a library.
+# Unset this, this prefix doesn't match the module prefix, they are different
+# for historical reasons.
+UNSET(PYTHON_FOUND)
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
