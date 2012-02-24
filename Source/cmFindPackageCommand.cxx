@@ -912,38 +912,37 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     else
       {
-      e << "Could not find ";
       if(this->UseFindModules)
         {
-        e << "module Find" << this->Name << ".cmake or ";
+        e << "By not providing \"Find" << this->Name << ".cmake\" in "
+             "CMAKE_MODULE_PATH this project has asked CMake to find a "
+             "package configuration file provided by \""<<this->Name<< "\", "
+             "but CMake did not find one.\n";
         }
-      e << "a configuration file for package " << this->Name << ".\n";
-      if(this->UseFindModules)
-        {
-        e << "Adjust CMAKE_MODULE_PATH to find Find"
-          << this->Name << ".cmake or set ";
-        }
-      else
-        {
-        e << "Set ";
-        }
-      e << this->Variable << " to the directory containing a CMake "
-        << "configuration file for " << this->Name << ".  ";
+
       if(this->Configs.size() == 1)
         {
-        e << "The file will be called " << this->Configs[0];
+        e << "Could not find a package configuration file named \""
+          << this->Configs[0] << "\" provided by package \"" << this->Name << "\".\n";
         }
       else
         {
-        e << "The file will have one of the following names:\n";
-        for(std::vector<std::string>::const_iterator ci=this->Configs.begin();
+        e << "Could not find a package configuration file provided by \""
+          << this->Name << "\" with any of the following names:\n";
+        for(std::vector<std::string>::const_iterator ci =
+                                                       this->Configs.begin();
             ci != this->Configs.end(); ++ci)
           {
           e << "  " << *ci << "\n";
           }
         }
-      }
 
+      e << "Add the installation prefix of \"" << this->Name << "\" to "
+        "CMAKE_PREFIX_PATH or set \"" << this->Variable << "\" to a "
+        "directory containing one of the above files. "
+        "If \"" << this->Name << "\" provides a separate development "
+        "package or SDK, be sure it has been installed.";
+      }
 
     this->Makefile->IssueMessage(
       this->Required? cmake::FATAL_ERROR : cmake::WARNING, e.str());
