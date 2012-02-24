@@ -231,6 +231,25 @@ IF(BUILD_TESTING)
     FIND_PACKAGE(Qt4)
   ENDIF(NOT QT4_FOUND)
 
+  IF(QT4_FOUND)
+    # test whether the Qt4 which has been found works, on some machines
+    # which run nightly builds there were errors like "wrong file format"
+    # for libQtCore.so. So first check it works, and only if it does add
+    # the automoc test.
+    INCLUDE(CheckCXXSourceCompiles)
+    SET(_save_CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
+    SET(_save_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
+
+    SET(CMAKE_REQUIRED_INCLUDES ${QT_INCLUDES})
+    SET(CMAKE_REQUIRED_LIBRARIES ${QT_QTCORE_LIBRARIES})
+
+    CHECK_CXX_SOURCE_COMPILES("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
+                              QT4_WORKS)
+
+    SET(CMAKE_REQUIRED_INCLUDES "${_save_CMAKE_REQUIRED_INCLUDES}")
+    SET(CMAKE_REQUIRED_LIBRARIES "${_save_CMAKE_REQUIRED_LIBRARIES}")
+  ENDIF()
+
   # run test for BundleUtilities on supported platforms/compilers
   if(MSVC OR
      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
@@ -249,7 +268,7 @@ IF(BUILD_TESTING)
 
     # run test for DeployQt4 on supported platforms/compilers (which depends on BundleUtilities)
     # this test also depends on the existence of the standard qtiff plugin
-    if(QT4_FOUND)
+    if(QT4_WORKS)
       ADD_TEST(Qt4Deploy ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/Qt4Deploy"
@@ -259,6 +278,7 @@ IF(BUILD_TESTING)
         --build-project Qt4Deploy
         --build-options
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
         )
       LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Deploy")
     endif()
@@ -868,43 +888,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
 
-  IF(NOT QT4_FOUND)
-    FIND_PACKAGE(Qt4)
-  ENDIF(NOT QT4_FOUND)
-
-  IF(QT4_FOUND)
-    # test whether the Qt4 which has been found works, on some machines
-    # which run nightly builds there were errors like "wrong file format"
-    # for libQtCore.so. So first check it works, and only if it does add
-    # the automoc test.
-    INCLUDE(CheckCXXSourceCompiles)
-    SET(_save_CMAKE_REQUIRED_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
-    SET(_save_CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
-
-    SET(CMAKE_REQUIRED_INCLUDES ${QT_INCLUDES})
-    SET(CMAKE_REQUIRED_LIBRARIES ${QT_QTCORE_LIBRARIES})
-
-    CHECK_CXX_SOURCE_COMPILES("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
-                              QT4_WORKS_FOR_AUTOMOC_TEST)
-
-    SET(CMAKE_REQUIRED_INCLUDES "${_save_CMAKE_REQUIRED_INCLUDES}")
-    SET(CMAKE_REQUIRED_LIBRARIES "${_save_CMAKE_REQUIRED_LIBRARIES}")
-
-    IF(QT4_WORKS_FOR_AUTOMOC_TEST)
-      ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
-        "${CMake_BINARY_DIR}/Tests/QtAutomoc"
-        --build-generator ${CMAKE_TEST_GENERATOR}
-        --build-project QtAutomoc
-        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-        --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
-        --force-new-ctest-process
-        --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
-        --test-command ${CMAKE_CTEST_COMMAND} -V
-        )
-      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
-    ENDIF()
+  IF(QT4_WORKS)
+    ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
+      "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project QtAutomoc
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+      --force-new-ctest-process
+      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+      --test-command ${CMAKE_CTEST_COMMAND} -V
+      )
+    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
   ENDIF()
 
   ADD_TEST(ExternalProject ${CMAKE_CTEST_COMMAND}
