@@ -31,7 +31,7 @@ public:
   cmPropertyDefinition() { this->Chained = false; };
 
   // is it chained?
-  bool IsChained() {return this->Chained; };
+  bool IsChained() const { return this->Chained; };
 
   // Get the section if any
   const std::string &GetDocumentationSection() const {
