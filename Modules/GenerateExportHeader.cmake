@@ -149,13 +149,6 @@ include(CheckCXXCompilerFlag)
 macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
   check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
     int main() { return somefunc();}" ${_RESULT}
-    # Some compilers do not fail with a bad flag
-    FAIL_REGEX "unrecognized .*option"                     # GNU
-    FAIL_REGEX "ignoring unknown option"                   # MSVC
-    FAIL_REGEX "warning D9002"                             # MSVC, any lang
-    FAIL_REGEX "[Uu]nknown option"                         # HP
-    FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
-    FAIL_REGEX "command option .* is not recognized"       # XL
   )
 endmacro()
 
