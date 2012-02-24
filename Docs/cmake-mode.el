@@ -68,9 +68,9 @@ set the path with these commands:
                                        "\\|" "[ \t\r\n]"
                                        "\\)*"))
 (defconst cmake-regex-block-open
-  "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\|ELSEIF\\|WHILE\\|FUNCTION\\)$")
+  "^\\([iI][fF]\\|[mM][aA][cC][rR][oO]\\|[fF][oO][rR][eE][aA][cC][hH]\\|[eE][lL][sS][eE]\\|[eE][lL][sS][eE][iI][fF]\\|[wW][hH][iI][lL][eE]\\|[fF][uU][nN][cC][tT][iI][oO][nN]\\)$")
 (defconst cmake-regex-block-close
-  "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\|ELSEIF\\|ENDWHILE\\|ENDFUNCTION\\)[ \t]*(")
+  "^[ \t]*\\([eE][nN][dD][iI][fF]\\|[eE][nN][dD][fF][oO][rR][eE][aA][cC][hH]\\|[eE][nN][dD][mM][aA][cC][rR][oO]\\|[eE][lL][sS][eE]\\|[eE][lL][sS][eE][iI][fF]\\|[eE][nN][dD][wW][hH][iI][lL][eE]\\|[eE][nN][dD][fF][uU][nN][cC][tT][iI][oO][nN]\\)[ \t]*(")
 
 ;------------------------------------------------------------------------------
 
