@@ -4,6 +4,7 @@
 # - PackageMaker CPack generator (Mac OS X).
 # The following variable is specific to installers build on Mac OS X
 # using PackageMaker:
+##end
 #
 ##variable
 #  CPACK_OSX_PACKAGE_VERSION - The version of Mac OS X that the
