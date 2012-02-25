@@ -12,10 +12,15 @@
 #ifndef cmPropertyMap_h
 #define cmPropertyMap_h
 
-#include "cmProperty.h"
 #include "cmStandardIncludes.h"
 
 class cmake;
+
+namespace cmProperty
+{
+  enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, CACHE,
+                   TEST, VARIABLE, CACHED_VARIABLE };
+}
 
 class cmPropertyMap : public std::map<cmStdString,cmStdString>
 {

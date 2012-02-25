@@ -12,7 +12,7 @@
 #ifndef cmPropertyDefinition_h
 #define cmPropertyDefinition_h
 
-#include "cmProperty.h"
+#include "cmPropertyMap.h"
 #include "cmStandardIncludes.h"
 
 class cmPropertyDefinition 
