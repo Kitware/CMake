@@ -1903,12 +1903,8 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::UNKNOWN_LIBRARY:
         {
-        // Get the location of the target's output file and depend on it.
-        if(const char* location = target->GetLocation(config))
-          {
-          dep = location;
-          return true;
-          }
+        dep = target->GetLocation(config);
+        return true;
         }
         break;
       case cmTarget::UTILITY:
