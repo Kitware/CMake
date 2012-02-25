@@ -13,6 +13,7 @@
 #define cmPropertyDefinition_h
 
 #include "cmProperty.h"
+#include "cmStandardIncludes.h"
 
 class cmPropertyDefinition 
 {

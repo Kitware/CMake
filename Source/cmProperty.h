@@ -12,30 +12,10 @@
 #ifndef cmProperty_h
 #define cmProperty_h
 
-#include "cmStandardIncludes.h"
-
-class cmProperty 
+namespace cmProperty
 {
-public:
   enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, CACHE,
                    TEST, VARIABLE, CACHED_VARIABLE };
-
-  // set this property
-  void Set(const char *name, const char *value);
-
-  // append to this property
-  void Append(const char *name, const char *value, bool asString = false);
-
-  // get the value
-  const char *GetValue() const;
-
-  // construct with the value not set
-  cmProperty() { this->ValueHasBeenSet = false; };
-
-protected:
-  std::string Name;
-  std::string Value;
-  bool ValueHasBeenSet;
-};
+}
 
 #endif
