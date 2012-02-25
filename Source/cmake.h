@@ -66,21 +66,24 @@ class cmake
   };
 
 
-  /** Describes the working modes of cmake.
-   * NORMAL_MODE: cmake runs to create project files
-   * SCRIPT_MODE: in script mode there is no generator and no cache. Also,
-   *              language are not enabled, so add_executable and things do
-   *              not do anything. Started by using -P
-   * FIND_PACKAGE_MODE: cmake runs in pkg-config like mode, i.e. it just
-   *              searches for a package and prints the results to stdout.
-   *              This is similar to SCRIPT_MODE, but commands like
-   *              add_library() work too, since they may be used e.g. in
-   *              exported target files. Started via --find-package
-   */
+  /** \brief Describes the working modes of cmake */
   enum WorkingMode
   {
-    NORMAL_MODE,
+    NORMAL_MODE, ///< Cmake runs to create project files
+    /** \brief Script mode (started by using -P).
+     *
+     * In script mode there is no generator and no cache. Also,
+     * languages are not enabled, so add_executable and things do
+     * nothing.
+     */
     SCRIPT_MODE,
+    /** \brief A pkg-config like mode
+     *
+     * In this mode cmake just searches for a package and prints the results to
+     * stdout. This is similar to SCRIPT_MODE, but commands like add_library()
+     * work too, since they may be used e.g. in exported target files. Started
+     * via --find-package.
+     */
     FIND_PACKAGE_MODE
   };
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
