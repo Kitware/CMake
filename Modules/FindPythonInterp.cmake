@@ -89,15 +89,18 @@ endif()
 # determine python version string
 if(PYTHON_EXECUTABLE)
     execute_process(COMMAND "${PYTHON_EXECUTABLE}" --version
+                    OUTPUT_VARIABLE _VERSION_O
                     ERROR_VARIABLE _VERSION
                     RESULT_VARIABLE _PYTHON_VERSION_RESULT
-                    OUTPUT_QUIET
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_STRIP_TRAILING_WHITESPACE)
     if(_PYTHON_VERSION_RESULT)
+message(STATUS "'python --version' process result is ${_PYTHON_VERSION_RESULT}, stdout is '${_VERSION_O}', stderr is '${_VERSION}'")
         execute_process(COMMAND "${PYTHON_EXECUTABLE}" -V
+                       OUTPUT_VARIABLE _VERSION_O
                         ERROR_VARIABLE _VERSION
                         RESULT_VARIABLE _PYTHON_VERSION_RESULT
-                        OUTPUT_QUIET
+                        OUTPUT_STRIP_TRAILING_WHITESPACE
                         ERROR_STRIP_TRAILING_WHITESPACE)
     endif(_PYTHON_VERSION_RESULT)
     if(NOT _PYTHON_VERSION_RESULT AND _VERSION MATCHES "^Python [0-9]+\\.[0-9]+.*")
@@ -107,6 +110,8 @@ if(PYTHON_EXECUTABLE)
         if(PYTHON_VERSION_STRING MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+.*")
             string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" PYTHON_VERSION_PATCH "${PYTHON_VERSION_STRING}")
         endif()
+else()
+message(STATUS "process result is ${_PYTHON_VERSION_RESULT}, stdout is '${_VERSION_O}', stderr is '${_VERSION}'")
     endif()
     unset(_PYTHON_VERSION_RESULT)
     unset(_VERSION)
