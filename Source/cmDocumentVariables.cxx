@@ -895,7 +895,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("BORLAND", cmProperty::VARIABLE,
-     "True of the borland compiler is being used.",
+     "True if the borland compiler is being used.",
      "This is set to true if the Borland compiler is being used.",false,
      "Variables That Describe the System");
 
