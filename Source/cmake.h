@@ -88,12 +88,11 @@ class cmake
   };
   typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
 
-  ///! construct an instance of cmake
+  /// Default constructor
   cmake();
-  ///! destruct an instance of cmake
+  /// Destructor
   ~cmake();
 
-  ///! construct an instance of cmake
   static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";};
   static const char *GetCMakeFilesDirectoryPostSlash() {
     return "CMakeFiles/";};
