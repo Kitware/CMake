@@ -49,7 +49,7 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   /** This command does not really have a final pass but it needs to
       stay alive since it owns variable watch callback information. */
@@ -58,12 +58,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "variable_watch";}
+  virtual const char* GetName() const { return "variable_watch";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Watch the CMake variable for change.";
     }
@@ -71,7 +71,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  variable_watch(<variable name> [<command to execute>])\n"

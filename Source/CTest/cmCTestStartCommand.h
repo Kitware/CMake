@@ -55,12 +55,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ctest_start";}
+  virtual const char* GetName() const { return "ctest_start";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Starts the testing for a given model";
     }
@@ -68,7 +68,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  ctest_start(Model [TRACK <track>] [APPEND] [source [binary]])\n"

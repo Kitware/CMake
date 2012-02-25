@@ -32,17 +32,17 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "set_directory_properties";}
+  virtual const char* GetName() const { return "set_directory_properties";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Set a property of the directory.";
     }
@@ -58,7 +58,7 @@ public:
   /**
    * Longer documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
       return
         "  set_directory_properties(PROPERTIES prop1 value1 prop2 value2)\n"

@@ -44,12 +44,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "aux_source_directory";}
+  virtual const char* GetName() const { return "aux_source_directory";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Find all source files in a directory.";
     }
@@ -57,7 +57,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  aux_source_directory(<dir> <variable>)\n"

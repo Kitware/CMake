@@ -52,12 +52,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "fltk_wrap_ui";}
+  virtual const char* GetName() const { return "fltk_wrap_ui";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Create FLTK user interfaces Wrappers.";
     }
@@ -65,7 +65,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  fltk_wrap_ui(resultingLibraryName source1\n"

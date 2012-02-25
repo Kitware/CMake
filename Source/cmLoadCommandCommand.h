@@ -40,12 +40,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "load_command";}
+  virtual const char* GetName() const {return "load_command";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Load a command into a running CMake.";
     }
@@ -53,7 +53,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  load_command(COMMAND_NAME <loc1> [loc2 ...])\n"

@@ -108,11 +108,11 @@ void cmFindBase::GenerateDocumentation()
 }
 
 //----------------------------------------------------------------------------
-const char* cmFindBase::GetFullDocumentation()
+const char* cmFindBase::GetFullDocumentation() const
 {
   if(this->GenericDocumentation.empty())
     {
-    this->GenerateDocumentation();
+    const_cast<cmFindBase *>(this)->GenerateDocumentation();
     }
   return this->GenericDocumentation.c_str();
 }

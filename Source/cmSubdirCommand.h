@@ -42,12 +42,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "subdirs";}
+  virtual const char* GetName() const { return "subdirs";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Deprecated. Use the add_subdirectory() command instead.";
     }
@@ -55,7 +55,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "Add a list of subdirectories to the build.\n"
@@ -79,7 +79,7 @@ public:
     }
   
   /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged()
+  virtual bool IsDiscouraged() const
     {
     return true;
     }

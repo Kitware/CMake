@@ -41,12 +41,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "include_directories";}
+  virtual const char* GetName() const { return "include_directories";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Add include directories to the build.";
     }
@@ -54,7 +54,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  include_directories([AFTER|BEFORE] [SYSTEM] dir1 dir2 ...)\n"

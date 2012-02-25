@@ -32,12 +32,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "set_tests_properties";}
+  virtual const char* GetName() const { return "set_tests_properties";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Set a property of the tests.";
     }
@@ -45,7 +45,7 @@ public:
   /**
    * Longer documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  set_tests_properties(test1 [test2...] PROPERTIES prop1 value1 prop2"

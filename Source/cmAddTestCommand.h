@@ -41,12 +41,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "add_test";}
+  virtual const char* GetName() const { return "add_test";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Add a test to the project with the specified arguments.";
     }
@@ -54,7 +54,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  add_test(testname Exename arg1 arg2 ... )\n"
