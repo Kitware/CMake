@@ -745,23 +745,9 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->LibraryGenerator = libraryGenerator;
       te->RuntimeGenerator = runtimeGenerator;
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-        ->AddTargetToExports(exports.GetCString(), te);
+        ->AddTargetToExport(exports.GetCString(), te);
       }
     }
-
-
-    // Add this install rule to an export if one was specified and
-    // this is not a namelink-only rule.
-    if(!exports.GetString().empty() && !namelinkOnly)
-      {
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-        ->AddTargetToExports(exports.GetCString(), &target,
-                             archiveGenerator, runtimeGenerator,
-                             libraryGenerator, frameworkGenerator,
-                             bundleGenerator, publicHeaderGenerator);
-      }
-    }
-
 
   // Tell the global generator about any installation component names
   // specified

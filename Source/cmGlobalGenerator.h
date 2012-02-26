@@ -154,7 +154,7 @@ public:
   { return &InstallComponents; }
 
   ///! Add one installed target to the sets of the exports
-  void AddTargetToExports(const char* exportSet, cmTargetExport* te);
+  void AddTargetToExport(const char* exportSet, cmTargetExport* te);
   ///! Get the export target set with the   given name
   const std::vector<cmTargetExport*>* GetExportSet(const char* name) const;
 
