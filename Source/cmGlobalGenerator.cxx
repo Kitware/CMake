@@ -21,7 +21,7 @@
 #include "cmQtAutomoc.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
-#include "cmExportInstallFileGenerator.h"
+#include "cmTargetExport.h"
 #include "cmComputeTargetDepends.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"

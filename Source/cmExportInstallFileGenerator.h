@@ -91,34 +91,4 @@ protected:
   std::map<cmStdString, cmStdString> ConfigImportFiles;
 };
 
-/*
-  cmTargetExport is used in cmGlobalGenerator to collect the install
-  generators for targets associated with an export.
-*/
-class cmTargetExport
-{
-public:
-  cmTargetExport(cmTarget* tgt,
-                 cmInstallTargetGenerator* archive,
-                 cmInstallTargetGenerator* runtime,
-                 cmInstallTargetGenerator* library,
-                 cmInstallTargetGenerator* framework,
-                 cmInstallTargetGenerator* bundle,
-                 cmInstallFilesGenerator* headers
-                ) : Target(tgt), ArchiveGenerator(archive),
-                    RuntimeGenerator(runtime), LibraryGenerator(library),
-                    FrameworkGenerator(framework), BundleGenerator(bundle),
-                    HeaderGenerator(headers) {}
-
-  cmTarget* Target;
-  cmInstallTargetGenerator* ArchiveGenerator;
-  cmInstallTargetGenerator* RuntimeGenerator;
-  cmInstallTargetGenerator* LibraryGenerator;
-  cmInstallTargetGenerator* FrameworkGenerator;
-  cmInstallTargetGenerator* BundleGenerator;
-  cmInstallFilesGenerator* HeaderGenerator;
-private:
-  cmTargetExport();
-};
-
 #endif
