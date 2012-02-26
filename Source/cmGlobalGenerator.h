@@ -154,13 +154,7 @@ public:
     { return &this->InstallComponents; }
 
   ///! Add one installed target to the sets of the exports
-  void AddTargetToExports(const char* exportSet, cmTarget* target,
-                          cmInstallTargetGenerator* archive,
-                          cmInstallTargetGenerator* runTime,
-                          cmInstallTargetGenerator* library,
-                          cmInstallTargetGenerator* framework,
-                          cmInstallTargetGenerator* bundle,
-                          cmInstallFilesGenerator* publicHeaders);
+  void AddTargetToExports(const char* exportSet, cmTargetExport* te);
   ///! Get the export target set with the   given name
   const std::vector<cmTargetExport*>* GetExportSet(const char* name) const;
 

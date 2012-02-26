@@ -17,6 +17,7 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallCommandArguments.h"
+#include "cmTargetExport.h"
 
 #include <cmsys/Glob.hxx>
 
@@ -735,6 +736,24 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // this is not a namelink-only rule.
     if(!exports.GetString().empty() && !namelinkOnly)
       {
+      cmTargetExport *te = new cmTargetExport;
+      te->Target = &target;
+      te->ArchiveGenerator = archiveGenerator;
+      te->BundleGenerator = bundleGenerator;
+      te->FrameworkGenerator = frameworkGenerator;
+      te->HeaderGenerator = publicHeaderGenerator;
+      te->LibraryGenerator = libraryGenerator;
+      te->RuntimeGenerator = runtimeGenerator;
+      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+        ->AddTargetToExports(exports.GetCString(), te);
+      }
+    }
+
+
+    // Add this install rule to an export if one was specified and
+    // this is not a namelink-only rule.
+    if(!exports.GetString().empty() && !namelinkOnly)
+      {
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->AddTargetToExports(exports.GetCString(), &target,
                              archiveGenerator, runtimeGenerator,
@@ -742,6 +761,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
                              bundleGenerator, publicHeaderGenerator);
       }
     }
+
 
   // Tell the global generator about any installation component names
   // specified

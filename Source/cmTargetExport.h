@@ -23,18 +23,6 @@ class cmInstallFilesGenerator;
 class cmTargetExport
 {
 public:
-  cmTargetExport(cmTarget* tgt,
-                 cmInstallTargetGenerator* archive,
-                 cmInstallTargetGenerator* runtime,
-                 cmInstallTargetGenerator* library,
-                 cmInstallTargetGenerator* framework,
-                 cmInstallTargetGenerator* bundle,
-                 cmInstallFilesGenerator* headers
-                ) : Target(tgt), ArchiveGenerator(archive),
-                    RuntimeGenerator(runtime), LibraryGenerator(library),
-                    FrameworkGenerator(framework), BundleGenerator(bundle),
-                    HeaderGenerator(headers) {}
-
   cmTarget* Target; ///< The target
 
   ///@name Generators
