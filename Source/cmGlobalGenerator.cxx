@@ -1467,18 +1467,10 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
 }
 
 void cmGlobalGenerator::AddTargetToExports(const char* exportSetName,
-                                           cmTarget* target,
-                                           cmInstallTargetGenerator* archive,
-                                           cmInstallTargetGenerator* runTime,
-                                           cmInstallTargetGenerator* library,
-                                           cmInstallTargetGenerator* framework,
-                                           cmInstallTargetGenerator* bundle,
-                                           cmInstallFilesGenerator* headers)
+                                           cmTargetExport *te)
 {
-  if ((exportSetName) && (*exportSetName) && (target))
+  if ((exportSetName) && (*exportSetName) && (te))
     {
-    cmTargetExport* te = new cmTargetExport(target, archive, runTime, library,
-                                            framework, bundle, headers);
     this->ExportSets[exportSetName].push_back(te);
     }
 }
