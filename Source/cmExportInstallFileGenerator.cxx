@@ -14,6 +14,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmTargetExport.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator

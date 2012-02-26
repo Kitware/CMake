@@ -251,6 +251,7 @@ set(SRCS
   cmSystemTools.h
   cmTarget.cxx
   cmTarget.h
+  cmTargetExport.h
   cmTest.cxx
   cmTest.h
   cmTestGenerator.cxx
