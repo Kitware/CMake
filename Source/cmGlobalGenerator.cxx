@@ -1466,7 +1466,7 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     }
 }
 
-void cmGlobalGenerator::AddTargetToExports(const char* exportSetName,
+void cmGlobalGenerator::AddTargetToExport(const char* exportSetName,
                                            cmTargetExport *te)
 {
   if ((exportSetName) && (*exportSetName) && (te))
