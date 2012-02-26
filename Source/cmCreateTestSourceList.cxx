@@ -70,7 +70,7 @@ bool cmCreateTestSourceList
   if (cmSystemTools::GetFilenameExtension(*i).size() < 2)
     {
     this->SetError(
-      "You must specify a file extenion for the test driver file.");
+      "You must specify a file extension for the test driver file.");
     return false;
     }
   std::string driver = this->Makefile->GetCurrentOutputDirectory();

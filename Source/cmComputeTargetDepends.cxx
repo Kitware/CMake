@@ -31,7 +31,7 @@ dependencies for each target such that no cycles are left and the
 build order is safe.
 
 For most target types cyclic dependencies are not allowed.  However
-STATIC libraries may depend on each other in a cyclic fasion.  In
+STATIC libraries may depend on each other in a cyclic fashion.  In
 general the directed dependency graph forms a directed-acyclic-graph
 of strongly connected components.  All strongly connected components
 should consist of only STATIC_LIBRARY targets.
