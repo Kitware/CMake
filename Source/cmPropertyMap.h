@@ -13,13 +13,14 @@
 #define cmPropertyMap_h
 
 #include "cmProperty.h"
-#include "cmStandardIncludes.h"
 
 class cmake;
 
-class cmPropertyMap : public std::map<cmStdString,cmStdString>
+class cmPropertyMap : public std::map<cmStdString,cmProperty>
 {
 public:
+  cmProperty *GetOrCreateProperty(const char *name);
+
   void SetProperty(const char *name, const char *value, 
                    cmProperty::ScopeType scope);
 
