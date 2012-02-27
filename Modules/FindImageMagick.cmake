@@ -171,7 +171,7 @@ FOREACH(component ${ImageMagick_FIND_COMPONENTS}
     ELSEIF(ImageMagick_${component}_EXECUTABLE)
       # if no components were requested explicitly put all (default) executables
       # in the list
-      LIST(APPEND ImageMagick_DEFAULT_EXECUTABLES "${ImageMagick_${component}_EXECUTABLE}")
+      LIST(APPEND ImageMagick_DEFAULT_EXECUTABLES ImageMagick_${component}_EXECUTABLE)
     ENDIF(ImageMagick_FIND_COMPONENTS)
   ENDIF(component STREQUAL "Magick++")
 ENDFOREACH(component)
