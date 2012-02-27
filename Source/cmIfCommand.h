@@ -15,11 +15,6 @@
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 
-/** \class cmIfFunctionBlocker
- * \brief subclass of function blocker
- *
- * 
- */
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -39,11 +34,7 @@ public:
   unsigned int ScopeDepth;
 };
 
-/** \class cmIfCommand
- * \brief starts an if block
- *
- * cmIfCommand starts an if block
- */
+/// Starts an if block
 class cmIfCommand : public cmCommand
 {
 public:

@@ -16,11 +16,6 @@
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 
-/** \class cmForEachFunctionBlocker
- * \brief subclass of function blocker
- *
- * 
- */
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -37,11 +32,7 @@ private:
   int Depth;
 };
 
-/** \class cmForEachCommand
- * \brief starts an if block
- *
- * cmForEachCommand starts an if block
- */
+/// Starts foreach() ... endforeach() block
 class cmForEachCommand : public cmCommand
 {
 public:
