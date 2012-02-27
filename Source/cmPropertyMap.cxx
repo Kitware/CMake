@@ -13,21 +13,6 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
-{
-  cmPropertyMap::iterator it = this->find(name);
-  cmProperty *prop;
-  if (it == this->end())
-    {
-    prop = &(*this)[name];
-    }
-  else
-    {
-    prop = &(it->second);
-    }
-  return prop;
-}
-
 void cmPropertyMap::SetProperty(const char *name, const char *value,
                                 cmProperty::ScopeType scope)
 {
@@ -54,8 +39,7 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
   (void)scope;
 #endif
 
-  cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Set(name,value);
+  (*this)[name] = value;
 }
 
 void cmPropertyMap::AppendProperty(const char* name, const char* value,
@@ -80,8 +64,12 @@ void cmPropertyMap::AppendProperty(const char* name, const char* value,
   (void)scope;
 #endif
 
-  cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Append(name,value,asString);
+  cmStdString &old = (*this)[name];
+  if(!old.empty() && !asString)
+    {
+    old += ";";
+    }
+  old += value;
 }
 
 const char *cmPropertyMap
@@ -118,6 +106,6 @@ const char *cmPropertyMap
       }
     return 0;
     }
-  return it->second.GetValue();
+  return it->second.c_str();
 }
 
