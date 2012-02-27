@@ -17,8 +17,7 @@
 class cmExportInstallFileGenerator;
 class cmInstallFilesGenerator;
 class cmInstallTargetGenerator;
-class cmTarget;
-class cmTargetExport;
+class cmExportSet;
 class cmMakefile;
 
 /** \class cmInstallExportGenerator
@@ -35,13 +34,11 @@ public:
                            cmMakefile* mf);
   ~cmInstallExportGenerator();
 protected:
-  typedef std::vector<cmTargetExport*> ExportSet;
-
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
-  void GenerateImportFile(ExportSet const* exportSet);
-  void GenerateImportFile(const char* config, ExportSet const* exportSet);
+  void GenerateImportFile(cmExportSet const* exportSet);
+  void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   void ComputeTempDir();
 
   std::string Name;

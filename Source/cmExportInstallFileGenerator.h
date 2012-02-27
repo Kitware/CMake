@@ -18,6 +18,7 @@ class cmInstallExportGenerator;
 class cmInstallFilesGenerator;
 class cmInstallTargetGenerator;
 class cmTargetExport;
+class cmExportSet;
 
 /** \class cmExportInstallFileGenerator
  * \brief Generate a file exporting targets from an install tree.
@@ -46,7 +47,7 @@ public:
 
   /** Set the set of targets to be exported.  These are the targets
       associated with the export name.  */
-  void SetExportSet(std::vector<cmTargetExport*> const* eSet)
+  void SetExportSet(cmExportSet const* eSet)
     { this->ExportSet = eSet; }
 
   /** Get the per-config file generated for each configuraiton.  This
@@ -83,7 +84,7 @@ protected:
 
   cmInstallExportGenerator* InstallExportGenerator;
   std::string Name;
-  std::vector<cmTargetExport*> const* ExportSet;
+  cmExportSet const* ExportSet;
 
   std::string ImportPrefix;
 
