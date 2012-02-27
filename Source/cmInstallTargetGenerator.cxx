@@ -83,7 +83,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   std::vector<std::string> filesTo;
   std::string literal_args;
   cmTarget::TargetType targetType = this->Target->GetType();
-  cmInstallType type;
+  cmInstallType type = cmInstallType();
   switch(targetType)
     {
     case cmTarget::EXECUTABLE: type = cmInstallType_EXECUTABLE; break;
