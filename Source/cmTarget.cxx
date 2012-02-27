@@ -43,12 +43,6 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
         return "UTILITY";
       case cmTarget::GLOBAL_TARGET:
         return "GLOBAL_TARGET";
-      case cmTarget::INSTALL_FILES:
-        return "INSTALL_FILES";
-      case cmTarget::INSTALL_PROGRAMS:
-        return "INSTALL_PROGRAMS";
-      case cmTarget::INSTALL_DIRECTORY:
-        return "INSTALL_DIRECTORY";
       case cmTarget::UNKNOWN_LIBRARY:
         return "UNKNOWN_LIBRARY";
     }
@@ -1204,16 +1198,6 @@ void cmTarget::DefineProperties(cmake *cm)
 void cmTarget::SetType(TargetType type, const char* name)
 {
   this->Name = name;
-  if(type == cmTarget::INSTALL_FILES ||
-     type == cmTarget::INSTALL_PROGRAMS ||
-     type == cmTarget::INSTALL_DIRECTORY)
-    {
-    this->Makefile->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   "SetType called on cmTarget for INSTALL_FILES, "
-                   "INSTALL_PROGRAMS, or INSTALL_DIRECTORY ");
-    return;
-    }
   // only add dependency information for library targets
   this->TargetTypeValue = type;
   if(this->TargetTypeValue >= STATIC_LIBRARY
