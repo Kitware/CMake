@@ -257,14 +257,6 @@ public:
     };
   FortranFormat GetFortranFormat(const char* value);
 
-  /** Return the directories into which object files will be put.
-   *  There maybe more than one for fat binary systems like OSX.
-   */
-  virtual void
-  GetTargetObjectFileDirectories(cmTarget* target,
-                                 std::vector<std::string>&
-                                 dirs);
-
   /**
    * Convert the given remote path to a relative path with respect to
    * the given local path.  The local path must be given in component

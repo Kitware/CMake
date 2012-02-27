@@ -76,9 +76,6 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGInitDirectory();
 
-  void GetTargetObjectFileDirectories(cmTarget* target,
-                                      std::vector<std::string>& 
-                                      dirs);
   void SetCurrentLocalGenerator(cmLocalGenerator*);
 
   /** Return true if the generated build tree may contain multiple builds.

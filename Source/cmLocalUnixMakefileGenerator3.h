@@ -257,9 +257,6 @@ public:
     {
     return !this->SkipAssemblySourceRules;
     }
-  // Get the directories into which the .o files will go for this target
-  void GetTargetObjectFileDirectories(cmTarget* target,
-                                      std::vector<std::string>& dirs);
 
   // Fill the vector with the target names for the object files,
   // preprocessed files and assembly files. Currently only used by the

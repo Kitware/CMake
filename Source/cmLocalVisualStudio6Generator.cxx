@@ -1778,17 +1778,6 @@ cmLocalVisualStudio6Generator
   return "";
 }
 
-void cmLocalVisualStudio6Generator
-::GetTargetObjectFileDirectories(cmTarget* ,
-                                 std::vector<std::string>& 
-                                 dirs)
-{
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
-  dir += "/";
-  dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
-  dirs.push_back(dir);
-}
-
 std::string
 cmLocalVisualStudio6Generator
 ::GetConfigName(std::string const& configuration) const
