@@ -1045,10 +1045,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           }
          }
          break;
-        // ignore these:
-        case cmTarget::INSTALL_FILES:
-        case cmTarget::INSTALL_PROGRAMS:
-        case cmTarget::INSTALL_DIRECTORY:
         default:
           break;
         }

@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmInstallFilesGenerator.h"
 
-#include "cmTarget.h"
-
 //----------------------------------------------------------------------------
 cmInstallFilesGenerator
 ::cmInstallFilesGenerator(std::vector<std::string> const& files,
@@ -43,8 +41,8 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
   const char* no_dir_permissions = 0;
   this->AddInstallRule(os,
                        (this->Programs
-                        ? cmTarget::INSTALL_PROGRAMS
-                        : cmTarget::INSTALL_FILES),
+                        ? cmInstallType_PROGRAMS
+                        : cmInstallType_FILES),
                        this->Files,
                        this->Optional,
                        this->FilePermissions.c_str(), no_dir_permissions,
