@@ -57,7 +57,7 @@ void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
       for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
         {
         fout << " " << pit->first
-             << " " << lg->EscapeForCMake(pit->second.c_str());
+             << " " << lg->EscapeForCMake(pit->second.GetValue());
         }
       fout << ")" << std::endl;
       }

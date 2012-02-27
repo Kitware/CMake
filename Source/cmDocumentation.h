@@ -13,7 +13,7 @@
 #define _cmDocumentation_h
 
 #include "cmStandardIncludes.h"
-#include "cmPropertyMap.h"
+#include "cmProperty.h"
 #include "cmDocumentationFormatter.h"
 #include "cmDocumentationFormatterHTML.h"
 #include "cmDocumentationFormatterDocbook.h"

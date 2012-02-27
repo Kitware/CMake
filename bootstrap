@@ -188,6 +188,7 @@ CMAKE_CXX_SOURCES="\
   cmDocumentationFormatter \
   cmDocumentationFormatterText \
   cmPolicies \
+  cmProperty \
   cmPropertyMap \
   cmPropertyDefinition \
   cmPropertyDefinitionMap \
