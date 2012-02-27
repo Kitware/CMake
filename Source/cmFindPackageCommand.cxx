@@ -538,7 +538,6 @@ bool cmFindPackageCommand
         e << "given CONFIGS option followed by invalid file name \""
           << args[i] << "\".  The names given must be file names without "
           << "a path and with a \".cmake\" extension.";
-        this->SetError(e.str().c_str());
         return false;
         }
       this->Configs.push_back(args[i]);
