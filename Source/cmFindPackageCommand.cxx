@@ -911,14 +911,6 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     else
       {
-      std::string requestedVersionString;
-      if(!this->Version.empty())
-        {
-        requestedVersionString = " (requested version ";
-        requestedVersionString += this->Version;
-        requestedVersionString += ")";
-        }
-
       e << "Could not find ";
       if(!this->NoModule)
         {
@@ -927,12 +919,11 @@ bool cmFindPackageCommand::HandlePackageMode()
       if(this->Configs.size() == 1)
         {
         e << "a configuration file named " << this->Configs[0]
-          << " for package " << this->Name << requestedVersionString << ".\n";
+          << " for package " << this->Name << ".\n";
         }
       else
         {
         e << "a configuration file for package " << this->Name
-          << requestedVersionString
           << " with one of the following names:\n";
         for(std::vector<std::string>::const_iterator ci=this->Configs.begin();
             ci != this->Configs.end(); ++ci)
