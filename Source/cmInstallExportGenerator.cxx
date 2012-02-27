@@ -16,7 +16,6 @@
 #include "cmake.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
-#include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
@@ -186,7 +185,7 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     files.push_back(i->second);
     std::string config_test = this->CreateConfigTest(i->first.c_str());
     os << indent << "IF(" << config_test << ")\n";
-    this->AddInstallRule(os, cmTarget::INSTALL_FILES, files, false,
+    this->AddInstallRule(os, cmInstallType_FILES, files, false,
                          this->FilePermissions.c_str(), 0, 0, 0,
                          indent.Next());
     os << indent << "ENDIF(" << config_test << ")\n";
@@ -225,6 +224,6 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   // Install the main export file.
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
-  this->AddInstallRule(os, cmTarget::INSTALL_FILES, files, false,
+  this->AddInstallRule(os, cmInstallType_FILES, files, false,
                        this->FilePermissions.c_str(), 0, 0, 0, indent);
 }

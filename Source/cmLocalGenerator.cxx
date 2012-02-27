@@ -1916,10 +1916,6 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
         // A utility target has no file on which to depend.  This was listed
         // only to get the target-level dependency.
         return false;
-      case cmTarget::INSTALL_FILES:
-      case cmTarget::INSTALL_PROGRAMS:
-      case cmTarget::INSTALL_DIRECTORY:
-        break;
       }
     }
 
