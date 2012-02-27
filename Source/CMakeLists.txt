@@ -225,6 +225,8 @@ SET(SRCS
   cmPolicies.cxx
   cmProcessTools.cxx
   cmProcessTools.h
+  cmProperty.cxx
+  cmProperty.h
   cmPropertyDefinition.cxx
   cmPropertyDefinition.h
   cmPropertyDefinitionMap.cxx
