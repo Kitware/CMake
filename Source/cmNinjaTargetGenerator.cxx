@@ -334,8 +334,15 @@ cmNinjaTargetGenerator
   compileCmdVar += "_COMPILE_OBJECT";
   std::string compileCmd =
     this->GetMakefile()->GetRequiredDefinition(compileCmdVar.c_str());
+  std::vector<std::string> compileCmds;
+  cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
-  this->GetLocalGenerator()->ExpandRuleVariables(compileCmd, vars);
+  for (std::vector<std::string>::iterator i = compileCmds.begin();
+       i != compileCmds.end(); ++i)
+    this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
+
+  std::string cmdLine =
+    this->GetLocalGenerator()->BuildCommandLine(compileCmds);
 
   // Write the rule for compiling file of the given language.
   std::ostringstream comment;
@@ -343,7 +350,7 @@ cmNinjaTargetGenerator
   std::ostringstream description;
   description << "Building " << language << " object $out";
   this->GetGlobalGenerator()->AddRule(this->LanguageCompilerRule(language),
-                                      compileCmd,
+                                      cmdLine,
                                       description.str(),
                                       comment.str(),
                                       depfile);
