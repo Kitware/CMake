@@ -15,6 +15,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
+#include "cmExportSet.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
@@ -36,11 +37,11 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
   // Create all the imported targets.
-  for(std::vector<cmTargetExport*>::const_iterator
-        tei = this->ExportSet->begin();
-      tei != this->ExportSet->end(); ++tei)
+  for(std::vector<cmTargetExport const*>::const_iterator
+        tei = this->ExportSet->GetTargetExports()->begin();
+      tei != this->ExportSet->GetTargetExports()->end(); ++tei)
     {
-    cmTargetExport* te = *tei;
+    cmTargetExport const* te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
       {
       this->GenerateImportTargetCode(os, te->Target);
@@ -161,12 +162,12 @@ cmExportInstallFileGenerator
     }
 
   // Add each target in the set to the export.
-  for(std::vector<cmTargetExport*>::const_iterator
-        tei = this->ExportSet->begin();
-      tei != this->ExportSet->end(); ++tei)
+  for(std::vector<cmTargetExport const*>::const_iterator
+        tei = this->ExportSet->GetTargetExports()->begin();
+      tei != this->ExportSet->GetTargetExports()->end(); ++tei)
     {
     // Collect import properties for this target.
-    cmTargetExport* te = *tei;
+    cmTargetExport const* te = *tei;
     ImportPropertyMap properties;
     std::set<std::string> importedLocations;
     this->SetImportLocationProperty(config, suffix, te->ArchiveGenerator,

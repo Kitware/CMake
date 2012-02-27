@@ -176,6 +176,8 @@ set(SRCS
   cmExportFileGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExportSet.h
+  cmExportSet.cxx
   cmExtraCodeBlocksGenerator.cxx
   cmExtraCodeBlocksGenerator.h
   cmExtraEclipseCDT4Generator.cxx

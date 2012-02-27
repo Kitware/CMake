@@ -23,6 +23,7 @@
 #include "cmInstallFilesGenerator.h"
 
 #include "cmExportInstallFileGenerator.h"
+#include "cmExportSet.h"
 
 //----------------------------------------------------------------------------
 cmInstallExportGenerator::cmInstallExportGenerator(
@@ -114,7 +115,7 @@ void cmInstallExportGenerator::ComputeTempDir()
 void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
   // Get the export set requested.
-  ExportSet const* exportSet =
+  cmExportSet const* exportSet =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
     ->GetExportSet(this->Name.c_str());
 

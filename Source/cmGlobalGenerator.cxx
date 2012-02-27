@@ -76,12 +76,13 @@ cmGlobalGenerator::~cmGlobalGenerator()
     }
 
   this->ClearGeneratorTargets();
-  this->ClearExportSets();
+  this->ExportSets.clear();
 }
 
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
                                                 cmMakefile *mf,
-                                                bool optional) {
+                                                bool optional)
+{
   std::string langComp = "CMAKE_";
   langComp += lang;
   langComp += "_COMPILER";
@@ -817,7 +818,7 @@ void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorTargets();
-  this->ClearExportSets();
+  this->ExportSets.clear();
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1467,33 +1468,24 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
 }
 
 void cmGlobalGenerator::AddTargetToExport(const char* exportSetName,
-                                           cmTargetExport *te)
+                                           cmTargetExport const* te)
 {
-  if ((exportSetName) && (*exportSetName) && (te))
+  std::map<cmStdString, cmExportSet>::iterator it = ExportSets.find(exportSetName);
+  // If EXPORT named exportSetName does not exist, create it.
+  if (it == ExportSets.end())
     {
-    this->ExportSets[exportSetName].push_back(te);
+    cmStdString key = exportSetName;
+    cmExportSet value(key);
+    it = ExportSets.insert(std::make_pair(key, value)).first;
     }
+  it->second.AddTargetExport(te);
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::ClearExportSets()
-{
-  for(std::map<cmStdString, std::vector<cmTargetExport*> >::iterator
-        setIt = this->ExportSets.begin();
-      setIt != this->ExportSets.end(); ++setIt)
-    {
-    for(unsigned int i = 0; i < setIt->second.size(); ++i)
-      {
-      delete setIt->second[i];
-      }
-    }
-  this->ExportSets.clear();
-}
 
-const std::vector<cmTargetExport*>* cmGlobalGenerator::GetExportSet(
-                                                        const char* name) const
+const cmExportSet *cmGlobalGenerator::GetExportSet(const char* name) const
 {
-  std::map<cmStdString, std::vector<cmTargetExport*> >::const_iterator
+  std::map<cmStdString, cmExportSet >::const_iterator
                                      exportSetIt = this->ExportSets.find(name);
   if (exportSetIt != this->ExportSets.end())
     {
