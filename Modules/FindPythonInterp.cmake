@@ -101,6 +101,10 @@ if(PYTHON_EXECUTABLE)
         list(GET _VERSION 0 PYTHON_VERSION_MAJOR)
         list(GET _VERSION 1 PYTHON_VERSION_MINOR)
         list(GET _VERSION 2 PYTHON_VERSION_PATCH)
+        if(PYTHON_VERSION_PATCH EQUAL 0)
+            # it's called "Python 2.7", not "2.7.0"
+            string(REGEX REPLACE "\\.0$" "" PYTHON_VERSION_STRING "${PYTHON_VERSION_STRING}")
+        endif()
     else()
         # sys.version predates sys.version_info, so use that
         execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.version)"
