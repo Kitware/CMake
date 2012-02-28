@@ -48,6 +48,7 @@ IF(BUILD_TESTING)
 
   ADD_SUBDIRECTORY(CMakeLib)
   ADD_SUBDIRECTORY(CMakeOnly)
+  ADD_SUBDIRECTORY(CMakeCommands)
 
   ADD_SUBDIRECTORY(FindPackageModeMakefileTest)
 
@@ -1694,13 +1695,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   add_config_tests(MinSizeRel)
   add_config_tests(Release)
   add_config_tests(RelWithDebInfo)
-
-  add_test(CMakeCommands.build_command ${CMAKE_CMAKE_COMMAND}
-    -DCMake_SOURCE_DIR=${CMake_SOURCE_DIR}
-    -Ddir=${CMake_BINARY_DIR}/Tests/CMakeCommands/build_command
-    -Dgen=${CMAKE_TEST_GENERATOR}
-    -P "${CMake_SOURCE_DIR}/Tests/CMakeCommands/build_command/RunCMake.cmake"
-  )
 
   ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
 
