@@ -237,7 +237,6 @@ cmNinjaNormalTargetGenerator
       }
 
       // We have archive link commands set. First, delete the existing archive.
-      std::vector<std::string> linkCmds;
       std::string cmakeCommand =
         this->GetLocalGenerator()->ConvertToOutputFormat(
           this->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND"),
