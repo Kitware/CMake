@@ -73,6 +73,7 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->VersionFoundPatch = 0;
   this->VersionFoundTweak = 0;
   this->VersionFoundCount = 0;
+  this->RequiredCMakeVersion = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -370,6 +371,15 @@ bool cmFindPackageCommand
     {
     this->SetError("called with incorrect number of arguments");
     return false;
+    }
+
+  // Lookup required version of CMake.
+  if(const char* rv =
+     this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION"))
+    {
+    unsigned int v[3] = {0,0,0};
+    sscanf(rv, "%u.%u.%u", &v[0], &v[1], &v[2]);
+    this->RequiredCMakeVersion = CMake_VERSION_ENCODE(v[0],v[1],v[2]);
     }
 
   // Check for debug mode.
@@ -689,6 +699,37 @@ bool cmFindPackageCommand
       this->AppendSuccessInformation();
       return true;
       }
+    }
+
+  if(this->UseFindModules && this->UseConfigFiles &&
+     this->Makefile->IsOn("CMAKE_FIND_PACKAGE_WARN_NO_MODULE"))
+    {
+    cmOStringStream aw;
+    if(this->RequiredCMakeVersion >= CMake_VERSION_ENCODE(2,8,8))
+      {
+      aw << "find_package called without either MODULE or CONFIG option and "
+        "no Find" << this->Name << ".cmake module is in CMAKE_MODULE_PATH.  "
+        "Add MODULE to exclusively request Module mode and fail if "
+        "Find" << this->Name << ".cmake is missing.  "
+        "Add CONFIG to exclusively request Config mode and search for a "
+        "package configuration file provided by " << this->Name <<
+        " (" << this->Name << "Config.cmake or " <<
+        cmSystemTools::LowerCase(this->Name) << "-config.cmake).  ";
+      }
+    else
+      {
+      aw << "find_package called without NO_MODULE option and no "
+        "Find" << this->Name << ".cmake module is in CMAKE_MODULE_PATH.  "
+        "Add NO_MODULE to exclusively request Config mode and search for a "
+        "package configuration file provided by " << this->Name <<
+        " (" << this->Name << "Config.cmake or " <<
+        cmSystemTools::LowerCase(this->Name) << "-config.cmake).  "
+        "Otherwise make Find" << this->Name << ".cmake available in "
+        "CMAKE_MODULE_PATH.";
+      }
+    aw << "\n"
+      "(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this warning.)";
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, aw.str());
     }
 
   // No find module.  Assume the project has a CMake config file.  Use

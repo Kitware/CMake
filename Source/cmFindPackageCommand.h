@@ -130,6 +130,7 @@ private:
   unsigned int VersionFoundPatch;
   unsigned int VersionFoundTweak;
   unsigned int VersionFoundCount;
+  unsigned int RequiredCMakeVersion;
   bool Quiet;
   bool Required;
   bool Compatibility_1_6;
