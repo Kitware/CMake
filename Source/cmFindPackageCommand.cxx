@@ -415,7 +415,8 @@ bool cmFindPackageCommand
   Doing doing = DoingNone;
   cmsys::RegularExpression version("^[0-9.]+$");
   bool haveVersion = false;
-  std::string haveModeString = "";
+  std::set<unsigned int> configArgs;
+  std::set<unsigned int> moduleArgs;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     if(args[i] == "QUIET")
@@ -431,48 +432,18 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "MODULE")
       {
-      if(!haveModeString.empty())
-        {
-        cmOStringStream e;
-        e << "given " << args[i] << ", but mode is already set to "
-          << haveModeString << ".";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      this->UseConfigFiles = false;
+      moduleArgs.insert(i);
       doing = DoingNone;
-      haveModeString = args[i];
       }
     else if(args[i] == "CONFIG")
       {
-      if(!haveModeString.empty())
-        {
-        cmOStringStream e;
-        e << "given " << args[i] << ", but mode is already set to "
-          << haveModeString << ".";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      this->UseFindModules = false;
+      configArgs.insert(i);
       doing = DoingNone;
-      haveModeString = args[i];
       }
     else if(args[i] == "NO_MODULE")
       {
-      if(!haveModeString.empty())
-        {
-        cmOStringStream e;
-        e << "given " << args[i] << ", but mode is already set to "
-          << haveModeString << ".";
-        this->SetError(e.str().c_str());
-        return false;
-        }
-
-      this->UseFindModules = false;
+      configArgs.insert(i);
       doing = DoingNone;
-      haveModeString = args[i];
       }
     else if(args[i] == "REQUIRED")
       {
@@ -486,31 +457,31 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "NAMES")
       {
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingNames;
       }
     else if(args[i] == "PATHS")
       {
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingPaths;
       }
     else if(args[i] == "HINTS")
       {
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingHints;
       }
     else if(args[i] == "PATH_SUFFIXES")
       {
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingPathSuffixes;
       }
     else if(args[i] == "CONFIGS")
       {
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingConfigs;
       }
@@ -523,27 +494,27 @@ bool cmFindPackageCommand
     else if(args[i] == "NO_CMAKE_PACKAGE_REGISTRY")
       {
       this->NoUserRegistry = true;
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_SYSTEM_PACKAGE_REGISTRY")
       {
       this->NoSystemRegistry = true;
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_BUILDS_PATH")
       {
       this->NoBuilds = true;
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(this->CheckCommonArgument(args[i]))
       {
-      this->UseFindModules = false;
+      configArgs.insert(i);
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
@@ -601,6 +572,29 @@ bool cmFindPackageCommand
       this->SetError(e.str().c_str());
       return false;
       }
+    }
+
+  // Maybe choose one mode exclusively.
+  this->UseFindModules = configArgs.empty();
+  this->UseConfigFiles = moduleArgs.empty();
+  if(!this->UseFindModules && !this->UseConfigFiles)
+    {
+    cmOStringStream e;
+    e << "given options exclusive to Module mode:\n";
+    for(std::set<unsigned int>::const_iterator si = moduleArgs.begin();
+        si != moduleArgs.end(); ++si)
+      {
+      e << "  " << args[*si] << "\n";
+      }
+    e << "and options exclusive to Config mode:\n";
+    for(std::set<unsigned int>::const_iterator si = configArgs.begin();
+        si != configArgs.end(); ++si)
+      {
+      e << "  " << args[*si] << "\n";
+      }
+    e << "The options are incompatible.";
+    this->SetError(e.str().c_str());
+    return false;
     }
 
   // Ignore EXACT with no version.
