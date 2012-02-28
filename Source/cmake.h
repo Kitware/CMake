@@ -9,28 +9,6 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-// This class represents a cmake invocation. It is the top level class when
-// running cmake. Most cmake based GUIS should primarily create an instance
-// of this class and communicate with it.
-//
-// The basic process for a GUI is as follows:
-//
-// 1) Create a cmake instance
-// 2) Set the Home & Start directories, generator, and cmake command. this
-//    can be done using the Set methods or by using SetArgs and passing in
-//    command line arguments.
-// 3) Load the cache by calling LoadCache (duh)
-// 4) if you are using command line arguments with -D or -C flags then
-//    call SetCacheArgs (or if for some other reason you want to modify the
-//    cache, do it now.
-// 5) Finally call Configure
-// 6) Let the user change values and go back to step 5
-// 7) call Generate
-//
-// If your GUI allows the user to change the start & home directories then
-// you must at a minimum redo steps 2 through 7.
-//
-
 
 #ifndef cmake_h
 #define cmake_h
@@ -52,6 +30,30 @@ class cmPolicies;
 class cmListFileBacktrace;
 class cmTarget;
 class cmGeneratedFileStream;
+
+/** \brief Represents a cmake invocation.
+ *
+ * This class represents a cmake invocation. It is the top level class when
+ * running cmake. Most cmake based GUIS should primarily create an instance
+ * of this class and communicate with it.
+ *
+ * The basic process for a GUI is as follows:
+ *
+ * -# Create a cmake instance
+ * -# Set the Home & Start directories, generator, and cmake command. this
+ *    can be done using the Set methods or by using SetArgs and passing in
+ *    command line arguments.
+ * -# Load the cache by calling LoadCache (duh)
+ * -# if you are using command line arguments with -D or -C flags then
+ *    call SetCacheArgs (or if for some other reason you want to modify the
+ *    cache), do it now.
+ * -# Finally call Configure
+ * -# Let the user change values and go back to step 5
+ * -# call Generate
+
+ * If your GUI allows the user to change the start & home directories then
+ * you must at a minimum redo steps 2 through 7.
+ */
 
 class cmake
 {
@@ -166,12 +168,6 @@ class cmake
   int Configure();
   int ActualConfigure();
 
-  /**
-   * Configure the cmMakefiles. This routine will create a GlobalGenerator if
-   * one has not already been set. It will then Call Configure on the
-   * GlobalGenerator. This in turn will read in an process all the CMakeList
-   * files for the tree. It will not produce any actual Makefiles, or
-   * workspaces. Generate does that.  */
   int LoadCache();
   void PreLoadCMakeFiles();
 
