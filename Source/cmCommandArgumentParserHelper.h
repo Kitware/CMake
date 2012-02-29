@@ -81,7 +81,6 @@ private:
   cmStdString InputBuffer;
   std::vector<char> OutputBuffer;
   int CurrentLine;
-  int UnionsAvailable;
   int Verbose;
 
   void Print(const char* place, const char* str);
