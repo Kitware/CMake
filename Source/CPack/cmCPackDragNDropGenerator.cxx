@@ -421,6 +421,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     if(ifs.is_open())
     {
       cmGeneratedFileStream osf(sla_r.c_str());
+      osf << "#include <CoreServices/CoreServices.r>\n\n";
       osf << SLAHeader;
       osf << "\n";
       osf << "data 'TEXT' (5002, \"English\") {\n";
@@ -481,13 +482,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
  
     // Rez the SLA 
     cmOStringStream embed_sla_command;
-    embed_sla_command << "/bin/bash -c \"";   // need expansion of "*.r"
     embed_sla_command << this->GetOption("CPACK_COMMAND_REZ");
-    embed_sla_command << " /Developer/Headers/FlatCarbon/*.r ";
-    embed_sla_command << "'" << sla_r << "'";
+    embed_sla_command << " \"" << sla_r << "\"";
     embed_sla_command << " -a -o ";
-    embed_sla_command << "'" << temp_udco << "'\"";
-    
+    embed_sla_command << "\"" << temp_udco << "\"";
+
     if(!this->RunCommand(embed_sla_command, &error))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
