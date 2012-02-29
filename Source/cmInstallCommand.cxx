@@ -18,6 +18,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallCommandArguments.h"
 #include "cmTargetExport.h"
+#include "cmExportSet.h"
 
 #include <cmsys/Glob.hxx>
 
@@ -745,7 +746,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->LibraryGenerator = libraryGenerator;
       te->RuntimeGenerator = runtimeGenerator;
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-        ->AddTargetToExport(exports.GetCString(), te);
+        ->GetExportSets()[exports.GetString()]->AddTargetExport(te);
       }
     }
 

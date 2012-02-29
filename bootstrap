@@ -200,6 +200,7 @@ CMAKE_CXX_SOURCES="\
   cmExportFileGenerator \
   cmExportInstallFileGenerator \
   cmExportSet \
+  cmExportSetMap \
   cmInstallDirectoryGenerator \
   cmGeneratedFileStream \
   cmGeneratorTarget \
