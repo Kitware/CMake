@@ -1467,35 +1467,6 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     }
 }
 
-void cmGlobalGenerator::AddTargetToExport(const char* exportSetName,
-                                           cmTargetExport const* te)
-{
-  std::map<cmStdString, cmExportSet>::iterator it = ExportSets.find(exportSetName);
-  // If EXPORT named exportSetName does not exist, create it.
-  if (it == ExportSets.end())
-    {
-    cmStdString key = exportSetName;
-    cmExportSet value(key);
-    it = ExportSets.insert(std::make_pair(key, value)).first;
-    }
-  it->second.AddTargetExport(te);
-}
-
-//----------------------------------------------------------------------------
-
-const cmExportSet *cmGlobalGenerator::GetExportSet(const char* name) const
-{
-  std::map<cmStdString, cmExportSet >::const_iterator
-                                     exportSetIt = this->ExportSets.find(name);
-  if (exportSetIt != this->ExportSets.end())
-    {
-    return &exportSetIt->second;
-    }
-
-  return 0;
-}
-
-
 void cmGlobalGenerator::EnableInstallTarget()
 {
   this->InstallTargetEnabled = true;

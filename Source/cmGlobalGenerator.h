@@ -18,14 +18,13 @@
 #include "cmTarget.h" // For cmTargets
 #include "cmTargetDepend.h" // For cmTargetDependSet
 #include "cmSystemTools.h" // for cmSystemTools::OutputOption
-#include "cmExportSet.h" // For cmExportSet
+#include "cmExportSetMap.h" // For cmExportSetMap
 class cmake;
 class cmGeneratorTarget;
 class cmMakefile;
 class cmLocalGenerator;
 class cmExternalMakefileProjectGenerator;
 class cmTarget;
-class cmTargetExport;
 class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
 
@@ -154,10 +153,7 @@ public:
   const std::set<cmStdString>* GetInstallComponents() const
     { return &this->InstallComponents; }
 
-  ///! Add one installed target to the sets of the exports
-  void AddTargetToExport(const char* exportSet, cmTargetExport const* te);
-  ///! Get the export target set with the   given name
-  const cmExportSet *GetExportSet(const char* name) const;
+  cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
   void AddToManifest(const char* config, std::string const& f);
@@ -329,7 +325,7 @@ protected:
   std::set<cmStdString> InstallComponents;
   bool InstallTargetEnabled;
   // Sets of named target exports
-  std::map<cmStdString, cmExportSet> ExportSets;
+  cmExportSetMap ExportSets;
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.

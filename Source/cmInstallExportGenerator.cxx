@@ -117,7 +117,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   // Get the export set requested.
   cmExportSet const* exportSet =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->GetExportSet(this->Name.c_str());
+    ->GetExportSets()[this->Name];
 
   // Skip empty sets.
   if(!exportSet)
