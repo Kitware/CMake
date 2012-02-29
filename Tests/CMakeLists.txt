@@ -274,7 +274,7 @@ IF(BUILD_TESTING)
 
     # run test for DeployQt4 on supported platforms/compilers (which depends on BundleUtilities)
     # this test also depends on the existence of the standard qtiff plugin
-    if(QT4_WORKS)
+    if(QT4_WORKS AND QT_QTSQL_FOUND)
       ADD_TEST(Qt4Deploy ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/Qt4Deploy"

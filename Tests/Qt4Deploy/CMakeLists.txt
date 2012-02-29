@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(Qt4Deploy)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
 
-find_package(Qt4 REQUIRED QtMain QtCore QtGui QtSql)
+find_package(Qt4 REQUIRED QtMain QtCore QtSql)
 include(${QT_USE_FILE})
 
 add_executable(testdeploy MACOSX_BUNDLE testdeploy.cpp)
