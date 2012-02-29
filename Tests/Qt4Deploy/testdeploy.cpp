@@ -1,8 +1,8 @@
 #include <QCoreApplication>
-#include <QImageReader>
 #include <QSqlDatabase>
 #include <QLibraryInfo>
 #include <QDebug>
+#include <QStringList>
 
 int main(int argc, char** argv)
 {
