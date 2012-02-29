@@ -14,10 +14,7 @@
 
 #include "cmCommand.h"
 
-/** \class cmMathCommand
- * \brief Common string operations
- *
- */
+/// Mathematical expressions: math(EXPR ...) command.
 class cmMathCommand : public cmCommand
 {
 public:
