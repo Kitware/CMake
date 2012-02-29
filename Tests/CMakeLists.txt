@@ -888,7 +888,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
 
-  IF(QT4_WORKS)
+  IF(QT4_WORKS AND QT_QTGUI_FOUND)
     ADD_TEST(QtAutomoc ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
