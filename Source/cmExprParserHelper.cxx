@@ -30,12 +30,6 @@ cmExprParserHelper::~cmExprParserHelper()
   this->CleanupParser();
 }
 
-void cmExprParserHelper::SetLineFile(long line, const char* file)
-{
-  this->FileLine = line;
-  this->FileName = file;
-}
-
 int cmExprParserHelper::ParseString(const char* str, int verb)
 {
   if ( !str)

@@ -46,8 +46,6 @@ public:
 
   int GetResult() { return this->Result; }
 
-  void SetLineFile(long line, const char* file);
-
   const char* GetError() { return this->ErrorString.c_str(); }
 
 private:
