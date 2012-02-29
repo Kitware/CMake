@@ -30,7 +30,7 @@
 class cmDependsFortranSourceInfo
 {
 public:
-  // The name of the soruce file.
+  // The name of the source file.
   std::string Source;
 
   // Set of provided and required modules.
@@ -810,8 +810,8 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
    *   -GNU
    *   -Intel
    *
-   * Eat the stream content until all recompile only realated changes
-   * are left bedind.
+   * Eat the stream content until all recompile only related changes
+   * are left behind.
    */
   if (strcmp(compilerId, "GNU") == 0 )
     {
@@ -852,7 +852,7 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
       }
     }
 
-  // Compare the remainng content.  If no compiler id matched above,
+  // Compare the remaining content.  If no compiler id matched above,
   // including the case none was given, this will compare the whole
   // content.
   if(!cmDependsFortranStreamsDiffer(finModFile, finStampFile))
@@ -1209,7 +1209,7 @@ void cmDependsFortranParser_RuleElif(cmDependsFortranParser* parser)
    * cmDependsFortranParser_RuleIf(..)
    */
 
-  // Allways taken unless an #ifdef or #ifndef-branch has been taken
+  // Always taken unless an #ifdef or #ifndef-branch has been taken
   // already.  If the second condition isn't meet already
   // (parser->InPPFalseBranch == 0) correct it.
   if(!parser->SkipToEnd.empty() &&
@@ -1228,7 +1228,7 @@ void cmDependsFortranParser_RuleElse(cmDependsFortranParser* parser)
     return;
     }
 
-  // parser->InPPFalseBranch is either 0 or 1.  We change it denpending on
+  // parser->InPPFalseBranch is either 0 or 1.  We change it depending on
   // parser->SkipToEnd.top()
   if(!parser->SkipToEnd.empty() &&
      parser->SkipToEnd.top())
