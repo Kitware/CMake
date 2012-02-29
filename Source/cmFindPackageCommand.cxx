@@ -354,11 +354,11 @@ void cmFindPackageCommand::GenerateDocumentation()
 }
 
 //----------------------------------------------------------------------------
-const char* cmFindPackageCommand::GetFullDocumentation()
+const char* cmFindPackageCommand::GetFullDocumentation() const
 {
   if(this->CommandDocumentation.empty())
     {
-    this->GenerateDocumentation();
+    const_cast<cmFindPackageCommand *>(this)->GenerateDocumentation();
     }
   return this->CommandDocumentation.c_str();
 }

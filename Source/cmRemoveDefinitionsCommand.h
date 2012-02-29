@@ -42,12 +42,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "remove_definitions";}
+  virtual const char* GetName() const {return "remove_definitions";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Removes -D define flags added by add_definitions.";
     }
@@ -55,7 +55,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  remove_definitions(-DFOO -DBAR ...)\n"

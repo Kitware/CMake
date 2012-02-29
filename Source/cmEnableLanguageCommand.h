@@ -43,12 +43,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "enable_language";}
+  virtual const char* GetName() const {return "enable_language";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Enable a language (CXX/C/Fortran/etc)";
     }
@@ -56,7 +56,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  enable_language(languageName [OPTIONAL] )\n"

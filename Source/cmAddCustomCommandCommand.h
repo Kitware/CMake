@@ -44,12 +44,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "add_custom_command";}
+  virtual const char* GetName() const {return "add_custom_command";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Add a custom build rule to the generated build system.";
     }
@@ -57,7 +57,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "There are two main signatures for add_custom_command "

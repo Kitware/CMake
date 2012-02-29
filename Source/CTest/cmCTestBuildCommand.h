@@ -43,12 +43,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ctest_build";}
+  virtual const char* GetName() const { return "ctest_build";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Build the project.";
     }
@@ -57,7 +57,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  ctest_build([BUILD build_dir] [TARGET target] [RETURN_VALUE res]\n"
