@@ -29,6 +29,7 @@ AddCMakeTest(CMakeMinimumRequired "")
 AddCMakeTest(CompilerIdVendor "")
 AddCMakeTest(ProcessorCount "")
 AddCMakeTest(PushCheckState "")
+AddCMakeTest(While "")
 
 AddCMakeTest(FileDownload "")
 set_property(TEST CMake.FileDownload PROPERTY
