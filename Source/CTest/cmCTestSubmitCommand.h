@@ -48,12 +48,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ctest_submit";}
+  virtual const char* GetName() const { return "ctest_submit";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Submit results to a dashboard server.";
     }
@@ -61,7 +61,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  ctest_submit([PARTS ...] [FILES ...] [RETRY_COUNT count] "

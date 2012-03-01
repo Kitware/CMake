@@ -45,12 +45,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "export";}
+  virtual const char* GetName() const { return "export";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return
       "Export targets from the build tree for use by outside projects.";
@@ -59,7 +59,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  export(TARGETS [target1 [target2 [...]]] [NAMESPACE <namespace>]\n"

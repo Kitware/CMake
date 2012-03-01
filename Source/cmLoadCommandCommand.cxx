@@ -69,12 +69,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return info.Name; }
+  virtual const char* GetName() const { return info.Name; }
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
       if (this->info.GetTerseDocumentation)
         {
@@ -123,7 +123,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
       if (this->info.GetFullDocumentation)
         {
