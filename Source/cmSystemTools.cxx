@@ -104,6 +104,9 @@ public:
 private:
   HANDLE handle_;
 };
+#elif defined(__APPLE__)
+#include <crt_externs.h>
+#define environ (*_NSGetEnviron())
 #endif
 
 bool cmSystemTools::s_RunCommandHideConsole = false;
