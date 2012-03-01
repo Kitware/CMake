@@ -88,7 +88,7 @@ bool cmProjectCommand
     if(!readit && !cmSystemTools::GetFatalErrorOccured())
       {
       std::string m =
-        "could not find load file:\n"
+        "could not find file:\n"
         "  ";
       m += include;
       this->SetError(m.c_str());
