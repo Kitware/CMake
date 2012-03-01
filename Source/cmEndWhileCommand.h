@@ -34,7 +34,7 @@ public:
    * Override cmCommand::InvokeInitialPass to get arguments before
    * expansion.
    */
-  virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const&,
+  virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const& args,
                                  cmExecutionStatus &status);
   
   /**
