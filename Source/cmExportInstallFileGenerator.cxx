@@ -20,7 +20,7 @@
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
 ::cmExportInstallFileGenerator(cmInstallExportGenerator* iegen):
-  InstallExportGenerator(iegen)
+  IEGen(iegen)
 {
 }
 
@@ -38,8 +38,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
   // Create all the imported targets.
   for(std::vector<cmTargetExport const*>::const_iterator
-        tei = this->ExportSet->GetTargetExports()->begin();
-      tei != this->ExportSet->GetTargetExports()->end(); ++tei)
+        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
+      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
     cmTargetExport const* te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
@@ -49,8 +49,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     else
       {
       cmOStringStream e;
-      e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
-        << "includes target \"" << te->Target->GetName()
+      e << "INSTALL(EXPORT \""
+        << this->IEGen->GetExportSet()->GetName()
+        << "\" ...) " << "includes target \"" << te->Target->GetName()
         << "\" more than once in the export set.";
       cmSystemTools::Error(e.str().c_str());
       return false;
@@ -86,7 +87,7 @@ bool
 cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config)
 {
   // Skip configurations not enabled for this export.
-  if(!this->InstallExportGenerator->InstallsForConfig(config))
+  if(!this->IEGen->InstallsForConfig(config))
     {
     return true;
     }
@@ -142,7 +143,7 @@ cmExportInstallFileGenerator
 {
   // Add code to compute the installation prefix relative to the
   // import file location.
-  const char* installDest = this->InstallExportGenerator->GetDestination();
+  const char* installDest = this->IEGen->GetDestination();
   if(!cmSystemTools::FileIsFullPath(installDest))
     {
     std::string dest = installDest;
@@ -163,8 +164,8 @@ cmExportInstallFileGenerator
 
   // Add each target in the set to the export.
   for(std::vector<cmTargetExport const*>::const_iterator
-        tei = this->ExportSet->GetTargetExports()->begin();
-      tei != this->ExportSet->GetTargetExports()->end(); ++tei)
+        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
+      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
@@ -311,9 +312,11 @@ void
 cmExportInstallFileGenerator
 ::ComplainAboutImportPrefix(cmInstallTargetGenerator* itgen)
 {
-  const char* installDest = this->InstallExportGenerator->GetDestination();
+  const char* installDest = this->IEGen->GetDestination();
   cmOStringStream e;
-  e << "INSTALL(EXPORT \"" << this->Name << "\") given absolute "
+  e << "INSTALL(EXPORT \""
+    << this->IEGen->GetExportSet()->GetName()
+    << "\") given absolute "
     << "DESTINATION \"" << installDest << "\" but the export "
     << "references an installation of target \""
     << itgen->GetTarget()->GetName() << "\" which has relative "
@@ -327,7 +330,9 @@ cmExportInstallFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* depender, cmTarget* dependee)
 {
   cmOStringStream e;
-  e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
+  e << "INSTALL(EXPORT \""
+    << this->IEGen->GetExportSet()->GetName()
+    << "\" ...) "
     << "includes target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName()
     << "\" that is not in the export set.";

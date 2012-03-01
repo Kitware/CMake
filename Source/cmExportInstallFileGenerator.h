@@ -41,15 +41,6 @@ public:
       files.  */
   cmExportInstallFileGenerator(cmInstallExportGenerator* iegen);
 
-  /** Set the name of the export associated with the files.  This is
-      the name given to the install(EXPORT) command mode.  */
-  void SetName(const char* name) { this->Name = name; }
-
-  /** Set the set of targets to be exported.  These are the targets
-      associated with the export name.  */
-  void SetExportSet(cmExportSet const* eSet)
-    { this->ExportSet = eSet; }
-
   /** Get the per-config file generated for each configuraiton.  This
       maps from the configuration name to the file temporary location
       for installation.  */
@@ -82,9 +73,7 @@ protected:
 
   void ComplainAboutImportPrefix(cmInstallTargetGenerator* itgen);
 
-  cmInstallExportGenerator* InstallExportGenerator;
-  std::string Name;
-  cmExportSet const* ExportSet;
+  cmInstallExportGenerator* IEGen;
 
   std::string ImportPrefix;
 
