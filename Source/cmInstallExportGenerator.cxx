@@ -27,7 +27,7 @@
 
 //----------------------------------------------------------------------------
 cmInstallExportGenerator::cmInstallExportGenerator(
-  const char* name,
+  cmExportSet* exportSet,
   const char* destination,
   const char* file_permissions,
   std::vector<std::string> const& configurations,
@@ -35,7 +35,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   const char* filename, const char* name_space,
   cmMakefile* mf)
   :cmInstallGenerator(destination, configurations, component)
-  ,Name(name)
+  ,ExportSet(exportSet)
   ,FilePermissions(file_permissions)
   ,FileName(filename)
   ,Namespace(name_space)
@@ -114,16 +114,12 @@ void cmInstallExportGenerator::ComputeTempDir()
 //----------------------------------------------------------------------------
 void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 {
-  // Get the export set requested.
-  cmExportSet const* exportSet =
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-    ->GetExportSets()[this->Name];
-
   // Skip empty sets.
-  if(!exportSet)
+  if(ExportSet->GetTargetExports()->empty())
     {
     cmOStringStream e;
-    e << "INSTALL(EXPORT) given unknown export \"" << this->Name << "\"";
+    e << "INSTALL(EXPORT) given unknown export \""
+      << ExportSet->GetName() << "\"";
     cmSystemTools::Error(e.str().c_str());
     return;
     }
@@ -138,8 +134,6 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   this->MainImportFile += this->FileName;
 
   // Generate the import file for this export set.
-  this->EFGen->SetName(this->Name.c_str());
-  this->EFGen->SetExportSet(exportSet);
   this->EFGen->SetExportFile(this->MainImportFile.c_str());
   this->EFGen->SetNamespace(this->Namespace.c_str());
   if(this->ConfigurationTypes->empty())

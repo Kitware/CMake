@@ -1271,7 +1271,9 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator =
     new cmInstallExportGenerator(
-      exp.GetCString(), ica.GetDestination().c_str(),
+      this->Makefile->GetLocalGenerator()
+          ->GetGlobalGenerator()->GetExportSets()[exp.GetString()],
+      ica.GetDestination().c_str(),
       ica.GetPermissions().c_str(), ica.GetConfigurations(),
       ica.GetComponent().c_str(), fname.c_str(),
       name_space.GetCString(), this->Makefile);
