@@ -21,8 +21,9 @@ class cmPolicy;
 /** \class cmPolicies
  * \brief Handles changes in CMake behavior and policies
  *
- * See the cmake wiki section on policies for an overview of this class's
- * purpose
+ * See the cmake wiki section on
+ * <a href="http://www.cmake.org/Wiki/CMake/Policies">policies</a>
+ * for an overview of this class's purpose
  */
 class cmPolicies
 {
@@ -30,32 +31,46 @@ public:
   cmPolicies();
   ~cmPolicies();
 
-  enum PolicyStatus { OLD, WARN, NEW, REQUIRED_IF_USED, REQUIRED_ALWAYS };
+  /// Status of a policy
+  enum PolicyStatus {
+    OLD, ///< Use old behavior
+    WARN, ///< Use old behavior but issue a warning
+    NEW, ///< Use new behavior
+    /// Issue an error if user doesn't set policy status to NEW and hits the
+    /// check
+    REQUIRED_IF_USED,
+    REQUIRED_ALWAYS ///< Issue an error unless user sets policy status to NEW.
+  };
   static const char* PolicyStatusNames[];
 
+  /// Policy identifiers
   enum PolicyID
   {
-    CMP0000, // Policy version specification
-    CMP0001, // Ignore old compatibility variable
-    CMP0002, // Target names must be unique
-    CMP0003, // Linking does not include extra -L paths
-    CMP0004, // Libraries linked may not have leading or trailing whitespace
-    CMP0005, // Definition value escaping
-    CMP0006, // BUNDLE install rules needed for MACOSX_BUNDLE targets
-    CMP0007, // list command handling of empty elements
-    CMP0008, // Full-path libraries must be a valid library file name
-    CMP0009, // GLOB_RECURSE should not follow symlinks by default
-    CMP0010, // Bad variable reference syntax is an error
-    CMP0011, // Strong policy scope for include and find_package
-    CMP0012, // Recognize numbers and boolean constants in if()
-    CMP0013, // Duplicate binary directories not allowed
-    CMP0014, // Input directories must have CMakeLists.txt
-    CMP0015, // link_directories() treats paths relative to source dir
-    CMP0016, // target_link_libraries() fails if only argument is not a target
-    CMP0017, // Prefer files in CMAKE_ROOT when including from CMAKE_ROOT
+    CMP0000, ///< Policy version specification
+    CMP0001, ///< Ignore old compatibility variable
+    CMP0002, ///< Target names must be unique
+    CMP0003, ///< Linking does not include extra -L paths
+    CMP0004, ///< Libraries linked may not have leading or trailing whitespace
+    CMP0005, ///< Definition value escaping
+    CMP0006, ///< BUNDLE install rules needed for MACOSX_BUNDLE targets
+    CMP0007, ///< list command handling of empty elements
+    CMP0008, ///< Full-path libraries must be a valid library file name
+    CMP0009, ///< GLOB_RECURSE should not follow symlinks by default
+    CMP0010, ///< Bad variable reference syntax is an error
+    CMP0011, ///< Strong policy scope for include and find_package
+    CMP0012, ///< Recognize numbers and boolean constants in if()
+    CMP0013, ///< Duplicate binary directories not allowed
+    CMP0014, ///< Input directories must have CMakeLists.txt
+    CMP0015, ///< link_directories() treats paths relative to source dir
+    /// target_link_libraries() fails if only argument is not a target
+    CMP0016,
+    CMP0017, ///< Prefer files in CMAKE_ROOT when including from CMAKE_ROOT
 
-    // Always the last entry.  Useful mostly to avoid adding a comma
-    // the last policy when adding a new one.
+    /** \brief Always the last entry.
+     *
+     * Useful mostly to avoid adding a comma the last policy when adding a new
+     * one.
+     */
     CMPCOUNT
   };
 

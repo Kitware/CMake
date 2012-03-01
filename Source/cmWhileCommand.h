@@ -16,11 +16,6 @@
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 
-/** \class cmWhileFunctionBlocker
- * \brief subclass of function blocker
- *
- * 
- */
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -37,11 +32,7 @@ private:
   int Depth;
 };
 
-/** \class cmWhileCommand
- * \brief starts a while loop
- *
- * cmWhileCommand starts a while loop
- */
+/// \brief Starts a while loop
 class cmWhileCommand : public cmCommand
 {
 public:

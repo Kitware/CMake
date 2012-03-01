@@ -17,11 +17,6 @@
 #include "cmListFileCache.h"
 class cmMakefile;
 
-/** \class cmFunctionBlocker
- * \brief A class that defines an interface for blocking cmake functions
- *
- * This is the superclass for any classes that need to block a cmake function
- */
 class cmFunctionBlocker
 {
 public:
