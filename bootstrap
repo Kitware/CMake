@@ -131,7 +131,7 @@ case "${cmake_system}" in
 *MINGW*)
   cmake_fix_slashes()
   {
-    cmd //c echo "$(echo "$1" | sed 's/\\/\//g')" | sed 's/^"//;s/"$//'
+    cmd //c echo "$(echo "$1" | sed 's/\\/\//g')" | sed 's/^"//;s/" *$//'
   }
   ;;
 *)
