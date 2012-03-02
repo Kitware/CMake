@@ -18,7 +18,7 @@
 #             [PREFIX_NAME <prefix_name>]
 # )
 #
-# ADD_COMPILER_EXPORT_FLAGS( [FATAL_WARNINGS] )
+# ADD_COMPILER_EXPORT_FLAGS( [<output_variable>] )
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
 # determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS function
