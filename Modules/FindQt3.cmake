@@ -1,10 +1,11 @@
 # - Locate Qt include paths and libraries
 # This module defines:
-#  QT_INCLUDE_DIR - where to find qt.h, etc.
-#  QT_LIBRARIES   - the libraries to link against to use Qt.
-#  QT_DEFINITIONS - definitions to use when
-#                   compiling code that uses Qt.
-#  QT_FOUND       - If false, don't try to use Qt.
+#  QT_INCLUDE_DIR    - where to find qt.h, etc.
+#  QT_LIBRARIES      - the libraries to link against to use Qt.
+#  QT_DEFINITIONS    - definitions to use when
+#                      compiling code that uses Qt.
+#  QT_FOUND          - If false, don't try to use Qt.
+#  QT_VERSION_STRING - the version of Qt found
 #
 # If you need the multithreaded version of Qt, set QT_MT_REQUIRED to TRUE
 #
@@ -77,6 +78,7 @@ IF(QT_INCLUDE_DIR)
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
   STRING(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
+  SET(QT_VERSION_STRING "${qt_version_str}")
 ENDIF(QT_INCLUDE_DIR)
 
 FILE(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
@@ -195,58 +197,16 @@ IF (WIN32)
     )
 ENDIF (WIN32)
 
-
-IF (QT_MIN_VERSION)
-
-  STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" qt_major_vers "${qt_version_str}")
-  STRING(REGEX REPLACE "[0-9]+\\.([0-9]+)\\.[0-9]+" "\\1" qt_minor_vers "${qt_version_str}")
-  STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" qt_patch_vers "${qt_version_str}")
-
-  #now parse the parts of the user given version string into variables
-  STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+$" req_qt_major_vers "${QT_MIN_VERSION}")
-  IF (NOT req_qt_major_vers)
-    error_message(  "Invalid Qt version string given: \"${QT_MIN_VERSION}\", expected e.g. \"3.1.5\"")
-  ENDIF (NOT req_qt_major_vers)
-
-  STRING(REGEX REPLACE "([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_qt_major_vers "${QT_MIN_VERSION}")
-  STRING(REGEX REPLACE "[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_qt_minor_vers "${QT_MIN_VERSION}")
-  STRING(REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_qt_patch_vers "${QT_MIN_VERSION}")
-
-  # req = "6.5.4", qt = "3.2.1"
-  MACRO(error_message msg)
-    IF(QT3_REQUIRED)
-      MESSAGE( FATAL_ERROR ${msg})
-    ELSE(QT3_REQUIRED)
-      MESSAGE( STATUS ${msg})
-    ENDIF(QT3_REQUIRED)
-  ENDMACRO(error_message)
-
-  IF (req_qt_major_vers GREATER qt_major_vers)                  # (6 > 3) ?
-    ERROR_MESSAGE(  "Qt major version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")            # yes
-  ELSE  (req_qt_major_vers GREATER qt_major_vers)               # no
-    IF (req_qt_major_vers LESS qt_major_vers)                  # (6 < 3) ?
-      SET( QT_VERSION_BIG_ENOUGH "YES" )                      # yes
-    ELSE (req_qt_major_vers LESS qt_major_vers)                # ( 6==3) ?
-      IF (req_qt_minor_vers GREATER qt_minor_vers)            # (5>2) ?
-        ERROR_MESSAGE(  "Qt minor version not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")      # yes
-      ELSE (req_qt_minor_vers GREATER qt_minor_vers)          # no
-        IF (req_qt_minor_vers LESS qt_minor_vers)            # (5<2) ?
-          SET( QT_VERSION_BIG_ENOUGH "YES" )                # yes
-        ELSE (req_qt_minor_vers LESS qt_minor_vers)          # (5==2)
-          IF (req_qt_patch_vers GREATER qt_patch_vers)      # (4>1) ?
-            ERROR_MESSAGE(  "Qt patch level not matched (required: ${QT_MIN_VERSION}, found: ${qt_version_str})")  # yes
-          ELSE (req_qt_patch_vers GREATER qt_patch_vers)    # (4>1) ?
-            SET( QT_VERSION_BIG_ENOUGH "YES" )             # yes
-          ENDIF (req_qt_patch_vers GREATER qt_patch_vers)   # (4>1) ?
-        ENDIF (req_qt_minor_vers LESS qt_minor_vers)
-      ENDIF (req_qt_minor_vers GREATER qt_minor_vers)
-    ENDIF (req_qt_major_vers LESS qt_major_vers)
-  ENDIF (req_qt_major_vers GREATER qt_major_vers)
-ENDIF (QT_MIN_VERSION)
+#support old QT_MIN_VERSION if set, but not if version is supplied by find_package()
+IF(NOT Qt3_FIND_VERSION AND QT_MIN_VERSION)
+  SET(Qt3_FIND_VERSION ${QT_MIN_VERSION})
+ENDIF(NOT Qt3_FIND_VERSION AND QT_MIN_VERSION)
 
 # if the include a library are found then we have it
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt3  DEFAULT_MSG  QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt3
+                                  REQUIRED_VARS QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE
+                                  VERSION_VAR QT_VERSION_STRING)
 SET(QT_FOUND ${QT3_FOUND} )
 
 IF(QT_FOUND)
