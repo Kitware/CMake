@@ -40,12 +40,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "mark_as_advanced";}
+  virtual const char* GetName() const {return "mark_as_advanced";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Mark cmake cached variables as advanced.";
     }
@@ -53,7 +53,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  mark_as_advanced([CLEAR|FORCE] VAR VAR2 VAR...)\n"
@@ -75,7 +75,7 @@ public:
    * make many of the modules usable in cmake/ctest scripts, (among them
    * FindUnixMake.cmake used by the CTEST_BUILD command.
   */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   cmTypeMacro(cmMarkAsAdvancedCommand, cmCommand);
 };
