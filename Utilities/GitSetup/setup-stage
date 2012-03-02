@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#=============================================================================
+# Copyright 2010-2012 Kitware, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#=============================================================================
+
+# Run this script to set up the topic stage for pushing changes.
+
+# Project configuration instructions:
+#
+# - Run a Topic Stage repository next to the main project repository.
+#
+# - Populate adjacent "config" file with:
+#    stage.url = Topic Stage repository URL
+#    stage.pushurl = Topic Stage push URL if not "$url"
+
+egrep-q() {
+	egrep "$@" >/dev/null 2>/dev/null
+}
+
+die() {
+	echo 1>&2 "$@" ; exit 1
+}
+
+# Make sure we are inside the repository.
+cd "${BASH_SOURCE%/*}" &&
+
+# Load the project configuration.
+url=$(git config -f config --get stage.url) &&
+pushurl=$(git config -f config --get stage.pushurl || echo '') ||
+die 'This project is not configured to use a topic stage.'
+
+# Configure the remote if necessary.
+if git config remote.stage.url >/dev/null; then
+	echo 'Topic stage already configured.'
+else
+	echo 'Setting up the topic stage...' &&
+	git remote add stage "$url" &&
+	if test -n "$pushurl"; then
+		git config remote.stage.pushurl "$pushurl"
+	fi
+fi || die 'Could not add the topic stage remote.'
