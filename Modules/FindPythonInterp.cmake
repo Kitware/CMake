@@ -10,7 +10,9 @@
 #  PYTHON_VERSION_MINOR       - Python minor version found e.g. 5
 #  PYTHON_VERSION_PATCH       - Python patch version found e.g. 2
 #
-#  Python_ADDITIONAL_VERSIONS - list of additional Python versions to search for
+# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
+# version numbers that should be taken into account when searching for Python.
+# You need to set this variable before calling find_package(PythonInterp).
 
 #=============================================================================
 # Copyright 2005-2010 Kitware, Inc.
