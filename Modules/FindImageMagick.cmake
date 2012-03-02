@@ -27,6 +27,8 @@
 #  ImageMagick_VERSION_STRING         - the version of ImageMagick found
 #                                       (since CMake 2.8.8)
 #
+# ImageMagick_VERSION_STRING will not work for old versions like 5.2.3.
+#
 # There are also components for the following ImageMagick APIs:
 #
 #  Magick++
