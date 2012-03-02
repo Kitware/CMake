@@ -153,11 +153,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     std::string ccFile = this->BinaryDirectory + "/CMakeCache.txt";
     cmSystemTools::RemoveFile(ccFile.c_str());
 
-    // we need to create a directory and CMakeList file etc...
+    // we need to create a directory and CMakeLists file etc...
     // first create the directories
     sourceDirectory = this->BinaryDirectory.c_str();
 
-    // now create a CMakeList.txt file in that directory
+    // now create a CMakeLists.txt file in that directory
     FILE *fout = fopen(outFileName.c_str(),"w");
     if (!fout)
       {
