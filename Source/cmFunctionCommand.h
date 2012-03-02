@@ -15,11 +15,6 @@
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 
-/** \class cmFunctionFunctionBlocker
- * \brief subclass of function blocker
- *
- *
- */
 class cmFunctionFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -35,11 +30,7 @@ public:
   int Depth;
 };
 
-/** \class cmFunctionCommand
- * \brief starts an if block
- *
- * cmFunctionCommand starts an if block
- */
+/// Starts function() ... endfunction() block
 class cmFunctionCommand : public cmCommand
 {
 public:
