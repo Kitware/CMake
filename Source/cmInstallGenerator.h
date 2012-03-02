@@ -12,6 +12,7 @@
 #ifndef cmInstallGenerator_h
 #define cmInstallGenerator_h
 
+#include "cmInstallType.h"
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
@@ -29,7 +30,7 @@ public:
   virtual ~cmInstallGenerator();
 
   void AddInstallRule(
-    std::ostream& os, int type,
+    std::ostream& os, cmInstallType type,
     std::vector<std::string> const& files,
     bool optional = false,
     const char* permissions_file = 0,
