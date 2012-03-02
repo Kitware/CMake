@@ -175,6 +175,8 @@ std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
     
     // And finally to a c++ string
     executable = bundlePath + "/Contents/MacOS/" + std::string(buffer);
+    // Only release CFURLRef if it's not null
+    CFRelease( executableURL );
     }
 
   // Any CF objects returned from functions with "create" or 
@@ -182,7 +184,6 @@ std::string cmFindProgramCommand::GetBundleExecutable(std::string bundlePath)
   CFRelease( bundlePathCFS );
   CFRelease( bundleURL );
   CFRelease( appBundle );
-  CFRelease( executableURL );
 #endif
 
   return executable;
