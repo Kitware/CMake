@@ -47,13 +47,16 @@ IF(QT4_FOUND)
 ENDIF(QT4_FOUND)
 
 
-FILE(GLOB GLOB_PATHS_BIN /usr/lib/qt-3*/bin/)
+FILE(GLOB GLOB_PATHS /usr/lib/qt-3*)
+FOREACH(GLOB_PATH ${GLOB_PATHS})
+  LIST(APPEND GLOB_PATHS_BIN "${GLOB_PATH}/bin")
+ENDFOREACH(GLOB_PATH)
 FIND_PATH(QT_INCLUDE_DIR qt.h
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
   $ENV{QTDIR}/include
-  ${GLOB_PATHS_BIN}
+  ${GLOB_PATHS}
   /usr/local/qt/include
   /usr/lib/qt/include
   /usr/lib/qt3/include
