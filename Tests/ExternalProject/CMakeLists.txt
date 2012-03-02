@@ -280,6 +280,18 @@ if(do_cvs_tests)
   set_property(TARGET ${proj}
     PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
 
+  # The MSYS cvs tool interprets "c:/" as a "machine:" name for SSH.
+  # Detect the MSYS cvs and convert the repo path to an MSYS path.
+  if(WIN32)
+    if(EXISTS "${CVS_EXECUTABLE}")
+      file(STRINGS "${CVS_EXECUTABLE}" cvs_is_msys LIMIT_COUNT 1 REGEX "[Mm][Ss][Yy][Ss]")
+      if(cvs_is_msys)
+        message(STATUS "'${CVS_EXECUTABLE}' is from MSYS (contains '${cvs_is_msys}')")
+        string(REGEX REPLACE "^([A-Za-z]):" "/\\1" local_cvs_repo "${local_cvs_repo}")
+      endif()
+    endif()
+  endif()
+
   # CVS by date stamp:
   #
   set(proj TutorialStep1-CVS-20090626)

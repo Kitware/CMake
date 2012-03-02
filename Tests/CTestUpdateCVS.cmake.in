@@ -18,6 +18,19 @@ set(CVS "@CVS_EXECUTABLE@")
 message(" cvs = ${CVS}")
 
 set(REPO ${TOP}/repo)
+
+# The MSYS cvs tool interprets "c:/" as a "machine:" name for SSH.
+# Detect the MSYS cvs and convert the repo path to an MSYS path.
+if(WIN32)
+  if(EXISTS "${CVS}")
+    file(STRINGS "${CVS}" cvs_is_msys LIMIT_COUNT 1 REGEX "[Mm][Ss][Yy][Ss]")
+    if(cvs_is_msys)
+      message("  '${CVS}' is from MSYS (contains '${cvs_is_msys}')")
+      string(REGEX REPLACE "^([A-Za-z]):" "/\\1" REPO "${REPO}")
+    endif()
+  endif()
+endif()
+
 set(CVSCMD ${CVS} -d${REPO})
 
 # CVSNT requires an extra option to 'cvs init'.
