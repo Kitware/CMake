@@ -353,24 +353,70 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "cmCPackPackageMakerGenerator::Initialize()" << std::endl);
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  std::vector<std::string> path;
-  std::string pkgPath
-    = "/Developer/Applications/Utilities/PackageMaker.app/Contents";
-  std::string versionFile = pkgPath + "/version.plist";
-  if ( !cmSystemTools::FileExists(versionFile.c_str()) )
+
+  // Starting with Xcode 4.3, PackageMaker is a separate app, and you
+  // can put it anywhere you want. So... use a variable for its location.
+  // People who put it in unexpected places can use the variable to tell
+  // us where it is.
+  //
+  // Use the following locations, in "most recent installation" order,
+  // to search for the PackageMaker app. Assume people who copy it into
+  // the new Xcode 4.3 app in "/Applications" will copy it into the nested
+  // Applications folder inside the Xcode bundle itself. Or directly in
+  // the "/Applications" directory.
+  //
+  // If found, save result in the CPACK_INSTALLER_PROGRAM variable.
+
+  std::vector<std::string> paths;
+  paths.push_back(
+    "/Applications/Xcode.app/Contents/Applications"
+    "/PackageMaker.app/Contents/MacOS");
+  paths.push_back(
+    "/Applications/Utilities"
+    "/PackageMaker.app/Contents/MacOS");
+  paths.push_back(
+    "/Applications"
+    "/PackageMaker.app/Contents/MacOS");
+  paths.push_back(
+    "/Developer/Applications/Utilities"
+    "/PackageMaker.app/Contents/MacOS");
+  paths.push_back(
+    "/Developer/Applications"
+    "/PackageMaker.app/Contents/MacOS");
+
+  std::string pkgPath;
+  const char *inst_program = this->GetOption("CPACK_INSTALLER_PROGRAM");
+  if (inst_program && *inst_program)
     {
-    pkgPath = "/Developer/Applications/PackageMaker.app/Contents";
-    std::string newVersionFile = pkgPath + "/version.plist";
-    if ( !cmSystemTools::FileExists(newVersionFile.c_str()) )
+    pkgPath = inst_program;
+    }
+  else
+    {
+    pkgPath = cmSystemTools::FindProgram("PackageMaker", paths, false);
+    if ( pkgPath.empty() )
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "Cannot find PackageMaker compiler version file: "
-        << versionFile.c_str() << " or " << newVersionFile.c_str()
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find PackageMaker compiler"
         << std::endl);
       return 0;
       }
-    versionFile = newVersionFile;
+    this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
     }
+
+  std::string contents_dir;
+  contents_dir = cmSystemTools::GetFilenamePath(pkgPath);
+  contents_dir = cmSystemTools::GetFilenamePath(contents_dir);
+
+  std::string versionFile = contents_dir + "/version.plist";
+
+  if ( !cmSystemTools::FileExists(versionFile.c_str()) )
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Cannot find PackageMaker compiler version file: "
+      << versionFile.c_str()
+      << std::endl);
+    return 0;
+    }
+
   std::ifstream ifs(versionFile.c_str());
   if ( !ifs )
     {
@@ -378,6 +424,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
       "Cannot open PackageMaker compiler version file" << std::endl);
     return 0;
     }
+
   // Check the PackageMaker version
   cmsys::RegularExpression rexKey("<key>CFBundleShortVersionString</key>");
   cmsys::RegularExpression rexVersion("<string>([0-9]+.[0-9.]+)</string>");
@@ -440,17 +487,8 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
     this->PackageCompatibilityVersion = 10.3;
     }
 
-  pkgPath += "/MacOS";
-  path.push_back(pkgPath);
-  pkgPath = cmSystemTools::FindProgram("PackageMaker", path, false);
-  if ( pkgPath.empty() )
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find PackageMaker compiler"
-      << std::endl);
-    return 0;
-    }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
-  pkgPath = cmSystemTools::FindProgram("hdiutil", path, false);
+  std::vector<std::string> no_paths;
+  pkgPath = cmSystemTools::FindProgram("hdiutil", no_paths, false);
   if ( pkgPath.empty() )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find hdiutil compiler"
