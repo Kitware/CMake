@@ -861,7 +861,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "of of just main()."
      "This makes it a GUI executable instead of a console application.  "
      "See the CMAKE_MFC_FLAG variable documentation to configure use "
-     "of MFC for WinMain executables.");
+     "of MFC for WinMain executables.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_WIN32_EXECUTABLE if it is set when a target is created.");
 
   cm->DefineProperty
     ("MACOSX_BUNDLE", cmProperty::TARGET,
@@ -871,7 +873,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This makes it a GUI executable that can be launched from "
      "the Finder.  "
      "See the MACOSX_BUNDLE_INFO_PLIST target property for information "
-     "about creation of the Info.plist file for the application bundle.");
+     "about creation of the Info.plist file for the application bundle.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_MACOSX_BUNDLE if it is set when a target is created.");
 
   cm->DefineProperty
     ("MACOSX_BUNDLE_INFO_PLIST", cmProperty::TARGET,
@@ -1224,6 +1228,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("AUTOMOC", 0);
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
+  this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
+  this->SetPropertyDefault("MACOSX_BUNDLE", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
