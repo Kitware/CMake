@@ -209,9 +209,9 @@ cmMakefile::~cmMakefile()
     {
     delete *i;
     }
-  for(unsigned int i=0; i < this->UsedCommands.size(); i++)
+  for(unsigned int i=0; i < this->FinalPassCommands.size(); i++)
     {
-    delete this->UsedCommands[i];
+    delete this->FinalPassCommands[i];
     }
   std::vector<cmFunctionBlocker*>::iterator pos;
   for (pos = this->FunctionBlockers.begin();
@@ -418,7 +418,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       else if(pcmd->HasFinalPass())
         {
         // use the command
-        this->UsedCommands.push_back(pcmd.release());
+        this->FinalPassCommands.push_back(pcmd.release());
         }
       }
     else if ( this->GetCMakeInstance()->GetWorkingMode() == cmake::SCRIPT_MODE
@@ -810,8 +810,8 @@ void cmMakefile::FinalPass()
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
-  for(std::vector<cmCommand*>::iterator i = this->UsedCommands.begin();
-      i != this->UsedCommands.end(); ++i)
+  for(std::vector<cmCommand*>::iterator i = this->FinalPassCommands.begin();
+      i != this->FinalPassCommands.end(); ++i)
     {
     (*i)->FinalPass();
     }

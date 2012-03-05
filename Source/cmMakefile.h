@@ -604,12 +604,6 @@ public:
    */
   bool CanIWriteThisFile(const char* fileName);
 
-  /**
-   * Get the vector of used command instances.
-   */
-  const std::vector<cmCommand*>& GetUsedCommands() const
-    {return this->UsedCommands;}
-
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
    * Get the vector source groups.
@@ -895,7 +889,7 @@ protected:
   std::vector<cmSourceGroup> SourceGroups;
 #endif
 
-  std::vector<cmCommand*> UsedCommands;
+  std::vector<cmCommand*> FinalPassCommands;
   cmLocalGenerator* LocalGenerator;
   bool IsFunctionBlocked(const cmListFileFunction& lff,
                          cmExecutionStatus &status);
