@@ -138,11 +138,11 @@ function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
   cmake_parse_arguments(CCF "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
 
   if(CCF_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "Unknown keywords given to CONFIGURE_CONFIG_FILE(): \"${CCF_UNPARSED_ARGUMENTS}\"")
+    message(FATAL_ERROR "Unknown keywords given to CONFIGURE_PACKAGE_CONFIG_FILE(): \"${CCF_UNPARSED_ARGUMENTS}\"")
   endif()
 
   if(NOT CCF_INSTALL_DESTINATION)
-    message(FATAL_ERROR "No INSTALL_DESTINATION given to CONFIGURE_CONFIG_FILE()")
+    message(FATAL_ERROR "No INSTALL_DESTINATION given to CONFIGURE_PACKAGE_CONFIG_FILE()")
   endif()
 
   if(IS_ABSOLUTE "${CCF_INSTALL_DESTINATION}")
@@ -166,7 +166,7 @@ function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
   endforeach()
 
   set(PACKAGE_HELPER_INIT "
-####### Expanded from @PACKAGE_HELPER_INIT@ by ConfigureConfigFile.cmake #######
+####### Expanded from @PACKAGE_HELPER_INIT@ by configure_package_config_file() #######
 get_filename_component(PACKAGE_PREFIX_DIR \"\${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_RELATIVE_PATH}\" ABSOLUTE)
 ")
 
