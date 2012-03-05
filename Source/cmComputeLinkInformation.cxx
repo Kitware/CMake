@@ -1772,6 +1772,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
      !linking_for_install);
   bool use_link_rpath =
     outputRuntime && linking_for_install &&
+    !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH") &&
     this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
