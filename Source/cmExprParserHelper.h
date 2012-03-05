@@ -46,8 +46,6 @@ public:
 
   int GetResult() { return this->Result; }
 
-  void SetLineFile(long line, const char* file);
-
   const char* GetError() { return this->ErrorString.c_str(); }
 
 private:
@@ -55,7 +53,6 @@ private:
   cmStdString InputBuffer;
   std::vector<char> OutputBuffer;
   int CurrentLine;
-  int UnionsAvailable;
   int Verbose;
 
   void Print(const char* place, const char* str);
