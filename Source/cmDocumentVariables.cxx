@@ -1278,6 +1278,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_WIN32_EXECUTABLE", cmProperty::VARIABLE,
+     "Default value for WIN32_EXECUTABLE of targets.",
+     "This variable is used to initialize the "
+     "WIN32_EXECUTABLE property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_MACOSX_BUNDLE", cmProperty::VARIABLE,
+     "Default value for MACOSX_BUNDLE of targets.",
+     "This variable is used to initialize the "
+     "MACOSX_BUNDLE property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
 
 //   Variables defined when the a language is enabled These variables will
 // also be defined whenever CMake has loaded its support for compiling (LANG)
