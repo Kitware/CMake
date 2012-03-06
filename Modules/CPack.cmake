@@ -101,6 +101,11 @@
 ##end
 #
 ##variable
+#   CPACK_PACKAGE_ICON - A branding image that will be displayed inside
+#   the installer (used by GUI installers).
+##end
+#
+##variable
 #  CPACK_PROJECT_CONFIG_FILE - CPack-time project CPack configuration
 #  file. This file included at cpack time, once per
 #  generator after CPack has set CPACK_GENERATOR to the actual generator
@@ -245,6 +250,15 @@
 #
 ##variable
 #  CPACK_INSTALLED_DIRECTORIES - Extra directories to install.
+##end
+#
+##variable
+#   CPACK_PACKAGE_INSTALL_REGISTRY_KEY - Registry key used when
+#   installing this project. This is only used
+#   by installer for Windows.
+##end
+##variable
+#   CPACK_CREATE_DESKTOP_LINKS - List of desktop links to create.
 ##end
 #
 
