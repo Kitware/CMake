@@ -61,7 +61,7 @@ endmacro(check_version_string)
 # reported.
 
 foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HSPELL
-        JASPER LIBXML2 LIBXSLT PERL PostgreSQL TCLSH TIFF ZLIB)
+        JASPER LIBXML2 LIBXSLT PERL PostgreSQL TIFF ZLIB)
     check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach(VTEST)
 
