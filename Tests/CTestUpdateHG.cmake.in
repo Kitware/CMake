@@ -28,7 +28,7 @@ run_child(
   WORKING_DIRECTORY ${TOP}/repo.hg
   COMMAND ${HG} init
   )
-set(REPO file://${TOP}/repo.hg)
+set(REPO file:///${TOP}/repo.hg)
 
 #-----------------------------------------------------------------------------
 # Import initial content into the repository.
