@@ -5,7 +5,6 @@ message("CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
 message("")
 message("CMake_BINARY_DIR='${CMake_BINARY_DIR}'")
 message("CMake_SOURCE_DIR='${CMake_SOURCE_DIR}'")
-message("CVS_EXECUTABLE='${CVS_EXECUTABLE}'")
 message("GIT_EXECUTABLE='${GIT_EXECUTABLE}'")
 message("HOME='${HOME}'")
 message("ENV{DASHBOARD_TEST_FROM_CTEST}='$ENV{DASHBOARD_TEST_FROM_CTEST}'")
@@ -43,7 +42,7 @@ message("in_source_build='${in_source_build}'")
 message("")
 
 
-# If this does not appear to be a git or CVS checkout, just pass the test here
+# If this does not appear to be a git checkout, just pass the test here
 # and now. (Do not let the test fail if it is run in a tree *exported* from a
 # repository or unpacked from a .zip file source installer...)
 #
@@ -52,29 +51,13 @@ if(EXISTS "${CMake_SOURCE_DIR}/.git")
   set(is_git_checkout 1)
 endif()
 
-set(is_cvs_checkout 0)
-if(EXISTS "${CMake_SOURCE_DIR}/CVS/Root")
-  set(is_cvs_checkout 1)
-endif()
-
 message("is_git_checkout='${is_git_checkout}'")
-message("is_cvs_checkout='${is_cvs_checkout}'")
 message("")
 
-if(NOT is_cvs_checkout)
 if(NOT is_git_checkout)
-  message("source tree is neither git nor CVS checkout... test passes by early return...")
+  message("source tree is not a git checkout... test passes by early return...")
   return()
 endif()
-endif()
-
-if(is_cvs_checkout)
-if(is_git_checkout)
-  message("warning: source tree has both git *and* CVS file system bits???")
-  # should this condition be a FATAL_ERROR test failure...?
-endif()
-endif()
-
 
 # This test looks for the following types of changes in the source tree:
 #
@@ -83,50 +66,12 @@ set(conflicts 0)
 set(modifications 0)
 set(nonadditions 0)
 
-# ov == output variable... conditionally filled in by either cvs or git below:
+# ov == output variable... conditionally filled in by either git below:
 #
 set(cmd "")
 set(ov "")
 set(ev "")
 set(rv "")
-
-
-if(is_cvs_checkout AND CVS_EXECUTABLE)
-  # Check with "cvs -q -n up -dP" if there are any local modifications to the
-  # CMake source tree:
-  #
-  message("=============================================================================")
-  message("This is a cvs checkout, using cvs to verify source tree....")
-  message("")
-
-  execute_process(COMMAND ${CVS_EXECUTABLE} --version
-    WORKING_DIRECTORY ${CMake_SOURCE_DIR}
-    OUTPUT_VARIABLE version_output
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  message("=== output of 'cvs --version' ===")
-  message("${version_output}")
-  message("=== end output ===")
-  message("")
-
-  file(READ "${CMake_SOURCE_DIR}/CVS/Root" contents)
-  message("=== content of CVS/Root ===")
-  message("${contents}")
-  message("=== end content ===")
-  message("")
-
-  file(READ "${CMake_SOURCE_DIR}/CVS/Repository" contents)
-  message("=== content of CVS/Repository ===")
-  message("${contents}")
-  message("=== end content ===")
-  message("")
-
-  message("Copy/paste this command to reproduce:")
-  message("cd \"${CMake_SOURCE_DIR}\" && \"${CVS_EXECUTABLE}\" -q -n up -dP")
-  message("")
-
-  set(cmd ${CVS_EXECUTABLE} -q -n up -dP)
-endif()
-
 
 # If no GIT_EXECUTABLE, see if we can figure out which git was used
 # for the ctest_update step on this dashboard...
@@ -268,8 +213,8 @@ endif()
 
 
 if(cmd)
-  # Use the HOME value passed in to the script for calling cvs/git so it can
-  # find its .cvspass or user/global config settings...
+  # Use the HOME value passed in to the script for calling git so it can
+  # find its user/global config settings...
   #
   set(original_ENV_HOME "$ENV{HOME}")
   set(ENV{HOME} "${HOME}")
@@ -322,28 +267,6 @@ if(NOT ov STREQUAL "")
     endif()
 
     if(consider)
-      if(is_cvs_checkout)
-        if(line MATCHES "^A ")
-          message("   locally added file/directory detected...")
-          set(additions 1)
-        endif()
-
-        if(line MATCHES "^C ")
-          message("   conflict detected...")
-          set(conflicts 1)
-        endif()
-
-        if(line MATCHES "^M ")
-          message("   locally modified file detected...")
-          set(modifications 1)
-        endif()
-
-        if(line MATCHES "^\\? ")
-          message("   locally non-added file/directory detected...")
-          set(nonadditions 1)
-        endif()
-      endif()
-
       if(is_git_checkout)
         if(line MATCHES "^#[ \t]*modified:")
           message("   locally modified file detected...")
