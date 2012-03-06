@@ -29,9 +29,9 @@
 # resulting FooConfig.cmake file relocatable.
 # Usage:
 #   1. write a FooConfig.cmake.in file as you are used to
-#   2. insert a line containing only the string "@PACKAGE_HELPER_INIT@"
-#   3. instead of SET(FOO_DIR "@SOME_INSTALL_DIR@"), use SET(FOO_DIR "@PACKAGE_HELPER_SOME_INSTALL_DIR@")
-#      (this must be after the @PACKAGE_HELPER_INIT@ line)
+#   2. insert a line containing only the string "@PACKAGE_INIT@"
+#   3. instead of SET(FOO_DIR "@SOME_INSTALL_DIR@"), use SET(FOO_DIR "@PACKAGE_SOME_INSTALL_DIR@")
+#      (this must be after the @PACKAGE_INIT@ line)
 #   4. instead of using the normal CONFIGURE_FILE(), use CONFIGURE_PACKAGE_CONFIG_FILE()
 #
 # The <input> and <output> arguments are the input and output file, the same way
@@ -42,7 +42,7 @@
 #
 # The variables <var1> to <varN> given as PATH_VARS are the variables which contain
 # install destinations. For each of them the macro will create a helper variable
-# PACKAGE_HELPER_<var...>. These helper variables must be used
+# PACKAGE_<var...>. These helper variables must be used
 # in the FooConfig.cmake.in file for setting the installed location. They are calculated
 # by CONFIGURE_PACKAGE_CONFIG_FILE() so that they are always relative to the
 # installed location of the package. This works both for relative and also for absolute locations.
@@ -102,10 +102,10 @@
 # With a FooConfig.cmake.in:
 #   set(FOO_VERSION x.y.z)
 #   ...
-#   @PACKAGE_HELPER_INIT@
+#   @PACKAGE_INIT@
 #   ...
-#   set_and_check(FOO_INCLUDE_DIR "@PACKAGE_HELPER_INCLUDE_INSTALL_DIR@")
-#   set_and_check(FOO_SYSCONFIG_DIR "@PACKAGE_HELPER_SYSCONFIG_INSTALL_DIR@")
+#   set_and_check(FOO_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
+#   set_and_check(FOO_SYSCONFIG_DIR "@PACKAGE_SYSCONFIG_INSTALL_DIR@")
 
 
 #=============================================================================
@@ -158,20 +158,20 @@ function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
     else()
       if(IS_ABSOLUTE "${${var}}")
         string(REPLACE "${CMAKE_INSTALL_PREFIX}" "\${PACKAGE_PREFIX_DIR}"
-                        PACKAGE_HELPER_${var} "${${var}}")
+                        PACKAGE_${var} "${${var}}")
       else()
-        set(PACKAGE_HELPER_${var} "\${PACKAGE_PREFIX_DIR}/${${var}}")
+        set(PACKAGE_${var} "\${PACKAGE_PREFIX_DIR}/${${var}}")
       endif()
     endif()
   endforeach()
 
-  set(PACKAGE_HELPER_INIT "
-####### Expanded from @PACKAGE_HELPER_INIT@ by configure_package_config_file() #######
+  set(PACKAGE_INIT "
+####### Expanded from @PACKAGE_INIT@ by configure_package_config_file() #######
 get_filename_component(PACKAGE_PREFIX_DIR \"\${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_RELATIVE_PATH}\" ABSOLUTE)
 ")
 
   if(NOT CCF_NO_SET_AND_CHECK_MACRO)
-    set(PACKAGE_HELPER_INIT "${PACKAGE_HELPER_INIT}
+    set(PACKAGE_INIT "${PACKAGE_INIT}
 macro(set_and_check _var _file)
   set(\${_var} \"\${_file}\")
   if(NOT EXISTS \"\${_file}\")
@@ -181,7 +181,7 @@ endmacro()
 ")
   endif()
 
-  set(PACKAGE_HELPER_INIT "${PACKAGE_HELPER_INIT}
+  set(PACKAGE_INIT "${PACKAGE_INIT}
 ####################################################################################")
 
   configure_file("${_inputFile}" "${_outputFile}" @ONLY)
