@@ -229,6 +229,13 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   const std::vector<std::string> &deps = cli->GetDepends();
   cmNinjaDeps result(deps.size());
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
+
+  // Add a dependency on the link definitions file, if any.
+  if(!this->ModuleDefinitionFile.empty())
+    {
+    result.push_back(this->ModuleDefinitionFile);
+    }
+
   return result;
 }
 
@@ -328,6 +335,7 @@ cmNinjaTargetGenerator
   }
   vars.Flags = flags.c_str();
 
+
   // Rule for compiling object file.
   std::string compileCmdVar = "CMAKE_";
   compileCmdVar += language;
@@ -395,6 +403,8 @@ cmNinjaTargetGenerator
   if (!language) {
     if (source->GetPropertyAsBool("EXTERNAL_OBJECT"))
       this->Objects.push_back(this->GetSourceFilePath(source));
+    if(cmSystemTools::UpperCase(source->GetExtension()) == "DEF")
+      this->ModuleDefinitionFile = GetSourceFilePath(source);
     return;
   }
 
@@ -464,4 +474,30 @@ cmNinjaTargetGenerator
                                      emptyDeps,
                                      orderOnlyDeps,
                                      vars);
+}
+
+//----------------------------------------------------------------------------
+void
+cmNinjaTargetGenerator
+::AddModuleDefinitionFlag(std::string& flags)
+{
+  if(this->ModuleDefinitionFile.empty())
+    {
+    return;
+    }
+
+  // TODO: Create a per-language flag variable.
+  const char* defFileFlag =
+    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  if(!defFileFlag)
+    {
+    return;
+    }
+
+  // Append the flag and value.  Use ConvertToLinkReference to help
+  // vs6's "cl -link" pass it to the linker.
+  std::string flag = defFileFlag;
+  flag += (this->LocalGenerator->ConvertToLinkReference(
+             this->ModuleDefinitionFile.c_str()));
+  this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }

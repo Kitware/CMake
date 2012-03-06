@@ -285,6 +285,7 @@ cmNinjaNormalTargetGenerator
       default:
         assert(0 && "Unexpected target type");
       }
+
       const char *linkCmd =
         this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
