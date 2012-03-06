@@ -3592,7 +3592,8 @@ bool cmTarget::HaveBuildTreeRPATH()
 bool cmTarget::HaveInstallTreeRPATH()
 {
   const char* install_rpath = this->GetProperty("INSTALL_RPATH");
-  return install_rpath && *install_rpath;
+  return (install_rpath && *install_rpath) &&
+          !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
 }
 
 //----------------------------------------------------------------------------
@@ -3699,7 +3700,8 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
     {
     std::string dir;
 
-    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+       !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH"))
       {
       const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
       if(install_name_dir && *install_name_dir)
