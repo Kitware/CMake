@@ -1062,6 +1062,10 @@ bool cmFindPackageCommand::HandlePackageMode()
 
     this->Makefile->IssueMessage(
       this->Required? cmake::FATAL_ERROR : cmake::WARNING, e.str());
+    if (this->Required)
+      {
+      cmSystemTools::SetFatalErrorOccured();
+      }
 
     if (!aw.str().empty())
       {
