@@ -65,12 +65,8 @@ protected:
   MaybeCreateImplibDir(cmTarget& target, const char* config, bool isFortran);
 
   // Safe object file name generation.
-  void ComputeObjectNameRequirements(std::vector<cmSourceGroup> const&);
+  void ComputeObjectNameRequirements(std::vector<cmSourceFile*> const&);
   bool SourceFileCompiles(const cmSourceFile* sf);
-  void CountObjectNames(const std::vector<cmSourceGroup>& groups,
-                        std::map<cmStdString, int>& count);
-  void InsertNeedObjectNames(const std::vector<cmSourceGroup>& groups,
-                             std::map<cmStdString, int>& count);
   std::set<const cmSourceFile*> NeedObjectName;
   friend class cmVisualStudio10TargetGenerator;
 

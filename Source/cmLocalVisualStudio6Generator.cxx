@@ -380,7 +380,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     }
 
   // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(sourceGroups);
+  this->ComputeObjectNameRequirements(classes);
   
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);

@@ -872,9 +872,6 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
 
 void cmVisualStudio10TargetGenerator::ComputeObjectNames()
 {
-  // We may be modifying the source groups temporarily, so make a copy.
-  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
-
   // get the classes from the source lists then add them to the groups
   std::vector<cmSourceFile*>const & classes = this->Target->GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -886,13 +883,10 @@ void cmVisualStudio10TargetGenerator::ComputeObjectNames()
       {
       this->ModuleDefinitionFile = (*i)->GetFullPath();
       }
-    cmSourceGroup& sourceGroup =
-      this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
-    sourceGroup.AssignSource(*i);
     }
 
   // Compute which sources need unique object computation.
-  this->LocalGenerator->ComputeObjectNameRequirements(sourceGroups);
+  this->LocalGenerator->ComputeObjectNameRequirements(classes);
 }
 
 bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(

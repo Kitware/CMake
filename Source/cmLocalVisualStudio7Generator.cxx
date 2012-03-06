@@ -1307,7 +1307,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
 
   // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(sourceGroups);
+  this->ComputeObjectNameRequirements(classes);
 
   // open the project
   this->WriteProjectStart(fout, libName, target, sourceGroups);
