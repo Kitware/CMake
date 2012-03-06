@@ -1348,7 +1348,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endif()
 
   IF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
-    ADD_TEST_MACRO(SBCS SBCS)
+    IF(NOT MSVC60)
+      ADD_TEST_MACRO(SBCS SBCS)
+    ENDIF(NOT MSVC60)
 
     ADD_TEST(VSExternalInclude ${CMAKE_CTEST_COMMAND}
       --build-and-test
