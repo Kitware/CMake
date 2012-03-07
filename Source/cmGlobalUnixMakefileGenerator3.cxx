@@ -17,6 +17,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
+#include "cmGeneratorTarget.h"
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 {
@@ -68,6 +69,37 @@ void cmGlobalUnixMakefileGenerator3
     "A hierarchy of UNIX makefiles is generated into the build tree.  Any "
     "standard UNIX-style make program can build the project through the "
     "default make target.  A \"make install\" target is also provided.";
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalUnixMakefileGenerator3
+::ComputeTargetObjects(cmGeneratorTarget* gt) const
+{
+  cmTarget* target = gt->Target;
+  cmLocalUnixMakefileGenerator3* lg =
+    static_cast<cmLocalUnixMakefileGenerator3*>(gt->LocalGenerator);
+
+  // Compute full path to object file directory for this target.
+  std::string dir_max;
+  dir_max += gt->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir_max += "/";
+
+  // Compute the name of each object file.
+  for(std::vector<cmSourceFile*>::iterator
+        si = gt->ObjectSources.begin();
+      si != gt->ObjectSources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    bool hasSourceExtension = true;
+    std::string objectName = gt->LocalGenerator
+      ->GetObjectFileNameWithoutTarget(*sf, dir_max,
+                                       &hasSourceExtension);
+    gt->Objects[sf] = objectName;
+    lg->AddLocalObjectFile(target, sf, objectName, hasSourceExtension);
+    }
 }
 
 //----------------------------------------------------------------------------

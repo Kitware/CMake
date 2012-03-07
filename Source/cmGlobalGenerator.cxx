@@ -1074,7 +1074,9 @@ void cmGlobalGenerator::CreateGeneratorTargets()
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
-      this->GeneratorTargets[t] = new cmGeneratorTarget(t);
+      cmGeneratorTarget* gt = new cmGeneratorTarget(t);
+      this->GeneratorTargets[t] = gt;
+      this->ComputeTargetObjects(gt);
       }
     }
 }
@@ -1102,6 +1104,12 @@ cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
     return 0;
     }
   return ti->second;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::ComputeTargetObjects(cmGeneratorTarget*) const
+{
+  // Implemented in generator subclasses that need this.
 }
 
 void cmGlobalGenerator::CheckLocalGenerators()

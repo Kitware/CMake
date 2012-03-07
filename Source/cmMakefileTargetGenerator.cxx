@@ -418,12 +418,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     }
 
   // Get the full path name of the object file.
-  bool hasSourceExtension;
-  std::string objNoTargetDir;
-  std::string obj =
-    this->LocalGenerator->GetObjectFileName(*this->Target, source,
-                                            &objNoTargetDir,
-                                            &hasSourceExtension);
+  std::string const& objectName = this->GeneratorTarget->Objects[&source];
+  std::string obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
+  obj += "/";
+  obj += objectName;
 
   // Avoid generating duplicate rules.
   if(this->ObjectFiles.find(obj) == this->ObjectFiles.end())
@@ -477,10 +475,6 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     AddImplicitDepends(*this->Target, lang,
                        objFullPath.c_str(),
                        srcFullPath.c_str());
-
-  // add this to the list of objects for this local generator
-  this->LocalGenerator->AddLocalObjectFile(
-    this->Target, &source, objNoTargetDir, hasSourceExtension);
 }
 
 //----------------------------------------------------------------------------

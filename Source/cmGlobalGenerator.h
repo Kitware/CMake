@@ -379,6 +379,7 @@ private:
   GeneratorTargetsType GeneratorTargets;
   void CreateGeneratorTargets();
   void ClearGeneratorTargets();
+  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   // Cache directory content and target files to be built.
   struct DirectoryContent: public std::set<cmStdString>

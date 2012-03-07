@@ -40,6 +40,8 @@ public:
   std::vector<cmSourceFile*> OSXContent;
   std::string ModuleDefinitionFile;
 
+  std::map<cmSourceFile const*, std::string> Objects;
+
 private:
   void ClassifySources();
 
