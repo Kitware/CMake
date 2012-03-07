@@ -107,12 +107,18 @@ protected:
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
 
+  // Helper to add flag for windows .def file.
+  void AddModuleDefinitionFlag(std::string& flags);
+
 private:
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+
+  // The windows module definition source file (.def), if any.
+  std::string ModuleDefinitionFile;
 };
 
 #endif // ! cmNinjaTargetGenerator_h

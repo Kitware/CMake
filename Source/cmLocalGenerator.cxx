@@ -1503,7 +1503,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
             linkFlags +=
               this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
             linkFlags += this->Convert(sf->GetFullPath().c_str(),
-                                       START_OUTPUT, SHELL);
+                                       FULL, SHELL);
             linkFlags += " ";
             }
           }
