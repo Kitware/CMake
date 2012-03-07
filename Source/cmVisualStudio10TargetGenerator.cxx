@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
+#include "cmGeneratorTarget.h"
 #include "cmTarget.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
@@ -62,6 +63,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
 {
   this->GlobalGenerator = gg;
   this->Target = target;
+  this->GeneratorTarget = gg->GetGeneratorTarget(target);
   this->Makefile = target->GetMakefile();
   this->LocalGenerator =  
     (cmLocalVisualStudio7Generator*)
@@ -70,7 +72,8 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
-  this->ComputeObjectNames();
+  this->LocalGenerator
+    ->ComputeObjectNameRequirements(target->GetSourceFiles());
   this->BuildFileStream = 0;
 }
 
@@ -421,12 +424,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
   this->SourcesVisited.clear();
-  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-      source != sources.end(); ++source)
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = this->GeneratorTarget->CustomCommands.begin();
+      si != this->GeneratorTarget->CustomCommands.end(); ++si)
     {
-    cmSourceFile* sf = *source;
-    this->WriteCustomCommand(sf);
+    this->WriteCustomCommand(*si);
     }
 }
 
@@ -873,25 +875,6 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       }
     }
   this->WriteString("</ItemGroup>\n", 1);
-}
-
-void cmVisualStudio10TargetGenerator::ComputeObjectNames()
-{
-  // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*>const & classes = this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
-      i != classes.end(); i++)
-    {
-    // Add the file to the list of sources.
-    std::string source = (*i)->GetFullPath();
-    if(cmSystemTools::UpperCase((*i)->GetExtension()) == "DEF")
-      {
-      this->ModuleDefinitionFile = (*i)->GetFullPath();
-      }
-    }
-
-  // Compute which sources need unique object computation.
-  this->LocalGenerator->ComputeObjectNameRequirements(classes);
 }
 
 bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
@@ -1513,10 +1496,10 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  if(!this->ModuleDefinitionFile.empty())
+  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
     {
     linkOptions.AddFlag("ModuleDefinitionFile",
-                        this->ModuleDefinitionFile.c_str());
+                        this->GeneratorTarget->ModuleDefinitionFile.c_str());
     }
 
   linkOptions.RemoveFlag("GenerateManifest");
