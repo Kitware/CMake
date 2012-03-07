@@ -95,6 +95,8 @@ private:
 
   std::string ConvertToNinjaPath(const char *path);
 
+  struct map_to_ninja_path;
+  friend struct map_to_ninja_path;
   struct map_to_ninja_path {
     cmLocalNinjaGenerator *LocalGenerator;
     map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
