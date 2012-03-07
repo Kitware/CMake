@@ -15,6 +15,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 
 #include "cmComputeLinkInformation.h"
@@ -336,9 +337,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       }
     }
 
-  // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(classes);
-  
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);
   
@@ -358,6 +356,8 @@ void cmLocalVisualStudio6Generator
 ::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
              std::ostream &fout, const char *libName)
 {
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
   const std::vector<const cmSourceFile *> &sourceFiles = 
     sg->GetSourceFiles();
   // If the group is empty, don't write it at all.
@@ -374,28 +374,6 @@ void cmLocalVisualStudio6Generator
     this->WriteDSPBeginGroup(fout, name.c_str(), "");
     }
 
-  // Compute the maximum length configuration name.
-  std::string config_max;
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
-    {
-    // Strip the subdirectory name out of the configuration name.
-    std::string config = this->GetConfigName(*i);
-    if(config.size() > config_max.size())
-      {
-      config_max = config;
-      }
-    }
-
-  // Compute the maximum length full path to the intermediate
-  // files directory for any configuration.  This is used to construct
-  // object file names that do not produce paths that are too long.
-  std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += config_max;
-  dir_max += "/";
-
   // Loop through each source in the source group.
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
@@ -406,11 +384,9 @@ void cmLocalVisualStudio6Generator
     std::string compileFlags;
     std::vector<std::string> depends;
     std::string objectNameDir;
-    if(this->NeedObjectName.find(*sf) != this->NeedObjectName.end())
+    if(gt->ExplicitObjectName.find(*sf) != gt->ExplicitObjectName.end())
       {
-      objectNameDir =
-        cmSystemTools::GetFilenamePath(
-          this->GetObjectFileNameWithoutTarget(*(*sf), dir_max));
+      objectNameDir = cmSystemTools::GetFilenamePath(gt->Objects[*sf]);
       }
 
     // Add per-source file flags.
@@ -1793,6 +1769,36 @@ cmLocalVisualStudio6Generator
 {
   // No per-target directory for this generator (yet).
   return "";
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalVisualStudio6Generator
+::ComputeLongestObjectDirectory(cmTarget&) const
+{
+  // Compute the maximum length configuration name.
+  std::string config_max;
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
+    {
+    // Strip the subdirectory name out of the configuration name.
+    std::string config = this->GetConfigName(*i);
+    if(config.size() > config_max.size())
+      {
+      config_max = config;
+      }
+    }
+
+  // Compute the maximum length full path to the intermediate
+  // files directory for any configuration.  This is used to construct
+  // object file names that do not produce paths that are too long.
+  std::string dir_max;
+  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += config_max;
+  dir_max += "/";
+  return dir_max;
 }
 
 std::string

@@ -72,8 +72,6 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
-  this->LocalGenerator
-    ->ComputeObjectNameRequirements(target->GetSourceFiles());
   this->BuildFileStream = 0;
 }
 
@@ -883,16 +881,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   cmSourceFile& sf = *source;
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
-  // Compute the maximum length full path to the intermediate
-  // files directory for any configuration.  This is used to construct
-  // object file names that do not produce paths that are too long.
-  std::string dir_max;
-  lg->ComputeMaxDirectoryLength(dir_max, *this->Target);
-
   std::string objectName;
-  if(lg->NeedObjectName.find(&sf) != lg->NeedObjectName.end())
+  if(this->GeneratorTarget->ExplicitObjectName.find(&sf)
+     != this->GeneratorTarget->ExplicitObjectName.end())
     {
-    objectName = lg->GetObjectFileNameWithoutTarget(sf, dir_max);
+    objectName = this->GeneratorTarget->Objects[&sf];
     }
   std::string flags;
   std::string defines;

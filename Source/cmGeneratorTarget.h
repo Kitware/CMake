@@ -41,6 +41,7 @@ public:
   std::string ModuleDefinitionFile;
 
   std::map<cmSourceFile const*, std::string> Objects;
+  std::set<cmSourceFile const*> ExplicitObjectName;
 
 private:
   void ClassifySources();

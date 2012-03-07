@@ -12,8 +12,10 @@
 #include "cmGlobalVisualStudioGenerator.h"
 
 #include "cmCallVisualStudioMacro.h"
-#include "cmLocalGenerator.h"
+#include "cmGeneratorTarget.h"
+#include "cmLocalVisualStudioGenerator.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmTarget.h"
 
 //----------------------------------------------------------------------------
@@ -95,6 +97,48 @@ void cmGlobalVisualStudioGenerator::Generate()
 
   // Run all the local generators.
   this->cmGlobalGenerator::Generate();
+}
+
+//----------------------------------------------------------------------------
+void
+cmGlobalVisualStudioGenerator
+::ComputeTargetObjects(cmGeneratorTarget* gt) const
+{
+  cmLocalVisualStudioGenerator* lg =
+    static_cast<cmLocalVisualStudioGenerator*>(gt->LocalGenerator);
+  std::string dir_max = lg->ComputeLongestObjectDirectory(*gt->Target);
+
+  // Count the number of object files with each name.  Note that
+  // windows file names are not case sensitive.
+  std::map<cmStdString, int> counts;
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = gt->ObjectSources.begin();
+      si != gt->ObjectSources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    std::string objectNameLower = cmSystemTools::LowerCase(
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
+    objectNameLower += ".obj";
+    counts[objectNameLower] += 1;
+    }
+
+  // For all source files producing duplicate names we need unique
+  // object name computation.
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = gt->ObjectSources.begin();
+      si != gt->ObjectSources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    std::string objectName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    objectName += ".obj";
+    if(counts[cmSystemTools::LowerCase(objectName)] > 1)
+      {
+      gt->ExplicitObjectName.insert(sf);
+      objectName = lg->GetObjectFileNameWithoutTarget(*sf, dir_max);
+      }
+    gt->Objects[sf] = objectName;
+    }
 }
 
 //----------------------------------------------------------------------------
