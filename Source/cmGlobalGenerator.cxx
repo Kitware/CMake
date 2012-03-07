@@ -24,6 +24,7 @@
 #include "cmExportInstallFileGenerator.h"
 #include "cmComputeTargetDepends.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 
 #include <cmsys/Directory.hxx>
 
@@ -74,6 +75,7 @@ cmGlobalGenerator::~cmGlobalGenerator()
     delete this->ExtraGenerator;
     }
 
+  this->ClearGeneratorTargets();
   this->ClearExportSets();
 }
 
@@ -807,6 +809,7 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
 void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
+  this->ClearGeneratorTargets();
   this->ClearExportSets();
   // Delete any existing cmLocalGenerators
   unsigned int i;
@@ -947,6 +950,9 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GenerateTargetManifest();
     }
 
+  // Create per-target generator information.
+  this->CreateGeneratorTargets();
+
   // Compute the inter-target dependencies.
   if(!this->ComputeTargetDepends())
     {
@@ -1056,6 +1062,47 @@ void cmGlobalGenerator::CreateAutomocTargets()
 #endif
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CreateGeneratorTargets()
+{
+  // Construct per-target generator information.
+  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmTargets& targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget* t = &ti->second;
+      this->GeneratorTargets[t] = new cmGeneratorTarget(t);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::ClearGeneratorTargets()
+{
+  for(GeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
+      i != this->GeneratorTargets.end(); ++i)
+    {
+    delete i->second;
+    }
+  this->GeneratorTargets.clear();
+}
+
+//----------------------------------------------------------------------------
+cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
+{
+  GeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
+  if(ti == this->GeneratorTargets.end())
+    {
+    this->CMakeInstance->IssueMessage(
+      cmake::INTERNAL_ERROR, "Missing cmGeneratorTarget instance!",
+      cmListFileBacktrace());
+    return 0;
+    }
+  return ti->second;
+}
 
 void cmGlobalGenerator::CheckLocalGenerators()
 {

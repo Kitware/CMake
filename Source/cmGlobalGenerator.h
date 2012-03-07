@@ -19,6 +19,7 @@
 #include "cmTargetDepend.h" // For cmTargetDependSet
 #include "cmSystemTools.h" // for cmSystemTools::OutputOption
 class cmake;
+class cmGeneratorTarget;
 class cmMakefile;
 class cmLocalGenerator;
 class cmExternalMakefileProjectGenerator;
@@ -251,6 +252,9 @@ public:
   // via a target_link_libraries or add_dependencies
   TargetDependSet const& GetTargetDirectDepends(cmTarget & target);
 
+  /** Get per-target generator information.  */
+  cmGeneratorTarget* GetGeneratorTarget(cmTarget*) const;
+
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
 
@@ -369,6 +373,12 @@ private:
   // Store computed inter-target dependencies.
   typedef std::map<cmTarget *, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
+
+  // Per-target generator information.
+  typedef std::map<cmTarget*, cmGeneratorTarget*> GeneratorTargetsType;
+  GeneratorTargetsType GeneratorTargets;
+  void CreateGeneratorTargets();
+  void ClearGeneratorTargets();
 
   // Cache directory content and target files to be built.
   struct DirectoryContent: public std::set<cmStdString>
