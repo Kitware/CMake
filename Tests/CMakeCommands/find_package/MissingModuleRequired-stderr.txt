@@ -18,4 +18,4 @@ CMake Warning \(dev\) at MissingModuleRequired.cmake:1 \(find_package\):
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers.  Use -Wno-dev to suppress it.$
