@@ -100,7 +100,6 @@ public:
    * source group.
    */
   const std::vector<const cmSourceFile*>& GetSourceFiles() const;
-  std::vector<const cmSourceFile*>& GetSourceFiles();
   
   std::vector<cmSourceGroup> const& GetGroupChildren() const;
 private:
