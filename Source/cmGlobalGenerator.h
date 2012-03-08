@@ -184,7 +184,7 @@ public:
   const char* GetLanguageOutputExtension(cmSourceFile const&);
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGInitDirectory()  { return "."; }
+  virtual const char* GetCMakeCFGIntDir() const { return "."; }
 
   /** Get whether the generator should use a script for link commands.  */
   bool GetUseLinkScript() const { return this->UseLinkScript; }

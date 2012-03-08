@@ -945,7 +945,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     outName += ".rule";
     const char* dir =
       this->LocalGenerator->GetGlobalGenerator()->
-      GetCMakeCFGInitDirectory();
+      GetCMakeCFGIntDir();
     if(dir && dir[0] == '$')
       {
       cmSystemTools::ReplaceString(outName, dir,
@@ -2865,7 +2865,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
 {
   this->AddDefinition("CMAKE_CFG_INTDIR",
                       this->LocalGenerator->GetGlobalGenerator()
-                      ->GetCMakeCFGInitDirectory());
+                      ->GetCMakeCFGIntDir());
   this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this,
                                                              optional);
 }

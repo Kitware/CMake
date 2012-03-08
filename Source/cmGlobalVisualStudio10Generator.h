@@ -72,7 +72,7 @@ public:
    * Studio?
    */
   virtual std::string GetUserMacrosRegKeyBase();
-  virtual const char* GetCMakeCFGInitDirectory() 
+  virtual const char* GetCMakeCFGIntDir() const
     { return "$(Configuration)";}
   bool Find64BitTools(cmMakefile* mf);
 protected:

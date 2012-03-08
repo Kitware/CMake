@@ -1769,7 +1769,7 @@ void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
-  const char* cmakeCfgIntDir = this->GetCMakeCFGInitDirectory();
+  const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
   const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   // CPack

@@ -3283,7 +3283,7 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
 }
 
 //----------------------------------------------------------------------------
-const char* cmGlobalXCodeGenerator::GetCMakeCFGInitDirectory()
+const char* cmGlobalXCodeGenerator::GetCMakeCFGIntDir() const
 {
   return this->XcodeVersion >= 21 ?
     "$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" : ".";

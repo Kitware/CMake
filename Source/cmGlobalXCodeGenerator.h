@@ -74,7 +74,7 @@ public:
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGInitDirectory();
+  virtual const char* GetCMakeCFGIntDir() const;
 
   void SetCurrentLocalGenerator(cmLocalGenerator*);
 
