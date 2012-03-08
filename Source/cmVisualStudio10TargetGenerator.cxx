@@ -394,6 +394,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       {
       this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
       }
+    else if (this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+       this->ClOptions[*i]->UsingSBCS())
+      {
+      this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
+      }
     else
       {
       this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
