@@ -23,7 +23,7 @@
 #define TEST_C_(C, V, PRI, T, U)                                        \
   {                                                                     \
   T const x = VALUE(T, U);                                              \
-  T y = @KWIML@_INT_##C(V);                                             \
+  T y = C(V);                                                           \
   printf(LANG "@KWIML@_INT_" #C ":"                                     \
          " expression [%"@KWIML@_INT_PRI##PRI"],"                       \
          " literal [%"@KWIML@_INT_PRI##PRI"]", x, y);                   \
@@ -91,7 +91,7 @@
 #define TEST2(PRI, SCN, T, U, STR) \
         TEST2_(PRI, SCN, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
 #define TEST_C(C, V, PRI, T, U) \
-        TEST_C_(C, V, PRI, @KWIML@_INT_##T, @KWIML@_INT_##U)
+        TEST_C_(@KWIML@_INT_##C, V, PRI, @KWIML@_INT_##T, @KWIML@_INT_##U)
 #define TEST_PRI(PRI, T, U, STR) \
         TEST_PRI_(PRI, @KWIML@_INT_##T, @KWIML@_INT_##U, STR)
 #define TEST_SCN(SCN, T, U, STR) \
