@@ -139,6 +139,22 @@ cmGlobalVisualStudioGenerator
       }
     gt->Objects[sf] = objectName;
     }
+
+  std::string dir = gt->Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  std::string tgtDir = lg->GetTargetDirectory(*gt->Target);
+  if(!tgtDir.empty())
+    {
+    dir += tgtDir;
+    dir += "/";
+    }
+  const char* cd = this->GetCMakeCFGIntDir();
+  if(cd && *cd)
+    {
+    dir += cd;
+    dir += "/";
+    }
+  gt->ObjectDirectory = dir;
 }
 
 //----------------------------------------------------------------------------

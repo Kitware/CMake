@@ -43,6 +43,11 @@ public:
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
 
+  /** Full path with trailing slash to the top-level directory
+      holding object files for this target.  Includes the build
+      time config name placeholder if needed for the generator.  */
+  std::string ObjectDirectory;
+
 private:
   void ClassifySources();
 

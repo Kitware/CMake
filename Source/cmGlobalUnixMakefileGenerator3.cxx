@@ -86,6 +86,7 @@ cmGlobalUnixMakefileGenerator3
   dir_max += "/";
   dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
   dir_max += "/";
+  gt->ObjectDirectory = dir_max;
 
   // Compute the name of each object file.
   for(std::vector<cmSourceFile*>::iterator
