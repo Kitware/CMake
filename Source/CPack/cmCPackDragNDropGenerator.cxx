@@ -63,6 +63,12 @@ cmCPackDragNDropGenerator::~cmCPackDragNDropGenerator()
 //----------------------------------------------------------------------
 int cmCPackDragNDropGenerator::InitializeInternal()
 {
+  // Starting with Xcode 4.3, look in "/Applications/Xcode.app" first:
+  //
+  std::vector<std::string> paths;
+  paths.push_back("/Applications/Xcode.app/Contents/Developer/Tools");
+  paths.push_back("/Developer/Tools");
+
   const std::string hdiutil_path = cmSystemTools::FindProgram("hdiutil",
     std::vector<std::string>(), false);
   if(hdiutil_path.empty())
@@ -75,7 +81,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   this->SetOptionIfNotSet("CPACK_COMMAND_HDIUTIL", hdiutil_path.c_str());
 
   const std::string setfile_path = cmSystemTools::FindProgram("SetFile",
-    std::vector<std::string>(1, "/Developer/Tools"), false);
+    paths, false);
   if(setfile_path.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -86,7 +92,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   this->SetOptionIfNotSet("CPACK_COMMAND_SETFILE", setfile_path.c_str());
   
   const std::string rez_path = cmSystemTools::FindProgram("Rez",
-    std::vector<std::string>(1, "/Developer/Tools"), false);
+    paths, false);
   if(rez_path.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
