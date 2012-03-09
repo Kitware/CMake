@@ -170,23 +170,25 @@ int cmCPackOSXX11Generator::PackageFiles()
          << "\" create -ov -format UDZO -srcfolder \"" 
          << diskImageDirectory.c_str() 
          << "\" \"" << packageFileNames[0] << "\"";
-  int retVal = 1;
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Compress disk image using command: " 
                 << dmgCmd.str().c_str() << std::endl);
   // since we get random dashboard failures with this one
   // try running it more than once
-  int numTries = 4;
+  int retVal = 1;
+  int numTries = 10;
   bool res = false;
   while(numTries > 0)
     {
     res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
                                           &retVal, 0, 
                                           this->GeneratorVerbose, 0);
-    if(res && retVal)
+    if ( res && !retVal )
       {
       numTries = -1;
+      break;
       }
+    cmSystemTools::Delay(500);
     numTries--;
     }
   if ( !res || retVal )
