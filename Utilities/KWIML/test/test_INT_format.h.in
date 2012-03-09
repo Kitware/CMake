@@ -24,7 +24,7 @@
   {                                                                     \
   T const x = VALUE(T, U);                                              \
   T y = C(V);                                                           \
-  printf(LANG "@KWIML@_INT_" #C ":"                                     \
+  printf(LANG #C ":"                                                    \
          " expression [%"@KWIML@_INT_PRI##PRI"],"                       \
          " literal [%"@KWIML@_INT_PRI##PRI"]", x, y);                   \
   if(x == y)                                                            \
