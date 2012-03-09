@@ -39,3 +39,5 @@ macro(add_RunCMake_test test)
     -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
     )
 endmacro()
+
+add_RunCMake_test(find_package)

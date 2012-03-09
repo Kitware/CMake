@@ -8,4 +8,3 @@ macro(add_CMakeCommands_test test)
 endmacro()
 
 add_CMakeCommands_test(build_command)
-add_CMakeCommands_test(find_package)
