@@ -319,17 +319,19 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     << "\" \"" << packageFileNames[0] << "\"";
   std::string output;
   int retVal = 1;
-  int numTries = 4;
+  int numTries = 10;
   bool res = false;
   while(numTries > 0)
     {
     res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
                                           &retVal, 0, this->GeneratorVerbose, 
                                           0);
-    if(res && retVal)
+    if ( res && !retVal )
       {
       numTries = -1;
+      break;
       }
+    cmSystemTools::Delay(500);
     numTries--;
     }
   if ( !res || retVal )
