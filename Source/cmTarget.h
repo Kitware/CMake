@@ -403,9 +403,6 @@ public:
   // Define the properties
   static void DefineProperties(cmake *cm);
 
-  // Compute the OBJECT_FILES property only when requested
-  void ComputeObjectFiles();
-
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro();
