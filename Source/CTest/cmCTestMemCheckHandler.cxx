@@ -679,7 +679,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
     " bytes in [0-9,]+ blocks are definitely lost"
     " in loss record [0-9,]+ of [0-9,]+");
   cmsys::RegularExpression vgPAR(
-    "== .*Syscall param .* contains unaddressable byte\\(s\\)");
+    "== .*Syscall param .* (contains|points to) unaddressable byte\\(s\\)");
   cmsys::RegularExpression vgMPK1(
     "== .*[0-9,]+ bytes in [0-9,]+ blocks are possibly lost in"
     " loss record [0-9,]+ of [0-9,]+");
