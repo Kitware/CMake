@@ -2973,17 +2973,6 @@ cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
   return "";
 }
 
-
-//----------------------------------------------------------------------------
-void
-cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
-                                                 std::vector<std::string>&
-                                                 )
-{
-  cmSystemTools::Error("GetTargetObjectFileDirectories"
-                       " called on cmLocalGenerator");
-}
-
 //----------------------------------------------------------------------------
 unsigned int cmLocalGenerator::GetBackwardsCompatibility()
 {

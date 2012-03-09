@@ -145,6 +145,20 @@ void cmLocalUnixMakefileGenerator3::Generate()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator3::AddLocalObjectFile(
+  cmTarget* target, cmSourceFile* sf, std::string objNoTargetDir,
+  bool hasSourceExtension)
+{
+  if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
+    {
+    objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
+    }
+  LocalObjectInfo& info = this->LocalObjectFiles[objNoTargetDir];
+  info.HasSourceExtension = hasSourceExtension;
+  info.push_back(LocalObjectEntry(target, sf->GetLanguage()));
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
                                             (std::vector<std::string>& targets)
 {
@@ -2266,15 +2280,4 @@ void cmLocalUnixMakefileGenerator3
       *i = cmd;
       }
     }
-}
-
-
-void cmLocalUnixMakefileGenerator3
-::GetTargetObjectFileDirectories(cmTarget* target,
-                                 std::vector<std::string>& dirs)
-{
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
-  dir += "/";
-  dir += this->GetTargetDirectory(*target);
-  dirs.push_back(dir);
 }

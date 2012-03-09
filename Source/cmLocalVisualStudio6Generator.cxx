@@ -337,7 +337,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
     }
 
   // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(sourceGroups);
+  this->ComputeObjectNameRequirements(classes);
   
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);
@@ -1793,17 +1793,6 @@ cmLocalVisualStudio6Generator
 {
   // No per-target directory for this generator (yet).
   return "";
-}
-
-void cmLocalVisualStudio6Generator
-::GetTargetObjectFileDirectories(cmTarget* ,
-                                 std::vector<std::string>& 
-                                 dirs)
-{
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
-  dir += "/";
-  dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
-  dirs.push_back(dir);
 }
 
 std::string

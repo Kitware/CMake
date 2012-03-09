@@ -188,8 +188,6 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  // initialize Architectures so it can be used by
-  //  GetTargetObjectFileDirectories
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
     const char* osxArch =
       mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
@@ -3369,37 +3367,6 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
     ret += "\"";
     }
   return ret;
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalXCodeGenerator::
-GetTargetObjectFileDirectories(cmTarget* target,
-                               std::vector<std::string>&
-                               dirs)
-{
-  std::string dir = this->CurrentMakefile->GetCurrentOutputDirectory();
-  dir += "/";
-  dir += this->CurrentMakefile->GetProjectName();
-  dir += ".build/";
-  dir += this->GetCMakeCFGInitDirectory();
-  dir += "/";
-  dir += target->GetName();
-  dir += ".build/Objects-normal/";
-  std::string dirsave = dir;
-  if(this->Architectures.size())
-    {
-    for(std::vector<std::string>::iterator i = this->Architectures.begin();
-        i != this->Architectures.end(); ++i)
-      {
-      dir += *i;
-      dirs.push_back(dir);
-      dir = dirsave;
-      }
-    }
-  else
-    {
-    dirs.push_back(dir);
-    }
 }
 
 //----------------------------------------------------------------------------

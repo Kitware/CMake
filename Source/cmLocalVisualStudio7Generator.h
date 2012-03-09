@@ -54,9 +54,6 @@ public:
   void SetBuildType(BuildType,const char *name);
 
   void SetPlatformName(const char* n) { this->PlatformName = n;}
-  void GetTargetObjectFileDirectories(cmTarget* target,
-                                      std::vector<std::string>& 
-                                      dirs); 
 
   void SetExtraFlagTable(cmVS7FlagTable const* table)
     { this->ExtraFlagTable = table; }

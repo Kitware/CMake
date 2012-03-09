@@ -489,16 +489,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
                        srcFullPath.c_str());
 
   // add this to the list of objects for this local generator
-  if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
-    {
-    objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
-    }
-  cmLocalUnixMakefileGenerator3::LocalObjectInfo& info =
-    this->LocalGenerator->LocalObjectFiles[objNoTargetDir];
-  info.HasSourceExtension = hasSourceExtension;
-  info.push_back(
-    cmLocalUnixMakefileGenerator3::LocalObjectEntry(this->Target, lang)
-    );
+  this->LocalGenerator->AddLocalObjectFile(
+    this->Target, &source, objNoTargetDir, hasSourceExtension);
 }
 
 //----------------------------------------------------------------------------

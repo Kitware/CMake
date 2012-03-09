@@ -83,75 +83,48 @@ bool cmLocalVisualStudioGenerator::SourceFileCompiles(const cmSourceFile* sf)
 }
 
 //----------------------------------------------------------------------------
-void cmLocalVisualStudioGenerator::CountObjectNames(
-    const std::vector<cmSourceGroup>& groups,
-    std::map<cmStdString, int>& counts)
-{
-  for(unsigned int i = 0; i < groups.size(); ++i)
-    {
-    cmSourceGroup sg = groups[i];
-    std::vector<const cmSourceFile*> const& srcs = sg.GetSourceFiles();
-    for(std::vector<const cmSourceFile*>::const_iterator s = srcs.begin();
-        s != srcs.end(); ++s)
-      {
-      const cmSourceFile* sf = *s;
-      if(this->SourceFileCompiles(sf))
-        {
-        std::string objectName = cmSystemTools::LowerCase(
-            cmSystemTools::GetFilenameWithoutLastExtension(
-              sf->GetFullPath()));
-        objectName += ".obj";
-        counts[objectName] += 1;
-        }
-      }
-    this->CountObjectNames(sg.GetGroupChildren(), counts);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmLocalVisualStudioGenerator::InsertNeedObjectNames(
-   const std::vector<cmSourceGroup>& groups,
-    std::map<cmStdString, int>& count)
-{
-  for(unsigned int i = 0; i < groups.size(); ++i)
-    {
-    cmSourceGroup sg = groups[i];
-    std::vector<const cmSourceFile*> const& srcs = sg.GetSourceFiles();
-    for(std::vector<const cmSourceFile*>::const_iterator s = srcs.begin();
-        s != srcs.end(); ++s)
-      {
-      const cmSourceFile* sf = *s;
-      if(this->SourceFileCompiles(sf))
-        {
-        std::string objectName = cmSystemTools::LowerCase(
-           cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
-        objectName += ".obj";
-        if(count[objectName] > 1)
-          {
-          this->NeedObjectName.insert(sf);
-          }
-        }
-      }
-    this->InsertNeedObjectNames(sg.GetGroupChildren(), count);
-    }
-}
-
-
-//----------------------------------------------------------------------------
-void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
-(std::vector<cmSourceGroup> const& sourceGroups)
+void
+cmLocalVisualStudioGenerator::ComputeObjectNameRequirements(
+  std::vector<cmSourceFile*> const& sources
+  )
 {
   // Clear the current set of requirements.
   this->NeedObjectName.clear();
 
   // Count the number of object files with each name.  Note that
   // windows file names are not case sensitive.
-  std::map<cmStdString, int> objectNameCounts;
-  this->CountObjectNames(sourceGroups, objectNameCounts);
+  std::map<cmStdString, int> counts;
+  for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
+      s != sources.end(); ++s)
+    {
+    const cmSourceFile* sf = *s;
+    if(this->SourceFileCompiles(sf))
+      {
+      std::string objectName = cmSystemTools::LowerCase(
+        cmSystemTools::GetFilenameWithoutLastExtension(
+          sf->GetFullPath()));
+      objectName += ".obj";
+      counts[objectName] += 1;
+      }
+    }
 
   // For all source files producing duplicate names we need unique
   // object name computation.
-  this->InsertNeedObjectNames(sourceGroups, objectNameCounts);
+  for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
+      s != sources.end(); ++s)
+    {
+    const cmSourceFile* sf = *s;
+    if(this->SourceFileCompiles(sf))
+      {
+      std::string objectName = cmSystemTools::LowerCase(
+         cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
+      objectName += ".obj";
+      if(counts[objectName] > 1)
+        {
+        this->NeedObjectName.insert(sf);
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------

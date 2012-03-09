@@ -1101,17 +1101,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "better if VS_GLOBAL_QtVersion is set to the version "
      "FindQt4.cmake found. For example, \"4.7.3\"");
 
-#if 0
-  cm->DefineProperty
-    ("OBJECT_FILES", cmProperty::TARGET,
-     "Used to get the resulting list of object files that make up a "
-     "target.",
-     "This can be used to put object files from one library "
-     "into another library. It is a read only property.  It "
-     "converts the source list for the target into a list of full "
-     "paths to object names that will be produced by the target.");
-#endif
-
 #define CM_TARGET_FILE_TYPES_DOC                                            \
      "There are three kinds of target files that may be built: "            \
      "archive, library, and runtime.  "                                     \
@@ -2610,54 +2599,6 @@ const char* cmTarget::GetFeature(const char* feature, const char* config)
 const char *cmTarget::GetProperty(const char* prop)
 {
   return this->GetProperty(prop, cmProperty::TARGET);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::ComputeObjectFiles()
-{
-  if (this->IsImported())
-    {
-    return;
-    }
-#if 0
-  std::vector<std::string> dirs;
-  this->Makefile->GetLocalGenerator()->
-    GetTargetObjectFileDirectories(this,
-                                   dirs);
-  std::string objectFiles;
-  std::string objExtensionLookup1 = "CMAKE_";
-  std::string objExtensionLookup2 = "_OUTPUT_EXTENSION";
-
-  for(std::vector<std::string>::iterator d = dirs.begin();
-      d != dirs.end(); ++d)
-    {
-    for(std::vector<cmSourceFile*>::iterator s = this->SourceFiles.begin();
-        s != this->SourceFiles.end(); ++s)
-      {
-      cmSourceFile* sf = *s;
-      if(const char* lang = sf->GetLanguage())
-        {
-        std::string lookupObj = objExtensionLookup1 + lang;
-        lookupObj += objExtensionLookup2;
-        const char* obj = this->Makefile->GetDefinition(lookupObj.c_str());
-        if(obj)
-          {
-          if(objectFiles.size())
-            {
-            objectFiles += ";";
-            }
-          std::string objFile = *d;
-          objFile += "/";
-          objFile += this->Makefile->GetLocalGenerator()->
-            GetSourceObjectName(*sf);
-          objFile += obj;
-          objectFiles += objFile;
-          }
-        }
-      }
-    }
-  this->SetProperty("OBJECT_FILES", objectFiles.c_str());
-#endif
 }
 
 //----------------------------------------------------------------------------
