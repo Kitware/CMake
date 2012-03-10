@@ -61,7 +61,7 @@
 # For an example see below the documentation for WRITE_BASIC_PACKAGE_VERSION_FILE().
 #
 #
-#  WRITE_BASIC_PACKAGE_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
+#  WRITE_BASIC_PACKAGE_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion|ExactVersion) )
 #
 # Writes a file for use as <package>ConfigVersion.cmake file to <filename>.
 # See the documentation of FIND_PACKAGE() for details on this.
@@ -76,6 +76,10 @@
 # not be considered compatible if 1.0 is requested.
 # This mode should be used for packages which guarantee backward compatibility within the
 # same major version.
+# If ExactVersion is used, then the package is only considered compatible if the requested
+# version matches exactly its own version number (not considering the tweak version).
+# For example, version 1.2.3 of a package is only considered compatible to requested version 1.2.3.
+# This mode is for packages without compatibility guarantees.
 # If your project has more elaborated version matching rules, you will need to write your
 # own custom ConfigVersion.cmake file instead of using this macro.
 #
