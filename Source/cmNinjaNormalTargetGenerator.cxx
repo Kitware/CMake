@@ -341,6 +341,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                             vars["LINK_FLAGS"],
                                             *this->GetTarget());
 
+  this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
+
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating
   // code between the Makefile executable and library generators.
