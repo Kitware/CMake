@@ -69,9 +69,13 @@
 #    major.minor.patch is the version number of the project to be installed
 # The COMPATIBILITY mode AnyNewerVersion means that the installed package version
 # will be considered compatible if it is newer or exactly the same as the requested version.
+# This mode should be used for packages which are fully backward compatible,
+# also across major versions.
 # If SameMajorVersion is used instead, then the behaviour differs from AnyNewerVersion
 # in that the major version number must be the same as requested, e.g. version 2.0 will
 # not be considered compatible if 1.0 is requested.
+# This mode should be used for packages which guarantee backward compatibility within the
+# same major version.
 # If your project has more elaborated version matching rules, you will need to write your
 # own custom ConfigVersion.cmake file instead of using this macro.
 #
