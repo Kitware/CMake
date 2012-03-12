@@ -642,6 +642,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   bool targetBuilds = true;
   switch(target.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
+      targetBuilds = false; // TODO: PDB for object library?
     case cmTarget::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       configType = "4";
@@ -1001,6 +1003,22 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
   switch(target.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
+      {
+      std::string libpath = this->GetTargetDirectory(target);
+      libpath += "/";
+      libpath += configName;
+      libpath += "/";
+      libpath += target.GetName();
+      libpath += ".lib";
+      const char* tool =
+        this->FortranProject? "VFLibrarianTool":"VCLibrarianTool";
+      fout << "\t\t\t<Tool\n"
+           << "\t\t\t\tName=\"" << tool << "\"\n";
+      fout << "\t\t\t\tOutputFile=\""
+           << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << "\"/>\n";
+      break;
+      }
     case cmTarget::STATIC_LIBRARY:
     {
     std::string targetNameFull = target.GetFullName(configName);

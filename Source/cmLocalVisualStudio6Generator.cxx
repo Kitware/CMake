@@ -127,6 +127,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
     switch(l->second.GetType())
       {
       case cmTarget::STATIC_LIBRARY:
+      case cmTarget::OBJECT_LIBRARY:
         this->SetBuildType(STATIC_LIBRARY, l->first.c_str(), l->second);
         break;
       case cmTarget::SHARED_LIBRARY:
@@ -1240,8 +1241,18 @@ void cmLocalVisualStudio6Generator
     outputNameMinSizeRel = target.GetFullName("MinSizeRel");
     outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
     }
+  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    outputName = target.GetName();
+    outputName += ".lib";
+    outputNameDebug = outputName;
+    outputNameRelease = outputName;
+    outputNameMinSizeRel = outputName;
+    outputNameRelWithDebInfo = outputName;
+    }
 
   // Compute the output directory for the target.
+  std::string outputDirOld;
   std::string outputDirDebug;
   std::string outputDirRelease;
   std::string outputDirMinSizeRel;
@@ -1251,6 +1262,11 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
+#ifdef CM_USE_OLD_VS6
+    outputDirOld =
+      removeQuotes(this->ConvertToOptionallyRelativeOutputPath
+                   (target.GetDirectory().c_str()));
+#endif
     outputDirDebug =
         removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
                        target.GetDirectory("Debug").c_str()));
@@ -1263,6 +1279,14 @@ void cmLocalVisualStudio6Generator
     outputDirRelWithDebInfo =
         removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
                  target.GetDirectory("RelWithDebInfo").c_str()));
+    }
+  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    std::string outputDir = cmake::GetCMakeFilesDirectoryPostSlash();
+    outputDirDebug = outputDir + "Debug";
+    outputDirRelease = outputDir + "Release";
+    outputDirMinSizeRel = outputDir + "MinSizeRel";
+    outputDirRelWithDebInfo = outputDir + "RelWithDebInfo";
     }
 
   // Compute the proper link information for the target.
@@ -1432,7 +1456,8 @@ void cmLocalVisualStudio6Generator
                                  libnameExports.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                  mfcFlag);
-    if(target.GetType() == cmTarget::STATIC_LIBRARY )
+    if(target.GetType() == cmTarget::STATIC_LIBRARY ||
+       target.GetType() == cmTarget::OBJECT_LIBRARY)
       {
       cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_DEBUG",
                                    staticLibOptionsDebug.c_str());
@@ -1531,7 +1556,7 @@ void cmLocalVisualStudio6Generator
                     (exePath.c_str())).c_str());
 #endif
 
-    if(targetBuilds)
+    if(targetBuilds || target.GetType() == cmTarget::OBJECT_LIBRARY)
       {
       cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_DEBUG",
                                    outputDirDebug.c_str());
@@ -1541,13 +1566,11 @@ void cmLocalVisualStudio6Generator
                                    outputDirMinSizeRel.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_RELWITHDEBINFO",
                                    outputDirRelWithDebInfo.c_str());
-#ifdef CM_USE_OLD_VS6
-      std::string outPath = target.GetDirectory();
-      cmSystemTools::ReplaceString
-        (line, "OUTPUT_DIRECTORY",
-         removeQuotes(this->ConvertToOptionallyRelativeOutputPath
-                      (outPath.c_str())).c_str());
-#endif
+      if(!outputDirOld.empty())
+        {
+        cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY",
+                                     outputDirOld.c_str());
+        }
       }
 
     cmSystemTools::ReplaceString(line, 

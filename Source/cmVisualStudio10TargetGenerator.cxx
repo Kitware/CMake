@@ -148,7 +148,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
-  if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
+  if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     if(!this->ComputeClOptions())
       {
@@ -359,6 +359,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       case cmTarget::MODULE_LIBRARY:
         configType += "DynamicLibrary";
         break;
+      case cmTarget::OBJECT_LIBRARY:
       case cmTarget::STATIC_LIBRARY:
         configType += "StaticLibrary";
         break;
@@ -389,7 +390,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     mfcLine += useOfMfcValue + "</UseOfMfc>\n";
     this->WriteString(mfcLine.c_str(), 2);
 
-    if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
        this->ClOptions[*i]->UsingUnicode() ||
        this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
@@ -1006,20 +1007,29 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       }
     else
       {
-      std::string targetNameFull =
-        this->Target->GetFullName(config->c_str());
       std::string intermediateDir = this->LocalGenerator->
         GetTargetDirectory(*this->Target);
       intermediateDir += "/";
       intermediateDir += *config;
       intermediateDir += "/";
+      std::string outDir;
+      std::string targetNameFull;
+      if(ttype == cmTarget::OBJECT_LIBRARY)
+        {
+        outDir = intermediateDir;
+        targetNameFull = this->Target->GetName();
+        targetNameFull += ".lib";
+        }
+      else
+        {
+        outDir = this->Target->GetDirectory(config->c_str()) + "/";
+        targetNameFull = this->Target->GetFullName(config->c_str());
+        }
       this->ConvertToWindowsSlash(intermediateDir);
-      std::string outDir = this->Target->GetDirectory(config->c_str());
       this->ConvertToWindowsSlash(outDir);
 
       this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
       *this->BuildFileStream << outDir
-                             << "\\"
                              << "</OutDir>\n";
 
       this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
@@ -1253,11 +1263,15 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   *this->BuildFileStream << configName 
                          << "</AssemblerListingLocation>\n";
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
-  this->WriteString("<ProgramDataBaseFileName>", 3);
-  *this->BuildFileStream << this->Target->GetDirectory(configName.c_str())
-                         << "/" 
-                         << this->Target->GetPDBName(configName.c_str())
-                         << "</ProgramDataBaseFileName>\n";
+  if(this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
+    {
+    // TODO: PDB for object library?
+    this->WriteString("<ProgramDataBaseFileName>", 3);
+    *this->BuildFileStream << this->Target->GetDirectory(configName.c_str())
+                           << "/"
+                           << this->Target->GetPDBName(configName.c_str())
+                           << "</ProgramDataBaseFileName>\n";
+    }
   this->WriteString("</ClCompile>\n", 2);
 }
 
@@ -1568,7 +1582,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>
-    if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
+    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
       this->WriteClOptions(*i, includes);
       //    output rc compile flags <ResourceCompile></ResourceCompile>
