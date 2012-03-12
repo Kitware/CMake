@@ -29,6 +29,8 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
 //----------------------------------------------------------------------------
 void cmGeneratorTarget::ClassifySources()
 {
+  bool isObjLib = this->Target->GetType() == cmTarget::OBJECT_LIBRARY;
+  std::vector<cmSourceFile*> badObjLib;
   std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
@@ -43,6 +45,7 @@ void cmGeneratorTarget::ClassifySources()
     else if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
       {
       this->OSXContent.push_back(sf);
+      if(isObjLib) { badObjLib.push_back(sf); }
       }
     else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
@@ -51,10 +54,12 @@ void cmGeneratorTarget::ClassifySources()
     else if(sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
       this->ExternalObjects.push_back(sf);
+      if(isObjLib) { badObjLib.push_back(sf); }
       }
     else if(cmSystemTools::LowerCase(sf->GetExtension()) == "def")
       {
       this->ModuleDefinitionFile = sf->GetFullPath();
+      if(isObjLib) { badObjLib.push_back(sf); }
       }
     else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
       {
@@ -69,6 +74,22 @@ void cmGeneratorTarget::ClassifySources()
     else
       {
       this->ExtraSources.push_back(sf);
+      if(isObjLib) { badObjLib.push_back(sf); }
       }
+    }
+
+  if(!badObjLib.empty())
+    {
+    cmOStringStream e;
+    e << "OBJECT library \"" << this->Target->GetName() << "\" contains:\n";
+    for(std::vector<cmSourceFile*>::iterator i = badObjLib.begin();
+        i != badObjLib.end(); ++i)
+      {
+      e << "  " << (*i)->GetLocation().GetName() << "\n";
+      }
+    e << "but may contain only headers and sources that compile.";
+    this->GlobalGenerator->GetCMakeInstance()
+      ->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                     this->Target->GetBacktrace());
     }
 }

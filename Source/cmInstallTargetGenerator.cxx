@@ -90,6 +90,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     case cmTarget::STATIC_LIBRARY: type = cmInstallType_STATIC_LIBRARY; break;
     case cmTarget::SHARED_LIBRARY: type = cmInstallType_SHARED_LIBRARY; break;
     case cmTarget::MODULE_LIBRARY: type = cmInstallType_MODULE_LIBRARY; break;
+    case cmTarget::OBJECT_LIBRARY:
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
     case cmTarget::UNKNOWN_LIBRARY:

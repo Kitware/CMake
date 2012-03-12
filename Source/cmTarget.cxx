@@ -37,6 +37,8 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
         return "MODULE_LIBRARY";
       case cmTarget::SHARED_LIBRARY:
         return "SHARED_LIBRARY";
+      case cmTarget::OBJECT_LIBRARY:
+        return "OBJECT_LIBRARY";
       case cmTarget::EXECUTABLE:
         return "EXECUTABLE";
       case cmTarget::UTILITY:

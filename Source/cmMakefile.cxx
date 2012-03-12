@@ -853,6 +853,14 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
   cmTargets::iterator ti = this->Targets.find(target);
   if(ti != this->Targets.end())
     {
+    if(ti->second.GetType() == cmTarget::OBJECT_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "Target \"" << target << "\" is an OBJECT library "
+        "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
     // Add the command to the appropriate build step for the target.
     std::vector<std::string> no_output;
     cmCustomCommand cc(this, no_output, depends,
@@ -1912,8 +1920,11 @@ cmTarget* cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
   // wrong type ? default to STATIC
   if (    (type != cmTarget::STATIC_LIBRARY)
        && (type != cmTarget::SHARED_LIBRARY)
-       && (type != cmTarget::MODULE_LIBRARY))
+       && (type != cmTarget::MODULE_LIBRARY)
+       && (type != cmTarget::OBJECT_LIBRARY))
     {
+    this->IssueMessage(cmake::INTERNAL_ERROR,
+                       "cmMakefile::AddLibrary given invalid target type.");
     type = cmTarget::STATIC_LIBRARY;
     }
 
