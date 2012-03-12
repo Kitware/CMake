@@ -635,6 +635,25 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->WriteGroupSources("Midl", idls, sourceGroups);
   this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
 
+  // Add object library contents as external objects.
+  std::vector<std::string> objs;
+  this->GeneratorTarget->UseObjectLibraries(objs);
+  if(!objs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<std::string>::const_iterator
+          oi = objs.begin(); oi != objs.end(); ++oi)
+      {
+      std::string obj = *oi;
+      this->WriteString("<Object Include=\"", 2);
+      this->ConvertToWindowsSlash(obj);
+      (*this->BuildFileStream ) << obj << "\">\n";
+      this->WriteString("<Filter>Object Libraries</Filter>\n", 3);
+      this->WriteString("</Object>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+
   this->WriteString("<ItemGroup>\n", 1);
   for(std::set<cmSourceGroup*>::iterator g = groupsUsed.begin();
       g != groupsUsed.end(); ++g)
@@ -657,6 +676,18 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
         << "</UniqueIdentifier>\n";
       this->WriteString("</Filter>\n", 2);
       }
+    }
+  if(!objs.empty())
+    {
+    this->WriteString("<Filter Include=\"Object Libraries\">\n", 2);
+    std::string guidName = "SG_Filter_Object Libraries";
+    this->GlobalGenerator->CreateGUID(guidName.c_str());
+    this->WriteString("<UniqueIdentifier>", 3);
+    std::string guid =
+      this->GlobalGenerator->GetGUID(guidName.c_str());
+    (*this->BuildFileStream) << "{" << guid << "}"
+                             << "</UniqueIdentifier>\n";
+    this->WriteString("</Filter>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
   this->WriteGroupSources("None", none, sourceGroups);
@@ -873,6 +904,19 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       (*this->BuildFileStream ) << " />\n";
       }
     }
+
+  // Add object library contents as external objects.
+  std::vector<std::string> objs;
+  this->GeneratorTarget->UseObjectLibraries(objs);
+  for(std::vector<std::string>::const_iterator
+        oi = objs.begin(); oi != objs.end(); ++oi)
+    {
+    std::string obj = *oi;
+    this->WriteString("<Object Include=\"", 2);
+    this->ConvertToWindowsSlash(obj);
+    (*this->BuildFileStream ) << obj << "\" />\n";
+    }
+
   this->WriteString("</ItemGroup>\n", 1);
 }
 
