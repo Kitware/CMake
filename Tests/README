@@ -16,10 +16,15 @@ your test to the test runs.
 This includes tests that will build something using try_compile() and friends,
 but nothing that expects add_executable(), add_library(), or add_test() to run.
 
-If this matches your test you should put it into the Tests/CMakeOnly/ directory.
-Create a subdirectory named like your test and write the CMakeLists.txt you
-need into that subdirectory. Use the add_CMakeOnly_test() macro from
-Tests/CMakeOnly/CMakeLists.txt to add your test to the test runs.
+If the test configures the project only once and it must succeed then put it
+into the Tests/CMakeOnly/ directory.  Create a subdirectory named like your
+test and write the CMakeLists.txt you need into that subdirectory. Use the
+add_CMakeOnly_test() macro from Tests/CMakeOnly/CMakeLists.txt to add your
+test to the test runs.
+
+If the test configures the project with multiple variations and verifies
+success or failure each time then put it into the Tests/RunCMake/ directory.
+Read the instructions in Tests/RunCMake/CMakeLists.txt to add a test.
 
 3. If you are testing something from the Modules directory
 
