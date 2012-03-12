@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+project(${RunCMake_TEST} NONE)
+include(${RunCMake_TEST}.cmake)
+
 # This CMakeLists file is *sometimes expected* to result in a configure error.
 #
 # expect this to succeed:
@@ -12,12 +16,9 @@
 # ...even purposefully calling it with known-bad argument lists to cover
 # error handling code.
 #
-cmake_minimum_required(VERSION 2.8)
-project(test_build_command)
 
 set(cmd "initial")
 
-message("CTEST_FULL_OUTPUT")
 message("0. begin")
 
 if(TEST_ERROR_CONDITIONS)

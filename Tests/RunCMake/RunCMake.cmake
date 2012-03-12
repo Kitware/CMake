@@ -1,15 +1,16 @@
-if(NOT DEFINED dir)
-  message(FATAL_ERROR "dir not defined")
-endif()
+foreach(arg
+    RunCMake_GENERATOR
+    RunCMake_SOURCE_DIR
+    RunCMake_BINARY_DIR
+    )
+  if(NOT DEFINED ${arg})
+    message(FATAL_ERROR "${arg} not given!")
+  endif()
+endforeach()
 
-if(NOT DEFINED gen)
-  message(FATAL_ERROR "gen not defined")
-endif()
-
-# TODO: Generalize this for other tests.
-function(run_test test)
-  set(top_src "${CMAKE_CURRENT_LIST_DIR}")
-  set(top_bin "${dir}")
+function(run_cmake test)
+  set(top_src "${RunCMake_SOURCE_DIR}")
+  set(top_bin "${RunCMake_BINARY_DIR}")
   if(EXISTS ${top_src}/${test}-result.txt)
     file(READ ${top_src}/${test}-result.txt expect_result)
     string(REGEX REPLACE "\n+$" "" expect_result "${expect_result}")
@@ -29,7 +30,8 @@ function(run_test test)
   file(REMOVE_RECURSE "${binary_dir}")
   file(MAKE_DIRECTORY "${binary_dir}")
   execute_process(
-    COMMAND ${CMAKE_COMMAND} "${source_dir}" -G "${gen}" -DTEST=${test}
+    COMMAND ${CMAKE_COMMAND} "${source_dir}"
+              -G "${RunCMake_GENERATOR}" -DRunCMake_TEST=${test}
     WORKING_DIRECTORY "${binary_dir}"
     OUTPUT_VARIABLE actual_stdout
     ERROR_VARIABLE actual_stderr
@@ -65,16 +67,3 @@ function(run_test test)
     message(STATUS "${test} - PASSED")
   endif()
 endfunction()
-
-run_test(MissingNormal)
-run_test(MissingNormalRequired)
-run_test(MissingNormalVersion)
-run_test(MissingNormalWarnNoModuleOld)
-run_test(MissingNormalWarnNoModuleNew)
-run_test(MissingModule)
-run_test(MissingModuleRequired)
-run_test(MissingConfig)
-run_test(MissingConfigOneName)
-run_test(MissingConfigRequired)
-run_test(MissingConfigVersion)
-run_test(MixedModeOptions)
