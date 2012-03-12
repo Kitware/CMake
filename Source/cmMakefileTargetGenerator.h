@@ -118,6 +118,9 @@ protected:
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
 
+  // Append object file dependencies.
+  void AppendObjectDepends(std::vector<std::string>& depends);
+
   // Append link rule dependencies (objects, etc.).
   void AppendLinkDepends(std::vector<std::string>& depends);
 

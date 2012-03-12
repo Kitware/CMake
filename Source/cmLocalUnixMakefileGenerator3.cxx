@@ -358,6 +358,7 @@ void cmLocalUnixMakefileGenerator3
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
        (t->second.GetType() == cmTarget::UTILITY))
       {
       emitted.insert(t->second.GetName());

@@ -411,6 +411,7 @@ void cmGlobalUnixMakefileGenerator3
          (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
          (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
          (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+         (l->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
          (l->second.GetType() == cmTarget::UTILITY))
         {
         std::string tname = lg->GetRelativeTargetDirectory(l->second);
@@ -446,6 +447,7 @@ cmGlobalUnixMakefileGenerator3
        (l->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (l->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
        (l->second.GetType() == cmTarget::UTILITY))
       {
       // Add this to the list of depends rules in this directory.
@@ -620,6 +622,7 @@ cmGlobalUnixMakefileGenerator3
           (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+          (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
           (t->second.GetType() == cmTarget::UTILITY)))
         {
         // Add a rule to build the target by name.
@@ -706,6 +709,7 @@ cmGlobalUnixMakefileGenerator3
         || (t->second.GetType() == cmTarget::STATIC_LIBRARY)
         || (t->second.GetType() == cmTarget::SHARED_LIBRARY)
         || (t->second.GetType() == cmTarget::MODULE_LIBRARY)
+        || (t->second.GetType() == cmTarget::OBJECT_LIBRARY)
         || (t->second.GetType() == cmTarget::UTILITY)))
       {
       std::string makefileName;
@@ -1015,6 +1019,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
            (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
            (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
            (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+           (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
            (t->second.GetType() == cmTarget::GLOBAL_TARGET) ||
            (t->second.GetType() == cmTarget::UTILITY))
           {

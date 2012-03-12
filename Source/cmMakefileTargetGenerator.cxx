@@ -65,6 +65,7 @@ cmMakefileTargetGenerator::New(cmTarget *tgt)
     case cmTarget::STATIC_LIBRARY:
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
+    case cmTarget::OBJECT_LIBRARY:
       result = new cmMakefileLibraryTargetGenerator(tgt);
       break;
     case cmTarget::UTILITY:
@@ -1596,7 +1597,7 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
-::AppendLinkDepends(std::vector<std::string>& depends)
+::AppendObjectDepends(std::vector<std::string>& depends)
 {
   // Add dependencies on the compiled object files.
   std::string relPath = this->LocalGenerator->GetHomeRelativeOutputPath();
@@ -1609,25 +1610,32 @@ void cmMakefileTargetGenerator
     depends.push_back(objTarget);
     }
 
-  // Add dependencies on targets that must be built first.
-  this->AppendTargetDepends(depends);
-
-  // Add a dependency on the rule file itself.
-  this->LocalGenerator->AppendRuleDepend(depends,
-                                         this->BuildFileNameFull.c_str());
-
-  // Add a dependency on the link definitions file, if any.
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
-    {
-    depends.push_back(this->GeneratorTarget->ModuleDefinitionFile);
-    }
-
   // Add dependencies on the external object files.
   for(std::vector<std::string>::const_iterator obj
         = this->ExternalObjects.begin();
       obj != this->ExternalObjects.end(); ++obj)
     {
     depends.push_back(*obj);
+    }
+
+  // Add a dependency on the rule file itself.
+  this->LocalGenerator->AppendRuleDepend(depends,
+                                         this->BuildFileNameFull.c_str());
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator
+::AppendLinkDepends(std::vector<std::string>& depends)
+{
+  this->AppendObjectDepends(depends);
+
+  // Add dependencies on targets that must be built first.
+  this->AppendTargetDepends(depends);
+
+  // Add a dependency on the link definitions file, if any.
+  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+    {
+    depends.push_back(this->GeneratorTarget->ModuleDefinitionFile);
     }
 
   // Add user-specified dependencies.
