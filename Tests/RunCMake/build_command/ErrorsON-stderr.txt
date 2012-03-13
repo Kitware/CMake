@@ -1,0 +1,12 @@
+CMake Error at CMakeLists.txt:[0-9]+ \(build_command\):
+  build_command requires at least one argument naming a CMake variable
+
++
+1. cmd='initial'
+CMake Error at CMakeLists.txt:[0-9]+ \(build_command\):
+  build_command unknown argument "BOGUS"
+
++
+2. cmd='initial'
+CMake Error at CMakeLists.txt:[0-9]+ \(build_command\):
+  build_command unknown argument "STUFF"
