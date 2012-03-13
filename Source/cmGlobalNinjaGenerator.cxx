@@ -664,6 +664,7 @@ cmGlobalNinjaGenerator
       target->GetFullPath(configName).c_str()));
     break;
 
+  case cmTarget::OBJECT_LIBRARY:
   case cmTarget::UTILITY: {
     std::string path = ng->ConvertToNinjaPath(
       target->GetMakefile()->GetStartOutputDirectory());

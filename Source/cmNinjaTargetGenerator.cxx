@@ -34,6 +34,7 @@ cmNinjaTargetGenerator::New(cmTarget* target)
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::STATIC_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
+      case cmTarget::OBJECT_LIBRARY:
         return new cmNinjaNormalTargetGenerator(target);
 
       case cmTarget::UTILITY:
@@ -221,7 +222,8 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 {
   // Static libraries never depend on other targets for linking.
-  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+  if (this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+      this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =

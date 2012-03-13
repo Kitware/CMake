@@ -43,10 +43,13 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
                             this->TargetNamePDB,
                             GetLocalGenerator()->GetConfigName());
 
-  // on Windows the output dir is already needed at compile time
-  // ensure the directory exists (OutDir test)
-  std::string outpath = target->GetDirectory(this->GetConfigName());
-  cmSystemTools::MakeDirectory(outpath.c_str());
+  if(target->GetType() != cmTarget::OBJECT_LIBRARY)
+    {
+    // on Windows the output dir is already needed at compile time
+    // ensure the directory exists (OutDir test)
+    std::string outpath = target->GetDirectory(this->GetConfigName());
+    cmSystemTools::MakeDirectory(outpath.c_str());
+    }
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
@@ -67,8 +70,15 @@ void cmNinjaNormalTargetGenerator::Generate()
   // Write the build statements
   this->WriteObjectBuildStatements();
 
-  this->WriteLinkRule();
-  this->WriteLinkStatement();
+  if(this->GetTarget()->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    this->WriteObjectLibStatement();
+    }
+  else
+    {
+    this->WriteLinkRule();
+    this->WriteLinkStatement();
+    }
 
   this->GetBuildFileStream() << "\n";
   this->GetRulesFileStream() << "\n";
@@ -464,6 +474,24 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // Add aliases for the file name and the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->TargetNameOut,
                                              this->GetTarget());
+  this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
+                                             this->GetTarget());
+}
+
+//----------------------------------------------------------------------------
+void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
+{
+  // Write a phony output that depends on all object files.
+  cmNinjaDeps outputs;
+  this->GetLocalGenerator()->AppendTargetOutputs(this->GetTarget(), outputs);
+  cmNinjaDeps depends = this->GetObjects();
+  cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
+                                          "Object library "
+                                          + this->GetTargetName(),
+                                          outputs,
+                                          depends);
+
+  // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
                                              this->GetTarget());
 }
