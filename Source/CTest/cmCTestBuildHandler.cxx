@@ -94,6 +94,7 @@ static const char* cmCTestErrorMatches[] = {
   ": Invalid argument",
   "^The project cannot be built\\.",
   "^\\[ERROR\\]",
+  "^Command .* failed with exit code",
   0
 };
 
