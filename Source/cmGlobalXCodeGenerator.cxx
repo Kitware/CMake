@@ -19,6 +19,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmGeneratorTarget.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -3610,4 +3611,52 @@ bool cmGlobalXCodeGenerator::IsMultiConfig()
 
   // Newer Xcode versions are multi config:
   return true;
+}
+
+ //----------------------------------------------------------------------------
+void
+cmGlobalXCodeGenerator
+::ComputeTargetObjects(cmGeneratorTarget* gt) const
+{
+  // Count the number of object files with each name. Warn about duplicate
+  // names since Xcode names them uniquely automatically with a numeric suffix
+  // to avoid exact duplicate file names. Note that Mac file names are not
+  // typically case sensitive, hence the LowerCase.
+  std::map<cmStdString, int> counts;
+  for(std::vector<cmSourceFile*>::const_iterator
+      si = gt->ObjectSources.begin();
+      si != gt->ObjectSources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    std::string objectName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    objectName += ".o";
+
+    std::string objectNameLower = cmSystemTools::LowerCase(objectName);
+    counts[objectNameLower] += 1;
+    if (2 == counts[objectNameLower])
+      {
+      // TODO: emit warning about duplicate name?
+      }
+
+    gt->Objects[sf] = objectName;
+    }
+
+  const char* configName = this->GetCMakeCFGIntDir();
+  std::string dir = this->GetObjectsNormalDirectory(
+    this->CurrentProject, configName, gt->Target);
+  if(this->XcodeVersion >= 21)
+    {
+    dir += "$(CURRENT_ARCH)/";
+    }
+  else
+    {
+#ifdef __ppc__
+    dir += "ppc/";
+#endif
+#ifdef __i386
+    dir += "i386/";
+#endif
+    }
+  gt->ObjectDirectory = dir;
 }

@@ -206,6 +206,8 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  void ComputeTargetObjects(cmGeneratorTarget* gt) const;
+
   std::string GetObjectsNormalDirectory(
     const std::string &projName,
     const std::string &configName,
