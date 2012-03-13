@@ -372,7 +372,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
   }
 
-  vars["TARGET_PDB"] = this->GetTargetPDB();
+  vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+    this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
     &this->GetTarget()->GetPreBuildCommands(),
