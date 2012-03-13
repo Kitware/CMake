@@ -118,17 +118,17 @@ private:
   void AppendCustomCommandLines(const cmCustomCommand *cc,
                                 std::vector<std::string> &cmdLines);
   void WriteCustomCommandRule();
-  void WriteCustomCommandBuildStatement(cmCustomCommand *cc,
+  void WriteCustomCommandBuildStatement(cmCustomCommand const *cc,
                                         const cmNinjaDeps& orderOnlyDeps);
 
-  void AddCustomCommandTarget(cmCustomCommand* cc, cmTarget* target);
+  void AddCustomCommandTarget(cmCustomCommand const* cc, cmTarget* target);
   void WriteCustomCommandBuildStatements();
 
 private:
   std::string ConfigName;
   std::string HomeRelativeOutputPath;
 
-  typedef std::map<cmCustomCommand*, std::set<cmTarget*> >
+  typedef std::map<cmCustomCommand const*, std::set<cmTarget*> >
     CustomCommandTargetMap;
   CustomCommandTargetMap CustomCommandTargets;
 };

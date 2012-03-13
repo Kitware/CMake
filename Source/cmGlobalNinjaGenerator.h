@@ -270,7 +270,7 @@ private:
 
   /// Called when we have seen the given custom command.  Returns true
   /// if we has seen it before.
-  bool SeenCustomCommand(cmCustomCommand *cc) {
+  bool SeenCustomCommand(cmCustomCommand const *cc) {
     return !this->CustomCommands.insert(cc).second;
   }
 
@@ -315,7 +315,7 @@ private:
   cmNinjaDeps AllDependencies;
 
   /// The set of custom commands we have seen.
-  std::set<cmCustomCommand *> CustomCommands;
+  std::set<cmCustomCommand const*> CustomCommands;
 
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
