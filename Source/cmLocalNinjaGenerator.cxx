@@ -343,8 +343,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
 }
 
 void
-cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(cmCustomCommand *cc,
-                                            const cmNinjaDeps& orderOnlyDeps)
+cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
+  cmCustomCommand const *cc, const cmNinjaDeps& orderOnlyDeps)
 {
   if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc))
     return;
@@ -383,7 +383,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(cmCustomCommand *cc,
   }
 }
 
-void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand* cc,
+void cmLocalNinjaGenerator::AddCustomCommandTarget(cmCustomCommand const* cc,
                                                    cmTarget* target)
 {
   this->CustomCommandTargets[cc].insert(target);
