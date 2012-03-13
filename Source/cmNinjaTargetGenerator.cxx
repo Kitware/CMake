@@ -464,7 +464,8 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
-  vars["TARGET_PDB"] = this->GetTargetPDB();
+  vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+    this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
 
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment,
