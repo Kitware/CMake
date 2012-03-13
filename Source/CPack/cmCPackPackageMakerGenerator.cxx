@@ -404,6 +404,9 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
     this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM", pkgPath.c_str());
     }
 
+  // Get path to the real PackageMaker, not a symlink:
+  pkgPath = cmSystemTools::GetRealPath(pkgPath.c_str());
+  // Up from there to find the version.plist file in the "Contents" dir:
   std::string contents_dir;
   contents_dir = cmSystemTools::GetFilenamePath(pkgPath);
   contents_dir = cmSystemTools::GetFilenamePath(contents_dir);
