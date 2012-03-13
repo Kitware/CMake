@@ -160,15 +160,18 @@ public:
   void AppendFeatureOptions(std::string& flags, const char* lang,
                             const char* feature);
 
-  /** Translate a dependency as given in CMake code to the name to
-      appear in a generated build file.  If the given name is that of
-      a utility target, returns false.  If the given name is that of
-      a CMake target it will be transformed to the real output
-      location of that target for the given configuration.  If the
-      given name is the full path to a file it will be returned.
-      Otherwise the name is treated as a relative path with respect to
-      the source directory of this generator.  This should only be
-      used for dependencies of custom commands.  */
+  /** \brief Get absolute path to dependency \a name
+   *
+   * Translate a dependency as given in CMake code to the name to
+   * appear in a generated build file.
+   * - If \a name is a utility target, returns false.
+   * - If \a name is a CMake target, it will be transformed to the real output
+   *   location of that target for the given configuration.
+   * - If \a name is the full path to a file, it will be returned.
+   * - Otherwise \a name is treated as a relative path with respect to
+   *   the source directory of this generator.  This should only be
+   *   used for dependencies of custom commands.
+   */
   bool GetRealDependency(const char* name, const char* config,
                          std::string& dep);
 
@@ -257,14 +260,6 @@ public:
     FortranFormatFree
     };
   FortranFormat GetFortranFormat(const char* value);
-
-  /** Return the directories into which object files will be put.
-   *  There maybe more than one for fat binary systems like OSX.
-   */
-  virtual void
-  GetTargetObjectFileDirectories(cmTarget* target,
-                                 std::vector<std::string>&
-                                 dirs);
 
   /**
    * Convert the given remote path to a relative path with respect to

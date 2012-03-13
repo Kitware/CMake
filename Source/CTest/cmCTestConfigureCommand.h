@@ -38,12 +38,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ctest_configure";}
+  virtual const char* GetName() const { return "ctest_configure";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Configure the project build tree.";
     }
@@ -51,7 +51,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  ctest_configure([BUILD build_dir] [SOURCE source_dir] [APPEND]\n"

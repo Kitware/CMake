@@ -34,7 +34,7 @@ public:
    * Override cmCommand::InvokeInitialPass to get arguments before
    * expansion.
    */
-  virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const&,
+  virtual bool InvokeInitialPass(std::vector<cmListFileArgument> const& args,
                                  cmExecutionStatus &status);
   
   /**
@@ -47,17 +47,17 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "endwhile";}
+  virtual const char* GetName() const { return "endwhile";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Ends a list of commands in a while block.";
     }
@@ -65,7 +65,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  endwhile(expression)\n"

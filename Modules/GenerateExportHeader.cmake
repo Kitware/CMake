@@ -18,7 +18,7 @@
 #             [PREFIX_NAME <prefix_name>]
 # )
 #
-# ADD_COMPILER_EXPORT_FLAGS( [FATAL_WARNINGS] )
+# ADD_COMPILER_EXPORT_FLAGS( [<output_variable>] )
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
 # determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS function
@@ -149,46 +149,20 @@ include(CheckCXXCompilerFlag)
 macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
   check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
     int main() { return somefunc();}" ${_RESULT}
-    # Some compilers do not fail with a bad flag
-    FAIL_REGEX "unrecognized .*option"                     # GNU
-    FAIL_REGEX "ignoring unknown option"                   # MSVC
-    FAIL_REGEX "warning D9002"                             # MSVC, any lang
-    FAIL_REGEX "[Uu]nknown option"                         # HP
-    FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
-    FAIL_REGEX "command option .* is not recognized"       # XL
   )
 endmacro()
 
 macro(_test_compiler_hidden_visibility)
 
-  if(CMAKE_COMPILER_IS_GNUCXX)
-    exec_program(${CMAKE_C_COMPILER} ARGS --version
-      OUTPUT_VARIABLE _gcc_version_info)
-    string(REGEX MATCH "[345]\\.[0-9]\\.[0-9]"
-      _gcc_version "${_gcc_version_info}")
-    # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
-    # patch level, handle this here:
-    if(NOT _gcc_version)
-      string(REGEX REPLACE ".*\\(GCC\\).* ([34]\\.[0-9]) .*" "\\1.0"
-        _gcc_version "${_gcc_version_info}")
-    endif()
-
-    if("${_gcc_version}" VERSION_LESS "4.2")
-      set(GCC_TOO_OLD TRUE)
-      message(WARNING "GCC version older than 4.2")
-    endif()
-  endif()
-
-  if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
-    exec_program(${CMAKE_CXX_COMPILER} ARGS -V
-      OUTPUT_VARIABLE _intel_version_info)
-    string(REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" "\\1"
-      _intel_version "${_intel_version_info}")
-
-    if(${_intel_version} VERSION_LESS "12.0")
-      set(_INTEL_TOO_OLD TRUE)
-      message(WARNING "Intel compiler older than 12.0")
-    endif()
+  if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.2")
+    set(GCC_TOO_OLD TRUE)
+    message(WARNING "GCC version older than 4.2")
+  elseif(CMAKE_COMPILER_IS_GNUC AND CMAKE_C_COMPILER_VERSION VERSION_LESS "4.2")
+    set(GCC_TOO_OLD TRUE)
+    message(WARNING "GCC version older than 4.2")
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES Intel AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "12.0")
+    set(_INTEL_TOO_OLD TRUE)
+    message(WARNING "Intel compiler older than 12.0")
   endif()
 
 

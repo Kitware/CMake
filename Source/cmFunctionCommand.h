@@ -15,11 +15,6 @@
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 
-/** \class cmFunctionFunctionBlocker
- * \brief subclass of function blocker
- *
- *
- */
 class cmFunctionFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -35,11 +30,7 @@ public:
   int Depth;
 };
 
-/** \class cmFunctionCommand
- * \brief starts an if block
- *
- * cmFunctionCommand starts an if block
- */
+/// Starts function() ... endfunction() block
 class cmFunctionCommand : public cmCommand
 {
 public:
@@ -61,17 +52,17 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "function";}
+  virtual const char* GetName() const { return "function";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Start recording a function for later invocation as a command.";
     }
@@ -79,7 +70,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  function(<name> [arg1 [arg2 [arg3 ...]]])\n"

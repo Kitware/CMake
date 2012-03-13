@@ -50,9 +50,7 @@ public:
   void SetBuildType(BuildType, const char* libName, cmTarget&);
 
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
-  void GetTargetObjectFileDirectories(cmTarget* target,
-                                      std::vector<std::string>& 
-                                      dirs);
+  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
 private:
   std::string DSPHeaderTemplate;
   std::string DSPFooterTemplate;

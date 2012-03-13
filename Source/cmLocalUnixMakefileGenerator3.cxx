@@ -145,6 +145,20 @@ void cmLocalUnixMakefileGenerator3::Generate()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator3::AddLocalObjectFile(
+  cmTarget* target, cmSourceFile* sf, std::string objNoTargetDir,
+  bool hasSourceExtension)
+{
+  if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
+    {
+    objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
+    }
+  LocalObjectInfo& info = this->LocalObjectFiles[objNoTargetDir];
+  info.HasSourceExtension = hasSourceExtension;
+  info.push_back(LocalObjectEntry(target, sf->GetLanguage()));
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
                                             (std::vector<std::string>& targets)
 {
@@ -344,6 +358,7 @@ void cmLocalUnixMakefileGenerator3
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
        (t->second.GetType() == cmTarget::UTILITY))
       {
       emitted.insert(t->second.GetName());
@@ -1995,45 +2010,6 @@ void cmLocalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
-std::string
-cmLocalUnixMakefileGenerator3
-::GetObjectFileName(cmTarget& target,
-                    const cmSourceFile& source,
-                    std::string* nameWithoutTargetDir,
-                    bool* hasSourceExtension)
-{
-  // Make sure we never hit this old case.
-  if(source.GetProperty("MACOSX_PACKAGE_LOCATION"))
-    {
-    std::string msg = "MACOSX_PACKAGE_LOCATION set on source file: ";
-    msg += source.GetFullPath();
-    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
-                                      msg.c_str());
-    }
-
-  // Start with the target directory.
-  std::string obj = this->GetTargetDirectory(target);
-  obj += "/";
-
-  // Get the object file name without the target directory.
-  std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += obj;
-  std::string objectName =
-    this->GetObjectFileNameWithoutTarget(source, dir_max,
-                                         hasSourceExtension);
-  if(nameWithoutTargetDir)
-    {
-    *nameWithoutTargetDir = objectName;
-    }
-
-  // Append the object name to the target directory.
-  obj += objectName;
-  return obj;
-}
-
-//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
 {
   os
@@ -2266,15 +2242,4 @@ void cmLocalUnixMakefileGenerator3
       *i = cmd;
       }
     }
-}
-
-
-void cmLocalUnixMakefileGenerator3
-::GetTargetObjectFileDirectories(cmTarget* target,
-                                 std::vector<std::string>& dirs)
-{
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
-  dir += "/";
-  dir += this->GetTargetDirectory(*target);
-  dirs.push_back(dir);
 }

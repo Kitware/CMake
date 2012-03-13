@@ -40,19 +40,19 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "try_compile";}
+  virtual const char* GetName() const { return "try_compile";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Try building some code.";
     }
 
   /**
    * More documentation.  */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  try_compile(RESULT_VAR <bindir> <srcdir>\n"

@@ -15,11 +15,6 @@
 #include "cmCommand.h"
 #include "cmFunctionBlocker.h"
 
-/** \class cmIfFunctionBlocker
- * \brief subclass of function blocker
- *
- * 
- */
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
@@ -39,11 +34,7 @@ public:
   unsigned int ScopeDepth;
 };
 
-/** \class cmIfCommand
- * \brief starts an if block
- *
- * cmIfCommand starts an if block
- */
+/// Starts an if block
 class cmIfCommand : public cmCommand
 {
 public:
@@ -72,12 +63,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "if";}
+  virtual const char* GetName() const { return "if";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Conditionally execute a group of commands.";
     }
@@ -85,12 +76,12 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  if(expression)\n"

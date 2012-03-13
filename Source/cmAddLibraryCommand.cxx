@@ -64,6 +64,12 @@ bool cmAddLibraryCommand
       type = cmTarget::MODULE_LIBRARY;
       haveSpecifiedType = true;
       }
+    else if(libType == "OBJECT")
+      {
+      ++s;
+      type = cmTarget::OBJECT_LIBRARY;
+      haveSpecifiedType = true;
+      }
     else if(libType == "UNKNOWN")
       {
       ++s;
@@ -117,6 +123,14 @@ bool cmAddLibraryCommand
       {
       this->SetError("called with IMPORTED argument but no library type.");
       return false;
+      }
+    if(type == cmTarget::OBJECT_LIBRARY)
+      {
+      this->Makefile->IssueMessage(
+        cmake::FATAL_ERROR,
+        "The OBJECT library type may not be used for IMPORTED libraries."
+        );
+      return true;
       }
 
     // Make sure the target does not already exist.

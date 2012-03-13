@@ -42,12 +42,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "target_link_libraries";}
+  virtual const char* GetName() const { return "target_link_libraries";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return
       "Link a target to given libraries.";
@@ -56,7 +56,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  target_link_libraries(<target> [item1 [item2 [...]]]\n"

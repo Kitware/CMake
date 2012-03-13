@@ -84,6 +84,16 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
+  if(this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    cmOStringStream e;
+    e << "Object library target \"" << args[0] << "\" "
+      << "may not link to anything.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return true;
+    }
+
   // but we might not have any libs after variable expansion
   if(args.size() < 2)
     {

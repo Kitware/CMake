@@ -261,11 +261,13 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 void cmDepends::SetIncludePathFromLanguage(const char* lang)
 {
   // Look for the new per "TARGET_" variant first:
+  const char * includePath = 0;
   std::string includePathVar = "CMAKE_";
   includePathVar += lang;
   includePathVar += "_TARGET_INCLUDE_PATH";
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  if(const char* includePath = mf->GetDefinition(includePathVar.c_str()))
+  includePath = mf->GetDefinition(includePathVar.c_str());
+  if(includePath)
     {
     cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
     }
@@ -275,7 +277,8 @@ void cmDepends::SetIncludePathFromLanguage(const char* lang)
     includePathVar = "CMAKE_";
     includePathVar += lang;
     includePathVar += "_INCLUDE_PATH";
-    if(const char* includePath = mf->GetDefinition(includePathVar.c_str()))
+    includePath = mf->GetDefinition(includePathVar.c_str());
+    if(includePath)
       {
       cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
       }

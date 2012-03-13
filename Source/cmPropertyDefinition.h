@@ -14,45 +14,56 @@
 
 #include "cmProperty.h"
 
-class cmPropertyDefinition 
+/** \class cmPropertyDefinition
+ * \brief Property meta-information
+ *
+ * This class contains the following meta-information about property:
+ * - Name;
+ * - Various documentation strings;
+ * - The scope of the property;
+ * - If the property is chained.
+ */
+class cmPropertyDefinition
 {
 public:
-  // Define this property
+  /// Define this property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription, 
                       const char *DocumentationSection,
                       bool chained);
 
-  // get the documentation string
+  /// Get the documentation string
   cmDocumentationEntry GetDocumentation() const;
 
-  // basic constructor 
+  /// Default constructor
   cmPropertyDefinition() { this->Chained = false; };
 
-  // is it chained?
-  bool IsChained() {return this->Chained; };
+  /// Is the property chained?
+  bool IsChained() const { return this->Chained; };
 
-  // Get the section if any
+  /// Get the section if any
   const std::string &GetDocumentationSection() const {
     return this->DocumentationSection; }; 
-  
-  // get the scope
+
+  /// Get the scope
   cmProperty::ScopeType GetScope() const {
     return this->Scope; };
 
-  // get the docs
+  /// Get the documentation (short version)
   const std::string &GetShortDescription() const {
-    return this->ShortDescription; }; 
+    return this->ShortDescription; };
+
+  /// Get the documentation (full version)
   const std::string &GetFullDescription() const {
     return this->FullDescription; }; 
-  
+
 protected:
   std::string Name;
   std::string ShortDescription;
   std::string FullDescription;
   std::string DocumentationSection;
-  cmProperty::ScopeType Scope; 
+  cmProperty::ScopeType Scope;
   bool Chained;
 };
 

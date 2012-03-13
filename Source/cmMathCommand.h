@@ -14,10 +14,7 @@
 
 #include "cmCommand.h"
 
-/** \class cmMathCommand
- * \brief Common string operations
- *
- */
+/// Mathematical expressions: math(EXPR ...) command.
 class cmMathCommand : public cmCommand
 {
 public:
@@ -39,17 +36,17 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable() { return true; }
+  virtual bool IsScriptable() const { return true; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "math";}
+  virtual const char* GetName() const { return "math";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Mathematical expressions.";
     }
@@ -57,7 +54,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  math(EXPR <output variable> <math expression>)\n"

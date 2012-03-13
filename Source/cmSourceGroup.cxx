@@ -120,12 +120,6 @@ const std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles() const
 }
 
 //----------------------------------------------------------------------------
-std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles()
-{
-  return this->SourceFiles;
-}
-
-//----------------------------------------------------------------------------
 void cmSourceGroup::AddChild(cmSourceGroup child)
 {
   this->Internal->GroupChildren.push_back(child);

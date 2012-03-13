@@ -87,7 +87,7 @@ public:
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
+  virtual const char* GetCMakeCFGIntDir() const { return "$(OutDir)"; }
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */

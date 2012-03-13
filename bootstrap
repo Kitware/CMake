@@ -127,10 +127,20 @@ fi
 cmake_bootstrap_dir="${cmake_binary_dir}/Bootstrap${_cmk}"
 
 # Helper function to fix windows paths.
-cmake_fix_slashes ()
-{
-  echo "$1" | sed 's/\\/\//g'
-}
+case "${cmake_system}" in
+*MINGW*)
+  cmake_fix_slashes()
+  {
+    cmd //c echo "$(echo "$1" | sed 's/\\/\//g')" | sed 's/^"//;s/" *$//'
+  }
+  ;;
+*)
+  cmake_fix_slashes()
+  {
+    echo "$1" | sed 's/\\/\//g'
+  }
+  ;;
+esac
 
 # Choose the default install prefix.
 if ${cmake_system_mingw}; then
@@ -198,6 +208,7 @@ CMAKE_CXX_SOURCES="\
   cmExportInstallFileGenerator \
   cmInstallDirectoryGenerator \
   cmGeneratedFileStream \
+  cmGeneratorTarget \
   cmGeneratorExpression \
   cmGlobalGenerator \
   cmLocalGenerator \

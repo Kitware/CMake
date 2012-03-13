@@ -40,12 +40,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() {return "create_test_sourcelist";}
+  virtual const char* GetName() const {return "create_test_sourcelist";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Create a test driver and source list for building test programs.";
     }
@@ -53,7 +53,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  create_test_sourcelist(sourceListName driverName\n"

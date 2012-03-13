@@ -53,176 +53,212 @@
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_NAME - The name of the package (or application). If
-#   not specified, defaults to the project name.
+#  CPACK_PACKAGE_NAME - The name of the package (or application). If
+#  not specified, defaults to the project name.
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_VENDOR - The name of the package vendor. (e.g.,
-#   "Kitware").
+#  CPACK_PACKAGE_VENDOR - The name of the package vendor. (e.g.,
+#  "Kitware").
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_VERSION_MAJOR - Package major Version
+#  CPACK_PACKAGE_VERSION_MAJOR - Package major Version
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_VERSION_MINOR - Package minor Version
+#  CPACK_PACKAGE_VERSION_MINOR - Package minor Version
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_VERSION_PATCH - Package patch Version
+#  CPACK_PACKAGE_VERSION_PATCH - Package patch Version
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_DESCRIPTION_FILE - A text file used to describe the
-#   project. Used, for example, the introduction screen of a
-#   CPack-generated Windows installer to describe the project.
+#  CPACK_PACKAGE_DESCRIPTION_FILE - A text file used to describe the
+#  project. Used, for example, the introduction screen of a
+#  CPack-generated Windows installer to describe the project.
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_DESCRIPTION_SUMMARY - Short description of the
-#   project (only a few words).
+#  CPACK_PACKAGE_DESCRIPTION_SUMMARY - Short description of the
+#  project (only a few words).
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_FILE_NAME - The name of the package file to generate,
-#   not including the extension. For example, cmake-2.6.1-Linux-i686.
+#  CPACK_PACKAGE_FILE_NAME - The name of the package file to generate,
+#  not including the extension. For example, cmake-2.6.1-Linux-i686.
+#  The default value is
+#  ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}.
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_INSTALL_DIRECTORY - Installation directory on the
-#   target system, e.g., "CMake 2.5".
+#  CPACK_PACKAGE_INSTALL_DIRECTORY - Installation directory on the
+#  target system. This may be used by some CPack generators
+#  like NSIS to create an installation directory e.g., "CMake 2.5"
+#  below the installation prefix. All installed element will be
+#  put inside this directory.
 ##end
 #
 ##variable
-#   CPACK_PROJECT_CONFIG_FILE - File included at cpack time, once per
-#   generator after setting CPACK_GENERATOR to the actual generator
-#   being used. Allows per-generator setting of CPACK_* variables at
-#   cpack time.
+#   CPACK_PACKAGE_ICON - A branding image that will be displayed inside
+#   the installer (used by GUI installers).
 ##end
 #
 ##variable
-#   CPACK_RESOURCE_FILE_LICENSE - License file for the project, which
-#   will typically be displayed to the user (often with an explicit
-#   "Accept" button, for graphical installers) prior to installation.
+#  CPACK_PROJECT_CONFIG_FILE - CPack-time project CPack configuration
+#  file. This file included at cpack time, once per
+#  generator after CPack has set CPACK_GENERATOR to the actual generator
+#  being used. It allows per-generator setting of CPACK_* variables at
+#  cpack time.
 ##end
 #
 ##variable
-#   CPACK_RESOURCE_FILE_README - ReadMe file for the project, which
-#   typically describes in some detail
+#  CPACK_RESOURCE_FILE_LICENSE - License to be embedded in the installer. It
+#  will typically be displayed to the user by the produced installer
+#  (often with an explicit "Accept" button, for graphical installers)
+#  prior to installation. This license file is NOT added to installed
+#  file but is used by some CPack generators like NSIS. If you want
+#  to install a license file (may be the same as this one)
+#  along with your project you must add an appropriate CMake INSTALL
+#  command in your CMakeLists.txt.
 ##end
 #
 ##variable
-#   CPACK_RESOURCE_FILE_WELCOME - Welcome file for the project, which
-#   welcomes users to this installer. Typically used in the graphical
-#   installers on Windows and Mac OS X.
+#  CPACK_RESOURCE_FILE_README - ReadMe file to be embedded in the installer. It
+#  typically describes in some detail the purpose of the project
+#  during the installation. Not all CPack generators uses
+#  this file.
 ##end
 #
 ##variable
-#   CPACK_MONOLITHIC_INSTALL - Disables the component-based 
-#   installation mechanism, so that all components are always installed.
+#  CPACK_RESOURCE_FILE_WELCOME - Welcome file to be embedded in the
+#  installer. It welcomes users to this installer.
+#  Typically used in the graphical installers on Windows and Mac OS X.
 ##end
 #
 ##variable
-#   CPACK_GENERATOR - List of CPack generators to use. If not
-#   specified, CPack will create a set of options (e.g.,
-#   CPACK_BINARY_NSIS) allowing the user to enable/disable individual
-#   generators.
+#  CPACK_MONOLITHIC_INSTALL - Disables the component-based
+#  installation mechanism. When set the component specification is ignored
+#  and all installed items are put in a single "MONOLITHIC" package.
+#  Some CPack generators do monolithic packaging by default and
+#  may be asked to do component packaging by setting
+#  CPACK_<GENNAME>_COMPONENT_INSTALL to 1/TRUE.
 ##end
 #
 ##variable
-#   CPACK_OUTPUT_CONFIG_FILE - The name of the CPack configuration file
-#   for binary installers that will be generated by the CPack
-#   module. Defaults to CPackConfig.cmake.
+#  CPACK_GENERATOR - List of CPack generators to use. If not
+#  specified, CPack will create a set of options CPACK_BINARY_<GENNAME> (e.g.,
+#  CPACK_BINARY_NSIS) allowing the user to enable/disable individual
+#  generators. This variable may be used on the command line
+#  as well as in:
+#
+#    cpack -D CPACK_GENERATOR="ZIP;TGZ" /path/to/build/tree
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_EXECUTABLES - Lists each of the executables along
-#   with a text label, to be used to create Start Menu shortcuts on
-#   Windows. For example, setting this to the list ccmake;CMake will
-#   create a shortcut named "CMake" that will execute the installed
-#   executable ccmake.
+#  CPACK_OUTPUT_CONFIG_FILE - The name of the CPack binary configuration
+#  file. This file is the CPack configuration generated by the CPack module
+#  for binary installers. Defaults to CPackConfig.cmake.
 ##end
 #
 ##variable
-#   CPACK_STRIP_FILES - List of files to be stripped. Starting with
-#   CMake 2.6.0 CPACK_STRIP_FILES will be a boolean variable which
-#   enables stripping of all files (a list of files evaluates to TRUE
-#   in CMake, so this change is compatible).
+#  CPACK_PACKAGE_EXECUTABLES - Lists each of the executables and associated
+#  text label to be used to create Start Menu shortcuts. For example,
+#  setting this to the list ccmake;CMake will
+#  create a shortcut named "CMake" that will execute the installed
+#  executable ccmake. Not all CPack generators use it (at least NSIS and
+#  OSXX11 do).
+##end
+#
+##variable
+#  CPACK_STRIP_FILES - List of files to be stripped. Starting with
+#  CMake 2.6.0 CPACK_STRIP_FILES will be a boolean variable which
+#  enables stripping of all files (a list of files evaluates to TRUE
+#  in CMake, so this change is compatible).
 ##end
 #
 # The following CPack variables are specific to source packages, and 
 # will not affect binary packages:
 #
 ##variable
-#   CPACK_SOURCE_PACKAGE_FILE_NAME - The name of the source package,
-#   e.g., cmake-2.6.1
+#  CPACK_SOURCE_PACKAGE_FILE_NAME - The name of the source package. For
+#  example cmake-2.6.1.
 ##end
 #
 ##variable
-#   CPACK_SOURCE_STRIP_FILES - List of files in the source tree that
-#   will be stripped. Starting with CMake 2.6.0
-#   CPACK_SOURCE_STRIP_FILES will be a boolean variable which enables
-#   stripping of all files (a list of files evaluates to TRUE in CMake,
-#   so this change is compatible).
+#  CPACK_SOURCE_STRIP_FILES - List of files in the source tree that
+#  will be stripped. Starting with CMake 2.6.0
+#  CPACK_SOURCE_STRIP_FILES will be a boolean variable which enables
+#  stripping of all files (a list of files evaluates to TRUE in CMake,
+#  so this change is compatible).
 ##end
 #
 ##variable
-#   CPACK_SOURCE_GENERATOR - List of generators used for the source
-#   packages. As with CPACK_GENERATOR, if this is not specified then
-#   CPack will create a set of options (e.g., CPACK_SOURCE_ZIP)
-#   allowing users to select which packages will be generated.
+#  CPACK_SOURCE_GENERATOR - List of generators used for the source
+#  packages. As with CPACK_GENERATOR, if this is not specified then
+#  CPack will create a set of options (e.g., CPACK_SOURCE_ZIP)
+#  allowing users to select which packages will be generated.
 ##end
 #
 ##variable
-#   CPACK_SOURCE_OUTPUT_CONFIG_FILE - The name of the CPack
-#   configuration file for source installers that will be generated by
-#   the CPack module. Defaults to CPackSourceConfig.cmake.
+#  CPACK_SOURCE_OUTPUT_CONFIG_FILE - The name of the CPack source
+#  configuration file. This file is the CPack configuration generated by the
+#  CPack module for source installers. Defaults to CPackSourceConfig.cmake.
 ##end
 #
 ##variable
-#   CPACK_SOURCE_IGNORE_FILES - Pattern of files in the source tree
-#   that won't be packaged when building a source package. This is a
-#   list of patterns, e.g., /CVS/;/\\.svn/;\\.swp$;\\.#;/#;.*~;cscope.*
+#  CPACK_SOURCE_IGNORE_FILES - Pattern of files in the source tree
+#  that won't be packaged when building a source package. This is a
+#  list of regular expression patterns (that must be properly escaped),
+#  e.g., /CVS/;/\\.svn/;\\.swp$;\\.#;/#;.*~;cscope.*
 ##end
 #
 # The following variables are for advanced uses of CPack:
 #
 ##variable
-#   CPACK_CMAKE_GENERATOR - What CMake generator should be used if the
-#   project is CMake project. Defaults to the value of CMAKE_GENERATOR;
-#   few users will want to change this setting.
+#  CPACK_CMAKE_GENERATOR - What CMake generator should be used if the
+#  project is CMake project. Defaults to the value of CMAKE_GENERATOR
+#  few users will want to change this setting.
 ##end
 #
 ##variable
-#   CPACK_INSTALL_CMAKE_PROJECTS - List of four values that specify
-#   what project to install. The four values are: Build directory,
-#   Project Name, Project Component, Directory. If omitted, CPack will
-#   build an installer that installers everything.
+#  CPACK_INSTALL_CMAKE_PROJECTS - List of four values that specify
+#  what project to install. The four values are: Build directory,
+#  Project Name, Project Component, Directory. If omitted, CPack will
+#  build an installer that installers everything.
 ##end
 #
 ##variable
-#   CPACK_SYSTEM_NAME - System name, defaults to the value of
-#   ${CMAKE_SYSTEM_NAME}.
+#  CPACK_SYSTEM_NAME - System name, defaults to the value of
+#  ${CMAKE_SYSTEM_NAME}.
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_VERSION - Package full version, used internally. By
-#   default, this is built from CPACK_PACKAGE_VERSION_MAJOR,
-#   CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH.
+#  CPACK_PACKAGE_VERSION - Package full version, used internally. By
+#  default, this is built from CPACK_PACKAGE_VERSION_MAJOR,
+#  CPACK_PACKAGE_VERSION_MINOR, and CPACK_PACKAGE_VERSION_PATCH.
 ##end
 #
 ##variable
-#   CPACK_TOPLEVEL_TAG - Directory for the installed files.
+#  CPACK_TOPLEVEL_TAG - Directory for the installed files.
 ##end
 #
 ##variable
-#   CPACK_INSTALL_COMMANDS - Extra commands to install components.
+#  CPACK_INSTALL_COMMANDS - Extra commands to install components.
 ##end
 #
 ##variable
-#   CPACK_INSTALLED_DIRECTORIES - Extra directories to install.
+#  CPACK_INSTALLED_DIRECTORIES - Extra directories to install.
+##end
+#
+##variable
+#   CPACK_PACKAGE_INSTALL_REGISTRY_KEY - Registry key used when
+#   installing this project. This is only used
+#   by installer for Windows.
+##end
+##variable
+#   CPACK_CREATE_DESKTOP_LINKS - List of desktop links to create.
 ##end
 #
 
@@ -358,6 +394,12 @@ macro(cpack_optional_append _list _cond _item)
   endif(${_cond})
 endmacro(cpack_optional_append _list _cond _item)
 
+##variable
+# CPACK_BINARY_<GENNAME> - CPack generated options for binary generators. The
+# CPack.cmake module generates (when CPACK_GENERATOR is not set)
+# a set of CMake options (see CMake option command) which may then be used to
+# select the CPack generator(s) to be used when launching the package target.
+##end
 # Provide options to choose generators
 # we might check here if the required tools for the generates exist
 # and set the defaults according to the results

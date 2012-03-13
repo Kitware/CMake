@@ -126,9 +126,9 @@ IF(CURL_MALLOC_DEBUG)
 ENDIF(CURL_MALLOC_DEBUG)
 
 # On windows preload settings
-IF(WIN32)
+IF(WIN32 AND NOT MINGW)
   INCLUDE(${LIBCURL_SOURCE_DIR}/Platforms/WindowsCache.cmake)
-ENDIF(WIN32)
+ENDIF()
 
 # This macro checks if the symbol exists in the library and if it
 # does, it appends library to the list.

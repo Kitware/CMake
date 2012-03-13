@@ -54,20 +54,13 @@ public:
   void SetBuildType(BuildType,const char *name);
 
   void SetPlatformName(const char* n) { this->PlatformName = n;}
-  void GetTargetObjectFileDirectories(cmTarget* target,
-                                      std::vector<std::string>& 
-                                      dirs); 
 
   void SetExtraFlagTable(cmVS7FlagTable const* table)
     { this->ExtraFlagTable = table; }
   virtual std::string GetTargetDirectory(cmTarget const&) const;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
-  // Compute the maximum length full path to the intermediate
-  // files directory for any configuration.  This is used to construct
-  // object file names that do not produce paths that are too long.
-  void ComputeMaxDirectoryLength(std::string& maxdir,
-                                 cmTarget& target);
+  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
 
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);

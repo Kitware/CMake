@@ -27,6 +27,8 @@
 #  ImageMagick_VERSION_STRING         - the version of ImageMagick found
 #                                       (since CMake 2.8.8)
 #
+# ImageMagick_VERSION_STRING will not work for old versions like 5.2.3.
+#
 # There are also components for the following ImageMagick APIs:
 #
 #  Magick++
@@ -171,7 +173,7 @@ FOREACH(component ${ImageMagick_FIND_COMPONENTS}
     ELSEIF(ImageMagick_${component}_EXECUTABLE)
       # if no components were requested explicitly put all (default) executables
       # in the list
-      LIST(APPEND ImageMagick_DEFAULT_EXECUTABLES "${ImageMagick_${component}_EXECUTABLE}")
+      LIST(APPEND ImageMagick_DEFAULT_EXECUTABLES ImageMagick_${component}_EXECUTABLE)
     ENDIF(ImageMagick_FIND_COMPONENTS)
   ENDIF(component STREQUAL "Magick++")
 ENDFOREACH(component)

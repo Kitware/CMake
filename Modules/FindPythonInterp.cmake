@@ -10,11 +10,14 @@
 #  PYTHON_VERSION_MINOR       - Python minor version found e.g. 5
 #  PYTHON_VERSION_PATCH       - Python patch version found e.g. 2
 #
-#  Python_ADDITIONAL_VERSIONS - list of additional Python versions to search for
+# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
+# version numbers that should be taken into account when searching for Python.
+# You need to set this variable before calling find_package(PythonInterp).
 
 #=============================================================================
 # Copyright 2005-2010 Kitware, Inc.
 # Copyright 2011 Bjoern Ricks <bjoern.ricks@gmail.com>
+# Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -88,24 +91,42 @@ endif()
 
 # determine python version string
 if(PYTHON_EXECUTABLE)
-    execute_process(COMMAND "${PYTHON_EXECUTABLE}" --version
-                    ERROR_VARIABLE _VERSION
+    execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c
+                            "import sys; sys.stdout.write(';'.join([str(x) for x in sys.version_info[:3]]))"
+                    OUTPUT_VARIABLE _VERSION
                     RESULT_VARIABLE _PYTHON_VERSION_RESULT
-                    OUTPUT_QUIET
-                    ERROR_STRIP_TRAILING_WHITESPACE)
-    if(_PYTHON_VERSION_RESULT)
-        execute_process(COMMAND "${PYTHON_EXECUTABLE}" -V
-                        ERROR_VARIABLE _VERSION
+                    ERROR_QUIET)
+    if(NOT _PYTHON_VERSION_RESULT)
+        string(REPLACE ";" "." PYTHON_VERSION_STRING "${_VERSION}")
+        list(GET _VERSION 0 PYTHON_VERSION_MAJOR)
+        list(GET _VERSION 1 PYTHON_VERSION_MINOR)
+        list(GET _VERSION 2 PYTHON_VERSION_PATCH)
+        if(PYTHON_VERSION_PATCH EQUAL 0)
+            # it's called "Python 2.7", not "2.7.0"
+            string(REGEX REPLACE "\\.0$" "" PYTHON_VERSION_STRING "${PYTHON_VERSION_STRING}")
+        endif()
+    else()
+        # sys.version predates sys.version_info, so use that
+        execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.version)"
+                        OUTPUT_VARIABLE _VERSION
                         RESULT_VARIABLE _PYTHON_VERSION_RESULT
-                        OUTPUT_QUIET
-                        ERROR_STRIP_TRAILING_WHITESPACE)
-    endif(_PYTHON_VERSION_RESULT)
-    if(NOT _PYTHON_VERSION_RESULT AND _VERSION MATCHES "^Python [0-9]+\\.[0-9]+.*")
-        string(REPLACE "Python " "" PYTHON_VERSION_STRING "${_VERSION}")
-        string(REGEX REPLACE "^([0-9]+)\\.[0-9]+.*" "\\1" PYTHON_VERSION_MAJOR "${PYTHON_VERSION_STRING}")
-        string(REGEX REPLACE "^[0-9]+\\.([0-9])+.*" "\\1" PYTHON_VERSION_MINOR "${PYTHON_VERSION_STRING}")
-        if(PYTHON_VERSION_STRING MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+.*")
-            string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" PYTHON_VERSION_PATCH "${PYTHON_VERSION_STRING}")
+                        ERROR_QUIET)
+        if(NOT _PYTHON_VERSION_RESULT)
+            string(REGEX REPLACE " .*" "" PYTHON_VERSION_STRING "${_VERSION}")
+            string(REGEX REPLACE "^([0-9]+)\\.[0-9]+.*" "\\1" PYTHON_VERSION_MAJOR "${PYTHON_VERSION_STRING}")
+            string(REGEX REPLACE "^[0-9]+\\.([0-9])+.*" "\\1" PYTHON_VERSION_MINOR "${PYTHON_VERSION_STRING}")
+            if(PYTHON_VERSION_STRING MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+.*")
+                string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" PYTHON_VERSION_PATCH "${PYTHON_VERSION_STRING}")
+            else()
+                set(PYTHON_VERSION_PATCH "0")
+            endif()
+        else()
+            # sys.version was first documented for Python 1.5, so assume
+            # this is older.
+            set(PYTHON_VERSION_STRING "1.4")
+            set(PYTHON_VERSION_MAJOR "1")
+            set(PYTHON_VERSION_MAJOR "4")
+            set(PYTHON_VERSION_MAJOR "0")
         endif()
     endif()
     unset(_PYTHON_VERSION_RESULT)

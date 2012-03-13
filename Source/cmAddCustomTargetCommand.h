@@ -42,13 +42,13 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() 
+  virtual const char* GetName() const
     {return "add_custom_target";}
   
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Add a target with no output so it will always be built.";
     }
@@ -56,7 +56,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  add_custom_target(Name [ALL] [command1 [args1...]]\n"

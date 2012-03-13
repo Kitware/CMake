@@ -182,6 +182,8 @@ protected:
   size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
 
   cmGeneratedFileStream *CommandDatabase;
+private:
+  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 };
 
 #endif

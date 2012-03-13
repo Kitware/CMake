@@ -27,7 +27,7 @@
 This file computes an ordered list of link items to use when linking a
 single target in one configuration.  Each link item is identified by
 the string naming it.  A graph of dependencies is created in which
-each node corresponds to one item and directed eges lead from nodes to
+each node corresponds to one item and directed edges lead from nodes to
 those which must *follow* them on the link line.  For example, the
 graph
 
@@ -42,7 +42,7 @@ search of the link dependencies starting from the main target.
 
 There are two types of items: those with known direct dependencies and
 those without known dependencies.  We will call the two types "known
-items" and "unknown items", respecitvely.  Known items are those whose
+items" and "unknown items", respectively.  Known items are those whose
 names correspond to targets (built or imported) and those for which an
 old-style <item>_LIB_DEPENDS variable is defined.  All other items are
 unknown and we must infer dependencies for them.  For items that look
@@ -150,7 +150,7 @@ times the component needs to be seen (once for trivial components,
 twice for non-trivial).  If at any time another component finishes and
 re-adds an already pending component, the pending component is reset
 so that it needs to be seen in its entirety again.  This ensures that
-all dependencies of a component are satisified no matter where it
+all dependencies of a component are satisfied no matter where it
 appears.
 
 After the original link line has been completed, we append to it the
@@ -630,6 +630,19 @@ cmTarget* cmComputeLinkDepends::FindTargetToLink(int depender_index,
   if(tgt && tgt->GetType() == cmTarget::EXECUTABLE &&
      !tgt->IsExecutableWithExports())
     {
+    tgt = 0;
+    }
+
+  if(tgt && tgt->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    cmOStringStream e;
+    e << "Target \"" << this->Target->GetName() << "\" links to "
+      "OBJECT library \"" << tgt->GetName() << "\" but this is not "
+      "allowed.  "
+      "One may link only to STATIC or SHARED libraries, or to executables "
+      "with the ENABLE_EXPORTS property set.";
+    this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                      this->Target->GetBacktrace());
     tgt = 0;
     }
 

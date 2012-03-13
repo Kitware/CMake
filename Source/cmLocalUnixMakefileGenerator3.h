@@ -225,24 +225,9 @@ public:
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
 
-  struct LocalObjectEntry
-  {
-    cmTarget* Target;
-    std::string Language;
-    LocalObjectEntry(): Target(0), Language() {}
-    LocalObjectEntry(cmTarget* t, const char* lang):
-      Target(t), Language(lang) {}
-  };
-  struct LocalObjectInfo: public std::vector<LocalObjectEntry>
-  {
-    bool HasSourceExtension;
-    bool HasPreprocessRule;
-    bool HasAssembleRule;
-    LocalObjectInfo():HasSourceExtension(false), HasPreprocessRule(false),
-                      HasAssembleRule(false) {}
-  };
-  std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
-    { return this->LocalObjectFiles;}
+  void AddLocalObjectFile(cmTarget* target, cmSourceFile* sf,
+                          std::string objNoTargetDir,
+                          bool hasSourceExtension);
 
   std::vector<cmStdString> const& GetLocalHelp() { return this->LocalHelp; }
 
@@ -257,9 +242,6 @@ public:
     {
     return !this->SkipAssemblySourceRules;
     }
-  // Get the directories into which the .o files will go for this target
-  void GetTargetObjectFileDirectories(cmTarget* target,
-                                      std::vector<std::string>& dirs);
 
   // Fill the vector with the target names for the object files,
   // preprocessed files and assembly files. Currently only used by the
@@ -301,14 +283,6 @@ protected:
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                cmTarget& target,
                                const std::vector<std::string>& objects);
-  void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
-                                  const char* comment, const char* output,
-                                  LocalObjectInfo const& info);
-
-  std::string GetObjectFileName(cmTarget& target,
-                                const cmSourceFile& source,
-                                std::string* nameWithoutTargetDir = 0,
-                                bool* hasSourceExtension = 0);
 
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
@@ -378,7 +352,27 @@ private:
   bool SkipPreprocessedSourceRules;
   bool SkipAssemblySourceRules;
 
+  struct LocalObjectEntry
+  {
+    cmTarget* Target;
+    std::string Language;
+    LocalObjectEntry(): Target(0), Language() {}
+    LocalObjectEntry(cmTarget* t, const char* lang):
+      Target(t), Language(lang) {}
+  };
+  struct LocalObjectInfo: public std::vector<LocalObjectEntry>
+  {
+    bool HasSourceExtension;
+    bool HasPreprocessRule;
+    bool HasAssembleRule;
+    LocalObjectInfo():HasSourceExtension(false), HasPreprocessRule(false),
+                      HasAssembleRule(false) {}
+  };
   std::map<cmStdString, LocalObjectInfo> LocalObjectFiles;
+  void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
+                                  const char* comment, const char* output,
+                                  LocalObjectInfo const& info);
+
   std::vector<cmStdString> LocalHelp;
 
   /* does the work for each target */

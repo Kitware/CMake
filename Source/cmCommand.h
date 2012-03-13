@@ -96,7 +96,7 @@ public:
   /**
    * This determines if the command is invoked when in script mode.
    */
-  virtual bool IsScriptable()
+  virtual bool IsScriptable() const
     {
     return false;
     }
@@ -105,7 +105,7 @@ public:
    * This determines if usage of the method is discouraged or not.
    * This is currently only used for generating the documentation.
    */
-  virtual bool IsDiscouraged()
+  virtual bool IsDiscouraged() const
     {
     return false;
     }
@@ -116,7 +116,7 @@ public:
    * cmMacroHelperCommand and cmFunctionHelperCommand
    * which cannot provide appropriate documentation.
    */
-  virtual bool ShouldAppearInDocumentation()
+  virtual bool ShouldAppearInDocumentation() const
     {
     return true;
     }
@@ -124,17 +124,17 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() = 0;
+  virtual const char* GetName() const = 0;
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() = 0;
+  virtual const char* GetTerseDocumentation() const = 0;
 
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation() = 0;
+  virtual const char* GetFullDocumentation() const = 0;
 
   /**
    * Enable the command.
@@ -151,7 +151,7 @@ public:
   /**
    * Query whether the command is enabled.
    */
-  bool GetEnabled()  
+  bool GetEnabled() const
     {return this->Enabled;}
 
   /**

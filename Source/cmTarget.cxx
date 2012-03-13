@@ -37,18 +37,14 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
         return "MODULE_LIBRARY";
       case cmTarget::SHARED_LIBRARY:
         return "SHARED_LIBRARY";
+      case cmTarget::OBJECT_LIBRARY:
+        return "OBJECT_LIBRARY";
       case cmTarget::EXECUTABLE:
         return "EXECUTABLE";
       case cmTarget::UTILITY:
         return "UTILITY";
       case cmTarget::GLOBAL_TARGET:
         return "GLOBAL_TARGET";
-      case cmTarget::INSTALL_FILES:
-        return "INSTALL_FILES";
-      case cmTarget::INSTALL_PROGRAMS:
-        return "INSTALL_PROGRAMS";
-      case cmTarget::INSTALL_DIRECTORY:
-        return "INSTALL_DIRECTORY";
       case cmTarget::UNKNOWN_LIBRARY:
         return "UNKNOWN_LIBRARY";
     }
@@ -887,7 +883,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "of of just main()."
      "This makes it a GUI executable instead of a console application.  "
      "See the CMAKE_MFC_FLAG variable documentation to configure use "
-     "of MFC for WinMain executables.");
+     "of MFC for WinMain executables.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_WIN32_EXECUTABLE if it is set when a target is created.");
 
   cm->DefineProperty
     ("MACOSX_BUNDLE", cmProperty::TARGET,
@@ -897,7 +895,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This makes it a GUI executable that can be launched from "
      "the Finder.  "
      "See the MACOSX_BUNDLE_INFO_PLIST target property for information "
-     "about creation of the Info.plist file for the application bundle.");
+     "about creation of the Info.plist file for the application bundle.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_MACOSX_BUNDLE if it is set when a target is created.");
 
   cm->DefineProperty
     ("MACOSX_BUNDLE_INFO_PLIST", cmProperty::TARGET,
@@ -1103,17 +1103,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "better if VS_GLOBAL_QtVersion is set to the version "
      "FindQt4.cmake found. For example, \"4.7.3\"");
 
-#if 0
-  cm->DefineProperty
-    ("OBJECT_FILES", cmProperty::TARGET,
-     "Used to get the resulting list of object files that make up a "
-     "target.",
-     "This can be used to put object files from one library "
-     "into another library. It is a read only property.  It "
-     "converts the source list for the target into a list of full "
-     "paths to object names that will be produced by the target.");
-#endif
-
 #define CM_TARGET_FILE_TYPES_DOC                                            \
      "There are three kinds of target files that may be built: "            \
      "archive, library, and runtime.  "                                     \
@@ -1204,16 +1193,6 @@ void cmTarget::DefineProperties(cmake *cm)
 void cmTarget::SetType(TargetType type, const char* name)
 {
   this->Name = name;
-  if(type == cmTarget::INSTALL_FILES ||
-     type == cmTarget::INSTALL_PROGRAMS ||
-     type == cmTarget::INSTALL_DIRECTORY)
-    {
-    this->Makefile->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   "SetType called on cmTarget for INSTALL_FILES, "
-                   "INSTALL_PROGRAMS, or INSTALL_DIRECTORY ");
-    return;
-    }
   // only add dependency information for library targets
   this->TargetTypeValue = type;
   if(this->TargetTypeValue >= STATIC_LIBRARY
@@ -1260,6 +1239,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("AUTOMOC", 0);
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
+  this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
+  this->SetPropertyDefault("MACOSX_BUNDLE", 0);
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -2623,54 +2604,6 @@ const char *cmTarget::GetProperty(const char* prop)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputeObjectFiles()
-{
-  if (this->IsImported())
-    {
-    return;
-    }
-#if 0
-  std::vector<std::string> dirs;
-  this->Makefile->GetLocalGenerator()->
-    GetTargetObjectFileDirectories(this,
-                                   dirs);
-  std::string objectFiles;
-  std::string objExtensionLookup1 = "CMAKE_";
-  std::string objExtensionLookup2 = "_OUTPUT_EXTENSION";
-
-  for(std::vector<std::string>::iterator d = dirs.begin();
-      d != dirs.end(); ++d)
-    {
-    for(std::vector<cmSourceFile*>::iterator s = this->SourceFiles.begin();
-        s != this->SourceFiles.end(); ++s)
-      {
-      cmSourceFile* sf = *s;
-      if(const char* lang = sf->GetLanguage())
-        {
-        std::string lookupObj = objExtensionLookup1 + lang;
-        lookupObj += objExtensionLookup2;
-        const char* obj = this->Makefile->GetDefinition(lookupObj.c_str());
-        if(obj)
-          {
-          if(objectFiles.size())
-            {
-            objectFiles += ";";
-            }
-          std::string objFile = *d;
-          objFile += "/";
-          objFile += this->Makefile->GetLocalGenerator()->
-            GetSourceObjectName(*sf);
-          objFile += obj;
-          objectFiles += objFile;
-          }
-        }
-      }
-    }
-  this->SetProperty("OBJECT_FILES", objectFiles.c_str());
-#endif
-}
-
-//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const char* prop,
                                   cmProperty::ScopeType scope)
 {
@@ -3627,7 +3560,8 @@ bool cmTarget::HaveBuildTreeRPATH()
 bool cmTarget::HaveInstallTreeRPATH()
 {
   const char* install_rpath = this->GetProperty("INSTALL_RPATH");
-  return install_rpath && *install_rpath;
+  return (install_rpath && *install_rpath) &&
+          !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
 }
 
 //----------------------------------------------------------------------------
@@ -3734,7 +3668,8 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
     {
     std::string dir;
 
-    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH"))
+    if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
+       !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH"))
       {
       const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
       if(install_name_dir && *install_name_dir)

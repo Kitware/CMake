@@ -7,8 +7,12 @@
 #  PYTHON_LIBRARIES           - path to the python library
 #  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
 #  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
-#  PYTHON_DEBUG_LIBRARIES     - path to the debug library
-#  Python_ADDITIONAL_VERSIONS - list of additional Python versions to search for
+#  PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
+#  PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
+#
+# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
+# version numbers that should be taken into account when searching for Python.
+# You need to set this variable before calling find_package(PythonLibs).
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -27,11 +31,42 @@ INCLUDE(CMakeFindFrameworks)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 
+SET(_PYTHON1_VERSIONS 1.6 1.5)
+SET(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
+SET(_PYTHON3_VERSIONS 3.3 3.2 3.1 3.0)
+
+IF(PythonLibs_FIND_VERSION)
+    IF(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+        STRING(REGEX REPLACE "^([0-9]+\\.[0-9]+).*" "\\1" _PYTHON_FIND_MAJ_MIN "${PythonLibs_FIND_VERSION}")
+        STRING(REGEX REPLACE "^([0-9]+).*" "\\1" _PYTHON_FIND_MAJ "${_PYTHON_FIND_MAJ_MIN}")
+        UNSET(_PYTHON_FIND_OTHER_VERSIONS)
+        IF(NOT PythonLibs_FIND_VERSION_EXACT)
+            FOREACH(_PYTHON_V ${_PYTHON${_PYTHON_FIND_MAJ}_VERSIONS})
+                IF(NOT _PYTHON_V VERSION_LESS _PYTHON_FIND_MAJ_MIN)
+                    LIST(APPEND _PYTHON_FIND_OTHER_VERSIONS ${_PYTHON_V})
+                ENDIF()
+             ENDFOREACH()
+        ENDIF(NOT PythonLibs_FIND_VERSION_EXACT)
+        UNSET(_PYTHON_FIND_MAJ_MIN)
+        UNSET(_PYTHON_FIND_MAJ)
+    ELSE(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+        SET(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON${PythonLibs_FIND_VERSION}_VERSIONS})
+    ENDIF(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+ELSE(PythonLibs_FIND_VERSION)
+    SET(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
+ENDIF(PythonLibs_FIND_VERSION)
+
 # Set up the versions we know about, in the order we will search. Always add
 # the user supplied additional versions to the front.
-set(_Python_VERSIONS
+SET(_Python_VERSIONS
   ${Python_ADDITIONAL_VERSIONS}
-  2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
+  ${_PYTHON_FIND_OTHER_VERSIONS}
+  )
+
+UNSET(_PYTHON_FIND_OTHER_VERSIONS)
+UNSET(_PYTHON1_VERSIONS)
+UNSET(_PYTHON2_VERSIONS)
+UNSET(_PYTHON3_VERSIONS)
 
 FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
   STRING(REPLACE "." "" _CURRENT_VERSION_NO_DOTS ${_CURRENT_VERSION})
@@ -92,6 +127,17 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
   SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL
     "Path to where Python.h is found (deprecated)")
 
+  IF(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
+    FILE(STRINGS "${PYTHON_INCLUDE_DIR}/patchlevel.h" python_version_str
+         REGEX "^#define[ \t]+PY_VERSION[ \t]+\"[^\"]+\"")
+    STRING(REGEX REPLACE "^#define[ \t]+PY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
+                         PYTHONLIBS_VERSION_STRING "${python_version_str}")
+    UNSET(python_version_str)
+  ENDIF(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
+
+  IF(PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR)
+    BREAK()
+  ENDIF(PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR)
 ENDFOREACH(_CURRENT_VERSION)
 
 MARK_AS_ADVANCED(
@@ -105,13 +151,23 @@ MARK_AS_ADVANCED(
 # library. We now set the variables listed by the documentation for this
 # module.
 SET(PYTHON_INCLUDE_DIRS "${PYTHON_INCLUDE_DIR}")
-SET(PYTHON_LIBRARIES "${PYTHON_LIBRARY}")
 SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
+# These variables have been historically named in this module different from
+# what SELECT_LIBRARY_CONFIGURATIONS() expects.
+SET(PYTHON_LIBRARY_DEBUG "${PYTHON_DEBUG_LIBRARY}")
+SET(PYTHON_LIBRARY_RELEASE "${PYTHON_LIBRARY}")
+INCLUDE(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+SELECT_LIBRARY_CONFIGURATIONS(PYTHON)
+# SELECT_LIBRARY_CONFIGURATIONS() sets ${PREFIX}_FOUND if it has a library.
+# Unset this, this prefix doesn't match the module prefix, they are different
+# for historical reasons.
+UNSET(PYTHON_FOUND)
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs DEFAULT_MSG PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS)
-
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs
+                                  REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS
+                                  VERSION_VAR PYTHONLIBS_VERSION_STRING)
 
 # PYTHON_ADD_MODULE(<name> src1 src2 ... srcN) is used to build modules for python.
 # PYTHON_WRITE_MODULES_HEADER(<filename>) writes a header file you can include

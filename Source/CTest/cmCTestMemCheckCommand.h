@@ -41,12 +41,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ctest_memcheck";}
+  virtual const char* GetName() const { return "ctest_memcheck";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation()
+  virtual const char* GetTerseDocumentation() const
     {
     return "Run tests with a dynamic analysis tool.";
     }
@@ -54,7 +54,7 @@ public:
   /**
    * More documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
     return
       "  ctest_memcheck([BUILD build_dir] [RETURN_VALUE res] [APPEND]\n"

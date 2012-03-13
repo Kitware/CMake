@@ -77,6 +77,24 @@ bool cmProjectCommand
     languages.push_back("CXX");
     }
   this->Makefile->EnableLanguage(languages, false);
+  std::string extraInclude = "CMAKE_PROJECT_" + args[0] + "_INCLUDE";
+  const char* include = this->Makefile->GetDefinition(extraInclude.c_str());
+  if(include)
+    {
+    std::string fullFilePath;
+    bool readit =
+      this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(),
+                                    include);
+    if(!readit && !cmSystemTools::GetFatalErrorOccured())
+      {
+      std::string m =
+        "could not find file:\n"
+        "  ";
+      m += include;
+      this->SetError(m.c_str());
+      return false;
+      }
+    }
   return true;
 }
 

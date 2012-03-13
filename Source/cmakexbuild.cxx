@@ -15,7 +15,7 @@
 
 // This is a wrapper program for xcodebuild
 // it calls xcodebuild, and does two things
-// it removes much of the output, all the setevn
+// it removes much of the output, all the setenv
 // stuff.  Also, it checks for the text file busy
 // error, and re-runs xcodebuild until that error does
 // not show up.

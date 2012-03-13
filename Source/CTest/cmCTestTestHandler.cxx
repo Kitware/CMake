@@ -59,11 +59,11 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "subdirs";}
+  virtual const char* GetName() const { return "subdirs";}
 
   // Unused methods
-  virtual const char* GetTerseDocumentation() { return ""; }
-  virtual const char* GetFullDocumentation() { return ""; }
+  virtual const char* GetTerseDocumentation() const { return ""; }
+  virtual const char* GetFullDocumentation() const { return ""; }
 
   cmTypeMacro(cmCTestSubdirCommand, cmCommand);
 
@@ -161,11 +161,11 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "add_subdirectory";}
+  virtual const char* GetName() const { return "add_subdirectory";}
 
   // Unused methods
-  virtual const char* GetTerseDocumentation() { return ""; }
-  virtual const char* GetFullDocumentation() { return ""; }
+  virtual const char* GetTerseDocumentation() const { return ""; }
+  virtual const char* GetFullDocumentation() const { return ""; }
 
   cmTypeMacro(cmCTestAddSubdirectoryCommand, cmCommand);
 
@@ -251,11 +251,11 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "ADD_TEST";}
+  virtual const char* GetName() const { return "ADD_TEST";}
 
   // Unused methods
-  virtual const char* GetTerseDocumentation() { return ""; }
-  virtual const char* GetFullDocumentation() { return ""; }
+  virtual const char* GetTerseDocumentation() const { return ""; }
+  virtual const char* GetFullDocumentation() const { return ""; }
 
   cmTypeMacro(cmCTestAddTestCommand, cmCommand);
 
@@ -299,11 +299,11 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "SET_TESTS_PROPERTIES";}
+  virtual const char* GetName() const { return "SET_TESTS_PROPERTIES";}
 
   // Unused methods
-  virtual const char* GetTerseDocumentation() { return ""; }
-  virtual const char* GetFullDocumentation() { return ""; }
+  virtual const char* GetTerseDocumentation() const { return ""; }
+  virtual const char* GetFullDocumentation() const { return ""; }
 
   cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
 

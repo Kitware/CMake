@@ -135,7 +135,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
       " that has not been defined. Some variables were always defined "
       "by CMake in versions prior to 1.6. To fix this you might need to set "
       "the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less. If "
-      "you are writing a CMakeList file, (or have already set "
+      "you are writing a CMakeLists file, (or have already set "
       "CMAKE_BACKWARDS_COMPATABILITY to 1.4 or less) then you probably need "
       "to include a CMake module to test for the feature this variable "
       "defines.";
@@ -1433,7 +1433,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Command to start progress for a build
     else if (args[1] == "cmake_progress_start" && args.size() == 4)
       {
-      // bascially remove the directory
+      // basically remove the directory
       std::string dirName = args[2];
       dirName += "/Progress";
       cmSystemTools::RemoveADirectory(dirName.c_str());
@@ -1930,7 +1930,7 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
     {
     delete this->GlobalGenerator;
     // restore the original environment variables CXX and CC
-    // Restor CC
+    // Restore CC
     std::string env = "CC=";
     if(this->CCEnvironment.size())
       {
@@ -2612,7 +2612,7 @@ int cmake::LoadCache()
   // could we not read the cache
   if (!this->CacheManager->LoadCache(this->GetHomeOutputDirectory()))
     {
-    // if it does exist, but isn;t readable then warn the user
+    // if it does exist, but isn't readable then warn the user
     std::string cacheFile = this->GetHomeOutputDirectory();
     cacheFile += "/CMakeCache.txt";
     if(cmSystemTools::FileExists(cacheFile.c_str()))
@@ -3373,19 +3373,21 @@ void cmake::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("ENABLED_FEATURES", cmProperty::GLOBAL,
      "List of features which are enabled during the CMake run.",
-     "List of features which are enabled during the CMake run. Be default "
+     "List of features which are enabled during the CMake run. By default "
      "it contains the names of all packages which were found. This is "
      "determined using the <NAME>_FOUND variables. Packages which are "
      "searched QUIET are not listed. A project can add its own features to "
-     "this list.This property is used by the macros in FeatureSummary.cmake.");
+     "this list. "
+     "This property is used by the macros in FeatureSummary.cmake.");
   cm->DefineProperty
     ("DISABLED_FEATURES", cmProperty::GLOBAL,
      "List of features which are disabled during the CMake run.",
-     "List of features which are disabled during the CMake run. Be default "
+     "List of features which are disabled during the CMake run. By default "
      "it contains the names of all packages which were not found. This is "
      "determined using the <NAME>_FOUND variables. Packages which are "
      "searched QUIET are not listed. A project can add its own features to "
-     "this list.This property is used by the macros in FeatureSummary.cmake.");
+     "this list. "
+     "This property is used by the macros in FeatureSummary.cmake.");
   cm->DefineProperty
     ("PACKAGES_FOUND", cmProperty::GLOBAL,
      "List of packages which were found during the CMake run.",

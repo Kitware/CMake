@@ -56,6 +56,8 @@ public:
   /** Version of Visual Studio.  */
   VSVersion GetVersion() const { return this->Version; }
 
+  virtual std::string ComputeLongestObjectDirectory(cmTarget&) const = 0;
+
 protected:
   virtual const char* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return false; }
@@ -63,16 +65,6 @@ protected:
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
   MaybeCreateImplibDir(cmTarget& target, const char* config, bool isFortran);
-
-  // Safe object file name generation.
-  void ComputeObjectNameRequirements(std::vector<cmSourceGroup> const&);
-  bool SourceFileCompiles(const cmSourceFile* sf);
-  void CountObjectNames(const std::vector<cmSourceGroup>& groups,
-                        std::map<cmStdString, int>& count);
-  void InsertNeedObjectNames(const std::vector<cmSourceGroup>& groups,
-                             std::map<cmStdString, int>& count);
-  std::set<const cmSourceFile*> NeedObjectName;
-  friend class cmVisualStudio10TargetGenerator;
 
   VSVersion Version;
 };

@@ -1912,24 +1912,17 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::UNKNOWN_LIBRARY:
-        {
-        // Get the location of the target's output file and depend on it.
-        if(const char* location = target->GetLocation(config))
-          {
-          dep = location;
-          return true;
-          }
-        }
-        break;
+        dep = target->GetLocation(config);
+        return true;
+      case cmTarget::OBJECT_LIBRARY:
+        // An object library has no single file on which to depend.
+        // This was listed to get the target-level dependency.
+        return false;
       case cmTarget::UTILITY:
       case cmTarget::GLOBAL_TARGET:
         // A utility target has no file on which to depend.  This was listed
         // only to get the target-level dependency.
         return false;
-      case cmTarget::INSTALL_FILES:
-      case cmTarget::INSTALL_PROGRAMS:
-      case cmTarget::INSTALL_DIRECTORY:
-        break;
       }
     }
 
@@ -2982,17 +2975,6 @@ cmLocalGenerator::GetTargetDirectory(cmTarget const&) const
   cmSystemTools::Error("GetTargetDirectory"
                        " called on cmLocalGenerator");
   return "";
-}
-
-
-//----------------------------------------------------------------------------
-void
-cmLocalGenerator::GetTargetObjectFileDirectories(cmTarget* ,
-                                                 std::vector<std::string>&
-                                                 )
-{
-  cmSystemTools::Error("GetTargetObjectFileDirectories"
-                       " called on cmLocalGenerator");
 }
 
 //----------------------------------------------------------------------------

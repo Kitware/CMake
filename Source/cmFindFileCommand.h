@@ -33,12 +33,12 @@ public:
     {
     return new cmFindFileCommand;
     }
-  virtual const char* GetName() { return "find_file";}
+  virtual const char* GetName() const { return "find_file";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Find the full path to a file.";
     }

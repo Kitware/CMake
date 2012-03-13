@@ -392,10 +392,6 @@ void cmExtraCodeBlocksGenerator
                              make.c_str(), makefile, compiler.c_str());
           }
           break;
-        // ignore these:
-        case cmTarget::INSTALL_FILES:
-        case cmTarget::INSTALL_PROGRAMS:
-        case cmTarget::INSTALL_DIRECTORY:
         default:
           break;
         }

@@ -82,8 +82,23 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   std::vector<std::string> filesFrom;
   std::vector<std::string> filesTo;
   std::string literal_args;
-  cmTarget::TargetType type = this->Target->GetType();
-  if(type == cmTarget::EXECUTABLE)
+  cmTarget::TargetType targetType = this->Target->GetType();
+  cmInstallType type = cmInstallType();
+  switch(targetType)
+    {
+    case cmTarget::EXECUTABLE: type = cmInstallType_EXECUTABLE; break;
+    case cmTarget::STATIC_LIBRARY: type = cmInstallType_STATIC_LIBRARY; break;
+    case cmTarget::SHARED_LIBRARY: type = cmInstallType_SHARED_LIBRARY; break;
+    case cmTarget::MODULE_LIBRARY: type = cmInstallType_MODULE_LIBRARY; break;
+    case cmTarget::OBJECT_LIBRARY:
+    case cmTarget::UTILITY:
+    case cmTarget::GLOBAL_TARGET:
+    case cmTarget::UNKNOWN_LIBRARY:
+      this->Target->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
+        "cmInstallTargetGenerator created with non-installable target.");
+      return;
+    }
+  if(targetType == cmTarget::EXECUTABLE)
     {
     // There is a bug in cmInstallCommand if this fails.
     assert(this->NamelinkMode == NamelinkModeNone);
@@ -110,7 +125,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
         }
 
       // An import library looks like a static library.
-      type = cmTarget::STATIC_LIBRARY;
+      type = cmInstallType_STATIC_LIBRARY;
       }
     else
       {
@@ -121,7 +136,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       if(this->Target->IsAppBundleOnApple())
         {
         // Install the whole app bundle directory.
-        type = cmTarget::INSTALL_DIRECTORY;
+        type = cmInstallType_DIRECTORY;
         literal_args += " USE_SOURCE_PERMISSIONS";
         from1 += ".app";
 
@@ -173,7 +188,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
         }
 
       // An import library looks like a static library.
-      type = cmTarget::STATIC_LIBRARY;
+      type = cmInstallType_STATIC_LIBRARY;
       }
     else if(this->Target->IsFrameworkOnApple())
       {
@@ -181,7 +196,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       assert(this->NamelinkMode == NamelinkModeNone);
 
       // Install the whole framework directory.
-      type = cmTarget::INSTALL_DIRECTORY;
+      type = cmInstallType_DIRECTORY;
       literal_args += " USE_SOURCE_PERMISSIONS";
       std::string from1 = fromDirConfig + targetName + ".framework";
 

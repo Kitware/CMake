@@ -8,11 +8,6 @@
 ##end
 #
 ##variable
-#   CPACK_PACKAGE_INSTALL_REGISTRY_KEY - Registry key used when
-#   installing this project.
-##end
-#
-##variable
 #   CPACK_NSIS_INSTALL_ROOT - The default installation directory presented
 #   to the end user by the NSIS installer is under this root dir. The full
 #   directory presented to the end user is:
@@ -27,11 +22,6 @@
 ##variable
 #   CPACK_NSIS_MUI_UNIICON - The icon file (.ico) for the generated
 #   uninstall program.
-##end
-#
-##variable
-#   CPACK_PACKAGE_ICON - A branding image that will be displayed inside
-#   the installer.
 ##end
 #
 ##variable
@@ -106,6 +96,15 @@
 ##variable
 #   CPACK_NSIS_MUI_FINISHPAGE_RUN - Specify an executable to add an option
 #   to run on the finish page of the NSIS installer.
+##end
+##variable
+#   CPACK_NSIS_MENU_LINKS - Specify links in [application] menu.
+#   This should contain a list of pair "link" "link name". The link
+#   may be an URL or a path relative to installation prefix.
+#   Like:
+#     set(CPACK_NSIS_MENU_LINKS
+#         "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html" "CMake Help"
+#         "http://www.cmake.org" "CMake Web Site")
 ##end
 
 #=============================================================================

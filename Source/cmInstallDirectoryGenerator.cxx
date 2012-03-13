@@ -42,7 +42,7 @@ cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
 {
   // Write code to install the directories.
   const char* no_rename = 0;
-  this->AddInstallRule(os, cmTarget::INSTALL_DIRECTORY,
+  this->AddInstallRule(os, cmInstallType_DIRECTORY,
                        this->Directories,
                        this->Optional,
                        this->FilePermissions.c_str(),

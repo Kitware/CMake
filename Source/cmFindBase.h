@@ -31,7 +31,7 @@ public:
   virtual bool ParseArguments(std::vector<std::string> const& args);
   cmTypeMacro(cmFindBase, cmFindCommon);
   
-  virtual const char* GetFullDocumentation();
+  virtual const char* GetFullDocumentation() const;
 
 protected:
   virtual void GenerateDocumentation();

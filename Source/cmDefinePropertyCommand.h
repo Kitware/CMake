@@ -32,12 +32,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() { return "define_property";}
+  virtual const char* GetName() const { return "define_property";}
 
   /**
    * Succinct documentation.
    */
-  virtual const char* GetTerseDocumentation() 
+  virtual const char* GetTerseDocumentation() const
     {
     return "Define and document custom properties.";
     }
@@ -45,7 +45,7 @@ public:
   /**
    * Longer documentation.
    */
-  virtual const char* GetFullDocumentation()
+  virtual const char* GetFullDocumentation() const
     {
       return
         "  define_property(<GLOBAL | DIRECTORY | TARGET | SOURCE |\n"

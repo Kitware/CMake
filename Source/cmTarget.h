@@ -59,8 +59,8 @@ class cmTarget
 public:
   cmTarget();
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
-                    SHARED_LIBRARY, MODULE_LIBRARY, UTILITY, GLOBAL_TARGET,
-                    INSTALL_FILES, INSTALL_PROGRAMS, INSTALL_DIRECTORY,
+                    SHARED_LIBRARY, MODULE_LIBRARY,
+                    OBJECT_LIBRARY, UTILITY, GLOBAL_TARGET,
                     UNKNOWN_LIBRARY};
   static const char* GetTargetTypeName(TargetType targetType);
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };
@@ -403,9 +403,6 @@ public:
 
   // Define the properties
   static void DefineProperties(cmake *cm);
-
-  // Compute the OBJECT_FILES property only when requested
-  void ComputeObjectFiles();
 
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
