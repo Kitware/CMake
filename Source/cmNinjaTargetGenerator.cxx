@@ -256,7 +256,10 @@ cmNinjaTargetGenerator
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if(!path.empty())
     path += "/";
-  path += this->LocalGenerator->GetObjectFileName(*this->Target, *source);
+  std::string const& objectName = this->GeneratorTarget->Objects[source];
+  path += this->LocalGenerator->GetTargetDirectory(*this->Target);
+  path += "/";
+  path += objectName;
   return path;
 }
 

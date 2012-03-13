@@ -14,6 +14,7 @@
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmVersion.h"
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
@@ -497,6 +498,34 @@ bool cmGlobalNinjaGenerator::HasRule(const std::string &name)
 {
   RulesSetType::const_iterator rule = this->Rules.find(name);
   return (rule != this->Rules.end());
+}
+
+//----------------------------------------------------------------------------
+// Private virtual overrides
+
+// TODO: Refactor to combine with cmGlobalUnixMakefileGenerator3 impl.
+void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
+{
+  cmTarget* target = gt->Target;
+
+  // Compute full path to object file directory for this target.
+  std::string dir_max;
+  dir_max += gt->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir_max += "/";
+  gt->ObjectDirectory = dir_max;
+
+  // Compute the name of each object file.
+  for(std::vector<cmSourceFile*>::iterator
+        si = gt->ObjectSources.begin();
+      si != gt->ObjectSources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    std::string objectName = gt->LocalGenerator
+      ->GetObjectFileNameWithoutTarget(*sf, dir_max);
+    gt->Objects[sf] = objectName;
+    }
 }
 
 //----------------------------------------------------------------------------
