@@ -33,16 +33,3 @@ cmLocalXCodeGenerator::GetTargetDirectory(cmTarget const&) const
   // No per-target directory for this generator (yet).
   return "";
 }
-
-//----------------------------------------------------------------------------
-void cmLocalXCodeGenerator::
-GetTargetObjectFileDirectories(cmTarget* target,
-                               std::vector<std::string>& 
-                               dirs)
-{
-  cmGlobalXCodeGenerator* g = 
-    (cmGlobalXCodeGenerator*)this->GetGlobalGenerator();
-  g->SetCurrentLocalGenerator(this);
-  g->GetTargetObjectFileDirectories(target,
-                                    dirs);
-}

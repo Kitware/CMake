@@ -1311,7 +1311,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
 
   // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(sourceGroups);
+  this->ComputeObjectNameRequirements(classes);
 
   // open the project
   this->WriteProjectStart(fout, libName, target, sourceGroups);
@@ -2116,19 +2116,6 @@ std::string cmLocalVisualStudio7Generator
   dir += target.GetName();
   dir += ".dir";
   return dir;
-}
-
-void cmLocalVisualStudio7Generator::
-GetTargetObjectFileDirectories(cmTarget* target,
-                               std::vector<std::string>& 
-                               dirs)
-{
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
-  dir += "/";
-  dir += this->GetTargetDirectory(*target);
-  dir += "/";
-  dir += this->GetGlobalGenerator()->GetCMakeCFGInitDirectory();
-  dirs.push_back(dir);
 }
 
 //----------------------------------------------------------------------------
