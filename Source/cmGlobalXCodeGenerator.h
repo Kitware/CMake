@@ -200,6 +200,11 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  std::string GetObjectsNormalDirectory(
+    const std::string &projName,
+    const std::string &configName,
+    const cmTarget *t) const;
+
   void addObject(cmXCodeObject *obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);

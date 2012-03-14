@@ -3046,6 +3046,26 @@ void cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmGlobalXCodeGenerator::GetObjectsNormalDirectory(
+  const std::string &projName,
+  const std::string &configName,
+  const cmTarget *t) const
+{
+  std::string dir =
+    t->GetMakefile()->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += projName;
+  dir += ".build/";
+  dir += configName;
+  dir += "/";
+  dir += t->GetName();
+  dir += ".build/Objects-normal/";
+
+  return dir;
+}
+
+//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   std::vector<cmXCodeObject*>& targets)
@@ -3169,15 +3189,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         // then remove those exectuables as well
         if(this->Architectures.size() > 1)
           {
-          std::string universal =
-            t->GetMakefile()->GetCurrentOutputDirectory();
-          universal += "/";
-          universal += this->CurrentProject;
-          universal += ".build/";
-          universal += configName;
-          universal += "/";
-          universal += t->GetName();
-          universal += ".build/Objects-normal/";
+          std::string universal = this->GetObjectsNormalDirectory(
+            this->CurrentProject, configName, t);
           for( std::vector<std::string>::iterator arch =
                  this->Architectures.begin();
                arch != this->Architectures.end(); ++arch)
