@@ -13,6 +13,7 @@
 #include "cmCacheManager.h"
 #include "cmSystemTools.h"
 #include "cmCacheManager.h"
+#include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmVersion.h"
@@ -431,9 +432,8 @@ bool cmCacheManager::SaveCache(const char* path)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
-  std::string tempFile = cacheFile;
-  tempFile += ".tmp";
-  std::ofstream fout(tempFile.c_str());
+  cmGeneratedFileStream fout(cacheFile.c_str());
+  fout.SetCopyIfDifferent(true);
   if(!fout)
     {
     cmSystemTools::Error("Unable to open cache file for save. ",
@@ -561,10 +561,7 @@ bool cmCacheManager::SaveCache(const char* path)
       }
     }
   fout << "\n";
-  fout.close();
-  cmSystemTools::CopyFileIfDifferent(tempFile.c_str(),
-                                     cacheFile.c_str());
-  cmSystemTools::RemoveFile(tempFile.c_str());
+  fout.Close();
   std::string checkCacheFile = path;
   checkCacheFile += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(checkCacheFile.c_str());
