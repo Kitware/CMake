@@ -87,6 +87,8 @@ private:
   void ComputeLinkOptions(cmTarget& target, const char* configName,
                           const std::string extraOptions,
                           std::string& options);
+  void OutputObjects(cmTarget& target, const char* tool,
+                     std::string& options);
   std::string GetTargetIncludeOptions(cmTarget &target);
   std::vector<std::string> Configurations;
 

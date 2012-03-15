@@ -48,8 +48,13 @@ public:
       time config name placeholder if needed for the generator.  */
   std::string ObjectDirectory;
 
+  std::vector<cmTarget*> ObjectLibraries;
+
+  void UseObjectLibraries(std::vector<std::string>& objs);
+
 private:
   void ClassifySources();
+  void LookupObjectLibraries();
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

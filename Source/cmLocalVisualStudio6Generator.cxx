@@ -1428,6 +1428,16 @@ void cmLocalVisualStudio6Generator
       staticLibOptionsRelWithDebInfo += " ";
       staticLibOptionsRelWithDebInfo = libflagsRelWithDebInfo;
       }
+    std::string objects;
+    this->OutputObjects(target, "LIB", objects);
+    if(!objects.empty())
+      {
+      objects = "\n" + objects;
+      staticLibOptionsDebug += objects;
+      staticLibOptionsRelease += objects;
+      staticLibOptionsMinSizeRel += objects;
+      staticLibOptionsRelWithDebInfo += objects;
+      }
     }
 
   // Add the export symbol definition for shared library objects.
@@ -1587,7 +1597,7 @@ void cmLocalVisualStudio6Generator
     std::string flagsDebug = " ";
     std::string flagsDebugRel = " ";
     if(target.GetType() >= cmTarget::EXECUTABLE && 
-       target.GetType() <= cmTarget::MODULE_LIBRARY)
+       target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
       const char* linkLanguage = target.GetLinkerLanguage();
       if(!linkLanguage)
@@ -1742,6 +1752,8 @@ void cmLocalVisualStudio6Generator
   ItemVector const& linkLibs = cli.GetItems();
   std::vector<std::string> const& linkDirs = cli.GetDirectories();
 
+  this->OutputObjects(target, "LINK", options);
+
   // Build the link options code.
   for(std::vector<std::string>::const_iterator d = linkDirs.begin();
       d != linkDirs.end(); ++d)
@@ -1782,6 +1794,28 @@ void cmLocalVisualStudio6Generator
     {
     options += "# ADD LINK32 ";
     options += extraOptions;
+    options += "\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalVisualStudio6Generator
+::OutputObjects(cmTarget& target, const char* tool,
+                std::string& options)
+{
+  // VS 6 does not support per-config source locations so we
+  // list object library content on the link line instead.
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+  std::vector<std::string> objs;
+  gt->UseObjectLibraries(objs);
+  for(std::vector<std::string>::const_iterator
+        oi = objs.begin(); oi != objs.end(); ++oi)
+    {
+    options += "# ADD ";
+    options += tool;
+    options += "32 ";
+    options += this->ConvertToOptionallyRelativeOutputPath(oi->c_str());
     options += "\n";
     }
 }
