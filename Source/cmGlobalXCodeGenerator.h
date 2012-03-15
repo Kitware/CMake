@@ -153,6 +153,12 @@ private:
                           std::vector<cmLocalGenerator*>& generators);
   void WriteXCodePBXProj(std::ostream& fout, cmLocalGenerator* root,
                          std::vector<cmLocalGenerator*>& generators);
+  cmXCodeObject* CreateXCodeFileReferenceFromPath(const std::string &fullpath,
+                                                  cmTarget& cmtarget,
+                                                  const std::string &lang);
+  cmXCodeObject* CreateXCodeSourceFileFromPath(const std::string &fullpath,
+                                               cmTarget& cmtarget,
+                                               const std::string &lang);
   cmXCodeObject* CreateXCodeFileReference(cmSourceFile* sf,
                                           cmTarget& cmtarget);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 

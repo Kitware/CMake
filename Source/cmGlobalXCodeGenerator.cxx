@@ -561,12 +561,40 @@ cmXCodeObject* cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
-cmStdString GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
+cmStdString
+GetGroupMapKeyFromPath(cmTarget& cmtarget, const std::string& fullpath)
 {
   cmStdString key(cmtarget.GetName());
   key += "-";
-  key += sf->GetFullPath();
+  key += fullpath;
   return key;
+}
+
+//----------------------------------------------------------------------------
+cmStdString
+GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
+{
+  return GetGroupMapKeyFromPath(cmtarget, sf->GetFullPath());
+}
+
+//----------------------------------------------------------------------------
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
+  const std::string &fullpath,
+  cmTarget& cmtarget,
+  const std::string &lang)
+{
+  // Using a map and the full path guarantees that we will always get the same
+  // fileRef object for any given full path.
+  //
+  cmXCodeObject* fileRef =
+    this->CreateXCodeFileReferenceFromPath(fullpath, cmtarget, lang);
+
+  cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
+  buildFile->SetComment(fileRef->GetComment());
+  buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
+
+  return buildFile;
 }
 
 //----------------------------------------------------------------------------
@@ -603,14 +631,16 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     flags += flagsBuild.GetString();
     }
 
-  // Using a map and the full path guarantees that we will always get the same
-  // fileRef object for any given full path.
-  //
-  cmXCodeObject* fileRef = this->CreateXCodeFileReference(sf, cmtarget);
+  const char* lang =
+    this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
+  if (!lang)
+    {
+    lang = "";
+    }
 
-  cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
-  buildFile->SetComment(fileRef->GetComment());
-  buildFile->AddAttribute("fileRef", this->CreateObjectReference(fileRef));
+  cmXCodeObject* buildFile =
+    this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang);
+  cmXCodeObject* fileRef = buildFile->GetObject("fileRef")->GetObject();
 
   cmXCodeObject* settings =
     this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
@@ -662,36 +692,12 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 }
 
 //----------------------------------------------------------------------------
-cmXCodeObject*
-cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
-                                                 cmTarget& cmtarget)
+std::string
+GetSourcecodeValueFromFileExtension(const std::string& _ext,
+                                    const std::string& lang)
 {
-  std::string fname = sf->GetFullPath();
-  cmXCodeObject* fileRef = this->FileRefs[fname];
-  if(!fileRef)
-    {
-    fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-    std::string comment = fname;
-    //comment += " in ";
-    //std::string gname = group->GetObject("name")->GetString();
-    //comment += gname.substr(1, gname.size()-2);
-    fileRef->SetComment(fname.c_str());
-    this->FileRefs[fname] = fileRef;
-    }
-  cmStdString key = GetGroupMapKey(cmtarget, sf);
-  cmXCodeObject* group = this->GroupMap[key];
-  cmXCodeObject* children = group->GetObject("children");
-  if (!children->HasObject(fileRef))
-    {
-    children->AddObject(fileRef);
-    }
-  fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
-
-  const char* lang =
-    this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
+  std::string ext = cmSystemTools::LowerCase(_ext);
   std::string sourcecode = "sourcecode";
-  std::string ext = sf->GetExtension();
-  ext = cmSystemTools::LowerCase(ext);
 
   if(ext == "o")
     {
@@ -726,18 +732,6 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     {
     sourcecode += ".cpp.h";
     }
-  else if(lang && strcmp(lang, "CXX") == 0)
-    {
-    sourcecode += ".cpp.cpp";
-    }
-  else if(lang && strcmp(lang, "C") == 0)
-    {
-    sourcecode += ".c.c";
-    }
-  else if(lang && strcmp(lang, "Fortran") == 0)
-    {
-    sourcecode += ".fortran.f90";
-    }
   else if(ext == "png" || ext == "gif" || ext == "jpg")
     {
     sourcecode = "image";
@@ -745,6 +739,18 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
   else if(ext == "txt")
     {
     sourcecode += ".text";
+    }
+  else if(lang == "CXX")
+    {
+    sourcecode += ".cpp.cpp";
+    }
+  else if(lang == "C")
+    {
+    sourcecode += ".c.c";
+    }
+  else if(lang == "Fortran")
+    {
+    sourcecode += ".fortran.f90";
     }
   //else
   //  {
@@ -754,11 +760,51 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
   //  // valid lastKnownFileType value.
   //  }
 
+  return sourcecode;
+}
+
+//----------------------------------------------------------------------------
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
+  const std::string &fullpath,
+  cmTarget& cmtarget,
+  const std::string &lang)
+{
+  std::string fname = fullpath;
+  cmXCodeObject* fileRef = this->FileRefs[fname];
+  if(!fileRef)
+    {
+    fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
+    std::string comment = fname;
+    fileRef->SetComment(fname.c_str());
+    this->FileRefs[fname] = fileRef;
+    }
+  cmStdString key = GetGroupMapKeyFromPath(cmtarget, fullpath);
+  cmXCodeObject* group = this->GroupMap[key];
+  cmXCodeObject* children = group->GetObject("children");
+  if (!children->HasObject(fileRef))
+    {
+    children->AddObject(fileRef);
+    }
+  fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
+
+  // Compute the extension.
+  std::string ext;
+  std::string realExt =
+    cmSystemTools::GetFilenameLastExtension(fullpath);
+  if(!realExt.empty())
+    {
+    // Extension without the leading '.'.
+    ext = realExt.substr(1);
+    }
+
+  std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
+
   fileRef->AddAttribute("lastKnownFileType",
                         this->CreateString(sourcecode.c_str()));
 
   // Store the file path relative to the top of the source tree.
-  std::string path = this->RelativeToSource(sf->GetFullPath().c_str());
+  std::string path = this->RelativeToSource(fullpath.c_str());
   std::string name = cmSystemTools::GetFilenameName(path.c_str());
   const char* sourceTree = (cmSystemTools::FileIsFullPath(path.c_str())?
                             "<absolute>" : "SOURCE_ROOT");
@@ -770,6 +816,22 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     fileRef->AddAttribute("refType", this->CreateString("4"));
     }
   return fileRef;
+}
+
+//----------------------------------------------------------------------------
+cmXCodeObject*
+cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
+                                                 cmTarget& cmtarget)
+{
+  const char* lang =
+    this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
+  if (!lang)
+    {
+    lang = "";
+    }
+
+  return this->CreateXCodeFileReferenceFromPath(
+    sf->GetFullPath(), cmtarget, lang);
 }
 
 //----------------------------------------------------------------------------
