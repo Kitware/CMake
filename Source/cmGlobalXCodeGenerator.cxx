@@ -409,6 +409,8 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       // this will make sure that when the next target is built
       // things are up-to-date
       if((target.GetType() == cmTarget::EXECUTABLE ||
+// Nope - no post-build for OBJECT_LIRBRARY
+//          target.GetType() == cmTarget::OBJECT_LIBRARY ||
           target.GetType() == cmTarget::STATIC_LIBRARY ||
           target.GetType() == cmTarget::SHARED_LIBRARY ||
           target.GetType() == cmTarget::MODULE_LIBRARY))
@@ -1548,7 +1550,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string defFlags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
-  bool binary = ((target.GetType() == cmTarget::STATIC_LIBRARY) ||
+  bool binary = ((target.GetType() == cmTarget::OBJECT_LIBRARY) ||
+                 (target.GetType() == cmTarget::STATIC_LIBRARY) ||
                  (target.GetType() == cmTarget::EXECUTABLE) ||
                  shared);
 
@@ -1635,7 +1638,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
 
   const char* linkFlagsProp = "LINK_FLAGS";
-  if(target.GetType() == cmTarget::STATIC_LIBRARY)
+  if(target.GetType() == cmTarget::OBJECT_LIBRARY ||
+     target.GetType() == cmTarget::STATIC_LIBRARY)
     {
     linkFlagsProp = "STATIC_LIBRARY_FLAGS";
     }
@@ -1689,11 +1693,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string pnprefix;
   std::string pnbase;
   std::string pnsuffix;
-  target.GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
 
-  // Store the product name for all target types.
-  buildSettings->AddAttribute("PRODUCT_NAME",
-                              this->CreateString(pnbase.c_str()));
+  target.GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
 
   // Set attributes to specify the proper name for the target.
   std::string pndir = this->CurrentMakefile->GetCurrentOutputDirectory();
@@ -1717,17 +1718,44 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                   this->CreateString(pndir.c_str()));
       pndir = target.GetDirectory(configName);
       }
+
     buildSettings->AddAttribute("EXECUTABLE_PREFIX",
                                 this->CreateString(pnprefix.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
                                 this->CreateString(pnsuffix.c_str()));
     }
+  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    pnprefix = "lib";
+    pnbase = target.GetName();
+    pnsuffix = ".a";
+
+    if(this->XcodeVersion >= 21)
+      {
+      std::string pncdir = this->GetObjectsNormalDirectory(
+        this->CurrentProject, configName, &target);
+      buildSettings->AddAttribute("CONFIGURATION_BUILD_DIR",
+                                  this->CreateString(pncdir.c_str()));
+      }
+    else
+      {
+      buildSettings->AddAttribute("OBJROOT",
+                                  this->CreateString(pndir.c_str()));
+      pndir = this->GetObjectsNormalDirectory(
+        this->CurrentProject, configName, &target);
+      }
+    }
+
+  // Store the product name for all target types.
+  buildSettings->AddAttribute("PRODUCT_NAME",
+                              this->CreateString(pnbase.c_str()));
   buildSettings->AddAttribute("SYMROOT",
                               this->CreateString(pndir.c_str()));
 
   // Handle settings for each target type.
   switch(target.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
     {
     buildSettings->AddAttribute("LIBRARY_STYLE",
@@ -2231,6 +2259,7 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(cmTarget& cmtarget)
 {
   switch(cmtarget.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
       return "archive.ar";
     case cmTarget::MODULE_LIBRARY:
@@ -2254,6 +2283,7 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(cmTarget& cmtarget)
 {
   switch(cmtarget.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
     case cmTarget::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
     case cmTarget::MODULE_LIBRARY:
@@ -2311,7 +2341,17 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     {
     fileRef->AddAttribute("explicitFileType", this->CreateString(fileType));
     }
-  std::string fullName = cmtarget.GetFullName(defConfig.c_str());
+  std::string fullName;
+  if(cmtarget.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    fullName = "lib";
+    fullName += cmtarget.GetName();
+    fullName += ".a";
+    }
+  else
+    {
+    fullName = cmtarget.GetFullName(defConfig.c_str());
+    }
   fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("0"));
   fileRef->AddAttribute("sourceTree",
@@ -2516,7 +2556,8 @@ void cmGlobalXCodeGenerator
     }
 
   // Skip link information for static libraries.
-  if(cmtarget->GetType() == cmTarget::STATIC_LIBRARY)
+  if(cmtarget->GetType() == cmTarget::OBJECT_LIBRARY ||
+     cmtarget->GetType() == cmTarget::STATIC_LIBRARY)
     {
     return;
     }
@@ -2664,6 +2705,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
 
       std::vector<cmSourceFile*>  classes = cmtarget.GetSourceFiles();
 
+      // Put cmSourceFile instances in proper groups:
       for(std::vector<cmSourceFile*>::const_iterator s = classes.begin();
           s != classes.end(); s++)
         {
@@ -3197,6 +3239,8 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       cmTarget* t =target->GetTarget();
 
       if(t->GetType() == cmTarget::EXECUTABLE ||
+// Nope - no post-build for OBJECT_LIRBRARY
+//         t->GetType() == cmTarget::OBJECT_LIBRARY ||
          t->GetType() == cmTarget::STATIC_LIBRARY ||
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
