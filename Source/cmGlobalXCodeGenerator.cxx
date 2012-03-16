@@ -295,6 +295,10 @@ void cmGlobalXCodeGenerator::Generate()
     }
   this->ForceLinkerLanguages();
   this->cmGlobalGenerator::Generate();
+  if(cmSystemTools::GetErrorOccuredFlag())
+    {
+    return;
+    }
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     cmLocalGenerator* root = it->second[0];
@@ -943,6 +947,20 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
           sourceFiles.push_back(xsf);
           }
         }
+      }
+
+    // Add object library contents as external objects. (Equivalent to
+    // the externalObjFiles above, except each one is not a cmSourceFile
+    // within the target.)
+    std::vector<std::string> objs;
+    this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+    for(std::vector<std::string>::const_iterator
+          oi = objs.begin(); oi != objs.end(); ++oi)
+      {
+      std::string obj = *oi;
+      cmXCodeObject* xsf =
+        this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
+      externalObjFiles.push_back(xsf);
       }
 
     // some build phases only apply to bundles and/or frameworks
@@ -2717,6 +2735,21 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         cmXCodeObject* pbxgroup =
           this->CreateOrGetPBXGroup(cmtarget, &sourceGroup);
         cmStdString key = GetGroupMapKey(cmtarget, sf);
+        this->GroupMap[key] = pbxgroup;
+        }
+
+      // Put OBJECT_LIBRARY objects in proper groups:
+      std::vector<std::string> objs;
+      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+      for(std::vector<std::string>::const_iterator
+            oi = objs.begin(); oi != objs.end(); ++oi)
+        {
+        std::string const& source = *oi;
+        cmSourceGroup& sourceGroup =
+          mf->FindSourceGroup(source.c_str(), sourceGroups);
+        cmXCodeObject* pbxgroup =
+          this->CreateOrGetPBXGroup(cmtarget, &sourceGroup);
+        cmStdString key = GetGroupMapKeyFromPath(cmtarget, source);
         this->GroupMap[key] = pbxgroup;
         }
       }
