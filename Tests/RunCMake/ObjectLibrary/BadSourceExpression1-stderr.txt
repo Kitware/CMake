@@ -1,0 +1,6 @@
+CMake Error at BadSourceExpression1.cmake:1 \(add_library\):
+  Unrecognized generator expression:
+
+    \$<BAD_EXPRESSION>
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

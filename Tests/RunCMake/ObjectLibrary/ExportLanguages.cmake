@@ -1,0 +1,15 @@
+enable_language(CXX)
+add_library(A OBJECT a.cxx)
+add_library(B STATIC a.c $<TARGET_OBJECTS:A>)
+
+# Verify that object library languages are propagated.
+export(TARGETS B NAMESPACE Exp FILE BExport.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/BExport.cmake)
+get_property(configs TARGET ExpB PROPERTY IMPORTED_CONFIGURATIONS)
+foreach(c ${configs})
+  get_property(langs TARGET ExpB PROPERTY IMPORTED_LINK_INTERFACE_LANGUAGES_${c})
+  list(FIND langs CXX pos)
+  if(${pos} LESS 0)
+    message(FATAL_ERROR "Target export does not list object library languages.")
+  endif()
+endforeach()

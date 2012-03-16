@@ -1,0 +1,17 @@
+# Add -fPIC so objects can be used in shared libraries.
+# TODO: Need property for this.
+if(CMAKE_SHARED_LIBRARY_C_FLAGS)
+  set(CMAKE_C_FLAGS "${CMAKE_SHARED_LIBRARY_C_FLAGS} ${CMAKE_C_FLAGS}")
+endif()
+
+add_definitions(-DA)
+
+add_custom_command(
+  OUTPUT a1.c
+  DEPENDS a1.c.in
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/a1.c.in
+                                   ${CMAKE_CURRENT_BINARY_DIR}/a1.c
+  )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_library(A OBJECT a1.c a2.c)
