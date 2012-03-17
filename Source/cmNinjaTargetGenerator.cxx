@@ -475,6 +475,17 @@ cmNinjaTargetGenerator
                                      emptyDeps,
                                      orderOnlyDeps,
                                      vars);
+
+  if(const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
+    std::vector<std::string> outputList;
+    cmSystemTools::ExpandListArgument(objectOutputs, outputList);
+    std::transform(outputList.begin(), outputList.end(), outputList.begin(),
+                   MapToNinjaPath());
+    cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
+                                            "Additional output files.",
+                                            outputList,
+                                            outputs);
+  }
 }
 
 //----------------------------------------------------------------------------
