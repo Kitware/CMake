@@ -78,10 +78,18 @@ void cmNinjaUtilityTargetGenerator::Generate()
 
     // TODO: fix problematic global targets.  For now, search and replace the
     // makefile vars.
-    cmSystemTools::ReplaceString(command, "$(CMAKE_SOURCE_DIR)",
-                         this->GetTarget()->GetMakefile()->GetHomeDirectory());
-    cmSystemTools::ReplaceString(command, "$(CMAKE_BINARY_DIR)",
-                   this->GetTarget()->GetMakefile()->GetHomeOutputDirectory());
+    cmSystemTools::ReplaceString(
+      command,
+      "$(CMAKE_SOURCE_DIR)",
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        this->GetTarget()->GetMakefile()->GetHomeDirectory(),
+        cmLocalGenerator::SHELL).c_str());
+    cmSystemTools::ReplaceString(
+      command,
+      "$(CMAKE_BINARY_DIR)",
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        this->GetTarget()->GetMakefile()->GetHomeOutputDirectory(),
+        cmLocalGenerator::SHELL).c_str());
     cmSystemTools::ReplaceString(command, "$(ARGS)", "");
 
     if (command.find('$') != std::string::npos)
