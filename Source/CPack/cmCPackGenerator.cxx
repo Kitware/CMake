@@ -1437,6 +1437,12 @@ bool cmCPackGenerator::SupportsComponentInstallation() const
 }
 
 //----------------------------------------------------------------------
+bool cmCPackGenerator::WantsComponentInstallation() const
+{
+  return (!IsOn("CPACK_MONOLITHIC_INSTALL") & SupportsComponentInstallation());
+}
+
+//----------------------------------------------------------------------
 cmCPackInstallationType*
 cmCPackGenerator::GetInstallationType(const char *projectName,
                                       const char *name)

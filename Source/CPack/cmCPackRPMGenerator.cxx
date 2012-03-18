@@ -201,7 +201,7 @@ int cmCPackRPMGenerator::PackageFiles()
                   << toplevel << std::endl);
 
   /* Are we in the component packaging case */
-  if (SupportsComponentInstallation()) {
+  if (WantsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package
     // If ALL COMPONENTS in ONE package has been requested
     // then the package file is unique and should be open here.
