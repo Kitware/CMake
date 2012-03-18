@@ -19,7 +19,7 @@
 #
 # The second mode is more powerful and also supports version checking:
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [REQUIRED_VARS <var1>...<varN>]
-#                                           [VERSION_VAR   <versionvar>
+#                                           [VERSION_VAR   <versionvar>]
 #                                           [CONFIG_MODE]
 #                                           [FAIL_MESSAGE "Custom failure message"] )
 #
