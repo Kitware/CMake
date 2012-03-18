@@ -410,6 +410,8 @@ bool cmFindPackageCommand
   this->Name = args[0];
   std::string components;
   const char* components_sep = "";
+  std::set<std::string> requiredComponents;
+  std::set<std::string> optionalComponents;
 
   // Check ancient compatibility.
   this->Compatibility_1_6 =
@@ -420,8 +422,8 @@ bool cmFindPackageCommand
   this->SearchPathSuffixes.push_back("");
 
   // Parse the arguments.
-  enum Doing { DoingNone, DoingComponents, DoingNames, DoingPaths,
-               DoingPathSuffixes, DoingConfigs, DoingHints };
+  enum Doing { DoingNone, DoingComponents, DoingOptionalComponents, DoingNames,
+               DoingPaths, DoingPathSuffixes, DoingConfigs, DoingHints };
   Doing doing = DoingNone;
   cmsys::RegularExpression version("^[0-9.]+$");
   bool haveVersion = false;
@@ -464,6 +466,11 @@ bool cmFindPackageCommand
       {
       this->Compatibility_1_6 = false;
       doing = DoingComponents;
+      }
+    else if(args[i] == "OPTIONAL_COMPONENTS")
+      {
+      this->Compatibility_1_6 = false;
+      doing = DoingOptionalComponents;
       }
     else if(args[i] == "NAMES")
       {
@@ -528,12 +535,23 @@ bool cmFindPackageCommand
       this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
-    else if(doing == DoingComponents)
+    else if((doing == DoingComponents) || (doing == DoingOptionalComponents))
       {
-      // Set a variable telling the find script this component
+      // Set a variable telling the find script whether this component
       // is required.
+      const char* isRequired = "1";
+      if (doing == DoingOptionalComponents)
+        {
+        isRequired = "0";
+        optionalComponents.insert(args[i]);
+        }
+      else
+        {
+        requiredComponents.insert(args[i]);
+        }
+
       std::string req_var = this->Name + "_FIND_REQUIRED_" + args[i];
-      this->AddFindDefinition(req_var.c_str(), "1");
+      this->AddFindDefinition(req_var.c_str(), isRequired);
 
       // Append to the list of required components.
       components += components_sep;
@@ -582,6 +600,22 @@ bool cmFindPackageCommand
       this->SetError(e.str().c_str());
       return false;
       }
+    }
+
+  std::vector<std::string> doubledComponents;
+  std::set_intersection(requiredComponents.begin(), requiredComponents.end(),
+                        optionalComponents.begin(), optionalComponents.end(),
+                        std::back_inserter(doubledComponents));
+  if(!doubledComponents.empty())
+    {
+    cmOStringStream e;
+    e << "called with components that are both required and optional:\n";
+    for(unsigned int i=0; i<doubledComponents.size(); ++i)
+      {
+      e << "  " << doubledComponents[i] << "\n";
+      }
+    this->SetError(e.str().c_str());
+    return false;
     }
 
   // Maybe choose one mode exclusively.
