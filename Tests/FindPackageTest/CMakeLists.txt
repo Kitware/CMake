@@ -37,6 +37,12 @@ FIND_PACKAGE(VersionTestB 1.2)
 FIND_PACKAGE(VersionTestC 1.2.3)
 FIND_PACKAGE(VersionTestD 1.2.3.4)
 
+
+FIND_PACKAGE(LotsOfComponents COMPONENTS AComp OPTIONAL_COMPONENTS BComp CComp)
+IF(NOT LOTSOFCOMPONENTS_FOUND)
+  MESSAGE(SEND_ERROR "LotsOfComponents not found !")
+ENDIF()
+
 #-----------------------------------------------------------------------------
 # Test system package registry if possible.
 SET(CMakeTestSystemPackage "")
