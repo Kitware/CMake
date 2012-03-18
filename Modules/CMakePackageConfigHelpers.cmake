@@ -2,7 +2,8 @@
 #
 #    CONFIGURE_PACKAGE_CONFIG_FILE(<input> <output> INSTALL_DESTINATION <path>
 #                                                   [PATH_VARS <var1> <var2> ... <varN>]
-#                                                   [NO_SET_AND_CHECK_MACRO] )
+#                                                   [NO_SET_AND_CHECK_MACRO]
+#                                                   [NO_CHECK_REQUIRED_COMPONENTS_MACRO])
 #
 # CONFIGURE_PACKAGE_CONFIG_FILE() should be used instead of the plain
 # CONFIGURE_FILE() command when creating the <Name>Config.cmake or <Name>-config.cmake
@@ -49,14 +50,26 @@
 # For absolute locations it works only if the absolute location is a subdirectory
 # of CMAKE_INSTALL_PREFIX.
 #
-# By default configure_package_config_file() also generates a macro set_and_check()
-# into the FooConfig.cmake file. This should be used instead of the normal set()
+# By default configure_package_config_file() also generates two helper macros,
+# set_and_check() and check_required_components() into the FooConfig.cmake file.
+#
+# set_and_check() should be used instead of the normal set()
 # command for setting directories and file locations. Additionally to setting the
 # variable it also checks that the referenced file or directory actually exists
 # and fails with a FATAL_ERROR otherwise. This makes sure that the created
 # FooConfig.cmake file does not contain wrong references.
 # When using the NO_SET_AND_CHECK_MACRO, this macro is not generated into the
 # FooConfig.cmake file.
+#
+# check_required_components(<package_name>) should be called at the end of the
+# FooConfig.cmake file if the package supports components.
+# This macro checks whether all requested, non-optional components have been found,
+# and if this is not the case, sets the Foo_FOUND variable to FALSE, so that the package
+# is considered to be not found.
+# It does that by testing the Foo_<Component>_FOUND variables for all requested
+# required components.
+# When using the NO_CHECK_REQUIRED_COMPONENTS option, this macro is not generated
+# into the FooConfig.cmake file.
 #
 # For an example see below the documentation for WRITE_BASIC_PACKAGE_VERSION_FILE().
 #
@@ -114,6 +127,8 @@
 #   ...
 #   set_and_check(FOO_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
 #   set_and_check(FOO_SYSCONFIG_DIR "@PACKAGE_SYSCONFIG_INSTALL_DIR@")
+#
+#   check_required_components(Foo)
 
 
 #=============================================================================
@@ -139,7 +154,7 @@ endmacro()
 
 
 function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
-  set(options NO_SET_AND_CHECK_MACRO)
+  set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)
   set(oneValueArgs INSTALL_DESTINATION )
   set(multiValueArgs PATH_VARS )
 
@@ -185,6 +200,21 @@ macro(set_and_check _var _file)
   if(NOT EXISTS \"\${_file}\")
     message(FATAL_ERROR \"File or directory \${_file} referenced by variable \${_var} does not exist !\")
   endif()
+endmacro()
+")
+  endif()
+
+
+  if(NOT CCF_NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+    set(PACKAGE_INIT "${PACKAGE_INIT}
+macro(check_required_components _NAME)
+  foreach(comp \${\${_NAME}_FIND_COMPONENTS})
+    if(NOT \${_NAME}_\${comp}_FOUND)
+      if(\${_NAME}_FIND_REQUIRED_\${comp})
+        set(\${_NAME}_FOUND FALSE)
+      endif()
+    endif()
+  endforeach(comp)
 endmacro()
 ")
   endif()

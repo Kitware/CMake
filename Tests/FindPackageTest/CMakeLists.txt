@@ -336,6 +336,8 @@ configure_package_config_file(RelocatableConfig.cmake.in "${CMAKE_CURRENT_BINARY
                               PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
                              )
 
+set(Relocatable_FIND_COMPONENTS AComp BComp CComp)
+set(Relocatable_FIND_REQUIRED_BComp 1)
 include("${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake")
 
 if(NOT "${RELOC_INCLUDE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/include")
@@ -348,6 +350,14 @@ endif()
 
 if(NOT "${RELOC_BUILD_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
   message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to \"${RELOC_BUILD_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}\")")
+endif()
+
+if(NOT DEFINED Relocatable_FOUND)
+  message(SEND_ERROR "Relocatable_FOUND not defined !")
+endif()
+
+if(Relocatable_FOUND)
+  message(SEND_ERROR "Relocatable_FOUND set to TRUE !")
 endif()
 
 #-----------------------------------------------------------------------------
