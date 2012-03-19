@@ -208,6 +208,7 @@ CMAKE_CXX_SOURCES="\
   cmExportInstallFileGenerator \
   cmInstallDirectoryGenerator \
   cmGeneratedFileStream \
+  cmGeneratorTarget \
   cmGeneratorExpression \
   cmGlobalGenerator \
   cmLocalGenerator \

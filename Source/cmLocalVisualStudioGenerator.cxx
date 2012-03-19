@@ -65,69 +65,6 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
 }
 
 //----------------------------------------------------------------------------
-bool cmLocalVisualStudioGenerator::SourceFileCompiles(const cmSourceFile* sf)
-{
-  // Identify the language of the source file.
-  if(const char* lang = this->GetSourceFileLanguage(*sf))
-    {
-    // Check whether this source will actually be compiled.
-    return (!sf->GetCustomCommand() &&
-            !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-            !sf->GetPropertyAsBool("EXTERNAL_OBJECT"));
-    }
-  else
-    {
-    // Unknown source file language.  Assume it will not be compiled.
-    return false;
-    }
-}
-
-//----------------------------------------------------------------------------
-void
-cmLocalVisualStudioGenerator::ComputeObjectNameRequirements(
-  std::vector<cmSourceFile*> const& sources
-  )
-{
-  // Clear the current set of requirements.
-  this->NeedObjectName.clear();
-
-  // Count the number of object files with each name.  Note that
-  // windows file names are not case sensitive.
-  std::map<cmStdString, int> counts;
-  for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
-      s != sources.end(); ++s)
-    {
-    const cmSourceFile* sf = *s;
-    if(this->SourceFileCompiles(sf))
-      {
-      std::string objectName = cmSystemTools::LowerCase(
-        cmSystemTools::GetFilenameWithoutLastExtension(
-          sf->GetFullPath()));
-      objectName += ".obj";
-      counts[objectName] += 1;
-      }
-    }
-
-  // For all source files producing duplicate names we need unique
-  // object name computation.
-  for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
-      s != sources.end(); ++s)
-    {
-    const cmSourceFile* sf = *s;
-    if(this->SourceFileCompiles(sf))
-      {
-      std::string objectName = cmSystemTools::LowerCase(
-         cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
-      objectName += ".obj";
-      if(counts[objectName] > 1)
-        {
-        this->NeedObjectName.insert(sf);
-        }
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 const char* cmLocalVisualStudioGenerator::ReportErrorLabel() const
 {
   return ":VCReportError";

@@ -20,6 +20,7 @@
 class cmTarget;
 class cmGlobalNinjaGenerator;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
 class cmMakefile;
 class cmSourceFile;
 class cmCustomCommand;
@@ -112,13 +113,11 @@ protected:
 
 private:
   cmTarget* Target;
+  cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
-
-  // The windows module definition source file (.def), if any.
-  std::string ModuleDefinitionFile;
 };
 
 #endif // ! cmNinjaTargetGenerator_h

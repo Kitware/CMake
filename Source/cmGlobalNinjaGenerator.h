@@ -18,6 +18,7 @@
 
 class cmLocalGenerator;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
 
 /**
  * \class cmGlobalNinjaGenerator
@@ -234,6 +235,11 @@ protected:
   /// Overloaded methods.
   /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
+
+private:
+
+  /// @see cmGlobalGenerator::ComputeTargetObjects
+  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
 private:
   // In order to access the AddDependencyToAll() functions and co.

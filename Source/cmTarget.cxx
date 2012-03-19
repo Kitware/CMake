@@ -37,6 +37,8 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
         return "MODULE_LIBRARY";
       case cmTarget::SHARED_LIBRARY:
         return "SHARED_LIBRARY";
+      case cmTarget::OBJECT_LIBRARY:
+        return "OBJECT_LIBRARY";
       case cmTarget::EXECUTABLE:
         return "EXECUTABLE";
       case cmTarget::UTILITY:
@@ -1727,7 +1729,15 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   for(std::vector<std::string>::const_iterator i = srcs.begin();
       i != srcs.end(); ++i)
     {
-    this->AddSource(i->c_str());
+    const char* src = i->c_str();
+    if(src[0] == '$' && src[1] == '<')
+      {
+      this->ProcessSourceExpression(*i);
+      }
+    else
+      {
+      this->AddSource(src);
+      }
     }
 }
 
@@ -1743,6 +1753,24 @@ cmSourceFile* cmTarget::AddSource(const char* s)
   cmSourceFile* sf = this->Makefile->GetOrCreateSource(src.c_str());
   this->AddSourceFile(sf);
   return sf;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ProcessSourceExpression(std::string const& expr)
+{
+  if(strncmp(expr.c_str(), "$<TARGET_OBJECTS:", 17) == 0 &&
+     expr[expr.size()-1] == '>')
+    {
+    std::string objLibName = expr.substr(17, expr.size()-18);
+    this->ObjectLibraries.push_back(objLibName);
+    }
+  else
+    {
+    cmOStringStream e;
+    e << "Unrecognized generator expression:\n"
+      << "  " << expr;
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -4545,7 +4573,21 @@ void cmTarget::ComputeLinkImplementation(const char* config,
 
   // This target needs runtime libraries for its source languages.
   std::set<cmStdString> languages;
+  // Get languages used in our source files.
   this->GetLanguages(languages);
+  // Get languages used in object library sources.
+  for(std::vector<std::string>::iterator i = this->ObjectLibraries.begin();
+      i != this->ObjectLibraries.end(); ++i)
+    {
+    if(cmTarget* objLib = this->Makefile->FindTargetToUse(i->c_str()))
+      {
+      if(objLib->GetType() == cmTarget::OBJECT_LIBRARY)
+        {
+        objLib->GetLanguages(languages);
+        }
+      }
+    }
+  // Copy the set of langauges to the link implementation.
   for(std::set<cmStdString>::iterator li = languages.begin();
       li != languages.end(); ++li)
     {

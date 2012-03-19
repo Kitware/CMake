@@ -633,6 +633,19 @@ cmTarget* cmComputeLinkDepends::FindTargetToLink(int depender_index,
     tgt = 0;
     }
 
+  if(tgt && tgt->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    cmOStringStream e;
+    e << "Target \"" << this->Target->GetName() << "\" links to "
+      "OBJECT library \"" << tgt->GetName() << "\" but this is not "
+      "allowed.  "
+      "One may link only to STATIC or SHARED libraries, or to executables "
+      "with the ENABLE_EXPORTS property set.";
+    this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                      this->Target->GetBacktrace());
+    tgt = 0;
+    }
+
   // Return the target found, if any.
   return tgt;
 }
