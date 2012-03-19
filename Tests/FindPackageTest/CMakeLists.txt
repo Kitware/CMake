@@ -82,6 +82,7 @@ SET(PACKAGES
   RecursiveA RecursiveB RecursiveC
   ArchA ArchB ArchC ArchD
   EnvA EnvB
+  SetFoundTRUE SetFoundFALSE
   ${CMakeTestSystemPackage}
   )
 FOREACH(p ${PACKAGES})
@@ -116,6 +117,10 @@ FIND_PACKAGE(VersionedB 3.1 EXACT NAMES zot)
 FIND_PACKAGE(VersionedC 4.0 EXACT NAMES zot)
 FIND_PACKAGE(VersionedD 1.1 EXACT NAMES Baz)
 FIND_PACKAGE(VersionedE 1.2 EXACT NAMES Baz)
+
+# Test Config files which set Xyz_FOUND themselves:
+FIND_PACKAGE(SetFoundTRUE NO_MODULE)
+FIND_PACKAGE(SetFoundFALSE NO_MODULE)
 
 # Test wrong initial path when result is present.
 SET(WrongA_DIR "${VersionedD_DIR}")
@@ -201,6 +206,8 @@ SET(ArchC_EXPECTED "lib/arch/zot-3.1/zot-config.cmake")
 SET(ArchD_EXPECTED "lib/arch/cmake/zot-4.0/zot-config.cmake")
 SET(EnvA_EXPECTED "lib/zot-3.1/zot-config.cmake")
 SET(EnvB_MISSING "EnvB_DIR-NOTFOUND")
+SET(SetFoundTRUE_EXPECTED "cmake/SetFoundTRUEConfig.cmake")
+SET(SetFoundFALSE_MISSING "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 SET(CMakeTestSystemPackage_EXPECTED "SystemPackage/CMakeTestSystemPackageConfig.cmake")
 
 # Check the results.
@@ -211,6 +218,11 @@ FOREACH(p ${PACKAGES})
       MESSAGE(SEND_ERROR
         "Package ${p} should have been [${${p}_MISSING}] but "
         "was [${${p}_DIR}]")
+    ENDIF()
+    IF(${p}_FOUND)
+      MESSAGE(SEND_ERROR
+        "Package ${p} should not have been found, but ${p}_FOUND is set to "
+        "\"${${p}_FOUND}\"")
     ENDIF()
   ELSEIF(${p}_FOUND)
     # Convert to relative path for comparison to expected location.

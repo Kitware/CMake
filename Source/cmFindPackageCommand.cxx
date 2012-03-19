@@ -952,11 +952,26 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     }
 
+  std::string foundVar = this->Name;
+  foundVar += "_FOUND";
+
   // If the directory for the config file was found, try to read the file.
   bool result = true;
   bool found = false;
+  bool configFileSetFOUNDFalse = false;
+
   if(fileFound)
     {
+    if ((this->Makefile->IsDefinitionSet(foundVar.c_str()))
+      && (this->Makefile->IsOn(foundVar.c_str()) == false))
+      {
+      // by removing Foo_FOUND here if it is FALSE, we don't really change
+      // the situation for the Config file which is about to be included,
+      // but we make it possible to detect later on whether the Config file
+      // has set Foo_FOUND to FALSE itself:
+      this->Makefile->RemoveDefinition(foundVar.c_str());
+      }
+
     // Set the version variables before loading the config file.
     // It may override them.
     this->StoreVersionFound();
@@ -966,6 +981,15 @@ bool cmFindPackageCommand::HandlePackageMode()
       {
       // The package has been found.
       found = true;
+
+      // Check whether the Config file has set Foo_FOUND to FALSE:
+      if ((this->Makefile->IsDefinitionSet(foundVar.c_str()))
+           && (this->Makefile->IsOn(foundVar.c_str()) == false))
+        {
+        // we get here if the Config file has set Foo_FOUND actively to FALSE
+        found = false;
+        configFileSetFOUNDFalse = true;
+        }
       }
     else
       {
@@ -973,14 +997,22 @@ bool cmFindPackageCommand::HandlePackageMode()
       result = false;
       }
     }
-  else if(!this->Quiet || this->Required)
+
+  if (result && !found && (!this->Quiet || this->Required))
     {
     // The variable is not set.
     cmOStringStream e;
     cmOStringStream aw;
+    if (configFileSetFOUNDFalse)
+      {
+      e << "Found package configuration file:\n"
+        "  " << this->FileFound << "\n"
+        "but it set " << foundVar << " to FALSE so package \"" <<
+        this->Name << "\" is considered to be NOT FOUND.";
+      }
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.
-    if (this->ConsideredConfigs.size() > 0)
+    else if (this->ConsideredConfigs.size() > 0)
       {
       e << "Could not find a configuration file for package \""
         << this->Name << "\" that "
@@ -1074,8 +1106,6 @@ bool cmFindPackageCommand::HandlePackageMode()
     }
 
   // Set a variable marking whether the package was found.
-  std::string foundVar = this->Name;
-  foundVar += "_FOUND";
   this->Makefile->AddDefinition(foundVar.c_str(), found? "1":"0");
 
   // Set a variable naming the configuration file that was found.
