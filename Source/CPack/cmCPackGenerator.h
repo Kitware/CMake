@@ -189,7 +189,21 @@ protected:
   virtual int InstallProjectViaInstallCMakeProjects(
     bool setDestDir, const char* tempInstallDirectory);
 
+  /**
+   * Does the CPack generator support component installation?.
+   * Some Generators requires the user to set
+   * CPACK_<GENNAME>_COMPONENT_INSTALL in order to make this
+   * method return true.
+   * @return true if supported, false otherwise
+   */
   virtual bool SupportsComponentInstallation() const;
+  /**
+   * Does the currently running generator want a component installation.
+   * The generator may support component installation but he may
+   * be requiring monolithic install using CPACK_MONOLITHIC_INSTALL.
+   * @return true if component installation is supported and wanted.
+   */
+  virtual bool WantsComponentInstallation() const;
   virtual cmCPackInstallationType* GetInstallationType(const char *projectName,
                                                        const char* name);
   virtual cmCPackComponent* GetComponent(const char *projectName,
