@@ -782,6 +782,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
                        "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
+  this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();

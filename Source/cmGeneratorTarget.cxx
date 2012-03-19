@@ -75,7 +75,10 @@ void cmGeneratorTarget::ClassifySources()
     else
       {
       this->ExtraSources.push_back(sf);
-      if(isObjLib) { badObjLib.push_back(sf); }
+      if(isObjLib && cmSystemTools::LowerCase(sf->GetExtension()) != "txt")
+        {
+        badObjLib.push_back(sf);
+        }
       }
     }
 

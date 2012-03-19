@@ -153,6 +153,12 @@ private:
                           std::vector<cmLocalGenerator*>& generators);
   void WriteXCodePBXProj(std::ostream& fout, cmLocalGenerator* root,
                          std::vector<cmLocalGenerator*>& generators);
+  cmXCodeObject* CreateXCodeFileReferenceFromPath(const std::string &fullpath,
+                                                  cmTarget& cmtarget,
+                                                  const std::string &lang);
+  cmXCodeObject* CreateXCodeSourceFileFromPath(const std::string &fullpath,
+                                               cmTarget& cmtarget,
+                                               const std::string &lang);
   cmXCodeObject* CreateXCodeFileReference(cmSourceFile* sf,
                                           cmTarget& cmtarget);
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 
@@ -200,6 +206,13 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  void ComputeTargetObjects(cmGeneratorTarget* gt) const;
+
+  std::string GetObjectsNormalDirectory(
+    const std::string &projName,
+    const std::string &configName,
+    const cmTarget *t) const;
+
   void addObject(cmXCodeObject *obj);
   std::string PostBuildMakeTarget(std::string const& tName,
                                   std::string const& configName);
