@@ -38,6 +38,7 @@ public:
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmSourceFile*> ExternalObjects;
   std::vector<cmSourceFile*> OSXContent;
+  std::vector<cmSourceFile*> IDLSources;
   std::string ModuleDefinitionFile;
 
   std::map<cmSourceFile const*, std::string> Objects;
