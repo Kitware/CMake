@@ -131,7 +131,9 @@ cmNinjaNormalTargetGenerator
     vars.CMTarget = this->GetTarget();
     vars.Language = this->TargetLinkLanguage;
     vars.Objects = "$in";
-    std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();
+    std::string objdir = this->GetLocalGenerator()->GetHomeRelativeOutputPath();
+    objdir += objdir.empty() ? "" : "/";
+    objdir += cmake::GetCMakeFilesDirectoryPostSlash();
     objdir += this->GetTargetName();
     objdir += ".dir";
     objdir = this->GetLocalGenerator()->Convert(objdir.c_str(),
