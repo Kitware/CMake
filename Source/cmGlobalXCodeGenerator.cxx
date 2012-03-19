@@ -135,8 +135,17 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;
-  parser.ParseFile
-    ("/Developer/Applications/Xcode.app/Contents/version.plist");
+  if (cmSystemTools::FileExists("/Applications/Xcode.app/Contents/version.plist"))
+    {
+    parser.ParseFile
+      ("/Applications/Xcode.app/Contents/version.plist");
+    }
+  else
+    {
+    parser.ParseFile
+      ("/Developer/Applications/Xcode.app/Contents/version.plist");
+
+    }
   cmsys::auto_ptr<cmGlobalXCodeGenerator>
     gg(new cmGlobalXCodeGenerator(parser.Version));
   if (gg->XcodeVersion == 20)
