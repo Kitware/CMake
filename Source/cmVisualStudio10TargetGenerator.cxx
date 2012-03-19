@@ -857,19 +857,10 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
     {
-    // If an object file is generated, then vs10
-    // will use it in the build, and we have to list
-    // it as None instead of Object
-    if((*si)->GetPropertyAsBool("GENERATED"))
-      {
-      this->WriteSource("None", *si);
-      }
-    // If it is not a generated object then we have
-    // to use the Object type
-    else
-      {
-      this->WriteSource("Object", *si);
-      }
+    // If an object file is generated in this target, then vs10 will use
+    // it in the build, and we have to list it as None instead of Object.
+    std::vector<cmSourceFile*> const* d = this->Target->GetSourceDepends(*si);
+    this->WriteSource((d && !d->empty())? "None":"Object", *si);
     }
 
   this->WriteSources("None", this->GeneratorTarget->ExtraSources);
