@@ -47,10 +47,11 @@ private:
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
-  void WriteCLSources();
+  void WriteSource(const char* tool, cmSourceFile* sf, bool end = true);
+  void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
+  void WriteAllSources();
   void WriteDotNetReferences();
   void WriteWinRTReferences();
-  void WriteObjSources();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();
   bool ComputeClOptions();

@@ -253,8 +253,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WritePathAndIncrementalLinkOptions();
   this->WriteItemDefinitionGroups();
   this->WriteCustomCommands();
-  this->WriteObjSources();
-  this->WriteCLSources();
+  this->WriteAllSources();
   this->WriteDotNetReferences();
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
@@ -795,107 +794,56 @@ WriteGroupSources(const char* name,
   this->WriteString("</ItemGroup>\n", 1);
 }
 
-void cmVisualStudio10TargetGenerator::WriteObjSources()
-{ 
-  if(this->Target->GetType() > cmTarget::MODULE_LIBRARY)
+void cmVisualStudio10TargetGenerator::WriteSource(
+  const char* tool, cmSourceFile* sf, bool end)
+{
+  std::string sourceFile = sf->GetFullPath();
+  // do not use a relative path here because it means that you
+  // can not use as long a path to the file.
+  this->ConvertToWindowsSlash(sourceFile);
+  this->WriteString("<", 2);
+  (*this->BuildFileStream ) << tool <<
+    " Include=\"" << sourceFile << (end? "\" />\n" : "\" ");
+}
+
+void cmVisualStudio10TargetGenerator::WriteSources(
+  const char* tool, std::vector<cmSourceFile*> const& sources)
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = sources.begin(); si != sources.end(); ++si)
     {
-    return;
-    }
-  bool first = true;
-  std::vector<cmSourceFile*>const & sources = this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-      source != sources.end(); ++source)
-    {
-    std::string ext =
-      cmSystemTools::LowerCase((*source)->GetExtension());
-    if(ext == "obj" || ext == "o")
-      {
-      if(first)
-        {
-        this->WriteString("<ItemGroup>\n", 1);
-        first = false;
-        }
-      // If an object file is generated, then vs10
-      // will use it in the build, and we have to list
-      // it as None instead of Object
-      if((*source)->GetPropertyAsBool("GENERATED"))
-        {
-        this->WriteString("<None Include=\"", 2);
-        }
-      // If it is not a generated object then we have
-      // to use the Object type
-      else
-        {
-        this->WriteString("<Object Include=\"", 2);
-        }
-      (*this->BuildFileStream ) << (*source)->GetFullPath() << "\" />\n";
-      }
-    }
-  if(!first)
-    {
-    this->WriteString("</ItemGroup>\n", 1); 
+    this->WriteSource(tool, *si);
     }
 }
 
-
-void cmVisualStudio10TargetGenerator::WriteCLSources()
+void cmVisualStudio10TargetGenerator::WriteAllSources()
 {
   if(this->Target->GetType() > cmTarget::UTILITY)
     {
     return;
     }
   this->WriteString("<ItemGroup>\n", 1);
-  std::vector<cmSourceFile*>const& sources = this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-      source != sources.end(); ++source)
+
+  this->WriteSources("ClInclude", this->GeneratorTarget->HeaderSources);
+  this->WriteSources("Midl", this->GeneratorTarget->IDLSources);
+
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = this->GeneratorTarget->ObjectSources.begin();
+      si != this->GeneratorTarget->ObjectSources.end(); ++si)
     {
-    std::string ext = cmSystemTools::LowerCase((*source)->GetExtension());
-    if((*source)->GetCustomCommand() || ext == "o" || ext == "obj")
-      {
-      continue;
-      }
-    // If it is not a custom command and it is not a pre-built obj file,
-    // then add it as a source (c/c++/header/rc/idl) file
-    bool header = (*source)->GetPropertyAsBool("HEADER_FILE_ONLY")
-      || this->GlobalGenerator->IgnoreFile(ext.c_str());
-    const char* lang = (*source)->GetLanguage();
-    bool cl = lang && (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") ==0);
-    bool rc = lang && (strcmp(lang, "RC") == 0);
-    bool idl = ext == "idl";
-    std::string sourceFile = (*source)->GetFullPath();
-    // do not use a relative path here because it means that you
-    // can not use as long a path to the file.
-    this->ConvertToWindowsSlash(sourceFile);
-    // output the source file
-    if(header)
-      {
-      this->WriteString("<ClInclude Include=\"", 2);
-      }
-    else if(cl)
-      {
-      this->WriteString("<ClCompile Include=\"", 2);
-      }
-    else if(rc)
-      {
-      this->WriteString("<ResourceCompile Include=\"", 2);
-      }
-    else if(idl)
-      {
-      this->WriteString("<Midl Include=\"", 2);
-      }
-    else
-      {
-      this->WriteString("<None Include=\"", 2);
-      }
-    (*this->BuildFileStream ) << sourceFile << "\"";
+    const char* lang = (*si)->GetLanguage();
+    bool cl = strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0;
+    bool rc = strcmp(lang, "RC") == 0;
+    const char* tool = cl? "ClCompile" : (rc? "ResourceCompile" : "None");
+    this->WriteSource(tool, *si, false);
     // ouput any flags specific to this source file
-    if(!header && cl && this->OutputSourceSpecificFlags(*source))
+    if(cl && this->OutputSourceSpecificFlags(*si))
       {
       // if the source file has specific flags the tag
       // is ended on a new line
       this->WriteString("</ClCompile>\n", 2);
       }
-    else if(!header && rc && this->OutputSourceSpecificFlags(*source))
+    else if(rc && this->OutputSourceSpecificFlags(*si))
       {
       this->WriteString("</ResourceCompile>\n", 2);
       }
@@ -904,6 +852,18 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       (*this->BuildFileStream ) << " />\n";
       }
     }
+
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = this->GeneratorTarget->ExternalObjects.begin();
+      si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+    {
+    // If an object file is generated in this target, then vs10 will use
+    // it in the build, and we have to list it as None instead of Object.
+    std::vector<cmSourceFile*> const* d = this->Target->GetSourceDepends(*si);
+    this->WriteSource((d && !d->empty())? "None":"Object", *si);
+    }
+
+  this->WriteSources("None", this->GeneratorTarget->ExtraSources);
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;

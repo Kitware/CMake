@@ -59,3 +59,5 @@ ADD_EXECUTABLE(ExternalOBJ executable.cxx ${CUSTOM_OBJECT})
 # not didn't work.  So, repeat the executable using the object
 # directly and not from the output of the copy.
 ADD_EXECUTABLE(ExternalOBJ2 executable.cxx ${EXTERNAL_OBJECT})
+
+ADD_SUBDIRECTORY(Sub)
