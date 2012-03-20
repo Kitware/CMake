@@ -25,8 +25,8 @@
   T const x = VALUE(T, U);                                              \
   T y = C(V);                                                           \
   printf(LANG #C ":"                                                    \
-         " expression [%"@KWIML@_INT_PRI##PRI"],"                       \
-         " literal [%"@KWIML@_INT_PRI##PRI"]", x, y);                   \
+         " expression [%" @KWIML@_INT_PRI##PRI "],"                     \
+         " literal [%" @KWIML@_INT_PRI##PRI "]", x, y);                 \
   if(x == y)                                                            \
     {                                                                   \
     printf(", PASSED\n");                                               \
@@ -42,7 +42,7 @@
   {                                                                     \
   T const x = VALUE(T, U);                                              \
   char const* str = STR;                                                \
-  sprintf(buf, "%"@KWIML@_INT_PRI##PRI, x);                             \
+  sprintf(buf, "%" @KWIML@_INT_PRI##PRI, x);                            \
   printf(LANG "@KWIML@_INT_PRI" #PRI ":"                                \
          " expected [%s], got [%s]", str, buf);                         \
   if(strcmp(str, buf) == 0)                                             \
@@ -62,13 +62,13 @@
   T const x = VALUE(T, U);                                              \
   T y;                                                                  \
   char const* str = STR;                                                \
-  if(sscanf(str, "%"@KWIML@_INT_SCN##SCN, &y) != 1)                     \
+  if(sscanf(str, "%" @KWIML@_INT_SCN##SCN, &y) != 1)                    \
     {                                                                   \
     y = 0;                                                              \
     }                                                                   \
   printf(LANG "@KWIML@_INT_SCN" #SCN ":"                                \
-         " expected [%"@KWIML@_INT_PRI##PRI"],"                         \
-         " got [%"@KWIML@_INT_PRI##PRI"]", x, y);                       \
+         " expected [%" @KWIML@_INT_PRI##PRI "],"                       \
+         " got [%" @KWIML@_INT_PRI##PRI "]", x, y);                     \
   if(x == y)                                                            \
     {                                                                   \
     printf(", PASSED\n");                                               \
