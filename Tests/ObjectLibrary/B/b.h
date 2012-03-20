@@ -1,8 +1,8 @@
-#ifdef A
-# error "A must not be defined"
+#ifdef A_DEF
+# error "A_DEF must not be defined"
 #endif
-#ifndef B
-# error "B not defined"
+#ifndef B_DEF
+# error "B_DEF not defined"
 #endif
 #if defined(_WIN32) && defined(Bexport)
 # define EXPORT_B __declspec(dllexport)
