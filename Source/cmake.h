@@ -102,8 +102,8 @@ class cmake
   //@{
   /**
    * Set/Get the home directory (or output directory) in the project. The
-   * home directory is the top directory of the project. It is where
-   * cmake was run. Remember that CMake processes
+   * home directory is the top directory of the project. It is the
+   * path-to-source cmake was run with. Remember that CMake processes
    * CMakeLists files by recursing up the tree starting at the StartDirectory
    * and going up until it reaches the HomeDirectory.
    */
@@ -294,7 +294,7 @@ class cmake
   void SetWorkingMode(WorkingMode mode) { this->CurrentWorkingMode = mode; }
   WorkingMode GetWorkingMode() { return this->CurrentWorkingMode; }
 
-  ///! Debug the try compile stuff by not delelting the files
+  ///! Debug the try compile stuff by not deleting the files
   bool GetDebugTryCompile(){return this->DebugTryCompile;}
   void DebugTryCompileOn(){this->DebugTryCompile = true;}
 
@@ -372,7 +372,7 @@ class cmake
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
                     cmListFileBacktrace const& backtrace);
-  //  * run the --build option
+  ///! run the --build option
   int Build(const std::string& dir,
             const std::string& target,
             const std::string& config,
@@ -436,7 +436,7 @@ protected:
   void SetDirectoriesFromFile(const char* arg);
 
   //! Make sure all commands are what they say they are and there is no
-  //macros.
+  /// macros.
   void CleanupCommandsAndMacros();
 
   void GenerateGraphViz(const char* fileName) const;
