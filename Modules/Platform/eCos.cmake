@@ -1,5 +1,12 @@
 # support for eCos http://ecos.sourceware.org
-SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
+
+# Guard against multiple inclusion, which e.g. leads to multiple calls to add_definition() #12987
+IF(__ECOS_CMAKE_INCLUDED)
+  RETURN()
+ENDIF()
+SET(__ECOS_CMAKE_INCLUDED TRUE)
+
+SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "")       # -shared
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath
