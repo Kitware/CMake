@@ -185,6 +185,8 @@ SET(SRCS
   cmGeneratedFileStream.cxx
   cmGeneratorExpression.cxx
   cmGeneratorExpression.h
+  cmGeneratorTarget.cxx
+  cmGeneratorTarget.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
   cmGlobalUnixMakefileGenerator3.cxx

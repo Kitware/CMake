@@ -25,6 +25,7 @@ public:
   virtual void WriteRuleFiles();  
   
 protected:
+  void WriteObjectLibraryRules();
   void WriteStaticLibraryRules();
   void WriteSharedLibraryRules(bool relink);
   void WriteModuleLibraryRules(bool relink);

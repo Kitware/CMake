@@ -17,6 +17,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 
 #include "cmComputeLinkInformation.h"
@@ -38,6 +39,7 @@ public:
     LocalGenerator(e) {}
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   void OutputLibraries(std::ostream& fout, ItemVector const& libs);
+  void OutputObjects(std::ostream& fout, cmTarget* t, const char* isep = 0);
 private:
   cmLocalVisualStudio7Generator* LocalGenerator;
 };
@@ -641,6 +643,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   bool targetBuilds = true;
   switch(target.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
+      targetBuilds = false; // TODO: PDB for object library?
     case cmTarget::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       configType = "4";
@@ -1000,6 +1004,22 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
   switch(target.GetType())
     {
+    case cmTarget::OBJECT_LIBRARY:
+      {
+      std::string libpath = this->GetTargetDirectory(target);
+      libpath += "/";
+      libpath += configName;
+      libpath += "/";
+      libpath += target.GetName();
+      libpath += ".lib";
+      const char* tool =
+        this->FortranProject? "VFLibrarianTool":"VCLibrarianTool";
+      fout << "\t\t\t<Tool\n"
+           << "\t\t\t\tName=\"" << tool << "\"\n";
+      fout << "\t\t\t\tOutputFile=\""
+           << this->ConvertToXMLOutputPathSingle(libpath.c_str()) << "\"/>\n";
+      break;
+      }
     case cmTarget::STATIC_LIBRARY:
     {
     std::string targetNameFull = target.GetFullName(configName);
@@ -1014,6 +1034,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
 
+    if(this->GetVersion() < VS8)
+      {
+      cmOStringStream libdeps;
+      this->Internal->OutputObjects(libdeps, &target);
+      if(!libdeps.str().empty())
+        {
+        fout << "\t\t\t\tAdditionalDependencies=\"" << libdeps.str() << "\"\n";
+        }
+      }
     std::string libflags;
     if(const char* flags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
       {
@@ -1074,8 +1103,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // Use the NOINHERIT macro to avoid getting VS project default
     // libraries which may be set by the user to something bad.
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-         << this->Makefile->GetSafeDefinition(standardLibsVar.c_str())
-         << " ";
+         << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+    if(this->GetVersion() < VS8)
+      {
+      this->Internal->OutputObjects(fout, &target, " ");
+      }
+    fout << " ";
     this->Internal->OutputLibraries(fout, cli.GetItems());
     fout << "\"\n";
     temp = target.GetDirectory(configName);
@@ -1155,8 +1188,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // Use the NOINHERIT macro to avoid getting VS project default
     // libraries which may be set by the user to something bad.
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
-         << this->Makefile->GetSafeDefinition(standardLibsVar.c_str())
-         << " ";
+         << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
+    if(this->GetVersion() < VS8)
+      {
+      this->Internal->OutputObjects(fout, &target, " ");
+      }
+    fout << " ";
     this->Internal->OutputLibraries(fout, cli.GetItems());
     fout << "\"\n";
     temp = target.GetDirectory(configName);
@@ -1244,6 +1281,30 @@ cmLocalVisualStudio7GeneratorInternals
 
 //----------------------------------------------------------------------------
 void
+cmLocalVisualStudio7GeneratorInternals
+::OutputObjects(std::ostream& fout, cmTarget* t, const char* isep)
+{
+  // VS < 8 does not support per-config source locations so we
+  // list object library content on the link line instead.
+  cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
+  cmGeneratorTarget* gt =
+    lg->GetGlobalGenerator()->GetGeneratorTarget(t);
+  std::vector<std::string> objs;
+  gt->UseObjectLibraries(objs);
+  const char* sep = isep? isep : "";
+  for(std::vector<std::string>::const_iterator
+        oi = objs.begin(); oi != objs.end(); ++oi)
+    {
+    std::string rel = lg->Convert(oi->c_str(),
+                                  cmLocalGenerator::START_OUTPUT,
+                                  cmLocalGenerator::UNCHANGED);
+    fout << sep << lg->ConvertToXMLOutputPath(rel.c_str());
+    sep = " ";
+    }
+}
+
+//----------------------------------------------------------------------------
+void
 cmLocalVisualStudio7Generator
 ::OutputLibraryDirectories(std::ostream& fout,
                            std::vector<std::string> const& dirs)
@@ -1310,9 +1371,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     sourceGroup.AssignSource(*i);
     }
 
-  // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(classes);
-
   // open the project
   this->WriteProjectStart(fout, libName, target, sourceGroups);
   // write the configuration information
@@ -1328,7 +1386,27 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     this->WriteGroup(&sg, target, fout, libName, configs);
     }
 
-  //}
+  if(this->GetVersion() >= VS8)
+    {
+    // VS >= 8 support per-config source locations so we
+    // list object library content as external objects.
+    cmGeneratorTarget* gt =
+      this->GlobalGenerator->GetGeneratorTarget(&target);
+    std::vector<std::string> objs;
+    gt->UseObjectLibraries(objs);
+    if(!objs.empty())
+      {
+      // TODO: Separate sub-filter for each object library used?
+      fout << "\t\t<Filter Name=\"Object Libraries\">\n";
+      for(std::vector<std::string>::const_iterator
+            oi = objs.begin(); oi != objs.end(); ++oi)
+        {
+        std::string o = this->ConvertToXMLOutputPathSingle(oi->c_str());
+        fout << "\t\t\t<File RelativePath=\"" << o << "\" />\n";
+        }
+      fout << "\t\t</Filter>\n";
+      }
+    }
 
   fout << "\t</Files>\n";
 
@@ -1352,8 +1430,7 @@ public:
   cmLocalVisualStudio7GeneratorFCInfo(cmLocalVisualStudio7Generator* lg,
                                       cmTarget& target,
                                       cmSourceFile const& sf,
-                                      std::vector<std::string>* configs,
-                                      std::string const& dir_max);
+                                      std::vector<std::string>* configs);
   std::map<cmStdString, cmLVS7GFileConfig> FileConfigMap;
 };
 
@@ -1361,13 +1438,14 @@ cmLocalVisualStudio7GeneratorFCInfo
 ::cmLocalVisualStudio7GeneratorFCInfo(cmLocalVisualStudio7Generator* lg,
                                       cmTarget& target,
                                       cmSourceFile const& sf,
-                                      std::vector<std::string>* configs,
-                                      std::string const& dir_max)
+                                      std::vector<std::string>* configs)
 {
+  cmGeneratorTarget* gt =
+    lg->GetGlobalGenerator()->GetGeneratorTarget(&target);
   std::string objectName;
-  if(lg->NeedObjectName.find(&sf) != lg->NeedObjectName.end())
+  if(gt->ExplicitObjectName.find(&sf) != gt->ExplicitObjectName.end())
     {
-    objectName = lg->GetObjectFileNameWithoutTarget(sf, dir_max);
+    objectName = gt->Objects[&sf];
     }
 
   // Compute per-source, per-config information.
@@ -1478,11 +1556,11 @@ cmLocalVisualStudio7GeneratorFCInfo
     }
 }
 
-
-void cmLocalVisualStudio7Generator
-::ComputeMaxDirectoryLength(std::string& maxdir,
-  cmTarget& target)
-{  
+//----------------------------------------------------------------------------
+std::string
+cmLocalVisualStudio7Generator
+::ComputeLongestObjectDirectory(cmTarget& target) const
+{
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -1507,7 +1585,7 @@ void cmLocalVisualStudio7Generator
   dir_max += "/";
   dir_max += config_max;
   dir_max += "/";
-  maxdir = dir_max;
+  return dir_max;
 }
 
 void cmLocalVisualStudio7Generator
@@ -1530,19 +1608,13 @@ void cmLocalVisualStudio7Generator
     this->WriteVCProjBeginGroup(fout, name.c_str(), "");
     }
 
-  // Compute the maximum length full path to the intermediate
-  // files directory for any configuration.  This is used to construct
-  // object file names that do not produce paths that are too long.
-  std::string dir_max;
-  this->ComputeMaxDirectoryLength(dir_max, target);
-
   // Loop through each source in the source group.
   std::string objectName;
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
     std::string source = (*sf)->GetFullPath();
-    FCInfo fcinfo(this, target, *(*sf), configs, dir_max);
+    FCInfo fcinfo(this, target, *(*sf), configs);
 
     if (source != libName || target.GetType() == cmTarget::UTILITY ||
       target.GetType() == cmTarget::GLOBAL_TARGET )

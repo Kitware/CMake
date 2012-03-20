@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmVisualStudio10TargetGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
+#include "cmGeneratorTarget.h"
 #include "cmTarget.h"
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratedFileStream.h"
@@ -62,6 +63,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
 {
   this->GlobalGenerator = gg;
   this->Target = target;
+  this->GeneratorTarget = gg->GetGeneratorTarget(target);
   this->Makefile = target->GetMakefile();
   this->LocalGenerator =  
     (cmLocalVisualStudio7Generator*)
@@ -70,7 +72,6 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
-  this->ComputeObjectNames();
   this->BuildFileStream = 0;
 }
 
@@ -147,7 +148,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->Target->SetProperty("GENERATOR_FILE_NAME",this->Name.c_str());
   this->Target->SetProperty("GENERATOR_FILE_NAME_EXT",
                             ".vcxproj");
-  if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
+  if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     if(!this->ComputeClOptions())
       {
@@ -358,6 +359,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       case cmTarget::MODULE_LIBRARY:
         configType += "DynamicLibrary";
         break;
+      case cmTarget::OBJECT_LIBRARY:
       case cmTarget::STATIC_LIBRARY:
         configType += "StaticLibrary";
         break;
@@ -388,7 +390,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     mfcLine += useOfMfcValue + "</UseOfMfc>\n";
     this->WriteString(mfcLine.c_str(), 2);
 
-    if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
        this->ClOptions[*i]->UsingUnicode() ||
        this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
@@ -421,12 +423,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
   this->SourcesVisited.clear();
-  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
-      source != sources.end(); ++source)
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = this->GeneratorTarget->CustomCommands.begin();
+      si != this->GeneratorTarget->CustomCommands.end(); ++si)
     {
-    cmSourceFile* sf = *source;
-    this->WriteCustomCommand(sf);
+    this->WriteCustomCommand(*si);
     }
 }
 
@@ -634,6 +635,25 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->WriteGroupSources("Midl", idls, sourceGroups);
   this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
 
+  // Add object library contents as external objects.
+  std::vector<std::string> objs;
+  this->GeneratorTarget->UseObjectLibraries(objs);
+  if(!objs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<std::string>::const_iterator
+          oi = objs.begin(); oi != objs.end(); ++oi)
+      {
+      std::string obj = *oi;
+      this->WriteString("<Object Include=\"", 2);
+      this->ConvertToWindowsSlash(obj);
+      (*this->BuildFileStream ) << obj << "\">\n";
+      this->WriteString("<Filter>Object Libraries</Filter>\n", 3);
+      this->WriteString("</Object>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+
   this->WriteString("<ItemGroup>\n", 1);
   for(std::set<cmSourceGroup*>::iterator g = groupsUsed.begin();
       g != groupsUsed.end(); ++g)
@@ -656,6 +676,18 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
         << "</UniqueIdentifier>\n";
       this->WriteString("</Filter>\n", 2);
       }
+    }
+  if(!objs.empty())
+    {
+    this->WriteString("<Filter Include=\"Object Libraries\">\n", 2);
+    std::string guidName = "SG_Filter_Object Libraries";
+    this->GlobalGenerator->CreateGUID(guidName.c_str());
+    this->WriteString("<UniqueIdentifier>", 3);
+    std::string guid =
+      this->GlobalGenerator->GetGUID(guidName.c_str());
+    (*this->BuildFileStream) << "{" << guid << "}"
+                             << "</UniqueIdentifier>\n";
+    this->WriteString("</Filter>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
   this->WriteGroupSources("None", none, sourceGroups);
@@ -872,26 +904,20 @@ void cmVisualStudio10TargetGenerator::WriteCLSources()
       (*this->BuildFileStream ) << " />\n";
       }
     }
-  this->WriteString("</ItemGroup>\n", 1);
-}
 
-void cmVisualStudio10TargetGenerator::ComputeObjectNames()
-{
-  // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*>const & classes = this->Target->GetSourceFiles();
-  for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
-      i != classes.end(); i++)
+  // Add object library contents as external objects.
+  std::vector<std::string> objs;
+  this->GeneratorTarget->UseObjectLibraries(objs);
+  for(std::vector<std::string>::const_iterator
+        oi = objs.begin(); oi != objs.end(); ++oi)
     {
-    // Add the file to the list of sources.
-    std::string source = (*i)->GetFullPath();
-    if(cmSystemTools::UpperCase((*i)->GetExtension()) == "DEF")
-      {
-      this->ModuleDefinitionFile = (*i)->GetFullPath();
-      }
+    std::string obj = *oi;
+    this->WriteString("<Object Include=\"", 2);
+    this->ConvertToWindowsSlash(obj);
+    (*this->BuildFileStream ) << obj << "\" />\n";
     }
 
-  // Compute which sources need unique object computation.
-  this->LocalGenerator->ComputeObjectNameRequirements(classes);
+  this->WriteString("</ItemGroup>\n", 1);
 }
 
 bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
@@ -900,16 +926,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   cmSourceFile& sf = *source;
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
-  // Compute the maximum length full path to the intermediate
-  // files directory for any configuration.  This is used to construct
-  // object file names that do not produce paths that are too long.
-  std::string dir_max;
-  lg->ComputeMaxDirectoryLength(dir_max, *this->Target);
-
   std::string objectName;
-  if(lg->NeedObjectName.find(&sf) != lg->NeedObjectName.end())
+  if(this->GeneratorTarget->ExplicitObjectName.find(&sf)
+     != this->GeneratorTarget->ExplicitObjectName.end())
     {
-    objectName = lg->GetObjectFileNameWithoutTarget(sf, dir_max);
+    objectName = this->GeneratorTarget->Objects[&sf];
     }
   std::string flags;
   std::string defines;
@@ -1030,20 +1051,29 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       }
     else
       {
-      std::string targetNameFull =
-        this->Target->GetFullName(config->c_str());
       std::string intermediateDir = this->LocalGenerator->
         GetTargetDirectory(*this->Target);
       intermediateDir += "/";
       intermediateDir += *config;
       intermediateDir += "/";
+      std::string outDir;
+      std::string targetNameFull;
+      if(ttype == cmTarget::OBJECT_LIBRARY)
+        {
+        outDir = intermediateDir;
+        targetNameFull = this->Target->GetName();
+        targetNameFull += ".lib";
+        }
+      else
+        {
+        outDir = this->Target->GetDirectory(config->c_str()) + "/";
+        targetNameFull = this->Target->GetFullName(config->c_str());
+        }
       this->ConvertToWindowsSlash(intermediateDir);
-      std::string outDir = this->Target->GetDirectory(config->c_str());
       this->ConvertToWindowsSlash(outDir);
 
       this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
       *this->BuildFileStream << outDir
-                             << "\\"
                              << "</OutDir>\n";
 
       this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
@@ -1277,11 +1307,15 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   *this->BuildFileStream << configName 
                          << "</AssemblerListingLocation>\n";
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
-  this->WriteString("<ProgramDataBaseFileName>", 3);
-  *this->BuildFileStream << this->Target->GetDirectory(configName.c_str())
-                         << "/" 
-                         << this->Target->GetPDBName(configName.c_str())
-                         << "</ProgramDataBaseFileName>\n";
+  if(this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
+    {
+    // TODO: PDB for object library?
+    this->WriteString("<ProgramDataBaseFileName>", 3);
+    *this->BuildFileStream << this->Target->GetDirectory(configName.c_str())
+                           << "/"
+                           << this->Target->GetPDBName(configName.c_str())
+                           << "</ProgramDataBaseFileName>\n";
+    }
   this->WriteString("</ClCompile>\n", 2);
 }
 
@@ -1513,10 +1547,10 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  if(!this->ModuleDefinitionFile.empty())
+  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
     {
     linkOptions.AddFlag("ModuleDefinitionFile",
-                        this->ModuleDefinitionFile.c_str());
+                        this->GeneratorTarget->ModuleDefinitionFile.c_str());
     }
 
   linkOptions.RemoveFlag("GenerateManifest");
@@ -1592,7 +1626,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>
-    if(this->Target->GetType() <= cmTarget::MODULE_LIBRARY)
+    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
       {
       this->WriteClOptions(*i, includes);
       //    output rc compile flags <ResourceCompile></ResourceCompile>

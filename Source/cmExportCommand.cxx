@@ -124,6 +124,14 @@ bool cmExportCommand
         {
         targets.push_back(target);
         }
+      else if(target->GetType() == cmTarget::OBJECT_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "given OBJECT library \"" << *currentTarget
+          << "\" which may not be exported.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       else
         {
         cmOStringStream e;

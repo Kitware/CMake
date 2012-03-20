@@ -32,6 +32,7 @@ private:
   void WriteLanguagesRules();
   void WriteLinkRule();
   void WriteLinkStatement();
+  void WriteObjectLibStatement();
   std::vector<std::string> ComputeLinkCmd();
 
 private:

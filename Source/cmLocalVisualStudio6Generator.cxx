@@ -15,6 +15,7 @@
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 
 #include "cmComputeLinkInformation.h"
@@ -126,6 +127,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
     switch(l->second.GetType())
       {
       case cmTarget::STATIC_LIBRARY:
+      case cmTarget::OBJECT_LIBRARY:
         this->SetBuildType(STATIC_LIBRARY, l->first.c_str(), l->second);
         break;
       case cmTarget::SHARED_LIBRARY:
@@ -336,9 +338,6 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       }
     }
 
-  // Compute which sources need unique object computation.
-  this->ComputeObjectNameRequirements(classes);
-  
   // Write the DSP file's header.
   this->WriteDSPHeader(fout, libName, target, sourceGroups);
   
@@ -358,6 +357,8 @@ void cmLocalVisualStudio6Generator
 ::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
              std::ostream &fout, const char *libName)
 {
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
   const std::vector<const cmSourceFile *> &sourceFiles = 
     sg->GetSourceFiles();
   // If the group is empty, don't write it at all.
@@ -374,28 +375,6 @@ void cmLocalVisualStudio6Generator
     this->WriteDSPBeginGroup(fout, name.c_str(), "");
     }
 
-  // Compute the maximum length configuration name.
-  std::string config_max;
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
-    {
-    // Strip the subdirectory name out of the configuration name.
-    std::string config = this->GetConfigName(*i);
-    if(config.size() > config_max.size())
-      {
-      config_max = config;
-      }
-    }
-
-  // Compute the maximum length full path to the intermediate
-  // files directory for any configuration.  This is used to construct
-  // object file names that do not produce paths that are too long.
-  std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += config_max;
-  dir_max += "/";
-
   // Loop through each source in the source group.
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
@@ -406,11 +385,9 @@ void cmLocalVisualStudio6Generator
     std::string compileFlags;
     std::vector<std::string> depends;
     std::string objectNameDir;
-    if(this->NeedObjectName.find(*sf) != this->NeedObjectName.end())
+    if(gt->ExplicitObjectName.find(*sf) != gt->ExplicitObjectName.end())
       {
-      objectNameDir =
-        cmSystemTools::GetFilenamePath(
-          this->GetObjectFileNameWithoutTarget(*(*sf), dir_max));
+      objectNameDir = cmSystemTools::GetFilenamePath(gt->Objects[*sf]);
       }
 
     // Add per-source file flags.
@@ -1264,8 +1241,18 @@ void cmLocalVisualStudio6Generator
     outputNameMinSizeRel = target.GetFullName("MinSizeRel");
     outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
     }
+  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    outputName = target.GetName();
+    outputName += ".lib";
+    outputNameDebug = outputName;
+    outputNameRelease = outputName;
+    outputNameMinSizeRel = outputName;
+    outputNameRelWithDebInfo = outputName;
+    }
 
   // Compute the output directory for the target.
+  std::string outputDirOld;
   std::string outputDirDebug;
   std::string outputDirRelease;
   std::string outputDirMinSizeRel;
@@ -1275,6 +1262,11 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
+#ifdef CM_USE_OLD_VS6
+    outputDirOld =
+      removeQuotes(this->ConvertToOptionallyRelativeOutputPath
+                   (target.GetDirectory().c_str()));
+#endif
     outputDirDebug =
         removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
                        target.GetDirectory("Debug").c_str()));
@@ -1287,6 +1279,14 @@ void cmLocalVisualStudio6Generator
     outputDirRelWithDebInfo =
         removeQuotes(this->ConvertToOptionallyRelativeOutputPath(
                  target.GetDirectory("RelWithDebInfo").c_str()));
+    }
+  else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    std::string outputDir = cmake::GetCMakeFilesDirectoryPostSlash();
+    outputDirDebug = outputDir + "Debug";
+    outputDirRelease = outputDir + "Release";
+    outputDirMinSizeRel = outputDir + "MinSizeRel";
+    outputDirRelWithDebInfo = outputDir + "RelWithDebInfo";
     }
 
   // Compute the proper link information for the target.
@@ -1428,6 +1428,16 @@ void cmLocalVisualStudio6Generator
       staticLibOptionsRelWithDebInfo += " ";
       staticLibOptionsRelWithDebInfo = libflagsRelWithDebInfo;
       }
+    std::string objects;
+    this->OutputObjects(target, "LIB", objects);
+    if(!objects.empty())
+      {
+      objects = "\n" + objects;
+      staticLibOptionsDebug += objects;
+      staticLibOptionsRelease += objects;
+      staticLibOptionsMinSizeRel += objects;
+      staticLibOptionsRelWithDebInfo += objects;
+      }
     }
 
   // Add the export symbol definition for shared library objects.
@@ -1456,7 +1466,8 @@ void cmLocalVisualStudio6Generator
                                  libnameExports.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_MFC_FLAG",
                                  mfcFlag);
-    if(target.GetType() == cmTarget::STATIC_LIBRARY )
+    if(target.GetType() == cmTarget::STATIC_LIBRARY ||
+       target.GetType() == cmTarget::OBJECT_LIBRARY)
       {
       cmSystemTools::ReplaceString(line, "CM_STATIC_LIB_ARGS_DEBUG",
                                    staticLibOptionsDebug.c_str());
@@ -1555,7 +1566,7 @@ void cmLocalVisualStudio6Generator
                     (exePath.c_str())).c_str());
 #endif
 
-    if(targetBuilds)
+    if(targetBuilds || target.GetType() == cmTarget::OBJECT_LIBRARY)
       {
       cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_DEBUG",
                                    outputDirDebug.c_str());
@@ -1565,13 +1576,11 @@ void cmLocalVisualStudio6Generator
                                    outputDirMinSizeRel.c_str());
       cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY_RELWITHDEBINFO",
                                    outputDirRelWithDebInfo.c_str());
-#ifdef CM_USE_OLD_VS6
-      std::string outPath = target.GetDirectory();
-      cmSystemTools::ReplaceString
-        (line, "OUTPUT_DIRECTORY",
-         removeQuotes(this->ConvertToOptionallyRelativeOutputPath
-                      (outPath.c_str())).c_str());
-#endif
+      if(!outputDirOld.empty())
+        {
+        cmSystemTools::ReplaceString(line, "OUTPUT_DIRECTORY",
+                                     outputDirOld.c_str());
+        }
       }
 
     cmSystemTools::ReplaceString(line, 
@@ -1588,7 +1597,7 @@ void cmLocalVisualStudio6Generator
     std::string flagsDebug = " ";
     std::string flagsDebugRel = " ";
     if(target.GetType() >= cmTarget::EXECUTABLE && 
-       target.GetType() <= cmTarget::MODULE_LIBRARY)
+       target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
       const char* linkLanguage = target.GetLinkerLanguage();
       if(!linkLanguage)
@@ -1743,6 +1752,8 @@ void cmLocalVisualStudio6Generator
   ItemVector const& linkLibs = cli.GetItems();
   std::vector<std::string> const& linkDirs = cli.GetDirectories();
 
+  this->OutputObjects(target, "LINK", options);
+
   // Build the link options code.
   for(std::vector<std::string>::const_iterator d = linkDirs.begin();
       d != linkDirs.end(); ++d)
@@ -1787,12 +1798,64 @@ void cmLocalVisualStudio6Generator
     }
 }
 
+//----------------------------------------------------------------------------
+void cmLocalVisualStudio6Generator
+::OutputObjects(cmTarget& target, const char* tool,
+                std::string& options)
+{
+  // VS 6 does not support per-config source locations so we
+  // list object library content on the link line instead.
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+  std::vector<std::string> objs;
+  gt->UseObjectLibraries(objs);
+  for(std::vector<std::string>::const_iterator
+        oi = objs.begin(); oi != objs.end(); ++oi)
+    {
+    options += "# ADD ";
+    options += tool;
+    options += "32 ";
+    options += this->ConvertToOptionallyRelativeOutputPath(oi->c_str());
+    options += "\n";
+    }
+}
+
 std::string
 cmLocalVisualStudio6Generator
 ::GetTargetDirectory(cmTarget const&) const
 {
   // No per-target directory for this generator (yet).
   return "";
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalVisualStudio6Generator
+::ComputeLongestObjectDirectory(cmTarget&) const
+{
+  // Compute the maximum length configuration name.
+  std::string config_max;
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
+    {
+    // Strip the subdirectory name out of the configuration name.
+    std::string config = this->GetConfigName(*i);
+    if(config.size() > config_max.size())
+      {
+      config_max = config;
+      }
+    }
+
+  // Compute the maximum length full path to the intermediate
+  // files directory for any configuration.  This is used to construct
+  // object file names that do not produce paths that are too long.
+  std::string dir_max;
+  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += "/";
+  dir_max += config_max;
+  dir_max += "/";
+  return dir_max;
 }
 
 std::string

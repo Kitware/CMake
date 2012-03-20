@@ -284,11 +284,6 @@ protected:
                                cmTarget& target,
                                const std::vector<std::string>& objects);
 
-  std::string GetObjectFileName(cmTarget& target,
-                                const cmSourceFile& source,
-                                std::string* nameWithoutTargetDir = 0,
-                                bool* hasSourceExtension = 0);
-
   void AppendRuleDepend(std::vector<std::string>& depends,
                         const char* ruleFileName);
   void AppendRuleDepends(std::vector<std::string>& depends,

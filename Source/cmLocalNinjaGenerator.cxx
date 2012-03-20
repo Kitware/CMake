@@ -117,37 +117,6 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
   return static_cast<cmGlobalNinjaGenerator*>(this->GetGlobalGenerator());
 }
 
-// TODO: Picked up from cmLocalUnixMakefileGenerator3.  Refactor it.
-std::string
-cmLocalNinjaGenerator
-::GetObjectFileName(const cmTarget& target,
-                    const cmSourceFile& source)
-{
-  // Make sure we never hit this old case.
-  if(source.GetProperty("MACOSX_PACKAGE_LOCATION"))
-    {
-    std::string msg = "MACOSX_PACKAGE_LOCATION set on source file: ";
-    msg += source.GetFullPath();
-    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
-                                      msg.c_str());
-    }
-
-  // Start with the target directory.
-  std::string obj = this->GetTargetDirectory(target);
-  obj += "/";
-
-  // Get the object file name without the target directory.
-  std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += obj;
-  std::string objectName =
-    this->GetObjectFileNameWithoutTarget(source, dir_max, 0);
-  // Append the object name to the target directory.
-  obj += objectName;
-  return obj;
-}
-
 //----------------------------------------------------------------------------
 // Virtual protected methods.
 

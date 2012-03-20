@@ -97,6 +97,8 @@ protected:
   typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
 private:
+  void ComputeTargetObjects(cmGeneratorTarget* gt) const;
+
   void FollowLinkDepends(cmTarget* target, std::set<cmTarget*>& linked);
 
   class TargetSetMap: public std::map<cmTarget*, TargetSet> {};

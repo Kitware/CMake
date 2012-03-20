@@ -358,6 +358,7 @@ void cmLocalUnixMakefileGenerator3
        (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
        (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
+       (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
        (t->second.GetType() == cmTarget::UTILITY))
       {
       emitted.insert(t->second.GetName());
@@ -2006,45 +2007,6 @@ void cmLocalUnixMakefileGenerator3
     cmakefileStream
       << "  )\n";
     }
-}
-
-//----------------------------------------------------------------------------
-std::string
-cmLocalUnixMakefileGenerator3
-::GetObjectFileName(cmTarget& target,
-                    const cmSourceFile& source,
-                    std::string* nameWithoutTargetDir,
-                    bool* hasSourceExtension)
-{
-  // Make sure we never hit this old case.
-  if(source.GetProperty("MACOSX_PACKAGE_LOCATION"))
-    {
-    std::string msg = "MACOSX_PACKAGE_LOCATION set on source file: ";
-    msg += source.GetFullPath();
-    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR,
-                                      msg.c_str());
-    }
-
-  // Start with the target directory.
-  std::string obj = this->GetTargetDirectory(target);
-  obj += "/";
-
-  // Get the object file name without the target directory.
-  std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += obj;
-  std::string objectName =
-    this->GetObjectFileNameWithoutTarget(source, dir_max,
-                                         hasSourceExtension);
-  if(nameWithoutTargetDir)
-    {
-    *nameWithoutTargetDir = objectName;
-    }
-
-  // Append the object name to the target directory.
-  obj += objectName;
-  return obj;
 }
 
 //----------------------------------------------------------------------------

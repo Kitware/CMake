@@ -1914,6 +1914,10 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
       case cmTarget::UNKNOWN_LIBRARY:
         dep = target->GetLocation(config);
         return true;
+      case cmTarget::OBJECT_LIBRARY:
+        // An object library has no single file on which to depend.
+        // This was listed to get the target-level dependency.
+        return false;
       case cmTarget::UTILITY:
       case cmTarget::GLOBAL_TARGET:
         // A utility target has no file on which to depend.  This was listed
