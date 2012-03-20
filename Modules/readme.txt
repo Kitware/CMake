@@ -57,7 +57,7 @@ For example:
 # - This is a cool module
 # This module does really cool stuff.
 # It can do even more than you think.
-# 
+#
 # It even needs to paragraphs to tell you about it.
 # And it defines the following variables:
 #  VAR_COOL - this is great isn't it?
@@ -119,17 +119,31 @@ able to find the package.  If the
 REQUIRED option is given to the command it will set the variable
 XXX_FIND_REQUIRED to true before loading the FindXXX.cmake module.  If
 this variable is set the module should issue a FATAL_ERROR if the
-package cannot be found.  For each package-specific component, say
-YYY, listed after the REQUIRED option a variable XXX_FIND_REQUIRED_YYY
-to true.  The set of components listed after either the REQUIRED
-option or the COMPONENTS option will be specified in a
-XXX_FIND_COMPONENTS variable.  This can be used by the FindXXX.cmake
-module to determine which sub-components of the package must be found.
+package cannot be found.
 If neither the QUIET nor REQUIRED options are given then the
 FindXXX.cmake module should look for the package and complain without
 error if the module is not found.
 
-To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS() 
+A package can be provide sub-components.
+Those components can be listed after the COMPONENTS (or REQUIRED)
+or OPTIONAL_COMPONENTS keywords.  The set of all listed components will be
+specified in a XXX_FIND_COMPONENTS variable.
+For each package-specific component, say Yyy, a variable XXX_FIND_REQUIRED_Yyy
+will be set to true if it listed after COMPONENTS and it will be set to false
+if it was listed after OPTIONAL_COMPONENTS.
+Using those variables a FindXXX.cmake module and also a XXXConfig.cmake package
+configuration file can determine whether and which components have been requested,
+and whether they were requested as required or as optional.
+For each of the requested components a XXX_Yyy_FOUND variable should be set
+accordingly.
+The per-package XXX_FOUND variable should be only set to true if all requested
+required components have been found. A missing optional component should not
+keep the XXX_FOUND variable from being set to true.
+If the package provides XXX_INCLUDE_DIRS and XXX_LIBRARIES variables, the include
+dirs and libraries for all components which were requested and which have been
+found should be added to those two variables.
+
+To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS()
 macro, as an example see FindJPEG.cmake.
 
 For internal implementation, it's a generally accepted convention that variables starting with
