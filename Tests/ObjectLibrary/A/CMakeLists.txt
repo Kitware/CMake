@@ -1,10 +1,10 @@
 # Add -fPIC so objects can be used in shared libraries.
 # TODO: Need property for this.
-if(CMAKE_SHARED_LIBRARY_C_FLAGS)
+if(CMAKE_SHARED_LIBRARY_C_FLAGS AND NOT WATCOM)
   set(CMAKE_C_FLAGS "${CMAKE_SHARED_LIBRARY_C_FLAGS} ${CMAKE_C_FLAGS}")
 endif()
 
-add_definitions(-DA)
+add_definitions(-DA_DEF)
 
 add_custom_command(
   OUTPUT a1.c
