@@ -20,7 +20,9 @@ FIND_PROGRAM(CMAKE_ECLIPSE_EXECUTABLE NAMES eclipse DOC "The Eclipse executable"
 FUNCTION(_FIND_ECLIPSE_VERSION)
   # This code is in a function so the variables used here have only local scope
   IF(CMAKE_ECLIPSE_EXECUTABLE)
-    GET_FILENAME_COMPONENT(_ECLIPSE_DIR "${CMAKE_ECLIPSE_EXECUTABLE}" PATH)
+    # use REALPATH to resolve symlinks (http://public.kitware.com/Bug/view.php?id=13036)
+    GET_FILENAME_COMPONENT(_REALPATH_CMAKE_ECLIPSE_EXECUTABLE "${CMAKE_ECLIPSE_EXECUTABLE}" REALPATH)
+    GET_FILENAME_COMPONENT(_ECLIPSE_DIR "${_REALPATH_CMAKE_ECLIPSE_EXECUTABLE}" PATH)
     FILE(GLOB _ECLIPSE_FEATURE_DIR "${_ECLIPSE_DIR}/features/org.eclipse.platform*")
     IF("${_ECLIPSE_FEATURE_DIR}" MATCHES ".+org.eclipse.platform_([0-9]+\\.[0-9]+).+")
       SET(_ECLIPSE_VERSION ${CMAKE_MATCH_1})
