@@ -202,13 +202,20 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   cmMakefile::ScopePushPop varScope(makefile);
   static_cast<void>(varScope);
 
-  makefile->AddDefinition("_moc_target_name", automocTargetName.c_str());
-  makefile->AddDefinition("_moc_incs", _moc_incs.c_str());
-  makefile->AddDefinition("_moc_defs", _moc_defs.c_str());
-  makefile->AddDefinition("_moc_compile_defs", _moc_compile_defs.c_str());
-  makefile->AddDefinition("_moc_options", _moc_options.c_str());
-  makefile->AddDefinition("_moc_files", _moc_files.c_str());
-  makefile->AddDefinition("_moc_headers", _moc_headers.c_str());
+  makefile->AddDefinition("_moc_target_name",
+          cmLocalGenerator::EscapeForCMake(automocTargetName.c_str()).c_str());
+  makefile->AddDefinition("_moc_incs",
+          cmLocalGenerator::EscapeForCMake(_moc_incs.c_str()).c_str());
+  makefile->AddDefinition("_moc_defs",
+          cmLocalGenerator::EscapeForCMake(_moc_defs.c_str()).c_str());
+  makefile->AddDefinition("_moc_compile_defs",
+          cmLocalGenerator::EscapeForCMake(_moc_compile_defs.c_str()).c_str());
+  makefile->AddDefinition("_moc_options",
+          cmLocalGenerator::EscapeForCMake(_moc_options.c_str()).c_str());
+  makefile->AddDefinition("_moc_files",
+          cmLocalGenerator::EscapeForCMake(_moc_files.c_str()).c_str());
+  makefile->AddDefinition("_moc_headers",
+          cmLocalGenerator::EscapeForCMake(_moc_headers.c_str()).c_str());
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
@@ -340,8 +347,9 @@ void cmQtAutomoc::WriteOldMocDefinitionsFile(const char* targetDirectory)
   std::fstream outfile;
   outfile.open(filename.c_str(),
                std::ios::out | std::ios::trunc);
-  outfile << "set(AM_OLD_MOC_DEFINITIONS \""
-              << this->Join(this->MocDefinitions, ' ') << "\")\n";
+  outfile << "set(AM_OLD_MOC_DEFINITIONS "
+              << cmLocalGenerator::EscapeForCMake(
+                       this->Join(this->MocDefinitions, ' ').c_str()) << ")\n";
 
   outfile.close();
 }
