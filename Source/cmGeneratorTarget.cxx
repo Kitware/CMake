@@ -37,6 +37,7 @@ void cmGeneratorTarget::ClassifySources()
       si != sources.end(); ++si)
     {
     cmSourceFile* sf = *si;
+    std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
     cmTarget::SourceFileFlags tsFlags =
       this->Target->GetTargetSourceFileFlags(sf);
     if(sf->GetCustomCommand())
@@ -57,9 +58,14 @@ void cmGeneratorTarget::ClassifySources()
       this->ExternalObjects.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
       }
-    else if(cmSystemTools::LowerCase(sf->GetExtension()) == "def")
+    else if(ext == "def")
       {
       this->ModuleDefinitionFile = sf->GetFullPath();
+      if(isObjLib) { badObjLib.push_back(sf); }
+      }
+    else if(ext == "idl")
+      {
+      this->IDLSources.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
       }
     else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
@@ -67,6 +73,7 @@ void cmGeneratorTarget::ClassifySources()
       // We only get here if a source file is not an external object
       // and has an extension that is listed as an ignored file type.
       // No message or diagnosis should be given.
+      this->ExtraSources.push_back(sf);
       }
     else if(sf->GetLanguage())
       {
@@ -75,7 +82,7 @@ void cmGeneratorTarget::ClassifySources()
     else
       {
       this->ExtraSources.push_back(sf);
-      if(isObjLib && cmSystemTools::LowerCase(sf->GetExtension()) != "txt")
+      if(isObjLib && ext != "txt")
         {
         badObjLib.push_back(sf);
         }
