@@ -1,5 +1,6 @@
 include(RunCMake)
 
+run_cmake(ComponentRequiredAndOptional)
 run_cmake(MissingNormal)
 run_cmake(MissingNormalRequired)
 run_cmake(MissingNormalVersion)

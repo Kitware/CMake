@@ -19,7 +19,8 @@
 #
 # The second mode is more powerful and also supports version checking:
 #    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [REQUIRED_VARS <var1>...<varN>]
-#                                           [VERSION_VAR   <versionvar>
+#                                           [VERSION_VAR   <versionvar>]
+#                                           [HANDLE_COMPONENTS]
 #                                           [CONFIG_MODE]
 #                                           [FAIL_MESSAGE "Custom failure message"] )
 #
@@ -32,6 +33,11 @@
 # in the find_package() call. The EXACT keyword is also handled. The default
 # messages include information about the required version and the version
 # which has been actually found, both if the version is ok or not.
+# If the package supports components, use the HANDLE_COMPONENTS option to enable
+# handling them. In this case, find_package_handle_standard_args() will report
+# which components have been found and which are missing, and the <NAME>_FOUND
+# variable will be set to FALSE if any of the required components (i.e. not the
+# ones listed after OPTIONAL_COMPONENTS) are missing.
 # Use the option CONFIG_MODE if your FindXXX.cmake module is a wrapper for
 # a find_package(... NO_MODULE) call.  In this case VERSION_VAR will be set
 # to <NAME>_VERSION and the macro will automatically check whether the
@@ -128,7 +134,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
 # new extended or in the "old" mode:
-  SET(options CONFIG_MODE)
+  SET(options CONFIG_MODE HANDLE_COMPONENTS)
   SET(oneValueArgs FAIL_MESSAGE VERSION_VAR)
   SET(multiValueArgs REQUIRED_VARS)
   SET(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
@@ -189,6 +195,36 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     ENDIF(NOT ${_CURRENT_VAR})
   ENDFOREACH(_CURRENT_VAR)
 
+  # component handling
+  UNSET(FOUND_COMPONENTS_MSG)
+  UNSET(MISSING_COMPONENTS_MSG)
+
+  IF(FPHSA_HANDLE_COMPONENTS)
+    FOREACH(comp ${${_NAME}_FIND_COMPONENTS})
+      IF(${_NAME}_${comp}_FOUND)
+
+        IF(NOT DEFINED FOUND_COMPONENTS_MSG)
+          SET(FOUND_COMPONENTS_MSG "found components: ")
+        ENDIF()
+        SET(FOUND_COMPONENTS_MSG "${FOUND_COMPONENTS_MSG} ${comp}")
+
+      ELSE()
+
+        IF(NOT DEFINED MISSING_COMPONENTS_MSG)
+          SET(MISSING_COMPONENTS_MSG "missing components: ")
+        ENDIF()
+        SET(MISSING_COMPONENTS_MSG "${MISSING_COMPONENTS_MSG} ${comp}")
+
+        IF(${_NAME}_FIND_REQUIRED_${comp})
+          SET(${_NAME_UPPER}_FOUND FALSE)
+          SET(MISSING_VARS "${MISSING_VARS} ${comp}")
+        ENDIF()
+
+      ENDIF()
+    ENDFOREACH(comp)
+    SET(COMPONENT_MSG "${FOUND_COMPONENTS_MSG} ${MISSING_COMPONENTS_MSG}")
+    SET(DETAILS "${DETAILS}[c${COMPONENT_MSG}]")
+  ENDIF(FPHSA_HANDLE_COMPONENTS)
 
   # version handling:
   SET(VERSION_MSG "")
@@ -240,7 +276,7 @@ FUNCTION(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
   # print the result:
   IF (${_NAME_UPPER}_FOUND)
-    FIND_PACKAGE_MESSAGE(${_NAME} "Found ${_NAME}: ${${_FIRST_REQUIRED_VAR}} ${VERSION_MSG}" "${DETAILS}")
+    FIND_PACKAGE_MESSAGE(${_NAME} "Found ${_NAME}: ${${_FIRST_REQUIRED_VAR}} ${VERSION_MSG} ${COMPONENT_MSG}" "${DETAILS}")
   ELSE (${_NAME_UPPER}_FOUND)
 
     IF(FPHSA_CONFIG_MODE)
