@@ -339,6 +339,10 @@ cmNinjaTargetGenerator
     depfile = "$out.d";
     cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
                                  depfile.c_str());
+    cmSystemTools::ReplaceString(depfileFlagsStr, "<OBJECT>",
+                                 "$out");
+    cmSystemTools::ReplaceString(depfileFlagsStr, "<CMAKE_C_COMPILER>",
+                       this->GetMakefile()->GetDefinition("CMAKE_C_COMPILER"));
     flags += " " + depfileFlagsStr;
   }
   vars.Flags = flags.c_str();
