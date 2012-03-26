@@ -540,7 +540,7 @@ set (CUDA_INCLUDE_DIRS ${CUDA_TOOLKIT_INCLUDE})
 
 macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    # CUDA 3.2+ on Windows moved the library directoryies, so we need the new
+    # CUDA 3.2+ on Windows moved the library directories, so we need the new
     # and old paths.
     set(_cuda_64bit_lib_dir "lib/x64" "lib64" )
   endif()
