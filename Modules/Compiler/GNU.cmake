@@ -30,7 +30,10 @@ macro(__compiler_gnu lang)
   # in try_compile mode.
   GET_PROPERTY(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
   if(NOT _IN_TC OR CMAKE_FORCE_DEPFILES)
-    set(CMAKE_DEPFILE_FLAGS_${lang} "-MMD -MF <DEPFILE>")
+    # distcc does not transform -o to -MT when invoking the preprocessor
+    # internally, as it ought to.  Work around this bug by setting -MT here
+    # even though it isn't strictly necessary.
+    set(CMAKE_DEPFILE_FLAGS_${lang} "-MMD -MT <OBJECT> -MF <DEPFILE>")
   endif()
 
   # Initial configuration flags.
