@@ -242,7 +242,7 @@ SET(CMAKE_FIND_APPBUNDLE FIRST)
 SET(CMAKE_SYSTEM_APPBUNDLE_PATH
   ~/Applications
   /Applications
-  /Developer/Applications)
+  ${OSX_DEVELOPER_ROOT}/Applications)
 
 INCLUDE(Platform/UnixPaths)
 LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
