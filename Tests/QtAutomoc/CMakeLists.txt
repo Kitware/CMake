@@ -8,7 +8,7 @@ include(UseQt4)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_definitions(-DFOO)
+add_definitions(-DFOO -DSomeDefine="Barx")
 
 # enable relaxed mode so automoc can handle all the special cases:
 set(CMAKE_AUTOMOC_RELAXED_MODE TRUE)
