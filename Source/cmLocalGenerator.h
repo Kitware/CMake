@@ -251,7 +251,7 @@ public:
   std::string EscapeForShellOldStyle(const char* str);
 
   /** Escape the given string as an argument in a CMake script.  */
-  std::string EscapeForCMake(const char* str);
+  static std::string EscapeForCMake(const char* str);
 
   enum FortranFormat
     {
