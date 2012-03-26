@@ -51,8 +51,6 @@ FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   PATHS
     ~/Library/Frameworks
     /Library/Frameworks
-    /usr/local/include
-    /usr/include
     /sw/include # Fink
     /opt/local/include # DarwinPorts
     /opt/csw/include # Blastwave
@@ -69,8 +67,6 @@ FIND_LIBRARY(PRODUCER_LIBRARY
   $ENV{OSGDIR}
   PATH_SUFFIXES lib64 lib
   PATHS
-  /usr/local
-  /usr
   /sw
   /opt/local
   /opt/csw

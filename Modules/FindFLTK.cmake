@@ -105,8 +105,6 @@ IF(NOT FLTK_DIR)
     # Look in standard UNIX install locations.
     /usr/local/lib/fltk
     /usr/lib/fltk
-    /usr/local/include
-    /usr/include
     /usr/local/fltk
     /usr/X11R6/include
 

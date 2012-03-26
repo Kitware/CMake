@@ -82,8 +82,6 @@ SET(TCLTK_POSSIBLE_LIB_PATHS
   "${TK_LIBRARY_PATH}"
   "${TCL_TCLSH_PATH_PARENT}/lib"
   "${TK_WISH_PATH_PARENT}/lib"
-  /usr/lib 
-  /usr/local/lib
   )
 
 IF(WIN32)
@@ -162,8 +160,6 @@ SET(TCLTK_POSSIBLE_INCLUDE_PATHS
   ${TK_FRAMEWORK_INCLUDES} 
   "${TCL_TCLSH_PATH_PARENT}/include"
   "${TK_WISH_PATH_PARENT}/include"
-  /usr/include
-  /usr/local/include
   /usr/include/tcl${TK_LIBRARY_VERSION}
   /usr/include/tcl${TCL_LIBRARY_VERSION}
   /usr/include/tcl8.6

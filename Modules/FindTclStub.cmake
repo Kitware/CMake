@@ -66,8 +66,6 @@ SET(TCLTK_POSSIBLE_LIB_PATHS
   "${TK_LIBRARY_PATH}"
   "${TCL_TCLSH_PATH_PARENT}/lib"
   "${TK_WISH_PATH_PARENT}/lib"
-  /usr/lib 
-  /usr/local/lib
 )
 
 IF(WIN32)
