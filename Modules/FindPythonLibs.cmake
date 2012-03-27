@@ -123,9 +123,8 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
       python${_CURRENT_VERSION}
   )
 
-  # For backward compatibility, set PYTHON_INCLUDE_PATH, but make it internal.
-  SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}" CACHE INTERNAL
-    "Path to where Python.h is found (deprecated)")
+  # For backward compatibility, set PYTHON_INCLUDE_PATH.
+  SET(PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_DIR}")
 
   IF(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
     FILE(STRINGS "${PYTHON_INCLUDE_DIR}/patchlevel.h" python_version_str
