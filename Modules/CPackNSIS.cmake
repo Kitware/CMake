@@ -15,13 +15,17 @@
 ##end
 #
 ##variable
-#   CPACK_NSIS_MUI_ICON - The icon file (.ico) for the generated
+#   CPACK_NSIS_MUI_ICON - The icon file (<dot>ico) for the generated
 #   install program.
 ##end
 #
 ##variable
-#   CPACK_NSIS_MUI_UNIICON - The icon file (.ico) for the generated
+#   CPACK_NSIS_MUI_UNIICON - The icon file (<dot>ico) for the generated
 #   uninstall program.
+##end
+#
+##variable
+#   CPACK_NSIS_INSTALLER_MUI_ICON_CODE - undocumented.
 ##end
 #
 ##variable
@@ -40,7 +44,8 @@
 ##end
 #
 ##variable
-#   CPACK_NSIS_MODIFY_PATH - If this is set to "ON", then an extra page
+#   CPACK_NSIS_MODIFY_PATH - Modify PATH toggle.
+#   If this is set to "ON", then an extra page
 #   will appear in the installer that will allow the user to choose
 #   whether the program directory should be added to the system PATH
 #   variable.
