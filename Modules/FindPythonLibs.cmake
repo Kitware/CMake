@@ -82,7 +82,12 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
   ENDIF(WIN32)
 
   FIND_LIBRARY(PYTHON_LIBRARY
-    NAMES python${_CURRENT_VERSION_NO_DOTS} python${_CURRENT_VERSION}
+    NAMES
+    python${_CURRENT_VERSION_NO_DOTS}
+    python${_CURRENT_VERSION}mu
+    python${_CURRENT_VERSION}m
+    python${_CURRENT_VERSION}u
+    python${_CURRENT_VERSION}
     PATHS
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
@@ -120,6 +125,9 @@ FOREACH(_CURRENT_VERSION ${_Python_VERSIONS})
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/include
     PATH_SUFFIXES
+      python${_CURRENT_VERSION}mu
+      python${_CURRENT_VERSION}m
+      python${_CURRENT_VERSION}u
       python${_CURRENT_VERSION}
   )
 
