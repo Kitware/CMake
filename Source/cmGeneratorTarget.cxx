@@ -58,6 +58,10 @@ void cmGeneratorTarget::ClassifySources()
       this->ExternalObjects.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
       }
+    else if(sf->GetLanguage())
+      {
+      this->ObjectSources.push_back(sf);
+      }
     else if(ext == "def")
       {
       this->ModuleDefinitionFile = sf->GetFullPath();
@@ -74,10 +78,6 @@ void cmGeneratorTarget::ClassifySources()
       // and has an extension that is listed as an ignored file type.
       // No message or diagnosis should be given.
       this->ExtraSources.push_back(sf);
-      }
-    else if(sf->GetLanguage())
-      {
-      this->ObjectSources.push_back(sf);
       }
     else
       {
