@@ -20,6 +20,9 @@
 #include <cmsys/Terminal.h>
 
 #include <string.h>
+#if defined(__APPLE__)
+#include <unistd.h>
+#endif
 
 #include "cmQtAutomoc.h"
 
