@@ -27,8 +27,8 @@
 
 find_path(SDLMIXER_INCLUDE_DIR SDL_mixer.h
   HINTS
-  $ENV{SDLMIXERDIR}
-  $ENV{SDLDIR}
+    ENV SDLMIXERDIR
+    ENV SDLDIR
   PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks
@@ -52,8 +52,8 @@ find_path(SDLMIXER_INCLUDE_DIR SDL_mixer.h
 find_library(SDLMIXER_LIBRARY
   NAMES SDL_mixer
   HINTS
-  $ENV{SDLMIXERDIR}
-  $ENV{SDLDIR}
+    ENV SDLMIXERDIR
+    ENV SDLDIR
   PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks

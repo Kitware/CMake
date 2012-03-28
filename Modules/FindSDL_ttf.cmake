@@ -27,8 +27,8 @@
 
 find_path(SDLTTF_INCLUDE_DIR SDL_ttf.h
   HINTS
-  $ENV{SDLTTFDIR}
-  $ENV{SDLDIR}
+    ENV SDLTTFDIR
+    ENV SDLDIR
   PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks
@@ -52,8 +52,8 @@ find_path(SDLTTF_INCLUDE_DIR SDL_ttf.h
 find_library(SDLTTF_LIBRARY
   NAMES SDL_ttf
   HINTS
-  $ENV{SDLTTFDIR}
-  $ENV{SDLDIR}
+    ENV SDLTTFDIR
+    ENV SDLDIR
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks

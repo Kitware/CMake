@@ -76,9 +76,9 @@ mark_as_advanced(SDL_SOUND_EXTRAS)
 find_path(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   HINTS
   $ENV{SDLSOUNDDIR}/include
-  $ENV{SDLSOUNDDIR}
+    ENV SDLSOUNDDIR
   $ENV{SDLDIR}/include
-  $ENV{SDLDIR}
+    ENV SDLDIR
   PATHS
   /usr/local/include/SDL
   /usr/include/SDL
@@ -100,9 +100,9 @@ find_library(SDL_SOUND_LIBRARY
   NAMES SDL_sound
   HINTS
   $ENV{SDLSOUNDDIR}/lib
-  $ENV{SDLSOUNDDIR}
+    ENV SDLSOUNDDIR
   $ENV{SDLDIR}/lib
-  $ENV{SDLDIR}
+    ENV SDLDIR
   PATHS
   /sw/lib
   /opt/local/lib
@@ -213,11 +213,11 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES libmikmod-coreaudio mikmod
          PATHS
          $ENV{MIKMODDIR}/lib
-         $ENV{MIKMODDIR}
+           ENV MIKMODDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -234,11 +234,11 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES modplug
          PATHS
          $ENV{MODPLUGDIR}/lib
-         $ENV{MODPLUGDIR}
+           ENV MODPLUGDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -256,13 +256,13 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES vorbis Vorbis VORBIS
          PATHS
          $ENV{VORBISDIR}/lib
-         $ENV{VORBISDIR}
+           ENV VORBISDIR
          $ENV{OGGDIR}/lib
-         $ENV{OGGDIR}
+           ENV OGGDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -276,13 +276,13 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES ogg Ogg OGG
          PATHS
          $ENV{OGGDIR}/lib
-         $ENV{OGGDIR}
+           ENV OGGDIR
          $ENV{VORBISDIR}/lib
-         $ENV{VORBISDIR}
+           ENV VORBISDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -300,11 +300,11 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES smpeg SMPEG Smpeg SMpeg
          PATHS
          $ENV{SMPEGDIR}/lib
-         $ENV{SMPEGDIR}
+           ENV SMPEGDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -322,11 +322,11 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES flac FLAC
          PATHS
          $ENV{FLACDIR}/lib
-         $ENV{FLACDIR}
+           ENV FLACDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -347,11 +347,11 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          NAMES speex SPEEX
          PATHS
          $ENV{SPEEXDIR}/lib
-         $ENV{SPEEXDIR}
+           ENV SPEEXDIR
          $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
+           ENV SDLSOUNDDIR
          $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
+           ENV SDLDIR
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -368,15 +368,15 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            NAMES ogg Ogg OGG
            PATHS
            $ENV{OGGDIR}/lib
-           $ENV{OGGDIR}
+             ENV OGGDIR
            $ENV{VORBISDIR}/lib
-           $ENV{VORBISDIR}
+             ENV VORBISDIR
            $ENV{SPEEXDIR}/lib
-           $ENV{SPEEXDIR}
+             ENV SPEEXDIR
            $ENV{SDLSOUNDDIR}/lib
-           $ENV{SDLSOUNDDIR}
+             ENV SDLSOUNDDIR
            $ENV{SDLDIR}/lib
-           $ENV{SDLDIR}
+             ENV SDLDIR
            /sw/lib
            /opt/local/lib
            /opt/csw/lib

@@ -44,7 +44,7 @@
 # everything still works.
 find_path(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   HINTS
-  $ENV{FREETYPE_DIR}
+    ENV FREETYPE_DIR
   PATHS
   /usr/local/X11R6/include
   /usr/local/X11/include
@@ -64,7 +64,7 @@ find_path(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
 find_library(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   HINTS
-  $ENV{FREETYPE_DIR}
+    ENV FREETYPE_DIR
   PATH_SUFFIXES lib64 lib
   PATHS
   /usr/local/X11R6

@@ -27,8 +27,8 @@
 
 find_path(SDLIMAGE_INCLUDE_DIR SDL_image.h
   HINTS
-  $ENV{SDLIMAGEDIR}
-  $ENV{SDLDIR}
+    ENV SDLIMAGEDIR
+    ENV SDLDIR
   PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks
@@ -52,8 +52,8 @@ find_path(SDLIMAGE_INCLUDE_DIR SDL_image.h
 find_library(SDLIMAGE_LIBRARY
   NAMES SDL_image
   HINTS
-  $ENV{SDLIMAGEDIR}
-  $ENV{SDLDIR}
+    ENV SDLIMAGEDIR
+    ENV SDLDIR
   PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks

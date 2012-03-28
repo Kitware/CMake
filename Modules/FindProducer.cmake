@@ -44,9 +44,9 @@
 # Try the user's environment request before anything else.
 find_path(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   HINTS
-  $ENV{PRODUCER_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
+    ENV PRODUCER_DIR
+    ENV OSG_DIR
+    ENV OSGDIR
   PATH_SUFFIXES include
   PATHS
     ~/Library/Frameworks
@@ -62,9 +62,9 @@ find_path(PRODUCER_INCLUDE_DIR Producer/CameraGroup
 find_library(PRODUCER_LIBRARY
   NAMES Producer
   HINTS
-  $ENV{PRODUCER_DIR}
-  $ENV{OSG_DIR}
-  $ENV{OSGDIR}
+    ENV PRODUCER_DIR
+    ENV OSG_DIR
+    ENV OSGDIR
   PATH_SUFFIXES lib64 lib
   PATHS
   /sw

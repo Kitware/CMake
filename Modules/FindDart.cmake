@@ -17,7 +17,9 @@
 #  License text for the above reference.)
 
 find_path(DART_ROOT README.INSTALL
-    $ENV{DART_ROOT}
+    HINTS
+      ENV DART_ROOT
+    PATHS
     ${PROJECT_SOURCE_DIR}/Dart
      /usr/share/Dart
     C:/Dart

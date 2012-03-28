@@ -32,12 +32,12 @@ else()
   find_path(QUICKTIME_INCLUDE_DIR QuickTime.h
     HINTS
     $ENV{QUICKTIME_DIR}/include
-    $ENV{QUICKTIME_DIR}
+      ENV QUICKTIME_DIR
   )
   find_library(QUICKTIME_LIBRARY QuickTime
     HINTS
     $ENV{QUICKTIME_DIR}/lib
-    $ENV{QUICKTIME_DIR}
+      ENV QUICKTIME_DIR
   )
 endif()
 

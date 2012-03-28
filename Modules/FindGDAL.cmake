@@ -42,8 +42,8 @@
 
 find_path(GDAL_INCLUDE_DIR gdal.h
   HINTS
-    $ENV{GDAL_DIR}
-    $ENV{GDAL_ROOT}
+    ENV GDAL_DIR
+    ENV GDAL_ROOT
   PATH_SUFFIXES
      include/gdal
      include/GDAL
@@ -64,8 +64,8 @@ if(UNIX)
     # libgdal.so...
     find_program(GDAL_CONFIG gdal-config
         HINTS
-          $ENV{GDAL_DIR}
-          $ENV{GDAL_ROOT}
+          ENV GDAL_DIR
+          ENV GDAL_ROOT
         PATH_SUFFIXES bin
         PATHS
             /sw # Fink
@@ -88,8 +88,8 @@ endif()
 find_library(GDAL_LIBRARY
   NAMES ${_gdal_lib} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
   HINTS
-     $ENV{GDAL_DIR}
-     $ENV{GDAL_ROOT}
+     ENV GDAL_DIR
+     ENV GDAL_ROOT
      ${_gdal_libpath}
   PATH_SUFFIXES lib64 lib
   PATHS

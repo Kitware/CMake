@@ -54,13 +54,13 @@
 find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     HINTS
         # enough environment variables?
-        $ENV{OPENTHREADS_INCLUDE_DIR}
-        $ENV{OPENTHREADS_DIR}
-        $ENV{OSG_INCLUDE_DIR}
-        $ENV{OSG_DIR}
-        $ENV{OSGDIR}
-        $ENV{OpenThreads_ROOT}
-        $ENV{OSG_ROOT}
+        ENV OPENTHREADS_INCLUDE_DIR
+        ENV OPENTHREADS_DIR
+        ENV OSG_INCLUDE_DIR
+        ENV OSG_DIR
+        ENV OSGDIR
+        ENV OpenThreads_ROOT
+        ENV OSG_ROOT
     PATHS
         /sw # Fink
         /opt/local # DarwinPorts
@@ -74,13 +74,13 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
 find_library(OPENTHREADS_LIBRARY
     NAMES OpenThreads OpenThreadsWin32
     HINTS
-        $ENV{OPENTHREADS_LIBRARY_DIR}
-        $ENV{OPENTHREADS_DIR}
-        $ENV{OSG_LIBRARY_DIR}
-        $ENV{OSG_DIR}
-        $ENV{OSGDIR}
-        $ENV{OpenThreads_ROOT}
-        $ENV{OSG_ROOT}
+        ENV OPENTHREADS_LIBRARY_DIR
+        ENV OPENTHREADS_DIR
+        ENV OSG_LIBRARY_DIR
+        ENV OSG_DIR
+        ENV OSGDIR
+        ENV OpenThreads_ROOT
+        ENV OSG_ROOT
     PATHS
         /sw
         /opt/local
@@ -93,14 +93,14 @@ find_library(OPENTHREADS_LIBRARY
 find_library(OPENTHREADS_LIBRARY_DEBUG
     NAMES OpenThreadsd OpenThreadsWin32d
     HINTS
-        $ENV{OPENTHREADS_DEBUG_LIBRARY_DIR}
-        $ENV{OPENTHREADS_LIBRARY_DIR}
-        $ENV{OPENTHREADS_DIR}
-        $ENV{OSG_LIBRARY_DIR}
-        $ENV{OSG_DIR}
-        $ENV{OSGDIR}
-        $ENV{OpenThreads_ROOT}
-        $ENV{OSG_ROOT}
+        ENV OPENTHREADS_DEBUG_LIBRARY_DIR
+        ENV OPENTHREADS_LIBRARY_DIR
+        ENV OPENTHREADS_DIR
+        ENV OSG_LIBRARY_DIR
+        ENV OSG_DIR
+        ENV OSGDIR
+        ENV OpenThreads_ROOT
+        ENV OSG_ROOT
     PATHS
         /sw
         /opt/local

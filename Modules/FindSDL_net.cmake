@@ -27,8 +27,8 @@
 
 find_path(SDLNET_INCLUDE_DIR SDL_net.h
   HINTS
-  $ENV{SDLNETDIR}
-  $ENV{SDLDIR}
+    ENV SDLNETDIR
+    ENV SDLDIR
   PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks
@@ -51,8 +51,8 @@ find_path(SDLNET_INCLUDE_DIR SDL_net.h
 find_library(SDLNET_LIBRARY
   NAMES SDL_net
   HINTS
-  $ENV{SDLNETDIR}
-  $ENV{SDLDIR}
+    ENV SDLNETDIR
+    ENV SDLDIR
   PATH_SUFFIXES lib64 lib
   PATHS
   ~/Library/Frameworks

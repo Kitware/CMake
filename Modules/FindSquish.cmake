@@ -54,8 +54,9 @@ if(NOT SQUISH_INSTALL_DIR)
 
   # Look for an installation
   find_path(SQUISH_INSTALL_DIR bin/squishrunner
+    HINTS
     # Look for an environment variable SQUISH_INSTALL_DIR.
-    $ENV{SQUISH_INSTALL_DIR}
+      ENV SQUISH_INSTALL_DIR
 
     # Look in places relative to the system executable search path.
     ${SQUISH_INSTALL_DIR_SEARCH}

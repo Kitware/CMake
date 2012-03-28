@@ -26,10 +26,10 @@ function(OSG_FIND_PATH module header)
    # Try the user's environment request before anything else.
    find_path(${module_uc}_INCLUDE_DIR ${header}
        HINTS
-            $ENV{${module_uc}_DIR}
-            $ENV{OSG_DIR}
-            $ENV{OSGDIR}
-            $ENV{OSG_ROOT}
+            ENV ${module_uc}_DIR
+            ENV OSG_DIR
+            ENV OSGDIR
+            ENV OSG_ROOT
        PATH_SUFFIXES include
        PATHS
             /sw # Fink
@@ -50,10 +50,10 @@ function(OSG_FIND_LIBRARY module library)
    find_library(${module_uc}_LIBRARY
        NAMES ${library}
        HINTS
-            $ENV{${module_uc}_DIR}
-            $ENV{OSG_DIR}
-            $ENV{OSGDIR}
-            $ENV{OSG_ROOT}
+            ENV ${module_uc}_DIR
+            ENV OSG_DIR
+            ENV OSGDIR
+            ENV OSG_ROOT
        PATH_SUFFIXES lib64 lib
        PATHS
             /sw # Fink
@@ -66,10 +66,10 @@ function(OSG_FIND_LIBRARY module library)
    find_library(${module_uc}_LIBRARY_DEBUG
        NAMES ${library}d
        HINTS
-            $ENV{${module_uc}_DIR}
-            $ENV{OSG_DIR}
-            $ENV{OSGDIR}
-            $ENV{OSG_ROOT}
+            ENV ${module_uc}_DIR
+            ENV OSG_DIR
+            ENV OSGDIR
+            ENV OSG_ROOT
        PATH_SUFFIXES lib64 lib
        PATHS
             /sw # Fink
