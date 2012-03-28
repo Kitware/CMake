@@ -65,7 +65,7 @@ find_library(PRODUCER_LIBRARY
     ENV PRODUCER_DIR
     ENV OSG_DIR
     ENV OSGDIR
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
   /sw
   /opt/local

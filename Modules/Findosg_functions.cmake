@@ -54,7 +54,7 @@ function(OSG_FIND_LIBRARY module library)
             ENV OSG_DIR
             ENV OSGDIR
             ENV OSG_ROOT
-       PATH_SUFFIXES lib64 lib
+       PATH_SUFFIXES lib
        PATHS
             /sw # Fink
             /opt/local # DarwinPorts
@@ -70,7 +70,7 @@ function(OSG_FIND_LIBRARY module library)
             ENV OSG_DIR
             ENV OSGDIR
             ENV OSG_ROOT
-       PATH_SUFFIXES lib64 lib
+       PATH_SUFFIXES lib
        PATHS
             /sw # Fink
             /opt/local # DarwinPorts

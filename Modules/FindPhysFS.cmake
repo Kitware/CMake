@@ -40,7 +40,7 @@ find_library(PHYSFS_LIBRARY
   NAMES physfs
   HINTS
     ENV PHYSFSDIR
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks

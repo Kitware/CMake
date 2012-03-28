@@ -91,7 +91,7 @@ find_library(GDAL_LIBRARY
      ENV GDAL_DIR
      ENV GDAL_ROOT
      ${_gdal_libpath}
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
     /sw
     /opt/local

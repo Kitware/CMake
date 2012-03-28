@@ -41,7 +41,7 @@ find_library(LUA_LIBRARY_lua
   NAMES lua50 lua5.0 lua-5.0 lua5 lua
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -61,7 +61,7 @@ else()
     HINTS
       ENV LUALIB_DIR
       ENV LUA_DIR
-    PATH_SUFFIXES lib64 lib
+    PATH_SUFFIXES lib
     PATHS
     /sw
     /opt/local

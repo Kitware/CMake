@@ -29,24 +29,18 @@ find_path(SDLTTF_INCLUDE_DIR SDL_ttf.h
   HINTS
     ENV SDLTTFDIR
     ENV SDLDIR
-  PATH_SUFFIXES include
+  PATH_SUFFIXES include include/SDL
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local/include/SDL
-  /usr/include/SDL
   /usr/local/include/SDL12
   /usr/local/include/SDL11 # FreeBSD ports
   /usr/include/SDL12
   /usr/include/SDL11
-  /sw/include/SDL # Fink
-  /sw/include
-  /opt/local/include/SDL # DarwinPorts
-  /opt/local/include
-  /opt/csw/include/SDL # Blastwave
-  /opt/csw/include
-  /opt/include/SDL
-  /opt/include
+  /sw # Fink
+  /opt/local # DarwinPorts
+  /opt/csw # Blastwave
+  /opt
 )
 
 find_library(SDLTTF_LIBRARY
@@ -61,7 +55,7 @@ find_library(SDLTTF_LIBRARY
   /opt/local
   /opt/csw
   /opt
-    PATH_SUFFIXES lib64 lib
+    PATH_SUFFIXES lib
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

@@ -20,13 +20,15 @@ find_path(DART_ROOT README.INSTALL
     HINTS
       ENV DART_ROOT
     PATHS
-    ${PROJECT_SOURCE_DIR}/Dart
-     /usr/share/Dart
-    C:/Dart
-    "$ENV{ProgramFiles}/Dart"
-    "C:/Program Files/Dart"
-    ${PROJECT_SOURCE_DIR}/../Dart
-    [HKEY_LOCAL_MACHINE\\SOFTWARE\\Dart\\InstallPath]
+      ${PROJECT_SOURCE_DIR}
+      /usr/share
+      C:/
+      "C:/Program Files"
+      ${PROJECT_SOURCE_DIR}/..
+      [HKEY_LOCAL_MACHINE\\SOFTWARE\\Dart\\InstallPath]
+      ENV ProgramFiles
+    PATH_SUFFIXES
+      Dart
     DOC "If you have Dart installed, where is it located?"
     )
 

@@ -42,7 +42,7 @@ find_library(LUA_LIBRARY
   NAMES lua51 lua5.1 lua-5.1 lua
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks

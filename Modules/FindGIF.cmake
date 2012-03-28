@@ -42,7 +42,7 @@ find_library(GIF_LIBRARY
   NAMES ${POTENTIAL_GIF_LIBS}
   HINTS
     ENV GIF_DIR
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
   ~/Library/Frameworks
   /usr/freeware

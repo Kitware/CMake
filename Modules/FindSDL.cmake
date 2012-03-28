@@ -88,7 +88,7 @@ find_library(SDL_LIBRARY_TEMP
   NAMES SDL SDL-1.1
   HINTS
     ENV SDLDIR
-  PATH_SUFFIXES lib64 lib
+  PATH_SUFFIXES lib
   PATHS
   /sw
   /opt/local
@@ -106,7 +106,7 @@ if(NOT SDL_BUILDING_LIBRARY)
       NAMES SDLmain SDLmain-1.1
       HINTS
         ENV SDLDIR
-      PATH_SUFFIXES lib64 lib
+      PATH_SUFFIXES lib
       PATHS
       /sw
       /opt/local
