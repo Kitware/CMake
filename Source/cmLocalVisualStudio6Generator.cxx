@@ -85,6 +85,23 @@ void cmLocalVisualStudio6Generator::AddHelperCommands()
   this->CreateCustomTargetsAndCommands(lang);
 }
 
+void cmLocalVisualStudio6Generator::AddCMakeListsRules()
+{
+  cmTargets &tgts = this->Makefile->GetTargets();
+  for(cmTargets::iterator l = tgts.begin();
+      l != tgts.end(); l++)
+    {
+    // Add a rule to regenerate the build system when the target
+    // specification source changes.
+    const char* suppRegenRule =
+      this->Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
+    if (!cmSystemTools::IsOn(suppRegenRule))
+      {
+      this->AddDSPBuildRule(l->second);
+      }
+    }
+}
+
 void cmLocalVisualStudio6Generator::Generate()
 {
   this->OutputDSPFile();
@@ -107,18 +124,6 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
   // Create the DSP or set of DSP's for libraries and executables
 
   cmTargets &tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin(); 
-      l != tgts.end(); l++)
-    {
-    // Add a rule to regenerate the build system when the target
-    // specification source changes.
-    const char* suppRegenRule =
-      this->Makefile->GetDefinition("CMAKE_SUPPRESS_REGENERATION");
-    if (!cmSystemTools::IsOn(suppRegenRule))
-      {
-      this->AddDSPBuildRule(l->second);
-      }
-    }
 
   // build any targets
   for(cmTargets::iterator l = tgts.begin(); 

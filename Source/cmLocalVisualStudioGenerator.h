@@ -58,6 +58,8 @@ public:
 
   virtual std::string ComputeLongestObjectDirectory(cmTarget&) const = 0;
 
+  virtual void AddCMakeListsRules() = 0;
+
 protected:
   virtual const char* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return false; }

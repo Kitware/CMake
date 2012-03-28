@@ -64,6 +64,7 @@ public:
 
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);
+  virtual void AddCMakeListsRules();
 protected:
   void CreateSingleVCProj(const char *lname, cmTarget &tgt);
 private:

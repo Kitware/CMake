@@ -34,6 +34,7 @@ public:
   virtual ~cmLocalVisualStudio6Generator();
 
   virtual void AddHelperCommands();
+  virtual void AddCMakeListsRules();
 
   /**
    * Generate the makefile for this directory. 
