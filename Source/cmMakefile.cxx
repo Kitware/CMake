@@ -778,8 +778,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
     ("Source Files",
      "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
      "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
-  this->AddSourceGroup("Header Files",
-                       "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$");
+  this->AddSourceGroup("Header Files", CM_HEADER_REGEX);
   this->AddSourceGroup("CMake Rules", "\\.rule$");
   this->AddSourceGroup("Resources", "\\.plist$");
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");

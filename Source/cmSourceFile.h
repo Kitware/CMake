@@ -116,4 +116,7 @@ private:
   std::vector<std::string> Depends;
 };
 
+// TODO: Factor out into platform information modules.
+#define CM_HEADER_REGEX "\\.(h|hh|h\\+\\+|hm|hpp|hxx|in|txx|inl)$"
+
 #endif

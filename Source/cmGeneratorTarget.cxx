@@ -30,6 +30,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
 //----------------------------------------------------------------------------
 void cmGeneratorTarget::ClassifySources()
 {
+  cmsys::RegularExpression header(CM_HEADER_REGEX);
   bool isObjLib = this->Target->GetType() == cmTarget::OBJECT_LIBRARY;
   std::vector<cmSourceFile*> badObjLib;
   std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
@@ -71,6 +72,10 @@ void cmGeneratorTarget::ClassifySources()
       {
       this->IDLSources.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
+      }
+    else if(header.find(sf->GetFullPath().c_str()))
+      {
+      this->HeaderSources.push_back(sf);
       }
     else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
       {
