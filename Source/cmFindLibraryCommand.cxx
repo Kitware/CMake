@@ -57,7 +57,13 @@ void cmFindLibraryCommand::GenerateDocumentation()
     "the full path to the framework <fullPath>/A.framework. "
     "When a full path to a framework is used as a library, "
     "CMake will use a -framework A, and a -F<fullPath> to "
-    "link the framework to the target. ";
+    "link the framework to the target."
+    "\n"
+    "If the global property FIND_LIBRARY_USE_LIB64_PATHS is set all search "
+    "paths will be tested as normal, with \"64/\" appended, and with all "
+    "matches of \"lib/\" replaced with \"lib64/\". This property is "
+    "automatically set for the platforms that are known to need it if at "
+    "least one of the languages supported by the PROJECT command is enabled.";
 }
 
 // cmFindLibraryCommand
