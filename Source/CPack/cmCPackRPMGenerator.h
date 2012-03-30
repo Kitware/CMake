@@ -35,6 +35,17 @@ public:
   cmCPackRPMGenerator();
   virtual ~cmCPackRPMGenerator();
 
+  static bool CanGenerate()
+    {
+#ifdef __APPLE__
+    // on MacOS enable CPackRPM iff rpmbuild is found
+    return cmSystemTools::FindProgram("rpmbuild") != "" ? true : false;
+#else
+    // legacy behavior on other systems
+    return true;
+#endif
+    }
+
 protected:
   virtual int InitializeInternal();
   virtual int PackageFiles();

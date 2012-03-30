@@ -699,6 +699,31 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ENDIF(CTEST_RUN_CPackComponents)
 
   IF(CTEST_RUN_CPackComponentsForAll)
+    # Analyze 'cpack --help' output for list of available generators:
+    execute_process(COMMAND ${CMAKE_CPACK_COMMAND} --help
+      RESULT_VARIABLE result
+      OUTPUT_VARIABLE stdout
+      ERROR_VARIABLE stderr)
+
+    string(REPLACE ";" "\\;" stdout "${stdout}")
+    string(REPLACE "\n" "E;" stdout "${stdout}")
+
+    set(collecting 0)
+    set(ACTIVE_CPACK_GENERATORS)
+    foreach(eline ${stdout})
+      string(REGEX REPLACE "^(.*)E$" "\\1" line "${eline}")
+      if(collecting AND NOT line STREQUAL "")
+        string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\1" gen "${line}")
+        string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\2" doc "${line}")
+        list(APPEND ACTIVE_CPACK_GENERATORS ${gen})
+      endif()
+      if(line STREQUAL "Generators")
+        set(collecting 1)
+      endif()
+    endforeach()
+    # ACTIVE_CPACK_GENERATORS variable
+    # now contains the list of 'active generators'
+
     set(CPackComponentsForAll_EXTRA_OPTIONS)
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
     # set up list of CPack generators
@@ -706,18 +731,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     if(APPLE)
       list(APPEND GENLST "DragNDrop")
     endif(APPLE)
-    if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
-        find_program(RPMBUILD NAMES rpmbuild)
-    endif(CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
-    if (RPMBUILD)
-       list(APPEND GENLST "RPM")
-    endif(RPMBUILD)
-    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-       find_program(DPKG NAMES dpkg)
-       if (DPKG)
-          list(APPEND GENLST "DEB")
-       endif(DPKG)
-    endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    if (NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+      list(FIND ACTIVE_CPACK_GENERATORS "RPM" RPM_ACTIVE)
+      if (NOT ${RPM_ACTIVE} EQUAL -1)
+        list(APPEND GENLST "RPM")
+      endif(NOT ${RPM_ACTIVE} EQUAL -1)
+    endif(NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+    list(FIND ACTIVE_CPACK_GENERATORS "DEB" DEB_ACTIVE)
+    if (NOT ${DEB_ACTIVE} EQUAL -1)
+      list(APPEND GENLST "DEB")
+    endif(NOT ${DEB_ACTIVE} EQUAL -1)
+
     # set up list of component packaging ways
     list(APPEND CWAYLST "default")
     list(APPEND CWAYLST "OnePackPerGroup")
