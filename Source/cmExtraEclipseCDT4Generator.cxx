@@ -501,6 +501,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+        case cmTarget::OBJECT_LIBRARY:
           {
           const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
                                                           "[exe] " : "[lib] ");
@@ -1017,6 +1018,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        case cmTarget::STATIC_LIBRARY:
        case cmTarget::SHARED_LIBRARY:
        case cmTarget::MODULE_LIBRARY:
+       case cmTarget::OBJECT_LIBRARY:
          {
          const char* prefix = (ti->second.GetType()==cmTarget::EXECUTABLE ?
                                                           "[exe] " : "[lib] ");
