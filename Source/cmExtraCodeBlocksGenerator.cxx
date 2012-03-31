@@ -383,6 +383,7 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+        case cmTarget::OBJECT_LIBRARY:
           {
           this->AppendTarget(fout, ti->first.c_str(), &ti->second,
                              make.c_str(), makefile, compiler.c_str());
@@ -420,6 +421,7 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::STATIC_LIBRARY:
         case cmTarget::SHARED_LIBRARY:
         case cmTarget::MODULE_LIBRARY:
+        case cmTarget::OBJECT_LIBRARY:
         case cmTarget::UTILITY: // can have sources since 2.6.3
           {
           const std::vector<cmSourceFile*>&sources=ti->second.GetSourceFiles();
@@ -570,7 +572,17 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       }
 
     const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
-    fout<<"         <Option output=\"" << target->GetLocation(buildType)
+    const char* location = 0;
+    if ( target->GetType()==cmTarget::OBJECT_LIBRARY)
+      {
+      location = "dummy"; // hmm, what to use here ?
+      }
+    else
+      {
+      location = target->GetLocation(buildType);
+      }
+
+    fout<<"         <Option output=\"" << location
                             << "\" prefix_auto=\"0\" extension_auto=\"0\" />\n"
           "         <Option working_dir=\"" << workingDir << "\" />\n"
           "         <Option object_output=\"./\" />\n"
@@ -728,7 +740,8 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
       return 1;
       }
     }
-  else if ( target->GetType()==cmTarget::STATIC_LIBRARY)
+  else if (( target->GetType()==cmTarget::STATIC_LIBRARY)
+        || (target->GetType()==cmTarget::OBJECT_LIBRARY))
     {
     return 2;
     }
