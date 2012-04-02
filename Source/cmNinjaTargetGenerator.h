@@ -118,6 +118,9 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+
+  // The windows module definition source file (.def), if any.
+  std::string ModuleDefinitionFile;
 };
 
 #endif // ! cmNinjaTargetGenerator_h
