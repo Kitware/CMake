@@ -4,6 +4,14 @@ project(ModuleDefinition C)
 # Test .def file source recognition for DLLs.
 add_library(example_dll SHARED example_dll.c example_dll.def)
 
+# Test generated .def file.
+add_custom_command(OUTPUT example_dll_gen.def
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/example_dll_gen.def.in
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/example_dll_gen.def.in
+                                   ${CMAKE_CURRENT_BINARY_DIR}/example_dll_gen.def
+  )
+add_library(example_dll_gen SHARED example_dll_gen.c example_dll_gen.def)
+
 # Test /DEF:<file> flag recognition for VS.
 if(MSVC OR "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
   add_library(example_dll_2 SHARED example_dll_2.c)
@@ -16,7 +24,7 @@ endif()
 # Test .def file source recognition for EXEs.
 add_executable(example_exe example_exe.c example_exe.def)
 set_property(TARGET example_exe PROPERTY ENABLE_EXPORTS 1)
-target_link_libraries(example_exe example_dll ${example_dll_2})
+target_link_libraries(example_exe example_dll example_dll_gen ${example_dll_2})
 
 # Test linking to the executable.
 add_library(example_mod_1 MODULE example_mod_1.c)
