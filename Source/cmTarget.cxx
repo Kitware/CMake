@@ -847,9 +847,10 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("SUFFIX", cmProperty::TARGET,
-     "What comes after the library name.",
+     "What comes after the target name.",
      "A target property that can be set to override the suffix "
-     "(such as \".so\") on a library name.");
+     "(such as \".so\" or \".exe\") on the name of a library, module or "
+     "executable.");
 
   cm->DefineProperty
     ("TYPE", cmProperty::TARGET,
