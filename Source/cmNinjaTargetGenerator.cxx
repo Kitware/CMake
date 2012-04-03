@@ -236,9 +236,9 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
   std::transform(deps.begin(), deps.end(), result.begin(), MapToNinjaPath());
 
   // Add a dependency on the link definitions file, if any.
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+  if(!this->ModuleDefinitionFile.empty())
     {
-    result.push_back(this->GeneratorTarget->ModuleDefinitionFile);
+    result.push_back(this->ModuleDefinitionFile);
     }
 
   return result;
@@ -409,6 +409,11 @@ cmNinjaTargetGenerator
     {
     this->WriteObjectBuildStatement(*si);
     }
+  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+    {
+    this->ModuleDefinitionFile = this->ConvertToNinjaPath(
+      this->GeneratorTarget->ModuleDefinitionFile.c_str());
+    }
 
   {
   // Add object library contents as external objects.
@@ -509,7 +514,7 @@ void
 cmNinjaTargetGenerator
 ::AddModuleDefinitionFlag(std::string& flags)
 {
-  if(this->GeneratorTarget->ModuleDefinitionFile.empty())
+  if(this->ModuleDefinitionFile.empty())
     {
     return;
     }
@@ -526,6 +531,6 @@ cmNinjaTargetGenerator
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
   flag += (this->LocalGenerator->ConvertToLinkReference(
-             this->GeneratorTarget->ModuleDefinitionFile.c_str()));
+             this->ModuleDefinitionFile.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }
