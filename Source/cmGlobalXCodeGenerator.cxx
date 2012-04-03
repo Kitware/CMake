@@ -3023,6 +3023,7 @@ void cmGlobalXCodeGenerator
   cmXCodeObject* buildConfigurations =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   std::vector<cmXCodeObject*> configs;
+  const char *defaultConfigName = "Debug";
   if(this->XcodeVersion == 15)
     {
     cmXCodeObject* configDebug =
@@ -3039,6 +3040,10 @@ void cmGlobalXCodeGenerator
     for(unsigned int i = 0; i < this->CurrentConfigurationTypes.size(); ++i)
       {
       const char* name = this->CurrentConfigurationTypes[i].c_str();
+      if (0 == i)
+        {
+        defaultConfigName = name;
+        }
       cmXCodeObject* config =
         this->CreateObject(cmXCodeObject::XCBuildConfiguration);
       config->AddAttribute("name", this->CreateString(name));
@@ -3060,7 +3065,7 @@ void cmGlobalXCodeGenerator
   configlist->AddAttribute("defaultConfigurationIsVisible",
                            this->CreateString("0"));
   configlist->AddAttribute("defaultConfigurationName",
-                           this->CreateString("Debug"));
+                           this->CreateString(defaultConfigName));
   cmXCodeObject* buildSettings =
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   const char* osxArch =
