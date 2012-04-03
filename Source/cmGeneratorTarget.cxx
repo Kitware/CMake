@@ -30,6 +30,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
 //----------------------------------------------------------------------------
 void cmGeneratorTarget::ClassifySources()
 {
+  cmsys::RegularExpression header(CM_HEADER_REGEX);
   bool isObjLib = this->Target->GetType() == cmTarget::OBJECT_LIBRARY;
   std::vector<cmSourceFile*> badObjLib;
   std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
@@ -58,6 +59,10 @@ void cmGeneratorTarget::ClassifySources()
       this->ExternalObjects.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
       }
+    else if(sf->GetLanguage())
+      {
+      this->ObjectSources.push_back(sf);
+      }
     else if(ext == "def")
       {
       this->ModuleDefinitionFile = sf->GetFullPath();
@@ -68,16 +73,16 @@ void cmGeneratorTarget::ClassifySources()
       this->IDLSources.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
       }
+    else if(header.find(sf->GetFullPath().c_str()))
+      {
+      this->HeaderSources.push_back(sf);
+      }
     else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
       {
       // We only get here if a source file is not an external object
       // and has an extension that is listed as an ignored file type.
       // No message or diagnosis should be given.
       this->ExtraSources.push_back(sf);
-      }
-    else if(sf->GetLanguage())
-      {
-      this->ObjectSources.push_back(sf);
       }
     else
       {

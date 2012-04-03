@@ -95,6 +95,16 @@ void cmGlobalVisualStudioGenerator::Generate()
   // of Visual Studio.
   this->ConfigureCMakeVisualStudioMacros();
 
+  // Add CMakeLists.txt with custom command to rerun CMake.
+  for(std::vector<cmLocalGenerator*>::const_iterator
+        lgi = this->LocalGenerators.begin();
+      lgi != this->LocalGenerators.end(); ++lgi)
+    {
+    cmLocalVisualStudioGenerator* lg =
+      static_cast<cmLocalVisualStudioGenerator*>(*lgi);
+    lg->AddCMakeListsRules();
+    }
+
   // Run all the local generators.
   this->cmGlobalGenerator::Generate();
 }

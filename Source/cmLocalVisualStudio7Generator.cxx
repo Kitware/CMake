@@ -100,6 +100,28 @@ void cmLocalVisualStudio7Generator::Generate()
   this->WriteStampFiles();
 }
 
+void cmLocalVisualStudio7Generator::AddCMakeListsRules()
+{
+  cmTargets &tgts = this->Makefile->GetTargets();
+  // Create the regeneration custom rule.
+  if(!this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION"))
+    {
+    // Create a rule to regenerate the build system when the target
+    // specification source changes.
+    if(cmSourceFile* sf = this->CreateVCProjBuildRule())
+      {
+      // Add the rule to targets that need it.
+      for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
+        {
+        if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+          {
+          l->second.AddSourceFile(sf);
+          }
+        }
+      }
+    }
+}
+
 void cmLocalVisualStudio7Generator::FixGlobalTargets()
 {
   // Visual Studio .NET 2003 Service Pack 1 will not run post-build
@@ -155,24 +177,6 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
 
   // Get the set of targets in this directory.
   cmTargets &tgts = this->Makefile->GetTargets();
-
-  // Create the regeneration custom rule.
-  if(!this->Makefile->IsOn("CMAKE_SUPPRESS_REGENERATION"))
-    {
-    // Create a rule to regenerate the build system when the target
-    // specification source changes.
-    if(cmSourceFile* sf = this->CreateVCProjBuildRule())
-      {
-      // Add the rule to targets that need it.
-      for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
-        {
-        if(l->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
-          {
-          l->second.AddSourceFile(sf);
-          }
-        }
-      }
-    }
 
   // Create the project file for each target.
   for(cmTargets::iterator l = tgts.begin();
