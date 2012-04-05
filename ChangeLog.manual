@@ -1,3 +1,39 @@
+Changes in CMake 2.8.8-rc2 (since 2.8.8-rc1)
+--------------------------------------------
+Alex Neundorf (4):
+      make cmLocalGenerator::EscapeForCMake() static
+      automoc: fix #13018, proper cmake escaping to avoid false rebuilds
+      automoc: add define to test which caused bug #13018
+      fix #13054: support OBJECT libraries in Eclipse
+
+Ben Boeckel (1):
+      Create granular targets for Ninja generators too
+
+Brad King (6):
+      CTest.UpdateHG: Fix repo URL for leading slash
+      Always compile sources with known language
+      Classify known header file extensions as headers
+      VS: Add CMakeLists.txt re-run rules at start of generation
+      Test generated module .def files
+      Ninja: Fix module .def file path conversion
+
+David Cole (2):
+      CMake: Clarify SUFFIX target property documentation.
+      Xcode: Pay attention to custom configuration types (#13082)
+
+Peter Collingbourne (1):
+      Ninja: Substitute <OBJECT> and <CMAKE_C_COMPILER> in depfile flags
+
+Rolf Eike Beer (2):
+      FILE: mention that TO_CMAKE_PATH also handles list delimiters
+      FIND_LIBRARY: document FIND_LIBRARY_USE_LIB64_PATHS
+
+Sean McBride (1):
+      automoc: include <unistd.h> on Apple to get pathconf
+
+Tom Hughes (1):
+      Override topdir from rpm command line seems necessary on Amazon linux.
+
 Changes in CMake 2.8.8-rc1 (since 2.8.7)
 ----------------------------------------
 Aaron C. Meadows (1):
