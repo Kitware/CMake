@@ -15,12 +15,14 @@
 ##end
 #
 ##variable
-#   CPACK_NSIS_MUI_ICON - The icon file (<dot>ico) for the generated
+#   CPACK_NSIS_MUI_ICON - An icon filename.
+#   The name of a *.ico file used as the main icon for the generated
 #   install program.
 ##end
 #
 ##variable
-#   CPACK_NSIS_MUI_UNIICON - The icon file (<dot>ico) for the generated
+#   CPACK_NSIS_MUI_UNIICON - An icon filename.
+#   The name of a *.ico file used as the main icon for the generated
 #   uninstall program.
 ##end
 #
