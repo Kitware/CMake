@@ -56,6 +56,7 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 # hardcode CMAKE_INSTALL_NAME_TOOL here to install_name_tool, so it behaves as it did before, Alex
 IF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
   FIND_PROGRAM(CMAKE_INSTALL_NAME_TOOL install_name_tool)
+  MARK_AS_ADVANCED(CMAKE_INSTALL_NAME_TOOL)
 ENDIF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
 
 # Set the assumed (Pre 10.5 or Default) location of the developer tools
@@ -63,6 +64,7 @@ SET(OSX_DEVELOPER_ROOT "/Developer")
 
 # Use the xcode-select tool if it's available (Xcode >= 3.0 installations)
 FIND_PROGRAM(CMAKE_XCODE_SELECT xcode-select)
+MARK_AS_ADVANCED(CMAKE_XCODE_SELECT)
 IF(CMAKE_XCODE_SELECT)
   EXECUTE_PROCESS(COMMAND ${CMAKE_XCODE_SELECT} "-print-path"
     OUTPUT_VARIABLE OSX_DEVELOPER_ROOT
@@ -239,10 +241,22 @@ SET(CMAKE_SYSTEM_FRAMEWORK_PATH
 # default to searching for application bundles first
 SET(CMAKE_FIND_APPBUNDLE FIRST)
 # set up the default search directories for application bundles
+SET(_apps_paths)
+FOREACH(_path
+  "~/Applications"
+  "/Applications"
+  "${OSX_DEVELOPER_ROOT}/../Applications" # Xcode 4.3+
+  "${OSX_DEVELOPER_ROOT}/Applications"    # pre-4.3
+  )
+  GET_FILENAME_COMPONENT(_apps "${_path}" ABSOLUTE)
+  IF(EXISTS "${_apps}")
+    LIST(APPEND _apps_paths "${_apps}")
+  ENDIF()
+ENDFOREACH()
+LIST(REMOVE_DUPLICATES _apps_paths)
 SET(CMAKE_SYSTEM_APPBUNDLE_PATH
-  ~/Applications
-  /Applications
-  ${OSX_DEVELOPER_ROOT}/Applications)
+  ${_apps_paths})
+UNSET(_apps_paths)
 
 INCLUDE(Platform/UnixPaths)
 LIST(APPEND CMAKE_SYSTEM_PREFIX_PATH
