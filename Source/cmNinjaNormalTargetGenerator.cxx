@@ -55,16 +55,19 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 {
 }
 
-void cmNinjaNormalTargetGenerator::EnsureDirectoryExists(const std::string& dir)
+void
+cmNinjaNormalTargetGenerator
+::EnsureDirectoryExists(const std::string& dir)
 {
   cmSystemTools::MakeDirectory(dir.c_str());
 }
 
-void cmNinjaNormalTargetGenerator::EnsureParentDirectoryExists(const std::string& path)
+void
+cmNinjaNormalTargetGenerator
+::EnsureParentDirectoryExists(const std::string& path)
 {
   EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
 }
-
 
 
 void cmNinjaNormalTargetGenerator::Generate()
