@@ -56,6 +56,7 @@ SET(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 # hardcode CMAKE_INSTALL_NAME_TOOL here to install_name_tool, so it behaves as it did before, Alex
 IF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
   FIND_PROGRAM(CMAKE_INSTALL_NAME_TOOL install_name_tool)
+  MARK_AS_ADVANCED(CMAKE_INSTALL_NAME_TOOL)
 ENDIF(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
 
 # Set the assumed (Pre 10.5 or Default) location of the developer tools
@@ -63,6 +64,7 @@ SET(OSX_DEVELOPER_ROOT "/Developer")
 
 # Use the xcode-select tool if it's available (Xcode >= 3.0 installations)
 FIND_PROGRAM(CMAKE_XCODE_SELECT xcode-select)
+MARK_AS_ADVANCED(CMAKE_XCODE_SELECT)
 IF(CMAKE_XCODE_SELECT)
   EXECUTE_PROCESS(COMMAND ${CMAKE_XCODE_SELECT} "-print-path"
     OUTPUT_VARIABLE OSX_DEVELOPER_ROOT
