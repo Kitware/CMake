@@ -60,6 +60,9 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 // disable until somebody actually tests it:
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
+#ifdef CMAKE_USE_NINJA
+  this->SupportedGlobalGenerators.push_back("Ninja");
+#endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 }
 
