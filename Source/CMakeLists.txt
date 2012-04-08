@@ -382,7 +382,7 @@ IF(CMAKE_ENABLE_NINJA)
     )
   ADD_DEFINITIONS(-DCMAKE_USE_NINJA)
 ELSE()
-  MESSAGE(STATUS "Ninja generator disabled, enforce with -DCMAKE_USE_NINJA=ON")
+  MESSAGE(STATUS "Ninja generator disabled, enforce with -DCMAKE_ENABLE_NINJA=ON")
 ENDIF()
 
 # create a library used by the command line and the GUI
