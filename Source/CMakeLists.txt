@@ -357,18 +357,16 @@ ENDIF (WIN32)
 
 # Turn on Ninja by default, but disable it
 # on platforms where it does not pass all tests.
-# Enforce Ninja support with ENABLE_NINJA
+# Enforce Ninja support by setting CMAKE_USE_NINJA
 set(_CMAKE_DEFAULT_NINJA_VALUE TRUE)
 if(WIN32 OR APPLE)
-  if(NOT ENABLE_NINJA)
-    SET(_CMAKE_DEFAULT_NINJA_VALUE FALSE)
-  endif()
+  SET(_CMAKE_DEFAULT_NINJA_VALUE FALSE)
 endif()
 SET(CMAKE_ENABLE_NINJA ${_CMAKE_DEFAULT_NINJA_VALUE} CACHE BOOL
-    "Enable the ninja generator for CMake. On Windows and OSX broken" FORCE)
+    "Enable the ninja generator for CMake. On Windows and OSX broken")
 MARK_AS_ADVANCED(CMAKE_ENABLE_NINJA)
 IF(CMAKE_ENABLE_NINJA)
-  MESSAGE(STATUS "Enable ninja generator.")
+  MESSAGE(STATUS "Ninja generator enabled.")
   SET(SRCS ${SRCS}
     cmGlobalNinjaGenerator.cxx
     cmGlobalNinjaGenerator.h
@@ -384,7 +382,7 @@ IF(CMAKE_ENABLE_NINJA)
     )
   ADD_DEFINITIONS(-DCMAKE_USE_NINJA)
 ELSE()
-  MESSAGE(STATUS "Ninja generator disabled, enforce with -DENABLE_NINJA=ON")
+  MESSAGE(STATUS "Ninja generator disabled, enforce with -DCMAKE_USE_NINJA=ON")
 ENDIF()
 
 # create a library used by the command line and the GUI
