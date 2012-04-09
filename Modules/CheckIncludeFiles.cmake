@@ -13,7 +13,7 @@
 #  CMAKE_REQUIRED_INCLUDES = list of include directories
 
 #=============================================================================
-# Copyright 2003-2009 Kitware, Inc.
+# Copyright 2003-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -44,7 +44,17 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     CONFIGURE_FILE("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY IMMEDIATE)
 
-    MESSAGE(STATUS "Looking for include files ${INCLUDE}")
+    SET(_INCLUDE ${INCLUDE}) # remove empty elements
+    IF("${_INCLUDE}" MATCHES "^([^;]+);.+;([^;]+)$")
+      LIST(LENGTH _INCLUDE _INCLUDE_LEN)
+      SET(_description "${_INCLUDE_LEN} include files ${CMAKE_MATCH_1}, ..., ${CMAKE_MATCH_2}")
+    ELSEIF("${_INCLUDE}" MATCHES "^([^;]+);([^;]+)$")
+      SET(_description "include files ${CMAKE_MATCH_1}, ${CMAKE_MATCH_2}")
+    ELSE()
+      SET(_description "include file ${_INCLUDE}")
+    ENDIF()
+
+    MESSAGE(STATUS "Looking for ${_description}")
     TRY_COMPILE(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c
@@ -54,14 +64,14 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
       OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
-      MESSAGE(STATUS "Looking for include files ${INCLUDE} - found")
+      MESSAGE(STATUS "Looking for ${_description} - found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
         "Determining if files ${INCLUDE} "
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
-      MESSAGE(STATUS "Looking for include files ${INCLUDE} - not found.")
+      MESSAGE(STATUS "Looking for ${_description} - not found.")
       SET(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
         "Determining if files ${INCLUDE} "
