@@ -537,6 +537,31 @@ void cmExtraCodeBlocksGenerator
 }
 
 
+// Write a dummy file for OBJECT libraries, so C::B can reference some file
+std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
+                                        cmMakefile* mf, cmTarget* target) const
+{
+  // this file doesn't seem to be used by C::B in custom makefile mode,
+  // but we generate a unique file for each OBJECT library so in case
+  // C::B uses it in some way, the targets don't interfere with each other.
+  std::string filename = mf->GetCurrentOutputDirectory();
+  filename += "/";
+  filename += mf->GetLocalGenerator()->GetTargetDirectory(*target);
+  filename += "/";
+  filename += target->GetName();
+  filename += ".objlib";
+  cmGeneratedFileStream fout(filename.c_str());
+  if(fout)
+    {
+    fout << "# This is a dummy file for the OBJECT library "
+         << target->GetName()
+         << " for the CMake CodeBlocks project generator.\n"
+         << "# Don't edit, this file will be overwritten.\n";
+    }
+  return filename;
+}
+
+
 // Generate the xml code for one target.
 void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               const char* targetName,
@@ -575,10 +600,11 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       }
 
     const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
-    const char* location = 0;
+    std::string location;
     if ( target->GetType()==cmTarget::OBJECT_LIBRARY)
       {
-      location = "dummy"; // hmm, what to use here ?
+      location = this->CreateDummyTargetFile(const_cast<cmMakefile*>(makefile),
+                                             target);
       }
     else
       {
