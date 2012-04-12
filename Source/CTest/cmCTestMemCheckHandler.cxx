@@ -358,7 +358,7 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
 
     os
       << "\t\t</Results>\n"
-      << logTag << memcheckstr << std::endl
+      << logTag << cmXMLSafe(memcheckstr) << std::endl
       << "\t</Log>\n";
     this->WriteTestResultFooter(os, result);
     if ( current < cc )
