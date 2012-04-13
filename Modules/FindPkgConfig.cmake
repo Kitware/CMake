@@ -13,11 +13,10 @@
 # When the 'QUIET' argument is set, no status messages will be printed.
 #
 # It sets the following variables:
-#   PKG_CONFIG_FOUND          ... true if pkg-config works on the system
+#   PKG_CONFIG_FOUND          ... if pkg-config executable was found
 #   PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
 #   PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
 #                                 (since CMake 2.8.8)
-#   PKG_CONFIG_FOUND          ... if pkg-config executable was found
 #
 # For the following variables two sets of values exist; first one is the
 # common one and has the given PREFIX. The second set contains flags
@@ -103,6 +102,11 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PkgConfig
                                   REQUIRED_VARS PKG_CONFIG_EXECUTABLE
                                   VERSION_VAR PKG_CONFIG_VERSION_STRING)
+
+# This is needed because the module name is "PkgConfig" but the name of
+# this variable has always been PKG_CONFIG_FOUND so this isn't automatically
+# handled by FPHSA.
+set(PKG_CONFIG_FOUND "${PKGCONFIG_FOUND}")
 
 # Unsets the given variables
 macro(_pkgconfig_unset var)
