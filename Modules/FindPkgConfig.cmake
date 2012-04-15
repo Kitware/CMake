@@ -106,7 +106,7 @@ find_package_handle_standard_args(PkgConfig
 # This is needed because the module name is "PkgConfig" but the name of
 # this variable has always been PKG_CONFIG_FOUND so this isn't automatically
 # handled by FPHSA.
-set(PKG_CONFIG_FOUND "${PkgConfig_FOUND}")
+set(PKG_CONFIG_FOUND "${PKGCONFIG_FOUND}")
 
 # Unsets the given variables
 macro(_pkgconfig_unset var)
