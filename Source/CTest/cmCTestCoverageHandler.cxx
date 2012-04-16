@@ -752,6 +752,33 @@ int cmCTestCoverageHandler::HandlePHPCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
+struct cmCTestCoverageHandlerLocale
+{
+  cmCTestCoverageHandlerLocale()
+    {
+    if(const char* l = cmSystemTools::GetEnv("LC_ALL"))
+      {
+      lc_all = l;
+      }
+    if(lc_all != "C")
+      {
+      cmSystemTools::PutEnv("LC_ALL=C");
+      }
+    }
+  ~cmCTestCoverageHandlerLocale()
+    {
+    if(!lc_all.empty())
+      {
+      cmSystemTools::PutEnv(("LC_ALL=" + lc_all).c_str());
+      }
+    else
+      {
+      cmSystemTools::UnsetEnv("LC_ALL");
+      }
+    }
+  std::string lc_all;
+};
+
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
@@ -815,7 +842,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   int file_count = 0;
 
   // make sure output from gcov is in English!
-  cmSystemTools::PutEnv("LC_ALL=POSIX");
+  cmCTestCoverageHandlerLocale locale_C;
+  static_cast<void>(locale_C);
 
   // files is a list of *.da and *.gcda files with coverage data in them.
   // These are binary files that you give as input to gcov so that it will
