@@ -480,11 +480,16 @@ int cmCPackDebGenerator::createDeb()
     // Do not end the md5sum file with yet another (invalid)
     }
 
-  cmd = "\"";
-  cmd += cmakeExecutable;
-  cmd += "\" -E tar cfz control.tar.gz ./control ./md5sums";
-  const char* controlExtra =
-    this->GetOption("CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
+    cmd = "";
+    if (NULL != this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE"))
+      {
+      cmd = this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
+      }
+    cmd += " \"";
+    cmd += cmakeExecutable;
+    cmd += "\" -E tar cfz control.tar.gz ./control ./md5sums";
+    const char* controlExtra =
+      this->GetOption("CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
   if( controlExtra )
     {
     std::vector<std::string> controlExtraList;
