@@ -25,14 +25,14 @@ function(run_cmake test)
       unset(expect_std${o})
     endif()
   endforeach()
-  set(source_dir "${top_src}")
-  set(binary_dir "${top_bin}/${test}-build")
-  file(REMOVE_RECURSE "${binary_dir}")
-  file(MAKE_DIRECTORY "${binary_dir}")
+  set(RunCMake_TEST_SOURCE_DIR "${top_src}")
+  set(RunCMake_TEST_BINARY_DIR "${top_bin}/${test}-build")
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   execute_process(
-    COMMAND ${CMAKE_COMMAND} "${source_dir}"
+    COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
               -G "${RunCMake_GENERATOR}" -DRunCMake_TEST=${test}
-    WORKING_DIRECTORY "${binary_dir}"
+    WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
     OUTPUT_VARIABLE actual_stdout
     ERROR_VARIABLE actual_stderr
     RESULT_VARIABLE actual_result
@@ -53,6 +53,11 @@ function(run_cmake test)
       endif()
     endif()
   endforeach()
+  unset(RunCMake_TEST_FAILED)
+  include(${top_src}/${test}-check.cmake OPTIONAL)
+  if(RunCMake_TEST_FAILED)
+    set(msg "${RunCMake_TEST_FAILED}\n${msg}")
+  endif()
   if(msg)
     string(REGEX REPLACE "\n" "\n actual-out> " actual_out " actual-out> ${actual_stdout}")
     string(REGEX REPLACE "\n" "\n actual-err> " actual_err " actual-err> ${actual_stderr}")
