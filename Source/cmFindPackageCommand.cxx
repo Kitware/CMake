@@ -89,7 +89,7 @@ void cmFindPackageCommand::GenerateDocumentation()
                                "FIND_XXX", "find_package");
   this->CommandDocumentation =
     "  find_package(<package> [version] [EXACT] [QUIET] [MODULE]\n"
-    "               [[REQUIRED|COMPONENTS] [components...]]\n"
+    "               [REQUIRED] [[COMPONENTS] [components...]]\n"
     "               [OPTIONAL_COMPONENTS components...]\n"
     "               [NO_POLICY_SCOPE])\n"
     "Finds and loads settings from an external project.  "
@@ -102,7 +102,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "package cannot be found."
     "\n"
     "A package-specific list of required components may be listed after the "
-    "COMPONENTS option or directly after the REQUIRED option.  "
+    "COMPONENTS option (or after the REQUIRED option if present).  "
     "Additional optional components may be listed after OPTIONAL_COMPONENTS.  "
     "Available components and their influence on whether a package is "
     "considered to be found are defined by the target package."
@@ -136,7 +136,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "proceeds to Config mode.\n"
     "The complete Config mode command signature is:\n"
     "  find_package(<package> [version] [EXACT] [QUIET]\n"
-    "               [[REQUIRED|COMPONENTS] [components...]]\n"
+    "               [REQUIRED] [[COMPONENTS] [components...]]\n"
     "               [CONFIG|NO_MODULE]\n"
     "               [NO_POLICY_SCOPE]\n"
     "               [NAMES name1 [name2 ...]]\n"
