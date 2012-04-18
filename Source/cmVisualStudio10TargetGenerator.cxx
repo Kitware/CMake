@@ -460,7 +460,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
 {
   std::string sourcePath = source->GetFullPath();
   // the rule file seems to need to exist for vs10
-  if (source->GetExtension() == "rule")
+  if (source->GetPropertyAsBool("__CMAKE_RULE"))
     {
     if(!cmSystemTools::FileExists(sourcePath.c_str()))
       {
