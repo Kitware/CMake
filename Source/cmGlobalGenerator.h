@@ -277,6 +277,9 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return false; }
 
+  /** Generate an <output>.rule file path for a given command output.  */
+  virtual std::string GenerateRuleFile(std::string const& output) const;
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
