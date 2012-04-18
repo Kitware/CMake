@@ -1,3 +1,22 @@
+Changes in CMake 2.8.8 (since 2.8.8-rc2)
+----------------------------------------
+Brad King (1):
+      CheckIncludeFiles: Shorten check description message
+
+David Cole (3):
+      CPackNSIS: Rewrite variable documentation to make it more readable.
+      OS X: Use correct extra path when searching for applicaton bundles (#13066)
+      OS X: Mark find_program results as advanced
+
+Eric NOULARD (1):
+      Fix some doc typo and add an undocumented var.
+
+Kashif Rasul (1):
+      OS X: Use OSX_DEVELOPER_ROOT for app search path (#13066)
+
+Rolf Eike Beer (1):
+      FindBoost: add support for 1.49 and 1.50
+
 Changes in CMake 2.8.8-rc2 (since 2.8.8-rc1)
 --------------------------------------------
 Alex Neundorf (4):
