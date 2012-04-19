@@ -274,6 +274,7 @@ private:
   void WriteTargetAll(std::ostream& os);
   void WriteTargetRebuildManifest(std::ostream& os);
   void WriteTargetClean(std::ostream& os);
+  void WriteTargetHelp(std::ostream& os);
 
   /// Called when we have seen the given custom command.  Returns true
   /// if we has seen it before.
