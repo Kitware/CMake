@@ -44,8 +44,11 @@
  * - Watcom C++ in C code.  (For any version?)
  * - SGI MIPSpro
  * - Microsoft Visual C++ 6.0 (supposedly newer versions too)
+ * - IBM VisualAge 6 (XL v6)
  */
 #if defined(__WATCOMC__) || defined(__sgi) || defined(__hpux) || defined(__BORLANDC__)
+#define	inline
+#elif defined(__IBMC__) && __IBMC__ < 700
 #define	inline
 #elif defined(_MSC_VER) || defined(__osf__)
 #define inline __inline
