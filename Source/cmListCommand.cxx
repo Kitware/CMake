@@ -204,6 +204,12 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
     this->Makefile->AddDefinition(variableName.c_str(), "NOTFOUND");
     return true;
     }
+  // FIXME: Add policy to make non-existing lists an error like empty lists.
+  if(varArgsExpanded.empty())
+    {
+    this->SetError("GET given empty list");
+    return false;
+    }
 
   std::string value;
   size_t cc;
@@ -318,7 +324,8 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   // expand the variable
   int item = atoi(args[2].c_str());
   std::vector<std::string> varArgsExpanded;
-  if ( !this->GetList(varArgsExpanded, listName.c_str()) && item != 0)
+  if((!this->GetList(varArgsExpanded, listName.c_str())
+      || varArgsExpanded.empty()) && item != 0)
     {
     cmOStringStream str;
     str << "index: " << item << " out of range (0, 0)";
@@ -542,6 +549,12 @@ bool cmListCommand::HandleRemoveAtCommand(
   if ( !this->GetList(varArgsExpanded, listName.c_str()) )
     {
     this->SetError("sub-command REMOVE_AT requires list to be present.");
+    return false;
+    }
+  // FIXME: Add policy to make non-existing lists an error like empty lists.
+  if(varArgsExpanded.empty())
+    {
+    this->SetError("REMOVE_AT given empty list");
     return false;
     }
 
