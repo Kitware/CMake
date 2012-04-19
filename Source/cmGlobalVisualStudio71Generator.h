@@ -64,10 +64,12 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
-                                          bool partOfDefaultBuild);
+                                          bool partOfDefaultBuild,
+                                          const char* platformMapping = NULL);
   virtual void WriteExternalProject(std::ostream& fout,
                                     const char* name,
                                     const char* path,
+                                    const char* typeGuid,
                                     const std::set<cmStdString>& depends);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
