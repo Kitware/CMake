@@ -214,13 +214,11 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
   // (this could be avoided with per-target source files)
   const char* no_main_dependency = 0;
   const char* no_working_directory = 0;
-  mf->AddCustomCommandToOutput(
-    stamps, listFiles,
-    no_main_dependency, commandLines, "Checking Build System",
-    no_working_directory, true);
-  std::string ruleName = stamps[0];
-  ruleName += ".rule";
-  if(cmSourceFile* file = mf->GetSource(ruleName.c_str()))
+  if(cmSourceFile* file =
+     mf->AddCustomCommandToOutput(
+       stamps, listFiles,
+       no_main_dependency, commandLines, "Checking Build System",
+       no_working_directory, true))
     {
     tgt->AddSourceFile(file);
     }

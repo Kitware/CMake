@@ -212,3 +212,21 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
     return false;
     }
 }
+
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudio10Generator
+::GenerateRuleFile(std::string const& output) const
+{
+  // The VS 10 generator needs to create the .rule files on disk.
+  // Hide them away under the CMakeFiles directory.
+  std::string ruleDir = this->GetCMakeInstance()->GetHomeOutputDirectory();
+  ruleDir += cmake::GetCMakeFilesDirectory();
+  ruleDir += "/";
+  ruleDir += cmSystemTools::ComputeStringMD5(
+    cmSystemTools::GetFilenamePath(output).c_str());
+  std::string ruleFile = ruleDir + "/";
+  ruleFile += cmSystemTools::GetFilenameName(output);
+  ruleFile += ".rule";
+  return ruleFile;
+}

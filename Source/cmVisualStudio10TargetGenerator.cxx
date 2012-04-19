@@ -459,8 +459,9 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
                                                  command)
 {
   std::string sourcePath = source->GetFullPath();
-  // the rule file seems to need to exist for vs10
-  if (source->GetExtension() == "rule")
+  // VS 10 will always rebuild a custom command attached to a .rule
+  // file that doesn't exist so create the file explicitly.
+  if (source->GetPropertyAsBool("__CMAKE_RULE"))
     {
     if(!cmSystemTools::FileExists(sourcePath.c_str()))
       {

@@ -75,6 +75,10 @@ public:
   virtual const char* GetCMakeCFGIntDir() const
     { return "$(Configuration)";}
   bool Find64BitTools(cmMakefile* mf);
+
+  /** Generate an <output>.rule file path for a given command output.  */
+  virtual std::string GenerateRuleFile(std::string const& output) const;
+
 protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
 
