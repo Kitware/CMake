@@ -273,6 +273,7 @@ private:
   void WriteBuiltinTargets(std::ostream& os);
   void WriteTargetAll(std::ostream& os);
   void WriteTargetRebuildManifest(std::ostream& os);
+  void WriteTargetClean(std::ostream& os);
 
   /// Called when we have seen the given custom command.  Returns true
   /// if we has seen it before.
