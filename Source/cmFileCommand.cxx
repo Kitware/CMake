@@ -300,7 +300,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
     offset = atoi(offsetArg.GetCString());
     }
 
-  file.seekg(offset);
+  file.seekg(offset, std::ios::beg); // explicit ios::beg for IBM VisualAge 6
 
   std::string output;
 
