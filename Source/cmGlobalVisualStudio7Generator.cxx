@@ -250,9 +250,9 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
       {
-      this->WriteProjectConfigurations(fout, target->GetName(),
-                                       true,
-                                       target->GetProperty("VS_PLATFORM_MAPPING"));
+      this->WriteProjectConfigurations(
+        fout, target->GetName(),
+        true, target->GetProperty("VS_PLATFORM_MAPPING"));
       }
     else
       {
@@ -585,7 +585,8 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild, const char* platformMapping)
+                             bool partOfDefaultBuild,
+                             const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
