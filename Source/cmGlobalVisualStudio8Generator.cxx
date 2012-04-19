@@ -268,7 +268,8 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild, const char* platformMapping)
+                             bool partOfDefaultBuild,
+                             const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -276,12 +277,14 @@ cmGlobalVisualStudio8Generator
     {
     fout << "\t\t{" << guid << "}." << *i
          << "|" << this->GetPlatformName() << ".ActiveCfg = " << *i << "|"
-         << (platformMapping ? platformMapping : this->GetPlatformName()) << "\n";
+         << (platformMapping ? platformMapping : this->GetPlatformName())
+         << "\n";
     if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Build.0 = " << *i << "|"
-           << (platformMapping ? platformMapping : this->GetPlatformName()) << "\n";
+           << (platformMapping ? platformMapping : this->GetPlatformName())
+           << "\n";
       }
     }
 }
