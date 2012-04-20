@@ -422,26 +422,13 @@ ENDIF()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
-# The CMake version number.
-SET(CMake_VERSION_MAJOR 2)
-SET(CMake_VERSION_MINOR 8)
-SET(CMake_VERSION_PATCH 8)
-#SET(CMake_VERSION_TWEAK 0)
-#SET(CMake_VERSION_RC 1)
-
-# Releases define a tweak level.
-IF(DEFINED CMake_VERSION_TWEAK)
+INCLUDE(Source/CMakeVersion.cmake)
+# Releases define a small tweak level.
+IF("${CMake_VERSION_TWEAK}" VERSION_LESS 20000000)
   SET(CMake_VERSION_IS_RELEASE 1)
   SET(CMake_VERSION_SOURCE "")
 ELSE()
   SET(CMake_VERSION_IS_RELEASE 0)
-
-  # Use the date as the tweak level.
-  INCLUDE(${CMake_SOURCE_DIR}/Source/kwsys/kwsysDateStamp.cmake)
-  SET(CMake_VERSION_TWEAK
-    "${KWSYS_DATE_STAMP_YEAR}${KWSYS_DATE_STAMP_MONTH}${KWSYS_DATE_STAMP_DAY}"
-    )
-
   INCLUDE(${CMake_SOURCE_DIR}/Source/CMakeVersionSource.cmake)
 ENDIF()
 
