@@ -89,6 +89,7 @@
 #  CPACK_PACKAGE_FILE_NAME - The name of the package file to generate,
 #  not including the extension. For example, cmake-2.6.1-Linux-i686.
 #  The default value is
+#
 #  ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}.
 ##end
 #
