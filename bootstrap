@@ -18,15 +18,8 @@ die() {
 # Version number extraction function.
 cmake_version_component()
 {
-  cat "${cmake_source_dir}/CMakeLists.txt" | sed -n "
+  cat "${cmake_source_dir}/Source/CMakeVersion.cmake" | sed -n "
 /^SET(CMake_VERSION_${1}/ {s/SET(CMake_VERSION_${1} *\([0-9]*\))/\1/;p;}
-"
-}
-
-cmake_date_stamp_component()
-{
-  cat "${cmake_source_dir}/Source/kwsys/kwsysDateStamp.cmake" | sed -n "
-/KWSYS_DATE_STAMP_${1}/  {s/^.* \([0-9][0-9]*\))$/\1/;p;}
 "
 }
 
@@ -46,9 +39,6 @@ cmake_version_minor="`cmake_version_component MINOR`"
 cmake_version_patch="`cmake_version_component PATCH`"
 cmake_version="${cmake_version_major}.${cmake_version_minor}.${cmake_version_patch}"
 cmake_version_tweak="`cmake_version_component TWEAK`"
-if [ "x$cmake_version_tweak" = "x" ]; then
-  cmake_version_tweak="`cmake_date_stamp_component YEAR``cmake_date_stamp_component MONTH``cmake_date_stamp_component DAY`"
-fi
 if [ "$cmake_version_tweak" != "0" ]; then
   cmake_version="${cmake_version}.${cmake_version_tweak}"
 fi
