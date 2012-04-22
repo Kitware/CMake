@@ -137,10 +137,20 @@ cmExportFileGenerator
       (mf->IsOn("WIN32") || mf->IsOn("CYGWIN") || mf->IsOn("MINGW"));
     if(!dll_platform)
       {
-      std::string soname = target->GetSOName(config);
-      std::string prop = "IMPORTED_SONAME";
+      std::string prop;
+      std::string value;
+      if(target->HasSOName(config))
+        {
+        prop = "IMPORTED_SONAME";
+        value = target->GetSOName(config);
+        }
+      else
+        {
+        prop = "IMPORTED_NO_SONAME";
+        value = "TRUE";
+        }
       prop += suffix;
-      properties[prop] = soname;
+      properties[prop] = value;
       }
     }
 
