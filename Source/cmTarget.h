@@ -347,6 +347,9 @@ public:
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const char* config=0);
 
+  /** Whether this library has soname enabled and platform supports it.  */
+  bool HasSOName(const char* config);
+
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const char* config);
 
