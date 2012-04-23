@@ -3025,8 +3025,7 @@ bool cmTarget::HasSOName(const char* config)
   return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
            this->GetType() == cmTarget::MODULE_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetDefinition(sonameFlag.c_str()) &&
-          !this->IsFrameworkOnApple());
+          this->Makefile->GetDefinition(sonameFlag.c_str()));
 }
 
 //----------------------------------------------------------------------------
@@ -3365,7 +3364,8 @@ void cmTarget::GetLibraryNames(std::string& name,
   // Check for library version properties.
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
-  if(!this->HasSOName(config))
+  if(!this->HasSOName(config) ||
+     this->IsFrameworkOnApple())
     {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
