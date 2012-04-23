@@ -39,6 +39,50 @@ TARGET_LINK_LIBRARIES(example_exe kwsys)
 ADD_LIBRARY(example_mod_1 MODULE src/example_mod_1.c)
 TARGET_LINK_LIBRARIES(example_mod_1 example_exe)
 
+
+IF(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG AND
+    "${CMAKE_C_CREATE_SHARED_MODULE}" MATCHES "SONAME_FLAG")
+  # Add a second plugin that should not have any soname.
+  ADD_LIBRARY(example_mod_2 MODULE src/example_mod_1.c)
+  TARGET_LINK_LIBRARIES(example_mod_2 example_exe)
+  SET_PROPERTY(TARGET example_mod_2 PROPERTY NO_SONAME 1)
+
+  # Verify that targets export with proper IMPORTED SONAME properties.
+  EXPORT(TARGETS example_mod_1 example_mod_2 NAMESPACE exp_
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/mods.cmake)
+  INCLUDE(${CMAKE_CURRENT_BINARY_DIR}/mods.cmake)
+  GET_PROPERTY(configs TARGET exp_example_mod_1 PROPERTY IMPORTED_CONFIGURATIONS)
+  FOREACH(c ${configs})
+    STRING(TOUPPER "${c}" CONFIG)
+    GET_PROPERTY(soname1 TARGET exp_example_mod_1 PROPERTY IMPORTED_SONAME_${CONFIG})
+    GET_PROPERTY(soname2 TARGET exp_example_mod_2 PROPERTY IMPORTED_NO_SONAME_${CONFIG})
+    IF(soname1)
+      MESSAGE(STATUS "exp_example_mod_1 has IMPORTED_SONAME_${CONFIG} as expected: ${soname1}")
+    ELSE()
+      MESSAGE(SEND_ERROR "exp_example_mod_1 does not have IMPORTED_SONAME_${CONFIG} but should")
+    ENDIF()
+    IF(soname2)
+      MESSAGE(STATUS "exp_example_mod_2 has IMPORTED_NO_SONAME_${CONFIG} as expected: ${soname2}")
+    ELSE()
+      MESSAGE(SEND_ERROR "exp_example_mod_2 does not have IMPORTED_NO_SONAME_${CONFIG} but should")
+    ENDIF()
+  ENDFOREACH()
+
+  # Parse the binary to check for SONAME if possible.
+  IF("${CMAKE_EXECUTABLE_FORMAT}" MATCHES "ELF")
+    FIND_PROGRAM(READELF_EXE readelf)
+    IF(READELF_EXE)
+      ADD_CUSTOM_TARGET(check_mod_soname ALL COMMAND
+        ${CMAKE_COMMAND} -Dreadelf=${READELF_EXE}
+                         -Dmod1=$<TARGET_FILE:example_mod_1>
+                         -Dmod2=$<TARGET_FILE:example_mod_2>
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/check_mod_soname.cmake
+        )
+      ADD_DEPENDENCIES(check_mod_soname example_mod_1 example_mod_2)
+    ENDIF()
+  ENDIF()
+ENDIF()
+
 # TODO:
 #  - create a plugin that links to a static lib
 #  - create a plugin that links to a shared lib
