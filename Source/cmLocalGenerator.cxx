@@ -783,6 +783,7 @@ static const char* ruleReplaceVars[] =
   "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
   "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
   "CMAKE_${LANG}_LINK_FLAGS",
+  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
   "CMAKE_${LANG}_ARCHIVE",
   "CMAKE_AR",
   "CMAKE_CURRENT_SOURCE_DIR",
@@ -953,20 +954,22 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         }
       }
     }
-  if(variable == "TARGET_SONAME" || variable == "SONAME_FLAG")
+  if(replaceValues.TargetSOName)
     {
-    if(replaceValues.TargetSOName && replaceValues.Language)
+    if(variable == "TARGET_SONAME")
       {
-      std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
-      name += replaceValues.Language;
-      name += "_FLAG";
-      if(const char *flag = this->Makefile->GetDefinition(name.c_str()))
+      if(replaceValues.Language)
         {
-        return ((variable == "TARGET_SONAME") ?
-                replaceValues.TargetSOName : flag);
+        std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
+        name += replaceValues.Language;
+        name += "_FLAG";
+        if(this->Makefile->GetDefinition(name.c_str()))
+          {
+          return replaceValues.TargetSOName;
+          }
         }
+      return "";
       }
-    return "";
     }
   if(replaceValues.TargetInstallNameDir)
     {

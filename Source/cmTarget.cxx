@@ -823,19 +823,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "CMAKE_SKIP_BUILD_RPATH if it is set when a target is created.");
 
   cm->DefineProperty
-    ("NO_SONAME", cmProperty::TARGET,
-     "Whether to set \"soname\" when linking a shared library or module.",
-     "Enable this boolean property if a generated shared library or module "
-     "should not have \"soname\" set. Default is to set \"soname\" on all "
-     "shared libraries and modules as long as the platform supports it. "
-     "Generally, use this property only for leaf private libraries or "
-     "plugins. If you use it on normal shared libraries which other targets "
-     "link against, on some platforms a linker will insert a full path to "
-     "the library (as specified at link time) into the dynamic section of "
-     "the dependant binary. Therefore, once installed, dynamic linker may "
-     "eventually fail to locate the library for the binary.");
-
-  cm->DefineProperty
     ("SOVERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
@@ -844,7 +831,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "supports symlinks and the linker supports so-names. "
      "If only one of both is specified the missing is assumed to have "
      "the same version number. "
-     "SOVERSION is ignored if NO_SONAME property is set. "
      "For shared libraries and executables on Windows the VERSION "
      "attribute is parsed to extract a \"major.minor\" version number. "
      "These numbers are used as the image version of the binary. ");
@@ -3009,26 +2995,6 @@ std::string cmTarget::GetPDBName(const char* config)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HasSOName(const char* config)
-{
-  // Construct the name of the soname flag variable for this language.
-  const char* ll = this->GetLinkerLanguage(config);
-  std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
-  if(ll)
-    {
-    sonameFlag += "_";
-    sonameFlag += ll;
-    }
-  sonameFlag += "_FLAG";
-  // soname is supported only for shared libraries and modules,
-  // and then only when the platform supports an soname flag.
-  return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
-           this->GetType() == cmTarget::MODULE_LIBRARY) &&
-          !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetDefinition(sonameFlag.c_str()));
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetSOName(const char* config)
 {
   if(this->IsImported())
@@ -3361,10 +3327,22 @@ void cmTarget::GetLibraryNames(std::string& name,
     return;
     }
 
+  // Construct the name of the soname flag variable for this language.
+  const char* ll = this->GetLinkerLanguage(config);
+  std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
+  if(ll)
+    {
+    sonameFlag += "_";
+    sonameFlag += ll;
+    }
+  sonameFlag += "_FLAG";
+
   // Check for library version properties.
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
-  if(!this->HasSOName(config) ||
+  if((this->GetType() != cmTarget::SHARED_LIBRARY &&
+      this->GetType() != cmTarget::MODULE_LIBRARY) ||
+     !this->Makefile->GetDefinition(sonameFlag.c_str()) ||
      this->IsFrameworkOnApple())
     {
     // Versioning is supported only for shared libraries and modules,

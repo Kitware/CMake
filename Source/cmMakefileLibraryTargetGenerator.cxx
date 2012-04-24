@@ -714,10 +714,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
-  if (this->Target->HasSOName(this->ConfigName))
-    {
-    vars.TargetSOName= targetNameSO.c_str();
-    }
+  vars.TargetSOName= targetNameSO.c_str();
   vars.LinkFlags = linkFlags.c_str();
 
   // Compute the directory portion of the install_name setting.
