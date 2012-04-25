@@ -44,6 +44,8 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
+  std::string CreateDummyTargetFile(cmMakefile* mf, cmTarget* target) const;
+
   std::string GetCBCompilerId(const cmMakefile* mf);
   int GetCBTargetType(cmTarget* target);
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
