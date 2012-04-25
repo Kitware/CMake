@@ -70,6 +70,8 @@ private:
 
   //! Handle coverage using xdebug php coverage
   int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
+  //! Handle coverage using GTM
+  int HandleGTMCoverage(cmCTestCoverageHandlerContainer* cont);
 
   //! Handle coverage using Bullseye
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
