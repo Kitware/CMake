@@ -2092,6 +2092,21 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmGlobalGenerator::GenerateRuleFile(std::string const& output) const
+{
+  std::string ruleFile = output;
+  ruleFile += ".rule";
+  const char* dir = this->GetCMakeCFGIntDir();
+  if(dir && dir[0] == '$')
+    {
+    cmSystemTools::ReplaceString(ruleFile, dir,
+                                 cmake::GetCMakeFilesDirectory());
+    }
+  return ruleFile;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
                                                  const char*, std::string&)
 {

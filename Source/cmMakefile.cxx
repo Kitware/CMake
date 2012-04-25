@@ -883,7 +883,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
 }
 
 //----------------------------------------------------------------------------
-void
+cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const std::vector<std::string>& depends,
                                      const char* main_dependency,
@@ -897,7 +897,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
   if(outputs.empty())
     {
     cmSystemTools::Error("Attempt to add a custom rule with no output!");
-    return;
+    return 0;
     }
 
   // Validate custom commands.  TODO: More strict?
@@ -910,7 +910,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       cmOStringStream e;
       e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
+      return 0;
       }
     }
 
@@ -928,7 +928,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
         {
         // The existing custom command is identical.  Silently ignore
         // the duplicate.
-        return;
+        return file;
         }
       else
         {
@@ -948,17 +948,11 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
   // Generate a rule file if the main dependency is not available.
   if(!file)
     {
+    cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+
     // Construct a rule file associated with the first output produced.
-    std::string outName = outputs[0];
-    outName += ".rule";
-    const char* dir =
-      this->LocalGenerator->GetGlobalGenerator()->
-      GetCMakeCFGIntDir();
-    if(dir && dir[0] == '$')
-      {
-      cmSystemTools::ReplaceString(outName, dir,
-                                   cmake::GetCMakeFilesDirectory());
-      }
+    std::string outName = gg->GenerateRuleFile(outputs[0]);
+
     // Check if the rule file already exists.
     file = this->GetSource(outName.c_str());
     if(file && file->GetCustomCommand() && !replace)
@@ -970,11 +964,12 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                              outName.c_str(),
                              "\" which already has a custom rule.");
         }
-      return;
+      return file;
       }
 
     // Create a cmSourceFile for the rule file.
     file = this->GetOrCreateSource(outName.c_str(), true);
+    file->SetProperty("__CMAKE_RULE", "1");
     }
 
   // Always create the output sources and mark them generated.
@@ -1004,10 +999,11 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
     }
+  return file;
 }
 
 //----------------------------------------------------------------------------
-void
+cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const char* output,
                                      const std::vector<std::string>& depends,
                                      const char* main_dependency,
@@ -1019,9 +1015,9 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
-  this->AddCustomCommandToOutput(outputs, depends, main_dependency,
-                                 commandLines, comment, workingDir,
-                                 replace, escapeOldStyle);
+  return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
+                                        commandLines, comment, workingDir,
+                                        replace, escapeOldStyle);
 }
 
 //----------------------------------------------------------------------------
@@ -1054,13 +1050,14 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
     {
     // Get the name of this output.
     const char* output = oi->c_str();
+    cmSourceFile* sf;
 
     // Choose whether to use a main dependency.
     if(sourceFiles.find(source))
       {
       // The source looks like a real file.  Use it as the main dependency.
-      this->AddCustomCommandToOutput(output, depends, source,
-                                     commandLines, comment, 0);
+      sf = this->AddCustomCommandToOutput(output, depends, source,
+                                          commandLines, comment, 0);
       }
     else
       {
@@ -1068,20 +1065,18 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       const char* no_main_dependency = 0;
       std::vector<std::string> depends2 = depends;
       depends2.push_back(source);
-      this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
-                                     commandLines, comment, 0);
+      sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
+                                          commandLines, comment, 0);
       }
 
     // If the rule was added to the source (and not a .rule file),
     // then add the source to the target to make sure the rule is
     // included.
-    std::string sname = output;
-    sname += ".rule";
-    if(!this->GetSource(sname.c_str()))
+    if(sf && !sf->GetPropertyAsBool("__CMAKE_RULE"))
       {
       if (this->Targets.find(target) != this->Targets.end())
         {
-        this->Targets[target].AddSource(source);
+        this->Targets[target].AddSourceFile(sf);
         }
       else
         {
@@ -1976,7 +1971,6 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 
   // look through all the source files that have custom commands
   // and see if the custom command has the passed source file as an output
-  // keep in mind the possible .rule extension that may be tacked on
   for(std::vector<cmSourceFile*>::const_iterator i =
         this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
     {
