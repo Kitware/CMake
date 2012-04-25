@@ -47,14 +47,28 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     {
     // on Windows the output dir is already needed at compile time
     // ensure the directory exists (OutDir test)
-    std::string outpath = target->GetDirectory(this->GetConfigName());
-    cmSystemTools::MakeDirectory(outpath.c_str());
+    EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
     }
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 {
 }
+
+void
+cmNinjaNormalTargetGenerator
+::EnsureDirectoryExists(const std::string& dir)
+{
+  cmSystemTools::MakeDirectory(dir.c_str());
+}
+
+void
+cmNinjaNormalTargetGenerator
+::EnsureParentDirectoryExists(const std::string& path)
+{
+  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
+}
+
 
 void cmNinjaNormalTargetGenerator::Generate()
 {
@@ -380,13 +394,18 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
   }
 
+  std::string path;
   if (!this->TargetNameImport.empty()) {
-    vars["TARGET_IMPLIB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
+    path = this->GetLocalGenerator()->ConvertToOutputFormat(
+                    targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
+    vars["TARGET_IMPLIB"] = path;
+    EnsureParentDirectoryExists(path);
   }
 
-  vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
+  path = this->GetLocalGenerator()->ConvertToOutputFormat(
+                   this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
+  vars["TARGET_PDB"] = path;
+  EnsureParentDirectoryExists(path);
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
     &this->GetTarget()->GetPreBuildCommands(),
@@ -413,7 +432,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // If we have any PRE_LINK commands, we need to go back to HOME_OUTPUT for
   // the link commands.
   if (!preLinkCmdLines.empty()) {
-    std::string path = this->GetLocalGenerator()->ConvertToOutputFormat(
+    path = this->GetLocalGenerator()->ConvertToOutputFormat(
       this->GetMakefile()->GetHomeOutputDirectory(),
       cmLocalGenerator::SHELL);
     preLinkCmdLines.push_back("cd " + path);
