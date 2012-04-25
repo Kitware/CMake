@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmCTestCoverageHandler.h"
 #include "cmParsePHPCoverage.h"
+#include "cmParseGTMCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -373,21 +374,29 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
   int file_count = 0;
   file_count += this->HandleGCovCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;
     }
   file_count += this->HandleTracePyCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;
     }
   file_count += this->HandlePHPCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;
     }
+  file_count += this->HandleGTMCoverage(&cont);
   error = cont.Error;
+  if ( file_count < 0 )
+    {
+    return error;
+    }
 
   std::set<std::string> uncovered = this->FindUncoveredFiles(&cont);
 
@@ -748,6 +757,18 @@ int cmCTestCoverageHandler::HandlePHPCoverage(
   if(cmSystemTools::FileIsDirectory(coverageDir.c_str()))
     {
     cov.ReadPHPCoverageDirectory(coverageDir.c_str());
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+}
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandleGTMCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmParseGTMCoverage cov(*cont, this->CTest);
+  std::string coverageFile = this->CTest->GetBinaryDir() + "/gtm_coverage.mcov";
+  if(cmSystemTools::FileExists(coverageFile.c_str()))
+    {
+    cov.ReadGTMCoverage(coverageFile.c_str());
     }
   return static_cast<int>(cont->TotalCoverage.size());
 }
