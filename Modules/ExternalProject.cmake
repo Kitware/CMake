@@ -1079,9 +1079,15 @@ function(_ep_add_download_command name)
       set(git_tag "master")
     endif()
 
+    # For the download step, and the git clone operation, only the repository
+    # should be recorded in a configured RepositoryInfo file. If the repo
+    # changes, the clone script should be run again. But if only the tag
+    # changes, avoid running the clone script again. Let the 'always' running
+    # update step checkout the new tag.
+    #
     set(repository ${git_repository})
     set(module)
-    set(tag ${git_tag})
+    set(tag)
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-gitinfo.txt"
