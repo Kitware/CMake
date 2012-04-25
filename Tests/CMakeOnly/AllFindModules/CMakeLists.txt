@@ -71,7 +71,7 @@ endmacro(check_version_string)
 # reported.
 
 foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HSPELL
-        JASPER LIBXML2 LIBXSLT PERL PostgreSQL TIFF ZLIB)
+        JASPER LIBXML2 LIBXSLT PERL PKG_CONFIG PostgreSQL TIFF ZLIB)
     check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach(VTEST)
 
@@ -82,4 +82,3 @@ endforeach(VTEST)
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
 check_version_string(SUBVERSION Subversion_VERSION_SVN)
-check_version_string(PKGCONFIG PKG_CONFIG_VERSION_STRING)
