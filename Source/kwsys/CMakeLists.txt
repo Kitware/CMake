@@ -123,7 +123,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_FundamentalType 1)
   SET(KWSYS_USE_Terminal 1)
   SET(KWSYS_USE_IOStream 1)
-  SET(KWSYS_USE_DateStamp 1)
   SET(KWSYS_USE_String 1)
   SET(KWSYS_USE_SystemInformation 1)
   SET(KWSYS_USE_CPU 1)
@@ -690,7 +689,7 @@ ENDFOREACH(cpp)
 
 # Add selected C components.
 FOREACH(c
-    Process Base64 FundamentalType MD5 Terminal System DateStamp String CPU
+    Process Base64 FundamentalType MD5 Terminal System String CPU
     )
   IF(KWSYS_USE_${c})
     # Use the corresponding header file.
