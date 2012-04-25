@@ -620,6 +620,9 @@ INSTALL(
                               WORLD_READ WORLD_EXECUTE
   )
 
+# process docs related install
+ADD_SUBDIRECTORY(Docs)
+
 #-----------------------------------------------------------------------
 # End of the main section of the CMakeLists file
 #-----------------------------------------------------------------------
