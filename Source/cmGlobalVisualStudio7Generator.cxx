@@ -250,8 +250,9 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
       {
-      this->WriteProjectConfigurations(fout, target->GetName(),
-                                       true);
+      this->WriteProjectConfigurations(
+        fout, target->GetName(),
+        true, target->GetProperty("VS_PLATFORM_MAPPING"));
       }
     else
       {
@@ -286,8 +287,12 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       {
       std::string project = target->GetName();
       std::string location = expath;
-      this->WriteExternalProject(fout, project.c_str(), 
-                                 location.c_str(), target->GetUtilities());
+
+      this->WriteExternalProject(fout,
+                                 project.c_str(),
+                                 location.c_str(),
+                                 target->GetProperty("VS_PROJECT_TYPE"),
+                                 target->GetUtilities());
       written = true;
       }
     else
@@ -580,18 +585,21 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild)
+                             bool partOfDefaultBuild,
+                             const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
-         << ".ActiveCfg = " << *i << "|Win32\n";
+         << ".ActiveCfg = " << *i << "|"
+         << (platformMapping ? platformMapping : "Win32") << "\n";
     if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
-           << ".Build.0 = " << *i << "|Win32\n";
+           << ".Build.0 = " << *i << "|"
+           << (platformMapping ? platformMapping : "Win32") << "\n";
       }
     }
 }
@@ -604,10 +612,14 @@ void cmGlobalVisualStudio7Generator
 void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout, 
                                const char* name,
                                const char* location,
+                               const char* typeGuid,
                                const std::set<cmStdString>&)
 { 
   std::string d = cmSystemTools::ConvertToOutputPath(location);
-  fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
+  fout << "Project("
+       << "\"{"
+       << (typeGuid ? typeGuid : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
+       << "}\") = \""
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)

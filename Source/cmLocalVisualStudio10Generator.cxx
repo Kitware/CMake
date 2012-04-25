@@ -99,6 +99,14 @@ void cmLocalVisualStudio10Generator
 {
   cmVS10XMLParser parser;
   parser.ParseFile(path); 
+
+  // if we can not find a GUID then create one
+  if(parser.GUID.empty())
+    {
+    this->GlobalGenerator->CreateGUID(name);
+    return;
+    }
+
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
   // save the GUID in the cache

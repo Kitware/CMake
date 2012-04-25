@@ -77,7 +77,8 @@ protected:
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(std::ostream& fout,
                                           const char* name,
-                                          bool partOfDefaultBuild);
+                                          bool partOfDefaultBuild,
+                                          const char* platformMapping = NULL);
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
                                    const char* path, cmTarget &t);
