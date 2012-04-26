@@ -351,7 +351,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
     else
       {
       // try some alternate names
-      char* tryname[] = {"GUX", "GTM", "ONT", 0};
+      const char* tryname[] = {"GUX", "GTM", "ONT", 0};
       for(int k=0; tryname[k] != 0; k++)
         {
         std::string routine2 = routine + tryname[k];
