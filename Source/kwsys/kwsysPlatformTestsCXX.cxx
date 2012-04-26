@@ -393,6 +393,32 @@ int main(int, char **argv)
 }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_SETENV
+#include <stdlib.h>
+int main()
+{
+  return setenv("A", "B", 1);
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_UNSETENV
+#include <stdlib.h>
+int main()
+{
+  unsetenv("A");
+  return 0;
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
+#include <stdlib.h>
+int main()
+{
+  char* e = environ[0];
+  return e? 0:1;
+}
+#endif
+
 #ifdef TEST_KWSYS_CXX_TYPE_INFO
 /* Collect fundamental type information and save it to a CMake script.  */
 
