@@ -824,15 +824,23 @@ function(_ep_get_configuration_subdir_suffix suffix_var)
 endfunction(_ep_get_configuration_subdir_suffix)
 
 
+function(_ep_get_step_stampfile name step stampfile_var)
+  ExternalProject_Get_Property(${name} stamp_dir)
+
+  _ep_get_configuration_subdir_suffix(cfgdir)
+  set(stampfile "${stamp_dir}${cfgdir}/${name}-${step}")
+
+  set(${stampfile_var} "${stampfile}" PARENT_SCOPE)
+endfunction()
+
+
 function(ExternalProject_Add_StepTargets name)
   set(steps ${ARGN})
 
-  _ep_get_configuration_subdir_suffix(cfgdir)
-  ExternalProject_Get_Property(${name} stamp_dir)
-
   foreach(step ${steps})
+    _ep_get_step_stampfile(${name} ${step} stamp_file)
     add_custom_target(${name}-${step}
-      DEPENDS ${stamp_dir}${cfgdir}/${name}-${step})
+      DEPENDS ${stamp_file})
 
     # Depend on other external projects (target-level).
     get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
@@ -845,23 +853,26 @@ endfunction(ExternalProject_Add_StepTargets)
 
 function(ExternalProject_Add_Step name step)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  ExternalProject_Get_Property(${name} stamp_dir)
-
   _ep_get_configuration_subdir_suffix(cfgdir)
 
+  set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
+  _ep_get_step_stampfile(${name} ${step} stamp_file)
+
   add_custom_command(APPEND
-    OUTPUT ${cmf_dir}${cfgdir}/${name}-complete
-    DEPENDS ${stamp_dir}${cfgdir}/${name}-${step}
+    OUTPUT ${complete_stamp_file}
+    DEPENDS ${stamp_file}
     )
+
   _ep_parse_arguments(ExternalProject_Add_Step
-                       ${name} _EP_${step}_ "${ARGN}")
+                      ${name} _EP_${step}_ "${ARGN}")
 
   # Steps depending on this step.
   get_property(dependers TARGET ${name} PROPERTY _EP_${step}_DEPENDERS)
   foreach(depender IN LISTS dependers)
+    _ep_get_step_stampfile(${name} ${depender} depender_stamp_file)
     add_custom_command(APPEND
-      OUTPUT ${stamp_dir}${cfgdir}/${name}-${depender}
-      DEPENDS ${stamp_dir}${cfgdir}/${name}-${step}
+      OUTPUT ${depender_stamp_file}
+      DEPENDS ${stamp_file}
       )
   endforeach()
 
@@ -871,7 +882,8 @@ function(ExternalProject_Add_Step name step)
   # Dependencies on steps.
   get_property(dependees TARGET ${name} PROPERTY _EP_${step}_DEPENDEES)
   foreach(dependee IN LISTS dependees)
-    list(APPEND depends ${stamp_dir}${cfgdir}/${name}-${dependee})
+    _ep_get_step_stampfile(${name} ${dependee} dependee_stamp_file)
+    list(APPEND depends ${dependee_stamp_file})
   endforeach()
 
   # The command to run.
@@ -901,10 +913,10 @@ function(ExternalProject_Add_Step name step)
   # Run every time?
   get_property(always TARGET ${name} PROPERTY _EP_${step}_ALWAYS)
   if(always)
-    set_property(SOURCE ${stamp_dir}${cfgdir}/${name}-${step} PROPERTY SYMBOLIC 1)
+    set_property(SOURCE ${stamp_file} PROPERTY SYMBOLIC 1)
     set(touch)
   else()
-    set(touch ${CMAKE_COMMAND} -E touch ${stamp_dir}${cfgdir}/${name}-${step})
+    set(touch ${CMAKE_COMMAND} -E touch ${stamp_file})
   endif()
 
   # Wrap with log script?
@@ -914,7 +926,7 @@ function(ExternalProject_Add_Step name step)
   endif()
 
   add_custom_command(
-    OUTPUT ${stamp_dir}${cfgdir}/${name}-${step}
+    OUTPUT ${stamp_file}
     COMMENT ${comment}
     COMMAND ${command}
     COMMAND ${touch}
@@ -1283,14 +1295,12 @@ endfunction(_ep_add_patch_command)
 function(_ep_add_configure_command name)
   ExternalProject_Get_Property(${name} source_dir binary_dir tmp_dir)
 
-  _ep_get_configuration_subdir_suffix(cfgdir)
-
   # Depend on other external projects (file-level).
   set(file_deps)
   get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
   foreach(dep IN LISTS deps)
-    get_property(dep_stamp_dir TARGET ${dep} PROPERTY _EP_STAMP_DIR)
-    list(APPEND file_deps ${dep_stamp_dir}${cfgdir}/${dep}-done)
+    _ep_get_step_stampfile(${dep} "done" done_stamp_file)
+    list(APPEND file_deps ${done_stamp_file})
   endforeach()
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_CONFIGURE_COMMAND SET)
@@ -1453,11 +1463,14 @@ function(ExternalProject_Add name)
 
   # Add a custom target for the external project.
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  add_custom_target(${name} ALL DEPENDS ${cmf_dir}${cfgdir}/${name}-complete)
+  set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
+
+  add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
   set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
   _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})
-  ExternalProject_Get_Property(${name} stamp_dir)
+  _ep_get_step_stampfile(${name} "done" done_stamp_file)
+  _ep_get_step_stampfile(${name} "install" install_stamp_file)
 
   # The 'complete' step depends on all other steps and creates a
   # 'done' mark.  A dependent external project's 'configure' step
@@ -1468,19 +1481,18 @@ function(ExternalProject_Add name)
   # parallel builds.  However, the Ninja generator needs to see the entire
   # dependency graph, and can cope with custom commands belonging to
   # multiple targets, so we add the 'done' mark as an output for Ninja only.
-  set(complete_outputs ${cmf_dir}${cfgdir}/${name}-complete)
+  set(complete_outputs ${complete_stamp_file})
   if(${CMAKE_GENERATOR} MATCHES "Ninja")
-    set(complete_outputs
-        ${complete_outputs} ${stamp_dir}${cfgdir}/${name}-done)
+    set(complete_outputs ${complete_outputs} ${done_stamp_file})
   endif()
 
   add_custom_command(
     OUTPUT ${complete_outputs}
     COMMENT "Completed '${name}'"
     COMMAND ${CMAKE_COMMAND} -E make_directory ${cmf_dir}${cfgdir}
-    COMMAND ${CMAKE_COMMAND} -E touch ${cmf_dir}${cfgdir}/${name}-complete
-    COMMAND ${CMAKE_COMMAND} -E touch ${stamp_dir}${cfgdir}/${name}-done
-    DEPENDS ${stamp_dir}${cfgdir}/${name}-install
+    COMMAND ${CMAKE_COMMAND} -E touch ${complete_stamp_file}
+    COMMAND ${CMAKE_COMMAND} -E touch ${done_stamp_file}
+    DEPENDS ${install_stamp_file}
     VERBATIM
     )
 
