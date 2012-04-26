@@ -671,7 +671,7 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
 
   if (environment && environment->size()>0)
     {
-    cmSystemTools::AppendEnv(environment);
+    cmSystemTools::AppendEnv(*environment);
     }
 
   return this->TestProcess->StartProcess();

@@ -48,7 +48,7 @@
 #include <float.h>
 #include <ctype.h>
 
-#include <memory> // auto_ptr
+#include <cmsys/auto_ptr.hxx>
 
 #include <cm_zlib.h>
 #include <cmsys/Base64.h>
@@ -509,7 +509,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   cmMakefile *mf = lg->GetMakefile();
   if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
     {
@@ -1277,7 +1277,6 @@ int cmCTest::RunTest(std::vector<const char*> argv,
                      std::ostream* log, double testTimeOut,
                      std::vector<std::string>* environment)
 {
-  std::vector<std::string> origEnv;
   bool modifyEnv = (environment && environment->size()>0);
 
   // determine how much time we have
@@ -1334,9 +1333,11 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       }
     std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
 
+    cmsys::auto_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
     if (modifyEnv)
       {
-      origEnv = cmSystemTools::AppendEnv(environment);
+      saveEnv.reset(new cmSystemTools::SaveRestoreEnvironment);
+      cmSystemTools::AppendEnv(*environment);
       }
 
     *retVal = inst.Run(args, output);
@@ -1351,11 +1352,6 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       "Internal cmCTest object used to run test." << std::endl
       <<  *output << std::endl);
 
-    if (modifyEnv)
-      {
-      cmSystemTools::RestoreEnv(origEnv);
-      }
-
     return cmsysProcess_State_Exited;
     }
   std::vector<char> tempOutput;
@@ -1364,9 +1360,11 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     *output = "";
     }
 
+  cmsys::auto_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
   if (modifyEnv)
     {
-    origEnv = cmSystemTools::AppendEnv(environment);
+    saveEnv.reset(new cmSystemTools::SaveRestoreEnvironment);
+    cmSystemTools::AppendEnv(*environment);
     }
 
   cmsysProcess* cp = cmsysProcess_New();
@@ -1435,11 +1433,6 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       << std::flush);
     }
   cmsysProcess_Delete(cp);
-
-  if (modifyEnv)
-    {
-    cmSystemTools::RestoreEnv(origEnv);
-    }
 
   return result;
 }

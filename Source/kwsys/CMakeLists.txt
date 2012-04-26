@@ -552,11 +552,16 @@ SET_SOURCE_FILES_PROPERTIES(ProcessUNIX.c System.c PROPERTIES
   COMPILE_FLAGS "-DKWSYS_C_HAS_PTRDIFF_T=${KWSYS_C_HAS_PTRDIFF_T} -DKWSYS_C_HAS_SSIZE_T=${KWSYS_C_HAS_SSIZE_T}"
   )
 
-IF(KWSYS_DO_NOT_CLEAN_PUTENV)
-  # Disable cleanup of putenv memory for issues with GCOV.
+IF(KWSYS_USE_SystemTools)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_SETENV
+    "Checking whether CXX compiler has setenv" DIRECT)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_UNSETENV
+    "Checking whether CXX compiler has unsetenv" DIRECT)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
+    "Checking whether CXX compiler has environ in stdlib.h" DIRECT)
   SET_SOURCE_FILES_PROPERTIES(SystemTools.cxx PROPERTIES
-    COMPILE_FLAGS -DKWSYS_DO_NOT_CLEAN_PUTENV=1)
-ENDIF(KWSYS_DO_NOT_CLEAN_PUTENV)
+    COMPILE_FLAGS "-DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV} -DKWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV} -DKWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}")
+ENDIF()
 
 #-----------------------------------------------------------------------------
 # Choose a directory for the generated headers.
