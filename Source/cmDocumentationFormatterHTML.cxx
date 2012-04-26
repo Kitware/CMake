@@ -127,7 +127,7 @@ void cmDocumentationFormatterHTML
       {
       os << "<h2><a name=\"section_";
       cmDocumentationPrintHTMLId(os, name);
-      os << "\"/>" << name << "</h2>\n";
+      os << "\"></a>" << name << "</h2>\n";
       }
 
     // Is a list needed?
@@ -167,9 +167,9 @@ void cmDocumentationFormatterHTML
           {
           os << "    <a name=\"" << prefix << ":";
           cmDocumentationPrintHTMLId(os, op->Name.c_str());
-          os << "\"><b><code>";
+          os << "\"></a><b><code>";
           this->PrintHTMLEscapes(os, op->Name.c_str());
-          os << "</code></b></a>: ";
+          os << "</code></b>: ";
           }
         this->PrintHTMLEscapes(os, op->Brief.c_str());
         if(op->Full.size())
@@ -269,9 +269,9 @@ void cmDocumentationFormatterHTML
     return;
     }
 
-  os << "<h2><a name=\"section_Index\">Master Index "
+  os << "<h2><a name=\"section_Index\"></a>Master Index "
      << "CMake " << cmVersion::GetCMakeVersion()
-     << "</a></h2>\n";
+     << "</h2>\n";
 
   if (!sections.empty())
     {
