@@ -749,7 +749,11 @@ public:
 
   /** Put a string into the environment
       of the form var=value */
-  static bool PutEnv(const char* value);
+  static bool PutEnv(const char* env);
+
+  /** Remove a string from the environment.
+      Input is of the form "var" or "var=value" (value is ignored). */
+  static bool UnPutEnv(const char* env);
 
   /**
    * Get current working directory CWD
