@@ -765,7 +765,8 @@ int cmCTestCoverageHandler::HandleGTMCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
   cmParseGTMCoverage cov(*cont, this->CTest);
-  std::string coverageFile = this->CTest->GetBinaryDir() + "/gtm_coverage.mcov";
+  std::string coverageFile = this->CTest->GetBinaryDir() +
+    "/gtm_coverage.mcov";
   if(cmSystemTools::FileExists(coverageFile.c_str()))
     {
     cov.ReadGTMCoverage(coverageFile.c_str());
