@@ -536,6 +536,18 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   this->WriteString("</CustomBuild>\n", 2);
 }
 
+std::string
+cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
+                                             bool forceRelative)
+{
+  return forceRelative
+    ? cmSystemTools::RelativePath(
+      this->Makefile->GetCurrentOutputDirectory(), path.c_str())
+    : this->LocalGenerator->Convert(path.c_str(),
+                                    cmLocalGenerator::START_OUTPUT,
+                                    cmLocalGenerator::UNCHANGED);
+}
+
 void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)
 {
   // first convert all of the slashes
@@ -716,10 +728,7 @@ WriteGroupSources(const char* name,
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     const char* filter = sourceGroup.GetFullName();
     this->WriteString("<", 2); 
-    std::string path = s->RelativePath?
-      cmSystemTools::RelativePath(
-        this->Makefile->GetCurrentOutputDirectory(),
-        source.c_str()) : source;
+    std::string path = this->ConvertPath(source, s->RelativePath);
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
                              << path;
@@ -743,25 +752,17 @@ void cmVisualStudio10TargetGenerator::WriteSource(
   const char* tool, cmSourceFile* sf, const char* end)
 {
   std::string sourceFile = sf->GetFullPath();
-  bool relative = sf->GetCustomCommand()? true:false;
-  if(relative)
-    {
-    // custom command sources must use relative paths or they will
-    // not show up in the GUI.
-    sourceFile = cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentOutputDirectory(),
-      sourceFile.c_str());
-    }
-  else
-    {
-    // do not use a relative path here because it means that you
-    // can not use as long a path to the file.
-    }
+  // do not use a relative path here because it means that you
+  // can not use as long a path to the file.
+  // custom command sources must use relative paths or they will
+  // not show up in the GUI.
+  bool forceRelative = sf->GetCustomCommand()? true:false;
+  sourceFile = this->ConvertPath(sourceFile, forceRelative);
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream ) << tool <<
     " Include=\"" << sourceFile << "\"" << (end? end : " />\n");
-  ToolSource toolSource = {sf, relative};
+  ToolSource toolSource = {sf, forceRelative};
   this->Tools[tool].push_back(toolSource);
 }
 

@@ -50,6 +50,7 @@ private:
   };
   struct ToolSources: public std::vector<ToolSource> {};
 
+  std::string ConvertPath(std::string const& path, bool forceRelative);
   void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
