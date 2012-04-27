@@ -520,7 +520,7 @@ bool SystemTools::UnPutEnv(const char* env)
 /* Order by environment key only (VAR from VAR=VALUE).  */
 struct kwsysEnvCompare
 {
-  bool operator() (const char* l, const char* r)
+  bool operator() (const char* l, const char* r) const
     {
     const char* leq = strchr(l, '=');
     const char* req = strchr(r, '=');
