@@ -491,14 +491,9 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
-  this->WriteString("<CustomBuild Include=\"", 2);
-  // custom command have to use relative paths or they do not
-  // show up in the GUI
-  std::string path = cmSystemTools::RelativePath(
-    this->Makefile->GetCurrentOutputDirectory(),
-    sourcePath.c_str());
-  this->ConvertToWindowsSlash(path);
-  (*this->BuildFileStream ) << path << "\">\n";
+
+  this->WriteSource("CustomBuild", source, ">\n");
+
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
@@ -796,15 +791,26 @@ WriteGroupSources(const char* name,
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
-  const char* tool, cmSourceFile* sf, bool end)
+  const char* tool, cmSourceFile* sf, const char* end)
 {
   std::string sourceFile = sf->GetFullPath();
-  // do not use a relative path here because it means that you
-  // can not use as long a path to the file.
+  if(sf->GetCustomCommand())
+    {
+    // custom command sources must use relative paths or they will
+    // not show up in the GUI.
+    sourceFile = cmSystemTools::RelativePath(
+      this->Makefile->GetCurrentOutputDirectory(),
+      sourceFile.c_str());
+    }
+  else
+    {
+    // do not use a relative path here because it means that you
+    // can not use as long a path to the file.
+    }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream ) << tool <<
-    " Include=\"" << sourceFile << (end? "\" />\n" : "\" ");
+    " Include=\"" << sourceFile << "\"" << (end? end : " />\n");
 }
 
 void cmVisualStudio10TargetGenerator::WriteSources(
@@ -836,7 +842,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     bool cl = strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0;
     bool rc = strcmp(lang, "RC") == 0;
     const char* tool = cl? "ClCompile" : (rc? "ResourceCompile" : "None");
-    this->WriteSource(tool, *si, false);
+    this->WriteSource(tool, *si, " ");
     // ouput any flags specific to this source file
     if(cl && this->OutputSourceSpecificFlags(*si))
       {

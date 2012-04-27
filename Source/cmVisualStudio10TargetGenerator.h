@@ -47,7 +47,7 @@ private:
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
-  void WriteSource(const char* tool, cmSourceFile* sf, bool end = true);
+  void WriteSource(const char* tool, cmSourceFile* sf, const char* end = 0);
   void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
