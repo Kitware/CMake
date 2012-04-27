@@ -765,12 +765,23 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     // Normal path conversion resulted in a full path.  VS 10 (but not 11)
     // refuses to show the property page in the IDE for a source file with a
     // full path (not starting in a '.' or '/' AFAICT).  CMake <= 2.8.4 used a
-    // relative path but to allow deeper build trees now CMake uses a full
-    // path except for custom commands which work only as relative paths.
-    if(sf->GetCustomCommand())
+    // relative path but to allow deeper build trees CMake 2.8.[5678] used a
+    // full path except for custom commands.  Custom commands do not work
+    // without a relative path, but they do not seem to be involved in tools
+    // with the above behavior.  For other sources we now use a relative path
+    // when the combined path will not be too long so property pages appear.
+    std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
+    size_t const maxLen = 250;
+    if(sf->GetCustomCommand() ||
+       ((strlen(this->Makefile->GetCurrentOutputDirectory()) + 1 +
+         sourceRel.length()) <= maxLen))
       {
       forceRelative = true;
-      sourceFile = this->ConvertPath(sf->GetFullPath(), forceRelative);
+      sourceFile = sourceRel;
+      }
+    else
+      {
+      this->GlobalGenerator->PathTooLong(this->Target, sf, sourceRel);
       }
     }
   this->ConvertToWindowsSlash(sourceFile);
