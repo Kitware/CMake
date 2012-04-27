@@ -13,6 +13,7 @@
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
+#include "cmSourceFile.h"
 #include "cmake.h"
 
 
@@ -48,6 +49,38 @@ cmLocalGenerator *cmGlobalVisualStudio10Generator::CreateLocalGenerator()
   lg->SetPlatformName(this->GetPlatformName());
   lg->SetGlobalGenerator(this);
   return lg;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio10Generator::Generate()
+{
+  this->LongestSource = LongestSourcePath();
+  this->cmGlobalVisualStudio8Generator::Generate();
+  if(this->LongestSource.Length > 0)
+    {
+    cmMakefile* mf = this->LongestSource.Target->GetMakefile();
+    cmOStringStream e;
+    e <<
+      "The binary and/or source directory paths may be too long to generate "
+      "Visual Studio 10 files for this project.  "
+      "Consider choosing shorter directory names to build this project with "
+      "Visual Studio 10.  "
+      "A more detailed explanation follows."
+      "\n"
+      "There is a bug in the VS 10 IDE that renders property dialog fields "
+      "blank for files referenced by full path in the project file.  "
+      "However, CMake must reference at least one file by full path:\n"
+      "  " << this->LongestSource.SourceFile->GetFullPath() << "\n"
+      "This is because some Visual Studio tools would append the relative "
+      "path to the end of the referencing directory path, as in:\n"
+      "  " << mf->GetCurrentOutputDirectory() << "/"
+      << this->LongestSource.SourceRel << "\n"
+      "and then incorrectly complain that the file does not exist because "
+      "the path length is too long for some internal buffer or API.  "
+      "To avoid this problem CMake must use a full path for this file "
+      "which then triggers the VS 10 property dialog bug.";
+    mf->IssueMessage(cmake::WARNING, e.str().c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -229,4 +262,19 @@ cmGlobalVisualStudio10Generator
   ruleFile += cmSystemTools::GetFilenameName(output);
   ruleFile += ".rule";
   return ruleFile;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio10Generator::PathTooLong(
+  cmTarget* target, cmSourceFile* sf, std::string const& sfRel)
+{
+  size_t len = (strlen(target->GetMakefile()->GetCurrentOutputDirectory()) +
+                1 + sfRel.length());
+  if(len > this->LongestSource.Length)
+    {
+    this->LongestSource.Length = len;
+    this->LongestSource.Target = target;
+    this->LongestSource.SourceFile = sf;
+    this->LongestSource.SourceRel = sfRel;
+    }
 }

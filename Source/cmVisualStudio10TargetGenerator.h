@@ -43,11 +43,19 @@ public:
     );
   
 private:
+  struct ToolSource
+  {
+    cmSourceFile* SourceFile;
+    bool RelativePath;
+  };
+  struct ToolSources: public std::vector<ToolSource> {};
+
+  std::string ConvertPath(std::string const& path, bool forceRelative);
   void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
-  void WriteSource(const char* tool, cmSourceFile* sf, bool end = true);
+  void WriteSource(const char* tool, cmSourceFile* sf, const char* end = 0);
   void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
@@ -77,8 +85,7 @@ private:
   void WriteEvents(std::string const& configName);
   void WriteEvent(const char* name, std::vector<cmCustomCommand> & commands,
                   std::string const& configName);
-  void WriteGroupSources(const char* name,
-                         std::vector<cmSourceFile*> const& sources,
+  void WriteGroupSources(const char* name, ToolSources const& sources,
                          std::vector<cmSourceGroup>& );
   void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
@@ -99,6 +106,9 @@ private:
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile*> SourcesVisited;
+
+  typedef std::map<cmStdString, ToolSources> ToolSourceMap;
+  ToolSourceMap Tools;
 };
 
 #endif
