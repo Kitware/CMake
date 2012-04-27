@@ -43,6 +43,13 @@ public:
     );
   
 private:
+  struct ToolSource
+  {
+    cmSourceFile* SourceFile;
+    bool RelativePath;
+  };
+  struct ToolSources: public std::vector<ToolSource> {};
+
   void ConvertToWindowsSlash(std::string& s);
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
@@ -77,8 +84,7 @@ private:
   void WriteEvents(std::string const& configName);
   void WriteEvent(const char* name, std::vector<cmCustomCommand> & commands,
                   std::string const& configName);
-  void WriteGroupSources(const char* name,
-                         std::vector<cmSourceFile*> const& sources,
+  void WriteGroupSources(const char* name, ToolSources const& sources,
                          std::vector<cmSourceGroup>& );
   void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
@@ -99,6 +105,9 @@ private:
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile*> SourcesVisited;
+
+  typedef std::map<cmStdString, ToolSources> ToolSourceMap;
+  ToolSourceMap Tools;
 };
 
 #endif
