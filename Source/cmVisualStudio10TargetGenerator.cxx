@@ -751,13 +751,28 @@ WriteGroupSources(const char* name,
 void cmVisualStudio10TargetGenerator::WriteSource(
   const char* tool, cmSourceFile* sf, const char* end)
 {
-  std::string sourceFile = sf->GetFullPath();
-  // do not use a relative path here because it means that you
-  // can not use as long a path to the file.
-  // custom command sources must use relative paths or they will
-  // not show up in the GUI.
-  bool forceRelative = sf->GetCustomCommand()? true:false;
-  sourceFile = this->ConvertPath(sourceFile, forceRelative);
+  // Visual Studio tools append relative paths to the current dir, as in:
+  //
+  //  c:\path\to\current\dir\..\..\..\relative\path\to\source.c
+  //
+  // and fail if this exceeds the maximum allowed path length.  Our path
+  // conversion uses full paths outside the build tree to allow deeper trees.
+  bool forceRelative = false;
+  std::string sourceFile = this->ConvertPath(sf->GetFullPath(), false);
+  if(this->LocalGenerator->GetVersion() == cmLocalVisualStudioGenerator::VS10
+     && cmSystemTools::FileIsFullPath(sourceFile.c_str()))
+    {
+    // Normal path conversion resulted in a full path.  VS 10 (but not 11)
+    // refuses to show the property page in the IDE for a source file with a
+    // full path (not starting in a '.' or '/' AFAICT).  CMake <= 2.8.4 used a
+    // relative path but to allow deeper build trees now CMake uses a full
+    // path except for custom commands which work only as relative paths.
+    if(sf->GetCustomCommand())
+      {
+      forceRelative = true;
+      sourceFile = this->ConvertPath(sf->GetFullPath(), forceRelative);
+      }
+    }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream ) << tool <<
