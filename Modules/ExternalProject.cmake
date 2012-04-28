@@ -252,10 +252,21 @@ define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
   )
 
 
-function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag src_name work_dir)
+function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag src_name work_dir gitclone_infofile gitclone_stampfile)
   file(WRITE ${script_filename}
 "if(\"${git_tag}\" STREQUAL \"\")
   message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
+endif()
+
+set(run 0)
+
+if(\"${gitclone_infofile}\" IS_NEWER_THAN \"${gitclone_stampfile}\")
+  set(run 1)
+endif()
+
+if(NOT run)
+  message(STATUS \"Avoiding repeated git clone, stamp file is up to date: '${gitclone_stampfile}'\")
+  return()
 endif()
 
 execute_process(
@@ -300,6 +311,19 @@ execute_process(
   )
 if(error_code)
   message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
+endif()
+
+# Complete success, update the script-last-run stamp file:
+#
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E copy
+    \"${gitclone_infofile}\"
+    \"${gitclone_stampfile}\"
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${gitclone_stampfile}'\")
 endif()
 
 "
@@ -1115,6 +1139,7 @@ function(_ep_add_download_command name)
     #
     _ep_write_gitclone_script(${tmp_dir}/${name}-gitclone.cmake ${source_dir}
       ${GIT_EXECUTABLE} ${git_repository} ${git_tag} ${src_name} ${work_dir}
+      ${stamp_dir}/${name}-gitinfo.txt ${stamp_dir}/${name}-gitclone-lastrun.txt
       )
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
