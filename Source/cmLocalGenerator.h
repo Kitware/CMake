@@ -228,6 +228,7 @@ public:
     const char* ObjectDir;
     const char* Flags;
     const char* ObjectsQuoted;
+    const char* SONameFlag;
     const char* TargetSOName;
     const char* TargetInstallNameDir;
     const char* LinkFlags;
