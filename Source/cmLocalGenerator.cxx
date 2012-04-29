@@ -964,17 +964,9 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         {
         return replaceValues.TargetSOName;
         }
-      if(variable == "SONAME_FLAG")
+      if(variable == "SONAME_FLAG" && replaceValues.SONameFlag)
         {
-        if(replaceValues.SONameFlag)
-          {
-          return replaceValues.SONameFlag;
-          }
-        // else default to the CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG value
-        if(replaceValues.Language)
-          {
-          return this->GetMakefile()->GetSONameFlag(replaceValues.Language);
-          }
+        return replaceValues.SONameFlag;
         }
       if(replaceValues.TargetInstallNameDir && variable == "TARGET_INSTALLNAME_DIR")
         {
