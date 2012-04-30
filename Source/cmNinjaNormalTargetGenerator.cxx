@@ -152,10 +152,8 @@ cmNinjaNormalTargetGenerator
                                                 cmLocalGenerator::SHELL);
     vars.ObjectDir = objdir.c_str();
     vars.Target = "$out";
-    if (this->GetTarget()->HasSOName(this->GetConfigName()))
-      {
-      vars.TargetSOName = "$SONAME";
-      }
+    vars.SONameFlag = "$SONAME_FLAG";
+    vars.TargetSOName = "$SONAME";
     vars.TargetInstallNameDir = "$INSTALLNAME_DIR";
     vars.TargetPDB = "$TARGET_PDB";
 
@@ -369,17 +367,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                              this->GetTarget(),
                              this->TargetLinkLanguage,
                              this->GetConfigName());
-  vars["SONAME"] = this->TargetNameSO;
+  if (this->GetTarget()->HasSOName(this->GetConfigName())) {
+    vars["SONAME_FLAG"] =
+      this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
+    vars["SONAME"] = this->TargetNameSO;
+    if (targetType == cmTarget::SHARED_LIBRARY) {
+      std::string install_name_dir = this->GetTarget()
+        ->GetInstallNameDirForBuildTree(this->GetConfigName());
 
-  if (targetType == cmTarget::SHARED_LIBRARY) {
-    std::string install_name_dir =
-      this->GetTarget()->GetInstallNameDirForBuildTree(this->GetConfigName());
-
-    if (!install_name_dir.empty()) {
-      vars["INSTALLNAME_DIR"] =
-        this->GetLocalGenerator()->Convert(install_name_dir.c_str(),
-            cmLocalGenerator::NONE,
-            cmLocalGenerator::SHELL, false);
+      if (!install_name_dir.empty()) {
+        vars["INSTALLNAME_DIR"] =
+          this->GetLocalGenerator()->Convert(install_name_dir.c_str(),
+              cmLocalGenerator::NONE,
+              cmLocalGenerator::SHELL, false);
+      }
     }
   }
 

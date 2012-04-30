@@ -3011,21 +3011,12 @@ std::string cmTarget::GetPDBName(const char* config)
 //----------------------------------------------------------------------------
 bool cmTarget::HasSOName(const char* config)
 {
-  // Construct the name of the soname flag variable for this language.
-  const char* ll = this->GetLinkerLanguage(config);
-  std::string sonameFlag = "CMAKE_SHARED_LIBRARY_SONAME";
-  if(ll)
-    {
-    sonameFlag += "_";
-    sonameFlag += ll;
-    }
-  sonameFlag += "_FLAG";
   // soname is supported only for shared libraries and modules,
   // and then only when the platform supports an soname flag.
   return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
            this->GetType() == cmTarget::MODULE_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetDefinition(sonameFlag.c_str()));
+          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
 }
 
 //----------------------------------------------------------------------------

@@ -783,6 +783,7 @@ static const char* ruleReplaceVars[] =
   "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
   "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
   "CMAKE_${LANG}_LINK_FLAGS",
+  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
   "CMAKE_${LANG}_ARCHIVE",
   "CMAKE_AR",
   "CMAKE_CURRENT_SOURCE_DIR",
@@ -953,27 +954,27 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         }
       }
     }
-  if(variable == "TARGET_SONAME" || variable == "SONAME_FLAG")
+  if(variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
+     variable == "TARGET_INSTALLNAME_DIR")
     {
-    if(replaceValues.TargetSOName && replaceValues.Language)
+    // All these variables depend on TargetSOName
+    if(replaceValues.TargetSOName)
       {
-      std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
-      name += replaceValues.Language;
-      name += "_FLAG";
-      if(const char *flag = this->Makefile->GetDefinition(name.c_str()))
+      if(variable == "TARGET_SONAME")
         {
-        return ((variable == "TARGET_SONAME") ?
-                replaceValues.TargetSOName : flag);
+        return replaceValues.TargetSOName;
+        }
+      if(variable == "SONAME_FLAG" && replaceValues.SONameFlag)
+        {
+        return replaceValues.SONameFlag;
+        }
+      if(replaceValues.TargetInstallNameDir &&
+         variable == "TARGET_INSTALLNAME_DIR")
+        {
+        return replaceValues.TargetInstallNameDir;
         }
       }
     return "";
-    }
-  if(replaceValues.TargetInstallNameDir)
-    {
-    if(variable == "TARGET_INSTALLNAME_DIR")
-      {
-      return replaceValues.TargetInstallNameDir;
-      }
     }
   if(replaceValues.LinkLibraries)
     {
