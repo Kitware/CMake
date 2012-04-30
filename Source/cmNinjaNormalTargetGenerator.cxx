@@ -372,8 +372,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
     vars["SONAME"] = this->TargetNameSO;
     if (targetType == cmTarget::SHARED_LIBRARY) {
-      std::string install_name_dir =
-        this->GetTarget()->GetInstallNameDirForBuildTree(this->GetConfigName());
+      std::string install_name_dir = this->GetTarget()
+        ->GetInstallNameDirForBuildTree(this->GetConfigName());
 
       if (!install_name_dir.empty()) {
         vars["INSTALLNAME_DIR"] =

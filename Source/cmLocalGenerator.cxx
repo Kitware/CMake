@@ -968,7 +968,8 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         {
         return replaceValues.SONameFlag;
         }
-      if(replaceValues.TargetInstallNameDir && variable == "TARGET_INSTALLNAME_DIR")
+      if(replaceValues.TargetInstallNameDir &&
+         variable == "TARGET_INSTALLNAME_DIR")
         {
         return replaceValues.TargetInstallNameDir;
         }
