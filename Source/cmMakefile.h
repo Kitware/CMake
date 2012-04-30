@@ -595,6 +595,9 @@ public:
   /** Return whether the target platform is 64-bit.  */
   bool PlatformIs64Bit() const;
 
+  /** Retrieve soname flag for the specified language if supported */
+  const char* GetSONameFlag(const char* language) const;
+
   /**
    * Get a list of preprocessor define flags.
    */
