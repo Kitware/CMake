@@ -152,7 +152,10 @@ cmNinjaNormalTargetGenerator
                                                 cmLocalGenerator::SHELL);
     vars.ObjectDir = objdir.c_str();
     vars.Target = "$out";
-    vars.TargetSOName = "$SONAME";
+    if (this->GetTarget()->HasSOName(this->GetConfigName()))
+      {
+      vars.TargetSOName = "$SONAME";
+      }
     vars.TargetInstallNameDir = "$INSTALLNAME_DIR";
     vars.TargetPDB = "$TARGET_PDB";
 
