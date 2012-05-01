@@ -1,6 +1,6 @@
 #=============================================================================
 # CMake - Cross Platform Makefile Generator
-# Copyright 2000-2011 Kitware, Inc., Insight Software Consortium
+# Copyright 2000-2012 Kitware, Inc., Insight Software Consortium
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2 FATAL_ERROR)
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
 PROJECT(CMake)
 
@@ -324,10 +324,9 @@ MACRO (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build or use system libarchive for CMake and CTest.
   IF(CMAKE_USE_SYSTEM_LIBARCHIVE)
-    IF(EXISTS ${CMAKE_ROOT}/Modules/FindLibArchive.cmake)
+    IF(EXISTS ${CMAKE_ROOT}/Modules/FindLibArchive.cmake) # added in 2.8.3
       FIND_PACKAGE(LibArchive)
     ELSE()
-      CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0 FATAL_ERROR)
       INCLUDE(${CMake_SOURCE_DIR}/Modules/FindLibArchive.cmake)
     ENDIF()
     IF(NOT LibArchive_FOUND)
