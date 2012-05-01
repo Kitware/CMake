@@ -404,6 +404,7 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
         if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
           {
           this->CleanupFiles(fullPath.c_str());
+          cmSystemTools::RemoveADirectory(fullPath.c_str());
           }
         else
           {
