@@ -954,29 +954,27 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
         }
       }
     }
-  if(replaceValues.TargetSOName)
+  if(variable == "TARGET_SONAME" || variable == "SONAME_FLAG" ||
+     variable == "TARGET_INSTALLNAME_DIR")
     {
-    if(variable == "TARGET_SONAME")
+    // All these variables depend on TargetSOName
+    if(replaceValues.TargetSOName)
       {
-      if(replaceValues.Language)
+      if(variable == "TARGET_SONAME")
         {
-        std::string name = "CMAKE_SHARED_LIBRARY_SONAME_";
-        name += replaceValues.Language;
-        name += "_FLAG";
-        if(this->Makefile->GetDefinition(name.c_str()))
-          {
-          return replaceValues.TargetSOName;
-          }
+        return replaceValues.TargetSOName;
         }
-      return "";
+      if(variable == "SONAME_FLAG" && replaceValues.SONameFlag)
+        {
+        return replaceValues.SONameFlag;
+        }
+      if(replaceValues.TargetInstallNameDir &&
+         variable == "TARGET_INSTALLNAME_DIR")
+        {
+        return replaceValues.TargetInstallNameDir;
+        }
       }
-    }
-  if(replaceValues.TargetInstallNameDir)
-    {
-    if(variable == "TARGET_INSTALLNAME_DIR")
-      {
-      return replaceValues.TargetInstallNameDir;
-      }
+    return "";
     }
   if(replaceValues.LinkLibraries)
     {
