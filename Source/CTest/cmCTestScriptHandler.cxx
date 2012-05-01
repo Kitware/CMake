@@ -643,11 +643,7 @@ int cmCTestScriptHandler::RunCurrentScript()
     {
     std::vector<std::string> envArgs;
     cmSystemTools::ExpandListArgument(this->CTestEnv.c_str(),envArgs);
-    // for each variable/argument do a putenv
-    for (unsigned i = 0; i < envArgs.size(); ++i)
-      {
-      cmSystemTools::PutEnv(envArgs[i].c_str());
-      }
+    cmSystemTools::AppendEnv(envArgs);
     }
 
   // now that we have done most of the error checking finally run the

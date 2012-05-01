@@ -25,6 +25,8 @@
 #include KWSYS_HEADER(ios/fstream)
 #include KWSYS_HEADER(ios/sstream)
 
+#include KWSYS_HEADER(stl/set)
+
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -76,6 +78,14 @@
 #elif defined (__CYGWIN__)
 # include <windows.h>
 # undef _WIN32
+#endif
+
+#if !KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
+# if defined(_WIN32)
+extern __declspec(dllimport) char **environ;
+# else
+extern char **environ;
+# endif
 #endif
 
 #ifdef __CYGWIN__
@@ -371,37 +381,223 @@ bool SystemTools::GetEnv(const char* key, kwsys_stl::string& result)
     }
 }
 
-#ifdef __INTEL_COMPILER
-#pragma warning disable 444
+//----------------------------------------------------------------------------
+
+#if defined(__CYGWIN__) || defined(__GLIBC__)
+# define KWSYS_PUTENV_NAME  /* putenv("A")  removes A.  */
+#elif defined(_WIN32)
+# define KWSYS_PUTENV_EMPTY /* putenv("A=") removes A. */
 #endif
 
-class kwsysDeletingCharVector : public kwsys_stl::vector<char*>
+#if KWSYS_CXX_HAS_UNSETENV
+/* unsetenv("A") removes A from the environment.
+   On older platforms it returns void instead of int.  */
+static int kwsysUnPutEnv(const char* env)
 {
-public:
-  ~kwsysDeletingCharVector();
+  if(const char* eq = strchr(env, '='))
+    {
+    std::string name(env, eq-env);
+    unsetenv(name.c_str());
+    }
+  else
+    {
+    unsetenv(env);
+    }
+  return 0;
+}
+
+#elif defined(KWSYS_PUTENV_EMPTY) || defined(KWSYS_PUTENV_NAME)
+/* putenv("A=") or putenv("A") removes A from the environment.  */
+static int kwsysUnPutEnv(const char* env)
+{
+  int err = 0;
+  const char* eq = strchr(env, '=');
+  size_t const len = eq? (size_t)(eq-env) : strlen(env);
+# ifdef KWSYS_PUTENV_EMPTY
+  size_t const sz = len + 2;
+# else
+  size_t const sz = len + 1;
+# endif
+  char local_buf[256];
+  char* buf = sz > sizeof(local_buf) ? (char*)malloc(sz) : local_buf;
+  if(!buf)
+    {
+    return -1;
+    }
+  strncpy(buf, env, len);
+# ifdef KWSYS_PUTENV_EMPTY
+  buf[len] = '=';
+  buf[len+1] = 0;
+  if(putenv(buf) < 0)
+    {
+    err = errno;
+    }
+# else
+  buf[len] = 0;
+  if(putenv(buf) < 0 && errno != EINVAL)
+    {
+    err = errno;
+    }
+# endif
+  if(buf != local_buf)
+    {
+    free(buf);
+    }
+  if(err)
+    {
+    errno = err;
+    return -1;
+    }
+  return 0;
+}
+
+#else
+/* Manipulate the "environ" global directly.  */
+static int kwsysUnPutEnv(const char* env)
+{
+  const char* eq = strchr(env, '=');
+  size_t const len = eq? (size_t)(eq-env) : strlen(env);
+  int in = 0;
+  int out = 0;
+  while(environ[in])
+    {
+    if(strlen(environ[in]) > len &&
+       environ[in][len] == '=' &&
+       strncmp(env, environ[in], len) == 0)
+      {
+      ++in;
+      }
+    else
+      {
+      environ[out++] = environ[in++];
+      }
+    }
+  while(out < in)
+    {
+    environ[out++] = 0;
+    }
+  return 0;
+}
+#endif
+
+//----------------------------------------------------------------------------
+
+#if KWSYS_CXX_HAS_SETENV
+
+/* setenv("A", "B", 1) will set A=B in the environment and makes its
+   own copies of the strings.  */
+bool SystemTools::PutEnv(const char* env)
+{
+  if(const char* eq = strchr(env, '='))
+    {
+    std::string name(env, eq-env);
+    return setenv(name.c_str(), eq+1, 1) == 0;
+    }
+  else
+    {
+    return kwsysUnPutEnv(env) == 0;
+    }
+}
+
+bool SystemTools::UnPutEnv(const char* env)
+{
+  return kwsysUnPutEnv(env) == 0;
+}
+
+#else
+
+/* putenv("A=B") will set A=B in the environment.  Most putenv implementations
+   put their argument directly in the environment.  They never free the memory
+   on program exit.  Keep an active set of pointers to memory we allocate and
+   pass to putenv, one per environment key.  At program exit remove any
+   environment values that may still reference memory we allocated.  Then free
+   the memory.  This will not affect any environment values we never set.  */
+
+# ifdef __INTEL_COMPILER
+#  pragma warning disable 444 /* base has non-virtual destructor */
+# endif
+
+/* Order by environment key only (VAR from VAR=VALUE).  */
+struct kwsysEnvCompare
+{
+  bool operator() (const char* l, const char* r) const
+    {
+    const char* leq = strchr(l, '=');
+    const char* req = strchr(r, '=');
+    size_t llen = leq? (leq-l) : strlen(l);
+    size_t rlen = req? (req-r) : strlen(r);
+    if(llen == rlen)
+      {
+      return strncmp(l,r,llen) < 0;
+      }
+    else
+      {
+      return strcmp(l,r) < 0;
+      }
+    }
 };
 
-kwsysDeletingCharVector::~kwsysDeletingCharVector()
+class kwsysEnv: public kwsys_stl::set<const char*, kwsysEnvCompare>
 {
-#ifndef KWSYS_DO_NOT_CLEAN_PUTENV
-  for(kwsys_stl::vector<char*>::iterator i = this->begin();
-      i != this->end(); ++i)
+  class Free
+  {
+    const char* Env;
+  public:
+    Free(const char* env): Env(env) {}
+    ~Free() { free(const_cast<char*>(this->Env)); }
+  };
+public:
+  typedef kwsys_stl::set<const char*, kwsysEnvCompare> derived;
+  ~kwsysEnv()
     {
-    delete []*i;
+    for(derived::iterator i = this->begin(); i != this->end(); ++i)
+      {
+      kwsysUnPutEnv(*i);
+      free(const_cast<char*>(*i));
+      }
     }
-#endif
-}
-bool SystemTools::PutEnv(const char* value)
+  const char* Release(const char* env)
+    {
+    const char* old = 0;
+    derived::iterator i = this->find(env);
+    if(i != this->end())
+      {
+      old = *i;
+      this->erase(i);
+      }
+    return old;
+    }
+  bool Put(const char* env)
+    {
+    Free oldEnv(this->Release(env));
+    static_cast<void>(oldEnv);
+    char* newEnv = strdup(env);
+    this->insert(newEnv);
+    return putenv(newEnv) == 0;
+    }
+  bool UnPut(const char* env)
+    {
+    Free oldEnv(this->Release(env));
+    static_cast<void>(oldEnv);
+    return kwsysUnPutEnv(env) == 0;
+    }
+};
+
+static kwsysEnv kwsysEnvInstance;
+
+bool SystemTools::PutEnv(const char* env)
 {
-  static kwsysDeletingCharVector localEnvironment;
-  char* envVar = new char[strlen(value)+1];
-  strcpy(envVar, value);
-  int ret = putenv(envVar);
-  // save the pointer in the static vector so that it can
-  // be deleted on exit
-  localEnvironment.push_back(envVar);
-  return ret == 0;
+  return kwsysEnvInstance.Put(env);
 }
+
+bool SystemTools::UnPutEnv(const char* env)
+{
+  return kwsysEnvInstance.UnPut(env);
+}
+
+#endif
+
+//----------------------------------------------------------------------------
 
 const char* SystemTools::GetExecutableExtension()
 {

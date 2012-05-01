@@ -328,6 +328,58 @@ bool CheckStringOperations()
 }
 
 //----------------------------------------------------------------------------
+
+bool CheckPutEnv(const char* env, const char* name, const char* value)
+{
+  if(!kwsys::SystemTools::PutEnv(env))
+    {
+    kwsys_ios::cerr << "PutEnv(\"" << env
+                    << "\") failed!" << kwsys_ios::endl;
+    return false;
+    }
+  const char* v = kwsys::SystemTools::GetEnv(name);
+  v = v? v : "(null)";
+  if(strcmp(v, value) != 0)
+    {
+    kwsys_ios::cerr << "GetEnv(\"" << name << "\") returned \""
+                    << v << "\", not \"" << value << "\"!" << kwsys_ios::endl;
+    return false;
+    }
+  return true;
+}
+
+bool CheckUnPutEnv(const char* env, const char* name)
+{
+  if(!kwsys::SystemTools::UnPutEnv(env))
+    {
+    kwsys_ios::cerr << "UnPutEnv(\"" << env << "\") failed!"
+                    << kwsys_ios::endl;
+    return false;
+    }
+  if(const char* v = kwsys::SystemTools::GetEnv(name))
+    {
+    kwsys_ios::cerr << "GetEnv(\"" << name << "\") returned \""
+                    << v << "\", not (null)!" << kwsys_ios::endl;
+    return false;
+    }
+  return true;
+}
+
+bool CheckEnvironmentOperations()
+{
+  bool res = true;
+  res &= CheckPutEnv("A=B", "A", "B");
+  res &= CheckPutEnv("B=C", "B", "C");
+  res &= CheckPutEnv("C=D", "C", "D");
+  res &= CheckPutEnv("D=E", "D", "E");
+  res &= CheckUnPutEnv("A", "A");
+  res &= CheckUnPutEnv("B=", "B");
+  res &= CheckUnPutEnv("C=D", "C");
+  /* Leave "D=E" in environment so a memory checker can test for leaks.  */
+  return res;
+}
+
+//----------------------------------------------------------------------------
 int testSystemTools(int, char*[])
 {
   bool res = true;
@@ -355,6 +407,8 @@ int testSystemTools(int, char*[])
   res &= CheckFileOperations();
 
   res &= CheckStringOperations();
+
+  res &= CheckEnvironmentOperations();
 
   return res ? 0 : 1;
 }
