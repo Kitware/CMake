@@ -1,0 +1,2 @@
+*.cmcov     -whitespace
+*.mcov     -whitespace

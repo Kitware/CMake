@@ -769,7 +769,13 @@ int cmCTestCoverageHandler::HandleGTMCoverage(
     "/gtm_coverage.mcov";
   if(cmSystemTools::FileExists(coverageFile.c_str()))
     {
-    cov.ReadGTMCoverage(coverageFile.c_str());
+    cov.ReadCoverageFile(coverageFile.c_str());
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               " Cannot find GTM coverage file: " << coverageFile
+               << std::endl);
     }
   return static_cast<int>(cont->TotalCoverage.size());
 }
