@@ -491,14 +491,9 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations(); 
-  this->WriteString("<CustomBuild Include=\"", 2);
-  // custom command have to use relative paths or they do not
-  // show up in the GUI
-  std::string path = cmSystemTools::RelativePath(
-    this->Makefile->GetCurrentOutputDirectory(),
-    sourcePath.c_str());
-  this->ConvertToWindowsSlash(path);
-  (*this->BuildFileStream ) << path << "\">\n";
+
+  this->WriteSource("CustomBuild", source, ">\n");
+
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
@@ -541,6 +536,18 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   this->WriteString("</CustomBuild>\n", 2);
 }
 
+std::string
+cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
+                                             bool forceRelative)
+{
+  return forceRelative
+    ? cmSystemTools::RelativePath(
+      this->Makefile->GetCurrentOutputDirectory(), path.c_str())
+    : this->LocalGenerator->Convert(path.c_str(),
+                                    cmLocalGenerator::START_OUTPUT,
+                                    cmLocalGenerator::UNCHANGED);
+}
+
 void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)
 {
   // first convert all of the slashes
@@ -559,13 +566,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceFile*>  classes = this->Target->GetSourceFiles();
   
   std::set<cmSourceGroup*> groupsUsed;
-  std::vector<cmSourceFile*> clCompile;
-  std::vector<cmSourceFile*> customBuild;
-  std::vector<cmSourceFile*> none;
-  std::vector<cmSourceFile*> headers;
-  std::vector<cmSourceFile*> idls;
-  std::vector<cmSourceFile*> resource;
-  
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin(); 
       s != classes.end(); s++)
     {
@@ -574,40 +574,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     cmSourceGroup& sourceGroup = 
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     groupsUsed.insert(&sourceGroup);
-    const char* lang = sf->GetLanguage(); 
-    bool header = (*s)->GetPropertyAsBool("HEADER_FILE_ONLY")
-      || this->GlobalGenerator->IgnoreFile
-      ((*s)->GetExtension().c_str());
-    std::string ext =
-      cmSystemTools::LowerCase((*s)->GetExtension());
-    if(!lang)
-      {
-      lang = "None";
-      }
-    if(header)
-      {
-      headers.push_back(sf);
-      }
-    else if(lang[0] == 'C')
-      {
-      clCompile.push_back(sf);
-      }
-    else if(strcmp(lang, "RC") == 0)
-      {
-      resource.push_back(sf);
-      }
-    else if(sf->GetCustomCommand())
-      {
-      customBuild.push_back(sf);
-      }
-    else if(ext == "idl")
-      {
-      idls.push_back(sf);
-      }
-    else
-      {
-      none.push_back(sf);
-      }
     }
 
   this->AddMissingSourceGroups(groupsUsed, sourceGroups);
@@ -629,11 +595,11 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                     "xmlns=\"http://schemas.microsoft.com/"
                     "developer/msbuild/2003\">\n",
                     0);
-  this->WriteGroupSources("ClCompile", clCompile, sourceGroups);
-  this->WriteGroupSources("ClInclude", headers, sourceGroups);
-  this->WriteGroupSources("ResourceCompile", resource, sourceGroups);
-  this->WriteGroupSources("Midl", idls, sourceGroups);
-  this->WriteGroupSources("CustomBuild", customBuild, sourceGroups);
+  for(ToolSourceMap::const_iterator ti = this->Tools.begin();
+      ti != this->Tools.end(); ++ti)
+    {
+    this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
+    }
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;
@@ -690,7 +656,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteString("</Filter>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
-  this->WriteGroupSources("None", none, sourceGroups);
   this->WriteString("</Project>\n", 0);
   // restore stream pointer
   this->BuildFileStream = save;
@@ -750,32 +715,20 @@ cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 void
 cmVisualStudio10TargetGenerator::
 WriteGroupSources(const char* name,
-                  std::vector<cmSourceFile*> const& sources,
+                  ToolSources const& sources,
                   std::vector<cmSourceGroup>& sourceGroups)
 {
   this->WriteString("<ItemGroup>\n", 1);
-  for(std::vector<cmSourceFile*>::const_iterator s = sources.begin();
+  for(ToolSources::const_iterator s = sources.begin();
       s != sources.end(); ++s)
     {
-    cmSourceFile* sf = *s;
-    if(sf->GetExtension() == "obj")
-      {
-      continue;
-      }
+    cmSourceFile* sf = s->SourceFile;
     std::string const& source = sf->GetFullPath();
     cmSourceGroup& sourceGroup = 
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     const char* filter = sourceGroup.GetFullName();
     this->WriteString("<", 2); 
-    std::string path = source;
-    // custom command sources must use relative paths or they will
-    // not show up in the GUI.
-    if(sf->GetCustomCommand())
-      {
-      path = cmSystemTools::RelativePath(
-        this->Makefile->GetCurrentOutputDirectory(),
-        source.c_str());
-      }
+    std::string path = this->ConvertPath(source, s->RelativePath);
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
                              << path;
@@ -796,15 +749,47 @@ WriteGroupSources(const char* name,
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
-  const char* tool, cmSourceFile* sf, bool end)
+  const char* tool, cmSourceFile* sf, const char* end)
 {
-  std::string sourceFile = sf->GetFullPath();
-  // do not use a relative path here because it means that you
-  // can not use as long a path to the file.
+  // Visual Studio tools append relative paths to the current dir, as in:
+  //
+  //  c:\path\to\current\dir\..\..\..\relative\path\to\source.c
+  //
+  // and fail if this exceeds the maximum allowed path length.  Our path
+  // conversion uses full paths outside the build tree to allow deeper trees.
+  bool forceRelative = false;
+  std::string sourceFile = this->ConvertPath(sf->GetFullPath(), false);
+  if(this->LocalGenerator->GetVersion() == cmLocalVisualStudioGenerator::VS10
+     && cmSystemTools::FileIsFullPath(sourceFile.c_str()))
+    {
+    // Normal path conversion resulted in a full path.  VS 10 (but not 11)
+    // refuses to show the property page in the IDE for a source file with a
+    // full path (not starting in a '.' or '/' AFAICT).  CMake <= 2.8.4 used a
+    // relative path but to allow deeper build trees CMake 2.8.[5678] used a
+    // full path except for custom commands.  Custom commands do not work
+    // without a relative path, but they do not seem to be involved in tools
+    // with the above behavior.  For other sources we now use a relative path
+    // when the combined path will not be too long so property pages appear.
+    std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
+    size_t const maxLen = 250;
+    if(sf->GetCustomCommand() ||
+       ((strlen(this->Makefile->GetCurrentOutputDirectory()) + 1 +
+         sourceRel.length()) <= maxLen))
+      {
+      forceRelative = true;
+      sourceFile = sourceRel;
+      }
+    else
+      {
+      this->GlobalGenerator->PathTooLong(this->Target, sf, sourceRel);
+      }
+    }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream ) << tool <<
-    " Include=\"" << sourceFile << (end? "\" />\n" : "\" ");
+    " Include=\"" << sourceFile << "\"" << (end? end : " />\n");
+  ToolSource toolSource = {sf, forceRelative};
+  this->Tools[tool].push_back(toolSource);
 }
 
 void cmVisualStudio10TargetGenerator::WriteSources(
@@ -836,7 +821,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     bool cl = strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0;
     bool rc = strcmp(lang, "RC") == 0;
     const char* tool = cl? "ClCompile" : (rc? "ResourceCompile" : "None");
-    this->WriteSource(tool, *si, false);
+    this->WriteSource(tool, *si, " ");
     // ouput any flags specific to this source file
     if(cl && this->OutputSourceSpecificFlags(*si))
       {
