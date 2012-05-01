@@ -127,3 +127,31 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
     }
   return true;
 }
+
+bool cmParseMumpsCoverage::FindMumpsFile(std::string const& routine,
+                                         std::string& filepath)
+{
+  std::map<cmStdString, cmStdString>::iterator i =
+    this->RoutineToDirectory.find(routine);
+  if(i != this->RoutineToDirectory.end())
+    {
+    filepath = i->second;
+    return true;
+    }
+  else
+    {
+    // try some alternate names
+    const char* tryname[] = {"GUX", "GTM", "ONT", 0};
+    for(int k=0; tryname[k] != 0; k++)
+      {
+      std::string routine2 = routine + tryname[k];
+      i = this->RoutineToDirectory.find(routine2);
+      if(i != this->RoutineToDirectory.end())
+        {
+        filepath = i->second;
+        return true;
+        }
+      }
+    }
+  return false;
+}

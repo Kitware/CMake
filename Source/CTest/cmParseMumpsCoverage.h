@@ -40,6 +40,9 @@ protected:
   bool LoadPackages(const char* dir);
   // initialize the coverage information for a single mumps file
   void InitializeMumpsFile(std::string& file);
+  // Find mumps file for routine
+  bool FindMumpsFile(std::string const& routine,
+                     std::string& filepath);
 protected:
   std::map<cmStdString, cmStdString> RoutineToDirectory;
   cmCTestCoverageHandlerContainer& Coverage;

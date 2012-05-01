@@ -12,6 +12,7 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmParsePHPCoverage.h"
 #include "cmParseGTMCoverage.h"
+#include "cmParseCacheCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -391,7 +392,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     return error;
     }
-  file_count += this->HandleGTMCoverage(&cont);
+  file_count += this->HandleMumpsCoverage(&cont);
   error = cont.Error;
   if ( file_count < 0 )
     {
@@ -761,20 +762,38 @@ int cmCTestCoverageHandler::HandlePHPCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 //----------------------------------------------------------------------
-int cmCTestCoverageHandler::HandleGTMCoverage(
+int cmCTestCoverageHandler::HandleMumpsCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
+  // try gtm coverage
   cmParseGTMCoverage cov(*cont, this->CTest);
   std::string coverageFile = this->CTest->GetBinaryDir() +
     "/gtm_coverage.mcov";
   if(cmSystemTools::FileExists(coverageFile.c_str()))
     {
     cov.ReadCoverageFile(coverageFile.c_str());
+    return static_cast<int>(cont->TotalCoverage.size());
     }
   else
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-               " Cannot find GTM coverage file: " << coverageFile
+               " Cannot find foobar GTM coverage file: " << coverageFile
+               << std::endl);
+    }
+  cmParseCacheCoverage ccov(*cont, this->CTest);
+  coverageFile = this->CTest->GetBinaryDir() +
+    "/cache_coverage.cmcov";
+  if(cmSystemTools::FileExists(coverageFile.c_str()))
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Parsing Cache Coverage: " << coverageFile
+               << std::endl);
+    ccov.ReadCoverageFile(coverageFile.c_str());
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               " Cannot find Cache coverage file: " << coverageFile
                << std::endl);
     }
   return static_cast<int>(cont->TotalCoverage.size());
