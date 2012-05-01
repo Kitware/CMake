@@ -27,6 +27,7 @@ class cmParseMumpsCoverage
 public:
   cmParseMumpsCoverage(cmCTestCoverageHandlerContainer& cont,
     cmCTest* ctest);
+  virtual ~cmParseMumpsCoverage();
   // This is the toplevel coverage file locating the coverage files
   // and the mumps source code package tree.
   bool ReadCoverageFile(const char* file);
