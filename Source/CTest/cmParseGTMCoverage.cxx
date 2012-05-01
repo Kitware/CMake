@@ -88,36 +88,14 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
                    "Can not find mumps file : "
-                   << lastroutine << "  referenced in this line of mcov data:\n"
+                   << lastroutine <<
+                   "  referenced in this line of mcov data:\n"
                    "[" << line << "]\n");
         }
       continue;
       }
     // Find the full path to the file
-    std::map<cmStdString, cmStdString>::iterator i =
-      this->RoutineToDirectory.find(routine);
-    bool found = false;
-    if(i != this->RoutineToDirectory.end())
-      {
-      filepath = i->second;
-      found = true;
-      }
-    else
-      {
-      // try some alternate names
-      const char* tryname[] = {"GUX", "GTM", "ONT", 0};
-      for(int k=0; tryname[k] != 0; k++)
-        {
-        std::string routine2 = routine + tryname[k];
-        i = this->RoutineToDirectory.find(routine2);
-        if(i != this->RoutineToDirectory.end())
-          {
-          found = true;
-          filepath = i->second;
-          break; // break out of tryname loop if found
-          }
-        }
-      }
+    bool found = this->FindMumpsFile(routine, filepath);
     if(found)
       {
       int lineoffset;
