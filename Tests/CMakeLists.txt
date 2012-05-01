@@ -1708,6 +1708,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION
       "Reading ctest configuration file: ${CTEST_TEST_ESCAPED_BINARY_DIR}.Tests.CTestTestConfigFileInBuildDir2.CTestConfig.cmake")
 
+  # test coverage for mumps
+  # create a MumpsCoverage dir in the binary tree under Testing to
+  # avoid the .NoDartCoverage files in the cmake testing tree
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCoverage/DartConfiguration.tcl")
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/gtm_coverage.mcov.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCoverage/gtm_coverage.mcov")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCoverage")
+  add_test(NAME CTestGTMCoverage
+    WORKING_DIRECTORY  "${CMake_BINARY_DIR}/Testing/MumpsCoverage"
+    COMMAND
+    ${CMAKE_CTEST_COMMAND} -T Coverage --debug)
+  set_tests_properties(CTestGTMCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*XINDEX.m.*Total LOC:.*127.*Percentage Coverage: 85.83.*")
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.
