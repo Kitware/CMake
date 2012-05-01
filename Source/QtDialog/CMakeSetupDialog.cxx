@@ -288,7 +288,7 @@ CMakeSetupDialog::~CMakeSetupDialog()
 
   // wait for thread to stop
   this->CMakeThread->quit();
-  this->CMakeThread->wait(2000);
+  this->CMakeThread->wait();
 }
 
 bool CMakeSetupDialog::prepareConfigure()
