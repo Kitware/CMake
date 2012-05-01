@@ -7,8 +7,9 @@
 #include <cmsys/Glob.hxx>
 
 
-cmParseCacheCoverage::cmParseCacheCoverage(cmCTestCoverageHandlerContainer& cont,
-                                       cmCTest* ctest)
+cmParseCacheCoverage::cmParseCacheCoverage(
+  cmCTestCoverageHandlerContainer& cont,
+  cmCTest* ctest)
   :cmParseMumpsCoverage(cont, ctest)
 {
 }
@@ -101,7 +102,6 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     }
   std::string routine;
   std::string filepath;
-  bool foundFile = false;
   while(cmSystemTools::GetLineFromStream(in, line))
     {
     // clear out line argument vector
@@ -181,6 +181,13 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
       continue; // skip setting count to avoid crash
       }
     // now add to count for linenumber
+    // for some reason the cache coverage adds extra lines to the
+    // end of the file in some cases. Since they do not exist, we will
+    // mark them as non executable
+    while(linenumber >= coverageVector.size())
+      {
+      coverageVector.push_back(-1);
+      }
     coverageVector[linenumber] += count;
     }
   return true;
