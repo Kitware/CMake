@@ -14,6 +14,10 @@ cmParseMumpsCoverage::cmParseMumpsCoverage(
 {
 }
 
+cmParseMumpsCoverage::~cmParseMumpsCoverage()
+{
+}
+
 bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
 {
   // Read the gtm_coverage.mcov file, that has two lines of data:
