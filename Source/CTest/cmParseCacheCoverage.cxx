@@ -44,7 +44,43 @@ bool cmParseCacheCoverage::LoadCoverageData(const char* d)
         }
       }
     }
+  // now remove files wht no actual coverage...
+  this->RemoveUnCoveredFiles();
   return true;
+}
+
+void cmParseCacheCoverage::RemoveUnCoveredFiles()
+{
+  // loop over the coverage data computed and remove all files
+  // that only have -1 or 0 for the lines.
+  cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator ci =
+    this->Coverage.TotalCoverage.begin();
+  while(ci != this->Coverage.TotalCoverage.end())
+    {
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector& v =
+      ci->second;
+    bool nothing = true;
+    for(cmCTestCoverageHandlerContainer::SingleFileCoverageVector::iterator i=
+          v.begin(); i != v.end(); ++i)
+      {
+      if(*i > 0)
+        {
+        nothing = false;
+        break;
+        }
+      }
+    if(nothing)
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 "No coverage found in: " << ci->first
+                 << std::endl);
+      this->Coverage.TotalCoverage.erase(ci++);
+      }
+    else
+      {
+      ++ci;
+      }
+    }
 }
 
 bool cmParseCacheCoverage::SplitString(std::vector<std::string>& args,
