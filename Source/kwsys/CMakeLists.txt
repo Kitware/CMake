@@ -141,7 +141,6 @@ IF(KWSYS_USE_Process)
   SET(KWSYS_USE_System 1)
 ENDIF(KWSYS_USE_Process)
 IF(KWSYS_USE_SystemInformation)
-  SET(KWSYS_USE_FundamentalType 1)
   SET(KWSYS_USE_Process 1)
 ENDIF(KWSYS_USE_SystemInformation)
 
@@ -413,6 +412,39 @@ IF(UNIX)
     "Checking whether struct stat has st_mtim member" DIRECT)
 ENDIF(UNIX)
 
+# Check existence and uniqueness of long long and __int64.
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_LONG_LONG
+  "Checking whether C++ compiler has 'long long'" DIRECT)
+KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS___INT64
+  "Checking whether C++ compiler has '__int64'" DIRECT)
+IF(KWSYS_CXX_HAS___INT64)
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_SAME_LONG_AND___INT64
+    "Checking whether long and __int64 are the same type" DIRECT)
+  IF(KWSYS_CXX_HAS_LONG_LONG)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_SAME_LONG_LONG_AND___INT64
+      "Checking whether long long and __int64 are the same type" DIRECT)
+  ENDIF()
+ENDIF()
+
+# Enable the "long long" type if it is available.  It is standard in
+# C99 and C++03 but not in earlier standards.
+IF(KWSYS_CXX_HAS_LONG_LONG)
+  SET(KWSYS_USE_LONG_LONG 1)
+ELSE()
+  SET(KWSYS_USE_LONG_LONG 0)
+ENDIF()
+
+# Enable the "__int64" type if it is available and unique.  It is not
+# standard.
+SET(KWSYS_USE___INT64 0)
+IF(KWSYS_CXX_HAS___INT64)
+  IF(NOT KWSYS_CXX_SAME_LONG_AND___INT64)
+    IF(NOT KWSYS_CXX_SAME_LONG_LONG_AND___INT64)
+      SET(KWSYS_USE___INT64 1)
+    ENDIF()
+  ENDIF()
+ENDIF()
+
 IF(KWSYS_USE_FundamentalType)
   # Look for type size helper macros.
   KWSYS_PLATFORM_INFO_TEST(C KWSYS_C_TYPE_MACROS
@@ -463,34 +495,6 @@ IF(KWSYS_USE_FundamentalType)
     ENDIF()
   ENDFOREACH()
 
-  # Check uniqueness of types.
-  IF(KWSYS_SIZEOF___INT64)
-    KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_SAME_LONG_AND___INT64
-      "Checking whether long and __int64 are the same type" DIRECT)
-    IF(KWSYS_SIZEOF_LONG_LONG)
-      KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_SAME_LONG_LONG_AND___INT64
-        "Checking whether long long and __int64 are the same type" DIRECT)
-    ENDIF(KWSYS_SIZEOF_LONG_LONG)
-  ENDIF(KWSYS_SIZEOF___INT64)
-
-  # Enable the "long long" type if it is available.  It is standard in
-  # C99 and C++03 but not in earlier standards.
-  IF(KWSYS_SIZEOF_LONG_LONG)
-    SET(KWSYS_USE_LONG_LONG 1)
-  ELSE(KWSYS_SIZEOF_LONG_LONG)
-    SET(KWSYS_USE_LONG_LONG 0)
-  ENDIF(KWSYS_SIZEOF_LONG_LONG)
-
-  # Enable the "__int64" type if it is available and unique.  It is not
-  # standard.
-  SET(KWSYS_USE___INT64 0)
-  IF(KWSYS_SIZEOF___INT64)
-    IF(NOT KWSYS_CXX_SAME_LONG_AND___INT64)
-      IF(NOT KWSYS_CXX_SAME_LONG_LONG_AND___INT64)
-        SET(KWSYS_USE___INT64 1)
-      ENDIF(NOT KWSYS_CXX_SAME_LONG_LONG_AND___INT64)
-    ENDIF(NOT KWSYS_CXX_SAME_LONG_AND___INT64)
-  ENDIF(KWSYS_SIZEOF___INT64)
   IF(KWSYS_USE___INT64)
     KWSYS_PLATFORM_CXX_TEST(KWSYS_CAN_CONVERT_UI64_TO_DOUBLE
       "Checking whether unsigned __int64 can convert to double" DIRECT)
@@ -505,8 +509,6 @@ ENDIF(KWSYS_USE_FundamentalType)
 
 IF(KWSYS_USE_IOStream)
   # Determine whether iostreams support long long.
-  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_LONG_LONG
-    "Checking whether C++ compiler has 'long long'" DIRECT)
   IF(KWSYS_CXX_HAS_LONG_LONG)
     SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
       -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI}
@@ -561,6 +563,12 @@ IF(KWSYS_USE_SystemTools)
     "Checking whether CXX compiler has environ in stdlib.h" DIRECT)
   SET_SOURCE_FILES_PROPERTIES(SystemTools.cxx PROPERTIES
     COMPILE_FLAGS "-DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV} -DKWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV} -DKWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}")
+ENDIF()
+
+IF(KWSYS_USE_SystemInformation)
+  SET_PROPERTY(SOURCE SystemInformation.cxx PROPERTY
+    COMPILE_DEFINITIONS KWSYS_USE_LONG_LONG=${KWSYS_USE_LONG_LONG}
+                        KWSYS_USE___INT64=${KWSYS_USE___INT64})
 ENDIF()
 
 #-----------------------------------------------------------------------------
