@@ -29,24 +29,32 @@ bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
     return false;
     }
   std::string line;
-  cmSystemTools::GetLineFromStream(in, line);
-  std::string::size_type pos = line.find(':', 0);
-  std::string packages;
-  if(pos != std::string::npos)
+  while(cmSystemTools::GetLineFromStream(in, line))
     {
-    packages = line.substr(pos+1);
+    std::string::size_type pos = line.find(':', 0);
+    std::string packages;
+    if(pos != std::string::npos)
+      {
+      std::string type = line.substr(0, pos);
+      std::string path = line.substr(pos+1);
+      if(type == "packages")
+        {
+        this->LoadPackages(path.c_str());
+        }
+      else if(type == "coverage_dir")
+        {
+        this->LoadCoverageData(path.c_str());
+        }
+      else
+        {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "Parse Error in Mumps coverage file :\n"
+                   << file <<
+                   "\ntype: [" << type << "]\npath:[" << path << "]\n"
+                   "input line: [" << line << "]\n");
+        }
+      }
     }
-  cmSystemTools::GetLineFromStream(in, line);
-  pos = line.find(':', 0);
-  std::string coverage_dir;
-  if(pos != std::string::npos)
-    {
-    coverage_dir = line.substr(pos+1);
-    }
-  // load the mumps files from the packages directory
-  this->LoadPackages(packages.c_str());
-  // now load the *.mcov files from the coverage directory
-  this->LoadCoverageData(coverage_dir.c_str());
   return true;
 }
 
