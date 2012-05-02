@@ -1,0 +1,8 @@
+execute_process(COMMAND "@CMAKE_CTEST_COMMAND@" -T Coverage --debug
+  WORKING_DIRECTORY  "@CMake_BINARY_DIR@/Testing/@_MUMPS_TEST_DIR@"
+  RESULT_VARIABLE RES)
+if(${RES} EQUAL 0)
+  message("Test passed")
+else()
+  message(FATAL_ERROR "Error code running ctest=${RES}")
+endif()

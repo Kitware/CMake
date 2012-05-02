@@ -1719,10 +1719,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
      "${CMake_BINARY_DIR}/Testing/MumpsCoverage/gtm_coverage.mcov")
   file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
     DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCoverage")
-  add_test(NAME CTestGTMCoverage
-    WORKING_DIRECTORY  "${CMake_BINARY_DIR}/Testing/MumpsCoverage"
-    COMMAND
-    ${CMAKE_CTEST_COMMAND} -T Coverage --debug)
+  set(_MUMPS_TEST_DIR MumpsCoverage)
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/RunTest.ctest.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCoverage/RunTest.ctest"
+     @ONLY)
+  add_test(CTestGTMCoverage
+    ${CMAKE_CTEST_COMMAND}
+    -S ${CMake_BINARY_DIR}/Testing/MumpsCoverage/RunTest.ctest)
   set_tests_properties(CTestGTMCoverage PROPERTIES
       PASS_REGULAR_EXPRESSION
       "Process file.*XINDEX.m.*Total LOC:.*127.*Percentage Coverage: 85.83.*")
@@ -1735,10 +1739,14 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage/cache_coverage.cmcov")
   file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
     DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage")
-  add_test(NAME CTestCacheCoverage
-    WORKING_DIRECTORY  "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage"
-    COMMAND
-    ${CMAKE_CTEST_COMMAND} -T Coverage --debug)
+  set(_MUMPS_TEST_DIR MumpsCacheCoverage)
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/RunTest.ctest.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage/RunTest.ctest"
+     @ONLY)
+  add_test(CTestCacheCoverage
+    ${CMAKE_CTEST_COMMAND}
+    -S ${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage/RunTest.ctest)
   set_tests_properties(CTestCacheCoverage PROPERTIES
       PASS_REGULAR_EXPRESSION
       "Process file.*XINDEX.m.*Total LOC:.*125.*Percentage Coverage: 85.60.*")
