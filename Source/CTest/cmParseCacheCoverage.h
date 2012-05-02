@@ -29,6 +29,8 @@ public:
 protected:
   // implement virtual from parent
   bool LoadCoverageData(const char* dir);
+  // remove files with no coverage
+  void RemoveUnCoveredFiles();
   // Read a single mcov file
   bool ReadCMCovFile(const char* f);
   // split a string based on ,
