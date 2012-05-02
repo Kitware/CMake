@@ -26,7 +26,6 @@
 // http://msdn.microsoft.com/en-us/library/ms683219(VS.85).aspx
 
 #include "kwsysPrivate.h"
-#include KWSYS_HEADER(FundamentalType.h)
 #include KWSYS_HEADER(stl/string)
 #include KWSYS_HEADER(stl/vector)
 #include KWSYS_HEADER(ios/iosfwd)
@@ -38,7 +37,6 @@
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
-# include "FundamentalType.h.in"
 # include "SystemInformation.hxx.in"
 # include "Process.h.in"
 # include "Configure.hxx.in"
