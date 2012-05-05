@@ -31,6 +31,7 @@ MACRO (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
      FAIL_REGEX "command line option .* is valid for .* but not for C\\\\+\\\\+" # GNU
      FAIL_REGEX "unrecognized .*option"                     # GNU
      FAIL_REGEX "unknown .*option"                          # Clang
+     FAIL_REGEX "warning: argument unused during compilation:"  # Clang
      FAIL_REGEX "ignoring unknown option"                   # MSVC
      FAIL_REGEX "warning D9002"                             # MSVC, any lang
      FAIL_REGEX "option.*not supported"                     # Intel
