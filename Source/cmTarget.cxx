@@ -1318,6 +1318,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
     }
+  this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);
 
   // Record current policies for later use.
   this->PolicyStatusCMP0003 =
