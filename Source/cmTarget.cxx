@@ -756,6 +756,14 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \"lib\") on a library name.");
 
   cm->DefineProperty
+    ("POSITION_INDEPENDENT_CODE", cmProperty::TARGET,
+     "Whether to create a position-independent target",
+     "The POSITION_INDEPENDENT_CODE property determines whether position "
+     "independent executables or shared libraries will be created.  "
+     "This property is true by default for SHARED and MODULE library "
+     "targets and false otherwise.");
+
+  cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
@@ -1304,6 +1312,12 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // of the same directory property:
   this->SetProperty("INCLUDE_DIRECTORIES",
                     this->Makefile->GetProperty("INCLUDE_DIRECTORIES"));
+
+  if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
+      || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
+    {
+    this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
+    }
 
   // Record current policies for later use.
   this->PolicyStatusCMP0003 =

@@ -1963,6 +1963,84 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
+bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
+                                            const std::string &lang) const
+{
+  std::string originalFlags =
+    this->GlobalGenerator->GetSharedLibFlagsForLanguage(lang);
+  if (shared)
+    {
+    std::string flagsVar = "CMAKE_SHARED_LIBRARY_";
+    flagsVar += lang;
+    flagsVar += "_FLAGS";
+    std::string flags =
+        this->Makefile->GetRequiredDefinition(flagsVar.c_str());
+
+    if (flags != originalFlags)
+      {
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0018))
+        {
+        case cmPolicies::WARN:
+        {
+          cmOStringStream e;
+          e << "Variable " << flagsVar << " has been modified. CMake "
+            "will ignore the POSITION_INDEPENDENT_CODE target property for "
+            "shared libraries and will use the " << flagsVar << " variable "
+            "instead.  This may cause errors if the original content of "
+            << flagsVar << " was removed.\n"
+            << this->Makefile->GetPolicies()->GetPolicyWarning(
+                                                      cmPolicies::CMP0018);
+
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          // fall through to OLD behaviour
+        }
+        case cmPolicies::OLD:
+          return true;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+        default:
+          return false;
+        }
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
+                                                   std::string const& lang,
+                                                   int targetType)
+{
+  const char* picFlags = 0;
+
+  if(targetType == cmTarget::EXECUTABLE)
+    {
+    std::string flagsVar = "CMAKE_";
+    flagsVar += lang;
+    flagsVar += "_COMPILE_OPTIONS_PIE";
+    picFlags = this->Makefile->GetSafeDefinition(flagsVar.c_str());
+    }
+  if (!picFlags)
+    {
+    std::string flagsVar = "CMAKE_";
+    flagsVar += lang;
+    flagsVar += "_COMPILE_OPTIONS_PIC";
+    picFlags = this->Makefile->GetSafeDefinition(flagsVar.c_str());
+    }
+  if (picFlags)
+    {
+    std::vector<std::string> options;
+    cmSystemTools::ExpandListArgument(picFlags, options);
+    for(std::vector<std::string>::const_iterator oi = options.begin();
+        oi != options.end(); ++oi)
+      {
+      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
                                               const char* var,
                                               const char* config)

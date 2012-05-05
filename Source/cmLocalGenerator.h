@@ -425,6 +425,10 @@ protected:
 private:
   std::string ConvertToOutputForExistingCommon(const char* remote,
                                                std::string const& result);
+
+  bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;
+  void AddPositionIndependentFlags(std::string& flags, std::string const& l,
+                                   int targetType);
 };
 
 #endif
