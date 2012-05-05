@@ -20,6 +20,8 @@ set(__COMPILER_SCO 1)
 
 macro(__compiler_sco lang)
   # Feature flags.
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC -Kpic)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE -Kpie)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-Kpic -belf")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-belf -Wl,-Bexport")
 endmacro()
