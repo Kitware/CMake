@@ -19,6 +19,7 @@ endif()
 set(__HPUX_COMPILER_HP 1)
 
 macro(__hpux_compiler_hp lang)
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "+Z")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "+Z")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-Wl,-E,+nodefaultrpath -b -L/usr/lib")
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-Wl,+s,-E,+nodefaultrpath")
