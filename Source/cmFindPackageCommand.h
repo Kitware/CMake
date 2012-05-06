@@ -69,7 +69,7 @@ protected:
   virtual void GenerateDocumentation();
 private:
   void AppendSuccessInformation();
-  void AppendToProperty(const char* propertyName);
+  void AppendToFoundProperty(bool found);
   void SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
   void AddFindDefinition(const char* var, const char* val);
