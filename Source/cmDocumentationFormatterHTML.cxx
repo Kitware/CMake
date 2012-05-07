@@ -145,7 +145,7 @@ void cmDocumentationFormatterHTML
             cmDocumentationPrintHTMLId(os, op->Name.c_str());
             os << "\"><b><code>";
             this->PrintHTMLEscapes(os, op->Name.c_str());
-            os << "</code></b></a></li>";
+            os << "</code></b></a></li>\n";
             }
           }
         os << "</ul>\n" ;
