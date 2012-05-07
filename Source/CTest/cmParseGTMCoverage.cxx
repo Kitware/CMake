@@ -61,7 +61,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
   while(  cmSystemTools::GetLineFromStream(in, line))
     {
     // only look at lines that have coverage data
-    if(line.find("^COVERAGE") == line.npos)
+    if(line.find("^ZZCOVERAGE") == line.npos)
       {
       continue;
       }
