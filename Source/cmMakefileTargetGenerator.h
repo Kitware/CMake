@@ -73,6 +73,7 @@ protected:
   void WriteTargetDependRules();
 
   // write rules for Mac OS X Application Bundle content.
+  void WriteMacOSXContentRules(std::vector<cmSourceFile*> const& sources);
   void WriteMacOSXContentRules(cmSourceFile& source, const char* pkgloc);
 
   // write the rules for an object
