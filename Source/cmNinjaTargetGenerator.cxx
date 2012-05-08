@@ -396,7 +396,6 @@ cmNinjaTargetGenerator
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      }
-  // TODO: this->GeneratorTarget->OSXContent
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)

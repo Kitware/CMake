@@ -39,16 +39,9 @@ void cmGeneratorTarget::ClassifySources()
     {
     cmSourceFile* sf = *si;
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
-    cmTarget::SourceFileFlags tsFlags =
-      this->Target->GetTargetSourceFileFlags(sf);
     if(sf->GetCustomCommand())
       {
       this->CustomCommands.push_back(sf);
-      }
-    else if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
-      {
-      this->OSXContent.push_back(sf);
-      if(isObjLib) { badObjLib.push_back(sf); }
       }
     else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
