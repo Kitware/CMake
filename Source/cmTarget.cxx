@@ -832,7 +832,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "plugins. If you use it on normal shared libraries which other targets "
      "link against, on some platforms a linker will insert a full path to "
      "the library (as specified at link time) into the dynamic section of "
-     "the dependant binary. Therefore, once installed, dynamic linker may "
+     "the dependent binary. Therefore, once installed, dynamic loader may "
      "eventually fail to locate the library for the binary.");
 
   cm->DefineProperty
