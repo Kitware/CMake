@@ -38,7 +38,6 @@
 #define @KWSYS_NAMESPACE@_hash_fun_hxx
 
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
-#include <@KWSYS_NAMESPACE@/FundamentalType.h>
 #include <@KWSYS_NAMESPACE@/cstddef>        // size_t
 #include <@KWSYS_NAMESPACE@/stl/string>     // string
 
@@ -124,7 +123,7 @@ struct hash<unsigned long> {
 };
 
 // use long long or __int64
-#if @KWSYS_NAMESPACE@_USE_LONG_LONG
+#if @KWSYS_USE_LONG_LONG@
 @KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
 struct hash<long long> {
   size_t operator()(long long __x) const { return __x; }
@@ -134,7 +133,7 @@ struct hash<long long> {
 struct hash<unsigned long long> {
   size_t operator()(unsigned long long __x) const { return __x; }
 };
-#elif @KWSYS_NAMESPACE@_USE___INT64
+#elif @KWSYS_USE___INT64@
 @KWSYS_NAMESPACE@_CXX_DEFINE_SPECIALIZATION
 struct hash<__int64> {
   size_t operator()(__int64 __x) const { return __x; }
