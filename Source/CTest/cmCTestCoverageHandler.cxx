@@ -800,7 +800,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   std::string st2gcovOutputRex1 = "^File *[`'](.*)'$";
   std::string st2gcovOutputRex2
     = "Lines executed: *[0-9]+\\.[0-9]+% of [0-9]+$";
-  std::string st2gcovOutputRex3 = "^(.*):creating [`'](.*\\.gcov)'";
+  std::string st2gcovOutputRex3 = "^(.*)reating [`'](.*\\.gcov)'";
   std::string st2gcovOutputRex4 = "^(.*):unexpected EOF *$";
   std::string st2gcovOutputRex5 = "^(.*):cannot open source file*$";
   std::string st2gcovOutputRex6
