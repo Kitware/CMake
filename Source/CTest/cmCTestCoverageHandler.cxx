@@ -1853,7 +1853,7 @@ int cmCTestCoverageHandler::HandleBullseyeCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
   const char* covfile = cmSystemTools::GetEnv("COVFILE");
-  if(!covfile)
+  if(!covfile || strlen(covfile) == 0)
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
                " COVFILE environment variable not found, not running " 
