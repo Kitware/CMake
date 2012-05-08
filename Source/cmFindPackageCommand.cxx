@@ -1368,41 +1368,73 @@ bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AppendToProperty(const char* propertyName)
+void cmFindPackageCommand::AppendToFoundProperty(bool found)
 {
-  std::string propertyValue;
-  const char *prop =
-      this->Makefile->GetCMakeInstance()->GetProperty(propertyName);
-  if (prop && *prop)
+  std::vector<std::string> foundContents;
+  const char *foundProp =
+             this->Makefile->GetCMakeInstance()->GetProperty("PACKAGES_FOUND");
+  if (foundProp && *foundProp)
     {
-    propertyValue = prop;
+    std::string tmp = foundProp;
 
-    std::vector<std::string> contents;
-    cmSystemTools::ExpandListArgument(propertyValue, contents, false);
+    cmSystemTools::ExpandListArgument(tmp, foundContents, false);
+    std::vector<std::string>::iterator nameIt = std::find(
+                       foundContents.begin(), foundContents.end(), this->Name);
+    if(nameIt != foundContents.end())
+      {
+      foundContents.erase(nameIt);
+      }
+    }
 
-    bool alreadyInserted = false;
-    for(std::vector<std::string>::const_iterator it = contents.begin();
-      it != contents.end(); ++ it )
+  std::vector<std::string> notFoundContents;
+  const char *notFoundProp =
+         this->Makefile->GetCMakeInstance()->GetProperty("PACKAGES_NOT_FOUND");
+  if (notFoundProp && *notFoundProp)
+    {
+    std::string tmp = notFoundProp;
+
+    cmSystemTools::ExpandListArgument(tmp, notFoundContents, false);
+    std::vector<std::string>::iterator nameIt = std::find(
+                 notFoundContents.begin(), notFoundContents.end(), this->Name);
+    if(nameIt != notFoundContents.end())
       {
-      if (*it == this->Name)
-        {
-        alreadyInserted = true;
-        break;
-        }
+      notFoundContents.erase(nameIt);
       }
-    if (!alreadyInserted)
-      {
-      propertyValue += ";";
-      propertyValue += this->Name;
-      }
+    }
+
+  if(found)
+    {
+    foundContents.push_back(this->Name);
     }
   else
     {
-    propertyValue = this->Name;
+    notFoundContents.push_back(this->Name);
     }
-  this->Makefile->GetCMakeInstance()->SetProperty(propertyName,
-                                                  propertyValue.c_str());
- }
+
+
+  std::string tmp;
+  const char* sep ="";
+  for(size_t i=0; i<foundContents.size(); i++)
+    {
+    tmp += sep;
+    tmp += foundContents[i];
+    sep = ";";
+    }
+
+  this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_FOUND",
+                                                  tmp.c_str());
+
+  tmp = "";
+  sep = "";
+  for(size_t i=0; i<notFoundContents.size(); i++)
+    {
+    tmp += sep;
+    tmp += notFoundContents[i];
+    sep = ";";
+    }
+  this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_NOT_FOUND",
+                                                  tmp.c_str());
+}
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::AppendSuccessInformation()
@@ -1413,14 +1445,10 @@ void cmFindPackageCommand::AppendSuccessInformation()
 
   const char* upperResult = this->Makefile->GetDefinition(upperFound.c_str());
   const char* result = this->Makefile->GetDefinition(found.c_str());
-  if ((cmSystemTools::IsOn(result)) || (cmSystemTools::IsOn(upperResult)))
-    {
-    this->AppendToProperty("PACKAGES_FOUND");
-    }
-  else
-    {
-    this->AppendToProperty("PACKAGES_NOT_FOUND");
-    }
+  bool packageFound = ((cmSystemTools::IsOn(result))
+                                        || (cmSystemTools::IsOn(upperResult)));
+
+  this->AppendToFoundProperty(packageFound);
 
   // Record whether the find was quiet or not, so this can be used
   // e.g. in FeatureSummary.cmake
