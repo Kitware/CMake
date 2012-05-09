@@ -37,6 +37,9 @@
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
 
+  ;Require administrator access
+  RequestExecutionLevel admin
+
 @CPACK_NSIS_DEFINES@
 
   !include Sections.nsh
@@ -119,7 +122,7 @@ Var AR_RegFlags
  "exit_${SecName}:"
 !macroend
 
-!macro RemoveSection SecName
+!macro RemoveSection_CPack SecName
   ;  This macro is used to call section's Remove_... macro
   ;from the uninstaller.
   ;Input: section index constant name specified in Section command.
@@ -841,7 +844,7 @@ Section "Uninstall"
   DeleteRegKey SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   ; Removes all optional components
-  !insertmacro SectionList "RemoveSection"
+  !insertmacro SectionList "RemoveSection_CPack"
 
   !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
 
