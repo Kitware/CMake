@@ -487,6 +487,36 @@ cmNinjaTargetGenerator
   vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
 
+  if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
+    {
+    cmLocalGenerator::RuleVariables compileObjectVars;
+    std::string lang = language;
+    compileObjectVars.Language = lang.c_str();
+    compileObjectVars.Source = sourceFileName.c_str();
+    compileObjectVars.Object = objectFileName.c_str();
+    compileObjectVars.Flags = vars["FLAGS"].c_str();
+    compileObjectVars.Defines = vars["DEFINES"].c_str();
+
+    // Rule for compiling object file.
+    std::string compileCmdVar = "CMAKE_";
+    compileCmdVar += language;
+    compileCmdVar += "_COMPILE_OBJECT";
+    std::string compileCmd =
+      this->GetMakefile()->GetRequiredDefinition(compileCmdVar.c_str());
+    std::vector<std::string> compileCmds;
+    cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
+
+    for (std::vector<std::string>::iterator i = compileCmds.begin();
+        i != compileCmds.end(); ++i)
+      this->GetLocalGenerator()->ExpandRuleVariables(*i, compileObjectVars);
+
+    std::string cmdLine =
+      this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+
+    this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine,
+                                                     sourceFileName);
+    }
+
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment,
                                      rule,
