@@ -754,6 +754,8 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
 
   this->WriteTargetAll(os);
   this->WriteTargetRebuildManifest(os);
+  this->WriteTargetClean(os);
+  this->WriteTargetHelp(os);
 }
 
 void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
@@ -819,4 +821,44 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                   "A missing CMake input file is not an error.",
                   implicitDeps,
                   cmNinjaDeps());
+}
+
+void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
+{
+  WriteRule(*this->RulesFileStream,
+            "CLEAN",
+            "ninja -t clean",
+            "Cleaning all built files...",
+            "Rule for cleaning all built files.",
+            /*depfile=*/ "",
+            /*restat=*/ false,
+            /*generator=*/ false);
+  WriteBuild(os,
+             "Clean all the built files.",
+             "CLEAN",
+             /*outputs=*/ cmNinjaDeps(1, "clean"),
+             /*explicitDeps=*/ cmNinjaDeps(),
+             /*implicitDeps=*/ cmNinjaDeps(),
+             /*orderOnlyDeps=*/ cmNinjaDeps(),
+             /*variables=*/ cmNinjaVars());
+}
+
+void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
+{
+  WriteRule(*this->RulesFileStream,
+            "HELP",
+            "ninja -t targets",
+            "All primary targets available:",
+            "Rule for printing all primary targets available.",
+            /*depfile=*/ "",
+            /*restat=*/ false,
+            /*generator=*/ false);
+  WriteBuild(os,
+             "Print all primary targets available.",
+             "HELP",
+             /*outputs=*/ cmNinjaDeps(1, "help"),
+             /*explicitDeps=*/ cmNinjaDeps(),
+             /*implicitDeps=*/ cmNinjaDeps(),
+             /*orderOnlyDeps=*/ cmNinjaDeps(),
+             /*variables=*/ cmNinjaVars());
 }
