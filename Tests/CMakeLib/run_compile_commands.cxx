@@ -35,7 +35,7 @@ private:
   void ParseTranslationUnits()
   {
     this->TranslationUnits = TranslationUnitsType();
-    ExpectOrDie('[', "at start of compile command file");
+    ExpectOrDie('[', "at start of compile command file\n");
     do
       {
       ParseTranslationUnit();
