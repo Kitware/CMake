@@ -77,7 +77,7 @@ function(GetDefaultWindowsPrefixBase var)
   #
   if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(arch_hint "x64")
-  elif("${CMAKE_GENERATOR}" MATCHES "ARM")
+  elseif("${CMAKE_GENERATOR}" MATCHES "ARM")
     set(arch_hint "ARM")
   elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(arch_hint "x64")
