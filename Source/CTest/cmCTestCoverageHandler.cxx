@@ -771,6 +771,9 @@ int cmCTestCoverageHandler::HandleMumpsCoverage(
     "/gtm_coverage.mcov";
   if(cmSystemTools::FileExists(coverageFile.c_str()))
     {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Parsing Cache Coverage: " << coverageFile
+               << std::endl);
     cov.ReadCoverageFile(coverageFile.c_str());
     return static_cast<int>(cont->TotalCoverage.size());
     }
