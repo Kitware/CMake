@@ -723,6 +723,10 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode = "file.xib";
     }
+  else if(ext == "storyboard")
+    {
+    sourcecode = "file.storyboard";
+    }
   else if(ext == "mm")
     {
     sourcecode += ".cpp.objcpp";
