@@ -131,7 +131,7 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
     this->RoutineToDirectory[name.substr(0, name.size()-2)] = *fileIt;
     // initialze each file, this is left out until CDash is fixed
     // to handle large numbers of files
-//    this->InitializeMumpsFile(*fileIt);
+    this->InitializeMumpsFile(*fileIt);
     }
   return true;
 }

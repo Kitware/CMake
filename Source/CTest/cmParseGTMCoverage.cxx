@@ -103,12 +103,6 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
                                        function,
                                        lineoffset))
         {
-        // hack, this should be done on every file, but for now
-        // just do it on the ones that have coverage at all
-        if( this->Coverage.TotalCoverage[filepath].size() == 0)
-          {
-          this->InitializeMumpsFile(filepath);
-          }
         cmCTestCoverageHandlerContainer::SingleFileCoverageVector&
           coverageVector = this->Coverage.TotalCoverage[filepath];
         coverageVector[lineoffset + linenumber] += count;

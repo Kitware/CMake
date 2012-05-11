@@ -44,11 +44,10 @@ bool cmParseCacheCoverage::LoadCoverageData(const char* d)
         }
       }
     }
-  // now remove files wht no actual coverage...
-  this->RemoveUnCoveredFiles();
   return true;
 }
 
+// not currently used, but leave it in case we want it in the future
 void cmParseCacheCoverage::RemoveUnCoveredFiles()
 {
   // loop over the coverage data computed and remove all files
@@ -194,15 +193,6 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     if(filepath.size() == 0)
       {
       continue;
-      }
-    // routine and filepath should be set at this point.
-    // see if we have visited this file before, and if not
-    // call InitializeMumpsFile
-    if( this->Coverage.TotalCoverage[filepath].size() == 0)
-      {
-      // hack, this should be done on every file, but for now
-      // just do it on the ones that have coverage at all
-      this->InitializeMumpsFile(filepath);
       }
     // now we are ready to set the coverage from the line of data
     cmCTestCoverageHandlerContainer::SingleFileCoverageVector&
