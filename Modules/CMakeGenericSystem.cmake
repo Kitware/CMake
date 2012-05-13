@@ -168,6 +168,10 @@ ELSE(CMAKE_HOST_UNIX)
   SET(CMAKE_GENERIC_PROGRAM_FILES)
 ENDIF(CMAKE_HOST_UNIX)
 
+# Set a variable which will be used as component name in install() commands
+# where no COMPONENT has been given:
+SET(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Unspecified")
+
 MARK_AS_ADVANCED(
   CMAKE_SKIP_RPATH
   CMAKE_SKIP_INSTALL_RPATH

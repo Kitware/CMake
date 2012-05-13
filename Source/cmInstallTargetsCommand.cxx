@@ -58,7 +58,8 @@ bool cmInstallTargetsCommand
     }
 
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                       ->AddInstallComponent("Unspecified");
+                       ->AddInstallComponent(this->Makefile->GetSafeDefinition(
+                                      "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
   return true;
 }

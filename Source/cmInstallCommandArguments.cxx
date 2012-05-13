@@ -23,7 +23,8 @@ const char* cmInstallCommandArguments::PermissionsTable[] =
 
 const std::string cmInstallCommandArguments::EmptyString;
 
-cmInstallCommandArguments::cmInstallCommandArguments()
+cmInstallCommandArguments::cmInstallCommandArguments(
+                                           const std::string& defaultComponent)
 :Parser()
 ,ArgumentGroup()
 ,Destination   (&Parser, "DESTINATION"   , &ArgumentGroup)
@@ -35,7 +36,9 @@ cmInstallCommandArguments::cmInstallCommandArguments()
 ,NamelinkOnly  (&Parser, "NAMELINK_ONLY" , &ArgumentGroup)
 ,NamelinkSkip  (&Parser, "NAMELINK_SKIP" , &ArgumentGroup)
 ,GenericArguments(0)
-{}
+{
+  this->Component.SetDefaultString(defaultComponent.c_str());
+}
 
 const std::string& cmInstallCommandArguments::GetDestination() const
 {

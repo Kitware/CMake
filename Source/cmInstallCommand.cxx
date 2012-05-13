@@ -55,6 +55,13 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
   this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->EnableInstallTarget();
 
+  this->DefaultComponentName = this->Makefile->GetSafeDefinition(
+                                       "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
+  if (this->DefaultComponentName.empty())
+    {
+    this->DefaultComponentName = "Unspecified";
+    }
+
   // Switch among the command modes.
   if(args[0] == "SCRIPT")
     {
@@ -95,7 +102,7 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
 //----------------------------------------------------------------------------
 bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
 {
-  std::string component("Unspecified");
+  std::string component = this->DefaultComponentName;
   int componentCount = 0;
   bool doing_script = false;
   bool doing_code = false;
@@ -222,7 +229,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   // ARCHIVE, RUNTIME etc. (see above)
   // These generic args also contain the targets and the export stuff
   std::vector<std::string> unknownArgs;
-  cmInstallCommandArguments genericArgs;
+  cmInstallCommandArguments genericArgs(this->DefaultComponentName);
   cmCAStringVector targetList(&genericArgs.Parser, "TARGETS");
   cmCAString exports(&genericArgs.Parser,"EXPORT", &genericArgs.ArgumentGroup);
   targetList.Follows(0);
@@ -230,14 +237,14 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   genericArgs.Parse(&genericArgVector.GetVector(), &unknownArgs);
   bool success = genericArgs.Finalize();
 
-  cmInstallCommandArguments archiveArgs;
-  cmInstallCommandArguments libraryArgs;
-  cmInstallCommandArguments runtimeArgs;
-  cmInstallCommandArguments frameworkArgs;
-  cmInstallCommandArguments bundleArgs;
-  cmInstallCommandArguments privateHeaderArgs;
-  cmInstallCommandArguments publicHeaderArgs;
-  cmInstallCommandArguments resourceArgs;
+  cmInstallCommandArguments archiveArgs(this->DefaultComponentName);
+  cmInstallCommandArguments libraryArgs(this->DefaultComponentName);
+  cmInstallCommandArguments runtimeArgs(this->DefaultComponentName);
+  cmInstallCommandArguments frameworkArgs(this->DefaultComponentName);
+  cmInstallCommandArguments bundleArgs(this->DefaultComponentName);
+  cmInstallCommandArguments privateHeaderArgs(this->DefaultComponentName);
+  cmInstallCommandArguments publicHeaderArgs(this->DefaultComponentName);
+  cmInstallCommandArguments resourceArgs(this->DefaultComponentName);
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME, ARCHIVE etc.
@@ -788,7 +795,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
 {
   // This is the FILES mode.
   bool programs = (args[0] == "PROGRAMS");
-  cmInstallCommandArguments ica;
+  cmInstallCommandArguments ica(this->DefaultComponentName);
   cmCAStringVector files(&ica.Parser, programs ? "PROGRAMS" : "FILES");
   files.Follows(0);
   ica.ArgumentGroup.Follows(&files);
@@ -865,7 +872,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   std::string permissions_file;
   std::string permissions_dir;
   std::vector<std::string> configurations;
-  std::string component = "Unspecified";
+  std::string component = this->DefaultComponentName;
   std::string literal_args;
   for(unsigned int i=1; i < args.size(); ++i)
     {
@@ -1179,7 +1186,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 {
   // This is the EXPORT mode.
-  cmInstallCommandArguments ica;
+  cmInstallCommandArguments ica(this->DefaultComponentName);
   cmCAString exp(&ica.Parser, "EXPORT");
   cmCAString name_space(&ica.Parser, "NAMESPACE", &ica.ArgumentGroup);
   cmCAString filename(&ica.Parser, "FILE", &ica.ArgumentGroup);

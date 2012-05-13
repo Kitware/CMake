@@ -19,7 +19,7 @@
 class cmInstallCommandArguments
 {
   public:
-    cmInstallCommandArguments();
+    cmInstallCommandArguments(const std::string& defaultComponent);
     void SetGenericArguments(cmInstallCommandArguments* args)
                                                {this->GenericArguments = args;}
     void Parse(const std::vector<std::string>* args,
@@ -45,6 +45,7 @@ class cmInstallCommandArguments
     cmCommandArgumentsHelper Parser;
     cmCommandArgumentGroup ArgumentGroup;
   private:
+    cmInstallCommandArguments(); // disabled
     cmCAString Destination;
     cmCAString Component;
     cmCAString Rename;
