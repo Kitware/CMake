@@ -77,4 +77,20 @@ void cmCPackDocumentVariables::DefineVariables(cmake* cm)
          "which is done right before packaging the files."
          " The script is not called by e.g.: make install.", false,
          "Variables common to all CPack generators");
+
+  cm->DefineProperty
+        ("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION", cmProperty::VARIABLE,
+         "Ask CPack to warn each time a file with absolute INSTALL"
+         " DESTINATION is encountered.",
+         "", false,
+         "Variables common to all CPack generators");
+
+  cm->DefineProperty
+        ("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION", cmProperty::VARIABLE,
+         "Ask CPack to error out as soon as a file with absolute INSTALL"
+         " DESTINATION is encountered",
+         "The fatal error is emitted before the installation of "
+         "the offending file takes place. Some CPack generators, like NSIS,"
+         "enforce this internally.", false,
+         "Variables common to all CPack generators");
 }

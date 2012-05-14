@@ -80,6 +80,15 @@ void cmInstallGenerator
                  }
              }
      os << "\")\n";
+     os << indent << "IF (CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << indent << "message(WARNING \"ABSOLUTE path INSTALL "
+        << "DESTINATION : ${CPACK_ABSOLUTE_DESTINATION_FILES}\")\n";
+     os << indent << "ENDIF (CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+
+     os << indent << "IF (CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << indent << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
+        << "DESTINATION forbidden (by CPack): ${CPACK_ABSOLUTE_DESTINATION_FILES}\")\n";
+     os << indent << "ENDIF (CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
      }
   os << "FILE(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
   if(optional)
