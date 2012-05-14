@@ -45,6 +45,7 @@ protected:
     std::vector<std::string>& dirs);
 
   enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir() const;
+  virtual bool SupportsAbsoluteDestination() const;
   virtual bool SupportsComponentInstallation() const;
 
   /// Produce a string that contains the NSIS code to describe a

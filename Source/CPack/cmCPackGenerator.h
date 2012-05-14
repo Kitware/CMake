@@ -206,11 +206,20 @@ protected:
 
   /**
    * Does the CPack generator support CPACK_SET_DESTDIR?
-   * The default legacy value is 'true' generator
+   * The default legacy value is 'SETDESTDIR_SUPPORTED' generator
    * have to override it in order change this.
    * @return CPackSetDestdirSupport
    */
   virtual enum CPackSetDestdirSupport SupportsSetDestdir() const;
+
+  /**
+   * Does the CPack generator support absolute path
+   * in INSTALL DESTINATION?
+   * The default legacy value is 'true' generator
+   * have to override it in order change this.
+   * @return true if supported false otherwise
+   */
+  virtual bool SupportsAbsoluteDestination() const;
 
   /**
    * Does the CPack generator support component installation?.

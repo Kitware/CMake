@@ -639,6 +639,12 @@ cmCPackNSISGenerator::SupportsSetDestdir() const
 }
 
 //----------------------------------------------------------------------
+bool cmCPackNSISGenerator::SupportsAbsoluteDestination() const
+{
+        return false;
+}
+
+//----------------------------------------------------------------------
 bool cmCPackNSISGenerator::SupportsComponentInstallation() const
 {
         return true;

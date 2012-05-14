@@ -849,8 +849,27 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           filesBefore = glB.GetFiles();
           std::sort(filesBefore.begin(),filesBefore.end());
           }
+
+        // If CPack was asked to warn on ABSOLUTE INSTALL DESTINATION
+        // then forward request to cmake_install.cmake script
+        if (this->GetOption("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION"))
+          {
+            mf->AddDefinition("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION",
+                              "1");
+          }
+        // If current CPack generator does support
+        // ABSOLUTE INSTALL DESTINATION or CPack has been asked for
+        // then ask cmake_install.cmake script to error out
+        // as soon as it occurs (before installing file)
+        if (!SupportsAbsoluteDestination() ||
+            this->GetOption("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION"))
+          {
+            mf->AddDefinition("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION",
+                              "1");
+          }
         // do installation
         int res = mf->ReadListFile(0, installFile.c_str());
+
         // Now rebuild the list of files after installation
         // of the current component (if we are in component install)
         if (componentInstall)
@@ -1458,6 +1477,12 @@ enum cmCPackGenerator::CPackSetDestdirSupport
 cmCPackGenerator::SupportsSetDestdir() const
 {
   return cmCPackGenerator::SETDESTDIR_SUPPORTED;
+}
+
+//----------------------------------------------------------------------
+bool cmCPackGenerator::SupportsAbsoluteDestination() const
+{
+  return true;
 }
 
 //----------------------------------------------------------------------
