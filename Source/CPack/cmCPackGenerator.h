@@ -190,6 +190,29 @@ protected:
     bool setDestDir, const char* tempInstallDirectory);
 
   /**
+   * The various level of support of
+   * CPACK_SET_DESTDIR used by the generator.
+   */
+  enum CPackSetDestdirSupport {
+    /* the generator works with or without it */
+    SETDESTDIR_SUPPORTED,
+    /* the generator works best if automatically handled */
+    SETDESTDIR_INTERNALLY_SUPPORTED,
+    /* no official support, use at your own risk */
+    SETDESTDIR_SHOULD_NOT_BE_USED,
+    /* officially NOT supported */
+    SETDESTDIR_UNSUPPORTED
+  };
+
+  /**
+   * Does the CPack generator support CPACK_SET_DESTDIR?
+   * The default legacy value is 'true' generator
+   * have to override it in order change this.
+   * @return CPackSetDestdirSupport
+   */
+  virtual enum CPackSetDestdirSupport SupportsSetDestdir() const;
+
+  /**
    * Does the CPack generator support component installation?.
    * Some Generators requires the user to set
    * CPACK_<GENNAME>_COMPONENT_INSTALL in order to make this

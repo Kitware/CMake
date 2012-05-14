@@ -64,6 +64,7 @@ int cmCPackNSISGenerator::PackageFiles()
       << std::endl);
     return false;
     }
+
   std::string nsisFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   std::string tmpFile = nsisFileName;
   tmpFile += "/NSISOutput.log";
@@ -628,6 +629,13 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
     }
   dirs.push_back(topdir);
   return true;
+}
+
+//----------------------------------------------------------------------
+enum cmCPackGenerator::CPackSetDestdirSupport
+cmCPackNSISGenerator::SupportsSetDestdir() const
+{
+  return cmCPackGenerator::SETDESTDIR_SHOULD_NOT_BE_USED;
 }
 
 //----------------------------------------------------------------------

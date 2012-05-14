@@ -62,9 +62,30 @@ void cmCPackGenerator::DisplayVerboseOutput(const char* msg,
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::PrepareNames()
-{  
+{
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "Create temp directory." << std::endl);
+
+  // checks CPACK_SET_DESTDIR support
+  if (IsOn("CPACK_SET_DESTDIR"))
+    {
+      if (SETDESTDIR_UNSUPPORTED==SupportsSetDestdir())
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "CPACK_SET_DESTDIR is set to ON but the '"
+                        << Name << "' generator does NOT support it."
+                        << std::endl);
+          return 0;
+        }
+      else if (SETDESTDIR_SHOULD_NOT_BE_USED==SupportsSetDestdir())
+        {
+          cmCPackLogger(cmCPackLog::LOG_WARNING,
+                        "CPACK_SET_DESTDIR is set to ON but it is "
+                        << "usually a bad idea to do that with '"
+                        << Name << "' generator. Use at your own risk."
+                        << std::endl);
+        }
+  }
 
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
@@ -953,6 +974,8 @@ int cmCPackGenerator::DoPackage()
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
     "Create package using " << this->Name.c_str() << std::endl);
 
+  // Prepare CPack internal name and check
+  // values for many CPACK_xxx vars
   if ( !this->PrepareNames() )
     {
     return 0;
@@ -1428,6 +1451,13 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
             }
       }
   return initialPackageFileName + suffix;
+}
+
+//----------------------------------------------------------------------
+enum cmCPackGenerator::CPackSetDestdirSupport
+cmCPackGenerator::SupportsSetDestdir() const
+{
+  return cmCPackGenerator::SETDESTDIR_SUPPORTED;
 }
 
 //----------------------------------------------------------------------
