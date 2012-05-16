@@ -385,6 +385,11 @@ void cmGlobalNinjaGenerator::Generate()
   this->WriteTargetAliases(*this->BuildFileStream);
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
+  if (cmSystemTools::GetErrorOccuredFlag()) {
+    this->RulesFileStream->setstate(std::ios_base::failbit);
+    this->BuildFileStream->setstate(std::ios_base::failbit);
+  }
+
   this->CloseRulesFileStream();
   this->CloseBuildFileStream();
 }
