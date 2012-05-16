@@ -701,6 +701,11 @@ public:
 #endif
 
   /**
+   * Print a command's invocation
+   */
+  void PrintCommandTrace(const cmListFileFunction& lff);
+
+  /**
    * Execute a single CMake command.  Returns true if the command
    * succeeded or false if it failed.
    */
