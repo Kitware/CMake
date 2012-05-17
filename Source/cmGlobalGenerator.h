@@ -280,6 +280,8 @@ public:
   /** Generate an <output>.rule file path for a given command output.  */
   virtual std::string GenerateRuleFile(std::string const& output) const;
 
+  static std::string EscapeJSON(const std::string& s);
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend

@@ -103,18 +103,6 @@ cmGlobalUnixMakefileGenerator3
     }
 }
 
-//----------------------------------------------------------------------------
-std::string EscapeJSON(const std::string& s) {
-  std::string result;
-  for (std::string::size_type i = 0; i < s.size(); ++i) {
-    if (s[i] == '"' || s[i] == '\\') {
-      result += '\\';
-    }
-    result += s[i];
-  }
-  return result;
-}
-
 void cmGlobalUnixMakefileGenerator3::Generate()
 {
   // first do superclass method
@@ -179,11 +167,14 @@ void cmGlobalUnixMakefileGenerator3::AddCXXCompileCommand(
     *this->CommandDatabase << "," << std::endl;
     }
   *this->CommandDatabase << "{" << std::endl
-      << "  \"directory\": \"" << EscapeJSON(workingDirectory) << "\","
+      << "  \"directory\": \""
+      << cmGlobalGenerator::EscapeJSON(workingDirectory) << "\","
       << std::endl
-      << "  \"command\": \"" << EscapeJSON(compileCommand) << "\","
+      << "  \"command\": \"" <<
+      cmGlobalGenerator::EscapeJSON(compileCommand) << "\","
       << std::endl
-      << "  \"file\": \"" << EscapeJSON(sourceFile) << "\""
+      << "  \"file\": \"" <<
+      cmGlobalGenerator::EscapeJSON(sourceFile) << "\""
       << std::endl << "}";
 }
 
