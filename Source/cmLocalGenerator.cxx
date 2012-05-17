@@ -1963,6 +1963,33 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
+                                       std::string const& lang)
+{
+  int targetType = target->GetType();
+
+  bool shared = ((targetType == cmTarget::SHARED_LIBRARY) ||
+                  (targetType == cmTarget::MODULE_LIBRARY));
+
+  if (this->GetShouldUseOldFlags(shared, lang))
+    {
+    this->AddSharedFlags(flags, lang.c_str(), shared);
+    }
+  else
+    {
+    // Add position independendent flags, if needed.
+    if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE"))
+      {
+      this->AddPositionIndependentFlags(flags, lang, targetType);
+      }
+    if (shared)
+      {
+      this->AppendFeatureOptions(flags, lang.c_str(), "DLL");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
                                             const std::string &lang) const
 {
