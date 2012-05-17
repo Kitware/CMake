@@ -193,12 +193,13 @@ cmNinjaNormalTargetGenerator
     vars.LinkFlags = "$LINK_FLAGS";
 
     std::string langFlags;
-    this->GetLocalGenerator()->AddLanguageFlags(langFlags,
-                                                this->TargetLinkLanguage,
-                                                this->GetConfigName());
-    if (targetType != cmTarget::EXECUTABLE)
+    if (targetType != cmTarget::EXECUTABLE) {
+      this->GetLocalGenerator()->AddLanguageFlags(langFlags,
+                                                  this->TargetLinkLanguage,
+                                                  this->GetConfigName());
       langFlags += " $ARCH_FLAGS";
-    vars.LanguageCompileFlags = langFlags.c_str();
+      vars.LanguageCompileFlags = langFlags.c_str();
+    }
 
     // Rule for linking library.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd();
