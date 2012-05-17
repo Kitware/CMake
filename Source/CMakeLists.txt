@@ -337,6 +337,8 @@ IF (WIN32)
       cmGlobalVisualStudio11Generator.cxx
       cmGlobalVisualStudio11Win64Generator.h
       cmGlobalVisualStudio11Win64Generator.cxx
+      cmGlobalVisualStudio11ARMGenerator.h
+      cmGlobalVisualStudio11ARMGenerator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx
