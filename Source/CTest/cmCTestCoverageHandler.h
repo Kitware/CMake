@@ -70,6 +70,8 @@ private:
 
   //! Handle coverage using xdebug php coverage
   int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
+  //! Handle coverage for mumps
+  int HandleMumpsCoverage(cmCTestCoverageHandlerContainer* cont);
 
   //! Handle coverage using Bullseye
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);

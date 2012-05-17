@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmCTestCoverageHandler.h"
 #include "cmParsePHPCoverage.h"
+#include "cmParseGTMCoverage.h"
+#include "cmParseCacheCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -373,21 +375,29 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
   int file_count = 0;
   file_count += this->HandleGCovCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;
     }
   file_count += this->HandleTracePyCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;
     }
   file_count += this->HandlePHPCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;
     }
+  file_count += this->HandleMumpsCoverage(&cont);
   error = cont.Error;
+  if ( file_count < 0 )
+    {
+    return error;
+    }
 
   std::set<std::string> uncovered = this->FindUncoveredFiles(&cont);
 
@@ -748,6 +758,46 @@ int cmCTestCoverageHandler::HandlePHPCoverage(
   if(cmSystemTools::FileIsDirectory(coverageDir.c_str()))
     {
     cov.ReadPHPCoverageDirectory(coverageDir.c_str());
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+}
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandleMumpsCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  // try gtm coverage
+  cmParseGTMCoverage cov(*cont, this->CTest);
+  std::string coverageFile = this->CTest->GetBinaryDir() +
+    "/gtm_coverage.mcov";
+  if(cmSystemTools::FileExists(coverageFile.c_str()))
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Parsing Cache Coverage: " << coverageFile
+               << std::endl);
+    cov.ReadCoverageFile(coverageFile.c_str());
+    return static_cast<int>(cont->TotalCoverage.size());
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               " Cannot find foobar GTM coverage file: " << coverageFile
+               << std::endl);
+    }
+  cmParseCacheCoverage ccov(*cont, this->CTest);
+  coverageFile = this->CTest->GetBinaryDir() +
+    "/cache_coverage.cmcov";
+  if(cmSystemTools::FileExists(coverageFile.c_str()))
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Parsing Cache Coverage: " << coverageFile
+               << std::endl);
+    ccov.ReadCoverageFile(coverageFile.c_str());
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               " Cannot find Cache coverage file: " << coverageFile
+               << std::endl);
     }
   return static_cast<int>(cont->TotalCoverage.size());
 }
@@ -1806,7 +1856,7 @@ int cmCTestCoverageHandler::HandleBullseyeCoverage(
   cmCTestCoverageHandlerContainer* cont)
 {
   const char* covfile = cmSystemTools::GetEnv("COVFILE");
-  if(!covfile)
+  if(!covfile || strlen(covfile) == 0)
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, 
                " COVFILE environment variable not found, not running " 
