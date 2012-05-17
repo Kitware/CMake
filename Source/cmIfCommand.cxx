@@ -74,6 +74,13 @@ IsFunctionBlocked(const cmListFileFunction& lff,
           {
           this->IsBlocking = this->HasRun;
           this->HasRun = true;
+
+          // if trace is enabled, print a (trivially) evaluated "else"
+          // statement
+          if(!this->IsBlocking && mf.GetCMakeInstance()->GetTrace())
+            {
+            mf.PrintCommandTrace(this->Functions[c]);
+            }
           }
         else if (scopeDepth == 0 && !cmSystemTools::Strucmp
                  (this->Functions[c].Name.c_str(),"elseif"))
@@ -87,6 +94,12 @@ IsFunctionBlocked(const cmListFileFunction& lff,
             // Place this call on the call stack.
             cmMakefileCall stack_manager(&mf, this->Functions[c], status);
             static_cast<void>(stack_manager);
+
+            // if trace is enabled, print the evaluated "elseif" statement
+            if(mf.GetCMakeInstance()->GetTrace())
+              {
+              mf.PrintCommandTrace(this->Functions[c]);
+              }
 
             std::string errorString;
 
