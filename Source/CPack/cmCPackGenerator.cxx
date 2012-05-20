@@ -857,7 +857,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         // then forward request to cmake_install.cmake script
         if (this->GetOption("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION"))
           {
-            mf->AddDefinition("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION",
+            mf->AddDefinition("CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION",
                               "1");
           }
         // If current CPack generator does support
@@ -867,11 +867,19 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         if (!SupportsAbsoluteDestination() ||
             this->GetOption("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION"))
           {
-            mf->AddDefinition("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION",
+            mf->AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION",
                               "1");
           }
         // do installation
         int res = mf->ReadListFile(0, installFile.c_str());
+        // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
+        // to CPack (may be used by generators like CPack RPM or DEB)
+        // in order to transparently handle ABSOLUTE PATH
+        if (mf->GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"))
+          {
+            mf->AddDefinition("CPACK_ABSOLUTE_DESTINATION_FILES",
+                mf->GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"));
+          }
 
         // Now rebuild the list of files after installation
         // of the current component (if we are in component install)
