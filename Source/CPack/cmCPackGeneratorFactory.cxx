@@ -40,6 +40,10 @@
 
 #include "cmCPackLog.h"
 
+#if defined(__BORLANDC__)
+# pragma warn -8008 /* condition is always true */
+#endif
+
 //----------------------------------------------------------------------
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
