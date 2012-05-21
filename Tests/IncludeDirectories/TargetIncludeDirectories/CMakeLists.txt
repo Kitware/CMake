@@ -23,7 +23,4 @@ add_executable(TargetIncludeDirectories main.cpp)
 set_property(TARGET TargetIncludeDirectories APPEND PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/bat")
 set_property(TARGET TargetIncludeDirectories APPEND PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/foo")
 
-# Test that relative directories are relative to the source dir.
-set_property(TARGET TargetIncludeDirectories APPEND PROPERTY INCLUDE_DIRECTORIES "source_include_dir")
-
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/baz")

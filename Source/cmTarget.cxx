@@ -4709,13 +4709,9 @@ std::vector<std::string> cmTarget::GetIncludeDirectories()
   for(std::vector<std::string>::const_iterator
       li = includes.begin(); li != includes.end(); ++li)
     {
-    // Treat relative paths as relative to the source dir.
-    std::string dir = (cmSystemTools::CollapseFullPath
-         (li->c_str(), this->Makefile->GetCurrentDirectory()));
-
-    if(uniqueIncludes.insert(dir).second)
+    if(uniqueIncludes.insert(*li).second)
       {
-      orderedAndUniqueIncludes.push_back(dir);
+      orderedAndUniqueIncludes.push_back(*li);
       }
     }
 
