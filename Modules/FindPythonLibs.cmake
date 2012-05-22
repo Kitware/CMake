@@ -13,6 +13,11 @@
 # The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
 # version numbers that should be taken into account when searching for Python.
 # You need to set this variable before calling find_package(PythonLibs).
+#
+# If you'd like to specify the installation of Python to use, you should modify
+# the following cache variables:
+#  PYTHON_LIBRARY             - path to the python library
+#  PYTHON_INCLUDE_DIR         - path to where Python.h is found
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
