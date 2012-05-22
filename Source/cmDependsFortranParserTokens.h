@@ -1,9 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* A Bison parser, made by GNU Bison 2.5.  */
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
+/* Bison interface for Yacc-like parsers in C
 
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +29,7 @@
 
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -64,7 +64,8 @@
      CPP_TOENDL = 282,
      UNTERMINATED_STRING = 283,
      STRING = 284,
-     WORD = 285
+     WORD = 285,
+     CPP_INCLUDE_ANGLE = 286
    };
 #endif
 /* Tokens.  */
@@ -96,6 +97,7 @@
 #define UNTERMINATED_STRING 283
 #define STRING 284
 #define WORD 285
+#define CPP_INCLUDE_ANGLE 286
 
 
 
@@ -104,12 +106,14 @@
 typedef union YYSTYPE
 {
 
-/* Line 1676 of yacc.c  */
-#line 94 "cmDependsFortranParser.y"
+/* Line 2068 of yacc.c  */
+#line 89 "cmDependsFortranParser.y"
 
   char* string;
 
-/* Line 1676 of yacc.c  */
+
+
+/* Line 2068 of yacc.c  */
 #line 118 "cmDependsFortranParserTokens.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
