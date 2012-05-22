@@ -34,7 +34,7 @@ bool cmInstallFilesCommand
 
   if((args.size() > 1) && (args[1] == "FILES"))
     {
-    this->IsFilesForm = true;    
+    this->IsFilesForm = true;
     for(std::vector<std::string>::const_iterator s = args.begin()+2;
         s != args.end(); ++s)
       {
@@ -53,45 +53,46 @@ bool cmInstallFilesCommand
       this->FinalArgs.push_back(*s);
       }
     }
-  
+
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-                       ->AddInstallComponent("Unspecified");
+                      ->AddInstallComponent(this->Makefile->GetSafeDefinition(
+                                      "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
   return true;
 }
 
-void cmInstallFilesCommand::FinalPass() 
+void cmInstallFilesCommand::FinalPass()
 {
   // No final pass for "FILES" form of arguments.
   if(this->IsFilesForm)
     {
     return;
     }
-  
+
   std::string testf;
   std::string ext = this->FinalArgs[0];
-  
+
   // two different options
   if (this->FinalArgs.size() > 1)
     {
     // now put the files into the list
     std::vector<std::string>::iterator s = this->FinalArgs.begin();
     ++s;
-    // for each argument, get the files 
+    // for each argument, get the files
     for (;s != this->FinalArgs.end(); ++s)
       {
       // replace any variables
       std::string temps = *s;
       if (cmSystemTools::GetFilenamePath(temps).size() > 0)
         {
-          testf = cmSystemTools::GetFilenamePath(temps) + "/" + 
+          testf = cmSystemTools::GetFilenamePath(temps) + "/" +
             cmSystemTools::GetFilenameWithoutLastExtension(temps) + ext;
         }
       else
         {
           testf = cmSystemTools::GetFilenameWithoutLastExtension(temps) + ext;
         }
-      
+
       // add to the result
       this->Files.push_back(this->FindInstallSource(testf.c_str()));
       }
@@ -102,9 +103,9 @@ void cmInstallFilesCommand::FinalPass()
     std::string regex = this->FinalArgs[0].c_str();
     cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
                         regex.c_str(), files);
-    
+
     std::vector<std::string>::iterator s = files.begin();
-    // for each argument, get the files 
+    // for each argument, get the files
     for (;s != files.end(); ++s)
       {
       this->Files.push_back(this->FindInstallSource(s->c_str()));
@@ -128,13 +129,14 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
   // Use a file install generator.
   const char* no_permissions = "";
   const char* no_rename = "";
-  const char* no_component = "Unspecified";
+  std::string no_component = this->Makefile->GetSafeDefinition(
+                                       "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
   std::vector<std::string> no_configurations;
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(this->Files,
                                 destination.c_str(), false,
                                 no_permissions, no_configurations,
-                                no_component, no_rename));
+                                no_component.c_str(), no_rename));
 }
 
 
@@ -151,7 +153,7 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
     // This is a full path.
     return name;
     }
-  
+
   // This is a relative path.
   std::string tb = this->Makefile->GetCurrentOutputDirectory();
   tb += "/";
@@ -159,7 +161,7 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
   std::string ts = this->Makefile->GetCurrentDirectory();
   ts += "/";
   ts += name;
-  
+
   if(cmSystemTools::FileExists(tb.c_str()))
     {
     // The file exists in the binary tree.  Use it.
