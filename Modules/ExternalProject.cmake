@@ -712,8 +712,12 @@ function(_ep_get_build_command name step cmd_var)
       endif()
     else() # if(cfg_cmd_id STREQUAL "configure")
       # Non-CMake project.  Guess "make" and "make install" and "make test".
-      # But use "$(MAKE)" to get recursive parallel make.
-      set(cmd "$(MAKE)")
+      if("${CMAKE_GENERATOR}" MATCHES "Makefiles")
+        # Try to get the parallel arguments
+        set(cmd "$(MAKE)")
+      else()
+        set(cmd "make")
+      endif()
       if(step STREQUAL "INSTALL")
         set(args install)
       endif()
