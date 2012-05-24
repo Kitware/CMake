@@ -102,6 +102,7 @@ static bool cmDependsFortranParserIsKeyword(const char* word,
 %token <string> CPP_TOENDL
 %token <number> UNTERMINATED_STRING
 %token <string> STRING WORD
+%token <string> CPP_INCLUDE_ANGLE
 
 /*-------------------------------------------------------------------------*/
 /* grammar */
@@ -191,6 +192,13 @@ keyword_stmt:
       }
     free($1);
     free($2);
+    }
+| CPP_INCLUDE_ANGLE other EOSTMT
+    {
+    cmDependsFortranParser* parser =
+      cmDependsFortran_yyget_extra(yyscanner);
+    cmDependsFortranParser_RuleInclude(parser, $1);
+    free($1);
     }
 | include STRING other EOSTMT
     {
