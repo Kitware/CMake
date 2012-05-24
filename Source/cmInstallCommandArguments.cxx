@@ -23,7 +23,8 @@ const char* cmInstallCommandArguments::PermissionsTable[] =
 
 const std::string cmInstallCommandArguments::EmptyString;
 
-cmInstallCommandArguments::cmInstallCommandArguments()
+cmInstallCommandArguments::cmInstallCommandArguments(
+                                           const std::string& defaultComponent)
 :Parser()
 ,ArgumentGroup()
 ,Destination   (&Parser, "DESTINATION"   , &ArgumentGroup)
@@ -35,7 +36,9 @@ cmInstallCommandArguments::cmInstallCommandArguments()
 ,NamelinkOnly  (&Parser, "NAMELINK_ONLY" , &ArgumentGroup)
 ,NamelinkSkip  (&Parser, "NAMELINK_SKIP" , &ArgumentGroup)
 ,GenericArguments(0)
-{}
+{
+  this->Component.SetDefaultString(defaultComponent.c_str());
+}
 
 const std::string& cmInstallCommandArguments::GetDestination() const
 {
@@ -130,7 +133,7 @@ bool cmInstallCommandArguments::GetNamelinkSkip() const
   return false;
 }
 
-const std::vector<std::string>& 
+const std::vector<std::string>&
     cmInstallCommandArguments::GetConfigurations() const
 {
   if (!this->Configurations.GetVector().empty())
@@ -156,7 +159,7 @@ bool cmInstallCommandArguments::Finalize()
   return true;
 }
 
-void cmInstallCommandArguments::Parse(const std::vector<std::string>* args, 
+void cmInstallCommandArguments::Parse(const std::vector<std::string>* args,
                                       std::vector<std::string>* unconsumedArgs)
 {
   this->Parser.Parse(args, unconsumedArgs);
@@ -166,9 +169,9 @@ void cmInstallCommandArguments::Parse(const std::vector<std::string>* args,
 bool cmInstallCommandArguments::CheckPermissions()
 {
   this->PermissionsString = "";
-  for(std::vector<std::string>::const_iterator 
-      permIt = this->Permissions.GetVector().begin(); 
-      permIt != this->Permissions.GetVector().end(); 
+  for(std::vector<std::string>::const_iterator
+      permIt = this->Permissions.GetVector().begin();
+      permIt != this->Permissions.GetVector().end();
       ++permIt)
     {
     if (!this->CheckPermissions(*permIt, this->PermissionsString))
@@ -183,7 +186,7 @@ bool cmInstallCommandArguments::CheckPermissions(
                     const std::string& onePermission, std::string& permissions)
 {
   // Check the permission against the table.
-  for(const char** valid = cmInstallCommandArguments::PermissionsTable; 
+  for(const char** valid = cmInstallCommandArguments::PermissionsTable;
       *valid; ++valid)
     {
     if(onePermission == *valid)
