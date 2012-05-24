@@ -63,6 +63,16 @@ public:
       cmSystemTools::OUTPUT_MERGE : cmSystemTools::OUTPUT_NONE; }
 
   /**
+   * Returns true if the generator may work on this system.
+   * Rational:
+   * Some CPack generator may run on some host and may not on others
+   * (with the same system) because some tools are missing. If the tool
+   * is missing then CPack won't activate (in the CPackGeneratorFactory)
+   * this particular generator.
+   */
+  static bool CanGenerate() { return true; }
+
+  /**
    * Do the actual whole package processing.
    * Subclass may redefine it but its usually enough
    * to redefine @ref PackageFiles, because in fact
