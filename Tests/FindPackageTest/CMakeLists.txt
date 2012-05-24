@@ -363,9 +363,15 @@ endif()
 #-----------------------------------------------------------------------------
 # Test write_basic_config_version_file().
 
+# also test that an empty CMAKE_SIZEOF_VOID_P is accepted:
+set(_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
+set(CMAKE_SIZEOF_VOID_P "")
+
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake
                                  VERSION 1.2.3
                                  COMPATIBILITY AnyNewerVersion)
+
+set(CMAKE_SIZEOF_VOID_P ${_CMAKE_SIZEOF_VOID_P})
 
 set(PACKAGE_FIND_VERSION 2.3.4)
 include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
@@ -377,6 +383,10 @@ set(PACKAGE_FIND_VERSION 0.0.1)
 include(${CMAKE_CURRENT_BINARY_DIR}/Foo123ConfigVersion.cmake)
 if(NOT PACKAGE_VERSION_COMPATIBLE)
   message(SEND_ERROR "Did not find Foo123 with version 1.2.3 (0.0.1 was requested) !")
+endif()
+
+if(PACKAGE_VERSION_UNSUITABLE)
+  message(SEND_ERROR "PACKAGE_VERSION_UNSUITABLE set, but must not be !")
 endif()
 
 set(PACKAGE_FIND_VERSION 1.0.0)
@@ -405,6 +415,7 @@ write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/Boo123ConfigVersion.
                                 VERSION 1.2.3
                                 COMPATIBILITY SameMajorVersion)
 
+unset(PACKAGE_VERSION_UNSUITABLE)
 set(PACKAGE_VERSION_EXACT FALSE)
 set(PACKAGE_FIND_VERSION 2.3.4)
 set(PACKAGE_FIND_VERSION_MAJOR 2)
@@ -456,6 +467,7 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion
                                  VERSION 1.2.3.17
                                  COMPATIBILITY ExactVersion)
 
+unset(PACKAGE_VERSION_UNSUITABLE)
 set(PACKAGE_VERSION_EXACT FALSE)
 set(PACKAGE_FIND_VERSION 2.3.4)
 include(${CMAKE_CURRENT_BINARY_DIR}/Bar123ConfigVersion.cmake)

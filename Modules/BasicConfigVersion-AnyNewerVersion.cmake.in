@@ -18,6 +18,11 @@ else()
   endif()
 endif()
 
+# if the installed or the using project don't have CMAKE_SIZEOF_VOID_P set, ignore it:
+if("${CMAKE_SIZEOF_VOID_P}"  STREQUAL ""  OR "@CMAKE_SIZEOF_VOID_P@" STREQUAL "")
+   return()
+endif()
+
 # check that the installed version has the same 32/64bit-ness as the one which is currently searching:
 if(NOT "${CMAKE_SIZEOF_VOID_P}"  STREQUAL  "@CMAKE_SIZEOF_VOID_P@")
    math(EXPR installedBits "@CMAKE_SIZEOF_VOID_P@ * 8")
