@@ -81,11 +81,7 @@
 #endif
 
 #if !KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
-# if defined(_WIN32)
-extern __declspec(dllimport) char **environ;
-# else
 extern char **environ;
-# endif
 #endif
 
 #ifdef __CYGWIN__
