@@ -700,9 +700,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "Setting this property tells CMake what imported configurations are "
      "suitable for use when building the <CONFIG> configuration.  "
      "The first configuration in the list found to be provided by the "
-     "imported target is selected.  If no matching configurations are "
-     "available the imported target is considered to be not found.  "
-     "This property is ignored for non-imported targets.",
+     "imported target is selected.  If this property is set and no matching "
+     "configurations are available, then the imported target is considered "
+     "to be not found.  This property is ignored for non-imported targets.",
      false /* TODO: make this chained */ );
 
   cm->DefineProperty
