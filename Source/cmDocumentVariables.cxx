@@ -1350,6 +1350,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_POSITION_INDEPENDENT_FLAGS", cmProperty::VARIABLE,
+     "Default value for POSITION_INDEPENDENT_CODE of targets.",
+     "This variable is used to initialize the "
+     "POSITION_INDEPENDENT_CODE property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
 
 //   Variables defined when the a language is enabled These variables will
 // also be defined whenever CMake has loaded its support for compiling (LANG)

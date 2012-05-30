@@ -245,9 +245,6 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     std::string flags;
     const char *lang = l.c_str();
 
-    bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
-                   (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
-
     // Add language feature flags.
     this->AddFeatureFlags(flags, lang);
 
@@ -260,8 +257,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
       this->AddFortranFlags(flags);
       }
 
-    // Add shared-library flags if needed.
-    this->LocalGenerator->AddSharedFlags(flags, lang, shared);
+    this->LocalGenerator->AddCMP0018Flags(flags, this->Target, lang);
 
     // Add include directory flags.
     this->AddIncludeFlags(flags, lang);

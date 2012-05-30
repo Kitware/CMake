@@ -281,6 +281,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       flag += this->Makefile->GetSafeDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
       cmakeFlags.push_back(flag);
       }
+    if(this->Makefile->GetDefinition("CMAKE_POSITION_INDEPENDENT_CODE")!=0)
+      {
+      fprintf(fout, "SET(CMAKE_POSITION_INDEPENDENT_CODE \"ON\")\n");
+      }
 
     /* Use a random file name to avoid rapid creation and deletion
        of the same executable name (some filesystems fail on that).  */

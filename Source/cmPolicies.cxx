@@ -463,6 +463,34 @@ cmPolicies::cmPolicies()
     "The OLD behaviour is to always prefer files from CMAKE_MODULE_PATH over "
     "files from the CMake modules directory.",
     2,8,4,0, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0018, "CMP0018",
+    "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.",
+    "CMake 2.8.8 and lower compiled sources in SHARED and MODULE libraries "
+    "using the value of the undocumented CMAKE_SHARED_LIBRARY_<Lang>_FLAGS "
+    "platform variable.  The variable contained platform-specific flags "
+    "needed to compile objects for shared libraries.  Typically it included "
+    "a flag such as -fPIC for position independent code but also included "
+    "other flags needed on certain platforms.  CMake 2.8.9 and higher "
+    "prefer instead to use the POSITION_INDEPENDENT_CODE target property to "
+    "determine what targets should be position independent, and new "
+    "undocumented platform variables to select flags while ignoring "
+    "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS completely."
+    "\n"
+    "The default for either approach produces identical compilation flags, "
+    "but if a project modifies CMAKE_SHARED_LIBRARY_<Lang>_FLAGS from its "
+    "original value this policy determines which approach to use."
+    "\n"
+    "The OLD behavior for this policy is to ignore the "
+    "POSITION_INDEPENDENT_CODE property for all targets and use the modified "
+    "value of CMAKE_SHARED_LIBRARY_<Lang>_FLAGS for SHARED and MODULE "
+    "libraries."
+    "\n"
+    "The NEW behavior for this policy is to ignore "
+    "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS whether it is modified or not and "
+    "honor the POSITION_INDEPENDENT_CODE target property.",
+    2,8,9,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

@@ -315,6 +315,24 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
 
+  if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag(-fPIE run_pic_test)
+  else()
+    if (CMAKE_CXX_COMPILER_ID MATCHES "PGI"
+        OR CMAKE_CXX_COMPILER_ID MATCHES "PathScale"
+        OR CMAKE_SYSTEM_NAME MATCHES "IRIX64"
+        OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+      set(run_pic_test 0)
+    else()
+      set(run_pic_test 1)
+    endif()
+  endif()
+
+  if (run_pic_test)
+    ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
+  endif()
+
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test

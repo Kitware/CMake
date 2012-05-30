@@ -140,7 +140,8 @@ public:
 
   void AddLanguageFlags(std::string& flags, const char* lang,
                         const char* config);
-  void AddSharedFlags(std::string& flags, const char* lang, bool shared);
+  void AddCMP0018Flags(std::string &flags, cmTarget* target,
+                       std::string const& lang);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
   ///! Append flags to a string.
@@ -425,6 +426,11 @@ protected:
 private:
   std::string ConvertToOutputForExistingCommon(const char* remote,
                                                std::string const& result);
+
+  void AddSharedFlags(std::string& flags, const char* lang, bool shared);
+  bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;
+  void AddPositionIndependentFlags(std::string& flags, std::string const& l,
+                                   int targetType);
 };
 
 #endif
