@@ -228,9 +228,10 @@ SET(CMAKE_CXX_CREATE_MACOSX_FRAMEWORK
       "<CMAKE_CXX_COMPILER> <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <LINK_FLAGS> -o <TARGET> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> <OBJECTS> <LINK_LIBRARIES>")
 
 
- 
 # default to searching for frameworks first
-SET(CMAKE_FIND_FRAMEWORK FIRST)
+IF(NOT DEFINED CMAKE_FIND_FRAMEWORK)
+  SET(CMAKE_FIND_FRAMEWORK FIRST)
+ENDIF()
 # set up the default search directories for frameworks
 SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   ~/Library/Frameworks
@@ -239,7 +240,9 @@ SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   /System/Library/Frameworks)
 
 # default to searching for application bundles first
-SET(CMAKE_FIND_APPBUNDLE FIRST)
+IF(NOT DEFINED CMAKE_FIND_APPBUNDLE)
+  SET(CMAKE_FIND_APPBUNDLE FIRST)
+ENDIF()
 # set up the default search directories for application bundles
 SET(_apps_paths)
 FOREACH(_path
