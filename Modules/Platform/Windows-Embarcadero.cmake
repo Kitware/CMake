@@ -76,7 +76,8 @@ SET (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_R
 
 
 macro(__embarcadero_language lang)
-  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "${_tD}")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_DLL "${_tD}") # Note: This variable is a ';' separated list
+  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "${_tD}") # ... while this is a space separated string.
 
   # compile a source file into an object file
   # place <DEFINES> outside the response file because Borland refuses
