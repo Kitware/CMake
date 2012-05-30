@@ -20,7 +20,8 @@ SET (CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT "debug all" )
 SET (CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT "debug all" )
 SET (CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT "debug all" )
 
-set (CMAKE_SHARED_LIBRARY_C_FLAGS "-bd" )
+set(CMAKE_C_COMPILE_OPTIONS_DLL "-bd") # Note: This variable is a ';' separated list
+set(CMAKE_SHARED_LIBRARY_C_FLAGS "-bd") # ... while this is a space separated string.
 
 SET(CMAKE_RC_COMPILER "rc" )
 
