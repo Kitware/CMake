@@ -106,7 +106,9 @@ SET(CMAKE_Fortran_CREATE_SHARED_MODULE
 
 
 # default to searching for frameworks first
-SET(CMAKE_FIND_FRAMEWORK FIRST)
+IF(NOT DEFINED CMAKE_FIND_FRAMEWORK)
+  SET(CMAKE_FIND_FRAMEWORK FIRST)
+ENDIF()
 # set up the default search directories for frameworks
 SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   ~/Library/Frameworks
@@ -115,7 +117,9 @@ SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   /System/Library/Frameworks)
 
 # default to searching for application bundles first
-SET(CMAKE_FIND_APPBUNDLE FIRST)
+IF(NOT DEFINED CMAKE_FIND_APPBUNDLE)
+  SET(CMAKE_FIND_APPBUNDLE FIRST)
+ENDIF()
 # set up the default search directories for application bundles
 SET(CMAKE_SYSTEM_APPBUNDLE_PATH
   ~/Applications
@@ -125,4 +129,3 @@ SET(CMAKE_SYSTEM_APPBUNDLE_PATH
 INCLUDE(Platform/UnixPaths)
 SET(CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_SYSTEM_INCLUDE_PATH} /sw/include)
 SET(CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SYSTEM_LIBRARY_PATH} /sw/lib)
-
