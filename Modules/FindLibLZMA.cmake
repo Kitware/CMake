@@ -13,23 +13,14 @@
 #  LIBLZMA_VERSION_STRING    - version number as a string (ex: "5.0.3")
 
 
-# Copyright (c) 2008, Per Øyvind Karlsen, <peroyvind@mandriva.org>
-# Copyright (c) 2009, Alexander Neundorf, <neundorf@kde.org>
-# Copyright (c) 2009, Helio Chissini de Castro, <helio@kde.org>
-# Copyright (c) 2012, Mario Bensi, <mbensi@ipsquad.net>
-#
-#=============================================================================
+# Copyright 2008, Per Øyvind Karlsen, <peroyvind@mandriva.org>
+# Copyright 2009, Alexander Neundorf, <neundorf@kde.org>
+# Copyright 2009, Helio Chissini de Castro, <helio@kde.org>
+# Copyright 2012, Mario Bensi, <mbensi@ipsquad.net>
 # Copyright 2001-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
 
 
 FIND_PATH(LIBLZMA_INCLUDE_DIR lzma.h )
