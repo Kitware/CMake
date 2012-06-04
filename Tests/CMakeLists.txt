@@ -47,7 +47,7 @@ CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 
 # Testing
 IF(BUILD_TESTING)
-  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles" OR "${CMAKE_TEST_GENERATOR}" MATCHES Ninja)
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_TEST_GENERATOR}" MATCHES Ninja AND NOT WIN32))
     SET(TEST_CompileCommandOutput 1)
   ENDIF()
 
