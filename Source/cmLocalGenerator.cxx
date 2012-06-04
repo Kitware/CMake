@@ -1549,12 +1549,6 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         return;
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
-      std::string sharedFlagsVar = "CMAKE_SHARED_LIBRARY_";
-      sharedFlagsVar += linkLanguage;
-      sharedFlagsVar += "_FLAGS";
-      flags += " ";
-      flags += this->Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
-      flags += " ";
       cmOStringStream linklibs;
       this->OutputLinkLibraries(linklibs, target, false);
       linkLibs = linklibs.str();
@@ -1959,6 +1953,111 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     flagsVar += lang;
     flagsVar += "_FLAGS";
     this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
+                                       std::string const& lang)
+{
+  int targetType = target->GetType();
+
+  bool shared = ((targetType == cmTarget::SHARED_LIBRARY) ||
+                  (targetType == cmTarget::MODULE_LIBRARY));
+
+  if (this->GetShouldUseOldFlags(shared, lang))
+    {
+    this->AddSharedFlags(flags, lang.c_str(), shared);
+    }
+  else
+    {
+    // Add position independendent flags, if needed.
+    if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE"))
+      {
+      this->AddPositionIndependentFlags(flags, lang, targetType);
+      }
+    if (shared)
+      {
+      this->AppendFeatureOptions(flags, lang.c_str(), "DLL");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
+                                            const std::string &lang) const
+{
+  std::string originalFlags =
+    this->GlobalGenerator->GetSharedLibFlagsForLanguage(lang);
+  if (shared)
+    {
+    std::string flagsVar = "CMAKE_SHARED_LIBRARY_";
+    flagsVar += lang;
+    flagsVar += "_FLAGS";
+    std::string flags =
+        this->Makefile->GetRequiredDefinition(flagsVar.c_str());
+
+    if (flags != originalFlags)
+      {
+      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0018))
+        {
+        case cmPolicies::WARN:
+        {
+          cmOStringStream e;
+          e << "Variable " << flagsVar << " has been modified. CMake "
+            "will ignore the POSITION_INDEPENDENT_CODE target property for "
+            "shared libraries and will use the " << flagsVar << " variable "
+            "instead.  This may cause errors if the original content of "
+            << flagsVar << " was removed.\n"
+            << this->Makefile->GetPolicies()->GetPolicyWarning(
+                                                      cmPolicies::CMP0018);
+
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          // fall through to OLD behaviour
+        }
+        case cmPolicies::OLD:
+          return true;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+        default:
+          return false;
+        }
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
+                                                   std::string const& lang,
+                                                   int targetType)
+{
+  const char* picFlags = 0;
+
+  if(targetType == cmTarget::EXECUTABLE)
+    {
+    std::string flagsVar = "CMAKE_";
+    flagsVar += lang;
+    flagsVar += "_COMPILE_OPTIONS_PIE";
+    picFlags = this->Makefile->GetSafeDefinition(flagsVar.c_str());
+    }
+  if (!picFlags)
+    {
+    std::string flagsVar = "CMAKE_";
+    flagsVar += lang;
+    flagsVar += "_COMPILE_OPTIONS_PIC";
+    picFlags = this->Makefile->GetSafeDefinition(flagsVar.c_str());
+    }
+  if (picFlags)
+    {
+    std::vector<std::string> options;
+    cmSystemTools::ExpandListArgument(picFlags, options);
+    for(std::vector<std::string>::const_iterator oi = options.begin();
+        oi != options.end(); ++oi)
+      {
+      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      }
     }
 }
 

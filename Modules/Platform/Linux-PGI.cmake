@@ -20,6 +20,8 @@ set(__LINUX_COMPILER_PGI 1)
 
 macro(__linux_compiler_pgi lang)
   # Shared library compile and link flags.
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 endmacro()
