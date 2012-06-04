@@ -1994,10 +1994,10 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
     std::string flagsVar = "CMAKE_SHARED_LIBRARY_";
     flagsVar += lang;
     flagsVar += "_FLAGS";
-    std::string flags =
-        this->Makefile->GetRequiredDefinition(flagsVar.c_str());
+    const char* flags =
+        this->Makefile->GetSafeDefinition(flagsVar.c_str());
 
-    if (flags != originalFlags)
+    if (flags && flags != originalFlags)
       {
       switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0018))
         {

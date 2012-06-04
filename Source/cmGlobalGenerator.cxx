@@ -590,9 +590,12 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     std::string sharedLibFlagsVar = "CMAKE_SHARED_LIBRARY_";
     sharedLibFlagsVar += lang;
     sharedLibFlagsVar += "_FLAGS";
-    std::string sharedLibFlags =
-      mf->GetRequiredDefinition(sharedLibFlagsVar.c_str());
-    this->LanguageToOriginalSharedLibFlags[lang] = sharedLibFlags;
+    const char* sharedLibFlags =
+      mf->GetSafeDefinition(sharedLibFlagsVar.c_str());
+    if (sharedLibFlags)
+      {
+      this->LanguageToOriginalSharedLibFlags[lang] = sharedLibFlags;
+      }
     } // end for each language
 
   // Now load files that can override any settings on the platform or for
