@@ -315,7 +315,9 @@ IF(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
 
-  ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
+  if(NOT WIN32)
+    ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
+  endif()
 
   ADD_TEST(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
