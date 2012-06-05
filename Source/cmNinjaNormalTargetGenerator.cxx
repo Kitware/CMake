@@ -484,7 +484,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   int cmdLineLimit = -1;
 #ifdef _WIN32
-  cmdLineLimit = 30000;
+  cmdLineLimit = 8100;
 #else
   // TODO
 #endif
