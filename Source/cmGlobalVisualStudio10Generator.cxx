@@ -278,3 +278,9 @@ void cmGlobalVisualStudio10Generator::PathTooLong(
     this->LongestSource.SourceRel = sfRel;
     }
 }
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::UseFolderProperty()
+{
+  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
+}
