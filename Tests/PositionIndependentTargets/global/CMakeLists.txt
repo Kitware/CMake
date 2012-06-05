@@ -26,5 +26,5 @@ int main(int,char**) { return 0; }\n"
 )
 
 if (NOT PIC_TRY_COMPILE_RESULT)
-  message(SEND_ERROR "TRY_COMPILE with content requiring __PIC__ failed.")
+  message(SEND_ERROR "TRY_COMPILE with content requiring __PIC__ failed. ${OUTPUT}")
 endif()
