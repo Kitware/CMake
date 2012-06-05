@@ -151,6 +151,8 @@ cmNinjaNormalTargetGenerator
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
+  if (useResponseFile)
+    ruleName += "_RSPFILE";
 
   // Select whether to use a response file for objects.
   std::string rspfile;
@@ -174,7 +176,6 @@ cmNinjaNormalTargetGenerator
         } else {
           responseFlag = "@";
         }
-        ruleName += "_RSPFILE";
         rspfile = "$out.rsp";
         responseFlag += rspfile;
         vars.Objects = responseFlag.c_str();
@@ -484,7 +485,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   int cmdLineLimit = -1;
 #ifdef _WIN32
-  cmdLineLimit = 30000;
+  cmdLineLimit = 8100;
 #else
   // TODO
 #endif

@@ -449,8 +449,8 @@ void cmGlobalNinjaGenerator
     }
 
   // check for mingw
-  std::string cc = mf->GetDefinition("CMAKE_C_COMPILER");
-  if(cc.find("gcc.exe") != std::string::npos)
+  const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
+  if(cc && std::string(cc).find("gcc.exe") != std::string::npos)
     {
     UsingMinGW = true;
     }
