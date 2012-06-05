@@ -316,6 +316,7 @@ IF(BUILD_TESTING)
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
 
   if (APPLE)
+    include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(-fPIE run_pic_test)
   else()
     set(run_pic_test 1)
