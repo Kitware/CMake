@@ -22,7 +22,9 @@ macro(__compiler_gnu lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")
-  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
+  if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.4)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
+  endif()
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 
