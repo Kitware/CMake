@@ -8,10 +8,17 @@ add_executable(test_target_executable_global
 add_library(test_target_shared_library_global
   SHARED "${CMAKE_CURRENT_SOURCE_DIR}/../pic_lib.cpp"
 )
+set_target_properties(test_target_shared_library_global
+  PROPERTIES DEFINE_SYMBOL PIC_TEST_BUILD_DLL
+)
 
 add_library(test_target_static_library_global
   STATIC "${CMAKE_CURRENT_SOURCE_DIR}/../pic_lib.cpp"
 )
+set_target_properties(test_target_static_library_global
+  PROPERTIES COMPILE_DEFINITIONS PIC_TEST_STATIC_BUILD
+)
+
 
 file(READ
   "${CMAKE_CURRENT_SOURCE_DIR}/../pic_test.h"
