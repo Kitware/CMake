@@ -225,10 +225,17 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                                 const cmNinjaDeps& deps,
                                               const cmNinjaDeps& orderOnlyDeps)
 {
+  std::string cmd = command;
+#ifdef _WIN32
+   if (cmd.empty())
+      // TODO Shouldn't an empty command be handled by ninja?
+      cmd = "cmd.exe /c";
+#endif
+
   this->AddCustomCommandRule();
 
   cmNinjaVars vars;
-  vars["COMMAND"] = command;
+  vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
 
   cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
