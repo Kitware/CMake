@@ -160,7 +160,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   arguments << "\n";
 
 
-  std::ostringstream builds;
+  cmOStringStream builds;
 
   // Write outputs files.
   builds << "build";
