@@ -240,10 +240,10 @@ cmNinjaNormalTargetGenerator
       this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
     // Write the linker rule with response file if needed.
-    std::ostringstream comment;
+    cmOStringStream comment;
     comment << "Rule for linking " << this->TargetLinkLanguage << " "
             << this->GetVisibleTypeName() << ".";
-    std::ostringstream description;
+    cmOStringStream description;
     description << "Linking " << this->TargetLinkLanguage << " "
                 << this->GetVisibleTypeName() << " $out";
     this->GetGlobalGenerator()->AddRule(ruleName,
@@ -380,7 +380,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                    /*implib=*/true).c_str());
 
   // Compute the comment.
-  std::ostringstream comment;
+  cmOStringStream comment;
   comment << "Link the " << this->GetVisibleTypeName() << " "
           << targetOutputReal;
 

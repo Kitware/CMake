@@ -275,7 +275,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     return ":";
 #endif
 
-  std::ostringstream cmd;
+  cmOStringStream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
        li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin()) {
@@ -299,7 +299,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
     if (!wd)
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
-    std::ostringstream cdCmd;
+    cmOStringStream cdCmd;
     cdCmd << "cd " << this->ConvertToOutputFormat(wd, SHELL);
     cmdLines.push_back(cdCmd.str());
   }
