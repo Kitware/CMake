@@ -89,7 +89,10 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string &path)
 {
   std::string result = path;
 #ifdef _WIN32
-  cmSystemTools::ReplaceString(result, "/", "\\");
+  if(UsingMinGW)
+    cmSystemTools::ReplaceString(result, "\\", "/");
+  else
+    cmSystemTools::ReplaceString(result, "/", "\\");
 #endif
   return EncodeLiteral(result);
 }
@@ -101,7 +104,8 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                         const cmNinjaDeps& explicitDeps,
                                         const cmNinjaDeps& implicitDeps,
                                         const cmNinjaDeps& orderOnlyDeps,
-                                        const cmNinjaVars& variables)
+                                        const cmNinjaVars& variables,
+                                        int cmdLineLimit)
 {
   // Make sure there is a rule.
   if(rule.empty())
@@ -123,9 +127,40 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   cmGlobalNinjaGenerator::WriteComment(os, comment);
 
-  cmOStringStream builds;
+  cmOStringStream arguments;
 
   // TODO: Better formatting for when there are multiple input/output files.
+
+  // Write explicit dependencies.
+  for(cmNinjaDeps::const_iterator i = explicitDeps.begin();
+      i != explicitDeps.end();
+      ++i)
+    arguments  << " " << EncodeIdent(EncodePath(*i), os);
+
+  // Write implicit dependencies.
+  if(!implicitDeps.empty())
+    {
+    arguments << " |";
+    for(cmNinjaDeps::const_iterator i = implicitDeps.begin();
+        i != implicitDeps.end();
+        ++i)
+      arguments  << " " << EncodeIdent(EncodePath(*i), os);
+    }
+
+  // Write order-only dependencies.
+  if(!orderOnlyDeps.empty())
+    {
+    arguments << " ||";
+    for(cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
+        i != orderOnlyDeps.end();
+        ++i)
+      arguments  << " " << EncodeIdent(EncodePath(*i), os);
+    }
+
+  arguments << "\n";
+
+
+  std::ostringstream builds;
 
   // Write outputs files.
   builds << "build";
@@ -135,38 +170,16 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     builds << " " << EncodeIdent(EncodePath(*i), os);
   builds << ":";
 
+
   // Write the rule.
   builds << " " << rule;
 
-  // Write explicit dependencies.
-  for(cmNinjaDeps::const_iterator i = explicitDeps.begin();
-      i != explicitDeps.end();
-      ++i)
-    builds  << " " << EncodeIdent(EncodePath(*i), os);
+  // check if a response file rule should be used
+  const std::string args = arguments.str();
+  if (cmdLineLimit > 0 && args.size() > (size_t)cmdLineLimit)
+    builds << "_RSPFILE";
 
-  // Write implicit dependencies.
-  if(!implicitDeps.empty())
-    {
-    builds << " |";
-    for(cmNinjaDeps::const_iterator i = implicitDeps.begin();
-        i != implicitDeps.end();
-        ++i)
-      builds  << " " << EncodeIdent(EncodePath(*i), os);
-    }
-
-  // Write order-only dependencies.
-  if(!orderOnlyDeps.empty())
-    {
-    builds << " ||";
-    for(cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
-        i != orderOnlyDeps.end();
-        ++i)
-      builds  << " " << EncodeIdent(EncodePath(*i), os);
-    }
-
-  builds << "\n";
-
-  os << builds.str();
+  os << builds.str() << args;
 
   // Write the variables bound to this build statement.
   for(cmNinjaVars::const_iterator i = variables.begin();
@@ -200,6 +213,7 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
                 "$DESC",
                 "Rule for running custom commands.",
                 /*depfile*/ "",
+                /*rspfile*/ "",
                 /*restat*/ true);
 }
 
@@ -211,10 +225,17 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                                 const cmNinjaDeps& deps,
                                               const cmNinjaDeps& orderOnlyDeps)
 {
+  std::string cmd = command;
+#ifdef _WIN32
+   if (cmd.empty())
+      // TODO Shouldn't an empty command be handled by ninja?
+      cmd = "cmd.exe /c";
+#endif
+
   this->AddCustomCommandRule();
 
   cmNinjaVars vars;
-  vars["COMMAND"] = command;
+  vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
 
   cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
@@ -233,6 +254,7 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
                                        const std::string& description,
                                        const std::string& comment,
                                        const std::string& depfile,
+                                       const std::string& rspfile,
                                        bool restat,
                                        bool generator)
 {
@@ -275,6 +297,14 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
     {
     cmGlobalNinjaGenerator::Indent(os, 1);
     os << "description = " << description << "\n";
+    }
+
+  if(!rspfile.empty())
+    {
+      cmGlobalNinjaGenerator::Indent(os, 1);
+      os << "rspfile = " << rspfile << "\n";
+      cmGlobalNinjaGenerator::Indent(os, 1);
+      os << "rspfile_content = $in" << "\n";
     }
 
   if(restat)
@@ -404,16 +434,19 @@ void cmGlobalNinjaGenerator
                  cmMakefile *mf,
                  bool optional)
 {
-  this->cmGlobalGenerator::EnableLanguage(languages, mf, optional);
   std::string path;
   for(std::vector<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
+    std::vector<std::string> language;
+    language.push_back(*l);
+
     if(*l == "NONE")
       {
+      this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
       continue;
       }
-    if(*l == "Fortran")
+    else if(*l == "Fortran")
       {
       std::string message = "The \"";
       message += this->GetName();
@@ -422,9 +455,25 @@ void cmGlobalNinjaGenerator
       message += "\" yet.";
       cmSystemTools::Error(message.c_str());
       }
+    else if(*l == "RC")
+      {
+      // check if mingw is used
+      const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
+      if(cc && std::string(cc).find("gcc.exe") != std::string::npos)
+      {
+        UsingMinGW = true;
+        std::string rc = cmSystemTools::FindProgram("windres");
+        if(rc.empty())
+          rc = "windres.exe";;
+        mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
+        }
+      }
+    this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
     this->ResolveLanguageCompiler(*l, mf, optional);
-    }
+  }
 }
+
+bool cmGlobalNinjaGenerator::UsingMinGW = false;
 
 // Implemented by:
 //   cmGlobalUnixMakefileGenerator3
@@ -483,6 +532,7 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                      const std::string& description,
                                      const std::string& comment,
                                      const std::string& depfile,
+                                     const std::string& rspfile,
                                      bool restat,
                                      bool generator)
 {
@@ -497,6 +547,7 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                     description,
                                     comment,
                                     depfile,
+                                    rspfile,
                                     restat,
                                     generator);
 }
@@ -841,6 +892,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             "Re-running CMake...",
             "Rule for re-running cmake.",
             /*depfile=*/ "",
+            /*rspfile=*/ "",
             /*restat=*/ false,
             /*generator=*/ true);
 
@@ -878,6 +930,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             "Cleaning all built files...",
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
+            /*rspfile=*/ "",
             /*restat=*/ false,
             /*generator=*/ false);
   WriteBuild(os,
@@ -898,6 +951,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",
+            /*rspfile=*/ "",
             /*restat=*/ false,
             /*generator=*/ false);
   WriteBuild(os,
