@@ -240,6 +240,7 @@ bool cmArchiveWrite::AddFile(const char* file,
   // Clear acl and xattr fields not useful for distribution.
   archive_entry_acl_clear(e);
   archive_entry_xattr_clear(e);
+  archive_entry_set_fflags(e, 0, 0);
   if(archive_write_header(this->Archive, e) != ARCHIVE_OK)
     {
     this->Error = "archive_write_header: ";
