@@ -275,16 +275,16 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     return ":";
 #endif
 
-  // TODO: This will work only on Unix platforms. I don't
-  // want to use a link.txt file because I will lose the benefit of the
-  // $in variables. A discussion about dealing with multiple commands in
-  // a rule is started here:
-  // groups.google.com/group/ninja-build/browse_thread/thread/d515f23a78986008
   cmOStringStream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
        li != cmdLines.end(); ++li) {
-    if (li != cmdLines.begin())
+    if (li != cmdLines.begin()) {
       cmd << " && ";
+#ifdef _WIN32
+    } else if (cmdLines.size() > 1) {
+      cmd << "cmd.exe /c ";
+#endif
+    }
     cmd << *li;
   }
   return cmd.str();

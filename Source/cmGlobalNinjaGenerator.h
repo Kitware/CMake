@@ -81,7 +81,8 @@ public:
                          const cmNinjaDeps& explicitDeps,
                          const cmNinjaDeps& implicitDeps,
                          const cmNinjaDeps& orderOnlyDeps,
-                         const cmNinjaVars& variables);
+                         const cmNinjaVars& variables,
+                         int cmdLineLimit = -1);
 
   /**
    * Helper to write a build statement with the special 'phony' rule.
@@ -113,6 +114,7 @@ public:
                         const std::string& description,
                         const std::string& comment = "",
                         const std::string& depfile = "",
+                        const std::string& rspfile = ""					,
                         bool restat = false,
                         bool generator = false);
 
@@ -226,6 +228,7 @@ public:
                const std::string& description,
                const std::string& comment = "",
                const std::string& depfile = "",
+               const std::string& rspfile = "",
                bool restat = false,
                bool generator = false);
 
@@ -341,6 +344,8 @@ private:
   TargetAliasMap TargetAliases;
 
   static cmLocalGenerator* LocalGenerator;
+
+  static bool UsingMinGW;
 };
 
 #endif // ! cmGlobalNinjaGenerator_h
