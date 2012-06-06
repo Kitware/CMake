@@ -434,16 +434,19 @@ void cmGlobalNinjaGenerator
                  cmMakefile *mf,
                  bool optional)
 {
-  this->cmGlobalGenerator::EnableLanguage(languages, mf, optional);
   std::string path;
   for(std::vector<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
+    std::vector<std::string> language;
+    language.push_back(*l);
+
     if(*l == "NONE")
       {
+      this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
       continue;
       }
-    if(*l == "Fortran")
+    else if(*l == "Fortran")
       {
       std::string message = "The \"";
       message += this->GetName();
@@ -452,15 +455,22 @@ void cmGlobalNinjaGenerator
       message += "\" yet.";
       cmSystemTools::Error(message.c_str());
       }
+    else if(*l == "RC")
+      {
+      // check if mingw is used
+      const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
+      if(cc && std::string(cc).find("gcc.exe") != std::string::npos)
+      {
+        UsingMinGW = true;
+        std::string rc = cmSystemTools::FindProgram("windres");
+        if(rc.empty())
+          rc = "windres.exe";;
+        mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
+        }
+      }
+    this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
     this->ResolveLanguageCompiler(*l, mf, optional);
-    }
-
-  // check for mingw
-  const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
-  if(cc && std::string(cc).find("gcc.exe") != std::string::npos)
-    {
-    UsingMinGW = true;
-    }
+  }
 }
 
 bool cmGlobalNinjaGenerator::UsingMinGW = false;
