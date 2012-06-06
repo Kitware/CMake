@@ -280,7 +280,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   // $in variables. A discussion about dealing with multiple commands in
   // a rule is started here:
   // groups.google.com/group/ninja-build/browse_thread/thread/d515f23a78986008
-  std::ostringstream cmd;
+  cmOStringStream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
        li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin())
@@ -299,7 +299,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
     if (!wd)
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
-    std::ostringstream cdCmd;
+    cmOStringStream cdCmd;
     cdCmd << "cd " << this->ConvertToOutputFormat(wd, SHELL);
     cmdLines.push_back(cdCmd.str());
   }
