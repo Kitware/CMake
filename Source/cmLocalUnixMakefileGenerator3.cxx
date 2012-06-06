@@ -36,6 +36,30 @@
 #include <queue>
 
 //----------------------------------------------------------------------------
+// Escape special characters in Makefile dependency lines
+class cmMakeSafe
+{
+public:
+  cmMakeSafe(const char* s): Data(s) {}
+  cmMakeSafe(std::string const& s): Data(s.c_str()) {}
+private:
+  const char* Data;
+  friend std::ostream& operator<<(std::ostream& os,
+                                  cmMakeSafe const& self)
+    {
+    for(const char* c = self.Data; *c; ++c)
+      {
+      switch (*c)
+        {
+        case '=': os << "$(EQUALS)"; break;
+        default: os << *c; break;
+        }
+      }
+    return os;
+    }
+};
+
+//----------------------------------------------------------------------------
 // Helper function used below.
 static std::string cmSplitExtension(std::string const& in, std::string& base)
 {
@@ -555,28 +579,13 @@ cmLocalUnixMakefileGenerator3
     space = " ";
     }
 
-  // Warn about paths not supported by Make tools.
-  std::string::size_type pos = tgt.find_first_of("=");
-  if(pos != std::string::npos)
-    {
-    cmOStringStream m;
-    m <<
-      "Make rule for\n"
-      "  " << tgt << "\n"
-      "has '=' on left hand side.  "
-      "The make tool may not support this.";
-    cmListFileBacktrace bt;
-    this->GlobalGenerator->GetCMakeInstance()
-      ->IssueMessage(cmake::WARNING, m.str(), bt);
-    }
-
   // Mark the rule as symbolic if requested.
   if(symbolic)
     {
     if(const char* sym =
        this->Makefile->GetDefinition("CMAKE_MAKE_SYMBOLIC_RULE"))
       {
-      os << tgt.c_str() << space << ": " << sym << "\n";
+      os << cmMakeSafe(tgt) << space << ": " << sym << "\n";
       }
     }
 
@@ -584,7 +593,7 @@ cmLocalUnixMakefileGenerator3
   if(depends.empty())
     {
     // No dependencies.  The commands will always run.
-    os << tgt.c_str() << space << ":\n";
+    os << cmMakeSafe(tgt) << space << ":\n";
     }
   else
     {
@@ -595,7 +604,7 @@ cmLocalUnixMakefileGenerator3
       {
       replace = *dep;
       replace = this->Convert(replace.c_str(),HOME_OUTPUT,MAKEFILE);
-      os << tgt.c_str() << space << ": " << replace.c_str() << "\n";
+      os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
       }
     }
 
@@ -608,7 +617,7 @@ cmLocalUnixMakefileGenerator3
     }
   if(symbolic && !this->WatcomWMake)
     {
-    os << ".PHONY : " << tgt.c_str() << "\n";
+    os << ".PHONY : " << cmMakeSafe(tgt) << "\n";
     }
   os << "\n";
   // Add the output to the local help if requested.
@@ -686,6 +695,10 @@ cmLocalUnixMakefileGenerator3
     << "RM = "
     << this->ConvertShellCommand(cmakecommand, FULL)
     << " -E remove -f\n"
+    << "\n";
+  makefileStream
+    << "# Escaping for special characters.\n"
+    << "EQUALS = =\n"
     << "\n";
 
   if(const char* edit_cmd =
