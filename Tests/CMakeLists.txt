@@ -319,7 +319,15 @@ IF(BUILD_TESTING)
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(-fPIE run_pic_test)
   else()
-    set(run_pic_test 1)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "PGI"
+        OR CMAKE_CXX_COMPILER_ID MATCHES "PathScale"
+        OR CMAKE_SYSTEM_NAME MATCHES "IRIX64"
+        OR CMAKE_CXX_COMPILER_ID MATCHES "Intel"
+        OR (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4))
+      set(run_pic_test 0)
+    else()
+      set(run_pic_test 1)
+    endif()
   endif()
 
   if (run_pic_test)
