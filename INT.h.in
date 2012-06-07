@@ -176,6 +176,65 @@ An includer may test the following macros after inclusion:
 #define @KWIML@_INT_HAVE_UINTPTR_T 1
 #endif
 
+#if defined(_AIX43) && !defined(_AIX50) && !defined(_AIX51)
+  /* AIX 4.3 defines these incorrectly with % and no quotes. */
+# define @KWIML@_INT_BROKEN_PRId8
+# define @KWIML@_INT_BROKEN_SCNd8
+# define @KWIML@_INT_BROKEN_PRIi8
+# define @KWIML@_INT_BROKEN_SCNi8
+# define @KWIML@_INT_BROKEN_PRIo8
+# define @KWIML@_INT_BROKEN_SCNo8
+# define @KWIML@_INT_BROKEN_PRIu8
+# define @KWIML@_INT_BROKEN_SCNu8
+# define @KWIML@_INT_BROKEN_PRIx8
+# define @KWIML@_INT_BROKEN_SCNx8
+# define @KWIML@_INT_BROKEN_PRIX8
+# define @KWIML@_INT_BROKEN_PRId16
+# define @KWIML@_INT_BROKEN_SCNd16
+# define @KWIML@_INT_BROKEN_PRIi16
+# define @KWIML@_INT_BROKEN_SCNi16
+# define @KWIML@_INT_BROKEN_PRIo16
+# define @KWIML@_INT_BROKEN_SCNo16
+# define @KWIML@_INT_BROKEN_PRIu16
+# define @KWIML@_INT_BROKEN_SCNu16
+# define @KWIML@_INT_BROKEN_PRIx16
+# define @KWIML@_INT_BROKEN_SCNx16
+# define @KWIML@_INT_BROKEN_PRIX16
+# define @KWIML@_INT_BROKEN_PRId32
+# define @KWIML@_INT_BROKEN_SCNd32
+# define @KWIML@_INT_BROKEN_PRIi32
+# define @KWIML@_INT_BROKEN_SCNi32
+# define @KWIML@_INT_BROKEN_PRIo32
+# define @KWIML@_INT_BROKEN_SCNo32
+# define @KWIML@_INT_BROKEN_PRIu32
+# define @KWIML@_INT_BROKEN_SCNu32
+# define @KWIML@_INT_BROKEN_PRIx32
+# define @KWIML@_INT_BROKEN_SCNx32
+# define @KWIML@_INT_BROKEN_PRIX32
+# define @KWIML@_INT_BROKEN_PRId64
+# define @KWIML@_INT_BROKEN_SCNd64
+# define @KWIML@_INT_BROKEN_PRIi64
+# define @KWIML@_INT_BROKEN_SCNi64
+# define @KWIML@_INT_BROKEN_PRIo64
+# define @KWIML@_INT_BROKEN_SCNo64
+# define @KWIML@_INT_BROKEN_PRIu64
+# define @KWIML@_INT_BROKEN_SCNu64
+# define @KWIML@_INT_BROKEN_PRIx64
+# define @KWIML@_INT_BROKEN_SCNx64
+# define @KWIML@_INT_BROKEN_PRIX64
+# define @KWIML@_INT_BROKEN_PRIdPTR
+# define @KWIML@_INT_BROKEN_SCNdPTR
+# define @KWIML@_INT_BROKEN_PRIiPTR
+# define @KWIML@_INT_BROKEN_SCNiPTR
+# define @KWIML@_INT_BROKEN_PRIoPTR
+# define @KWIML@_INT_BROKEN_SCNoPTR
+# define @KWIML@_INT_BROKEN_PRIuPTR
+# define @KWIML@_INT_BROKEN_SCNuPTR
+# define @KWIML@_INT_BROKEN_PRIxPTR
+# define @KWIML@_INT_BROKEN_SCNxPTR
+# define @KWIML@_INT_BROKEN_PRIXPTR
+#endif
+
 #if (defined(__SUNPRO_C)||defined(__SUNPRO_CC)) && defined(_CHAR_IS_UNSIGNED)
 # define @KWIML@_INT_BROKEN_INT8_T /* system type defined incorrectly */
 #elif defined(__BORLANDC__) && defined(_CHAR_UNSIGNED)
