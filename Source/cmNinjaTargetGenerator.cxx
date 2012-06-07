@@ -330,12 +330,17 @@ cmNinjaTargetGenerator
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
 
+  bool cldeps = false;
+  const char* cc = this->GetMakefile()->GetDefinition("CMAKE_C_COMPILER");
+  if(cc && std::string(cc).find("cl.exe") != std::string::npos)
+    cldeps = true;
+
   std::string depfile;
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
   const char *depfileFlags =
     this->GetMakefile()->GetDefinition(depfileFlagsName.c_str());
-  if (depfileFlags) {
-    std::string depfileFlagsStr = depfileFlags;
+  if (depfileFlags || cldeps) {
+    std::string depfileFlagsStr = depfileFlags ? depfileFlags : "";
     depfile = "$out.d";
     cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
                                  depfile.c_str());
@@ -363,6 +368,9 @@ cmNinjaTargetGenerator
 
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+
+  if(cldeps)
+      cmdLine = "cldeps.exe $out.d $out " + cmdLine;
 
   // Write the rule for compiling file of the given language.
   std::ostringstream comment;
