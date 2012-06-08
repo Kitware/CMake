@@ -460,17 +460,28 @@ void cmGlobalNinjaGenerator
       // check if mingw is used
       const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
       if(cc && std::string(cc).find("gcc.exe") != std::string::npos)
-      {
+        {
         UsingMinGW = true;
         std::string rc = cmSystemTools::FindProgram("windres");
         if(rc.empty())
           rc = "windres.exe";;
         mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
         }
+      else if (cc && std::string(cc).find("cl.exe") != std::string::npos)
+        {
+        const char* cmake = mf->GetDefinition("CMAKE_COMMAND");
+        std::string bindir = cmake ? cmake : "";
+        cmSystemTools::ReplaceString(bindir, "cmake.exe", "");
+        std::vector<std::string> locations;
+        locations.push_back(bindir);
+        std::string cldeps = cmSystemTools::FindProgram("cmcldeps", locations);
+        if(!cldeps.empty())
+          mf->AddDefinition("CMAKE_CMCLDEPS_EXECUTABLE", cldeps.c_str());
+        }
       }
     this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
     this->ResolveLanguageCompiler(*l, mf, optional);
-  }
+    }
 }
 
 bool cmGlobalNinjaGenerator::UsingMinGW = false;

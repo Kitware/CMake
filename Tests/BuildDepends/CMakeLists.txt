@@ -28,6 +28,10 @@ function(help_xcode_depends)
   endif(HELP_XCODE)
 endfunction(help_xcode_depends)
 
+if("${CMAKE_GENERATOR}" MATCHES "Ninja")
+  set(HELP_NINJA 1) # TODO Why is this needed?
+endif()
+
 # The Intel compiler causes the MSVC linker to crash during
 # incremental linking, so avoid the /INCREMENTAL:YES flag.
 if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
@@ -154,7 +158,7 @@ try_compile(RESULT
   OUTPUT_VARIABLE OUTPUT)
 
 # Xcode is in serious need of help here
-if(HELP_XCODE)
+if(HELP_XCODE OR HELP_NINJA)
   try_compile(RESULT 
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
@@ -165,7 +169,7 @@ if(HELP_XCODE)
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-endif(HELP_XCODE)
+endif()
 
 message("Output from second build:\n${OUTPUT}")
 if(NOT RESULT)
