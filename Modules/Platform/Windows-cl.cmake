@@ -251,21 +251,3 @@ IF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
   CONFIGURE_FILE(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in 
                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXPlatform.cmake IMMEDIATE)
 ENDIF(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
-
-
-IF(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER)
-  # TODO try_compile doesn't need cmcldeps, find a better solution
-  if(NOT EXISTS ${CMAKE_TRY_COMPILE_SOURCE_DIR}/../ShowIncludes)
-    SET(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
-    FILE(WRITE ${showdir}/foo.h "\n")
-    FILE(WRITE ${showdir}/main.c "#include \"foo.h\" \nint main(){}\n")
-    EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} /nologo /showIncludes ${showdir}/main.c
-                    WORKING_DIRECTORY ${showdir} OUTPUT_VARIABLE showOut)
-    STRING(REPLACE main.c "" showOut1 ${showOut})
-    STRING(REPLACE "/" "\\" header1 ${showdir}/foo.h)
-    STRING(TOLOWER ${header1} header2)
-    STRING(REPLACE ${header2} "" showOut2 ${showOut1})
-    STRING(REPLACE "\n" "" showOut3 ${showOut2})
-    SET(CMAKE_CL_SHOWINCLUDE_PREFIX ${showOut3})
-  ENDIF()
-ENDIF()

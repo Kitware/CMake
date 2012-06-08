@@ -327,20 +327,14 @@ cmNinjaTargetGenerator
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
 
-  const char* cldeps = 0;
-  const char* showIncludePrefix = 0;
-  const char* cc = this->GetMakefile()->GetDefinition("CMAKE_C_COMPILER");
-  if(cc && std::string(cc).find("cl.exe") != std::string::npos)
-    {
-    cldeps = this->GetMakefile()->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
-    showIncludePrefix = this->GetMakefile()->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
-    }
+  cmMakefile* mf = this->GetMakefile();
+  const char* clDepsBinary = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
+  const char* clShowPrefix = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
 
   std::string depfile;
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
-  const char *depfileFlags =
-    this->GetMakefile()->GetDefinition(depfileFlagsName.c_str());
-  if (depfileFlags || (cldeps && showIncludePrefix)) {
+  const char *depfileFlags = mf->GetDefinition(depfileFlagsName.c_str());
+  if (depfileFlags || (clDepsBinary && clShowPrefix)) {
     std::string depfileFlagsStr = depfileFlags ? depfileFlags : "";
     depfile = "$out.d";
     cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
@@ -348,7 +342,7 @@ cmNinjaTargetGenerator
     cmSystemTools::ReplaceString(depfileFlagsStr, "<OBJECT>",
                                  "$out");
     cmSystemTools::ReplaceString(depfileFlagsStr, "<CMAKE_C_COMPILER>",
-                       this->GetMakefile()->GetDefinition("CMAKE_C_COMPILER"));
+                       mf->GetDefinition("CMAKE_C_COMPILER"));
     flags += " " + depfileFlagsStr;
   }
   vars.Flags = flags.c_str();
@@ -358,8 +352,7 @@ cmNinjaTargetGenerator
   std::string compileCmdVar = "CMAKE_";
   compileCmdVar += language;
   compileCmdVar += "_COMPILE_OBJECT";
-  std::string compileCmd =
-    this->GetMakefile()->GetRequiredDefinition(compileCmdVar.c_str());
+  std::string compileCmd = mf->GetRequiredDefinition(compileCmdVar.c_str());
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
@@ -370,10 +363,10 @@ cmNinjaTargetGenerator
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
 
-  if(cldeps && showIncludePrefix)
+  if(clDepsBinary && clShowPrefix)
     {
-    std::string prefix = showIncludePrefix;
-    cmdLine =  std::string(cldeps) + " $in $out.d $out " + "\"" + prefix + "\" " + cmdLine;
+    std::string prefix = clShowPrefix;
+    cmdLine = "\"" + std::string(clDepsBinary) + "\" $in $out.d $out \"" + prefix + "\" " + cmdLine;
     }
 
   // Write the rule for compiling file of the given language.
