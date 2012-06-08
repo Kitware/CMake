@@ -383,6 +383,10 @@ IF(CMAKE_ENABLE_NINJA)
     cmNinjaUtilityTargetGenerator.h
     )
   ADD_DEFINITIONS(-DCMAKE_USE_NINJA)
+  IF(MSVC) # TODO WIN32
+    ADD_EXECUTABLE(cmcldeps cmcldeps.cxx)
+    INSTALL_TARGETS(/bin cmcldeps)
+  ENDIF()
 ELSE()
   MESSAGE(STATUS "Ninja generator disabled, enforce with -DCMAKE_ENABLE_NINJA=ON")
 ENDIF()

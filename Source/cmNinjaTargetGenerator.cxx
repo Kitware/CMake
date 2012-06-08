@@ -330,16 +330,20 @@ cmNinjaTargetGenerator
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
 
-  bool cldeps = false;
+  const char* cldeps = 0;
+  const char* showIncludePrefix = 0;
   const char* cc = this->GetMakefile()->GetDefinition("CMAKE_C_COMPILER");
   if(cc && std::string(cc).find("cl.exe") != std::string::npos)
-    cldeps = true;
+    {
+    cldeps = this->GetMakefile()->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
+    showIncludePrefix = this->GetMakefile()->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
+    }
 
   std::string depfile;
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
   const char *depfileFlags =
     this->GetMakefile()->GetDefinition(depfileFlagsName.c_str());
-  if (depfileFlags || cldeps) {
+  if (depfileFlags || (cldeps && showIncludePrefix)) {
     std::string depfileFlagsStr = depfileFlags ? depfileFlags : "";
     depfile = "$out.d";
     cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
@@ -369,8 +373,11 @@ cmNinjaTargetGenerator
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
 
-  if(cldeps)
-      cmdLine = "cldeps.exe $out.d $out " + cmdLine;
+  if(cldeps && showIncludePrefix)
+    {
+    std::string prefix = showIncludePrefix;
+    cmdLine =  std::string(cldeps) + " $in $out.d $out " + "\"" + prefix + "\" " + cmdLine;
+    }
 
   // Write the rule for compiling file of the given language.
   std::ostringstream comment;
