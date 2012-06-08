@@ -533,9 +533,9 @@ function (find_jar VARIABLE)
         endif (${_state} STREQUAL "name")
     endforeach (arg ${ARGN})
 
-    if (${_jar_names} STREQUAL "")
+    if (_jar_names STREQUAL "")
         message(FATAL_ERROR "find_jar: No name to search for given")
-    endif (${_jar_names} STREQUAL "")
+    endif (_jar_names STREQUAL "")
 
     foreach (jar_name ${_jar_names})
         foreach (version ${_jar_versions})
