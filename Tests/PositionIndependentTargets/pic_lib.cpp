@@ -3,8 +3,10 @@
 
 class PIC_TEST_EXPORT Dummy
 {
-  int dummy()
-  {
-    return 0;
-  }
+  int dummy();
 };
+
+int Dummy::dummy()
+{
+  return 0;
+}
