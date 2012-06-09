@@ -1,3 +1,22 @@
+#=============================================================================
+# Copyright 2012 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
+#
+# When using Ninja cl.exe is wrapped by cmcldeps to extract the included
+# headers for dependency tracking.
+#
+# cmcldeps path is set, and cmcldeps needs to know the localized string
+# in front of each include path, so it can remove it.
+#
+
 IF(MSVC_C_ARCHITECTURE_ID AND CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER)
   STRING(REPLACE "cmake.exe" "cmcldeps.exe"  CMAKE_CMCLDEPS_EXECUTABLE ${CMAKE_COMMAND})
   SET(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
