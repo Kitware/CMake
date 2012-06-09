@@ -328,13 +328,25 @@ cmNinjaTargetGenerator
   vars.TargetPDB = "$TARGET_PDB";
 
   cmMakefile* mf = this->GetMakefile();
+  bool useClDeps = false;
   const char* clDepsBinary = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
   const char* clShowPrefix = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
+  const char* projectName  = mf->GetProjectName();
+  if (clDepsBinary && clShowPrefix)
+    {
+    useClDeps = true;
+    if (projectName && std::string(projectName) == "CMAKE_TRY_COMPILE")
+      {
+      // don't wrap for try_compile, TODO but why doesn't it work with cmcldeps?
+      useClDeps = false;
+      }
+    }
+
 
   std::string depfile;
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
   const char *depfileFlags = mf->GetDefinition(depfileFlagsName.c_str());
-  if (depfileFlags || (clDepsBinary && clShowPrefix)) {
+  if (depfileFlags || useClDeps) {
     std::string depfileFlagsStr = depfileFlags ? depfileFlags : "";
     depfile = "$out.d";
     cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
@@ -363,7 +375,7 @@ cmNinjaTargetGenerator
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
 
-  if(clDepsBinary && clShowPrefix)
+  if(useClDeps)
     {
     std::string prefix = clShowPrefix;
     cmdLine = "\"" + std::string(clDepsBinary) + "\" $in $out.d $out \"" + prefix + "\" " + cmdLine;
