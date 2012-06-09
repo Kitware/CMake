@@ -1,3 +1,4 @@
+
 #=============================================================================
 # Copyright 2012 Kitware, Inc.
 #
@@ -8,6 +9,8 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 #
 # When using Ninja cl.exe is wrapped by cmcldeps to extract the included
