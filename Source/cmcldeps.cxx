@@ -52,6 +52,8 @@ struct Subprocess {
 
   const string& GetOutput() const;
 
+  int ExitCode() const { return exit_code_; }
+
  private:
   Subprocess();
   bool Start(struct SubprocessSet* set, const string& command);
@@ -69,6 +71,7 @@ struct Subprocess {
   OVERLAPPED overlapped_;
   char overlapped_buf_[4 << 10];
   bool is_reading_;
+  int exit_code_;
 #else
   int fd_;
   pid_t pid_;
@@ -189,7 +192,7 @@ void Win32Fatal(const char* function) {
 
 }  // anonymous namespace
 
-Subprocess::Subprocess() : child_(NULL) , overlapped_(), is_reading_(false) {
+Subprocess::Subprocess() : child_(NULL) , overlapped_(), is_reading_(false), exit_code_(1) {
 }
 
 Subprocess::~Subprocess() {
@@ -338,7 +341,7 @@ ExitStatus Subprocess::Finish() {
 
   CloseHandle(child_);
   child_ = NULL;
-
+  exit_code_ = exit_code;
   return exit_code == 0              ? ExitSuccess :
          exit_code == CONTROL_C_EXIT ? ExitInterrupted :
                                        ExitFailure;
@@ -606,8 +609,9 @@ int main() {
   }
 
   bool success = subproc->Finish() == ExitSuccess;
-  string output = subproc->GetOutput();
+  int exit_code = subproc->ExitCode();
 
+  string output = subproc->GetOutput();
   delete subproc;
 
   // process the include directives and output everything else
@@ -635,7 +639,7 @@ int main() {
   }
 
   if (!success)
-    return 3;
+    return exit_code;
 
   // don't update .d until/unless we succeed compilation
   outputDepFile(dfile, objfile, includes);
