@@ -1,5 +1,5 @@
 IF(MSVC_C_ARCHITECTURE_ID AND CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER)
-  FIND_PROGRAM(CMAKE_CMCLDEPS_EXECUTABLE NAMES cmcldeps.exe)
+  STRING(REPLACE "cmake.exe" "cmcldeps.exe"  CMAKE_CMCLDEPS_EXECUTABLE ${CMAKE_COMMAND})
   SET(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
   FILE(WRITE ${showdir}/foo.h "\n")
   FILE(WRITE ${showdir}/main.c "#include \"foo.h\" \nint main(){}\n")
