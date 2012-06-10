@@ -96,13 +96,11 @@ void cmNinjaNormalTargetGenerator::Generate()
 #endif
     this->WriteLinkStatement();
     }
-
-  this->GetBuildFileStream() << "\n";
-  this->GetRulesFileStream() << "\n";
 }
 
 void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
 {
+#ifdef NINJA_GEN_VERBOSE_FILES
   cmGlobalNinjaGenerator::WriteDivider(this->GetRulesFileStream());
   this->GetRulesFileStream()
     << "# Rules for each languages for "
@@ -110,6 +108,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << " target "
     << this->GetTargetName()
     << "\n\n";
+#endif
 
   std::set<cmStdString> languages;
   this->GetTarget()->GetLanguages(languages);

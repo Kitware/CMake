@@ -306,10 +306,11 @@ void
 cmNinjaTargetGenerator
 ::WriteLanguageRules(const std::string& language)
 {
+#ifdef NINJA_GEN_VERBOSE_FILES
   this->GetRulesFileStream()
     << "# Rules for language " << language << "\n\n";
+#endif
   this->WriteCompileRule(language);
-  this->GetRulesFileStream() << "\n";
 }
 
 void

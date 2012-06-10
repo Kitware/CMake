@@ -46,7 +46,9 @@ void cmLocalNinjaGenerator::Generate()
   this->SetConfigName();
 
   this->WriteProcessedMakefile(this->GetBuildFileStream());
+#ifdef NINJA_GEN_VERBOSE_FILES
   this->WriteProcessedMakefile(this->GetRulesFileStream());
+#endif
 
   this->WriteBuildFileTop();
 

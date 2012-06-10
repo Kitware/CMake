@@ -43,12 +43,13 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
   std::string replace = comment;
   std::string::size_type lpos = 0;
   std::string::size_type rpos;
+  os << "\n#############################################\n";
   while((rpos = replace.find('\n', lpos)) != std::string::npos)
     {
     os << "# " << replace.substr(lpos, rpos - lpos) << "\n";
     lpos = rpos + 1;
     }
-  os << "# " << replace.substr(lpos) << "\n";
+  os << "# " << replace.substr(lpos) << "\n\n";
 }
 
 static bool IsIdentChar(char c)
@@ -318,6 +319,8 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
     cmGlobalNinjaGenerator::Indent(os, 1);
     os << "generator = 1\n";
     }
+
+  os << "\n";
 }
 
 void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
@@ -374,11 +377,20 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   , CompileCommandsStream(0)
   , Rules()
   , AllDependencies()
+  , CommentStream(0)
 {
   // // Ninja is not ported to non-Unix OS yet.
   // this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
+  this->ClearCommentStream();
 }
+
+void cmGlobalNinjaGenerator::ClearCommentStream()
+{
+  delete CommentStream;
+  CommentStream = new cmsys_ios::stringstream(std::ios::out);
+}
+
 
 //----------------------------------------------------------------------------
 // Virtual public methods.
@@ -537,7 +549,13 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
 {
   // Do not add the same rule twice.
   if (this->HasRule(name))
+    {
+    this->ClearCommentStream();
     return;
+    }
+
+  *this->RulesFileStream << this->GetCommentStream().str();
+  this->ClearCommentStream();
 
   this->Rules.insert(name);
   cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream,
