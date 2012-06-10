@@ -576,7 +576,7 @@ static void outputDepFile(const string& dfile, const string& objfile,
 
   for (vector<string>::iterator i(incs.begin()); i != incs.end(); ++i) {
     tmp = *i;
-    doEscape(tmp, "\\", "\\\\");
+    doEscape(tmp, "\\", "/");
     doEscape(tmp, " ", "\\ ");
     //doEscape(tmp, "(", "("); // TODO ninja cant read ( and )
     //doEscape(tmp, ")", ")");
