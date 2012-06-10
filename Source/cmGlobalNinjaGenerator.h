@@ -16,6 +16,8 @@
 #  include "cmGlobalGenerator.h"
 #  include "cmNinjaTypes.h"
 
+//#define NINJA_GEN_VERBOSE_FILES
+
 class cmLocalGenerator;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
@@ -215,6 +217,11 @@ public:
   cmGeneratedFileStream* GetRulesFileStream() const
   { return this->RulesFileStream; }
 
+  void ClearCommentStream();
+  cmsys_ios::stringstream& GetCommentStream() const
+  { return *this->CommentStream; }
+
+
   void AddCXXCompileCommand(const std::string &commandLine,
                             const std::string &sourceFile);
 
@@ -346,6 +353,9 @@ private:
   static cmLocalGenerator* LocalGenerator;
 
   static bool UsingMinGW;
+
+  cmsys_ios::stringstream* CommentStream;
+
 };
 
 #endif // ! cmGlobalNinjaGenerator_h
