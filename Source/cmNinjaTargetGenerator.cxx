@@ -338,7 +338,8 @@ cmNinjaTargetGenerator
     useClDeps = true;
     if (projectName && std::string(projectName) == "CMAKE_TRY_COMPILE")
       {
-      // don't wrap for try_compile, TODO but why doesn't it work with cmcldeps?
+      // don't wrap for try_compile,
+      // TODO but why doesn't it work with cmcldeps?
       useClDeps = false;
       }
     }
@@ -379,7 +380,8 @@ cmNinjaTargetGenerator
   if(useClDeps)
     {
     std::string prefix = clShowPrefix;
-    cmdLine = "\"" + std::string(clDepsBinary) + "\" $in $out.d $out \"" + prefix + "\" " + cmdLine;
+    cmdLine = "\"" + std::string(clDepsBinary) + "\" $in $out.d $out \""
+            + prefix + "\" " + cmdLine;
     }
 
   // Write the rule for compiling file of the given language.
