@@ -102,16 +102,17 @@ bool cmAddLibraryCommand
     STATIC. But at this point we know only the name of the target, but not
     yet its linker language. */
   if ((type != cmTarget::STATIC_LIBRARY) &&
+      (type != cmTarget::OBJECT_LIBRARY) &&
        (this->Makefile->GetCMakeInstance()->GetPropertyAsBool(
                                       "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
-    std::string msg = "ADD_LIBRARY for library ";
-    msg += args[0];
-    msg += " is used with the ";
-    msg += type==cmTarget::SHARED_LIBRARY ? "SHARED" : "MODULE";
-    msg += " option, but the target platform supports only STATIC libraries. "
-           "Building it STATIC instead. This may lead to problems.";
-    cmSystemTools::Message(msg.c_str() ,"Warning");
+    cmOStringStream w;
+    w <<
+      "ADD_LIBRARY called with " <<
+      (type==cmTarget::SHARED_LIBRARY ? "SHARED" : "MODULE") <<
+      " option but the target platform does not support dynamic linking. "
+      "Building a STATIC library instead. This may lead to problems.";
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
     type = cmTarget::STATIC_LIBRARY;
     }
 
