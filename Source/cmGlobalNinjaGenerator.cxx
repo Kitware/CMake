@@ -66,7 +66,7 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
   if (std::find_if(ident.begin(), ident.end(),
                    std::not1(std::ptr_fun(IsIdentChar))) != ident.end()) {
     static unsigned VarNum = 0;
-    std::ostringstream names;
+    cmOStringStream names;
     names << "ident" << VarNum++;
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
@@ -123,7 +123,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   cmGlobalNinjaGenerator::WriteComment(os, comment);
 
-  std::ostringstream builds;
+  cmOStringStream builds;
 
   // TODO: Better formatting for when there are multiple input/output files.
 
@@ -825,7 +825,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmLocalGenerator *lg = this->LocalGenerators[0];
   cmMakefile* mfRoot = lg->GetMakefile();
 
-  std::ostringstream cmd;
+  cmOStringStream cmd;
   cmd << lg->ConvertToOutputFormat(
            mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
            cmLocalGenerator::SHELL)
