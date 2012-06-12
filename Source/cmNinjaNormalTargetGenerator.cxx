@@ -179,16 +179,8 @@ cmNinjaNormalTargetGenerator
         responseFlag += rspfile;
         vars.Objects = responseFlag.c_str();
     }
-    std::string objdir =
-      this->GetLocalGenerator()->GetHomeRelativeOutputPath();
-    objdir += objdir.empty() ? "" : "/";
-    objdir += cmake::GetCMakeFilesDirectoryPostSlash();
-    objdir += this->GetTargetName();
-    objdir += ".dir";
-    objdir = this->GetLocalGenerator()->Convert(objdir.c_str(),
-                                                cmLocalGenerator::START_OUTPUT,
-                                                cmLocalGenerator::SHELL);
-    vars.ObjectDir = objdir.c_str();
+
+    vars.ObjectDir = "$OBJECT_DIR";
     vars.Target = "$out";
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
@@ -433,10 +425,24 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(path);
   }
 
-  path = this->GetLocalGenerator()->ConvertToOutputFormat(
-                   this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
-  vars["TARGET_PDB"] = path;
-  EnsureParentDirectoryExists(path);
+  // TODO move to GetTargetPDB
+  cmMakefile* mf = this->GetMakefile();
+  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
+    {
+    path = this->GetTargetPDB();
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                          ConvertToNinjaPath(path.c_str()).c_str(),
+                          cmLocalGenerator::SHELL);
+    EnsureParentDirectoryExists(path);
+    }
+
+  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
+    {
+    path = GetTarget()->GetSupportDirectory();
+    vars["OBJECT_DIR"] = ConvertToNinjaPath(path.c_str());
+    EnsureDirectoryExists(path);
+    }
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
     &this->GetTarget()->GetPreBuildCommands(),
