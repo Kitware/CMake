@@ -147,6 +147,9 @@ public:
                            const cmNinjaDeps& targets,
                            const std::string& comment = "");
 
+
+  static bool IsMinGW() { return UsingMinGW; }
+
 public:
   /// Default constructor.
   cmGlobalNinjaGenerator();

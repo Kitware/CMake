@@ -154,6 +154,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                               language.c_str());
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, language.c_str(), false);
+  if(cmGlobalNinjaGenerator::IsMinGW())
+    cmSystemTools::ReplaceString(includeFlags, "\\", "/");
   this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
   }
 
