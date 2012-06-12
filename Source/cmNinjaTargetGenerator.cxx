@@ -333,19 +333,29 @@ cmNinjaTargetGenerator
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
 
+
   cmMakefile* mf = this->GetMakefile();
+
   bool useClDeps = false;
-  const char* clDepsBinary = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
-  const char* clShowPrefix = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
-  const char* projectName  = mf->GetProjectName();
-  if (clDepsBinary && clShowPrefix)
+  std::string clDepsBinary;
+  std::string clShowPrefix;
+  if (lang == "C" || lang == "CXX")
     {
-    useClDeps = true;
-    if (projectName && std::string(projectName) == "CMAKE_TRY_COMPILE")
+    const char* depsPtr = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
+    const char* showPtr = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
+    if (depsPtr && showPtr)
       {
       // don't wrap for try_compile,
       // TODO but why doesn't it work with cmcldeps?
-      useClDeps = false;
+      const std::string projectName  = mf->GetProjectName() ?
+                                       mf->GetProjectName() : "";
+      if (projectName != "CMAKE_TRY_COMPILE")
+        {
+        useClDeps = true;
+        clDepsBinary = depsPtr;
+        clShowPrefix = showPtr;
+        vars.DependencyFile = "$DEP_FILE";
+        }
       }
     }
 
@@ -354,15 +364,13 @@ cmNinjaTargetGenerator
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
   const char *depfileFlags = mf->GetDefinition(depfileFlagsName.c_str());
   if (depfileFlags || useClDeps) {
-    std::string depfileFlagsStr = depfileFlags ? depfileFlags : "";
-    depfile = "$out.d";
-    cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
-                                 depfile.c_str());
-    cmSystemTools::ReplaceString(depfileFlagsStr, "<OBJECT>",
-                                 "$out");
-    cmSystemTools::ReplaceString(depfileFlagsStr, "<CMAKE_C_COMPILER>",
+    std::string depFlagsStr = depfileFlags ? depfileFlags : "";
+    depfile = "$DEP_FILE";
+    cmSystemTools::ReplaceString(depFlagsStr, "<DEPFILE>", "\"$DEP_FILE\"");
+    cmSystemTools::ReplaceString(depFlagsStr, "<OBJECT>",  "$out");
+    cmSystemTools::ReplaceString(depFlagsStr, "<CMAKE_C_COMPILER>",
                        mf->GetDefinition("CMAKE_C_COMPILER"));
-    flags += " " + depfileFlagsStr;
+    flags += " " + depFlagsStr;
   }
   vars.Flags = flags.c_str();
 
@@ -384,9 +392,8 @@ cmNinjaTargetGenerator
 
   if(useClDeps)
     {
-    std::string prefix = clShowPrefix;
-    cmdLine = "\"" + std::string(clDepsBinary) + "\" $in $out.d $out \""
-            + prefix + "\" " + cmdLine;
+    cmdLine = "\"" + clDepsBinary + "\" $in \"$DEP_FILE\" $out \""
+              + clShowPrefix + "\" " + cmdLine;
     }
 
   // Write the rule for compiling file of the given language.
@@ -509,6 +516,8 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
+  vars["DEP_FILE"] = objectFileName + ".d";;
+  EnsureParentDirectoryExists(objectFileName);
 
   // TODO move to GetTargetPDB
   cmMakefile* mf = this->GetMakefile();
@@ -598,4 +607,18 @@ cmNinjaTargetGenerator
   flag += (this->LocalGenerator->ConvertToLinkReference(
              this->ModuleDefinitionFile.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
+}
+
+void
+cmNinjaTargetGenerator
+::EnsureDirectoryExists(const std::string& dir)
+{
+  cmSystemTools::MakeDirectory(dir.c_str());
+}
+
+void
+cmNinjaTargetGenerator
+::EnsureParentDirectoryExists(const std::string& path)
+{
+  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
 }

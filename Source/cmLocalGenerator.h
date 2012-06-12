@@ -235,6 +235,7 @@ public:
     const char* LanguageCompileFlags;
     const char* Defines;
     const char* RuleLauncher;
+    const char* DependencyFile;
   };
 
   /** Set whether to treat conversions to SHELL as a link script shell.  */
