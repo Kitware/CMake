@@ -111,6 +111,9 @@ protected:
   // Helper to add flag for windows .def file.
   void AddModuleDefinitionFlag(std::string& flags);
 
+  void EnsureDirectoryExists(const std::string& dir);
+  void EnsureParentDirectoryExists(const std::string& path);
+
 private:
   cmTarget* Target;
   cmGeneratorTarget* GeneratorTarget;
