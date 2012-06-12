@@ -298,7 +298,7 @@ std::string cmNinjaTargetGenerator::GetTargetPDB() const
     targetFullPathPDB += this->Target->GetPDBName(this->GetConfigName());
     }
 
-  return ConvertToNinjaPath(targetFullPathPDB.c_str());
+  return targetFullPathPDB.c_str();
 }
 
 
@@ -504,8 +504,16 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
-  vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
+
+  // TODO move to GetTargetPDB
+  cmMakefile* mf = this->GetMakefile();
+  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
+    {
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                        ConvertToNinjaPath(GetTargetPDB().c_str()).c_str(),
+                        cmLocalGenerator::SHELL);
+    }
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
     {
