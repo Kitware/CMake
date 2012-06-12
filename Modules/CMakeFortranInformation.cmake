@@ -74,6 +74,18 @@ ENDIF()
 # catch any modules
 SET(CMAKE_NEEDS_REQUIRES_STEP_Fortran_FLAG 1)
 
+IF(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIC)
+  SET(CMAKE_Fortran_COMPILE_OPTIONS_PIC ${CMAKE_C_COMPILE_OPTIONS_PIC})
+ENDIF(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIC)
+
+IF(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIE)
+  SET(CMAKE_Fortran_COMPILE_OPTIONS_PIE ${CMAKE_C_COMPILE_OPTIONS_PIE})
+ENDIF(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIE)
+
+IF(NOT CMAKE_Fortran_COMPILE_OPTIONS_DLL)
+  SET(CMAKE_Fortran_COMPILE_OPTIONS_DLL ${CMAKE_C_COMPILE_OPTIONS_DLL})
+ENDIF(NOT CMAKE_Fortran_COMPILE_OPTIONS_DLL)
+
 # Create a set of shared library variable specific to Fortran
 # For 90% of the systems, these are the same flags as the C versions
 # so if these are not set just copy the flags from the c version

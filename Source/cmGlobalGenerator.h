@@ -277,6 +277,8 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return false; }
 
+  std::string GetSharedLibFlagsForLanguage(std::string const& lang);
+
   /** Generate an <output>.rule file path for a given command output.  */
   virtual std::string GenerateRuleFile(std::string const& output) const;
 
@@ -359,6 +361,7 @@ private:
   std::map<cmStdString, cmStdString> LanguageToOutputExtension;
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
   std::map<cmStdString, int> LanguageToLinkerPreference;
+  std::map<cmStdString, cmStdString> LanguageToOriginalSharedLibFlags;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };

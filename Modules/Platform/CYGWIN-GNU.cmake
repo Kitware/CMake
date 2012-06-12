@@ -35,7 +35,10 @@ macro(__cygwin_compiler_gnu lang)
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 
-  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "") # No -fPIC on cygwin
+   # No -fPIC on cygwin
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")
+  set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
 
   # Initialize C link type selection flags.  These flags are used when
   # building a shared library, shared module, or executable that links

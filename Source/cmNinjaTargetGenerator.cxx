@@ -140,11 +140,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   //   }
 
   // Add shared-library flags if needed.
-  {
-  bool shared = ((this->Target->GetType() == cmTarget::SHARED_LIBRARY) ||
-                 (this->Target->GetType() == cmTarget::MODULE_LIBRARY));
-  this->GetLocalGenerator()->AddSharedFlags(flags, language.c_str(), shared);
-  }
+  this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
+                                        language.c_str());
 
   // TODO: Handle response file.
   // Add include directory flags.
