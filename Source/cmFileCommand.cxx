@@ -1003,7 +1003,9 @@ protected:
     // Match rules are case-insensitive on some platforms.
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
     std::string lower = cmSystemTools::LowerCase(file);
-    file = lower.c_str();
+    const char* file_to_match = lower.c_str();
+#else
+    const char* file_to_match = file;
 #endif
 
     // Collect properties from all matching rules.
@@ -1012,7 +1014,7 @@ protected:
     for(std::vector<MatchRule>::iterator mr = this->MatchRules.begin();
         mr != this->MatchRules.end(); ++mr)
       {
-      if(mr->Regex.find(file))
+      if(mr->Regex.find(file_to_match))
         {
         matched = true;
         result.Exclude |= mr->Properties.Exclude;
