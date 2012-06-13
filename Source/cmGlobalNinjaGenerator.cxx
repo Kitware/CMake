@@ -377,18 +377,10 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   , CompileCommandsStream(0)
   , Rules()
   , AllDependencies()
-  , CommentStream(0)
 {
   // // Ninja is not ported to non-Unix OS yet.
   // this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
-  this->ClearCommentStream();
-}
-
-void cmGlobalNinjaGenerator::ClearCommentStream()
-{
-  delete CommentStream;
-  CommentStream = new cmsys_ios::stringstream(std::ios::out);
 }
 
 
@@ -550,12 +542,10 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
   // Do not add the same rule twice.
   if (this->HasRule(name))
     {
-    this->ClearCommentStream();
     return;
     }
 
-  *this->RulesFileStream << this->GetCommentStream().str();
-  this->ClearCommentStream();
+  *this->RulesFileStream;
 
   this->Rules.insert(name);
   cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream,
