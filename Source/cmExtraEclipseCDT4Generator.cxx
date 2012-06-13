@@ -286,6 +286,9 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   // set the make command
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string makeArgs = mf->GetSafeDefinition(
+                                               "CMAKE_ECLIPSE_MAKE_ARGUMENTS");
+
   fout <<
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.enabledIncrementalBuild</key>\n"
@@ -293,7 +296,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.command</key>\n"
-    "\t\t\t\t\t<value>" + this->GetEclipsePath(make) + "</value>\n"
+    "\t\t\t\t\t<value>" << this->GetEclipsePath(make) << "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.contents</key>\n"
@@ -305,7 +308,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.build.arguments</key>\n"
-    "\t\t\t\t\t<value></value>\n"
+    "\t\t\t\t\t<value>" << makeArgs << "</value>\n"
     "\t\t\t\t</dictionary>\n"
     "\t\t\t\t<dictionary>\n"
     "\t\t\t\t\t<key>org.eclipse.cdt.make.core.buildLocation</key>\n"
