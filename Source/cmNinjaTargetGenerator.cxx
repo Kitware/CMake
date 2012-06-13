@@ -336,7 +336,7 @@ cmNinjaTargetGenerator
   bool useClDeps = false;
   std::string clDepsBinary;
   std::string clShowPrefix;
-  if (lang == "C" || lang == "CXX")
+  if (lang == "C" || lang == "CXX" || lang == "RC")
     {
     const char* depsPtr = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
     const char* showPtr = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
@@ -349,8 +349,9 @@ cmNinjaTargetGenerator
       if (projectName != "CMAKE_TRY_COMPILE")
         {
         useClDeps = true;
-        clDepsBinary = depsPtr;
-        clShowPrefix = showPtr;
+        std::string qu = "\"";
+        clDepsBinary = qu + depsPtr + qu;
+        clShowPrefix = qu + showPtr + qu;
         vars.DependencyFile = "$DEP_FILE";
         }
       }
@@ -389,8 +390,10 @@ cmNinjaTargetGenerator
 
   if(useClDeps)
     {
-    cmdLine = "\"" + clDepsBinary + "\" $in \"$DEP_FILE\" $out \""
-              + clShowPrefix + "\" " + cmdLine;
+    std::string cl = mf->GetDefinition("CMAKE_C_COMPILER");
+    cl = "\"" + cl + "\" ";
+    cmdLine =   clDepsBinary + " " + lang + " $in \"$DEP_FILE\" $out "
+              + clShowPrefix + " " + cl   + cmdLine;
     }
 
   // Write the rule for compiling file of the given language.
