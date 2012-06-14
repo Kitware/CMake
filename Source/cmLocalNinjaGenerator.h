@@ -111,6 +111,7 @@ private:
 
   void AppendCustomCommandDeps(const cmCustomCommand *cc,
                                cmNinjaDeps &ninjaDeps);
+  std::string nopCommand() const;
   std::string BuildCommandLine(const std::vector<std::string> &cmdLines);
   void AppendCustomCommandLines(const cmCustomCommand *cc,
                                 std::vector<std::string> &cmdLines);

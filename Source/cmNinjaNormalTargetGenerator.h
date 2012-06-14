@@ -30,7 +30,7 @@ private:
   std::string LanguageLinkerRule() const;
   const char* GetVisibleTypeName() const;
   void WriteLanguagesRules();
-  void WriteLinkRule(bool useResponseFile);
+  void WriteLinkRule(const std::string& postfix = "");
   void WriteLinkStatement();
   void WriteObjectLibStatement();
   std::vector<std::string> ComputeLinkCmd();

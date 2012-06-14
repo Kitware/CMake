@@ -84,6 +84,7 @@ public:
                          const cmNinjaDeps& implicitDeps,
                          const cmNinjaDeps& orderOnlyDeps,
                          const cmNinjaVars& variables,
+                         bool suppressShell = false,
                          int cmdLineLimit = -1);
 
   /**
