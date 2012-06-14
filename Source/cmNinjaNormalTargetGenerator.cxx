@@ -479,13 +479,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
     if (targetOutput == targetOutputReal) {
       vars["POST_BUILD"] = postBuildCmdLine;
+      if (preLinkCmdLines.empty()) {
+        // rule with PRE_LINK will be selected, feed it
+        vars["PRE_LINK"] = locGtor->nopCommand();
+      }
     } else {
-      vars["POST_BUILD"] = ":";
       symlinkVars["POST_BUILD"] = postBuildCmdLine;
-    }
-    if (preLinkCmdLines.empty()) {
-      // rule with PRE_LINK will be selected, feed it
-      vars["PRE_LINK"] = locGtor->nopCommand();
     }
   }
 
@@ -496,7 +495,16 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmdLineLimit = 8000;
 #else
   // cmdLineLimit = ?? TODO
-  suppressShell = true;
+  suppressShell = false;
+
+  // TODO also use _NOSHELL rule
+  if (vars.find("PRE_LINK") == vars.end())
+    vars["PRE_LINK"] = locGtor->nopCommand();
+  if (vars.find("POST_BUILD") == vars.end())
+    vars["POST_BUILD"] = locGtor->nopCommand();
+  if (targetOutput != targetOutputReal &&
+      symlinkVars.find("POST_BUILD") == symlinkVars.end())
+    symlinkVars["POST_BUILD"] = locGtor->nopCommand();
 #endif
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
