@@ -245,6 +245,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 
 bool cmQtAutomoc::Run(const char* targetDirectory)
 {
+  bool success = true;
   cmake cm;
   cmGlobalGenerator* gg = this->CreateGlobalGenerator(&cm, targetDirectory);
   cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
@@ -256,7 +257,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    this->RunAutomoc();
+    success = this->RunAutomoc();
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
@@ -264,7 +265,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
   delete gg;
   gg = NULL;
   makefile = NULL;
-  return true;
+  return success;
 }
 
 
@@ -578,7 +579,7 @@ bool cmQtAutomoc::RunAutomoc()
 
   if (this->RunMocFailed)
     {
-    std::cerr << "returning failed.."<< std::endl;
+    std::cerr << "moc failed..."<< std::endl;
     return false;
     }
   outStream.flush();
