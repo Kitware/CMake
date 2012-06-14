@@ -496,7 +496,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmdLineLimit = 8000;
 #else
   // cmdLineLimit = ?? TODO
-  isCmdSequenc = true;
+  suppressShell = true;
 #endif
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
