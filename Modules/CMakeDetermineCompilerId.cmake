@@ -302,12 +302,6 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
       TIMEOUT 10
       )
 
-    IF("${lang}" STREQUAL "ASM")
-      MESSAGE(STATUS "Checked for ${vendor}")
-      MESSAGE(STATUS "   Output: -${output}-")
-      MESSAGE(STATUS "   Result: -${result}-")
-    ENDIF("${lang}" STREQUAL "ASM")
-
     IF("${output}" MATCHES "${regex}")
       FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
