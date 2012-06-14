@@ -833,7 +833,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   // Insert the alias into the map.  If the alias was already present in the
   // map and referred to another target, mark it as ambiguous.
   std::pair<TargetAliasMap::iterator, bool> newAlias =
-    TargetAliases.insert(make_pair(alias, target));
+    TargetAliases.insert(std::make_pair(alias, target));
   if (newAlias.second && newAlias.first->second != target)
     newAlias.first->second = 0;
 }
