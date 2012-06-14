@@ -478,12 +478,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
 
-  int cmdLineLimit = -1;
+  int cmdLineLimit;
 #ifdef _WIN32
-  cmdLineLimit = 8100;
+  cmdLineLimit = 8000;
 #else
-  // TODO
+  cmdLineLimit = -1; // TODO
 #endif
+
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment.str(),
