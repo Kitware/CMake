@@ -106,7 +106,6 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                         const cmNinjaDeps& implicitDeps,
                                         const cmNinjaDeps& orderOnlyDeps,
                                         const cmNinjaVars& variables,
-                                        bool suppressShell,
                                         int cmdLineLimit)
 {
   // Make sure there is a rule.
@@ -178,15 +177,8 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   // check if a response file rule should be used
   const std::string args = arguments.str();
-  if (suppressShell)
-    {
-    builds << "_NOSHELL";
-    }
-  else if (cmdLineLimit > 0 &&
-      args.size() + builds.str().size() > (size_t)cmdLineLimit)
-    {
+  if (cmdLineLimit > 0 && args.size() > (size_t)cmdLineLimit)
     builds << "_RSPFILE";
-    }
 
   os << builds.str() << args;
 

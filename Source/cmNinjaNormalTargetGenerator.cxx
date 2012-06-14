@@ -75,13 +75,9 @@ void cmNinjaNormalTargetGenerator::Generate()
     }
   else
     {
-    this->WriteLinkRule();
-#ifdef _WIN32
-    // TODO remove hardcoded strings
-    this->WriteLinkRule("_RSPFILE");
-    this->WriteLinkRule("_NOSHELL");
-#else
-     // TODO response file support only Linux
+    this->WriteLinkRule(false);
+#ifdef _WIN32 // TODO response file support only Linux
+    this->WriteLinkRule(true);
 #endif
     this->WriteLinkStatement();
     }
@@ -135,18 +131,12 @@ cmNinjaNormalTargetGenerator
 
 void
 cmNinjaNormalTargetGenerator
-::WriteLinkRule(const std::string& postfix)
+::WriteLinkRule(bool useResponseFile)
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
-
-  bool useResponseFile = false;
-  bool suppressShell = false;
-  if (!postfix.empty()) {
-    ruleName += postfix;
-    useResponseFile = (postfix == "_RSPFILE");
-    suppressShell   = (postfix == "_NOSHELL");
-  }
+  if (useResponseFile)
+    ruleName += "_RSPFILE";
 
   // Select whether to use a response file for objects.
   std::string rspfile;
@@ -220,10 +210,8 @@ cmNinjaNormalTargetGenerator
       {
       this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
       }
-    if (!suppressShell) {
-      linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
-      linkCmds.push_back("$POST_BUILD");
-    }
+    linkCmds.insert(linkCmds.begin(), "$PRE_LINK");
+    linkCmds.push_back("$POST_BUILD");
     std::string linkCmd =
       this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
@@ -343,7 +331,6 @@ cmNinjaNormalTargetGenerator
 
 void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 {
-  cmLocalNinjaGenerator* locGtor = this->GetLocalGenerator();
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
 
   // Write comments.
@@ -381,10 +368,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaDeps explicitDeps = this->GetObjects(),
               implicitDeps = this->ComputeLinkDeps();
 
-  locGtor->GetTargetFlags(vars["LINK_LIBRARIES"],
-                          vars["FLAGS"],
-                          vars["LINK_FLAGS"],
-                          *this->GetTarget());
+  this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
+                                            vars["FLAGS"],
+                                            vars["LINK_FLAGS"],
+                                            *this->GetTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
 
@@ -394,7 +381,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string flags = (targetType == cmTarget::EXECUTABLE
                                ? vars["FLAGS"]
                                : vars["ARCH_FLAGS"]);
-  locGtor->AddArchitectureFlags(flags,
+  this->GetLocalGenerator()->AddArchitectureFlags(flags,
                              this->GetTarget(),
                              this->TargetLinkLanguage,
                              this->GetConfigName());
@@ -413,16 +400,16 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
       if (!install_name_dir.empty()) {
         vars["INSTALLNAME_DIR"] =
-          locGtor->Convert(install_name_dir.c_str(),
-                           cmLocalGenerator::NONE,
-                           cmLocalGenerator::SHELL, false);
+          this->GetLocalGenerator()->Convert(install_name_dir.c_str(),
+              cmLocalGenerator::NONE,
+              cmLocalGenerator::SHELL, false);
       }
     }
   }
 
   std::string path;
   if (!this->TargetNameImport.empty()) {
-    path = locGtor->ConvertToOutputFormat(
+    path = this->GetLocalGenerator()->ConvertToOutputFormat(
                     targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
     vars["TARGET_IMPLIB"] = path;
     EnsureParentDirectoryExists(path);
@@ -434,7 +421,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
     {
     path = this->GetTargetPDB();
-    vars["TARGET_PDB"] = locGtor->ConvertToOutputFormat(
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                           ConvertToNinjaPath(path.c_str()).c_str(),
                           cmLocalGenerator::SHELL);
     EnsureParentDirectoryExists(path);
@@ -464,53 +451,38 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin();
          ci != cmdLists[i]->end(); ++ci) {
-      locGtor->AppendCustomCommandLines(&*ci, *cmdLineLists[i]);
+      this->GetLocalGenerator()->AppendCustomCommandLines(&*ci,
+                                                          *cmdLineLists[i]);
     }
   }
 
   // If we have any PRE_LINK commands, we need to go back to HOME_OUTPUT for
   // the link commands.
   if (!preLinkCmdLines.empty()) {
-    path = locGtor->ConvertToOutputFormat(
+    path = this->GetLocalGenerator()->ConvertToOutputFormat(
       this->GetMakefile()->GetHomeOutputDirectory(),
       cmLocalGenerator::SHELL);
     preLinkCmdLines.push_back("cd " + path);
-    vars["PRE_LINK"] = locGtor->BuildCommandLine(preLinkCmdLines);
   }
+
+  vars["PRE_LINK"] =
+    this->GetLocalGenerator()->BuildCommandLine(preLinkCmdLines);
+  std::string postBuildCmdLine =
+    this->GetLocalGenerator()->BuildCommandLine(postBuildCmdLines);
 
   cmNinjaVars symlinkVars;
-  if (!postBuildCmdLines.empty()) {
-    std::string postBuildCmdLine =
-      locGtor->BuildCommandLine(postBuildCmdLines);
-
-    if (targetOutput == targetOutputReal) {
-      vars["POST_BUILD"] = postBuildCmdLine;
-      if (preLinkCmdLines.empty()) {
-        // rule with PRE_LINK will be selected, feed it
-        vars["PRE_LINK"] = locGtor->nopCommand();
-      }
-    } else {
-      symlinkVars["POST_BUILD"] = postBuildCmdLine;
-    }
+  if (targetOutput == targetOutputReal) {
+    vars["POST_BUILD"] = postBuildCmdLine;
+  } else {
+    vars["POST_BUILD"] = ":";
+    symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
-
-  bool suppressShell = preLinkCmdLines.empty() && postBuildCmdLines.empty();
 
   int cmdLineLimit = -1;
 #ifdef _WIN32
-  cmdLineLimit = 8000;
+  cmdLineLimit = 8100;
 #else
-  // cmdLineLimit = ?? TODO
-  suppressShell = false;
-
-  // TODO also use _NOSHELL rule
-  if (vars.find("PRE_LINK") == vars.end())
-    vars["PRE_LINK"] = locGtor->nopCommand();
-  if (vars.find("POST_BUILD") == vars.end())
-    vars["POST_BUILD"] = locGtor->nopCommand();
-  if (targetOutput != targetOutputReal &&
-      symlinkVars.find("POST_BUILD") == symlinkVars.end())
-    symlinkVars["POST_BUILD"] = locGtor->nopCommand();
+  // TODO
 #endif
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
@@ -521,7 +493,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                      implicitDeps,
                                      emptyDeps,
                                      vars,
-                                     suppressShell,
                                      cmdLineLimit);
 
   if (targetOutput != targetOutputReal) {
