@@ -1699,8 +1699,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "cmake_automoc")
       {
         cmQtAutomoc automoc;
-        automoc.Run(args[2].c_str());
-        return 0;
+        bool automocSuccess = automoc.Run(args[2].c_str());
+        return automocSuccess ? 0 : 1;
       }
 #endif
 
