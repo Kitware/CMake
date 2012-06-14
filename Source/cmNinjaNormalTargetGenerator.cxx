@@ -391,12 +391,18 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating
   // code between the Makefile executable and library generators.
-  locGtor->AddArchitectureFlags(targetType == cmTarget::EXECUTABLE
+  std::string flags = (targetType == cmTarget::EXECUTABLE
                                ? vars["FLAGS"]
-                               : vars["ARCH_FLAGS"],
+                               : vars["ARCH_FLAGS"]);
+  locGtor->AddArchitectureFlags(flags,
                              this->GetTarget(),
                              this->TargetLinkLanguage,
                              this->GetConfigName());
+  if (targetType == cmTarget::EXECUTABLE) {
+    vars["FLAGS"] = flags;
+  } else {
+    vars["ARCH_FLAGS"] = flags;
+  }
   if (this->GetTarget()->HasSOName(this->GetConfigName())) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
