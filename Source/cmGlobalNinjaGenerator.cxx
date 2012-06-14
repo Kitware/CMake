@@ -553,8 +553,6 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
     return;
     }
 
-  *this->RulesFileStream;
-
   this->Rules.insert(name);
   cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream,
                                     name,
