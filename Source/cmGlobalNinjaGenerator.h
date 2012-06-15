@@ -317,7 +317,7 @@ private:
     ASD.insert(deps.begin(), deps.end());
   }
 
-  std::string cmGlobalNinjaGenerator::ninjaCmd() const;
+  std::string ninjaCmd() const;
 
 private:
   /// The file containing the build statement. (the relation ship of the
