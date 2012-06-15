@@ -698,7 +698,7 @@ int main() {
     // rc: src\x\x.rc  ->  cl: /Tc src\x\x.rc
     clrest = replace(clrest, srcfile, "/Tc " + srcfile);
 
-    cl = "\"" + cl + "\" /P /DRC_INVOKED ";
+    cl = "\"" + cl + "\" /EP /DRC_INVOKED ";
 
     // extract dependencies with cl.exe
     process(srcfilename, dfile, objfile,
