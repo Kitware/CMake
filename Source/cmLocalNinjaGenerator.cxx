@@ -264,14 +264,6 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(const cmCustomCommand *cc,
   }
 }
 
-std::string cmLocalNinjaGenerator::nopCommand() const {
-#ifdef _WIN32
-    return "cd .";
-#else
-    return ":";
-#endif
-}
-
 std::string cmLocalNinjaGenerator::BuildCommandLine(
                                     const std::vector<std::string> &cmdLines)
 {
@@ -280,10 +272,9 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   // don't use POST_BUILD.
   if (cmdLines.empty())
 #ifdef _WIN32
-    return "";
+    return "cd.";
 #else
-    // TODO use _NOSHELL rule also on Linux
-    return nopCommand();
+    return ":";
 #endif
 
   cmOStringStream cmd;
