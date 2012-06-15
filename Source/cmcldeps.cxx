@@ -58,7 +58,7 @@ struct Subprocess {
 
  private:
   Subprocess();
-  bool Start(struct SubprocessSet* set, const string& command);
+  bool Start(struct SubprocessSet* set, const string& command, const string& dir);
   void OnPipeReady();
 
   string buf_;
@@ -89,7 +89,7 @@ struct SubprocessSet {
   SubprocessSet();
   ~SubprocessSet();
 
-  Subprocess* Add(const string& command);
+  Subprocess* Add(const string& command, const string& dir);
   bool DoWork();
   Subprocess* NextFinished();
   void Clear();
@@ -244,7 +244,8 @@ HANDLE Subprocess::SetupPipe(HANDLE ioport) {
   return output_write_child;
 }
 
-bool Subprocess::Start(SubprocessSet* set, const string& command) {
+bool Subprocess::Start(SubprocessSet* set, const string& command,
+                                           const string& dir) {
   HANDLE child_pipe = SetupPipe(set->ioport_);
 
   SECURITY_ATTRIBUTES security_attributes;
@@ -273,7 +274,7 @@ bool Subprocess::Start(SubprocessSet* set, const string& command) {
   // lines greater than 8,191 chars.
   if (!CreateProcessA(NULL, (char*)command.c_str(), NULL, NULL,
                       /* inherit handles */ TRUE, CREATE_NEW_PROCESS_GROUP,
-                      NULL, NULL,
+                      NULL, (dir.empty() ? NULL : dir.c_str()),
                       &startup_info, &process_info)) {
     DWORD error = GetLastError();
     if (error == ERROR_FILE_NOT_FOUND) {
@@ -388,9 +389,9 @@ BOOL WINAPI SubprocessSet::NotifyInterrupted(DWORD dwCtrlType) {
   return FALSE;
 }
 
-Subprocess *SubprocessSet::Add(const string& command) {
+Subprocess *SubprocessSet::Add(const string& command, const string& dir) {
   Subprocess *subprocess = new Subprocess;
-  if (!subprocess->Start(this, command)) {
+  if (!subprocess->Start(this, command, dir)) {
     delete subprocess;
     return 0;
   }
@@ -615,10 +616,11 @@ static int process( const string& srcfilename,
                     const string& objfile,
                     const string& prefix,
                     const string& cmd,
+                    const string& dir = "",
                     bool quiet = false) {
 
   SubprocessSet subprocs;
-  Subprocess* subproc = subprocs.Add(cmd);
+  Subprocess* subproc = subprocs.Add(cmd, dir);
 
   if(!subproc)
     return 2;
@@ -700,11 +702,18 @@ int main() {
     // rc: src\x\x.rc  ->  cl: /Tc src\x\x.rc
     clrest = replace(clrest, srcfile, "/Tc " + srcfile);
 
-    cl = "\"" + cl + "\" /EP /DRC_INVOKED ";
+    cl = "\"" + cl + "\" /P /DRC_INVOKED ";
+
+    // call cl in object dir so the .i is generated there
+    string objdir;
+    std::string::size_type pos = objfile.rfind("\\");
+    if (pos != string::npos) {
+      objdir = objfile.substr(0, pos);
+    }
 
     // extract dependencies with cl.exe
     process(srcfilename, dfile, objfile,
-                  prefix, cl + nol + show + clrest, true);
+                  prefix, cl + nol + show + clrest, objdir, true);
 
     // compile rc file with rc.exe
     return process(srcfilename, "" , objfile, prefix, binpath + " " + rest);
