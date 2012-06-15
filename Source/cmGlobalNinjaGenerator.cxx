@@ -928,11 +928,22 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                   cmNinjaDeps());
 }
 
+std::string cmGlobalNinjaGenerator::ninjaCmd() const
+{
+  cmLocalGenerator* lgen = this->LocalGenerators[0];
+  if (lgen) {
+    return lgen->ConvertToOutputFormat(
+             lgen->GetMakefile()->GetRequiredDefinition("CMAKE_MAKE_PROGRAM"),
+                                    cmLocalGenerator::SHELL);
+  }
+  return "ninja";
+}
+
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "CLEAN",
-            "ninja -t clean",
+            (ninjaCmd() + " -t clean").c_str(),
             "Cleaning all built files...",
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
@@ -953,7 +964,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "HELP",
-            "ninja -t targets",
+            (ninjaCmd() + " -t tagets").c_str(),
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",
