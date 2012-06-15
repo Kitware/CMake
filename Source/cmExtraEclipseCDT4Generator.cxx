@@ -34,6 +34,9 @@ cmExtraEclipseCDT4Generator
   this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
+#ifdef CMAKE_USE_NINJA
+  this->SupportedGlobalGenerators.push_back("Ninja");
+#endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 
   this->SupportsVirtualFolders = true;
@@ -1070,9 +1073,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       }
 
     //insert rules for compiling, preprocessing and assembling individual files
-    cmLocalUnixMakefileGenerator3* lumg=(cmLocalUnixMakefileGenerator3*)*it;
     std::vector<std::string> objectFileTargets;
-    lumg->GetIndividualFileTargets(objectFileTargets);
+    (*it)->GetIndividualFileTargets(objectFileTargets);
     for(std::vector<std::string>::const_iterator fit=objectFileTargets.begin();
         fit != objectFileTargets.end();
         ++fit)

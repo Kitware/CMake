@@ -205,6 +205,10 @@ public:
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);
 
+  // Fill the vector with the target names for the object files,
+  // preprocessed files and assembly files.
+  virtual void GetIndividualFileTargets(std::vector<std::string>& targets) {}
+
   // Create a struct to hold the varibles passed into
   // ExpandRuleVariables
   struct RuleVariables

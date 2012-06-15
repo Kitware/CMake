@@ -44,6 +44,9 @@ cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
 :cmExternalMakefileProjectGenerator()
 {
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
+#ifdef CMAKE_USE_NINJA
+  this->SupportedGlobalGenerators.push_back("Ninja");
+#endif
 }
 
 void cmGlobalKdevelopGenerator::Generate()
