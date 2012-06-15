@@ -707,7 +707,7 @@ int main() {
                   prefix, cl + nol + show + clrest, true);
 
     // compile rc file with rc.exe
-    return process(srcfilename, "" , objfile, prefix, binpath + rest);
+    return process(srcfilename, "" , objfile, prefix, binpath + " " + rest);
   }
 
   usage("Invalid language specified.");
