@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <cstdio>
+
 using namespace std;
 
 #ifdef _WIN32
