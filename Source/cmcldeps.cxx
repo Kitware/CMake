@@ -683,11 +683,10 @@ int main() {
     srcfilename = srcfile.substr(pos + 1);
   }
 
-  std::string nol = " /nologo ";
   std::string show = " /showIncludes ";
   if (lang == "C" || lang == "CXX") {
     return process(srcfilename, dfile, objfile, prefix,
-                   binpath + nol + show + rest);
+                   binpath + show + rest);
   } else if (lang == "RC") {
     // "misuse" cl.exe to get headers from .rc files
 
@@ -702,7 +701,7 @@ int main() {
 
     // extract dependencies with cl.exe
     process(srcfilename, dfile, objfile,
-                  prefix, cl + nol + show + clrest, true);
+                  prefix, cl + show + clrest, true);
 
     // compile rc file with rc.exe
     return process(srcfilename, "" , objfile, prefix, binpath + nol + rest);
