@@ -31,6 +31,12 @@
 #include <signal.h>
 #endif
 
+#if defined(_WIN64)
+typedef unsigned __int64 cmULONG_PTR;
+#else
+typedef unsigned long cmULONG_PTR;
+#endif
+
 //#include "exit_status.h"
 enum ExitStatus {
   ExitSuccess,
@@ -57,7 +63,8 @@ struct Subprocess {
 
  private:
   Subprocess();
-  bool Start(struct SubprocessSet* set, const std::string& command, const std::string& dir);
+  bool Start(struct SubprocessSet* set, const std::string& command,
+                                        const std::string& dir);
   void OnPipeReady();
 
   std::string buf_;
@@ -67,7 +74,7 @@ struct Subprocess {
   /// other end of the pipe, usable in the child process.
   HANDLE SetupPipe(HANDLE ioport);
 
-  HANDLE child_;
+  PROCESS_INFORMATION child_;
   HANDLE pipe_;
   OVERLAPPED overlapped_;
   char overlapped_buf_[4 << 10];
@@ -193,8 +200,9 @@ void Win32Fatal(const char* function) {
 
 }  // anonymous namespace
 
-Subprocess::Subprocess() : child_(NULL) , overlapped_(), is_reading_(false),
+Subprocess::Subprocess() : overlapped_(), is_reading_(false),
                            exit_code_(1) {
+  child_.hProcess = NULL;
 }
 
 Subprocess::~Subprocess() {
@@ -203,7 +211,7 @@ Subprocess::~Subprocess() {
       Win32Fatal("CloseHandle");
   }
   // Reap child if forgotten.
-  if (child_)
+  if (child_.hProcess)
     Finish();
 }
 
@@ -220,7 +228,7 @@ HANDLE Subprocess::SetupPipe(HANDLE ioport) {
   if (pipe_ == INVALID_HANDLE_VALUE)
     Win32Fatal("CreateNamedPipe");
 
-  if (!CreateIoCompletionPort(pipe_, ioport, (ULONG_PTR)this, 0))
+  if (!CreateIoCompletionPort(pipe_, ioport, (cmULONG_PTR)this, 0))
     Win32Fatal("CreateIoCompletionPort");
 
   memset(&overlapped_, 0, sizeof(overlapped_));
@@ -299,7 +307,7 @@ bool Subprocess::Start(SubprocessSet* set, const std::string& command,
   CloseHandle(nul);
 
   CloseHandle(process_info.hThread);
-  child_ = process_info.hProcess;
+  child_ = process_info;
 
   return true;
 }
@@ -336,17 +344,17 @@ void Subprocess::OnPipeReady() {
 }
 
 ExitStatus Subprocess::Finish() {
-  if (!child_)
+  if (!child_.hProcess)
     return ExitFailure;
 
   // TODO: add error handling for all of these.
-  WaitForSingleObject(child_, INFINITE);
+  WaitForSingleObject(child_.hProcess, INFINITE);
 
   DWORD exit_code = 0;
-  GetExitCodeProcess(child_, &exit_code);
+  GetExitCodeProcess(child_.hProcess, &exit_code);
 
-  CloseHandle(child_);
-  child_ = NULL;
+  CloseHandle(child_.hProcess);
+  child_.hProcess = NULL;
   exit_code_ = exit_code;
   return exit_code == 0              ? ExitSuccess :
          exit_code == CONTROL_C_EXIT ? ExitInterrupted :
@@ -388,13 +396,14 @@ BOOL WINAPI SubprocessSet::NotifyInterrupted(DWORD dwCtrlType) {
   return FALSE;
 }
 
-Subprocess *SubprocessSet::Add(const std::string& command, const std::string& dir) {
+Subprocess *SubprocessSet::Add(const std::string& command,
+                               const std::string& dir) {
   Subprocess *subprocess = new Subprocess;
   if (!subprocess->Start(this, command, dir)) {
     delete subprocess;
     return 0;
   }
-  if (subprocess->child_)
+  if (subprocess->child_.hProcess)
     running_.push_back(subprocess);
   else
     finished_.push(subprocess);
@@ -406,7 +415,7 @@ bool SubprocessSet::DoWork() {
   Subprocess* subproc;
   OVERLAPPED* overlapped;
 
-  if (!GetQueuedCompletionStatus(ioport_, &bytes_read, (PULONG_PTR)&subproc,
+  if (!GetQueuedCompletionStatus(ioport_, &bytes_read, (cmULONG_PTR*)&subproc,
                                  &overlapped, INFINITE)) {
     if (GetLastError() != ERROR_BROKEN_PIPE)
       Win32Fatal("GetQueuedCompletionStatus");
@@ -441,10 +450,11 @@ Subprocess* SubprocessSet::NextFinished() {
 void SubprocessSet::Clear() {
   for (std::vector<Subprocess*>::iterator i = running_.begin();
        i != running_.end(); ++i) {
-    if ((*i)->child_)
+    if ((*i)->child_.hProcess) {
       if (!GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
-                                    GetProcessId((*i)->child_)))
+                                    (*i)->child_.dwProcessId))
         Win32Fatal("GenerateConsoleCtrlEvent");
+      }
   }
   for (std::vector<Subprocess*>::iterator i = running_.begin();
        i != running_.end(); ++i)
@@ -504,7 +514,8 @@ static std::string trimLeadingSpace(const std::string& cmdline) {
   return cmdline.substr(i);
 }
 
-static void doEscape(std::string& str, const std::string& search, const std::string& repl) {
+static void doEscape(std::string& str, const std::string& search,
+                                       const std::string& repl) {
   std::string::size_type pos = 0;
   while ((pos = str.find(search, pos)) != std::string::npos) {
     str.replace(pos, search.size(), repl);
@@ -578,12 +589,12 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   doEscape(tmp, " ", "\\ ");
   fprintf(out, "%s: \\\n", tmp.c_str());
 
-  for (std::vector<std::string>::iterator i(incs.begin()); i != incs.end(); ++i) {
-    tmp = *i;
+  std::vector<std::string>::iterator it = incs.begin();
+  for (; it != incs.end(); ++it) {
+    tmp = *it;
     doEscape(tmp, "\\", "/");
     doEscape(tmp, " ", "\\ ");
     fprintf(out, "%s \\\n", tmp.c_str());
-    //printf("include: %s \n", tmp.c_str());
   }
 
   fprintf(out, "\n");
