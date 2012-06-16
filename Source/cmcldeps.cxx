@@ -23,6 +23,7 @@
 #include <vector>
 #include <queue>
 #include <cstdio>
+#include <algorithm>
 
 
 #ifdef _WIN32
