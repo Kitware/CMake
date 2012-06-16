@@ -23,6 +23,7 @@
 #include <vector>
 #include <queue>
 #include <cstdio>
+#include <algorithm>
 
 
 #ifdef _WIN32
@@ -448,17 +449,17 @@ Subprocess* SubprocessSet::NextFinished() {
 }
 
 void SubprocessSet::Clear() {
-  for (std::vector<Subprocess*>::iterator i = running_.begin();
-       i != running_.end(); ++i) {
-    if ((*i)->child_.hProcess) {
+  std::vector<Subprocess*>::iterator it = running_.begin();
+  for (; it != running_.end(); ++it) {
+    if ((*it)->child_.hProcess) {
       if (!GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
-                                    (*i)->child_.dwProcessId))
+                                    (*it)->child_.dwProcessId))
         Win32Fatal("GenerateConsoleCtrlEvent");
       }
   }
-  for (std::vector<Subprocess*>::iterator i = running_.begin();
-       i != running_.end(); ++i)
-    delete *i;
+  it = running_.begin();
+  for (; it != running_.end(); ++it)
+    delete *it;
   running_.clear();
 }
 

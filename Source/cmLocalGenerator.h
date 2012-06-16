@@ -207,7 +207,7 @@ public:
 
   // Fill the vector with the target names for the object files,
   // preprocessed files and assembly files.
-  virtual void GetIndividualFileTargets(std::vector<std::string>& targets) {}
+  virtual void GetIndividualFileTargets(std::vector<std::string>&) {}
 
   // Create a struct to hold the varibles passed into
   // ExpandRuleVariables
