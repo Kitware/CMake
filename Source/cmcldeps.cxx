@@ -32,6 +32,10 @@
 #include <signal.h>
 #endif
 
+
+// bcc32 only finds remove(const char*)
+namespace stlport { }
+
 #if defined(_WIN64)
 typedef unsigned __int64 cmULONG_PTR;
 #else
@@ -429,8 +433,10 @@ bool SubprocessSet::DoWork() {
   subproc->OnPipeReady();
 
   if (subproc->Done()) {
+    using namespace std;
+    using namespace stlport;
     std::vector<Subprocess*>::iterator end =
-        std::remove(running_.begin(), running_.end(), subproc);
+        remove(running_.begin(), running_.end(), subproc);
     if (running_.end() != end) {
       finished_.push(subproc);
       running_.resize(end - running_.begin());
