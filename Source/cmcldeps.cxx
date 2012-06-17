@@ -577,8 +577,8 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
     return;
 
   // strip duplicates
-  sort(incs.begin(), incs.end());
-  incs.erase(unique(incs.begin(), incs.end()), incs.end());
+  std::sort(incs.begin(), incs.end());
+  incs.erase(std::unique(incs.begin(), incs.end()), incs.end());
 
   FILE* out = fopen(dfile.c_str(), "wb");
 
@@ -651,7 +651,7 @@ static int process( const std::string& srcfilename,
   std::string line;
   std::vector<std::string> includes;
   bool isFirstLine = true; // cl prints always first the source filename
-  while (getline(ss, line)) {
+  while (std::getline(ss, line)) {
     if (startsWith(line, prefix)) {
       std::string inc = trimLeadingSpace(line.substr(prefix.size()).c_str());
       if (inc[inc.size() - 1] == '\r') // blech, stupid \r\n
