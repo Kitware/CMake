@@ -32,6 +32,10 @@
 #include <signal.h>
 #endif
 
+
+// bcc32 only finds remove(const char*)
+namespace stlport { }
+
 #if defined(_WIN64)
 typedef unsigned __int64 cmULONG_PTR;
 #else
@@ -429,8 +433,10 @@ bool SubprocessSet::DoWork() {
   subproc->OnPipeReady();
 
   if (subproc->Done()) {
+    using namespace std;
+    using namespace stlport;
     std::vector<Subprocess*>::iterator end =
-        std::remove(running_.begin(), running_.end(), subproc);
+        remove(running_.begin(), running_.end(), subproc);
     if (running_.end() != end) {
       finished_.push(subproc);
       running_.resize(end - running_.begin());
@@ -577,8 +583,8 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
     return;
 
   // strip duplicates
-  sort(incs.begin(), incs.end());
-  incs.erase(unique(incs.begin(), incs.end()), incs.end());
+  std::sort(incs.begin(), incs.end());
+  incs.erase(std::unique(incs.begin(), incs.end()), incs.end());
 
   FILE* out = fopen(dfile.c_str(), "wb");
 
@@ -651,7 +657,7 @@ static int process( const std::string& srcfilename,
   std::string line;
   std::vector<std::string> includes;
   bool isFirstLine = true; // cl prints always first the source filename
-  while (getline(ss, line)) {
+  while (std::getline(ss, line)) {
     if (startsWith(line, prefix)) {
       std::string inc = trimLeadingSpace(line.substr(prefix.size()).c_str());
       if (inc[inc.size() - 1] == '\r') // blech, stupid \r\n
