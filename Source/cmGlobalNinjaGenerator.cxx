@@ -644,13 +644,22 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
     *this->CompileCommandsStream << "," << std::endl;
     }
 
+  std::string sourceFileName = sourceFile;
+  if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str()))
+    {
+    sourceFileName = cmSystemTools::CollapseFullPath(
+      sourceFileName.c_str(),
+      this->GetCMakeInstance()->GetHomeOutputDirectory());
+    }
+
+
   *this->CompileCommandsStream << "\n{\n"
      << "  \"directory\": \""
      << cmGlobalGenerator::EscapeJSON(buildFileDir) << "\",\n"
      << "  \"command\": \""
      << cmGlobalGenerator::EscapeJSON(commandLine) << "\",\n"
      << "  \"file\": \""
-     << cmGlobalGenerator::EscapeJSON(sourceFile) << "\"\n"
+     << cmGlobalGenerator::EscapeJSON(sourceFileName) << "\"\n"
      << "}";
 }
 
