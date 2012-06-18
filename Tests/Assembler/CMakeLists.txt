@@ -23,6 +23,7 @@ endif("${CMAKE_GENERATOR}" MATCHES "Makefile")
 
 
 if(SRCS)
+  set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}")
   enable_language(ASM OPTIONAL)
 else(SRCS)
   message(STATUS "No assembler enabled, using C")
