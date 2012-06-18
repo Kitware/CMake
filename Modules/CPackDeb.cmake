@@ -68,7 +68,11 @@
 # CPACK_DEBIAN_PACKAGE_HOMEPAGE
 #     Mandatory : NO
 #     Default   : -
-#     The URL of the web site for this package
+#     The URL of the web site for this package, preferably (when applicable) the
+#     site from which the original source can be obtained and any additional
+#     upstream documentation or information may be found.
+#     The content of this field is a simple URL without any surrounding
+#     characters such as <>.
 ##end
 ##variable
 # CPACK_DEBIAN_PACKAGE_SHLIBDEPS
@@ -137,6 +141,30 @@
 #     Packages can declare in their control file that they should overwrite
 #     files in certain other packages, or completely replace other packages.
 ##end
+##variable
+# CPACK_DEBIAN_PACKAGE_RECOMMENDS
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     Allows packages to declare a strong, but not absolute, dependency on other packages.
+##end
+##variable
+# CPACK_DEBIAN_PACKAGE_SUGGESTS
+#     Mandatory : NO
+#     Default   : -
+#     see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#     Allows packages to declare a suggested package install grouping.
+##end
+##variable
+# CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+#     Mandatory : NO
+#     Default   : -
+#     This variable allow advanced user to add custom script to the control.tar.gz
+#     Typical usage is for conffiles, postinst, postrm, prerm.
+#     Usage: SET(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+#            "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+##end
+
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
