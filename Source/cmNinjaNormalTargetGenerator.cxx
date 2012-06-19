@@ -90,7 +90,10 @@ void cmNinjaNormalTargetGenerator::Generate()
     }
   else
     {
-    this->WriteLinkRule();
+    this->WriteLinkRule(false);
+#ifdef _WIN32 // TODO response file support only Linux
+    this->WriteLinkRule(true);
+#endif
     this->WriteLinkStatement();
     }
 
@@ -144,17 +147,39 @@ cmNinjaNormalTargetGenerator
 
 void
 cmNinjaNormalTargetGenerator
-::WriteLinkRule()
+::WriteLinkRule(bool useResponseFile)
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
+  if (useResponseFile)
+    ruleName += "_RSPFILE";
+
+  // Select whether to use a response file for objects.
+  std::string rspfile;
 
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
     cmLocalGenerator::RuleVariables vars;
     vars.RuleLauncher = "RULE_LAUNCH_LINK";
     vars.CMTarget = this->GetTarget();
     vars.Language = this->TargetLinkLanguage;
-    vars.Objects = "$in";
+
+    std::string responseFlag;
+    if (!useResponseFile) {
+      vars.Objects = "$in";
+    } else {
+        // handle response file
+        std::string cmakeLinkVar = std::string("CMAKE_") +
+                        this->TargetLinkLanguage + "_RESPONSE_FILE_LINK_FLAG";
+        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar.c_str());
+        if(flag) {
+          responseFlag = flag;
+        } else {
+          responseFlag = "@";
+        }
+        rspfile = "$out.rsp";
+        responseFlag += rspfile;
+        vars.Objects = responseFlag.c_str();
+    }
     std::string objdir =
       this->GetLocalGenerator()->GetHomeRelativeOutputPath();
     objdir += objdir.empty() ? "" : "/";
@@ -201,7 +226,7 @@ cmNinjaNormalTargetGenerator
       vars.LanguageCompileFlags = langFlags.c_str();
     }
 
-    // Rule for linking library.
+    // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd();
     for(std::vector<std::string>::iterator i = linkCmds.begin();
         i != linkCmds.end();
@@ -214,7 +239,7 @@ cmNinjaNormalTargetGenerator
     std::string linkCmd =
       this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
-    // Write the linker rule.
+    // Write the linker rule with response file if needed.
     cmOStringStream comment;
     comment << "Rule for linking " << this->TargetLinkLanguage << " "
             << this->GetVisibleTypeName() << ".";
@@ -224,7 +249,9 @@ cmNinjaNormalTargetGenerator
     this->GetGlobalGenerator()->AddRule(ruleName,
                                         linkCmd,
                                         description.str(),
-                                        comment.str());
+                                        comment.str(),
+                                        /*depfile*/ "",
+                                        rspfile);
   }
 
   if (this->TargetNameOut != this->TargetNameReal) {
@@ -456,6 +483,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
 
+  int cmdLineLimit = -1;
+#ifdef _WIN32
+  cmdLineLimit = 8100;
+#else
+  // TODO
+#endif
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment.str(),
@@ -464,7 +497,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                      explicitDeps,
                                      implicitDeps,
                                      emptyDeps,
-                                     vars);
+                                     vars,
+                                     cmdLineLimit);
 
   if (targetOutput != targetOutputReal) {
     if (targetType == cmTarget::EXECUTABLE) {
