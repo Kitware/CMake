@@ -85,8 +85,6 @@ IF(NOT FLTK2_DIR)
     # Look in standard UNIX install locations.
     /usr/local/lib/fltk2
     /usr/lib/fltk2
-    /usr/local/include
-    /usr/include
     /usr/local/fltk2
     /usr/X11R6/include
 
@@ -193,8 +191,6 @@ IF(FLTK2_DIR)
     ENDIF(FLTK2_FLUID_EXECUTABLE)
 
     SET(FLTK2_INCLUDE_SEARCH_PATH ${FLTK2_INCLUDE_SEARCH_PATH}
-      /usr/local/include
-      /usr/include
       /usr/local/fltk2
       /usr/X11R6/include
       )
@@ -202,8 +198,6 @@ IF(FLTK2_DIR)
     FIND_PATH(FLTK2_INCLUDE_DIR fltk/run.h ${FLTK2_INCLUDE_SEARCH_PATH})
 
     SET(FLTK2_LIBRARY_SEARCH_PATH ${FLTK2_LIBRARY_SEARCH_PATH}
-      /usr/lib
-      /usr/local/lib
       /usr/local/fltk2/lib
       /usr/X11R6/lib
       ${FLTK2_INCLUDE_DIR}/lib

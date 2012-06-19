@@ -32,8 +32,6 @@ FIND_PATH(LUA_INCLUDE_DIR lua.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local
-  /usr
   /sw # Fink
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
@@ -48,8 +46,6 @@ FIND_LIBRARY(LUA_LIBRARY
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local
-  /usr
   /sw
   /opt/local
   /opt/csw

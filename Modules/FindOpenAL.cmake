@@ -68,8 +68,6 @@ FIND_PATH(OPENAL_INCLUDE_DIR al.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local
-  /usr
   /sw # Fink
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
@@ -85,8 +83,6 @@ FIND_LIBRARY(OPENAL_LIBRARY
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local
-  /usr
   /sw
   /opt/local
   /opt/csw

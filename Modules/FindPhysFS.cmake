@@ -30,8 +30,6 @@ FIND_PATH(PHYSFS_INCLUDE_DIR physfs.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local
-  /usr
   /sw # Fink
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
@@ -46,8 +44,6 @@ FIND_LIBRARY(PHYSFS_LIBRARY
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
-  /usr/local
-  /usr
   /sw
   /opt/local
   /opt/csw
