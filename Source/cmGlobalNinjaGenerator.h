@@ -16,6 +16,8 @@
 #  include "cmGlobalGenerator.h"
 #  include "cmNinjaTypes.h"
 
+//#define NINJA_GEN_VERBOSE_FILES
+
 class cmLocalGenerator;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
@@ -144,6 +146,9 @@ public:
   static void WriteDefault(std::ostream& os,
                            const cmNinjaDeps& targets,
                            const std::string& comment = "");
+
+
+  static bool IsMinGW() { return UsingMinGW; }
 
 public:
   /// Default constructor.
@@ -312,6 +317,8 @@ private:
     ASD.insert(deps.begin(), deps.end());
   }
 
+  std::string ninjaCmd() const;
+
 private:
   /// The file containing the build statement. (the relation ship of the
   /// compilation DAG).
@@ -346,6 +353,7 @@ private:
   static cmLocalGenerator* LocalGenerator;
 
   static bool UsingMinGW;
+
 };
 
 #endif // ! cmGlobalNinjaGenerator_h

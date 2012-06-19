@@ -55,21 +55,6 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 {
 }
 
-void
-cmNinjaNormalTargetGenerator
-::EnsureDirectoryExists(const std::string& dir)
-{
-  cmSystemTools::MakeDirectory(dir.c_str());
-}
-
-void
-cmNinjaNormalTargetGenerator
-::EnsureParentDirectoryExists(const std::string& path)
-{
-  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
-}
-
-
 void cmNinjaNormalTargetGenerator::Generate()
 {
   if (!this->TargetLinkLanguage) {
@@ -96,13 +81,11 @@ void cmNinjaNormalTargetGenerator::Generate()
 #endif
     this->WriteLinkStatement();
     }
-
-  this->GetBuildFileStream() << "\n";
-  this->GetRulesFileStream() << "\n";
 }
 
 void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
 {
+#ifdef NINJA_GEN_VERBOSE_FILES
   cmGlobalNinjaGenerator::WriteDivider(this->GetRulesFileStream());
   this->GetRulesFileStream()
     << "# Rules for each languages for "
@@ -110,6 +93,7 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << " target "
     << this->GetTargetName()
     << "\n\n";
+#endif
 
   std::set<cmStdString> languages;
   this->GetTarget()->GetLanguages(languages);
@@ -180,16 +164,8 @@ cmNinjaNormalTargetGenerator
         responseFlag += rspfile;
         vars.Objects = responseFlag.c_str();
     }
-    std::string objdir =
-      this->GetLocalGenerator()->GetHomeRelativeOutputPath();
-    objdir += objdir.empty() ? "" : "/";
-    objdir += cmake::GetCMakeFilesDirectoryPostSlash();
-    objdir += this->GetTargetName();
-    objdir += ".dir";
-    objdir = this->GetLocalGenerator()->Convert(objdir.c_str(),
-                                                cmLocalGenerator::START_OUTPUT,
-                                                cmLocalGenerator::SHELL);
-    vars.ObjectDir = objdir.c_str();
+
+    vars.ObjectDir = "$OBJECT_DIR";
     vars.Target = "$out";
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
@@ -402,13 +378,18 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating
   // code between the Makefile executable and library generators.
-  this->GetLocalGenerator()
-      ->AddArchitectureFlags(targetType == cmTarget::EXECUTABLE
+  std::string flags = (targetType == cmTarget::EXECUTABLE
                                ? vars["FLAGS"]
-                               : vars["ARCH_FLAGS"],
+                               : vars["ARCH_FLAGS"]);
+  this->GetLocalGenerator()->AddArchitectureFlags(flags,
                              this->GetTarget(),
                              this->TargetLinkLanguage,
                              this->GetConfigName());
+  if (targetType == cmTarget::EXECUTABLE) {
+    vars["FLAGS"] = flags;
+  } else {
+    vars["ARCH_FLAGS"] = flags;
+  }
   if (this->GetTarget()->HasSOName(this->GetConfigName())) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
@@ -434,10 +415,24 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(path);
   }
 
-  path = this->GetLocalGenerator()->ConvertToOutputFormat(
-                   this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
-  vars["TARGET_PDB"] = path;
-  EnsureParentDirectoryExists(path);
+  // TODO move to GetTargetPDB
+  cmMakefile* mf = this->GetMakefile();
+  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
+    {
+    path = this->GetTargetPDB();
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                          ConvertToNinjaPath(path.c_str()).c_str(),
+                          cmLocalGenerator::SHELL);
+    EnsureParentDirectoryExists(path);
+    }
+
+  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
+    {
+    path = GetTarget()->GetSupportDirectory();
+    vars["OBJECT_DIR"] = ConvertToNinjaPath(path.c_str());
+    EnsureDirectoryExists(path);
+    }
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
     &this->GetTarget()->GetPreBuildCommands(),
@@ -483,12 +478,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
 
-  int cmdLineLimit = -1;
+  int cmdLineLimit;
 #ifdef _WIN32
-  cmdLineLimit = 8100;
+  cmdLineLimit = 8000;
 #else
-  // TODO
+  cmdLineLimit = -1; // TODO
 #endif
+
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment.str(),

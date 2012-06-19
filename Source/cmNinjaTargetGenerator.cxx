@@ -151,6 +151,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                               language.c_str());
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, language.c_str(), false);
+  if(cmGlobalNinjaGenerator::IsMinGW())
+    cmSystemTools::ReplaceString(includeFlags, "\\", "/");
   this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
   }
 
@@ -298,7 +300,7 @@ std::string cmNinjaTargetGenerator::GetTargetPDB() const
     targetFullPathPDB += this->Target->GetPDBName(this->GetConfigName());
     }
 
-  return ConvertToNinjaPath(targetFullPathPDB.c_str());
+  return targetFullPathPDB.c_str();
 }
 
 
@@ -306,10 +308,11 @@ void
 cmNinjaTargetGenerator
 ::WriteLanguageRules(const std::string& language)
 {
+#ifdef NINJA_GEN_VERBOSE_FILES
   this->GetRulesFileStream()
     << "# Rules for language " << language << "\n\n";
+#endif
   this->WriteCompileRule(language);
-  this->GetRulesFileStream() << "\n";
 }
 
 void
@@ -327,20 +330,45 @@ cmNinjaTargetGenerator
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
 
+
+  cmMakefile* mf = this->GetMakefile();
+
+  bool useClDeps = false;
+  std::string clDepsBinary;
+  std::string clShowPrefix;
+  if (lang == "C" || lang == "CXX" || lang == "RC")
+    {
+    const char* depsPtr = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
+    const char* showPtr = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
+    if (depsPtr && showPtr)
+      {
+      // don't wrap for try_compile,
+      // TODO but why doesn't it work with cmcldeps?
+      const std::string projectName  = mf->GetProjectName() ?
+                                       mf->GetProjectName() : "";
+      if (projectName != "CMAKE_TRY_COMPILE")
+        {
+        useClDeps = true;
+        std::string qu = "\"";
+        clDepsBinary = qu + depsPtr + qu;
+        clShowPrefix = qu + showPtr + qu;
+        vars.DependencyFile = "$DEP_FILE";
+        }
+      }
+    }
+
+
   std::string depfile;
   std::string depfileFlagsName = "CMAKE_DEPFILE_FLAGS_" + language;
-  const char *depfileFlags =
-    this->GetMakefile()->GetDefinition(depfileFlagsName.c_str());
-  if (depfileFlags) {
-    std::string depfileFlagsStr = depfileFlags;
-    depfile = "$out.d";
-    cmSystemTools::ReplaceString(depfileFlagsStr, "<DEPFILE>",
-                                 depfile.c_str());
-    cmSystemTools::ReplaceString(depfileFlagsStr, "<OBJECT>",
-                                 "$out");
-    cmSystemTools::ReplaceString(depfileFlagsStr, "<CMAKE_C_COMPILER>",
-                       this->GetMakefile()->GetDefinition("CMAKE_C_COMPILER"));
-    flags += " " + depfileFlagsStr;
+  const char *depfileFlags = mf->GetDefinition(depfileFlagsName.c_str());
+  if (depfileFlags || useClDeps) {
+    std::string depFlagsStr = depfileFlags ? depfileFlags : "";
+    depfile = "$DEP_FILE";
+    cmSystemTools::ReplaceString(depFlagsStr, "<DEPFILE>", "\"$DEP_FILE\"");
+    cmSystemTools::ReplaceString(depFlagsStr, "<OBJECT>",  "$out");
+    cmSystemTools::ReplaceString(depFlagsStr, "<CMAKE_C_COMPILER>",
+                       mf->GetDefinition("CMAKE_C_COMPILER"));
+    flags += " " + depFlagsStr;
   }
   vars.Flags = flags.c_str();
 
@@ -349,8 +377,7 @@ cmNinjaTargetGenerator
   std::string compileCmdVar = "CMAKE_";
   compileCmdVar += language;
   compileCmdVar += "_COMPILE_OBJECT";
-  std::string compileCmd =
-    this->GetMakefile()->GetRequiredDefinition(compileCmdVar.c_str());
+  std::string compileCmd = mf->GetRequiredDefinition(compileCmdVar.c_str());
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
@@ -360,6 +387,14 @@ cmNinjaTargetGenerator
 
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+
+  if(useClDeps)
+    {
+    std::string cl = mf->GetDefinition("CMAKE_C_COMPILER");
+    cl = "\"" + cl + "\" ";
+    cmdLine =   clDepsBinary + " " + lang + " $in \"$DEP_FILE\" $out "
+              + clShowPrefix + " " + cl   + cmdLine;
+    }
 
   // Write the rule for compiling file of the given language.
   cmOStringStream comment;
@@ -481,8 +516,18 @@ cmNinjaTargetGenerator
   cmNinjaVars vars;
   vars["FLAGS"] = this->ComputeFlagsForObject(source, language);
   vars["DEFINES"] = this->ComputeDefines(source, language);
-  vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    this->GetTargetPDB().c_str(), cmLocalGenerator::SHELL);
+  vars["DEP_FILE"] = objectFileName + ".d";;
+  EnsureParentDirectoryExists(objectFileName);
+
+  // TODO move to GetTargetPDB
+  cmMakefile* mf = this->GetMakefile();
+  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
+    {
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                        ConvertToNinjaPath(GetTargetPDB().c_str()).c_str(),
+                        cmLocalGenerator::SHELL);
+    }
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
     {
@@ -562,4 +607,18 @@ cmNinjaTargetGenerator
   flag += (this->LocalGenerator->ConvertToLinkReference(
              this->ModuleDefinitionFile.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
+}
+
+void
+cmNinjaTargetGenerator
+::EnsureDirectoryExists(const std::string& dir)
+{
+  cmSystemTools::MakeDirectory(dir.c_str());
+}
+
+void
+cmNinjaTargetGenerator
+::EnsureParentDirectoryExists(const std::string& path)
+{
+  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
 }

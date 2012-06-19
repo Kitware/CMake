@@ -205,6 +205,10 @@ public:
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);
 
+  // Fill the vector with the target names for the object files,
+  // preprocessed files and assembly files.
+  virtual void GetIndividualFileTargets(std::vector<std::string>&) {}
+
   // Create a struct to hold the varibles passed into
   // ExpandRuleVariables
   struct RuleVariables
@@ -236,6 +240,7 @@ public:
     const char* LanguageCompileFlags;
     const char* Defines;
     const char* RuleLauncher;
+    const char* DependencyFile;
   };
 
   /** Set whether to treat conversions to SHELL as a link script shell.  */

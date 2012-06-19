@@ -43,12 +43,13 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
   std::string replace = comment;
   std::string::size_type lpos = 0;
   std::string::size_type rpos;
+  os << "\n#############################################\n";
   while((rpos = replace.find('\n', lpos)) != std::string::npos)
     {
     os << "# " << replace.substr(lpos, rpos - lpos) << "\n";
     lpos = rpos + 1;
     }
-  os << "# " << replace.substr(lpos) << "\n";
+  os << "# " << replace.substr(lpos) << "\n\n";
 }
 
 static bool IsIdentChar(char c)
@@ -176,7 +177,8 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   // check if a response file rule should be used
   const std::string args = arguments.str();
-  if (cmdLineLimit > 0 && args.size() > (size_t)cmdLineLimit)
+  if (cmdLineLimit > 0 &&
+       (args.size() + + builds.str().size()) > (size_t)cmdLineLimit)
     builds << "_RSPFILE";
 
   os << builds.str() << args;
@@ -318,6 +320,8 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
     cmGlobalNinjaGenerator::Indent(os, 1);
     os << "generator = 1\n";
     }
+
+  os << "\n";
 }
 
 void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
@@ -379,6 +383,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   // this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
 }
+
 
 //----------------------------------------------------------------------------
 // Virtual public methods.
@@ -458,9 +463,8 @@ void cmGlobalNinjaGenerator
     else if(*l == "RC")
       {
       // check if mingw is used
-      const char* cc = mf->GetDefinition("CMAKE_C_COMPILER");
-      if(cc && std::string(cc).find("gcc.exe") != std::string::npos)
-      {
+      if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
+        {
         UsingMinGW = true;
         std::string rc = cmSystemTools::FindProgram("windres");
         if(rc.empty())
@@ -470,7 +474,7 @@ void cmGlobalNinjaGenerator
       }
     this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
     this->ResolveLanguageCompiler(*l, mf, optional);
-  }
+    }
 }
 
 bool cmGlobalNinjaGenerator::UsingMinGW = false;
@@ -538,7 +542,9 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
 {
   // Do not add the same rule twice.
   if (this->HasRule(name))
+    {
     return;
+    }
 
   this->Rules.insert(name);
   cmGlobalNinjaGenerator::WriteRule(*this->RulesFileStream,
@@ -818,7 +824,7 @@ void cmGlobalNinjaGenerator::AddTargetAlias(const std::string& alias,
   // Insert the alias into the map.  If the alias was already present in the
   // map and referred to another target, mark it as ambiguous.
   std::pair<TargetAliasMap::iterator, bool> newAlias =
-    TargetAliases.insert(make_pair(alias, target));
+    TargetAliases.insert(std::make_pair(alias, target));
   if (newAlias.second && newAlias.first->second != target)
     newAlias.first->second = 0;
 }
@@ -922,11 +928,22 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                   cmNinjaDeps());
 }
 
+std::string cmGlobalNinjaGenerator::ninjaCmd() const
+{
+  cmLocalGenerator* lgen = this->LocalGenerators[0];
+  if (lgen) {
+    return lgen->ConvertToOutputFormat(
+             lgen->GetMakefile()->GetRequiredDefinition("CMAKE_MAKE_PROGRAM"),
+                                    cmLocalGenerator::SHELL);
+  }
+  return "ninja";
+}
+
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "CLEAN",
-            "ninja -t clean",
+            (ninjaCmd() + " -t clean").c_str(),
             "Cleaning all built files...",
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
@@ -947,7 +964,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "HELP",
-            "ninja -t targets",
+            (ninjaCmd() + " -t tagets").c_str(),
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",
