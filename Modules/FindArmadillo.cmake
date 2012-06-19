@@ -74,7 +74,7 @@ endif (ARMADILLO_INCLUDE_DIR)
 #======================
 
 
-# Checks 'RECQUIRED', 'QUIET' and versions.
+# Checks 'REQUIRED', 'QUIET' and versions.
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Armadillo
   REQUIRED_VARS ARMADILLO_LIBRARY ARMADILLO_INCLUDE_DIR
