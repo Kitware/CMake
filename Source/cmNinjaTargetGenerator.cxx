@@ -537,6 +537,15 @@ cmNinjaTargetGenerator
     std::string escapedSourceFileName =
       this->LocalGenerator->ConvertToOutputFormat(
         sourceFileName.c_str(), cmLocalGenerator::SHELL);
+
+    if (!cmSystemTools::FileIsFullPath(escapedSourceFileName.c_str()))
+      {
+      escapedSourceFileName = cmSystemTools::CollapseFullPath(
+        escapedSourceFileName.c_str(),
+        this->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory());
+      }
+
+
     compileObjectVars.Source = escapedSourceFileName.c_str();
     compileObjectVars.Object = objectFileName.c_str();
     compileObjectVars.Flags = vars["FLAGS"].c_str();
