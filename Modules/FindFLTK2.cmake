@@ -59,18 +59,14 @@ SET(FLTK2_DIR_STRING "directory containing FLTK2Config.cmake.  This is either th
 # Search only if the location is not already known.
 IF(NOT FLTK2_DIR)
   # Get the system search path as a list.
-  IF(UNIX)
-    STRING(REGEX MATCHALL "[^:]+" FLTK2_DIR_SEARCH1 "$ENV{PATH}")
-  ELSE(UNIX)
-    STRING(REGEX REPLACE "\\\\" "/" FLTK2_DIR_SEARCH1 "$ENV{PATH}")
-  ENDIF(UNIX)
-  STRING(REGEX REPLACE "/;" ";" FLTK2_DIR_SEARCH2 ${FLTK2_DIR_SEARCH1})
+  FILE(TO_CMAKE_PATH "$ENV{PATH}" FLTK2_DIR_SEARCH2)
 
   # Construct a set of paths relative to the system search path.
   SET(FLTK2_DIR_SEARCH "")
   FOREACH(dir ${FLTK2_DIR_SEARCH2})
     SET(FLTK2_DIR_SEARCH ${FLTK2_DIR_SEARCH} "${dir}/../lib/fltk")
   ENDFOREACH(dir)
+  STRING(REPLACE "//" "/" FLTK2_DIR_SEARCH "${FLTK2_DIR_SEARCH}")
 
   #
   # Look for an installation or build tree.
