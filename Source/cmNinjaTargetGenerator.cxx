@@ -497,9 +497,9 @@ cmNinjaTargetGenerator
       {
       escapedSourceFileName = cmSystemTools::CollapseFullPath(
         escapedSourceFileName.c_str(),
-        this->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory());
+        this->GetGlobalGenerator()->GetCMakeInstance()->
+          GetHomeOutputDirectory());
       }
-
 
     compileObjectVars.Source = escapedSourceFileName.c_str();
     compileObjectVars.Object = objectFileName.c_str();
