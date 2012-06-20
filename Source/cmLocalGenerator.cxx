@@ -2865,10 +2865,13 @@ cmLocalGenerator
     bool replaceExt = this->NeedBackwardsCompatibility(2, 4);
     if(!replaceExt)
       {
-      std::string repVar = "CMAKE_";
-      repVar += source.GetLanguage();
-      repVar += "_OUTPUT_EXTENSION_REPLACE";
-      replaceExt = this->Makefile->IsOn(repVar.c_str());
+      if(const char* lang = source.GetLanguage())
+        {
+        std::string repVar = "CMAKE_";
+        repVar += lang;
+        repVar += "_OUTPUT_EXTENSION_REPLACE";
+        replaceExt = this->Makefile->IsOn(repVar.c_str());
+        }
       }
 
     // Remove the source extension if it is to be replaced.
