@@ -128,13 +128,12 @@ class cmCTestBZR::RevnoParser: public cmCTestVC::LineParser
 {
 public:
   RevnoParser(cmCTestBZR* bzr, const char* prefix, std::string& rev):
-    BZR(bzr), Rev(rev)
+    Rev(rev)
     {
     this->SetLog(&bzr->Log, prefix);
     this->RegexRevno.compile("^([0-9]+)$");
     }
 private:
-  cmCTestBZR* BZR;
   std::string& Rev;
   cmsys::RegularExpression RegexRevno;
   virtual bool ProcessLine()

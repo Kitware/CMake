@@ -1416,10 +1416,9 @@ class cmMakefileTargetGeneratorObjectStrings
 {
 public:
   cmMakefileTargetGeneratorObjectStrings(std::vector<std::string>& strings,
-                                         cmMakefile* mf,
                                          cmLocalUnixMakefileGenerator3* lg,
                                          std::string::size_type limit):
-    Strings(strings), Makefile(mf), LocalGenerator(lg), LengthLimit(limit)
+    Strings(strings), LocalGenerator(lg), LengthLimit(limit)
     {
     this->Space = "";
     }
@@ -1454,7 +1453,6 @@ public:
     }
 private:
   std::vector<std::string>& Strings;
-  cmMakefile* Makefile;
   cmLocalUnixMakefileGenerator3* LocalGenerator;
   std::string::size_type LengthLimit;
   std::string CurrentString;
@@ -1469,7 +1467,7 @@ cmMakefileTargetGenerator
                       std::string::size_type limit)
 {
   cmMakefileTargetGeneratorObjectStrings
-    helper(objStrings, this->Makefile, this->LocalGenerator, limit);
+    helper(objStrings, this->LocalGenerator, limit);
   for(std::vector<std::string>::const_iterator i = this->Objects.begin();
       i != this->Objects.end(); ++i)
     {
