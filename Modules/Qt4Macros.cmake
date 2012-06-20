@@ -220,9 +220,9 @@ ENDMACRO (QT4_ADD_RESOURCES)
 
 MACRO(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
   GET_FILENAME_COMPONENT(_infile ${_interface} ABSOLUTE)
-  SET(_header ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h)
-  SET(_impl   ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp)
-  SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc)
+  SET(_header "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h")
+  SET(_impl   "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp")
+  SET(_moc    "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc")
 
   GET_SOURCE_FILE_PROPERTY(_nonamespace ${_interface} NO_NAMESPACE)
   IF(_nonamespace)
@@ -241,16 +241,16 @@ MACRO(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
     SET(_params ${_params} -i ${_include})
   ENDIF(_include)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
+  ADD_CUSTOM_COMMAND(OUTPUT "${_impl}" "${_header}"
       COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} ${_params} -p ${_basename} ${_infile}
       DEPENDS ${_infile} VERBATIM)
 
-  SET_SOURCE_FILES_PROPERTIES(${_impl} PROPERTIES SKIP_AUTOMOC TRUE)
+  SET_SOURCE_FILES_PROPERTIES("${_impl}" PROPERTIES SKIP_AUTOMOC TRUE)
 
-  QT4_GENERATE_MOC(${_header} ${_moc})
+  QT4_GENERATE_MOC("${_header}" "${_moc}")
 
-  SET(${_sources} ${${_sources}} ${_impl} ${_header} ${_moc})
-  MACRO_ADD_FILE_DEPENDENCIES(${_impl} ${_moc})
+  LIST(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
+  MACRO_ADD_FILE_DEPENDENCIES("${_impl}" "${_moc}")
 
 ENDMACRO(QT4_ADD_DBUS_INTERFACE)
 
@@ -306,27 +306,27 @@ MACRO(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
   ENDIF (_optionalBasename)
 
   SET(_optionalClassName "${ARGV5}")
-  SET(_header ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h)
-  SET(_impl   ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp)
-  SET(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc)
+  SET(_header "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h")
+  SET(_impl   "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp")
+  SET(_moc    "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc")
 
   IF(_optionalClassName)
-    ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
+    ADD_CUSTOM_COMMAND(OUTPUT "${_impl}" "${_header}"
        COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} -m -a ${_basename} -c ${_optionalClassName} -i ${_include} -l ${_parentClass} ${_infile}
        DEPENDS ${_infile} VERBATIM
     )
   ELSE(_optionalClassName)
-    ADD_CUSTOM_COMMAND(OUTPUT ${_impl} ${_header}
+    ADD_CUSTOM_COMMAND(OUTPUT "${_impl}" "${_header}"
        COMMAND ${QT_DBUSXML2CPP_EXECUTABLE} -m -a ${_basename} -i ${_include} -l ${_parentClass} ${_infile}
        DEPENDS ${_infile} VERBATIM
      )
   ENDIF(_optionalClassName)
 
-  QT4_GENERATE_MOC(${_header} ${_moc})
-  SET_SOURCE_FILES_PROPERTIES(${_impl} PROPERTIES SKIP_AUTOMOC TRUE)
-  MACRO_ADD_FILE_DEPENDENCIES(${_impl} ${_moc})
+  QT4_GENERATE_MOC("${_header}" "${_moc}")
+  SET_SOURCE_FILES_PROPERTIES("${_impl}" PROPERTIES SKIP_AUTOMOC TRUE)
+  MACRO_ADD_FILE_DEPENDENCIES("${_impl}" "${_moc}")
 
-  SET(${_sources} ${${_sources}} ${_impl} ${_header} ${_moc})
+  LIST(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
 ENDMACRO(QT4_ADD_DBUS_ADAPTOR)
 
 
