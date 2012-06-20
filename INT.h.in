@@ -260,14 +260,14 @@ An includer may test the following macros after inclusion:
 # endif
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # define @KWIML@_INT__NO_SCN8
-#elif defined(__HP_cc) || defined(__HP_aCC)
-# define @KWIML@_INT__NO_SCN8
 #elif defined(__BORLANDC__)
 # define @KWIML@_INT__NO_SCN8
 # define @KWIML@_INT__NO_SCN64
 #elif defined(_MSC_VER)
 # define @KWIML@_INT__NO_SCN8
 #elif defined(__WATCOMC__)
+# define @KWIML@_INT__NO_SCN8
+# elif defined(__hpux) /* HP runtime lacks support (any compiler) */
 # define @KWIML@_INT__NO_SCN8
 #endif
 
