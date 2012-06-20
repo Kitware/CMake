@@ -45,6 +45,7 @@ macro(add_RunCMake_test test)
     )
 endmacro()
 
+add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
 
 add_RunCMake_test(build_command)
