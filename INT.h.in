@@ -529,6 +529,12 @@ An includer may test the following macros after inclusion:
 # define @KWIML@_INT_PRIX32 "X"
 #endif
 
+#if defined(__hpux) && defined(__GNUC__) && !defined(__LP64__) \
+ && defined(__CONCAT__) && defined(__CONCAT_U__)
+  /* Some HPs define UINT32_C incorrectly and break GNU.  */
+# define @KWIML@_INT_BROKEN_UINT32_C
+#endif
+
 /* 32-bit constants */
 #if defined(INT32_C) && !defined(@KWIML@_INT_BROKEN_INT32_C)
 # define @KWIML@_INT_INT32_C(c) INT32_C(c)
