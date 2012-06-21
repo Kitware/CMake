@@ -48,7 +48,6 @@ private:
 
   std::vector<std::string> OrderedDirectories;
 
-  bool OrderedDirectoriesComputed;
   std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
   std::vector<cmOrderDirectoriesConstraint*> ImplicitDirEntries;
   std::vector<std::string> UserDirectories;
