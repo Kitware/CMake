@@ -91,6 +91,9 @@ run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} add .
   )
 run_child(WORKING_DIRECTORY ${TOP}/import
+  COMMAND ${GIT} config core.safecrlf false
+  )
+run_child(WORKING_DIRECTORY ${TOP}/import
   COMMAND ${GIT} submodule add ${MOD_REPO} module
   )
 run_child(WORKING_DIRECTORY ${TOP}/import
