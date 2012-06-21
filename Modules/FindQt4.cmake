@@ -102,15 +102,28 @@
 #        accompanying header file foo.h.
 #        If a source file has the SKIP_AUTOMOC property set it will be ignored by this macro.
 #
+#        You should have a look on the AUTOMOC property for targets to achieve the same results.
+#
 #  macro QT4_ADD_DBUS_INTERFACE(outfiles interface basename)
-#        create a the interface header and implementation files with the 
+#        Create a the interface header and implementation files with the
 #        given basename from the given interface xml file and add it to 
-#        the list of sources
+#        the list of sources.
+#
+#        You can pass additional parameters to the qdbusxml2cpp call by setting
+#        properties on the input file:
+#
+#        INCLUDE the given file will be included in the generate interface header
+#
+#        CLASSNAME the generated class is named accordingly
+#
+#        NO_NAMESPACE the generated class is not wrapped in a namespace
 #
 #  macro QT4_ADD_DBUS_INTERFACES(outfiles inputfile ... )
-#        create the interface header and implementation files 
-#        for all listed interface xml files
-#        the name will be automatically determined from the name of the xml file
+#        Create the interface header and implementation files
+#        for all listed interface xml files.
+#        The basename will be automatically determined from the name of the xml file.
+#
+#        The source file properties described for QT4_ADD_DBUS_INTERFACE also apply here.
 #
 #  macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] [classname])
 #        create a dbus adaptor (header and implementation file) from the xml file
@@ -217,7 +230,7 @@
 #  QT_QAXCONTAINER_INCLUDE_DIR Path to "include/ActiveQt" (Windows only)
 #  QT_QAXSERVER_INCLUDE_DIR    Path to "include/ActiveQt" (Windows only)
 #  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"         
-#  QT_QTDBUS_INCLUDE_DIR       Path to "include/QtDBus" 
+#  QT_QTDBUS_INCLUDE_DIR       Path to "include/QtDBus"
 #  QT_QTDESIGNER_INCLUDE_DIR   Path to "include/QtDesigner" 
 #  QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR   Path to "include/QtDesigner"
 #  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui" 
