@@ -43,18 +43,14 @@ SET(SQUISH_CLIENT_EXECUTABLE_STRING "The squishclient executable program.")
 # Search only if the location is not already known.
 IF(NOT SQUISH_INSTALL_DIR)
   # Get the system search path as a list.
-  IF(UNIX)
-    STRING(REGEX MATCHALL "[^:]+" SQUISH_INSTALL_DIR_SEARCH1 "$ENV{PATH}")
-  ELSE(UNIX)
-    STRING(REGEX REPLACE "\\\\" "/" SQUISH_INSTALL_DIR_SEARCH1 "$ENV{PATH}")
-  ENDIF(UNIX)
-  STRING(REGEX REPLACE "/;" ";" SQUISH_INSTALL_DIR_SEARCH2 ${SQUISH_INSTALL_DIR_SEARCH1})
+  FILE(TO_CMAKE_PATH "$ENV{PATH}" SQUISH_INSTALL_DIR_SEARCH2)
 
   # Construct a set of paths relative to the system search path.
   SET(SQUISH_INSTALL_DIR_SEARCH "")
   FOREACH(dir ${SQUISH_INSTALL_DIR_SEARCH2})
     SET(SQUISH_INSTALL_DIR_SEARCH ${SQUISH_INSTALL_DIR_SEARCH} "${dir}/../lib/fltk")
   ENDFOREACH(dir)
+  STRING(REPLACE "//" "/" SQUISH_INSTALL_DIR_SEARCH "${SQUISH_INSTALL_DIR_SEARCH}")
 
   # Look for an installation
   FIND_PATH(SQUISH_INSTALL_DIR bin/squishrunner
