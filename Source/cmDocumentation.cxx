@@ -221,7 +221,7 @@ DOCUMENT_INTRO(CompatCommands, "cmakecompat",
 cmDocumentation::cmDocumentation()
 :CurrentFormatter(0)
 {
-  this->SetForm(TextForm);
+  this->SetForm(TextForm, 0);
   this->addCommonStandardDocSections();
   this->ShowGenerators = true;
 }
@@ -594,7 +594,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       i != this->RequestedHelpItems.end();
       ++i)
     {
-    this->SetForm(i->HelpForm);
+    this->SetForm(i->HelpForm, i->ManSection);
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
@@ -1269,9 +1269,9 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::Print(Form f, std::ostream& os)
+void cmDocumentation::Print(Form f, int manSection, std::ostream& os)
 {
-  this->SetForm(f);
+  this->SetForm(f, manSection);
   this->Print(os);
 }
 
@@ -1879,7 +1879,7 @@ void cmDocumentation::CreateFullDocumentation()
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetForm(Form f)
+void cmDocumentation::SetForm(Form f, int manSection)
 {
   switch(f)
   {
@@ -1890,6 +1890,7 @@ void cmDocumentation::SetForm(Form f)
       this->CurrentFormatter = &this->DocbookFormatter;
       break;
     case ManForm:
+      this->ManFormatter.SetManSection(manSection);
       this->CurrentFormatter = &this->ManFormatter;
       break;
     case TextForm:

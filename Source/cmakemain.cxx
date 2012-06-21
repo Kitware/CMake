@@ -418,7 +418,7 @@ int do_cmake(int ac, char** av)
       {
       doc.ClearSections();
       doc.SetSection("NOTE", cmDocumentationNOTE);
-      doc.Print(cmDocumentation::UsageForm, std::cerr);
+      doc.Print(cmDocumentation::UsageForm, 0, std::cerr);
       return 1;
       }
     return result;

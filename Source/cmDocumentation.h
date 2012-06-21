@@ -108,7 +108,7 @@ public:
    * Print documentation in the given form.  All previously added
    * sections will be generated.
    */
-  void Print(Form f, std::ostream& os);
+  void Print(Form f, int manSection, std::ostream& os);
 
   /**
    * Print documentation in the current form.  All previously added
@@ -190,7 +190,7 @@ public:
                                std::vector<cmDocumentationEntry>& commands,
                                cmake* cm);
 private:
-  void SetForm(Form f);
+  void SetForm(Form f, int manSection);
   void SetDocName(const char* docname);
 
   bool CreateSingleModule(const char* fname,
@@ -247,11 +247,12 @@ private:
 
   struct RequestedHelpItem
   {
-    RequestedHelpItem():HelpForm(TextForm), HelpType(None) {}
+    RequestedHelpItem():HelpForm(TextForm), HelpType(None), ManSection(1) {}
     cmDocumentationEnums::Form HelpForm;
     cmDocumentationEnums::Type HelpType;
     std::string Filename;
     std::string Argument;
+    int ManSection;
   };
 
   std::vector<RequestedHelpItem> RequestedHelpItems;

@@ -19,7 +19,13 @@
 
 cmDocumentationFormatterMan::cmDocumentationFormatterMan()
 :cmDocumentationFormatter()
+,ManSection(1)
 {
+}
+
+void cmDocumentationFormatterMan::SetManSection(int manSection)
+{
+  this->ManSection = manSection;
 }
 
 void cmDocumentationFormatterMan
@@ -87,7 +93,7 @@ void cmDocumentationFormatterMan::PrintHeader(const char* docname,
 
   this->EscapeText(s_docname);
   this->EscapeText(s_appname);
-  os << ".TH " << s_docname << " 1 \""
+  os << ".TH " << s_docname << " " << this->ManSection << " \""
     << cmSystemTools::GetCurrentDateTime("%B %d, %Y").c_str()
     << "\" \"" << s_appname
     << " " << cmVersion::GetCMakeVersion()
