@@ -642,7 +642,8 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 
 
 cmDocumentation::Form cmDocumentation::GetFormFromFilename(
-                                                   const std::string& filename)
+                                                   const std::string& filename,
+                                                   int* manSection)
 {
   std::string ext = cmSystemTools::GetFilenameLastExtension(filename);
   ext = cmSystemTools::UpperCase(ext);
@@ -659,6 +660,10 @@ cmDocumentation::Form cmDocumentation::GetFormFromFilename(
   // ".1" to ".9" should be manpages
   if ((ext.length()==2) && (ext[1] >='1') && (ext[1]<='9'))
     {
+    if (manSection)
+      {
+      *manSection = ext[1] - '0';
+      }
     return cmDocumentation::ManForm;
     }
 
@@ -1128,49 +1133,57 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       {
       help.HelpType = cmDocumentation::Properties;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-policies") == 0)
       {
       help.HelpType = cmDocumentation::Policies;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-variables") == 0)
       {
       help.HelpType = cmDocumentation::Variables;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-modules") == 0)
       {
       help.HelpType = cmDocumentation::Modules;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-custom-modules") == 0)
       {
       help.HelpType = cmDocumentation::CustomModules;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-commands") == 0)
       {
       help.HelpType = cmDocumentation::Commands;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-compatcommands") == 0)
       {
       help.HelpType = cmDocumentation::CompatCommands;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
       help.HelpType = cmDocumentation::Full;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-html") == 0)
       {
@@ -1183,6 +1196,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpType = cmDocumentation::Full;
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::ManForm;
+      help.ManSection = 1;
       }
     else if(strcmp(argv[i], "--help-command") == 0)
       {
@@ -1190,35 +1204,40 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
       help.Argument = cmSystemTools::LowerCase(help.Argument);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-module") == 0)
       {
       help.HelpType = cmDocumentation::SingleModule;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-property") == 0)
       {
       help.HelpType = cmDocumentation::SingleProperty;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-policy") == 0)
       {
       help.HelpType = cmDocumentation::SinglePolicy;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-variable") == 0)
       {
       help.HelpType = cmDocumentation::SingleVariable;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename);
+      help.HelpForm = this->GetFormFromFilename(help.Filename,
+                                                &help.ManSection);
       }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {

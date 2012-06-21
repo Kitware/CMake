@@ -133,7 +133,8 @@ public:
   /** Set CMAKE_MODULE_PATH so we can find additional cmake modules */
   void SetCMakeModulePath(const char* path)  { this->CMakeModulePath = path;}
 
-  static Form GetFormFromFilename(const std::string& filename);
+  static Form GetFormFromFilename(const std::string& filename,
+                                  int* ManSection);
 
   /** Add common (to all tools) documentation section(s) */
   void addCommonStandardDocSections();
