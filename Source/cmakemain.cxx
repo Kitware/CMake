@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-// include these first, otherwise there will be problems on Windows 
-// with GetCurrentDirectory() being redefined 
+// include these first, otherwise there will be problems on Windows
+// with GetCurrentDirectory() being redefined
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmDynamicLoader.h"
 #include "cmDocumentation.h"
@@ -183,7 +183,7 @@ static const char * cmDocumentationOptions[][3] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},
-  {"--help-policy cmp [file]", 
+  {"--help-policy cmp [file]",
    "Print help for a single policy and exit.",
    "Full documentation specific to the given policy is displayed."
    "If a file is specified, the documentation is written into and the output "
@@ -194,7 +194,7 @@ static const char * cmDocumentationOptions[][3] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},
-  {"--help-property prop [file]", 
+  {"--help-property prop [file]",
    "Print help for a single property and exit.",
    "Full documentation specific to the given property is displayed."
    "If a file is specified, the documentation is written into and the output "
@@ -212,7 +212,7 @@ static const char * cmDocumentationOptions[][3] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},
-  {"--help-variable var [file]", 
+  {"--help-variable var [file]",
    "Print help for a single variable and exit.",
    "Full documentation specific to the given variable is displayed."
    "If a file is specified, the documentation is written into and the output "
@@ -296,13 +296,13 @@ static std::string cmakemainGetStack(void *clientdata)
   return msg;
 }
 
-static void cmakemainErrorCallback(const char* m, const char*, bool&, 
+static void cmakemainErrorCallback(const char* m, const char*, bool&,
                                    void *clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }
 
-static void cmakemainProgressCallback(const char *m, float prog, 
+static void cmakemainProgressCallback(const char *m, float prog,
                                       void* clientdata)
 {
   cmMakefile* mf = cmakemainGetMakefile(clientdata);
@@ -348,7 +348,7 @@ int do_cmake(int ac, char** av)
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
-    std::cerr << "Current working directory cannot be established." 
+    std::cerr << "Current working directory cannot be established."
               << std::endl;
     nocwd = 1;
     }
@@ -357,13 +357,13 @@ int do_cmake(int ac, char** av)
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
   if(doc.CheckOptions(ac, av, "-E") || nocwd)
-    { 
+    {
     // Construct and print requested documentation.
     cmake hcm;
     hcm.AddCMakePaths();
     doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
 
-    // the command line args are processed here so that you can do 
+    // the command line args are processed here so that you can do
     // -DCMAKE_MODULE_PATH=/some/path and have this value accessible here
     std::vector<std::string> args;
     for(int i =0; i < ac; ++i)
@@ -401,7 +401,7 @@ int do_cmake(int ac, char** av)
     doc.SetSections(propDocs);
 
     cmDocumentationEntry e;
-    e.Brief = 
+    e.Brief =
       "variables defined by cmake, that give information about the project, "
       "and cmake";
     doc.PrependSection("Variables that Provide Information",e);
@@ -418,7 +418,7 @@ int do_cmake(int ac, char** av)
       {
       doc.ClearSections();
       doc.SetSection("NOTE", cmDocumentationNOTE);
-      doc.Print(cmDocumentation::UsageForm, std::cerr);
+      doc.Print(cmDocumentation::UsageForm, 0, std::cerr);
       return 1;
       }
     return result;
@@ -426,13 +426,13 @@ int do_cmake(int ac, char** av)
 #else
   if ( nocwd || ac == 1 )
     {
-    std::cout << 
+    std::cout <<
       "Bootstrap CMake should not be used outside CMake build process."
               << std::endl;
     return 0;
     }
 #endif
-  
+
   bool wiz = false;
   bool sysinfo = false;
   bool command = false;
@@ -453,7 +453,7 @@ int do_cmake(int ac, char** av)
       sysinfo = true;
       }
     // if command has already been set, then
-    // do not eat the -E 
+    // do not eat the -E
     else if (!command && strcmp(av[i], "-E") == 0)
       {
       command = true;
@@ -500,7 +500,7 @@ int do_cmake(int ac, char** av)
       workingMode = cmake::FIND_PACKAGE_MODE;
       args.push_back(av[i]);
       }
-    else 
+    else
       {
       args.push_back(av[i]);
       }
@@ -513,15 +513,15 @@ int do_cmake(int ac, char** av)
   if (wiz)
     {
     cmakewizard wizard;
-    return wizard.RunWizard(args); 
+    return wizard.RunWizard(args);
     }
   if (sysinfo)
     {
     cmake cm;
     int ret = cm.GetSystemInformation(args);
-    return ret; 
+    return ret;
     }
-  cmake cm;  
+  cmake cm;
   cmSystemTools::SetErrorCallback(cmakemainErrorCallback, (void *)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
   cm.SetWorkingMode(workingMode);
@@ -529,7 +529,7 @@ int do_cmake(int ac, char** av)
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
     {
-    cmCacheManager::CacheIterator it = 
+    cmCacheManager::CacheIterator it =
       cm.GetCacheManager()->GetCacheIterator();
     std::cout << "-- Cache values" << std::endl;
     for ( it.Begin(); !it.IsAtEnd(); it.Next() )
@@ -545,8 +545,8 @@ int do_cmake(int ac, char** av)
             {
             std::cout << "// " << it.GetProperty("HELPSTRING") << std::endl;
             }
-          std::cout << it.GetName() << ":" << 
-            cmCacheManager::TypeToString(it.GetType()) 
+          std::cout << it.GetName() << ":" <<
+            cmCacheManager::TypeToString(it.GetType())
             << "=" << it.GetValue() << std::endl;
           if ( list_help )
             {

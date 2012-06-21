@@ -22,6 +22,8 @@ class cmDocumentationFormatterMan : public cmDocumentationFormatter
 public:
   cmDocumentationFormatterMan();
 
+  void SetManSection(int manSection);
+
   virtual cmDocumentationEnums::Form GetForm() const
                                       { return cmDocumentationEnums::ManForm;}
 
@@ -35,6 +37,7 @@ public:
 
 private:
   void EscapeText(std::string& man_text);
+  int ManSection;
 };
 
 #endif
