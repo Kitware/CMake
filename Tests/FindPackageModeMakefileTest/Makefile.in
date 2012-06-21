@@ -1,10 +1,29 @@
+CMAKE = "@cmakeExecutable@"
+CMAKE_CURRENT_BINARY_DIR = "@CMAKE_CURRENT_BINARY_DIR@"
+CMAKE_CXX_COMPILER = "@CMAKE_CXX_COMPILER@"
+CMAKE_CXX_COMPILER_ID = "@CMAKE_CXX_COMPILER_ID@"
+
+CMAKE_FOO = $(CMAKE) --find-package -DCMAKE_MODULE_PATH=$(CMAKE_CURRENT_BINARY_DIR) -DNAME=Foo -DLANGUAGE=CXX -DCOMPILER_ID=$(CMAKE_CXX_COMPILER_ID)
+
+tmp = tmp.txt
+
 all: clean pngtest
 
 main.o: main.cpp
-	"@CMAKE_CXX_COMPILER@" $(CXXFLAGS) -c $(shell "@cmakeExecutable@" --find-package -DCMAKE_MODULE_PATH="@CMAKE_CURRENT_BINARY_DIR@" -DNAME=Foo -DLANGUAGE=CXX -DCOMPILER_ID=@CMAKE_CXX_COMPILER_ID@ -DMODE=COMPILE) main.cpp
+	@$(CMAKE_FOO) -DMODE=COMPILE >$(tmp)
+	@foo="`cat $(tmp)`"; \
+	 printf '"%s" %s %s -c main.cpp\n' $(CMAKE_CXX_COMPILER) "$(CXXFLAGS)" "$$foo" >$(tmp)
+	@cat $(tmp)
+	@sh $(tmp)
+	@rm -f $(tmp)
 
 pngtest: main.o
-	"@CMAKE_CXX_COMPILER@" $(LDFLAGS) -o pngtest main.o $(shell "@cmakeExecutable@" --find-package -DCMAKE_MODULE_PATH="@CMAKE_CURRENT_BINARY_DIR@" -DNAME=Foo -DLANGUAGE=CXX -DCOMPILER_ID=@CMAKE_CXX_COMPILER_ID@ -DMODE=LINK)
+	@$(CMAKE_FOO) -DMODE=LINK >$(tmp)
+	@foo="`cat $(tmp)`"; \
+	 printf '"%s" %s %s -o pngtest main.o %s\n' $(CMAKE_CXX_COMPILER) "$(CXXFLAGS)" "$(LDFLAGS)" "$$foo" >$(tmp)
+	@cat $(tmp)
+	@sh $(tmp)
+	@rm -f $(tmp)
 
 clean:
-	rm -f *.o pngtest
+	rm -f $(tmp) *.o pngtest
