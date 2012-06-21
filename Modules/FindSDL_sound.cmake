@@ -86,8 +86,6 @@ FIND_PATH(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   /usr/local/include/SDL11 # FreeBSD ports
   /usr/include/SDL12
   /usr/include/SDL11
-  /usr/local/include
-  /usr/include
   /sw/include/SDL # Fink
   /sw/include
   /opt/local/include/SDL # DarwinPorts
@@ -106,8 +104,6 @@ FIND_LIBRARY(SDL_SOUND_LIBRARY
   $ENV{SDLDIR}/lib
   $ENV{SDLDIR}
   PATHS
-  /usr/local/lib
-  /usr/lib
   /sw/lib
   /opt/local/lib
   /opt/csw/lib
@@ -222,8 +218,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -245,8 +239,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -271,8 +263,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -293,8 +283,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -317,8 +305,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -341,8 +327,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -368,8 +352,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          $ENV{SDLSOUNDDIR}
          $ENV{SDLDIR}/lib
          $ENV{SDLDIR}
-         /usr/local/lib
-         /usr/lib
          /sw/lib
          /opt/local/lib
          /opt/csw/lib
@@ -395,8 +377,6 @@ IF(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            $ENV{SDLSOUNDDIR}
            $ENV{SDLDIR}/lib
            $ENV{SDLDIR}
-           /usr/local/lib
-           /usr/lib
            /sw/lib
            /opt/local/lib
            /opt/csw/lib
