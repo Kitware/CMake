@@ -32,9 +32,9 @@ void cmDocumentationFormatterMan
     os << ".SH " << name << "\n";
     }
 
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     section.GetEntries();
-  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end(); ++op)
     {
     if(op->Name.size())
@@ -58,7 +58,7 @@ void cmDocumentationFormatterMan::EscapeText(std::string& man_text)
   cmSystemTools::ReplaceString(man_text, "-", "\\-");
 }
 
-void cmDocumentationFormatterMan::PrintPreformatted(std::ostream& os, 
+void cmDocumentationFormatterMan::PrintPreformatted(std::ostream& os,
                                                     const char* text)
 {
   std::string man_text = text;
@@ -69,7 +69,7 @@ void cmDocumentationFormatterMan::PrintPreformatted(std::ostream& os,
   os << ".fi\n\n";
 }
 
-void cmDocumentationFormatterMan::PrintParagraph(std::ostream& os, 
+void cmDocumentationFormatterMan::PrintParagraph(std::ostream& os,
                                                  const char* text)
 {
   std::string man_text = text;
