@@ -534,17 +534,20 @@ cmNinjaTargetGenerator
     cmLocalGenerator::RuleVariables compileObjectVars;
     std::string lang = language;
     compileObjectVars.Language = lang.c_str();
-    std::string escapedSourceFileName =
-      this->LocalGenerator->ConvertToOutputFormat(
-        sourceFileName.c_str(), cmLocalGenerator::SHELL);
 
-    if (!cmSystemTools::FileIsFullPath(escapedSourceFileName.c_str()))
+    std::string escapedSourceFileName = sourceFileName;
+
+    if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str()))
       {
       escapedSourceFileName = cmSystemTools::CollapseFullPath(
         escapedSourceFileName.c_str(),
         this->GetGlobalGenerator()->GetCMakeInstance()->
           GetHomeOutputDirectory());
       }
+
+    escapedSourceFileName =
+      this->LocalGenerator->ConvertToOutputFormat(
+        escapedSourceFileName.c_str(), cmLocalGenerator::SHELL);
 
     compileObjectVars.Source = escapedSourceFileName.c_str();
     compileObjectVars.Object = objectFileName.c_str();
