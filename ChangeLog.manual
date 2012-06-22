@@ -1,3 +1,309 @@
+Changes in CMake 2.8.9-rc1 (since 2.8.8)
+----------------------------------------
+Alex Neundorf (12):
+      -fix #13081: support OBJECT libraries in CodeBlocks/QtCreator projects
+      CodeBlocks: improve support for OBJECT libraries
+      fix #13195: avoid multiple mentions of found packages
+      FeatureSummary.cmake: nicer formatting
+      -strip trailing whitespace
+      make default install component name configurable
+      -add docs for ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME}
+      write_basic_package_version_file() now works with unset CMAKE_SIZEOF_VOID_P
+      add test for #13241: empty SIZEOF_VOIDP in write_basic_package_version_file
+      ASM compiler detection: remove debug output (#13270)
+      Eclipse: parallel build also for "Build project" #13287
+      automoc: better error handling (#13299)
+
+Anthony J. Bentley (1):
+      FindwxWidgets: Do not use -isystem on OpenBSD (#13219)
+
+Ben Boeckel (2):
+      Don't put legacy variables back into the cache
+      Search for other ABIFLAGS builds of Python
+
+Bill Hoffman (15):
+      Add support to ctest for GTM mumps coverage.
+      Fix warning about char* instead of const char*.
+      Fix line length.
+      Add test for mumps coverage. Also refactor code to prepare for cache coverage.
+      Add virutal destructor to silence warning.
+      Add support for Cache coverage.
+      Fix some warnings and a bug where it went past the length of a vector.
+      Use a script to run the test because WORKING_DIRECTORY is not in 2.8.2.
+      Use <TARGET_FILE> expression to run ctest so it works with Xcode and VS IDE.
+      Add ability to specify more than one package directory or coverage directory.
+      Remove uncovered files from cache coverage data.
+      Disable bullseye coverage for mumps coverage test.
+      Update test data to match new coverage format.
+      Do not try to run bullseye coverage if COVFILE env is empty.
+      CDash now supports lots of files in coverage. So, show all files.
+
+Brad King (59):
+      Add LICENSE and NOTICE
+      Add 'tips' script to suggest local configuration
+      Add 'setup-user' script to configure authorship information
+      Add 'setup-hooks' script to install local hooks
+      Add 'setup-gerrit' script to configure Gerrit access
+      Add 'setup-stage' script to configure topic stage remote
+      Add 'setup-ssh' script to configure ssh push access
+      Add README instructions and sample configuration
+      Add and configure developer setup helper scripts
+      Exclude from source archives files specific to Git work tree
+      Exclude from CMake source archives files specific to Git work tree
+      Refactor CMake version handling
+      Document behavior of multiple target_link_libraries calls (#13113)
+      ctest_coverage: Save/restore LC_ALL around gcov (#13136)
+      Cleanup custom command .rule file internal handling
+      Factor out custom command .rule file path generation
+      VS10: Avoid creating .rule files next to outputs (#13141)
+      find_package: Document <package>_FIND_* variables (#13142)
+      find_package: Fix components signature documentation (#13142)
+      Teach RunCMake tests to allow custom checks
+      list: Handle errors on empty lists more gracefully (#13138)
+      include_external_msproject: Test TYPE, GUID, PLATFORM options (#13120)
+      VS: Fix line-too-long style errors
+      libarchive: Avoid 'inline' keyword on XL C v6 (#13148)
+      Intel: On Windows use /EHsc instead of deprecated /GX (#13163)
+      KWSys: Remove DateStamp
+      try_compile: Cleanup temporary directories (#13160)
+      setup-stage: Optionally reconfigure topic stage
+      CTest: Escape MemCheck test output for XML (#13124)
+      Documentation: Fix HTML anchor ranges
+      Require CMake 2.8.2 or higher to build CMake
+      CTest: Simplify environment save/restore
+      KWSys: Fix SystemTools environment memory handling (#13156)
+      VS10: Refactor custom commands to use WriteSource
+      VS10: Simplify vcxproj.filter file generation
+      VS10: Convert paths normally unless forced to relative
+      VS11: Do not use source path conversion workaround specific to VS 10
+      VS10: Generate relative source paths when possible (#12570)
+      Intel: On Windows use /RTC1 instead of deprecated /GZ (#13174)
+      Test NO_SONAME property (#13155)
+      KWSys: Remove dependencies on FundamentalType
+      Documentation: Improve HTML section index format
+      VS: Restore header files marked as OS X Framework content (#13196)
+      VS11: Fix ARM architecture hint typo (#13077)
+      Fortran: Follow <>-style includes (#13239)
+      bootstrap: Port back to old shells (#13199)
+      KWSys: Remove unused environ declaration from SystemTools
+      FindBZip2: Search locations in GnuWin32 registry
+      cmArchiveWrite: Clear fflags from archive entries
+      Makefile: Support directory names containing '=' (#12934)
+      libarchive: Avoid 'inline' on SunPro < 5.9 (#13277)
+      Avoid direct use of std::(o|)stringstream (#13272)
+      KWIML: Add interface to report broken integer format macros
+      KWIML: Report broken integer format macros on AIX 4.3
+      add_library: Allow OBJECT library without dynamic linking (#13289)
+      install: Fix FILES_MATCHING on case-sensitive Mac filesystems (#13177)
+      Make CTest.UpdateGIT robust to Git safecrlf on Windows
+      Do not crash on SHARED library without language (#13324)
+      CMakeDetermineCCompiler: Fix typo "_CXX_" -> "_C_" (#13330)
+
+Brian Helba (1):
+      Print any evaluated 'elseif'/'else' commands in trace mode (#13220)
+
+Charlie Sharpsteen (1):
+      Mac: Add guards to CMAKE_FIND_FRAMEWORK and CMAKE_FIND_APPBUNDLE defaults
+
+Clinton Stimpson (1):
+      cmake-gui: Wait for configure/generate thread to complete before exiting.
+
+Daniel R. Gomez (6):
+      KWSys: Fix hashtable prime list on g++ 2.9 (#13273)
+      Tests/IncludeDirectories: Files must end in a newline (#13314)
+      Tests/VSGNUFortran: Avoid C++ comment in C code (#13314)
+      Tests/Assembler: Assemble and link with same flags (#13314)
+      Fix FindPackageMode test Makefile (#13314)
+      Avoid string.clear and string.push_back (#13319)
+
+David Cole (12):
+      Begin post-2.8.8 development
+      CPack/NSIS: Add CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS (#13085)
+      ExternalProject: Add missing COMMAND keyword
+      ExternalProject: Avoid unnecessary git clones (#12564)
+      ExternalProject: Refactor repeated code into function (#12564)
+      ExternalProject: Avoid repeated git clone operations (#12564)
+      CTest: Modify reg ex so it also works with gcov 4.7 output (#13121)
+      BZip2: Remove unnecessary *.bz2 files from CMake source tree
+      Ninja: Enable the ninja generator by default on Windows.
+      Revert "Millenium update: 79 * (16/9)/(4/3) = 105"
+      Ninja: Restructure code to work with the Borland compilers
+      Remove unused ivars to eliminate compiler warnings
+
+David Faure (1):
+      Abort FindQt4.cmake if Qt 5 is found.
+
+Eric NOULARD (12):
+      Use fakeroot for control.tar.gz as well
+      Enhancement of bash completion scripts given by Igor Murzov.
+      Install editors helper files
+      CPack - preserve timestamp for CPACK_INSTALLED_DIRECTORIES. fixes: #0013193
+      CPack add easy possibility to warn about CPACK_SET_DESTDIR
+      CPack add necessary check to detect/warns/error on ABSOLUTE DESTINATION
+      Fix KWStyle warning
+      Use CPACK_xxx and CMAKE_xxx in a consistent way.
+      CPack allow RPM and DEB generator to be used on OSX.
+      Calm down Borland compiler warning about "always true"
+      CPackRPM: avoid leakage of RPM directive from one component to another.
+      CPackDeb add missing documentation for some CPACK_DEBIAN_xx variables.
+
+Fraser Hutchison (1):
+      CPack: Fixed incorrect error log for CPACK_NSIS_MENU_LINKS.
+
+Jan Schaffmeister (1):
+      Xcode: Recognize storyboard source files (#13214)
+
+Jim Hague (2):
+      libarchive: Avoid trailing , in enum for XL v6 (#13148)
+      Workaround IBM XL v6 streams seekg bug (#13149)
+
+Jonathan Klein (1):
+      FindBullet: Add missing math library name (#13309)
+
+Joseph Snyder (1):
+      Change GT.M Coverage Parser global
+
+Konstantin Tokarev (1):
+      [OSX] Fixed undefined symbol when linking CMakeLib into shared library
+
+Kurtis Nusbaum (1):
+      Added conditional for the phonon backend plugin.
+
+Leonid Yurchenko (1):
+      include_external_msproject: Add TYPE, GUID, PLATFORM options (#13120)
+
+Mario Bensi (1):
+      Add FindLibLZMA Module
+
+Mariusz Plucinski (1):
+      Do not crash on unknown source language (#13323)
+
+Matt McCormick (1):
+      ExternalProject: Fix 'make' builds with Ninja (#13159)
+
+Minmin Gong (1):
+      VS11: Add ARM architecture generator (#13077)
+
+Modestas Vainius (3):
+      Fix CPack RPM man page typo detected by lintian.
+      Support building shared libraries or modules without soname (#13155)
+      Fix a few typos in NO_SONAME property description.
+
+Nicolas Despres (2):
+      Ninja: Add a convenient 'clean' target.
+      Ninja: Add a convenient 'help' target.
+
+Patrick Gansterer (1):
+      Added CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL
+
+Peter Collingbourne (2):
+      Ninja: apply CMAKE_<LANG>_FLAGS_<TYPE> to executable targets (#13069)
+      Ninja: mark rules/build file streams failed if error occurred (#13067, #13105)
+
+Peter Kuemmel (61):
+      Ninja: ensure output directories exist
+      Ninja: no 16:9 screens for the cmake team ;)
+      Ninja: add option to enable ninja where it is not enabled by default
+      Ninja: remove GCC -Wshadow warning
+      Ninja: enable Ninja for CodeBlocks
+      Ninja: no additional variable needed to enable ninja
+      Ninja: CMAKE_USE_NINJA is the name of the macro
+      VC Express doesn't support folders, ignore USE_FOLDER property
+      Ninja: add response file support on Windows
+      Ninja: 30000 is too long for windows cmd
+      Ninja: check for valid pointer
+      Ninja: also create rspfile rules
+      Ninja: don't break because of empty commands
+      Ninja: find mingw's resource compiler
+      Ninja: add dependency tracking for msvc with cldeps
+      Ninja: add wrapper for cl to extract dependencies
+      Ninja: allow spaces in source path
+      Ninja: assume cmcldeps in the same dir as cmake
+      Ninja: add copyright and description
+      Ninja: don't set cmcldeps vars to empty string when they are not defined
+      Ninja: fix ModuleNoticies test
+      Ninja: don't use cmcldeps for try_compile
+      Ninja: allow spaces in cldeps's .d file
+      Ninja: fix line length
+      Ninja: don't pollute the rules file with useless comments
+      Ninja: use slahes in .d files
+      Line Length: <79
+      Millenium update: 79 * (16/9)/(4/3) = 105
+      Ninja: complete MinGW support
+      Ninja: use slashes for include dirs, so also slahes are in the .d files
+      Ninja: ninja can't read dep. pathes with parentheses
+      Ninja: work with ninja/master, don't compile rc files with cl
+      Ninja: extract dependencies for .rc files with msvc tools
+      Ninja: remove unused CommentStream
+      Ninja: onyl use pre processor for rc file parsing
+      Ninja: suppress startup logos
+      Ninja: cmcldeps
+      Ninja: don't use shell when cmake is called directly
+      Ninja: ninja now also could read parentheses in .d files
+      Ninja: fix Linux build
+      Ninja: sh needs something befor and after &&
+      Ninja: build with old vc versions
+      Ninja: remove nop line
+      Ninja: undo all the NOSHELL patches
+      Ninja: be more accurate when estimating the command line length
+      Ninja: don't pollute build dir with preprocessed rc files
+      Ninja: Eclipse and KDevelop fixes for ninja
+      Ninja: no /nologo option in old rc.exe
+      Ninja: but cl supports /nologo ...
+      Ninja: try to make GetProcessId visible
+      Ninja: build cmcldeps with mingw
+      Ninja: don't remove space between command and parameters
+      Ninja: some bytes of the rc files couldn't be piped correctly
+      Ninja: build server fixes
+      Ninja: build with old msvc versions
+      Ninja: msvc6 for-scoping
+      Ninja: maybe this fixes the bcc32 build
+      remove warning about unused parameter
+      Ninja: build server fixes
+      Ninja: try work around for bcc32 bug
+      Ninja: disable cldeps for bcc32, it's too old, and ninja would also not build
+
+Rolf Eike Beer (12):
+      FindPkgConfig.cmake: fix documented output variable not set (#13125,#13132)
+      UseJava: fix typo in variable name (#13135)
+      Check{C,CXX}CompilerFlag: catch more Intel warning types (#12576)
+      FindPythonLibs: honor EXACT version specification (#13216)
+      UseJava: fix find_jar() called with multiple files (#13281)
+      fix some typos
+      do not explicitely specify /usr and /usr/local as search paths
+      replace open coded versions of file(TO_CMAKE_PATH)
+      FindDevIL: clean up documentation formatting
+      FindQt4: extend documentation
+      Qt4Macros: improve basename extraction in QT4_ADD_DBUS_INTERFACES
+      Qt4Macros: add some quotes to prevent damage from spaces in the paths
+
+Sean McBride (1):
+      Remove unused ivars to eliminate compiler warnings
+
+Sebastian Leske (1):
+      Improve documentation of set command (#13269)
+
+Stephen Kelly (10):
+      Fix the number variable comparison when Qt is not found.
+      Update the docs of IMPORTED_LOCATION_CONFIG to match the code.
+      Move the EscapeJSON method to a sharable location.
+      Add newline to the output.
+      Make the CMAKE_EXPORT_COMPILE_COMMANDS option work with Ninja.
+      Escape the source file to be compiled if required.
+      Exclude the CompileCommandOutput test on WIN32.
+      Add platform variables for position independent code flags
+      Add platform variable for flags specific to shared libraries
+      Refactor generation of shared library flags
+
+Tobias Bieniek (1):
+      Qt4Macros: Added support for generated resource files
+
+Zack Galbreath (1):
+      FindPythonLibs: Document cache variables (#13240)
+
+Zaheer Chothia (1):
+      VS: Set Intel Fortran 13 project version
+
 Changes in CMake 2.8.8 (since 2.8.8-rc2)
 ----------------------------------------
 Brad King (1):
