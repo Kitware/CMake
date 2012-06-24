@@ -435,6 +435,15 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     return 2;
     }
 
+  // Add definitions of variables passed in on the command line:
+  const std::map<std::string, std::string> &defs =
+    this->CTest->GetDefinitions();
+  for (std::map<std::string, std::string>::const_iterator it = defs.begin();
+       it != defs.end(); ++it)
+    {
+    this->Makefile->AddDefinition(it->first.c_str(), it->second.c_str());
+    }
+
   // finally read in the script
   if (!this->Makefile->ReadListFile(0, script.c_str()) ||
     cmSystemTools::GetErrorOccuredFlag())

@@ -2230,6 +2230,22 @@ void cmCTest::HandleScriptArguments(size_t &i,
 }
 
 //----------------------------------------------------------------------
+bool cmCTest::AddVariableDefinition(const std::string &arg)
+{
+  std::string name;
+  std::string value;
+  cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
+
+  if (cmCacheManager::ParseEntry(arg.c_str(), name, value, type))
+    {
+    this->Definitions[name] = value;
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------
 // the main entry point of ctest, called from main
 int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 {
@@ -2265,8 +2281,11 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       // into the separate stages
       if (!this->AddTestsForDashboardType(targ))
         {
-        this->ErrorMessageUnknownDashDValue(targ);
-        executeTests = false;
+        if (!this->AddVariableDefinition(targ))
+          {
+          this->ErrorMessageUnknownDashDValue(targ);
+          executeTests = false;
+          }
         }
       }
 

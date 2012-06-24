@@ -418,6 +418,11 @@ public:
 
   std::string GetCostDataFile();
 
+  const std::map<std::string, std::string> &GetDefinitions()
+    {
+    return this->Definitions;
+    }
+
 private:
   std::string ConfigType;
   std::string ScheduleType;
@@ -520,6 +525,9 @@ private:
   //! read as "emit an error message for an unknown -D value"
   void ErrorMessageUnknownDashDValue(std::string &val);
 
+  //! add a variable definition from a command line -D value
+  bool AddVariableDefinition(const std::string &arg);
+
   //! parse and process most common command line arguments
   void HandleCommandLineArguments(size_t &i, 
                                   std::vector<std::string> &args);
@@ -562,6 +570,8 @@ private:
   int OutputLogFileLastTag;
 
   bool OutputTestOutputOnTestFailure;
+
+  std::map<std::string, std::string> Definitions;
 };
 
 class cmCTestLogWrite

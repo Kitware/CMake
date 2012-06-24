@@ -103,6 +103,12 @@ static const char * cmDocumentationOptions[][3] =
    "a dashboard test. All tests are <Mode><Test>, where Mode can be "
    "Experimental, Nightly, and Continuous, and Test can be Start, Update, "
    "Configure, Build, Test, Coverage, and Submit."},
+  {"-D <var>:<type>=<value>", "Define a variable for script mode",
+   "Pass in variable values on the command line. Use in "
+   "conjunction with -S to pass variable values to a dashboard script. "
+   "Parsing -D arguments as variable values is only attempted if "
+   "the value following -D does not match any of the known dashboard "
+   "types."},
   {"-M <model>, --test-model <model>", "Sets the model for a dashboard",
    "This option tells ctest to act as a Dart client "
    "where the TestModel can be Experimental, "
