@@ -2236,7 +2236,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
   this->FindRunningCMake();
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
-  bool performSomeTest = true;
+  bool executeTests = true;
   bool SRArgumentSpecified = false;
 
   // copy the command line
@@ -2266,7 +2266,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       if (!this->AddTestsForDashboardType(targ))
         {
         this->ErrorMessageUnknownDashDValue(targ);
-        performSomeTest = false;
+        executeTests = false;
         }
       }
 
@@ -2277,7 +2277,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       i++;
       if ( !this->SetTest(args[i].c_str(), false) )
         {
-        performSomeTest = false;
+        executeTests = false;
         cmCTestLog(this, ERROR_MESSAGE,
           "CTest -T called with incorrect option: "
           << args[i].c_str() << std::endl);
@@ -2315,7 +2315,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         }
       else
         {
-        performSomeTest = false;
+        executeTests = false;
         cmCTestLog(this, ERROR_MESSAGE,
           "CTest -M called with incorrect option: " << str.c_str()
           << std::endl);
@@ -2386,8 +2386,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
     return retv;
     }
 
-  // if some tests must be run 
-  if(performSomeTest)
+  if(executeTests)
     {
     int res;
     // call process directory
