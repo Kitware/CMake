@@ -2289,6 +2289,17 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         }
       }
 
+    // If it's not exactly -D, but it starts with -D, then try to parse out
+    // a variable definition from it, same as CMake does. Unsuccessful
+    // attempts are simply ignored since previous ctest versions ignore
+    // this too. (As well as many other unknown command line args.)
+    //
+    if(arg != "-D" && cmSystemTools::StringStartsWith(arg.c_str(), "-D"))
+      {
+      std::string input = arg.substr(2);
+      this->AddVariableDefinition(input);
+      }
+
     if(this->CheckArgument(arg, "-T", "--test-action") &&
       (i < args.size() -1) )
       {
