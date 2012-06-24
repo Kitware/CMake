@@ -1944,32 +1944,30 @@ bool cmCTest::AddTestsForDashboardType(std::string &targ)
     }
   else
     {
-    cmCTestLog(this, ERROR_MESSAGE,
-               "CTest -D called with incorrect option: "
-               << targ << std::endl);
-    cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
-               << "  " << "ctest" << " -D Continuous" << std::endl
-               << "  " << "ctest"
-               << " -D Continuous(Start|Update|Configure|Build)" << std::endl
-               << "  " << "ctest"
-               << " -D Continuous(Test|Coverage|MemCheck|Submit)"
-               << std::endl
-               << "  " << "ctest" << " -D Experimental" << std::endl
-               << "  " << "ctest"
-               << " -D Experimental(Start|Update|Configure|Build)"
-               << std::endl
-               << "  " << "ctest"
-               << " -D Experimental(Test|Coverage|MemCheck|Submit)"
-               << std::endl
-               << "  " << "ctest" << " -D Nightly" << std::endl
-               << "  " << "ctest"
-               << " -D Nightly(Start|Update|Configure|Build)" << std::endl
-               << "  " << "ctest"
-               << " -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
-               << "  " << "ctest" << " -D NightlyMemoryCheck" << std::endl);
     return false;
     }
   return true;
+}
+
+
+//----------------------------------------------------------------------
+void cmCTest::ErrorMessageUnknownDashDValue(std::string &val)
+{
+  cmCTestLog(this, ERROR_MESSAGE,
+    "CTest -D called with incorrect option: " << val << std::endl);
+
+  cmCTestLog(this, ERROR_MESSAGE,
+    "Available options are:" << std::endl
+    << "  ctest -D Continuous" << std::endl
+    << "  ctest -D Continuous(Start|Update|Configure|Build)" << std::endl
+    << "  ctest -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
+    << "  ctest -D Experimental" << std::endl
+    << "  ctest -D Experimental(Start|Update|Configure|Build)" << std::endl
+    << "  ctest -D Experimental(Test|Coverage|MemCheck|Submit)" << std::endl
+    << "  ctest -D Nightly" << std::endl
+    << "  ctest -D Nightly(Start|Update|Configure|Build)" << std::endl
+    << "  ctest -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
+    << "  ctest -D NightlyMemoryCheck" << std::endl);
 }
 
 
@@ -2263,10 +2261,11 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       this->ProduceXML = true;
       i++;
       std::string targ = args[i];
-      // AddTestsForDashboard parses the dashborad type and converts it
+      // AddTestsForDashboard parses the dashboard type and converts it
       // into the separate stages
       if (!this->AddTestsForDashboardType(targ))
         {
+        this->ErrorMessageUnknownDashDValue(targ);
         performSomeTest = false;
         }
       }

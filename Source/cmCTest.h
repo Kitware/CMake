@@ -417,6 +417,7 @@ public:
   bool GetLabelSummary() { return this->LabelSummary;}
 
   std::string GetCostDataFile();
+
 private:
   std::string ConfigType;
   std::string ScheduleType;
@@ -515,6 +516,9 @@ private:
 
   //! parse the option after -D and convert it into the appropriate steps
   bool AddTestsForDashboardType(std::string &targ);
+
+  //! read as "emit an error message for an unknown -D value"
+  void ErrorMessageUnknownDashDValue(std::string &val);
 
   //! parse and process most common command line arguments
   void HandleCommandLineArguments(size_t &i, 
