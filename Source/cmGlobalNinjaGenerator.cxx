@@ -964,7 +964,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "HELP",
-            (ninjaCmd() + " -t tagets").c_str(),
+            (ninjaCmd() + " -t targets").c_str(),
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",
