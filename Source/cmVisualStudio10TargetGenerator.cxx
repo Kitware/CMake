@@ -571,6 +571,24 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     {
     cmSourceFile* sf = *s; 
     std::string const& source = sf->GetFullPath();
+    // VS 10 will always rebuild a custom target if its symbolic
+    // file doesn't exist so create the file explicitly.
+    if(sf->GetPropertyAsBool("SYMBOLIC"))
+      {
+      if(!cmSystemTools::FileExists(source.c_str()))
+        {
+        // Make sure the path exists for the file
+        std::string path = cmSystemTools::GetFilenamePath(source);
+        cmSystemTools::MakeDirectory(path.c_str());
+        std::ofstream fout(source.c_str());
+        if(fout)
+          {
+          fout << "# generated from CMake\n";
+          fout.flush();
+          fout.close();
+          }
+        }
+      }
     cmSourceGroup& sourceGroup = 
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
     groupsUsed.insert(&sourceGroup);
