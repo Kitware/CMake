@@ -178,11 +178,9 @@ static int process( const std::string& srcfilename,
                     bool quiet = false)
 {
   std::string output;
-  int ret = 0;
   // break up command line into a vector
   std::vector<std::string> args;
-  cmSystemTools::ParseWindowsCommandLine(cmd.c_str(),
-                                         args);
+  cmSystemTools::ParseWindowsCommandLine(cmd.c_str(), args);
   // convert to correct vector type for RunSingleCommand
   std::vector<cmStdString> command;
   for(std::vector<std::string>::iterator i = args.begin();
@@ -191,14 +189,10 @@ static int process( const std::string& srcfilename,
     command.push_back(i->c_str());
     }
   // run the command
-  bool success =
-    cmSystemTools::RunSingleCommand(command, &output, &ret, dir.c_str(),
-                                    cmSystemTools::OUTPUT_NONE);
-  if(ret!= 0)
-    {
-    return 2;
-    }
-  int exit_code = ret;
+  int exit_code = 0;
+  bool run = cmSystemTools::RunSingleCommand(command, &output, &exit_code,
+                                    dir.c_str(), cmSystemTools::OUTPUT_NONE);
+
   // process the include directives and output everything else
   std::stringstream ss(output);
   std::string line;
@@ -221,14 +215,11 @@ static int process( const std::string& srcfilename,
     }
   }
 
-  if (!success) {
-    return exit_code;
-  }
-
   // don't update .d until/unless we succeed compilation
-  outputDepFile(dfile, objfile, includes);
+  if (run && exit_code == 0)
+    outputDepFile(dfile, objfile, includes);
 
-  return 0;
+  return exit_code;
 }
 
 
