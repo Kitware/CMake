@@ -1,2 +1,2 @@
-INCLUDE(Platform/UnixPaths)
+include(Platform/UnixPaths)
 

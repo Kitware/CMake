@@ -9,14 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-SUBDIRS(Doxygen KWStyle)
+subdirs(Doxygen KWStyle)
 
-MAKE_DIRECTORY(${CMake_BINARY_DIR}/Docs)
+make_directory(${CMake_BINARY_DIR}/Docs)
 
 # Add a documentation target.
-SET(DOC_FILES "")
+set(DOC_FILES "")
 
-SET(MAN_FILES
+set(MAN_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.1
   ${CMake_BINARY_DIR}/Docs/cmakecommands.1
   ${CMake_BINARY_DIR}/Docs/cmakecompat.1
@@ -25,7 +25,7 @@ SET(MAN_FILES
   ${CMake_BINARY_DIR}/Docs/cmakevars.1
   ${CMake_BINARY_DIR}/Docs/cmakemodules.1
   )
-SET(TEXT_FILES
+set(TEXT_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.txt
   ${CMake_BINARY_DIR}/Docs/cmake.docbook
   ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
@@ -35,7 +35,7 @@ SET(TEXT_FILES
   ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
   ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
   )
-SET(HTML_FILES
+set(HTML_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.html
   ${CMake_BINARY_DIR}/Docs/cmake-policies.html
   ${CMake_BINARY_DIR}/Docs/cmake-properties.html
@@ -45,12 +45,12 @@ SET(HTML_FILES
   ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
   )
 
-MACRO(ADD_DOCS target dependency)
+macro(ADD_DOCS target dependency)
   # Generate documentation for "ctest" executable.
-  GET_TARGET_PROPERTY(CMD ${target} LOCATION)
+  get_target_property(CMD ${target} LOCATION)
   # only generate the documentation if the target is actually built
-  IF(CMD)
-    ADD_CUSTOM_COMMAND(
+  if(CMD)
+    add_custom_command(
       OUTPUT ${CMake_BINARY_DIR}/Docs/${target}.txt
       ${${target}-PATH} # Possibly set PATH, see below.
       COMMAND ${CMD}
@@ -61,27 +61,27 @@ MACRO(ADD_DOCS target dependency)
       DEPENDS ${target}
       MAIN_DEPENDENCY ${dependency}
       )
-    SET(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
-    LIST(APPEND MAN_FILES ${CMake_BINARY_DIR}/Docs/${target}.1)
-    LIST(APPEND TEXT_FILES
+    set(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
+    list(APPEND MAN_FILES ${CMake_BINARY_DIR}/Docs/${target}.1)
+    list(APPEND TEXT_FILES
       ${CMake_BINARY_DIR}/Docs/${target}.txt
       ${CMake_BINARY_DIR}/Docs/${target}.docbook
       )
-    LIST(APPEND HTML_FILES ${CMake_BINARY_DIR}/Docs/${target}.html)
-  ENDIF(CMD)
-ENDMACRO(ADD_DOCS target dependency)
+    list(APPEND HTML_FILES ${CMake_BINARY_DIR}/Docs/${target}.html)
+  endif(CMD)
+endmacro(ADD_DOCS target dependency)
 
 # Help cmake-gui find the Qt DLLs on Windows.
-SET(WIN_SHELL_GENS "Visual Studio|NMake|MinGW|Watcom|Borland")
-IF(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
+set(WIN_SHELL_GENS "Visual Studio|NMake|MinGW|Watcom|Borland")
+if(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
     AND EXISTS "${QT_QMAKE_EXECUTABLE}" AND NOT CMAKE_NO_AUTO_QT_ENV)
-  GET_FILENAME_COMPONENT(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
-  IF(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
+  get_filename_component(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
+  if(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
     # Tell the macro to set the path before running cmake-gui.
-    STRING(REPLACE ";" "\\;" _PATH "PATH=${Qt_BIN_DIR};%PATH%")
-    SET(cmake-gui-PATH COMMAND set "${_PATH}")
-  ENDIF(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
-ENDIF(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
+    string(REPLACE ";" "\\;" _PATH "PATH=${Qt_BIN_DIR};%PATH%")
+    set(cmake-gui-PATH COMMAND set "${_PATH}")
+  endif(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
+endif(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
   AND EXISTS "${QT_QMAKE_EXECUTABLE}" AND NOT CMAKE_NO_AUTO_QT_ENV)
 
 # add the docs for the executables
@@ -93,10 +93,10 @@ ADD_DOCS(cmake-gui ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in)
 
 # add the documentation for cmake itself
 
-GET_TARGET_PROPERTY(CMD cmake LOCATION)
-ADD_CUSTOM_COMMAND(
+get_target_property(CMD cmake LOCATION)
+add_custom_command(
   OUTPUT ${CMake_BINARY_DIR}/Docs/cmake.txt
-  COMMAND ${CMD} 
+  COMMAND ${CMD}
   ARGS --copyright ${CMake_BINARY_DIR}/Docs/Copyright.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.html
@@ -124,12 +124,12 @@ ADD_CUSTOM_COMMAND(
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
 
-INSTALL_FILES(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
-INSTALL_FILES(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
-INSTALL(FILES cmake.m4 DESTINATION share/aclocal)
+install_files(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
+install_files(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
+install(FILES cmake.m4 DESTINATION share/aclocal)
 
 # Drive documentation generation.
-ADD_CUSTOM_TARGET(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
+add_custom_target(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
 
 # Documentation testing.
 if(BUILD_TESTING)

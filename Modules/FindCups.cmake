@@ -5,7 +5,7 @@
 #  CUPS_INCLUDE_DIR - the Cups include directory
 #  CUPS_LIBRARIES - Libraries needed to use Cups
 #  CUPS_VERSION_STRING - version of Cups found (since CMake 2.8.8)
-#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which 
+#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
 #  features this function (i.e. at least 1.1.19)
 
 #=============================================================================
@@ -65,5 +65,5 @@ else (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR
                                       VERSION_VAR CUPS_VERSION_STRING)
 endif (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
-  
+
 mark_as_advanced(CUPS_INCLUDE_DIR CUPS_LIBRARIES)

@@ -12,6 +12,6 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM ninja
+find_program(CMAKE_MAKE_PROGRAM ninja
   DOC "Program used to build from build.ninja files.")
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)

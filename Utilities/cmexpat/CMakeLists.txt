@@ -1,34 +1,34 @@
-PROJECT(CMEXPAT)
+project(CMEXPAT)
 
-SET(expat_SRCS
+set(expat_SRCS
   xmlparse.c
   xmltok.c
   xmlrole.c
 )
 
-INCLUDE(${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
+include(${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
 TEST_BIG_ENDIAN(CMEXPAT_BIGENDIAN)
 
-INCLUDE_DIRECTORIES(
+include_directories(
   "${CMEXPAT_BINARY_DIR}/.."
   )
 
-IF(WIN32)
-  IF(NOT BUILD_SHARED_LIBS)
-    SET (CM_EXPAT_STATIC 1)
-  ENDIF(NOT BUILD_SHARED_LIBS)
-ENDIF(WIN32)
+if(WIN32)
+  if(NOT BUILD_SHARED_LIBS)
+    set(CM_EXPAT_STATIC 1)
+  endif(NOT BUILD_SHARED_LIBS)
+endif(WIN32)
 
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/expatConfig.h.in
+configure_file(${CMEXPAT_SOURCE_DIR}/expatConfig.h.in
                ${CMEXPAT_BINARY_DIR}/expatConfig.h)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/expatDllConfig.h.in
+configure_file(${CMEXPAT_SOURCE_DIR}/expatDllConfig.h.in
                ${CMEXPAT_BINARY_DIR}/expatDllConfig.h)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/.NoDartCoverage
+configure_file(${CMEXPAT_SOURCE_DIR}/.NoDartCoverage
                ${CMEXPAT_BINARY_DIR}/.NoDartCoverage)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/cm_expat_mangle.h
+configure_file(${CMEXPAT_SOURCE_DIR}/cm_expat_mangle.h
                ${CMEXPAT_BINARY_DIR}/cm_expat_mangle.h)
-CONFIGURE_FILE(${CMEXPAT_SOURCE_DIR}/expat.h
+configure_file(${CMEXPAT_SOURCE_DIR}/expat.h
                ${CMEXPAT_BINARY_DIR}/expat.h)
 
-ADD_LIBRARY(cmexpat ${expat_SRCS})
-INSTALL(FILES COPYING DESTINATION ${CMake_DOC_DEST}/cmexpat)
+add_library(cmexpat ${expat_SRCS})
+install(FILES COPYING DESTINATION ${CMake_DOC_DEST}/cmexpat)

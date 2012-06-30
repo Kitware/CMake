@@ -3,9 +3,9 @@ project (Simple)
 
 add_executable (Simple simple.cxx)
 
-add_library (simpleLib STATIC 
-  simpleLib.cxx 
-  simpleCLib.c 
+add_library (simpleLib STATIC
+  simpleLib.cxx
+  simpleCLib.c
   simpleWe.cpp
   )
 

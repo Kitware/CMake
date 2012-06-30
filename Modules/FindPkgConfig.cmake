@@ -156,7 +156,7 @@ endmacro(_pkgconfig_invoke_dyn)
 macro(_pkgconfig_parse_options _result _is_req _is_silent)
   set(${_is_req} 0)
   set(${_is_silent} 0)
-  
+
   foreach(_pkg ${ARGN})
     if (_pkg STREQUAL "REQUIRED")
       set(${_is_req} 1)
@@ -207,7 +207,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
         message(STATUS "checking for modules '${_pkg_check_modules_list}'")
       endif(_pkg_check_modules_cnt EQUAL 1)
     endif(NOT ${_is_silent})
-    
+
     set(_pkg_check_modules_packages)
     set(_pkg_check_modules_failed)
 
@@ -234,14 +234,14 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
       if (_pkg_check_modules_pkg_op STREQUAL "=")
         list(APPEND _pkg_check_modules_exist_query --exact-version)
       endif(_pkg_check_modules_pkg_op STREQUAL "=")
-      
+
       if (_pkg_check_modules_pkg_op STREQUAL "<=")
         list(APPEND _pkg_check_modules_exist_query --max-version)
       endif(_pkg_check_modules_pkg_op STREQUAL "<=")
 
       # create the final query which is of the format:
       # * --atleast-version <version> <pkg-name>
-      # * --exact-version <version> <pkg-name>      
+      # * --exact-version <version> <pkg-name>
       # * --max-version <version> <pkg-name>
       # * --exists <pkg-name>
       if (_pkg_check_modules_pkg_op)
@@ -281,7 +281,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
     else(_pkg_check_modules_failed)
       # when we are here, we checked whether requested modules
       # exist. Now, go through them and set variables
-      
+
       _pkgconfig_set(${_prefix}_FOUND 1)
       list(LENGTH _pkg_check_modules_packages pkg_count)
 
@@ -293,7 +293,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
         else(pkg_count EQUAL 1)
           set(_pkg_check_prefix "${_prefix}_${_pkg_check_modules_pkg}")
         endif(pkg_count EQUAL 1)
-        
+
         _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" VERSION    ""   --modversion )
         _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" PREFIX     ""   --variable=prefix )
         _pkgconfig_invoke(${_pkg_check_modules_pkg} "${_pkg_check_prefix}" INCLUDEDIR ""   --variable=includedir )
@@ -363,9 +363,9 @@ macro(pkg_search_module _prefix _module0)
         message(SEND_ERROR "None of the required '${_pkg_modules_alt}' found")
       endif(${_pkg_is_required})
     endif(NOT ${_prefix}_FOUND)
-    
+
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
-  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)  
+  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
 endmacro(pkg_search_module)
 
 ### Local Variables:

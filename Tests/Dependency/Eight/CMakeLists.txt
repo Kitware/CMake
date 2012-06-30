@@ -1,3 +1,3 @@
-ADD_LIBRARY( Eight EightSrc.c )
-TARGET_LINK_LIBRARIES( Eight Seven )
+add_library( Eight EightSrc.c )
+target_link_libraries( Eight Seven )
 

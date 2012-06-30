@@ -2,4 +2,4 @@
 # http://www.dragonflybsd.org
 # see http://archive.netbsd.se/?ml=dfbsd-users&a=2007-07&m=4678361
 
-INCLUDE(Platform/FreeBSD)
+include(Platform/FreeBSD)

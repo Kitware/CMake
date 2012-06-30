@@ -1,17 +1,17 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.1)
+cmake_minimum_required(VERSION 2.1)
 
 # Settings:
-SET(CTEST_DASHBOARD_ROOT                "@CMake_BINARY_DIR@/Tests/CTestTest")
-SET(CTEST_SITE                          "@SITE@")
-SET(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-NoBuild")
+set(CTEST_DASHBOARD_ROOT                "@CMake_BINARY_DIR@/Tests/CTestTest")
+set(CTEST_SITE                          "@SITE@")
+set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-NoBuild")
 
-SET(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestFailure")
-SET(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestFailure")
-SET(CTEST_CVS_COMMAND                   "@CVSCOMMAND@")
-SET(CTEST_CMAKE_GENERATOR               "@CMAKE_TEST_GENERATOR@")
-SET(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
-SET(CTEST_COVERAGE_COMMAND              "@COVERAGE_COMMAND@")
-SET(CTEST_NOTES_FILES                   "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}")
+set(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestFailure")
+set(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestFailure")
+set(CTEST_CVS_COMMAND                   "@CVSCOMMAND@")
+set(CTEST_CMAKE_GENERATOR               "@CMAKE_TEST_GENERATOR@")
+set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
+set(CTEST_COVERAGE_COMMAND              "@COVERAGE_COMMAND@")
+set(CTEST_NOTES_FILES                   "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}")
 
 #CTEST_EMPTY_BINARY_DIRECTORY(${CTEST_BINARY_DIRECTORY})
 

@@ -15,18 +15,18 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 
-INCLUDE(CheckTypeExists)
+include(CheckTypeExists)
 
-MACRO (CHECK_HEADER_DIRENT)
+macro(CHECK_HEADER_DIRENT)
   CHECK_TYPE_EXISTS("DIR *" dirent.h     HAVE_DIRENT_H)
-  IF(NOT HAVE_DIRENT_H)
+  if(NOT HAVE_DIRENT_H)
     CHECK_TYPE_EXISTS("DIR *" sys/ndir.h  HAVE_SYS_NDIR_H)
-    IF(NOT HAVE_SYS_NDIR_H)
+    if(NOT HAVE_SYS_NDIR_H)
       CHECK_TYPE_EXISTS("DIR *" ndir.h      HAVE_NDIR_H)
-      IF(NOT HAVE_NDIR_H)
+      if(NOT HAVE_NDIR_H)
         CHECK_TYPE_EXISTS("DIR *" sys/dir.h   HAVE_SYS_DIR_H)
-      ENDIF(NOT HAVE_NDIR_H)
-    ENDIF(NOT HAVE_SYS_NDIR_H)
-  ENDIF(NOT HAVE_DIRENT_H)
-ENDMACRO (CHECK_HEADER_DIRENT)
+      endif(NOT HAVE_NDIR_H)
+    endif(NOT HAVE_SYS_NDIR_H)
+  endif(NOT HAVE_DIRENT_H)
+endmacro(CHECK_HEADER_DIRENT)
 

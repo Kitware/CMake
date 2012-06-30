@@ -36,7 +36,7 @@ endif()
 # Create installation targets. Note that we put each kind of file
 # into a different component via COMPONENT. These components will
 # be used to create the installation components.
-install(TARGETS mylib 
+install(TARGETS mylib
   ARCHIVE
   DESTINATION lib
   COMPONENT libraries)

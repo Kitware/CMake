@@ -20,4 +20,4 @@
 
 # For now there is no way to do a try compile on just a .rc file
 # so just do nothing in here.
-SET(CMAKE_RC_COMPILER_WORKS 1 CACHE INTERNAL "")
+set(CMAKE_RC_COMPILER_WORKS 1 CACHE INTERNAL "")
