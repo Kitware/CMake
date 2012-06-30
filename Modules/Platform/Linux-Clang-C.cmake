@@ -1,1 +1,1 @@
-INCLUDE(Platform/Linux-GNU-C)
+include(Platform/Linux-GNU-C)

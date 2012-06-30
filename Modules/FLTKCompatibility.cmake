@@ -12,4 +12,4 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(CheckIncludeFile)
+include(CheckIncludeFile)

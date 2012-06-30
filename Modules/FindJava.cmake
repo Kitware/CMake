@@ -16,14 +16,14 @@
 #  Java_VERSION            = This is set to: $major.$minor.$patch(.$tweak)
 #
 # The minimum required version of Java can be specified using the
-# standard CMake syntax, e.g. FIND_PACKAGE(Java 1.5)
+# standard CMake syntax, e.g. find_package(Java 1.5)
 #
 # NOTE: ${Java_VERSION} and ${Java_VERSION_STRING} are not guaranteed to be
 # identical. For example some java version may return:
 # Java_VERSION_STRING = 1.5.0_17
 # and
 # Java_VERSION        = 1.5.0.17
-# 
+#
 # another example is the Java OEM, with:
 # Java_VERSION_STRING = 1.6.0-oem
 # and
@@ -37,9 +37,9 @@
 #  Java_<component>_FOUND        - TRUE if <component> is found.
 #
 # Example Usages:
-#  FIND_PACKAGE(Java)
-#  FIND_PACKAGE(Java COMPONENTS Runtime)
-#  FIND_PACKAGE(Java COMPONENTS Development)
+#  find_package(Java)
+#  find_package(Java COMPONENTS Runtime)
+#  find_package(Java COMPONENTS Development)
 #
 
 #=============================================================================
@@ -57,7 +57,7 @@
 #  License text for the above reference.)
 
 # The HINTS option should only be used for values computed from the system.
-SET(_JAVA_HINTS
+set(_JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
@@ -70,7 +70,7 @@ SET(_JAVA_HINTS
   )
 # Hard-coded guesses should still go in PATHS. This ensures that the user
 # environment can always override hard guesses.
-SET(_JAVA_PATHS
+set(_JAVA_PATHS
   /usr/lib/java/bin
   /usr/share/java/bin
   /usr/local/java/bin
@@ -81,79 +81,79 @@ SET(_JAVA_PATHS
   /usr/lib/j2sdk1.5-sun/bin
   /opt/sun-jdk-1.5.0.04/bin
   )
-FIND_PROGRAM(Java_JAVA_EXECUTABLE
+find_program(Java_JAVA_EXECUTABLE
   NAMES java
   HINTS ${_JAVA_HINTS}
   PATHS ${_JAVA_PATHS}
 )
 
-IF(Java_JAVA_EXECUTABLE)
-    EXECUTE_PROCESS(COMMAND ${Java_JAVA_EXECUTABLE} -version
+if(Java_JAVA_EXECUTABLE)
+    execute_process(COMMAND ${Java_JAVA_EXECUTABLE} -version
       RESULT_VARIABLE res
       OUTPUT_VARIABLE var
       ERROR_VARIABLE var # sun-java output to stderr
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_STRIP_TRAILING_WHITESPACE)
-    IF( res )
-      IF(${Java_FIND_REQUIRED})
-        MESSAGE( FATAL_ERROR "Error executing java -version" )
-      ELSE()
-        MESSAGE( STATUS "Warning, could not run java --version")
-      ENDIF()
-    ELSE()
+    if( res )
+      if(${Java_FIND_REQUIRED})
+        message( FATAL_ERROR "Error executing java -version" )
+      else()
+        message( STATUS "Warning, could not run java --version")
+      endif()
+    else()
       # extract major/minor version and patch level from "java -version" output
-      # Tested on linux using 
+      # Tested on linux using
       # 1. Sun / Sun OEM
       # 2. OpenJDK 1.6
       # 3. GCJ 1.5
       # 4. Kaffe 1.4.2
-      IF(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_.]+[oem-]*\".*")
+      if(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_.]+[oem-]*\".*")
         # This is most likely Sun / OpenJDK, or maybe GCJ-java compat layer
-        STRING( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_.]+)[oem-]*\".*"
+        string( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_.]+)[oem-]*\".*"
                 "\\1" Java_VERSION_STRING "${var}" )
-      ELSEIF(var MATCHES "java full version \"kaffe-[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
+      elseif(var MATCHES "java full version \"kaffe-[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
         # Kaffe style
-        STRING( REGEX REPLACE "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+).*"
+        string( REGEX REPLACE "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+).*"
                 "\\1" Java_VERSION_STRING "${var}" )
-      ELSE()
-        IF(NOT Java_FIND_QUIETLY)
+      else()
+        if(NOT Java_FIND_QUIETLY)
           message(WARNING "regex not supported: ${var}. Please report")
-        ENDIF(NOT Java_FIND_QUIETLY)
-      ENDIF()
-      STRING( REGEX REPLACE "([0-9]+).*" "\\1" Java_VERSION_MAJOR "${Java_VERSION_STRING}" )
-      STRING( REGEX REPLACE "[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_MINOR "${Java_VERSION_STRING}" )
-      STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_PATCH "${Java_VERSION_STRING}" )
+        endif(NOT Java_FIND_QUIETLY)
+      endif()
+      string( REGEX REPLACE "([0-9]+).*" "\\1" Java_VERSION_MAJOR "${Java_VERSION_STRING}" )
+      string( REGEX REPLACE "[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_MINOR "${Java_VERSION_STRING}" )
+      string( REGEX REPLACE "[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_PATCH "${Java_VERSION_STRING}" )
       # warning tweak version can be empty:
-      STRING( REGEX REPLACE "[0-9]+\\.[0-9]+\\.[0-9]+\\_?\\.?([0-9]*)$" "\\1" Java_VERSION_TWEAK "${Java_VERSION_STRING}" )
+      string( REGEX REPLACE "[0-9]+\\.[0-9]+\\.[0-9]+\\_?\\.?([0-9]*)$" "\\1" Java_VERSION_TWEAK "${Java_VERSION_STRING}" )
       if( Java_VERSION_TWEAK STREQUAL "" ) # check case where tweak is not defined
         set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH})
       else( )
         set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH}.${Java_VERSION_TWEAK})
       endif( )
-    ENDIF()
+    endif()
 
-ENDIF(Java_JAVA_EXECUTABLE)
+endif(Java_JAVA_EXECUTABLE)
 
 
-FIND_PROGRAM(Java_JAR_EXECUTABLE
+find_program(Java_JAR_EXECUTABLE
   NAMES jar
   HINTS ${_JAVA_HINTS}
   PATHS ${_JAVA_PATHS}
 )
 
-FIND_PROGRAM(Java_JAVAC_EXECUTABLE
+find_program(Java_JAVAC_EXECUTABLE
   NAMES javac
   HINTS ${_JAVA_HINTS}
   PATHS ${_JAVA_PATHS}
 )
 
-FIND_PROGRAM(Java_JAVAH_EXECUTABLE
+find_program(Java_JAVAH_EXECUTABLE
   NAMES javah
   HINTS ${_JAVA_HINTS}
   PATHS ${_JAVA_PATHS}
 )
 
-FIND_PROGRAM(Java_JAVADOC_EXECUTABLE
+find_program(Java_JAVADOC_EXECUTABLE
   NAMES javadoc
   HINTS ${_JAVA_HINTS}
   PATHS ${_JAVA_PATHS}
@@ -189,7 +189,7 @@ else()
 endif()
 
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   Java_JAVA_EXECUTABLE
   Java_JAR_EXECUTABLE
   Java_JAVAC_EXECUTABLE
@@ -198,7 +198,7 @@ MARK_AS_ADVANCED(
   )
 
 # LEGACY
-SET(JAVA_RUNTIME ${Java_JAVA_EXECUTABLE})
-SET(JAVA_ARCHIVE ${Java_JAR_EXECUTABLE})
-SET(JAVA_COMPILE ${Java_JAVAC_EXECUTABLE})
+set(JAVA_RUNTIME ${Java_JAVA_EXECUTABLE})
+set(JAVA_ARCHIVE ${Java_JAR_EXECUTABLE})
+set(JAVA_COMPILE ${Java_JAVAC_EXECUTABLE})
 

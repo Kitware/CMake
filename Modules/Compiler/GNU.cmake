@@ -32,7 +32,7 @@ macro(__compiler_gnu lang)
   # header file as a warning if depfiles are enabled, causing check_header_file
   # tests to always succeed.  Work around this by disabling dependency tracking
   # in try_compile mode.
-  GET_PROPERTY(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
+  get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
   if(NOT _IN_TC OR CMAKE_FORCE_DEPFILES)
     # distcc does not transform -o to -MT when invoking the preprocessor
     # internally, as it ought to.  Work around this bug by setting -MT here

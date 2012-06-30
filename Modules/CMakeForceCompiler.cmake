@@ -24,8 +24,8 @@
 # information tests.
 #
 # So a simple toolchain file could look like this:
-#   INCLUDE (CMakeForceCompiler)
-#   SET(CMAKE_SYSTEM_NAME Generic)
+#   include(CMakeForceCompiler)
+#   set(CMAKE_SYSTEM_NAME Generic)
 #   CMAKE_FORCE_C_COMPILER   (chc12 MetrowerksHicross)
 #   CMAKE_FORCE_CXX_COMPILER (chc12 MetrowerksHicross)
 
@@ -42,41 +42,41 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-MACRO(CMAKE_FORCE_C_COMPILER compiler id)
-  SET(CMAKE_C_COMPILER "${compiler}")
-  SET(CMAKE_C_COMPILER_ID_RUN TRUE)
-  SET(CMAKE_C_COMPILER_ID ${id})
-  SET(CMAKE_C_COMPILER_WORKS TRUE)
-  SET(CMAKE_C_COMPILER_FORCED TRUE)
+macro(CMAKE_FORCE_C_COMPILER compiler id)
+  set(CMAKE_C_COMPILER "${compiler}")
+  set(CMAKE_C_COMPILER_ID_RUN TRUE)
+  set(CMAKE_C_COMPILER_ID ${id})
+  set(CMAKE_C_COMPILER_WORKS TRUE)
+  set(CMAKE_C_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.
-  IF("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
-    SET(CMAKE_COMPILER_IS_GNUCC 1)
-  ENDIF("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
-ENDMACRO(CMAKE_FORCE_C_COMPILER)
+  if("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+    set(CMAKE_COMPILER_IS_GNUCC 1)
+  endif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+endmacro(CMAKE_FORCE_C_COMPILER)
 
-MACRO(CMAKE_FORCE_CXX_COMPILER compiler id)
-  SET(CMAKE_CXX_COMPILER "${compiler}")
-  SET(CMAKE_CXX_COMPILER_ID_RUN TRUE)
-  SET(CMAKE_CXX_COMPILER_ID ${id})
-  SET(CMAKE_CXX_COMPILER_WORKS TRUE)
-  SET(CMAKE_CXX_COMPILER_FORCED TRUE)
-
-  # Set old compiler id variables.
-  IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-    SET(CMAKE_COMPILER_IS_GNUCXX 1)
-  ENDIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-ENDMACRO(CMAKE_FORCE_CXX_COMPILER)
-
-MACRO(CMAKE_FORCE_Fortran_COMPILER compiler id)
-  SET(CMAKE_Fortran_COMPILER "${compiler}")
-  SET(CMAKE_Fortran_COMPILER_ID_RUN TRUE)
-  SET(CMAKE_Fortran_COMPILER_ID ${id})
-  SET(CMAKE_Fortran_COMPILER_WORKS TRUE)
-  SET(CMAKE_Fortran_COMPILER_FORCED TRUE)
+macro(CMAKE_FORCE_CXX_COMPILER compiler id)
+  set(CMAKE_CXX_COMPILER "${compiler}")
+  set(CMAKE_CXX_COMPILER_ID_RUN TRUE)
+  set(CMAKE_CXX_COMPILER_ID ${id})
+  set(CMAKE_CXX_COMPILER_WORKS TRUE)
+  set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.
-  IF("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
-    SET(CMAKE_COMPILER_IS_GNUG77 1)
-  ENDIF("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
-ENDMACRO(CMAKE_FORCE_Fortran_COMPILER)
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+    set(CMAKE_COMPILER_IS_GNUCXX 1)
+  endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+endmacro(CMAKE_FORCE_CXX_COMPILER)
+
+macro(CMAKE_FORCE_Fortran_COMPILER compiler id)
+  set(CMAKE_Fortran_COMPILER "${compiler}")
+  set(CMAKE_Fortran_COMPILER_ID_RUN TRUE)
+  set(CMAKE_Fortran_COMPILER_ID ${id})
+  set(CMAKE_Fortran_COMPILER_WORKS TRUE)
+  set(CMAKE_Fortran_COMPILER_FORCED TRUE)
+
+  # Set old compiler id variables.
+  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+    set(CMAKE_COMPILER_IS_GNUG77 1)
+  endif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+endmacro(CMAKE_FORCE_Fortran_COMPILER)

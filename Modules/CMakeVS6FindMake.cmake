@@ -12,7 +12,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM
+find_program(CMAKE_MAKE_PROGRAM
   NAMES msdev
   PATHS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\6.0\\Setup;VsCommonDir]/MSDev98/Bin
@@ -20,6 +20,6 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   "c:/Program Files/Microsoft Visual Studio/Common/MSDev98/Bin"
   "/Program Files/Microsoft Visual Studio/Common/MSDev98/Bin"
   )
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
-SET(MSVC60 1)
-SET(MSVC_VERSION 1200)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)
+set(MSVC60 1)
+set(MSVC_VERSION 1200)

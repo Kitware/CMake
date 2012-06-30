@@ -18,9 +18,9 @@
 #  License text for the above reference.)
 
 # don't even bother under WIN32
-IF(UNIX)
+if(UNIX)
 
-  FIND_PATH( GTK_gtk_INCLUDE_PATH NAMES gtk/gtk.h
+  find_path( GTK_gtk_INCLUDE_PATH NAMES gtk/gtk.h
     PATH_SUFFIXES gtk-1.2 gtk12
     PATHS
     /usr/openwin/share/include
@@ -33,7 +33,7 @@ IF(UNIX)
   # for both.
   #  - Atanas Georgiev <atanas@cs.columbia.edu>
 
-  FIND_PATH( GTK_glibconfig_INCLUDE_PATH NAMES glibconfig.h
+  find_path( GTK_glibconfig_INCLUDE_PATH NAMES glibconfig.h
     PATHS
     /usr/openwin/share/include
     /usr/local/include/glib12
@@ -43,7 +43,7 @@ IF(UNIX)
     /opt/gnome/lib/glib/include
   )
 
-  FIND_PATH( GTK_glib_INCLUDE_PATH NAMES glib.h
+  find_path( GTK_glib_INCLUDE_PATH NAMES glib.h
     PATH_SUFFIXES gtk-1.2 glib-1.2 glib12
     PATHS
     /usr/openwin/share/include
@@ -51,12 +51,12 @@ IF(UNIX)
     /opt/gnome/include
   )
 
-  FIND_PATH( GTK_gtkgl_INCLUDE_PATH NAMES gtkgl/gtkglarea.h
+  find_path( GTK_gtkgl_INCLUDE_PATH NAMES gtkgl/gtkglarea.h
     PATHS /usr/openwin/share/include
           /opt/gnome/include
   )
 
-  FIND_LIBRARY( GTK_gtkgl_LIBRARY gtkgl
+  find_library( GTK_gtkgl_LIBRARY gtkgl
     /usr/openwin/lib
     /opt/gnome/lib
   )
@@ -65,43 +65,43 @@ IF(UNIX)
   # The 12 suffix is thanks to the FreeBSD ports collection
   #
 
-  FIND_LIBRARY( GTK_gtk_LIBRARY
+  find_library( GTK_gtk_LIBRARY
     NAMES  gtk gtk12
     PATHS /usr/openwin/lib
           /opt/gnome/lib
   )
 
-  FIND_LIBRARY( GTK_gdk_LIBRARY
+  find_library( GTK_gdk_LIBRARY
     NAMES  gdk gdk12
     PATHS  /usr/openwin/lib
            /opt/gnome/lib
   )
 
-  FIND_LIBRARY( GTK_gmodule_LIBRARY
+  find_library( GTK_gmodule_LIBRARY
     NAMES  gmodule gmodule12
     PATHS  /usr/openwin/lib
            /opt/gnome/lib
   )
 
-  FIND_LIBRARY( GTK_glib_LIBRARY
+  find_library( GTK_glib_LIBRARY
     NAMES  glib glib12
     PATHS  /usr/openwin/lib
            /opt/gnome/lib
   )
 
-  FIND_LIBRARY( GTK_Xi_LIBRARY 
-    NAMES Xi 
-    PATHS /usr/openwin/lib 
-          /opt/gnome/lib 
-    ) 
+  find_library( GTK_Xi_LIBRARY
+    NAMES Xi
+    PATHS /usr/openwin/lib
+          /opt/gnome/lib
+    )
 
-  FIND_LIBRARY( GTK_gthread_LIBRARY
+  find_library( GTK_gthread_LIBRARY
     NAMES  gthread gthread12
     PATHS  /usr/openwin/lib
            /opt/gnome/lib
   )
 
-  IF(GTK_gtk_INCLUDE_PATH
+  if(GTK_gtk_INCLUDE_PATH
      AND GTK_glibconfig_INCLUDE_PATH
      AND GTK_glib_INCLUDE_PATH
      AND GTK_gtk_LIBRARY
@@ -110,42 +110,42 @@ IF(UNIX)
     # Assume that if gtk and glib were found, the other
     # supporting libraries have also been found.
 
-    SET( GTK_FOUND "YES" )
-    SET( GTK_INCLUDE_DIR  ${GTK_gtk_INCLUDE_PATH}
+    set( GTK_FOUND "YES" )
+    set( GTK_INCLUDE_DIR  ${GTK_gtk_INCLUDE_PATH}
                            ${GTK_glibconfig_INCLUDE_PATH}
                            ${GTK_glib_INCLUDE_PATH} )
-    SET( GTK_LIBRARIES  ${GTK_gtk_LIBRARY}
+    set( GTK_LIBRARIES  ${GTK_gtk_LIBRARY}
                         ${GTK_gdk_LIBRARY}
                         ${GTK_glib_LIBRARY} )
 
-    IF(GTK_gmodule_LIBRARY)
-      SET(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gmodule_LIBRARY})
-    ENDIF(GTK_gmodule_LIBRARY)
-    IF(GTK_gthread_LIBRARY)
-      SET(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gthread_LIBRARY})
-    ENDIF(GTK_gthread_LIBRARY)
-    IF(GTK_Xi_LIBRARY)
-      SET(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_Xi_LIBRARY})
-    ENDIF(GTK_Xi_LIBRARY)
+    if(GTK_gmodule_LIBRARY)
+      set(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gmodule_LIBRARY})
+    endif(GTK_gmodule_LIBRARY)
+    if(GTK_gthread_LIBRARY)
+      set(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gthread_LIBRARY})
+    endif(GTK_gthread_LIBRARY)
+    if(GTK_Xi_LIBRARY)
+      set(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_Xi_LIBRARY})
+    endif(GTK_Xi_LIBRARY)
 
-    IF(GTK_gtkgl_INCLUDE_PATH AND GTK_gtkgl_LIBRARY)
-      SET( GTK_GL_FOUND "YES" )
-      SET( GTK_INCLUDE_DIR  ${GTK_INCLUDE_DIR}
+    if(GTK_gtkgl_INCLUDE_PATH AND GTK_gtkgl_LIBRARY)
+      set( GTK_GL_FOUND "YES" )
+      set( GTK_INCLUDE_DIR  ${GTK_INCLUDE_DIR}
                             ${GTK_gtkgl_INCLUDE_PATH} )
-      SET( GTK_LIBRARIES  ${GTK_gtkgl_LIBRARY} ${GTK_LIBRARIES} )
-      MARK_AS_ADVANCED(
+      set( GTK_LIBRARIES  ${GTK_gtkgl_LIBRARY} ${GTK_LIBRARIES} )
+      mark_as_advanced(
         GTK_gtkgl_LIBRARY
         GTK_gtkgl_INCLUDE_PATH
         )
-    ENDIF(GTK_gtkgl_INCLUDE_PATH AND GTK_gtkgl_LIBRARY)
+    endif(GTK_gtkgl_INCLUDE_PATH AND GTK_gtkgl_LIBRARY)
 
-  ENDIF(GTK_gtk_INCLUDE_PATH
+  endif(GTK_gtk_INCLUDE_PATH
      AND GTK_glibconfig_INCLUDE_PATH
      AND GTK_glib_INCLUDE_PATH
      AND GTK_gtk_LIBRARY
      AND GTK_glib_LIBRARY)
 
-  MARK_AS_ADVANCED(
+  mark_as_advanced(
     GTK_gdk_LIBRARY
     GTK_glib_INCLUDE_PATH
     GTK_glib_LIBRARY
@@ -159,7 +159,7 @@ IF(UNIX)
     GTK_gtkgl_LIBRARY
   )
 
-ENDIF(UNIX)
+endif(UNIX)
 
 
 

@@ -17,4 +17,4 @@
 # and link the most basic of programs.   If not, a fatal error
 # is set and cmake stops processing commands and will not generate
 # any makefiles or projects.
-SET(CMAKE_Java_COMPILER_WORKS 1 CACHE INTERNAL "")
+set(CMAKE_Java_COMPILER_WORKS 1 CACHE INTERNAL "")
