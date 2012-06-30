@@ -1,1 +1,1 @@
-ADD_LIBRARY( NoDepA NoDepASrc.c )
+add_library( NoDepA NoDepASrc.c )

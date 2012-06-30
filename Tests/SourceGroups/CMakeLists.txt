@@ -2,9 +2,9 @@ cmake_minimum_required (VERSION 2.6)
 project(SourceGroups)
 
 # this is not really a test which can fail
-# it is more an example with several source_group() 
+# it is more an example with several source_group()
 # commands.
-# The created projects have to be loaded manually 
+# The created projects have to be loaded manually
 # in Visual Studio/Xcode/Eclipse/...
 # to see whether the correct groups have been created.
 
@@ -19,7 +19,7 @@ source_group(Base\\Sub1\\Sub2 FILES sub1/foobar.c)
 # a group with empty name
 source_group("" FILES foo.c)
 
-# a group, whose name consists only of the delimiter 
+# a group, whose name consists only of the delimiter
 #should be handled the same way as an empty name
 source_group("\\" FILES baz.c)
 

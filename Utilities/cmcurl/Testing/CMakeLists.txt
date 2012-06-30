@@ -1,4 +1,4 @@
-SET(CURL_TESTS
+set(CURL_TESTS
     ftpget
     ftpgetresp
     ftpupload
@@ -8,12 +8,12 @@ SET(CURL_TESTS
     simple
    )
 
-CONFIGURE_FILE(${LIBCURL_SOURCE_DIR}/Testing/testconfig.h.in
+configure_file(${LIBCURL_SOURCE_DIR}/Testing/testconfig.h.in
                ${LIBCURL_BINARY_DIR}/Testing/testconfig.h)
 
-INCLUDE_DIRECTORIES(${LIBCURL_BINARY_DIR}/Testing)
+include_directories(${LIBCURL_BINARY_DIR}/Testing)
 
-FOREACH(TEST ${CURL_TESTS})
-  ADD_EXECUTABLE(${TEST} ${TEST}.c)
-  TARGET_LINK_LIBRARIES(${TEST} cmcurl)
-ENDFOREACH(TEST)
+foreach(TEST ${CURL_TESTS})
+  add_executable(${TEST} ${TEST}.c)
+  target_link_libraries(${TEST} cmcurl)
+endforeach(TEST)

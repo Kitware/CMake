@@ -1,8 +1,8 @@
 #
 # Add test
 #
-ADD_EXECUTABLE(testing2 testing2.cxx)
-ADD_TEST(testing.2 ${Testing_BINARY_DIR}/bin/testing2)
+add_executable(testing2 testing2.cxx)
+add_test(testing.2 ${Testing_BINARY_DIR}/bin/testing2)
 
 add_test(NotCycle.a ${CMAKE_COMMAND} -E echo a)
 add_test(NotCycle.test1 ${CMAKE_COMMAND} -E echo test1)

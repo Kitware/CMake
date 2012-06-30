@@ -1,46 +1,46 @@
 # a simple C only test case
 cmake_minimum_required (VERSION 2.6)
-PROJECT (FunctionTest)
+project(FunctionTest)
 
-FUNCTION(FAILED testname)
-  MESSAGE(SEND_ERROR "${testname} failed ${ARGN}")
-ENDFUNCTION(FAILED)
+function(FAILED testname)
+  message(SEND_ERROR "${testname} failed ${ARGN}")
+endfunction(FAILED)
 
-FUNCTION(PASS testname)
-  MESSAGE("${testname} passed ${ARGN}")
-ENDFUNCTION(PASS)
+function(PASS testname)
+  message("${testname} passed ${ARGN}")
+endfunction(PASS)
 
 
 # test scope
-SET(COUNT 3)
-FUNCTION(scope_test)
-  SET(COUNT 4)
-ENDFUNCTION(scope_test)
+set(COUNT 3)
+function(scope_test)
+  set(COUNT 4)
+endfunction(scope_test)
 scope_test()
-IF(COUNT EQUAL "3")
+if(COUNT EQUAL "3")
   PASS("scope")
-ELSE(COUNT EQUAL "3")
+else(COUNT EQUAL "3")
   FAILED("COUNT Got: ${COUNT}")
-ENDIF(COUNT EQUAL "3")
+endif(COUNT EQUAL "3")
 
 # test ARGC
-FUNCTION(weird_name)
-  IF("${ARGC}" EQUAL "3")
+function(weird_name)
+  if("${ARGC}" EQUAL "3")
     PASS("ARGC")
-  ELSE("${ARGC}" EQUAL "3")
+  else("${ARGC}" EQUAL "3")
     FAILED("ARGC" "Got: ${ARGC}")
-  ENDIF("${ARGC}" EQUAL "3")
-ENDFUNCTION(weird_name)
+  endif("${ARGC}" EQUAL "3")
+endfunction(weird_name)
 WeIrD_nAmE(a1 a2 a3)
 
 # test ARGN
-FUNCTION(test_argn_function argument)
-  IF("${ARGN}" EQUAL "3")
+function(test_argn_function argument)
+  if("${ARGN}" EQUAL "3")
     PASS("ARGN")
-  ELSE("${ARGN}" EQUAL "3")
+  else("${ARGN}" EQUAL "3")
     FAILED("ARGN" "Got: ${ARGN}")
-  ENDIF("${ARGN}" EQUAL "3")
-ENDFUNCTION(test_argn_function)
+  endif("${ARGN}" EQUAL "3")
+endfunction(test_argn_function)
 Test_Argn_Function(ignored 3)
 
 # test argument naming and raise scope
@@ -86,91 +86,91 @@ endif (fresult EQUAL 120)
 
 
 # case test
-FUNCTION(strange_function m)
-  SET("${m}" strange_function PARENT_SCOPE)
-ENDFUNCTION(strange_function m)
+function(strange_function m)
+  set("${m}" strange_function PARENT_SCOPE)
+endfunction(strange_function m)
 
 STRANGE_FUNCTION(var)
 set(second_var "second_var")
-IF("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
+if("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
   PASS("Case Test" "(${var} ${second_var})")
-ELSE("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
+else("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
   FAILED("Case test" "(${var} ${second_var})")
-ENDIF("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
+endif("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
 
 # test backing up command
-FUNCTION(ADD_EXECUTABLE exec)
+function(ADD_EXECUTABLE exec)
   _ADD_EXECUTABLE(mini${exec} ${ARGN})
-ENDFUNCTION(ADD_EXECUTABLE)
+endfunction(ADD_EXECUTABLE)
 
 # var undef case
-FUNCTION(undef_var m)
-  SET("${m}" PARENT_SCOPE)
-ENDFUNCTION(undef_var)
+function(undef_var m)
+  set("${m}" PARENT_SCOPE)
+endfunction(undef_var)
 
-SET(FUNCTION_UNDEFINED 1)
+set(FUNCTION_UNDEFINED 1)
 undef_var(FUNCTION_UNDEFINED)
-IF(DEFINED FUNCTION_UNDEFINED)
+if(DEFINED FUNCTION_UNDEFINED)
   FAILED("Function Undefine Test" "(${FUNCTION_UNDEFINED})")
-ELSE(DEFINED FUNCTION_UNDEFINED)
+else(DEFINED FUNCTION_UNDEFINED)
   PASS("Function Undefine Test" "(${FUNCTION_UNDEFINED})")
-ENDIF(DEFINED FUNCTION_UNDEFINED)
+endif(DEFINED FUNCTION_UNDEFINED)
 
 # Subdirectory scope raise.
-SET(SUBDIR_UNDEFINED 1)
-ADD_SUBDIRECTORY(SubDirScope)
-IF(DEFINED SUBDIR_UNDEFINED)
+set(SUBDIR_UNDEFINED 1)
+add_subdirectory(SubDirScope)
+if(DEFINED SUBDIR_UNDEFINED)
   FAILED("Subdir Undefine Test" "(${SUBDIR_UNDEFINED})")
-ELSE(DEFINED SUBDIR_UNDEFINED)
+else(DEFINED SUBDIR_UNDEFINED)
   PASS("Subdir Undefine Test" "(${SUBDIR_UNDEFINED})")
-ENDIF(DEFINED SUBDIR_UNDEFINED)
-IF(DEFINED SUBDIR_DEFINED)
+endif(DEFINED SUBDIR_UNDEFINED)
+if(DEFINED SUBDIR_DEFINED)
   PASS("Subdir Define Test" "(${SUBDIR_DEFINED})")
-ELSE(DEFINED SUBDIR_DEFINED)
+else(DEFINED SUBDIR_DEFINED)
   FAILED("Subdir Define Test" "(${SUBDIR_DEFINED})")
-ENDIF(DEFINED SUBDIR_DEFINED)
+endif(DEFINED SUBDIR_DEFINED)
 
 # Test function-scoped directory.
-FUNCTION(ADD_SUBDIR2 dir)
-  ADD_SUBDIRECTORY("${dir}" "${dir}2")
+function(ADD_SUBDIR2 dir)
+  add_subdirectory("${dir}" "${dir}2")
   # The parent scope sets in the subdir should be visible here.
-  IF(DEFINED SUBDIR_UNDEFINED)
+  if(DEFINED SUBDIR_UNDEFINED)
     FAILED("Subdir Function Undefine Test 1" "(${SUBDIR_UNDEFINED})")
-  ELSE(DEFINED SUBDIR_UNDEFINED)
+  else(DEFINED SUBDIR_UNDEFINED)
     PASS("Subdir Function Undefine Test 1" "(${SUBDIR_UNDEFINED})")
-  ENDIF(DEFINED SUBDIR_UNDEFINED)
-  IF(DEFINED SUBDIR_DEFINED)
+  endif(DEFINED SUBDIR_UNDEFINED)
+  if(DEFINED SUBDIR_DEFINED)
     PASS("Subdir Function Define Test 1" "(${SUBDIR_DEFINED})")
-  ELSE(DEFINED SUBDIR_DEFINED)
+  else(DEFINED SUBDIR_DEFINED)
     FAILED("Subdir Function Define Test 1" "(${SUBDIR_DEFINED})")
-  ENDIF(DEFINED SUBDIR_DEFINED)
-ENDFUNCTION(ADD_SUBDIR2)
+  endif(DEFINED SUBDIR_DEFINED)
+endfunction(ADD_SUBDIR2)
 
 # Reset test variables.
-SET(SUBDIR_UNDEFINED 1)
-SET(SUBDIR_DEFINED)
+set(SUBDIR_UNDEFINED 1)
+set(SUBDIR_DEFINED)
 
 # Run test function.
 ADD_SUBDIR2(SubDirScope)
 
 # The parent scope sets in the subdir should not be visible here.
-IF(DEFINED SUBDIR_UNDEFINED)
+if(DEFINED SUBDIR_UNDEFINED)
   PASS("Subdir Function Undefine Test 2" "(${SUBDIR_UNDEFINED})")
-ELSE(DEFINED SUBDIR_UNDEFINED)
+else(DEFINED SUBDIR_UNDEFINED)
   FAILED("Subdir Function Undefine Test 2" "(${SUBDIR_UNDEFINED})")
-ENDIF(DEFINED SUBDIR_UNDEFINED)
-IF(DEFINED SUBDIR_DEFINED)
+endif(DEFINED SUBDIR_UNDEFINED)
+if(DEFINED SUBDIR_DEFINED)
   FAILED("Subdir Function Define Test 2" "(${SUBDIR_DEFINED})")
-ELSE(DEFINED SUBDIR_DEFINED)
+else(DEFINED SUBDIR_DEFINED)
   PASS("Subdir Function Define Test 2" "(${SUBDIR_DEFINED})")
-ENDIF(DEFINED SUBDIR_DEFINED)
+endif(DEFINED SUBDIR_DEFINED)
 
-ADD_EXECUTABLE(FunctionTest functionTest.c)
+add_executable(FunctionTest functionTest.c)
 
 # Use the PROJECT_LABEL property: in IDEs, the project label should appear
 # in the UI rather than the target name. If this were a good test of the
 # property rather than just a smoke test, it would verify that the label
 # actually appears in the UI of the IDE... Or at least that the text appears
 # somewhere in the generated project files.
-SET_PROPERTY(TARGET miniFunctionTest
+set_property(TARGET miniFunctionTest
   PROPERTY PROJECT_LABEL "Test de Fonctionnement")

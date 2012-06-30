@@ -1,5 +1,5 @@
-PROJECT(CMCompress)
+project(CMCompress)
 
-ADD_LIBRARY(cmcompress cmcompress.c)
+add_library(cmcompress cmcompress.c)
 
-INSTALL(FILES Copyright.txt DESTINATION ${CMake_DOC_DEST}/cmcompress)
+install(FILES Copyright.txt DESTINATION ${CMake_DOC_DEST}/cmcompress)

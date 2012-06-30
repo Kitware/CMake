@@ -1,1 +1,1 @@
-ADD_LIBRARY(mytest libc1.c)
+add_library(mytest libc1.c)

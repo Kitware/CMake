@@ -6,13 +6,13 @@
 ############################################
 
 # Public headers
-SET(include_HEADERS
+set(include_HEADERS
   archive.h
   archive_entry.h
 )
 
 # Sources and private headers
-SET(libarchive_SOURCES
+set(libarchive_SOURCES
   archive_acl.c
   archive_check_magic.c
   archive_crypto.c
@@ -115,7 +115,7 @@ SET(libarchive_SOURCES
 )
 
 # Man pages
-SET(libarchive_MANS
+set(libarchive_MANS
   archive_entry.3
   archive_entry_acl.3
   archive_entry_linkify.3
@@ -138,15 +138,15 @@ SET(libarchive_MANS
   tar.5
 )
 
-IF(WIN32 AND NOT CYGWIN)
-  LIST(APPEND libarchive_SOURCES archive_entry_copy_bhfi.c)
-  LIST(APPEND libarchive_SOURCES archive_read_disk_windows.c)
-  LIST(APPEND libarchive_SOURCES archive_windows.c)
-  LIST(APPEND libarchive_SOURCES archive_windows.h)
-  LIST(APPEND libarchive_SOURCES archive_write_disk_windows.c)
-  LIST(APPEND libarchive_SOURCES filter_fork_windows.c)
-ENDIF(WIN32 AND NOT CYGWIN)
+if(WIN32 AND NOT CYGWIN)
+  list(APPEND libarchive_SOURCES archive_entry_copy_bhfi.c)
+  list(APPEND libarchive_SOURCES archive_read_disk_windows.c)
+  list(APPEND libarchive_SOURCES archive_windows.c)
+  list(APPEND libarchive_SOURCES archive_windows.h)
+  list(APPEND libarchive_SOURCES archive_write_disk_windows.c)
+  list(APPEND libarchive_SOURCES filter_fork_windows.c)
+endif(WIN32 AND NOT CYGWIN)
 
 # CMake needs just one static "cmlibarchive" library.
-ADD_LIBRARY(cmlibarchive STATIC ${libarchive_SOURCES} ${include_HEADERS})
-TARGET_LINK_LIBRARIES(cmlibarchive ${ADDITIONAL_LIBS})
+add_library(cmlibarchive STATIC ${libarchive_SOURCES} ${include_HEADERS})
+target_link_libraries(cmlibarchive ${ADDITIONAL_LIBS})

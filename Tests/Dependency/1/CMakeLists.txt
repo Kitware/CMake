@@ -1,3 +1,3 @@
-ADD_LIBRARY( One OneSrc.c )
+add_library( One OneSrc.c )
 # This library has no dependencies
-TARGET_LINK_LIBRARIES( One "" )
+target_link_libraries( One "" )
