@@ -272,7 +272,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   // don't use POST_BUILD.
   if (cmdLines.empty())
 #ifdef _WIN32
-    return "cd.";
+    return "cd .";
 #else
     return ":";
 #endif
