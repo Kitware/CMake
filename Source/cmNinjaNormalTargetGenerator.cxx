@@ -480,7 +480,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   int cmdLineLimit;
 #ifdef _WIN32
-  cmdLineLimit = 8000;
+  cmdLineLimit = 8000 - this->GetGlobalGenerator()->
+                                 GetRuleCmdLength(this->LanguageLinkerRule());
 #else
   cmdLineLimit = -1; // TODO
 #endif
