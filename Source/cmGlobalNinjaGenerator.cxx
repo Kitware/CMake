@@ -557,6 +557,8 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                     rspfile,
                                     restat,
                                     generator);
+
+  this->RuleCmdLength[name] = command.size();
 }
 
 bool cmGlobalNinjaGenerator::HasRule(const std::string &name)
