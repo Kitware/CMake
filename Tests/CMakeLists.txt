@@ -625,6 +625,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildDepends")
 
+  ADD_TEST(BuildTypeFlags ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/BuildTypeFlags"
+    "${CMake_BINARY_DIR}/Tests/BuildTypeFlags"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project BuildTypeFlags
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    )
+  LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildTypeFlags")
+
   SET(SimpleInstallInstallDir
     "${CMake_BINARY_DIR}/Tests/SimpleInstall/InstallDirectory")
   ADD_TEST(SimpleInstall ${CMAKE_CTEST_COMMAND}
