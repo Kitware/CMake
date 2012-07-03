@@ -294,8 +294,12 @@ int main (int argc, char *argv[])
 
   cmDocumentation doc;
   doc.addCPackStandardDocSections();
-  /* Were we invoked to display doc or to do some work ? */
-  if(doc.CheckOptions(argc, argv,"-G") || nocwd)
+  /* Were we invoked to display doc or to do some work ?
+   * Unlike cmake launching cpack with zero argument
+   * should launch cpack using "cpackConfigFile" if it exists
+   * in the current directory.
+   */
+  if((doc.CheckOptions(argc, argv,"-G") || nocwd) && !(argc==1))
     {
       help = true;
     }
