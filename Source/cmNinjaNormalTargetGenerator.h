@@ -34,6 +34,7 @@ private:
   void WriteLinkStatement();
   void WriteObjectLibStatement();
   std::vector<std::string> ComputeLinkCmd();
+  void CreateAppBundle(const std::string& targetName, std::string& outpath);
 
 private:
   // Target name info.
@@ -43,6 +44,7 @@ private:
   std::string TargetNameImport;
   std::string TargetNamePDB;
   const char *TargetLinkLanguage;
+  std::string MacContentDirectory;
 };
 
 #endif // ! cmNinjaNormalTargetGenerator_h

@@ -33,6 +33,8 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNameReal()
   , TargetNameImport()
   , TargetNamePDB()
+  , TargetLinkLanguage(0)
+  , MacContentDirectory()
 {
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
@@ -54,6 +56,15 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     // on Windows the output dir is already needed at compile time
     // ensure the directory exists (OutDir test)
     EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
+    }
+
+  // TODO: Factor with the cmMakefileExecutableTargetGenerator constructor.
+  if(target->IsAppBundleOnApple())
+    {
+    this->MacContentDirectory = target->GetDirectory(this->GetConfigName());
+    this->MacContentDirectory += "/";
+    this->MacContentDirectory += this->TargetNameOut;
+    this->MacContentDirectory += ".app/Contents/";
     }
 }
 
@@ -341,6 +352,29 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
 
+  std::string targetOutput = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
+  std::string targetOutputReal = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/false,
+                                   /*realpath=*/true).c_str());
+  std::string targetOutputImplib = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/true).c_str());
+
+  if (this->GetTarget()->IsAppBundleOnApple())
+    {
+    // Create the app bundle
+    std::string outpath;
+    this->CreateAppBundle(this->TargetNameOut, outpath);
+
+    // Calculate the output path
+    targetOutput = outpath + this->TargetNameOut;
+    targetOutput = this->ConvertToNinjaPath(targetOutput.c_str());
+    targetOutputReal = outpath + this->TargetNameReal;
+    targetOutputReal = this->ConvertToNinjaPath(targetOutputReal.c_str());
+    }
+
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   this->GetBuildFileStream()
@@ -352,16 +386,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   cmNinjaDeps emptyDeps;
   cmNinjaVars vars;
-
-  std::string targetOutput = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
-  std::string targetOutputReal = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
-                                   /*implib=*/false,
-                                   /*realpath=*/true).c_str());
-  std::string targetOutputImplib = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
-                                   /*implib=*/true).c_str());
 
   // Compute the comment.
   cmOStringStream comment;
@@ -575,4 +599,25 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
   // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
                                              this->GetTarget());
+}
+
+// TODO: Factor with cmMakefileExecutableTargetGenerator::CreateAppBundle().
+void
+cmNinjaNormalTargetGenerator::CreateAppBundle(const std::string& targetName,
+                                              std::string& outpath)
+{
+  // Compute bundle directory names.
+  outpath = this->MacContentDirectory;
+  outpath += "MacOS";
+  cmSystemTools::MakeDirectory(outpath.c_str());
+  this->GetMakefile()->AddCMakeOutputFile(outpath.c_str());
+  outpath += "/";
+
+  // Configure the Info.plist file.  Note that it needs the executable name
+  // to be set.
+  std::string plist = this->MacContentDirectory + "Info.plist";
+  this->GetLocalGenerator()->GenerateAppleInfoPList(this->GetTarget(),
+                                                    targetName.c_str(),
+                                                    plist.c_str());
+  this->GetMakefile()->AddCMakeOutputFile(plist.c_str());
 }
