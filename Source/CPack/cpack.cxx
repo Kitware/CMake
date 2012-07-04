@@ -207,8 +207,7 @@ int main (int argc, char *argv[])
   std::string helpHTML;
 
   std::string cpackProjectName;
-  std::string cpackProjectDirectory
-    = cmsys::SystemTools::GetCurrentWorkingDirectory();
+  std::string cpackProjectDirectory;
   std::string cpackBuildConfig;
   std::string cpackProjectVersion;
   std::string cpackProjectPatch;
@@ -370,10 +369,24 @@ int main (int argc, char *argv[])
       globalMF->AddDefinition("CPACK_PACKAGE_VENDOR",
         cpackProjectVendor.c_str());
       }
+    // if this is not empty it has been set on the command line
+    // go for it. Command line override values set in config file.
     if ( !cpackProjectDirectory.empty() )
       {
       globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
-        cpackProjectDirectory.c_str());
+                              cpackProjectDirectory.c_str());
+      }
+    // The value has not been set on the command line
+    else
+      {
+      // get a default value (current working directory)
+      cpackProjectDirectory = cmsys::SystemTools::GetCurrentWorkingDirectory();
+      // use default value iff no value has been provided by the config file
+      if (!globalMF->IsSet("CPACK_PACKAGE_DIRECTORY"))
+        {
+        globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
+                                cpackProjectDirectory.c_str());
+        }
       }
     if ( !cpackBuildConfig.empty() )
       {
