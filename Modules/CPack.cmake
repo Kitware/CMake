@@ -63,6 +63,14 @@
 ##end
 #
 ##variable
+#  CPACK_PACKAGE_DIRECTORY - The directory in which CPack is doing its
+#  packaging. If it is not set then this will default (internally) to the
+#  build dir. This variable may be defined in CPack config file or from
+#  the cpack command line option "-B". If set the command line option
+#  override the value found in the config file.
+##end
+#
+##variable
 #  CPACK_PACKAGE_VERSION_MAJOR - Package major Version
 ##end
 #
