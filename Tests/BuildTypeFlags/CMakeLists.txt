@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(flags C)
+project(BuildTypeFlags C)
 
 enable_testing()
 include(CTest)
@@ -27,7 +27,7 @@ add_library(lib_shared SHARED lib.c)
 add_executable(flags flags.c)
 target_link_libraries(flags lib)
 
-add_test( NAME flags_set COMMAND flags)
+add_test(NAME flags_set COMMAND flags)
 
 set_tests_properties(flags_set PROPERTIES
                      PASS_REGULAR_EXPRESSION " ${CMAKE_BUILD_TYPE}")
