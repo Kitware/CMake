@@ -299,9 +299,8 @@ bool CMakeSetupDialog::prepareConfigure()
   if(!dir.exists())
     {
     QString msg = tr("Build directory does not exist, "
-                         "should I create it?")
-                      + "\n\n"
-                      + tr("Directory: ");
+                         "should I create it?\n\n"
+                      "Directory: ");
     msg += bindir;
     QString title = tr("Create Directory");
     QMessageBox::StandardButton btn;
@@ -490,9 +489,9 @@ void CMakeSetupDialog::closeEvent(QCloseEvent* e)
   // don't close if we're busy, unless the user really wants to
   if(this->CurrentState == Configuring)
     {
-    QString msg = "You are in the middle of a Configure.\n"
+    QString msg = tr("You are in the middle of a Configure.\n"
                    "If you Exit now the configure information will be lost.\n"
-                   "Are you sure you want to Exit?";
+                   "Are you sure you want to Exit?");
     QString title = tr("Confirm Exit");
     QMessageBox::StandardButton btn;
     btn = QMessageBox::critical(this, title, msg,
@@ -715,33 +714,33 @@ bool CMakeSetupDialog::setupFirstConfigure()
 
       QString mode = dialog.getCrossIncludeMode();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE",
-                        "CMake Find Include Mode", mode, false);
+                        tr("CMake Find Include Mode"), mode, false);
       mode = dialog.getCrossLibraryMode();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY",
-                        "CMake Find Library Mode", mode, false);
+                        tr("CMake Find Library Mode"), mode, false);
       mode = dialog.getCrossProgramMode();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM",
-                        "CMake Find Program Mode", mode, false);
+                        tr("CMake Find Program Mode"), mode, false);
 
       QString rootPath = dialog.getCrossRoot();
       m->insertProperty(QCMakeProperty::PATH, "CMAKE_FIND_ROOT_PATH",
-                        "CMake Find Root Path", rootPath, false);
+                        tr("CMake Find Root Path"), rootPath, false);
 
       QString systemName = dialog.getSystemName();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_NAME",
-                        "CMake System Name", systemName, false);
+                        tr("CMake System Name"), systemName, false);
       QString cxxCompiler = dialog.getCXXCompiler();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
-                        "CXX compiler.", cxxCompiler, false);
+                        tr("CXX compiler."), cxxCompiler, false);
       QString cCompiler = dialog.getCCompiler();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_C_COMPILER",
-                        "C compiler.", cCompiler, false);
+                        tr("C compiler."), cCompiler, false);
       }
     else if(dialog.crossCompilerToolChainFile())
       {
       QString toolchainFile = dialog.getCrossCompilerToolChainFile();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_TOOLCHAIN_FILE",
-                        "Cross Compile ToolChain File", toolchainFile, false);
+                        tr("Cross Compile ToolChain File"), toolchainFile, false);
       }
     return true;
     }
@@ -772,7 +771,7 @@ void CMakeSetupDialog::doReloadCache()
 void CMakeSetupDialog::doDeleteCache()
 {
   QString title = tr("Delete Cache");
-  QString msg = "Are you sure you want to delete the cache?";
+  QString msg = tr("Are you sure you want to delete the cache?");
   QMessageBox::StandardButton btn;
   btn = QMessageBox::information(this, title, msg,
                                  QMessageBox::Yes | QMessageBox::No);
@@ -786,9 +785,9 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = "CMake %1\n"
+  QString msg = tr("CMake %1\n"
                 "Using Qt %2\n"
-                "www.cmake.org";
+                "www.cmake.org");
 
   msg = msg.arg(cmVersion::GetCMakeVersion());
   msg = msg.arg(qVersion());

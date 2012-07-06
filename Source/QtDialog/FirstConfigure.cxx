@@ -17,10 +17,10 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
   l->addWidget(this->GeneratorOptions);
   l->addSpacing(6);
 
-  this->CompilerSetupOptions[0] = new QRadioButton("Use default native compilers", this);
-  this->CompilerSetupOptions[1] = new QRadioButton("Specify native compilers", this);
-  this->CompilerSetupOptions[2] = new QRadioButton("Specify toolchain file for cross-compiling", this);
-  this->CompilerSetupOptions[3] = new QRadioButton("Specify options for cross-compiling", this);
+  this->CompilerSetupOptions[0] = new QRadioButton(tr("Use default native compilers"), this);
+  this->CompilerSetupOptions[1] = new QRadioButton(tr("Specify native compilers"), this);
+  this->CompilerSetupOptions[2] = new QRadioButton(tr("Specify toolchain file for cross-compiling"), this);
+  this->CompilerSetupOptions[3] = new QRadioButton(tr("Specify options for cross-compiling"), this);
   l->addWidget(this->CompilerSetupOptions[0]);
   l->addWidget(this->CompilerSetupOptions[1]);
   l->addWidget(this->CompilerSetupOptions[2]);
@@ -159,9 +159,9 @@ CrossCompilerSetup::CrossCompilerSetup(QWidget* p)
 
   // fill in combo boxes
   QStringList modes;
-  modes << "Search in Target Root, then native system";
-  modes << "Search only in Target Root";
-  modes << "Search only in native system";
+  modes << tr("Search in Target Root, then native system");
+  modes << tr("Search only in Target Root");
+  modes << tr("Search only in native system");
   crossProgramMode->addItems(modes);
   crossLibraryMode->addItems(modes);
   crossIncludeMode->addItems(modes);
