@@ -125,7 +125,7 @@ int main(int argc, char** argv)
 
   // pick up translation files if they exists in the data directory
   QDir translationsDir = cmExecDir;
-  translationsDir.cd(".." CMAKE_DATA_DIR);
+  translationsDir.cd(QString::fromLocal8Bit(".." CMAKE_DATA_DIR));
   translationsDir.cd("i18n");
   QTranslator translator;
   QString transfile = QString("cmake_%1").arg(QLocale::system().name());
@@ -157,15 +157,15 @@ int main(int argc, char** argv)
   arg.Parse();
   if(!sourceDirectory.empty() && !binaryDirectory.empty())
     {
-    dialog.setSourceDirectory(sourceDirectory.c_str());
-    dialog.setBinaryDirectory(binaryDirectory.c_str());
+    dialog.setSourceDirectory(QString::fromLocal8Bit(sourceDirectory.c_str()));
+    dialog.setBinaryDirectory(QString::fromLocal8Bit(binaryDirectory.c_str()));
     }
   else
     {
     QStringList args = app.arguments();
     if(args.count() == 2)
       {
-      cmsys_stl::string filePath = cmSystemTools::CollapseFullPath(args[1].toAscii().data());
+      cmsys_stl::string filePath = cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
 
       // check if argument is a directory containing CMakeCache.txt
       cmsys_stl::string buildFilePath =
@@ -184,12 +184,18 @@ int main(int argc, char** argv)
 
       if(cmSystemTools::FileExists(buildFilePath.c_str()))
         {
-        dialog.setBinaryDirectory(cmSystemTools::GetFilenamePath(buildFilePath).c_str());
+        dialog.setBinaryDirectory(
+          QString::fromLocal8Bit(
+            cmSystemTools::GetFilenamePath(buildFilePath).c_str()
+            )
+          );
         }
       else if(cmSystemTools::FileExists(srcFilePath.c_str()))
         {
-        dialog.setSourceDirectory(filePath.c_str());
-        dialog.setBinaryDirectory(cmSystemTools::CollapseFullPath(".").c_str());
+        dialog.setSourceDirectory(QString::fromLocal8Bit(filePath.c_str()));
+        dialog.setBinaryDirectory(
+          QString::fromLocal8Bit(cmSystemTools::CollapseFullPath(".").c_str())
+          );
         }
       }
     }
