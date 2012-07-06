@@ -508,20 +508,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                          emptyDeps,
                                          symlinkVars);
     } else {
-      cmNinjaDeps outputs;
+      cmNinjaDeps symlinks;
       const std::string soName = this->GetTargetFilePath(this->TargetNameSO);
       // If one link has to be created.
       if (targetOutputReal == soName || targetOutput == soName) {
         symlinkVars["SONAME"] = soName;
       } else {
         symlinkVars["SONAME"] = "";
-        outputs.push_back(soName);
+        symlinks.push_back(soName);
       }
-      outputs.push_back(targetOutput);
+      symlinks.push_back(targetOutput);
       cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                       "Create library symlink " + targetOutput,
                                          "CMAKE_SYMLINK_LIBRARY",
-                                         outputs,
+                                         symlinks,
                                          cmNinjaDeps(1, targetOutputReal),
                                          emptyDeps,
                                          emptyDeps,
