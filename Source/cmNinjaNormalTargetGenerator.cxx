@@ -16,6 +16,7 @@
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
+#include "cmOSXBundleGenerator.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -34,8 +35,8 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNameImport()
   , TargetNamePDB()
   , TargetLinkLanguage(0)
-  , MacContentDirectory()
-  , FrameworkVersion()
+  , OSXBundleGenerator(0)
+  , MacContentFolders()
 {
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
@@ -59,43 +60,15 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
     }
 
-  // TODO: Factor with the cmMakefileExecutableTargetGenerator constructor.
-  if(target->IsAppBundleOnApple())
-    {
-    this->MacContentDirectory = target->GetDirectory(this->GetConfigName());
-    this->MacContentDirectory += "/";
-    this->MacContentDirectory += this->TargetNameOut;
-    this->MacContentDirectory += ".app/Contents/";
-    }
-  // TODO: Factor with the cmMakefileLibraryTargetGenerator constructor.
-  else if(target->IsFrameworkOnApple())
-    {
-    this->FrameworkVersion = target->GetFrameworkVersion();
-    this->MacContentDirectory = target->GetDirectory(this->GetConfigName());
-    this->MacContentDirectory += "/";
-    this->MacContentDirectory += this->TargetNameOut;
-    this->MacContentDirectory += ".framework/Versions/";
-    this->MacContentDirectory += this->FrameworkVersion;
-    this->MacContentDirectory += "/";
-    }
-  else if(target->IsCFBundleOnApple())
-    {
-    this->MacContentDirectory = target->GetDirectory(this->GetConfigName());
-    this->MacContentDirectory += "/";
-    this->MacContentDirectory += this->TargetNameOut;
-    this->MacContentDirectory += ".";
-    const char *ext = target->GetProperty("BUNDLE_EXTENSION");
-    if (!ext)
-      {
-      ext = "bundle";
-      }
-    this->MacContentDirectory += ext;
-    this->MacContentDirectory += "/Contents/";
-    }
+  this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
+                                                      this->TargetNameOut,
+                                                      this->GetConfigName());
+  this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 {
+  delete this->OSXBundleGenerator;
 }
 
 void cmNinjaNormalTargetGenerator::Generate()
@@ -392,7 +365,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     {
     // Create the app bundle
     std::string outpath;
-    this->CreateAppBundle(this->TargetNameOut, outpath);
+    this->OSXBundleGenerator->CreateAppBundle(this->TargetNameOut, outpath);
 
     // Calculate the output path
     targetOutput = outpath + this->TargetNameOut;
@@ -403,7 +376,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   else if (this->GetTarget()->IsFrameworkOnApple())
     {
     // Create the library framework.
-    this->CreateFramework(this->TargetNameOut);
+    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut);
     }
 
   // Write comments.
@@ -630,114 +603,4 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
   // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
                                              this->GetTarget());
-}
-
-// TODO: Factor with cmMakefileExecutableTargetGenerator::CreateAppBundle().
-void
-cmNinjaNormalTargetGenerator::CreateAppBundle(const std::string& targetName,
-                                              std::string& outpath)
-{
-  // Compute bundle directory names.
-  outpath = this->MacContentDirectory;
-  outpath += "MacOS";
-  cmSystemTools::MakeDirectory(outpath.c_str());
-  this->GetMakefile()->AddCMakeOutputFile(outpath.c_str());
-  outpath += "/";
-
-  // Configure the Info.plist file.  Note that it needs the executable name
-  // to be set.
-  std::string plist = this->MacContentDirectory + "Info.plist";
-  this->GetLocalGenerator()->GenerateAppleInfoPList(this->GetTarget(),
-                                                    targetName.c_str(),
-                                                    plist.c_str());
-  this->GetMakefile()->AddCMakeOutputFile(plist.c_str());
-}
-
-// TODO: Factor with cmMakefileLibraryTargetGenerator::CreateFramework().
-void
-cmNinjaNormalTargetGenerator::CreateFramework(std::string const& targetName)
-{
-  // Create the Resources directory.
-  std::string resources = this->MacContentDirectory + "Resources/";
-  cmSystemTools::MakeDirectory(resources.c_str());
-
-  // Configure the Info.plist file into the Resources directory.
-  std::set<cmStdString> macContentFolders;
-  macContentFolders.insert("Resources");
-  std::string plist = resources + "Info.plist";
-  this->GetLocalGenerator()->GenerateFrameworkInfoPList(this->GetTarget(),
-                                                        targetName.c_str(),
-                                                        plist.c_str());
-
-  // TODO: Use the cmMakefileTargetGenerator::ExtraFiles vector to
-  // drive rules to create these files at build time.
-  std::string oldName;
-  std::string newName;
-
-  // Compute the location of the top-level foo.framework directory.
-  std::string top = this->GetTarget()->GetDirectory(this->GetConfigName());
-  top += "/";
-  top += this->TargetNameOut;
-  top += ".framework/";
-
-  // Make foo.framework/Versions
-  std::string versions = top;
-  versions += "Versions";
-  cmSystemTools::MakeDirectory(versions.c_str());
-
-  // Make foo.framework/Versions/version
-  std::string version = versions;
-  version += "/";
-  version += this->FrameworkVersion;
-  cmSystemTools::MakeDirectory(version.c_str());
-
-  // Current -> version
-  oldName = this->FrameworkVersion;
-  newName = versions;
-  newName += "/Current";
-  cmSystemTools::RemoveFile(newName.c_str());
-  cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-  this->GetMakefile()->AddCMakeOutputFile(newName.c_str());
-
-  // foo -> Versions/Current/foo
-  oldName = "Versions/Current/";
-  oldName += this->TargetNameOut;
-  newName = top;
-  newName += this->TargetNameOut;
-  cmSystemTools::RemoveFile(newName.c_str());
-  cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-  this->GetMakefile()->AddCMakeOutputFile(newName.c_str());
-
-  // Resources -> Versions/Current/Resources
-  if(macContentFolders.find("Resources") != macContentFolders.end())
-    {
-    oldName = "Versions/Current/Resources";
-    newName = top;
-    newName += "Resources";
-    cmSystemTools::RemoveFile(newName.c_str());
-    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-    this->GetMakefile()->AddCMakeOutputFile(newName.c_str());
-    }
-
-  // Headers -> Versions/Current/Headers
-  if(macContentFolders.find("Headers") != macContentFolders.end())
-    {
-    oldName = "Versions/Current/Headers";
-    newName = top;
-    newName += "Headers";
-    cmSystemTools::RemoveFile(newName.c_str());
-    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-    this->GetMakefile()->AddCMakeOutputFile(newName.c_str());
-    }
-
-  // PrivateHeaders -> Versions/Current/PrivateHeaders
-  if(macContentFolders.find("PrivateHeaders") != macContentFolders.end())
-    {
-    oldName = "Versions/Current/PrivateHeaders";
-    newName = top;
-    newName += "PrivateHeaders";
-    cmSystemTools::RemoveFile(newName.c_str());
-    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-    this->GetMakefile()->AddCMakeOutputFile(newName.c_str());
-    }
 }

@@ -15,8 +15,12 @@
 
 #  include "cmNinjaTargetGenerator.h"
 #  include "cmNinjaTypes.h"
+#  include "cmStandardIncludes.h"
+
+#  include <set>
 
 class cmSourceFile;
+class cmOSXBundleGenerator;
 
 class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {
@@ -34,8 +38,6 @@ private:
   void WriteLinkStatement();
   void WriteObjectLibStatement();
   std::vector<std::string> ComputeLinkCmd();
-  void CreateAppBundle(const std::string& targetName, std::string& outpath);
-  void CreateFramework(std::string const& targetName);
 
 private:
   // Target name info.
@@ -45,8 +47,8 @@ private:
   std::string TargetNameImport;
   std::string TargetNamePDB;
   const char *TargetLinkLanguage;
-  std::string MacContentDirectory;
-  std::string FrameworkVersion;
+  cmOSXBundleGenerator* OSXBundleGenerator;
+  std::set<cmStdString> MacContentFolders;
 };
 
 #endif // ! cmNinjaNormalTargetGenerator_h

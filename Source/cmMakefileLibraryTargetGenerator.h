@@ -14,11 +14,14 @@
 
 #include "cmMakefileTargetGenerator.h"
 
+class cmOSXBundleGenerator;
+
 class cmMakefileLibraryTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
   cmMakefileLibraryTargetGenerator(cmTarget* target);
+  virtual ~cmMakefileLibraryTargetGenerator();
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
@@ -33,7 +36,6 @@ protected:
                          bool relink);
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);
-  void CreateFramework(std::string const& targetName);
   void CreateCFBundle(std::string& targetName, std::string& outpath);
 
   // Store the computd framework version for OS X Frameworks.
@@ -41,6 +43,9 @@ protected:
 
   void AppendOSXVerFlag(std::string& flags, const char* lang,
                         const char* name, bool so);
+
+private:
+  cmOSXBundleGenerator* OSXBundleGenerator;
 };
 
 #endif
