@@ -199,7 +199,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
     (extraFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
-                                    
+
   this->LocalGenerator->AddConfigVariableFlags
     (extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->ConfigName);
   this->AddModuleDefinitionFlag(extraFlags);
@@ -220,7 +220,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   linkRuleVar += "_CREATE_SHARED_MODULE";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(extraFlags, 
+  this->LocalGenerator->AppendFlags(extraFlags,
                                     this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
@@ -246,7 +246,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   linkRuleVar += "_CREATE_MACOSX_FRAMEWORK";
 
   std::string extraFlags;
-  this->LocalGenerator->AppendFlags(extraFlags, 
+  this->LocalGenerator->AppendFlags(extraFlags,
                                     this->Target->GetProperty("LINK_FLAGS"));
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
@@ -460,16 +460,16 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Construct the output path version of the names for use in command
   // arguments.
-  std::string targetOutPathPDB = 
+  std::string targetOutPathPDB =
     this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
-  std::string targetOutPath = 
+  std::string targetOutPath =
     this->Convert(targetFullPath.c_str(),cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
-  std::string targetOutPathSO = 
+  std::string targetOutPathSO =
     this->Convert(targetFullPathSO.c_str(),cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
-  std::string targetOutPathReal = 
+  std::string targetOutPathReal =
     this->Convert(targetFullPathReal.c_str(),cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
   std::string targetOutPathImport =
@@ -569,7 +569,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   std::vector<std::string> commands1;
   // Add a command to remove any existing files for this library.
-  // for static libs only 
+  // for static libs only
   if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
     {
     this->LocalGenerator->AppendCleanCommand(commands1, libCleanFiles,

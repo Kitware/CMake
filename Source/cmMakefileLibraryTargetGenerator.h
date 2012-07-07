@@ -14,7 +14,7 @@
 
 #include "cmMakefileTargetGenerator.h"
 
-class cmMakefileLibraryTargetGenerator: 
+class cmMakefileLibraryTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
@@ -22,8 +22,8 @@ public:
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
-  virtual void WriteRuleFiles();  
-  
+  virtual void WriteRuleFiles();
+
 protected:
   void WriteObjectLibraryRules();
   void WriteStaticLibraryRules();

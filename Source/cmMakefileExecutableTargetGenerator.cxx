@@ -129,7 +129,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathPDB = outpath + targetNamePDB;
   std::string targetFullPathImport = outpathImp + targetNameImport;
-  std::string targetOutPathPDB = 
+  std::string targetOutPathPDB =
     this->Convert(targetFullPathPDB.c_str(),
                   cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
