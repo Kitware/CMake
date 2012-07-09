@@ -1,5 +1,5 @@
 #include "generated.h"
-int main()
+int mainGeneratedHeader()
 {
   return 0;
 }
