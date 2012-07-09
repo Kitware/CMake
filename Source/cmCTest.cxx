@@ -1944,32 +1944,30 @@ bool cmCTest::AddTestsForDashboardType(std::string &targ)
     }
   else
     {
-    cmCTestLog(this, ERROR_MESSAGE,
-               "CTest -D called with incorrect option: "
-               << targ << std::endl);
-    cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
-               << "  " << "ctest" << " -D Continuous" << std::endl
-               << "  " << "ctest"
-               << " -D Continuous(Start|Update|Configure|Build)" << std::endl
-               << "  " << "ctest"
-               << " -D Continuous(Test|Coverage|MemCheck|Submit)"
-               << std::endl
-               << "  " << "ctest" << " -D Experimental" << std::endl
-               << "  " << "ctest"
-               << " -D Experimental(Start|Update|Configure|Build)"
-               << std::endl
-               << "  " << "ctest"
-               << " -D Experimental(Test|Coverage|MemCheck|Submit)"
-               << std::endl
-               << "  " << "ctest" << " -D Nightly" << std::endl
-               << "  " << "ctest"
-               << " -D Nightly(Start|Update|Configure|Build)" << std::endl
-               << "  " << "ctest"
-               << " -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
-               << "  " << "ctest" << " -D NightlyMemoryCheck" << std::endl);
     return false;
     }
   return true;
+}
+
+
+//----------------------------------------------------------------------
+void cmCTest::ErrorMessageUnknownDashDValue(std::string &val)
+{
+  cmCTestLog(this, ERROR_MESSAGE,
+    "CTest -D called with incorrect option: " << val << std::endl);
+
+  cmCTestLog(this, ERROR_MESSAGE,
+    "Available options are:" << std::endl
+    << "  ctest -D Continuous" << std::endl
+    << "  ctest -D Continuous(Start|Update|Configure|Build)" << std::endl
+    << "  ctest -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
+    << "  ctest -D Experimental" << std::endl
+    << "  ctest -D Experimental(Start|Update|Configure|Build)" << std::endl
+    << "  ctest -D Experimental(Test|Coverage|MemCheck|Submit)" << std::endl
+    << "  ctest -D Nightly" << std::endl
+    << "  ctest -D Nightly(Start|Update|Configure|Build)" << std::endl
+    << "  ctest -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
+    << "  ctest -D NightlyMemoryCheck" << std::endl);
 }
 
 
@@ -2232,13 +2230,29 @@ void cmCTest::HandleScriptArguments(size_t &i,
 }
 
 //----------------------------------------------------------------------
+bool cmCTest::AddVariableDefinition(const std::string &arg)
+{
+  std::string name;
+  std::string value;
+  cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
+
+  if (cmCacheManager::ParseEntry(arg.c_str(), name, value, type))
+    {
+    this->Definitions[name] = value;
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------
 // the main entry point of ctest, called from main
 int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 {
   this->FindRunningCMake();
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
-  bool performSomeTest = true;
+  bool executeTests = true;
   bool SRArgumentSpecified = false;
 
   // copy the command line
@@ -2263,12 +2277,27 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       this->ProduceXML = true;
       i++;
       std::string targ = args[i];
-      // AddTestsForDashboard parses the dashborad type and converts it
+      // AddTestsForDashboard parses the dashboard type and converts it
       // into the separate stages
       if (!this->AddTestsForDashboardType(targ))
         {
-        performSomeTest = false;
+        if (!this->AddVariableDefinition(targ))
+          {
+          this->ErrorMessageUnknownDashDValue(targ);
+          executeTests = false;
+          }
         }
+      }
+
+    // If it's not exactly -D, but it starts with -D, then try to parse out
+    // a variable definition from it, same as CMake does. Unsuccessful
+    // attempts are simply ignored since previous ctest versions ignore
+    // this too. (As well as many other unknown command line args.)
+    //
+    if(arg != "-D" && cmSystemTools::StringStartsWith(arg.c_str(), "-D"))
+      {
+      std::string input = arg.substr(2);
+      this->AddVariableDefinition(input);
       }
 
     if(this->CheckArgument(arg, "-T", "--test-action") &&
@@ -2278,7 +2307,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       i++;
       if ( !this->SetTest(args[i].c_str(), false) )
         {
-        performSomeTest = false;
+        executeTests = false;
         cmCTestLog(this, ERROR_MESSAGE,
           "CTest -T called with incorrect option: "
           << args[i].c_str() << std::endl);
@@ -2316,7 +2345,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         }
       else
         {
-        performSomeTest = false;
+        executeTests = false;
         cmCTestLog(this, ERROR_MESSAGE,
           "CTest -M called with incorrect option: " << str.c_str()
           << std::endl);
@@ -2387,8 +2416,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
     return retv;
     }
 
-  // if some tests must be run 
-  if(performSomeTest)
+  if(executeTests)
     {
     int res;
     // call process directory

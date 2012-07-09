@@ -1822,6 +1822,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   add_config_tests(Release)
   add_config_tests(RelWithDebInfo)
 
+  # Test -S script with some -D variable definition args to ctest:
+  add_test(CTestConfig.ScriptWithArgs ${CMAKE_CTEST_COMMAND}
+    -C "Release"
+    -D arg1=this
+    -D arg2=that
+    -D "arg3=the other"
+    "-Darg4=this is the fourth"
+    -Darg5=the_fifth
+    -Darg6:STRING=value-with-type
+    -S "${CMake_SOURCE_DIR}/Tests/CTestConfig/ScriptWithArgs.cmake" -VV
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestConfig/ScriptWithArgs.log"
+    )
+
   ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
 
   CONFIGURE_FILE(
