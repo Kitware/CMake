@@ -66,7 +66,8 @@
 # 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0, 1.38, 1.38.0, 1.39, 1.39.0,
 # 1.40, 1.40.0, 1.41, 1.41.0, 1.42, 1.42.0, 1.43, 1.43.0, 1.44, 1.44.0,
 # 1.45, 1.45.0, 1.46, 1.46.0, 1.46.1, 1.47, 1.47.0, 1.48, 1.48.0,
-# 1.49, 1.49.0, 1.50, 1.50.0
+# 1.49, 1.49.0, 1.50, 1.50.0, 1.51, 1.51.0, 1.52, 1.52.0,
+# 1.53, 1.53.0, 1.54, 1.54.0, 1.55, 1.55.0, 1.56, 1.56.0
 #
 # NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
 # add both 1.x and 1.x.0 as shown above.  Official Boost include directories
@@ -246,7 +247,7 @@
 # Copyright 2007      Wengo
 # Copyright 2007      Mike Jackson
 # Copyright 2008      Andreas Pakulat <apaku@gmx.de>
-# Copyright 2008-2010 Philip Lowman <philip@yhbt.com>
+# Copyright 2008-2012 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -298,6 +299,7 @@ endif()
 #-------------------------------------------------------------------------------
 #  FindBoost functions & macros
 #
+
 ############################################
 #
 # Check the existence of the libraries.
@@ -428,16 +430,93 @@ function(_Boost_CHECK_SPELLING _var)
   endif()
 endfunction()
 
+# Guesses Boost's compiler prefix used in built library names
+# Returns the guess by setting the variable pointed to by _ret
+function(_Boost_GUESS_COMPILER_PREFIX _ret)
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"
+      OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
+      OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
+    if(WIN32)
+      set (_boost_COMPILER "-iw")
+    else()
+      set (_boost_COMPILER "-il")
+    endif()
+  elseif (MSVC11)
+    set(_boost_COMPILER "-vc110")
+  elseif (MSVC10)
+    set(_boost_COMPILER "-vc100")
+  elseif (MSVC90)
+    set(_boost_COMPILER "-vc90")
+  elseif (MSVC80)
+    set(_boost_COMPILER "-vc80")
+  elseif (MSVC71)
+    set(_boost_COMPILER "-vc71")
+  elseif (MSVC70) # Good luck!
+    set(_boost_COMPILER "-vc7") # yes, this is correct
+  elseif (MSVC60) # Good luck!
+    set(_boost_COMPILER "-vc6") # yes, this is correct
+  elseif (BORLAND)
+    set(_boost_COMPILER "-bcb")
+  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
+    set(_boost_COMPILER "-sw")
+  elseif (MINGW)
+    if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+        set(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
+    else()
+      _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
+      set(_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
+    endif()
+  elseif (UNIX)
+    if (CMAKE_COMPILER_IS_GNUCXX)
+      if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
+        set(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
+      else()
+        _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
+        # Determine which version of GCC we have.
+        if(APPLE)
+          if(Boost_MINOR_VERSION)
+            if(${Boost_MINOR_VERSION} GREATER 35)
+              # In Boost 1.36.0 and newer, the mangled compiler name used
+              # on Mac OS X/Darwin is "xgcc".
+              set(_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
+            else(${Boost_MINOR_VERSION} GREATER 35)
+              # In Boost <= 1.35.0, there is no mangled compiler name for
+              # the Mac OS X/Darwin version of GCC.
+              set(_boost_COMPILER "")
+            endif(${Boost_MINOR_VERSION} GREATER 35)
+          else(Boost_MINOR_VERSION)
+            # We don't know the Boost version, so assume it's
+            # pre-1.36.0.
+            set(_boost_COMPILER "")
+          endif(Boost_MINOR_VERSION)
+        else()
+          set(_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
+        endif()
+      endif()
+    endif (CMAKE_COMPILER_IS_GNUCXX)
+  else()
+    # TODO at least Boost_DEBUG here?
+    set(_boost_COMPILER "")
+  endif()
+  set(${_ret} ${_boost_COMPILER} PARENT_SCOPE)
+endfunction()
+
 #
 # End functions/macros
 #
 #-------------------------------------------------------------------------------
 
-
-
+#-------------------------------------------------------------------------------
+# main.
+#-------------------------------------------------------------------------------
 
 if(NOT DEFINED Boost_USE_MULTITHREADED)
     set(Boost_USE_MULTITHREADED TRUE)
+endif()
+
+# Check the version of Boost against the requested version.
+if(Boost_FIND_VERSION AND NOT Boost_FIND_VERSION_MINOR)
+  message(SEND_ERROR "When requesting a specific version of Boost, you must provide at least the major and minor version numbers, e.g., 1.34")
 endif()
 
 if(Boost_FIND_VERSION_EXACT)
@@ -450,6 +529,8 @@ else(Boost_FIND_VERSION_EXACT)
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
+    "1.56.0" "1.56" "1.55.0" "1.55" "1.54.0" "1.54"
+    "1.53.0" "1.53" "1.52.0" "1.52" "1.51.0" "1.51"
     "1.50.0" "1.50" "1.49.0" "1.49" "1.48.0" "1.48" "1.47.0" "1.47" "1.46.1"
     "1.46.0" "1.46" "1.45.0" "1.45" "1.44.0" "1.44" "1.43.0" "1.43" "1.42.0" "1.42"
     "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0" "1.37"
@@ -480,51 +561,7 @@ endif(Boost_FIND_VERSION_EXACT)
 # Boost.
 set(Boost_ERROR_REASON)
 
-set( _boost_IN_CACHE TRUE)
-if(Boost_INCLUDE_DIR)
-
-  # On versions < 1.35, remove the System library from the considered list
-  # since it wasn't added until 1.35.
-  if(Boost_VERSION AND Boost_FIND_COMPONENTS)
-     if(Boost_VERSION LESS 103500)
-       list(REMOVE_ITEM Boost_FIND_COMPONENTS system)
-     endif()
-  endif()
-
-  foreach(COMPONENT ${Boost_FIND_COMPONENTS})
-    string(TOUPPER ${COMPONENT} COMPONENT)
-    if(NOT Boost_${COMPONENT}_FOUND)
-      set( _boost_IN_CACHE FALSE)
-    endif(NOT Boost_${COMPONENT}_FOUND)
-  endforeach(COMPONENT)
-else(Boost_INCLUDE_DIR)
-  set( _boost_IN_CACHE FALSE)
-endif(Boost_INCLUDE_DIR)
-
-if(_boost_IN_CACHE)
-  # in cache already
-  set(Boost_FOUND TRUE)
-  foreach(COMPONENT ${Boost_FIND_COMPONENTS})
-    string(TOUPPER ${COMPONENT} COMPONENT)
-    _Boost_ADJUST_LIB_VARS( ${COMPONENT} )
-    set(Boost_LIBRARIES ${Boost_LIBRARIES} ${Boost_${COMPONENT}_LIBRARY})
-  endforeach(COMPONENT)
-  set(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIR})
-  if(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
-    math(EXPR Boost_MAJOR_VERSION "${Boost_VERSION} / 100000")
-    math(EXPR Boost_MINOR_VERSION "${Boost_VERSION} / 100 % 1000")
-    math(EXPR Boost_SUBMINOR_VERSION "${Boost_VERSION} % 100")
-  endif(Boost_VERSION AND NOT "${Boost_VERSION}" STREQUAL "0")
   if(Boost_DEBUG)
-      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                     "boost ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} "
-                     "is already in the cache.  To view debugging messages, please clear the cache.")
-  endif()
-else(_boost_IN_CACHE)
-  # Need to search for boost
-  if(Boost_DEBUG)
-    message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-                   "Boost not in cache")
     # Output some of their choices
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "_boost_TEST_VERSIONS = ${_boost_TEST_VERSIONS}")
@@ -738,78 +775,17 @@ else(_boost_IN_CACHE)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "using user-specified Boost_COMPILER = ${_boost_COMPILER}")
     endif()
-  else(Boost_COMPILER)
+  else()
     # Attempt to guess the compiler suffix
     # NOTE: this is not perfect yet, if you experience any issues
     # please report them and use the Boost_COMPILER variable
     # to work around the problems.
-    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"
-        OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
-        OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
-      if(WIN32)
-        set (_boost_COMPILER "-iw")
-      else()
-        set (_boost_COMPILER "-il")
-      endif()
-    elseif (MSVC11)
-      set(_boost_COMPILER "-vc110")
-    elseif (MSVC10)
-      set(_boost_COMPILER "-vc100")
-    elseif (MSVC90)
-      set(_boost_COMPILER "-vc90")
-    elseif (MSVC80)
-      set(_boost_COMPILER "-vc80")
-    elseif (MSVC71)
-      set(_boost_COMPILER "-vc71")
-    elseif (MSVC70) # Good luck!
-      set(_boost_COMPILER "-vc7") # yes, this is correct
-    elseif (MSVC60) # Good luck!
-      set(_boost_COMPILER "-vc6") # yes, this is correct
-    elseif (BORLAND)
-      set(_boost_COMPILER "-bcb")
-    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "SunPro")
-      set(_boost_COMPILER "-sw")
-    elseif (MINGW)
-      if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
-          set(_boost_COMPILER "-mgw") # no GCC version encoding prior to 1.34
-      else()
-        _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
-        set(_boost_COMPILER "-mgw${_boost_COMPILER_VERSION}")
-      endif()
-    elseif (UNIX)
-      if (CMAKE_COMPILER_IS_GNUCXX)
-        if(${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION} VERSION_LESS 1.34)
-          set(_boost_COMPILER "-gcc") # no GCC version encoding prior to 1.34
-        else()
-          _Boost_COMPILER_DUMPVERSION(_boost_COMPILER_VERSION)
-          # Determine which version of GCC we have.
-          if(APPLE)
-            if(Boost_MINOR_VERSION)
-              if(${Boost_MINOR_VERSION} GREATER 35)
-                # In Boost 1.36.0 and newer, the mangled compiler name used
-                # on Mac OS X/Darwin is "xgcc".
-                set(_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
-              else(${Boost_MINOR_VERSION} GREATER 35)
-                # In Boost <= 1.35.0, there is no mangled compiler name for
-                # the Mac OS X/Darwin version of GCC.
-                set(_boost_COMPILER "")
-              endif(${Boost_MINOR_VERSION} GREATER 35)
-            else(Boost_MINOR_VERSION)
-              # We don't know the Boost version, so assume it's
-              # pre-1.36.0.
-              set(_boost_COMPILER "")
-            endif(Boost_MINOR_VERSION)
-          else()
-            set(_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
-          endif()
-        endif()
-      endif (CMAKE_COMPILER_IS_GNUCXX)
-    endif()
+    _Boost_GUESS_COMPILER_PREFIX(_boost_COMPILER)
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
         "guessed _boost_COMPILER = ${_boost_COMPILER}")
     endif()
-  endif(Boost_COMPILER)
+  endif()
 
   set (_boost_MULTITHREADED "-mt")
   if( NOT Boost_USE_MULTITHREADED )
@@ -944,6 +920,13 @@ else(_boost_IN_CACHE)
     endif()
   endif()
 
+  # On versions < 1.35, remove the System library from the considered list
+  # since it wasn't added until 1.35.
+  if(Boost_VERSION AND Boost_FIND_COMPONENTS)
+     if(Boost_VERSION LESS 103500)
+       list(REMOVE_ITEM Boost_FIND_COMPONENTS system)
+     endif()
+  endif()
 
   foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     string(TOUPPER ${COMPONENT} UPPERCOMPONENT)
@@ -1030,8 +1013,16 @@ else(_boost_IN_CACHE)
   if( Boost_USE_STATIC_LIBS )
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${_boost_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
   endif()
+
   # ------------------------------------------------------------------------
   #  End finding boost libraries
+  # ------------------------------------------------------------------------
+
+  # ------------------------------------------------------------------------
+  #  Begin long process of determining Boost_FOUND, starting with version
+  #  number checks, followed by
+  #  TODO: Ideally the version check logic should happen prior to searching
+  #        for libraries...
   # ------------------------------------------------------------------------
 
   set(Boost_INCLUDE_DIRS
@@ -1042,10 +1033,6 @@ else(_boost_IN_CACHE)
   if(Boost_INCLUDE_DIR)
     set( Boost_FOUND TRUE )
 
-    # Check the version of Boost against the requested version.
-    if (Boost_FIND_VERSION AND NOT Boost_FIND_VERSION_MINOR)
-      message(SEND_ERROR "When requesting a specific version of Boost, you must provide at least the major and minor version numbers, e.g., 1.34")
-    endif (Boost_FIND_VERSION AND NOT Boost_FIND_VERSION_MINOR)
     if(Boost_MAJOR_VERSION LESS "${Boost_FIND_VERSION_MAJOR}" )
       set( Boost_FOUND FALSE )
       set(_Boost_VERSION_AGE "old")
@@ -1147,7 +1134,7 @@ else(_boost_IN_CACHE)
 
       # Look for the boost library path.
       # Note that the user may not have installed any libraries
-      # so it is quite possible the Boost_LIBRARY_PATH may not exist.
+      # so it is quite possible the Boost_LIBRARY_DIRS may not exist.
       set(_boost_LIB_DIR ${Boost_INCLUDE_DIR})
 
       if("${_boost_LIB_DIR}" MATCHES "boost-[0-9]+")
@@ -1179,6 +1166,10 @@ else(_boost_IN_CACHE)
     set( Boost_FOUND FALSE)
   endif(Boost_INCLUDE_DIR)
 
+  # ------------------------------------------------------------------------
+  #  Notification to end user about what was found
+  # ------------------------------------------------------------------------
+
   if(Boost_FOUND)
       if(NOT Boost_FIND_QUIETLY)
         message(STATUS "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
@@ -1201,7 +1192,7 @@ else(_boost_IN_CACHE)
     else()
       if(NOT Boost_FIND_QUIETLY)
         # we opt not to automatically output Boost_ERROR_REASON here as
-        # it could be quite lengthy and somewhat imposing in it's requests
+        # it could be quite lengthy and somewhat imposing in its requests
         # Since Boost is not always a required dependency we'll leave this
         # up to the end-user.
         if(Boost_DEBUG OR Boost_DETAILED_FAILURE_MSG)
@@ -1218,4 +1209,3 @@ else(_boost_IN_CACHE)
       Boost_INCLUDE_DIRS
       Boost_LIBRARY_DIRS
   )
-endif(_boost_IN_CACHE)
