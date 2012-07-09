@@ -15,7 +15,7 @@
 #include <QCompleter>
 
 static const int NumTypes = 4;
-static const QString TypeStrings[NumTypes] =
+static const QByteArray TypeStrings[NumTypes] =
   { "BOOL", "PATH", "FILEPATH", "STRING" };
 static const QCMakeProperty::PropertyType Types[NumTypes] =
   { QCMakeProperty::BOOL, QCMakeProperty::PATH,
