@@ -319,6 +319,8 @@ private:
 
   std::string ninjaCmd() const;
 
+  int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
+
 private:
   /// The file containing the build statement. (the relation ship of the
   /// compilation DAG).
@@ -334,6 +336,9 @@ private:
 
   /// The set of rules added to the generated build system.
   RulesSetType Rules;
+
+  /// Length of rule command, used by rsp file evaluation
+  std::map<std::string, int> RuleCmdLength;
 
   /// The set of dependencies to add to the "all" target.
   cmNinjaDeps AllDependencies;

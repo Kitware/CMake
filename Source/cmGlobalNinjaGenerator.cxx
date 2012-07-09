@@ -160,34 +160,35 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   arguments << "\n";
 
-
-  cmOStringStream builds;
+  cmOStringStream build;
 
   // Write outputs files.
-  builds << "build";
+  build << "build";
   for(cmNinjaDeps::const_iterator i = outputs.begin();
-      i != outputs.end();
-      ++i)
-    builds << " " << EncodeIdent(EncodePath(*i), os);
-  builds << ":";
-
+      i != outputs.end(); ++i)
+    build << " " << EncodeIdent(EncodePath(*i), os);
+  build << ":";
 
   // Write the rule.
-  builds << " " << rule;
-
-  // check if a response file rule should be used
-  const std::string args = arguments.str();
-  if (cmdLineLimit > 0 &&
-       (args.size() + + builds.str().size()) > (size_t)cmdLineLimit)
-    builds << "_RSPFILE";
-
-  os << builds.str() << args;
+  build << " " << rule;
 
   // Write the variables bound to this build statement.
+  cmOStringStream variable_assignments;
   for(cmNinjaVars::const_iterator i = variables.begin();
-      i != variables.end();
-      ++i)
-    cmGlobalNinjaGenerator::WriteVariable(os, i->first, i->second, "", 1);
+      i != variables.end(); ++i)
+    cmGlobalNinjaGenerator::WriteVariable(variable_assignments,
+                                          i->first, i->second, "", 1);
+
+  // check if a response file rule should be used
+  std::string buildstr = build.str();
+  const std::string assignments = variable_assignments.str();
+  const std::string args = arguments.str();
+  if (cmdLineLimit > 0
+      && args.size() + buildstr.size() + assignments.size()
+         > (size_t) cmdLineLimit)
+    buildstr += "_RSPFILE";
+
+  os << buildstr << args << assignments;
 }
 
 void cmGlobalNinjaGenerator::WritePhonyBuild(std::ostream& os,
@@ -556,6 +557,8 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                     rspfile,
                                     restat,
                                     generator);
+
+  this->RuleCmdLength[name] = command.size();
 }
 
 bool cmGlobalNinjaGenerator::HasRule(const std::string &name)
