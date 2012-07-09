@@ -156,6 +156,8 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 #  define @KWIML@_ABI_CHAR_IS_UNSIGNED 1
 # elif defined(__BORLANDC__) /* Borland default */
 #  define @KWIML@_ABI_CHAR_IS_SIGNED 1
+# elif defined(__hpux) /* Old HP: no __HP_cc/__HP_aCC/__GNUC__ above */
+#  define @KWIML@_ABI_CHAR_IS_SIGNED 1 /* (unless +uc) */
 # endif
 #endif
 #if !defined(@KWIML@_ABI_CHAR_IS_UNSIGNED) && !defined(@KWIML@_ABI_CHAR_IS_SIGNED) \
@@ -251,6 +253,8 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 #  else
 #   define @KWIML@_ABI_SIZEOF_LONG_LONG 0
 #  endif
+# elif defined(__hpux) && !defined(__GNUC__) /* Old HP: no __HP_cc/__HP_aCC above */
+#  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # endif
 #endif
 #if !defined(@KWIML@_ABI_SIZEOF_LONG_LONG) && !defined(@KWIML@_ABI_NO_ERROR_LONG_LONG)

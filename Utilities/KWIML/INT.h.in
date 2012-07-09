@@ -91,10 +91,11 @@ An includer may test the following macros after inclusion:
     Some compilers define integer format macros incorrectly for their
     own formatted print/scan implementations.
 
-  @KWIML@_INT_BROKEN_INT64_C  = macro INT64_C is incorrect if defined
-  @KWIML@_INT_BROKEN_UINT64_C = macro UINT64_C is incorrect if defined
+  @KWIML@_INT_BROKEN_INT#_C  = macro INT#_C is incorrect if defined
+  @KWIML@_INT_BROKEN_UINT#_C = macro UINT#_C is incorrect if defined
     Some compilers define integer constant macros incorrectly and
-    cannot handle literals as large as the integer type.
+    cannot handle literals as large as the integer type or even
+    produce bad preprocessor syntax.
 
   @KWIML@_INT_BROKEN_INT8_T   = type 'int8_t' is available but incorrect
     Some compilers have a flag to make 'char' (un)signed but do not account
@@ -259,14 +260,14 @@ An includer may test the following macros after inclusion:
 # endif
 #elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 # define @KWIML@_INT__NO_SCN8
-#elif defined(__HP_cc) || defined(__HP_aCC)
-# define @KWIML@_INT__NO_SCN8
 #elif defined(__BORLANDC__)
 # define @KWIML@_INT__NO_SCN8
 # define @KWIML@_INT__NO_SCN64
 #elif defined(_MSC_VER)
 # define @KWIML@_INT__NO_SCN8
 #elif defined(__WATCOMC__)
+# define @KWIML@_INT__NO_SCN8
+# elif defined(__hpux) /* HP runtime lacks support (any compiler) */
 # define @KWIML@_INT__NO_SCN8
 #endif
 
@@ -341,12 +342,12 @@ An includer may test the following macros after inclusion:
 #endif
 
 /* 8-bit constants */
-#if defined(INT8_C)
+#if defined(INT8_C) && !defined(@KWIML@_INT_BROKEN_INT8_C)
 # define @KWIML@_INT_INT8_C(c) INT8_C(c)
 #else
 # define @KWIML@_INT_INT8_C(c) c
 #endif
-#if defined(UINT8_C)
+#if defined(UINT8_C) && !defined(@KWIML@_INT_BROKEN_UINT8_C)
 # define @KWIML@_INT_UINT8_C(c) UINT8_C(c)
 #else
 # define @KWIML@_INT_UINT8_C(c) c ## u
@@ -435,12 +436,12 @@ An includer may test the following macros after inclusion:
 #endif
 
 /* 16-bit constants */
-#if defined(INT16_C)
+#if defined(INT16_C) && !defined(@KWIML@_INT_BROKEN_INT16_C)
 # define @KWIML@_INT_INT16_C(c) INT16_C(c)
 #else
 # define @KWIML@_INT_INT16_C(c) c
 #endif
-#if defined(UINT16_C)
+#if defined(UINT16_C) && !defined(@KWIML@_INT_BROKEN_UINT16_C)
 # define @KWIML@_INT_UINT16_C(c) UINT16_C(c)
 #else
 # define @KWIML@_INT_UINT16_C(c) c ## u
@@ -528,13 +529,19 @@ An includer may test the following macros after inclusion:
 # define @KWIML@_INT_PRIX32 "X"
 #endif
 
+#if defined(__hpux) && defined(__GNUC__) && !defined(__LP64__) \
+ && defined(__CONCAT__) && defined(__CONCAT_U__)
+  /* Some HPs define UINT32_C incorrectly and break GNU.  */
+# define @KWIML@_INT_BROKEN_UINT32_C
+#endif
+
 /* 32-bit constants */
-#if defined(INT32_C)
+#if defined(INT32_C) && !defined(@KWIML@_INT_BROKEN_INT32_C)
 # define @KWIML@_INT_INT32_C(c) INT32_C(c)
 #else
 # define @KWIML@_INT_INT32_C(c) c
 #endif
-#if defined(UINT32_C)
+#if defined(UINT32_C) && !defined(@KWIML@_INT_BROKEN_UINT32_C)
 # define @KWIML@_INT_UINT32_C(c) UINT32_C(c)
 #else
 # define @KWIML@_INT_UINT32_C(c) c ## u
