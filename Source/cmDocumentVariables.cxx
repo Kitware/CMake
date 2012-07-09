@@ -218,7 +218,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Full path to ctest command installed with cmake.",
      "This is the full path to the CTest executable ctest "
      "which is useful from custom commands that want "
-     " to use the cmake -E option for portable system "
+     "to use the cmake -E option for portable system "
      "commands.",false,
      "Variables that Provide Information");
 
@@ -355,7 +355,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "If this is set to TRUE, then the rpath information "
      "is not added to compiled executables.  The default "
      "is to add rpath information if the platform supports it.  "
-     "This allows for easy running from the build tree.  To omit RPATH"
+     "This allows for easy running from the build tree.  To omit RPATH "
      "in the install step, but not the build step, use "
      "CMAKE_SKIP_INSTALL_RPATH instead.",false,
      "Variables that Provide Information");
