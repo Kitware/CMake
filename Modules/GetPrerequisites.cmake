@@ -195,6 +195,14 @@ function(is_file_executable file result_var)
           return()
         endif("${file_ov}" MATCHES "text")
       endif("${file_ov}" MATCHES "executable")
+
+      # Also detect position independent executables on Linux,
+      # where "file" gives "shared object ... (uses shared libraries)"
+      if("${file_ov}" MATCHES "shared object.*\(uses shared libs\)")
+        set(${result_var} 1 PARENT_SCOPE)
+        return()
+      endif()
+
     else(file_cmd)
       message(STATUS "warning: No 'file' command, skipping execute_process...")
     endif(file_cmd)
