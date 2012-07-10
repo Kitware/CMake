@@ -50,6 +50,7 @@ add_RunCMake_test(ObjectLibrary)
 
 add_RunCMake_test(build_command)
 add_RunCMake_test(find_package)
+add_RunCMake_test(include)
 add_RunCMake_test(list)
 
 if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
