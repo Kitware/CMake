@@ -24,6 +24,7 @@ class cmGeneratorTarget;
 class cmMakefile;
 class cmSourceFile;
 class cmCustomCommand;
+class cmOSXBundleGenerator;
 
 class cmNinjaTargetGenerator
 {
@@ -113,6 +114,16 @@ protected:
 
   void EnsureDirectoryExists(const std::string& dir);
   void EnsureParentDirectoryExists(const std::string& path);
+
+  void WriteMacOSXContentBuildStatements(
+    std::vector<cmSourceFile*> const& sources);
+  void WriteMacOSXContentBuildStatement(cmSourceFile& source,
+                                        const char* pkgloc);
+
+protected:
+  // Properly initialized by sub-classes.
+  cmOSXBundleGenerator* OSXBundleGenerator;
+  std::set<cmStdString> MacContentFolders;
 
 private:
   cmTarget* Target;

@@ -35,8 +35,6 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNameImport()
   , TargetNamePDB()
   , TargetLinkLanguage(0)
-  , OSXBundleGenerator(0)
-  , MacContentFolders()
 {
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)

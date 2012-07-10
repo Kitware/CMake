@@ -47,8 +47,6 @@ private:
   std::string TargetNameImport;
   std::string TargetNamePDB;
   const char *TargetLinkLanguage;
-  cmOSXBundleGenerator* OSXBundleGenerator;
-  std::set<cmStdString> MacContentFolders;
 };
 
 #endif // ! cmNinjaNormalTargetGenerator_h

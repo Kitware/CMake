@@ -22,6 +22,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmOSXBundleGenerator.h"
 
 #include <algorithm>
 
@@ -56,7 +57,10 @@ cmNinjaTargetGenerator::New(cmTarget* target)
 }
 
 cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmTarget* target)
-  : Target(target),
+  :
+    OSXBundleGenerator(0),
+    MacContentFolders(),
+    Target(target),
     Makefile(target->GetMakefile()),
     LocalGenerator(
       static_cast<cmLocalNinjaGenerator*>(Makefile->GetLocalGenerator())),
@@ -428,6 +432,9 @@ cmNinjaTargetGenerator
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      }
+  this->WriteMacOSXContentBuildStatements(
+    this->GeneratorTarget->HeaderSources);
+  this->WriteMacOSXContentBuildStatements(this->GeneratorTarget->ExtraSources);
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
@@ -633,4 +640,62 @@ cmNinjaTargetGenerator
 ::EnsureParentDirectoryExists(const std::string& path)
 {
   EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
+}
+
+//----------------------------------------------------------------------------
+// TODO: Re-factor with cmMakefileTargetGenerator::WriteMacOSXContentRules
+void cmNinjaTargetGenerator::WriteMacOSXContentBuildStatements(
+  std::vector<cmSourceFile*> const& sources)
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = sources.begin(); si != sources.end(); ++si)
+    {
+    cmTarget::SourceFileFlags tsFlags =
+      this->Target->GetTargetSourceFileFlags(*si);
+    if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
+      {
+      this->WriteMacOSXContentBuildStatement(**si, tsFlags.MacFolder);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+// TODO: Re-factor with cmMakefileTargetGenerator::WriteMacOSXContentRules
+void cmNinjaTargetGenerator::WriteMacOSXContentBuildStatement(
+  cmSourceFile& source, const char* pkgloc)
+{
+  // Skip OS X content when not building a Framework or Bundle.
+  if(this->OSXBundleGenerator->GetMacContentDirectory().empty())
+    {
+    return;
+    }
+
+  // Construct the full path to the content subdirectory.
+  std::string macdir = this->OSXBundleGenerator->GetMacContentDirectory();
+  macdir += pkgloc;
+  cmSystemTools::MakeDirectory(macdir.c_str());
+
+  // Record use of this content location.  Only the first level
+  // directory is needed.
+  {
+  std::string loc = pkgloc;
+  loc = loc.substr(0, loc.find('/'));
+  this->MacContentFolders.insert(loc);
+  }
+
+  // Get the input file location.
+  std::string input = source.GetFullPath();
+  input = this->GetLocalGenerator()->ConvertToNinjaPath(input.c_str());
+
+  // Get the output file location.
+  std::string output = macdir;
+  output += "/";
+  output += cmSystemTools::GetFilenameName(input);
+  output = this->GetLocalGenerator()->ConvertToNinjaPath(output.c_str());
+
+  // Write a build statement to copy the content into the bundle.
+  this->GetGlobalGenerator()->WriteMacOSXContentBuild(input, output);
+
+  // Add as a dependency of all target so that it gets called.
+  this->GetGlobalGenerator()->AddDependencyToAll(output);
 }
