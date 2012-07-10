@@ -217,6 +217,7 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
                 "Rule for running custom commands.",
                 /*depfile*/ "",
                 /*rspfile*/ "",
+                /*rspcontent*/ "",
                 /*restat*/ true);
 }
 
@@ -258,6 +259,7 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
                                        const std::string& comment,
                                        const std::string& depfile,
                                        const std::string& rspfile,
+                                       const std::string& rspcontent,
                                        bool restat,
                                        bool generator)
 {
@@ -307,7 +309,8 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
       cmGlobalNinjaGenerator::Indent(os, 1);
       os << "rspfile = " << rspfile << "\n";
       cmGlobalNinjaGenerator::Indent(os, 1);
-      os << "rspfile_content = $in" << "\n";
+      os << "rspfile_content = " <<
+        (rspcontent.empty() ? "$in" :rspcontent) << "\n";
     }
 
   if(restat)
@@ -538,6 +541,7 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                      const std::string& comment,
                                      const std::string& depfile,
                                      const std::string& rspfile,
+                                     const std::string& rspcontent,
                                      bool restat,
                                      bool generator)
 {
@@ -555,6 +559,7 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                     comment,
                                     depfile,
                                     rspfile,
+                                    rspcontent,
                                     restat,
                                     generator);
 
@@ -911,6 +916,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             "Rule for re-running cmake.",
             /*depfile=*/ "",
             /*rspfile=*/ "",
+            /*rspcontent*/ "",
             /*restat=*/ false,
             /*generator=*/ true);
 
@@ -960,6 +966,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
             /*rspfile=*/ "",
+            /*rspcontent*/ "",
             /*restat=*/ false,
             /*generator=*/ false);
   WriteBuild(os,
@@ -981,6 +988,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",
             /*rspfile=*/ "",
+            /*rspcontent*/ "",
             /*restat=*/ false,
             /*generator=*/ false);
   WriteBuild(os,
