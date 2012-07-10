@@ -114,11 +114,12 @@ public:
                         const std::string& name,
                         const std::string& command,
                         const std::string& description,
-                        const std::string& comment = "",
-                        const std::string& depfile = "",
-                        const std::string& rspfile = ""					,
-                        bool restat = false,
-                        bool generator = false);
+                        const std::string& comment,
+                        const std::string& depfile,
+                        const std::string& rspfile,
+                        const std::string& rspcontent,
+                        bool restat,
+                        bool generator);
 
   /**
    * Write a variable named @a name to @a os with value @a value and an
@@ -231,9 +232,10 @@ public:
   void AddRule(const std::string& name,
                const std::string& command,
                const std::string& description,
-               const std::string& comment = "",
+               const std::string& comment,
                const std::string& depfile = "",
                const std::string& rspfile = "",
+               const std::string& rspcontent = "",
                bool restat = false,
                bool generator = false);
 
