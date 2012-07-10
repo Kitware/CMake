@@ -306,11 +306,15 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
 
   if(!rspfile.empty())
     {
-      cmGlobalNinjaGenerator::Indent(os, 1);
-      os << "rspfile = " << rspfile << "\n";
-      cmGlobalNinjaGenerator::Indent(os, 1);
-      os << "rspfile_content = " <<
-        (rspcontent.empty() ? "$in" :rspcontent) << "\n";
+    if (rspcontent.empty())
+      {
+      cmSystemTools::Error("No rspfile_content given!", comment.c_str());
+      return;
+      }
+    cmGlobalNinjaGenerator::Indent(os, 1);
+    os << "rspfile = " << rspfile << "\n";
+    cmGlobalNinjaGenerator::Indent(os, 1);
+    os << "rspfile_content = " << rspcontent << "\n";
     }
 
   if(restat)
