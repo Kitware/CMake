@@ -17,15 +17,9 @@ endfunction()
 
 if(APPLE)
   # only use multi-arch if the sysroot exists on this machine
-  if(EXISTS "${CMAKE_OSX_SYSROOT}")
-    if("${CMAKE_GENERATOR}" MATCHES "Ninja")
-      # c++-4.2: -E, -S, -save-temps and -M options are not
-      #          allowed with multiple -arch flags
-      # but in a ninja build -MMD and -MT is set
-      set(CMAKE_OSX_ARCHITECTURES "i386")
-    else()
-      set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
-    endif()
+  # Ninja needs -M which could not be used with multiple -arch flags
+  if(EXISTS "${CMAKE_OSX_SYSROOT}" AND NOT "${CMAKE_GENERATOR}" MATCHES "Ninja")
+    set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
     test_for_xcode4(is_xcode4)
     if(is_xcode4)
       # Xcode 4, use modern architectures as defaults
