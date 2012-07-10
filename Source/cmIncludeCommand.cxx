@@ -78,6 +78,13 @@ bool cmIncludeCommand
         }
     }
 
+  if (fname.empty())
+    {
+    this->SetError("called with empty file name.");
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
   if(!cmSystemTools::FileIsFullPath(fname.c_str()))
     {
     // Not a path. Maybe module.
