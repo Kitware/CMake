@@ -31,14 +31,6 @@ bool cmIncludeCommand
     {
     if (args[i] == "OPTIONAL")
       {
-      if (fname.empty())
-        {
-        // do nothing when no file name is given
-        // because of OPTIONAL don't handle it as error
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-                "In command 'include(<filename> OPTIONAL)' <filename> is empty.");
-        return true;
-        }
       if (optional)
         {
         this->SetError("called with invalid arguments: OPTIONAL used twice");
@@ -78,11 +70,11 @@ bool cmIncludeCommand
         }
     }
 
-  if (fname.empty())
+  if(fname.empty())
     {
-    this->SetError("called with empty file name.");
-    cmSystemTools::SetFatalErrorOccured();
-    return false;
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                 "include() given empty file name (ignored).");
+    return true;
     }
 
   if(!cmSystemTools::FileIsFullPath(fname.c_str()))
