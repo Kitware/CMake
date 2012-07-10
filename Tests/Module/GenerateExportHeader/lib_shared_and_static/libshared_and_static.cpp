@@ -1,6 +1,8 @@
 
 #include "libshared_and_static.h"
 
+#ifdef __cplusplus
+
 int LibsharedAndStatic::libshared_and_static() const
 {
   return 0;
@@ -69,6 +71,8 @@ int LibsharedAndStaticExcluded::libshared_and_static_not_exported() const {
 int LibsharedAndStaticExcluded::libshared_and_static_excluded() const {
   return 0;
 }
+
+#endif
 
 int libshared_and_static() {
   return 0;
