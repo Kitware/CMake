@@ -125,11 +125,8 @@ class cmCAString : public cmCommandArgument
     /// Return the string
     const std::string& GetString() const                 {return this->String;}
     const char* GetCString() const               {return this->String.c_str();}
-    void SetDefaultString(const char* text)
-                                    {this->DefaultString = (text ? text : "");}
   private:
     std::string String;
-    std::string DefaultString;
     unsigned int DataStart;
     virtual bool DoConsume(const std::string& arg, unsigned int index);
     virtual void DoReset();
