@@ -488,8 +488,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                  GetRuleCmdLength(this->LanguageLinkerRule());
 #ifdef _WIN32
   int commandLineLengthLimit = 8000 - linkRuleLength;
-#elif __linux
-  // for instance ARG_MAX is 2096152 on Ubuntu
+#elif defined(__linux) || defined(__APPLE__)
+  // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
   int commandLineLengthLimit = sysconf(_SC_ARG_MAX) - linkRuleLength - 1000;
 #else
   int commandLineLengthLimit = -1;
