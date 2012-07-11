@@ -123,6 +123,7 @@ public:
       "  if(<variable>)\n"
       "True if the variable is defined to a value that is not a false "
       "constant.  False otherwise.  "
+      "(Note macro arguments are not variables.)"
       "\n"
       "  if(NOT <expression>)\n"
       "True if the expression is not true."
