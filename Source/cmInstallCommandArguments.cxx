@@ -36,8 +36,8 @@ cmInstallCommandArguments::cmInstallCommandArguments(
 ,NamelinkOnly  (&Parser, "NAMELINK_ONLY" , &ArgumentGroup)
 ,NamelinkSkip  (&Parser, "NAMELINK_SKIP" , &ArgumentGroup)
 ,GenericArguments(0)
+,DefaultComponentName(defaultComponent)
 {
-  this->Component.SetDefaultString(defaultComponent.c_str());
 }
 
 const std::string& cmInstallCommandArguments::GetDestination() const
@@ -63,7 +63,10 @@ const std::string& cmInstallCommandArguments::GetComponent() const
     {
     return this->GenericArguments->GetComponent();
     }
-
+  if (!this->DefaultComponentName.empty())
+    {
+    return this->DefaultComponentName;
+    }
   static std::string unspecifiedComponent = "Unspecified";
   return unspecifiedComponent;
 }

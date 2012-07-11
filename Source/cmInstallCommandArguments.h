@@ -61,6 +61,7 @@ class cmInstallCommandArguments
     cmInstallCommandArguments* GenericArguments;
     static const char* PermissionsTable[];
     static const std::string EmptyString;
+    std::string DefaultComponentName;
     bool CheckPermissions();
 };
 
