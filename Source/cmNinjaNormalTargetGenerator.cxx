@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 
 #include <assert.h>
+#include <algorithm>
 
 cmNinjaNormalTargetGenerator::
 cmNinjaNormalTargetGenerator(cmTarget* target)
@@ -367,8 +368,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   outputs.push_back(targetOutputReal);
 
   // Compute specific libraries to link with.
-  cmNinjaDeps explicitDeps = this->GetObjects(),
-              implicitDeps = this->ComputeLinkDeps();
+  cmNinjaDeps explicitDeps = this->GetObjects();
+  cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
 
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
@@ -434,6 +435,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     path = GetTarget()->GetSupportDirectory();
     vars["OBJECT_DIR"] = ConvertToNinjaPath(path.c_str());
     EnsureDirectoryExists(path);
+    // ar.exe can't handle backslashes in rsp files (implictly used by gcc)
+    std::string& linkLibraries = vars["LINK_LIBRARIES"];
+    std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
     }
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
