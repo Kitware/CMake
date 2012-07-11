@@ -115,7 +115,9 @@ macro(__windows_compiler_gnu lang)
   list(APPEND CMAKE_${lang}_ABI_FILES "Platform/Windows-GNU-${lang}-ABI")
 
   # Support very long lists of object files.
-  if("${CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG}" STREQUAL "@")
+  # TODO: check for which gcc versions this is still needed, not needed for gcc >= 4.4.
+  # Ninja generator doesn't support this work around.
+  if("${CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG}" STREQUAL "@" AND NOT CMAKE_GENERATOR MATCHES "Ninja")
     foreach(rule CREATE_SHARED_MODULE CREATE_SHARED_LIBRARY LINK_EXECUTABLE)
       # The gcc/collect2/ld toolchain does not use response files
       # internally so we cannot pass long object lists.  Instead pass
