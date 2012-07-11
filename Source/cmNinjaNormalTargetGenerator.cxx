@@ -20,6 +20,11 @@
 #include <assert.h>
 #include <algorithm>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
+
 cmNinjaNormalTargetGenerator::
 cmNinjaNormalTargetGenerator(cmTarget* target)
   : cmNinjaTargetGenerator(target)
