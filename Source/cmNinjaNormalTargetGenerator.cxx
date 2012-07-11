@@ -125,7 +125,10 @@ const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmTarget::SHARED_LIBRARY:
       return "shared library";
     case cmTarget::MODULE_LIBRARY:
-      return "shared module";
+      if (this->GetTarget()->IsCFBundleOnApple())
+        return "CFBundle shared module";
+      else
+        return "shared module";
     case cmTarget::EXECUTABLE:
       return "executable";
     default:
