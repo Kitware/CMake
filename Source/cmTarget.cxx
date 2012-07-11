@@ -3169,6 +3169,7 @@ std::string cmTarget::GetFullPath(const char* config, bool implib,
 std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
                                         bool realname)
 {
+  // TODO: Re-factor with cmOSXBundleGenerator's constructor.
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
@@ -3184,6 +3185,18 @@ std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
     fpath += ".framework/Versions/";
     fpath += this->GetFrameworkVersion();
     fpath += "/";
+    }
+  if(this->IsCFBundleOnApple())
+    {
+    fpath += this->GetFullName(config, false);
+    fpath += ".";
+    const char *ext = this->GetProperty("BUNDLE_EXTENSION");
+    if (!ext)
+      {
+      ext = "bundle";
+      }
+    fpath += ext;
+    fpath += "/Contents/MacOS/";
     }
 
   // Add the full name of the target.

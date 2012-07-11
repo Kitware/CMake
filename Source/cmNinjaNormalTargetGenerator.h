@@ -38,6 +38,7 @@ private:
   void WriteLinkStatement();
   void WriteObjectLibStatement();
   std::vector<std::string> ComputeLinkCmd();
+  void CreateCFBundle(std::string& targetName, std::string& outpath);
 
 private:
   // Target name info.
