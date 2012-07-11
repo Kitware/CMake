@@ -23,13 +23,13 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 macro(TEST_FAIL value msg)
   if (${value})
-    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
   endif ()
 endmacro()
 
 macro(TEST_PASS value msg)
   if (NOT ${value})
-    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
   endif ()
 endmacro()
 
