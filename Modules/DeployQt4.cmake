@@ -290,7 +290,7 @@ function(install_qt4_executable executable)
                 endforeach()
         endif()
 
-        resolve_qt4_paths(libs)
+        resolve_qt4_paths(libs "")
 
         install(CODE
   "INCLUDE(\"${DeployQt4_cmake_dir}/DeployQt4.cmake\")
