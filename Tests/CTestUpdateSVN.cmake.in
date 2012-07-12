@@ -41,7 +41,6 @@ init_testing()
 #-----------------------------------------------------------------------------
 # Create the repository.
 message("Creating repository...")
-file(MAKE_DIRECTORY ${TOP}/repo)
 run_child(
   COMMAND ${SVNADMIN} create --config-dir ${TOP}/config ${TOP}/repo
   )
