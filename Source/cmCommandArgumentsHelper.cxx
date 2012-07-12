@@ -178,7 +178,7 @@ bool cmCAString::DoConsume(const std::string& arg, unsigned int index)
 
 void cmCAString::DoReset()
 {
-  this->String = this->DefaultString;
+  this->String = "";
 }
 
 cmCAEnabler::cmCAEnabler(cmCommandArgumentsHelper* args, 
