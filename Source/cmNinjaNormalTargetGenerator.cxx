@@ -18,6 +18,12 @@
 #include "cmMakefile.h"
 
 #include <assert.h>
+#include <algorithm>
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 
 cmNinjaNormalTargetGenerator::
 cmNinjaNormalTargetGenerator(cmTarget* target)
@@ -75,10 +81,8 @@ void cmNinjaNormalTargetGenerator::Generate()
     }
   else
     {
-    this->WriteLinkRule(false);
-#ifdef _WIN32 // TODO response file support only Linux
-    this->WriteLinkRule(true);
-#endif
+    this->WriteLinkRule(false); // write rule without rspfile support
+    this->WriteLinkRule(true);  // write rule with rspfile support
     this->WriteLinkStatement();
     }
 }
@@ -140,6 +144,7 @@ cmNinjaNormalTargetGenerator
 
   // Select whether to use a response file for objects.
   std::string rspfile;
+  std::string rspcontent;
 
   if (!this->GetGlobalGenerator()->HasRule(ruleName)) {
     cmLocalGenerator::RuleVariables vars;
@@ -150,6 +155,7 @@ cmNinjaNormalTargetGenerator
     std::string responseFlag;
     if (!useResponseFile) {
       vars.Objects = "$in";
+      vars.LinkLibraries = "$LINK_LIBRARIES";
     } else {
         // handle response file
         std::string cmakeLinkVar = std::string("CMAKE_") +
@@ -162,7 +168,9 @@ cmNinjaNormalTargetGenerator
         }
         rspfile = "$out.rsp";
         responseFlag += rspfile;
+        rspcontent = "$in $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
+        vars.LinkLibraries = "";
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
@@ -189,7 +197,6 @@ cmNinjaNormalTargetGenerator
     vars.TargetVersionMajor = targetVersionMajor.c_str();
     vars.TargetVersionMinor = targetVersionMinor.c_str();
 
-    vars.LinkLibraries = "$LINK_LIBRARIES";
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
 
@@ -227,7 +234,8 @@ cmNinjaNormalTargetGenerator
                                         description.str(),
                                         comment.str(),
                                         /*depfile*/ "",
-                                        rspfile);
+                                        rspfile,
+                                        rspcontent);
   }
 
   if (this->TargetNameOut != this->TargetNameReal) {
@@ -365,8 +373,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   outputs.push_back(targetOutputReal);
 
   // Compute specific libraries to link with.
-  cmNinjaDeps explicitDeps = this->GetObjects(),
-              implicitDeps = this->ComputeLinkDeps();
+  cmNinjaDeps explicitDeps = this->GetObjects();
+  cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
 
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
@@ -432,6 +440,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     path = GetTarget()->GetSupportDirectory();
     vars["OBJECT_DIR"] = ConvertToNinjaPath(path.c_str());
     EnsureDirectoryExists(path);
+    // ar.exe can't handle backslashes in rsp files (implictly used by gcc)
+    std::string& linkLibraries = vars["LINK_LIBRARIES"];
+    std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
     }
 
   std::vector<cmCustomCommand> *cmdLists[3] = {
@@ -478,12 +489,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     symlinkVars["POST_BUILD"] = postBuildCmdLine;
   }
 
-  int cmdLineLimit;
-#ifdef _WIN32
-  cmdLineLimit = 8000 - this->GetGlobalGenerator()->
+  int linkRuleLength = this->GetGlobalGenerator()->
                                  GetRuleCmdLength(this->LanguageLinkerRule());
+#ifdef _WIN32
+  int commandLineLengthLimit = 8000 - linkRuleLength;
+#elif defined(__linux) || defined(__APPLE__)
+  // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
+  int commandLineLengthLimit = sysconf(_SC_ARG_MAX) - linkRuleLength - 1000;
 #else
-  cmdLineLimit = -1; // TODO
+  int commandLineLengthLimit = -1;
 #endif
 
   // Write the build statement for this target.
@@ -495,7 +509,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                      implicitDeps,
                                      emptyDeps,
                                      vars,
-                                     cmdLineLimit);
+                                     commandLineLengthLimit);
 
   if (targetOutput != targetOutputReal) {
     if (targetType == cmTarget::EXECUTABLE) {
