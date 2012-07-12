@@ -70,6 +70,13 @@ bool cmIncludeCommand
         }
     }
 
+  if(fname.empty())
+    {
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                 "include() given empty file name (ignored).");
+    return true;
+    }
+
   if(!cmSystemTools::FileIsFullPath(fname.c_str()))
     {
     // Not a path. Maybe module.
