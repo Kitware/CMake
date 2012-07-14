@@ -1,3 +1,79 @@
+Changes in CMake 2.8.9-rc2 (since 2.8.9-rc1)
+--------------------------------------------
+Alex Neundorf (4):
+      -remove trailing whitespace
+      documentation: preparation for making the man section configurable
+      man documentation: detect man section from the given filename
+      Eclipse: fix #13313, always set LANG to C, also if unset
+
+Bill Hoffman (1):
+      Remove process execution code from cmcldeps and have it use cmake code.
+
+Brad King (12):
+      KWIML: Generalize interface to report broken integer literal macros
+      KWIML: Teach ABI.h about 'long long' and 'char' on old HP
+      KWIML: Teach INT.h that no HP platform implements SCN*8 formats
+      KWIML: Teach INT about broken UINT32_C on old HP
+      Fix project command documentation typo (#13384)
+      CTestUpdateSVN: Do not create repo directory first (#13349)
+      Tests/CustomCommand: Do not use 'main' in a library
+      AIX-GNU: Link shared libs with -brtl,-bnoipath (#13352)
+      include: Ignore empty string as file name (#13388)
+      Add ASM platform information for GNU compiler on AIX (#13390)
+      if: Document that macro arguments are not variables (#13393)
+      install: Fix COMPONENT option
+
+Clinton Stimpson (3):
+      GetPrerequisites.cmake: detect executables built with the -pie linker flag.
+      cmake-gui: Fix code to respect current locale.
+      DeployQt4: workaround bug 13258 where ARGV1 is leaked into a sub function.
+
+David Cole (7):
+      STYLE: Fix line length, remove extra blank line
+      CTest: Refactor error output into ErrorMessageUnknownDashDValue
+      CTest: Rename local variable for clarity
+      CTest: Extend -D command line arg handling for variable definitions
+      CTest: Allow -Dvar=value with no space between the D and the var
+      CTest: Add test to verify -D variable definitions work
+      Ninja: Fix typo: tagets -> targets
+
+Eric NOULARD (3):
+      Enhance documentation of install command w.r.t. the "Undefined" component.
+      CPack fix regression between 2.8.7 and 2.8.8 when running cpack with no arg.
+      Do not provide defaul value for CPACK_PACKAGE_DIRECTORY if found in config.
+
+Nicolas Despres (1):
+      Ninja: Clean all symlink created for libraries.
+
+Peter Kuemmel (6):
+      Ninja: print error message when command failed
+      Ninja: also consider variables when checking command line length
+      Ninja: also consider rule command length for rsp file
+      Ninja: remove int/size_t warning
+      Ninja: add soname test case
+      Ninja: don't shadow 'outputs' variable
+
+Peter Kümmel (6):
+      Ninja: also write link libraries to rsp file
+      Ninja: remove some unused default arguments
+      Ninja: error on missing rspfile_content
+      Ninja: disable work around when linking with mingw
+      Ninja: enable response file support on Mac (length 262144)
+      Ninja: sysconf() is declared in unistd.h
+
+Philip Lowman (2):
+      FindBoost: Fix bug where Boost_FOUND could be false when version specified
+      FindBoost: Future proof to 1.56
+
+Rolf Eike Beer (2):
+      FindJava: improve version matching (#12878)
+      fix 2 space bugs in variable documentation
+
+Stephen Kelly (3):
+      Use full paths in compile_commands.json for out of source builds.
+      Construct the full path before escaping it.
+      Fix PositionIndependentTargets test with clang trunk.
+
 Changes in CMake 2.8.9-rc1 (since 2.8.8)
 ----------------------------------------
 Alex Neundorf (12):
