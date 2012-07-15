@@ -475,9 +475,8 @@ void cmGlobalNinjaGenerator
         {
         UsingMinGW = true;
         std::string rc = cmSystemTools::FindProgram("windres");
-        if(rc.empty())
-          rc = "windres.exe";;
-        mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
+        if(!rc.empty())
+          mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
         }
       }
     this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
