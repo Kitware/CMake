@@ -474,15 +474,30 @@ void cmGlobalNinjaGenerator
       if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
         {
         UsingMinGW = true;
-        if(!mf->GetDefinition("CMAKE_RC_COMPILER")
-           && mf->GetDefinition("CMAKE_C_COMPILER"))
+        if(!mf->GetDefinition("CMAKE_RC_COMPILER"))
           {
-          std::string windres = "windres";
-          std::string gcc = mf->GetDefinition("CMAKE_C_COMPILER");
-          std::string::size_type prefix = gcc.rfind("gcc");
-          if (prefix != std::string::npos)
-            windres.insert(0, gcc.substr(0, prefix));
-          windres = cmSystemTools::FindProgram(windres.c_str());
+          std::string windres = cmSystemTools::FindProgram("windres");
+          if(windres.empty())
+            {
+            std::string path;
+            std::string::size_type prefix = std::string::npos;
+            if (mf->GetDefinition("CMAKE_C_COMPILER"))
+              {
+              path = mf->GetDefinition("CMAKE_C_COMPILER");
+              prefix = path.rfind("gcc");
+              }
+            else if (mf->GetDefinition("CMAKE_CXX_COMPILER"))
+              {
+              path = mf->GetDefinition("CMAKE_CXX_COMPILER");
+              prefix = path.rfind("++");
+              prefix--;
+              }
+            if (prefix != std::string::npos)
+              {
+              windres = path.substr(0, prefix) + "windres";
+              windres = cmSystemTools::FindProgram(windres.c_str());
+              }
+            }
           if(!windres.empty())
             mf->AddDefinition("CMAKE_RC_COMPILER", windres.c_str());
           }
