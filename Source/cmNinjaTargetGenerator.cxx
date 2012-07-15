@@ -143,16 +143,18 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
                                         language.c_str());
 
-  // TODO: Handle response file.
   // Add include directory flags.
   {
   std::vector<std::string> includes;
   this->LocalGenerator->GetIncludeDirectories(includes, this->Target,
                                               language.c_str());
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(), false);
+    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
+    language == "RC" ? true : false); // full include paths for RC
+                                      // needed by cmcldeps
   if(cmGlobalNinjaGenerator::IsMinGW())
     cmSystemTools::ReplaceString(includeFlags, "\\", "/");
+
   this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
   }
 
