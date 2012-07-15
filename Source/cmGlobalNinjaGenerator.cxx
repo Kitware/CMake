@@ -474,10 +474,11 @@ void cmGlobalNinjaGenerator
       if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
         {
         UsingMinGW = true;
-        if(!mf->GetDefinition("CMAKE_RC_COMPILER"))
+        if(!mf->GetDefinition("CMAKE_RC_COMPILER")
+           && mf->GetDefinition("CMAKE_C_COMPILER"))
           {
           std::string windres = "windres";
-          std::string gcc = mf->GetRequiredDefinition("CMAKE_C_COMPILER");
+          std::string gcc = mf->GetDefinition("CMAKE_C_COMPILER");
           std::string::size_type prefix = gcc.rfind("gcc");
           if (prefix != std::string::npos)
             windres.insert(0, gcc.substr(0, prefix));
