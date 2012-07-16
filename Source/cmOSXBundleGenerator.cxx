@@ -39,49 +39,36 @@ cmOSXBundleGenerator(cmTarget* target,
  , FrameworkVersion()
  , MacContentFolders(0)
 {
-  if(this->Target->IsAppBundleOnApple())
-    {
-    this->MacContentDirectory = this->Target->GetDirectory(this->ConfigName);
-    this->MacContentDirectory += "/";
-    this->MacContentDirectory += this->TargetNameOut;
-    this->MacContentDirectory += ".app/Contents/";
-    }
-  else if(this->Target->IsFrameworkOnApple())
-    {
+  if (this->MustSkip())
+    return;
+
+  this->MacContentDirectory =
+    this->Target->GetMacContentDirectory(this->ConfigName,
+                                         /*implib*/ false,
+                                         /*includeMacOS*/ false);
+  if(this->Target->IsFrameworkOnApple())
     this->FrameworkVersion = this->Target->GetFrameworkVersion();
-    this->MacContentDirectory = this->Target->GetDirectory(this->ConfigName);
-    this->MacContentDirectory += "/";
-    this->MacContentDirectory += this->TargetNameOut;
-    this->MacContentDirectory += ".framework/Versions/";
-    this->MacContentDirectory += this->FrameworkVersion;
-    this->MacContentDirectory += "/";
-    }
-  else if(this->Target->IsCFBundleOnApple())
-    {
-    this->MacContentDirectory = this->Target->GetDirectory(this->ConfigName);
-    this->MacContentDirectory += "/";
-    this->MacContentDirectory += this->TargetNameOut;
-    this->MacContentDirectory += ".";
-    const char *ext = this->Target->GetProperty("BUNDLE_EXTENSION");
-    if (!ext)
-      {
-      ext = "bundle";
-      }
-    this->MacContentDirectory += ext;
-    this->MacContentDirectory += "/Contents/";
-    }
+}
+
+//----------------------------------------------------------------------------
+bool cmOSXBundleGenerator::MustSkip()
+{
+  return !this->Target->HaveWellDefinedOutputFiles();
 }
 
 //----------------------------------------------------------------------------
 void cmOSXBundleGenerator::CreateAppBundle(std::string& targetName,
                                            std::string& outpath)
 {
+  if (this->MustSkip())
+    return;
+
   // Compute bundle directory names.
   outpath = this->MacContentDirectory;
   outpath += "MacOS";
   cmSystemTools::MakeDirectory(outpath.c_str());
-  this->Makefile->AddCMakeOutputFile(outpath.c_str());
   outpath += "/";
+  this->Makefile->AddCMakeOutputFile(outpath.c_str());
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
@@ -95,6 +82,9 @@ void cmOSXBundleGenerator::CreateAppBundle(std::string& targetName,
 //----------------------------------------------------------------------------
 void cmOSXBundleGenerator::CreateFramework(std::string const& targetName)
 {
+  if (this->MustSkip())
+    return;
+
   assert(this->MacContentFolders);
 
   // Configure the Info.plist file into the Resources directory.
@@ -184,12 +174,15 @@ void cmOSXBundleGenerator::CreateFramework(std::string const& targetName)
 void cmOSXBundleGenerator::CreateCFBundle(std::string& targetName,
                                           std::string& outpath)
 {
+  if (this->MustSkip())
+    return;
+
   // Compute bundle directory names.
   outpath = this->MacContentDirectory;
   outpath += "MacOS";
   cmSystemTools::MakeDirectory(outpath.c_str());
-  this->Makefile->AddCMakeOutputFile(outpath.c_str());
   outpath += "/";
+  this->Makefile->AddCMakeOutputFile(outpath.c_str());
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
@@ -207,6 +200,9 @@ cmOSXBundleGenerator::
 GenerateMacOSXContentStatements(std::vector<cmSourceFile*> const& sources,
                                 MacOSXContentGeneratorType* generator)
 {
+  if (this->MustSkip())
+    return;
+
   for(std::vector<cmSourceFile*>::const_iterator
         si = sources.begin(); si != sources.end(); ++si)
     {

@@ -53,6 +53,9 @@ public:
   { this->MacContentFolders = macContentFolders; }
 
 private:
+  bool MustSkip();
+
+private:
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
