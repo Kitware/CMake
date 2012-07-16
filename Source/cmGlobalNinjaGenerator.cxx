@@ -479,22 +479,22 @@ void cmGlobalNinjaGenerator
           std::string windres = cmSystemTools::FindProgram("windres");
           if(windres.empty())
             {
-            std::string path;
+            std::string compiler_path;
             std::string::size_type prefix = std::string::npos;
             if (mf->GetDefinition("CMAKE_C_COMPILER"))
               {
-              path = mf->GetDefinition("CMAKE_C_COMPILER");
-              prefix = path.rfind("gcc");
+              compiler_path = mf->GetDefinition("CMAKE_C_COMPILER");
+              prefix = compiler_path.rfind("gcc");
               }
             else if (mf->GetDefinition("CMAKE_CXX_COMPILER"))
               {
-              path = mf->GetDefinition("CMAKE_CXX_COMPILER");
-              prefix = path.rfind("++");
+              compiler_path = mf->GetDefinition("CMAKE_CXX_COMPILER");
+              prefix = compiler_path.rfind("++");
               prefix--;
               }
             if (prefix != std::string::npos)
               {
-              windres = path.substr(0, prefix) + "windres";
+              windres = compiler_path.substr(0, prefix) + "windres";
               windres = cmSystemTools::FindProgram(windres.c_str());
               }
             }
