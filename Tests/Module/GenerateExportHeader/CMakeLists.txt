@@ -89,6 +89,9 @@ macro(_do_build Include Library LibrarySource Source Languages)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/src.cpp" "#include \"${Include}\"\n"
     "int main() { ${Source}; }\n"
   )
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/src.c" "#include \"${Include}\"\n"
+    "int main() { ${Source}; }\n"
+  )
 
   if ("${Library}" STREQUAL "static_variant")
     set(CONDITIONAL_STATIC_DEFINE "add_definitions(-DLIBSHARED_AND_STATIC_STATIC_DEFINE)\n")
@@ -118,8 +121,13 @@ macro(_do_build Include Library LibrarySource Source Languages)
 
     "${CONDITIONAL_STATIC_DEFINE}"
 
-    "add_executable(compiletest src.cpp)\n"
-    "target_link_libraries(compiletest ${Library})\n"
+    "if(CMAKE_CXX_COMPILER_LOADED)\n"
+    "  add_executable(compiletest src.cpp)\n"
+    "  target_link_libraries(compiletest ${Library})\n"
+    "elseif(CMAKE_C_COMPILER_LOADED)\n"
+    "  add_executable(compiletest src.c)\n"
+    "  target_link_libraries(compiletest ${Library}_c)\n"
+    "endif()\n"
   )
 
   try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/fail${COUNT}

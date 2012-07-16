@@ -52,4 +52,5 @@ endmacro()
 
 run_tests("")
 run_tests("CXX")
+run_tests("C")
 run_tests("C CXX")
