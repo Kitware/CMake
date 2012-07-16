@@ -16,6 +16,16 @@
 
 #include <cassert>
 
+void cmOSXBundleGenerator::PrepareTargetProperties(cmTarget* target)
+{
+  if(target->IsCFBundleOnApple())
+    {
+    target->SetProperty("PREFIX", "");
+    target->SetProperty("SUFFIX", "");
+    }
+}
+
+//----------------------------------------------------------------------------
 cmOSXBundleGenerator::
 cmOSXBundleGenerator(cmTarget* target,
                      std::string targetNameOut,
@@ -168,4 +178,25 @@ void cmOSXBundleGenerator::CreateFramework(std::string const& targetName)
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
     this->Makefile->AddCMakeOutputFile(newName.c_str());
     }
+}
+
+//----------------------------------------------------------------------------
+void cmOSXBundleGenerator::CreateCFBundle(std::string& targetName,
+                                          std::string& outpath)
+{
+  // Compute bundle directory names.
+  outpath = this->MacContentDirectory;
+  outpath += "MacOS";
+  cmSystemTools::MakeDirectory(outpath.c_str());
+  this->Makefile->AddCMakeOutputFile(outpath.c_str());
+  outpath += "/";
+
+  // Configure the Info.plist file.  Note that it needs the executable name
+  // to be set.
+  std::string plist = this->MacContentDirectory;
+  plist += "Info.plist";
+  this->LocalGenerator->GenerateAppleInfoPList(this->Target,
+                                               targetName.c_str(),
+                                               plist.c_str());
+  this->Makefile->AddCMakeOutputFile(plist.c_str());
 }

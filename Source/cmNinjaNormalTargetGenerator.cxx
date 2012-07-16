@@ -36,12 +36,7 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNamePDB()
   , TargetLinkLanguage(0)
 {
-  // TODO: Re-factor with cmMakefileLibraryTargetGenerator's constructor.
-  if(target->IsCFBundleOnApple())
-    {
-    target->SetProperty("PREFIX", "");
-    target->SetProperty("SUFFIX", "");
-    }
+  cmOSXBundleGenerator::PrepareTargetProperties(target);
 
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
@@ -383,13 +378,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     // Create the library framework.
     this->OSXBundleGenerator->CreateFramework(this->TargetNameOut);
     }
-  // TODO: Re-factor with cmMakefileLibraryTargetGenerator::WriteLibraryRules.
   else if(this->GetTarget()->IsCFBundleOnApple())
     {
+    // Create the core foundation bundle.
     std::string outpath;
-    outpath = this->GetTarget()->GetDirectory(this->GetConfigName());
-    outpath += "/";
-    this->CreateCFBundle(this->TargetNameOut, outpath);
+    this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut, outpath);
     }
 
   // Write comments.
@@ -616,26 +609,4 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
   // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
                                              this->GetTarget());
-}
-
-//----------------------------------------------------------------------------
-// TODO: Re-factor with cmMakefileLibraryTargetGenerator::CreateCFBundle.
-void cmNinjaNormalTargetGenerator::CreateCFBundle(std::string& targetName,
-                                                  std::string& outpath)
-{
-  // Compute bundle directory names.
-  outpath = this->OSXBundleGenerator->GetMacContentDirectory();
-  outpath += "MacOS";
-  cmSystemTools::MakeDirectory(outpath.c_str());
-  this->GetMakefile()->AddCMakeOutputFile(outpath.c_str());
-  outpath += "/";
-
-  // Configure the Info.plist file.  Note that it needs the executable name
-  // to be set.
-  std::string plist = this->OSXBundleGenerator->GetMacContentDirectory();
-  plist += "Info.plist";
-  this->GetLocalGenerator()->GenerateAppleInfoPList(this->GetTarget(),
-                                                    targetName.c_str(),
-                                                    plist.c_str());
-  this->GetMakefile()->AddCMakeOutputFile(plist.c_str());
 }

@@ -28,11 +28,7 @@ cmMakefileLibraryTargetGenerator
   cmMakefileTargetGenerator(target),
   OSXBundleGenerator(0)
 {
-  if(this->Target->IsCFBundleOnApple())
-    {
-    target->SetProperty("PREFIX", "");
-    target->SetProperty("SUFFIX", "");
-    }
+  cmOSXBundleGenerator::PrepareTargetProperties(this->Target);
 
   this->CustomCommandDriver = OnDepends;
   this->Target->GetLibraryNames(
@@ -250,27 +246,6 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 }
 
 //----------------------------------------------------------------------------
-void
-cmMakefileLibraryTargetGenerator::CreateCFBundle(std::string& targetName,
-                                                 std::string& outpath)
-{
-  // Compute bundle directory names.
-  outpath = this->MacContentDirectory;
-  outpath += "MacOS";
-  cmSystemTools::MakeDirectory(outpath.c_str());
-  this->Makefile->AddCMakeOutputFile(outpath.c_str());
-  outpath += "/";
-
-  // Configure the Info.plist file.  Note that it needs the executable name
-  // to be set.
-  std::string plist = this->MacContentDirectory + "Info.plist";
-  this->LocalGenerator->GenerateAppleInfoPList(this->Target,
-                                               targetName.c_str(),
-                                               plist.c_str());
-  this->Makefile->AddCMakeOutputFile(plist.c_str());
-}
-
-//----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 (const char* linkRuleVar, const char* extraFlags, bool relink)
 {
@@ -328,7 +303,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     outpath = this->Target->GetDirectory(this->ConfigName);
     outpath += "/";
-    this->CreateCFBundle(targetName, outpath);
+    this->OSXBundleGenerator->CreateCFBundle(targetName, outpath);
     }
   else if(relink)
     {

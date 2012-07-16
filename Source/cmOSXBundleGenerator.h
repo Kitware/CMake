@@ -24,12 +24,15 @@ class cmLocalGenerator;
 class cmOSXBundleGenerator
 {
 public:
+  static void PrepareTargetProperties(cmTarget* target);
+
   cmOSXBundleGenerator(cmTarget* target,
                        std::string targetNameOut,
                        const char* configName);
 
   void CreateAppBundle(std::string& targetName, std::string& outpath);
   void CreateFramework(std::string const& targetName);
+  void CreateCFBundle(std::string& targetName, std::string& outpath);
 
   std::string GetMacContentDirectory() const
   { return this->MacContentDirectory; }
