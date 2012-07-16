@@ -1,10 +1,10 @@
 
 macro(static_build_pass Source Message)
-  build_pass("libstatic.h" "libstatic" "libstatic" "${Source}" ${Message})
+  build_pass("libstatic.h" "libstatic" "libstatic" "${Source}" ${Message} "")
 endmacro()
 
 macro(static_build_fail Source Message)
-  build_fail("libstatic.h" "libstatic" "libstatic" "${Source}" ${Message})
+  build_fail("libstatic.h" "libstatic" "libstatic" "${Source}" ${Message} "")
 endmacro()
 
 static_build_pass("Libstatic l; return l.libstatic_exported();" "Failed to build exported.")
