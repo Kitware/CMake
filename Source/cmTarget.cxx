@@ -3688,10 +3688,7 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
     dir += "/";
     if(this->IsFrameworkOnApple() && !for_xcode)
       {
-      dir += this->GetFullName(config, false);
-      dir += ".framework/Versions/";
-      dir += this->GetFrameworkVersion();
-      dir += "/";
+      dir += this->GetFrameworkDirectory(config);
       }
     return dir;
     }
@@ -3722,10 +3719,7 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
 
     if(this->IsFrameworkOnApple() && !for_xcode)
       {
-      dir += this->GetFullName(config, false);
-      dir += ".framework/Versions/";
-      dir += this->GetFrameworkVersion();
-      dir += "/";
+      dir += this->GetFrameworkDirectory(config);
       }
 
     return dir;
@@ -4715,6 +4709,17 @@ std::vector<std::string> cmTarget::GetIncludeDirectories()
 }
 
 //----------------------------------------------------------------------------
+std::string cmTarget::GetFrameworkDirectory(const char* config)
+{
+  std::string fpath;
+  fpath += this->GetFullName(config, false);
+  fpath += ".framework/Versions/";
+  fpath += this->GetFrameworkVersion();
+  fpath += "/";
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
 std::string cmTarget::BuildMacContentDirectory(const std::string& base,
                                                const char* config,
                                                bool includeMacOS)
@@ -4729,10 +4734,7 @@ std::string cmTarget::BuildMacContentDirectory(const std::string& base,
     }
   if(this->IsFrameworkOnApple())
     {
-    fpath += this->GetFullName(config, false);
-    fpath += ".framework/Versions/";
-    fpath += this->GetFrameworkVersion();
-    fpath += "/";
+    fpath += this->GetFrameworkDirectory(config);
     }
   if(this->IsCFBundleOnApple())
     {

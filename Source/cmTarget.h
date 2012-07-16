@@ -478,6 +478,9 @@ public:
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles();
 
+  /** @return the Mac framework directory without the base. */
+  std::string GetFrameworkDirectory(const char* config = 0);
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
