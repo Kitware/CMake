@@ -664,19 +664,8 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
     return;
     }
 
-  // Construct the full path to the content subdirectory.
   std::string macdir =
-    this->Generator->OSXBundleGenerator->GetMacContentDirectory();
-  macdir += pkgloc;
-  cmSystemTools::MakeDirectory(macdir.c_str());
-
-  // Record use of this content location.  Only the first level
-  // directory is needed.
-  {
-  std::string loc = pkgloc;
-  loc = loc.substr(0, loc.find('/'));
-  this->Generator->MacContentFolders.insert(loc);
-  }
+    this->Generator->OSXBundleGenerator->InitMacOSXContentDirectory(pkgloc);
 
   // Get the input file location.
   std::string input = source.GetFullPath();

@@ -214,3 +214,23 @@ GenerateMacOSXContentStatements(std::vector<cmSourceFile*> const& sources,
       }
     }
 }
+
+//----------------------------------------------------------------------------
+std::string
+cmOSXBundleGenerator::InitMacOSXContentDirectory(const char* pkgloc)
+{
+  // Construct the full path to the content subdirectory.
+  std::string macdir = this->MacContentDirectory;
+  macdir += pkgloc;
+  cmSystemTools::MakeDirectory(macdir.c_str());
+
+  // Record use of this content location.  Only the first level
+  // directory is needed.
+  {
+  std::string loc = pkgloc;
+  loc = loc.substr(0, loc.find('/'));
+  this->MacContentFolders->insert(loc);
+  }
+
+  return macdir;
+}
