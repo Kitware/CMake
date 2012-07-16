@@ -1418,42 +1418,44 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
 
-  IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-    SET(BundleTestInstallDir
-      "${CMake_BINARY_DIR}/Tests/BundleTest/InstallDirectory")
-    ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/BundleTest"
-      "${CMake_BINARY_DIR}/Tests/BundleTest"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project BundleTest
-      --build-target install
-#     --build-target package
-      --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
-       "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
-      --test-command
-      ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
+  IF (APPLE)
+    if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+      SET(BundleTestInstallDir
+        "${CMake_BINARY_DIR}/Tests/BundleTest/InstallDirectory")
+      ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/BundleTest"
+        "${CMake_BINARY_DIR}/Tests/BundleTest"
+        --build-two-config
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-project BundleTest
+        --build-target install
+#       --build-target package
+        --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
+        "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
+        --test-command
+        ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
 
-    ADD_TEST(CFBundleTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/CFBundleTest"
-      "${CMake_BINARY_DIR}/Tests/CFBundleTest"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project CFBundleTest
-      --test-command
-      ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
+      ADD_TEST(CFBundleTest ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/CFBundleTest"
+        "${CMake_BINARY_DIR}/Tests/CFBundleTest"
+        --build-two-config
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-project CFBundleTest
+        --test-command
+        ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
         -Ddir=${CMake_BINARY_DIR}/Tests/CFBundleTest
         -Dgen=${CMAKE_TEST_GENERATOR}
         -P ${CMake_SOURCE_DIR}/Tests/CFBundleTest/VerifyResult.cmake)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
 
-    ADD_TEST_MACRO(ObjC++ ObjC++)
-  ENDIF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
+      ADD_TEST_MACRO(ObjC++ ObjC++)
+    ENDIF (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  ENDIF (APPLE)
 
   IF(APPLE AND CTEST_TEST_CPACK)
     ADD_TEST(BundleGeneratorTest ${CMAKE_CTEST_COMMAND}
