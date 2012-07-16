@@ -440,7 +440,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     // so we need a plain target name in the rule available.
     // TODO: Makefile generator could use <TARGET> because it expands
     //       to the plain target name, here it expands to a relative path.
-    //       This difference could make trouble when switching to Ninja generator.
+    // This difference could make trouble when switching to Ninja generator.
     vars["TARGET_PDB"] = std::string(this->GetTarget()->GetName());
     }
 
