@@ -434,6 +434,15 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           cmLocalGenerator::SHELL);
     EnsureParentDirectoryExists(path);
     }
+  else
+    {
+    // It is common to place debug symbols at a specific place,
+    // so we need a plain target name in the rule available.
+    // TODO: Makefile generator could use <TARGET> because it expands
+    //       to the plain target name, here it expands to a relative path.
+    //       This difference could make trouble when switching to Ninja generator.
+    vars["TARGET_PDB"] = std::string(this->GetTarget()->GetName());
+    }
 
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
     {
