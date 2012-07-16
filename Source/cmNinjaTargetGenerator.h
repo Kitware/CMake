@@ -16,6 +16,7 @@
 #include "cmStandardIncludes.h"
 #include "cmNinjaTypes.h"
 #include "cmLocalNinjaGenerator.h"
+#include "cmOSXBundleGenerator.h"
 
 class cmTarget;
 class cmGlobalNinjaGenerator;
@@ -24,7 +25,6 @@ class cmGeneratorTarget;
 class cmMakefile;
 class cmSourceFile;
 class cmCustomCommand;
-class cmOSXBundleGenerator;
 
 class cmNinjaTargetGenerator
 {
@@ -115,12 +115,21 @@ protected:
   void EnsureDirectoryExists(const std::string& dir);
   void EnsureParentDirectoryExists(const std::string& path);
 
-  void WriteMacOSXContentBuildStatements(
-    std::vector<cmSourceFile*> const& sources);
-  void WriteMacOSXContentBuildStatement(cmSourceFile& source,
-                                        const char* pkgloc);
+  // write rules for Mac OS X Application Bundle content.
+  class MacOSXContentGeneratorType
+    : public cmOSXBundleGenerator::MacOSXContentGeneratorType
+  {
+  public:
+    MacOSXContentGeneratorType(cmNinjaTargetGenerator* Generator);
+    virtual void operator()(cmSourceFile& source, const char* pkgloc);
+
+  private:
+    cmNinjaTargetGenerator* Generator;
+  };
+  friend class MacOSXContentGeneratorType;
 
 protected:
+  MacOSXContentGeneratorType MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
   std::set<cmStdString> MacContentFolders;

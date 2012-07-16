@@ -13,6 +13,7 @@
 #define cmOSXBundleGenerator_h
 
 #include "cmStandardIncludes.h"
+#include "cmSourceFile.h"
 
 #include <string>
 #include <set>
@@ -33,6 +34,16 @@ public:
   void CreateAppBundle(std::string& targetName, std::string& outpath);
   void CreateFramework(std::string const& targetName);
   void CreateCFBundle(std::string& targetName, std::string& outpath);
+
+  class MacOSXContentGeneratorType
+  {
+  public:
+    virtual void operator()(cmSourceFile& source, const char* pkgloc) = 0;
+  };
+
+  void GenerateMacOSXContentStatements(
+    std::vector<cmSourceFile*> const& sources,
+    MacOSXContentGeneratorType* generator);
 
   std::string GetMacContentDirectory() const
   { return this->MacContentDirectory; }

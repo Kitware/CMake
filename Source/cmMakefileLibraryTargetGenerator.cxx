@@ -18,15 +18,13 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
-#include "cmOSXBundleGenerator.h"
 
 #include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmTarget* target):
-  cmMakefileTargetGenerator(target),
-  OSXBundleGenerator(0)
+  cmMakefileTargetGenerator(target)
 {
   cmOSXBundleGenerator::PrepareTargetProperties(this->Target);
 

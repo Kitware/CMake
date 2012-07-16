@@ -14,8 +14,6 @@
 
 #include "cmMakefileTargetGenerator.h"
 
-class cmOSXBundleGenerator;
-
 class cmMakefileLibraryTargetGenerator:
   public cmMakefileTargetGenerator
 {
@@ -42,9 +40,6 @@ protected:
 
   void AppendOSXVerFlag(std::string& flags, const char* lang,
                         const char* name, bool so);
-
-private:
-  cmOSXBundleGenerator* OSXBundleGenerator;
 };
 
 #endif

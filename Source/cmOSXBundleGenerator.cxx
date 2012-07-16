@@ -200,3 +200,21 @@ void cmOSXBundleGenerator::CreateCFBundle(std::string& targetName,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist.c_str());
 }
+
+//----------------------------------------------------------------------------
+void
+cmOSXBundleGenerator::
+GenerateMacOSXContentStatements(std::vector<cmSourceFile*> const& sources,
+                                MacOSXContentGeneratorType* generator)
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = sources.begin(); si != sources.end(); ++si)
+    {
+    cmTarget::SourceFileFlags tsFlags =
+      this->Target->GetTargetSourceFileFlags(*si);
+    if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
+      {
+      (*generator)(**si, tsFlags.MacFolder);
+      }
+    }
+}

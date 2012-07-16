@@ -14,8 +14,6 @@
 
 #include "cmMakefileTargetGenerator.h"
 
-class cmOSXBundleGenerator;
-
 class cmMakefileExecutableTargetGenerator: public cmMakefileTargetGenerator
 {
 public:
@@ -28,9 +26,6 @@ public:
 
 protected:
   virtual void WriteExecutableRule(bool relink);
-
-private:
-  cmOSXBundleGenerator* OSXBundleGenerator;
 };
 
 #endif

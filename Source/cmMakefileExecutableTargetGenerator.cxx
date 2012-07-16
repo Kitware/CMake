@@ -18,13 +18,11 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
-#include "cmOSXBundleGenerator.h"
 
 //----------------------------------------------------------------------------
 cmMakefileExecutableTargetGenerator
 ::cmMakefileExecutableTargetGenerator(cmTarget* target):
-  cmMakefileTargetGenerator(target),
-  OSXBundleGenerator(0)
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
   this->Target->GetExecutableNames(
@@ -34,6 +32,7 @@ cmMakefileExecutableTargetGenerator
   this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
                                                       this->TargetNameOut,
                                                       this->ConfigName);
+  this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
   this->MacContentDirectory =
     this->OSXBundleGenerator->GetMacContentDirectory();
 }
