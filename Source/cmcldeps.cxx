@@ -254,7 +254,10 @@ int main() {
     // rc: /fo x.dir\x.rc.res  ->  cl: /out:x.dir\x.rc.res.dep.obj
     clrest = replace(clrest, "/fo", "/out:");
     clrest = replace(clrest, objfile, objfile + ".dep.obj ");
+
     // rc: src\x\x.rc  ->  cl: /Tc src\x\x.rc
+    if (srcfile.find(" ") != std::string::npos)
+      srcfile = "\"" + srcfile + "\"";
     clrest = replace(clrest, srcfile, "/Tc " + srcfile);
 
     cl = "\"" + cl + "\" /P /DRC_INVOKED ";
