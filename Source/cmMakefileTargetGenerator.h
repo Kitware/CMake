@@ -13,6 +13,7 @@
 #define cmMakefileTargetGenerator_h
 
 #include "cmLocalUnixMakefileGenerator3.h"
+#include "cmOSXBundleGenerator.h"
 
 class cmCustomCommand;
 class cmDependInformation;
@@ -73,8 +74,17 @@ protected:
   void WriteTargetDependRules();
 
   // write rules for Mac OS X Application Bundle content.
-  void WriteMacOSXContentRules(std::vector<cmSourceFile*> const& sources);
-  void WriteMacOSXContentRules(cmSourceFile& source, const char* pkgloc);
+  class MacOSXContentGeneratorType
+    : public cmOSXBundleGenerator::MacOSXContentGeneratorType
+  {
+  public:
+    MacOSXContentGeneratorType(cmMakefileTargetGenerator* Generator);
+    virtual void operator()(cmSourceFile& source, const char* pkgloc);
+
+  private:
+    cmMakefileTargetGenerator* Generator;
+  };
+  friend class MacOSXContentGeneratorType;
 
   // write the rules for an object
   void WriteObjectRuleFiles(cmSourceFile& source);
@@ -223,6 +233,8 @@ protected:
   // Mac OS X content info.
   std::string MacContentDirectory;
   std::set<cmStdString> MacContentFolders;
+  cmOSXBundleGenerator* OSXBundleGenerator;
+  MacOSXContentGeneratorType MacOSXContentGenerator;
 
   typedef std::map<cmStdString, cmStdString> ByLanguageMap;
   std::string GetFlags(const std::string &l);

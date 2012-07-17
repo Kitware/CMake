@@ -103,6 +103,8 @@ public:
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
                              const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
+  void WriteMacOSXContentBuild(const std::string& input,
+                               const std::string& output);
 
   /**
    * Write a rule statement named @a name to @a os with the @a comment,
@@ -242,6 +244,7 @@ public:
   bool HasRule(const std::string& name);
 
   void AddCustomCommandRule();
+  void AddMacOSXContentRule();
 
 protected:
 
@@ -276,6 +279,7 @@ private:
   void WriteDisclaimer(std::ostream& os);
 
   void AddDependencyToAll(cmTarget* target);
+  void AddDependencyToAll(const std::string& input);
 
   void WriteAssumedSourceDependencies();
 

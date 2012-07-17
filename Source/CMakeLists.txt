@@ -219,6 +219,8 @@ SET(SRCS
   cmMakefileExecutableTargetGenerator.cxx
   cmMakefileLibraryTargetGenerator.cxx
   cmMakefileUtilityTargetGenerator.cxx
+  cmOSXBundleGenerator.cxx
+  cmOSXBundleGenerator.h
   cmNewLineStyle.h
   cmNewLineStyle.cxx
   cmOrderDirectories.cxx
