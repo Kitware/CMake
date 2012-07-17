@@ -447,7 +447,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::string base;
     std::string suffix;
     this->GetTarget()->GetFullNameComponents(std::string(), base, suffix);
-    vars["TARGET_PDB"] = base + suffix + ".gdb";
+    std::string dbg_suffix = ".dbg";
+    // TODO: Where to document?
+    if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))
+      dbg_suffix = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX");
+    vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
