@@ -469,7 +469,7 @@ cmNinjaTargetGenerator
   cmNinjaDeps emptyDeps;
 
   std::string comment;
-  const char* language = source->GetLanguage();
+  const std::string language = source->GetLanguage();
   std::string rule = this->LanguageCompilerRule(language);
 
   cmNinjaDeps outputs;
@@ -479,7 +479,11 @@ cmNinjaTargetGenerator
   this->Objects.push_back(objectFileName);
 
   cmNinjaDeps explicitDeps;
-  std::string sourceFileName = this->GetSourceFilePath(source);
+  std::string sourceFileName;
+  if (language == "RC")
+    sourceFileName = source->GetFullPath();
+  else
+    sourceFileName = this->GetSourceFilePath(source);
   explicitDeps.push_back(sourceFileName);
 
   // Ensure that the target dependencies are built before any source file in
