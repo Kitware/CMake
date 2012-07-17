@@ -19,6 +19,26 @@ die() {
   exit 1
 }
 
+#-------------------------------------------------------------------------------
+line_too_long=80
+bad=$(regex=".{$line_too_long}" &&
+git diff-index --cached HEAD --name-only --diff-filter=AM \
+    --pickaxe-regex -S"$regex" -- 'Source/*.h' 'Source/*.cxx' |
+while read file; do
+  lines_too_long=$(git diff-index -p --cached HEAD \
+                   --pickaxe-regex -S"$regex" -- "$file")
+  if echo "$lines_too_long" | egrep -q '^\+'"$regex"; then
+    echo "$lines_too_long"
+  fi
+done)
+test -z "$bad" ||
+die 'The following changes add lines too long for our C++ style:
+
+'"$bad"'
+
+Use lines strictly less than '"$line_too_long"' characters in C++ code.'
+
+#-------------------------------------------------------------------------------
 if test -z "$HOOKS_ALLOW_KWSYS"; then
   # Disallow changes to KWSys
   files=$(git diff-index --name-only --cached HEAD -- Source/kwsys) &&
