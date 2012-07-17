@@ -174,7 +174,14 @@ cmNinjaNormalTargetGenerator
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
+
+    // TODO:
+    // Makefile generator expands <TARGET> to the plain target name
+    // with suffix. $out expands to a relative path. This difference
+    // could make trouble when switching to Ninja generator. Maybe
+    // using TARGET_NAME and RuleVariables::TargetName is a fix.
     vars.Target = "$out";
+
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
     vars.TargetInstallNameDir = "$INSTALLNAME_DIR";
@@ -423,7 +430,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(path);
   }
 
-  // TODO move to GetTargetPDB
   cmMakefile* mf = this->GetMakefile();
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
@@ -438,10 +444,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     {
     // It is common to place debug symbols at a specific place,
     // so we need a plain target name in the rule available.
-    // TODO: Makefile generator could use <TARGET> because it expands
-    //       to the plain target name, here it expands to a relative path.
-    // This difference could make trouble when switching to Ninja generator.
-    vars["TARGET_PDB"] = std::string(this->GetTarget()->GetName());
+    std::string base;
+    std::string suffix;
+    this->GetTarget()->GetFullNameComponents(std::string(), base, suffix);
+    vars["TARGET_PDB"] = base + suffix + ".gdb";
     }
 
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
