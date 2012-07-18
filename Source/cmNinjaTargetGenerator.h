@@ -127,7 +127,7 @@ protected:
   private:
     cmNinjaTargetGenerator* Generator;
   };
-
+  friend struct MacOSXContentGeneratorType;
 
 protected:
   MacOSXContentGeneratorType* MacOSXContentGenerator;
