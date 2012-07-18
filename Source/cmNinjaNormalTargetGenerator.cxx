@@ -481,9 +481,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     {
     // It is common to place debug symbols at a specific place,
     // so we need a plain target name in the rule available.
+    std::string prefix;
     std::string base;
     std::string suffix;
-    this->GetTarget()->GetFullNameComponents(std::string(), base, suffix);
+    this->GetTarget()->GetFullNameComponents(prefix, base, suffix);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
     if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))
