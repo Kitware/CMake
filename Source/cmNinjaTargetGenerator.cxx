@@ -57,7 +57,7 @@ cmNinjaTargetGenerator::New(cmTarget* target)
 
 cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmTarget* target)
   :
-    MacOSXContentGenerator(this),
+    MacOSXContentGenerator(0),
     OSXBundleGenerator(0),
     MacContentFolders(),
     Target(target),
@@ -68,10 +68,12 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmTarget* target)
 {
   this->GeneratorTarget =
     this->GetGlobalGenerator()->GetGeneratorTarget(target);
+  MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
 }
 
 cmNinjaTargetGenerator::~cmNinjaTargetGenerator()
 {
+  delete MacOSXContentGenerator;
 }
 
 cmGeneratedFileStream& cmNinjaTargetGenerator::GetBuildFileStream() const
@@ -434,10 +436,10 @@ cmNinjaTargetGenerator
      }
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     this->GeneratorTarget->HeaderSources,
-    &this->MacOSXContentGenerator);
+    this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     this->GeneratorTarget->ExtraSources,
-    &this->MacOSXContentGenerator);
+    this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
@@ -645,13 +647,6 @@ cmNinjaTargetGenerator
   EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
 }
 
-//----------------------------------------------------------------------------
-cmNinjaTargetGenerator::MacOSXContentGeneratorType::
-MacOSXContentGeneratorType(cmNinjaTargetGenerator* generator)
-  : cmOSXBundleGenerator::MacOSXContentGeneratorType()
-  , Generator(generator)
-{
-}
 
 //----------------------------------------------------------------------------
 void

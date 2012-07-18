@@ -29,7 +29,7 @@
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
   : OSXBundleGenerator(0)
-  , MacOSXContentGenerator(this)
+  , MacOSXContentGenerator(0)
 {
   this->BuildFileStream = 0;
   this->InfoFileStream = 0;
@@ -52,6 +52,12 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
     {
     this->NoRuleMessages = cmSystemTools::IsOff(ruleStatus);
     }
+  MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
+}
+
+cmMakefileTargetGenerator::~cmMakefileTargetGenerator()
+{
+  delete MacOSXContentGenerator;
 }
 
 cmMakefileTargetGenerator *
@@ -157,10 +163,10 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     }
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     this->GeneratorTarget->HeaderSources,
-    &this->MacOSXContentGenerator);
+    this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     this->GeneratorTarget->ExtraSources,
-    &this->MacOSXContentGenerator);
+    this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
@@ -348,13 +354,6 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     }
 }
 
-//----------------------------------------------------------------------------
-cmMakefileTargetGenerator::MacOSXContentGeneratorType::
-MacOSXContentGeneratorType(cmMakefileTargetGenerator* generator)
-  : cmOSXBundleGenerator::MacOSXContentGeneratorType()
-  , Generator(generator)
-{
-}
 
 //----------------------------------------------------------------------------
 void

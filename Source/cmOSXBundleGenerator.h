@@ -35,9 +35,9 @@ public:
   void CreateFramework(std::string const& targetName);
   void CreateCFBundle(std::string& targetName, std::string& outpath);
 
-  class MacOSXContentGeneratorType
+  struct MacOSXContentGeneratorType
   {
-  public:
+    virtual ~MacOSXContentGeneratorType() {}
     virtual void operator()(cmSourceFile& source, const char* pkgloc) = 0;
   };
 
@@ -66,5 +66,6 @@ private:
   std::string FrameworkVersion;
   std::set<cmStdString>* MacContentFolders;
 };
+
 
 #endif
