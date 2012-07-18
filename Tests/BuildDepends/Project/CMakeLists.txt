@@ -26,7 +26,7 @@ if(APPLE)
       # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
       set(CMAKE_OSX_ARCHITECTURES i386 x86_64)
     endif()
-  endif(EXISTS "${CMAKE_OSX_SYSROOT}")
+  endif()
 endif(APPLE)
 
 add_library(foo STATIC ${testRebuild_BINARY_DIR}/foo.cxx)
