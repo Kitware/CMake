@@ -22,8 +22,6 @@
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
 
-#include <stdlib.h> // rand()
-
 class Main {
 
 public:
