@@ -1,5 +1,6 @@
-#import <iostream.h>
 #import <Cocoa/Cocoa.h>
+#import <iostream>
+using namespace std;
 
 int main()
 {
