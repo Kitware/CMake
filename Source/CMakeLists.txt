@@ -364,7 +364,7 @@ ENDIF (WIN32)
 # Enforce Ninja support by setting CMAKE_USE_NINJA
 set(_CMAKE_DEFAULT_NINJA_VALUE TRUE)
 if(APPLE)
-  SET(_CMAKE_DEFAULT_NINJA_VALUE FALSE)
+  SET(_CMAKE_DEFAULT_NINJA_VALUE TRUE)
 endif()
 SET(CMAKE_ENABLE_NINJA ${_CMAKE_DEFAULT_NINJA_VALUE} CACHE BOOL
     "Enable the ninja generator for CMake. When enabled, some CMake tests still fail on OSX")
