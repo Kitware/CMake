@@ -91,7 +91,7 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
 
 const char* cmNinjaTargetGenerator::GetConfigName() const
 {
-  return this->LocalGenerator->ConfigName.c_str();
+  return this->LocalGenerator->GetConfigName();
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.

@@ -126,13 +126,14 @@ protected:
   private:
     cmNinjaTargetGenerator* Generator;
   };
-  friend class MacOSXContentGeneratorType;
+
 
 protected:
   MacOSXContentGeneratorType MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
   std::set<cmStdString> MacContentFolders;
+
 
 private:
   cmTarget* Target;
