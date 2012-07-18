@@ -116,23 +116,25 @@ protected:
   void EnsureParentDirectoryExists(const std::string& path);
 
   // write rules for Mac OS X Application Bundle content.
-  class MacOSXContentGeneratorType
-    : public cmOSXBundleGenerator::MacOSXContentGeneratorType
+  struct MacOSXContentGeneratorType :
+    cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
-  public:
-    MacOSXContentGeneratorType(cmNinjaTargetGenerator* Generator);
-    virtual void operator()(cmSourceFile& source, const char* pkgloc);
+    MacOSXContentGeneratorType(cmNinjaTargetGenerator* g) :
+      Generator(g)  {}
+
+    void operator()(cmSourceFile& source, const char* pkgloc);
 
   private:
     cmNinjaTargetGenerator* Generator;
   };
-  friend class MacOSXContentGeneratorType;
+
 
 protected:
-  MacOSXContentGeneratorType MacOSXContentGenerator;
+  MacOSXContentGeneratorType* MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
   std::set<cmStdString> MacContentFolders;
+
 
 private:
   cmTarget* Target;

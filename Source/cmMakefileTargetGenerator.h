@@ -35,7 +35,7 @@ class cmMakefileTargetGenerator
 public:
   // constructor to set the ivars
   cmMakefileTargetGenerator(cmTarget* target);
-  virtual ~cmMakefileTargetGenerator() {};
+  virtual ~cmMakefileTargetGenerator();
 
   // construct using this factory call
   static cmMakefileTargetGenerator *New(cmTarget *tgt);
@@ -74,17 +74,17 @@ protected:
   void WriteTargetDependRules();
 
   // write rules for Mac OS X Application Bundle content.
-  class MacOSXContentGeneratorType
-    : public cmOSXBundleGenerator::MacOSXContentGeneratorType
+  struct MacOSXContentGeneratorType :
+    cmOSXBundleGenerator::MacOSXContentGeneratorType
   {
-  public:
-    MacOSXContentGeneratorType(cmMakefileTargetGenerator* Generator);
-    virtual void operator()(cmSourceFile& source, const char* pkgloc);
+    MacOSXContentGeneratorType(cmMakefileTargetGenerator* gen) :
+      Generator(gen) {}
+
+    void operator()(cmSourceFile& source, const char* pkgloc);
 
   private:
     cmMakefileTargetGenerator* Generator;
   };
-  friend class MacOSXContentGeneratorType;
 
   // write the rules for an object
   void WriteObjectRuleFiles(cmSourceFile& source);
@@ -234,7 +234,7 @@ protected:
   std::string MacContentDirectory;
   std::set<cmStdString> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
-  MacOSXContentGeneratorType MacOSXContentGenerator;
+  MacOSXContentGeneratorType* MacOSXContentGenerator;
 
   typedef std::map<cmStdString, cmStdString> ByLanguageMap;
   std::string GetFlags(const std::string &l);
