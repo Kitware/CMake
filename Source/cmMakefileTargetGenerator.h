@@ -51,6 +51,7 @@ public:
     { return this->ProgressFileNameFull; }
 
   cmTarget* GetTarget() { return this->Target;}
+
 protected:
 
   // create the file and directory etc
@@ -85,6 +86,7 @@ protected:
   private:
     cmMakefileTargetGenerator* Generator;
   };
+  friend struct MacOSXContentGeneratorType;
 
   // write the rules for an object
   void WriteObjectRuleFiles(cmSourceFile& source);

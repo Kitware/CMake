@@ -32,7 +32,7 @@ cmOSXBundleGenerator(cmTarget* target,
                      const char* configName)
  : Target(target)
  , Makefile(target->GetMakefile())
- , LocalGenerator(this->Makefile->GetLocalGenerator())
+ , LocalGenerator(Makefile->GetLocalGenerator())
  , TargetNameOut(targetNameOut)
  , ConfigName(configName)
  , MacContentDirectory()
