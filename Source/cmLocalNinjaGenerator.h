@@ -83,8 +83,8 @@ public:
 
   void ExpandRuleVariables(std::string& string,
                            const RuleVariables& replaceValues) {
-    return cmLocalGenerator::
-             ExpandRuleVariables(string, replaceValues); }
+    cmLocalGenerator::ExpandRuleVariables(string, replaceValues);
+  }
 
   std::string BuildCommandLine(const std::vector<std::string> &cmdLines);
 
