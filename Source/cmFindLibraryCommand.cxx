@@ -132,43 +132,35 @@ bool cmFindLibraryCommand
 //----------------------------------------------------------------------------
 void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 {
-  std::vector<std::string> newPaths;
-  bool found = false;
+  std::vector<std::string> original;
+  original.swap(this->SearchPaths);
   std::string subpath = "lib";
   subpath += suffix;
   subpath += "/";
-  for(std::vector<std::string>::iterator i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
+  for(std::vector<std::string>::iterator i = original.begin();
+      i != original.end(); ++i)
     {
     // Try replacing lib/ with lib<suffix>/
     std::string s = *i;
     cmSystemTools::ReplaceString(s, "lib/", subpath.c_str());
     if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
       {
-      found = true;
-      newPaths.push_back(s);
+      this->SearchPaths.push_back(s);
       }
 
-    // Now look for lib<suffix>
+    // Now look for <original><suffix>/
     s = *i;
     s += suffix;
     s += "/";
     if(cmSystemTools::FileIsDirectory(s.c_str()))
       {
-      found = true;
-      newPaths.push_back(s);
+      this->SearchPaths.push_back(s);
       }
-    // now add the original unchanged path
+    // Now add the original unchanged path
     if(cmSystemTools::FileIsDirectory(i->c_str()))
       {
-      newPaths.push_back(*i);
+      this->SearchPaths.push_back(*i);
       }
-    }
-
-  // If any new paths were found replace the original set.
-  if(found)
-    {
-    this->SearchPaths = newPaths;
     }
 }
 
