@@ -134,32 +134,51 @@ void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 {
   std::vector<std::string> original;
   original.swap(this->SearchPaths);
-  std::string subpath = "lib";
-  subpath += suffix;
-  subpath += "/";
   for(std::vector<std::string>::iterator i = original.begin();
       i != original.end(); ++i)
     {
-    // Try replacing lib/ with lib<suffix>/
-    std::string s = *i;
-    cmSystemTools::ReplaceString(s, "lib/", subpath.c_str());
-    if((s != *i) && cmSystemTools::FileIsDirectory(s.c_str()))
+    this->AddArchitecturePath(*i, 0, suffix);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmFindLibraryCommand::AddArchitecturePath(
+  std::string const& dir, std::string::size_type start_pos,
+  const char* suffix, bool fresh)
+{
+  std::string::size_type pos = dir.find("lib/", start_pos);
+  if(pos != std::string::npos)
+    {
+    std::string cur_dir  = dir.substr(0,pos+3);
+
+    // Follow "lib<suffix>".
+    std::string next_dir = cur_dir + suffix;
+    if(cmSystemTools::FileIsDirectory(next_dir.c_str()))
       {
-      this->SearchPaths.push_back(s);
+      next_dir += dir.substr(pos+3);
+      std::string::size_type next_pos = pos+3+strlen(suffix)+1;
+      this->AddArchitecturePath(next_dir, next_pos, suffix);
       }
 
-    // Now look for <original><suffix>/
-    s = *i;
-    s += suffix;
-    s += "/";
-    if(cmSystemTools::FileIsDirectory(s.c_str()))
+    // Follow "lib".
+    if(cmSystemTools::FileIsDirectory(cur_dir.c_str()))
       {
-      this->SearchPaths.push_back(s);
+      this->AddArchitecturePath(dir, pos+3+1, suffix, false);
       }
-    // Now add the original unchanged path
-    if(cmSystemTools::FileIsDirectory(i->c_str()))
+    }
+  if(fresh)
+    {
+    // Check for <dir><suffix>/.
+    std::string cur_dir  = dir + suffix + "/";
+    if(cmSystemTools::FileIsDirectory(cur_dir.c_str()))
       {
-      this->SearchPaths.push_back(*i);
+      this->SearchPaths.push_back(cur_dir);
+      }
+
+    // Now add the original unchanged path
+    if(cmSystemTools::FileIsDirectory(dir.c_str()))
+      {
+      this->SearchPaths.push_back(dir);
       }
     }
 }

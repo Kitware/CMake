@@ -62,6 +62,10 @@ public:
   
 protected:
   void AddArchitecturePaths(const char* suffix);
+  void AddArchitecturePath(std::string const& dir,
+                           std::string::size_type start_pos,
+                           const char* suffix,
+                           bool fresh = true);
   std::string FindLibrary();
   virtual void GenerateDocumentation();
 private:

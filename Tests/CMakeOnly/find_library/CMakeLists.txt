@@ -50,9 +50,9 @@ endforeach()
 set(CMAKE_SIZEOF_VOID_P 8)
 foreach(lib64
     lib/64/libtest2.a
-    #lib/A/lib64/libtest3.a # known breakage
+    lib/A/lib64/libtest3.a
     lib/libtest3.a
-    #lib64/A/lib/libtest2.a # known breakage
+    lib64/A/lib/libtest2.a
     lib64/A/lib64/libtest1.a
     lib64/A/libtest1.a
     lib64/libtest1.a
