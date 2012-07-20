@@ -34,9 +34,7 @@ cmExtraEclipseCDT4Generator
   this->SupportedGlobalGenerators.push_back("MinGW Makefiles");
 //  this->SupportedGlobalGenerators.push_back("MSYS Makefiles");
 #endif
-#ifdef CMAKE_USE_NINJA
   this->SupportedGlobalGenerators.push_back("Ninja");
-#endif
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 
   this->SupportsVirtualFolders = true;
