@@ -40,8 +40,8 @@ public:
 #ifdef __APPLE__
     // on MacOS enable CPackRPM iff rpmbuild is found
     std::vector<std::string> locations;
-    locations.push_back("/sw"); // Fink
-    locations.push_back("/opt/local"); //MacPort
+    locations.push_back("/sw/bin");        // Fink
+    locations.push_back("/opt/local/bin"); // MacPorts
     return cmSystemTools::FindProgram("rpmbuild") != "" ? true : false;
 #else
     // legacy behavior on other systems
