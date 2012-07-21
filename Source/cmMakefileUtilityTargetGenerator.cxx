@@ -33,6 +33,13 @@ cmMakefileUtilityTargetGenerator
 }
 
 //----------------------------------------------------------------------------
+cmMakefileUtilityTargetGenerator
+::~cmMakefileUtilityTargetGenerator()
+{
+  delete this->OSXBundleGenerator;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
 {
   this->CreateRuleFile();

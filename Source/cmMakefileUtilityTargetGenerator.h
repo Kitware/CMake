@@ -14,16 +14,17 @@
 
 #include "cmMakefileTargetGenerator.h"
 
-class cmMakefileUtilityTargetGenerator: 
+class cmMakefileUtilityTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
   cmMakefileUtilityTargetGenerator(cmTarget* target);
+  virtual ~cmMakefileUtilityTargetGenerator();
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
-  virtual void WriteRuleFiles();  
-  
+  virtual void WriteRuleFiles();
+
 protected:
 
 };
