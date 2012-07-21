@@ -16,6 +16,7 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio10IA64Generator::cmGlobalVisualStudio10IA64Generator()
 {
+  this->ArchitectureId = "x64";
 }
 
 //----------------------------------------------------------------------------
@@ -33,8 +34,6 @@ void cmGlobalVisualStudio10IA64Generator
 {
   this->cmGlobalVisualStudio10Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "x64");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "x64");
 }
 
 //----------------------------------------------------------------------------
