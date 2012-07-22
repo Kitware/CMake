@@ -73,7 +73,7 @@ cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmTarget* target)
 
 cmNinjaTargetGenerator::~cmNinjaTargetGenerator()
 {
-  delete MacOSXContentGenerator;
+  delete this->MacOSXContentGenerator;
 }
 
 cmGeneratedFileStream& cmNinjaTargetGenerator::GetBuildFileStream() const
