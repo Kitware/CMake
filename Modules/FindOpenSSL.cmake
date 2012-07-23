@@ -31,10 +31,10 @@ endif (UNIX)
 
 # http://www.slproweb.com/products/Win32OpenSSL.html
 SET(_OPENSSL_ROOT_HINTS
-  $ENV{OPENSSL_ROOT_DIR}
   ${OPENSSL_ROOT_DIR}
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
+  ENV OPENSSL_ROOT_DIR
   )
 SET(_OPENSSL_ROOT_PATHS
   "$ENV{PROGRAMFILES}/OpenSSL"
