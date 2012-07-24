@@ -252,6 +252,48 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                      vars);
 }
 
+void
+cmGlobalNinjaGenerator::AddMacOSXContentRule()
+{
+  cmLocalGenerator *lg = this->LocalGenerators[0];
+  cmMakefile* mfRoot = lg->GetMakefile();
+
+  cmOStringStream cmd;
+  cmd << lg->ConvertToOutputFormat(
+           mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
+           cmLocalGenerator::SHELL)
+      << " -E copy $in $out";
+
+  this->AddRule("COPY_OSX_CONTENT",
+                cmd.str(),
+                "Copying OS X Content $out",
+                "Rule for copying OS X bundle content file."
+                /*depfile*/ "",
+                /*rspfile*/ "");
+}
+
+void
+cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
+                                                const std::string& output)
+{
+  this->AddMacOSXContentRule();
+
+  cmNinjaDeps outputs;
+  outputs.push_back(output);
+  cmNinjaDeps deps;
+  deps.push_back(input);
+  cmNinjaVars vars;
+
+  cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
+                                     "",
+                                     "COPY_OSX_CONTENT",
+                                     outputs,
+                                     deps,
+                                     cmNinjaDeps(),
+                                     cmNinjaDeps(),
+                                     cmNinjaVars());
+}
+
 void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
                                        const std::string& name,
                                        const std::string& command,
@@ -779,6 +821,11 @@ void cmGlobalNinjaGenerator::WriteDisclaimer(std::ostream& os)
 void cmGlobalNinjaGenerator::AddDependencyToAll(cmTarget* target)
 {
   this->AppendTargetOutputs(target, this->AllDependencies);
+}
+
+void cmGlobalNinjaGenerator::AddDependencyToAll(const std::string& input)
+{
+  this->AllDependencies.push_back(input);
 }
 
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()

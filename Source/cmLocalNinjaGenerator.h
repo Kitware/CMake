@@ -45,7 +45,6 @@ public:
   /// Overloaded methods. @see cmLocalGenerator::GetTargetDirectory()
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
 
-public:
   const cmGlobalNinjaGenerator* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
 
@@ -67,17 +66,43 @@ public:
   std::string GetHomeRelativeOutputPath() const
   { return this->HomeRelativeOutputPath; }
 
-protected:
+  std::string ConvertToNinjaPath(const char *path);
+
+  struct map_to_ninja_path {
+    cmLocalNinjaGenerator *LocalGenerator;
+    map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
+      : LocalGenerator(LocalGen) {}
+    std::string operator()(const std::string &path) {
+      return LocalGenerator->ConvertToNinjaPath(path.c_str());
+    }
+  };
+
+  map_to_ninja_path MapToNinjaPath() {
+    return map_to_ninja_path(this);
+  }
+
+  void ExpandRuleVariables(std::string& string,
+                           const RuleVariables& replaceValues) {
+    cmLocalGenerator::ExpandRuleVariables(string, replaceValues);
+  }
+
+  std::string BuildCommandLine(const std::vector<std::string> &cmdLines);
+
+  void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
+
+  void AddCustomCommandTarget(cmCustomCommand const* cc, cmTarget* target);
+  void AppendCustomCommandLines(const cmCustomCommand *cc,
+                                std::vector<std::string> &cmdLines);
+  void AppendCustomCommandDeps(const cmCustomCommand *cc,
+                               cmNinjaDeps &ninjaDeps);
+
   virtual std::string ConvertToLinkReference(std::string const& lib);
+
+
+protected:
   virtual std::string ConvertToIncludeReference(std::string const& path);
 
-private:
-  friend class cmGlobalNinjaGenerator;
-
-  // In order to access to protected member of the local generator.
-  friend class cmNinjaTargetGenerator;
-  friend class cmNinjaNormalTargetGenerator;
-  friend class cmNinjaUtilityTargetGenerator;
 
 private:
   cmGeneratedFileStream& GetBuildFileStream() const;
@@ -90,38 +115,13 @@ private:
 
   void SetConfigName();
 
-  std::string ConvertToNinjaPath(const char *path);
-
-  struct map_to_ninja_path;
-  friend struct map_to_ninja_path;
-  struct map_to_ninja_path {
-    cmLocalNinjaGenerator *LocalGenerator;
-    map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
-      : LocalGenerator(LocalGen) {}
-    std::string operator()(const std::string &path) {
-      return LocalGenerator->ConvertToNinjaPath(path.c_str());
-    }
-  };
-  map_to_ninja_path MapToNinjaPath() {
-    return map_to_ninja_path(this);
-  }
-
-  void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
-
-  void AppendCustomCommandDeps(const cmCustomCommand *cc,
-                               cmNinjaDeps &ninjaDeps);
-  std::string BuildCommandLine(const std::vector<std::string> &cmdLines);
-  void AppendCustomCommandLines(const cmCustomCommand *cc,
-                                std::vector<std::string> &cmdLines);
   void WriteCustomCommandRule();
   void WriteCustomCommandBuildStatement(cmCustomCommand const *cc,
                                         const cmNinjaDeps& orderOnlyDeps);
 
-  void AddCustomCommandTarget(cmCustomCommand const* cc, cmTarget* target);
   void WriteCustomCommandBuildStatements();
 
-private:
+
   std::string ConfigName;
   std::string HomeRelativeOutputPath;
 

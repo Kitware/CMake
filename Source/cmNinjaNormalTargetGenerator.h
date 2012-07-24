@@ -15,8 +15,12 @@
 
 #  include "cmNinjaTargetGenerator.h"
 #  include "cmNinjaTypes.h"
+#  include "cmStandardIncludes.h"
+
+#  include <set>
 
 class cmSourceFile;
+class cmOSXBundleGenerator;
 
 class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {

@@ -16,6 +16,7 @@
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
+#include "cmOSXBundleGenerator.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -33,7 +34,10 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNameReal()
   , TargetNameImport()
   , TargetNamePDB()
+  , TargetLinkLanguage(0)
 {
+  cmOSXBundleGenerator::PrepareTargetProperties(target);
+
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
     target->GetExecutableNames(this->TargetNameOut,
@@ -55,10 +59,16 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     // ensure the directory exists (OutDir test)
     EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
     }
+
+  this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
+                                                      this->TargetNameOut,
+                                                      this->GetConfigName());
+  this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 {
+  delete this->OSXBundleGenerator;
 }
 
 void cmNinjaNormalTargetGenerator::Generate()
@@ -115,7 +125,10 @@ const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmTarget::SHARED_LIBRARY:
       return "shared library";
     case cmTarget::MODULE_LIBRARY:
-      return "shared module";
+      if (this->GetTarget()->IsCFBundleOnApple())
+        return "CFBundle shared module";
+      else
+        return "shared module";
     case cmTarget::EXECUTABLE:
       return "executable";
     default:
@@ -348,6 +361,40 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
 
+  std::string targetOutput = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
+  std::string targetOutputReal = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/false,
+                                   /*realpath=*/true).c_str());
+  std::string targetOutputImplib = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/true).c_str());
+
+  if (this->GetTarget()->IsAppBundleOnApple())
+    {
+    // Create the app bundle
+    std::string outpath;
+    this->OSXBundleGenerator->CreateAppBundle(this->TargetNameOut, outpath);
+
+    // Calculate the output path
+    targetOutput = outpath + this->TargetNameOut;
+    targetOutput = this->ConvertToNinjaPath(targetOutput.c_str());
+    targetOutputReal = outpath + this->TargetNameReal;
+    targetOutputReal = this->ConvertToNinjaPath(targetOutputReal.c_str());
+    }
+  else if (this->GetTarget()->IsFrameworkOnApple())
+    {
+    // Create the library framework.
+    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut);
+    }
+  else if(this->GetTarget()->IsCFBundleOnApple())
+    {
+    // Create the core foundation bundle.
+    std::string outpath;
+    this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut, outpath);
+    }
+
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   this->GetBuildFileStream()
@@ -359,16 +406,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   cmNinjaDeps emptyDeps;
   cmNinjaVars vars;
-
-  std::string targetOutput = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
-  std::string targetOutputReal = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
-                                   /*implib=*/false,
-                                   /*realpath=*/true).c_str());
-  std::string targetOutputImplib = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
-                                   /*implib=*/true).c_str());
 
   // Compute the comment.
   cmOStringStream comment;

@@ -72,14 +72,14 @@ else
   cmake_system_darwin=false
 fi
 
-# Determine whether this is BeOS 
+# Determine whether this is BeOS
 if echo "${cmake_system}" | grep BeOS >/dev/null 2>&1; then
   cmake_system_beos=true
 else
   cmake_system_beos=false
 fi
 
-# Determine whether this is Haiku 
+# Determine whether this is Haiku
 if echo "${cmake_system}" | grep Haiku >/dev/null 2>&1; then
   cmake_system_haiku=true
 else
@@ -220,6 +220,7 @@ CMAKE_CXX_SOURCES="\
   cmMakefileLibraryTargetGenerator \
   cmMakefileTargetGenerator \
   cmMakefileUtilityTargetGenerator \
+  cmOSXBundleGenerator \
   cmNewLineStyle \
   cmBootstrapCommands \
   cmCommands \
@@ -238,6 +239,11 @@ CMAKE_CXX_SOURCES="\
   cmExprLexer \
   cmExprParser \
   cmExprParserHelper \
+  cmGlobalNinjaGenerator \
+  cmLocalNinjaGenerator \
+  cmNinjaTargetGenerator \
+  cmNinjaNormalTargetGenerator \
+  cmNinjaUtilityTargetGenerator \
 "
 
 if ${cmake_system_mingw}; then
@@ -351,7 +357,7 @@ cmake_error()
   res=$1
   shift 1
   echo "---------------------------------------------"
-  echo "Error when bootstrapping CMake:" 
+  echo "Error when bootstrapping CMake:"
   echo "$*"
   echo "---------------------------------------------"
   if [ -f cmake_bootstrap.log ]; then
@@ -370,7 +376,7 @@ cmake_replace_string ()
   SEARCHFOR="$3"
   REPLACEWITH="$4"
   if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
-    cat "${INFILE}" | 
+    cat "${INFILE}" |
       sed "s/\@${SEARCHFOR}\@/${REPLACEWITH}/g" > "${OUTFILE}${_tmp}"
     if [ -f "${OUTFILE}${_tmp}" ]; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
@@ -393,7 +399,7 @@ cmake_kwsys_config_replace_string ()
   APPEND="$*"
   if [ -f "${INFILE}" ] || ${cmake_system_openvms}; then
     echo "${APPEND}" > "${OUTFILE}${_tmp}"
-    cat "${INFILE}" | 
+    cat "${INFILE}" |
       sed "/./ {s/\@KWSYS_NAMESPACE\@/cmsys/g;
                 s/@KWSYS_BUILD_SHARED@/${KWSYS_BUILD_SHARED}/g;
                 s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
@@ -797,7 +803,7 @@ echo '
 # include <iostream.h>
 #endif
 
-class NeedCXX 
+class NeedCXX
 {
 public:
   NeedCXX() { this->Foo = 1; }
@@ -1387,12 +1393,12 @@ cmake_kwsys_config_replace_string \
   "${cmake_bootstrap_dir}/cmsys/Configure.h" \
   "${cmake_compiler_settings_comment}"
 
-for a in ${KWSYS_FILES}; do 
+for a in ${KWSYS_FILES}; do
   cmake_replace_string "${cmake_source_dir}/Source/kwsys/${a}.in" \
      "${cmake_bootstrap_dir}/cmsys/${a}" KWSYS_NAMESPACE cmsys
 done
 
-for a in ${KWSYS_IOS_FILES}; do 
+for a in ${KWSYS_IOS_FILES}; do
   cmake_replace_string "${cmake_source_dir}/Source/kwsys/kwsys_ios_${a}.h.in" \
      "${cmake_bootstrap_dir}/cmsys/ios/${a}" KWSYS_NAMESPACE cmsys
 done
