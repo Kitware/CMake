@@ -474,10 +474,33 @@ void cmGlobalNinjaGenerator
       if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
         {
         UsingMinGW = true;
-        std::string rc = cmSystemTools::FindProgram("windres");
-        if(rc.empty())
-          rc = "windres.exe";;
-        mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
+        if(!mf->GetDefinition("CMAKE_RC_COMPILER"))
+          {
+          std::string windres = cmSystemTools::FindProgram("windres");
+          if(windres.empty())
+            {
+            std::string compiler_path;
+            std::string::size_type prefix = std::string::npos;
+            if (mf->GetDefinition("CMAKE_C_COMPILER"))
+              {
+              compiler_path = mf->GetDefinition("CMAKE_C_COMPILER");
+              prefix = compiler_path.rfind("gcc");
+              }
+            else if (mf->GetDefinition("CMAKE_CXX_COMPILER"))
+              {
+              compiler_path = mf->GetDefinition("CMAKE_CXX_COMPILER");
+              prefix = compiler_path.rfind("++");
+              prefix--;
+              }
+            if (prefix != std::string::npos)
+              {
+              windres = compiler_path.substr(0, prefix) + "windres";
+              windres = cmSystemTools::FindProgram(windres.c_str());
+              }
+            }
+          if(!windres.empty())
+            mf->AddDefinition("CMAKE_RC_COMPILER", windres.c_str());
+          }
         }
       }
     this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
