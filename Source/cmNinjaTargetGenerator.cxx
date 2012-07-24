@@ -143,16 +143,18 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
                                         language.c_str());
 
-  // TODO: Handle response file.
   // Add include directory flags.
   {
   std::vector<std::string> includes;
   this->LocalGenerator->GetIncludeDirectories(includes, this->Target,
                                               language.c_str());
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(), false);
+    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
+    language == "RC" ? true : false); // full include paths for RC
+                                      // needed by cmcldeps
   if(cmGlobalNinjaGenerator::IsMinGW())
     cmSystemTools::ReplaceString(includeFlags, "\\", "/");
+
   this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
   }
 
@@ -467,7 +469,7 @@ cmNinjaTargetGenerator
   cmNinjaDeps emptyDeps;
 
   std::string comment;
-  const char* language = source->GetLanguage();
+  const std::string language = source->GetLanguage();
   std::string rule = this->LanguageCompilerRule(language);
 
   cmNinjaDeps outputs;
@@ -477,7 +479,11 @@ cmNinjaTargetGenerator
   this->Objects.push_back(objectFileName);
 
   cmNinjaDeps explicitDeps;
-  std::string sourceFileName = this->GetSourceFilePath(source);
+  std::string sourceFileName;
+  if (language == "RC")
+    sourceFileName = source->GetFullPath();
+  else
+    sourceFileName = this->GetSourceFilePath(source);
   explicitDeps.push_back(sourceFileName);
 
   // Ensure that the target dependencies are built before any source file in
