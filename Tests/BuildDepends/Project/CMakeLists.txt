@@ -17,7 +17,8 @@ endfunction()
 
 if(APPLE)
   # only use multi-arch if the sysroot exists on this machine
-  if(EXISTS "${CMAKE_OSX_SYSROOT}")
+  # Ninja needs -M which could not be used with multiple -arch flags
+  if(EXISTS "${CMAKE_OSX_SYSROOT}" AND NOT "${CMAKE_GENERATOR}" MATCHES "Ninja")
     set(CMAKE_OSX_ARCHITECTURES "ppc;i386")
     test_for_xcode4(is_xcode4)
     if(is_xcode4)
@@ -25,7 +26,7 @@ if(APPLE)
       # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
       set(CMAKE_OSX_ARCHITECTURES i386 x86_64)
     endif()
-  endif(EXISTS "${CMAKE_OSX_SYSROOT}")
+  endif()
 endif(APPLE)
 
 add_library(foo STATIC ${testRebuild_BINARY_DIR}/foo.cxx)
