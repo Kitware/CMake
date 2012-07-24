@@ -174,7 +174,14 @@ cmNinjaNormalTargetGenerator
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
+
+    // TODO:
+    // Makefile generator expands <TARGET> to the plain target name
+    // with suffix. $out expands to a relative path. This difference
+    // could make trouble when switching to Ninja generator. Maybe
+    // using TARGET_NAME and RuleVariables::TargetName is a fix.
     vars.Target = "$out";
+
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
     vars.TargetInstallNameDir = "$INSTALLNAME_DIR";
@@ -423,7 +430,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(path);
   }
 
-  // TODO move to GetTargetPDB
   cmMakefile* mf = this->GetMakefile();
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
@@ -433,6 +439,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           ConvertToNinjaPath(path.c_str()).c_str(),
                           cmLocalGenerator::SHELL);
     EnsureParentDirectoryExists(path);
+    }
+  else
+    {
+    // It is common to place debug symbols at a specific place,
+    // so we need a plain target name in the rule available.
+    std::string prefix;
+    std::string base;
+    std::string suffix;
+    this->GetTarget()->GetFullNameComponents(prefix, base, suffix);
+    std::string dbg_suffix = ".dbg";
+    // TODO: Where to document?
+    if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))
+      dbg_suffix = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX");
+    vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
