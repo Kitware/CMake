@@ -1,3 +1,68 @@
+Changes in CMake 2.8.9-rc3 (since 2.8.9-rc2)
+--------------------------------------------
+Alexey Ozeritsky (1):
+      Fixed: FindLAPACK does not find MKL 10.3 when using gcc 4.x
+
+Brad King (3):
+      pre-commit: Reject C++ code with lines too long
+      Tests/X11: Add missing include <stdlib.h> for 'rand'
+      Tests/ObjC++: Use standard <iostream> header
+
+David Cole (1):
+      CPack: Use bin subdir when looking for dpkg and rpmbuild
+
+Eric NOULARD (2):
+      Do not run cpack at CMake time it is not available.
+      Find dpkg and rpmbuild in usual Fink and MacPort paths
+
+Nicolas Despres (17):
+      Ninja: Cannot pass a reference to an anonymous object.
+      Ninja: Add support for OS X app bundles.
+      Ninja: Add support for OX X library framework.
+      Ensure 3rd party libraries are writable.
+      Remove trailing white-spaces.
+      Re-factor OS X bundle and framework generation.
+      Ninja: Copy resource files in the bundle.
+      Ninja: Add support for CFBundle.
+      Enable BundleTest with CLang too.
+      Re-factor CFBundle generation.
+      Ninja: Use same echo message as makefiles.
+      Re-factor bundle content copying rules generation.
+      Re-factor Mac OS X content directory computation.
+      Re-factor framework directory computation.
+      Re-factor OS X content generator start up.
+      Fix memory leak in Makefile generator.
+      Add missing this->.
+
+Peter Kuemmel (1):
+      Ninja: dep files and multiple -arch flags not possible on mac
+
+Peter Kümmel (24):
+      Ninja: windres is also used for cross-compiling
+      Ninja: search for windres with prefix
+      Ninja: there could be null pointers
+      Ninja: more searching for windres
+      Ninja: path is already declared
+      Ninja: fix GCC 4.7 warning -Wconversion
+      Ninja: fix sytle
+      Ninja: also stop when .rc's .d file couldn't be generated
+      Ninja: readd quotes to src file path before patching it
+      Ninja: cmcldeps needs absolute paths for RCs
+      Ninja: on Mac no multiple -arch because of -M
+      Ninja: fix mis-matching endif() argument
+      Ninja: also mingw needs TARGET_PDB
+      Ninja: line length
+      Ninja: make TARGET_PDB a real .gdb file name
+      Ninja: make debug symbol suffix configurable by CMAKE_DEBUG_SYMBOL_SUFFIX
+      Ninja: remove 'friend' in ninja code
+      Ninja: remove warnings
+      Ninja: remove 'this' from member initializer list
+      Ninja: fixes for bcc
+      Ninja: enable ninja on Mac so all Mac CDash-builds are tested, cleanup later
+      Ninja: void function can't return a value
+      Ninja: enable ninja support everywhere
+      Ninja: also bootstrap ninja files
+
 Changes in CMake 2.8.9-rc2 (since 2.8.9-rc1)
 --------------------------------------------
 Alex Neundorf (4):
