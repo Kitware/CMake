@@ -134,9 +134,15 @@ IF(WIN32 AND NOT CYGWIN)
     MARK_AS_ADVANCED(LIB_EAY_DEBUG LIB_EAY_RELEASE)
   ELSEIF(MINGW)
     # same player, for MingW
+    SET(LIB_EAY_NAMES libeay32)
+    SET(SSL_EAY_NAMES ssleay32)
+    IF(CMAKE_CROSS_COMPILING)
+      LIST(APPEND LIB_EAY_NAMES crypto)
+      LIST(APPEND SSL_EAY_NAMES ssl)
+    ENDIF()
     FIND_LIBRARY(LIB_EAY
       NAMES
-        libeay32
+        ${LIB_EAY_NAMES}
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -145,7 +151,7 @@ IF(WIN32 AND NOT CYGWIN)
 
     FIND_LIBRARY(SSL_EAY
       NAMES
-        ssleay32
+        ${SSL_EAY_NAMES}
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -154,6 +160,8 @@ IF(WIN32 AND NOT CYGWIN)
 
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    unset(LIB_EAY_NAMES)
+    unset(SSL_EAY_NAMES)
   ELSE(MSVC)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     FIND_LIBRARY(LIB_EAY
