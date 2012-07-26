@@ -638,6 +638,17 @@ if(do_svn_tests)
     "${binary_base}/TutorialStep1-SVN-trunk/Tutorial" 98)
 endif()
 
+if(do_git_tests)
+  add_test(TutorialStep1-GIT-byhash
+    "${binary_base}/TutorialStep1-GIT-byhash/Tutorial" 100)
+
+  add_test(TutorialStep1-GIT-bytag
+    "${binary_base}/TutorialStep1-GIT-bytag/Tutorial" 99)
+
+  add_test(TutorialStep1-GIT-master
+    "${binary_base}/TutorialStep1-GIT-master/Tutorial" 98)
+endif()
+
 
 # InstallTree tests:
 #
