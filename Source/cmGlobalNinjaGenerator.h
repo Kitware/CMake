@@ -103,6 +103,8 @@ public:
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
                              const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
+  void WriteMacOSXContentBuild(const std::string& input,
+                               const std::string& output);
 
   /**
    * Write a rule statement named @a name to @a os with the @a comment,
@@ -150,6 +152,7 @@ public:
 
 
   static bool IsMinGW() { return UsingMinGW; }
+
 
 public:
   /// Default constructor.
@@ -214,12 +217,12 @@ public:
   }
   virtual const char* GetCleanTargetName()         const { return "clean"; }
 
-public:
-  cmGeneratedFileStream* GetBuildFileStream() const
-  { return this->BuildFileStream; }
 
-  cmGeneratedFileStream* GetRulesFileStream() const
-  { return this->RulesFileStream; }
+  cmGeneratedFileStream* GetBuildFileStream() const {
+    return this->BuildFileStream; }
+
+  cmGeneratedFileStream* GetRulesFileStream() const {
+    return this->RulesFileStream; }
 
   void AddCXXCompileCommand(const std::string &commandLine,
                             const std::string &sourceFile);
@@ -242,54 +245,12 @@ public:
   bool HasRule(const std::string& name);
 
   void AddCustomCommandRule();
+  void AddMacOSXContentRule();
 
-protected:
-
-  /// Overloaded methods.
-  /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
-  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
-
-private:
-
-  /// @see cmGlobalGenerator::ComputeTargetObjects
-  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
-
-private:
-  // In order to access the AddDependencyToAll() functions and co.
-  friend class cmLocalNinjaGenerator;
-
-  // In order to access the SeenCustomCommand() function.
-  friend class cmNinjaTargetGenerator;
-  friend class cmNinjaNormalTargetGenerator;
-  friend class cmNinjaUtilityTargetGenerator;
-
-private:
-  void OpenBuildFileStream();
-  void CloseBuildFileStream();
-
-  void CloseCompileCommandsStream();
-
-  void OpenRulesFileStream();
-  void CloseRulesFileStream();
-
-  /// Write the common disclaimer text at the top of each build file.
-  void WriteDisclaimer(std::ostream& os);
-
-  void AddDependencyToAll(cmTarget* target);
-
-  void WriteAssumedSourceDependencies();
-
-  void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
-
-  void AddTargetAlias(const std::string& alias, cmTarget* target);
-  void WriteTargetAliases(std::ostream& os);
-
-  void WriteBuiltinTargets(std::ostream& os);
-  void WriteTargetAll(std::ostream& os);
-  void WriteTargetRebuildManifest(std::ostream& os);
-  void WriteTargetClean(std::ostream& os);
-  void WriteTargetHelp(std::ostream& os);
+  bool HasCustomCommandOutput(const std::string &output) {
+    return this->CustomCommandOutputs.find(output) !=
+           this->CustomCommandOutputs.end();
+  }
 
   /// Called when we have seen the given custom command.  Returns true
   /// if we has seen it before.
@@ -305,11 +266,6 @@ private:
     this->AssumedSourceDependencies.erase(output);
   }
 
-  bool HasCustomCommandOutput(const std::string &output) {
-    return this->CustomCommandOutputs.find(output) !=
-           this->CustomCommandOutputs.end();
-  }
-
   void AddAssumedSourceDependencies(const std::string &source,
                                     const cmNinjaDeps &deps) {
     std::set<std::string> &ASD = this->AssumedSourceDependencies[source];
@@ -319,11 +275,59 @@ private:
     ASD.insert(deps.begin(), deps.end());
   }
 
-  std::string ninjaCmd() const;
+  void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
+  void AddDependencyToAll(cmTarget* target);
+  void AddDependencyToAll(const std::string& input);
 
-  int GetRuleCmdLength(const std::string& name) { return RuleCmdLength[name]; }
+  const std::vector<cmLocalGenerator*>& GetLocalGenerators() const {
+    return LocalGenerators; }
+
+  bool IsExcluded(cmLocalGenerator* root, cmTarget& target) {
+    return cmGlobalGenerator::IsExcluded(root, target); }
+
+  int GetRuleCmdLength(const std::string& name) {
+    return RuleCmdLength[name]; }
+
+  void AddTargetAlias(const std::string& alias, cmTarget* target);
+
+
+protected:
+
+  /// Overloaded methods.
+  /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
+  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
+
 
 private:
+
+  /// @see cmGlobalGenerator::ComputeTargetObjects
+  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
+
+  void OpenBuildFileStream();
+  void CloseBuildFileStream();
+
+  void CloseCompileCommandsStream();
+
+  void OpenRulesFileStream();
+  void CloseRulesFileStream();
+
+  /// Write the common disclaimer text at the top of each build file.
+  void WriteDisclaimer(std::ostream& os);
+
+  void WriteAssumedSourceDependencies();
+
+  void WriteTargetAliases(std::ostream& os);
+
+  void WriteBuiltinTargets(std::ostream& os);
+  void WriteTargetAll(std::ostream& os);
+  void WriteTargetRebuildManifest(std::ostream& os);
+  void WriteTargetClean(std::ostream& os);
+  void WriteTargetHelp(std::ostream& os);
+
+  std::string ninjaCmd() const;
+
+
   /// The file containing the build statement. (the relation ship of the
   /// compilation DAG).
   cmGeneratedFileStream* BuildFileStream;

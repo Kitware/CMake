@@ -465,6 +465,22 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories();
 
+  /** Append to @a base the mac content directory and return it. */
+  std::string BuildMacContentDirectory(const std::string& base,
+                                       const char* config = 0,
+                                       bool includeMacOS = true);
+
+  /** @return the mac content directory for this target. */
+  std::string GetMacContentDirectory(const char* config = 0,
+                                     bool implib = false,
+                                     bool includeMacOS = true);
+
+  /** @return whether this target have a well defined output file name. */
+  bool HaveWellDefinedOutputFiles();
+
+  /** @return the Mac framework directory without the base. */
+  std::string GetFrameworkDirectory(const char* config = 0);
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.

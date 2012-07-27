@@ -252,6 +252,48 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                      vars);
 }
 
+void
+cmGlobalNinjaGenerator::AddMacOSXContentRule()
+{
+  cmLocalGenerator *lg = this->LocalGenerators[0];
+  cmMakefile* mfRoot = lg->GetMakefile();
+
+  cmOStringStream cmd;
+  cmd << lg->ConvertToOutputFormat(
+           mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
+           cmLocalGenerator::SHELL)
+      << " -E copy $in $out";
+
+  this->AddRule("COPY_OSX_CONTENT",
+                cmd.str(),
+                "Copying OS X Content $out",
+                "Rule for copying OS X bundle content file."
+                /*depfile*/ "",
+                /*rspfile*/ "");
+}
+
+void
+cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
+                                                const std::string& output)
+{
+  this->AddMacOSXContentRule();
+
+  cmNinjaDeps outputs;
+  outputs.push_back(output);
+  cmNinjaDeps deps;
+  deps.push_back(input);
+  cmNinjaVars vars;
+
+  cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
+                                     "",
+                                     "COPY_OSX_CONTENT",
+                                     outputs,
+                                     deps,
+                                     cmNinjaDeps(),
+                                     cmNinjaDeps(),
+                                     cmNinjaVars());
+}
+
 void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
                                        const std::string& name,
                                        const std::string& command,
@@ -474,10 +516,33 @@ void cmGlobalNinjaGenerator
       if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
         {
         UsingMinGW = true;
-        std::string rc = cmSystemTools::FindProgram("windres");
-        if(rc.empty())
-          rc = "windres.exe";;
-        mf->AddDefinition("CMAKE_RC_COMPILER", rc.c_str());
+        if(!mf->GetDefinition("CMAKE_RC_COMPILER"))
+          {
+          std::string windres = cmSystemTools::FindProgram("windres");
+          if(windres.empty())
+            {
+            std::string compiler_path;
+            std::string::size_type prefix = std::string::npos;
+            if (mf->GetDefinition("CMAKE_C_COMPILER"))
+              {
+              compiler_path = mf->GetDefinition("CMAKE_C_COMPILER");
+              prefix = compiler_path.rfind("gcc");
+              }
+            else if (mf->GetDefinition("CMAKE_CXX_COMPILER"))
+              {
+              compiler_path = mf->GetDefinition("CMAKE_CXX_COMPILER");
+              prefix = compiler_path.rfind("++");
+              prefix--;
+              }
+            if (prefix != std::string::npos)
+              {
+              windres = compiler_path.substr(0, prefix) + "windres";
+              windres = cmSystemTools::FindProgram(windres.c_str());
+              }
+            }
+          if(!windres.empty())
+            mf->AddDefinition("CMAKE_RC_COMPILER", windres.c_str());
+          }
         }
       }
     this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
@@ -756,6 +821,11 @@ void cmGlobalNinjaGenerator::WriteDisclaimer(std::ostream& os)
 void cmGlobalNinjaGenerator::AddDependencyToAll(cmTarget* target)
 {
   this->AppendTargetOutputs(target, this->AllDependencies);
+}
+
+void cmGlobalNinjaGenerator::AddDependencyToAll(const std::string& input)
+{
+  this->AllDependencies.push_back(input);
 }
 
 void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()

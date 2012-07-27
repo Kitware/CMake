@@ -28,6 +28,8 @@
 
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
+  : OSXBundleGenerator(0)
+  , MacOSXContentGenerator(0)
 {
   this->BuildFileStream = 0;
   this->InfoFileStream = 0;
@@ -50,6 +52,12 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
     {
     this->NoRuleMessages = cmSystemTools::IsOff(ruleStatus);
     }
+  MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
+}
+
+cmMakefileTargetGenerator::~cmMakefileTargetGenerator()
+{
+  delete MacOSXContentGenerator;
 }
 
 cmMakefileTargetGenerator *
@@ -153,8 +161,12 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         }
       }
     }
-  this->WriteMacOSXContentRules(this->GeneratorTarget->HeaderSources);
-  this->WriteMacOSXContentRules(this->GeneratorTarget->ExtraSources);
+  this->OSXBundleGenerator->GenerateMacOSXContentStatements(
+    this->GeneratorTarget->HeaderSources,
+    this->MacOSXContentGenerator);
+  this->OSXBundleGenerator->GenerateMacOSXContentStatements(
+    this->GeneratorTarget->ExtraSources,
+    this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
@@ -172,7 +184,6 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // Add object library contents as external objects.
   this->GeneratorTarget->UseObjectLibraries(this->ExternalObjects);
 }
-
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteCommonCodeRules()
@@ -343,44 +354,20 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     }
 }
 
-//----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::WriteMacOSXContentRules(
-  std::vector<cmSourceFile*> const& sources)
-{
-  for(std::vector<cmSourceFile*>::const_iterator
-        si = sources.begin(); si != sources.end(); ++si)
-    {
-    cmTarget::SourceFileFlags tsFlags =
-      this->Target->GetTargetSourceFileFlags(*si);
-    if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
-      {
-      this->WriteMacOSXContentRules(**si, tsFlags.MacFolder);
-      }
-    }
-}
 
 //----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
-                                                        const char* pkgloc)
+void
+cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
+  (cmSourceFile& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
-  if(this->MacContentDirectory.empty())
+  if(this->Generator->MacContentDirectory.empty())
     {
     return;
     }
 
-  // Construct the full path to the content subdirectory.
-  std::string macdir = this->MacContentDirectory;
-  macdir += pkgloc;
-  cmSystemTools::MakeDirectory(macdir.c_str());
-
-  // Record use of this content location.  Only the first level
-  // directory is needed.
-  {
-  std::string loc = pkgloc;
-  loc = loc.substr(0, loc.find('/'));
-  this->MacContentFolders.insert(loc);
-  }
+  std::string macdir =
+    this->Generator->OSXBundleGenerator->InitMacOSXContentDirectory(pkgloc);
 
   // Get the input file location.
   std::string input = source.GetFullPath();
@@ -389,9 +376,11 @@ void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
   std::string output = macdir;
   output += "/";
   output += cmSystemTools::GetFilenameName(input);
-  this->CleanFiles.push_back(this->Convert(output.c_str(),
-                                           cmLocalGenerator::START_OUTPUT));
-  output = this->Convert(output.c_str(), cmLocalGenerator::HOME_OUTPUT);
+  this->Generator->CleanFiles.push_back(
+    this->Generator->Convert(output.c_str(),
+                             cmLocalGenerator::START_OUTPUT));
+  output = this->Generator->Convert(output.c_str(),
+                                    cmLocalGenerator::HOME_OUTPUT);
 
   // Create a rule to copy the content into the bundle.
   std::vector<std::string> depends;
@@ -399,21 +388,23 @@ void cmMakefileTargetGenerator::WriteMacOSXContentRules(cmSourceFile& source,
   depends.push_back(input);
   std::string copyEcho = "Copying OS X content ";
   copyEcho += output;
-  this->LocalGenerator->AppendEcho(commands, copyEcho.c_str(),
-                                   cmLocalUnixMakefileGenerator3::EchoBuild);
+  this->Generator->LocalGenerator->AppendEcho(
+    commands, copyEcho.c_str(),
+    cmLocalUnixMakefileGenerator3::EchoBuild);
   std::string copyCommand = "$(CMAKE_COMMAND) -E copy ";
-  copyCommand += this->Convert(input.c_str(),
-                               cmLocalGenerator::NONE,
-                               cmLocalGenerator::SHELL);
+  copyCommand += this->Generator->Convert(input.c_str(),
+                                          cmLocalGenerator::NONE,
+                                          cmLocalGenerator::SHELL);
   copyCommand += " ";
-  copyCommand += this->Convert(output.c_str(),
-                               cmLocalGenerator::NONE,
-                               cmLocalGenerator::SHELL);
+  copyCommand += this->Generator->Convert(output.c_str(),
+                                          cmLocalGenerator::NONE,
+                                          cmLocalGenerator::SHELL);
   commands.push_back(copyCommand);
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      output.c_str(),
-                                      depends, commands, false);
-  this->ExtraFiles.insert(output);
+  this->Generator->LocalGenerator->WriteMakeRule(
+    *this->Generator->BuildFileStream, 0,
+    output.c_str(),
+    depends, commands, false);
+  this->Generator->ExtraFiles.insert(output);
 }
 
 //----------------------------------------------------------------------------

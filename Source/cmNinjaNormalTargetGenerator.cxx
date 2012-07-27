@@ -16,6 +16,7 @@
 #include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
+#include "cmOSXBundleGenerator.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -33,7 +34,10 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNameReal()
   , TargetNameImport()
   , TargetNamePDB()
+  , TargetLinkLanguage(0)
 {
+  cmOSXBundleGenerator::PrepareTargetProperties(target);
+
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
     target->GetExecutableNames(this->TargetNameOut,
@@ -55,10 +59,16 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     // ensure the directory exists (OutDir test)
     EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
     }
+
+  this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
+                                                      this->TargetNameOut,
+                                                      this->GetConfigName());
+  this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
 
 cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 {
+  delete this->OSXBundleGenerator;
 }
 
 void cmNinjaNormalTargetGenerator::Generate()
@@ -115,7 +125,10 @@ const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
     case cmTarget::SHARED_LIBRARY:
       return "shared library";
     case cmTarget::MODULE_LIBRARY:
-      return "shared module";
+      if (this->GetTarget()->IsCFBundleOnApple())
+        return "CFBundle shared module";
+      else
+        return "shared module";
     case cmTarget::EXECUTABLE:
       return "executable";
     default:
@@ -174,7 +187,14 @@ cmNinjaNormalTargetGenerator
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
+
+    // TODO:
+    // Makefile generator expands <TARGET> to the plain target name
+    // with suffix. $out expands to a relative path. This difference
+    // could make trouble when switching to Ninja generator. Maybe
+    // using TARGET_NAME and RuleVariables::TargetName is a fix.
     vars.Target = "$out";
+
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
     vars.TargetInstallNameDir = "$INSTALLNAME_DIR";
@@ -341,6 +361,40 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
 
+  std::string targetOutput = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
+  std::string targetOutputReal = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/false,
+                                   /*realpath=*/true).c_str());
+  std::string targetOutputImplib = ConvertToNinjaPath(
+    this->GetTarget()->GetFullPath(this->GetConfigName(),
+                                   /*implib=*/true).c_str());
+
+  if (this->GetTarget()->IsAppBundleOnApple())
+    {
+    // Create the app bundle
+    std::string outpath;
+    this->OSXBundleGenerator->CreateAppBundle(this->TargetNameOut, outpath);
+
+    // Calculate the output path
+    targetOutput = outpath + this->TargetNameOut;
+    targetOutput = this->ConvertToNinjaPath(targetOutput.c_str());
+    targetOutputReal = outpath + this->TargetNameReal;
+    targetOutputReal = this->ConvertToNinjaPath(targetOutputReal.c_str());
+    }
+  else if (this->GetTarget()->IsFrameworkOnApple())
+    {
+    // Create the library framework.
+    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut);
+    }
+  else if(this->GetTarget()->IsCFBundleOnApple())
+    {
+    // Create the core foundation bundle.
+    std::string outpath;
+    this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut, outpath);
+    }
+
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   this->GetBuildFileStream()
@@ -352,16 +406,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   cmNinjaDeps emptyDeps;
   cmNinjaVars vars;
-
-  std::string targetOutput = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
-  std::string targetOutputReal = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
-                                   /*implib=*/false,
-                                   /*realpath=*/true).c_str());
-  std::string targetOutputImplib = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
-                                   /*implib=*/true).c_str());
 
   // Compute the comment.
   cmOStringStream comment;
@@ -423,7 +467,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     EnsureParentDirectoryExists(path);
   }
 
-  // TODO move to GetTargetPDB
   cmMakefile* mf = this->GetMakefile();
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
@@ -433,6 +476,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           ConvertToNinjaPath(path.c_str()).c_str(),
                           cmLocalGenerator::SHELL);
     EnsureParentDirectoryExists(path);
+    }
+  else
+    {
+    // It is common to place debug symbols at a specific place,
+    // so we need a plain target name in the rule available.
+    std::string prefix;
+    std::string base;
+    std::string suffix;
+    this->GetTarget()->GetFullNameComponents(prefix, base, suffix);
+    std::string dbg_suffix = ".dbg";
+    // TODO: Where to document?
+    if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))
+      dbg_suffix = mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX");
+    vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
@@ -495,7 +552,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   int commandLineLengthLimit = 8000 - linkRuleLength;
 #elif defined(__linux) || defined(__APPLE__)
   // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
-  int commandLineLengthLimit = sysconf(_SC_ARG_MAX) - linkRuleLength - 1000;
+  int commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))
+                                    - linkRuleLength - 1000;
 #else
   int commandLineLengthLimit = -1;
 #endif

@@ -717,31 +717,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ENDIF(CTEST_RUN_CPackComponents)
 
   IF(CTEST_RUN_CPackComponentsForAll)
-    # Analyze 'cpack --help' output for list of available generators:
-    execute_process(COMMAND ${CMAKE_CPACK_COMMAND} --help
-      RESULT_VARIABLE result
-      OUTPUT_VARIABLE stdout
-      ERROR_VARIABLE stderr)
+    # Check whether if rpmbuild command is found
+    # before adding RPM tests
+    find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
+    if(RPMBUILD_EXECUTABLE)
+      list(APPEND ACTIVE_CPACK_GENERATORS RPM)
+    endif(RPMBUILD_EXECUTABLE)
+    # Check whether if dpkg command is found
+    # before adding DEB tests
+    find_program(DPKG_EXECUTABLE NAMES dpkg)
+    if(DPKG_EXECUTABLE)
+      list(APPEND ACTIVE_CPACK_GENERATORS DEB)
+    endif(DPKG_EXECUTABLE)
 
-    string(REPLACE ";" "\\;" stdout "${stdout}")
-    string(REPLACE "\n" "E;" stdout "${stdout}")
-
-    set(collecting 0)
-    set(ACTIVE_CPACK_GENERATORS)
-    foreach(eline ${stdout})
-      string(REGEX REPLACE "^(.*)E$" "\\1" line "${eline}")
-      if(collecting AND NOT line STREQUAL "")
-        string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\1" gen "${line}")
-        string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\2" doc "${line}")
-        list(APPEND ACTIVE_CPACK_GENERATORS ${gen})
-      endif()
-      if(line STREQUAL "Generators")
-        set(collecting 1)
-      endif()
-    endforeach()
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
-
     set(CPackComponentsForAll_EXTRA_OPTIONS)
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
     # set up list of CPack generators
@@ -1418,42 +1408,44 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
   ENDIF(${CMAKE_TEST_GENERATOR} MATCHES "Visual Studio")
 
-  IF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-    SET(BundleTestInstallDir
-      "${CMake_BINARY_DIR}/Tests/BundleTest/InstallDirectory")
-    ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/BundleTest"
-      "${CMake_BINARY_DIR}/Tests/BundleTest"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project BundleTest
-      --build-target install
-#     --build-target package
-      --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
-       "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
-      --test-command
-      ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
+  IF (APPLE)
+    if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+      SET(BundleTestInstallDir
+        "${CMake_BINARY_DIR}/Tests/BundleTest/InstallDirectory")
+      ADD_TEST(BundleTest ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/BundleTest"
+        "${CMake_BINARY_DIR}/Tests/BundleTest"
+        --build-two-config
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-project BundleTest
+        --build-target install
+#       --build-target package
+        --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
+        "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
+        --test-command
+        ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleTest")
 
-    ADD_TEST(CFBundleTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/CFBundleTest"
-      "${CMake_BINARY_DIR}/Tests/CFBundleTest"
-      --build-two-config
-      --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-      --build-project CFBundleTest
-      --test-command
-      ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
+      ADD_TEST(CFBundleTest ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/CFBundleTest"
+        "${CMake_BINARY_DIR}/Tests/CFBundleTest"
+        --build-two-config
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-project CFBundleTest
+        --test-command
+        ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
         -Ddir=${CMake_BINARY_DIR}/Tests/CFBundleTest
         -Dgen=${CMAKE_TEST_GENERATOR}
         -P ${CMake_SOURCE_DIR}/Tests/CFBundleTest/VerifyResult.cmake)
-    LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
+      LIST(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CFBundleTest")
 
-    ADD_TEST_MACRO(ObjC++ ObjC++)
-  ENDIF (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
+      ADD_TEST_MACRO(ObjC++ ObjC++)
+    ENDIF (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  ENDIF (APPLE)
 
   IF(APPLE AND CTEST_TEST_CPACK)
     ADD_TEST(BundleGeneratorTest ${CMAKE_CTEST_COMMAND}

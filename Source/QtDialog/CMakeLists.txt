@@ -36,14 +36,14 @@ ELSE(NOT QT4_FOUND)
     QMacInstallDialog.cxx
     QMacInstallDialog.h
     )
-  QT4_WRAP_UI(UI_SRCS 
+  QT4_WRAP_UI(UI_SRCS
     CMakeSetupDialog.ui
     Compilers.ui
     CrossCompiler.ui
     AddCacheEntry.ui
     MacInstallDialog.ui
     )
-  QT4_WRAP_CPP(MOC_SRCS 
+  QT4_WRAP_CPP(MOC_SRCS
     AddCacheEntry.h
     Compilers.h
     CMakeSetupDialog.h
@@ -76,7 +76,7 @@ ELSE(NOT QT4_FOUND)
       SET_TARGET_PROPERTIES(cmake-gui PROPERTIES
        OUTPUT_NAME ${CMAKE_BUNDLE_NAME})
     ENDIF(APPLE)
-    SET(CMAKE_INSTALL_DESTINATION_ARGS 
+    SET(CMAKE_INSTALL_DESTINATION_ARGS
       BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
   ENDIF(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
 
@@ -112,11 +112,12 @@ ELSE(NOT QT4_FOUND)
     endif(APPLE)
     install(CODE "
       include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
+      set(BU_CHMOD_BUNDLE_ITEMS ON)
       fixup_bundle(\"${fixup_exe}\" \"\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
     ")
   endif(APPLE OR WIN32)
 
   CONFIGURE_FILE("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
-    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)    
+    "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)
 ENDIF(NOT QT4_FOUND)
 

@@ -484,8 +484,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
         # mkl >= 10.3
         if (CMAKE_C_COMPILER MATCHES ".+gcc.*")
           list(APPEND BLAS_SEARCH_LIBS
-            "mkl_blas95_lp64 mkl_intel_lp64 mkl_gnu_thread mkl_core")
-          set(LM "${LM};-lgomp")
+            "mkl_blas95_lp64 mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
         else ()
           list(APPEND BLAS_SEARCH_LIBS
             "mkl_blas95_lp64 mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
@@ -516,8 +515,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
         # mkl >= 10.3
         if (CMAKE_C_COMPILER MATCHES ".+gcc.*")
           list(APPEND BLAS_SEARCH_LIBS
-            "mkl_intel_lp64 mkl_gnu_thread mkl_core")
-          set(LM "${LM};-lgomp")
+            "mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
         else ()
           list(APPEND BLAS_SEARCH_LIBS
             "mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
