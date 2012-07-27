@@ -348,6 +348,19 @@ if(error_code)
   message(FATAL_ERROR \"Failed to get the hash for HEAD\")
 endif()
 
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" show-ref ${git_tag}
+  WORKING_DIRECTORY \"${work_dir}\"
+  OUTPUT_VARIABLE show_ref_output
+  )
+# If a remote ref is asked for, which can possibly move around,
+# we must always do a fetch and checkout.
+if(\"\${show_ref_output}\" MATCHES \"remotes\")
+  set(is_remote_ref 1)
+else()
+  set(is_remote_ref 0)
+endif()
+
 # This will fail if the tag does not exist (it probably has not been fetched
 # yet).
 execute_process(
@@ -358,7 +371,7 @@ execute_process(
   )
 
 # Is the hash checkout out that we want?
-if(error_code OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"))
+if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"))
   execute_process(
     COMMAND \"${git_EXECUTABLE}\" fetch
     WORKING_DIRECTORY \"${work_dir}\"
