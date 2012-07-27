@@ -982,6 +982,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set_tests_properties(ExternalProject PROPERTIES
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
+  add_test(ExternalProjectUpdate ${CMAKE_CMAKE_COMMAND}
+    -DExternalProjectUpdate_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
+    -DExternalProjectUpdate_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate
+    -DCMAKE_TEST_GENERATOR=${CMAKE_TEST_GENERATOR}
+    -DCMAKE_TEST_MAKEPROGRAM=${CMAKE_TEST_MAKEPROGRAM}
+    -DCMAKE_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
+    -P ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate/ExternalProjectUpdateTest.cmake
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
+  set_tests_properties(ExternalProjectUpdate PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+
   # do each of the tutorial steps
   foreach(STP RANGE 1 7)
     add_test(TutorialStep${STP} ${CMAKE_CTEST_COMMAND}
