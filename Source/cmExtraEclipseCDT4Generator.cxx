@@ -1334,8 +1334,22 @@ bool cmExtraEclipseCDT4Generator
     {
     outputPath = this->HomeOutputDirectory + "/" + outputPath;
     }
+
+  // in this case it's not necessary:
   if (cmSystemTools::IsSubDirectory(outputPath.c_str(),
                                     this->HomeOutputDirectory.c_str()))
+    {
+    return false;
+    }
+
+  // in these two cases Eclipse would complain:
+  if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
+                                    outputPath.c_str()))
+    {
+    return false;
+    }
+  if (cmSystemTools::GetRealPath(outputPath.c_str())
+              == cmSystemTools::GetRealPath(this->HomeOutputDirectory.c_str()))
     {
     return false;
     }
