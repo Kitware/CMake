@@ -31,10 +31,10 @@ endif (UNIX)
 
 # http://www.slproweb.com/products/Win32OpenSSL.html
 SET(_OPENSSL_ROOT_HINTS
-  $ENV{OPENSSL_ROOT_DIR}
   ${OPENSSL_ROOT_DIR}
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
+  ENV OPENSSL_ROOT_DIR
   )
 SET(_OPENSSL_ROOT_PATHS
   "$ENV{PROGRAMFILES}/OpenSSL"
@@ -79,7 +79,6 @@ IF(WIN32 AND NOT CYGWIN)
     FIND_LIBRARY(LIB_EAY_DEBUG
       NAMES
         libeay32MDd
-        libeay32
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -101,8 +100,6 @@ IF(WIN32 AND NOT CYGWIN)
     FIND_LIBRARY(SSL_EAY_DEBUG
       NAMES
         ssleay32MDd
-        ssleay32
-        ssl
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -122,16 +119,11 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-      set( OPENSSL_LIBRARIES
-        optimized ${SSL_EAY_RELEASE} debug ${SSL_EAY_DEBUG}
-        optimized ${LIB_EAY_RELEASE} debug ${LIB_EAY_DEBUG}
-        )
-    else()
-      set( OPENSSL_LIBRARIES ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE} )
-    endif()
-    MARK_AS_ADVANCED(SSL_EAY_DEBUG SSL_EAY_RELEASE)
-    MARK_AS_ADVANCED(LIB_EAY_DEBUG LIB_EAY_RELEASE)
+    include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+    select_library_configurations(LIB_EAY)
+    select_library_configurations(SSL_EAY)
+
+    set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   ELSEIF(MINGW)
     # same player, for MingW
     SET(LIB_EAY_NAMES libeay32)

@@ -48,17 +48,19 @@ macro( select_library_configurations basename )
     # if only the debug version was found, set the release value to be the
     # debug value.
     _set_library_name( ${basename} DEBUG RELEASE )
-    if (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE AND
-           NOT ${basename}_LIBRARY_DEBUG STREQUAL ${basename}_LIBRARY_RELEASE)
+    if( ${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE AND
+           NOT ${basename}_LIBRARY_DEBUG STREQUAL ${basename}_LIBRARY_RELEASE )
         # if the generator supports configuration types or CMAKE_BUILD_TYPE
         # is set, then set optimized and debug options.
         if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-            set( ${basename}_LIBRARY 
-                optimized ${${basename}_LIBRARY_RELEASE}
-                debug ${${basename}_LIBRARY_DEBUG} )
-            set( ${basename}_LIBRARIES 
-                optimized ${${basename}_LIBRARY_RELEASE}
-                debug ${${basename}_LIBRARY_DEBUG} )
+            set( ${basename}_LIBRARY )
+            foreach( _libname LISTS ${basename}_LIBRARY_RELEASE )
+                list( APPEND ${basename}_LIBRARY optimized "${_libname}" )
+            endforach()
+            foreach( _libname LISTS ${basename}_LIBRARY_DEBUG )
+                list( APPEND ${basename}_LIBRARY debug "${_libname}" )
+            endforach()
+            set( ${basename}_LIBRARIES "${${basename}_LIBRARY}" )
         else( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
             # If there are no configuration types or build type, just use
             # the release version
