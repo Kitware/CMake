@@ -24,6 +24,9 @@ FUNCTION(_FIND_ECLIPSE_VERSION)
     GET_FILENAME_COMPONENT(_REALPATH_CMAKE_ECLIPSE_EXECUTABLE "${CMAKE_ECLIPSE_EXECUTABLE}" REALPATH)
     GET_FILENAME_COMPONENT(_ECLIPSE_DIR "${_REALPATH_CMAKE_ECLIPSE_EXECUTABLE}" PATH)
     FILE(GLOB _ECLIPSE_FEATURE_DIR "${_ECLIPSE_DIR}/features/org.eclipse.platform*")
+    IF(APPLE AND NOT _ECLIPSE_FEATURE_DIR)
+      FILE(GLOB _ECLIPSE_FEATURE_DIR "${_ECLIPSE_DIR}/../../../features/org.eclipse.platform*")
+    ENDIF()
     IF("${_ECLIPSE_FEATURE_DIR}" MATCHES ".+org.eclipse.platform_([0-9]+\\.[0-9]+).+")
       SET(_ECLIPSE_VERSION ${CMAKE_MATCH_1})
     ENDIF()
@@ -37,6 +40,7 @@ FUNCTION(_FIND_ECLIPSE_VERSION)
   SET(_ECLIPSE_VERSION_NAME_3.5 "Galileo" )
   SET(_ECLIPSE_VERSION_NAME_3.6 "Helios" )
   SET(_ECLIPSE_VERSION_NAME_3.7 "Indigo" )
+  SET(_ECLIPSE_VERSION_NAME_4.2 "Juno" )
 
   IF(_ECLIPSE_VERSION)
     MESSAGE(STATUS "Found Eclipse version ${_ECLIPSE_VERSION} (${_ECLIPSE_VERSION_NAME_${_ECLIPSE_VERSION}})")
@@ -51,7 +55,9 @@ FUNCTION(_FIND_ECLIPSE_VERSION)
                                                             "3.4 (${_ECLIPSE_VERSION_NAME_3.4})"
                                                             "3.5 (${_ECLIPSE_VERSION_NAME_3.5})"
                                                             "3.6 (${_ECLIPSE_VERSION_NAME_3.6})"
-                                                            "3.7 (${_ECLIPSE_VERSION_NAME_3.7})")
+                                                            "3.7 (${_ECLIPSE_VERSION_NAME_3.7})"
+                                                            "4.2 (${_ECLIPSE_VERSION_NAME_4.2})"
+              )
 ENDFUNCTION()
 
 _FIND_ECLIPSE_VERSION()
