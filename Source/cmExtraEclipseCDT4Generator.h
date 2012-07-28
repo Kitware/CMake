@@ -93,10 +93,6 @@ private:
                                     const std::string&     path,
                                     LinkType linkType);
 
-  bool AppendOutLinkedResource(cmGeneratedFileStream& fout,
-                               const std::string&     defname,
-                               const std::string&     altdefname);
-
   static void AppendIncludeDirectories(cmGeneratedFileStream& fout,
                                    const std::vector<std::string>& includeDirs,
                                    std::set<std::string>& emittedDirs);
@@ -109,7 +105,6 @@ private:
   void CreateLinksForTargets(cmGeneratedFileStream& fout);
 
   std::vector<std::string> SrcLinkedResources;
-  std::vector<std::string> OutLinkedResources;
   std::string HomeDirectory;
   std::string HomeOutputDirectory;
   bool IsOutOfSourceBuild;
