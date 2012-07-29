@@ -29,25 +29,34 @@ if (UNIX)
   pkg_check_modules(_OPENSSL QUIET openssl)
 endif (UNIX)
 
-# http://www.slproweb.com/products/Win32OpenSSL.html
-SET(_OPENSSL_ROOT_HINTS
-  ${OPENSSL_ROOT_DIR}
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
-  ENV OPENSSL_ROOT_DIR
-  )
-SET(_OPENSSL_ROOT_PATHS
-  "$ENV{PROGRAMFILES}/OpenSSL"
-  "$ENV{PROGRAMFILES}/OpenSSL-Win32"
-  "$ENV{PROGRAMFILES}/OpenSSL-Win64"
-  "C:/OpenSSL/"
-  "C:/OpenSSL-Win32/"
-  "C:/OpenSSL-Win64/"
-  )
-SET(_OPENSSL_ROOT_HINTS_AND_PATHS
-  HINTS ${_OPENSSL_ROOT_HINTS}
-  PATHS ${_OPENSSL_ROOT_PATHS}
-  )
+IF (WIN32)
+  # http://www.slproweb.com/products/Win32OpenSSL.html
+  SET(_OPENSSL_ROOT_HINTS
+    ${OPENSSL_ROOT_DIR}
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
+    ENV OPENSSL_ROOT_DIR
+    )
+  FILE(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
+  SET(_OPENSSL_ROOT_PATHS
+    "${_programfiles}/OpenSSL"
+    "${_programfiles}/OpenSSL-Win32"
+    "${_programfiles}/OpenSSL-Win64"
+    "C:/OpenSSL/"
+    "C:/OpenSSL-Win32/"
+    "C:/OpenSSL-Win64/"
+    )
+  UNSET(_programfiles)
+  SET(_OPENSSL_ROOT_HINTS_AND_PATHS
+    HINTS ${_OPENSSL_ROOT_HINTS}
+    PATHS ${_OPENSSL_ROOT_PATHS}
+    )
+ELSE ()
+  SET(_OPENSSL_ROOT_HINTS
+    ${OPENSSL_ROOT_DIR}
+    ENV OPENSSL_ROOT_DIR
+    )
+ENDIF ()
 
 FIND_PATH(OPENSSL_INCLUDE_DIR
   NAMES
