@@ -69,7 +69,6 @@ FIND_PATH(OPENSSL_INCLUDE_DIR
 )
 
 IF(WIN32 AND NOT CYGWIN)
-  # MINGW should go here too
   IF(MSVC)
     # /MD and /MDd are the standard values - if someone wants to use
     # others, the libnames have to change here too
