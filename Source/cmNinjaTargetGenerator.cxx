@@ -248,6 +248,9 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     result.push_back(this->ModuleDefinitionFile);
     }
 
+  // Make sure the extra files are built.
+  result.insert(result.end(), this->ExtraFiles.begin(), this->ExtraFiles.end());
+
   return result;
 }
 
@@ -684,6 +687,6 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   this->Generator->GetGlobalGenerator()->WriteMacOSXContentBuild(input,
                                                                  output);
 
-  // Add as a dependency of all target so that it gets called.
-  this->Generator->GetGlobalGenerator()->AddDependencyToAll(output);
+  // Add as a dependency of the current target.
+  this->Generator->ExtraFiles.push_back(output);
 }
