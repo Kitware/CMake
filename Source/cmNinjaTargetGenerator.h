@@ -143,6 +143,8 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+  /// Set of extra output files to be driven by the build.
+  cmNinjaDeps ExtraFiles;
 
   // The windows module definition source file (.def), if any.
   std::string ModuleDefinitionFile;
