@@ -925,7 +925,7 @@ _archive_read_next_header2(struct archive *_a, struct archive_entry *entry)
 	if (fd < 0)
 		tree_enter_working_dir(t);
 
-	/* The current direcotry fd is needed at
+	/* The current directory fd is needed at
 	 * archive_read_disk_entry_from_file() function to read link data
 	 * with readlinkat(). */
 	a->entry_wd_fd = tree_current_dir_fd(t);
