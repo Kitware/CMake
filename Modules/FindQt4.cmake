@@ -70,7 +70,7 @@
 #  
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
 #        create moc code from a list of files containing Qt class with
-#        the Q_OBJECT declaration.  Per-direcotry preprocessor definitions 
+#        the Q_OBJECT declaration.  Per-directory preprocessor definitions
 #        are also added.  Options may be given to moc, such as those found
 #        when executing "moc -help".  
 #
