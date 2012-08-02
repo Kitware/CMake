@@ -33,6 +33,12 @@
 
 INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 
+# Load system-specific compiler preferences for this language.
+INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-C OPTIONAL)
+IF(NOT CMAKE_C_COMPILER_NAMES)
+  SET(CMAKE_C_COMPILER_NAMES cc)
+ENDIF()
+
 IF(NOT CMAKE_C_COMPILER)
   SET(CMAKE_C_COMPILER_INIT NOTFOUND)
 
@@ -56,7 +62,7 @@ IF(NOT CMAKE_C_COMPILER)
 
   # finally list compilers to try
   IF(NOT CMAKE_C_COMPILER_INIT)
-    SET(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}gcc ${_CMAKE_TOOLCHAIN_PREFIX}cc cl bcc xlc clang)
+    SET(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}cc ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc clang)
   ENDIF()
 
   _cmake_find_compiler(C)

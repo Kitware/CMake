@@ -20,6 +20,10 @@
 # as a default compiler
 
 INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
+INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-Fortran OPTIONAL)
+IF(NOT CMAKE_Fortran_COMPILER_NAMES)
+  SET(CMAKE_Fortran_COMPILER_NAMES f95)
+ENDIF()
 
 IF(NOT CMAKE_Fortran_COMPILER)
   # prefer the environment variable CC

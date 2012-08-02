@@ -33,8 +33,9 @@ IF(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
         SET(CMAKE_ASM_COMPILER_ID "${CMAKE_CXX_COMPILER_ID}")
       ELSE()
         # List all default C and CXX compilers
-        SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}gcc ${_CMAKE_TOOLCHAIN_PREFIX}cc cl bcc xlc
-                                                  ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ CC aCC cl bcc xlC)
+        SET(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST
+             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc
+          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC)
       ENDIF()
     ENDIF()
   ELSE() # some specific assembler "dialect"

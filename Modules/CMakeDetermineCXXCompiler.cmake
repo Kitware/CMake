@@ -32,6 +32,12 @@
 
 INCLUDE(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 
+# Load system-specific compiler preferences for this language.
+INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-CXX OPTIONAL)
+IF(NOT CMAKE_CXX_COMPILER_NAMES)
+  SET(CMAKE_CXX_COMPILER_NAMES CC)
+ENDIF()
+
 IF(NOT CMAKE_CXX_COMPILER)
   SET(CMAKE_CXX_COMPILER_INIT NOTFOUND)
 
@@ -55,7 +61,7 @@ IF(NOT CMAKE_CXX_COMPILER)
 
   # finally list compilers to try
   IF(NOT CMAKE_CXX_COMPILER_INIT)
-    SET(CMAKE_CXX_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ CC aCC cl bcc xlC clang++)
+    SET(CMAKE_CXX_COMPILER_LIST CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC clang++)
   ENDIF()
 
   _cmake_find_compiler(CXX)

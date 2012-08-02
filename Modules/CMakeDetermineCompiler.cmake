@@ -29,10 +29,16 @@ macro(_cmake_find_compiler lang)
       list(APPEND CMAKE_${lang}_COMPILER_LIST
         ${_${lang}_COMPILER_NAMES_${CMAKE_${l}_COMPILER_ID}})
     endforeach()
+    # Prefer vendors based on the platform.
+    list(APPEND CMAKE_${lang}_COMPILER_LIST ${CMAKE_${lang}_COMPILER_NAMES})
     # Append the rest of the list and remove duplicates.
     list(APPEND CMAKE_${lang}_COMPILER_LIST ${_${lang}_COMPILER_LIST})
     unset(_${lang}_COMPILER_LIST)
     list(REMOVE_DUPLICATES CMAKE_${lang}_COMPILER_LIST)
+    if(CMAKE_${lang}_COMPILER_EXCLUDE)
+      list(REMOVE_ITEM CMAKE_${lang}_COMPILER_LIST
+        ${CMAKE_${lang}_COMPILER_EXCLUDE})
+    endif()
   endif()
 
   # Look for directories containing compilers of reference languages.
