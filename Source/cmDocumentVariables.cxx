@@ -831,9 +831,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "the shared MFC library.  This is used in visual "
      "studio 6 and 7 project files.   The CMakeSetup "
      "dialog used MFC and the CMakeLists.txt looks like this:\n"
-     "add_definitions(-D_AFXDLL)\n"
-     "set(CMAKE_MFC_FLAG 2)\n"
-     "add_executable(CMakeSetup WIN32 ${SRCS})\n",false,
+     "  add_definitions(-D_AFXDLL)\n"
+     "  set(CMAKE_MFC_FLAG 2)\n"
+     "  add_executable(CMakeSetup WIN32 ${SRCS})\n",false,
      "Variables That Change Behavior");
 
   cm->DefineProperty
