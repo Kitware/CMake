@@ -196,7 +196,8 @@ bool cmListFile::ParseFile(const char* filename,
       {
       cmListFileFunction project;
       project.Name = "PROJECT";
-      cmListFileArgument prj("Project", false, filename, 0);
+      cmListFileArgument prj("Project", cmListFileArgument::Unquoted,
+                             filename, 0);
       project.Arguments.push_back(prj);
       this->Functions.insert(this->Functions.begin(),project);
       }
@@ -243,8 +244,8 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
     if(token->type == cmListFileLexer_Token_ParenLeft)
       {
       parenDepth++;
-      cmListFileArgument a("(",
-                           false, filename, token->line);
+      cmListFileArgument a("(", cmListFileArgument::Unquoted,
+                           filename, token->line);
       function.Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_ParenRight)
@@ -254,21 +255,21 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
         return true;
         }
       parenDepth--;
-      cmListFileArgument a(")",
-                           false, filename, token->line);
+      cmListFileArgument a(")", cmListFileArgument::Unquoted,
+                           filename, token->line);
       function.Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_Identifier ||
             token->type == cmListFileLexer_Token_ArgumentUnquoted)
       {
-      cmListFileArgument a(token->text,
-                           false, filename, token->line);
+      cmListFileArgument a(token->text, cmListFileArgument::Unquoted,
+                           filename, token->line);
       function.Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
-      cmListFileArgument a(token->text,
-                           true, filename, token->line);
+      cmListFileArgument a(token->text, cmListFileArgument::Quoted,
+                           filename, token->line);
       function.Arguments.push_back(a);
       }
     else if(token->type != cmListFileLexer_Token_Newline)

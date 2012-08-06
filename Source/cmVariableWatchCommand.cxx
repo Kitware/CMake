@@ -86,15 +86,20 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
     std::string command = *it;
     newLFF.Arguments.clear();
     newLFF.Arguments.push_back(
-      cmListFileArgument(variable, true, "unknown", 9999));
+      cmListFileArgument(variable, cmListFileArgument::Quoted,
+                         "unknown", 9999));
     newLFF.Arguments.push_back(
-      cmListFileArgument(accessString, true, "unknown", 9999));
+      cmListFileArgument(accessString, cmListFileArgument::Quoted,
+                         "unknown", 9999));
     newLFF.Arguments.push_back(
-      cmListFileArgument(newValue?newValue:"", true, "unknown", 9999));
+      cmListFileArgument(newValue?newValue:"", cmListFileArgument::Quoted,
+                         "unknown", 9999));
     newLFF.Arguments.push_back(
-      cmListFileArgument(currentListFile, true, "unknown", 9999));
+      cmListFileArgument(currentListFile, cmListFileArgument::Quoted,
+                         "unknown", 9999));
     newLFF.Arguments.push_back(
-      cmListFileArgument(stack, true, "unknown", 9999));
+      cmListFileArgument(stack, cmListFileArgument::Quoted,
+                         "unknown", 9999));
     newLFF.Name = command;
     newLFF.FilePath = "Some weird path";
     newLFF.Line = 9999;

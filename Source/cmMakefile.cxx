@@ -2799,7 +2799,7 @@ bool cmMakefile::ExpandArguments(
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
-    if(i->Quoted)
+    if(i->Delim == cmListFileArgument::Quoted)
       {
       outArgs.push_back(value);
       }
