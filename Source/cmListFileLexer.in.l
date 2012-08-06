@@ -75,6 +75,8 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %x STRING
 
 MAKEVAR \$\([A-Za-z0-9_]*\)
+UNQUOTED ([^ \t\r\n\(\)#\\\"]|\\.)
+LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t])*\"
 
 %%
 
@@ -111,7 +113,14 @@ MAKEVAR \$\([A-Za-z0-9_]*\)
   return 1;
 }
 
-({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.)({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.|\"({MAKEVAR}|[^\r\n\(\)#\\\"]|\\.)*\")* {
+({UNQUOTED})({UNQUOTED})* {
+  lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+  return 1;
+}
+
+({MAKEVAR}|{UNQUOTED})({LEGACY})* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
