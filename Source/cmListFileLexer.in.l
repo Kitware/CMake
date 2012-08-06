@@ -125,9 +125,15 @@ MAKEVAR \$\([A-Za-z0-9_]*\)
   BEGIN(STRING);
 }
 
-<STRING>([^\\\n\"]|\\(.|\n))+ {
+<STRING>([^\\\n\"]|\\.)+ {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
+}
+
+<STRING>\\\n {
+  cmListFileLexerAppend(lexer, yytext, yyleng);
+  ++lexer->line;
+  lexer->column = 1;
 }
 
 <STRING>\n {
