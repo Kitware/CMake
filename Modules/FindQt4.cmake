@@ -163,6 +163,17 @@
 #        filenames can be found in qm_files. The ts_files
 #        must exists and are not updated in any way.
 #
+# function QT4_USE_MODULES( target [link_type] modules...)
+#        Make <target> use the <modules> from Qt. Using a Qt module means
+#        to link to the library, add the relevant include directories for the module,
+#        and add the relevant compiler defines for using the module.
+#        Modules are roughly equivalent to components of Qt4, so usage would be
+#        something like:
+#         qt4_use_modules(myexe Core Gui Declarative)
+#        to use QtCore, QtGui and QtDeclarative. The optional <link_type> argument can
+#        be specified as either LINK_PUBLIC or LINK_PRIVATE to specify the same argument
+#        to the target_link_libraries call.
+#
 #
 #  Below is a detailed list of variables that FindQt4.cmake sets.
 #  QT_FOUND         If false, don't try to use Qt.
