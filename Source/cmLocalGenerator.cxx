@@ -2101,9 +2101,8 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::AppendDefines(std::string& defines,
-                                     const char* defines_list,
-                                     const char* lang)
+void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
+                                     const char* defines_list)
 {
   // Short-circuit if there are no definitions.
   if(!defines_list)
@@ -2115,12 +2114,23 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
   std::vector<std::string> defines_vec;
   cmSystemTools::ExpandListArgument(defines_list, defines_vec);
 
-  // Short-circuit if there are no definitions.
-  if(defines_vec.empty())
+  for(std::vector<std::string>::const_iterator di = defines_vec.begin();
+      di != defines_vec.end(); ++di)
     {
-    return;
+    // Skip unsupported definitions.
+    if(!this->CheckDefinition(*di))
+      {
+      continue;
+      }
+    defines.insert(*di);
     }
+}
 
+//----------------------------------------------------------------------------
+void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
+                                   std::string &definesString,
+                                   const char* lang)
+{
   // Lookup the define flag for the current language.
   std::string dflag = "-D";
   if(lang)
@@ -2135,23 +2145,13 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
       }
     }
 
-  // Add each definition to the command line with appropriate escapes.
-  const char* dsep = defines.empty()? "" : " ";
-  for(std::vector<std::string>::const_iterator di = defines_vec.begin();
-      di != defines_vec.end(); ++di)
+  std::set<std::string>::const_iterator defineIt = defines.begin();
+  const std::set<std::string>::const_iterator defineEnd = defines.end();
+  const char* itemSeparator = definesString.empty() ? "" : " ";
+  for( ; defineIt != defineEnd; ++defineIt)
     {
-    // Skip unsupported definitions.
-    if(!this->CheckDefinition(*di))
-      {
-      continue;
-      }
-
-    // Separate from previous definitions.
-    defines += dsep;
-    dsep = " ";
-
     // Append the definition with proper escaping.
-    defines += dflag;
+    std::string def = dflag;
     if(this->WatcomWMake)
       {
       // The Watcom compiler does its own command line parsing instead
@@ -2164,27 +2164,30 @@ void cmLocalGenerator::AppendDefines(std::string& defines,
       // command line without any escapes.  However we still have to
       // get the '$' and '#' characters through WMake as '$$' and
       // '$#'.
-      for(const char* c = di->c_str(); *c; ++c)
+      for(const char* c = defineIt->c_str(); *c; ++c)
         {
         if(*c == '$' || *c == '#')
           {
-          defines += '$';
+          def += '$';
           }
-        defines += *c;
+        def += *c;
         }
       }
     else
       {
       // Make the definition appear properly on the command line.  Use
       // -DNAME="value" instead of -D"NAME=value" to help VS6 parser.
-      std::string::size_type eq = di->find("=");
-      defines += di->substr(0, eq);
-      if(eq != di->npos)
+      std::string::size_type eq = defineIt->find("=");
+      def += defineIt->substr(0, eq);
+      if(eq != defineIt->npos)
         {
-        defines += "=";
-        defines += this->EscapeForShell(di->c_str() + eq + 1, true);
+        def += "=";
+        def += this->EscapeForShell(defineIt->c_str() + eq + 1, true);
         }
       }
+    definesString += itemSeparator;
+    itemSeparator = " ";
+    definesString += def;
     }
 }
 
