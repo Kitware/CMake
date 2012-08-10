@@ -136,8 +136,23 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::New()
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;
-  if (cmSystemTools::FileExists(
-       "/Applications/Xcode.app/Contents/version.plist"))
+  std::string versionFile;
+  {
+  std::string out;
+  std::string::size_type pos;
+  if(cmSystemTools::RunSingleCommand("xcode-select --print-path", &out, 0, 0,
+                                     cmSystemTools::OUTPUT_NONE) &&
+     (pos = out.find(".app/"), pos != out.npos))
+    {
+    versionFile = out.substr(0, pos+5)+"Contents/version.plist";
+    }
+  }
+  if(!versionFile.empty() && cmSystemTools::FileExists(versionFile.c_str()))
+    {
+    parser.ParseFile(versionFile.c_str());
+    }
+  else if (cmSystemTools::FileExists(
+             "/Applications/Xcode.app/Contents/version.plist"))
     {
     parser.ParseFile
       ("/Applications/Xcode.app/Contents/version.plist");
