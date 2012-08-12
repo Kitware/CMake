@@ -132,10 +132,12 @@ IF(MINGW)
 ENDIF(MINGW)
 
 IF(SDL_LIBRARY_TEMP)
+  SET(SDL_LIBRARY ${SDL_LIBRARY_TEMP})
+
   # For SDLmain
   IF(NOT SDL_BUILDING_LIBRARY)
     IF(SDLMAIN_LIBRARY)
-      SET(SDL_LIBRARY_TEMP ${SDLMAIN_LIBRARY} ${SDL_LIBRARY_TEMP})
+      SET(SDL_LIBRARY ${SDLMAIN_LIBRARY} ${SDL_LIBRARY})
     ENDIF(SDLMAIN_LIBRARY)
   ENDIF(NOT SDL_BUILDING_LIBRARY)
 
@@ -146,23 +148,23 @@ IF(SDL_LIBRARY_TEMP)
   # So I use a temporary variable until the end so I can set the 
   # "real" variable in one-shot.
   IF(APPLE)
-    SET(SDL_LIBRARY_TEMP ${SDL_LIBRARY_TEMP} "-framework Cocoa")
+    SET(SDL_LIBRARY ${SDL_LIBRARY} "-framework Cocoa")
   ENDIF(APPLE)
-    
+
   # For threads, as mentioned Apple doesn't need this.
   # In fact, there seems to be a problem if I used the Threads package
   # and try using this line, so I'm just skipping it entirely for OS X.
   IF(NOT APPLE)
-    SET(SDL_LIBRARY_TEMP ${SDL_LIBRARY_TEMP} ${CMAKE_THREAD_LIBS_INIT})
+    SET(SDL_LIBRARY ${SDL_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
   ENDIF(NOT APPLE)
 
   # For MinGW library
   IF(MINGW)
-    SET(SDL_LIBRARY_TEMP ${MINGW32_LIBRARY} ${SDL_LIBRARY_TEMP})
+    SET(SDL_LIBRARY ${MINGW32_LIBRARY} ${SDL_LIBRARY})
   ENDIF(MINGW)
 
   # Set the final string here so the GUI reflects the final state.
-  SET(SDL_LIBRARY ${SDL_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
+  SET(SDL_LIBRARY ${SDL_LIBRARY} CACHE STRING "Where the SDL Library can be found")
   # Set the temp variable to INTERNAL so it is not seen in the CMake GUI
   SET(SDL_LIBRARY_TEMP "${SDL_LIBRARY_TEMP}" CACHE INTERNAL "")
 ENDIF(SDL_LIBRARY_TEMP)
