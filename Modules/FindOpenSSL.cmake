@@ -29,25 +29,34 @@ if (UNIX)
   pkg_check_modules(_OPENSSL QUIET openssl)
 endif (UNIX)
 
-# http://www.slproweb.com/products/Win32OpenSSL.html
-SET(_OPENSSL_ROOT_HINTS
-  $ENV{OPENSSL_ROOT_DIR}
-  ${OPENSSL_ROOT_DIR}
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
-  )
-SET(_OPENSSL_ROOT_PATHS
-  "$ENV{PROGRAMFILES}/OpenSSL"
-  "$ENV{PROGRAMFILES}/OpenSSL-Win32"
-  "$ENV{PROGRAMFILES}/OpenSSL-Win64"
-  "C:/OpenSSL/"
-  "C:/OpenSSL-Win32/"
-  "C:/OpenSSL-Win64/"
-  )
-SET(_OPENSSL_ROOT_HINTS_AND_PATHS
-  HINTS ${_OPENSSL_ROOT_HINTS}
-  PATHS ${_OPENSSL_ROOT_PATHS}
-  )
+IF (WIN32)
+  # http://www.slproweb.com/products/Win32OpenSSL.html
+  SET(_OPENSSL_ROOT_HINTS
+    ${OPENSSL_ROOT_DIR}
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
+    ENV OPENSSL_ROOT_DIR
+    )
+  FILE(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
+  SET(_OPENSSL_ROOT_PATHS
+    "${_programfiles}/OpenSSL"
+    "${_programfiles}/OpenSSL-Win32"
+    "${_programfiles}/OpenSSL-Win64"
+    "C:/OpenSSL/"
+    "C:/OpenSSL-Win32/"
+    "C:/OpenSSL-Win64/"
+    )
+  UNSET(_programfiles)
+  SET(_OPENSSL_ROOT_HINTS_AND_PATHS
+    HINTS ${_OPENSSL_ROOT_HINTS}
+    PATHS ${_OPENSSL_ROOT_PATHS}
+    )
+ELSE ()
+  SET(_OPENSSL_ROOT_HINTS
+    ${OPENSSL_ROOT_DIR}
+    ENV OPENSSL_ROOT_DIR
+    )
+ENDIF ()
 
 FIND_PATH(OPENSSL_INCLUDE_DIR
   NAMES
@@ -60,7 +69,6 @@ FIND_PATH(OPENSSL_INCLUDE_DIR
 )
 
 IF(WIN32 AND NOT CYGWIN)
-  # MINGW should go here too
   IF(MSVC)
     # /MD and /MDd are the standard values - if someone wants to use
     # others, the libnames have to change here too
@@ -79,7 +87,6 @@ IF(WIN32 AND NOT CYGWIN)
     FIND_LIBRARY(LIB_EAY_DEBUG
       NAMES
         libeay32MDd
-        libeay32
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -101,8 +108,6 @@ IF(WIN32 AND NOT CYGWIN)
     FIND_LIBRARY(SSL_EAY_DEBUG
       NAMES
         ssleay32MDd
-        ssleay32
-        ssl
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -122,21 +127,22 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-      set( OPENSSL_LIBRARIES
-        optimized ${SSL_EAY_RELEASE} debug ${SSL_EAY_DEBUG}
-        optimized ${LIB_EAY_RELEASE} debug ${LIB_EAY_DEBUG}
-        )
-    else()
-      set( OPENSSL_LIBRARIES ${SSL_EAY_RELEASE} ${LIB_EAY_RELEASE} )
-    endif()
-    MARK_AS_ADVANCED(SSL_EAY_DEBUG SSL_EAY_RELEASE)
-    MARK_AS_ADVANCED(LIB_EAY_DEBUG LIB_EAY_RELEASE)
+    include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+    select_library_configurations(LIB_EAY)
+    select_library_configurations(SSL_EAY)
+
+    set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   ELSEIF(MINGW)
     # same player, for MingW
+    SET(LIB_EAY_NAMES libeay32)
+    SET(SSL_EAY_NAMES ssleay32)
+    IF(CMAKE_CROSS_COMPILING)
+      LIST(APPEND LIB_EAY_NAMES crypto)
+      LIST(APPEND SSL_EAY_NAMES ssl)
+    ENDIF()
     FIND_LIBRARY(LIB_EAY
       NAMES
-        libeay32
+        ${LIB_EAY_NAMES}
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -145,7 +151,7 @@ IF(WIN32 AND NOT CYGWIN)
 
     FIND_LIBRARY(SSL_EAY
       NAMES
-        ssleay32
+        ${SSL_EAY_NAMES}
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -154,6 +160,8 @@ IF(WIN32 AND NOT CYGWIN)
 
     MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
+    unset(LIB_EAY_NAMES)
+    unset(SSL_EAY_NAMES)
   ELSE(MSVC)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     FIND_LIBRARY(LIB_EAY
