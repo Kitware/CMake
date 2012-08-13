@@ -21,28 +21,28 @@ set(_INCLUDED_FILE 0)
 # Load compiler-specific information.
 if(CMAKE_Fortran_COMPILER_ID)
   include(Compiler/${CMAKE_Fortran_COMPILER_ID}-Fortran OPTIONAL)
-endif(CMAKE_Fortran_COMPILER_ID)
+endif()
 
 set(CMAKE_BASE_NAME)
 get_filename_component(CMAKE_BASE_NAME ${CMAKE_Fortran_COMPILER} NAME_WE)
 # since the gnu compiler has several names force g++
 if(CMAKE_COMPILER_IS_GNUG77)
   set(CMAKE_BASE_NAME g77)
-endif(CMAKE_COMPILER_IS_GNUG77)
+endif()
 if(CMAKE_Fortran_COMPILER_ID)
   include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_Fortran_COMPILER_ID}-Fortran OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
-endif(CMAKE_Fortran_COMPILER_ID)
+endif()
 if (NOT _INCLUDED_FILE)
   include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL
           RESULT_VARIABLE _INCLUDED_FILE)
-endif (NOT _INCLUDED_FILE)
+endif ()
 # We specify the compiler information in the system file for some
 # platforms, but this language may not have been enabled when the file
 # was first included.  Include it again to get the language info.
 # Remove this when all compiler info is removed from system files.
 if (NOT _INCLUDED_FILE)
   include(Platform/${CMAKE_SYSTEM_NAME} OPTIONAL)
-endif (NOT _INCLUDED_FILE)
+endif ()
 
 if(CMAKE_Fortran_SIZEOF_DATA_PTR)
   foreach(f ${CMAKE_Fortran_ABI_FILES})
@@ -76,15 +76,15 @@ set(CMAKE_NEEDS_REQUIRES_STEP_Fortran_FLAG 1)
 
 if(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIC)
   set(CMAKE_Fortran_COMPILE_OPTIONS_PIC ${CMAKE_C_COMPILE_OPTIONS_PIC})
-endif(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIC)
+endif()
 
 if(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIE)
   set(CMAKE_Fortran_COMPILE_OPTIONS_PIE ${CMAKE_C_COMPILE_OPTIONS_PIE})
-endif(NOT CMAKE_Fortran_COMPILE_OPTIONS_PIE)
+endif()
 
 if(NOT CMAKE_Fortran_COMPILE_OPTIONS_DLL)
   set(CMAKE_Fortran_COMPILE_OPTIONS_DLL ${CMAKE_C_COMPILE_OPTIONS_DLL})
-endif(NOT CMAKE_Fortran_COMPILE_OPTIONS_DLL)
+endif()
 
 # Create a set of shared library variable specific to Fortran
 # For 90% of the systems, these are the same flags as the C versions
@@ -127,7 +127,7 @@ endif()
 if(NOT CMAKE_MODULE_EXISTS)
   set(CMAKE_SHARED_MODULE_Fortran_FLAGS ${CMAKE_SHARED_LIBRARY_Fortran_FLAGS})
   set(CMAKE_SHARED_MODULE_CREATE_Fortran_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS})
-endif(NOT CMAKE_MODULE_EXISTS)
+endif()
 
 # repeat for modules
 if(NOT DEFINED CMAKE_SHARED_MODULE_CREATE_Fortran_FLAGS)
@@ -152,15 +152,15 @@ endif()
 
 if(NOT DEFINED CMAKE_SHARED_LIBRARY_LINK_Fortran_WITH_RUNTIME_PATH)
   set(CMAKE_SHARED_LIBRARY_LINK_Fortran_WITH_RUNTIME_PATH ${CMAKE_SHARED_LIBRARY_LINK_C_WITH_RUNTIME_PATH})
-endif(NOT DEFINED CMAKE_SHARED_LIBRARY_LINK_Fortran_WITH_RUNTIME_PATH)
+endif()
 
 if(NOT CMAKE_INCLUDE_FLAG_Fortran)
   set(CMAKE_INCLUDE_FLAG_Fortran ${CMAKE_INCLUDE_FLAG_C})
-endif(NOT CMAKE_INCLUDE_FLAG_Fortran)
+endif()
 
 if(NOT CMAKE_INCLUDE_FLAG_SEP_Fortran)
   set(CMAKE_INCLUDE_FLAG_SEP_Fortran ${CMAKE_INCLUDE_FLAG_SEP_C})
-endif(NOT CMAKE_INCLUDE_FLAG_SEP_Fortran)
+endif()
 
 set(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
@@ -168,7 +168,7 @@ set(CMAKE_Fortran_FLAGS_INIT "$ENV{FFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")
 # avoid just having a space as the initial value for the cache
 if(CMAKE_Fortran_FLAGS_INIT STREQUAL " ")
   set(CMAKE_Fortran_FLAGS_INIT)
-endif(CMAKE_Fortran_FLAGS_INIT STREQUAL " ")
+endif()
 set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS_INIT}" CACHE STRING
      "Flags for Fortran compiler.")
 
@@ -184,12 +184,12 @@ include(CMakeCommonLanguageInclude)
 if(NOT CMAKE_Fortran_CREATE_SHARED_LIBRARY)
   set(CMAKE_Fortran_CREATE_SHARED_LIBRARY
       "<CMAKE_Fortran_COMPILER> <CMAKE_SHARED_LIBRARY_Fortran_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
-endif(NOT CMAKE_Fortran_CREATE_SHARED_LIBRARY)
+endif()
 
 # create a Fortran shared module just copy the shared library rule
 if(NOT CMAKE_Fortran_CREATE_SHARED_MODULE)
   set(CMAKE_Fortran_CREATE_SHARED_MODULE ${CMAKE_Fortran_CREATE_SHARED_LIBRARY})
-endif(NOT CMAKE_Fortran_CREATE_SHARED_MODULE)
+endif()
 
 # Create a static archive incrementally for large object file counts.
 # If CMAKE_Fortran_CREATE_STATIC_LIBRARY is set it will override these.
@@ -208,19 +208,19 @@ endif()
 if(NOT CMAKE_Fortran_COMPILE_OBJECT)
   set(CMAKE_Fortran_COMPILE_OBJECT
     "<CMAKE_Fortran_COMPILER> <DEFINES> <FLAGS> -c <SOURCE> -o <OBJECT>")
-endif(NOT CMAKE_Fortran_COMPILE_OBJECT)
+endif()
 
 # link a fortran program
 if(NOT CMAKE_Fortran_LINK_EXECUTABLE)
   set(CMAKE_Fortran_LINK_EXECUTABLE
     "<CMAKE_Fortran_COMPILER> <CMAKE_Fortran_LINK_FLAGS> <LINK_FLAGS> <FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
-endif(NOT CMAKE_Fortran_LINK_EXECUTABLE)
+endif()
 
 if(CMAKE_Fortran_STANDARD_LIBRARIES_INIT)
   set(CMAKE_Fortran_STANDARD_LIBRARIES "${CMAKE_Fortran_STANDARD_LIBRARIES_INIT}"
     CACHE STRING "Libraries linked by defalut with all Fortran applications.")
   mark_as_advanced(CMAKE_Fortran_STANDARD_LIBRARIES)
-endif(CMAKE_Fortran_STANDARD_LIBRARIES_INIT)
+endif()
 
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
   set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG_INIT}" CACHE STRING
@@ -232,7 +232,7 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
   set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
      "Flags used by the compiler during Release with Debug Info builds.")
 
-endif(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
+endif()
 
 mark_as_advanced(
 CMAKE_Fortran_FLAGS

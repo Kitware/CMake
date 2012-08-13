@@ -47,15 +47,15 @@ macro(CHECK_C_SOURCE_COMPILES SOURCE VAR)
       CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}")
       set(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
-    else(CMAKE_REQUIRED_LIBRARIES)
+    else()
       set(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES)
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else(CMAKE_REQUIRED_INCLUDES)
+    else()
       set(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
       "${SOURCE}\n")
 
@@ -82,14 +82,14 @@ macro(CHECK_C_SOURCE_COMPILES SOURCE VAR)
         "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${SOURCE}\n")
-    else(${VAR})
+    else()
       message(STATUS "Performing Test ${VAR} - Failed")
       set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${SOURCE}\n")
-    endif(${VAR})
-  endif("${VAR}" MATCHES "^${VAR}$")
-endmacro(CHECK_C_SOURCE_COMPILES)
+    endif()
+  endif()
+endmacro()
 

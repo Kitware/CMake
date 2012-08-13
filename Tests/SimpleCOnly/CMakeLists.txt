@@ -14,4 +14,4 @@ message(STATUS "sizeof(float): ${SIZE_FLOAT}")
 # make sure optimized libs are not used by debug builds
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   target_link_libraries(Simple optimized c:/not/here.lib )
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
+endif()

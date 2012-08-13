@@ -80,11 +80,11 @@ if(_VTK_40_ALLOW AND NOT VTK_DIR)
   set(VTK_DIR_SEARCH_LEGACY "")
   if(VTK_BINARY_PATH AND USE_BUILT_VTK)
     set(VTK_DIR_SEARCH_LEGACY ${VTK_DIR_SEARCH_LEGACY} ${VTK_BINARY_PATH})
-  endif(VTK_BINARY_PATH AND USE_BUILT_VTK)
+  endif()
   if(VTK_INSTALL_PATH AND USE_INSTALLED_VTK)
     set(VTK_DIR_SEARCH_LEGACY ${VTK_DIR_SEARCH_LEGACY}
         ${VTK_INSTALL_PATH}/lib/vtk)
-  endif(VTK_INSTALL_PATH AND USE_INSTALLED_VTK)
+  endif()
 
   # Look for UseVTK.cmake in build trees or under <prefix>/include/vtk.
   find_path(VTK_DIR
@@ -129,13 +129,13 @@ endif()
 if(VTK_FOUND)
   # Set USE_VTK_FILE for backward-compatability.
   set(USE_VTK_FILE ${VTK_USE_FILE})
-else(VTK_FOUND)
+else()
   # VTK not found, explain to the user how to specify its location.
   if(VTK_FIND_REQUIRED)
     message(FATAL_ERROR ${VTK_DIR_MESSAGE})
-  else(VTK_FIND_REQUIRED)
+  else()
     if(NOT VTK_FIND_QUIETLY)
       message(STATUS ${VTK_DIR_MESSAGE})
-    endif(NOT VTK_FIND_QUIETLY)
-  endif(VTK_FIND_REQUIRED)
-endif(VTK_FOUND)
+    endif()
+  endif()
+endif()

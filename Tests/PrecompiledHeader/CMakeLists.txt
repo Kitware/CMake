@@ -12,28 +12,28 @@ if(CMAKE_CONFIGURATION_TYPES)
   foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
     file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/PCH/${cfg})
   endforeach()
-else(CMAKE_CONFIGURATION_TYPES)
+else()
   set(PCH_DIR "${CMAKE_CURRENT_BINARY_DIR}/PCH")
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/PCH)
-endif(CMAKE_CONFIGURATION_TYPES)
+endif()
 
 # The VS6 IDE does not support renaming .pch files with /Fp.
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
   set(PCH_USE_INCLUDE_DIR 1)
   set(PCH_FILE)
-else("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+else()
   set(PCH_USE_INCLUDE_DIR 0)
   set(PCH_FILE "\"/Fp${PCH_DIR}/foo_precompiled.pch\"")
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+endif()
 
 # Choose between an explicit include path and using /I during
 # precompilation.  The /I form is used to test that the PCH is
 # actually used.  In practice the include path form would be used.
 if(PCH_USE_INCLUDE_DIR)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-else(PCH_USE_INCLUDE_DIR)
+else()
   set(PCH_INCLUDE_DIR "\"/I${CMAKE_CURRENT_SOURCE_DIR}/include\"")
-endif(PCH_USE_INCLUDE_DIR)
+endif()
 
 # Create a target that will use a precompiled header.
 set(foo_SRCS foo1.c foo2.c)
@@ -56,4 +56,4 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
   # These source files use the precompiled header.
   set_source_files_properties(${foo_SRCS} PROPERTIES
     OBJECT_DEPENDS "${PCH_DIR}/foo_precompiled.pch")
-endif("${CMAKE_GENERATOR}" MATCHES "Makefile")
+endif()

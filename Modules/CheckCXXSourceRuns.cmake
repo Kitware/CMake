@@ -36,15 +36,15 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
       CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}")
       set(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
-    else(CMAKE_REQUIRED_LIBRARIES)
+    else()
       set(CHECK_CXX_SOURCE_COMPILES_ADD_LIBRARIES)
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else(CMAKE_REQUIRED_INCLUDES)
+    else()
       set(CHECK_CXX_SOURCE_COMPILES_ADD_INCLUDES)
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.cxx"
       "${SOURCE}\n")
 
@@ -62,7 +62,7 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
     # if it did not compile make the return value fail code of 1
     if(NOT ${VAR}_COMPILED)
       set(${VAR}_EXITCODE 1)
-    endif(NOT ${VAR}_COMPILED)
+    endif()
     # if the return value was 0 then it worked
     if("${${VAR}_EXITCODE}" EQUAL 0)
       set(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
@@ -72,12 +72,12 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
         "${OUTPUT}\n"
         "Return value: ${${VAR}}\n"
         "Source file was:\n${SOURCE}\n")
-    else("${${VAR}_EXITCODE}" EQUAL 0)
+    else()
       if(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
         set(${VAR} "${${VAR}_EXITCODE}")
-      else(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+      else()
         set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
-      endif(CMAKE_CROSSCOMPILING AND "${${VAR}_EXITCODE}" MATCHES  "FAILED_TO_RUN")
+      endif()
 
       message(STATUS "Performing Test ${VAR} - Failed")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
@@ -85,7 +85,7 @@ macro(CHECK_CXX_SOURCE_RUNS SOURCE VAR)
         "${OUTPUT}\n"
         "Return value: ${${VAR}_EXITCODE}\n"
         "Source file was:\n${SOURCE}\n")
-    endif("${${VAR}_EXITCODE}" EQUAL 0)
-  endif("${VAR}" MATCHES "^${VAR}$")
-endmacro(CHECK_CXX_SOURCE_RUNS)
+    endif()
+  endif()
+endmacro()
 

@@ -24,7 +24,7 @@ set(MFC_FOUND "NO")
 set(MFC_ATTEMPT_TRY_COMPILE 0)
 if(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW)
   set(MFC_ATTEMPT_TRY_COMPILE 1)
-endif(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW)
+endif()
 
 if(MFC_ATTEMPT_TRY_COMPILE)
   if("MFC_HAVE_MFC" MATCHES "^MFC_HAVE_MFC$")
@@ -45,16 +45,16 @@ if(MFC_ATTEMPT_TRY_COMPILE)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if MFC exists passed with the following output:\n"
         "${OUTPUT}\n\n")
-    else(MFC_HAVE_MFC)
+    else()
       message(STATUS "Looking for MFC - not found")
       set(MFC_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if MFC exists failed with the following output:\n"
         "${OUTPUT}\n\n")
-    endif(MFC_HAVE_MFC)
-  endif("MFC_HAVE_MFC" MATCHES "^MFC_HAVE_MFC$")
+    endif()
+  endif()
 
   if(MFC_HAVE_MFC)
     set(MFC_FOUND "YES")
-  endif(MFC_HAVE_MFC)
-endif(MFC_ATTEMPT_TRY_COMPILE)
+  endif()
+endif()

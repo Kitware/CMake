@@ -24,9 +24,9 @@ set (EXECUTABLE_OUTPUT_PATH
 #
 if (EXECUTABLE_OUTPUT_PATH)
   set (CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
-else (EXECUTABLE_OUTPUT_PATH)
+else ()
   set (CXX_TEST_PATH .)
-endif (EXECUTABLE_OUTPUT_PATH)
+endif ()
 
 #
 # Add exe
@@ -36,7 +36,7 @@ add_executable (wrapping wrapping.cxx)
 add_executable (Wrap Wrap.c)
 if(WIN32)
   set(EXE_EXT ".exe")
-endif(WIN32)
+endif()
 set(WRAP ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/Wrap${EXE_EXT})
 
 #
@@ -75,9 +75,9 @@ if (QT_FOUND AND QT_WRAP_UI)
   target_link_libraries(qtwrapping myqtlib)
 
   target_link_libraries( qtwrapping ${QT_LIBRARIES} )
-else (QT_FOUND AND QT_WRAP_UI)
+else ()
   add_executable (qtwrapping qtnoqtmain.cxx)
-endif (QT_FOUND AND QT_WRAP_UI)
+endif ()
 
 #
 # FLTK Wrappers

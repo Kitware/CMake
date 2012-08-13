@@ -34,12 +34,12 @@ if (NOT BZIP2_LIBRARIES)
 
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     SELECT_LIBRARY_CONFIGURATIONS(BZIP2)
-endif (NOT BZIP2_LIBRARIES)
+endif ()
 
 if (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
     file(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
     string(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
-endif (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
+endif ()
 
 # handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if
 # all listed variables are TRUE
@@ -51,6 +51,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
 if (BZIP2_FOUND)
    include(CheckLibraryExists)
    CHECK_LIBRARY_EXISTS("${BZIP2_LIBRARIES}" BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
-endif (BZIP2_FOUND)
+endif ()
 
 mark_as_advanced(BZIP2_INCLUDE_DIR)

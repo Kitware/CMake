@@ -22,7 +22,7 @@
 
 if(CYGWIN)
   find_program(TCL_TCLSH NAMES cygtclsh83 cygtclsh80)
-endif(CYGWIN)
+endif()
 
 get_filename_component(TK_WISH_PATH "${TK_WISH}" PATH)
 get_filename_component(TK_WISH_PATH_PARENT "${TK_WISH_PATH}" PATH)
@@ -64,7 +64,7 @@ if(WIN32)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin"
     )
-endif(WIN32)
+endif()
 
 set(TCL_TCLSH_NAMES
   tclsh
@@ -88,7 +88,7 @@ if(TCL_TCLSH)
                    OUTPUT_VARIABLE TCLSH_VERSION_STRING
                    ERROR_QUIET
                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif(TCL_TCLSH)
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if
 # all listed variables are TRUE

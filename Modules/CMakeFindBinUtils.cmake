@@ -48,7 +48,7 @@ else("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
   find_program(CMAKE_RANLIB NAMES ${_CMAKE_TOOLCHAIN_PREFIX}ranlib HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
   if(NOT CMAKE_RANLIB)
     set(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
-  endif(NOT CMAKE_RANLIB)
+  endif()
 
   find_program(CMAKE_STRIP NAMES ${_CMAKE_TOOLCHAIN_PREFIX}strip HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
   find_program(CMAKE_LINKER NAMES ${_CMAKE_TOOLCHAIN_PREFIX}ld HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
@@ -69,7 +69,7 @@ if(APPLE)
 
   if(NOT CMAKE_INSTALL_NAME_TOOL)
     message(FATAL_ERROR "Could not find install_name_tool, please check your installation.")
-  endif(NOT CMAKE_INSTALL_NAME_TOOL)
+  endif()
 
   mark_as_advanced(CMAKE_INSTALL_NAME_TOOL)
-endif(APPLE)
+endif()

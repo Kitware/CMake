@@ -7,7 +7,7 @@ macro(testwatch var access file stack)
   message("There was a ${access} access done on the variable: ${var} in file ${file}")
   message("List file stack is: ${stack}")
   set(${var}_watched 1)
-endmacro(testwatch)
+endmacro()
 
 variable_watch(somevar testwatch)
 

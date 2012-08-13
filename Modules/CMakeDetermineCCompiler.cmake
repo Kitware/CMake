@@ -47,18 +47,18 @@ if(NOT CMAKE_C_COMPILER)
     get_filename_component(CMAKE_C_COMPILER_INIT $ENV{CC} PROGRAM PROGRAM_ARGS CMAKE_C_FLAGS_ENV_INIT)
     if(CMAKE_C_FLAGS_ENV_INIT)
       set(CMAKE_C_COMPILER_ARG1 "${CMAKE_C_FLAGS_ENV_INIT}" CACHE STRING "First argument to C compiler")
-    endif(CMAKE_C_FLAGS_ENV_INIT)
+    endif()
     if(NOT EXISTS ${CMAKE_C_COMPILER_INIT})
       message(FATAL_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}.")
-    endif(NOT EXISTS ${CMAKE_C_COMPILER_INIT})
-  endif($ENV{CC} MATCHES ".+")
+    endif()
+  endif()
 
   # next try prefer the compiler specified by the generator
   if(CMAKE_GENERATOR_CC)
     if(NOT CMAKE_C_COMPILER_INIT)
       set(CMAKE_C_COMPILER_INIT ${CMAKE_GENERATOR_CC})
-    endif(NOT CMAKE_C_COMPILER_INIT)
-  endif(CMAKE_GENERATOR_CC)
+    endif()
+  endif()
 
   # finally list compilers to try
   if(NOT CMAKE_C_COMPILER_INIT)
@@ -67,7 +67,7 @@ if(NOT CMAKE_C_COMPILER)
 
   _cmake_find_compiler(C)
 
-else(NOT CMAKE_C_COMPILER)
+else()
 
   # we only get here if CMAKE_C_COMPILER was specified using -D or a pre-made CMakeCache.txt
   # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
@@ -78,7 +78,7 @@ else(NOT CMAKE_C_COMPILER)
   if("${_CMAKE_C_COMPILER_LIST_LENGTH}" EQUAL 2)
     list(GET CMAKE_C_COMPILER 1 CMAKE_C_COMPILER_ARG1)
     list(GET CMAKE_C_COMPILER 0 CMAKE_C_COMPILER)
-  endif("${_CMAKE_C_COMPILER_LIST_LENGTH}" EQUAL 2)
+  endif()
 
   # if a compiler was specified by the user but without path,
   # now try to find it with the full path
@@ -91,21 +91,21 @@ else(NOT CMAKE_C_COMPILER)
     mark_as_advanced(CMAKE_C_COMPILER_WITH_PATH)
     if(CMAKE_C_COMPILER_WITH_PATH)
       set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_WITH_PATH} CACHE STRING "C compiler" FORCE)
-    endif(CMAKE_C_COMPILER_WITH_PATH)
-  endif(NOT _CMAKE_USER_C_COMPILER_PATH)
-endif(NOT CMAKE_C_COMPILER)
+    endif()
+  endif()
+endif()
 mark_as_advanced(CMAKE_C_COMPILER)
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
   get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
-endif (NOT _CMAKE_TOOLCHAIN_LOCATION)
+endif ()
 
 # Build a small source file to identify the compiler.
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(CMAKE_C_COMPILER_ID_RUN 1)
   set(CMAKE_C_PLATFORM_ID "Windows")
   set(CMAKE_C_COMPILER_ID "MSVC")
-endif(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+endif()
 
 if(NOT CMAKE_C_COMPILER_ID_RUN)
   set(CMAKE_C_COMPILER_ID_RUN 1)
@@ -131,13 +131,13 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
   # Set old compiler and platform id variables.
   if("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUCC 1)
-  endif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+  endif()
   if("${CMAKE_C_PLATFORM_ID}" MATCHES "MinGW")
     set(CMAKE_COMPILER_IS_MINGW 1)
   elseif("${CMAKE_C_PLATFORM_ID}" MATCHES "Cygwin")
     set(CMAKE_COMPILER_IS_CYGWIN 1)
-  endif("${CMAKE_C_PLATFORM_ID}" MATCHES "MinGW")
-endif(NOT CMAKE_C_COMPILER_ID_RUN)
+  endif()
+endif()
 
 # If we have a gcc cross compiler, they have usually some prefix, like
 # e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc, optionally
@@ -152,13 +152,13 @@ if (CMAKE_CROSSCOMPILING
   get_filename_component(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
   if (COMPILER_BASENAME MATCHES "^(.+-)g?cc(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif (COMPILER_BASENAME MATCHES "^(.+-)g?cc(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
+  endif ()
 
   # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
   # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
   if ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+  endif ()
 
 endif (CMAKE_CROSSCOMPILING
     AND "${CMAKE_C_COMPILER_ID}" MATCHES "GNU"
@@ -169,7 +169,7 @@ include(CMakeFindBinUtils)
 if(MSVC_C_ARCHITECTURE_ID)
   set(SET_MSVC_C_ARCHITECTURE_ID
     "set(MSVC_C_ARCHITECTURE_ID ${MSVC_C_ARCHITECTURE_ID})")
-endif(MSVC_C_ARCHITECTURE_ID)
+endif()
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
   "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake"

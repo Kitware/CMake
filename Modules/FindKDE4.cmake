@@ -27,13 +27,13 @@
 if(QT_QT_LIBRARY)
   if(KDE4_FIND_REQUIRED)
     message( FATAL_ERROR "KDE4/Qt4 and Qt3 cannot be used together in one project.")
-  else(KDE4_FIND_REQUIRED)
+  else()
     if(NOT KDE4_FIND_QUIETLY)
       message( STATUS    "KDE4/Qt4 and Qt3 cannot be used together in one project.")
-    endif(NOT KDE4_FIND_QUIETLY)
+    endif()
     return()
-  endif(KDE4_FIND_REQUIRED)
-endif(QT_QT_LIBRARY)
+  endif()
+endif()
 
 file(TO_CMAKE_PATH "$ENV{KDEDIRS}" _KDEDIRS)
 
@@ -56,8 +56,8 @@ find_program(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config
 if (NOT KDE4_KDECONFIG_EXECUTABLE)
    if (KDE4_FIND_REQUIRED)
       message(FATAL_ERROR "ERROR: Could not find KDE4 kde4-config")
-   endif (KDE4_FIND_REQUIRED)
-endif (NOT KDE4_KDECONFIG_EXECUTABLE)
+   endif ()
+endif ()
 
 
 # when cross compiling, KDE4_DATA_DIR may be already preset
@@ -66,7 +66,7 @@ if(NOT KDE4_DATA_DIR)
       # when cross compiling, don't run kde4-config but use its location as install dir
       get_filename_component(KDE4_DATA_DIR "${KDE4_KDECONFIG_EXECUTABLE}" PATH)
       get_filename_component(KDE4_DATA_DIR "${KDE4_DATA_DIR}" PATH)
-   else(CMAKE_CROSSCOMPILING)
+   else()
       # then ask kde4-config for the kde data dirs
 
       if(KDE4_KDECONFIG_EXECUTABLE)
@@ -74,9 +74,9 @@ if(NOT KDE4_DATA_DIR)
         file(TO_CMAKE_PATH "${_data_DIR}" _data_DIR)
         # then check the data dirs for FindKDE4Internal.cmake
         find_path(KDE4_DATA_DIR cmake/modules/FindKDE4Internal.cmake HINTS ${_data_DIR})
-      endif(KDE4_KDECONFIG_EXECUTABLE)
-   endif(CMAKE_CROSSCOMPILING)
-endif(NOT KDE4_DATA_DIR)
+      endif()
+   endif()
+endif()
 
 # if it has been found...
 if (KDE4_DATA_DIR)
@@ -85,16 +85,16 @@ if (KDE4_DATA_DIR)
 
    if (KDE4_FIND_QUIETLY)
       set(_quiet QUIET)
-   endif (KDE4_FIND_QUIETLY)
+   endif ()
 
    if (KDE4_FIND_REQUIRED)
       set(_req REQUIRED)
-   endif (KDE4_FIND_REQUIRED)
+   endif ()
 
    # use FindKDE4Internal.cmake to do the rest
    find_package(KDE4Internal ${_req} ${_quiet})
-else (KDE4_DATA_DIR)
+else ()
    if (KDE4_FIND_REQUIRED)
       message(FATAL_ERROR "ERROR: cmake/modules/FindKDE4Internal.cmake not found in ${_data_DIR}")
-   endif (KDE4_FIND_REQUIRED)
-endif (KDE4_DATA_DIR)
+   endif ()
+endif ()

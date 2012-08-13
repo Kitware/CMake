@@ -30,7 +30,7 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS)
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
     OUTPUT_VARIABLE OUTPUT)
   set(FORTRAN_TEST_WAS_RUN 1)
-endif(NOT CMAKE_Fortran_COMPILER_WORKS)
+endif()
 
 if(NOT CMAKE_Fortran_COMPILER_WORKS)
   PrintTestCompilerStatus("Fortran" "  -- broken")
@@ -41,19 +41,19 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS)
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
-else(NOT CMAKE_Fortran_COMPILER_WORKS)
+else()
   if(FORTRAN_TEST_WAS_RUN)
     PrintTestCompilerStatus("Fortran" "  -- works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the Fortran compiler works passed with "
       "the following output:\n${OUTPUT}\n\n")
-  endif(FORTRAN_TEST_WAS_RUN)
+  endif()
   set(CMAKE_Fortran_COMPILER_WORKS 1 CACHE INTERNAL "")
 
   if(CMAKE_Fortran_COMPILER_FORCED)
     # The compiler configuration was forced by the user.
     # Assume the user has configured all compiler information.
-  else(CMAKE_Fortran_COMPILER_FORCED)
+  else()
     # Try to identify the ABI and configure it into CMakeFortranCompiler.cmake
     include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
     CMAKE_DETERMINE_COMPILER_ABI(Fortran ${CMAKE_ROOT}/Modules/CMakeFortranCompilerABI.F)
@@ -75,15 +75,15 @@ else(NOT CMAKE_Fortran_COMPILER_WORKS)
           "Determining if the Fortran compiler supports Fortran 90 passed with "
           "the following output:\n${OUTPUT}\n\n")
         set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 1)
-      else(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+      else()
         message(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90 -- no")
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the Fortran compiler supports Fortran 90 failed with "
           "the following output:\n${OUTPUT}\n\n")
         set(CMAKE_Fortran_COMPILER_SUPPORTS_F90 0)
-      endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+      endif()
       unset(CMAKE_Fortran_COMPILER_SUPPORTS_F90 CACHE)
-    endif(NOT DEFINED CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+    endif()
 
     configure_file(
       ${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
@@ -91,11 +91,11 @@ else(NOT CMAKE_Fortran_COMPILER_WORKS)
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
     include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake)
-  endif(CMAKE_Fortran_COMPILER_FORCED)
+  endif()
   if(CMAKE_Fortran_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_Fortran_ABI_FILES})
       include(${f})
     endforeach()
     unset(CMAKE_Fortran_ABI_FILES)
   endif()
-endif(NOT CMAKE_Fortran_COMPILER_WORKS)
+endif()

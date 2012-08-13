@@ -361,16 +361,16 @@ macro(_Boost_ADJUST_LIB_VARS basename)
 
       set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} CACHE FILEPATH "Boost library directory")
       set(Boost_${basename}_FOUND ON CACHE INTERNAL "Whether the Boost ${basename} library found")
-    endif(Boost_${basename}_LIBRARY)
+    endif()
 
-  endif(Boost_INCLUDE_DIR )
+  endif()
   # Make variables changeble to the advanced user
   mark_as_advanced(
       Boost_${basename}_LIBRARY
       Boost_${basename}_LIBRARY_RELEASE
       Boost_${basename}_LIBRARY_DEBUG
   )
-endmacro(_Boost_ADJUST_LIB_VARS)
+endmacro()
 
 #-------------------------------------------------------------------------------
 
@@ -479,21 +479,21 @@ function(_Boost_GUESS_COMPILER_PREFIX _ret)
               # In Boost 1.36.0 and newer, the mangled compiler name used
               # on Mac OS X/Darwin is "xgcc".
               set(_boost_COMPILER "-xgcc${_boost_COMPILER_VERSION}")
-            else(${Boost_MINOR_VERSION} GREATER 35)
+            else()
               # In Boost <= 1.35.0, there is no mangled compiler name for
               # the Mac OS X/Darwin version of GCC.
               set(_boost_COMPILER "")
-            endif(${Boost_MINOR_VERSION} GREATER 35)
-          else(Boost_MINOR_VERSION)
+            endif()
+          else()
             # We don't know the Boost version, so assume it's
             # pre-1.36.0.
             set(_boost_COMPILER "")
-          endif(Boost_MINOR_VERSION)
+          endif()
         else()
           set(_boost_COMPILER "-gcc${_boost_COMPILER_VERSION}")
         endif()
       endif()
-    endif (CMAKE_COMPILER_IS_GNUCXX)
+    endif ()
   else()
     # TODO at least Boost_DEBUG here?
     set(_boost_COMPILER "")
@@ -525,7 +525,7 @@ if(Boost_FIND_VERSION_EXACT)
   set(_boost_TEST_VERSIONS
     "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}.${Boost_FIND_VERSION_PATCH}"
     "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
-else(Boost_FIND_VERSION_EXACT)
+else()
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
@@ -549,12 +549,12 @@ else(Boost_FIND_VERSION_EXACT)
         # the patch level dropped.
         list(APPEND _boost_TEST_VERSIONS "${version}")
       endif()
-    endforeach(version)
-  else(Boost_FIND_VERSION)
+    endforeach()
+  else()
     # Any version is acceptable.
     set(_boost_TEST_VERSIONS "${_Boost_KNOWN_VERSIONS}")
-  endif(Boost_FIND_VERSION)
-endif(Boost_FIND_VERSION_EXACT)
+  endif()
+endif()
 
 # The reason that we failed to find Boost. This will be set to a
 # user-friendly message when we fail to find some necessary piece of
@@ -597,7 +597,7 @@ set(Boost_ERROR_REASON)
     # for linking.
     set(Boost_LIB_DIAGNOSTIC_DEFINITIONS
       "-DBOOST_LIB_DIAGNOSTIC" CACHE STRING "Boost diagnostic define")
-  endif(WIN32)
+  endif()
 
   set(_boost_INCLUDE_SEARCH_DIRS_SYSTEM
     C:/boost/include
@@ -671,7 +671,7 @@ set(Boost_ERROR_REASON)
     file(TO_CMAKE_PATH ${BOOST_INCLUDEDIR} BOOST_INCLUDEDIR)
     set(_boost_INCLUDE_SEARCH_DIRS
       ${BOOST_INCLUDEDIR} ${_boost_INCLUDE_SEARCH_DIRS})
-  endif( BOOST_INCLUDEDIR )
+  endif()
 
   # ------------------------------------------------------------------------
   #  Search for Boost include DIR
@@ -699,7 +699,7 @@ set(Boost_ERROR_REASON)
       list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
       list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
 
-    endforeach(_boost_VER)
+    endforeach()
 
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
@@ -717,7 +717,7 @@ set(Boost_ERROR_REASON)
       PATH_SUFFIXES ${_boost_PATH_SUFFIXES}
       ${_boost_FIND_OPTIONS}
       )
-  endif( NOT Boost_INCLUDE_DIR )
+  endif()
 
   # ------------------------------------------------------------------------
   #  Extract version information from version.hpp
@@ -748,16 +748,16 @@ set(Boost_ERROR_REASON)
 
       set(Boost_ERROR_REASON
           "${Boost_ERROR_REASON}Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\nBoost include path: ${Boost_INCLUDE_DIR}")
-    endif(NOT "${Boost_VERSION}" STREQUAL "0")
+    endif()
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "version.hpp reveals boost "
                      "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
     endif()
-  else(Boost_INCLUDE_DIR)
+  else()
     set(Boost_ERROR_REASON
       "${Boost_ERROR_REASON}Unable to find the Boost header files. Please set BOOST_ROOT to the root directory containing Boost or BOOST_INCLUDEDIR to the directory containing Boost's headers.")
-  endif(Boost_INCLUDE_DIR)
+  endif()
 
   # ------------------------------------------------------------------------
   #  Suffix initialization and compiler suffix detection.
@@ -1007,7 +1007,7 @@ set(Boost_ERROR_REASON)
 
     _Boost_ADJUST_LIB_VARS(${UPPERCOMPONENT})
 
-  endforeach(COMPONENT)
+  endforeach()
 
   # Restore the original find library ordering
   if( Boost_USE_STATIC_LIBS )
@@ -1044,9 +1044,9 @@ set(Boost_ERROR_REASON)
         if( Boost_FIND_VERSION_PATCH AND Boost_SUBMINOR_VERSION LESS "${Boost_FIND_VERSION_PATCH}" )
           set( Boost_FOUND FALSE )
           set(_Boost_VERSION_AGE "old")
-        endif( Boost_FIND_VERSION_PATCH AND Boost_SUBMINOR_VERSION LESS "${Boost_FIND_VERSION_PATCH}" )
-      endif( Boost_MINOR_VERSION LESS "${Boost_FIND_VERSION_MINOR}" )
-    endif( Boost_MAJOR_VERSION LESS "${Boost_FIND_VERSION_MAJOR}" )
+        endif()
+      endif()
+    endif()
 
     if (NOT Boost_FOUND)
       _Boost_MARK_COMPONENTS_FOUND(OFF)
@@ -1061,7 +1061,7 @@ set(Boost_ERROR_REASON)
       # If the user didn't specify a patchlevel, it's 0.
       if (NOT Boost_FIND_VERSION_PATCH)
         set(Boost_FIND_VERSION_PATCH 0)
-      endif (NOT Boost_FIND_VERSION_PATCH)
+      endif ()
 
       # We'll set Boost_FOUND true again if we have an exact version match.
       set(Boost_FOUND FALSE)
@@ -1071,10 +1071,10 @@ set(Boost_ERROR_REASON)
           if(Boost_SUBMINOR_VERSION EQUAL "${Boost_FIND_VERSION_PATCH}" )
             set( Boost_FOUND TRUE )
             _Boost_MARK_COMPONENTS_FOUND(ON)
-          endif(Boost_SUBMINOR_VERSION EQUAL "${Boost_FIND_VERSION_PATCH}" )
-        endif( Boost_MINOR_VERSION EQUAL "${Boost_FIND_VERSION_MINOR}" )
-      endif( Boost_MAJOR_VERSION EQUAL "${Boost_FIND_VERSION_MAJOR}" )
-    endif (Boost_FOUND AND Boost_FIND_VERSION_EXACT)
+          endif()
+        endif()
+      endif()
+    endif ()
 
     if(NOT Boost_FOUND)
       # State that we found a version of Boost that is too new or too old.
@@ -1083,12 +1083,12 @@ set(Boost_ERROR_REASON)
       if (Boost_FIND_VERSION_PATCH)
         set(Boost_ERROR_REASON
           "${Boost_ERROR_REASON}.${Boost_FIND_VERSION_PATCH}")
-      endif (Boost_FIND_VERSION_PATCH)
+      endif ()
       if (NOT Boost_FIND_VERSION_EXACT)
         set(Boost_ERROR_REASON "${Boost_ERROR_REASON} (or newer)")
-      endif (NOT Boost_FIND_VERSION_EXACT)
+      endif ()
       set(Boost_ERROR_REASON "${Boost_ERROR_REASON}.")
-    endif (NOT Boost_FOUND)
+    endif ()
 
     # Always check for missing components
     set(_boost_CHECKED_COMPONENT FALSE)
@@ -1101,7 +1101,7 @@ set(Boost_ERROR_REASON)
         list(APPEND _Boost_MISSING_COMPONENTS ${COMPONENT})
         set( Boost_FOUND FALSE)
       endif()
-    endforeach(COMPONENT)
+    endforeach()
 
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] Boost_FOUND = ${Boost_FOUND}")
@@ -1115,18 +1115,18 @@ set(Boost_ERROR_REASON)
       foreach(COMPONENT ${_Boost_MISSING_COMPONENTS})
         set(Boost_ERROR_REASON
           "${Boost_ERROR_REASON}        boost_${COMPONENT}\n")
-      endforeach(COMPONENT)
+      endforeach()
 
       list(LENGTH Boost_FIND_COMPONENTS Boost_NUM_COMPONENTS_WANTED)
       list(LENGTH _Boost_MISSING_COMPONENTS Boost_NUM_MISSING_COMPONENTS)
       if (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
         set(Boost_ERROR_REASON
           "${Boost_ERROR_REASON}No Boost libraries were found. You may need to set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
-      else (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
+      else ()
         set(Boost_ERROR_REASON
           "${Boost_ERROR_REASON}Some (but not all) of the required Boost libraries were found. You may need to install these additional Boost libraries. Alternatively, set BOOST_LIBRARYDIR to the directory containing Boost libraries or BOOST_ROOT to the location of Boost.")
-      endif (${Boost_NUM_COMPONENTS_WANTED} EQUAL ${Boost_NUM_MISSING_COMPONENTS})
-    endif (_Boost_MISSING_COMPONENTS)
+      endif ()
+    endif ()
 
     if( NOT Boost_LIBRARY_DIRS AND NOT _boost_CHECKED_COMPONENT )
       # Compatibility Code for backwards compatibility with CMake
@@ -1160,11 +1160,11 @@ set(Boost_ERROR_REASON)
         set(Boost_LIBRARY_DIRS ${_boost_LIB_DIR} CACHE FILEPATH "Boost library directory")
       endif()
 
-    endif( NOT Boost_LIBRARY_DIRS AND NOT _boost_CHECKED_COMPONENT )
+    endif()
 
-  else(Boost_INCLUDE_DIR)
+  else()
     set( Boost_FOUND FALSE)
-  endif(Boost_INCLUDE_DIR)
+  endif()
 
   # ------------------------------------------------------------------------
   #  Notification to end user about what was found
@@ -1176,16 +1176,16 @@ set(Boost_ERROR_REASON)
         if(Boost_FIND_COMPONENTS)
           message(STATUS "Found the following Boost libraries:")
         endif()
-      endif(NOT Boost_FIND_QUIETLY)
+      endif()
       foreach( COMPONENT  ${Boost_FIND_COMPONENTS} )
         string( TOUPPER ${COMPONENT} UPPERCOMPONENT )
         if( Boost_${UPPERCOMPONENT}_FOUND )
           if(NOT Boost_FIND_QUIETLY)
             message (STATUS "  ${COMPONENT}")
-          endif(NOT Boost_FIND_QUIETLY)
+          endif()
           set(Boost_LIBRARIES ${Boost_LIBRARIES} ${Boost_${UPPERCOMPONENT}_LIBRARY})
-        endif( Boost_${UPPERCOMPONENT}_FOUND )
-      endforeach(COMPONENT)
+        endif()
+      endforeach()
   else()
     if(Boost_FIND_REQUIRED)
       message(SEND_ERROR "Unable to find the requested Boost libraries.\n${Boost_ERROR_REASON}")
@@ -1201,7 +1201,7 @@ set(Boost_ERROR_REASON)
           message(STATUS "Could NOT find Boost")
         endif()
       endif()
-    endif(Boost_FIND_REQUIRED)
+    endif()
   endif()
 
   # show the Boost_INCLUDE_DIRS AND Boost_LIBRARIES variables only in the advanced view

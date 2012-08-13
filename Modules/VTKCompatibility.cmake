@@ -21,7 +21,7 @@ if(APPLE)
   string( REGEX REPLACE "CMAKE_C_COMPILER"
     CMAKE_CXX_COMPILER CMAKE_CXX_CREATE_SHARED_LIBRARY
     "${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
-endif(APPLE)
+endif()
 
 set(VTKFTGL_BINARY_DIR "${VTK_BINARY_DIR}/Utilities/ftgl"
   CACHE INTERNAL "")
@@ -48,5 +48,5 @@ set(TIFF_RIGHT_VERSION 1)
 # for very old VTK (versions prior to 4.2)
 macro(SOURCE_FILES)
   message (FATAL_ERROR "You are trying to build a very old version of VTK (prior to VTK 4.2). To do this you need to use CMake 2.0 as it was the last version of CMake to support VTK 4.0.")
-endmacro(SOURCE_FILES)
+endmacro()
 

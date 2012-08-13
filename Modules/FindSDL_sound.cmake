@@ -172,7 +172,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    set(TMP_TRY_LIBS)
    foreach(lib ${SDL_SOUND_LIBRARY} ${SDL_LIBRARY})
      set(TMP_TRY_LIBS "${TMP_TRY_LIBS} \"${lib}\"")
-   endforeach(lib)
+   endforeach()
 
    # message("TMP_TRY_LIBS ${TMP_TRY_LIBS}")
 
@@ -225,8 +225,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        )
        if(MIKMOD_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${MIKMOD_LIBRARY})
-       endif(MIKMOD_LIBRARY)
-     endif("${MY_OUTPUT}" MATCHES "MikMod_")
+       endif()
+     endif()
 
      # Find ModPlug
      if("${MY_OUTPUT}" MATCHES "MODPLUG_")
@@ -246,8 +246,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        )
        if(MODPLUG_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${MODPLUG_LIBRARY})
-       endif(MODPLUG_LIBRARY)
-     endif("${MY_OUTPUT}" MATCHES "MODPLUG_")
+       endif()
+     endif()
 
 
      # Find Ogg and Vorbis
@@ -270,7 +270,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          )
        if(VORBIS_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${VORBIS_LIBRARY})
-       endif(VORBIS_LIBRARY)
+       endif()
 
        find_library(OGG_LIBRARY
          NAMES ogg Ogg OGG
@@ -290,8 +290,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          )
        if(OGG_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${OGG_LIBRARY})
-       endif(OGG_LIBRARY)
-     endif("${MY_OUTPUT}" MATCHES "ov_")
+       endif()
+     endif()
 
 
      # Find SMPEG
@@ -312,8 +312,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          )
        if(SMPEG_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${SMPEG_LIBRARY})
-       endif(SMPEG_LIBRARY)
-     endif("${MY_OUTPUT}" MATCHES "SMPEG_")
+       endif()
+     endif()
 
 
      # Find FLAC
@@ -334,8 +334,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          )
        if(FLAC_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${FLAC_LIBRARY})
-       endif(FLAC_LIBRARY)
-     endif("${MY_OUTPUT}" MATCHES "FLAC_")
+       endif()
+     endif()
 
 
      # Hmmm...Speex seems to depend on Ogg. This might be a problem if
@@ -359,7 +359,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          )
        if(SPEEX_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${SPEEX_LIBRARY})
-       endif(SPEEX_LIBRARY)
+       endif()
 
        # Find OGG (needed for Speex)
      # We might have already found Ogg for Vorbis, so skip it if so.
@@ -384,16 +384,16 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
            )
          if(OGG_LIBRARY)
            set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${OGG_LIBRARY})
-         endif(OGG_LIBRARY)
-       endif(NOT OGG_LIBRARY)
-     endif("${MY_OUTPUT}" MATCHES "speex_")
+         endif()
+       endif()
+     endif()
 
-   else(NOT MY_RESULT)
+   else()
      set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARY}" CACHE INTERNAL "SDL_sound and dependent libraries")
-   endif(NOT MY_RESULT)
+   endif()
 
    set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP}" CACHE INTERNAL "SDL_sound and dependent libraries")
- endif(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
+ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 

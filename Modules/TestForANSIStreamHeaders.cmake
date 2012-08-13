@@ -23,12 +23,12 @@ if(NOT CMAKE_NO_ANSI_STREAM_HEADERS)
   if (CMAKE_ANSI_STREAM_HEADERS)
     set (CMAKE_NO_ANSI_STREAM_HEADERS 0 CACHE INTERNAL
          "Does the compiler support headers like iostream.")
-  else (CMAKE_ANSI_STREAM_HEADERS)
+  else ()
     set (CMAKE_NO_ANSI_STREAM_HEADERS 1 CACHE INTERNAL
        "Does the compiler support headers like iostream.")
-  endif (CMAKE_ANSI_STREAM_HEADERS)
+  endif ()
 
   mark_as_advanced(CMAKE_NO_ANSI_STREAM_HEADERS)
-endif(NOT CMAKE_NO_ANSI_STREAM_HEADERS)
+endif()
 
 

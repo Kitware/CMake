@@ -50,12 +50,12 @@ include(FindWish)
 
 if(TCLSH_VERSION_STRING)
   set(TCL_TCLSH_VERSION "${TCLSH_VERSION_STRING}")
-else(TCLSH_VERSION_STRING)
+else()
   get_filename_component(TCL_TCLSH_PATH "${TCL_TCLSH}" PATH)
   get_filename_component(TCL_TCLSH_PATH_PARENT "${TCL_TCLSH_PATH}" PATH)
   string(REGEX REPLACE
     "^.*tclsh([0-9]\\.*[0-9]).*$" "\\1" TCL_TCLSH_VERSION "${TCL_TCLSH}")
-endif(TCLSH_VERSION_STRING)
+endif()
 
 get_filename_component(TK_WISH_PATH "${TK_WISH}" PATH)
 get_filename_component(TK_WISH_PATH_PARENT "${TK_WISH_PATH}" PATH)
@@ -101,7 +101,7 @@ if(WIN32)
     "C:/Program Files/Tcl/lib"
     "C:/Tcl/lib"
     )
-endif(WIN32)
+endif()
 
 find_library(TCL_LIBRARY
   NAMES
@@ -137,9 +137,9 @@ if(Tcl_FRAMEWORKS)
   if(NOT TCL_INCLUDE_PATH)
     foreach(dir ${Tcl_FRAMEWORKS})
       set(TCL_FRAMEWORK_INCLUDES ${TCL_FRAMEWORK_INCLUDES} ${dir}/Headers)
-    endforeach(dir)
-  endif(NOT TCL_INCLUDE_PATH)
-endif(Tcl_FRAMEWORKS)
+    endforeach()
+  endif()
+endif()
 
 set(TK_FRAMEWORK_INCLUDES)
 if(Tk_FRAMEWORKS)
@@ -147,9 +147,9 @@ if(Tk_FRAMEWORKS)
     foreach(dir ${Tk_FRAMEWORKS})
       set(TK_FRAMEWORK_INCLUDES ${TK_FRAMEWORK_INCLUDES}
         ${dir}/Headers ${dir}/PrivateHeaders)
-    endforeach(dir)
-  endif(NOT TK_INCLUDE_PATH)
-endif(Tk_FRAMEWORKS)
+    endforeach()
+  endif()
+endif()
 
 set(TCLTK_POSSIBLE_INCLUDE_PATHS
   "${TCL_LIBRARY_PATH_PARENT}/include"
@@ -183,7 +183,7 @@ if(WIN32)
     "C:/Program Files/Tcl/include"
     "C:/Tcl/include"
     )
-endif(WIN32)
+endif()
 
 find_path(TCL_INCLUDE_PATH
   NAMES tcl.h

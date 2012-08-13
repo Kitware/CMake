@@ -51,21 +51,21 @@ if(CMAKE_GENERATOR MATCHES "Makefiles")
   mark_as_advanced(CMAKE_COLOR_MAKEFILE)
   if(DEFINED CMAKE_RULE_MESSAGES)
     set_property(GLOBAL PROPERTY RULE_MESSAGES ${CMAKE_RULE_MESSAGES})
-  endif(DEFINED CMAKE_RULE_MESSAGES)
+  endif()
   if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
     set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
       "Enable/Disable output of compile commands during generation."
       )
     mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
-  endif(CMAKE_GENERATOR MATCHES "Unix Makefiles")
-endif(CMAKE_GENERATOR MATCHES "Makefiles")
+  endif()
+endif()
 
 if(CMAKE_GENERATOR MATCHES "Ninja")
   set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
     "Enable/Disable output of compile commands during generation."
     )
   mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
-endif(CMAKE_GENERATOR MATCHES "Ninja")
+endif()
 
 # GetDefaultWindowsPrefixBase
 #
@@ -162,19 +162,19 @@ endfunction()
 # command line to override it.
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
-endif(NOT DEFINED CMAKE_INSTALL_PREFIX)
+endif()
 
 # Choose a default install prefix for this platform.
 if(CMAKE_HOST_UNIX)
   set(CMAKE_INSTALL_PREFIX "/usr/local"
     CACHE PATH "Install path prefix, prepended onto install directories.")
-else(CMAKE_HOST_UNIX)
+else()
   GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
   set(CMAKE_INSTALL_PREFIX
     "${CMAKE_GENERIC_PROGRAM_FILES}/${PROJECT_NAME}"
     CACHE PATH "Install path prefix, prepended onto install directories.")
   set(CMAKE_GENERIC_PROGRAM_FILES)
-endif(CMAKE_HOST_UNIX)
+endif()
 
 # Set a variable which will be used as component name in install() commands
 # where no COMPONENT has been given:

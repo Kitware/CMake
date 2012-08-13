@@ -52,7 +52,7 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
       string(REGEX REPLACE "^msgmerge \\([^\\)]*\\) ([0-9\\.]+[^ \n]*).*" "\\1" GETTEXT_VERSION_STRING "${gettext_version}")
    endif()
    unset(gettext_version)
-endif(GETTEXT_MSGMERGE_EXECUTABLE)
+endif()
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
@@ -85,7 +85,7 @@ macro(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
    if(${_firstPoFile} STREQUAL "ALL")
       set(_addToAll "ALL")
       set(_firstPoFile)
-   endif(${_firstPoFile} STREQUAL "ALL")
+   endif()
 
    foreach (_currentPoFile ${_firstPoFile} ${ARGN})
       get_filename_component(_absFile ${_currentPoFile} ABSOLUTE)
@@ -103,7 +103,7 @@ macro(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
       install(FILES ${_gmoFile} DESTINATION share/locale/${_lang}/LC_MESSAGES RENAME ${_potBasename}.mo)
       set(_gmoFiles ${_gmoFiles} ${_gmoFile})
 
-   endforeach (_currentPoFile )
+   endforeach ()
 
    if(NOT TARGET translations)
       add_custom_target(translations)
@@ -115,7 +115,7 @@ macro(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
 
    add_dependencies(translations ${uniqueTargetName})
 
-endmacro(GETTEXT_CREATE_TRANSLATIONS )
+endmacro()
 
 
 function(GETTEXT_PROCESS_POT_FILE _potFile)
@@ -148,9 +148,9 @@ function(GETTEXT_PROCESS_POT_FILE _potFile)
 
       if(_parsedArguments_INSTALL_DESTINATION)
          install(FILES ${_gmoFile} DESTINATION ${_parsedArguments_INSTALL_DESTINATION}/${_lang}/LC_MESSAGES RENAME ${_potBasename}.mo)
-      endif(_parsedArguments_INSTALL_DESTINATION)
+      endif()
       list(APPEND _gmoFiles ${_gmoFile})
-   endforeach (_lang )
+   endforeach ()
 
   if(NOT TARGET potfiles)
      add_custom_target(potfiles)
@@ -160,13 +160,13 @@ function(GETTEXT_PROCESS_POT_FILE _potFile)
 
    if(_parsedArguments_ALL)
       add_custom_target(${uniqueTargetName} ALL DEPENDS ${_gmoFiles})
-   else(_parsedArguments_ALL)
+   else()
       add_custom_target(${uniqueTargetName} DEPENDS ${_gmoFiles})
-   endif(_parsedArguments_ALL)
+   endif()
 
    add_dependencies(potfiles ${uniqueTargetName})
 
-endfunction(GETTEXT_PROCESS_POT_FILE)
+endfunction()
 
 
 function(GETTEXT_PROCESS_PO_FILES _lang)
@@ -189,9 +189,9 @@ function(GETTEXT_PROCESS_PO_FILES _lang)
 
       if(_parsedArguments_INSTALL_DESTINATION)
          install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.gmo DESTINATION ${_parsedArguments_INSTALL_DESTINATION}/${_lang}/LC_MESSAGES/ RENAME ${_basename}.mo)
-      endif(_parsedArguments_INSTALL_DESTINATION)
+      endif()
       list(APPEND _gmoFiles ${_gmoFile})
-   endforeach(_current_PO_FILE)
+   endforeach()
 
 
   if(NOT TARGET pofiles)
@@ -202,19 +202,19 @@ function(GETTEXT_PROCESS_PO_FILES _lang)
 
    if(_parsedArguments_ALL)
       add_custom_target(${uniqueTargetName} ALL DEPENDS ${_gmoFiles})
-   else(_parsedArguments_ALL)
+   else()
       add_custom_target(${uniqueTargetName} DEPENDS ${_gmoFiles})
-   endif(_parsedArguments_ALL)
+   endif()
 
    add_dependencies(pofiles ${uniqueTargetName})
 
-endfunction(GETTEXT_PROCESS_PO_FILES)
+endfunction()
 
 if (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
    set(GETTEXT_FOUND TRUE)
-else (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
+else ()
    set(GETTEXT_FOUND FALSE)
    if (GetText_REQUIRED)
       message(FATAL_ERROR "GetText not found")
-   endif (GetText_REQUIRED)
-endif (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
+   endif ()
+endif ()

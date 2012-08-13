@@ -214,7 +214,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         endif()
     endif()
 
-endfunction(_GTK2_FIND_INCLUDE_DIR)
+endfunction()
 
 #=============================================================
 # _GTK2_FIND_LIBRARY
@@ -343,7 +343,7 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
         set(${_var}_DEBUG ${${_var}})
         set(${_var}_DEBUG ${${_var}} PARENT_SCOPE)
     endif()
-endfunction(_GTK2_FIND_LIBRARY)
+endfunction()
 
 #=============================================================
 

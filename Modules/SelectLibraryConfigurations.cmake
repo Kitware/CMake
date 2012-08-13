@@ -38,8 +38,8 @@ macro( _set_library_name basename GOOD BAD )
         set( ${basename}_LIBRARY_${BAD} ${${basename}_LIBRARY_${GOOD}} )
         set( ${basename}_LIBRARY ${${basename}_LIBRARY_${GOOD}} )
         set( ${basename}_LIBRARIES ${${basename}_LIBRARY_${GOOD}} )
-    endif( ${basename}_LIBRARY_${GOOD} AND NOT ${basename}_LIBRARY_${BAD} )
-endmacro( _set_library_name )
+    endif()
+endmacro()
 
 macro( select_library_configurations basename )
     # if only the release version was found, set the debug to be the release
@@ -61,12 +61,12 @@ macro( select_library_configurations basename )
                 list( APPEND ${basename}_LIBRARY debug "${_libname}" )
             endforeach()
             set( ${basename}_LIBRARIES "${${basename}_LIBRARY}" )
-        else( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
+        else()
             # If there are no configuration types or build type, just use
             # the release version
             set( ${basename}_LIBRARY ${${basename}_LIBRARY_RELEASE} )
             set( ${basename}_LIBRARIES ${${basename}_LIBRARY_RELEASE} )
-        endif( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
+        endif()
     endif()
 
     set( ${basename}_LIBRARY ${${basename}_LIBRARY} CACHE FILEPATH
@@ -74,10 +74,10 @@ macro( select_library_configurations basename )
 
     if( ${basename}_LIBRARY )
         set( ${basename}_FOUND TRUE )
-    endif( ${basename}_LIBRARY )
+    endif()
 
     mark_as_advanced( ${basename}_LIBRARY
         ${basename}_LIBRARY_RELEASE
         ${basename}_LIBRARY_DEBUG
     )
-endmacro( select_library_configurations )
+endmacro()

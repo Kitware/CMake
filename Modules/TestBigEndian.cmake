@@ -28,25 +28,25 @@ macro(TEST_BIG_ENDIAN VARIABLE)
     if(CMAKE_SIZEOF_UNSIGNED_SHORT EQUAL 2)
       message(STATUS "Using unsigned short")
       set(CMAKE_16BIT_TYPE "unsigned short")
-    else(CMAKE_SIZEOF_UNSIGNED_SHORT EQUAL 2)
+    else()
       CHECK_TYPE_SIZE("unsigned int"   CMAKE_SIZEOF_UNSIGNED_INT)
       if(CMAKE_SIZEOF_UNSIGNED_INT)
         message(STATUS "Using unsigned int")
         set(CMAKE_16BIT_TYPE "unsigned int")
 
-      else(CMAKE_SIZEOF_UNSIGNED_INT)
+      else()
 
         CHECK_TYPE_SIZE("unsigned long"  CMAKE_SIZEOF_UNSIGNED_LONG)
         if(CMAKE_SIZEOF_UNSIGNED_LONG)
           message(STATUS "Using unsigned long")
           set(CMAKE_16BIT_TYPE "unsigned long")
-        else(CMAKE_SIZEOF_UNSIGNED_LONG)
+        else()
           message(FATAL_ERROR "no suitable type found")
-        endif(CMAKE_SIZEOF_UNSIGNED_LONG)
+        endif()
 
-      endif(CMAKE_SIZEOF_UNSIGNED_INT)
+      endif()
 
-    endif(CMAKE_SIZEOF_UNSIGNED_SHORT EQUAL 2)
+    endif()
 
 
     configure_file("${CMAKE_ROOT}/Modules/TestEndianess.c.in"
@@ -76,37 +76,37 @@ macro(TEST_BIG_ENDIAN VARIABLE)
           if(CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
             set(CMAKE_TEST_ENDIANESS_STRINGS_BE TRUE)
             set(CMAKE_TEST_ENDIANESS_STRINGS_LE FALSE)
-          else(CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+          else()
             set(CMAKE_TEST_ENDIANESS_STRINGS_BE FALSE)
             set(CMAKE_TEST_ENDIANESS_STRINGS_LE TRUE)
-          endif(CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+          endif()
           message(STATUS "TEST_BIG_ENDIAN found different results, consider setting CMAKE_OSX_ARCHITECTURES or CMAKE_TRY_COMPILE_OSX_ARCHITECTURES to one or no architecture !")
-        endif(CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  CMAKE_TEST_ENDIANESS_STRINGS_LE)
+        endif()
 
         if(CMAKE_TEST_ENDIANESS_STRINGS_LE)
           set(${VARIABLE} 0 CACHE INTERNAL "Result of TEST_BIG_ENDIAN" FORCE)
           message(STATUS "Check if the system is big endian - little endian")
-        endif(CMAKE_TEST_ENDIANESS_STRINGS_LE)
+        endif()
 
         if(CMAKE_TEST_ENDIANESS_STRINGS_BE)
           set(${VARIABLE} 1 CACHE INTERNAL "Result of TEST_BIG_ENDIAN" FORCE)
           message(STATUS "Check if the system is big endian - big endian")
-        endif(CMAKE_TEST_ENDIANESS_STRINGS_BE)
+        endif()
 
         if(NOT CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  NOT CMAKE_TEST_ENDIANESS_STRINGS_LE)
           message(SEND_ERROR "TEST_BIG_ENDIAN found no result!")
-        endif(NOT CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  NOT CMAKE_TEST_ENDIANESS_STRINGS_LE)
+        endif()
 
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the system is big endian passed with the following output:\n${OUTPUT}\nTestEndianess.c:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
 
-      else(HAVE_${VARIABLE})
+      else()
         message(STATUS "Check if the system is big endian - failed")
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the system is big endian failed with the following output:\n${OUTPUT}\nTestEndianess.c:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
         set(${VARIABLE})
-      endif(HAVE_${VARIABLE})
-  endif("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
-endmacro(TEST_BIG_ENDIAN)
+      endif()
+  endif()
+endmacro()
 
 

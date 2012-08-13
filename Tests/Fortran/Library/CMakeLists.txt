@@ -8,4 +8,4 @@ if(CMAKE_Fortran_MODDIR_FLAG)
   set_target_properties(subdir_mods PROPERTIES
     Fortran_MODULE_DIRECTORY modules
     )
-endif(CMAKE_Fortran_MODDIR_FLAG)
+endif()

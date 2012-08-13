@@ -38,7 +38,7 @@ function(OSG_FIND_PATH module header)
             /opt
             /usr/freeware
    )
-endfunction(OSG_FIND_PATH module header)
+endfunction()
 
 
 #
@@ -91,7 +91,7 @@ function(OSG_FIND_LIBRARY module library)
           PARENT_SCOPE
       )
    endif()
-endfunction(OSG_FIND_LIBRARY module library)
+endfunction()
 
 #
 # OSG_MARK_AS_ADVANCED

@@ -67,7 +67,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     else()
       set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
     endif()
-  endforeach(util)
+  endforeach()
   if(CMAKE_BOOTSTRAP)
     unset(CMAKE_USE_SYSTEM_LIBRARIES CACHE)
   endif()
@@ -87,15 +87,15 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   foreach(util ${UTILITIES})
     if(CMAKE_USE_SYSTEM_${util})
       message(STATUS "Using system-installed ${util}")
-    endif(CMAKE_USE_SYSTEM_${util})
-  endforeach(util)
+    endif()
+  endforeach()
 
   # Inform utility library header wrappers whether to use system versions.
   configure_file(${CMake_SOURCE_DIR}/Utilities/cmThirdParty.h.in
     ${CMake_BINARY_DIR}/Utilities/cmThirdParty.h
     @ONLY)
 
-endmacro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
+endmacro()
 
 
 
@@ -103,7 +103,7 @@ endmacro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 set(CMAKE_BUILD_ON_VISUAL_STUDIO 0)
 if(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW )
   set(CMAKE_BUILD_ON_VISUAL_STUDIO 1)
-endif(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW )
+endif()
 
 
 #-----------------------------------------------------------------------
@@ -113,7 +113,7 @@ endif(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW )
 macro(CMAKE_SETUP_TESTING)
   if (NOT DART_ROOT)
     set(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
-  endif (NOT DART_ROOT)
+  endif ()
 
   if(BUILD_TESTING)
     set(CMAKE_TEST_GENERATOR "" CACHE STRING
@@ -123,28 +123,28 @@ macro(CMAKE_SETUP_TESTING)
     if(NOT CMAKE_TEST_GENERATOR)
       set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
       set(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
-    else(NOT CMAKE_TEST_GENERATOR)
+    else()
       set(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
-    endif(NOT CMAKE_TEST_GENERATOR)
+    endif()
 
     # Are we testing with the MSVC compiler?
     set(CMAKE_TEST_MSVC 0)
     if(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
       set(CMAKE_TEST_MSVC 1)
-    else(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    else()
       if("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
           "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
         set(CMAKE_TEST_MSVC 1)
       endif("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
         "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
-    endif(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    endif()
 
     set(CMAKE_TEST_SYSTEM_LIBRARIES 0)
     foreach(util CURL EXPAT XMLRPC ZLIB)
       if(CMAKE_USE_SYSTEM_${util})
         set(CMAKE_TEST_SYSTEM_LIBRARIES 1)
-      endif(CMAKE_USE_SYSTEM_${util})
-    endforeach(util)
+      endif()
+    endforeach()
 
     # This variable is set by cmake, however to
     # test cmake we want to make sure that
@@ -154,7 +154,7 @@ macro(CMAKE_SETUP_TESTING)
     set(CMAKE_CTEST_COMMAND "${CMake_BIN_DIR}/ctest")
     set(CMAKE_CMAKE_COMMAND "${CMake_BIN_DIR}/cmake")
     set(CMAKE_CPACK_COMMAND "${CMake_BIN_DIR}/cpack")
-  endif(BUILD_TESTING)
+  endif()
 
   # configure some files for testing
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
@@ -171,10 +171,10 @@ macro(CMAKE_SETUP_TESTING)
   if(BUILD_TESTING AND DART_ROOT)
     configure_file(${CMake_SOURCE_DIR}/CMakeLogo.gif
       ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
-  endif(BUILD_TESTING AND DART_ROOT)
+  endif()
   mark_as_advanced(DART_ROOT)
   mark_as_advanced(CURL_TESTING)
-endmacro(CMAKE_SETUP_TESTING)
+endmacro()
 
 
 # Provide a way for Visual Studio Express users to turn OFF the new FOLDER
@@ -205,7 +205,7 @@ macro(CMAKE_SET_TARGET_FOLDER tgt folder)
   else()
     set_property(GLOBAL PROPERTY USE_FOLDERS OFF)
   endif()
-endmacro(CMAKE_SET_TARGET_FOLDER)
+endmacro()
 
 
 #-----------------------------------------------------------------------
@@ -266,15 +266,15 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT ZLIB_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_ZLIB is ON but a zlib is not found!")
-    endif(NOT ZLIB_FOUND)
+    endif()
     set(CMAKE_ZLIB_INCLUDES ${ZLIB_INCLUDE_DIR})
     set(CMAKE_ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
-  else(CMAKE_USE_SYSTEM_ZLIB)
+  else()
     set(CMAKE_ZLIB_INCLUDES ${CMake_SOURCE_DIR}/Utilities)
     set(CMAKE_ZLIB_LIBRARIES cmzlib)
     add_subdirectory(Utilities/cmzlib)
     CMAKE_SET_TARGET_FOLDER(cmzlib "Utilities/3rdParty")
-  endif(CMAKE_USE_SYSTEM_ZLIB)
+  endif()
 
   #---------------------------------------------------------------------
   # Build Curl library for CTest.
@@ -283,26 +283,26 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT CURL_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_CURL is ON but a curl is not found!")
-    endif(NOT CURL_FOUND)
+    endif()
     set(CMAKE_CURL_INCLUDES ${CURL_INCLUDE_DIRS})
     set(CMAKE_CURL_LIBRARIES ${CURL_LIBRARIES})
-  else(CMAKE_USE_SYSTEM_CURL)
+  else()
     set(CURL_SPECIAL_ZLIB_H ${CMAKE_ZLIB_HEADER})
     set(CURL_SPECIAL_LIBZ_INCLUDES ${CMAKE_ZLIB_INCLUDES})
     set(CURL_SPECIAL_LIBZ ${CMAKE_ZLIB_LIBRARIES})
     option(CMAKE_BUILD_CURL_SHARED "Should curl be built shared" FALSE)
     if(NOT CMAKE_BUILD_CURL_SHARED)
       add_definitions(-DCURL_STATICLIB)
-    endif(NOT CMAKE_BUILD_CURL_SHARED)
+    endif()
     set(CMAKE_CURL_INCLUDES)
     set(CMAKE_CURL_LIBRARIES cmcurl)
     if(CMAKE_TESTS_CDASH_SERVER)
       set(CMAKE_CURL_TEST_URL "${CMAKE_TESTS_CDASH_SERVER}/user.php")
-    endif(CMAKE_TESTS_CDASH_SERVER)
+    endif()
     add_subdirectory(Utilities/cmcurl)
     CMAKE_SET_TARGET_FOLDER(cmcurl "Utilities/3rdParty")
     CMAKE_SET_TARGET_FOLDER(LIBCURL "Utilities/3rdParty")
-  endif(CMAKE_USE_SYSTEM_CURL)
+  endif()
 
   #---------------------------------------------------------------------
   # Build Compress library for CTest.
@@ -334,7 +334,7 @@ macro (CMAKE_BUILD_UTILITIES)
     endif()
     set(CMAKE_TAR_INCLUDES ${LibArchive_INCLUDE_DIRS})
     set(CMAKE_TAR_LIBRARIES ${LibArchive_LIBRARIES})
-  else(CMAKE_USE_SYSTEM_LIBARCHIVE)
+  else()
     set(ZLIB_INCLUDE_DIR ${CMAKE_ZLIB_INCLUDES})
     set(ZLIB_LIBRARY ${CMAKE_ZLIB_LIBRARIES})
     add_definitions(-DLIBARCHIVE_STATIC)
@@ -346,7 +346,7 @@ macro (CMAKE_BUILD_UTILITIES)
     add_subdirectory(Utilities/cmlibarchive)
     CMAKE_SET_TARGET_FOLDER(cmlibarchive "Utilities/3rdParty")
     set(CMAKE_TAR_LIBRARIES cmlibarchive ${BZIP2_LIBRARIES})
-  endif(CMAKE_USE_SYSTEM_LIBARCHIVE)
+  endif()
 
   #---------------------------------------------------------------------
   # Build expat library for CMake and CTest.
@@ -355,15 +355,15 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT EXPAT_FOUND)
       message(FATAL_ERROR
         "CMAKE_USE_SYSTEM_EXPAT is ON but a expat is not found!")
-    endif(NOT EXPAT_FOUND)
+    endif()
     set(CMAKE_EXPAT_INCLUDES ${EXPAT_INCLUDE_DIRS})
     set(CMAKE_EXPAT_LIBRARIES ${EXPAT_LIBRARIES})
-  else(CMAKE_USE_SYSTEM_EXPAT)
+  else()
     set(CMAKE_EXPAT_INCLUDES)
     set(CMAKE_EXPAT_LIBRARIES cmexpat)
     add_subdirectory(Utilities/cmexpat)
     CMAKE_SET_TARGET_FOLDER(cmexpat "Utilities/3rdParty")
-  endif(CMAKE_USE_SYSTEM_EXPAT)
+  endif()
 
   #---------------------------------------------------------------------
   # Build XMLRPC library for CMake and CTest.
@@ -372,10 +372,10 @@ macro (CMAKE_BUILD_UTILITIES)
     if(NOT XMLRPC_FOUND)
       message(FATAL_ERROR
         "CTEST_USE_XMLRPC is ON but xmlrpc is not found!")
-    endif(NOT XMLRPC_FOUND)
+    endif()
     set(CMAKE_XMLRPC_INCLUDES ${XMLRPC_INCLUDE_DIRS})
     set(CMAKE_XMLRPC_LIBRARIES ${XMLRPC_LIBRARIES})
-  endif(CTEST_USE_XMLRPC)
+  endif()
 
   #---------------------------------------------------------------------
   # Use curses?
@@ -386,20 +386,20 @@ macro (CMAKE_BUILD_UTILITIES)
       find_package(Curses QUIET)
       if (CURSES_LIBRARY)
         option(BUILD_CursesDialog "Build the CMake Curses Dialog ccmake" ON)
-      else (CURSES_LIBRARY)
+      else ()
         message("Curses libraries were not found. Curses GUI for CMake will not be built.")
         set(BUILD_CursesDialog 0)
-      endif (CURSES_LIBRARY)
-    else(NOT "${CMAKE_SYSTEM_NAME}" MATCHES syllable)
+      endif ()
+    else()
       set(BUILD_CursesDialog 0)
-    endif(NOT "${CMAKE_SYSTEM_NAME}" MATCHES syllable)
-  else (UNIX)
+    endif()
+  else ()
     set(BUILD_CursesDialog 0)
-  endif (UNIX)
+  endif ()
   if(BUILD_CursesDialog)
     add_subdirectory(Source/CursesDialog/form)
-  endif(BUILD_CursesDialog)
-endmacro (CMAKE_BUILD_UTILITIES)
+  endif()
+endmacro ()
 
 #-----------------------------------------------------------------------
 if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
@@ -509,7 +509,7 @@ CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
 #
 if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
   set(CMAKE_TESTS_CDASH_SERVER "http://www.cdash.org/CDash")
-endif("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
+endif()
 
 # build the utilities (a macro defined in this file)
 CMAKE_BUILD_UTILITIES()
@@ -524,8 +524,8 @@ if(BUILD_CursesDialog)
   set(CURSES_NEED_RPATH FALSE)
   if(NOT "${_CURSES_DIR}" STREQUAL "/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/lib64" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib64")
     set(CURSES_NEED_RPATH TRUE)
-  endif(NOT "${_CURSES_DIR}" STREQUAL "/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib" AND NOT "${_CURSES_DIR}" STREQUAL "/lib64" AND NOT "${_CURSES_DIR}" STREQUAL "/usr/lib64")
-endif(BUILD_CursesDialog)
+  endif()
+endif()
 
 if(BUILD_QtDialog)
   if(APPLE)
@@ -538,16 +538,16 @@ if(BUILD_QtDialog)
     string(SUBSTRING "${CMAKE_INSTALL_PREFIX}" ${LEN} 1 ENDCH)
     if(NOT "${ENDCH}" STREQUAL "/")
       set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
-    endif(NOT "${ENDCH}" STREQUAL "/")
+    endif()
     set(CMAKE_INSTALL_PREFIX
       "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
-  endif(APPLE)
+  endif()
 
   set(QT_NEED_RPATH FALSE)
   if(NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib64" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib64")
     set(QT_NEED_RPATH TRUE)
-  endif(NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib64" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib64")
-endif(BUILD_QtDialog)
+  endif()
+endif()
 
 
 # The same might be true on other systems for other libraries.
@@ -563,7 +563,7 @@ if (UNIX)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
   endif(CMAKE_USE_SYSTEM_CURL   OR  CMAKE_USE_SYSTEM_ZLIB
         OR  CMAKE_USE_SYSTEM_EXPAT  OR  CTEST_USE_XMLRPC  OR  CURSES_NEED_RPATH  OR  QT_NEED_RPATH)
-endif (UNIX)
+endif ()
 
 
 # add the uninstall support

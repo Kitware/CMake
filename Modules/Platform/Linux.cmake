@@ -16,7 +16,7 @@ set(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)
 foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
   set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
-endforeach(type)
+endforeach()
 
 # Debian policy requires that shared libraries be installed without
 # executable permission.  Fedora policy requires that shared libraries
@@ -31,7 +31,7 @@ if(DEFINED CMAKE_INSTALL_SO_NO_EXE)
   # setting the user provides on the command line.
   set(CMAKE_INSTALL_SO_NO_EXE "${CMAKE_INSTALL_SO_NO_EXE}" CACHE INTERNAL
     "Install .so files without execute permission.")
-else(DEFINED CMAKE_INSTALL_SO_NO_EXE)
+else()
   # Store the decision variable as an internal cache entry to avoid
   # checking the platform every time.  This option is advanced enough
   # that only package maintainers should need to adjust it.  They are
@@ -39,11 +39,11 @@ else(DEFINED CMAKE_INSTALL_SO_NO_EXE)
   if(EXISTS "/etc/debian_version")
     set(CMAKE_INSTALL_SO_NO_EXE 1 CACHE INTERNAL
       "Install .so files without execute permission.")
-  else(EXISTS "/etc/debian_version")
+  else()
     set(CMAKE_INSTALL_SO_NO_EXE 0 CACHE INTERNAL
       "Install .so files without execute permission.")
-  endif(EXISTS "/etc/debian_version")
-endif(DEFINED CMAKE_INSTALL_SO_NO_EXE)
+  endif()
+endif()
 
 # Match multiarch library directory names.
 set(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*")
@@ -54,4 +54,4 @@ include(Platform/UnixPaths)
 # searched.
 if(EXISTS "/etc/debian_version")
   set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
-endif(EXISTS "/etc/debian_version")
+endif()

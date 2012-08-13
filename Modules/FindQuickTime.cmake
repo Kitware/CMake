@@ -28,7 +28,7 @@
 if(APPLE)
   find_path(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h)
   find_library(QUICKTIME_LIBRARY QuickTime)
-else(APPLE)
+else()
   find_path(QUICKTIME_INCLUDE_DIR QuickTime.h
     HINTS
     $ENV{QUICKTIME_DIR}/include
@@ -39,7 +39,7 @@ else(APPLE)
     $ENV{QUICKTIME_DIR}/lib
     $ENV{QUICKTIME_DIR}
   )
-endif(APPLE)
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set QUICKTIME_FOUND to TRUE if
 # all listed variables are TRUE

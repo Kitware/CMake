@@ -28,15 +28,15 @@ if("CMAKE_HAS_ANSI_STRING_STREAM" MATCHES "^CMAKE_HAS_ANSI_STRING_STREAM$")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler has sstream passed with "
       "the following output:\n${OUTPUT}\n\n")
-  else (CMAKE_HAS_ANSI_STRING_STREAM)
+  else ()
     message(STATUS "Check for sstream - not found")
     set (CMAKE_NO_ANSI_STRING_STREAM 1 CACHE INTERNAL
        "Does the compiler support sstream")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "Determining if the CXX compiler has sstream failed with "
       "the following output:\n${OUTPUT}\n\n")
-  endif (CMAKE_HAS_ANSI_STRING_STREAM)
-endif("CMAKE_HAS_ANSI_STRING_STREAM" MATCHES "^CMAKE_HAS_ANSI_STRING_STREAM$")
+  endif ()
+endif()
 
 
 

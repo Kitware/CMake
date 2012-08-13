@@ -58,10 +58,10 @@ if(LUA_LIBRARY)
     find_library(LUA_MATH_LIBRARY m)
     set( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
   # For Windows and Mac, don't need to explicitly include the math library
-  else(UNIX AND NOT APPLE)
+  else()
     set( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
-  endif(UNIX AND NOT APPLE)
-endif(LUA_LIBRARY)
+  endif()
+endif()
 
 if(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
   file(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_str REGEX "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua .+\"")

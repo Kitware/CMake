@@ -14,9 +14,9 @@
 #  if(X11_FOUND)
 #    FIND_PACKAGE_MESSAGE(X11 "Found X11: ${X11_X11_LIB}"
 #      "[${X11_X11_LIB}][${X11_INCLUDE_DIR}]")
-#  else(X11_FOUND)
+#  else()
 #   ...
-#  endif(X11_FOUND)
+#  endif()
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.
@@ -44,6 +44,6 @@ function(FIND_PACKAGE_MESSAGE pkg msg details)
       # message again.
       set("${DETAILS_VAR}" "${details}"
         CACHE INTERNAL "Details about finding ${pkg}")
-    endif(NOT "${details}" STREQUAL "${${DETAILS_VAR}}")
-  endif(NOT ${pkg}_FIND_QUIETLY)
-endfunction(FIND_PACKAGE_MESSAGE)
+    endif()
+  endif()
+endfunction()

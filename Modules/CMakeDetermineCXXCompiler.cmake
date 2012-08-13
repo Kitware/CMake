@@ -46,18 +46,18 @@ if(NOT CMAKE_CXX_COMPILER)
     get_filename_component(CMAKE_CXX_COMPILER_INIT $ENV{CXX} PROGRAM PROGRAM_ARGS CMAKE_CXX_FLAGS_ENV_INIT)
     if(CMAKE_CXX_FLAGS_ENV_INIT)
       set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
-    endif(CMAKE_CXX_FLAGS_ENV_INIT)
+    endif()
     if(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
       message(FATAL_ERROR "Could not find compiler set in environment variable CXX:\n$ENV{CXX}.\n${CMAKE_CXX_COMPILER_INIT}")
-    endif(NOT EXISTS ${CMAKE_CXX_COMPILER_INIT})
-  endif($ENV{CXX} MATCHES ".+")
+    endif()
+  endif()
 
   # next prefer the generator specified compiler
   if(CMAKE_GENERATOR_CXX)
     if(NOT CMAKE_CXX_COMPILER_INIT)
       set(CMAKE_CXX_COMPILER_INIT ${CMAKE_GENERATOR_CXX})
-    endif(NOT CMAKE_CXX_COMPILER_INIT)
-  endif(CMAKE_GENERATOR_CXX)
+    endif()
+  endif()
 
   # finally list compilers to try
   if(NOT CMAKE_CXX_COMPILER_INIT)
@@ -65,7 +65,7 @@ if(NOT CMAKE_CXX_COMPILER)
   endif()
 
   _cmake_find_compiler(CXX)
-else(NOT CMAKE_CXX_COMPILER)
+else()
 
 # we only get here if CMAKE_CXX_COMPILER was specified using -D or a pre-made CMakeCache.txt
 # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
@@ -77,7 +77,7 @@ else(NOT CMAKE_CXX_COMPILER)
   if("${_CMAKE_CXX_COMPILER_LIST_LENGTH}" EQUAL 2)
     list(GET CMAKE_CXX_COMPILER 1 CMAKE_CXX_COMPILER_ARG1)
     list(GET CMAKE_CXX_COMPILER 0 CMAKE_CXX_COMPILER)
-  endif("${_CMAKE_CXX_COMPILER_LIST_LENGTH}" EQUAL 2)
+  endif()
 
 # if a compiler was specified by the user but without path,
 # now try to find it with the full path
@@ -90,14 +90,14 @@ else(NOT CMAKE_CXX_COMPILER)
     mark_as_advanced(CMAKE_CXX_COMPILER_WITH_PATH)
     if(CMAKE_CXX_COMPILER_WITH_PATH)
       set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_WITH_PATH} CACHE STRING "CXX compiler" FORCE)
-    endif(CMAKE_CXX_COMPILER_WITH_PATH)
-  endif(NOT _CMAKE_USER_CXX_COMPILER_PATH)
-endif(NOT CMAKE_CXX_COMPILER)
+    endif()
+  endif()
+endif()
 mark_as_advanced(CMAKE_CXX_COMPILER)
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
   get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_CXX_COMPILER}" PATH)
-endif (NOT _CMAKE_TOOLCHAIN_LOCATION)
+endif ()
 
 # This block was used before the compiler was identified by building a
 # source file.  Unless g++ crashes when building a small C++
@@ -109,14 +109,14 @@ endif (NOT _CMAKE_TOOLCHAIN_LOCATION)
 # if(BEOS)
 #   set(CMAKE_COMPILER_IS_GNUCXX 1)
 #   set(CMAKE_COMPILER_IS_GNUCXX_RUN 1)
-# endif(BEOS)
+# endif()
 
 # Build a small source file to identify the compiler.
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(CMAKE_CXX_COMPILER_ID_RUN 1)
   set(CMAKE_CXX_PLATFORM_ID "Windows")
   set(CMAKE_CXX_COMPILER_ID "MSVC")
-endif(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+endif()
 if(NOT CMAKE_CXX_COMPILER_ID_RUN)
   set(CMAKE_CXX_COMPILER_ID_RUN 1)
 
@@ -138,13 +138,13 @@ if(NOT CMAKE_CXX_COMPILER_ID_RUN)
   # Set old compiler and platform id variables.
   if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUCXX 1)
-  endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+  endif()
   if("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
     set(CMAKE_COMPILER_IS_MINGW 1)
   elseif("${CMAKE_CXX_PLATFORM_ID}" MATCHES "Cygwin")
     set(CMAKE_COMPILER_IS_CYGWIN 1)
-  endif("${CMAKE_CXX_PLATFORM_ID}" MATCHES "MinGW")
-endif(NOT CMAKE_CXX_COMPILER_ID_RUN)
+  endif()
+endif()
 
 # if we have a g++ cross compiler, they have usually some prefix, like
 # e.g. powerpc-linux-g++, arm-elf-g++ or i586-mingw32msvc-g++ , optionally
@@ -159,13 +159,13 @@ if (CMAKE_CROSSCOMPILING
   get_filename_component(COMPILER_BASENAME "${CMAKE_CXX_COMPILER}" NAME)
   if (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
+  endif ()
 
   # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
   # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
   if ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+  endif ()
 
 endif (CMAKE_CROSSCOMPILING
     AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU"
@@ -176,7 +176,7 @@ include(CMakeFindBinUtils)
 if(MSVC_CXX_ARCHITECTURE_ID)
   set(SET_MSVC_CXX_ARCHITECTURE_ID
     "set(MSVC_CXX_ARCHITECTURE_ID ${MSVC_CXX_ARCHITECTURE_ID})")
-endif(MSVC_CXX_ARCHITECTURE_ID)
+endif()
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
   ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake

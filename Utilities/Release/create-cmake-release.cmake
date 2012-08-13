@@ -32,7 +32,7 @@ ${CMAKE_COMMAND} -DCMAKE_CREATE_VERSION=${CMAKE_CREATE_VERSION} -P ${CMAKE_ROOT}
 xterm -geometry 64x6+${x}+${y} -sb -sl 2000 -T ${f}-${CMAKE_CREATE_VERSION}.log -e tail -f  ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log&
 ")
     math(EXPR i "${i}+1")
-  endforeach(f)
+  endforeach()
   execute_process(COMMAND chmod a+x ${filename})
 endfunction()
 

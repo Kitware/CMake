@@ -8,6 +8,6 @@ message("T9 ${t9_name} resulted ${t9_var}")
 
 if ( "${t4_var}" EQUAL "0" AND "${t9_var}" EQUAL "0" )
   message("Everything is good, Yoshimi won...")
-else ( "${t4_var}" EQUAL "0" AND "${t9_var}" EQUAL "0" )
+else ()
   message(FATAL_ERROR "Yoshimi lost... The evil pink robots will take over the world")
-endif ( "${t4_var}" EQUAL "0" AND "${t9_var}" EQUAL "0" )
+endif ()

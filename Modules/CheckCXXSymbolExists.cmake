@@ -39,4 +39,4 @@ include(CheckSymbolExists)
 
 macro(CHECK_CXX_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   _CHECK_SYMBOL_EXISTS("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.cxx" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
-endmacro(CHECK_CXX_SYMBOL_EXISTS)
+endmacro()

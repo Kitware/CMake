@@ -44,8 +44,8 @@ if(NOT _INCLUDED_SYSTEM_INFO_FILE)
                    ${CMAKE_BINARY_DIR}/CopyOfCMakeCache.txt COPYONLY)
     message("Your CMakeCache.txt file was copied to CopyOfCMakeCache.txt. "
             "Please send that file to cmake@www.cmake.org.")
-   endif(EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
-endif(NOT _INCLUDED_SYSTEM_INFO_FILE)
+   endif()
+endif()
 
 
 # optionally include a file which can do extra-generator specific things, e.g.
@@ -53,7 +53,7 @@ endif(NOT _INCLUDED_SYSTEM_INFO_FILE)
 if(CMAKE_EXTRA_GENERATOR)
   string(REPLACE " " "" _CMAKE_EXTRA_GENERATOR_NO_SPACES ${CMAKE_EXTRA_GENERATOR} )
   include("CMakeFind${_CMAKE_EXTRA_GENERATOR_NO_SPACES}" OPTIONAL)
-endif(CMAKE_EXTRA_GENERATOR)
+endif()
 
 
 # for most systems a module is the same as a shared library
@@ -63,7 +63,7 @@ endif(CMAKE_EXTRA_GENERATOR)
 if(NOT CMAKE_MODULE_EXISTS)
   set(CMAKE_SHARED_MODULE_PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}")
   set(CMAKE_SHARED_MODULE_SUFFIX "${CMAKE_SHARED_LIBRARY_SUFFIX}")
-endif(NOT CMAKE_MODULE_EXISTS)
+endif()
 
 
 set(CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED 1)

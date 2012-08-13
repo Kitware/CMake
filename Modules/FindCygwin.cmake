@@ -25,4 +25,4 @@ if (WIN32)
   mark_as_advanced(
     CYGWIN_INSTALL_PATH
   )
-endif (WIN32)
+endif ()

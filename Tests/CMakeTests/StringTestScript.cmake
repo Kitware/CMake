@@ -236,42 +236,42 @@ elseif(testname STREQUAL string_find_with_no_possible_result) # pass
   message(STATUS "v='${v}'")
   if(NOT(-1 EQUAL ${v}))
     message(SEND_ERROR "FIND sub-command should return -1 but returned ${v}.")
-  endif(NOT(-1 EQUAL ${v}))
+  endif()
 
 elseif(testname STREQUAL string_find_reverse_with_no_possible_result) # pass
   string(FIND "CMake is a great application." "z" v REVERSE)
   message(STATUS "v='${v}'")
   if(NOT(-1 EQUAL ${v}))
     message(SEND_ERROR "FIND REVERSE sub-command should return -1 but returned ${v}.")
-  endif(NOT(-1 EQUAL ${v}))
+  endif()
 
 elseif(testname STREQUAL string_find_with_required_result) # pass
   string(FIND "CMake is a great application." "g" v)
   message(STATUS "v='${v}'")
   if(NOT(11 EQUAL ${v}))
     message(SEND_ERROR "FIND sub-command should return 11 but returned ${v}.")
-  endif(NOT(11 EQUAL ${v}))
+  endif()
 
 elseif(testname STREQUAL string_find_reverse_with_required_result) # pass
   string(FIND "CMake is a great application." "e" v REVERSE)
   message(STATUS "v='${v}'")
   if(NOT(13 EQUAL ${v}))
     message(SEND_ERROR "FIND REVERSE sub-command should return 13 but returned ${v}.")
-  endif(NOT(13 EQUAL ${v}))
+  endif()
 
 elseif(testname STREQUAL string_find_word_reverse_with_required_result) # pass
   string(FIND "The command should find REVERSE in this string. Or maybe this REVERSE?!" "REVERSE" v)
   message(STATUS "v='${v}'")
   if(NOT(24 EQUAL ${v}))
     message(SEND_ERROR "FIND sub-command should return 24 but returned ${v}.")
-  endif(NOT(24 EQUAL ${v}))
+  endif()
 
 elseif(testname STREQUAL string_find_reverse_word_reverse_with_required_result) # pass
   string(FIND "The command should find REVERSE in this string. Or maybe this REVERSE?!" "REVERSE" v REVERSE)
   message(STATUS "v='${v}'")
   if(NOT(62 EQUAL ${v}))
     message(SEND_ERROR "FIND sub-command should return 62 but returned ${v}.")
-  endif(NOT(62 EQUAL ${v}))
+  endif()
 
 else() # fail
   message(FATAL_ERROR "testname='${testname}' - error: no such test in '${CMAKE_CURRENT_LIST_FILE}'")

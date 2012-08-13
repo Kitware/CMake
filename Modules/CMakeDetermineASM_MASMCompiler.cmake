@@ -19,9 +19,9 @@ set(ASM_DIALECT "_MASM")
 # if we are using the 64bit cl compiler, assume we also want the 64bit assembler
 if(CMAKE_CL_64)
    set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml64)
-else(CMAKE_CL_64)
+else()
    set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ml)
-endif(CMAKE_CL_64)
+endif()
 
 include(CMakeDetermineASMCompiler)
 set(ASM_DIALECT)

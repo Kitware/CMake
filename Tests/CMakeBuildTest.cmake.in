@@ -16,7 +16,7 @@ execute_process(COMMAND "${CMAKE_COMMAND}"
   RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running cmake command")
-endif(RESULT)
+endif()
 
 # Now use the --build option to build the project
 message("running: ${CMAKE_COMMAND} --build")
@@ -25,7 +25,7 @@ execute_process(COMMAND "${CMAKE_COMMAND}"
   RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running cmake --build")
-endif(RESULT)
+endif()
 
 # check for configuration types
 set(CMAKE_CONFIGURATION_TYPES @CMAKE_CONFIGURATION_TYPES@)
@@ -33,15 +33,15 @@ set(CMAKE_CONFIGURATION_TYPES @CMAKE_CONFIGURATION_TYPES@)
 # are configuration types
 if(CMAKE_CONFIGURATION_TYPES)
   set(RUN_TEST "@CMAKE_BUILD_TEST_BINARY_DIR@/Debug/@CMAKE_BUILD_TEST_EXE@")
-else(CMAKE_CONFIGURATION_TYPES)
+else()
   set(RUN_TEST "@CMAKE_BUILD_TEST_BINARY_DIR@/@CMAKE_BUILD_TEST_EXE@")
-endif(CMAKE_CONFIGURATION_TYPES)
+endif()
 # run the test results
 message("running [${RUN_TEST}]")
 execute_process(COMMAND "${RUN_TEST}" RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running test @CMAKE_BUILD_TEST_EXE@")
-endif(RESULT)
+endif()
 
 # build it again with clean and only @CMAKE_BUILD_TEST_EXE@ target
 execute_process(COMMAND "${CMAKE_COMMAND}"
@@ -50,10 +50,10 @@ execute_process(COMMAND "${CMAKE_COMMAND}"
   RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running cmake --build")
-endif(RESULT)
+endif()
 
 # run it again after clean
 execute_process(COMMAND "${RUN_TEST}" RESULT_VARIABLE RESULT)
 if(RESULT)
   message(FATAL_ERROR "Error running test @CMAKE_BUILD_TEST_EXE@ after clean ")
-endif(RESULT)
+endif()

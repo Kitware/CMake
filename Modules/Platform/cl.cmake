@@ -8,13 +8,13 @@ set(MSVC 1)
 # hardcode CMAKE_LINKER here to link, so it behaves as it did before, Alex
 if(NOT DEFINED CMAKE_LINKER)
    set(CMAKE_LINKER link)
-endif(NOT DEFINED CMAKE_LINKER)
+endif()
 
 if(CMAKE_VERBOSE_MAKEFILE)
   set(CMAKE_CL_NOLOGO)
-else(CMAKE_VERBOSE_MAKEFILE)
+else()
   set(CMAKE_CL_NOLOGO "/nologo")
-endif(CMAKE_VERBOSE_MAKEFILE)
+endif()
 # create a shared C++ library
 set(CMAKE_CXX_CREATE_SHARED_LIBRARY
   "<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")

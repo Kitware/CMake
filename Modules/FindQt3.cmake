@@ -38,19 +38,19 @@
 if(QT4_FOUND)
   if(Qt3_FIND_REQUIRED)
     message( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
-  else(Qt3_FIND_REQUIRED)
+  else()
     if(NOT Qt3_FIND_QUIETLY)
       message( STATUS    "Qt3 and Qt4 cannot be used together in one project.")
-    endif(NOT Qt3_FIND_QUIETLY)
+    endif()
     return()
-  endif(Qt3_FIND_REQUIRED)
-endif(QT4_FOUND)
+  endif()
+endif()
 
 
 file(GLOB GLOB_PATHS /usr/lib/qt-3*)
 foreach(GLOB_PATH ${GLOB_PATHS})
   list(APPEND GLOB_PATHS_BIN "${GLOB_PATH}/bin")
-endforeach(GLOB_PATH)
+endforeach()
 find_path(QT_INCLUDE_DIR qt.h
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
@@ -70,7 +70,7 @@ find_path(QT_INCLUDE_DIR qt.h
 # QT_INCLUDE_DIR to NOTFOUND
 if(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
   set(QT_INCLUDE_DIR QT_INCLUDE_DIR-NOTFOUND CACHE PATH "path to Qt3 include directory" FORCE)
-endif(NOT EXISTS ${QT_INCLUDE_DIR}/qglobal.h)
+endif()
 
 if(QT_INCLUDE_DIR)
   #extract the version string from qglobal.h
@@ -82,7 +82,7 @@ if(QT_INCLUDE_DIR)
   # version X.Y.Z, so we need to remove the dots from version
   string(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
   set(QT_VERSION_STRING "${qt_version_str}")
-endif(QT_INCLUDE_DIR)
+endif()
 
 file(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
 if (QT_MT_REQUIRED)
@@ -104,7 +104,7 @@ if (QT_MT_REQUIRED)
     C:/Progra~1/qt/lib
     )
 
-else (QT_MT_REQUIRED)
+else ()
   find_library(QT_QT_LIBRARY
     NAMES
     qt qt-${qt_version_str_lib} qt-edu${qt_version_str_lib}
@@ -123,7 +123,7 @@ else (QT_MT_REQUIRED)
     /usr/share/qt3/lib
     C:/Progra~1/qt/lib
     )
-endif (QT_MT_REQUIRED)
+endif ()
 
 
 find_library(QT_QASSISTANTCLIENT_LIBRARY
@@ -162,7 +162,7 @@ find_program(QT_MOC_EXECUTABLE
 
 if(QT_MOC_EXECUTABLE)
   set ( QT_WRAP_CPP "YES")
-endif(QT_MOC_EXECUTABLE)
+endif()
 
 # qt 3 should prefer QTDIR over the PATH
 find_program(QT_UIC_EXECUTABLE
@@ -184,7 +184,7 @@ find_program(QT_UIC_EXECUTABLE
 
 if(QT_UIC_EXECUTABLE)
   set ( QT_WRAP_UI "YES")
-endif(QT_UIC_EXECUTABLE)
+endif()
 
 if (WIN32)
   find_library(QT_QTMAIN_LIBRARY qtmain
@@ -198,12 +198,12 @@ if (WIN32)
     "C:/Program Files/qt/lib"
     DOC "This Library is only needed by and included with Qt3 on MSWindows. It should be NOTFOUND, undefined or IGNORE otherwise."
     )
-endif (WIN32)
+endif ()
 
 #support old QT_MIN_VERSION if set, but not if version is supplied by find_package()
 if(NOT Qt3_FIND_VERSION AND QT_MIN_VERSION)
   set(Qt3_FIND_VERSION ${QT_MIN_VERSION})
-endif(NOT Qt3_FIND_VERSION AND QT_MIN_VERSION)
+endif()
 
 # if the include a library are found then we have it
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
@@ -222,23 +222,23 @@ if(QT_FOUND)
       set (QT_DEFINITIONS -DQT_DLL -DQT_THREAD_SUPPORT -DNO_DEBUG)
       set (QT_LIBRARIES imm32.lib ${QT_QT_LIBRARY} ${QT_QTMAIN_LIBRARY} )
       set (QT_LIBRARIES ${QT_LIBRARIES} winmm wsock32)
-    else (QT_QTMAIN_LIBRARY)
+    else ()
       # for version 2
       set (QT_LIBRARIES imm32.lib ws2_32.lib ${QT_QT_LIBRARY} )
-    endif (QT_QTMAIN_LIBRARY)
-  else (WIN32 AND NOT CYGWIN)
+    endif ()
+  else ()
     set (QT_LIBRARIES ${QT_QT_LIBRARY} )
 
     set (QT_DEFINITIONS -DQT_SHARED -DQT_NO_DEBUG)
     if(QT_QT_LIBRARY MATCHES "qt-mt")
       set (QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_THREAD_SUPPORT -D_REENTRANT)
-    endif(QT_QT_LIBRARY MATCHES "qt-mt")
+    endif()
 
-  endif (WIN32 AND NOT CYGWIN)
+  endif ()
 
   if (QT_QASSISTANTCLIENT_LIBRARY)
     set (QT_LIBRARIES ${QT_QASSISTANTCLIENT_LIBRARY} ${QT_LIBRARIES})
-  endif (QT_QASSISTANTCLIENT_LIBRARY)
+  endif ()
 
   # Backwards compatibility for CMake1.4 and 1.2
   set (QT_MOC_EXE ${QT_MOC_EXECUTABLE} )
@@ -248,47 +248,47 @@ if(QT_FOUND)
     find_package(X11)
     if (X11_FOUND)
       set (QT_LIBRARIES ${QT_LIBRARIES} ${X11_LIBRARIES})
-    endif (X11_FOUND)
+    endif ()
     if (CMAKE_DL_LIBS)
       set (QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_DL_LIBS})
-    endif (CMAKE_DL_LIBS)
-  endif(UNIX)
+    endif ()
+  endif()
   if(QT_QT_LIBRARY MATCHES "qt-mt")
     find_package(Threads)
     set(QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-  endif(QT_QT_LIBRARY MATCHES "qt-mt")
-endif(QT_FOUND)
+  endif()
+endif()
 
 if(QT_MOC_EXECUTABLE)
   execute_process(COMMAND ${QT_MOC_EXECUTABLE} "-v"
                   OUTPUT_VARIABLE QTVERSION_MOC
                   ERROR_QUIET)
-endif(QT_MOC_EXECUTABLE)
+endif()
 if(QT_UIC_EXECUTABLE)
   execute_process(COMMAND ${QT_UIC_EXECUTABLE} "-version"
                   OUTPUT_VARIABLE QTVERSION_UIC
                   ERROR_QUIET)
-endif(QT_UIC_EXECUTABLE)
+endif()
 
 set(_QT_UIC_VERSION_3 FALSE)
 if("${QTVERSION_UIC}" MATCHES ".* 3..*")
   set(_QT_UIC_VERSION_3 TRUE)
-endif("${QTVERSION_UIC}" MATCHES ".* 3..*")
+endif()
 
 set(_QT_MOC_VERSION_3 FALSE)
 if("${QTVERSION_MOC}" MATCHES ".* 3..*")
   set(_QT_MOC_VERSION_3 TRUE)
-endif("${QTVERSION_MOC}" MATCHES ".* 3..*")
+endif()
 
 set(QT_WRAP_CPP FALSE)
 if (QT_MOC_EXECUTABLE AND _QT_MOC_VERSION_3)
   set ( QT_WRAP_CPP TRUE)
-endif (QT_MOC_EXECUTABLE AND _QT_MOC_VERSION_3)
+endif ()
 
 set(QT_WRAP_UI FALSE)
 if (QT_UIC_EXECUTABLE AND _QT_UIC_VERSION_3)
   set ( QT_WRAP_UI TRUE)
-endif (QT_UIC_EXECUTABLE AND _QT_UIC_VERSION_3)
+endif ()
 
 mark_as_advanced(
   QT_INCLUDE_DIR

@@ -33,7 +33,7 @@ if (UNIX)
     /usr/local/avifile/lib
   )
 
-endif (UNIX)
+endif ()
 
 # handle the QUIETLY and REQUIRED arguments and set AVIFILE_FOUND to TRUE if
 # all listed variables are TRUE

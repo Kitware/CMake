@@ -30,10 +30,10 @@ include(Platform/UnixPaths)
 get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
 if(CMAKE_C_COMPILER AND NOT  "${CMAKE_C_COMPILER_ID}" MATCHES "GNU" AND NOT _IN_TC)
   message(FATAL_ERROR "GNU gcc is required for eCos")
-endif(CMAKE_C_COMPILER AND NOT  "${CMAKE_C_COMPILER_ID}" MATCHES "GNU" AND NOT _IN_TC)
+endif()
 if(CMAKE_CXX_COMPILER AND NOT  "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND NOT _IN_TC)
   message(FATAL_ERROR "GNU g++ is required for eCos")
-endif(CMAKE_CXX_COMPILER AND NOT  "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND NOT _IN_TC)
+endif()
 
 # find eCos system files
 find_path(ECOS_SYSTEM_CONFIG_HEADER_PATH NAMES pkgconf/system.h)
@@ -41,11 +41,11 @@ find_library(ECOS_SYSTEM_TARGET_LIBRARY NAMES libtarget.a)
 
 if(NOT ECOS_SYSTEM_CONFIG_HEADER_PATH)
   message(FATAL_ERROR "Could not find eCos pkgconf/system.h. Build eCos first and set up CMAKE_FIND_ROOT_PATH correctly.")
-endif(NOT ECOS_SYSTEM_CONFIG_HEADER_PATH)
+endif()
 
 if(NOT ECOS_SYSTEM_TARGET_LIBRARY)
   message(FATAL_ERROR "Could not find eCos \"libtarget.a\". Build eCos first and set up CMAKE_FIND_ROOT_PATH correctly.")
-endif(NOT ECOS_SYSTEM_TARGET_LIBRARY)
+endif()
 
 get_filename_component(ECOS_LIBTARGET_DIRECTORY "${ECOS_SYSTEM_TARGET_LIBRARY}" PATH)
 include_directories(${ECOS_SYSTEM_CONFIG_HEADER_PATH})

@@ -10,6 +10,6 @@ if(EXISTS /usr/include/dlfcn.h)
   set(CMAKE_SHARED_LIBRARY_RPATH_LINK_C_FLAG "-Wl,-rpath-link,")
   set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
   set(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
-endif(EXISTS /usr/include/dlfcn.h)
+endif()
 
 include(Platform/UnixPaths)

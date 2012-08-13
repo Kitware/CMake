@@ -19,6 +19,6 @@ find_program(CMAKE_SH sh.exe )
 if(CMAKE_SH)
   message(FATAL_ERROR "sh.exe was found in your PATH, here:\n${CMAKE_SH}\nFor MinGW make to work correctly sh.exe must NOT be in your path.\nRun cmake from a shell that does not have sh.exe in your PATH.\nIf you want to use a UNIX shell, then use MSYS Makefiles.\n")
   set(CMAKE_MAKE_PROGRAM NOTFOUND)
-endif(CMAKE_SH)
+endif()
 
 mark_as_advanced(CMAKE_MAKE_PROGRAM CMAKE_SH)

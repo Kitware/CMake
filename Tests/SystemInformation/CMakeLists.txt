@@ -16,7 +16,7 @@ add_executable(SystemInformation DumpInformation.cxx)
 
 macro(FOO args)
   message("Test macro")
-endmacro(FOO)
+endmacro()
 
 FOO(lala)
 
@@ -25,34 +25,34 @@ get_cmake_property(res VARIABLES)
 foreach(var ${res})
   file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/AllVariables.txt
              "${var} \"${${var}}\"\n")
-endforeach(var ${res})
+endforeach()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllCommands.txt "")
 get_cmake_property(res COMMANDS)
 foreach(var ${res})
   file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/AllCommands.txt
              "${var}\n")
-endforeach(var ${res})
+endforeach()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllMacros.txt "")
 get_cmake_property(res MACROS)
 foreach(var ${res})
   file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/AllMacros.txt
              "${var}\n")
-endforeach(var ${res})
+endforeach()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/OtherProperties.txt "")
 get_directory_property(res INCLUDE_DIRECTORIES)
 foreach(var ${res})
   file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/OtherProperties.txt
     "INCLUDE_DIRECTORY: ${var}\n")
-endforeach(var)
+endforeach()
 
 get_directory_property(res LINK_DIRECTORIES)
 foreach(var ${res})
   file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/OtherProperties.txt
     "LINK_DIRECTORIES: ${var}\n")
-endforeach(var)
+endforeach()
 
 get_directory_property(res INCLUDE_REGULAR_EXPRESSION)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/OtherProperties.txt

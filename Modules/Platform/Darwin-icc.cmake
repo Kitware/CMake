@@ -13,7 +13,7 @@ if ( _OSX_VERSION MATCHES "^10.4" )
     set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "-O2 -gdwarf-2")
     set (CMAKE_C_CREATE_PREPROCESSED_SOURCE "<CMAKE_C_COMPILER> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
     set (CMAKE_C_CREATE_ASSEMBLY_SOURCE "<CMAKE_C_COMPILER> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
- # endif(CMAKE_COMPILER_IS_GNUCC)
+ # endif()
 
 #  if(CMAKE_COMPILER_IS_GNUCXX)
     set (CMAKE_CXX_FLAGS_INIT "")
@@ -23,8 +23,8 @@ if ( _OSX_VERSION MATCHES "^10.4" )
     set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-O2 -gdwarf-2")
     set (CMAKE_CXX_CREATE_PREPROCESSED_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
     set (CMAKE_CXX_CREATE_ASSEMBLY_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
-#  endif(CMAKE_COMPILER_IS_GNUCXX)
-endif ( _OSX_VERSION MATCHES "^10.4" )
+#  endif()
+endif ()
 
 
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
@@ -54,17 +54,17 @@ if(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
   # if it is set.
   if(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
     set(_CMAKE_OSX_MACHINE "$ENV{CMAKE_OSX_ARCHITECTURES}")
-  endif(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+  endif()
   # now put _CMAKE_OSX_MACHINE into the cache
   set(CMAKE_OSX_ARCHITECTURES ${_CMAKE_OSX_MACHINE}
     CACHE STRING "Build architectures for OSX")
-endif(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
+endif()
 
 
 if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
   set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
     "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
-endif("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
+endif()
 
 if(NOT XCODE)
   # Enable shared library versioning.  This flag is not actually referenced
@@ -73,13 +73,13 @@ if(NOT XCODE)
   set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
   set(CMAKE_SHARED_LIBRARY_SONAME_CXX_FLAG "-install_name")
   set(CMAKE_SHARED_LIBRARY_SONAME_Fortran_FLAG "-install_name")
-endif(NOT XCODE)
+endif()
 
 # Xcode does not support -isystem yet.
 if(XCODE)
   set(CMAKE_INCLUDE_SYSTEM_FLAG_C)
   set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
-endif(XCODE)
+endif()
 
 set(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
 

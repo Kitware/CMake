@@ -35,7 +35,7 @@
 # For backwards compatibility support
 if(Doxygen_FIND_QUIETLY)
   set(DOXYGEN_FIND_QUIETLY TRUE)
-endif(Doxygen_FIND_QUIETLY)
+endif()
 
 # ===== Rationale for OS X AppBundle mods below =====
 #     With the OS X GUI version, Doxygen likes to be installed to /Applications and
@@ -109,7 +109,7 @@ if(NOT DOXYGEN_SKIP_DOT)
     get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
   endif()
 
-endif(NOT DOXYGEN_SKIP_DOT)
+endif()
 
 #
 # Backwards compatibility...

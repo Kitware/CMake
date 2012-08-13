@@ -30,7 +30,7 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
   set(CXX_TEST_WAS_RUN 1)
-endif(NOT CMAKE_CXX_COMPILER_WORKS)
+endif()
 
 if(NOT CMAKE_CXX_COMPILER_WORKS)
   PrintTestCompilerStatus("CXX" " -- broken")
@@ -46,19 +46,19 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${__CMAKE_CXX_COMPILER_OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
-else(NOT CMAKE_CXX_COMPILER_WORKS)
+else()
   if(CXX_TEST_WAS_RUN)
     PrintTestCompilerStatus("CXX" " -- works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler works passed with "
       "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
-  endif(CXX_TEST_WAS_RUN)
+  endif()
   set(CMAKE_CXX_COMPILER_WORKS 1 CACHE INTERNAL "")
 
   if(CMAKE_CXX_COMPILER_FORCED)
     # The compiler configuration was forced by the user.
     # Assume the user has configured all compiler information.
-  else(CMAKE_CXX_COMPILER_FORCED)
+  else()
     # Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
     include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
     CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
@@ -68,13 +68,13 @@ else(NOT CMAKE_CXX_COMPILER_WORKS)
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
     include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake)
-  endif(CMAKE_CXX_COMPILER_FORCED)
+  endif()
   if(CMAKE_CXX_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_CXX_ABI_FILES})
       include(${f})
     endforeach()
     unset(CMAKE_CXX_ABI_FILES)
   endif()
-endif(NOT CMAKE_CXX_COMPILER_WORKS)
+endif()
 
 unset(__CMAKE_CXX_COMPILER_OUTPUT)

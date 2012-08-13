@@ -1,10 +1,10 @@
 macro(TEST command expected)
   if("x${result}" STREQUAL "x${expected}")
     #message("TEST \"${command}\" success: \"${result}\" expected: \"${expected}\"")
-  else("x${result}" STREQUAL "x${expected}")
+  else()
     message(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
-  endif("x${result}" STREQUAL "x${expected}")
-endmacro(TEST command expected)
+  endif()
+endmacro()
 
 set(mylist andy bill ken brad)
 

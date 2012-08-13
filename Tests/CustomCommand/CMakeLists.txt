@@ -337,7 +337,7 @@ if(NOT MINGW)
   # *  # MinGW programs on windows always expands the wildcard!
   # /  # MSys make converts a leading slash to the mingw home directory
   list(APPEND CHECK_ARGS * /)
-endif(NOT MINGW)
+endif()
 
 # The windows command shell does not support a double quote by itself:
 #   double\"quote
@@ -359,7 +359,7 @@ foreach(arg ${CHECK_ARGS} "")
   set(EXPECTED_ARGUMENTS
     "${EXPECTED_ARGUMENTS}  \"${ARG}\",
 ")
-endforeach(arg)
+endforeach()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
                ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c
                @ONLY IMMEDIATE)

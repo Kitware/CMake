@@ -58,7 +58,7 @@ function(stresstest_list_prerequisites file)
 
   message(STATUS "=============================================================================")
   message(STATUS "")
-endfunction(stresstest_list_prerequisites)
+endfunction()
 
 
 function(test_cmake_executables)
@@ -68,7 +68,7 @@ function(test_cmake_executables)
 
   get_filename_component(cmake_bin_dir "${CMAKE_COMMAND}" PATH)
   list_prerequisites_by_glob(GLOB "${cmake_bin_dir}/*" 0 0 1)
-endfunction(test_cmake_executables)
+endfunction()
 
 
 message(STATUS "=============================================================================")
@@ -93,7 +93,7 @@ if(do_testdefaults)
   message(STATUS "")
   list_prerequisites("${CMAKE_COMMAND}")
   message(STATUS "")
-endif(do_testdefaults)
+endif()
 
 
 set(do_stresstest 0)
@@ -103,7 +103,7 @@ if(do_stresstest)
   message(STATUS "")
   stresstest_list_prerequisites("${CMAKE_COMMAND}")
   message(STATUS "")
-endif(do_stresstest)
+endif()
 
 
 test_cmake_executables()
@@ -141,7 +141,7 @@ message(STATUS "")
 get_cmake_property(vs VARIABLES)
 foreach(v ${vs})
   message(STATUS "${v}='${${v}}'")
-endforeach(v)
+endforeach()
 message(STATUS "")
 
 message(STATUS "=============================================================================")

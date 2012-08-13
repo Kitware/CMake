@@ -198,7 +198,7 @@ function (__java_copy_file src dest comment)
                 ${dest}
         DEPENDS ${src}
         COMMENT ${comment})
-endfunction (__java_copy_file src dest comment)
+endfunction ()
 
 # define helper scripts
 set(_JAVA_CLASS_FILELIST_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaClassFilelist.cmake)
@@ -209,18 +209,18 @@ function(add_jar _TARGET_NAME)
 
     if (NOT DEFINED CMAKE_JAVA_TARGET_OUTPUT_DIR)
       set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
-    endif(NOT DEFINED CMAKE_JAVA_TARGET_OUTPUT_DIR)
+    endif()
 
     if (CMAKE_JAVA_JAR_ENTRY_POINT)
       set(_ENTRY_POINT_OPTION e)
       set(_ENTRY_POINT_VALUE ${CMAKE_JAVA_JAR_ENTRY_POINT})
-    endif (CMAKE_JAVA_JAR_ENTRY_POINT)
+    endif ()
 
     if (LIBRARY_OUTPUT_PATH)
         set(CMAKE_JAVA_LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_PATH})
-    else (LIBRARY_OUTPUT_PATH)
+    else ()
         set(CMAKE_JAVA_LIBRARY_OUTPUT_PATH ${CMAKE_JAVA_TARGET_OUTPUT_DIR})
-    endif (LIBRARY_OUTPUT_PATH)
+    endif ()
 
     set(CMAKE_JAVA_INCLUDE_PATH
         ${CMAKE_JAVA_INCLUDE_PATH}
@@ -231,13 +231,13 @@ function(add_jar _TARGET_NAME)
 
     if (WIN32 AND NOT CYGWIN)
         set(CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
-    else (WIN32 AND NOT CYGWIN)
+    else ()
         set(CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
-    endif(WIN32 AND NOT CYGWIN)
+    endif()
 
     foreach (JAVA_INCLUDE_DIR ${CMAKE_JAVA_INCLUDE_PATH})
        set(CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_PATH_FINAL}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${JAVA_INCLUDE_DIR}")
-    endforeach(JAVA_INCLUDE_DIR)
+    endforeach()
 
     set(CMAKE_JAVA_CLASS_OUTPUT_PATH "${CMAKE_JAVA_TARGET_OUTPUT_DIR}${CMAKE_FILES_DIRECTORY}/${_TARGET_NAME}.dir")
 
@@ -250,7 +250,7 @@ function(add_jar _TARGET_NAME)
         set(_JAVA_TARGET_OUTPUT_LINK "${_TARGET_NAME}.jar")
     elseif (CMAKE_JAVA_TARGET_OUTPUT_NAME)
         set(_JAVA_TARGET_OUTPUT_NAME "${CMAKE_JAVA_TARGET_OUTPUT_NAME}.jar")
-    endif (CMAKE_JAVA_TARGET_OUTPUT_NAME AND CMAKE_JAVA_TARGET_VERSION)
+    endif ()
     # reset
     set(CMAKE_JAVA_TARGET_OUTPUT_NAME)
 
@@ -270,9 +270,9 @@ function(add_jar _TARGET_NAME)
         string(LENGTH ${_JAVA_REL_SOURCE_PATH} _SRC_LEN)
         if (${_BIN_LEN} LESS ${_SRC_LEN})
             set(_JAVA_REL_PATH ${_JAVA_REL_BINARY_PATH})
-        else (${_BIN_LEN} LESS ${_SRC_LEN})
+        else ()
             set(_JAVA_REL_PATH ${_JAVA_REL_SOURCE_PATH})
-        endif (${_BIN_LEN} LESS ${_SRC_LEN})
+        endif ()
         get_filename_component(_JAVA_REL_PATH ${_JAVA_REL_PATH} PATH)
 
         if (_JAVA_EXT MATCHES ".java")
@@ -290,13 +290,13 @@ function(add_jar _TARGET_NAME)
             list(APPEND CMAKE_JAVA_INCLUDE_PATH ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}} ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}_CLASSPATH})
             list(APPEND _JAVA_DEPENDS ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}})
 
-        else (_JAVA_EXT MATCHES ".java")
+        else ()
             __java_copy_file(${CMAKE_CURRENT_SOURCE_DIR}/${_JAVA_SOURCE_FILE}
                              ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_SOURCE_FILE}
                              "Copying ${_JAVA_SOURCE_FILE} to the build directory")
             list(APPEND _JAVA_RESOURCE_FILES ${_JAVA_SOURCE_FILE})
-        endif (_JAVA_EXT MATCHES ".java")
-    endforeach(_JAVA_SOURCE_FILE)
+        endif ()
+    endforeach()
 
     # create an empty java_class_filelist
     if (NOT EXISTS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist)
@@ -327,7 +327,7 @@ function(add_jar _TARGET_NAME)
             DEPENDS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         )
-    endif (_JAVA_COMPILE_FILES)
+    endif ()
 
     # create the jar file
     set(_JAVA_JAR_OUTPUT_PATH
@@ -367,7 +367,7 @@ function(add_jar _TARGET_NAME)
             DEPENDS ${_JAVA_RESOURCE_FILES} ${_JAVA_DEPENDS} ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             COMMENT "Creating Java archive ${_JAVA_TARGET_OUTPUT_NAME}"
         )
-    endif (CMAKE_JNI_TARGET)
+    endif ()
 
     # Add the target and make sure we have the latest resource files.
     add_custom_target(${_TARGET_NAME} ALL DEPENDS ${_JAVA_JAR_OUTPUT_PATH})
@@ -398,8 +398,8 @@ function(add_jar _TARGET_NAME)
                     JNI_SYMLINK
                         ${CMAKE_JAVA_TARGET_OUTPUT_DIR}/${_JAVA_TARGET_OUTPUT_LINK}
             )
-        endif (CMAKE_JNI_TARGET)
-    endif (_JAVA_TARGET_OUTPUT_LINK)
+        endif ()
+    endif ()
 
     set_property(
         TARGET
@@ -417,7 +417,7 @@ function(add_jar _TARGET_NAME)
                 ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
     )
 
-endfunction(add_jar)
+endfunction()
 
 function(INSTALL_JAR _TARGET_NAME _DESTINATION)
     get_property(__FILES
@@ -434,10 +434,10 @@ function(INSTALL_JAR _TARGET_NAME _DESTINATION)
             DESTINATION
                 ${_DESTINATION}
         )
-    else (__FILES)
+    else ()
         message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
-    endif (__FILES)
-endfunction(INSTALL_JAR _TARGET_NAME _DESTINATION)
+    endif ()
+endfunction()
 
 function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
     get_property(__SYMLINK
@@ -454,10 +454,10 @@ function(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
             DESTINATION
                 ${_DESTINATION}
         )
-    else (__SYMLINK)
+    else ()
         message(SEND_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
-    endif (__SYMLINK)
-endfunction(INSTALL_JNI_SYMLINK _TARGET_NAME _DESTINATION)
+    endif ()
+endfunction()
 
 function (find_jar VARIABLE)
     set(_jar_names)
@@ -481,12 +481,12 @@ function (find_jar VARIABLE)
                 set(_state "paths")
             elseif (${arg} STREQUAL "DOC")
                 set(_state "doc")
-            else (${arg} STREQUAL "NAMES")
+            else ()
                 set(_jar_names ${arg})
                 if (_jar_doc STREQUAL "NOTSET")
                     set(_jar_doc "Finding ${arg} jar")
-                endif (_jar_doc STREQUAL "NOTSET")
-            endif (${arg} STREQUAL "VERSIONS")
+                endif ()
+            endif ()
         elseif (${_state} STREQUAL "versions")
             if (${arg} STREQUAL "NAMES")
                 set(_state "names")
@@ -494,9 +494,9 @@ function (find_jar VARIABLE)
                 set(_state "paths")
             elseif (${arg} STREQUAL "DOC")
                 set(_state "doc")
-            else (${arg} STREQUAL "NAMES")
+            else ()
                 set(_jar_versions ${_jar_versions} ${arg})
-            endif (${arg} STREQUAL "NAMES")
+            endif ()
         elseif (${_state} STREQUAL "names")
             if (${arg} STREQUAL "VERSIONS")
                 set(_state "versions")
@@ -504,12 +504,12 @@ function (find_jar VARIABLE)
                 set(_state "paths")
             elseif (${arg} STREQUAL "DOC")
                 set(_state "doc")
-            else (${arg} STREQUAL "VERSIONS")
+            else ()
                 set(_jar_names ${_jar_names} ${arg})
                 if (_jar_doc STREQUAL "NOTSET")
                     set(_jar_doc "Finding ${arg} jar")
-                endif (_jar_doc STREQUAL "NOTSET")
-            endif (${arg} STREQUAL "VERSIONS")
+                endif ()
+            endif ()
         elseif (${_state} STREQUAL "paths")
             if (${arg} STREQUAL "VERSIONS")
                 set(_state "versions")
@@ -517,9 +517,9 @@ function (find_jar VARIABLE)
                 set(_state "names")
             elseif (${arg} STREQUAL "DOC")
                 set(_state "doc")
-            else (${arg} STREQUAL "VERSIONS")
+            else ()
                 set(_jar_paths ${_jar_paths} ${arg})
-            endif (${arg} STREQUAL "VERSIONS")
+            endif ()
         elseif (${_state} STREQUAL "doc")
             if (${arg} STREQUAL "VERSIONS")
                 set(_state "versions")
@@ -527,29 +527,29 @@ function (find_jar VARIABLE)
                 set(_state "names")
             elseif (${arg} STREQUAL "PATHS")
                 set(_state "paths")
-            else (${arg} STREQUAL "VERSIONS")
+            else ()
                 set(_jar_doc ${arg})
-            endif (${arg} STREQUAL "VERSIONS")
-        endif (${_state} STREQUAL "name")
-    endforeach (arg ${ARGN})
+            endif ()
+        endif ()
+    endforeach ()
 
     if (NOT _jar_names)
         message(FATAL_ERROR "find_jar: No name to search for given")
-    endif (NOT _jar_names)
+    endif ()
 
     foreach (jar_name ${_jar_names})
         foreach (version ${_jar_versions})
             set(_jar_files ${_jar_files} ${jar_name}-${version}.jar)
-        endforeach (version ${_jar_versions})
+        endforeach ()
         set(_jar_files ${_jar_files} ${jar_name}.jar)
-    endforeach (jar_name ${_jar_names})
+    endforeach ()
 
     find_file(${VARIABLE}
         NAMES   ${_jar_files}
         PATHS   ${_jar_paths}
         DOC     ${_jar_doc}
         NO_DEFAULT_PATH)
-endfunction (find_jar VARIABLE)
+endfunction ()
 
 function(create_javadoc _target)
     set(_javadoc_packages)
@@ -815,8 +815,8 @@ function(create_javadoc _target)
             else ()
                 set(_javadoc_version ${arg})
             endif ()
-        endif (${_state} STREQUAL "package")
-    endforeach (arg ${ARGN})
+        endif ()
+    endforeach ()
 
     set(_javadoc_builddir ${CMAKE_CURRENT_BINARY_DIR}/javadoc/${_target})
     set(_javadoc_options -d ${_javadoc_builddir})
@@ -827,12 +827,12 @@ function(create_javadoc _target)
             if (_start)
                 set(_sourcepath ${_path})
                 set(_start FALSE)
-            else (_start)
+            else ()
                 set(_sourcepath ${_sourcepath}:${_path})
-            endif (_start)
-        endforeach(_path ${_javadoc_sourcepath})
+            endif ()
+        endforeach()
         set(_javadoc_options ${_javadoc_options} -sourcepath ${_sourcepath})
-    endif (_javadoc_sourcepath)
+    endif ()
 
     if (_javadoc_classpath)
         set(_start TRUE)
@@ -840,32 +840,32 @@ function(create_javadoc _target)
             if (_start)
                 set(_classpath ${_path})
                 set(_start FALSE)
-            else (_start)
+            else ()
                 set(_classpath ${_classpath}:${_path})
-            endif (_start)
-        endforeach(_path ${_javadoc_classpath})
+            endif ()
+        endforeach()
         set(_javadoc_options ${_javadoc_options} -classpath "${_classpath}")
-    endif (_javadoc_classpath)
+    endif ()
 
     if (_javadoc_doctitle)
         set(_javadoc_options ${_javadoc_options} -doctitle '${_javadoc_doctitle}')
-    endif (_javadoc_doctitle)
+    endif ()
 
     if (_javadoc_windowtitle)
         set(_javadoc_options ${_javadoc_options} -windowtitle '${_javadoc_windowtitle}')
-    endif (_javadoc_windowtitle)
+    endif ()
 
     if (_javadoc_author)
         set(_javadoc_options ${_javadoc_options} -author)
-    endif (_javadoc_author)
+    endif ()
 
     if (_javadoc_use)
         set(_javadoc_options ${_javadoc_options} -use)
-    endif (_javadoc_use)
+    endif ()
 
     if (_javadoc_version)
         set(_javadoc_options ${_javadoc_options} -version)
-    endif (_javadoc_version)
+    endif ()
 
     add_custom_target(${_target}_javadoc ALL
         COMMAND ${Java_JAVADOC_EXECUTABLE} ${_javadoc_options}
@@ -878,4 +878,4 @@ function(create_javadoc _target)
         DIRECTORY ${_javadoc_builddir}
         DESTINATION ${_javadoc_installpath}
     )
-endfunction(create_javadoc)
+endfunction()

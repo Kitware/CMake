@@ -34,7 +34,7 @@ macro (CHECK_STRUCT_HAS_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
    set(_INCLUDE_FILES)
    foreach (it ${_HEADER})
       set(_INCLUDE_FILES "${_INCLUDE_FILES}#include <${it}>\n")
-   endforeach (it)
+   endforeach ()
 
    set(_CHECK_STRUCT_MEMBER_SOURCE_CODE "
 ${_INCLUDE_FILES}
@@ -47,5 +47,5 @@ int main()
 ")
    CHECK_C_SOURCE_COMPILES("${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
 
-endmacro (CHECK_STRUCT_HAS_MEMBER)
+endmacro ()
 

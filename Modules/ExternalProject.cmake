@@ -226,7 +226,7 @@ function(_ep_parse_arguments f name ns args)
       set(key "${arg}")
     endif()
   endforeach()
-endfunction(_ep_parse_arguments)
+endfunction()
 
 
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED
@@ -329,7 +329,7 @@ endif()
 "
 )
 
-endfunction(_ep_write_gitclone_script)
+endfunction()
 
 
 function(_ep_write_downloadfile_script script_filename remote local timeout md5)
@@ -377,7 +377,7 @@ message(STATUS \"downloading... done\")
 "
 )
 
-endfunction(_ep_write_downloadfile_script)
+endfunction()
 
 
 function(_ep_write_verifyfile_script script_filename local md5)
@@ -422,7 +422,7 @@ endif()
 "
 )
 
-endfunction(_ep_write_verifyfile_script)
+endfunction()
 
 
 function(_ep_write_extractfile_script script_filename name filename directory)
@@ -502,7 +502,7 @@ message(STATUS \"extracting... done\")
 "
 )
 
-endfunction(_ep_write_extractfile_script)
+endfunction()
 
 
 function(_ep_set_directories name)
@@ -523,7 +523,7 @@ function(_ep_set_directories name)
     set(binary_default "${prefix}/src/${name}-build")
     set(stamp_default "${prefix}/src/${name}-stamp")
     set(install_default "${prefix}")
-  else() # assert(base)
+  else()
     set(tmp_default "${base}/tmp/${name}")
     set(download_default "${base}/Download/${name}")
     set(source_default "${base}/Source/${name}")
@@ -573,7 +573,7 @@ function(_ep_set_directories name)
       message(FATAL_ERROR "dir '${dir}' does not exist after file(MAKE_DIRECTORY)")
     endif()
   endforeach()
-endfunction(_ep_set_directories)
+endfunction()
 
 
 # IMPORTANT: this MUST be a macro and not a function because of the
@@ -633,7 +633,7 @@ function(_ep_write_initial_cache target_name script_filename args)
     file(WRITE "${script_filename}.in" "\@script_initial_cache\@\n")
   endif()
   configure_file("${script_filename}.in" "${script_filename}")
-endfunction(_ep_write_initial_cache)
+endfunction()
 
 
 function(ExternalProject_Get_Property name)
@@ -645,7 +645,7 @@ function(ExternalProject_Get_Property name)
     endif()
     set(${var} "${${var}}" PARENT_SCOPE)
   endforeach()
-endfunction(ExternalProject_Get_Property)
+endfunction()
 
 
 function(_ep_get_configure_command_id name cfg_cmd_id_var)
@@ -671,7 +671,7 @@ function(_ep_get_configure_command_id name cfg_cmd_id_var)
       endif()
     endif()
   endif()
-endfunction(_ep_get_configure_command_id)
+endfunction()
 
 
 function(_ep_get_build_command name step cmd_var)
@@ -710,7 +710,7 @@ function(_ep_get_build_command name step cmd_var)
           set(args "")
         endif()
       endif()
-    else() # if(cfg_cmd_id STREQUAL "configure")
+    else()
       # Non-CMake project.  Guess "make" and "make install" and "make test".
       if("${CMAKE_GENERATOR}" MATCHES "Makefiles")
         # Try to get the parallel arguments
@@ -736,7 +736,7 @@ function(_ep_get_build_command name step cmd_var)
   endif()
 
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
-endfunction(_ep_get_build_command)
+endfunction()
 
 function(_ep_write_log_script name step cmd_var)
   ExternalProject_Get_Property(${name} stamp_dir)
@@ -784,7 +784,7 @@ if(result)
   set(msg \"Command failed (\${result}):\\n\")
   foreach(arg IN LISTS command)
     set(msg \"\${msg} '\${arg}'\")
-  endforeach(arg)
+  endforeach()
   message(FATAL_ERROR \"\${msg}\")
 endif()
 ")
@@ -823,7 +823,7 @@ if(result)
   set(msg \"Command failed: \${result}\\n\")
   foreach(arg IN LISTS command)
     set(msg \"\${msg} '\${arg}'\")
-  endforeach(arg)
+  endforeach()
   set(msg \"\${msg}\\nSee also\\n  ${logbase}-*.log\\n\")
   message(FATAL_ERROR \"\${msg}\")
 else()
@@ -833,7 +833,7 @@ endif()
 ")
   set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script})
   set(${cmd_var} "${command}" PARENT_SCOPE)
-endfunction(_ep_write_log_script)
+endfunction()
 
 # This module used to use "/${CMAKE_CFG_INTDIR}" directly and produced
 # makefiles with "/./" in paths for custom command dependencies. Which
@@ -849,7 +849,7 @@ function(_ep_get_configuration_subdir_suffix suffix_var)
     set(suffix "/${CMAKE_CFG_INTDIR}")
   endif()
   set(${suffix_var} "${suffix}" PARENT_SCOPE)
-endfunction(_ep_get_configuration_subdir_suffix)
+endfunction()
 
 
 function(_ep_get_step_stampfile name step stampfile_var)
@@ -876,7 +876,7 @@ function(ExternalProject_Add_StepTargets name)
       add_dependencies(${name}-${step} ${arg})
     endforeach()
   endforeach()
-endfunction(ExternalProject_Add_StepTargets)
+endfunction()
 
 
 function(ExternalProject_Add_Step name step)
@@ -974,7 +974,7 @@ function(ExternalProject_Add_Step name step)
       break()
     endif()
   endforeach()
-endfunction(ExternalProject_Add_Step)
+endfunction()
 
 
 function(_ep_add_mkdir_command name)
@@ -992,7 +992,7 @@ function(_ep_add_mkdir_command name)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${stamp_dir}${cfgdir}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${download_dir}
     )
-endfunction(_ep_add_mkdir_command)
+endfunction()
 
 
 function(_ep_get_git_version git_EXECUTABLE git_version_var)
@@ -1215,7 +1215,7 @@ function(_ep_add_download_command name)
     DEPENDEES mkdir
     ${log}
     )
-endfunction(_ep_add_download_command)
+endfunction()
 
 
 function(_ep_add_update_command name)
@@ -1297,7 +1297,7 @@ function(_ep_add_update_command name)
     DEPENDEES download
     ${log}
     )
-endfunction(_ep_add_update_command)
+endfunction()
 
 
 function(_ep_add_patch_command name)
@@ -1317,7 +1317,7 @@ function(_ep_add_patch_command name)
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
     )
-endfunction(_ep_add_patch_command)
+endfunction()
 
 
 # TODO: Make sure external projects use the proper compiler
@@ -1392,7 +1392,7 @@ function(_ep_add_configure_command name)
     DEPENDS ${file_deps}
     ${log}
     )
-endfunction(_ep_add_configure_command)
+endfunction()
 
 
 function(_ep_add_build_command name)
@@ -1418,7 +1418,7 @@ function(_ep_add_build_command name)
     DEPENDEES configure
     ${log}
     )
-endfunction(_ep_add_build_command)
+endfunction()
 
 
 function(_ep_add_install_command name)
@@ -1444,7 +1444,7 @@ function(_ep_add_install_command name)
     DEPENDEES build
     ${log}
     )
-endfunction(_ep_add_install_command)
+endfunction()
 
 
 function(_ep_add_test_command name)
@@ -1484,7 +1484,7 @@ function(_ep_add_test_command name)
       ${log}
       )
   endif()
-endfunction(_ep_add_test_command)
+endfunction()
 
 
 function(ExternalProject_Add name)
@@ -1550,4 +1550,4 @@ function(ExternalProject_Add name)
   # on install.
   #
   _ep_add_test_command(${name})
-endfunction(ExternalProject_Add)
+endfunction()

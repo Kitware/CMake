@@ -20,7 +20,7 @@ include_directories(${LoadCommand_BINARY_DIR})
 # try to compile the command
 # make sure it is not already loaded
 if(COMMAND CMAKE_TEST_COMMAND)
-else(COMMAND CMAKE_TEST_COMMAND)
+else()
   try_compile(COMPILE_OK
     ${LoadCommand_BINARY_DIR}/CMakeCommands
     ${LoadCommand_SOURCE_DIR}/CMakeCommands
@@ -33,7 +33,7 @@ else(COMMAND CMAKE_TEST_COMMAND)
     ${LoadCommand_SOURCE_DIR}/CMakeCommands
     CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
     OUTPUT_VARIABLE OUTPUT )
-endif(COMMAND CMAKE_TEST_COMMAND)
+endif()
 
 message("Output from try compile: ${OUTPUT}")
 
@@ -51,13 +51,13 @@ if (COMPILE_OK)
       "${LoadCommand_BINARY_DIR}/LoadedCommand2.cxx.in"
       "${LoadCommand_BINARY_DIR}/LoadedCommand3.cxx"
       )
-  endif (COMMAND CMAKE_TEST_COMMAND)
-else (COMPILE_OK)
+  endif ()
+else ()
   message("failed to compile CMAKE_LOADED_COMMANDS")
-endif (COMPILE_OK)
+endif ()
 
 # TEST_DEF is set by the loaded command cmTestCommand.c
 if (TEST_DEF AND SOME_CACHE_VARIABLE AND TEST_EXEC)
   add_definitions(-DCMAKE_IS_FUN)
-endif (TEST_DEF AND SOME_CACHE_VARIABLE AND TEST_EXEC)
+endif ()
 

@@ -33,7 +33,7 @@ if(WIN32)
     "C:/Perl/bin"
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\${ActivePerl_CurrentVersion}]/bin
     )
-endif(WIN32)
+endif()
 
 find_program(PERL_EXECUTABLE
   NAMES perl
@@ -68,7 +68,7 @@ if(PERL_EXECUTABLE)
       string(REGEX REPLACE ".*This is perl, version ([0-9\\._]+) +.*" "\\1" PERL_VERSION_STRING ${PERL_VERSION_OUTPUT_VARIABLE})
     endif()
   endif()
-endif(PERL_EXECUTABLE)
+endif()
 
 # Deprecated settings for compatibility with CMake1.4
 set(PERL ${PERL_EXECUTABLE})

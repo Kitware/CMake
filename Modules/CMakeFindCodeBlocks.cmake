@@ -19,7 +19,7 @@ find_program(CMAKE_CODEBLOCKS_EXECUTABLE NAMES codeblocks DOC "The CodeBlocks ex
 
 if(CMAKE_CODEBLOCKS_EXECUTABLE)
    set(CMAKE_OPEN_PROJECT_COMMAND "${CMAKE_CODEBLOCKS_EXECUTABLE} <PROJECT_FILE>" )
-endif(CMAKE_CODEBLOCKS_EXECUTABLE)
+endif()
 
 # Determine builtin macros and include dirs:
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeExtraGeneratorDetermineCompilerMacrosAndIncludeDirs.cmake)

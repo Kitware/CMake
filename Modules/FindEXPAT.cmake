@@ -36,13 +36,13 @@ if (EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
                        EXPAT_VERSION_PART "${VLINE}")
                 if(EXPAT_VERSION_STRING)
                     set(EXPAT_VERSION_STRING "${EXPAT_VERSION_STRING}.${EXPAT_VERSION_PART}")
-                else(EXPAT_VERSION_STRING)
+                else()
                     set(EXPAT_VERSION_STRING "${EXPAT_VERSION_PART}")
-                endif(EXPAT_VERSION_STRING)
+                endif()
             endif()
-        endforeach(VLINE)
-    endforeach(VPART)
-endif (EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
+        endforeach()
+    endforeach()
+endif ()
 
 # handle the QUIETLY and REQUIRED arguments and set EXPAT_FOUND to TRUE if
 # all listed variables are TRUE
@@ -55,6 +55,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT
 if(EXPAT_FOUND)
   set(EXPAT_LIBRARIES ${EXPAT_LIBRARY})
   set(EXPAT_INCLUDE_DIRS ${EXPAT_INCLUDE_DIR})
-endif(EXPAT_FOUND)
+endif()
 
 mark_as_advanced(EXPAT_INCLUDE_DIR EXPAT_LIBRARY)

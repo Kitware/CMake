@@ -40,15 +40,15 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
       CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}")
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
-    else(CMAKE_REQUIRED_LIBRARIES)
+    else()
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_FUNCTION_EXISTS_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else(CMAKE_REQUIRED_INCLUDES)
+    else()
       set(CHECK_FUNCTION_EXISTS_ADD_INCLUDES)
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
@@ -63,12 +63,12 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the function ${FUNCTION} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
-    else(${VARIABLE})
+    else()
       message(STATUS "Looking for ${FUNCTION} - not found")
       set(${VARIABLE} "" CACHE INTERNAL "Have function ${FUNCTION}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the function ${FUNCTION} exists failed with the following output:\n"
         "${OUTPUT}\n\n")
-    endif(${VARIABLE})
-  endif("${VARIABLE}" MATCHES "^${VARIABLE}$")
-endmacro(CHECK_FUNCTION_EXISTS)
+    endif()
+  endif()
+endmacro()

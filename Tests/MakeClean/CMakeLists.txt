@@ -13,12 +13,12 @@ if(TOCLEAN_BUILT)
     "Building ToClean succeeded with the following output:\n"
     "[${OUTPUT}]"
     )
-else(TOCLEAN_BUILT)
+else()
   message(FATAL_ERROR
     "Building ToClean failed with the following output:\n"
     "[${OUTPUT}]"
     )
-endif(TOCLEAN_BUILT)
+endif()
 
 # Get the set of files to check from the ToClean project.
 include(${MakeClean_BINARY_DIR}/ToClean/ToCleanFiles.cmake)
@@ -26,16 +26,16 @@ include(${MakeClean_BINARY_DIR}/ToClean/ToCleanFiles.cmake)
 # Check for the existence of the files.
 foreach(f ${TOCLEAN_FILES})
   if(EXISTS "${f}")
-  else(EXISTS "${f}")
+  else()
     message(FATAL_ERROR "File \"${f}\" does not exist!")
-  endif(EXISTS "${f}")
-endforeach(f)
+  endif()
+endforeach()
 
 # Configure an executable to check that all the files are missing.
 set(CHECK_FILES)
 foreach(f ${TOCLEAN_FILES})
   set(CHECK_FILES "${CHECK_FILES}      \"${f}\",\n")
-endforeach(f)
+endforeach()
 configure_file(${MakeClean_SOURCE_DIR}/check_clean.c.in
                ${MakeClean_BINARY_DIR}/check_clean.c @ONLY IMMEDIATE)
 add_executable(check_clean ${MakeClean_BINARY_DIR}/check_clean.c)

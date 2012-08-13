@@ -47,11 +47,11 @@ if(CMAKE_USE_KWSTYLE)
 
   if(KWSTYLE_USE_VIM_FORMAT)
     set(KWSTYLE_ARGUMENTS -vim ${KWSTYLE_ARGUMENTS})
-  endif(KWSTYLE_USE_VIM_FORMAT)
+  endif()
 
   if(KWSTYLE_USE_MSVC_FORMAT)
     set(KWSTYLE_ARGUMENTS -msvc ${KWSTYLE_ARGUMENTS})
-  endif(KWSTYLE_USE_MSVC_FORMAT)
+  endif()
 
   configure_file(${CMake_SOURCE_DIR}/Utilities/KWStyle/CMake.kws.xml.in
                ${CMake_BINARY_DIR}/CMake.kws.xml)
@@ -75,4 +75,4 @@ if(CMAKE_USE_KWSTYLE)
     )
 
   add_custom_target(StyleCheck DEPENDS ${CMake_BINARY_DIR}/KWStyleReport.txt)
-endif(CMAKE_USE_KWSTYLE)
+endif()

@@ -14,9 +14,9 @@ include(CheckIncludeFile)
 CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
 if(HAVE_ELF_H)
   set(CMAKE_USE_ELF_PARSER 1)
-else(HAVE_ELF_H)
+else()
   set(CMAKE_USE_ELF_PARSER)
-endif(HAVE_ELF_H)
+endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
@@ -65,7 +65,7 @@ if(CMAKE_REGENERATE_YACCLEX)
     set(BISON_FLAGS)
     if(YACC_EXECUTABLE MATCHES "bison")
       set(BISON_FLAGS "--yacc")
-    endif(YACC_EXECUTABLE MATCHES "bison")
+    endif()
     set(yacc_files)
     foreach(name ${parsersLexers})
       set(src "${CMAKE_CURRENT_SOURCE_DIR}/${name}Parser.y")
@@ -79,9 +79,9 @@ if(CMAKE_REGENERATE_YACCLEX)
         --name-prefix=${name}_yy --defines=${hdr} -o${dst} ${src}
         )
       set(yacc_files ${yacc_files} "${dst}")
-    endforeach(name)
+    endforeach()
     add_custom_target(RerunYacc DEPENDS ${yacc_files})
-  endif(YACC_EXECUTABLE)
+  endif()
   if(FLEX_EXECUTABLE)
     set(lex_files)
     foreach(name ${parsersLexers})
@@ -96,16 +96,16 @@ if(CMAKE_REGENERATE_YACCLEX)
         --prefix=${name}_yy --header-file=${hdr} -o${dst} ${src}
         )
       set(lex_files ${lex_files} "${dst}")
-    endforeach(name)
+    endforeach()
     add_custom_target(RerunLex DEPENDS ${lex_files})
-  endif(FLEX_EXECUTABLE)
+  endif()
 
-endif(CMAKE_REGENERATE_YACCLEX)
+endif()
 
 # Check if we can build the ELF parser.
 if(CMAKE_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
-endif(CMAKE_USE_ELF_PARSER)
+endif()
 
 #
 # Sources for CMakeLib
@@ -277,7 +277,7 @@ set(SRCS
 # Kdevelop only works on UNIX and not windows
 if(UNIX)
   set(SRCS ${SRCS} cmGlobalKdevelopGenerator.cxx)
-endif(UNIX)
+endif()
 
 # Xcode only works on Apple
 if(APPLE)
@@ -288,7 +288,7 @@ if(APPLE)
     cmGlobalXCodeGenerator.h
     cmLocalXCodeGenerator.cxx
     cmLocalXCodeGenerator.h)
-endif(APPLE)
+endif()
 
 
 if (WIN32)
@@ -356,8 +356,8 @@ if (WIN32)
       cmWin32ProcessExecution.cxx
       cmWin32ProcessExecution.h
       )
-  endif(NOT UNIX)
-endif (WIN32)
+  endif()
+endif ()
 
 # Ninja support
 set(SRCS ${SRCS}
@@ -390,12 +390,12 @@ target_link_libraries(CMakeLib cmsys
 # On Apple we need CoreFoundation
 if(APPLE)
   target_link_libraries(CMakeLib "-framework CoreFoundation")
-endif(APPLE)
+endif()
 
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
 if(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
   target_link_libraries(CMakeLib rpcrt4)
-endif(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
+endif()
 
 #
 # CTestLib
@@ -488,14 +488,14 @@ if(CYGWIN)
     CPack/cmCPackCygwinBinaryGenerator.cxx
     CPack/cmCPackCygwinSourceGenerator.cxx
     )
-endif(CYGWIN)
+endif()
 
 if(UNIX)
   set(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackDebGenerator.cxx
     CPack/cmCPackRPMGenerator.cxx
     )
-endif(UNIX)
+endif()
 
 if(APPLE)
   set(CPACK_SRCS ${CPACK_SRCS}
@@ -504,7 +504,7 @@ if(APPLE)
     CPack/cmCPackOSXX11Generator.cxx
     CPack/cmCPackPackageMakerGenerator.cxx
     )
-endif(APPLE)
+endif()
 
 # Build CPackLib
 add_library(CPackLib ${CPACK_SRCS})
@@ -517,7 +517,7 @@ if(APPLE)
     CPack/OSXScriptLauncher.cxx)
   target_link_libraries(OSXScriptLauncher cmsys)
   target_link_libraries(OSXScriptLauncher "-framework CoreFoundation")
-endif(APPLE)
+endif()
 
 # Build CMake executable
 add_executable(cmake cmakemain.cxx)
@@ -529,8 +529,8 @@ if(WIN32)
     add_executable(cmw9xcom cmw9xcom.cxx)
     target_link_libraries(cmw9xcom CMakeLib)
     install_targets(/bin cmw9xcom)
-  endif(NOT UNIX)
-endif(WIN32)
+  endif()
+endif()
 
 # Build CTest executable
 add_executable(ctest ctest.cxx)
@@ -543,13 +543,13 @@ target_link_libraries(cpack CPackLib)
 # Curses GUI
 if(BUILD_CursesDialog)
   include(${CMake_SOURCE_DIR}/Source/CursesDialog/CMakeLists.txt)
-endif(BUILD_CursesDialog)
+endif()
 
 # Qt GUI
 option(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
 if(BUILD_QtDialog)
   subdirs(QtDialog)
-endif(BUILD_QtDialog)
+endif()
 
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
 include (${CMake_SOURCE_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
@@ -559,6 +559,6 @@ install_targets(/bin ctest)
 install_targets(/bin cpack)
 if(APPLE)
   install_targets(/bin cmakexbuild)
-endif(APPLE)
+endif()
 
 install_files(${CMAKE_DATA_DIR}/include cmCPluginAPI.h)

@@ -23,7 +23,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     endif()
 
     include(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
-  endif(EXISTS "${CMAKE_ROOT}/Modules/InstallRequiredSystemLibraries.cmake")
+  endif()
 
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
   set(CPACK_PACKAGE_VENDOR "Kitware")
@@ -56,17 +56,17 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # cygwin is good for the system name
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
       set(CPACK_SYSTEM_NAME Cygwin)
-    else("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+    else()
       set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
-    endif("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
-  endif(NOT DEFINED CPACK_SYSTEM_NAME)
+    endif()
+  endif()
   if(${CPACK_SYSTEM_NAME} MATCHES Windows)
     if(CMAKE_CL_64)
       set(CPACK_SYSTEM_NAME win64-x64)
-    else(CMAKE_CL_64)
+    else()
       set(CPACK_SYSTEM_NAME win32-x86)
-    endif(CMAKE_CL_64)
-  endif(${CPACK_SYSTEM_NAME} MATCHES Windows)
+    endif()
+  endif()
 
   if(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
     # if the CPACK_PACKAGE_FILE_NAME is not defined by the cache
@@ -74,11 +74,11 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # needed
     if(CYGWIN)
       set(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
-    else(CYGWIN)
+    else()
       set(CPACK_PACKAGE_FILE_NAME
         "${CPACK_SOURCE_PACKAGE_FILE_NAME}-${CPACK_SYSTEM_NAME}")
-    endif(CYGWIN)
-  endif(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
+    endif()
+  endif()
 
   set(CPACK_PACKAGE_CONTACT "cmake@cmake.org")
 
@@ -86,7 +86,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     set(CPACK_STRIP_FILES "bin/ccmake;bin/cmake;bin/cpack;bin/ctest")
     set(CPACK_SOURCE_STRIP_FILES "")
     set(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
-  endif(UNIX)
+  endif()
 
   # cygwin specific packaging stuff
   if(CYGWIN)
@@ -110,7 +110,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     # configures some files and adds some install targets
     # this file uses some of the package file name variables
     include(Utilities/Release/Cygwin/CMakeLists.txt)
-  endif(CYGWIN)
+  endif()
 
   # Set the options file that needs to be included inside CMakeCPackOptions.cmake
   set(QT_DIALOG_CPACK_OPTIONS_FILE ${CMake_BINARY_DIR}/Source/QtDialog/QtDialogCPack.cmake)
@@ -120,4 +120,4 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
 
   # include CPack model once all variables are set
   include(CPack)
-endif(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
+endif()

@@ -59,15 +59,15 @@ macro(java_append_library_directories _var)
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "s390" "s390x")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sh")
         set(_java_libarch "sh")
-    else(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    else()
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}")
-    endif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    endif()
 
     # Append default list architectures if CMAKE_SYSTEM_PROCESSOR was empty or
     # system is non-Linux (where the code above has not been well tested)
     if(NOT _java_libarch OR NOT (CMAKE_SYSTEM_NAME MATCHES "Linux"))
         list(APPEND _java_libarch "i386" "amd64" "ppc")
-    endif(NOT _java_libarch OR NOT (CMAKE_SYSTEM_NAME MATCHES "Linux"))
+    endif()
 
     # Sometimes ${CMAKE_SYSTEM_PROCESSOR} is added to the list to prefer
     # current value to a hardcoded list. Remove possible duplicates.
@@ -78,12 +78,12 @@ macro(java_append_library_directories _var)
             foreach(_libarch ${_java_libarch})
                 string(REPLACE "{libarch}" "${_libarch}" _newpath "${_path}")
                 list(APPEND ${_var} "${_newpath}")
-            endforeach(_libarch)
-        else(_path MATCHES "{libarch}")
+            endforeach()
+        else()
             list(APPEND ${_var} "${_path}")
-        endif(_path MATCHES "{libarch}")
-    endforeach(_path)
-endmacro(java_append_library_directories)
+        endif()
+    endforeach()
+endmacro()
 
 get_filename_component(java_install_version
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
@@ -130,7 +130,7 @@ foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
     "${dir}/client"
     "${dir}/server"
     )
-endforeach(dir)
+endforeach()
 
 
 set(JAVA_AWT_INCLUDE_DIRECTORIES
@@ -160,43 +160,43 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   foreach(JAVA_INC_PATH ../include ../java/include ../share/java/include)
     if(EXISTS ${jpath}/${JAVA_INC_PATH})
       set(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES} "${jpath}/${JAVA_INC_PATH}")
-    endif(EXISTS ${jpath}/${JAVA_INC_PATH})
-  endforeach(JAVA_INC_PATH)
+    endif()
+  endforeach()
   foreach(JAVA_LIB_PATH
     ../lib ../jre/lib ../jre/lib/i386
     ../java/lib ../java/jre/lib ../java/jre/lib/i386
     ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
     if(EXISTS ${jpath}/${JAVA_LIB_PATH})
       set(JAVA_AWT_LIBRARY_DIRECTORIES ${JAVA_AWT_LIBRARY_DIRECTORIES} "${jpath}/${JAVA_LIB_PATH}")
-    endif(EXISTS ${jpath}/${JAVA_LIB_PATH})
-  endforeach(JAVA_LIB_PATH)
-endforeach(JAVA_PROG)
+    endif()
+  endforeach()
+endforeach()
 
 if(APPLE)
   if(EXISTS ~/Library/Frameworks/JavaVM.framework)
     set(JAVA_HAVE_FRAMEWORK 1)
-  endif(EXISTS ~/Library/Frameworks/JavaVM.framework)
+  endif()
   if(EXISTS /Library/Frameworks/JavaVM.framework)
     set(JAVA_HAVE_FRAMEWORK 1)
-  endif(EXISTS /Library/Frameworks/JavaVM.framework)
+  endif()
   if(EXISTS /System/Library/Frameworks/JavaVM.framework)
     set(JAVA_HAVE_FRAMEWORK 1)
-  endif(EXISTS /System/Library/Frameworks/JavaVM.framework)
+  endif()
 
   if(JAVA_HAVE_FRAMEWORK)
     if(NOT JAVA_AWT_LIBRARY)
       set (JAVA_AWT_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
-    endif(NOT JAVA_AWT_LIBRARY)
+    endif()
 
     if(NOT JAVA_JVM_LIBRARY)
       set (JAVA_JVM_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
-    endif(NOT JAVA_JVM_LIBRARY)
+    endif()
 
     if(NOT JAVA_AWT_INCLUDE_PATH)
       if(EXISTS /System/Library/Frameworks/JavaVM.framework/Headers/jawt.h)
         set (JAVA_AWT_INCLUDE_PATH "/System/Library/Frameworks/JavaVM.framework/Headers" CACHE FILEPATH "jawt.h location" FORCE)
-      endif(EXISTS /System/Library/Frameworks/JavaVM.framework/Headers/jawt.h)
-    endif(NOT JAVA_AWT_INCLUDE_PATH)
+      endif()
+    endif()
 
     # If using "-framework JavaVM", prefer its headers *before* the others in
     # JAVA_AWT_INCLUDE_DIRECTORIES... (*prepend* to the list here)
@@ -207,15 +207,15 @@ if(APPLE)
       /System/Library/Frameworks/JavaVM.framework/Headers
       ${JAVA_AWT_INCLUDE_DIRECTORIES}
       )
-  endif(JAVA_HAVE_FRAMEWORK)
-else(APPLE)
+  endif()
+else()
   find_library(JAVA_AWT_LIBRARY jawt
     PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
   )
   find_library(JAVA_JVM_LIBRARY NAMES jvm JavaVM
     PATHS ${JAVA_JVM_LIBRARY_DIRECTORIES}
   )
-endif(APPLE)
+endif()
 
 # add in the include path
 find_path(JAVA_INCLUDE_PATH jni.h

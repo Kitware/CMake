@@ -18,14 +18,14 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 if(CMAKE_GENERATOR MATCHES "Borland")
   set(CMAKE_START_TEMP_FILE "@&&|\n")
   set(CMAKE_END_TEMP_FILE "\n|")
-endif(CMAKE_GENERATOR MATCHES "Borland")
+endif()
 
 # for nmake make long command lines are redirected to a file
 # with the following syntax, see Windows-bcc32.cmake for use
 if(CMAKE_GENERATOR MATCHES "NMake")
   set(CMAKE_START_TEMP_FILE "@<<\n")
   set(CMAKE_END_TEMP_FILE "\n<<")
-endif(CMAKE_GENERATOR MATCHES "NMake")
+endif()
 
 include(Platform/WindowsPaths)
 

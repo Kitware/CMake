@@ -27,7 +27,7 @@
 if (UNIX)
   find_package(PkgConfig QUIET)
   pkg_check_modules(_OPENSSL QUIET openssl)
-endif (UNIX)
+endif ()
 
 if (WIN32)
   # http://www.slproweb.com/products/Win32OpenSSL.html
@@ -162,7 +162,7 @@ if(WIN32 AND NOT CYGWIN)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
     unset(LIB_EAY_NAMES)
     unset(SSL_EAY_NAMES)
-  else(MSVC)
+  else()
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
     find_library(LIB_EAY
       NAMES
@@ -186,8 +186,8 @@ if(WIN32 AND NOT CYGWIN)
 
     mark_as_advanced(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
-  endif(MSVC)
-else(WIN32 AND NOT CYGWIN)
+  endif()
+else()
 
   find_library(OPENSSL_SSL_LIBRARY
     NAMES
@@ -219,7 +219,7 @@ else(WIN32 AND NOT CYGWIN)
 
   set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 
-endif(WIN32 AND NOT CYGWIN)
+endif()
 
 function(from_hex HEX DEC)
   string(TOUPPER "${HEX}" HEX)
@@ -250,7 +250,7 @@ function(from_hex HEX DEC)
   endwhile()
 
   set(${DEC} ${_res} PARENT_SCOPE)
-endfunction(from_hex)
+endfunction()
 
 if (OPENSSL_INCLUDE_DIR)
   if (_OPENSSL_VERSION)
@@ -284,11 +284,11 @@ if (OPENSSL_INCLUDE_DIR)
       # this should be updated to handle that, too. This has not happened yet
       # so it is simply ignored here for now.
       string(ASCII "${OPENSSL_VERSION_PATCH_ASCII}" OPENSSL_VERSION_PATCH_STRING)
-    endif (NOT OPENSSL_VERSION_PATCH STREQUAL "00")
+    endif ()
 
     set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
-  endif (_OPENSSL_VERSION)
-endif (OPENSSL_INCLUDE_DIR)
+  endif ()
+endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
@@ -302,11 +302,11 @@ if (OPENSSL_VERSION)
     FAIL_MESSAGE
       "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
   )
-else (OPENSSL_VERSION)
+else ()
   find_package_handle_standard_args(OpenSSL "Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the system variable OPENSSL_ROOT_DIR"
     OPENSSL_LIBRARIES
     OPENSSL_INCLUDE_DIR
   )
-endif (OPENSSL_VERSION)
+endif ()
 
 mark_as_advanced(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)

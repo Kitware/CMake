@@ -11,7 +11,7 @@ if(NOT CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_FLAGS_RELEASE_INIT "-O2 -DNDEBUG")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-O2")
   set (CMAKE_C_FLAGS_INIT "")
-endif(NOT CMAKE_COMPILER_IS_GNUCXX)
+endif()
 # set flags for gcc support
 include(Platform/UnixPaths)
 
@@ -21,7 +21,7 @@ if(NOT CMAKE_COMPILER_IS_GNUCC)
     "<CMAKE_C_COMPILER> <FLAGS> -S <SOURCE>"
     "mv `basename \"<SOURCE>\" | sed 's/\\.[^./]*$$//'`.s <ASSEMBLY_SOURCE>"
     )
-endif(NOT CMAKE_COMPILER_IS_GNUCC)
+endif()
 
 if(NOT CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_CREATE_PREPROCESSED_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
@@ -29,7 +29,7 @@ if(NOT CMAKE_COMPILER_IS_GNUCXX)
     "<CMAKE_CXX_COMPILER> <FLAGS> -S <SOURCE>"
     "mv `basename \"<SOURCE>\" | sed 's/\\.[^./]*$$//'`.s <ASSEMBLY_SOURCE>"
     )
-endif(NOT CMAKE_COMPILER_IS_GNUCXX)
+endif()
 
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
@@ -38,7 +38,7 @@ endif(NOT CMAKE_COMPILER_IS_GNUCXX)
 foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
   set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
-endforeach(type)
+endforeach()
 
 # The IRIX linker needs to find transitive shared library dependencies
 # in the -L path.

@@ -118,7 +118,7 @@ if(Java_JAVA_EXECUTABLE)
       else()
         if(NOT Java_FIND_QUIETLY)
           message(WARNING "regex not supported: ${var}. Please report")
-        endif(NOT Java_FIND_QUIETLY)
+        endif()
       endif()
       string( REGEX REPLACE "([0-9]+).*" "\\1" Java_VERSION_MAJOR "${Java_VERSION_STRING}" )
       string( REGEX REPLACE "[0-9]+\\.([0-9]+).*" "\\1" Java_VERSION_MINOR "${Java_VERSION_STRING}" )
@@ -127,12 +127,12 @@ if(Java_JAVA_EXECUTABLE)
       string( REGEX REPLACE "[0-9]+\\.[0-9]+\\.[0-9]+[_\\.]?([0-9]*).*$" "\\1" Java_VERSION_TWEAK "${Java_VERSION_STRING}" )
       if( Java_VERSION_TWEAK STREQUAL "" ) # check case where tweak is not defined
         set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH})
-      else( )
+      else()
         set(Java_VERSION ${Java_VERSION_MAJOR}.${Java_VERSION_MINOR}.${Java_VERSION_PATCH}.${Java_VERSION_TWEAK})
-      endif( )
+      endif()
     endif()
 
-endif(Java_JAVA_EXECUTABLE)
+endif()
 
 
 find_program(Java_JAR_EXECUTABLE
@@ -178,7 +178,7 @@ if(Java_FIND_COMPONENTS)
       message(FATAL_ERROR "Comp: ${component} is not handled")
     endif()
     set(Java_${component}_FOUND TRUE)
-  endforeach(component)
+  endforeach()
 else()
   # Check for everything
   find_package_handle_standard_args(Java

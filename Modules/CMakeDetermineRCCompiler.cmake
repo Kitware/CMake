@@ -24,33 +24,33 @@ if(NOT CMAKE_RC_COMPILER)
     get_filename_component(CMAKE_RC_COMPILER_INIT $ENV{RC} PROGRAM PROGRAM_ARGS CMAKE_RC_FLAGS_ENV_INIT)
     if(CMAKE_RC_FLAGS_ENV_INIT)
       set(CMAKE_RC_COMPILER_ARG1 "${CMAKE_RC_FLAGS_ENV_INIT}" CACHE STRING "First argument to RC compiler")
-    endif(CMAKE_RC_FLAGS_ENV_INIT)
+    endif()
     if(EXISTS ${CMAKE_RC_COMPILER_INIT})
-    else(EXISTS ${CMAKE_RC_COMPILER_INIT})
+    else()
       message(FATAL_ERROR "Could not find compiler set in environment variable RC:\n$ENV{RC}.")
-    endif(EXISTS ${CMAKE_RC_COMPILER_INIT})
-  endif($ENV{RC} MATCHES ".+")
+    endif()
+  endif()
 
   # next try prefer the compiler specified by the generator
   if(CMAKE_GENERATOR_RC)
     if(NOT CMAKE_RC_COMPILER_INIT)
       set(CMAKE_RC_COMPILER_INIT ${CMAKE_GENERATOR_RC})
-    endif(NOT CMAKE_RC_COMPILER_INIT)
-  endif(CMAKE_GENERATOR_RC)
+    endif()
+  endif()
 
   # finally list compilers to try
   if(CMAKE_RC_COMPILER_INIT)
     set(CMAKE_RC_COMPILER_LIST ${CMAKE_RC_COMPILER_INIT})
-  else(CMAKE_RC_COMPILER_INIT)
+  else()
     set(CMAKE_RC_COMPILER_LIST rc)
-  endif(CMAKE_RC_COMPILER_INIT)
+  endif()
 
   # Find the compiler.
   find_program(CMAKE_RC_COMPILER NAMES ${CMAKE_RC_COMPILER_LIST} DOC "RC compiler")
   if(CMAKE_RC_COMPILER_INIT AND NOT CMAKE_RC_COMPILER)
     set(CMAKE_RC_COMPILER "${CMAKE_RC_COMPILER_INIT}" CACHE FILEPATH "RC compiler" FORCE)
-  endif(CMAKE_RC_COMPILER_INIT AND NOT CMAKE_RC_COMPILER)
-endif(NOT CMAKE_RC_COMPILER)
+  endif()
+endif()
 
 mark_as_advanced(CMAKE_RC_COMPILER)
 

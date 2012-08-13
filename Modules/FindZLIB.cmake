@@ -72,7 +72,7 @@ if(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
     if( "${ZLIB_H}" MATCHES "^.*ZLIB_VERSION \"[0-9]+\\.[0-9]+\\.[0-9]+\\.([0-9]+).*$")
         set(ZLIB_VERSION_TWEAK "${CMAKE_MATCH_1}")
         set(ZLIB_VERSION_STRING "${ZLIB_VERSION_STRING}.${ZLIB_VERSION_TWEAK}")
-    endif( "${ZLIB_H}" MATCHES "^.*ZLIB_VERSION \"[0-9]+\\.[0-9]+\\.[0-9]+\\.([0-9]+).*$")
+    endif()
 
     set(ZLIB_MAJOR_VERSION "${ZLIB_VERSION_MAJOR}")
     set(ZLIB_MINOR_VERSION "${ZLIB_VERSION_MINOR}")

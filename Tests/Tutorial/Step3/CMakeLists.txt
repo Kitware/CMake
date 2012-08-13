@@ -24,7 +24,7 @@ if (USE_MYMATH)
   include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
   add_subdirectory (MathFunctions)
   set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
-endif (USE_MYMATH)
+endif ()
 
 # add the executable
 add_executable (Tutorial tutorial.cxx)

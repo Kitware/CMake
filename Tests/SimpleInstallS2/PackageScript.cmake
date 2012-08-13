@@ -6,5 +6,5 @@ get_cmake_property(res VARIABLES)
 foreach(var ${res})
   file(APPEND ${CMAKE_INSTALL_PREFIX}/AllVariables.txt
              "${var} \"${${var}}\"\n")
-endforeach(var ${res})
+endforeach()
 

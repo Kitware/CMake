@@ -11,16 +11,16 @@ add_library(ExeImportedTarget UNKNOWN IMPORTED)
 # Test if(TARGET) command.
 if(NOT TARGET CMakeTestLibrary)
   message(FATAL_ERROR "if(NOT TARGET CMakeTestLibrary) returned true!")
-endif(NOT TARGET CMakeTestLibrary)
+endif()
 if(NOT TARGET ExeImportedTarget)
   message(FATAL_ERROR "if(NOT TARGET ExeImportedTarget) returned true!")
-endif(NOT TARGET ExeImportedTarget)
+endif()
 if(TARGET LibImportedTarget)
   message(FATAL_ERROR "if(TARGET LibImportedTarget) returned true!")
-endif(TARGET LibImportedTarget)
+endif()
 if(TARGET NotATarget)
   message(FATAL_ERROR "if(TARGET NotATarget) returned true!")
-endif(TARGET NotATarget)
+endif()
 
   # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to
 set(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
@@ -46,37 +46,37 @@ add_executable(complex.file complex.file.cxx complex_nobuild.cxx
 
 if (UNIX)
   target_link_libraries(complex ${CMAKE_DL_LIBS})
-else(UNIX)
+else()
   if (NOT BORLAND)
     if(NOT MINGW)
       target_link_libraries(complex rpcrt4.lib)
-    endif(NOT MINGW)
-  endif(NOT BORLAND)
-endif (UNIX)
+    endif()
+  endif()
+endif ()
 
 # Test linking to static lib when a shared lib has the same name.
 if(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
   add_definitions(-DCOMPLEX_TEST_LINK_STATIC)
   target_link_libraries(complex CMakeTestLinkStatic)
-endif(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
+endif()
 
 # can we get the path to a source file
 get_source_file_property(A_LOCATION A.cxx LOCATION)
 if ("${A_LOCATION}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/A.cxx")
   add_definitions(-DCMAKE_FOUND_ACXX)
-endif ("${A_LOCATION}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/A.cxx")
+endif ()
 
 # get the directory parent
 get_directory_property(P_VALUE PARENT_DIRECTORY)
 if ("${P_VALUE}" STREQUAL "${CMAKE_SOURCE_DIR}")
   add_definitions(-DCMAKE_FOUND_PARENT)
-endif ("${P_VALUE}" STREQUAL "${CMAKE_SOURCE_DIR}")
+endif ()
 
 # get the stack of listfiles
 include(Included.cmake)
 if ("${LF_VALUE}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt;${CMAKE_CURRENT_SOURCE_DIR}/Included.cmake")
   add_definitions(-DCMAKE_FOUND_LISTFILE_STACK)
-endif ("${LF_VALUE}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt;${CMAKE_CURRENT_SOURCE_DIR}/Included.cmake")
+endif ()
 
 # Test add/remove definitions.
 add_definitions(
@@ -128,7 +128,7 @@ target_link_libraries(notInAllExe notInAllLib)
 if(MSVC)
   set_target_properties(notInAllExe PROPERTIES
     LINK_FLAGS "/NODEFAULTLIB:LIBC;LIBCMT;MSVCRT")
-endif(MSVC)
+endif()
 
 # Test creating a custom target that builds not-in-all targets.
 add_custom_target(notInAllCustom)
@@ -146,7 +146,7 @@ add_subdirectory(Temp)
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
   add_executable(testSystemDir testSystemDir.cxx)
   set_target_properties(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")
-endif(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+endif()
 
 #
 # Extra coverage.Not used.

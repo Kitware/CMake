@@ -24,5 +24,5 @@ include(FindOpenGL)
 if (OPENGL_GLU_FOUND)
   set (GLU_LIBRARY ${OPENGL_LIBRARIES})
   set (GLU_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
-endif (OPENGL_GLU_FOUND)
+endif ()
 

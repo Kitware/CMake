@@ -29,7 +29,7 @@
 if (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
    # in cache already
    set(gnutls_FIND_QUIETLY TRUE)
-endif (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
+endif ()
 
 if (NOT WIN32)
    # try using pkg-config to get the directories and then use these values
@@ -39,7 +39,7 @@ if (NOT WIN32)
    PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
    set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
    set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
-endif (NOT WIN32)
+endif ()
 
 find_path(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
    HINTS

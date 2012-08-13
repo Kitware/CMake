@@ -49,4 +49,4 @@ if (BUILD_DOCUMENTATION)
   # We will probably need bash to create the custom target
   #
 
-endif (BUILD_DOCUMENTATION)
+endif ()

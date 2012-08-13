@@ -15,7 +15,7 @@ find_package(Qt4 REQUIRED)
 
 if(NOT QT4_FOUND)
   message(SEND_ERROR "Failed to find Qt 4.4 or greater.")
-else(NOT QT4_FOUND)
+else()
 
   include(${QT_USE_FILE})
   set(CMAKE_PACKAGE_QTGUI TRUE)
@@ -58,13 +58,13 @@ else(NOT QT4_FOUND)
   set(SRCS ${SRCS} ${UI_SRCS} ${MOC_SRCS} ${RC_SRCS})
   if(Q_WS_WIN)
     set(SRCS ${SRCS} CMakeSetup.rc)
-  endif(Q_WS_WIN)
+  endif()
   if(Q_WS_MAC)
     set(SRCS ${SRCS} CMakeSetup.icns)
     set(MACOSX_BUNDLE_ICON_FILE CMakeSetup.icns)
     set_source_files_properties(CMakeSetup.icns PROPERTIES
       MACOSX_PACKAGE_LOCATION Resources)
-  endif(Q_WS_MAC)
+  endif()
 
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -75,10 +75,10 @@ else(NOT QT4_FOUND)
     if(APPLE)
       set_target_properties(cmake-gui PROPERTIES
        OUTPUT_NAME ${CMAKE_BUNDLE_NAME})
-    endif(APPLE)
+    endif()
     set(CMAKE_INSTALL_DESTINATION_ARGS
       BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
-  endif(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 2.4)
+  endif()
 
   install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
@@ -88,7 +88,7 @@ else(NOT QT4_FOUND)
     install(FILES CMake.desktop DESTINATION share/applications )
     install(FILES CMakeSetup32.png DESTINATION share/pixmaps )
     install(FILES cmakecache.xml DESTINATION share/mime/packages )
-  endif(UNIX)
+  endif()
 
   if(APPLE)
     set(CMAKE_POSTFLIGHT_SCRIPT
@@ -101,7 +101,7 @@ else(NOT QT4_FOUND)
       "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
     install(CODE "execute_process(COMMAND ln -s \"../MacOS/${CMAKE_BUNDLE_NAME}\" cmake-gui
                   WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
-  endif(APPLE)
+  endif()
 
   if(APPLE OR WIN32)
     # install rules for including 3rd party libs such as Qt
@@ -109,15 +109,15 @@ else(NOT QT4_FOUND)
     set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
     if(APPLE)
       set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/${CMAKE_BUNDLE_NAME}")
-    endif(APPLE)
+    endif()
     install(CODE "
       include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
       set(BU_CHMOD_BUNDLE_ITEMS ON)
       fixup_bundle(\"${fixup_exe}\" \"\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
     ")
-  endif(APPLE OR WIN32)
+  endif()
 
   configure_file("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
     "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)
-endif(NOT QT4_FOUND)
+endif()
 

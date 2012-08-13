@@ -73,7 +73,7 @@ target_link_libraries(imp_mod1b bld_testExe2)
 foreach(c DEBUG RELWITHDEBINFO)
   set_property(TARGET imp_testExe1 PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
   set_property(TARGET imp_testExe1b PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
-endforeach(c)
+endforeach()
 
 #-----------------------------------------------------------------------------
 # Create a custom target to generate a header for the libraries below.

@@ -22,7 +22,7 @@
 
 if(UNIX)
   find_program(TK_WISH cygwish80 )
-endif(UNIX)
+endif()
 
 get_filename_component(TCL_TCLSH_PATH "${TCL_TCLSH}" PATH)
 get_filename_component(TCL_TCLSH_PATH_PARENT "${TCL_TCLSH_PATH}" PATH)
@@ -64,7 +64,7 @@ if(WIN32)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.2;Root]/bin"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Scriptics\\Tcl\\8.0;Root]/bin"
     )
-endif(WIN32)
+endif()
 
 set(TK_WISH_NAMES
   wish

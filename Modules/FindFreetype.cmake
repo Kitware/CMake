@@ -75,7 +75,7 @@ find_library(FREETYPE_LIBRARY
 # set the user variables
 if(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
   set(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
-endif(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
+endif()
 set(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
 
 if(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
@@ -90,14 +90,14 @@ if(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/
                        FREETYPE_VERSION_PART "${VLINE}")
                 if(FREETYPE_VERSION_STRING)
                     set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_STRING}.${FREETYPE_VERSION_PART}")
-                else(FREETYPE_VERSION_STRING)
+                else()
                     set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_PART}")
-                endif(FREETYPE_VERSION_STRING)
+                endif()
                 unset(FREETYPE_VERSION_PART)
             endif()
-        endforeach(VLINE)
-    endforeach(VPART)
-endif(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+        endforeach()
+    endforeach()
+endif()
 
 
 # handle the QUIETLY and REQUIRED arguments and set FREETYPE_FOUND to TRUE if

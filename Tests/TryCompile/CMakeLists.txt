@@ -4,26 +4,26 @@ project(TryCompile)
 macro(TEST_ASSERT value msg)
   if (NOT ${value})
     message (SEND_ERROR "Assertion failure:" ${msg} )
-  endif (NOT ${value})
-endmacro(TEST_ASSERT)
+  endif ()
+endmacro()
 
 macro(TEST_FAIL value msg)
   if (${value})
     message (SEND_ERROR "Failing test succeeded:" ${msg} )
-  endif (${value})
-endmacro(TEST_FAIL)
+  endif ()
+endmacro()
 
 macro(TEST_EXPECT_EXACT command expected)
   if(NOT "x${result}" STREQUAL "x${expected}")
     message(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
-  endif(NOT "x${result}" STREQUAL "x${expected}")
-endmacro(TEST_EXPECT_EXACT command expected)
+  endif()
+endmacro()
 
 macro(TEST_EXPECT_CONTAINS command expected)
   if(NOT "${result}" MATCHES "${expected}")
     message(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
-  endif(NOT "${result}" MATCHES "${expected}")
-endmacro(TEST_EXPECT_CONTAINS command expected)
+  endif()
+endmacro()
 
 
 # try to compile a file that should compile
@@ -37,12 +37,12 @@ try_compile(SHOULD_PASS
 
 if(NOT SHOULD_PASS)
   message(SEND_ERROR "should pass failed ${TRY_OUT}")
-endif(NOT SHOULD_PASS)
+endif()
 if(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
    message(SEND_ERROR "COPY_FILE to \"${TryCompile_BINARY_DIR}/CopyOfPass\" failed")
-else(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
+else()
    file(REMOVE "${TryCompile_BINARY_DIR}/CopyOfPass")
-endif(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
+endif()
 
 # try to compile a file that should not compile
 try_compile(SHOULD_FAIL
@@ -51,7 +51,7 @@ try_compile(SHOULD_FAIL
     OUTPUT_VARIABLE TRY_OUT)
 if(SHOULD_FAIL)
    message(SEND_ERROR "Should fail passed ${TRY_OUT}")
-endif(SHOULD_FAIL)
+endif()
 
 # try to compile a file that should compile
 try_compile(SHOULD_PASS
@@ -60,7 +60,7 @@ try_compile(SHOULD_PASS
     OUTPUT_VARIABLE TRY_OUT)
 if(NOT SHOULD_PASS)
   message(SEND_ERROR "should pass failed ${TRY_OUT}")
-endif(NOT SHOULD_PASS)
+endif()
 
 # try to compile a file that should not compile
 try_compile(SHOULD_FAIL
@@ -69,42 +69,42 @@ try_compile(SHOULD_FAIL
     OUTPUT_VARIABLE TRY_OUT)
 if(SHOULD_FAIL)
    message(SEND_ERROR "Should fail passed ${TRY_OUT}")
-endif(SHOULD_FAIL)
+endif()
 
 if(NOT SHOULD_FAIL)
   if(SHOULD_PASS)
     message("All Tests passed, ignore all previous output.")
-  else(SHOULD_PASS)
+  else()
     message("Test failed")
-  endif(SHOULD_PASS)
-else(NOT SHOULD_FAIL)
+  endif()
+else()
   message("Test failed")
-endif(NOT SHOULD_FAIL)
+endif()
 try_compile(CMAKE_ANSI_FOR_SCOPE
   ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 if (CMAKE_ANSI_FOR_SCOPE)
    message("Compiler supports ansi for")
-else(CMAKE_ANSI_FOR_SCOPE)
+else()
    message("Compiler does not support ansi for scope")
-endif(CMAKE_ANSI_FOR_SCOPE)
+endif()
 
 try_compile(CMAKE_ANSI_FOR_SCOPE
   ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 if (CMAKE_ANSI_FOR_SCOPE)
    message("Compiler supports ansi for")
-else(CMAKE_ANSI_FOR_SCOPE)
+else()
    message("Compiler does not support ansi for scope")
-endif(CMAKE_ANSI_FOR_SCOPE)
+endif()
 
 message("use the module now")
 include(${CMAKE_ROOT}/Modules/TestForANSIForScope.cmake)
 if (CMAKE_ANSI_FOR_SCOPE)
    message("Compiler supports ansi for")
-else(CMAKE_ANSI_FOR_SCOPE)
+else()
    message("Compiler does not support ansi for scope")
-endif(CMAKE_ANSI_FOR_SCOPE)
+endif()
 
 message("Testing try_compile project mode")
 try_compile(TEST_INNER
@@ -129,18 +129,18 @@ try_run(SHOULD_RUN SHOULD_COMPILE
     OUTPUT_VARIABLE TRY_OUT)
 if(NOT SHOULD_COMPILE)
   message(SEND_ERROR "exit_success failed compiling: ${TRY_OUT}")
-endif(NOT SHOULD_COMPILE)
+endif()
 if(NOT "${SHOULD_RUN}" STREQUAL "0")
   message(SEND_ERROR "exit_success failed running with exit code ${SHOULD_RUN}")
-endif(NOT "${SHOULD_RUN}" STREQUAL "0")
+endif()
 # check the compile output for the filename
 if(NOT "${TRY_OUT}" MATCHES "exit_success")
   message(SEND_ERROR " TRY_OUT didn't contain \"exit_success\": \"${TRY_OUT}\"")
-endif(NOT "${TRY_OUT}" MATCHES "exit_success")
+endif()
 # check the run output
 if(NOT "${TRY_OUT}" MATCHES "hello world")
   message(SEND_ERROR " TRY_OUT didn't contain \"hello world\": \"${TRY_OUT}\"")
-endif(NOT "${TRY_OUT}" MATCHES "hello world")
+endif()
 
 try_run(ARG_TEST_RUN ARG_TEST_COMPILE
     ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
@@ -149,10 +149,10 @@ try_run(ARG_TEST_RUN ARG_TEST_COMPILE
     ARGS arg1 arg2)
 if(NOT ARG_TEST_COMPILE)
   message(SEND_ERROR "expect_arg failed compiling: ${TRY_OUT}")
-endif(NOT ARG_TEST_COMPILE)
+endif()
 if(NOT "${ARG_TEST_RUN}" STREQUAL "0")
   message(SEND_ERROR "expect_arg failed running with exit code ${ARG_TEST_RUN} ${TRY_OUT}")
-endif(NOT "${ARG_TEST_RUN}" STREQUAL "0")
+endif()
 
 # try to run a file that should compile and run, but return an error
 try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
@@ -163,23 +163,23 @@ try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
 
 if(NOT SHOULD_COMPILE)
   message(STATUS " exit_with_error failed compiling: ${COMPILE_OUTPUT}")
-endif(NOT SHOULD_COMPILE)
+endif()
 if("${SHOULD_EXIT_WITH_ERROR}" STREQUAL "0")
   message(SEND_ERROR " exit_with_error passed with exit code ${SHOULD_EXIT_WITH_ERROR}")
-endif("${SHOULD_EXIT_WITH_ERROR}" STREQUAL "0")
+endif()
 
 # check the compile output, it should contain the filename
 if(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
   message(SEND_ERROR " COMPILE_OUT didn't contain \"exit_with_error\": \"${COMPILE_OUTPUT}\"")
-endif(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
+endif()
 #... but not the run time output
 if("${COMPILE_OUTPUT}" MATCHES "hello world")
   message(SEND_ERROR " COMPILE_OUT contains the run output: \"${COMPILE_OUTPUT}\"")
-endif("${COMPILE_OUTPUT}" MATCHES "hello world")
+endif()
 # check the run output, it should stdout
 if(NOT "${RUN_OUTPUT}" MATCHES "hello world")
   message(SEND_ERROR " RUN_OUTPUT didn't contain \"hello world\": \"${RUN_OUTPUT}\"")
-endif(NOT "${RUN_OUTPUT}" MATCHES "hello world")
+endif()
 
 #######################################################################
 #

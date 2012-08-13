@@ -129,7 +129,7 @@ if(FLEX_EXECUTABLE)
     set(FLEX_${Name}_OUTPUTS ${Output})
     set(FLEX_${Name}_INPUT ${Input})
     set(FLEX_${Name}_COMPILE_FLAGS ${FLEX_EXECUTABLE_opts})
-  endmacro(FLEX_TARGET)
+  endmacro()
   #============================================================
 
 
@@ -149,10 +149,10 @@ if(FLEX_EXECUTABLE)
 
     set_source_files_properties(${FLEX_${FlexTarget}_OUTPUTS}
       PROPERTIES OBJECT_DEPENDS ${BISON_${BisonTarget}_OUTPUT_HEADER})
-  endmacro(ADD_FLEX_BISON_DEPENDENCY)
+  endmacro()
   #============================================================
 
-endif(FLEX_EXECUTABLE)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLEX REQUIRED_VARS FLEX_EXECUTABLE

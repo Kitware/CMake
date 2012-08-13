@@ -60,19 +60,19 @@ macro(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
         OUTPUT_VARIABLE ${_cflags} )
       string(REGEX REPLACE "[\r\n]" " " ${_cflags} "${${_cflags}}")
 
-    else( NOT _return_VALUE)
+    else()
 
       message(STATUS "PKGCONFIG() indicates that ${_package} is not installed (install the package which contains ${_package}.pc if you want to support this feature)")
 
-    endif(NOT _return_VALUE)
+    endif()
 
   # if pkg-config has NOT been found, INFORM the user
-  else(PKGCONFIG_EXECUTABLE)
+  else()
 
     message(STATUS "WARNING: PKGCONFIG() indicates that the tool pkg-config has not been found on your system. You should install it.")
 
-  endif(PKGCONFIG_EXECUTABLE)
+  endif()
 
-endmacro(PKGCONFIG _include_DIR _link_DIR _link_FLAGS _cflags)
+endmacro()
 
 mark_as_advanced(PKGCONFIG_EXECUTABLE)

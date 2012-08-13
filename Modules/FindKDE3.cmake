@@ -79,19 +79,19 @@
 
 if(NOT UNIX AND KDE3_FIND_REQUIRED)
    message(FATAL_ERROR "Compiling KDE3 applications and libraries under Windows is not supported")
-endif(NOT UNIX AND KDE3_FIND_REQUIRED)
+endif()
 
 # If Qt4 has already been found, fail.
 if(QT4_FOUND)
   if(KDE3_FIND_REQUIRED)
     message( FATAL_ERROR "KDE3/Qt3 and Qt4 cannot be used together in one project.")
-  else(KDE3_FIND_REQUIRED)
+  else()
     if(NOT KDE3_FIND_QUIETLY)
       message( STATUS    "KDE3/Qt3 and Qt4 cannot be used together in one project.")
-    endif(NOT KDE3_FIND_QUIETLY)
+    endif()
     return()
-  endif(KDE3_FIND_REQUIRED)
-endif(QT4_FOUND)
+  endif()
+endif()
 
 
 set(QT_MT_REQUIRED TRUE)
@@ -100,7 +100,7 @@ set(QT_MT_REQUIRED TRUE)
 #this line includes FindQt.cmake, which searches the Qt library and headers
 if(KDE3_FIND_REQUIRED)
   set(_REQ_STRING_KDE3 "REQUIRED")
-endif(KDE3_FIND_REQUIRED)
+endif()
 
 find_package(Qt3 ${_REQ_STRING_KDE3})
 find_package(X11 ${_REQ_STRING_KDE3})
@@ -126,8 +126,8 @@ if(KDECONFIG_EXECUTABLE)
                         OUTPUT_VARIABLE kdedir )
       string(REGEX REPLACE "\n" "" KDE3PREFIX "${kdedir}")
 
-    endif ("${kde_version}" MATCHES "KDE: 3\\.")
-endif(KDECONFIG_EXECUTABLE)
+    endif ()
+endif()
 
 
 
@@ -161,10 +161,10 @@ get_filename_component(KDE3_LIB_DIR ${KDE3_KDECORE_LIBRARY} PATH )
 if(NOT KDE3_LIBTOOL_DIR)
    if(KDE3_KDECORE_LIBRARY MATCHES lib64)
      set(KDE3_LIBTOOL_DIR /lib64/kde3)
-   else(KDE3_KDECORE_LIBRARY MATCHES lib64)
+   else()
      set(KDE3_LIBTOOL_DIR /lib/kde3)
-   endif(KDE3_KDECORE_LIBRARY MATCHES lib64)
-endif(NOT KDE3_LIBTOOL_DIR)
+   endif()
+endif()
 
 #now search for the dcop utilities
 find_program(KDE3_DCOPIDL_EXECUTABLE NAMES dcopidl
@@ -198,9 +198,9 @@ find_program(KDE3_KCFGC_EXECUTABLE NAMES kconfig_compiler
 #SET KDE3_FOUND
 if (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPIDL2CPP_EXECUTABLE AND KDE3_KCFGC_EXECUTABLE)
    set(KDE3_FOUND TRUE)
-else (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPIDL2CPP_EXECUTABLE AND KDE3_KCFGC_EXECUTABLE)
+else ()
    set(KDE3_FOUND FALSE)
-endif (KDE3_INCLUDE_DIR AND KDE3_LIB_DIR AND KDE3_DCOPIDL_EXECUTABLE AND KDE3_DCOPIDL2CPP_EXECUTABLE AND KDE3_KCFGC_EXECUTABLE)
+endif ()
 
 # add some KDE specific stuff
 set(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
@@ -216,32 +216,32 @@ if(KDE3_FOUND)
       # I guess 2.95 also doesn't then
       if("${out}" MATCHES "2.9[56]")
          set(_KDE3_USE_FLAGS FALSE)
-      endif("${out}" MATCHES "2.9[56]")
-   endif(CMAKE_COMPILER_IS_GNUCXX)
+      endif()
+   endif()
 
    #only on linux, but NOT e.g. on FreeBSD:
    if(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
       set (KDE3_DEFINITIONS ${KDE3_DEFINITIONS} -D_XOPEN_SOURCE=500 -D_BSD_SOURCE)
       set ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
       set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -fno-exceptions -fno-check-new -fno-common")
-   endif(CMAKE_SYSTEM_NAME MATCHES "Linux" AND _KDE3_USE_FLAGS)
+   endif()
 
    # works on FreeBSD, NOT tested on NetBSD and OpenBSD
    if (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_USE_FLAGS)
       set ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -Wno-long-long -ansi -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
       set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-long-long -Wundef -Wcast-align -Wconversion -Wchar-subscripts -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
-   endif (CMAKE_SYSTEM_NAME MATCHES BSD AND _KDE3_USE_FLAGS)
+   endif ()
 
    # if no special buildtype is selected, add -O2 as default optimization
    if (NOT CMAKE_BUILD_TYPE AND _KDE3_USE_FLAGS)
       set ( CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -O2")
       set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-   endif (NOT CMAKE_BUILD_TYPE AND _KDE3_USE_FLAGS)
+   endif ()
 
 #set(CMAKE_SHARED_LINKER_FLAGS "-avoid-version -module -Wl,--no-undefined -Wl,--allow-shlib-undefined")
 #set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
 #set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -avoid-version -Wl,--no-undefined -lc")
-endif(KDE3_FOUND)
+endif()
 
 
 # KDE3Macros.cmake contains all the KDE specific macros
@@ -251,35 +251,35 @@ include(KDE3Macros)
 macro (KDE3_PRINT_RESULTS)
    if(KDE3_INCLUDE_DIR)
       message(STATUS "Found KDE3 include dir: ${KDE3_INCLUDE_DIR}")
-   else(KDE3_INCLUDE_DIR)
+   else()
       message(STATUS "Didn't find KDE3 headers")
-   endif(KDE3_INCLUDE_DIR)
+   endif()
 
    if(KDE3_LIB_DIR)
       message(STATUS "Found KDE3 library dir: ${KDE3_LIB_DIR}")
-   else(KDE3_LIB_DIR)
+   else()
       message(STATUS "Didn't find KDE3 core library")
-   endif(KDE3_LIB_DIR)
+   endif()
 
    if(KDE3_DCOPIDL_EXECUTABLE)
       message(STATUS "Found KDE3 dcopidl preprocessor: ${KDE3_DCOPIDL_EXECUTABLE}")
-   else(KDE3_DCOPIDL_EXECUTABLE)
+   else()
       message(STATUS "Didn't find the KDE3 dcopidl preprocessor")
-   endif(KDE3_DCOPIDL_EXECUTABLE)
+   endif()
 
    if(KDE3_DCOPIDL2CPP_EXECUTABLE)
       message(STATUS "Found KDE3 dcopidl2cpp preprocessor: ${KDE3_DCOPIDL2CPP_EXECUTABLE}")
-   else(KDE3_DCOPIDL2CPP_EXECUTABLE)
+   else()
       message(STATUS "Didn't find the KDE3 dcopidl2cpp preprocessor")
-   endif(KDE3_DCOPIDL2CPP_EXECUTABLE)
+   endif()
 
    if(KDE3_KCFGC_EXECUTABLE)
       message(STATUS "Found KDE3 kconfig_compiler preprocessor: ${KDE3_KCFGC_EXECUTABLE}")
-   else(KDE3_KCFGC_EXECUTABLE)
+   else()
       message(STATUS "Didn't find the KDE3 kconfig_compiler preprocessor")
-   endif(KDE3_KCFGC_EXECUTABLE)
+   endif()
 
-endmacro (KDE3_PRINT_RESULTS)
+endmacro ()
 
 
 if (KDE3_FIND_REQUIRED AND NOT KDE3_FOUND)
@@ -287,12 +287,12 @@ if (KDE3_FIND_REQUIRED AND NOT KDE3_FOUND)
    KDE3_PRINT_RESULTS()
    message(FATAL_ERROR "Could NOT find everything required for compiling KDE 3 programs")
 
-endif (KDE3_FIND_REQUIRED AND NOT KDE3_FOUND)
+endif ()
 
 
 if (NOT KDE3_FIND_QUIETLY)
    KDE3_PRINT_RESULTS()
-endif (NOT KDE3_FIND_QUIETLY)
+endif ()
 
 #add the found Qt and KDE include directories to the current include path
 set(KDE3_INCLUDE_DIRS ${QT_INCLUDE_DIR} ${KDE3_INCLUDE_DIR})

@@ -37,19 +37,19 @@ if (WIN32)
 
     find_library(OPENGL_glu_LIBRARY glu32 )
 
-  else (CYGWIN)
+  else ()
 
     if(BORLAND)
       set (OPENGL_gl_LIBRARY import32 CACHE STRING "OpenGL library for win32")
       set (OPENGL_glu_LIBRARY import32 CACHE STRING "GLU library for win32")
-    else(BORLAND)
+    else()
       set (OPENGL_gl_LIBRARY opengl32 CACHE STRING "OpenGL library for win32")
       set (OPENGL_glu_LIBRARY glu32 CACHE STRING "GLU library for win32")
-    endif(BORLAND)
+    endif()
 
-  endif (CYGWIN)
+  endif ()
 
-else (WIN32)
+else ()
 
   if (APPLE)
 
@@ -57,16 +57,16 @@ else (WIN32)
     find_library(OPENGL_glu_LIBRARY AGL DOC "AGL lib for OSX")
     find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
 
-  else(APPLE)
+  else()
     # Handle HP-UX cases where we only want to find OpenGL in either hpux64
     # or hpux32 depending on if we're doing a 64 bit build.
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
       set(HPUX_IA_OPENGL_LIB_PATH /opt/graphics/OpenGL/lib/hpux32/)
-    else(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    else()
       set(HPUX_IA_OPENGL_LIB_PATH
         /opt/graphics/OpenGL/lib/hpux64/
         /opt/graphics/OpenGL/lib/pa20_64)
-    endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    endif()
 
     # The first line below is to make sure that the proper headers
     # are used on a Linux machine with the NVidia drivers installed.
@@ -104,13 +104,13 @@ else (WIN32)
     if (OPENGL_gl_LIBRARY)
       if(NOT X11_FOUND)
         include(FindX11)
-      endif(NOT X11_FOUND)
+      endif()
       if (X11_FOUND)
         if (NOT APPLE)
           set (OPENGL_LIBRARIES ${X11_LIBRARIES})
-        endif (NOT APPLE)
-      endif (X11_FOUND)
-    endif (OPENGL_gl_LIBRARY)
+        endif ()
+      endif ()
+    endif ()
 
     find_library(OPENGL_glu_LIBRARY
       NAMES GLU MesaGLU
@@ -120,29 +120,29 @@ else (WIN32)
             /usr/shlib /usr/X11R6/lib
     )
 
-  endif(APPLE)
-endif (WIN32)
+  endif()
+endif ()
 
 if(OPENGL_gl_LIBRARY)
 
     if(OPENGL_xmesa_INCLUDE_DIR)
       set( OPENGL_XMESA_FOUND "YES" )
-    else(OPENGL_xmesa_INCLUDE_DIR)
+    else()
       set( OPENGL_XMESA_FOUND "NO" )
-    endif(OPENGL_xmesa_INCLUDE_DIR)
+    endif()
 
     set( OPENGL_LIBRARIES  ${OPENGL_gl_LIBRARY} ${OPENGL_LIBRARIES})
     if(OPENGL_glu_LIBRARY)
       set( OPENGL_GLU_FOUND "YES" )
       set( OPENGL_LIBRARIES ${OPENGL_glu_LIBRARY} ${OPENGL_LIBRARIES} )
-    else(OPENGL_glu_LIBRARY)
+    else()
       set( OPENGL_GLU_FOUND "NO" )
-    endif(OPENGL_glu_LIBRARY)
+    endif()
 
     # This deprecated setting is for backward compatibility with CMake1.4
     set (OPENGL_LIBRARY ${OPENGL_LIBRARIES})
 
-endif(OPENGL_gl_LIBRARY)
+endif()
 
 # This deprecated setting is for backward compatibility with CMake1.4
 set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})

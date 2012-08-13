@@ -28,7 +28,7 @@ function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
 
   if(CVF_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unknown keywords given to WRITE_BASIC_CONFIG_VERSION_FILE(): \"${CVF_UNPARSED_ARGUMENTS}\"")
-  endif(CVF_UNPARSED_ARGUMENTS)
+  endif()
 
   set(versionTemplateFile "${CMAKE_ROOT}/Modules/BasicConfigVersion-${CVF_COMPATIBILITY}.cmake.in")
   if(NOT EXISTS "${versionTemplateFile}")
@@ -41,4 +41,4 @@ function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
 
   configure_file("${versionTemplateFile}" "${_filename}" @ONLY)
 
-endfunction(WRITE_BASIC_CONFIG_VERSION_FILE)
+endfunction()

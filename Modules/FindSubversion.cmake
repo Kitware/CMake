@@ -31,7 +31,7 @@
 #    message("Current revision is ${Project_WC_REVISION}")
 #    Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
 #    message("Last changed log is ${Project_LAST_CHANGED_LOG}")
-#  endif(SUBVERSION_FOUND)
+#  endif()
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -81,7 +81,7 @@ if(Subversion_SVN_EXECUTABLE)
 
     if(NOT ${Subversion_svn_info_result} EQUAL 0)
       message(SEND_ERROR "Command \"${Subversion_SVN_EXECUTABLE} info ${dir}\" failed with output:\n${Subversion_svn_info_error}")
-    else(NOT ${Subversion_svn_info_result} EQUAL 0)
+    else()
 
       string(REGEX REPLACE "^(.*\n)?URL: ([^\n]+).*"
         "\\2" ${prefix}_WC_URL "${${prefix}_WC_INFO}")
@@ -96,12 +96,12 @@ if(Subversion_SVN_EXECUTABLE)
       string(REGEX REPLACE "^(.*\n)?Last Changed Date: ([^\n]+).*"
         "\\2" ${prefix}_WC_LAST_CHANGED_DATE "${${prefix}_WC_INFO}")
 
-    endif(NOT ${Subversion_svn_info_result} EQUAL 0)
+    endif()
 
     # restore the previous LC_ALL
     set(ENV{LC_ALL} ${_Subversion_SAVED_LC_ALL})
 
-  endmacro(Subversion_WC_INFO)
+  endmacro()
 
   macro(Subversion_WC_LOG dir prefix)
     # This macro can block if the certificate is not signed:
@@ -117,10 +117,10 @@ if(Subversion_SVN_EXECUTABLE)
 
     if(NOT ${Subversion_svn_log_result} EQUAL 0)
       message(SEND_ERROR "Command \"${Subversion_SVN_EXECUTABLE} log -r BASE ${dir}\" failed with output:\n${Subversion_svn_log_error}")
-    endif(NOT ${Subversion_svn_log_result} EQUAL 0)
-  endmacro(Subversion_WC_LOG)
+    endif()
+  endmacro()
 
-endif(Subversion_SVN_EXECUTABLE)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE

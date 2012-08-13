@@ -6,4 +6,4 @@ add_executable (Sleep sleep.c)
 
 foreach (time RANGE 1 4)
   add_test (TestSleep${time} Sleep ${time})
-endforeach (time RANGE 1 4)
+endforeach ()

@@ -30,7 +30,7 @@ if(UNIX)
     /usr/openwin/lib
     )
 
-endif(UNIX)
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set MOTIF_FOUND to TRUE if
 # all listed variables are TRUE

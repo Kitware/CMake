@@ -18,7 +18,7 @@
 # stored settings using the CMAKE_EXPORT_BUILD_SETTINGS macro.
 macro(CMAKE_IMPORT_BUILD_SETTINGS SETTINGS_FILE)
   if(${SETTINGS_FILE} MATCHES ".+")
-  else(${SETTINGS_FILE} MATCHES ".+")
+  else()
     message(SEND_ERROR "CMAKE_IMPORT_BUILD_SETTINGS called with no argument.")
-  endif(${SETTINGS_FILE} MATCHES ".+")
-endmacro(CMAKE_IMPORT_BUILD_SETTINGS)
+  endif()
+endmacro()

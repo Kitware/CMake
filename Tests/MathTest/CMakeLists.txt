@@ -17,7 +17,7 @@ foreach(expression
     ${expressions})
   math(EXPR expr "${expression}")
   set(FILE_EXPRESSIONS "${FILE_EXPRESSIONS}TEST_EXPRESSION(${expression}, ${expr})\n")
-endforeach(expression)
+endforeach()
 
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/MathTestTests.h.in"

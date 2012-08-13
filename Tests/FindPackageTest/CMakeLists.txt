@@ -30,7 +30,7 @@ find_path(FOO_DIR foo.h)
 if(NOT FOO_DIR)
   message(FATAL_ERROR "Did not find foo.h which is in ${CMAKE_CURRENT_SOURCE_DIR}/include
   CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
-endif(NOT FOO_DIR)
+endif()
 
 find_package(VersionTestA 1)
 find_package(VersionTestB 1.2)
@@ -93,7 +93,7 @@ set(PACKAGES
   )
 foreach(p ${PACKAGES})
   set(${p}_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
-endforeach(p)
+endforeach()
 
 # Enable framework and bundle searching.  Make sure bundles are found
 # before unix-syle packages.
@@ -238,58 +238,58 @@ foreach(p ${PACKAGES})
     # Debugging output.
     if(CMAKE_FIND_DEBUG_MODE)
       message("Package ${p} found [${REL_${p}_CONFIG}]")
-    endif(CMAKE_FIND_DEBUG_MODE)
+    endif()
 
     # Check and report failure.
     if(NOT "${REL_${p}_CONFIG}" STREQUAL "${${p}_EXPECTED}")
       message(SEND_ERROR
         "Package ${p} should have been [${${p}_EXPECTED}] but "
         "was [${REL_${p}_CONFIG}]")
-    endif(NOT "${REL_${p}_CONFIG}" STREQUAL "${${p}_EXPECTED}")
+    endif()
   else()
     message(SEND_ERROR "Package ${p} not found!")
   endif()
-endforeach(p)
+endforeach()
 
 # Check that version information was extracted.
 if(NOT "${VersionedA_VERSION}" STREQUAL "2.0")
   message(SEND_ERROR
     "Package VersionedA is version [${VersionedA_VERSION}], not [2.0]")
-endif(NOT "${VersionedA_VERSION}" STREQUAL "2.0")
+endif()
 if(NOT "${VersionedA_VERSION_MAJOR}" STREQUAL "2")
   message(SEND_ERROR
     "Package VersionedA is major version [${VersionedA_VERSION_MAJOR}], not [2]")
-endif(NOT "${VersionedA_VERSION_MAJOR}" STREQUAL "2")
+endif()
 if(NOT "${VersionedA_VERSION_MINOR}" STREQUAL "0")
   message(SEND_ERROR
     "Package VersionedA is minor version [${VersionedA_VERSION_MINOR}], not [0]")
-endif(NOT "${VersionedA_VERSION_MINOR}" STREQUAL "0")
+endif()
 
 if(NOT "${VersionedB_VERSION}" STREQUAL "3.1")
   message(SEND_ERROR
     "Package VersionedB is version [${VersionedB_VERSION}], not [3.1]")
-endif(NOT "${VersionedB_VERSION}" STREQUAL "3.1")
+endif()
 if(NOT "${VersionedB_VERSION_MAJOR}" STREQUAL "3")
   message(SEND_ERROR
     "Package VersionedB is major version [${VersionedB_VERSION_MAJOR}], not [3]")
-endif(NOT "${VersionedB_VERSION_MAJOR}" STREQUAL "3")
+endif()
 if(NOT "${VersionedB_VERSION_MINOR}" STREQUAL "1")
   message(SEND_ERROR
     "Package VersionedB is minor version [${VersionedB_VERSION_MINOR}], not [1]")
-endif(NOT "${VersionedB_VERSION_MINOR}" STREQUAL "1")
+endif()
 
 if(NOT "${Special_VERSION}" STREQUAL "1.2")
   message(SEND_ERROR
     "Package Special is version [${Special_VERSION}], not [1.2]")
-endif(NOT "${Special_VERSION}" STREQUAL "1.2")
+endif()
 if(NOT "${Special_VERSION_MAJOR}" STREQUAL "1")
   message(SEND_ERROR
     "Package Special is major version [${Special_VERSION_MAJOR}], not [1]")
-endif(NOT "${Special_VERSION_MAJOR}" STREQUAL "1")
+endif()
 if(NOT "${Special_VERSION_MINOR}" STREQUAL "2")
   message(SEND_ERROR
     "Package Special is minor version [${Special_VERSION_MINOR}], not [2]")
-endif(NOT "${Special_VERSION_MINOR}" STREQUAL "2")
+endif()
 
 # Test version number comparison.
 if(NOT "1.2.3.4" VERSION_LESS "1.2.3.5")

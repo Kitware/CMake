@@ -37,7 +37,7 @@ if(NOT CMAKE_C_COMPILER_WORKS)
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE __CMAKE_C_COMPILER_OUTPUT)
   set(C_TEST_WAS_RUN 1)
-endif(NOT CMAKE_C_COMPILER_WORKS)
+endif()
 
 if(NOT CMAKE_C_COMPILER_WORKS)
   PrintTestCompilerStatus("C" " -- broken")
@@ -53,19 +53,19 @@ if(NOT CMAKE_C_COMPILER_WORKS)
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${__CMAKE_C_COMPILER_OUTPUT}\n\n"
     "CMake will not be able to correctly generate this project.")
-else(NOT CMAKE_C_COMPILER_WORKS)
+else()
   if(C_TEST_WAS_RUN)
     PrintTestCompilerStatus("C" " -- works")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the C compiler works passed with "
       "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")
-  endif(C_TEST_WAS_RUN)
+  endif()
   set(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
   if(CMAKE_C_COMPILER_FORCED)
     # The compiler configuration was forced by the user.
     # Assume the user has configured all compiler information.
-  else(CMAKE_C_COMPILER_FORCED)
+  else()
     # Try to identify the ABI and configure it into CMakeCCompiler.cmake
     include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
     CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
@@ -75,13 +75,13 @@ else(NOT CMAKE_C_COMPILER_WORKS)
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
     include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake)
-  endif(CMAKE_C_COMPILER_FORCED)
+  endif()
   if(CMAKE_C_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_C_ABI_FILES})
       include(${f})
     endforeach()
     unset(CMAKE_C_ABI_FILES)
   endif()
-endif(NOT CMAKE_C_COMPILER_WORKS)
+endif()
 
 unset(__CMAKE_C_COMPILER_OUTPUT)

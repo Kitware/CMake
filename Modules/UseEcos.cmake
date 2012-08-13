@@ -33,24 +33,24 @@
 find_program(ECOSCONFIG_EXECUTABLE NAMES ecosconfig)
 if(NOT ECOSCONFIG_EXECUTABLE)
    message(SEND_ERROR "ecosconfig was not found. Either include it in the system path or set it manually using ccmake.")
-else(NOT ECOSCONFIG_EXECUTABLE)
+else()
    message(STATUS "Found ecosconfig: ${ECOSCONFIG_EXECUTABLE}")
-endif(NOT ECOSCONFIG_EXECUTABLE)
+endif()
 
 # check that ECOS_REPOSITORY is set correctly
 if (NOT EXISTS $ENV{ECOS_REPOSITORY}/ecos.db)
    message(SEND_ERROR "The environment variable ECOS_REPOSITORY is not set correctly. Set it to the directory which contains the file ecos.db")
-else (NOT EXISTS $ENV{ECOS_REPOSITORY}/ecos.db)
+else ()
    message(STATUS "ECOS_REPOSITORY is set to $ENV{ECOS_REPOSITORY}")
-endif (NOT EXISTS $ENV{ECOS_REPOSITORY}/ecos.db)
+endif ()
 
 # check that tclsh (coming with TCL) is available, otherwise ecosconfig doesn't work
 find_package(Tclsh)
 if (NOT TCL_TCLSH)
    message(SEND_ERROR "The TCL tclsh was not found. Please install TCL, it is required for building eCos applications.")
-else (NOT TCL_TCLSH)
+else ()
    message(STATUS "tlcsh found: ${TCL_TCLSH}")
-endif (NOT TCL_TCLSH)
+endif ()
 
 #add the globale include-diretories
 #usage: ECOS_ADD_INCLUDE_DIRECTORIES()
@@ -58,14 +58,14 @@ macro(ECOS_ADD_INCLUDE_DIRECTORIES)
 #check for ProjectSources.txt one level higher
    if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectSources.txt)
       include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
-   else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectSources.txt)
+   else ()
       include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
-   endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../ProjectSources.txt)
+   endif ()
 
 #the ecos include directory
    include_directories(${CMAKE_CURRENT_BINARY_DIR}/ecos/install/include/)
 
-endmacro(ECOS_ADD_INCLUDE_DIRECTORIES)
+endmacro()
 
 
 #we want to compile for the xscale processor, in this case the following macro has to be called
@@ -82,7 +82,7 @@ macro (ECOS_USE_ARM_ELF_TOOLS)
    add_definitions(-mcpu=xscale -mapcs-frame)
 #for the obj-tools
    set(ECOS_ARCH_PREFIX "arm-elf-")
-endmacro (ECOS_USE_ARM_ELF_TOOLS)
+endmacro ()
 
 #usage: ECOS_USE_PPC_EABI_TOOLS()
 macro (ECOS_USE_PPC_EABI_TOOLS)
@@ -97,7 +97,7 @@ macro (ECOS_USE_PPC_EABI_TOOLS)
    add_definitions()
 #for the obj-tools
    set(ECOS_ARCH_PREFIX "powerpc-eabi-")
-endmacro (ECOS_USE_PPC_EABI_TOOLS)
+endmacro ()
 
 #usage: ECOS_USE_I386_ELF_TOOLS()
 macro (ECOS_USE_I386_ELF_TOOLS)
@@ -112,7 +112,7 @@ macro (ECOS_USE_I386_ELF_TOOLS)
    add_definitions()
 #for the obj-tools
    set(ECOS_ARCH_PREFIX "i386-elf-")
-endmacro (ECOS_USE_I386_ELF_TOOLS)
+endmacro ()
 
 
 #since the actual sources are located one level upwards
@@ -126,10 +126,10 @@ macro(ECOS_ADJUST_DIRECTORY _target_FILES )
       get_filename_component(_abs_FILE ${_current_FILE} ABSOLUTE)
       if (NOT ${_abs_FILE} STREQUAL ${_current_FILE})
          get_filename_component(_abs_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../${_current_FILE} ABSOLUTE)
-      endif (NOT ${_abs_FILE} STREQUAL ${_current_FILE})
+      endif ()
       list(APPEND ${_target_FILES} ${_abs_FILE})
-   endforeach (_current_FILE)
-endmacro(ECOS_ADJUST_DIRECTORY)
+   endforeach ()
+endmacro()
 
 # the default ecos config file name
 # maybe in the future also out-of-source builds may be possible
@@ -141,7 +141,7 @@ macro(ECOS_ADD_TARGET_LIB)
 # when building out-of-source, create the ecos/ subdir
     if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ecos)
         file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ecos)
-    endif(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/ecos)
+    endif()
 
 #sources depend on target.ld
    set_source_files_properties(
@@ -162,7 +162,7 @@ macro(ECOS_ADD_TARGET_LIB)
    )
 
    add_custom_target( ecos make -C ${CMAKE_CURRENT_BINARY_DIR}/ecos/ DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/ecos/makefile )
-endmacro(ECOS_ADD_TARGET_LIB)
+endmacro()
 
 # get the directory of the current file, used later on in the file
 get_filename_component( ECOS_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
@@ -232,5 +232,5 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
       COMMAND echo -e \"\\n--- Full assembly listing ---\\n\" >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst
       COMMAND ${ECOS_ARCH_PREFIX}objdump -S -x -d -C ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst )
 
-endmacro(ECOS_ADD_EXECUTABLE)
+endmacro()
 

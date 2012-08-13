@@ -9,37 +9,37 @@ project(Preprocess)
 # to work with each tool and documents those known to not work.
 if("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(PP_XCODE 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
   set(PP_VS6 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
   set(PP_UMAKE 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
   set(PP_NMAKE 1)
-endif("${CMAKE_GENERATOR}" MATCHES "NMake Makefiles")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "MinGW Makefiles")
   set(PP_MINGW 1)
-endif("${CMAKE_GENERATOR}" MATCHES "MinGW Makefiles")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Borland Makefiles")
   set(PP_BORLAND 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Borland Makefiles")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Watcom WMake")
   set(PP_WATCOM 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Watcom WMake")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
   set(PP_VS70 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(PP_VS 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 10")
   set(PP_VS100 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 10")
+endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 11")
   set(PP_VS110 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 11")
+endif()
 
 # Some tests below check the PP_* variables set above.  They are meant
 # to test the case that the build tool is at fault.  Other tests below
@@ -80,8 +80,8 @@ if(NOT PP_VS6)
     # trouble passing to other tools, and the compiler may be directly
     # invoked from the command line.
     set(STRING_EXTRA "${STRING_EXTRA} ")
-  endif(NOT PP_BORLAND AND NOT PP_WATCOM)
-endif(NOT PP_VS6)
+  endif()
+endif()
 
 if(NOT PP_VS)
   # VS: ,
@@ -89,21 +89,21 @@ if(NOT PP_VS)
   # The comma-separated list of PreprocessorDefinitions in the project
   # file seems to be parsed before the content of entries is examined.
   set(STRING_EXTRA "${STRING_EXTRA},")
-endif(NOT PP_VS)
+endif()
 
 if(NOT PP_MINGW)
   # MinGW: &
   # When inside -D"FOO=\"a & b\"" MinGW make wants -D"FOO=\"a "&" b\""
   # but it does not like quoted ampersand elsewhere.
   set(STRING_EXTRA "${STRING_EXTRA}&")
-endif(NOT PP_MINGW)
+endif()
 
 if(NOT PP_MINGW)
   # MinGW: |
   # When inside -D"FOO=\"a | b\"" MinGW make wants -D"FOO=\"a "|" b\""
   # but it does not like quoted pipe elsewhere.
   set(STRING_EXTRA "${STRING_EXTRA}|")
-endif(NOT PP_MINGW)
+endif()
 
 if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # Borland, NMake, MinGW: ^
@@ -111,13 +111,13 @@ if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # but do not like quoted carrot elsewhere.  In NMake the non-quoted
   # syntax works when the flags are not in a make variable.
   set(STRING_EXTRA "${STRING_EXTRA}^")
-endif(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
+endif()
 
 if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
   # Borland, MinGW: < >
   # Angle-brackets have funny behavior that is hard to escape.
   set(STRING_EXTRA "${STRING_EXTRA}<>")
-endif(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
+endif()
 
 set(EXPR_OP1 "/")
 if((NOT MSVC OR PP_NMAKE) AND
@@ -150,7 +150,7 @@ endif()
 #  - NMake is okay with just \\\"
 if(PP_NMAKE OR PP_UMAKE)
   set(STRING_EXTRA "${STRING_EXTRA}\\\"")
-endif(PP_NMAKE OR PP_UMAKE)
+endif()
 
 # General: #
 # MSVC will not accept a # in the value of a string definition on the
@@ -187,7 +187,7 @@ set(EXPR "x*y+!(x==(y+1*2))*f(x${EXPR_OP1}2)")
 if(NOT WATCOM)
   # Watcom does not support - or / because it parses them as options.
   set(EXPR "${EXPR} + y/x-x")
-endif(NOT WATCOM)
+endif()
 
 #-----------------------------------------------------------------------------
 
@@ -199,11 +199,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPREPROCESS_DEBUG")
 # Inform the test if it built from Xcode or VS6 IDE.
 if(PP_XCODE)
   set(PREPROCESS_XCODE 1)
-endif(PP_XCODE)
+endif()
 if(PP_VS6)
   set(PREPROCESS_VS6 1)
   set(VS6 _vs6)
-endif(PP_VS6)
+endif()
 
 # Test old-style definitions.
 add_definitions(-DOLD_DEF -DOLD_EXPR=2)
@@ -213,7 +213,7 @@ set(OLD_DEFS_EXPECTED "OLD_DEF;OLD_EXPR=2")
 get_property(OLD_DEFS DIRECTORY PROPERTY COMPILE_DEFINITIONS)
 if(NOT "${OLD_DEFS}" STREQUAL "${OLD_DEFS_EXPECTED}")
   message(SEND_ERROR "add_definitions not converted to directory property!")
-endif(NOT "${OLD_DEFS}" STREQUAL "${OLD_DEFS_EXPECTED}")
+endif()
 
 add_executable(Preprocess preprocess.c preprocess${VS6}.cxx)
 
@@ -234,14 +234,14 @@ foreach(c "" "_DEBUG" "_RELEASE")
     SOURCE preprocess.c preprocess${VS6}.cxx
     PROPERTY COMPILE_DEFINITIONS${c} "FILE_DEF${c}"
     )
-endforeach(c)
+endforeach()
 
 # Add definitions with values.
 if(NOT PREPROCESS_VS6)
   # The path might have spaces, which VS6 does not support.
   set(DEF_TARGET_PATH "TARGET_PATH=\"${TARGET_PATH}\"")
   set(DEF_FILE_PATH "FILE_PATH=\"${FILE_PATH}\"")
-endif(NOT PREPROCESS_VS6)
+endif()
 set_property(
   TARGET Preprocess
   APPEND PROPERTY COMPILE_DEFINITIONS
@@ -263,7 +263,7 @@ add_custom_target(drive COMMAND Preprocess)
 # Configure the header file with the desired string value.
 if(SEMICOLON)
   set(STRING_VALUE "${STRING_VALUE};")
-endif(SEMICOLON)
+endif()
 configure_file(${Preprocess_SOURCE_DIR}/preprocess.h.in
                ${Preprocess_BINARY_DIR}/preprocess.h)
 include_directories(${Preprocess_BINARY_DIR})

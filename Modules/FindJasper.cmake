@@ -31,13 +31,13 @@ if (NOT JASPER_LIBRARIES)
 
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     SELECT_LIBRARY_CONFIGURATIONS(JASPER)
-endif (NOT JASPER_LIBRARIES)
+endif ()
 
 if (JASPER_INCLUDE_DIR AND EXISTS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h")
     file(STRINGS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h" jasper_version_str REGEX "^#define[\t ]+JAS_VERSION[\t ]+\".*\".*")
 
     string(REGEX REPLACE "^#define[\t ]+JAS_VERSION[\t ]+\"([^\"]+)\".*" "\\1" JASPER_VERSION_STRING "${jasper_version_str}")
-endif (JASPER_INCLUDE_DIR AND EXISTS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h")
+endif ()
 
 # handle the QUIETLY and REQUIRED arguments and set JASPER_FOUND to TRUE if
 # all listed variables are TRUE
@@ -48,6 +48,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Jasper
 
 if (JASPER_FOUND)
    set(JASPER_LIBRARIES ${JASPER_LIBRARIES} ${JPEG_LIBRARIES} )
-endif (JASPER_FOUND)
+endif ()
 
 mark_as_advanced(JASPER_INCLUDE_DIR)

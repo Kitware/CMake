@@ -59,23 +59,23 @@ if(CMAKE_HOST_UNIX)
       if("${val}" GREATER 0)
         exec_program(uname ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
           RETURN_VALUE val)
-      endif("${val}" GREATER 0)
+      endif()
     endif()
     # check the return of the last uname -m or -p
     if("${val}" GREATER 0)
         set(CMAKE_HOST_SYSTEM_PROCESSOR "unknown")
-    endif("${val}" GREATER 0)
+    endif()
     set(CMAKE_UNAME ${CMAKE_UNAME} CACHE INTERNAL "uname command")
     # processor may have double quote in the name, and that needs to be removed
     string(REGEX REPLACE "\"" "" CMAKE_HOST_SYSTEM_PROCESSOR "${CMAKE_HOST_SYSTEM_PROCESSOR}")
     string(REGEX REPLACE "/" "_" CMAKE_HOST_SYSTEM_PROCESSOR "${CMAKE_HOST_SYSTEM_PROCESSOR}")
-  endif(CMAKE_UNAME)
-else(CMAKE_HOST_UNIX)
+  endif()
+else()
   if(CMAKE_HOST_WIN32)
     set (CMAKE_HOST_SYSTEM_NAME "Windows")
     set (CMAKE_HOST_SYSTEM_PROCESSOR "$ENV{PROCESSOR_ARCHITECTURE}")
-  endif(CMAKE_HOST_WIN32)
-endif(CMAKE_HOST_UNIX)
+  endif()
+endif()
 
 # if a toolchain file is used, the user wants to cross compile.
 # in this case read the toolchain file and keep the CMAKE_HOST_SYSTEM_*
@@ -87,15 +87,15 @@ if(CMAKE_TOOLCHAIN_FILE)
   if(NOT _INCLUDED_TOOLCHAIN_FILE)
      # if the file isn't found there, check the default locations
      include("${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
-  endif(NOT _INCLUDED_TOOLCHAIN_FILE)
+  endif()
 
   if(_INCLUDED_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
-  else(_INCLUDED_TOOLCHAIN_FILE)
+  else()
     message(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
     set(CMAKE_TOOLCHAIN_FILE "NOTFOUND" CACHE FILEPATH "The CMake toolchain file" FORCE)
-  endif(_INCLUDED_TOOLCHAIN_FILE)
-endif(CMAKE_TOOLCHAIN_FILE)
+  endif()
+endif()
 
 
 # if CMAKE_SYSTEM_NAME is here already set, either it comes from a toolchain file
@@ -104,45 +104,45 @@ endif(CMAKE_TOOLCHAIN_FILE)
 if(CMAKE_SYSTEM_NAME)
   if(NOT DEFINED CMAKE_CROSSCOMPILING)
     set(CMAKE_CROSSCOMPILING TRUE)
-  endif(NOT DEFINED CMAKE_CROSSCOMPILING)
+  endif()
   set(PRESET_CMAKE_SYSTEM_NAME TRUE)
-else(CMAKE_SYSTEM_NAME)
+else()
   set(CMAKE_SYSTEM_NAME      "${CMAKE_HOST_SYSTEM_NAME}")
   set(CMAKE_SYSTEM_VERSION   "${CMAKE_HOST_SYSTEM_VERSION}")
   set(CMAKE_SYSTEM_PROCESSOR "${CMAKE_HOST_SYSTEM_PROCESSOR}")
   set(CMAKE_CROSSCOMPILING FALSE)
   set(PRESET_CMAKE_SYSTEM_NAME FALSE)
-endif(CMAKE_SYSTEM_NAME)
+endif()
 
 
 macro(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
   if(NOT ${_PREFIX}_NAME)
     set(${_PREFIX}_NAME "UnknownOS")
-  endif(NOT ${_PREFIX}_NAME)
+  endif()
 
   # fix for BSD/OS , remove the /
   if(${_PREFIX}_NAME MATCHES BSD.OS)
     set(${_PREFIX}_NAME BSDOS)
-  endif(${_PREFIX}_NAME MATCHES BSD.OS)
+  endif()
 
   # fix for GNU/kFreeBSD, remove the GNU/
   if(${_PREFIX}_NAME MATCHES kFreeBSD)
     set(${_PREFIX}_NAME kFreeBSD)
-  endif(${_PREFIX}_NAME MATCHES kFreeBSD)
+  endif()
 
   # fix for CYGWIN which has windows version in it
   if(${_PREFIX}_NAME MATCHES CYGWIN)
     set(${_PREFIX}_NAME CYGWIN)
-  endif(${_PREFIX}_NAME MATCHES CYGWIN)
+  endif()
 
   # set CMAKE_SYSTEM to the CMAKE_SYSTEM_NAME
   set(${_PREFIX}  ${${_PREFIX}_NAME})
   # if there is a CMAKE_SYSTEM_VERSION then add a -${CMAKE_SYSTEM_VERSION}
   if(${_PREFIX}_VERSION)
     set(${_PREFIX} ${${_PREFIX}}-${${_PREFIX}_VERSION})
-  endif(${_PREFIX}_VERSION)
+  endif()
 
-endmacro(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
+endmacro()
 
 ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_SYSTEM)
 ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_HOST_SYSTEM)
@@ -156,21 +156,21 @@ if(CMAKE_BINARY_DIR)
                 "The target system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
                 "The host system is: ${CMAKE_HOST_SYSTEM_NAME} - ${CMAKE_HOST_SYSTEM_VERSION} - ${CMAKE_HOST_SYSTEM_PROCESSOR}\n")
-  else(PRESET_CMAKE_SYSTEM_NAME)
+  else()
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
                 "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
-  endif(PRESET_CMAKE_SYSTEM_NAME)
+  endif()
 
   # if a toolchain file is used, it needs to be included in the configured file,
   # so settings done there are also available if they don't go in the cache and in try_compile()
   set(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED)
   if(DEFINED CMAKE_TOOLCHAIN_FILE)
     set(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED "include(\"${CMAKE_TOOLCHAIN_FILE}\")")
-  endif(DEFINED CMAKE_TOOLCHAIN_FILE)
+  endif()
 
   # configure variables set in this file for fast reload, the template file is defined at the top of this file
   configure_file(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
                 ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake
                 IMMEDIATE @ONLY)
 
-endif(CMAKE_BINARY_DIR)
+endif()

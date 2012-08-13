@@ -34,26 +34,26 @@
 file(GLOB GLOB_TEMP_VAR /usr/lib/qt-3*/bin/qmake)
 if(GLOB_TEMP_VAR)
   set(QT3_INSTALLED TRUE)
-endif(GLOB_TEMP_VAR)
+endif()
 set(GLOB_TEMP_VAR)
 
 file(GLOB GLOB_TEMP_VAR /usr/local/qt-x11-commercial-3*/bin/qmake)
 if(GLOB_TEMP_VAR)
   set(QT3_INSTALLED TRUE)
-endif(GLOB_TEMP_VAR)
+endif()
 set(GLOB_TEMP_VAR)
 
 # look for qt4 installations
 file(GLOB GLOB_TEMP_VAR /usr/local/qt-x11-commercial-4*/bin/qmake)
 if(GLOB_TEMP_VAR)
   set(QT4_INSTALLED TRUE)
-endif(GLOB_TEMP_VAR)
+endif()
 set(GLOB_TEMP_VAR)
 
 file(GLOB GLOB_TEMP_VAR /usr/local/Trolltech/Qt-4*/bin/qmake)
 if(GLOB_TEMP_VAR)
   set(QT4_INSTALLED TRUE)
-endif(GLOB_TEMP_VAR)
+endif()
 set(GLOB_TEMP_VAR)
 
 # now find qmake
@@ -64,17 +64,17 @@ if(QT_QMAKE_EXECUTABLE_FINDQT)
   if(QTVERSION MATCHES "4.*")
     set(QT_QMAKE_EXECUTABLE ${QT_QMAKE_EXECUTABLE_FINDQT} CACHE PATH "QT4 qmake program.")
     set(QT4_INSTALLED TRUE)
-  endif(QTVERSION MATCHES "4.*")
+  endif()
   if(QTVERSION MATCHES "Unknown")
     set(QT3_INSTALLED TRUE)
-  endif(QTVERSION MATCHES "Unknown")
-endif(QT_QMAKE_EXECUTABLE_FINDQT)
+  endif()
+endif()
 
 if(QT_QMAKE_EXECUTABLE_FINDQT)
   exec_program( ${QT_QMAKE_EXECUTABLE_FINDQT}
     ARGS "-query QT_INSTALL_HEADERS"
     OUTPUT_VARIABLE qt_headers )
-endif(QT_QMAKE_EXECUTABLE_FINDQT)
+endif()
 
 find_file( QT4_QGLOBAL_H_FILE qglobal.h
   "${QT_SEARCH_PATH}/Qt/include"
@@ -91,7 +91,7 @@ find_file( QT4_QGLOBAL_H_FILE qglobal.h
 
 if(QT4_QGLOBAL_H_FILE)
   set(QT4_INSTALLED TRUE)
-endif(QT4_QGLOBAL_H_FILE)
+endif()
 
 find_file( QT3_QGLOBAL_H_FILE qglobal.h
   "${QT_SEARCH_PATH}/Qt/include"
@@ -111,50 +111,50 @@ find_file( QT3_QGLOBAL_H_FILE qglobal.h
 
 if(QT3_QGLOBAL_H_FILE)
   set(QT3_INSTALLED TRUE)
-endif(QT3_QGLOBAL_H_FILE)
+endif()
 
 if(QT3_INSTALLED AND QT4_INSTALLED )
   # force user to pick if we have both
   set(DESIRED_QT_VERSION 0 CACHE STRING "Pick a version of QT to use: 3 or 4")
-else(QT3_INSTALLED AND QT4_INSTALLED )
+else()
   # if only one found then pick that one
   if(QT3_INSTALLED)
     set(DESIRED_QT_VERSION 3 CACHE STRING "Pick a version of QT to use: 3 or 4")
-  endif(QT3_INSTALLED)
+  endif()
   if(QT4_INSTALLED)
     set(DESIRED_QT_VERSION 4 CACHE STRING "Pick a version of QT to use: 3 or 4")
-  endif(QT4_INSTALLED)
-endif(QT3_INSTALLED AND QT4_INSTALLED )
+  endif()
+endif()
 
 if(DESIRED_QT_VERSION MATCHES 3)
   set(Qt3_FIND_REQUIRED ${Qt_FIND_REQUIRED})
   set(Qt3_FIND_QUIETLY  ${Qt_FIND_QUIETLY})
   include(FindQt3)
-endif(DESIRED_QT_VERSION MATCHES 3)
+endif()
 if(DESIRED_QT_VERSION MATCHES 4)
   set(Qt4_FIND_REQUIRED ${Qt_FIND_REQUIRED})
   set(Qt4_FIND_QUIETLY  ${Qt_FIND_QUIETLY})
   include(FindQt4)
-endif(DESIRED_QT_VERSION MATCHES 4)
+endif()
 
 if(NOT QT3_INSTALLED AND NOT QT4_INSTALLED)
   if(QT_REQUIRED)
     message(SEND_ERROR "CMake was unable to find any QT versions, put qmake in your path, or set QT_QMAKE_EXECUTABLE.")
-  endif(QT_REQUIRED)
-else(NOT QT3_INSTALLED AND NOT QT4_INSTALLED)
+  endif()
+else()
   if(NOT QT_FOUND AND NOT DESIRED_QT_VERSION)
     if(QT_REQUIRED)
       message(SEND_ERROR "Multiple versions of QT found please set DESIRED_QT_VERSION")
-    else(QT_REQUIRED)
+    else()
       message("Multiple versions of QT found please set DESIRED_QT_VERSION")
-    endif(QT_REQUIRED)
-  endif(NOT QT_FOUND AND NOT DESIRED_QT_VERSION)
+    endif()
+  endif()
   if(NOT QT_FOUND AND DESIRED_QT_VERSION)
     if(QT_REQUIRED)
       message(FATAL_ERROR "CMake was unable to find QT version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE, if those are set then QT_QT_LIBRARY or QT_LIBRARY_DIR.")
-    else(QT_REQUIRED)
+    else()
       message( "CMake was unable to find desired QT version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE.")
-    endif(QT_REQUIRED)
-  endif(NOT QT_FOUND AND DESIRED_QT_VERSION)
-endif(NOT QT3_INSTALLED AND NOT QT4_INSTALLED)
+    endif()
+  endif()
+endif()
 mark_as_advanced(QT3_QGLOBAL_H_FILE QT4_QGLOBAL_H_FILE QT_QMAKE_EXECUTABLE_FINDQT)

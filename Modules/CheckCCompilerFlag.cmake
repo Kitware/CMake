@@ -42,4 +42,4 @@ macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
      FAIL_REGEX "WARNING: unknown flag:"                    # Open64
      )
    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
-endmacro (CHECK_C_COMPILER_FLAG)
+endmacro ()

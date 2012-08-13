@@ -43,7 +43,7 @@ if(CURL_INCLUDE_DIR)
       unset(curl_version_str)
       break()
     endif()
-  endforeach(_curl_version_header)
+  endforeach()
 endif()
 
 # handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if
@@ -56,4 +56,4 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL
 if(CURL_FOUND)
   set(CURL_LIBRARIES ${CURL_LIBRARY})
   set(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
-endif(CURL_FOUND)
+endif()

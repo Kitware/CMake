@@ -77,7 +77,7 @@ set(PostgreSQL_ROOT_DIR_MESSAGE "Set the PostgreSQL_ROOT system variable to wher
 set(PostgreSQL_ROOT_DIRECTORIES $ENV{PostgreSQL_ROOT})
 if(PostgreSQL_ROOT_DIRECTORIES)
   file(TO_CMAKE_PATH ${PostgreSQL_ROOT_DIRECTORIES} PostgreSQL_ROOT_DIRECTORIES)
-endif(PostgreSQL_ROOT_DIRECTORIES)
+endif()
 
 set(PostgreSQL_KNOWN_VERSIONS ${PostgreSQL_ADDITIONAL_VERSIONS}
     "9.1" "9.0" "8.4" "8.3" "8.2" "8.1" "8.0")
@@ -86,8 +86,8 @@ set(PostgreSQL_KNOWN_VERSIONS ${PostgreSQL_ADDITIONAL_VERSIONS}
 if ( WIN32 )
   foreach (suffix ${PostgreSQL_KNOWN_VERSIONS} )
     set(PostgreSQL_ADDITIONAL_SEARCH_PATHS ${PostgreSQL_ADDITIONAL_SEARCH_PATHS} "C:/Program Files/PostgreSQL/${suffix}" )
-  endforeach(suffix)
-endif( WIN32 )
+  endforeach()
+endif()
 set( PostgreSQL_ROOT_DIRECTORIES
    ${PostgreSQL_ROOT_DIRECTORIES}
    ${PostgreSQL_ROOT}
@@ -167,6 +167,6 @@ if(PostgreSQL_FOUND)
   #message("Final PostgreSQL include dir: ${PostgreSQL_INCLUDE_DIRS}")
   #message("Final PostgreSQL library dir: ${PostgreSQL_LIBRARY_DIRS}")
   #message("Final PostgreSQL libraries:   ${PostgreSQL_LIBRARIES}")
-endif(PostgreSQL_FOUND)
+endif()
 
 mark_as_advanced(PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR PostgreSQL_LIBRARY )

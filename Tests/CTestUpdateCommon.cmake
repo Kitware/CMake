@@ -12,8 +12,8 @@ function(run_child)
     string(REGEX REPLACE "\n" "\n  " OUTPUT "${OUTPUT}")
     message(FATAL_ERROR "Child failed (${FAILED}), output is\n  ${OUTPUT}\n"
       "Command = [${ARGN}]\n")
-  endif(FAILED)
-endfunction(run_child)
+  endif()
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to find the Update.xml file and check for expected entries.
@@ -26,7 +26,7 @@ function(check_updates build)
     )
   if(NOT UPDATE_XML_FILE)
     message(FATAL_ERROR "Cannot find Update.xml with pattern\n  ${PATTERN}")
-  endif(NOT UPDATE_XML_FILE)
+  endif()
   message(" found ${UPDATE_XML_FILE}")
 
   set(max_update_xml_size 16384)
@@ -73,11 +73,11 @@ function(check_updates build)
     set(MSG "${MSG}Update.xml is missing expected entries:\n")
     foreach(f ${MISSING})
       set(MSG "${MSG}  ${f}\n")
-    endforeach(f)
-  else(MISSING)
+    endforeach()
+  else()
     # Success
     message(" no entries missing from Update.xml")
-  endif(MISSING)
+  endif()
 
   # Report the result
   if(EXTRA)
@@ -85,11 +85,11 @@ function(check_updates build)
     set(MSG "${MSG}Update.xml has extra unexpected entries:\n")
     foreach(f ${EXTRA})
       set(MSG "${MSG}  ${f}\n")
-    endforeach(f)
-  else(EXTRA)
+    endforeach()
+  else()
     # Success
     message(" no extra entries in Update.xml")
-  endif(EXTRA)
+  endif()
 
   if(MSG)
     # Provide the log file
@@ -99,14 +99,14 @@ function(check_updates build)
       file(READ ${UPDATE_LOG_FILE} UPDATE_LOG LIMIT ${max_update_xml_size})
       string(REGEX REPLACE "\n" "\n  " UPDATE_LOG "${UPDATE_LOG}")
       set(MSG "${MSG}Update log:\n  ${UPDATE_LOG}")
-    else(UPDATE_LOG_FILE)
+    else()
       set(MSG "${MSG}No update log found!")
-    endif(UPDATE_LOG_FILE)
+    endif()
 
     # Display the error message
     message(FATAL_ERROR "${MSG}")
-  endif(MSG)
-endfunction(check_updates)
+  endif()
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to create initial content.
@@ -123,7 +123,7 @@ set(CTEST_NIGHTLY_START_TIME \"21:00:00 EDT\")
   # Some other files.
   file(WRITE ${TOP}/${dir}/foo.txt "foo\n")
   file(WRITE ${TOP}/${dir}/bar.txt "bar\n")
-endfunction(create_content)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to update content.
@@ -137,20 +137,20 @@ function(update_content dir added_var removed_var dirs_var)
   set(${dirs_var} subdir PARENT_SCOPE)
   set(${added_var} zot.txt subdir/foo.txt subdir/bar.txt PARENT_SCOPE)
   set(${removed_var} bar.txt PARENT_SCOPE)
-endfunction(update_content)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to change existing files
 function(change_content dir)
   file(APPEND ${TOP}/${dir}/foo.txt "foo line 3\n")
   file(APPEND ${TOP}/${dir}/subdir/foo.txt "foo line 2\n")
-endfunction(change_content)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to create local modifications before update
 function(modify_content dir)
   file(APPEND ${TOP}/${dir}/CTestConfig.cmake "# local modification\n")
-endfunction(modify_content)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to write CTestConfiguration.ini content.
@@ -163,7 +163,7 @@ BuildDirectory: ${TOP}/${bin_dir}
 Site: test.site
 BuildName: user-test
 ")
-endfunction(create_build_tree)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to write the dashboard test script.
@@ -181,7 +181,7 @@ ${custom_text}
 ctest_start(Experimental)
 ctest_update(SOURCE \${CTEST_SOURCE_DIRECTORY})
 ")
-endfunction(create_dashboard_script)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to run the dashboard through the command line
@@ -205,7 +205,7 @@ function(run_dashboard_command_line bin_dir)
     Updated{subdir/bar.txt}
     ${_modified}
     )
-endfunction(run_dashboard_command_line)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to run the dashboard through a script
@@ -224,11 +224,11 @@ function(run_dashboard_script bin_dir)
     Updated{subdir/foo.txt}
     Updated{subdir/bar.txt}
     )
-endfunction(run_dashboard_script)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to initialize the testing directory.
 function(init_testing)
   file(REMOVE_RECURSE ${TOP})
   file(MAKE_DIRECTORY ${TOP})
-endfunction(init_testing)
+endfunction()

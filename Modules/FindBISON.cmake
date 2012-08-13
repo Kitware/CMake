@@ -98,14 +98,14 @@ if(BISON_EXECUTABLE)
     set(BISON_${Name}_VERBOSE_FILE ${filename})
     list(APPEND BISON_TARGET_extraoutputs
       "${BISON_TARGET_output_path}/${BISON_TARGET_output_name}.output")
-  endmacro(BISON_TARGET_option_verbose)
+  endmacro()
 
   # internal macro
   macro(BISON_TARGET_option_extraopts Options)
     set(BISON_TARGET_extraopts "${Options}")
     separate_arguments(BISON_TARGET_extraopts)
     list(APPEND BISON_TARGET_cmdopt ${BISON_TARGET_extraopts})
-  endmacro(BISON_TARGET_option_extraopts)
+  endmacro()
 
   #============================================================
   # BISON_TARGET (public macro)
@@ -161,12 +161,12 @@ if(BISON_EXECUTABLE)
       set(BISON_${Name}_COMPILE_FLAGS ${BISON_TARGET_cmdopt})
       set(BISON_${Name}_OUTPUT_SOURCE "${BisonOutput}")
 
-    endif(NOT ${ARGC} EQUAL 3 AND NOT ${ARGC} EQUAL 5 AND NOT ${ARGC} EQUAL 7)
-  endmacro(BISON_TARGET)
+    endif()
+  endmacro()
   #
   #============================================================
 
-endif(BISON_EXECUTABLE)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(BISON REQUIRED_VARS  BISON_EXECUTABLE

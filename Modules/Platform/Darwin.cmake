@@ -17,8 +17,8 @@ if(NOT DEFINED HAVE_FLAG_SEARCH_PATHS_FIRST)
   set(HAVE_FLAG_SEARCH_PATHS_FIRST 0)
   if("${DARWIN_MAJOR_VERSION}" GREATER 6)
     set(HAVE_FLAG_SEARCH_PATHS_FIRST 1)
-  endif("${DARWIN_MAJOR_VERSION}" GREATER 6)
-endif(NOT DEFINED HAVE_FLAG_SEARCH_PATHS_FIRST)
+  endif()
+endif()
 # More desirable, but does not work:
   #include(CheckCXXCompilerFlag)
   #CHECK_CXX_COMPILER_FLAG("-Wl,-search_paths_first" HAVE_FLAG_SEARCH_PATHS_FIRST)
@@ -41,7 +41,7 @@ set(CMAKE_CXX_LINK_FLAGS "-Wl,-headerpad_max_install_names")
 if(HAVE_FLAG_SEARCH_PATHS_FIRST)
   set(CMAKE_C_LINK_FLAGS "-Wl,-search_paths_first ${CMAKE_C_LINK_FLAGS}")
   set(CMAKE_CXX_LINK_FLAGS "-Wl,-search_paths_first ${CMAKE_CXX_LINK_FLAGS}")
-endif(HAVE_FLAG_SEARCH_PATHS_FIRST)
+endif()
 
 set(CMAKE_PLATFORM_HAS_INSTALLNAME 1)
 set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
@@ -57,7 +57,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".dylib" ".so" ".a")
 if(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
   find_program(CMAKE_INSTALL_NAME_TOOL install_name_tool)
   mark_as_advanced(CMAKE_INSTALL_NAME_TOOL)
-endif(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
+endif()
 
 # Set the assumed (Pre 10.5 or Default) location of the developer tools
 set(OSX_DEVELOPER_ROOT "/Developer")
@@ -69,7 +69,7 @@ if(CMAKE_XCODE_SELECT)
   execute_process(COMMAND ${CMAKE_XCODE_SELECT} "-print-path"
     OUTPUT_VARIABLE OSX_DEVELOPER_ROOT
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif(CMAKE_XCODE_SELECT)
+endif()
 
 # Find installed SDKs
 # Start with Xcode-4.3+ default SDKs directory
@@ -81,7 +81,7 @@ file(GLOB _CMAKE_OSX_SDKS "${_CMAKE_OSX_SDKS_DIR}/*")
 if(NOT _CMAKE_OSX_SDKS)
 set(_CMAKE_OSX_SDKS_DIR "${OSX_DEVELOPER_ROOT}/SDKs")
   file(GLOB _CMAKE_OSX_SDKS "${_CMAKE_OSX_SDKS_DIR}/*")
-endif(NOT _CMAKE_OSX_SDKS)
+endif()
 
 execute_process(COMMAND sw_vers -productVersion
   OUTPUT_VARIABLE CURRENT_OSX_VERSION
@@ -100,7 +100,7 @@ string(REGEX REPLACE "^([0-9]+\\.[0-9]+).*$" "\\1"
 if(_CURRENT_OSX_VERSION VERSION_GREATER 10.3)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
     "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
-endif(_CURRENT_OSX_VERSION VERSION_GREATER 10.3)
+endif()
 
 #----------------------------------------------------------------------------
 # CMAKE_OSX_SYSROOT
@@ -117,19 +117,19 @@ set(CMAKE_OSX_SYSROOT_DEFAULT
 if(_CURRENT_OSX_VERSION STREQUAL "10.4")
   set(CMAKE_OSX_SYSROOT_DEFAULT
     "${_CMAKE_OSX_SDKS_DIR}/MacOSX10.4u.sdk")
-endif(_CURRENT_OSX_VERSION STREQUAL "10.4")
+endif()
 
 if(_CURRENT_OSX_VERSION STREQUAL "10.3")
   set(CMAKE_OSX_SYSROOT_DEFAULT
     "${_CMAKE_OSX_SDKS_DIR}/MacOSX10.3.9.sdk")
-endif(_CURRENT_OSX_VERSION STREQUAL "10.3")
+endif()
 
 # Use environment or default as initial cache value:
 if(NOT ENV_SDKROOT STREQUAL "")
   set(CMAKE_OSX_SYSROOT_VALUE ${ENV_SDKROOT})
-else(NOT ENV_SDKROOT STREQUAL "")
+else()
   set(CMAKE_OSX_SYSROOT_VALUE ${CMAKE_OSX_SYSROOT_DEFAULT})
-endif(NOT ENV_SDKROOT STREQUAL "")
+endif()
 
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
 set(CMAKE_OSX_SYSROOT ${CMAKE_OSX_SYSROOT_VALUE} CACHE PATH
@@ -149,7 +149,7 @@ function(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
   if(_deploy GREATER "${SDK}")
     message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK} or lower")
   endif()
-endfunction(SanityCheckSDKAndDeployTarget)
+endfunction()
 #----------------------------------------------------------------------------
 
 # Make sure the combination of SDK and Deployment Target are allowed
@@ -163,15 +163,15 @@ execute_process(COMMAND uname -m
 # check for Power PC and change to ppc
 if(_CMAKE_OSX_MACHINE MATCHES "Power")
   set(_CMAKE_OSX_MACHINE ppc)
-endif(_CMAKE_OSX_MACHINE MATCHES "Power")
+endif()
 
 # check for environment variable CMAKE_OSX_ARCHITECTURES
 # if it is set.
 if(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
   set(CMAKE_OSX_ARCHITECTURES_VALUE "$ENV{CMAKE_OSX_ARCHITECTURES}")
-else(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+else()
   set(CMAKE_OSX_ARCHITECTURES_VALUE "")
-endif(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+endif()
 
 # now put _CMAKE_OSX_MACHINE into the cache
 set(CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES_VALUE} CACHE STRING
@@ -181,20 +181,20 @@ set(CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES_VALUE} CACHE STRING
 if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
   set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
     "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
-endif("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
+endif()
 
 if(NOT XCODE)
   # Enable shared library versioning.  This flag is not actually referenced
   # but the fact that the setting exists will cause the generators to support
   # soname computation.
   set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
-endif(NOT XCODE)
+endif()
 
 # Xcode does not support -isystem yet.
 if(XCODE)
   set(CMAKE_INCLUDE_SYSTEM_FLAG_C)
   set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
-endif(XCODE)
+endif()
 
 if("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
   # Need to list dependent shared libraries on link line.  When building

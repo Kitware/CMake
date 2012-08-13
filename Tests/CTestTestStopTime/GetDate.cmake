@@ -37,17 +37,17 @@ macro(GET_DATE)
   set(GD_PREFIX "GD_")
   if(NOT "${ARGV0}" STREQUAL "")
     set(GD_PREFIX "${ARGV0}")
-  endif(NOT "${ARGV0}" STREQUAL "")
+  endif()
   if(NOT "${GD_PREFIX}" STREQUAL "GD_")
     set(${GD_PREFIX}PREFIX "${GD_PREFIX}")
-  endif(NOT "${GD_PREFIX}" STREQUAL "GD_")
+  endif()
 
   # If there's an ARGV1, use it as ${GD_PREFIX}VERBOSE:
   #
   set(${GD_PREFIX}VERBOSE "0")
   if(NOT "${ARGV1}" STREQUAL "")
     set(${GD_PREFIX}VERBOSE "${ARGV1}")
-  endif(NOT "${ARGV1}" STREQUAL "")
+  endif()
 
   # Retrieve the current date and time in the format:
   #
@@ -65,13 +65,13 @@ macro(GET_DATE)
     #
     set(${GD_PREFIX}CMD "cmd")
     set(${GD_PREFIX}ARGS "/c echo %DATE% %TIME%")
-  else(WIN32)
+  else()
     #
     # Match the format returned by default in US English Windows:
     #
     set(${GD_PREFIX}CMD "date")
     set(${GD_PREFIX}ARGS "\"+%a %m/%d/%Y %H:%M:%S.00\"")
-  endif(WIN32)
+  endif()
 
   exec_program("${${GD_PREFIX}CMD}" "." ARGS "${${GD_PREFIX}ARGS}"
     OUTPUT_VARIABLE ${GD_PREFIX}OV RETURN_VALUE ${GD_PREFIX}RV
@@ -84,7 +84,7 @@ macro(GET_DATE)
     message(STATUS "GD_PREFIX='${GD_PREFIX}'")
     if(NOT "${GD_PREFIX}" STREQUAL "GD_")
       message(STATUS "${GD_PREFIX}PREFIX='${${GD_PREFIX}PREFIX}'")
-    endif(NOT "${GD_PREFIX}" STREQUAL "GD_")
+    endif()
     message(STATUS "${GD_PREFIX}VERBOSE='${${GD_PREFIX}VERBOSE}'")
     message(STATUS "")
     message(STATUS "${GD_PREFIX}CMD='${${GD_PREFIX}CMD}'")
@@ -92,7 +92,7 @@ macro(GET_DATE)
     message(STATUS "${GD_PREFIX}OV='${${GD_PREFIX}OV}'")
     message(STATUS "${GD_PREFIX}RV='${${GD_PREFIX}RV}'")
     message(STATUS "")
-  endif(${GD_PREFIX}VERBOSE)
+  endif()
 
   if("${${GD_PREFIX}RV}" STREQUAL "0")
     #
@@ -119,59 +119,59 @@ macro(GET_DATE)
     #
     if(NOT "${${GD_PREFIX}YEAR}" MATCHES "^[0-9][0-9][0-9][0-9]$")
       message(STATUS "WARNING: Extracted ${GD_PREFIX}YEAR='${${GD_PREFIX}YEAR}' is not a four digit number...")
-    endif(NOT "${${GD_PREFIX}YEAR}" MATCHES "^[0-9][0-9][0-9][0-9]$")
+    endif()
 
     # Expecting month to be <= 12:
     #
     if(${${GD_PREFIX}MONTH} GREATER 12)
       message(STATUS "WARNING: Extracted ${GD_PREFIX}MONTH='${${GD_PREFIX}MONTH}' is greater than 12!")
-    endif(${${GD_PREFIX}MONTH} GREATER 12)
+    endif()
 
     # Expecting day to be <= 31:
     #
     if(${${GD_PREFIX}DAY} GREATER 31)
       message(STATUS "WARNING: Extracted ${GD_PREFIX}DAY='${${GD_PREFIX}DAY}' is greater than 31!")
-    endif(${${GD_PREFIX}DAY} GREATER 31)
+    endif()
 
     # Expecting hour to be <= 23:
     #
     if(${${GD_PREFIX}HOUR} GREATER 23)
       message(STATUS "WARNING: Extracted ${GD_PREFIX}HOUR='${${GD_PREFIX}HOUR}' is greater than 23!")
-    endif(${${GD_PREFIX}HOUR} GREATER 23)
+    endif()
 
     # Expecting minute to be <= 59:
     #
     if(${${GD_PREFIX}MINUTE} GREATER 59)
       message(STATUS "WARNING: Extracted ${GD_PREFIX}MINUTE='${${GD_PREFIX}MINUTE}' is greater than 59!")
-    endif(${${GD_PREFIX}MINUTE} GREATER 59)
+    endif()
 
     # Expecting second to be <= 59:
     #
     if(${${GD_PREFIX}SECOND} GREATER 59)
       message(STATUS "WARNING: Extracted ${GD_PREFIX}SECOND='${${GD_PREFIX}SECOND}' is greater than 59!")
-    endif(${${GD_PREFIX}SECOND} GREATER 59)
+    endif()
 
     # If individual components are single digit,
     # prepend a leading zero:
     #
     if("${${GD_PREFIX}YEAR}" MATCHES "^[0-9]$")
       set(${GD_PREFIX}YEAR "0${${GD_PREFIX}YEAR}")
-    endif("${${GD_PREFIX}YEAR}" MATCHES "^[0-9]$")
+    endif()
     if("${${GD_PREFIX}MONTH}" MATCHES "^[0-9]$")
       set(${GD_PREFIX}MONTH "0${${GD_PREFIX}MONTH}")
-    endif("${${GD_PREFIX}MONTH}" MATCHES "^[0-9]$")
+    endif()
     if("${${GD_PREFIX}DAY}" MATCHES "^[0-9]$")
       set(${GD_PREFIX}DAY "0${${GD_PREFIX}DAY}")
-    endif("${${GD_PREFIX}DAY}" MATCHES "^[0-9]$")
+    endif()
     if("${${GD_PREFIX}HOUR}" MATCHES "^[0-9]$")
       set(${GD_PREFIX}HOUR "0${${GD_PREFIX}HOUR}")
-    endif("${${GD_PREFIX}HOUR}" MATCHES "^[0-9]$")
+    endif()
     if("${${GD_PREFIX}MINUTE}" MATCHES "^[0-9]$")
       set(${GD_PREFIX}MINUTE "0${${GD_PREFIX}MINUTE}")
-    endif("${${GD_PREFIX}MINUTE}" MATCHES "^[0-9]$")
+    endif()
     if("${${GD_PREFIX}SECOND}" MATCHES "^[0-9]$")
       set(${GD_PREFIX}SECOND "0${${GD_PREFIX}SECOND}")
-    endif("${${GD_PREFIX}SECOND}" MATCHES "^[0-9]$")
+    endif()
 
     if(${GD_PREFIX}VERBOSE)
       message(STATUS "${GD_PREFIX}REGEX='${${GD_PREFIX}REGEX}'")
@@ -192,16 +192,16 @@ macro(GET_DATE)
       message(STATUS "             monthly : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}")
       message(STATUS "            annually : ${${GD_PREFIX}YEAR}")
       message(STATUS "")
-    endif(${GD_PREFIX}VERBOSE)
-  else("${${GD_PREFIX}RV}" STREQUAL "0")
+    endif()
+  else()
     message(SEND_ERROR "ERROR: macro(GET_DATE) failed. ${GD_PREFIX}CMD='${${GD_PREFIX}CMD}' ${GD_PREFIX}ARGS='${${GD_PREFIX}ARGS}' ${GD_PREFIX}OV='${${GD_PREFIX}OV}' ${GD_PREFIX}RV='${${GD_PREFIX}RV}'")
-  endif("${${GD_PREFIX}RV}" STREQUAL "0")
+  endif()
 
   if(${GD_PREFIX}VERBOSE)
     message(STATUS "</GET_DATE>")
     message(STATUS "")
-  endif(${GD_PREFIX}VERBOSE)
-endmacro(GET_DATE)
+  endif()
+endmacro()
 
 macro(ADD_SECONDS sec)
   set(new_min ${${GD_PREFIX}MINUTE})
@@ -230,4 +230,4 @@ macro(ADD_SECONDS sec)
   if(${hr_len} EQUAL 1)
     set(new_hr "0${new_hr}")
   endif()
-endmacro(ADD_SECONDS)
+endmacro()

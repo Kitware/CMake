@@ -32,14 +32,14 @@
 macro(RTI_MESSAGE_QUIETLY QUIET TYPE MSG)
   if(NOT ${QUIET})
     message(${TYPE} "${MSG}")
-  endif(NOT ${QUIET})
-endmacro(RTI_MESSAGE_QUIETLY QUIET TYPE MSG)
+  endif()
+endmacro()
 
 # Detect the CERTI installation, http://www.cert.fr/CERTI
 if ("$ENV{CERTI_HOME}" STRGREATER "")
   file(TO_CMAKE_PATH "$ENV{CERTI_HOME}" CERTI_HOME)
   RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "Using environment defined CERTI_HOME: ${CERTI_HOME}")
-endif ("$ENV{CERTI_HOME}" STRGREATER "")
+endif ()
 
 set(RTI_DEFINITIONS "-DRTI_USES_STD_FSTREAM")
 
@@ -65,9 +65,9 @@ find_library(RTI_LIBRARY
 if (RTI_LIBRARY)
   set(RTI_LIBRARIES ${RTI_LIBRARY})
   RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "RTI library found: ${RTI_LIBRARY}")
-else (RTI_LIBRARY)
+else ()
   RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "RTI library NOT found")
-endif (RTI_LIBRARY)
+endif ()
 
 find_library(RTI_FEDTIME_LIBRARY
   NAMES FedTime
@@ -78,7 +78,7 @@ find_library(RTI_FEDTIME_LIBRARY
 if (RTI_FEDTIME_LIBRARY)
   set(RTI_LIBRARIES ${RTI_LIBRARIES} ${RTI_FEDTIME_LIBRARY})
   RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "RTI FedTime found: ${RTI_FEDTIME_LIBRARY}")
-endif (RTI_FEDTIME_LIBRARY)
+endif ()
 
 find_path(RTI_INCLUDE_DIR
   NAMES RTI.hh
@@ -88,9 +88,9 @@ find_path(RTI_INCLUDE_DIR
 
 if (RTI_INCLUDE_DIR)
   RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "RTI headers found: ${RTI_INCLUDE_DIR}")
-else (RTI_INCLUDE_DIR)
+else ()
   RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "RTI headers NOT found")
-endif (RTI_INCLUDE_DIR)
+endif ()
 
 # Set the modified system variables back to the original value.
 set(CMAKE_FIND_LIBRARY_PREFIXES "${RTI_OLD_FIND_LIBRARY_PREFIXES}")

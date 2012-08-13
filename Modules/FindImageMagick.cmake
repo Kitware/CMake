@@ -104,8 +104,8 @@ function(FIND_IMAGEMAGICK_API component header)
       ${ImageMagick_${component}_LIBRARY}
       )
     set(ImageMagick_LIBRARIES ${ImageMagick_LIBRARIES} PARENT_SCOPE)
-  endif(ImageMagick_${component}_INCLUDE_DIR AND ImageMagick_${component}_LIBRARY)
-endfunction(FIND_IMAGEMAGICK_API)
+  endif()
+endfunction()
 
 function(FIND_IMAGEMAGICK_EXE component)
   set(_IMAGEMAGICK_EXECUTABLE
@@ -116,10 +116,10 @@ function(FIND_IMAGEMAGICK_EXE component)
        PARENT_SCOPE
        )
     set(ImageMagick_${component}_FOUND TRUE PARENT_SCOPE)
-  else(EXISTS ${_IMAGEMAGICK_EXECUTABLE})
+  else()
     set(ImageMagick_${component}_FOUND FALSE PARENT_SCOPE)
-  endif(EXISTS ${_IMAGEMAGICK_EXECUTABLE})
-endfunction(FIND_IMAGEMAGICK_EXE)
+  endif()
+endfunction()
 
 #---------------------------------------------------------------------
 # Start Actual Work
@@ -160,23 +160,23 @@ foreach(component ${ImageMagick_FIND_COMPONENTS}
       Magick MagickCore CORE_RL_magick_
       )
     list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_MagickCore_LIBRARY)
-  else(component STREQUAL "Magick++")
+  else()
     if(ImageMagick_EXECUTABLE_DIR)
       FIND_IMAGEMAGICK_EXE(${component})
-    endif(ImageMagick_EXECUTABLE_DIR)
+    endif()
 
     if(ImageMagick_FIND_COMPONENTS)
       list(FIND ImageMagick_FIND_COMPONENTS ${component} is_requested)
       if(is_requested GREATER -1)
         list(APPEND ImageMagick_REQUIRED_VARS ImageMagick_${component}_EXECUTABLE)
-      endif(is_requested GREATER -1)
+      endif()
     elseif(ImageMagick_${component}_EXECUTABLE)
       # if no components were requested explicitly put all (default) executables
       # in the list
       list(APPEND ImageMagick_DEFAULT_EXECUTABLES ImageMagick_${component}_EXECUTABLE)
-    endif(ImageMagick_FIND_COMPONENTS)
-  endif(component STREQUAL "Magick++")
-endforeach(component)
+    endif()
+  endif()
+endforeach()
 
 if(NOT ImageMagick_FIND_COMPONENTS AND NOT ImageMagick_DEFAULT_EXECUTABLES)
   # No components were requested, and none of the default components were
@@ -199,7 +199,7 @@ if(ImageMagick_mogrify_EXECUTABLE)
     string(REGEX REPLACE "^Version: ImageMagick ([-0-9\\.]+).*" "\\1" ImageMagick_VERSION_STRING "${imagemagick_version}")
   endif()
   unset(imagemagick_version)
-endif(ImageMagick_mogrify_EXECUTABLE)
+endif()
 
 #---------------------------------------------------------------------
 # Standard Package Output

@@ -33,11 +33,11 @@
 # comment these out for distribution
 if    (NOT LOGFILE )
   #  set(LOGFILE "${PROJECT_BINARY_DIR}/CMakeOutput.log")
-endif (NOT LOGFILE )
+endif ()
 macro(MSG _MSG)
   #  file(APPEND ${LOGFILE} "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}):   ${_MSG}\n")
   #  message(STATUS "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): ${_MSG}")
-endmacro(MSG)
+endmacro()
 
 
 MSG("wxWidgets_FOUND=${wxWidgets_FOUND}")
@@ -45,33 +45,33 @@ if   (wxWidgets_FOUND)
   if   (wxWidgets_INCLUDE_DIRS)
     if(wxWidgets_INCLUDE_DIRS_NO_SYSTEM)
       include_directories(${wxWidgets_INCLUDE_DIRS})
-    else(wxWidgets_INCLUDE_DIRS_NO_SYSTEM)
+    else()
       include_directories(SYSTEM ${wxWidgets_INCLUDE_DIRS})
-    endif(wxWidgets_INCLUDE_DIRS_NO_SYSTEM)
+    endif()
     MSG("wxWidgets_INCLUDE_DIRS=${wxWidgets_INCLUDE_DIRS}")
-  endif(wxWidgets_INCLUDE_DIRS)
+  endif()
 
   if   (wxWidgets_LIBRARY_DIRS)
     link_directories(${wxWidgets_LIBRARY_DIRS})
     MSG("wxWidgets_LIBRARY_DIRS=${wxWidgets_LIBRARY_DIRS}")
-  endif(wxWidgets_LIBRARY_DIRS)
+  endif()
 
   if   (wxWidgets_DEFINITIONS)
     set_property(DIRECTORY APPEND
       PROPERTY COMPILE_DEFINITIONS ${wxWidgets_DEFINITIONS})
     MSG("wxWidgets_DEFINITIONS=${wxWidgets_DEFINITIONS}")
-  endif(wxWidgets_DEFINITIONS)
+  endif()
 
   if   (wxWidgets_DEFINITIONS_DEBUG)
     set_property(DIRECTORY APPEND
       PROPERTY COMPILE_DEFINITIONS_DEBUG ${wxWidgets_DEFINITIONS_DEBUG})
     MSG("wxWidgets_DEFINITIONS_DEBUG=${wxWidgets_DEFINITIONS_DEBUG}")
-  endif(wxWidgets_DEFINITIONS_DEBUG)
+  endif()
 
   if   (wxWidgets_CXX_FLAGS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${wxWidgets_CXX_FLAGS}")
     MSG("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
-  endif(wxWidgets_CXX_FLAGS)
+  endif()
 
   # DEPRECATED JW
   # just for backward compatibility: add deps to all targets
@@ -81,9 +81,9 @@ if   (wxWidgets_FOUND)
   #  # BUG: str too long:  MSG("wxWidgets_LIBRARIES=${wxWidgets_LIBRARIES}")
   #  if(LOGFILE)
   #    file(APPEND ${LOGFILE} "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}):   ${wxWidgets_LIBRARIES}\n")
-  #  endif(LOGFILE)
-  #endif(wxWidgets_LIBRARIES)
+  #  endif()
+  #endif()
 
-else (wxWidgets_FOUND)
+else ()
   message("wxWidgets requested but not found.")
-endif(wxWidgets_FOUND)
+endif()

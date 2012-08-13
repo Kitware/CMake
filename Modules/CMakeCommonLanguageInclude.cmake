@@ -25,7 +25,7 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
   if(NOT CMAKE_NO_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
       "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
-  endif(NOT CMAKE_NO_BUILD_TYPE)
+  endif()
 
   set (CMAKE_EXE_LINKER_FLAGS_DEBUG ${CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT} CACHE STRING
      "Flags used by the linker during debug builds.")
@@ -68,7 +68,7 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
      ${CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
      "Flags used by the linker during Release with Debug Info builds.")
 
-endif(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
+endif()
 # shared linker flags
 set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} $ENV{LDFLAGS}"
      CACHE STRING "Flags used by the linker during the creation of dll's.")

@@ -1,5 +1,5 @@
 if(EXISTS "${MARK_FILE}")
   message(FATAL_ERROR "Custom command run more than once!")
-else(EXISTS "${MARK_FILE}")
+else()
   file(WRITE "${MARK_FILE}" "check for running custom command twice\n")
-endif(EXISTS "${MARK_FILE}")
+endif()

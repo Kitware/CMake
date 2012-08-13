@@ -120,13 +120,13 @@ if(UNIX)
 
     if(GTK_gmodule_LIBRARY)
       set(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gmodule_LIBRARY})
-    endif(GTK_gmodule_LIBRARY)
+    endif()
     if(GTK_gthread_LIBRARY)
       set(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_gthread_LIBRARY})
-    endif(GTK_gthread_LIBRARY)
+    endif()
     if(GTK_Xi_LIBRARY)
       set(GTK_LIBRARIES ${GTK_LIBRARIES} ${GTK_Xi_LIBRARY})
-    endif(GTK_Xi_LIBRARY)
+    endif()
 
     if(GTK_gtkgl_INCLUDE_PATH AND GTK_gtkgl_LIBRARY)
       set( GTK_GL_FOUND "YES" )
@@ -137,7 +137,7 @@ if(UNIX)
         GTK_gtkgl_LIBRARY
         GTK_gtkgl_INCLUDE_PATH
         )
-    endif(GTK_gtkgl_INCLUDE_PATH AND GTK_gtkgl_LIBRARY)
+    endif()
 
   endif(GTK_gtk_INCLUDE_PATH
      AND GTK_glibconfig_INCLUDE_PATH
@@ -159,7 +159,7 @@ if(UNIX)
     GTK_gtkgl_LIBRARY
   )
 
-endif(UNIX)
+endif()
 
 
 

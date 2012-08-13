@@ -20,7 +20,7 @@
 #  find_package(Squish)
 #  if (SQUISH_FOUND)
 #    SQUISH_ADD_TEST(myTestName myApplication testSuiteName testCaseName)
-#  endif (SQUISH_FOUND)
+#  endif ()
 #
 
 #=============================================================================
@@ -49,7 +49,7 @@ if(NOT SQUISH_INSTALL_DIR)
   set(SQUISH_INSTALL_DIR_SEARCH "")
   foreach(dir ${SQUISH_INSTALL_DIR_SEARCH2})
     set(SQUISH_INSTALL_DIR_SEARCH ${SQUISH_INSTALL_DIR_SEARCH} "${dir}/../lib/fltk")
-  endforeach(dir)
+  endforeach()
   string(REPLACE "//" "/" SQUISH_INSTALL_DIR_SEARCH "${SQUISH_INSTALL_DIR_SEARCH}")
 
   # Look for an installation
@@ -65,7 +65,7 @@ if(NOT SQUISH_INSTALL_DIR)
 
     DOC "The ${SQUISH_INSTALL_DIR_STRING}"
     )
-endif(NOT SQUISH_INSTALL_DIR)
+endif()
 
 # search for the executables
 if(SQUISH_INSTALL_DIR)
@@ -74,37 +74,37 @@ if(SQUISH_INSTALL_DIR)
   # find the client program
   if(NOT SQUISH_CLIENT_EXECUTABLE)
     find_program(SQUISH_CLIENT_EXECUTABLE ${SQUISH_INSTALL_DIR}/bin/squishrunner DOC "The ${SQUISH_CLIENT_EXECUTABLE_STRING}")
-  endif(NOT SQUISH_CLIENT_EXECUTABLE)
+  endif()
 
   # find the server program
   if(NOT SQUISH_SERVER_EXECUTABLE)
     find_program(SQUISH_SERVER_EXECUTABLE ${SQUISH_INSTALL_DIR}/bin/squishserver DOC "The ${SQUISH_SERVER_EXECUTABLE_STRING}")
-  endif(NOT SQUISH_SERVER_EXECUTABLE)
+  endif()
 
-else(SQUISH_INSTALL_DIR)
+else()
   set(SQUISH_INSTALL_DIR_FOUND 0)
-endif(SQUISH_INSTALL_DIR)
+endif()
 
 # record if executables are set
 if(SQUISH_CLIENT_EXECUTABLE)
   set(SQUISH_CLIENT_EXECUTABLE_FOUND 1)
-else(SQUISH_CLIENT_EXECUTABLE)
+else()
   set(SQUISH_CLIENT_EXECUTABLE_FOUND 0)
-endif(SQUISH_CLIENT_EXECUTABLE)
+endif()
 
 if(SQUISH_SERVER_EXECUTABLE)
   set(SQUISH_SERVER_EXECUTABLE_FOUND 1)
-else(SQUISH_SERVER_EXECUTABLE)
+else()
   set(SQUISH_SERVER_EXECUTABLE_FOUND 0)
-endif(SQUISH_SERVER_EXECUTABLE)
+endif()
 
 # record if Squish was found
 set(SQUISH_FOUND 1)
 foreach(var SQUISH_INSTALL_DIR_FOUND SQUISH_CLIENT_EXECUTABLE_FOUND SQUISH_SERVER_EXECUTABLE_FOUND)
   if(NOT ${var})
     set(SQUISH_FOUND 0)
-  endif(NOT ${var})
-endforeach(var)
+  endif()
+endforeach()
 
 macro(SQUISH_ADD_TEST testName testAUT testCase envVars testWraper)
   add_test(${testName}
@@ -121,5 +121,5 @@ macro(SQUISH_ADD_TEST testName testAUT testCase envVars testWraper)
   set_tests_properties(${testName}
     PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED;ERROR;FATAL"
     )
-endmacro(SQUISH_ADD_TEST)
+endmacro()
 

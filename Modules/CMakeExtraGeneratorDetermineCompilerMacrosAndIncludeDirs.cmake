@@ -44,7 +44,7 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
     foreach(nextLine ${_includeLines})
       string(STRIP "${nextLine}" _includePath)
       list(APPEND ${_resultIncludeDirs} "${_includePath}")
-    endforeach(nextLine)
+    endforeach()
 
   endif()
 
@@ -71,9 +71,9 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
     else()
       list(APPEND ${_resultDefines} " ")
     endif()
-  endforeach(nextLine)
+  endforeach()
 
-endmacro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang)
+endmacro()
 
 # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables and set them
 # to "C" that way GCC's "search starts here" text is in English and we can grok it.

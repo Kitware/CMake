@@ -20,7 +20,7 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # prefer the environment variable ASM
   if($ENV{ASM${ASM_DIALECT}} MATCHES ".+")
     set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT "$ENV{ASM${ASM_DIALECT}}")
-  endif($ENV{ASM${ASM_DIALECT}} MATCHES ".+")
+  endif()
 
   # finally list compilers to try
   if("ASM${ASM_DIALECT}" STREQUAL "ASM") # the generic assembler support
@@ -47,7 +47,7 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # Find the compiler.
   _cmake_find_compiler(ASM${ASM_DIALECT})
 
-else(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
+else()
 
   # we only get here if CMAKE_ASM${ASM_DIALECT}_COMPILER was specified using -D or a pre-made CMakeCache.txt
   # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
@@ -62,14 +62,14 @@ else(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
     mark_as_advanced(CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH)
     if(CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH)
       set(CMAKE_ASM${ASM_DIALECT}_COMPILER ${CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH} CACHE FILEPATH "Assembler" FORCE)
-    endif(CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH)
-  endif(NOT _CMAKE_USER_ASM${ASM_DIALECT}_COMPILER_PATH)
-endif(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
+    endif()
+  endif()
+endif()
 mark_as_advanced(CMAKE_ASM${ASM_DIALECT}_COMPILER)
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
   get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_ASM${ASM_DIALECT}_COMPILER}" PATH)
-endif (NOT _CMAKE_TOOLCHAIN_LOCATION)
+endif ()
 
 
 if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
@@ -110,9 +110,9 @@ endif()
 
 if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   message(STATUS "The ASM${ASM_DIALECT} compiler identification is ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}")
-else(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
+else()
   message(STATUS "The ASM${ASM_DIALECT} compiler identification is unknown")
-endif(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
+endif()
 
 
 
@@ -127,22 +127,22 @@ if (NOT _CMAKE_TOOLCHAIN_PREFIX)
   get_filename_component(COMPILER_BASENAME "${CMAKE_ASM${ASM_DIALECT}_COMPILER}" NAME)
   if (COMPILER_BASENAME MATCHES "^(.+-)g?as(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif (COMPILER_BASENAME MATCHES "^(.+-)g?as(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
-endif (NOT _CMAKE_TOOLCHAIN_PREFIX)
+  endif ()
+endif ()
 
 # Now try the C compiler regexp:
 if (NOT _CMAKE_TOOLCHAIN_PREFIX)
   if (COMPILER_BASENAME MATCHES "^(.+-)g?cc(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif (COMPILER_BASENAME MATCHES "^(.+-)g?cc(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
-endif (NOT _CMAKE_TOOLCHAIN_PREFIX)
+  endif ()
+endif ()
 
 # Finally try the CXX compiler regexp:
 if (NOT _CMAKE_TOOLCHAIN_PREFIX)
   if (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif (COMPILER_BASENAME MATCHES "^(.+-)[gc]\\+\\+(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
-endif (NOT _CMAKE_TOOLCHAIN_PREFIX)
+  endif ()
+endif ()
 
 
 include(CMakeFindBinUtils)
@@ -151,9 +151,9 @@ set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ENV_VAR "ASM${ASM_DIALECT}")
 
 if(CMAKE_ASM${ASM_DIALECT}_COMPILER)
   message(STATUS "Found assembler: ${CMAKE_ASM${ASM_DIALECT}_COMPILER}")
-else(CMAKE_ASM${ASM_DIALECT}_COMPILER)
+else()
   message(STATUS "Didn't find assembler")
-endif(CMAKE_ASM${ASM_DIALECT}_COMPILER)
+endif()
 
 
 set(_CMAKE_ASM_COMPILER "${CMAKE_ASM${ASM_DIALECT}_COMPILER}")

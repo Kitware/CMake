@@ -7,9 +7,9 @@ if(APPLE)
   # check for Power PC and change to ppc
   if("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
     set(_CMAKE_OSX_MACHINE ppc)
-  endif("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
+  endif()
   set(CMAKE_OSX_ARCHITECTURES ${_CMAKE_OSX_MACHINE})
-endif(APPLE)
+endif()
 
 # Build the external object file.
 try_compile(EXTERNAL_OBJECT_BUILT
@@ -24,12 +24,12 @@ if(EXTERNAL_OBJECT_BUILT)
     "Building external_object.cxx succeeded with the following output:\n"
     "[${OUTPUT}]"
     )
-else(EXTERNAL_OBJECT_BUILT)
+else()
   message(FATAL_ERROR
     "Building external_object.cxx failed with the following output:\n"
     "[${OUTPUT}]"
     )
-endif(EXTERNAL_OBJECT_BUILT)
+endif()
 
 # Find the external object file.
 set(DIR ${ExternalOBJ_BINARY_DIR}/Object)
@@ -38,9 +38,9 @@ file(GLOB_RECURSE EXTERNAL_OBJECT
 if(EXTERNAL_OBJECT)
   list (GET EXTERNAL_OBJECT 0 EXTERNAL_OBJECT)
   message("Found \"${EXTERNAL_OBJECT}\".")
-else(EXTERNAL_OBJECT)
+else()
   message(FATAL_ERROR "Could not find external object.")
-endif(EXTERNAL_OBJECT)
+endif()
 
 # Test creation of external objects by custom commands.
 set(CUSTOM_OBJECT

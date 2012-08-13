@@ -32,7 +32,7 @@ file(APPEND "${RESULT_FILE}"
 get_cmake_property(res VARIABLES)
 foreach(var ${res})
   file(APPEND "${RESULT_FILE}" "${var} \"${${var}}\"\n")
-endforeach(var ${res})
+endforeach()
 
 file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
@@ -43,7 +43,7 @@ file(APPEND "${RESULT_FILE}"
 get_cmake_property(res COMMANDS)
 foreach(var ${res})
   file(APPEND "${RESULT_FILE}" "${var}\n")
-endforeach(var ${res})
+endforeach()
 
 file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
@@ -55,7 +55,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllMacros.txt "")
 get_cmake_property(res MACROS)
 foreach(var ${res})
   file(APPEND "${RESULT_FILE}" "${var}\n")
-endforeach(var ${res})
+endforeach()
 
 file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
@@ -66,12 +66,12 @@ file(APPEND "${RESULT_FILE}"
 get_directory_property(res INCLUDE_DIRECTORIES)
 foreach(var ${res})
   file(APPEND "${RESULT_FILE}" "INCLUDE_DIRECTORY: ${var}\n")
-endforeach(var)
+endforeach()
 
 get_directory_property(res LINK_DIRECTORIES)
 foreach(var ${res})
   file(APPEND "${RESULT_FILE}" "LINK_DIRECTORIES: ${var}\n")
-endforeach(var)
+endforeach()
 
 get_directory_property(res INCLUDE_REGULAR_EXPRESSION)
 file(APPEND "${RESULT_FILE}" "INCLUDE_REGULAR_EXPRESSION: ${res}\n")
@@ -89,8 +89,8 @@ macro(DUMP_FILE THE_FILE)
 
     file(READ "${THE_FILE}" FILE_CONTENTS LIMIT 50000)
     file(APPEND "${RESULT_FILE}" "${FILE_CONTENTS}")
-  endif (EXISTS "${THE_FILE}")
-endmacro(DUMP_FILE)
+  endif ()
+endmacro()
 
 DUMP_FILE("../CMakeCache.txt")
 DUMP_FILE("../CMakeFiles/CMakeOutput.log")
@@ -99,5 +99,5 @@ DUMP_FILE("../CMakeFiles/CMakeSystem.cmake")
 
 foreach (EXTRA_FILE ${EXTRA_DUMP_FILES})
   DUMP_FILE("${EXTRA_FILE}")
-endforeach (EXTRA_FILE)
+endforeach ()
 

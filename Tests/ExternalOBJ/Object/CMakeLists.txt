@@ -6,8 +6,8 @@ if(APPLE)
   # check for Power PC and change to ppc
   if("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
     set(_CMAKE_OSX_MACHINE ppc)
-  endif("${_CMAKE_OSX_MACHINE}" MATCHES "Power")
+  endif()
   set(CMAKE_OSX_ARCHITECTURES ${_CMAKE_OSX_MACHINE})
-endif(APPLE)
+endif()
 
 add_executable(external external_object.cxx external_main.cxx)

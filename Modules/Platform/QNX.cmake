@@ -25,7 +25,7 @@ set(CMAKE_PLATFORM_USES_PATH_WHEN_NO_SONAME 1)
 foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
   set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
-endforeach(type)
+endforeach()
 # force the language to be c++ since qnx only has gcc and not g++ and c++?
 set(CMAKE_CXX_COMPILE_OBJECT
   "<CMAKE_CXX_COMPILER> -x c++ <DEFINES> <FLAGS> -o <OBJECT> -c <SOURCE>")

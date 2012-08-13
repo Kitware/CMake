@@ -7,11 +7,11 @@ if(WATCOM)
   set(PLUS_NAME_FILES
     AnotherSubdir/pair_int.int.c
     vcl_algorithm_vcl_pair_double.foo.c)
-else(WATCOM)
+else()
     set(PLUS_NAME_FILES
     AnotherSubdir/pair+int.int.c
     vcl_algorithm+vcl_pair+double.foo.c)
-endif(WATCOM)
+endif()
 
 add_executable(TestFromSubdir
   AnotherSubdir/testfromsubdir.c
@@ -23,24 +23,24 @@ aux_source_directory(ThirdSubDir SOURCES)
 if(WATCOM)
   foreach(f ${SOURCES})
     if("${f}" STREQUAL "ThirdSubDir/pair+int.int1.c")
-    else("${f}" STREQUAL "ThirdSubDir/pair+int.int1.c")
+    else()
       set(SOURCES2 ${f} ${SOURCES2})
-    endif("${f}" STREQUAL "ThirdSubDir/pair+int.int1.c")
-  endforeach(f)
+    endif()
+  endforeach()
   set(SOURCES ${SOURCES2})
   set(SOURCES ${SOURCES}
     vcl_algorithm_vcl_pair_double.foo.c)
-else(WATCOM)
+else()
   foreach(f ${SOURCES})
     if("${f}" STREQUAL "ThirdSubDir/pair_int.int1.c")
-    else("${f}" STREQUAL "ThirdSubDir/pair_int.int1.c")
+    else()
       set(SOURCES2 ${f} ${SOURCES2})
       message("${f}")
-    endif("${f}" STREQUAL "ThirdSubDir/pair_int.int1.c")
-  endforeach(f)
+    endif()
+  endforeach()
   set(SOURCES ${SOURCES2})
   set(SOURCES ${SOURCES}
     vcl_algorithm+vcl_pair+double.foo.c)
-endif(WATCOM)
+endif()
 message("Sources: ${SOURCES}")
 add_executable(TestWithAuxSourceDir ${SOURCES})

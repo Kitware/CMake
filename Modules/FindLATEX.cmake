@@ -58,7 +58,7 @@ if (WIN32)
   )
   mark_as_advanced(GHOSTSCRIPT_LIBRARY_PATH)
 
-endif (WIN32)
+endif ()
 
 find_program(LATEX_COMPILER
   NAMES latex
@@ -101,11 +101,11 @@ if (WIN32)
     NAMES ps2pdf14.bat
     PATHS ${GHOSTSCRIPT_LIBRARY_PATH}
   )
-else (WIN32)
+else ()
   find_program(PS2PDF_CONVERTER
     NAMES ps2pdf14 ps2pdf
   )
-endif (WIN32)
+endif ()
 
 find_program(LATEX2HTML_CONVERTER
   NAMES latex2html

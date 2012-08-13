@@ -28,7 +28,7 @@ if (WIN32)
     ${OPENGL_LIBRARY_DIR}
     ${GLUT_ROOT_PATH}/Release
     )
-else (WIN32)
+else ()
 
   if (APPLE)
     # These values for Apple could probably do with improvement.
@@ -38,7 +38,7 @@ else (WIN32)
       )
     set(GLUT_glut_LIBRARY "-framework GLUT" CACHE STRING "GLUT library for OSX")
     set(GLUT_cocoa_LIBRARY "-framework Cocoa" CACHE STRING "Cocoa framework for OSX")
-  else (APPLE)
+  else ()
 
     find_path( GLUT_INCLUDE_DIR GL/glut.h
       /usr/include/GL
@@ -60,9 +60,9 @@ else (WIN32)
       /usr/openwin/lib
       )
 
-  endif (APPLE)
+  endif ()
 
-endif (WIN32)
+endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GLUT REQUIRED_VARS GLUT_glut_LIBRARY GLUT_INCLUDE_DIR)
@@ -80,7 +80,7 @@ if (GLUT_FOUND)
   #The following deprecated settings are for backwards compatibility with CMake1.4
   set (GLUT_LIBRARY ${GLUT_LIBRARIES})
   set (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})
-endif(GLUT_FOUND)
+endif()
 
 mark_as_advanced(
   GLUT_INCLUDE_DIR

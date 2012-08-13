@@ -38,31 +38,31 @@ if(Q_WS_WIN)
   # On Windows, qconfig.pri has "shared" for shared library builds
   if(NOT QT_CONFIG MATCHES "shared")
     set(QT_IS_STATIC 1)
-  endif(NOT QT_CONFIG MATCHES "shared")
-else(Q_WS_WIN)
+  endif()
+else()
   # On other platforms, check file extension to know if its static
   if(QT_QTCORE_LIBRARY_RELEASE)
     get_filename_component(qtcore_lib_ext "${QT_QTCORE_LIBRARY_RELEASE}" EXT)
     if("${qtcore_lib_ext}" STREQUAL "${CMAKE_STATIC_LIBRARY_SUFFIX}")
       set(QT_IS_STATIC 1)
-    endif("${qtcore_lib_ext}" STREQUAL "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  endif(QT_QTCORE_LIBRARY_RELEASE)
+    endif()
+  endif()
   if(QT_QTCORE_LIBRARY_DEBUG)
     get_filename_component(qtcore_lib_ext "${QT_QTCORE_LIBRARY_DEBUG}" EXT)
     if(${qtcore_lib_ext} STREQUAL ${CMAKE_STATIC_LIBRARY_SUFFIX})
       set(QT_IS_STATIC 1)
-    endif(${qtcore_lib_ext} STREQUAL ${CMAKE_STATIC_LIBRARY_SUFFIX})
-  endif(QT_QTCORE_LIBRARY_DEBUG)
-endif(Q_WS_WIN)
+    endif()
+  endif()
+endif()
 
 # build using shared Qt needs -DQT_DLL on Windows
 if(Q_WS_WIN  AND  NOT QT_IS_STATIC)
   set(QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_DLL)
-endif(Q_WS_WIN  AND  NOT QT_IS_STATIC)
+endif()
 
 if(NOT QT_IS_STATIC)
   return()
-endif(NOT QT_IS_STATIC)
+endif()
 
 # QtOpenGL dependencies
 find_package(OpenGL)
@@ -73,86 +73,86 @@ set (QT_QTOPENGL_LIB_DEPENDENCIES ${OPENGL_glu_LIBRARY} ${OPENGL_gl_LIBRARY})
 if(QT_QCONFIG MATCHES "system-png")
   find_package(PNG)
   set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${PNG_LIBRARY})
-endif(QT_QCONFIG MATCHES "system-png")
+endif()
 
 ## system jpeg
 if(QT_QCONFIG MATCHES "system-jpeg")
   find_package(JPEG)
   set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${JPEG_LIBRARIES})
-endif(QT_QCONFIG MATCHES "system-jpeg")
+endif()
 
 ## system tiff
 if(QT_QCONFIG MATCHES "system-tiff")
   find_package(TIFF)
   set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${TIFF_LIBRARIES})
-endif(QT_QCONFIG MATCHES "system-tiff")
+endif()
 
 ## system mng
 if(QT_QCONFIG MATCHES "system-mng")
   find_library(MNG_LIBRARY NAMES mng)
   set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${MNG_LIBRARY})
-endif(QT_QCONFIG MATCHES "system-mng")
+endif()
 
 # for X11, get X11 library directory
 if(Q_WS_X11)
   find_package(X11)
-endif(Q_WS_X11)
+endif()
 
 
 ## X11 SM
 if(QT_QCONFIG MATCHES "x11sm")
   if(X11_SM_LIB AND X11_ICE_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_SM_LIB} ${X11_ICE_LIB})
-  endif(X11_SM_LIB AND X11_ICE_LIB)
-endif(QT_QCONFIG MATCHES "x11sm")
+  endif()
+endif()
 
 
 ## Xi
 if(QT_QCONFIG MATCHES "tablet")
   if(X11_Xi_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_Xi_LIB})
-  endif(X11_Xi_LIB)
-endif(QT_QCONFIG MATCHES "tablet")
+  endif()
+endif()
 
 
 ## Xrender
 if(QT_QCONFIG MATCHES "xrender")
   if(X11_Xrender_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_Xrender_LIB})
-  endif(X11_Xrender_LIB)
-endif(QT_QCONFIG MATCHES "xrender")
+  endif()
+endif()
 
 
 ## Xrandr
 if(QT_QCONFIG MATCHES "xrandr")
   if(X11_Xrandr_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_Xrandr_LIB})
-  endif(X11_Xrandr_LIB)
-endif(QT_QCONFIG MATCHES "xrandr")
+  endif()
+endif()
 
 
 ## Xcursor
 if(QT_QCONFIG MATCHES "xcursor")
   if(X11_Xcursor_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_Xcursor_LIB})
-  endif(X11_Xcursor_LIB)
-endif(QT_QCONFIG MATCHES "xcursor")
+  endif()
+endif()
 
 
 ## Xinerama
 if(QT_QCONFIG MATCHES "xinerama")
   if(X11_Xinerama_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_Xinerama_LIB})
-  endif(X11_Xinerama_LIB)
-endif(QT_QCONFIG MATCHES "xinerama")
+  endif()
+endif()
 
 
 ## Xfixes
 if(QT_QCONFIG MATCHES "xfixes")
   if(X11_Xfixes_LIB)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${X11_Xfixes_LIB})
-  endif(X11_Xfixes_LIB)
-endif(QT_QCONFIG MATCHES "xfixes")
+  endif()
+endif()
 
 
 ## fontconfig
@@ -161,8 +161,8 @@ if(QT_QCONFIG MATCHES "fontconfig")
   mark_as_advanced(QT_FONTCONFIG_LIBRARY)
   if(QT_FONTCONFIG_LIBRARY)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${QT_FONTCONFIG_LIBRARY})
-  endif(QT_FONTCONFIG_LIBRARY)
-endif(QT_QCONFIG MATCHES "fontconfig")
+  endif()
+endif()
 
 
 ## system-freetype
@@ -170,15 +170,15 @@ if(QT_QCONFIG MATCHES "system-freetype")
   find_package(Freetype)
   if(FREETYPE_LIBRARIES)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} ${FREETYPE_LIBRARIES})
-  endif(FREETYPE_LIBRARIES)
-endif(QT_QCONFIG MATCHES "system-freetype")
+  endif()
+endif()
 
 
 ## system-zlib
 if(QT_QCONFIG MATCHES "system-zlib")
   find_package(ZLIB)
   set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ${ZLIB_LIBRARIES})
-endif(QT_QCONFIG MATCHES "system-zlib")
+endif()
 
 
 ## openssl
@@ -186,17 +186,17 @@ if(NOT Q_WS_WIN)
   set(_QT_NEED_OPENSSL 0)
   if(QT_VERSION_MINOR LESS 4 AND QT_QCONFIG MATCHES "openssl")
     set(_QT_NEED_OPENSSL 1)
-  endif(QT_VERSION_MINOR LESS 4 AND QT_QCONFIG MATCHES "openssl")
+  endif()
   if(QT_VERSION_MINOR GREATER 3 AND QT_QCONFIG MATCHES "openssl-linked")
     set(_QT_NEED_OPENSSL 1)
-  endif(QT_VERSION_MINOR GREATER 3 AND QT_QCONFIG MATCHES "openssl-linked")
+  endif()
   if(_QT_NEED_OPENSSL)
     find_package(OpenSSL)
     if(OPENSSL_LIBRARIES)
       set(QT_QTNETWORK_LIB_DEPENDENCIES ${QT_QTNETWORK_LIB_DEPENDENCIES} ${OPENSSL_LIBRARIES})
-    endif(OPENSSL_LIBRARIES)
-  endif(_QT_NEED_OPENSSL)
-endif(NOT Q_WS_WIN)
+    endif()
+  endif()
+endif()
 
 
 ## dbus
@@ -205,10 +205,10 @@ if(QT_QCONFIG MATCHES "dbus")
   find_library(QT_DBUS_LIBRARY NAMES dbus-1 )
   if(QT_DBUS_LIBRARY)
     set(QT_QTDBUS_LIB_DEPENDENCIES ${QT_QTDBUS_LIB_DEPENDENCIES} ${QT_DBUS_LIBRARY})
-  endif(QT_DBUS_LIBRARY)
+  endif()
   mark_as_advanced(QT_DBUS_LIBRARY)
 
-endif(QT_QCONFIG MATCHES "dbus")
+endif()
 
 
 ## glib
@@ -223,7 +223,7 @@ if(QT_QCONFIG MATCHES "glib")
   if(QT_GLIB_LIBRARY AND QT_GTHREAD_LIBRARY)
     set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
         ${QT_GTHREAD_LIBRARY} ${QT_GLIB_LIBRARY})
-  endif(QT_GLIB_LIBRARY AND QT_GTHREAD_LIBRARY)
+  endif()
 
 
   # Qt 4.5+ also links to gobject-2.0
@@ -234,10 +234,10 @@ if(QT_QCONFIG MATCHES "glib")
      if(QT_GOBJECT_LIBRARY)
        set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES}
            ${QT_GOBJECT_LIBRARY})
-     endif(QT_GOBJECT_LIBRARY)
-  endif(QT_VERSION_MINOR GREATER 4)
+     endif()
+  endif()
 
-endif(QT_QCONFIG MATCHES "glib")
+endif()
 
 
 ## clock-monotonic, just see if we need to link with rt
@@ -251,9 +251,9 @@ if(QT_QCONFIG MATCHES "clock-monotonic")
     mark_as_advanced(QT_RT_LIBRARY)
     if(QT_RT_LIBRARY)
       set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ${QT_RT_LIBRARY})
-    endif(QT_RT_LIBRARY)
-  endif(QT_POSIX_TIMERS)
-endif(QT_QCONFIG MATCHES "clock-monotonic")
+    endif()
+  endif()
+endif()
 
 
 if(Q_WS_X11)
@@ -264,17 +264,17 @@ if(Q_WS_X11)
   find_package(Threads)
   if(CMAKE_USE_PTHREADS_INIT)
     set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ${CMAKE_THREAD_LIBS_INIT})
-  endif(CMAKE_USE_PTHREADS_INIT)
+  endif()
 
   set (QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ${CMAKE_DL_LIBS})
 
-endif(Q_WS_X11)
+endif()
 
 
 if(Q_WS_WIN)
   set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} imm32 winmm)
   set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} ws2_32)
-endif(Q_WS_WIN)
+endif()
 
 
 if(Q_WS_MAC)
@@ -283,13 +283,13 @@ if(Q_WS_MAC)
   # Qt 4.0, 4.1, 4.2 use QuickTime
   if(QT_VERSION_MINOR LESS 3)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework QuickTime")
-  endif(QT_VERSION_MINOR LESS 3)
+  endif()
 
   # Qt 4.2+ use AppKit
   if(QT_VERSION_MINOR GREATER 1)
     set(QT_QTGUI_LIB_DEPENDENCIES ${QT_QTGUI_LIB_DEPENDENCIES} "-framework AppKit")
-  endif(QT_VERSION_MINOR GREATER 1)
+  endif()
 
   set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
-endif(Q_WS_MAC)
+endif()
 

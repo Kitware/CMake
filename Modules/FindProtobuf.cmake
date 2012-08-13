@@ -78,7 +78,7 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   if(NOT ARGN)
     message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
     return()
-  endif(NOT ARGN)
+  endif()
 
   if(PROTOBUF_GENERATE_CPP_APPEND_PATH)
     # Create an include path for each file specified

@@ -28,15 +28,15 @@ if("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler has std namespace passed with "
       "the following output:\n${OUTPUT}\n\n")
-  else (CMAKE_STD_NAMESPACE)
+  else ()
     message(STATUS "Check for STD namespace - not found")
     set (CMAKE_NO_STD_NAMESPACE 1 CACHE INTERNAL
        "Does the compiler support std::.")
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "Determining if the CXX compiler has std namespace failed with "
       "the following output:\n${OUTPUT}\n\n")
-  endif (CMAKE_STD_NAMESPACE)
-endif("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
+  endif ()
+endif()
 
 
 

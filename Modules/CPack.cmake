@@ -287,19 +287,19 @@
 # Define this var in order to avoid (or warn) concerning multiple inclusion
 if(CPack_CMake_INCLUDED)
   message(WARNING "CPack.cmake has already been included!!")
-else(CPack_CMake_INCLUDED)
+else()
   set(CPack_CMake_INCLUDED 1)
-endif(CPack_CMake_INCLUDED)
+endif()
 
 # Pick a configuration file
 set(cpack_input_file "${CMAKE_ROOT}/Templates/CPackConfig.cmake.in")
 if(EXISTS "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
   set(cpack_input_file "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
-endif(EXISTS "${CMAKE_SOURCE_DIR}/CPackConfig.cmake.in")
+endif()
 set(cpack_source_input_file "${CMAKE_ROOT}/Templates/CPackConfig.cmake.in")
 if(EXISTS "${CMAKE_SOURCE_DIR}/CPackSourceConfig.cmake.in")
   set(cpack_source_input_file "${CMAKE_SOURCE_DIR}/CPackSourceConfig.cmake.in")
-endif(EXISTS "${CMAKE_SOURCE_DIR}/CPackSourceConfig.cmake.in")
+endif()
 
 # Backward compatibility
 # Include CPackComponent macros if it has not already been included before.
@@ -309,8 +309,8 @@ include(CPackComponent)
 macro(cpack_set_if_not_set name value)
   if(NOT DEFINED "${name}")
     set(${name} "${value}")
-  endif(NOT DEFINED "${name}")
-endmacro(cpack_set_if_not_set)
+  endif()
+endmacro()
 
 # cpack_encode_variables - Macro to encode variables for the configuration file
 # find any variable that starts with CPACK and create a variable
@@ -324,9 +324,9 @@ macro(cpack_encode_variables)
     if("xxx${var}" MATCHES "xxxCPACK")
       set(_CPACK_OTHER_VARIABLES_
         "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
-      endif("xxx${var}" MATCHES "xxxCPACK")
-  endforeach(var ${res})
-endmacro(cpack_encode_variables)
+      endif()
+  endforeach()
+endmacro()
 
 # Set the package name
 cpack_set_if_not_set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
@@ -352,20 +352,20 @@ cpack_set_if_not_set(CPACK_MODULE_PATH "${CMAKE_MODULE_PATH}")
 
 if(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL)
   set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-endif(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL)
+endif()
 
 if(CPACK_NSIS_MODIFY_PATH)
   set(CPACK_NSIS_MODIFY_PATH ON)
-endif(CPACK_NSIS_MODIFY_PATH)
+endif()
 
 set(__cpack_system_name ${CMAKE_SYSTEM_NAME})
 if(${__cpack_system_name} MATCHES Windows)
   if(CMAKE_CL_64)
     set(__cpack_system_name win64)
-  else(CMAKE_CL_64)
+  else()
     set(__cpack_system_name win32)
-  endif(CMAKE_CL_64)
-endif(${__cpack_system_name} MATCHES Windows)
+  endif()
+endif()
 cpack_set_if_not_set(CPACK_SYSTEM_NAME "${__cpack_system_name}")
 
 # Root dir: default value should be the string literal "$PROGRAMFILES"
@@ -386,15 +386,15 @@ cpack_set_if_not_set(CPACK_PACKAGE_RELOCATABLE "true")
 # always force to exactly "true" or "false" for CPack.Info.plist.in:
 if(CPACK_PACKAGE_RELOCATABLE)
   set(CPACK_PACKAGE_RELOCATABLE "true")
-else(CPACK_PACKAGE_RELOCATABLE)
+else()
   set(CPACK_PACKAGE_RELOCATABLE "false")
-endif(CPACK_PACKAGE_RELOCATABLE)
+endif()
 
 macro(cpack_check_file_exists file description)
   if(NOT EXISTS "${file}")
     message(SEND_ERROR "CPack ${description} file: \"${file}\" could not be found.")
-  endif(NOT EXISTS "${file}")
-endmacro(cpack_check_file_exists)
+  endif()
+endmacro()
 
 cpack_check_file_exists("${CPACK_PACKAGE_DESCRIPTION_FILE}" "package description")
 cpack_check_file_exists("${CPACK_RESOURCE_FILE_LICENSE}"    "license resource")
@@ -404,8 +404,8 @@ cpack_check_file_exists("${CPACK_RESOURCE_FILE_WELCOME}"    "welcome resource")
 macro(cpack_optional_append _list _cond _item)
   if(${_cond})
     set(${_list} ${${_list}} ${_item})
-  endif(${_cond})
-endmacro(cpack_optional_append _list _cond _item)
+  endif()
+endmacro()
 
 ##variable
 # CPACK_BINARY_<GENNAME> - CPack generated options for binary generators. The
@@ -420,26 +420,26 @@ if(NOT CPACK_GENERATOR)
   if(UNIX)
     if(CYGWIN)
       option(CPACK_BINARY_CYGWIN "Enable to build Cygwin binary packages" ON)
-    else(CYGWIN)
+    else()
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
         option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" ON)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
-      else(APPLE)
+      else()
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
-      endif(APPLE)
+      endif()
       option(CPACK_BINARY_STGZ "Enable to build STGZ packages"    ON)
       option(CPACK_BINARY_TGZ  "Enable to build TGZ packages"     ON)
       option(CPACK_BINARY_TBZ2 "Enable to build TBZ2 packages"    OFF)
       option(CPACK_BINARY_DEB  "Enable to build Debian packages"  OFF)
       option(CPACK_BINARY_RPM  "Enable to build RPM packages"     OFF)
       option(CPACK_BINARY_NSIS "Enable to build NSIS packages"    OFF)
-    endif(CYGWIN)
-  else(UNIX)
+    endif()
+  else()
     option(CPACK_BINARY_NSIS "Enable to build NSIS packages" ON)
     option(CPACK_BINARY_ZIP  "Enable to build ZIP packages" OFF)
-  endif(UNIX)
+  endif()
 
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
@@ -455,29 +455,29 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TZ           TZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_ZIP          ZIP)
 
-endif(NOT CPACK_GENERATOR)
+endif()
 
 # Provide options to choose source generators
 if(NOT CPACK_SOURCE_GENERATOR)
   if(UNIX)
     if(CYGWIN)
       option(CPACK_SOURCE_CYGWIN "Enable to build Cygwin source packages" ON)
-    else(CYGWIN)
+    else()
       option(CPACK_SOURCE_TBZ2 "Enable to build TBZ2 source packages" ON)
       option(CPACK_SOURCE_TGZ  "Enable to build TGZ source packages"  ON)
       option(CPACK_SOURCE_TZ   "Enable to build TZ source packages"   ON)
       option(CPACK_SOURCE_ZIP  "Enable to build ZIP source packages"  OFF)
-    endif(CYGWIN)
-  else(UNIX)
+    endif()
+  else()
     option(CPACK_SOURCE_ZIP "Enable to build ZIP source packages" ON)
-  endif(UNIX)
+  endif()
 
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_CYGWIN  CygwinSource)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TGZ     TGZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TBZ2    TBZ2)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TZ      TZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_ZIP     ZIP)
-endif(NOT CPACK_SOURCE_GENERATOR)
+endif()
 
 # mark the above options as advanced
 mark_as_advanced(CPACK_BINARY_CYGWIN CPACK_BINARY_PACKAGEMAKER CPACK_BINARY_OSXX11
@@ -526,12 +526,12 @@ if(DEFINED CPACK_COMPONENTS_ALL)
   if(CPACK_MONOLITHIC_INSTALL)
     message("CPack warning: both CPACK_COMPONENTS_ALL and CPACK_MONOLITHIC_INSTALL have been set.\nDefaulting to a monolithic installation.")
     set(CPACK_COMPONENTS_ALL)
-  else(CPACK_MONOLITHIC_INSTALL)
+  else()
     # The user has provided the set of components to be installed as
     # part of a component-based installation; trust her.
     set(CPACK_COMPONENTS_ALL_SET_BY_USER TRUE)
-  endif(CPACK_MONOLITHIC_INSTALL)
-else(DEFINED CPACK_COMPONENTS_ALL)
+  endif()
+else()
   # If the user has not specifically requested a monolithic installer
   # but has specified components in various "install" commands, tell
   # CPack about those components.
@@ -543,10 +543,10 @@ else(DEFINED CPACK_COMPONENTS_ALL)
       # (at least, it isn't a component-based installation, but may
       # become one later if the user uses the cpack_add_* commands).
       set(CPACK_COMPONENTS_ALL)
-    endif(CPACK_COMPONENTS_LEN EQUAL 1)
+    endif()
     set(CPACK_COMPONENTS_LEN)
-  endif(NOT CPACK_MONOLITHIC_INSTALL)
-endif(DEFINED CPACK_COMPONENTS_ALL)
+  endif()
+endif()
 
 # CMake always generates a component named "Unspecified", which is
 # used to install everything that doesn't have an explicitly-provided

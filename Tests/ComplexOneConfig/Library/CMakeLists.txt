@@ -33,10 +33,10 @@ if(WIN32)
         target_link_libraries(CMakeTestLibrary
           optimized
           kernel32.lib)
-      endif(NOT MINGW)
-    endif(NOT BORLAND)
-  endif(NOT CYGWIN)
-endif(WIN32)
+      endif()
+    endif()
+  endif()
+endif()
 
 #
 # Create shared library
@@ -53,12 +53,12 @@ define_property(
 set_target_properties(CMakeTestCLibraryShared PROPERTIES FOO BAR)
 if(NOT BEOS AND NOT WIN32)  # No libm on BeOS.
   set_target_properties(CMakeTestCLibraryShared PROPERTIES LINK_FLAGS "-lm")
-endif(NOT BEOS AND NOT WIN32)
+endif()
 get_target_property(FOO_BAR_VAR CMakeTestCLibraryShared FOO)
 if(${FOO_BAR_VAR} MATCHES "BAR")
-else(${FOO_BAR_VAR} MATCHES "BAR")
+else()
   message(SEND_ERROR "SET_TARGET_PROPERTIES or GET_TARGET_PROPERTY failed, FOO_BAR_VAR should be BAR, but is ${FOO_BAR_VAR}")
-endif(${FOO_BAR_VAR} MATCHES "BAR")
+endif()
 
 # Create static and shared lib of same name.
 if(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
@@ -66,7 +66,7 @@ if(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
   add_library(CMakeTestLinkShared SHARED TestLink.c)
   set_target_properties(CMakeTestLinkStatic CMakeTestLinkShared
     PROPERTIES OUTPUT_NAME CMakeTestLink)
-endif(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
+endif()
 
 #
 # Attach pre-build/pre-link/post-build custom-commands to the lib.
@@ -127,7 +127,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
     if(ARCH_COUNT GREATER 1)
       # OSX does not support preprocessing more than one architecture.
       set(MAYBE_ALL)
-    endif(ARCH_COUNT GREATER 1)
+    endif()
 
     # Custom target to try preprocessing invocation.
     add_custom_target(test_preprocess ${MAYBE_ALL}
@@ -136,5 +136,5 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_preprocess.cmake
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
       )
-  endif(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE)
-endif("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
+  endif()
+endif()

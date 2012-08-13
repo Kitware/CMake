@@ -6,7 +6,7 @@ add_executable (Sleep sleep.c)
 
 foreach (index RANGE 1 3)
   add_test (TestSleep${index} Sleep)
-endforeach (index RANGE 1 3)
+endforeach ()
 
 set_tests_properties(TestSleep1 PROPERTIES COST -500)
 set_tests_properties(TestSleep2 PROPERTIES COST 12)

@@ -19,7 +19,7 @@ set(CMAKE_ASM_NASM_COMPILER_INIT nasm yasm)
 if(NOT CMAKE_ASM_NASM_COMPILER)
   find_program(CMAKE_ASM_NASM_COMPILER nasm
     "$ENV{ProgramFiles}/NASM")
-endif(NOT CMAKE_ASM_NASM_COMPILER)
+endif()
 
 # Load the generic DetermineASM compiler file with the DIALECT set properly:
 set(ASM_DIALECT "_NASM")

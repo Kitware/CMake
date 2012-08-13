@@ -28,7 +28,7 @@ if (WIN32)
     find_path(COIN3D_INCLUDE_DIRS Inventor/So.h)
     find_library(COIN3D_LIBRARIES Coin)
 
-  else (CYGWIN)
+  else ()
 
     find_path(COIN3D_INCLUDE_DIRS Inventor/So.h
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/include"
@@ -45,18 +45,18 @@ if (WIN32)
     if (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
       set(COIN3D_LIBRARIES optimized ${COIN3D_LIBRARY_RELEASE}
                            debug ${COIN3D_LIBRARY_DEBUG})
-    else (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
+    else ()
       if (COIN3D_LIBRARY_DEBUG)
         set (COIN3D_LIBRARIES ${COIN3D_LIBRARY_DEBUG})
-      endif (COIN3D_LIBRARY_DEBUG)
+      endif ()
       if (COIN3D_LIBRARY_RELEASE)
         set (COIN3D_LIBRARIES ${COIN3D_LIBRARY_RELEASE})
-      endif (COIN3D_LIBRARY_RELEASE)
-    endif (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
+      endif ()
+    endif ()
 
-  endif (CYGWIN)
+  endif ()
 
-else (WIN32)
+else ()
   if(APPLE)
     find_path(COIN3D_INCLUDE_DIRS Inventor/So.h
      /Library/Frameworks/Inventor.framework/Headers
@@ -65,14 +65,14 @@ else (WIN32)
       /Library/Frameworks/Inventor.framework/Libraries
     )
     set(COIN3D_LIBRARIES "-framework Coin3d" CACHE STRING "Coin3D library for OSX")
-  else(APPLE)
+  else()
 
     find_path(COIN3D_INCLUDE_DIRS Inventor/So.h)
     find_library(COIN3D_LIBRARIES Coin)
 
-  endif(APPLE)
+  endif()
 
-endif (WIN32)
+endif ()
 
 # handle the QUIETLY and REQUIRED arguments and set COIN3D_FOUND to TRUE if
 # all listed variables are TRUE

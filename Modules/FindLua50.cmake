@@ -55,7 +55,7 @@ find_library(LUA_LIBRARY_lua
 # (like GLU in OpenGL.framework)
 if(${LUA_LIBRARY_lua} MATCHES "framework")
   set( LUA_LIBRARIES "${LUA_LIBRARY_lua}" CACHE STRING "Lua framework")
-else(${LUA_LIBRARY_lua} MATCHES "framework")
+else()
   find_library(LUA_LIBRARY_lualib
     NAMES lualib50 lualib5.0 lualib5 lualib
     HINTS
@@ -74,11 +74,11 @@ else(${LUA_LIBRARY_lua} MATCHES "framework")
       find_library(MATH_LIBRARY_FOR_LUA m)
       set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua};${MATH_LIBRARY_FOR_LUA}" CACHE STRING "This is the concatentation of lua and lualib libraries")
     # For Windows and Mac, don't need to explicitly include the math library
-    else(UNIX AND NOT APPLE)
+    else()
       set( LUA_LIBRARIES "${LUA_LIBRARY_lualib};${LUA_LIBRARY_lua}" CACHE STRING "This is the concatentation of lua and lualib libraries")
-    endif(UNIX AND NOT APPLE)
-  endif(LUA_LIBRARY_lualib AND LUA_LIBRARY_lua)
-endif(${LUA_LIBRARY_lua} MATCHES "framework")
+    endif()
+  endif()
+endif()
 
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)

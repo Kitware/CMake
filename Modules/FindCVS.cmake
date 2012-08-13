@@ -5,7 +5,7 @@
 #   find_package(CVS)
 #   if(CVS_FOUND)
 #     message("CVS found: ${CVS_EXECUTABLE}")
-#   endif(CVS_FOUND)
+#   endif()
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.

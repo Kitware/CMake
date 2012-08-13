@@ -74,7 +74,7 @@ macro(__windows_compiler_gnu lang)
     foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
       set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-Bstatic")
       set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
-    endforeach(type)
+    endforeach()
   endif()
 
   # No -fPIC on Windows

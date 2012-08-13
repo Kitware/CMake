@@ -30,7 +30,7 @@
 
 if(PNG_FIND_QUIETLY)
   set(_FIND_ZLIB_ARG QUIET)
-endif(PNG_FIND_QUIETLY)
+endif()
 find_package(ZLIB ${_FIND_ZLIB_ARG})
 
 if(ZLIB_FOUND)
@@ -50,20 +50,20 @@ if(ZLIB_FOUND)
       if (CYGWIN)
         if(BUILD_SHARED_LIBS)
            # No need to define PNG_USE_DLL here, because it's default for Cygwin.
-        else(BUILD_SHARED_LIBS)
+        else()
           set (PNG_DEFINITIONS -DPNG_STATIC)
-        endif(BUILD_SHARED_LIBS)
-      endif (CYGWIN)
+        endif()
+      endif ()
 
-  endif (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
+  endif ()
 
   if (PNG_PNG_INCLUDE_DIR AND EXISTS "${PNG_PNG_INCLUDE_DIR}/png.h")
       file(STRINGS "${PNG_PNG_INCLUDE_DIR}/png.h" png_version_str REGEX "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\".+\"")
 
       string(REGEX REPLACE "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\"([^\"]+)\".*" "\\1" PNG_VERSION_STRING "${png_version_str}")
       unset(png_version_str)
-  endif (PNG_PNG_INCLUDE_DIR AND EXISTS "${PNG_PNG_INCLUDE_DIR}/png.h")
-endif(ZLIB_FOUND)
+  endif ()
+endif()
 
 # handle the QUIETLY and REQUIRED arguments and set PNG_FOUND to TRUE if
 # all listed variables are TRUE

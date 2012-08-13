@@ -22,7 +22,7 @@ if (BUILD_DOCUMENTATION)
   #
   if(NOT DOT_PATH)
     get_filename_component(DOT_PATH ${DOT} PATH)
-  endif(NOT DOT_PATH)
+  endif()
 
   configure_file(
     ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
@@ -36,4 +36,4 @@ if (BUILD_DOCUMENTATION)
     ${BASH}
     ${CMake_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
 
-endif (BUILD_DOCUMENTATION)
+endif ()

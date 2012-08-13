@@ -16,11 +16,11 @@
 if(CMAKE_GENERATOR MATCHES "Visual Studio 7")
   include(CMakeVS7BackwardCompatibility)
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif(CMAKE_GENERATOR MATCHES "Visual Studio 7")
+endif()
 if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
   include(CMakeVS6BackwardCompatibility)
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif(CMAKE_GENERATOR MATCHES "Visual Studio 6")
+endif()
 
 if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   # Old CMake versions did not support OS X universal binaries anyway,
@@ -57,10 +57,10 @@ if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
 
   if("${X11_X11_INCLUDE_PATH}" MATCHES "^/usr/include$")
     set (CMAKE_X_CFLAGS "" CACHE STRING "X11 extra flags.")
-  else("${X11_X11_INCLUDE_PATH}" MATCHES "^/usr/include$")
+  else()
     set (CMAKE_X_CFLAGS "-I${X11_X11_INCLUDE_PATH}" CACHE STRING
          "X11 extra flags.")
-  endif("${X11_X11_INCLUDE_PATH}" MATCHES "^/usr/include$")
+  endif()
   set (CMAKE_X_LIBS "${X11_LIBRARIES}" CACHE STRING
        "Libraries and options used in X11 programs.")
   set (CMAKE_HAS_X "${X11_FOUND}" CACHE INTERNAL "Is X11 around.")
@@ -86,7 +86,7 @@ if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
     set(CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
     set(__ERASE_CMAKE_TRY_COMPILE_OSX_ARCHITECTURES)
   endif()
-endif(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
+endif()
 
 mark_as_advanced(
 CMAKE_HP_PTHREADS

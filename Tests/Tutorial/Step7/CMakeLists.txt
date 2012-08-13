@@ -29,7 +29,7 @@ if (USE_MYMATH)
   include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
   add_subdirectory (MathFunctions)
   set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
-endif (USE_MYMATH)
+endif ()
 
 # add the executable
 add_executable (Tutorial tutorial.cxx)
@@ -59,7 +59,7 @@ macro (do_test arg result)
   set_tests_properties (TutorialComp${arg}
     PROPERTIES PASS_REGULAR_EXPRESSION ${result}
     )
-endmacro (do_test)
+endmacro ()
 
 # do a bunch of result based tests
 do_test (4 "4 is 2")

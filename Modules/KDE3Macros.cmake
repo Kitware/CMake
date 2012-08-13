@@ -54,7 +54,7 @@ macro(KDE3_ADD_DCOP_SKELS _sources)
           DEPENDS ${_tmp_FILE}
          )
 
-       endif (NOT HAVE_${_basename}_KIDL_RULE)
+       endif ()
 
       if (NOT HAVE_${_basename}_SKEL_RULE)
         set(HAVE_${_basename}_SKEL_RULE ON)
@@ -65,13 +65,13 @@ macro(KDE3_ADD_DCOP_SKELS _sources)
           DEPENDS ${_kidl}
           )
 
-      endif (NOT HAVE_${_basename}_SKEL_RULE)
+      endif ()
 
       set(${_sources} ${${_sources}} ${_skel})
 
-   endforeach (_current_FILE)
+   endforeach ()
 
-endmacro(KDE3_ADD_DCOP_SKELS)
+endmacro()
 
 
 macro(KDE3_ADD_DCOP_STUBS _sources)
@@ -94,7 +94,7 @@ macro(KDE3_ADD_DCOP_STUBS _sources)
            DEPENDS ${_tmp_FILE}
            )
 
-      endif (NOT HAVE_${_basename}_KIDL_RULE)
+      endif ()
 
 
       if (NOT HAVE_${_basename}_STUB_RULE)
@@ -106,13 +106,13 @@ macro(KDE3_ADD_DCOP_STUBS _sources)
            DEPENDS ${_kidl}
          )
 
-      endif (NOT HAVE_${_basename}_STUB_RULE)
+      endif ()
 
       set(${_sources} ${${_sources}} ${_stub_CPP})
 
-   endforeach (_current_FILE)
+   endforeach ()
 
-endmacro(KDE3_ADD_DCOP_STUBS)
+endmacro()
 
 
 macro(KDE3_ADD_KCFG_FILES _sources)
@@ -135,9 +135,9 @@ macro(KDE3_ADD_KCFG_FILES _sources)
 
       set(${_sources} ${${_sources}} ${_src_FILE})
 
-   endforeach (_current_FILE)
+   endforeach ()
 
-endmacro(KDE3_ADD_KCFG_FILES)
+endmacro()
 
 
 #create the moc files and add them to the list of sources
@@ -158,8 +158,8 @@ macro(KDE3_ADD_MOC_FILES _sources)
 
       set(${_sources} ${${_sources}} ${_moc})
 
-   endforeach (_current_FILE)
-endmacro(KDE3_ADD_MOC_FILES)
+   endforeach ()
+endmacro()
 
 
 get_filename_component( KDE3_MODULE_DIR  ${CMAKE_CURRENT_LIST_FILE} PATH)
@@ -202,8 +202,8 @@ macro(KDE3_ADD_UI_FILES _sources )
 
       set(${_sources} ${${_sources}} ${_src} ${_moc} )
 
-   endforeach (_current_FILE)
-endmacro(KDE3_ADD_UI_FILES)
+   endforeach ()
+endmacro()
 
 
 macro(KDE3_AUTOMOC)
@@ -245,12 +245,12 @@ macro(KDE3_AUTOMOC)
 
                ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
 
-            endforeach (_current_MOC_INC)
-         endif(_match)
+            endforeach ()
+         endif()
 
-      endif (EXISTS ${_abs_FILE} AND NOT _skip)
-   endforeach (_current_FILE)
-endmacro(KDE3_AUTOMOC)
+      endif ()
+   endforeach ()
+endmacro()
 
 # only used internally by KDE3_INSTALL_ICONS
 macro (_KDE3_ADD_ICON_INSTALL_RULE _install_SCRIPT _install_PATH _group _orig_NAME _install_NAME)
@@ -261,29 +261,29 @@ macro (_KDE3_ADD_ICON_INSTALL_RULE _install_SCRIPT _install_PATH _group _orig_NA
 
       if (${_group} STREQUAL "mime")
          set(_icon_GROUP  "mimetypes")
-      endif (${_group} STREQUAL "mime")
+      endif ()
 
       if (${_group} STREQUAL "filesys")
          set(_icon_GROUP  "filesystems")
-      endif (${_group} STREQUAL "filesys")
+      endif ()
 
       if (${_group} STREQUAL "device")
          set(_icon_GROUP  "devices")
-      endif (${_group} STREQUAL "device")
+      endif ()
 
       if (${_group} STREQUAL "app")
          set(_icon_GROUP  "apps")
-      endif (${_group} STREQUAL "app")
+      endif ()
 
       if (${_group} STREQUAL "action")
          set(_icon_GROUP  "actions")
-      endif (${_group} STREQUAL "action")
+      endif ()
 
 #      message(STATUS "icon: ${_current_ICON} size: ${_size} group: ${_group} name: ${_name}" )
    install(FILES ${_orig_NAME} DESTINATION ${_install_PATH}/${_icon_GROUP}/ RENAME ${_install_NAME} )
-   endif (NOT ${_group} STREQUAL ${_install_NAME} )
+   endif ()
 
-endmacro (_KDE3_ADD_ICON_INSTALL_RULE)
+endmacro ()
 
 
 macro (KDE3_INSTALL_ICONS _theme )
@@ -297,7 +297,7 @@ macro (KDE3_INSTALL_ICONS _theme )
       _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake
          ${_defaultpath}/${_theme}/${_size}x${_size}
          ${_group} ${_current_ICON} ${_name})
-   endforeach (_current_ICON)
+   endforeach ()
 
    # and now the svg icons
    file(GLOB _icons *.svgz)
@@ -307,9 +307,9 @@ macro (KDE3_INSTALL_ICONS _theme )
       _KDE3_ADD_ICON_INSTALL_RULE(${CMAKE_CURRENT_BINARY_DIR}/install_icons.cmake
                                  ${_defaultpath}/${_theme}/scalable
                                  ${_group} ${_current_ICON} ${_name})
-   endforeach (_current_ICON)
+   endforeach ()
 
-endmacro (KDE3_INSTALL_ICONS)
+endmacro ()
 
 macro(KDE3_INSTALL_LIBTOOL_FILE _target)
    get_target_property(_target_location ${_target} LOCATION)
@@ -324,9 +324,9 @@ macro(KDE3_INSTALL_LIBTOOL_FILE _target)
    file(APPEND ${_laname} "# Names of this library\n")
    if(CYGWIN)
      file(APPEND ${_laname} "library_names='${_soname}'\n")
-   else(CYGWIN)
+   else()
      file(APPEND ${_laname} "library_names='${_soname} ${_soname} ${_soname}'\n")
-   endif(CYGWIN)
+   endif()
    file(APPEND ${_laname} "# The name of the static archive\n")
    file(APPEND ${_laname} "old_library=''\n")
    file(APPEND ${_laname} "# Libraries that this one depends upon.\n")
@@ -340,16 +340,16 @@ macro(KDE3_INSTALL_LIBTOOL_FILE _target)
    file(APPEND ${_laname} "libdir='${CMAKE_INSTALL_PREFIX}/lib/kde3'\n")
 
    install_files(${KDE3_LIBTOOL_DIR} FILES ${_laname})
-endmacro(KDE3_INSTALL_LIBTOOL_FILE)
+endmacro()
 
 
 macro(KDE3_CREATE_FINAL_FILE _filename)
    file(WRITE ${_filename} "//autogenerated file\n")
    foreach (_current_FILE ${ARGN})
       file(APPEND ${_filename} "#include \"${_current_FILE}\"\n")
-   endforeach (_current_FILE)
+   endforeach ()
 
-endmacro(KDE3_CREATE_FINAL_FILE)
+endmacro()
 
 
 # option(KDE3_ENABLE_FINAL "Enable final all-in-one compilation")
@@ -360,24 +360,24 @@ macro(KDE3_ADD_KPART _target_NAME _with_PREFIX)
 #is the first argument is "WITH_PREFIX" then keep the standard "lib" prefix, otherwise SET the prefix empty
    if (${_with_PREFIX} STREQUAL "WITH_PREFIX")
       set(_first_SRC)
-   else (${_with_PREFIX} STREQUAL "WITH_PREFIX")
+   else ()
       set(_first_SRC ${_with_PREFIX})
-   endif (${_with_PREFIX} STREQUAL "WITH_PREFIX")
+   endif ()
 
 #    if (KDE3_ENABLE_FINAL)
 #       KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${_first_SRC} ${ARGN})
 #       add_library(${_target_NAME} MODULE  ${_target_NAME}_final.cpp)
-#    else (KDE3_ENABLE_FINAL)
+#    else ()
    add_library(${_target_NAME} MODULE ${_first_SRC} ${ARGN})
-#    endif (KDE3_ENABLE_FINAL)
+#    endif ()
 
    if(_first_SRC)
       set_target_properties(${_target_NAME} PROPERTIES PREFIX "")
-   endif(_first_SRC)
+   endif()
 
    KDE3_INSTALL_LIBTOOL_FILE(${_target_NAME})
 
-endmacro(KDE3_ADD_KPART)
+endmacro()
 
 
 macro(KDE3_ADD_KDEINIT_EXECUTABLE _target_NAME )
@@ -385,16 +385,16 @@ macro(KDE3_ADD_KDEINIT_EXECUTABLE _target_NAME )
 #    if (KDE3_ENABLE_FINAL)
 #       KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${ARGN})
 #       add_library(kdeinit_${_target_NAME} SHARED  ${_target_NAME}_final.cpp)
-#    else (KDE3_ENABLE_FINAL)
+#    else ()
    add_library(kdeinit_${_target_NAME} SHARED ${ARGN} )
-#    endif (KDE3_ENABLE_FINAL)
+#    endif ()
 
    configure_file(${KDE3_MODULE_DIR}/kde3init_dummy.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/${_target_NAME}_dummy.cpp)
 
    add_executable( ${_target_NAME} ${CMAKE_CURRENT_BINARY_DIR}/${_target_NAME}_dummy.cpp )
    target_link_libraries( ${_target_NAME} kdeinit_${_target_NAME} )
 
-endmacro(KDE3_ADD_KDEINIT_EXECUTABLE)
+endmacro()
 
 
 macro(KDE3_ADD_EXECUTABLE _target_NAME )
@@ -402,10 +402,10 @@ macro(KDE3_ADD_EXECUTABLE _target_NAME )
 #    if (KDE3_ENABLE_FINAL)
 #       KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${ARGN})
 #       add_executable(${_target_NAME} ${_target_NAME}_final.cpp)
-#    else (KDE3_ENABLE_FINAL)
+#    else ()
    add_executable(${_target_NAME} ${ARGN} )
-#    endif (KDE3_ENABLE_FINAL)
+#    endif ()
 
-endmacro(KDE3_ADD_EXECUTABLE)
+endmacro()
 
 

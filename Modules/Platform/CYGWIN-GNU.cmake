@@ -47,7 +47,7 @@ macro(__cygwin_compiler_gnu lang)
   foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
     set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-Bstatic")
     set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
-  endforeach(type)
+  endforeach()
 
   set(CMAKE_EXE_EXPORTS_${lang}_FLAG "-Wl,--export-all-symbols")
   # TODO: Is -Wl,--enable-auto-import now always default?

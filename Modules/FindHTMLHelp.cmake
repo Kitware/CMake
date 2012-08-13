@@ -51,4 +51,4 @@ if(WIN32)
     HTML_HELP_LIBRARY
     )
 
-endif(WIN32)
+endif()

@@ -8,7 +8,7 @@ get_directory_property(ANIMAL DIRECTORY OutOfSourceSubdir DEFINITION WEASELS)
 get_directory_property(ANIMALREL DIRECTORY SubDir/../OutOfSourceSubdir DEFINITION WEASELS)
 if(NOT "${ANIMAL}" STREQUAL "${ANIMALREL}")
   message(FATAL_ERROR "GET_DIRECTORY_PROPERTY does not seem to collapse paths.")
-endif(NOT "${ANIMAL}" STREQUAL "${ANIMALREL}")
+endif()
 
 configure_file(
   ${OutOfSource_SOURCE_DIR}/testdp.h.in

@@ -39,9 +39,9 @@ if(PHP4_FOUND_INCLUDE_PATH)
   set(php4_paths "${PHP4_POSSIBLE_INCLUDE_PATHS}")
   foreach(php4_path Zend main TSRM)
     set(php4_paths ${php4_paths} "${PHP4_FOUND_INCLUDE_PATH}/${php4_path}")
-  endforeach(php4_path Zend main TSRM)
+  endforeach()
   set(PHP4_INCLUDE_PATH "${php4_paths}" INTERNAL "PHP4 include paths")
-endif(PHP4_FOUND_INCLUDE_PATH)
+endif()
 
 find_program(PHP4_EXECUTABLE NAMES php4 php )
 
@@ -78,8 +78,8 @@ if(APPLE)
     )
     set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
       "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS},-U,${symbol}")
-  endforeach(symbol)
-endif(APPLE)
+  endforeach()
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PHP4 DEFAULT_MSG PHP4_EXECUTABLE PHP4_INCLUDE_PATH)

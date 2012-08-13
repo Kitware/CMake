@@ -6,7 +6,7 @@ macro(AddCMakeTest TestName PreArgs)
     "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" @ONLY IMMEDIATE)
   add_test(CMake.${TestName} ${CMAKE_EXECUTABLE} ${PreArgs}
     -P "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" ${ARGN})
-endmacro(AddCMakeTest)
+endmacro()
 
 
 AddCMakeTest(List "")

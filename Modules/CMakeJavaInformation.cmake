@@ -34,26 +34,26 @@ endif()
 if(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
 #  if(WIN32)
 #    set(class_files_mask "*.class")
-#  else(WIN32)
+#  else()
     set(class_files_mask ".")
-#  endif(WIN32)
+#  endif()
 
   set(CMAKE_Java_CREATE_STATIC_LIBRARY
       "<CMAKE_Java_ARCHIVE> -cf <TARGET> -C <OBJECT_DIR> ${class_files_mask}")
     # "${class_files_mask}" should really be "<OBJECTS>" but compling a *.java
     # file can create more than one *.class file...
-endif(NOT CMAKE_Java_CREATE_STATIC_LIBRARY)
+endif()
 
 # compile a Java file into an object file
 if(NOT CMAKE_Java_COMPILE_OBJECT)
   set(CMAKE_Java_COMPILE_OBJECT
     "<CMAKE_Java_COMPILER> <FLAGS> <SOURCE> -d <OBJECT_DIR>")
-endif(NOT CMAKE_Java_COMPILE_OBJECT)
+endif()
 
 # set java include flag option and the separator for multiple include paths
 set(CMAKE_INCLUDE_FLAG_Java "-classpath ")
 if(WIN32 AND NOT CYGWIN)
   set(CMAKE_INCLUDE_FLAG_SEP_Java ";")
-else(WIN32 AND NOT CYGWIN)
+else()
   set(CMAKE_INCLUDE_FLAG_SEP_Java ":")
-endif(WIN32 AND NOT CYGWIN)
+endif()

@@ -34,7 +34,7 @@ foreach(file ${FILES})
 
     math(EXPR count "${count} + 1")
   endif()
-endforeach(file)
+endforeach()
 if(${count} EQUAL 0)
    message(FATAL_ERROR "Error no files uploaded.")
 endif()

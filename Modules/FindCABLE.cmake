@@ -25,7 +25,7 @@
 
 if(NOT CABLE)
   find_path(CABLE_BUILD_DIR cableVersion.h)
-endif(NOT CABLE)
+endif()
 
 if(CABLE_BUILD_DIR)
   load_cache(${CABLE_BUILD_DIR}
@@ -43,25 +43,25 @@ if(CABLE_BUILD_DIR)
     find_library(CABLE_TCL_LIBRARY NAMES CableTclFacility PATHS
                  ${CABLE_LIBRARY_PATH}
                  ${CABLE_LIBRARY_PATH}/*)
-  else(CABLE_LIBRARY_PATH)
+  else()
     find_library(CABLE_TCL_LIBRARY NAMES CableTclFacility PATHS
                  ${CABLE_BINARY_DIR}/CableTclFacility
                  ${CABLE_BINARY_DIR}/CableTclFacility/*)
-  endif(CABLE_LIBRARY_PATH)
+  endif()
 
   if(CABLE_EXECUTABLE_PATH)
     find_program(CABLE NAMES cable PATHS
                  ${CABLE_EXECUTABLE_PATH}
                  ${CABLE_EXECUTABLE_PATH}/*)
-  else(CABLE_EXECUTABLE_PATH)
+  else()
     find_program(CABLE NAMES cable PATHS
                  ${CABLE_BINARY_DIR}/Executables
                  ${CABLE_BINARY_DIR}/Executables/*)
-  endif(CABLE_EXECUTABLE_PATH)
+  endif()
 
   find_path(CABLE_INCLUDE_DIR CableTclFacility/ctCalls.h
             ${CABLE_SOURCE_DIR})
-else(CABLE_BUILD_DIR)
+else()
   # Find the cable executable in the path.
   find_program(CABLE NAMES cable)
 
@@ -78,4 +78,4 @@ else(CABLE_BUILD_DIR)
   # executable.
   find_library(CABLE_TCL_LIBRARY NAMES CableTclFacility PATHS
                ${CABLE_ROOT_BIN}/../lib/Cable)
-endif(CABLE_BUILD_DIR)
+endif()

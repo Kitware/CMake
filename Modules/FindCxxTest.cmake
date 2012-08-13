@@ -147,7 +147,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
         add_test(${_cxxtest_testname} ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname})
     endif()
 
-endmacro(CXXTEST_ADD_TEST)
+endmacro()
 
 #=============================================================
 # main()

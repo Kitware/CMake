@@ -32,9 +32,9 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
   if("${VARIABLE}" MATCHES "^${VARIABLE}$")
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_INCLUDE_FILE_CXX_INCLUDE_DIRS "-DINCLUDE_DIRECTORIES=${CMAKE_REQUIRED_INCLUDES}")
-    else(CMAKE_REQUIRED_INCLUDES)
+    else()
       set(CHECK_INCLUDE_FILE_CXX_INCLUDE_DIRS)
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     set(MACRO_CHECK_INCLUDE_FILE_FLAGS ${CMAKE_REQUIRED_FLAGS})
     set(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
@@ -43,7 +43,7 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     if(${ARGC} EQUAL 3)
       set(CMAKE_CXX_FLAGS_SAVE ${CMAKE_CXX_FLAGS})
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARGV2}")
-    endif(${ARGC} EQUAL 3)
+    endif()
 
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
@@ -56,7 +56,7 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
 
     if(${ARGC} EQUAL 3)
       set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_SAVE})
-    endif(${ARGC} EQUAL 3)
+    endif()
 
     if(${VARIABLE})
       message(STATUS "Looking for C++ include ${INCLUDE} - found")
@@ -65,13 +65,13 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
         "Determining if the include file ${INCLUDE} "
         "exists passed with the following output:\n"
         "${OUTPUT}\n\n")
-    else(${VARIABLE})
+    else()
       message(STATUS "Looking for C++ include ${INCLUDE} - not found")
       set(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the include file ${INCLUDE} "
         "exists failed with the following output:\n"
         "${OUTPUT}\n\n")
-    endif(${VARIABLE})
-  endif("${VARIABLE}" MATCHES "^${VARIABLE}$")
-endmacro(CHECK_INCLUDE_FILE_CXX)
+    endif()
+  endif()
+endmacro()

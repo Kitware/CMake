@@ -1,14 +1,14 @@
 set(CMAKE_DL_LIBS "")
 
 if(CMAKE_SYSTEM MATCHES "OSF1-1.[012]")
-endif(CMAKE_SYSTEM MATCHES "OSF1-1.[012]")
+endif()
 if(CMAKE_SYSTEM MATCHES "OSF1-1.*")
   # OSF/1 1.3 from OSF using ELF, and derivatives, including AD2
   set(CMAKE_C_COMPILE_OPTIONS_PIC "-fpic")
   set(CMAKE_C_COMPILE_OPTIONS_PIE "-fpie")
   set(CMAKE_SHARED_LIBRARY_C_FLAGS "-fpic")     # -pic
   set(CMAKE_SHARED_LIBRARY_CXX_FLAGS "-fpic")   # -pic
-endif(CMAKE_SYSTEM MATCHES "OSF1-1.*")
+endif()
 
 
 
@@ -16,22 +16,22 @@ if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
   set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-expect_unresolved,\\*")       # -shared
   if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,-rpath,")
-  else(CMAKE_COMPILER_IS_GNUCXX)
+  else()
     set(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-rpath ")
-  endif(CMAKE_COMPILER_IS_GNUCXX)
+  endif()
   if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
-  else(CMAKE_COMPILER_IS_GNUCC)
+  else()
     set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-rpath ")
-  endif(CMAKE_COMPILER_IS_GNUCC)
+  endif()
   set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
-endif(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+endif()
 
 set(CMAKE_MAKE_INCLUDE_FROM_ROOT 1) # include $(CMAKE_BINARY_DIR)/...
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   # include the gcc flags
-else (CMAKE_COMPILER_IS_GNUCXX)
+else ()
   # use default OSF compiler flags
   set (CMAKE_C_FLAGS_INIT "")
   set (CMAKE_C_FLAGS_DEBUG_INIT "-g")
@@ -43,5 +43,5 @@ else (CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-O2 -DNDEBUG")
   set (CMAKE_CXX_FLAGS_RELEASE_INIT "-O2 -DNDEBUG")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-O2")
-endif(CMAKE_COMPILER_IS_GNUCXX)
+endif()
 include(Platform/UnixPaths)

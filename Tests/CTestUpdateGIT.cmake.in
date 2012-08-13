@@ -159,7 +159,7 @@ if(dirs_added)
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${GIT} add ${dirs_added}
     )
-endif(dirs_added)
+endif()
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
   COMMAND ${GIT} add ${files_added}
@@ -221,7 +221,7 @@ macro(rewind_source src_dir)
     WORKING_DIRECTORY ${TOP}/${src_dir}
     COMMAND ${GIT} submodule update
     )
-endmacro(rewind_source)
+endmacro()
 rewind_source(user-source)
 
 # Make sure pull does not try to rebase (which does not work with

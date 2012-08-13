@@ -49,18 +49,18 @@ mark_as_advanced(
 if (SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
   set (SELF_PACKER_FOR_EXECUTABLE_FLAGS "-q" CACHE STRING
        "Flags for the executable self-packer.")
-else (SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
+else ()
   set (SELF_PACKER_FOR_EXECUTABLE_FLAGS "" CACHE STRING
        "Flags for the executable self-packer.")
-endif (SELF_PACKER_FOR_EXECUTABLE MATCHES "upx")
+endif ()
 
 if (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
   set (SELF_PACKER_FOR_SHARED_LIB_FLAGS "-q" CACHE STRING
        "Flags for the shared lib self-packer.")
-else (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
+else ()
   set (SELF_PACKER_FOR_SHARED_LIB_FLAGS "" CACHE STRING
        "Flags for the shared lib self-packer.")
-endif (SELF_PACKER_FOR_SHARED_LIB MATCHES "upx")
+endif ()
 
 mark_as_advanced(
   SELF_PACKER_FOR_EXECUTABLE_FLAGS

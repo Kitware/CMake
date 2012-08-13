@@ -68,8 +68,8 @@ macro(ADD_DOCS target dependency)
       ${CMake_BINARY_DIR}/Docs/${target}.docbook
       )
     list(APPEND HTML_FILES ${CMake_BINARY_DIR}/Docs/${target}.html)
-  endif(CMD)
-endmacro(ADD_DOCS target dependency)
+  endif()
+endmacro()
 
 # Help cmake-gui find the Qt DLLs on Windows.
 set(WIN_SHELL_GENS "Visual Studio|NMake|MinGW|Watcom|Borland")
@@ -80,7 +80,7 @@ if(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
     # Tell the macro to set the path before running cmake-gui.
     string(REPLACE ";" "\\;" _PATH "PATH=${Qt_BIN_DIR};%PATH%")
     set(cmake-gui-PATH COMMAND set "${_PATH}")
-  endif(EXISTS "${Qt_BIN_DIR}/QtCore4.dll")
+  endif()
 endif(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
   AND EXISTS "${QT_QMAKE_EXECUTABLE}" AND NOT CMAKE_NO_AUTO_QT_ENV)
 

@@ -85,7 +85,7 @@ if(WIN32)
     "C:/Program Files/Tcl/lib"
     "C:/Tcl/lib"
     )
-endif(WIN32)
+endif()
 
 find_library(TCL_STUB_LIBRARY
   NAMES

@@ -46,7 +46,7 @@ endforeach()
 if (QT4_INSTALLED)
   # record qt lib directory
   set ( ENV{${SQUISH_LIBQTDIR}} ${squish_libqtdir} )
-endif (QT4_INSTALLED)
+endif ()
 
 # run the test
 if (WIN32)
@@ -54,19 +54,19 @@ if (WIN32)
     COMMAND ${CMAKE_ROOT}/Modules/SquishRunTestCase.bat ${squish_server_executable} ${squish_client_executable} ${squish_test_case} ${squish_wrapper} ${squish_aut}
     RESULT_VARIABLE test_rv
     )
-endif (WIN32)
+endif ()
 
 if (UNIX)
   execute_process(
     COMMAND ${CMAKE_ROOT}/Modules/SquishRunTestCase.sh ${squish_server_executable} ${squish_client_executable} ${squish_test_case} ${squish_wrapper} ${squish_aut}
     RESULT_VARIABLE test_rv
     )
-endif (UNIX)
+endif ()
 
 # check for an error with running the test
 if(NOT "${test_rv}" STREQUAL "0")
   message(FATAL_ERROR "Error running Squish test")
-endif(NOT "${test_rv}" STREQUAL "0")
+endif()
 
 
 

@@ -40,7 +40,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/CMakeExpandImportedTargets.cmake")
 
 macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   _CHECK_SYMBOL_EXISTS("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.c" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
-endmacro(CHECK_SYMBOL_EXISTS)
+endmacro()
 
 macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
   if("${VARIABLE}" MATCHES "^${VARIABLE}$")
@@ -51,19 +51,19 @@ macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
       CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}")
       set(CHECK_SYMBOL_EXISTS_LIBS
         "-DLINK_LIBRARIES:STRING=${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES}")
-    else(CMAKE_REQUIRED_LIBRARIES)
+    else()
       set(CHECK_SYMBOL_EXISTS_LIBS)
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
     if(CMAKE_REQUIRED_INCLUDES)
       set(CMAKE_SYMBOL_EXISTS_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    else(CMAKE_REQUIRED_INCLUDES)
+    else()
       set(CMAKE_SYMBOL_EXISTS_INCLUDES)
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     foreach(FILE ${FILES})
       set(CMAKE_CONFIGURABLE_FILE_CONTENT
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
-    endforeach(FILE)
+    endforeach()
     set(CMAKE_CONFIGURABLE_FILE_CONTENT
       "${CMAKE_CONFIGURABLE_FILE_CONTENT}\nint main(int argc, char** argv)\n{\n  (void)argv;\n#ifndef ${SYMBOL}\n  return ((int*)(&${SYMBOL}))[argc];\n#else\n  (void)argc;\n  return 0;\n#endif\n}\n")
 
@@ -88,7 +88,7 @@ macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
         "exist passed with the following output:\n"
         "${OUTPUT}\nFile ${SOURCEFILE}:\n"
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
-    else(${VARIABLE})
+    else()
       message(STATUS "Looking for ${SYMBOL} - not found.")
       set(${VARIABLE} "" CACHE INTERNAL "Have symbol ${SYMBOL}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
@@ -96,6 +96,6 @@ macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
         "exist failed with the following output:\n"
         "${OUTPUT}\nFile ${SOURCEFILE}:\n"
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
-    endif(${VARIABLE})
-  endif("${VARIABLE}" MATCHES "^${VARIABLE}$")
-endmacro(_CHECK_SYMBOL_EXISTS)
+    endif()
+  endif()
+endmacro()

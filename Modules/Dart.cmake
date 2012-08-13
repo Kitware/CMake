@@ -6,7 +6,7 @@
 #  include(Dart)
 #  if(BUILD_TESTING)
 #    # ... testing related CMake code ...
-#  endif(BUILD_TESTING)
+#  endif()
 # The BUILD_TESTING option is created by the Dart module to determine
 # whether testing support should be enabled.  The default is ON.
 
@@ -76,7 +76,7 @@ if(BUILD_TESTING)
   set(HAVE_DART)
   if(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
     set(HAVE_DART 1)
-  endif(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
+  endif()
 
   #
   # Section #2:
@@ -86,7 +86,7 @@ if(BUILD_TESTING)
   # find a tcl shell command
   if(HAVE_DART)
     find_package(Tclsh)
-  endif(HAVE_DART)
+  endif()
 
 
   if (HAVE_DART)
@@ -110,13 +110,13 @@ if(BUILD_TESTING)
     set(DART_EXPERIMENTAL_NAME Experimental)
     if(DART_EXPERIMENTAL_USE_PROJECT_NAME)
       set(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
-    endif(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-  endif (HAVE_DART)
+    endif()
+  endif ()
 
   set(RUN_FROM_CTEST_OR_DART 1)
   include(CTestTargets)
   set(RUN_FROM_CTEST_OR_DART)
-endif(BUILD_TESTING)
+endif()
 
 #
 # End of Dart.cmake

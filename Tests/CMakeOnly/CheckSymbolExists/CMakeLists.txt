@@ -24,7 +24,7 @@ foreach(_config_type Release RelWithDebInfo MinSizeRel Debug)
 
   if (CSE_RESULT_${_config_type})
     message(SEND_ERROR "CheckSymbolExists reported a nonexistent symbol as existing in configuration ${_config_type}")
-  endif (CSE_RESULT_${_config_type})
+  endif ()
 endforeach()
 
 set(CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE})
@@ -34,9 +34,9 @@ check_symbol_exists(errno "errno.h" CSE_RESULT_ERRNO)
 
 if (NOT CSE_RESULT_ERRNO)
   message(SEND_ERROR "CheckSymbolExists did not find errno in <errno.h>")
-else (NOT CSE_RESULT_ERRNO)
+else ()
   message(STATUS "errno found as expected")
-endif (NOT CSE_RESULT_ERRNO)
+endif ()
 
 if (CMAKE_COMPILER_IS_GNUCC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
@@ -47,5 +47,5 @@ if (CMAKE_COMPILER_IS_GNUCC)
 
   if (CSE_RESULT_O3)
     message(SEND_ERROR "CheckSymbolExists reported a nonexistent symbol as existing with optimization -O3")
-  endif (CSE_RESULT_O3)
-endif (CMAKE_COMPILER_IS_GNUCC)
+  endif ()
+endif ()

@@ -4,21 +4,21 @@ message(STATUS "")
 
 if(NOT CPackComponentsForAll_BINARY_DIR)
   message(FATAL_ERROR "CPackComponentsForAll_BINARY_DIR not set")
-endif(NOT CPackComponentsForAll_BINARY_DIR)
+endif()
 
 if(NOT CPackGen)
   message(FATAL_ERROR "CPackGen not set")
-endif(NOT CPackGen)
+endif()
 get_filename_component(CPACK_LOCATION ${CMAKE_COMMAND} PATH)
 set(CPackCommand "${CPACK_LOCATION}/cpack")
 message("cpack = ${CPackCommand}")
 if(NOT CPackCommand)
   message(FATAL_ERROR "CPackCommand not set")
-endif(NOT CPackCommand)
+endif()
 
 if(NOT CPackComponentWay)
   message(FATAL_ERROR "CPackComponentWay not set")
-endif(NOT CPackComponentWay)
+endif()
 
 set(expected_file_mask "")
 # The usual default behavior is to expect a single file
@@ -30,7 +30,7 @@ set(config_type $ENV{CMAKE_CONFIG_TYPE})
 set(config_args )
 if(config_type)
   set(config_args -C ${config_type})
-endif(config_type)
+endif()
 set(config_verbose )
 
 if(CPackGen MATCHES "ZIP")
@@ -80,15 +80,15 @@ if(CPackGen MATCHES "DragNDrop")
     elseif (${CPackComponentWay} STREQUAL "AllInOne")
         set(expected_count 1)
     endif ()
-endif(CPackGen MATCHES "DragNDrop")
+endif()
 
 # clean-up previously CPack generated files
 if(expected_file_mask)
   file(GLOB expected_file "${expected_file_mask}")
   if (expected_file)
     file(REMOVE ${expected_file})
-  endif(expected_file)
-endif(expected_file_mask)
+  endif()
+endif()
 
 message("config_args = ${config_args}")
 message("config_verbose = ${config_verbose}")
@@ -100,9 +100,9 @@ execute_process(COMMAND ${CPackCommand} ${config_verbose} -G ${CPackGen} ${confi
 
 if (CPack_result)
   message(FATAL_ERROR "error: CPack execution went wrong!, CPack_output=${CPack_output}, CPack_error=${CPack_error}")
-else (CPack_result)
+else ()
   message(STATUS "CPack_output=${CPack_output}")
-endif(CPack_result)
+endif()
 
 # Now verify if the number of expected file is OK
 # - using expected_file_mask and
@@ -116,11 +116,11 @@ if(expected_file_mask)
 
   if(NOT expected_file)
     message(FATAL_ERROR "error: expected_file=${expected_file} does not exist: CPackComponentsForAll test fails. (CPack_output=${CPack_output}, CPack_error=${CPack_error}")
-  endif(NOT expected_file)
+  endif()
 
   list(LENGTH expected_file actual_count)
   message(STATUS "actual_count='${actual_count}'")
   if(NOT actual_count EQUAL expected_count)
     message(FATAL_ERROR "error: expected_count=${expected_count} does not match actual_count=${actual_count}: CPackComponents test fails. (CPack_output=${CPack_output}, CPack_error=${CPack_error})")
-  endif(NOT actual_count EQUAL expected_count)
-endif(expected_file_mask)
+  endif()
+endif()

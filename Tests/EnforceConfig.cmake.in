@@ -1,9 +1,9 @@
 # Choose a configuration with which to drive CTest tests.
 if(CTEST_CONFIGURATION_TYPE)
   set(CTestTest_CONFIG "${CTEST_CONFIGURATION_TYPE}")
-else(CTEST_CONFIGURATION_TYPE)
+else()
   set(CTestTest_CONFIG "@CTestTest_CONFIG@")
-endif(CTEST_CONFIGURATION_TYPE)
+endif()
 
 # Choose a configuration that was built if none is given.
 if(NOT CTEST_CONFIGURATION_TYPE)
@@ -14,13 +14,13 @@ if(NOT CTEST_CONFIGURATION_TYPE)
     if(NOT CTEST_CONFIGURATION_TYPE)
       if(EXISTS "${CTEST_DIR}/${cfg}/${CTEST_EXE}")
         set(CTEST_CONFIGURATION_TYPE ${cfg})
-      endif(EXISTS "${CTEST_DIR}/${cfg}/${CTEST_EXE}")
-    endif(NOT CTEST_CONFIGURATION_TYPE)
-  endforeach(cfg)
+      endif()
+    endif()
+  endforeach()
   if(NOT CTEST_CONFIGURATION_TYPE)
     set(CTEST_CONFIGURATION_TYPE NoConfig)
-  endif(NOT CTEST_CONFIGURATION_TYPE)
+  endif()
   message("Guessing configuration ${CTEST_CONFIGURATION_TYPE}")
-endif(NOT CTEST_CONFIGURATION_TYPE)
+endif()
 
 @TEST_HOME_ENV_CODE@

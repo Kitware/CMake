@@ -40,7 +40,7 @@ macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
       CMAKE_EXPAND_IMPORTED_TARGETS(_ADJUSTED_CMAKE_REQUIRED_LIBRARIES  LIBRARIES  ${CMAKE_REQUIRED_LIBRARIES} CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}")
       set(CHECK_LIBRARY_EXISTS_LIBRARIES
         ${CHECK_LIBRARY_EXISTS_LIBRARIES} ${_ADJUSTED_CMAKE_REQUIRED_LIBRARIES})
-    endif(CMAKE_REQUIRED_LIBRARIES)
+    endif()
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_ROOT}/Modules/CheckFunctionExists.c
@@ -58,13 +58,13 @@ macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
         "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
         "passed with the following output:\n"
         "${OUTPUT}\n\n")
-    else(${VARIABLE})
+    else()
       message(STATUS "Looking for ${FUNCTION} in ${LIBRARY} - not found")
       set(${VARIABLE} "" CACHE INTERNAL "Have library ${LIBRARY}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the function ${FUNCTION} exists in the ${LIBRARY} "
         "failed with the following output:\n"
         "${OUTPUT}\n\n")
-    endif(${VARIABLE})
-  endif("${VARIABLE}" MATCHES "^${VARIABLE}$")
-endmacro(CHECK_LIBRARY_EXISTS)
+    endif()
+  endif()
+endmacro()

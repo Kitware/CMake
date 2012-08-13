@@ -188,7 +188,7 @@ function(ADD_FEATURE_INFO _name _enabled _desc)
   endif ()
 
   set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
-endfunction(ADD_FEATURE_INFO)
+endfunction()
 
 
 
@@ -253,7 +253,7 @@ function(SET_PACKAGE_PROPERTIES _name _props)
     set_property(GLOBAL PROPERTY _CMAKE_${_name}_TYPE "${_SPP_TYPE}" )
   endif()
 
-endfunction(SET_PACKAGE_PROPERTIES)
+endfunction()
 
 
 
@@ -306,28 +306,28 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_REQUIRED_VERSION)
         if(_info)
           set(_currentFeatureText "${_currentFeatureText} (required version ${_info})")
-        endif(_info)
+        endif()
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_DESCRIPTION)
         if(_info)
           set(_currentFeatureText "${_currentFeatureText} , ${_info}")
-        endif(_info)
+        endif()
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_URL)
         if(_info)
           set(_currentFeatureText "${_currentFeatureText} , <${_info}>")
-        endif(_info)
+        endif()
 
         get_property(_info  GLOBAL PROPERTY _CMAKE_${_currentFeature}_PURPOSE)
         foreach(_purpose ${_info})
           set(_currentFeatureText "${_currentFeatureText}\n   ${_purpose}")
         endforeach()
 
-      endif(includeThisOne)
+      endif()
 
-    endif("${_type}" STREQUAL ANY  OR  "${_type}" STREQUAL "${_currentType}")
+    endif()
 
-  endforeach(_currentFeature)
+  endforeach()
   set(${_var} "${_currentFeatureText}" PARENT_SCOPE)
-endfunction(_FS_GET_FEATURE_SUMMARY)
+endfunction()
 
 
 
@@ -412,11 +412,11 @@ function(FEATURE_SUMMARY)
   if(_FS_FILENAME)
     if(_FS_APPEND)
       file(APPEND "${_FS_FILENAME}" "${_fullText}")
-    else(_FS_APPEND)
+    else()
       file(WRITE  "${_FS_FILENAME}" "${_fullText}")
     endif()
 
-  else(_FS_FILENAME)
+  else()
     if(NOT _FS_VAR)
       message(STATUS "${_fullText}")
     endif()
@@ -430,7 +430,7 @@ function(FEATURE_SUMMARY)
     message(FATAL_ERROR "feature_summary() Error: REQUIRED package(s) are missing, aborting CMake run.")
   endif()
 
-endfunction(FEATURE_SUMMARY)
+endfunction()
 
 
 # The stuff below is only kept for compatibility
@@ -445,22 +445,22 @@ function(SET_PACKAGE_INFO _name _desc)
   if(_purpose MATCHES ".+")
     set_property(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_purpose}" )
   endif()
-endfunction(SET_PACKAGE_INFO)
+endfunction()
 
 
 
 function(SET_FEATURE_INFO)
   SET_PACKAGE_INFO(${ARGN})
-endfunction(SET_FEATURE_INFO)
+endfunction()
 
 
 
 function(PRINT_ENABLED_FEATURES)
   FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
-endfunction(PRINT_ENABLED_FEATURES)
+endfunction()
 
 
 
 function(PRINT_DISABLED_FEATURES)
   FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
-endfunction(PRINT_DISABLED_FEATURES)
+endfunction()

@@ -11,8 +11,8 @@ if(POLICY CMP0003)
   cmake_policy(GET CMP0003 P3)
   if(NOT "${P3}" STREQUAL "NEW")
     message(FATAL_ERROR "cmake_policy(GET) did not report NEW!")
-  endif(NOT "${P3}" STREQUAL "NEW")
-endif(POLICY CMP0003)
+  endif()
+endif()
 
 # Test building without per-rule echo lines in Makefiles.
 set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
@@ -25,8 +25,8 @@ set(CPACK_SOURCE_IGNORE_FILES "~$;\\.cvsignore$;^C:/hoffman/My Builds/testcase.*
 macro(ASSERT value msg)
   if (NOT ${value})
     message ("Assertion failure:" ${msg} )
-  endif (NOT ${value})
-endmacro(ASSERT)
+  endif ()
+endmacro()
 
 # invoke the macro
 ASSERT(Complex_BINARY_DIR "The PROJECT command is broken")
@@ -38,8 +38,8 @@ macro(TEST_ARGC value1 value2)
   add_definitions(${value1} ${value2})
   if (${ARGC} MATCHES 4)
     add_definitions(${ARGV2} ${ARGV3})
-  endif (${ARGC} MATCHES 4)
-endmacro(TEST_ARGC)
+  endif ()
+endmacro()
 
 # invoke the macro
 TEST_ARGC(-DCMAKE_ARGV1 -DCMAKE_ARGV2 -DCMAKE_ARGV3 -DCMAKE_ARGV4)
@@ -47,34 +47,34 @@ TEST_ARGC(-DCMAKE_ARGV1 -DCMAKE_ARGV2 -DCMAKE_ARGV3 -DCMAKE_ARGV4)
 macro(TEST_VAR_ARG fa)
   if("${ARGV}" MATCHES "^1;2;3$")
     message(STATUS "ARGV works")
-  else("${ARGV}" MATCHES "^1;2;3$")
+  else()
     message(FATAL_ERROR "ARGV does not work; got \"${ARGV}\" instead of \"1;2;3\"")
-  endif("${ARGV}" MATCHES "^1;2;3$")
+  endif()
   if("${ARGN}" MATCHES "^2;3$")
     message(STATUS "ARGN works")
-  else("${ARGN}" MATCHES "^2;3$")
+  else()
     message(FATAL_ERROR "ARGV does not work; got \"${ARGN}\" instead of \"2;3\"")
-  endif("${ARGN}" MATCHES "^2;3$")
-endmacro(TEST_VAR_ARG)
+  endif()
+endmacro()
 
 TEST_VAR_ARG(1 2 3)
 
 # Floating-point comparison test.
 if(2.4 LESS 2.4)
   message(FATAL_ERROR "Failed: 2.4 LESS 2.4")
-endif(2.4 LESS 2.4)
+endif()
 if(2.4 GREATER 2.4)
   message(FATAL_ERROR "Failed: 2.4 GREATER 2.4")
-endif(2.4 GREATER 2.4)
+endif()
 if(NOT 2.4 EQUAL 2.4)
   message(FATAL_ERROR "Failed: NOT 2.4 EQUAL 2.4")
-endif(NOT 2.4 EQUAL 2.4)
+endif()
 
 if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
   if(NOT CMAKE_COMPILER_IS_GNUCXX)
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -timplicit_local -no_implicit_include ")
-  endif(NOT CMAKE_COMPILER_IS_GNUCXX)
-endif(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+  endif()
+endif()
 
 
 add_definitions(-DCMAKE_IS_FUN)
@@ -93,7 +93,7 @@ separate_arguments(TEST_SEP)
 #
 if (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
   include(${Complex_SOURCE_DIR}/VarTests.cmake)
-endif (EXISTS ${Complex_SOURCE_DIR}/VarTests.cmake)
+endif ()
 include(fileshouldnotbehere OPTIONAL)
 load_cache(${Complex_SOURCE_DIR}/Cache
            EXCLUDE
@@ -104,9 +104,9 @@ load_cache(${Complex_SOURCE_DIR}/Cache
 load_cache(${Complex_SOURCE_DIR}/Cache READ_WITH_PREFIX foo CACHE_TEST_VAR2)
 if(${fooCACHE_TEST_VAR2} MATCHES bar)
   message("Load cache worked: ${fooCACHE_TEST_VAR2}")
-else(${fooCACHE_TEST_VAR2} MATCHES bar)
+else()
   message(FATAL_ERROR "Load cache with prefix failed: ${fooCACHE_TEST_VAR2}")
-endif(${fooCACHE_TEST_VAR2} MATCHES bar)
+endif()
 
 
 
@@ -151,9 +151,9 @@ message("\nIgnore this message")
 option(NO_EXEC_PROGRAM "Do not test EXEC_PROGRAM" 0)
 if (NOT NO_EXEC_PROGRAM)
   exec_program(${CMAKE_COMMAND} ARGS -E echo NO_EXEC_PROGRAM "${Complex_BINARY_DIR}")
-else (NOT NO_EXEC_PROGRAM)
+else ()
   message("Set this option ON")
-endif (NOT NO_EXEC_PROGRAM)
+endif ()
 
 mark_as_advanced(NO_EXEC_PROGRAM)
 mark_as_advanced(CLEAR NO_EXEC_PROGRAM)
@@ -164,9 +164,9 @@ execute_process(
   OUTPUT_VARIABLE TEST_OUT
   )
 if("${TEST_OUT}" MATCHES "^ABCDEFG\n$")
-else("${TEST_OUT}" MATCHES "^ABCDEFG\n$")
+else()
   message(SEND_ERROR "EXECUTE_PROCESS output test failed: [${TEST_OUT}]")
-endif("${TEST_OUT}" MATCHES "^ABCDEFG\n$")
+endif()
 
 # This test has some problems on UNIX systems.  Disabling for now.
 #
@@ -180,9 +180,9 @@ endif("${TEST_OUT}" MATCHES "^ABCDEFG\n$")
 # if("${RESULT}" MATCHES "^0$")
 #   message(SEND_ERROR
 #     "EXECUTE_PROCESS result test failed with RESULT=[${RESULT}]")
-# else("${RESULT}" MATCHES "^0$")
+# else()
 #   message(STATUS "EXECUTE_PROCESS result test passed with RESULT=[${RESULT}]")
-# endif("${RESULT}" MATCHES "^0$")
+# endif()
 
 #
 # Create directory.
@@ -204,7 +204,7 @@ foreach (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl)
     ${Complex_SOURCE_DIR}/Library/dummy
     ${Complex_BINARY_DIR}/Library/libdummylib${ext}
     COPYONLY IMMEDIATE)
-endforeach (ext)
+endforeach ()
 
 find_library(FIND_DUMMY_LIB
              dummylib
@@ -258,8 +258,8 @@ if (WIN32)
       "[${hkey}]" DOC "Registry_Test_Path")
     exec_program(${CMAKE_COMMAND} ARGS "-E delete_regv \"${hkey}\"")
     exec_program(${CMAKE_COMMAND} ARGS "-E remove \"${dir}/${file}\"")
-  endif (NOT UNIX)
-endif (WIN32)
+  endif ()
+endif ()
 
 #
 # Test a set and a remove
@@ -275,17 +275,17 @@ foreach(x "a")
   if(${x} MATCHES "a")
     # Should always execute.
     set(IF_INSIDE_FOREACH_THEN_EXECUTED 1)
-  else(${x} MATCHES "a")
+  else()
     # Should never execute.
     set(IF_INSIDE_FOREACH_ELSE_EXECUTED 1)
-  endif(${x} MATCHES "a")
-endforeach(x)
+  endif()
+endforeach()
 
 # test WHILE command
 set (while_var 1)
 while (while_var LESS 1000)
   set(while_var ${while_var}0)
-endwhile(while_var LESS 1000)
+endwhile()
 
 set(SHOULD_BE_ZERO )
 set(SHOULD_BE_ONE 1)
@@ -298,7 +298,7 @@ if (RESULT EQUAL 1)
     set (ELSEIF_RESULT 1)
   elseif (RESULT EQUAL 3)
     set (ELSEIF_RESULT 1)
-  endif (RESULT EQUAL 2)
+  endif ()
 elseif (RESULT EQUAL 2)
   set (ELSEIF_RESULT 1)
 elseif (RESULT EQUAL 3)
@@ -307,25 +307,25 @@ elseif (RESULT EQUAL 3)
   elseif (RESULT EQUAL 3)
     if (NOT ELSEIF_RESULT EQUAL 1)
       set (ELSEIF_RESULT 2)
-    endif (NOT ELSEIF_RESULT EQUAL 1)
-  endif (RESULT EQUAL 2)
+    endif ()
+  endif ()
 elseif (RESULT EQUAL 4)
   if (RESULT EQUAL 2)
     set (ELSEIF_RESULT 1)
   elseif (RESULT EQUAL 3)
     set (ELSEIF_RESULT 1)
-  endif (RESULT EQUAL 2)
-else (RESULT  EQUAL 1)
+  endif ()
+else ()
   if (RESULT EQUAL 2)
     set (ELSEIF_RESULT 1)
   elseif (RESULT EQUAL 3)
     set (ELSEIF_RESULT 1)
-  endif (RESULT EQUAL 2)
-endif (RESULT EQUAL 1)
+  endif ()
+endif ()
 
 if (NOT ELSEIF_RESULT EQUAL 2)
   set (ELSEIF_RESULT 0)
-endif (NOT ELSEIF_RESULT EQUAL 2)
+endif ()
 
 # test handling of parenthetical groups in conditionals
 if (2 GREATER 1 AND (4 LESS 3 OR 5 LESS 6) AND NOT (7 GREATER 8))
@@ -351,19 +351,19 @@ configure_file(
 string(REGEX MATCH "b" RESULT "abc")
 if(NOT RESULT)
   message(SEND_ERROR "string(REGEX MATCH ... ) test failed.")
-endif(NOT RESULT)
+endif()
 string(REGEX MATCHALL "b" RESULT "abcb")
 if(NOT RESULT)
   message(SEND_ERROR "string(REGEX MATCHALL ... ) test failed.")
-endif(NOT RESULT)
+endif()
 string(REGEX REPLACE ".([bd])." "[\\1]" RESULT "a(b)c(d)e")
 if("x${RESULT}" MATCHES "^xa\\[b\\]c\\[d\\]e$")
   set(STRING_REGEX_PASSED 1)
-endif("x${RESULT}" MATCHES "^xa\\[b\\]c\\[d\\]e$")
+endif()
 if(NOT STRING_REGEX_PASSED)
   message(SEND_ERROR
     "string(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
-endif(NOT STRING_REGEX_PASSED)
+endif()
 
 
 #

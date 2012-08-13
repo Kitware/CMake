@@ -12,7 +12,7 @@ if(CMAKE_PACKAGE_QTGUI)
     # we also want to run post install stuff to setup command line
     set(CPACK_POSTFLIGHT_SCRIPT "@CMAKE_POSTFLIGHT_SCRIPT@")
     set(CPACK_POSTUPGRADE_SCRIPT "@CMAKE_POSTUPGRADE_SCRIPT@")
-  endif(IS_APPLE)
-endif(CMAKE_PACKAGE_QTGUI)
+  endif()
+endif()
 
 

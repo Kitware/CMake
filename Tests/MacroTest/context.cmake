@@ -7,4 +7,4 @@ if(NOT "${current_file}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
     "  ${current_file}\n"
     "from the macro."
     )
-endif(NOT "${current_file}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}")
+endif()

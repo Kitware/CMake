@@ -113,8 +113,8 @@ if(NOT SDL_BUILDING_LIBRARY)
       /opt/csw
       /opt
     )
-  endif(NOT ${SDL_INCLUDE_DIR} MATCHES ".framework")
-endif(NOT SDL_BUILDING_LIBRARY)
+  endif()
+endif()
 
 # SDL may require threads on your system.
 # The Apple build may not need an explicit flag because one of the
@@ -122,22 +122,22 @@ endif(NOT SDL_BUILDING_LIBRARY)
 # But for non-OSX systems, I will use the CMake Threads package.
 if(NOT APPLE)
   find_package(Threads)
-endif(NOT APPLE)
+endif()
 
 # MinGW needs an additional library, mwindows
 # It's total link flags should look like -lmingw32 -lSDLmain -lSDL -lmwindows
 # (Actually on second look, I think it only needs one of the m* libraries.)
 if(MINGW)
   set(MINGW32_LIBRARY mingw32 CACHE STRING "mwindows for MinGW")
-endif(MINGW)
+endif()
 
 if(SDL_LIBRARY_TEMP)
   # For SDLmain
   if(NOT SDL_BUILDING_LIBRARY)
     if(SDLMAIN_LIBRARY)
       set(SDL_LIBRARY_TEMP ${SDLMAIN_LIBRARY} ${SDL_LIBRARY_TEMP})
-    endif(SDLMAIN_LIBRARY)
-  endif(NOT SDL_BUILDING_LIBRARY)
+    endif()
+  endif()
 
   # For OS X, SDL uses Cocoa as a backend so it must link to Cocoa.
   # CMake doesn't display the -framework Cocoa string in the UI even
@@ -147,25 +147,25 @@ if(SDL_LIBRARY_TEMP)
   # "real" variable in one-shot.
   if(APPLE)
     set(SDL_LIBRARY_TEMP ${SDL_LIBRARY_TEMP} "-framework Cocoa")
-  endif(APPLE)
+  endif()
 
   # For threads, as mentioned Apple doesn't need this.
   # In fact, there seems to be a problem if I used the Threads package
   # and try using this line, so I'm just skipping it entirely for OS X.
   if(NOT APPLE)
     set(SDL_LIBRARY_TEMP ${SDL_LIBRARY_TEMP} ${CMAKE_THREAD_LIBS_INIT})
-  endif(NOT APPLE)
+  endif()
 
   # For MinGW library
   if(MINGW)
     set(SDL_LIBRARY_TEMP ${MINGW32_LIBRARY} ${SDL_LIBRARY_TEMP})
-  endif(MINGW)
+  endif()
 
   # Set the final string here so the GUI reflects the final state.
   set(SDL_LIBRARY ${SDL_LIBRARY_TEMP} CACHE STRING "Where the SDL Library can be found")
   # Set the temp variable to INTERNAL so it is not seen in the CMake GUI
   set(SDL_LIBRARY_TEMP "${SDL_LIBRARY_TEMP}" CACHE INTERNAL "")
-endif(SDL_LIBRARY_TEMP)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 

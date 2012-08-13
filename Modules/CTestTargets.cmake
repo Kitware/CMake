@@ -14,7 +14,7 @@
 
 if(NOT RUN_FROM_CTEST_OR_DART)
   message(FATAL_ERROR "Do not incldue CTestTargets.cmake directly")
-endif(NOT RUN_FROM_CTEST_OR_DART)
+endif()
 
 # make directories in the binary tree
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/Temporary)
@@ -30,11 +30,11 @@ if(CTEST_NEW_FORMAT)
   configure_file(
     ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
     ${PROJECT_BINARY_DIR}/CTestConfiguration.ini )
-else(CTEST_NEW_FORMAT)
+else()
   configure_file(
     ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
     ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
-endif(CTEST_NEW_FORMAT)
+endif()
 
 #
 # Section 3:
@@ -47,7 +47,7 @@ set(__conf_types "")
 if(CMAKE_CONFIGURATION_TYPES)
   # We need to pass the configuration type on the test command line.
   set(__conf_types -C "${CMAKE_CFG_INTDIR}")
-endif(CMAKE_CONFIGURATION_TYPES)
+endif()
 
 # Add convenience targets.  Do this at most once in case of nested
 # projects.
@@ -66,7 +66,7 @@ if(NOT _CTEST_TARGETS_ADDED)
       )
     set_property(TARGET ${mode} PROPERTY RULE_LAUNCH_CUSTOM "")
     set_property(TARGET ${mode} PROPERTY FOLDER "CTestDashboardTargets")
-  endforeach(mode)
+  endforeach()
 
   # For Makefile generators add more granular targets.
   if("${CMAKE_GENERATOR}" MATCHES "(Ninja|Make)")
@@ -81,9 +81,9 @@ if(NOT _CTEST_TARGETS_ADDED)
           )
         set_property(TARGET ${mode}${testtype} PROPERTY RULE_LAUNCH_CUSTOM "")
         set_property(TARGET ${mode}${testtype} PROPERTY FOLDER "CTestDashboardTargets")
-      endforeach(testtype)
-    endforeach(mode)
-  endif("${CMAKE_GENERATOR}" MATCHES "(Ninja|Make)")
+      endforeach()
+    endforeach()
+  endif()
 
   # If requested, add an alias that is the equivalent of the built-in "test"
   # or "RUN_TESTS" target:
@@ -92,4 +92,4 @@ if(NOT _CTEST_TARGETS_ADDED)
       ${CMAKE_CTEST_COMMAND} ${__conf_types}
       )
   endif()
-endif(NOT _CTEST_TARGETS_ADDED)
+endif()

@@ -48,24 +48,24 @@ if(PythonLibs_FIND_VERSION)
         if(PythonLibs_FIND_VERSION_EXACT)
             if(_PYTHON_FIND_MAJ_MIN STREQUAL PythonLibs_FIND_VERSION)
                 set(_PYTHON_FIND_OTHER_VERSIONS "${PythonLibs_FIND_VERSION}")
-            else(_PYTHON_FIND_MAJ_MIN STREQUAL PythonLibs_FIND_VERSION)
+            else()
                 set(_PYTHON_FIND_OTHER_VERSIONS "${PythonLibs_FIND_VERSION}" "${_PYTHON_FIND_MAJ_MIN}")
-            endif(_PYTHON_FIND_MAJ_MIN STREQUAL PythonLibs_FIND_VERSION)
-        else(PythonLibs_FIND_VERSION_EXACT)
+            endif()
+        else()
             foreach(_PYTHON_V ${_PYTHON${_PYTHON_FIND_MAJ}_VERSIONS})
                 if(NOT _PYTHON_V VERSION_LESS _PYTHON_FIND_MAJ_MIN)
                     list(APPEND _PYTHON_FIND_OTHER_VERSIONS ${_PYTHON_V})
                 endif()
              endforeach()
-        endif(PythonLibs_FIND_VERSION_EXACT)
+        endif()
         unset(_PYTHON_FIND_MAJ_MIN)
         unset(_PYTHON_FIND_MAJ)
-    else(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
+    else()
         set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON${PythonLibs_FIND_VERSION}_VERSIONS})
-    endif(PythonLibs_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+.*)?$")
-else(PythonLibs_FIND_VERSION)
+    endif()
+else()
     set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
-endif(PythonLibs_FIND_VERSION)
+endif()
 
 # Set up the versions we know about, in the order we will search. Always add
 # the user supplied additional versions to the front.
@@ -90,7 +90,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
       )
-  endif(WIN32)
+  endif()
 
   find_library(PYTHON_LIBRARY
     NAMES
@@ -119,15 +119,15 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
   if(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
     set(PYTHON_INCLUDE_DIR "${PYTHON_INCLUDE_PATH}" CACHE PATH
       "Path to where Python.h is found" FORCE)
-  endif(DEFINED PYTHON_INCLUDE_PATH AND NOT DEFINED PYTHON_INCLUDE_DIR)
+  endif()
 
   set(PYTHON_FRAMEWORK_INCLUDES)
   if(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
     foreach(dir ${Python_FRAMEWORKS})
       set(PYTHON_FRAMEWORK_INCLUDES ${PYTHON_FRAMEWORK_INCLUDES}
         ${dir}/Versions/${_CURRENT_VERSION}/include/python${_CURRENT_VERSION})
-    endforeach(dir)
-  endif(Python_FRAMEWORKS AND NOT PYTHON_INCLUDE_DIR)
+    endforeach()
+  endif()
 
   find_path(PYTHON_INCLUDE_DIR
     NAMES Python.h
@@ -151,12 +151,12 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     string(REGEX REPLACE "^#define[ \t]+PY_VERSION[ \t]+\"([^\"]+)\".*" "\\1"
                          PYTHONLIBS_VERSION_STRING "${python_version_str}")
     unset(python_version_str)
-  endif(PYTHON_INCLUDE_DIR AND EXISTS "${PYTHON_INCLUDE_DIR}/patchlevel.h")
+  endif()
 
   if(PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR)
     break()
-  endif(PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR)
-endforeach(_CURRENT_VERSION)
+  endif()
+endforeach()
 
 mark_as_advanced(
   PYTHON_DEBUG_LIBRARY
@@ -204,10 +204,10 @@ function(PYTHON_ADD_MODULE _NAME )
   if(PYTHON_ENABLE_MODULE_${_NAME})
     if(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
       set(PY_MODULE_TYPE MODULE)
-    else(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+    else()
       set(PY_MODULE_TYPE STATIC)
       set_property(GLOBAL  APPEND  PROPERTY  PY_STATIC_MODULES_LIST ${_NAME})
-    endif(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+    endif()
 
     set_property(GLOBAL  APPEND  PROPERTY  PY_MODULES_LIST ${_NAME})
     add_library(${_NAME} ${PY_MODULE_TYPE} ${ARGN})
@@ -217,11 +217,11 @@ function(PYTHON_ADD_MODULE _NAME )
       set_target_properties(${_NAME} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}")
       if(WIN32 AND NOT CYGWIN)
         set_target_properties(${_NAME} PROPERTIES SUFFIX ".pyd")
-      endif(WIN32 AND NOT CYGWIN)
-    endif(PYTHON_MODULE_${_NAME}_BUILD_SHARED)
+      endif()
+    endif()
 
-  endif(PYTHON_ENABLE_MODULE_${_NAME})
-endfunction(PYTHON_ADD_MODULE)
+  endif()
+endfunction()
 
 function(PYTHON_WRITE_MODULES_HEADER _filename)
 
@@ -248,7 +248,7 @@ extern \"C\" {
 
   foreach(_currentModule ${PY_STATIC_MODULES_LIST})
     file(APPEND ${_filenameTmp} "extern void init${PYTHON_MODULE_PREFIX}${_currentModule}(void);\n\n")
-  endforeach(_currentModule ${PY_STATIC_MODULES_LIST})
+  endforeach()
 
   file(APPEND ${_filenameTmp}
 "#ifdef __cplusplus
@@ -260,16 +260,16 @@ extern \"C\" {
 
   foreach(_currentModule ${PY_STATIC_MODULES_LIST})
     file(APPEND ${_filenameTmp} "int ${_name}_${_currentModule}(void) \n{\n  static char name[]=\"${PYTHON_MODULE_PREFIX}${_currentModule}\"; return PyImport_AppendInittab(name, init${PYTHON_MODULE_PREFIX}${_currentModule});\n}\n\n")
-  endforeach(_currentModule ${PY_STATIC_MODULES_LIST})
+  endforeach()
 
   file(APPEND ${_filenameTmp} "void ${_name}_LoadAllPythonModules(void)\n{\n")
   foreach(_currentModule ${PY_STATIC_MODULES_LIST})
     file(APPEND ${_filenameTmp} "  ${_name}_${_currentModule}();\n")
-  endforeach(_currentModule ${PY_STATIC_MODULES_LIST})
+  endforeach()
   file(APPEND ${_filenameTmp} "}\n\n")
   file(APPEND ${_filenameTmp} "#ifndef EXCLUDE_LOAD_ALL_FUNCTION\nvoid CMakeLoadAllPythonModules(void)\n{\n  ${_name}_LoadAllPythonModules();\n}\n#endif\n\n#endif\n")
 
 # with configure_file() cmake complains that you may not use a file created using file(WRITE) as input file for configure_file()
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
 
-endfunction(PYTHON_WRITE_MODULES_HEADER)
+endfunction()

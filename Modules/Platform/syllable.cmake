@@ -25,7 +25,7 @@ set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-Wl,-soname,")
 foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
   set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-Wl,-Bstatic")
   set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-Wl,-Bdynamic")
-endforeach(type)
+endforeach()
 
 include(Platform/UnixPaths)
 

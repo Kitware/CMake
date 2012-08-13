@@ -30,15 +30,15 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_INCLUDE_FILES_INCLUDE_DIRS "-DINCLUDE_DIRECTORIES=${CMAKE_REQUIRED_INCLUDES}")
-    else(CMAKE_REQUIRED_INCLUDES)
+    else()
       set(CHECK_INCLUDE_FILES_INCLUDE_DIRS)
-    endif(CMAKE_REQUIRED_INCLUDES)
+    endif()
     set(CHECK_INCLUDE_FILES_CONTENT "/* */\n")
     set(MACRO_CHECK_INCLUDE_FILES_FLAGS ${CMAKE_REQUIRED_FLAGS})
     foreach(FILE ${INCLUDE})
       set(CMAKE_CONFIGURABLE_FILE_CONTENT
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
-    endforeach(FILE)
+    endforeach()
     set(CMAKE_CONFIGURABLE_FILE_CONTENT
       "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
@@ -70,13 +70,13 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
         "Determining if files ${INCLUDE} "
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")
-    else(${VARIABLE})
+    else()
       message(STATUS "Looking for ${_description} - not found.")
       set(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if files ${INCLUDE} "
         "exist failed with the following output:\n"
         "${OUTPUT}\nSource:\n${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")
-    endif(${VARIABLE})
-  endif("${VARIABLE}" MATCHES "^${VARIABLE}$")
-endmacro(CHECK_INCLUDE_FILES)
+    endif()
+  endif()
+endmacro()

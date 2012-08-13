@@ -21,4 +21,4 @@ list(APPEND CMAKE_SYSTEM_LIBRARY_PATH /boot/develop/lib/x86)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "/boot/common" CACHE PATH
     "Install path prefix, prepended onto install directories." FORCE)
-endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+endif()

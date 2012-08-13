@@ -24,6 +24,6 @@ set_property(GLOBAL PROPERTY TARGET_ARCHIVES_MAY_BE_SHARED_LIBS 1)
 #foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
 #  set(CMAKE_${type}_LINK_STATIC_C_FLAGS "-bstatic")
 #  set(CMAKE_${type}_LINK_DYNAMIC_C_FLAGS "-bdynamic")
-#endforeach(type)
+#endforeach()
 
 include(Platform/UnixPaths)
