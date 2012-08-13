@@ -1421,7 +1421,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval,
-             directory.c_str(), cmSystemTools::OUTPUT_MERGE, timeout) )
+             directory.c_str(), cmSystemTools::OUTPUT_NORMAL, timeout) )
         {
         return retval;
         }
