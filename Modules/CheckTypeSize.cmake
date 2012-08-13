@@ -24,6 +24,11 @@
 # size check automatically includes the available headers, thus
 # supporting checks of types defined in the headers.
 #
+# Despite the name of the macro you may use it to check the size of
+# more complex expressions, too. To check e.g. for the size of a struct
+# member you can do something like this:
+#  check_type_size("((struct something*)0)->member" SIZEOF_MEMBER)
+#
 # The following variables may be set before calling this macro to
 # modify the way the check is run:
 #
