@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddCustomTargetCommand;
     }
@@ -38,13 +38,13 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const
     {return "add_custom_target";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -52,7 +52,7 @@ public:
     {
     return "Add a target with no output so it will always be built.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -101,7 +101,7 @@ public:
       "convenience in editing even if they have not build rules."
       ;
     }
-  
+
   cmTypeMacro(cmAddCustomTargetCommand, cmCommand);
 };
 

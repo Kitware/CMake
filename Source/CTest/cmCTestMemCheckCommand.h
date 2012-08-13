@@ -60,7 +60,7 @@ public:
       "  ctest_memcheck([BUILD build_dir] [RETURN_VALUE res] [APPEND]\n"
       "             [START start number] [END end number]\n"
       "             [STRIDE stride number] [EXCLUDE exclude regex ]\n"
-      "             [INCLUDE include regex] \n" 
+      "             [INCLUDE include regex] \n"
       "             [EXCLUDE_LABEL exclude regex] \n"
       "             [INCLUDE_LABEL label regex] \n"
       "             [PARALLEL_LEVEL level] )\n"

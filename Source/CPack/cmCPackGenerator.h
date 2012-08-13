@@ -113,7 +113,7 @@ public:
 
   //! Display verbose information via logger
   void DisplayVerboseOutput(const char* msg, float progress);
-  
+
   bool ReadListFile(const char* moduleName);
 
 protected:

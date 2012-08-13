@@ -51,7 +51,7 @@ void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
-void cmCTestGenericHandler::SetPersistentOption(const char* op, 
+void cmCTestGenericHandler::SetPersistentOption(const char* op,
                                                 const char* value)
 {
   this->SetOption(op, value);
@@ -79,7 +79,7 @@ void cmCTestGenericHandler::Initialize()
   this->AppendXML = false;
   this->Options.clear();
   t_StringToString::iterator it;
-  for ( it = this->PersistentOptions.begin(); 
+  for ( it = this->PersistentOptions.begin();
     it != this->PersistentOptions.end();
     ++ it )
     {
@@ -117,7 +117,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
     {
     ostr << "_" << this->SubmitIndex;
     }
-  ostr << ".xml"; 
+  ostr << ".xml";
   if(this->CTest->GetCurrentTag().empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,

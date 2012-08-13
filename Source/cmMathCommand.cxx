@@ -43,7 +43,7 @@ bool cmMathCommand::HandleExprCommand(std::vector<std::string> const& args)
 
   const std::string& outputVariable = args[1];
   const std::string& expression = args[2];
-  
+
   cmExprParserHelper helper;
   if ( !helper.ParseString(expression.c_str(), 0) )
     {

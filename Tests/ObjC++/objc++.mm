@@ -5,7 +5,7 @@ using namespace std;
 int main()
 {
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-   
+
   NSMutableSet *mySet = [NSMutableSet set];
   cout<<"Adding values to the set."<<endl;
   [mySet addObject:[NSNumber numberWithInt:356]];

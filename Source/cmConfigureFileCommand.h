@@ -19,7 +19,7 @@ class cmConfigureFileCommand : public cmCommand
 public:
   cmTypeMacro(cmConfigureFileCommand, cmCommand);
 
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmConfigureFileCommand;
     }
@@ -48,7 +48,7 @@ public:
     {
     return "Copy a file to another location and modify its contents.";
     }
-  
+
   /**
    * Longer documentation.
    */
@@ -93,7 +93,7 @@ public:
 
 private:
   int ConfigureFile();
-  
+
   cmNewLineStyle NewLineStyle;
 
   std::string InputFile;

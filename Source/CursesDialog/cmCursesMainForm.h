@@ -30,12 +30,12 @@ class cmCursesMainForm : public cmCursesForm
 public:
   cmCursesMainForm(std::vector<std::string> const& args, int initwidth);
   virtual ~cmCursesMainForm();
-  
+
   /**
    * Set the widgets which represent the cache entries.
    */
   void InitializeUI();
-  
+
   /**
    * Handle user input.
    */
@@ -65,7 +65,7 @@ public:
    * exception is during a resize. The optional argument specifies the
    * string to be displayed in the status bar.
    */
-  virtual void UpdateStatusBar() { this->UpdateStatusBar(0); } 
+  virtual void UpdateStatusBar() { this->UpdateStatusBar(0); }
   virtual void UpdateStatusBar(const char* message);
 
   /**
@@ -90,7 +90,7 @@ public:
   int Configure(int noconfigure=0);
 
   /**
-   * Used to generate 
+   * Used to generate
    */
   int Generate();
 
@@ -98,7 +98,7 @@ public:
    * Used by main program
    */
   int LoadCache(const char *dir);
-  
+
   /**
    * Progress callback
    */

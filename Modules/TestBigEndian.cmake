@@ -21,7 +21,7 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
   IF("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
     MESSAGE(STATUS "Check if the system is big endian")
     MESSAGE(STATUS "Searching 16 bit integer")
-  
+
     INCLUDE(CheckTypeSize)
 
     CHECK_TYPE_SIZE("unsigned short" CMAKE_SIZEOF_UNSIGNED_SHORT)
@@ -35,7 +35,7 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
         SET(CMAKE_16BIT_TYPE "unsigned int")
 
       ELSE(CMAKE_SIZEOF_UNSIGNED_INT)
-  
+
         CHECK_TYPE_SIZE("unsigned long"  CMAKE_SIZEOF_UNSIGNED_LONG)
         IF(CMAKE_SIZEOF_UNSIGNED_LONG)
           MESSAGE(STATUS "Using unsigned long")
@@ -43,16 +43,16 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
         ELSE(CMAKE_SIZEOF_UNSIGNED_LONG)
           MESSAGE(FATAL_ERROR "no suitable type found")
         ENDIF(CMAKE_SIZEOF_UNSIGNED_LONG)
-    
+
       ENDIF(CMAKE_SIZEOF_UNSIGNED_INT)
-    
+
     ENDIF(CMAKE_SIZEOF_UNSIGNED_SHORT EQUAL 2)
 
-  
-    CONFIGURE_FILE("${CMAKE_ROOT}/Modules/TestEndianess.c.in" 
+
+    CONFIGURE_FILE("${CMAKE_ROOT}/Modules/TestEndianess.c.in"
                    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestEndianess.c"
                     IMMEDIATE @ONLY)
-  
+
      FILE(READ "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestEndianess.c"
           TEST_ENDIANESS_FILE_CONTENT)
 
@@ -96,10 +96,10 @@ MACRO(TEST_BIG_ENDIAN VARIABLE)
         IF(NOT CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  NOT CMAKE_TEST_ENDIANESS_STRINGS_LE)
           MESSAGE(SEND_ERROR "TEST_BIG_ENDIAN found no result!")
         ENDIF(NOT CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  NOT CMAKE_TEST_ENDIANESS_STRINGS_LE)
- 
+
         FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the system is big endian passed with the following output:\n${OUTPUT}\nTestEndianess.c:\n${TEST_ENDIANESS_FILE_CONTENT}\n\n")
- 
+
       ELSE(HAVE_${VARIABLE})
         MESSAGE(STATUS "Check if the system is big endian - failed")
         FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log

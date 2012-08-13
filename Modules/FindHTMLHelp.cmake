@@ -24,20 +24,20 @@ IF(WIN32)
     hhc
     "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]"
     "$ENV{ProgramFiles}/HTML Help Workshop"
-    "C:/Program Files/HTML Help Workshop" 
+    "C:/Program Files/HTML Help Workshop"
     )
 
   GET_FILENAME_COMPONENT(HTML_HELP_COMPILER_PATH "${HTML_HELP_COMPILER}" PATH)
 
-  FIND_PATH(HTML_HELP_INCLUDE_PATH 
-    htmlhelp.h 
+  FIND_PATH(HTML_HELP_INCLUDE_PATH
+    htmlhelp.h
     "${HTML_HELP_COMPILER_PATH}/include"
     "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]/include"
     "$ENV{ProgramFiles}/HTML Help Workshop/include"
-    "C:/Program Files/HTML Help Workshop/include" 
+    "C:/Program Files/HTML Help Workshop/include"
     )
 
-  FIND_LIBRARY(HTML_HELP_LIBRARY 
+  FIND_LIBRARY(HTML_HELP_LIBRARY
     htmlhelp
     "${HTML_HELP_COMPILER_PATH}/lib"
     "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]/lib"

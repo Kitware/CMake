@@ -51,7 +51,7 @@ public:
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
   cmPropertyMap &GetProperties() { return this->Properties; };
-    
+
   // Define the properties
   static void DefineProperties(cmake *cm);
 

@@ -18,7 +18,7 @@
  * \brief Add a test to the lists of tests to run.
  *
  * cmExportLibraryDependenciesCommand adds a test to the list of tests to run
- * 
+ *
  */
 class cmExportLibraryDependenciesCommand : public cmCommand
 {
@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmExportLibraryDependenciesCommand;
     }
@@ -40,7 +40,7 @@ public:
 
   /**
    * This is called at the end after all the information
-   * specified by the command is accumulated. 
+   * specified by the command is accumulated.
    */
   virtual void FinalPass();
   virtual bool HasFinalPass() const { return true; }
@@ -57,7 +57,7 @@ public:
     {
     return "Deprecated.  Use INSTALL(EXPORT) or EXPORT command.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -87,7 +87,7 @@ public:
     {
     return true;
     }
-  
+
   cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
 
 private:

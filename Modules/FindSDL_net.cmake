@@ -8,8 +8,8 @@
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
 #
-# Created by Eric Wing. This was influenced by the FindSDL.cmake 
-# module, but with modifications to recognize OS X frameworks and 
+# Created by Eric Wing. This was influenced by the FindSDL.cmake
+# module, but with modifications to recognize OS X frameworks and
 # additional Unix paths (FreeBSD, etc).
 
 #=============================================================================
@@ -44,11 +44,11 @@ FIND_PATH(SDLNET_INCLUDE_DIR SDL_net.h
   /opt/local/include/SDL # DarwinPorts
   /opt/local/include
   /opt/csw/include/SDL # Blastwave
-  /opt/csw/include 
+  /opt/csw/include
   /opt/include/SDL
   /opt/include
 )
-FIND_LIBRARY(SDLNET_LIBRARY 
+FIND_LIBRARY(SDLNET_LIBRARY
   NAMES SDL_net
   HINTS
   $ENV{SDLNETDIR}

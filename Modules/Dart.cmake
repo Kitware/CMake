@@ -48,14 +48,14 @@ IF(BUILD_TESTING)
   INCLUDE(CTest)
   SET(RUN_FROM_DART)
 
-  FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip 
+  FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip
     DOC "Path to program used to compress files for transfer to the dart server")
   FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
   FIND_PROGRAM(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
-  OPTION(DART_VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes." 
+  OPTION(DART_VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes."
     OFF)
-  OPTION(DART_BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )  
-  OPTION(DART_BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )  
+  OPTION(DART_BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )
+  OPTION(DART_BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )
 
   SET(VERBOSE_BUILD ${DART_VERBOSE_BUILD})
   SET(BUILD_ERROR_REPORT_LIMIT ${DART_BUILD_ERROR_REPORT_LIMIT})
@@ -64,13 +64,13 @@ IF(BUILD_TESTING)
 
   MARK_AS_ADVANCED(
     COMPRESSIONCOMMAND
-    DART_BUILD_ERROR_REPORT_LIMIT     
-    DART_BUILD_WARNING_REPORT_LIMIT 
+    DART_BUILD_ERROR_REPORT_LIMIT
+    DART_BUILD_WARNING_REPORT_LIMIT
     DART_TESTING_TIMEOUT
     DART_VERBOSE_BUILD
     DELIVER_CONTINUOUS_EMAIL
     GUNZIPCOMMAND
-    JAVACOMMAND 
+    JAVACOMMAND
     )
 
   SET(HAVE_DART)
@@ -80,7 +80,7 @@ IF(BUILD_TESTING)
 
   #
   # Section #2:
-  # 
+  #
   # Make necessary directories and configure testing scripts
   #
   # find a tcl shell command
@@ -112,7 +112,7 @@ IF(BUILD_TESTING)
       SET(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
     ENDIF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
   ENDIF (HAVE_DART)
-  
+
   SET(RUN_FROM_CTEST_OR_DART 1)
   INCLUDE(CTestTargets)
   SET(RUN_FROM_CTEST_OR_DART)

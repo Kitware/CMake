@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmIncludeExternalMSProjectCommand;
     }
@@ -38,7 +38,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -51,7 +51,7 @@ public:
     {
     return "Include an external Microsoft project file in a workspace.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -75,7 +75,7 @@ public:
       "(e.g. WIX projects). "
       "These options are not supported by the Visual Studio 6 generator.";
     }
-  
+
   cmTypeMacro(cmIncludeExternalMSProjectCommand, cmCommand);
 };
 

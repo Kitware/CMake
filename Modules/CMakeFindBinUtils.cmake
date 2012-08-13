@@ -1,13 +1,13 @@
 
 # search for additional tools required for C/C++ (and other languages ?)
 #
-# If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used 
+# If the internal cmake variable _CMAKE_TOOLCHAIN_PREFIX is set, this is used
 # as prefix for the tools (e.g. arm-elf-gcc etc.)
 # If the cmake variable _CMAKE_TOOLCHAIN_LOCATION is set, the compiler is
-# searched only there. The other tools are at first searched there, then 
+# searched only there. The other tools are at first searched there, then
 # also in the default locations.
 #
-# Sets the following variables: 
+# Sets the following variables:
 #   CMAKE_AR
 #   CMAKE_RANLIB
 #   CMAKE_LINKER
@@ -30,7 +30,7 @@
 #  License text for the above reference.)
 
 # if it's the MS C/CXX compiler, search for link
-IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" 
+IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
    OR "${CMAKE_C_COMPILER_ID}" MATCHES "MSVC"
    OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
 
@@ -39,7 +39,7 @@ IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
   MARK_AS_ADVANCED(CMAKE_LINKER)
 
 # in all other cases search for ar, ranlib, etc.
-ELSE("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" 
+ELSE("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
    OR "${CMAKE_C_COMPILER_ID}" MATCHES "MSVC"
    OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
 
@@ -58,7 +58,7 @@ ELSE("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
 
   MARK_AS_ADVANCED(CMAKE_AR CMAKE_RANLIB CMAKE_STRIP CMAKE_LINKER CMAKE_NM CMAKE_OBJDUMP CMAKE_OBJCOPY)
 
-ENDIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC" 
+ENDIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
    OR "${CMAKE_C_COMPILER_ID}" MATCHES "MSVC"
    OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
 

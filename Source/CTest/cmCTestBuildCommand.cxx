@@ -175,7 +175,7 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
 {
   bool ret =  cmCTestHandlerCommand::InitialPass(args, status);
   if ( this->Values[ctb_NUMBER_ERRORS] && *this->Values[ctb_NUMBER_ERRORS])
-    {  
+    {
     cmOStringStream str;
     str << this->Handler->GetTotalErrors();
     this->Makefile->AddDefinition(

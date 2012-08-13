@@ -98,14 +98,14 @@ ELSE()
             MESSAGE(STATUS "Check if compiler accepts -pthread - yes")
           ELSE()
             MESSAGE(STATUS "Check if compiler accepts -pthread - no")
-            FILE(APPEND 
-              ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+            FILE(APPEND
+              ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
               "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
           ENDIF()
         ELSE()
           MESSAGE(STATUS "Check if compiler accepts -pthread - no")
-          FILE(APPEND 
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+          FILE(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
         ENDIF()
 

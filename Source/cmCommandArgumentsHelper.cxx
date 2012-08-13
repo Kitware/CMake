@@ -12,20 +12,20 @@
 
 #include "cmCommandArgumentsHelper.h"
 
-cmCommandArgument::cmCommandArgument(cmCommandArgumentsHelper* args, 
-                                     const char* key, 
+cmCommandArgument::cmCommandArgument(cmCommandArgumentsHelper* args,
+                                     const char* key,
                                      cmCommandArgumentGroup* group)
 :Key(key)
 ,Group(group)
 ,WasActive(false)
 ,ArgumentsBeforeEmpty(true)
-,CurrentIndex(0) 
+,CurrentIndex(0)
 {
   if (args!=0)
     {
     args->AddArgument(this);
     }
-    
+
   if (this->Group!=0)
     {
     this->Group->ContainedArguments.push_back(this);
@@ -50,7 +50,7 @@ void cmCommandArgument::FollowsGroup(const cmCommandArgumentGroup* group)
   if (group!=0)
     {
     this->ArgumentsBeforeEmpty = false;
-    for(std::vector<cmCommandArgument*>::const_iterator 
+    for(std::vector<cmCommandArgument*>::const_iterator
         argIt= group->ContainedArguments.begin();
         argIt != group->ContainedArguments.end();
         ++argIt)
@@ -67,7 +67,7 @@ bool cmCommandArgument::MayFollow(const cmCommandArgument* current) const
     return true;
     }
 
-  std::set<const cmCommandArgument*>::const_iterator argIt 
+  std::set<const cmCommandArgument*>::const_iterator argIt
                                          = this->ArgumentsBefore.find(current);
   if (argIt != this->ArgumentsBefore.end())
     {
@@ -90,7 +90,7 @@ void cmCommandArgument::ApplyOwnGroup()
 {
   if (this->Group!=0)
     {
-    for (std::vector<cmCommandArgument*>::const_iterator 
+    for (std::vector<cmCommandArgument*>::const_iterator
          it = this->Group->ContainedArguments.begin();
          it != this->Group->ContainedArguments.end();
          ++it)
@@ -105,7 +105,7 @@ void cmCommandArgument::ApplyOwnGroup()
 
 void cmCommandArgument::Activate()
 {
-  this->WasActive = true; 
+  this->WasActive = true;
   this->CurrentIndex = 0;
 }
 
@@ -117,8 +117,8 @@ bool cmCommandArgument::Consume(const std::string& arg)
 }
 
 
-cmCAStringVector::cmCAStringVector(cmCommandArgumentsHelper* args, 
-                                   const char* key, 
+cmCAStringVector::cmCAStringVector(cmCommandArgumentsHelper* args,
+                                   const char* key,
                                    cmCommandArgumentGroup* group)
 :cmCommandArgument(args, key, group)
 ,Ignore(0)
@@ -151,8 +151,8 @@ void cmCAStringVector::DoReset()
   this->Vector.clear();
 }
 
-cmCAString::cmCAString(cmCommandArgumentsHelper* args, 
-                       const char* key, 
+cmCAString::cmCAString(cmCommandArgumentsHelper* args,
+                       const char* key,
                        cmCommandArgumentGroup* group)
 :cmCommandArgument(args, key, group)
 {
@@ -181,11 +181,11 @@ void cmCAString::DoReset()
   this->String = "";
 }
 
-cmCAEnabler::cmCAEnabler(cmCommandArgumentsHelper* args, 
-                         const char* key, 
+cmCAEnabler::cmCAEnabler(cmCommandArgumentsHelper* args,
+                         const char* key,
                          cmCommandArgumentGroup* group)
 :cmCommandArgument(args, key, group)
-,Enabled(false) 
+,Enabled(false)
 {}
 
 bool cmCAEnabler::DoConsume(const std::string&, unsigned int index)
@@ -202,11 +202,11 @@ void cmCAEnabler::DoReset()
   this->Enabled = false;
 }
 
-cmCADisabler::cmCADisabler(cmCommandArgumentsHelper* args, 
-                           const char* key, 
+cmCADisabler::cmCADisabler(cmCommandArgumentsHelper* args,
+                           const char* key,
                            cmCommandArgumentGroup* group)
 :cmCommandArgument(args, key, group)
-,Enabled(true) 
+,Enabled(true)
 {}
 
 bool cmCADisabler::DoConsume(const std::string&, unsigned int index)
@@ -225,7 +225,7 @@ void cmCADisabler::DoReset()
 
 void cmCommandArgumentGroup::Follows(const cmCommandArgument* arg)
 {
-  for(std::vector<cmCommandArgument*>::iterator 
+  for(std::vector<cmCommandArgument*>::iterator
       it = this->ContainedArguments.begin();
       it != this->ContainedArguments.end();
       ++it)
@@ -236,7 +236,7 @@ void cmCommandArgumentGroup::Follows(const cmCommandArgument* arg)
 
 void cmCommandArgumentGroup::FollowsGroup(const cmCommandArgumentGroup* group)
 {
-  for(std::vector<cmCommandArgument*>::iterator 
+  for(std::vector<cmCommandArgument*>::iterator
       it = this->ContainedArguments.begin();
       it != this->ContainedArguments.end();
       ++it)
@@ -245,7 +245,7 @@ void cmCommandArgumentGroup::FollowsGroup(const cmCommandArgumentGroup* group)
     }
 }
 
-void cmCommandArgumentsHelper::Parse(const std::vector<std::string>* args, 
+void cmCommandArgumentsHelper::Parse(const std::vector<std::string>* args,
                                      std::vector<std::string>* unconsumedArgs)
 {
   if(args==0)
@@ -253,7 +253,7 @@ void cmCommandArgumentsHelper::Parse(const std::vector<std::string>* args,
     return;
     }
 
-  for(std::vector<cmCommandArgument*>::iterator 
+  for(std::vector<cmCommandArgument*>::iterator
       argIt = this->Arguments.begin();
       argIt != this->Arguments.end();
       ++argIt)
@@ -268,7 +268,7 @@ void cmCommandArgumentsHelper::Parse(const std::vector<std::string>* args,
       it != args->end();
       ++it)
     {
-    for(std::vector<cmCommandArgument*>::iterator 
+    for(std::vector<cmCommandArgument*>::iterator
         argIt = this->Arguments.begin();
         argIt != this->Arguments.end();
         ++argIt)

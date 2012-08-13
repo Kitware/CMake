@@ -1,5 +1,5 @@
 project(LibName)
-# this is a test to make sure that relative path 
+# this is a test to make sure that relative path
 # LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH work
 set(LIBRARY_OUTPUT_PATH  lib)
 set(EXECUTABLE_OUTPUT_PATH lib)

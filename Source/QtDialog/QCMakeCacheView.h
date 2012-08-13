@@ -33,7 +33,7 @@ public:
   // retrieve the QCMakeCacheModel storing all the pointers
   // this isn't necessarily the model one would get from model()
   QCMakeCacheModel* cacheModel() const;
-  
+
   // get whether to show advanced entries
   bool showAdvanced() const;
 
@@ -65,7 +65,7 @@ public:
   // roles used to retrieve extra data such has help strings, types of
   // properties, and the advanced flag
   enum { HelpRole = Qt::ToolTipRole,
-         TypeRole = Qt::UserRole, 
+         TypeRole = Qt::UserRole,
          AdvancedRole,
          StringsRole,
          GroupRole
@@ -102,7 +102,7 @@ public slots:
 public:
   // get the properties
   QCMakePropertyList properties() const;
-  
+
   // editing enabled
   bool editEnabled() const;
 
@@ -112,7 +112,7 @@ public:
   // return flags (overloaded to modify flag based on EditEnabled flag)
   Qt::ItemFlags flags (const QModelIndex& index) const;
   QModelIndex buddy(const QModelIndex& idx) const;
-  
+
   // get the data in the model for this property
   void getPropertyData(const QModelIndex& idx1,
                        QCMakeProperty& prop) const;
@@ -124,20 +124,20 @@ protected:
   ViewType View;
 
   // set the data in the model for this property
-  void setPropertyData(const QModelIndex& idx1, 
+  void setPropertyData(const QModelIndex& idx1,
                        const QCMakeProperty& p, bool isNew);
 
   // breaks up he property list into groups
   // where each group has the same prefix up to the first underscore
   static void breakProperties(const QSet<QCMakeProperty>& props,
                        QMap<QString, QCMakePropertyList>& result);
-  
+
   // gets the prefix of a string up to the first _
   static QString prefix(const QString& s);
 
 };
 
-/// Qt delegate class for interaction (or other customization) 
+/// Qt delegate class for interaction (or other customization)
 /// with cache properties
 class QCMakeCacheModelDelegate : public QItemDelegate
 {
@@ -145,9 +145,9 @@ class QCMakeCacheModelDelegate : public QItemDelegate
 public:
   QCMakeCacheModelDelegate(QObject* p);
   /// create our own editors for cache properties
-  QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, 
+  QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
       const QModelIndex& index ) const;
-  bool editorEvent (QEvent* event, QAbstractItemModel* model, 
+  bool editorEvent (QEvent* event, QAbstractItemModel* model,
        const QStyleOptionViewItem& option, const QModelIndex& index);
   bool eventFilter(QObject* object, QEvent* event);
   void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;

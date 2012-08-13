@@ -33,7 +33,7 @@ IF(NOT CMAKE_C_COMPILER_WORKS)
     "int main(int argc, char* argv[])\n"
     "#endif\n"
     "{ (void)argv; return argc-1;}\n")
-  TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
+  TRY_COMPILE(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE __CMAKE_C_COMPILER_OUTPUT)
   SET(C_TEST_WAS_RUN 1)

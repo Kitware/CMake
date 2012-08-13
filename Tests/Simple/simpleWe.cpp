@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-class Foo 
+class Foo
 {
 public:
   Foo()

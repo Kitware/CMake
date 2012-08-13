@@ -25,7 +25,7 @@ bool cmBuildNameCommand
   const char* cacheValue = this->Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
     {
-    // do we need to correct the value? 
+    // do we need to correct the value?
     cmsys::RegularExpression reg("[()/]");
     if (reg.find(cacheValue))
       {
@@ -41,7 +41,7 @@ bool cmBuildNameCommand
     return true;
     }
 
-  
+
   std::string buildname = "WinNT";
   if(this->Makefile->GetDefinition("UNIX"))
     {
@@ -67,7 +67,7 @@ bool cmBuildNameCommand
                                "(", "_");
   cmSystemTools::ReplaceString(buildname,
                                ")", "_");
-  
+
   this->Makefile->AddCacheDefinition(args[0].c_str(),
                                  buildname.c_str(),
                                  "Name of build.",

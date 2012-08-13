@@ -59,7 +59,7 @@ void cmGlobalVisualStudio9Generator
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator
-::EnableLanguage(std::vector<std::string>const &  lang, 
+::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);

@@ -28,8 +28,8 @@ bool cmCTestEmptyBinaryDirectoryCommand
     ostr << "problem removing the binary directory: " << args[0].c_str();
     this->SetError(ostr.str().c_str());
     return false;
-    }  
-  
+    }
+
   return true;
 }
 

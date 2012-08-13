@@ -43,7 +43,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t; 
+typedef unsigned char flex_uint8_t;
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 #endif /* ! C99 */
@@ -165,7 +165,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE cmListFileLexer_yylex. 
+     *       existing scanners that call yyless() from OUTSIDE cmListFileLexer_yylex.
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
@@ -177,7 +177,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
                     if ( yytext[yyl] == '\n' )\
                         --yylineno;\
             }while(0)
-    
+
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
         do \
@@ -242,7 +242,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
         /* Whether to try to fill the input buffer when we reach the
          * end of it.
          */
@@ -834,7 +834,7 @@ yy_find_action:
                         int yyl;
                         for ( yyl = 0; yyl < yyleng; ++yyl )
                                 if ( yytext[yyl] == '\n' )
-                                           
+
     do{ yylineno++;
         yycolumn=0;
     }while(0)
@@ -1380,7 +1380,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         yyg->yy_hold_char = *++yyg->yy_c_buf_p;
 
         if ( c == '\n' )
-                   
+
     do{ yylineno++;
         yycolumn=0;
     }while(0)
@@ -1463,7 +1463,7 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
     YY_BUFFER_STATE cmListFileLexer_yy_create_buffer  (FILE * file, int  size , yyscan_t yyscanner)
 {
         YY_BUFFER_STATE b;
-    
+
         b = (YY_BUFFER_STATE) cmListFileLexer_yyalloc(sizeof( struct yy_buffer_state ) ,yyscanner );
         if ( ! b )
                 YY_FATAL_ERROR( "out of dynamic memory in cmListFileLexer_yy_create_buffer()" );
@@ -1529,7 +1529,7 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
     }
 
         b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
-    
+
         errno = oerrno;
 }
 
@@ -1633,9 +1633,9 @@ static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner)
                 yyg->yy_buffer_stack = (struct yy_buffer_state**)cmListFileLexer_yyalloc
                                                                 (num_to_alloc * sizeof(struct yy_buffer_state*)
                                                                 , yyscanner);
-                
+
                 memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-                                
+
                 yyg->yy_buffer_stack_max = num_to_alloc;
                 yyg->yy_buffer_stack_top = 0;
                 return;
@@ -1662,12 +1662,12 @@ static void cmListFileLexer_yyensure_buffer_stack (yyscan_t yyscanner)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * @param yyscanner The scanner object.
- * @return the newly allocated buffer state object. 
+ * @return the newly allocated buffer state object.
  */
 YY_BUFFER_STATE cmListFileLexer_yy_scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
         YY_BUFFER_STATE b;
-    
+
         if ( size < 2 ||
              base[size-2] != YY_END_OF_BUFFER_CHAR ||
              base[size-1] != YY_END_OF_BUFFER_CHAR )
@@ -1703,7 +1703,7 @@ YY_BUFFER_STATE cmListFileLexer_yy_scan_buffer  (char * base, yy_size_t  size , 
  */
 YY_BUFFER_STATE cmListFileLexer_yy_scan_string (yyconst char * yy_str , yyscan_t yyscanner)
 {
-    
+
         return cmListFileLexer_yy_scan_bytes(yy_str,strlen(yy_str) ,yyscanner);
 }
 
@@ -1720,7 +1720,7 @@ YY_BUFFER_STATE cmListFileLexer_yy_scan_bytes  (yyconst char * bytes, int  len ,
         char *buf;
         yy_size_t n;
         int i;
-    
+
         /* Get memory for full buffer, including space for trailing EOB's. */
         n = len + 2;
         buf = (char *) cmListFileLexer_yyalloc(n ,yyscanner );
@@ -1789,10 +1789,10 @@ YY_EXTRA_TYPE cmListFileLexer_yyget_extra  (yyscan_t yyscanner)
 int cmListFileLexer_yyget_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
+
         if (! YY_CURRENT_BUFFER)
             return 0;
-    
+
     return yylineno;
 }
 
@@ -1802,10 +1802,10 @@ int cmListFileLexer_yyget_lineno  (yyscan_t yyscanner)
 int cmListFileLexer_yyget_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-    
+
         if (! YY_CURRENT_BUFFER)
             return 0;
-    
+
     return yycolumn;
 }
 
@@ -1866,8 +1866,8 @@ void cmListFileLexer_yyset_lineno (int  line_number , yyscan_t yyscanner)
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "cmListFileLexer_yyset_lineno called with no buffer" , yyscanner); 
-    
+           yy_fatal_error( "cmListFileLexer_yyset_lineno called with no buffer" , yyscanner);
+
     yylineno = line_number;
 }
 
@@ -1881,8 +1881,8 @@ void cmListFileLexer_yyset_column (int  column_no , yyscan_t yyscanner)
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           yy_fatal_error( "cmListFileLexer_yyset_column called with no buffer" , yyscanner); 
-    
+           yy_fatal_error( "cmListFileLexer_yyset_column called with no buffer" , yyscanner);
+
     yycolumn = column_no;
 }
 

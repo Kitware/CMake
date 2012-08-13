@@ -38,15 +38,15 @@ public:
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-  
+
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
    * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.  
+   * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, 
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
   /**
    * Try running cmake and building a file. This is used for dynalically
@@ -54,16 +54,16 @@ public:
    */
   virtual std::string GenerateBuildCommand(const char* makeProgram,
                                            const char *projectName,
-                                           const char* additionalOptions, 
+                                           const char* additionalOptions,
                                            const char *targetName,
-                                           const char* config, 
+                                           const char* config,
                                            bool ignoreErrors,
                                            bool fast);
 
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.  
+   * requests that they Generate.
    */
   virtual void Generate();
 
@@ -82,7 +82,7 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig();
 
-private: 
+private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
   cmXCodeObject* CreatePBXGroup(cmXCodeObject *parent,
@@ -107,18 +107,18 @@ private:
 
   void AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                cmTarget& target,
-                               std::vector<cmCustomCommand> 
+                               std::vector<cmCustomCommand>
                                const & commands,
                                const char* commandFileName);
-  
-  void CreateCustomRulesMakefile(const char* makefileBasename, 
+
+  void CreateCustomRulesMakefile(const char* makefileBasename,
                                  cmTarget& target,
                                  std::vector<cmCustomCommand> const & commands,
                                  const char* configName,
-                                 const std::map<cmStdString, cmStdString>& 
+                                 const std::map<cmStdString, cmStdString>&
                                      multipleOutputPairs
                                 );
-  
+
   cmXCodeObject* FindXCodeTarget(cmTarget*);
   std::string GetOrCreateId(const char* name, const char* id);
 
@@ -135,9 +135,9 @@ private:
   const char* GetTargetFileType(cmTarget& cmtarget);
   const char* GetTargetProductType(cmTarget& cmtarget);
   std::string AddConfigurations(cmXCodeObject* target, cmTarget& cmtarget);
-  void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr, 
+  void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr,
                                const char* value);
-  void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr, 
+  void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr,
                                    const char* value, const char* configName);
   cmXCodeObject* CreateUtilityTarget(cmTarget& target);
   void AddDependAndLinkInformation(cmXCodeObject* target);
@@ -161,10 +161,10 @@ private:
                                                const std::string &lang);
   cmXCodeObject* CreateXCodeFileReference(cmSourceFile* sf,
                                           cmTarget& cmtarget);
-  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen, 
+  cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen,
                                        cmSourceFile* sf,
                                        cmTarget& cmtarget);
-  void CreateXCodeTargets(cmLocalGenerator* gen, 
+  void CreateXCodeTargets(cmLocalGenerator* gen,
                           std::vector<cmXCodeObject*>&);
   bool IsHeaderFile(cmSourceFile*);
   void AddDependTarget(cmXCodeObject* target,
@@ -172,9 +172,9 @@ private:
   void CreateXCodeDependHackTarget(std::vector<cmXCodeObject*>& targets);
   bool SpecialTargetEmitted(std::string const& tname);
   void SetGenerationRoot(cmLocalGenerator* root);
-  void AddExtraTargets(cmLocalGenerator* root, 
+  void AddExtraTargets(cmLocalGenerator* root,
                        std::vector<cmLocalGenerator*>& gens);
-  cmXCodeObject* CreateBuildPhase(const char* name, 
+  cmXCodeObject* CreateBuildPhase(const char* name,
                                   const char* name2,
                                   cmTarget& cmtarget,
                                   const std::vector<cmCustomCommand>&);

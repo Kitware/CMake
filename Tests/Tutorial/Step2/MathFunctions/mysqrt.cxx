@@ -8,9 +8,9 @@ double mysqrt(double x)
     {
     return 0;
     }
-  
+
   double result;
-  double delta;  
+  double delta;
   result = x;
 
   // do ten iterations

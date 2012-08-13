@@ -8,8 +8,8 @@ MESSAGE("X11_FOUND: ${X11_FOUND}")
 ADD_EXECUTABLE (UseX11 X11.c)
 install(TARGETS UseX11 DESTINATION bin)
 
-# so for universal binaries this test will fail if 
-# 
+# so for universal binaries this test will fail if
+#
 IF(APPLE)
   LIST(LENGTH CMAKE_OSX_ARCHITECTURES NUMARCH)
   IF(NUMARCH GREATER 1)

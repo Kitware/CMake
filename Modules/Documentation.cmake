@@ -33,10 +33,10 @@ IF (BUILD_DOCUMENTATION)
   FIND_PACKAGE(Perl)
   FIND_PACKAGE(Wget)
 
-  OPTION(DOCUMENTATION_HTML_HELP 
+  OPTION(DOCUMENTATION_HTML_HELP
     "Build the HTML Help file (CHM)." OFF)
 
-  OPTION(DOCUMENTATION_HTML_TARZ 
+  OPTION(DOCUMENTATION_HTML_TARZ
     "Build a compressed tar archive of the HTML doc." OFF)
 
   MARK_AS_ADVANCED(
@@ -44,7 +44,7 @@ IF (BUILD_DOCUMENTATION)
     DOCUMENTATION_HTML_TARZ
     )
 
-  # 
+  #
   # The documentation process is controled by a batch file.
   # We will probably need bash to create the custom target
   #

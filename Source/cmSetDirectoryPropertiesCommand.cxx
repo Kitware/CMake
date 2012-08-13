@@ -22,11 +22,11 @@ bool cmSetDirectoryPropertiesCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   std::string errors;
-  bool ret = 
-    cmSetDirectoryPropertiesCommand::RunCommand(this->Makefile, 
-                                                args.begin() + 1, 
+  bool ret =
+    cmSetDirectoryPropertiesCommand::RunCommand(this->Makefile,
+                                                args.begin() + 1,
                                                 args.end(), errors);
   if (!ret)
     {
@@ -52,19 +52,19 @@ bool cmSetDirectoryPropertiesCommand
     const std::string& value = *(ait+1);
     if ( prop == "VARIABLES" )
       {
-      errors = 
+      errors =
         "Variables and cache variables should be set using SET command";
       return false;
       }
     else if ( prop == "MACROS" )
       {
-      errors = 
+      errors =
         "Commands and macros cannot be set using SET_CMAKE_PROPERTIES";
       return false;
       }
     mf->SetProperty(prop.c_str(), value.c_str());
     }
-  
+
   return true;
 }
 

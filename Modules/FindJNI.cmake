@@ -2,7 +2,7 @@
 # This module finds if Java is installed and determines where the
 # include files and libraries are. It also determines what the name of
 # the library is. This code sets the following variables:
-#   
+#
 #  JNI_INCLUDE_DIRS      = the include dirs to use
 #  JNI_LIBRARIES         = the libraries to use
 #  JNI_FOUND             = TRUE if JNI headers and libraries were found.
@@ -138,7 +138,7 @@ SET(JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
   ${_JAVA_HOME}/include
-  /usr/include 
+  /usr/include
   /usr/local/include
   /usr/lib/java/include
   /usr/local/lib/java/include
@@ -162,9 +162,9 @@ FOREACH(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
       SET(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES} "${jpath}/${JAVA_INC_PATH}")
     ENDIF(EXISTS ${jpath}/${JAVA_INC_PATH})
   ENDFOREACH(JAVA_INC_PATH)
-  FOREACH(JAVA_LIB_PATH 
-    ../lib ../jre/lib ../jre/lib/i386 
-    ../java/lib ../java/jre/lib ../java/jre/lib/i386 
+  FOREACH(JAVA_LIB_PATH
+    ../lib ../jre/lib ../jre/lib/i386
+    ../java/lib ../java/jre/lib ../java/jre/lib/i386
     ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
     IF(EXISTS ${jpath}/${JAVA_LIB_PATH})
       SET(JAVA_AWT_LIBRARY_DIRECTORIES ${JAVA_AWT_LIBRARY_DIRECTORIES} "${jpath}/${JAVA_LIB_PATH}")
@@ -209,7 +209,7 @@ IF(APPLE)
       )
   ENDIF(JAVA_HAVE_FRAMEWORK)
 ELSE(APPLE)
-  FIND_LIBRARY(JAVA_AWT_LIBRARY jawt 
+  FIND_LIBRARY(JAVA_AWT_LIBRARY jawt
     PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
   )
   FIND_LIBRARY(JAVA_JVM_LIBRARY NAMES jvm JavaVM
@@ -217,12 +217,12 @@ ELSE(APPLE)
   )
 ENDIF(APPLE)
 
-# add in the include path    
-FIND_PATH(JAVA_INCLUDE_PATH jni.h 
+# add in the include path
+FIND_PATH(JAVA_INCLUDE_PATH jni.h
   ${JAVA_AWT_INCLUDE_DIRECTORIES}
 )
 
-FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h 
+FIND_PATH(JAVA_INCLUDE_PATH2 jni_md.h
   ${JAVA_INCLUDE_PATH}
   ${JAVA_INCLUDE_PATH}/win32
   ${JAVA_INCLUDE_PATH}/linux

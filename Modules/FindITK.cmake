@@ -7,16 +7,16 @@
 # that can be included to set the include directories, library directories,
 # and preprocessor macros.  In addition to the variables read from
 # ITKConfig.cmake, this find module also defines
-#  ITK_DIR  - The directory containing ITKConfig.cmake.  
-#             This is either the root of the build tree, 
-#             or the lib/InsightToolkit directory.  
+#  ITK_DIR  - The directory containing ITKConfig.cmake.
+#             This is either the root of the build tree,
+#             or the lib/InsightToolkit directory.
 #             This is the only cache entry.
-#   
-#  ITK_FOUND - Whether ITK was found.  If this is true, 
+#
+#  ITK_FOUND - Whether ITK was found.  If this is true,
 #              ITK_DIR is okay.
 #
-#  USE_ITK_FILE - The full path to the UseITK.cmake file.  
-#                 This is provided for backward 
+#  USE_ITK_FILE - The full path to the UseITK.cmake file.
+#                 This is provided for backward
 #                 compatability.  Use ITK_USE_FILE
 #                 instead.
 

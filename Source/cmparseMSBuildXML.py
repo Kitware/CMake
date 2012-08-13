@@ -9,7 +9,7 @@
 #
 #  BoolProperty  <Name>true|false</Name>
 #   simple example:
-#     <BoolProperty ReverseSwitch="Oy-" Name="OmitFramePointers" 
+#     <BoolProperty ReverseSwitch="Oy-" Name="OmitFramePointers"
 #      Category="Optimization" Switch="Oy">
 #   <BoolProperty.DisplayName>  <BoolProperty.Description>
 # <CLCompile>
@@ -67,7 +67,7 @@
 #     <Optimization>MaxSpeed</Optimization>
 #     example for O1 would be this:
 #     <Optimization>MinSpace</Optimization>
-# 
+#
 #  StringListProperty
 #   <StringListProperty Name="PreprocessorDefinitions" Category="Preprocessor" Switch="D ">
 #     <StringListProperty.DisplayName>
@@ -130,7 +130,7 @@ class Property:
     if document is not None:
       self.populate(document)
     pass
-   
+
   #document = the dom file that's root node is the Property node (ex. if you were parsing a BoolProperty the root node should be something like <BoolProperty Name="RegisterOutput" Category="General" IncludeInCommandLine="false">
   #spaces = do not use
   def populate(self,document, spaces = ""):
@@ -155,9 +155,9 @@ class Property:
       self.populate(child,spaces+"----")
       pass
 
-  #toString function 
+  #toString function
   def __str__(self):
-    toReturn = self.prefix_type+self.suffix_type+":" 
+    toReturn = self.prefix_type+self.suffix_type+":"
     for i in self.attributeNames:
       toReturn += "\n    "+i+": "+self.attributes[i]
     if self.argumentProperty != "":
@@ -191,7 +191,7 @@ class MSBuildToCMake:
   #        self.<Name>Properties.append(Property("<Name>",[<List of attributes>],child))
   #
   #Replace <Name> with the name of the new property (ex. if property is StringProperty replace <Name> with String)
-  #Replace <List of attributes> with a list of attributes in your property's root node 
+  #Replace <List of attributes> with a list of attributes in your property's root node
   #in the __init__ function add the line self.<Name>Properties = []
   #
   #That is all that is required to add new properties
@@ -236,7 +236,7 @@ class MSBuildToCMake:
       for j in lastProp.values:
           toReturn+="  {\""+lastProp.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
       toReturn += "\n"
-    
+
     toReturn += "\n  //Bool Properties\n"
     for i in self.boolProperties:
       if i.argumentProperty == "":
@@ -254,7 +254,7 @@ class MSBuildToCMake:
         if i.attributes["Switch"] != "":
           toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\", \"\", \"true\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
           toReturn += "  {\""+i.argumentProperty+"\", \""+i.attributes["Switch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
-    
+
     toReturn += "\n  //String List Properties\n"
     for i in self.stringListProperties:
       if i.attributes["Switch"] == "":
@@ -289,7 +289,7 @@ class MSBuildToCMake:
     for p in allList:
       for i in p:
         toReturn += "==================================================\n"+str(i).replace("\n","\n    ")+"\n==================================================\n"
-    
+
     return toReturn
 ###########################################################################################
 
@@ -305,8 +305,8 @@ def main(argv):
   for i in range(0,len(argv)):
     if argv[i] == "-x":
       xml_file = argv[i+1]
-    if argv[i] == "-h": 
-      print help 
+    if argv[i] == "-h":
+      print help
       sys.exit(0)
     pass
   if xml_file == None:

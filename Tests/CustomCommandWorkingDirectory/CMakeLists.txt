@@ -13,7 +13,7 @@ SET_SOURCE_FILES_PROPERTIES(
   "${TestWorkingDir_BINARY_DIR}/customTarget2.c"
   PROPERTIES GENERATED 1)
 
-ADD_EXECUTABLE(working "${TestWorkingDir_BINARY_DIR}/working.c" 
+ADD_EXECUTABLE(working "${TestWorkingDir_BINARY_DIR}/working.c"
   "${TestWorkingDir_BINARY_DIR}/customTarget.c")
 
 ADD_CUSTOM_TARGET(

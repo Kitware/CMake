@@ -114,11 +114,11 @@ MACRO(CMAKE_SETUP_TESTING)
   IF (NOT DART_ROOT)
     SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
   ENDIF (NOT DART_ROOT)
-  
+
   IF(BUILD_TESTING)
-    SET(CMAKE_TEST_GENERATOR "" CACHE STRING 
+    SET(CMAKE_TEST_GENERATOR "" CACHE STRING
       "Generator used when running tests")
-    SET(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH 
+    SET(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH
       "Generator used when running tests")
     IF(NOT CMAKE_TEST_GENERATOR)
       SET(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
@@ -126,7 +126,7 @@ MACRO(CMAKE_SETUP_TESTING)
     ELSE(NOT CMAKE_TEST_GENERATOR)
       SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
     ENDIF(NOT CMAKE_TEST_GENERATOR)
-    
+
     # Are we testing with the MSVC compiler?
     SET(CMAKE_TEST_MSVC 0)
     IF(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
@@ -138,14 +138,14 @@ MACRO(CMAKE_SETUP_TESTING)
       ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
         "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
     ENDIF(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
-    
+
     SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
     FOREACH(util CURL EXPAT XMLRPC ZLIB)
       IF(CMAKE_USE_SYSTEM_${util})
         SET(CMAKE_TEST_SYSTEM_LIBRARIES 1)
       ENDIF(CMAKE_USE_SYSTEM_${util})
     ENDFOREACH(util)
-    
+
     # This variable is set by cmake, however to
     # test cmake we want to make sure that
     # the ctest from this cmake is used for testing
@@ -169,7 +169,7 @@ MACRO(CMAKE_SETUP_TESTING)
   CONFIGURE_FILE(${CMake_SOURCE_DIR}/CTestCustom.ctest.in
     ${CMake_BINARY_DIR}/CTestCustom.ctest @ONLY)
   IF(BUILD_TESTING AND DART_ROOT)
-    CONFIGURE_FILE(${CMake_SOURCE_DIR}/CMakeLogo.gif 
+    CONFIGURE_FILE(${CMake_SOURCE_DIR}/CMakeLogo.gif
       ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
   ENDIF(BUILD_TESTING AND DART_ROOT)
   MARK_AS_ADVANCED(DART_ROOT)
@@ -253,18 +253,18 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ${CMake_BINARY_DIR}/Utilities
     ${CMake_SOURCE_DIR}/Utilities
     )
-  
+
   # check for the use of system libraries versus builtin ones
   # (a macro defined in this file)
   CMAKE_HANDLE_SYSTEM_LIBRARIES()
-  
+
   #---------------------------------------------------------------------
   # Build zlib library for Curl, CMake, and CTest.
   SET(CMAKE_ZLIB_HEADER "cm_zlib.h")
   IF(CMAKE_USE_SYSTEM_ZLIB)
     FIND_PACKAGE(ZLIB)
     IF(NOT ZLIB_FOUND)
-      MESSAGE(FATAL_ERROR 
+      MESSAGE(FATAL_ERROR
         "CMAKE_USE_SYSTEM_ZLIB is ON but a zlib is not found!")
     ENDIF(NOT ZLIB_FOUND)
     SET(CMAKE_ZLIB_INCLUDES ${ZLIB_INCLUDE_DIR})
@@ -275,13 +275,13 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ADD_SUBDIRECTORY(Utilities/cmzlib)
     CMAKE_SET_TARGET_FOLDER(cmzlib "Utilities/3rdParty")
   ENDIF(CMAKE_USE_SYSTEM_ZLIB)
-  
+
   #---------------------------------------------------------------------
   # Build Curl library for CTest.
   IF(CMAKE_USE_SYSTEM_CURL)
     FIND_PACKAGE(CURL)
     IF(NOT CURL_FOUND)
-      MESSAGE(FATAL_ERROR 
+      MESSAGE(FATAL_ERROR
         "CMAKE_USE_SYSTEM_CURL is ON but a curl is not found!")
     ENDIF(NOT CURL_FOUND)
     SET(CMAKE_CURL_INCLUDES ${CURL_INCLUDE_DIRS})
@@ -306,7 +306,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Build Compress library for CTest.
-  SET(CMAKE_COMPRESS_INCLUDES 
+  SET(CMAKE_COMPRESS_INCLUDES
     "${CMAKE_CURRENT_BINARY_DIR}/Utilities/cmcompress")
   SET(CMAKE_COMPRESS_LIBRARIES "cmcompress")
   ADD_SUBDIRECTORY(Utilities/cmcompress)
@@ -314,7 +314,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
   IF(CMAKE_USE_SYSTEM_BZIP2)
     FIND_PACKAGE(BZip2)
   ELSE()
-    SET(BZIP2_INCLUDE_DIR 
+    SET(BZIP2_INCLUDE_DIR
       "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmbzip2")
     SET(BZIP2_LIBRARIES cmbzip2)
     ADD_SUBDIRECTORY(Utilities/cmbzip2)
@@ -364,7 +364,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     ADD_SUBDIRECTORY(Utilities/cmexpat)
     CMAKE_SET_TARGET_FOLDER(cmexpat "Utilities/3rdParty")
   ENDIF(CMAKE_USE_SYSTEM_EXPAT)
-  
+
   #---------------------------------------------------------------------
   # Build XMLRPC library for CMake and CTest.
   IF(CTEST_USE_XMLRPC)
@@ -376,7 +376,7 @@ MACRO (CMAKE_BUILD_UTILITIES)
     SET(CMAKE_XMLRPC_INCLUDES ${XMLRPC_INCLUDE_DIRS})
     SET(CMAKE_XMLRPC_LIBRARIES ${XMLRPC_LIBRARIES})
   ENDIF(CTEST_USE_XMLRPC)
-  
+
   #---------------------------------------------------------------------
   # Use curses?
   IF (UNIX)
@@ -454,7 +454,7 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES
 # where to write the resulting executables and libraries
 SET(BUILD_SHARED_LIBS OFF)
 SET(EXECUTABLE_OUTPUT_PATH "" CACHE INTERNAL "No configurable exe dir.")
-SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL 
+SET(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
   "Where to put the libraries for CMake")
 
 # The CMake executables usually do not need any rpath to run in the build or
@@ -511,12 +511,12 @@ IF("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
   SET(CMAKE_TESTS_CDASH_SERVER "http://www.cdash.org/CDash")
 ENDIF("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
 
-# build the utilities (a macro defined in this file) 
+# build the utilities (a macro defined in this file)
 CMAKE_BUILD_UTILITIES()
 
 # On NetBSD ncurses is required, since curses doesn't have the wsyncup()
 # function. ncurses is installed via pkgsrc, so the library is in /usr/pkg/lib,
-# which isn't in the default linker search path. So without RPATH ccmake 
+# which isn't in the default linker search path. So without RPATH ccmake
 # doesn't run and the build doesn't succeed since ccmake is executed for
 # generating the documentation.
 IF(BUILD_CursesDialog)
@@ -539,10 +539,10 @@ IF(BUILD_QtDialog)
     IF(NOT "${ENDCH}" STREQUAL "/")
       SET(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
     ENDIF(NOT "${ENDCH}" STREQUAL "/")
-    SET(CMAKE_INSTALL_PREFIX 
+    SET(CMAKE_INSTALL_PREFIX
       "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
   ENDIF(APPLE)
-  
+
   SET(QT_NEED_RPATH FALSE)
   IF(NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/lib64" AND NOT "${QT_LIBRARY_DIR}" STREQUAL "/usr/lib64")
     SET(QT_NEED_RPATH TRUE)
@@ -551,7 +551,7 @@ ENDIF(BUILD_QtDialog)
 
 
 # The same might be true on other systems for other libraries.
-# Then only enable RPATH if we have are building at least with cmake 2.4, 
+# Then only enable RPATH if we have are building at least with cmake 2.4,
 # since this one has much better RPATH features than cmake 2.2.
 # The executables are then built with the RPATH for the libraries outside
 # the build tree, which is both the build and the install RPATH.
@@ -583,7 +583,7 @@ CONFIGURE_FILE(
   "${CMAKE_CURRENT_BINARY_DIR}/DartLocal.conf"
   COPYONLY)
 
-OPTION(CMAKE_STRICT   
+OPTION(CMAKE_STRICT
   "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
 MARK_AS_ADVANCED(CMAKE_STRICT)
 
@@ -600,7 +600,7 @@ CMAKE_SET_TARGET_FOLDER(cmw9xcom "Utilities/Win9xCompat")
 CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
 
 # add a test
-ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}" 
+ADD_TEST(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
   --system-information  -G "${CMAKE_TEST_GENERATOR}" )
 
 # Install license file as it requires.

@@ -31,7 +31,7 @@ public:
    *  Compare file modification times.
    *  Return true for successful comparison and false for error.
    *  When true is returned, result has -1, 0, +1 for
-   *  f1 older, same, or newer than f2.  
+   *  f1 older, same, or newer than f2.
    */
   bool FileTimeCompare(const char* f1, const char* f2, int* result);
 
@@ -42,7 +42,7 @@ public:
   bool FileTimesDiffer(const char* f1, const char* f2);
 
 protected:
-  
+
   cmFileTimeComparisonInternal* Internals;
 };
 

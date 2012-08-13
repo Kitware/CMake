@@ -29,7 +29,7 @@ ENDMACRO(TEST_EXPECT_CONTAINS command expected)
 # try to compile a file that should compile
 # also check that COPY_FILE works
 TRY_COMPILE(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT
     COPY_FILE ${TryCompile_BINARY_DIR}/CopyOfPass
@@ -46,7 +46,7 @@ ENDIF(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
@@ -55,7 +55,7 @@ ENDIF(SHOULD_FAIL)
 
 # try to compile a file that should compile
 TRY_COMPILE(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_PASS)
@@ -64,7 +64,7 @@ ENDIF(NOT SHOULD_PASS)
 
 # try to compile a file that should not compile
 TRY_COMPILE(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp 
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(SHOULD_FAIL)
@@ -80,8 +80,8 @@ IF(NOT SHOULD_FAIL)
 ELSE(NOT SHOULD_FAIL)
   MESSAGE("Test failed")
 ENDIF(NOT SHOULD_FAIL)
-TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   
-  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp 
+TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE
+  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 IF (CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler supports ansi for")
@@ -90,13 +90,13 @@ ELSE(CMAKE_ANSI_FOR_SCOPE)
 ENDIF(CMAKE_ANSI_FOR_SCOPE)
 
 TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE
-  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp 
+  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
 IF (CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler supports ansi for")
 ELSE(CMAKE_ANSI_FOR_SCOPE)
    MESSAGE("Compiler does not support ansi for scope")
-ENDIF(CMAKE_ANSI_FOR_SCOPE)        
+ENDIF(CMAKE_ANSI_FOR_SCOPE)
 
 MESSAGE("use the module now")
 INCLUDE(${CMAKE_ROOT}/Modules/TestForANSIForScope.cmake)
@@ -124,7 +124,7 @@ ADD_EXECUTABLE(TryCompile pass.c)
 # also check that OUTPUT_VARIABLE contains both the compile output
 # and the run output
 TRY_RUN(SHOULD_RUN SHOULD_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/exit_success.c
     OUTPUT_VARIABLE TRY_OUT)
 IF(NOT SHOULD_COMPILE)
@@ -143,7 +143,7 @@ IF(NOT "${TRY_OUT}" MATCHES "hello world")
 ENDIF(NOT "${TRY_OUT}" MATCHES "hello world")
 
 TRY_RUN(ARG_TEST_RUN ARG_TEST_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/expect_arg.c
     OUTPUT_VARIABLE TRY_OUT
     ARGS arg1 arg2)
@@ -156,7 +156,7 @@ ENDIF(NOT "${ARG_TEST_RUN}" STREQUAL "0")
 
 # try to run a file that should compile and run, but return an error
 TRY_RUN(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/exit_with_error.c
     COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
     RUN_OUTPUT_VARIABLE RUN_OUTPUT)

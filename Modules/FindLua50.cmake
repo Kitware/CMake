@@ -1,6 +1,6 @@
 # Locate Lua library
 # This module defines
-#  LUA50_FOUND, if false, do not try to link to Lua 
+#  LUA50_FOUND, if false, do not try to link to Lua
 #  LUA_LIBRARIES, both lua and lualib
 #  LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
 #
@@ -37,7 +37,7 @@ FIND_PATH(LUA_INCLUDE_DIR lua.h
   /opt
 )
 
-FIND_LIBRARY(LUA_LIBRARY_lua 
+FIND_LIBRARY(LUA_LIBRARY_lua
   NAMES lua50 lua5.0 lua-5.0 lua5 lua
   HINTS
   $ENV{LUA_DIR}
@@ -56,7 +56,7 @@ FIND_LIBRARY(LUA_LIBRARY_lua
 IF(${LUA_LIBRARY_lua} MATCHES "framework")
   SET( LUA_LIBRARIES "${LUA_LIBRARY_lua}" CACHE STRING "Lua framework")
 ELSE(${LUA_LIBRARY_lua} MATCHES "framework")
-  FIND_LIBRARY(LUA_LIBRARY_lualib 
+  FIND_LIBRARY(LUA_LIBRARY_lualib
     NAMES lualib50 lualib5.0 lualib5 lualib
     HINTS
     $ENV{LUALIB_DIR}
@@ -82,7 +82,7 @@ ENDIF(${LUA_LIBRARY_lua} MATCHES "framework")
 
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
 # all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 

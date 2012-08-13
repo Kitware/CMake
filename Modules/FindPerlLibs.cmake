@@ -236,7 +236,7 @@ if (PERL_EXECUTABLE)
 
 endif (PERL_EXECUTABLE)
 
-# handle the QUIETLY and REQUIRED arguments and set PERLLIBS_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set PERLLIBS_FOUND to TRUE if
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLUDE_PATH

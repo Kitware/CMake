@@ -19,7 +19,7 @@
  *
  * cmLinkLibrariesCommand is used to specify a list of libraries to link
  * into executable(s) or shared objects. The names of the libraries
- * should be those defined by the LIBRARY(library) command(s).  
+ * should be those defined by the LIBRARY(library) command(s).
  */
 class cmLinkLibrariesCommand : public cmCommand
 {
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmLinkLibrariesCommand;
     }
@@ -51,7 +51,7 @@ public:
     {
     return "Deprecated. Use the target_link_libraries() command instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -68,7 +68,7 @@ public:
       "the next library listed is to be used only for that specific "
       "type of build.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

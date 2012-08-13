@@ -12,7 +12,7 @@
 #include "cmQTWrapUICommand.h"
 
 // cmQTWrapUICommand
-bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn, 
+bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
                                     cmExecutionStatus &)
 {
   if(argsIn.size() < 4 )

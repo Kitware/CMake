@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmSiteNameCommand;
     }
@@ -46,7 +46,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "site_name";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -54,7 +54,7 @@ public:
     {
     return "Set the given variable to the name of the computer.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -63,7 +63,7 @@ public:
     return
       "  site_name(variable)\n";
     }
-  
+
   cmTypeMacro(cmSiteNameCommand, cmCommand);
 };
 

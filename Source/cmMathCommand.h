@@ -21,7 +21,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmMathCommand;
     }
@@ -50,7 +50,7 @@ public:
     {
     return "Mathematical expressions.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -64,10 +64,10 @@ public:
       "+ - * / % | & ^ ~ << >> * / %.  They have the same meaning "
       " as they do in c code.";
     }
-  
+
   cmTypeMacro(cmMathCommand, cmCommand);
 protected:
- 
+
   bool HandleExprCommand(std::vector<std::string> const& args);
 };
 

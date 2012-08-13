@@ -30,7 +30,7 @@ void cmPropertyDefinitionMap
   if (it == this->end())
     {
     prop = &(*this)[name];
-    prop->DefineProperty(name,scope,ShortDescription, FullDescription, 
+    prop->DefineProperty(name,scope,ShortDescription, FullDescription,
                          DocumentationSection, chain);
     }
 }
@@ -49,10 +49,10 @@ void cmPropertyDefinitionMap
       {
       switch (j->second.GetScope())
         {
-        case cmProperty::GLOBAL: 
+        case cmProperty::GLOBAL:
           secName = "Properties of Global Scope";
           break;
-        case cmProperty::TARGET: 
+        case cmProperty::TARGET:
           secName = "Properties on Targets";
           break;
         case cmProperty::SOURCE_FILE:
@@ -80,7 +80,7 @@ void cmPropertyDefinitionMap
       }
     if (!v[secName])
       {
-      v[secName] = new 
+      v[secName] = new
         cmDocumentationSection(secName.c_str(),
                                cmSystemTools::UpperCase(secName).c_str());
       }

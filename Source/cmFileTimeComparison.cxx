@@ -116,7 +116,7 @@ cmFileTimeComparison::~cmFileTimeComparison()
 }
 
 //----------------------------------------------------------------------------
-bool cmFileTimeComparison::FileTimeCompare(const char* f1, 
+bool cmFileTimeComparison::FileTimeCompare(const char* f1,
                                            const char* f2, int* result)
 {
   return this->Internals->FileTimeCompare(f1, f2, result);
@@ -129,7 +129,7 @@ bool cmFileTimeComparison::FileTimesDiffer(const char* f1, const char* f2)
 }
 
 //----------------------------------------------------------------------------
-int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1, 
+int cmFileTimeComparisonInternal::Compare(cmFileTimeComparison_Type* s1,
                                           cmFileTimeComparison_Type* s2)
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)

@@ -89,11 +89,11 @@ IF(UNIX)
            /opt/gnome/lib
   )
 
-  FIND_LIBRARY( GTK_Xi_LIBRARY 
-    NAMES Xi 
-    PATHS /usr/openwin/lib 
-          /opt/gnome/lib 
-    ) 
+  FIND_LIBRARY( GTK_Xi_LIBRARY
+    NAMES Xi
+    PATHS /usr/openwin/lib
+          /opt/gnome/lib
+    )
 
   FIND_LIBRARY( GTK_gthread_LIBRARY
     NAMES  gthread gthread12

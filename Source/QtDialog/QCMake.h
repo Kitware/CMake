@@ -38,12 +38,12 @@ struct QCMakeProperty
   QString Help;
   PropertyType Type;
   bool Advanced;
-  bool operator==(const QCMakeProperty& other) const 
-    { 
+  bool operator==(const QCMakeProperty& other) const
+    {
     return this->Key == other.Key;
     }
-  bool operator<(const QCMakeProperty& other) const 
-    { 
+  bool operator<(const QCMakeProperty& other) const
+    {
     return this->Key < other.Key;
     }
 };
@@ -56,7 +56,7 @@ Q_DECLARE_METATYPE(QCMakeProperty)
 Q_DECLARE_METATYPE(QCMakePropertyList)
 
 /// Qt API for CMake library.
-/// Wrapper like class allows for easier integration with 
+/// Wrapper like class allows for easier integration with
 /// Qt features such as, signal/slot connections, multi-threading, etc..
 class QCMake : public QObject
 {
@@ -136,7 +136,7 @@ protected:
 
   static bool interruptCallback(void*);
   static void progressCallback(const char* msg, float percent, void* cd);
-  static void errorCallback(const char* msg, const char* title, 
+  static void errorCallback(const char* msg, const char* title,
                             bool&, void* cd);
   bool SuppressDevWarnings;
   bool WarnUninitializedMode;

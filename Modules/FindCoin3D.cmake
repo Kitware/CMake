@@ -59,22 +59,22 @@ IF (WIN32)
 ELSE (WIN32)
   IF(APPLE)
     FIND_PATH(COIN3D_INCLUDE_DIRS Inventor/So.h
-     /Library/Frameworks/Inventor.framework/Headers 
+     /Library/Frameworks/Inventor.framework/Headers
     )
     FIND_LIBRARY(COIN3D_LIBRARIES Coin
       /Library/Frameworks/Inventor.framework/Libraries
-    )   
+    )
     SET(COIN3D_LIBRARIES "-framework Coin3d" CACHE STRING "Coin3D library for OSX")
   ELSE(APPLE)
 
     FIND_PATH(COIN3D_INCLUDE_DIRS Inventor/So.h)
-    FIND_LIBRARY(COIN3D_LIBRARIES Coin)   
+    FIND_LIBRARY(COIN3D_LIBRARIES Coin)
 
   ENDIF(APPLE)
 
 ENDIF (WIN32)
 
-# handle the QUIETLY and REQUIRED arguments and set COIN3D_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set COIN3D_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Coin3D DEFAULT_MSG COIN3D_LIBRARIES COIN3D_INCLUDE_DIRS)

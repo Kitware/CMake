@@ -42,7 +42,7 @@ public:
   virtual void AddHelperCommands();
 
   /**
-   * Generate the makefile for this directory. 
+   * Generate the makefile for this directory.
    */
   virtual void Generate();
 
@@ -77,17 +77,17 @@ private:
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout, cmTarget &target);
-  void WriteVCProjFile(std::ostream& fout, const char *libName, 
+  void WriteVCProjFile(std::ostream& fout, const char *libName,
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
                            const char *libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
                           const char* configName,
-                          const char* libName, cmTarget &tgt); 
+                          const char* libName, cmTarget &tgt);
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputTargetRules(std::ostream& fout, const char* configName, 
+  void OutputTargetRules(std::ostream& fout, const char* configName,
                          cmTarget &target, const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
                        cmTarget& t, bool debug);
@@ -98,18 +98,18 @@ private:
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteProjectStartFortran(std::ostream& fout, const char *libName,
                                 cmTarget &tgt);
-  void WriteVCProjBeginGroup(std::ostream& fout, 
+  void WriteVCProjBeginGroup(std::ostream& fout,
                           const char* group,
                           const char* filter);
   void WriteVCProjEndGroup(std::ostream& fout);
-  
+
   void WriteCustomRule(std::ostream& fout,
                        const char* source,
                        const cmCustomCommand& command,
                        FCInfo& fcinfo);
   void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
 
-  void WriteGroup(const cmSourceGroup *sg, 
+  void WriteGroup(const cmSourceGroup *sg,
                   cmTarget& target, std::ostream &fout,
                   const char *libName, std::vector<std::string> *configs);
 
@@ -122,7 +122,7 @@ private:
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   bool FortranProject;
-  std::string PlatformName; // Win32 or x64 
+  std::string PlatformName; // Win32 or x64
   cmLocalVisualStudio7GeneratorInternals* Internal;
 };
 

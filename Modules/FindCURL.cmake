@@ -25,7 +25,7 @@ FIND_PATH(CURL_INCLUDE_DIR NAMES curl/curl.h)
 MARK_AS_ADVANCED(CURL_INCLUDE_DIR)
 
 # Look for the library.
-FIND_LIBRARY(CURL_LIBRARY NAMES 
+FIND_LIBRARY(CURL_LIBRARY NAMES
     curl
   # Windows MSVC prebuilts:
     curllib
@@ -46,7 +46,7 @@ IF(CURL_INCLUDE_DIR)
   ENDFOREACH(_curl_version_header)
 ENDIF()
 
-# handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set CURL_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CURL

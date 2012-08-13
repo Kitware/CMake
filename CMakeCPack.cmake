@@ -70,12 +70,12 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
 
   IF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
     # if the CPACK_PACKAGE_FILE_NAME is not defined by the cache
-    # default to source package - system, on cygwin system is not 
+    # default to source package - system, on cygwin system is not
     # needed
     IF(CYGWIN)
       SET(CPACK_PACKAGE_FILE_NAME "${CPACK_SOURCE_PACKAGE_FILE_NAME}")
     ELSE(CYGWIN)
-      SET(CPACK_PACKAGE_FILE_NAME 
+      SET(CPACK_PACKAGE_FILE_NAME
         "${CPACK_SOURCE_PACKAGE_FILE_NAME}-${CPACK_SYSTEM_NAME}")
     ENDIF(CYGWIN)
   ENDIF(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
@@ -102,9 +102,9 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     SET(CPACK_CYGWIN_PATCH_NUMBER 1)
     # These files are required by the cmCPackCygwinSourceGenerator and the files
     # put into the release tar files.
-    SET(CPACK_CYGWIN_BUILD_SCRIPT 
+    SET(CPACK_CYGWIN_BUILD_SCRIPT
       "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.sh")
-    SET(CPACK_CYGWIN_PATCH_FILE 
+    SET(CPACK_CYGWIN_PATCH_FILE
       "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.patch")
     # include the sub directory cmake file for cygwin that
     # configures some files and adds some install targets

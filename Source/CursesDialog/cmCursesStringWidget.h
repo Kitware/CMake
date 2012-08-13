@@ -26,7 +26,7 @@ class cmCursesStringWidget : public cmCursesWidget
 {
 public:
   cmCursesStringWidget(int width, int height, int left, int top);
-  
+
   /**
    * Handle user input. Called by the container of this widget
    * when this widget has focus. Returns true if the input was

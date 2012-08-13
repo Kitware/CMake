@@ -20,8 +20,8 @@ SET(CMAKE_DL_LIBS "")
 SET(CMAKE_C_OUTPUT_EXTENSION ".rel")
 
 # find sdcclib as CMAKE_AR
-# since cmake may already have searched for "ar", sdcclib has to 
-# be searched with a different variable name (SDCCLIB_EXECUTABLE) 
+# since cmake may already have searched for "ar", sdcclib has to
+# be searched with a different variable name (SDCCLIB_EXECUTABLE)
 # and must then be forced into the cache
 GET_FILENAME_COMPONENT(SDCC_LOCATION "${CMAKE_C_COMPILER}" PATH)
 FIND_PROGRAM(SDCCLIB_EXECUTABLE sdcclib PATHS "${SDCC_LOCATION}" NO_DEFAULT_PATH)

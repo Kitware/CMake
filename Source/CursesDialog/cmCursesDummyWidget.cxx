@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmCursesDummyWidget.h"
 
-cmCursesDummyWidget::cmCursesDummyWidget(int width, int height, 
+cmCursesDummyWidget::cmCursesDummyWidget(int width, int height,
                                            int left, int top) :
   cmCursesWidget(width, height, left, top)
 {

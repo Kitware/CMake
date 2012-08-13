@@ -57,7 +57,7 @@ IF(CMAKE_C_COMPILER_ID)
     OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
 ENDIF(CMAKE_C_COMPILER_ID)
 IF (NOT _INCLUDED_FILE)
-  INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} 
+  INCLUDE(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}
     OPTIONAL RESULT_VARIABLE _INCLUDED_FILE)
 ENDIF (NOT _INCLUDED_FILE)
 # We specify the compiler information in the system file for some
@@ -76,7 +76,7 @@ IF(CMAKE_C_SIZEOF_DATA_PTR)
 ENDIF()
 
 # This should be included before the _INIT variables are
-# used to initialize the cache.  Since the rule variables 
+# used to initialize the cache.  Since the rule variables
 # have if blocks on them, users can still define them here.
 # But, it should still be after the platform file so changes can
 # be made to those values.
@@ -103,7 +103,7 @@ IF(NOT CMAKE_MODULE_EXISTS)
 ENDIF(NOT CMAKE_MODULE_EXISTS)
 
 SET(CMAKE_C_FLAGS_INIT "$ENV{CFLAGS} ${CMAKE_C_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache 
+# avoid just having a space as the initial value for the cache
 IF(CMAKE_C_FLAGS_INIT STREQUAL " ")
   SET(CMAKE_C_FLAGS_INIT)
 ENDIF(CMAKE_C_FLAGS_INIT STREQUAL " ")
@@ -113,7 +113,7 @@ SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT}" CACHE STRING
 IF(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 # default build type is none
   IF(NOT CMAKE_NO_BUILD_TYPE)
-    SET (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING 
+    SET (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_INIT} CACHE STRING
       "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
   ENDIF(NOT CMAKE_NO_BUILD_TYPE)
   SET (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG_INIT}" CACHE STRING
@@ -151,13 +151,13 @@ INCLUDE(CMakeCommonLanguageInclude)
 # <LINK_FLAGS>
 
 # C compiler information
-# <CMAKE_C_COMPILER>  
+# <CMAKE_C_COMPILER>
 # <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS>
 # <CMAKE_SHARED_MODULE_CREATE_C_FLAGS>
 # <CMAKE_C_LINK_FLAGS>
 
 # Static library tools
-# <CMAKE_AR> 
+# <CMAKE_AR>
 # <CMAKE_RANLIB>
 
 

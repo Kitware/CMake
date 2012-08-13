@@ -55,7 +55,7 @@ FIND_LIBRARY(GNUTLS_LIBRARY NAMES gnutls libgnutls
 
 MARK_AS_ADVANCED(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
-# handle the QUIETLY and REQUIRED arguments and set GNUTLS_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set GNUTLS_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GnuTLS

@@ -28,12 +28,12 @@
 # correspond to the ./configure --prefix=$GDAL_DIR
 # used in building gdal.
 #
-# Created by Eric Wing. I'm not a gdal user, but OpenSceneGraph uses it 
+# Created by Eric Wing. I'm not a gdal user, but OpenSceneGraph uses it
 # for osgTerrain so I whipped this module together for completeness.
 # I actually don't know the conventions or where files are typically
 # placed in distros.
 # Any real gdal users are encouraged to correct this (but please don't
-# break the OS X framework stuff when doing so which is what usually seems 
+# break the OS X framework stuff when doing so which is what usually seems
 # to happen).
 
 # This makes the presumption that you are include gdal.h like
@@ -85,7 +85,7 @@ IF(UNIX)
     endif()
 endif()
 
-FIND_LIBRARY(GDAL_LIBRARY 
+FIND_LIBRARY(GDAL_LIBRARY
   NAMES ${_gdal_lib} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
   HINTS
      $ENV{GDAL_DIR}

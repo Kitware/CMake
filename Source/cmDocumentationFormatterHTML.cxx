@@ -29,7 +29,7 @@ static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
   // Use an escape sequence if necessary.
   switch (c)
     {
-    case '<': 
+    case '<':
       os << "&lt;";
       break;
     case '>':
@@ -114,7 +114,7 @@ void cmDocumentationFormatterHTML
 {
   std::string prefix = this->ComputeSectionLinkPrefix(name);
 
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     section.GetEntries();
 
   // skip the index if the help for only a single item (--help-command,
@@ -131,7 +131,7 @@ void cmDocumentationFormatterHTML
       }
 
     // Is a list needed?
-    for(std::vector<cmDocumentationEntry>::const_iterator op 
+    for(std::vector<cmDocumentationEntry>::const_iterator op
          = entries.begin(); op != entries.end(); ++ op )
       {
       if (op->Name.size())
@@ -154,7 +154,7 @@ void cmDocumentationFormatterHTML
       }
     }
 
-  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end();)
     {
     if(op->Name.size())
@@ -191,7 +191,7 @@ void cmDocumentationFormatterHTML
     }
 }
 
-void cmDocumentationFormatterHTML::PrintPreformatted(std::ostream& os, 
+void cmDocumentationFormatterHTML::PrintPreformatted(std::ostream& os,
                                                      const char* text)
 {
   os << "<pre>";
@@ -199,7 +199,7 @@ void cmDocumentationFormatterHTML::PrintPreformatted(std::ostream& os,
   os << "</pre>\n    ";
 }
 
-void cmDocumentationFormatterHTML::PrintParagraph(std::ostream& os, 
+void cmDocumentationFormatterHTML::PrintParagraph(std::ostream& os,
                                                   const char* text)
 {
   os << "<p>";
@@ -229,7 +229,7 @@ void cmDocumentationFormatterHTML::PrintFooter(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterHTML::PrintHTMLEscapes(std::ostream& os, 
+void cmDocumentationFormatterHTML::PrintHTMLEscapes(std::ostream& os,
                                                     const char* text)
 {
   // Hyperlink prefixes.
@@ -262,7 +262,7 @@ void cmDocumentationFormatterHTML
              std::vector<const cmDocumentationSection *>& sections)
 {
   // skip the index if only the help for a single item is printed
-  if ((sections.size() == 1) 
+  if ((sections.size() == 1)
        && (sections[0]->GetName(this->GetForm()) != 0 )
        && (std::string(sections[0]->GetName(this->GetForm())) == "SingleItem"))
     {

@@ -149,8 +149,8 @@ IF(NOT "$ENV{x+(y)}" STREQUAL "Obscure environment variable value")
 ENDIF()
 
 # Make directories test
-FILE(MAKE_DIRECTORY 
-  "${CMAKE_CURRENT_BINARY_DIR}/Includes" 
+FILE(MAKE_DIRECTORY
+  "${CMAKE_CURRENT_BINARY_DIR}/Includes"
   "${CMAKE_CURRENT_BINARY_DIR}/Directory1"
   "${CMAKE_CURRENT_BINARY_DIR}/Directory2"
   )

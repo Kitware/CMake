@@ -55,7 +55,7 @@ set(CMAKE_HOST_SYSTEM_PROCESSOR)
 
 ############################################################
 
-# now define a toolchain file and check that everything is 
+# now define a toolchain file and check that everything is
 # detected correctly and nothing predefined is overwritten
 
 set(CMAKE_TOOLCHAIN_FILE "${MY_SOURCE_DIR}/DummyToolchain.cmake")

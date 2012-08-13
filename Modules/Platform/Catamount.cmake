@@ -1,7 +1,7 @@
-#Catamount, which runs on the compute nodes of Cray machines, e.g. RedStorm, doesn't support shared libs 
+#Catamount, which runs on the compute nodes of Cray machines, e.g. RedStorm, doesn't support shared libs
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
 
-SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
+SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "")       # -shared
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath

@@ -12,4 +12,4 @@ int main(int ac, char** av)
   fclose(fout);
   return 0;
 }
-  
+

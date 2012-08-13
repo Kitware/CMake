@@ -19,13 +19,13 @@ class cmXCodeObject
 {
 public:
   enum Type { OBJECT_LIST, STRING, ATTRIBUTE_GROUP, OBJECT_REF, OBJECT };
-  enum PBXType { PBXGroup, PBXBuildStyle, PBXProject, PBXHeadersBuildPhase, 
-                 PBXSourcesBuildPhase, PBXFrameworksBuildPhase, 
-                 PBXNativeTarget, PBXFileReference, PBXBuildFile, 
+  enum PBXType { PBXGroup, PBXBuildStyle, PBXProject, PBXHeadersBuildPhase,
+                 PBXSourcesBuildPhase, PBXFrameworksBuildPhase,
+                 PBXNativeTarget, PBXFileReference, PBXBuildFile,
                  PBXContainerItemProxy, PBXTargetDependency,
                  PBXShellScriptBuildPhase, PBXResourcesBuildPhase,
-                 PBXApplicationReference, PBXExecutableFileReference, 
-                 PBXLibraryReference, PBXToolTarget, PBXLibraryTarget, 
+                 PBXApplicationReference, PBXExecutableFileReference,
+                 PBXLibraryReference, PBXToolTarget, PBXLibraryTarget,
                  PBXAggregateTarget,XCBuildConfiguration,XCConfigurationList,
                  PBXCopyFilesBuildPhase,
                  None
@@ -38,16 +38,16 @@ public:
   PBXType GetIsA() { return this->IsA;}
 
   void SetString(const char* s);
-  const char* GetString() 
+  const char* GetString()
     {
       return this->String.c_str();
     }
-  
+
   void AddAttribute(const char* name, cmXCodeObject* value)
     {
       this->ObjectAttributes[name] = value;
     }
-  
+
   void SetObject(cmXCodeObject* value)
     {
       this->Object = value;
@@ -60,14 +60,14 @@ public:
     {
       this->List.push_back(value);
     }
-  bool HasObject(cmXCodeObject* o) 
+  bool HasObject(cmXCodeObject* o)
   {
-    return !(std::find(this->List.begin(), this->List.end(), o) 
+    return !(std::find(this->List.begin(), this->List.end(), o)
              == this->List.end());
   }
   void AddUniqueObject(cmXCodeObject* value)
   {
-    if(std::find(this->List.begin(), this->List.end(), value) 
+    if(std::find(this->List.begin(), this->List.end(), value)
        == this->List.end())
       {
       this->List.push_back(value);
@@ -77,7 +77,7 @@ public:
   void Print(std::ostream& out);
   virtual void PrintComment(std::ostream&) {};
 
-  static void PrintList(std::vector<cmXCodeObject*> const&, 
+  static void PrintList(std::vector<cmXCodeObject*> const&,
                         std::ostream& out);
   const char* GetId()
     {
@@ -119,7 +119,7 @@ public:
         }
       return 0;
     }
-  
+
   cmXCodeObject* GetPBXTargetDependency()
     {
       return this->PBXTargetDependencyValue;
@@ -129,7 +129,7 @@ public:
       this->PBXTargetDependencyValue = d;
     }
   void CopyAttributes(cmXCodeObject* );
-  
+
   void AddDependLibrary(const char* configName,
                         const char* l)
     {

@@ -36,7 +36,7 @@ bool cmExecProgramCommand
       doingargs = false;
       havereturn_variable = false;
       haveoutput_variable = true;
-      }    
+      }
     else if ( haveoutput_variable )
       {
       if ( output_variable.size() > 0 )
@@ -54,7 +54,7 @@ bool cmExecProgramCommand
       doingargs = false;
       haveoutput_variable = false;
       havereturn_variable = true;
-      }    
+      }
     else if ( havereturn_variable )
       {
       if ( return_variable.size() > 0 )
@@ -108,16 +108,16 @@ bool cmExecProgramCommand
     }
   else
     {
-    result = cmSystemTools::RunCommand(command.c_str(), output, 
+    result = cmSystemTools::RunCommand(command.c_str(), output,
                                        retVal, 0, verbose);
     }
   if(!result)
     {
     retVal = -1;
-    }  
+    }
 
   if ( output_variable.size() > 0 )
-    {    
+    {
     std::string::size_type first = output.find_first_not_of(" \n\t\r");
     std::string::size_type last = output.find_last_not_of(" \n\t\r");
     if(first == std::string::npos)
@@ -128,7 +128,7 @@ bool cmExecProgramCommand
       {
       last = output.size()-1;
       }
-    
+
     std::string coutput = std::string(output, first, last-first+1);
     this->Makefile->AddDefinition(output_variable.c_str(), coutput.c_str());
     }
@@ -139,7 +139,7 @@ bool cmExecProgramCommand
     sprintf(buffer, "%d", retVal);
     this->Makefile->AddDefinition(return_variable.c_str(), buffer);
     }
-  
+
   return true;
 }
 

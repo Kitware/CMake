@@ -17,9 +17,9 @@
 /** \class cmRemoveDefinitionsCommand
  * \brief Specify a list of compiler defines
  *
- * cmRemoveDefinitionsCommand specifies a list of compiler defines. 
+ * cmRemoveDefinitionsCommand specifies a list of compiler defines.
  * These defines will
- * be removed from the compile command.  
+ * be removed from the compile command.
  */
 class cmRemoveDefinitionsCommand : public cmCommand
 {
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmRemoveDefinitionsCommand;
     }
@@ -43,7 +43,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "remove_definitions";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -51,7 +51,7 @@ public:
     {
     return "Removes -D define flags added by add_definitions.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -62,7 +62,7 @@ public:
       "Removes flags (added by add_definitions) from the compiler command "
       "line for sources in the current directory and below.";
     }
-  
+
   cmTypeMacro(cmRemoveDefinitionsCommand, cmCommand);
 };
 

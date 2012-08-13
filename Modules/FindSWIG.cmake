@@ -35,7 +35,7 @@ IF(SWIG_EXECUTABLE)
     ERROR_VARIABLE SWIG_swiglib_error
     RESULT_VARIABLE SWIG_swiglib_result)
 
-  IF(SWIG_swiglib_result) 
+  IF(SWIG_swiglib_result)
     IF(SWIG_FIND_REQUIRED)
       MESSAGE(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -swiglib\" failed with output:\n${SWIG_swiglib_error}")
     ELSE(SWIG_FIND_REQUIRED)

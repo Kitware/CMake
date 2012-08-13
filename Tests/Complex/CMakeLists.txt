@@ -27,7 +27,7 @@ MACRO(ASSERT value msg)
     MESSAGE ("Assertion failure:" ${msg} )
   ENDIF (NOT ${value})
 ENDMACRO(ASSERT)
- 
+
 # invoke the macro
 ASSERT(Complex_BINARY_DIR "The PROJECT command is broken")
 
@@ -40,7 +40,7 @@ MACRO(TEST_ARGC value1 value2)
     ADD_DEFINITIONS(${ARGV2} ${ARGV3})
   ENDIF (${ARGC} MATCHES 4)
 ENDMACRO(TEST_ARGC)
- 
+
 # invoke the macro
 TEST_ARGC(-DCMAKE_ARGV1 -DCMAKE_ARGV2 -DCMAKE_ARGV3 -DCMAKE_ARGV4)
 
@@ -111,7 +111,7 @@ ENDIF(${fooCACHE_TEST_VAR2} MATCHES bar)
 
 
 #
-# Specify include and lib dirs 
+# Specify include and lib dirs
 # (BEFORE is for coverage)
 #
 INCLUDE_DIRECTORIES(
@@ -151,9 +151,9 @@ MESSAGE("\nIgnore this message")
 OPTION(NO_EXEC_PROGRAM "Do not test EXEC_PROGRAM" 0)
 IF (NOT NO_EXEC_PROGRAM)
   EXEC_PROGRAM(${CMAKE_COMMAND} ARGS -E echo NO_EXEC_PROGRAM "${Complex_BINARY_DIR}")
-ELSE (NOT NO_EXEC_PROGRAM) 
+ELSE (NOT NO_EXEC_PROGRAM)
   MESSAGE("Set this option ON")
-ENDIF (NOT NO_EXEC_PROGRAM) 
+ENDIF (NOT NO_EXEC_PROGRAM)
 
 MARK_AS_ADVANCED(NO_EXEC_PROGRAM)
 MARK_AS_ADVANCED(CLEAR NO_EXEC_PROGRAM)
@@ -247,12 +247,12 @@ IF(NOT FIND_DUMMY_STLIB_VERSIONED MATCHES "/libdummylib${CMAKE_STATIC_LIBRARY_SU
 ENDIF()
 
 #
-# Test SET_SOURCE_FILES_PROPERTIES 
+# Test SET_SOURCE_FILES_PROPERTIES
 #
-SET_SOURCE_FILES_PROPERTIES(nonexisting_file2 
-  GENERATED 
-  ABSTRACT 
-  WRAP_EXCLUDE 
+SET_SOURCE_FILES_PROPERTIES(nonexisting_file2
+  GENERATED
+  ABSTRACT
+  WRAP_EXCLUDE
   COMPILE_FLAGS "-foo -bar")
 
 GET_SOURCE_FILE_PROPERTY(FILE_HAS_ABSTRACT nonexisting_file2 ABSTRACT)
@@ -320,7 +320,7 @@ ENDWHILE(while_var LESS 1000)
 SET(SHOULD_BE_ZERO )
 SET(SHOULD_BE_ONE 1)
 
-# test elseif functionality, the mess below tries to catch problem 
+# test elseif functionality, the mess below tries to catch problem
 # of clauses being executed early or late etc
 set (RESULT 3)
 if (RESULT EQUAL 1)
@@ -328,7 +328,7 @@ if (RESULT EQUAL 1)
     set (ELSEIF_RESULT 1)
   elseif (RESULT EQUAL 3)
     set (ELSEIF_RESULT 1)
-  endif (RESULT EQUAL 2)  
+  endif (RESULT EQUAL 2)
 elseif (RESULT EQUAL 2)
   set (ELSEIF_RESULT 1)
 elseif (RESULT EQUAL 3)
@@ -337,20 +337,20 @@ elseif (RESULT EQUAL 3)
   elseif (RESULT EQUAL 3)
     if (NOT ELSEIF_RESULT EQUAL 1)
       set (ELSEIF_RESULT 2)
-    endif (NOT ELSEIF_RESULT EQUAL 1)      
-  endif (RESULT EQUAL 2)  
+    endif (NOT ELSEIF_RESULT EQUAL 1)
+  endif (RESULT EQUAL 2)
 elseif (RESULT EQUAL 4)
   if (RESULT EQUAL 2)
     set (ELSEIF_RESULT 1)
   elseif (RESULT EQUAL 3)
     set (ELSEIF_RESULT 1)
-  endif (RESULT EQUAL 2)  
+  endif (RESULT EQUAL 2)
 else (RESULT  EQUAL 1)
   if (RESULT EQUAL 2)
     set (ELSEIF_RESULT 1)
   elseif (RESULT EQUAL 3)
     set (ELSEIF_RESULT 1)
-  endif (RESULT EQUAL 2)  
+  endif (RESULT EQUAL 2)
 endif (RESULT EQUAL 1)
 
 if (NOT ELSEIF_RESULT EQUAL 2)
@@ -364,7 +364,7 @@ endif()
 
 
 #
-# Configure file 
+# Configure file
 # (plug vars to #define so that they can be tested)
 #
 CONFIGURE_FILE(

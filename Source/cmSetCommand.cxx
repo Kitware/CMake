@@ -20,7 +20,7 @@ bool cmSetCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   // watch for ENV signatures
   const char* variable = args[0].c_str(); // VAR is always first
   if (!strncmp(variable,"ENV{",4) && strlen(variable) > 5)
@@ -31,7 +31,7 @@ bool cmSetCommand
     varName[strlen(variable)-5] = '\0';
     std::string putEnvArg = varName;
     putEnvArg += "=";
-    
+
     // what is the current value if any
     const char *currValue = getenv(varName);
     delete [] varName;
@@ -47,7 +47,7 @@ bool cmSetCommand
         }
       return true;
       }
-    
+
     // if it will be cleared, then clear it if it isn;t already clear
     if (currValue)
       {
@@ -55,7 +55,7 @@ bool cmSetCommand
       }
     return true;
     }
-  
+
   // SET (VAR) // Removes the definition of VAR.
   if (args.size() == 1)
     {
@@ -63,7 +63,7 @@ bool cmSetCommand
     return true;
     }
 
-  // here are the remaining options 
+  // here are the remaining options
   //  SET (VAR value )
   //  SET (VAR CACHE TYPE "doc String" [FORCE])
   //  SET (VAR value CACHE TYPE "doc string" [FORCE])
@@ -71,10 +71,10 @@ bool cmSetCommand
   bool cache = false; // optional
   bool force = false; // optional
   bool parentScope = false;
-  cmCacheManager::CacheEntryType type 
+  cmCacheManager::CacheEntryType type
     = cmCacheManager::STRING; // required if cache
   const char* docstring = 0; // required if cache
-  
+
   unsigned int ignoreLastArgs = 0;
   // look for PARENT_SCOPE argument
   if (args.size() > 1 && args[args.size()-1] == "PARENT_SCOPE")
@@ -136,7 +136,7 @@ bool cmSetCommand
     this->SetError("given invalid arguments for CACHE mode.");
     return false;
     }
-  
+
   if(cache)
     {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
@@ -145,7 +145,7 @@ bool cmSetCommand
     }
 
   // see if this is already in the cache
-  cmCacheManager::CacheIterator it = 
+  cmCacheManager::CacheIterator it =
     this->Makefile->GetCacheManager()->GetCacheIterator(variable);
   if(!it.IsAtEnd() && (it.GetType() != cmCacheManager::UNINITIALIZED))
     {
@@ -158,7 +158,7 @@ bool cmSetCommand
       return true;
       }
     }
-  
+
   // if it is meant to be in the cache then define it in the cache
   if(cache)
     {

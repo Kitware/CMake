@@ -54,19 +54,19 @@ Modify cmExprLexer.h:
 
 %%
 
-[0-9][0-9]* { yylvalp->Number = atoi(yytext); return exp_NUMBER; } 
+[0-9][0-9]* { yylvalp->Number = atoi(yytext); return exp_NUMBER; }
 
 "+" { return exp_PLUS; }
-"-" { return exp_MINUS; } 
-"*" { return exp_TIMES; } 
-"/" { return exp_DIVIDE; } 
-"%" { return exp_MOD; } 
-"\|" { return exp_OR; } 
-"&" { return exp_AND; } 
-"^" { return exp_XOR; } 
-"~" { return exp_NOT; } 
-"<<" { return exp_SHIFTLEFT; } 
-">>" { return exp_SHIFTRIGHT; } 
+"-" { return exp_MINUS; }
+"*" { return exp_TIMES; }
+"/" { return exp_DIVIDE; }
+"%" { return exp_MOD; }
+"\|" { return exp_OR; }
+"&" { return exp_AND; }
+"^" { return exp_XOR; }
+"~" { return exp_NOT; }
+"<<" { return exp_SHIFTLEFT; }
+">>" { return exp_SHIFTRIGHT; }
 "(" { return exp_OPENPARENT; }
 ")" { return exp_CLOSEPARENT; }
 

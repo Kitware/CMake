@@ -2,8 +2,8 @@
 # This module can be used to find Qt4.
 # The most important issue is that the Qt4 qmake is available via the system path.
 # This qmake is then used to detect basically everything else.
-# This module defines a number of key variables and macros. 
-# The variable QT_USE_FILE is set which is the path to a CMake file that can be included 
+# This module defines a number of key variables and macros.
+# The variable QT_USE_FILE is set which is the path to a CMake file that can be included
 # to compile Qt 4 applications and libraries.  It sets up the compilation
 # environment for include directories, preprocessor defines and populates a
 # QT_LIBRARIES variable.
@@ -15,10 +15,10 @@
 #   target_link_libraries(myexe ${QT_LIBRARIES})
 #
 # The minimum required version can be specified using the standard find_package()-syntax
-# (see example above). 
+# (see example above).
 # For compatibility with older versions of FindQt4.cmake it is also possible to
-# set the variable QT_MIN_VERSION to the minimum required version of Qt4 before the 
-# find_package(Qt4) command. 
+# set the variable QT_MIN_VERSION to the minimum required version of Qt4 before the
+# find_package(Qt4) command.
 # If both are used, the version used in the find_package() command overrides the
 # one from QT_MIN_VERSION.
 #
@@ -53,26 +53,26 @@
 #                    QT_USE_QTSCRIPTTOOLS
 #                    QT_USE_QTDECLARATIVE
 #
-#  QT_USE_IMPORTED_TARGETS 
+#  QT_USE_IMPORTED_TARGETS
 #        If this variable is set to TRUE, FindQt4.cmake will create imported
-#        library targets for the various Qt libraries and set the 
+#        library targets for the various Qt libraries and set the
 #        library variables like QT_QTCORE_LIBRARY to point at these imported
-#        targets instead of the library file on disk. This provides much better 
-#        handling of the release and debug versions of the Qt libraries and is 
+#        targets instead of the library file on disk. This provides much better
+#        handling of the release and debug versions of the Qt libraries and is
 #       also always backwards compatible, except for the case that dependencies
-#       of libraries are exported, these will then also list the names of the 
+#       of libraries are exported, these will then also list the names of the
 #       imported targets as dependency and not the file location on disk. This
 #       is much more flexible, but requires that FindQt4.cmake is executed before
 #       such an exported dependency file is processed.
 #
 # There are also some files that need processing by some Qt tools such as moc
 # and uic.  Listed below are macros that may be used to process those files.
-#  
+#
 #  macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
 #        create moc code from a list of files containing Qt class with
 #        the Q_OBJECT declaration.  Per-directory preprocessor definitions
 #        are also added.  Options may be given to moc, such as those found
-#        when executing "moc -help".  
+#        when executing "moc -help".
 #
 #  macro QT4_WRAP_UI(outfiles inputfile ... OPTIONS ...)
 #        create code from a list of Qt designer ui files.
@@ -92,13 +92,13 @@
 #  macro QT4_AUTOMOC(sourcefile1 sourcefile2 ... )
 #        This macro is still experimental.
 #        It can be used to have moc automatically handled.
-#        So if you have the files foo.h and foo.cpp, and in foo.h a 
+#        So if you have the files foo.h and foo.cpp, and in foo.h a
 #        a class uses the Q_OBJECT macro, moc has to run on it. If you don't
 #        want to use QT4_WRAP_CPP() (which is reliable and mature), you can insert
 #        #include "foo.moc"
 #        in foo.cpp and then give foo.cpp as argument to QT4_AUTOMOC(). This will the
 #        scan all listed files at cmake-time for such included moc files and if it finds
-#        them cause a rule to be generated to run moc at build time on the 
+#        them cause a rule to be generated to run moc at build time on the
 #        accompanying header file foo.h.
 #        If a source file has the SKIP_AUTOMOC property set it will be ignored by this macro.
 #
@@ -106,7 +106,7 @@
 #
 #  macro QT4_ADD_DBUS_INTERFACE(outfiles interface basename)
 #        Create a the interface header and implementation files with the
-#        given basename from the given interface xml file and add it to 
+#        given basename from the given interface xml file and add it to
 #        the list of sources.
 #
 #        You can pass additional parameters to the qdbusxml2cpp call by setting
@@ -136,19 +136,19 @@
 #
 #  macro QT4_GENERATE_DBUS_INTERFACE( header [interfacename] OPTIONS ...)
 #        generate the xml interface file from the given header.
-#        If the optional argument interfacename is omitted, the name of the 
+#        If the optional argument interfacename is omitted, the name of the
 #        interface file is constructed from the basename of the header with
 #        the suffix .xml appended.
 #        Options may be given to qdbuscpp2xml, such as those found when executing "qdbuscpp2xml --help"
 #
-#  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ... 
+#  macro QT4_CREATE_TRANSLATION( qm_files directories ... sources ...
 #                                ts_files ... OPTIONS ...)
 #        out: qm_files
 #        in:  directories sources ts_files
 #        options: flags to pass to lupdate, such as -extensions to specify
 #        extensions for a directory scan.
 #        generates commands to create .ts (vie lupdate) and .qm
-#        (via lrelease) - files from directories and/or sources. The ts files are 
+#        (via lrelease) - files from directories and/or sources. The ts files are
 #        created and/or updated in the source tree (unless given with full paths).
 #        The qm files are generated in the build tree.
 #        Updating the translations can be done by adding the qm_files
@@ -211,41 +211,41 @@
 #                   The QT_USE_FILE will also define QT_DEBUG and QT_NO_DEBUG
 #                   to fit your current build type.  Those are not contained
 #                   in QT_DEFINITIONS.
-#                  
-#  QT_INCLUDES      List of paths to all include directories of 
+#
+#  QT_INCLUDES      List of paths to all include directories of
 #                   Qt4 QT_INCLUDE_DIR and QT_QTCORE_INCLUDE_DIR are
 #                   always in this variable even if NOTFOUND,
 #                   all other INCLUDE_DIRS are
 #                   only added if they are found.
 #                   You do not need to use this if you include QT_USE_FILE.
-#   
+#
 #
 #  Include directories for the Qt modules are listed here.
 #  You do not need to use these variables if you include QT_USE_FILE.
 #
 #  QT_INCLUDE_DIR              Path to "include" of Qt4
-#  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support" 
-#  QT_QTASSISTANT_INCLUDE_DIR  Path to "include/QtAssistant" 
+#  QT_QT3SUPPORT_INCLUDE_DIR   Path to "include/Qt3Support"
+#  QT_QTASSISTANT_INCLUDE_DIR  Path to "include/QtAssistant"
 #  QT_QTASSISTANTCLIENT_INCLUDE_DIR       Path to "include/QtAssistant"
 #  QT_QAXCONTAINER_INCLUDE_DIR Path to "include/ActiveQt" (Windows only)
 #  QT_QAXSERVER_INCLUDE_DIR    Path to "include/ActiveQt" (Windows only)
-#  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"         
+#  QT_QTCORE_INCLUDE_DIR       Path to "include/QtCore"
 #  QT_QTDBUS_INCLUDE_DIR       Path to "include/QtDBus"
-#  QT_QTDESIGNER_INCLUDE_DIR   Path to "include/QtDesigner" 
+#  QT_QTDESIGNER_INCLUDE_DIR   Path to "include/QtDesigner"
 #  QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR   Path to "include/QtDesigner"
-#  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui" 
+#  QT_QTGUI_INCLUDE_DIR        Path to "include/QtGui"
 #  QT_QTHELP_INCLUDE_DIR       Path to "include/QtHelp"
-#  QT_QTMOTIF_INCLUDE_DIR      Path to "include/QtMotif" 
-#  QT_QTMULTIMEDIA_INCLUDE_DIR Path to "include/QtMultimedia" 
-#  QT_QTNETWORK_INCLUDE_DIR    Path to "include/QtNetwork" 
-#  QT_QTNSPLUGIN_INCLUDE_DIR   Path to "include/QtNsPlugin" 
-#  QT_QTOPENGL_INCLUDE_DIR     Path to "include/QtOpenGL" 
+#  QT_QTMOTIF_INCLUDE_DIR      Path to "include/QtMotif"
+#  QT_QTMULTIMEDIA_INCLUDE_DIR Path to "include/QtMultimedia"
+#  QT_QTNETWORK_INCLUDE_DIR    Path to "include/QtNetwork"
+#  QT_QTNSPLUGIN_INCLUDE_DIR   Path to "include/QtNsPlugin"
+#  QT_QTOPENGL_INCLUDE_DIR     Path to "include/QtOpenGL"
 #  QT_QTSCRIPT_INCLUDE_DIR     Path to "include/QtScript"
-#  QT_QTSQL_INCLUDE_DIR        Path to "include/QtSql" 
+#  QT_QTSQL_INCLUDE_DIR        Path to "include/QtSql"
 #  QT_QTSVG_INCLUDE_DIR        Path to "include/QtSvg"
 #  QT_QTTEST_INCLUDE_DIR       Path to "include/QtTest"
 #  QT_QTWEBKIT_INCLUDE_DIR     Path to "include/QtWebKit"
-#  QT_QTXML_INCLUDE_DIR        Path to "include/QtXml" 
+#  QT_QTXML_INCLUDE_DIR        Path to "include/QtXml"
 #  QT_QTXMLPATTERNS_INCLUDE_DIR  Path to "include/QtXmlPatterns"
 #  QT_PHONON_INCLUDE_DIR       Path to "include/phonon"
 #  QT_QTSCRIPTTOOLS_INCLUDE_DIR       Path to "include/QtScriptTools"
@@ -292,7 +292,7 @@
 #  QT_QTMAIN_LIBRARY                The qtmain library for Windows
 #  QT_PHONON_LIBRARY                The phonon library
 #  QT_QTSCRIPTTOOLS_LIBRARY         The QtScriptTools library
-#  
+#
 # The QtDeclarative library:             QT_QTDECLARATIVE_LIBRARY
 #
 # also defined, but NOT for general use are
@@ -307,17 +307,17 @@
 #  QT_QCOLLECTIONGENERATOR_EXECUTABLE  Where to find the qcollectiongenerator tool.
 #  QT_DESIGNER_EXECUTABLE              Where to find the Qt designer tool.
 #  QT_LINGUIST_EXECUTABLE              Where to find the Qt linguist tool.
-#  
 #
-# These are around for backwards compatibility 
+#
+# These are around for backwards compatibility
 # they will be set
 #  QT_WRAP_CPP  Set true if QT_MOC_EXECUTABLE is found
 #  QT_WRAP_UI   Set true if QT_UIC_EXECUTABLE is found
-#  
+#
 # These variables do _NOT_ have any effect anymore (compared to FindQt.cmake)
 #  QT_MT_REQUIRED         Qt4 is now always multithreaded
-#  
-# These variables are set to "" Because Qt structure changed 
+#
+# These variables are set to "" Because Qt structure changed
 # (They make no sense in Qt4)
 #  QT_QT_LIBRARY        Qt-Library is now split
 
@@ -340,12 +340,12 @@ IF( Qt4_FIND_COMPONENTS )
     STRING( TOUPPER ${component} _COMPONENT )
     SET( QT_USE_${_COMPONENT} 1 )
   ENDFOREACH( component )
-  
+
   # To make sure we don't use QtCore or QtGui when not in COMPONENTS
   IF(NOT QT_USE_QTCORE)
     SET( QT_DONT_USE_QTCORE 1 )
   ENDIF(NOT QT_USE_QTCORE)
-  
+
   IF(NOT QT_USE_QTGUI)
     SET( QT_DONT_USE_QTGUI 1 )
   ENDIF(NOT QT_USE_QTGUI)
@@ -765,7 +765,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
                  QtHelp QtWebKit QtXmlPatterns phonon QtNetwork QtMultimedia
                  QtNsPlugin QtOpenGL QtSql QtXml QtDesigner QtDBus QtScriptTools
                  QtDeclarative)
-  
+
   IF(Q_WS_X11)
     SET(QT_MODULES ${QT_MODULES} QtMotif)
   ENDIF(Q_WS_X11)
@@ -840,7 +840,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     ${QT_LIBRARY_DIR}/QtDesigner.framework/Headers
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
-  
+
   # Set QT_QTASSISTANT_INCLUDE_DIR
   FIND_PATH(QT_QTASSISTANT_INCLUDE_DIR QtAssistant
     PATHS
@@ -848,7 +848,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     ${QT_LIBRARY_DIR}/QtAssistant.framework/Headers
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
-  
+
   # Set QT_QTASSISTANTCLIENT_INCLUDE_DIR
   FIND_PATH(QT_QTASSISTANTCLIENT_INCLUDE_DIR QAssistantClient
     PATHS
@@ -866,11 +866,11 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # find the libraries
   FOREACH(QT_MODULE ${QT_MODULES})
     STRING(TOUPPER ${QT_MODULE} _upper_qt_module)
-    FIND_LIBRARY(QT_${_upper_qt_module}_LIBRARY_RELEASE 
+    FIND_LIBRARY(QT_${_upper_qt_module}_LIBRARY_RELEASE
                  NAMES ${QT_MODULE}${QT_LIBINFIX} ${QT_MODULE}${QT_LIBINFIX}4
                  PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
         )
-    FIND_LIBRARY(QT_${_upper_qt_module}_LIBRARY_DEBUG 
+    FIND_LIBRARY(QT_${_upper_qt_module}_LIBRARY_DEBUG
                  NAMES ${QT_MODULE}${QT_LIBINFIX}_debug ${QT_MODULE}${QT_LIBINFIX}d ${QT_MODULE}${QT_LIBINFIX}d4
                  PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
         )
@@ -891,11 +891,11 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     FIND_LIBRARY(QT_QTMAIN_LIBRARY_RELEASE NAMES qtmain${QT_LIBINFIX} PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
     FIND_LIBRARY(QT_QTMAIN_LIBRARY_DEBUG NAMES qtmain${QT_LIBINFIX}d PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   ENDIF(Q_WS_WIN)
-  
+
   # Set QT_QTASSISTANTCLIENT_LIBRARY
   FIND_LIBRARY(QT_QTASSISTANTCLIENT_LIBRARY_RELEASE NAMES QtAssistantClient${QT_LIBINFIX} QtAssistantClient${QT_LIBINFIX}4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   FIND_LIBRARY(QT_QTASSISTANTCLIENT_LIBRARY_DEBUG   NAMES QtAssistantClient${QT_LIBINFIX}_debug QtAssistantClient${QT_LIBINFIX}d QtAssistantClient${QT_LIBINFIX}d4 PATHS ${QT_LIBRARY_DIR}  NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-  
+
   # Set QT_QTASSISTANT_LIBRARY
   FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_RELEASE NAMES QtAssistantClient${QT_LIBINFIX} QtAssistantClient${QT_LIBINFIX}4 QtAssistant${QT_LIBINFIX} QtAssistant${QT_LIBINFIX}4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_DEBUG   NAMES QtAssistantClient${QT_LIBINFIX}_debug QtAssistantClient${QT_LIBINFIX}d QtAssistantClient${QT_LIBINFIX}d4 QtAssistant${QT_LIBINFIX}_debug QtAssistant${QT_LIBINFIX}d4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -915,7 +915,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ############################################
 
 
-  # Set QT_xyz_LIBRARY variable and add 
+  # Set QT_xyz_LIBRARY variable and add
   # library include path to QT_INCLUDES
   _QT4_ADJUST_LIB_VARS(QtCore)
 
@@ -938,7 +938,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
 
   #######################################
   #
-  #       Check the executables of Qt 
+  #       Check the executables of Qt
   #          ( moc, uic, rcc )
   #
   #######################################
@@ -957,7 +957,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     SET(QT_DESIGNER_EXECUTABLE NOTFOUND)
     SET(QT_LINGUIST_EXECUTABLE NOTFOUND)
   ENDIF(QT_QMAKE_CHANGED)
-  
+
   FIND_PROGRAM(QT_MOC_EXECUTABLE
     NAMES moc-qt4 moc
     PATHS ${QT_BINARY_DIR}
@@ -976,19 +976,19 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
-  FIND_PROGRAM(QT_RCC_EXECUTABLE 
+  FIND_PROGRAM(QT_RCC_EXECUTABLE
     NAMES rcc
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
-  FIND_PROGRAM(QT_DBUSCPP2XML_EXECUTABLE 
+  FIND_PROGRAM(QT_DBUSCPP2XML_EXECUTABLE
     NAMES qdbuscpp2xml
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
-  FIND_PROGRAM(QT_DBUSXML2CPP_EXECUTABLE 
+  FIND_PROGRAM(QT_DBUSXML2CPP_EXECUTABLE
     NAMES qdbusxml2cpp
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
@@ -1043,10 +1043,10 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # get the directory of the current file, used later on in the file
   GET_FILENAME_COMPONENT( _qt4_current_dir  "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
-  
+
   ###############################################
   #
-  #       configuration/system dependent settings  
+  #       configuration/system dependent settings
   #
   ###############################################
 

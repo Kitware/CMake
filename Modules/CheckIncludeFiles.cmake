@@ -59,21 +59,21 @@ MACRO(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
-      CMAKE_FLAGS 
+      CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
       OUTPUT_VARIABLE OUTPUT)
     IF(${VARIABLE})
       MESSAGE(STATUS "Looking for ${_description} - found")
       SET(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if files ${INCLUDE} "
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")
     ELSE(${VARIABLE})
       MESSAGE(STATUS "Looking for ${_description} - not found.")
       SET(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if files ${INCLUDE} "
         "exist failed with the following output:\n"
         "${OUTPUT}\nSource:\n${CMAKE_CONFIGURABLE_FILE_CONTENT}\n")

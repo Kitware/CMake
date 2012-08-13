@@ -27,16 +27,16 @@ INCLUDE_DIRECTORIES(${LoadCommand_BINARY_DIR})
 # make sure it is not already loaded
 IF(COMMAND CMAKE_TEST_COMMAND)
 ELSE(COMMAND CMAKE_TEST_COMMAND)
-  TRY_COMPILE(COMPILE_OK 
-    ${LoadCommand_BINARY_DIR}/CMakeCommands 
-    ${LoadCommand_SOURCE_DIR}/CMakeCommands 
+  TRY_COMPILE(COMPILE_OK
+    ${LoadCommand_BINARY_DIR}/CMakeCommands
+    ${LoadCommand_SOURCE_DIR}/CMakeCommands
     CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
     OUTPUT_VARIABLE OUTPUT )
 # do another TRY_COMPILE to get around make
 # problem on hp
-  TRY_COMPILE(COMPILE_OK 
-    ${LoadCommand_BINARY_DIR}/CMakeCommands 
-    ${LoadCommand_SOURCE_DIR}/CMakeCommands 
+  TRY_COMPILE(COMPILE_OK
+    ${LoadCommand_BINARY_DIR}/CMakeCommands
+    ${LoadCommand_SOURCE_DIR}/CMakeCommands
     CMAKE_LOADED_COMMANDS CMAKE_FLAGS -DMUDSLIDE_TYPE:STRING=MUCHO
     OUTPUT_VARIABLE OUTPUT )
 ENDIF(COMMAND CMAKE_TEST_COMMAND)
@@ -45,8 +45,8 @@ MESSAGE("Output from try compile: ${OUTPUT}")
 
 # if the compile was OK, try loading the command
 IF (COMPILE_OK)
-  LOAD_COMMAND(CMAKE_TEST_COMMAND 
-    ${LoadCommand_BINARY_DIR}/CMakeCommands 
+  LOAD_COMMAND(CMAKE_TEST_COMMAND
+    ${LoadCommand_BINARY_DIR}/CMakeCommands
     ${LoadCommand_BINARY_DIR}/CMakeCommands/Debug
     ${LoadCommand_BINARY_DIR}/CMakeCommands/Development
     )

@@ -23,8 +23,8 @@
  * cmCommand is the base class for all commands in CMake. A command
  * manifests as an entry in CMakeLists.txt and produces one or
  * more makefile rules. Commands are associated with a particular
- * makefile. This base class cmCommand defines the API for commands 
- * to support such features as enable/disable, inheritance, 
+ * makefile. This base class cmCommand defines the API for commands
+ * to support such features as enable/disable, inheritance,
  * documentation, and construction.
  */
 class cmCommand : public cmObject
@@ -35,18 +35,18 @@ public:
   /**
    * Construct the command. By default it is enabled with no makefile.
    */
-  cmCommand()  
+  cmCommand()
     {this->Makefile = 0; this->Enabled = true;}
 
   /**
    * Need virtual destructor to destroy real command type.
    */
   virtual ~cmCommand() {}
-  
+
   /**
    * Specify the makefile.
    */
-  void SetMakefile(cmMakefile*m) 
+  void SetMakefile(cmMakefile*m)
     {this->Makefile = m; }
   cmMakefile* GetMakefile() { return this->Makefile; }
 
@@ -87,12 +87,12 @@ public:
    * Does this command have a final pass?  Query after InitialPass.
    */
   virtual bool HasFinalPass() const { return false; }
-  
+
   /**
    * This is a virtual constructor for the command.
    */
   virtual cmCommand* Clone() = 0;
-  
+
   /**
    * This determines if the command is invoked when in script mode.
    */
@@ -139,13 +139,13 @@ public:
   /**
    * Enable the command.
    */
-  void EnabledOn() 
+  void EnabledOn()
     {this->Enabled = true;}
 
   /**
    * Disable the command.
    */
-  void EnabledOff() 
+  void EnabledOff()
     {this->Enabled = false;}
 
   /**
@@ -157,13 +157,13 @@ public:
   /**
    * Disable or enable the command.
    */
-  void SetEnabled(bool enabled)  
+  void SetEnabled(bool enabled)
     {this->Enabled = enabled;}
 
   /**
    * Return the last error string.
    */
-  const char* GetError() 
+  const char* GetError()
     {
       if(this->Error.length() == 0)
         {

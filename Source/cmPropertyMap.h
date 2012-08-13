@@ -21,13 +21,13 @@ class cmPropertyMap : public std::map<cmStdString,cmProperty>
 public:
   cmProperty *GetOrCreateProperty(const char *name);
 
-  void SetProperty(const char *name, const char *value, 
+  void SetProperty(const char *name, const char *value,
                    cmProperty::ScopeType scope);
 
   void AppendProperty(const char* name, const char* value,
                       cmProperty::ScopeType scope, bool asString=false);
 
-  const char *GetPropertyValue(const char *name, 
+  const char *GetPropertyValue(const char *name,
                                cmProperty::ScopeType scope,
                                bool &chain) const;
 

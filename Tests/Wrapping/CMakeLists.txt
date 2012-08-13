@@ -11,12 +11,12 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM 1)
 #
 # Lib and exe path
 #
-SET (LIBRARY_OUTPUT_PATH 
-  ${Wrapping_BINARY_DIR}/bin/ CACHE INTERNAL 
+SET (LIBRARY_OUTPUT_PATH
+  ${Wrapping_BINARY_DIR}/bin/ CACHE INTERNAL
   "Single output directory for building all libraries.")
 
-SET (EXECUTABLE_OUTPUT_PATH 
-  ${Wrapping_BINARY_DIR}/bin/ CACHE INTERNAL 
+SET (EXECUTABLE_OUTPUT_PATH
+  ${Wrapping_BINARY_DIR}/bin/ CACHE INTERNAL
   "Single output directory for building all executables.")
 
 #

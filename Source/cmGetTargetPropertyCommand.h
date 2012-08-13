@@ -17,7 +17,7 @@
 class cmGetTargetPropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmGetTargetPropertyCommand;
     }
@@ -41,7 +41,7 @@ public:
     {
     return "Get a property from a target.";
     }
-  
+
   /**
    * Longer documentation.
    */
@@ -59,7 +59,7 @@ public:
         "\n"
         "See also the more general get_property() command.";
     }
-  
+
   cmTypeMacro(cmGetTargetPropertyCommand, cmCommand);
 };
 

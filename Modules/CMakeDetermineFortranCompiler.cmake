@@ -15,7 +15,7 @@
 # determine the compiler to use for Fortran programs
 # NOTE, a generator may set CMAKE_Fortran_COMPILER before
 # loading this file to force a compiler.
-# use environment variable FC first if defined by user, next use 
+# use environment variable FC first if defined by user, next use
 # the cmake variable CMAKE_GENERATOR_FC which can be defined by a generator
 # as a default compiler
 
@@ -34,12 +34,12 @@ IF(NOT CMAKE_Fortran_COMPILER)
     ENDIF(CMAKE_Fortran_FLAGS_ENV_INIT)
     IF(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
     ELSE(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
-      MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable FC:\n$ENV{FC}.") 
+      MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable FC:\n$ENV{FC}.")
     ENDIF(EXISTS ${CMAKE_Fortran_COMPILER_INIT})
   ENDIF($ENV{FC} MATCHES ".+")
-  
+
   # next try prefer the compiler specified by the generator
-  IF(CMAKE_GENERATOR_FC) 
+  IF(CMAKE_GENERATOR_FC)
     IF(NOT CMAKE_Fortran_COMPILER_INIT)
       SET(CMAKE_Fortran_COMPILER_INIT ${CMAKE_GENERATOR_FC})
     ENDIF(NOT CMAKE_Fortran_COMPILER_INIT)
@@ -64,7 +64,7 @@ IF(NOT CMAKE_Fortran_COMPILER)
     #  ifc: Intel Fortran 95 compiler for Linux/x86
     #  efc: Intel Fortran 95 compiler for IA64
     #
-    #  The order is 95 or newer compilers first, then 90, 
+    #  The order is 95 or newer compilers first, then 90,
     #  then 77 or older compilers, gnu is always last in the group,
     #  so if you paid for a compiler it is picked by default.
     SET(CMAKE_Fortran_COMPILER_LIST
@@ -88,7 +88,7 @@ IF(NOT CMAKE_Fortran_COMPILER)
 ELSE(NOT CMAKE_Fortran_COMPILER)
    # we only get here if CMAKE_Fortran_COMPILER was specified using -D or a pre-made CMakeCache.txt
   # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-  # if CMAKE_Fortran_COMPILER is a list of length 2, use the first item as 
+  # if CMAKE_Fortran_COMPILER is a list of length 2, use the first item as
   # CMAKE_Fortran_COMPILER and the 2nd one as CMAKE_Fortran_COMPILER_ARG1
 
   LIST(LENGTH CMAKE_Fortran_COMPILER _CMAKE_Fortran_COMPILER_LIST_LENGTH)
@@ -97,9 +97,9 @@ ELSE(NOT CMAKE_Fortran_COMPILER)
     LIST(GET CMAKE_Fortran_COMPILER 0 CMAKE_Fortran_COMPILER)
   ENDIF("${_CMAKE_Fortran_COMPILER_LIST_LENGTH}" EQUAL 2)
 
-  # if a compiler was specified by the user but without path, 
+  # if a compiler was specified by the user but without path,
   # now try to find it with the full path
-  # if it is found, force it into the cache, 
+  # if it is found, force it into the cache,
   # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
   # if the C compiler already had a path, reuse it for searching the CXX compiler
   GET_FILENAME_COMPONENT(_CMAKE_USER_Fortran_COMPILER_PATH "${CMAKE_Fortran_COMPILER}" PATH)
@@ -113,7 +113,7 @@ ELSE(NOT CMAKE_Fortran_COMPILER)
   ENDIF(NOT _CMAKE_USER_Fortran_COMPILER_PATH)
 ENDIF(NOT CMAKE_Fortran_COMPILER)
 
-MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)  
+MARK_AS_ADVANCED(CMAKE_Fortran_COMPILER)
 
 # Build a small source file to identify the compiler.
 IF(${CMAKE_GENERATOR} MATCHES "Visual Studio")

@@ -24,21 +24,21 @@ IF(NOT CMAKE_Java_COMPILER)
       SET(CMAKE_Java_COMPILER_ARG1 "${CMAKE_Java_FLAGS_ENV_INIT}" CACHE STRING "First argument to Java compiler")
     ENDIF(CMAKE_Java_FLAGS_ENV_INIT)
     IF(NOT EXISTS ${CMAKE_Java_COMPILER_INIT})
-      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_COMPILER:\n$ENV{JAVA_COMPILER}.") 
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_COMPILER:\n$ENV{JAVA_COMPILER}.")
     ENDIF(NOT EXISTS ${CMAKE_Java_COMPILER_INIT})
   ENDIF($ENV{JAVA_COMPILER} MATCHES ".+")
 
   IF($ENV{JAVA_RUNTIME} MATCHES ".+")
     GET_FILENAME_COMPONENT(CMAKE_Java_RUNTIME_INIT $ENV{JAVA_RUNTIME} PROGRAM PROGRAM_ARGS CMAKE_Java_FLAGS_ENV_INIT)
     IF(NOT EXISTS ${CMAKE_Java_RUNTIME_INIT})
-      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_RUNTIME:\n$ENV{JAVA_RUNTIME}.") 
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_RUNTIME:\n$ENV{JAVA_RUNTIME}.")
     ENDIF(NOT EXISTS ${CMAKE_Java_RUNTIME_INIT})
   ENDIF($ENV{JAVA_RUNTIME} MATCHES ".+")
 
   IF($ENV{JAVA_ARCHIVE} MATCHES ".+")
     GET_FILENAME_COMPONENT(CMAKE_Java_ARCHIVE_INIT $ENV{JAVA_ARCHIVE} PROGRAM PROGRAM_ARGS CMAKE_Java_FLAGS_ENV_INIT)
     IF(NOT EXISTS ${CMAKE_Java_ARCHIVE_INIT})
-      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_ARCHIVE:\n$ENV{JAVA_ARCHIVE}.") 
+      MESSAGE(SEND_ERROR "Could not find compiler set in environment variable JAVA_ARCHIVE:\n$ENV{JAVA_ARCHIVE}.")
     ENDIF(NOT EXISTS ${CMAKE_Java_ARCHIVE_INIT})
   ENDIF($ENV{JAVA_ARCHIVE} MATCHES ".+")
 
@@ -71,7 +71,7 @@ IF(NOT CMAKE_Java_COMPILER)
     FIND_PROGRAM(CMAKE_Java_COMPILER
       NAMES javac
       PATHS ${Java_BIN_PATH}
-    )    
+    )
   ENDIF(CMAKE_Java_COMPILER_INIT)
 
   # if no runtime has been specified yet, then look for one
@@ -81,7 +81,7 @@ IF(NOT CMAKE_Java_COMPILER)
     FIND_PROGRAM(CMAKE_Java_RUNTIME
       NAMES java
       PATHS ${Java_BIN_PATH}
-    )    
+    )
   ENDIF(CMAKE_Java_RUNTIME_INIT)
 
   # if no archive has been specified yet, then look for one
@@ -91,12 +91,12 @@ IF(NOT CMAKE_Java_COMPILER)
     FIND_PROGRAM(CMAKE_Java_ARCHIVE
       NAMES jar
       PATHS ${Java_BIN_PATH}
-    )    
+    )
   ENDIF(CMAKE_Java_ARCHIVE_INIT)
 ENDIF(NOT CMAKE_Java_COMPILER)
-MARK_AS_ADVANCED(CMAKE_Java_COMPILER)  
+MARK_AS_ADVANCED(CMAKE_Java_COMPILER)
 
 # configure variables set in this file for fast reload later on
-CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeJavaCompiler.cmake.in 
+CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeJavaCompiler.cmake.in
   ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeJavaCompiler.cmake IMMEDIATE @ONLY)
 SET(CMAKE_Java_COMPILER_ENV_VAR "JAVA_COMPILER")

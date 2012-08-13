@@ -33,11 +33,11 @@ ENDIF(CMAKE_PAREN)
 WRITE_FILE(${SUBDIR_BINARY_DIR}/ShouldBeHere "This file should exist.")
 #WATCOM WMAKE does not support + in the name of a file!
 IF(WATCOM)
-  SET(PLUS_NAME_FILES 
+  SET(PLUS_NAME_FILES
     "Another Subdir/pair_int.int.c"
     vcl_algorithm_vcl_pair_double.foo.c)
 ELSE(WATCOM)
-    SET(PLUS_NAME_FILES 
+    SET(PLUS_NAME_FILES
     "Another Subdir/pair+int.int.c"
     vcl_algorithm+vcl_pair+double.foo.c)
 ENDIF(WATCOM)
@@ -57,7 +57,7 @@ IF(WATCOM)
     ENDIF("${f}" STREQUAL "ThirdSubDir/pair+int.int1.c")
   ENDFOREACH(f)
   SET(SOURCES ${SOURCES2})
-  SET(SOURCES ${SOURCES} 
+  SET(SOURCES ${SOURCES}
     vcl_algorithm_vcl_pair_double.foo.c)
 ELSE(WATCOM)
   FOREACH(f ${SOURCES})
@@ -67,9 +67,9 @@ ELSE(WATCOM)
     ENDIF("${f}" STREQUAL "ThirdSubDir/pair_int.int1.c")
   ENDFOREACH(f)
   SET(SOURCES ${SOURCES2})
-  SET(SOURCES ${SOURCES} 
+  SET(SOURCES ${SOURCES}
     vcl_algorithm+vcl_pair+double.foo.c)
-ENDIF(WATCOM)  
+ENDIF(WATCOM)
 ADD_EXECUTABLE(TestWithAuxSourceDir ${SOURCES})
 IF(CMAKE_PAREN)
   target_link_libraries(TestWithAuxSourceDir testOddPath)

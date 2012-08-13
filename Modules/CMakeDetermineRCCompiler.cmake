@@ -15,7 +15,7 @@
 # determine the compiler to use for C programs
 # NOTE, a generator may set CMAKE_C_COMPILER before
 # loading this file to force a compiler.
-# use environment variable CCC first if defined by user, next use 
+# use environment variable CCC first if defined by user, next use
 # the cmake variable CMAKE_GENERATOR_CC which can be defined by a generator
 # as a default compiler
 IF(NOT CMAKE_RC_COMPILER)
@@ -27,12 +27,12 @@ IF(NOT CMAKE_RC_COMPILER)
     ENDIF(CMAKE_RC_FLAGS_ENV_INIT)
     IF(EXISTS ${CMAKE_RC_COMPILER_INIT})
     ELSE(EXISTS ${CMAKE_RC_COMPILER_INIT})
-      MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable RC:\n$ENV{RC}.") 
+      MESSAGE(FATAL_ERROR "Could not find compiler set in environment variable RC:\n$ENV{RC}.")
     ENDIF(EXISTS ${CMAKE_RC_COMPILER_INIT})
   ENDIF($ENV{RC} MATCHES ".+")
-  
+
   # next try prefer the compiler specified by the generator
-  IF(CMAKE_GENERATOR_RC) 
+  IF(CMAKE_GENERATOR_RC)
     IF(NOT CMAKE_RC_COMPILER_INIT)
       SET(CMAKE_RC_COMPILER_INIT ${CMAKE_GENERATOR_RC})
     ENDIF(NOT CMAKE_RC_COMPILER_INIT)
@@ -52,7 +52,7 @@ IF(NOT CMAKE_RC_COMPILER)
   ENDIF(CMAKE_RC_COMPILER_INIT AND NOT CMAKE_RC_COMPILER)
 ENDIF(NOT CMAKE_RC_COMPILER)
 
-MARK_AS_ADVANCED(CMAKE_RC_COMPILER)  
+MARK_AS_ADVANCED(CMAKE_RC_COMPILER)
 
 GET_FILENAME_COMPONENT(_CMAKE_RC_COMPILER_NAME_WE ${CMAKE_RC_COMPILER} NAME_WE)
 IF(_CMAKE_RC_COMPILER_NAME_WE STREQUAL "windres")
@@ -62,6 +62,6 @@ ELSE()
 ENDIF()
 
 # configure variables set in this file for fast reload later on
-CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeRCCompiler.cmake.in 
+CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeRCCompiler.cmake.in
                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeRCCompiler.cmake IMMEDIATE)
 SET(CMAKE_RC_COMPILER_ENV_VAR "RC")

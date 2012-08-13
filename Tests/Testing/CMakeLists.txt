@@ -7,12 +7,12 @@ PROJECT (Testing)
 #
 # Lib and exe path
 #
-SET (LIBRARY_OUTPUT_PATH 
-     ${Testing_BINARY_DIR}/bin/ CACHE PATH 
+SET (LIBRARY_OUTPUT_PATH
+     ${Testing_BINARY_DIR}/bin/ CACHE PATH
      "Single output directory for building all libraries.")
 
-SET (EXECUTABLE_OUTPUT_PATH 
-     ${Testing_BINARY_DIR}/bin/ CACHE PATH 
+SET (EXECUTABLE_OUTPUT_PATH
+     ${Testing_BINARY_DIR}/bin/ CACHE PATH
      "Single output directory for building all executables.")
 
 #

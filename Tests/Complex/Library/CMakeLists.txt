@@ -15,12 +15,12 @@ SET_TARGET_PROPERTIES(create_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY ".")
 #
 AUX_SOURCE_DIRECTORY(ExtraSources LibrarySources)
 SET(LibrarySources ${LibrarySources}
-  file2 
-  empty 
-  create_file.cxx 
-  GENERATED 
+  file2
+  empty
+  create_file.cxx
+  GENERATED
   nonexisting_file)
-REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file) 
+REMOVE(LibrarySources create_file.cxx GENERATED nonexisting_file)
 ADD_LIBRARY(CMakeTestLibrary ${LibrarySources})
 
 IF(WIN32)
@@ -28,10 +28,10 @@ IF(WIN32)
     IF(NOT BORLAND)
       IF(NOT MINGW)
         TARGET_LINK_LIBRARIES(CMakeTestLibrary
-          debug 
+          debug
           user32.lib)
         TARGET_LINK_LIBRARIES(CMakeTestLibrary
-          optimized 
+          optimized
           kernel32.lib)
       ENDIF(NOT MINGW)
     ENDIF(NOT BORLAND)
@@ -97,7 +97,7 @@ ADD_CUSTOM_COMMAND(TARGET CMakeTestLibraryShared POST_BUILD
 #
 ADD_CUSTOM_TARGET(custom_target1
                   ALL
-                  ${CREATE_FILE_EXE} 
+                  ${CREATE_FILE_EXE}
                   "${Complex_BINARY_DIR}/Library/custom_target1.txt")
 
 ADD_DEPENDENCIES(custom_target1 create_file)

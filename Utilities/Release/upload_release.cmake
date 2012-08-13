@@ -19,7 +19,7 @@ set(count 0)
 foreach(file ${FILES})
   if(NOT IS_DIRECTORY ${file})
     message("upload ${file} ${UPLOAD_LOC}")
-    execute_process(COMMAND 
+    execute_process(COMMAND
       scp ${file} ${UPLOAD_LOC}
       RESULT_VARIABLE result)
     if("${result}" GREATER 0)

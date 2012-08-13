@@ -137,7 +137,7 @@ int cmakewizard::RunWizard(std::vector<std::string> const& args)
           }
         }
       else
-        {    
+        {
         if(this->ShowAdvanced || !i.GetPropertyAsBool("ADVANCED"))
           {
           this->AskUser(key.c_str(), i);

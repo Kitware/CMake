@@ -38,14 +38,14 @@ ENDIF(QT_QT_LIBRARY)
 FILE(TO_CMAKE_PATH "$ENV{KDEDIRS}" _KDEDIRS)
 
 # when cross compiling, searching kde4-config in order to run it later on
-# doesn't make a lot of sense. We'll have to do something about this. 
+# doesn't make a lot of sense. We'll have to do something about this.
 # Searching always in the target environment ? Then we get at least the correct one,
 # still it can't be used to run it. Alex
 
 # For KDE4 kde-config has been renamed to kde4-config
 FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config
    # the suffix must be used since KDEDIRS can be a list of directories which don't have bin/ appended
-   PATH_SUFFIXES bin               
+   PATH_SUFFIXES bin
    HINTS
    ${CMAKE_INSTALL_PREFIX}
    ${_KDEDIRS}

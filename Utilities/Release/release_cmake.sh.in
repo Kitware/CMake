@@ -3,7 +3,7 @@ echo "Start release"
 date
 echo ""
 echo  "remove and create working directory @CMAKE_RELEASE_DIRECTORY@"
-rm -rf @CMAKE_RELEASE_DIRECTORY@ 
+rm -rf @CMAKE_RELEASE_DIRECTORY@
 mkdir @CMAKE_RELEASE_DIRECTORY@
 
 check_exit_value()
@@ -12,7 +12,7 @@ check_exit_value()
    if [ "$VALUE" != "0" ]; then
     echo "error in $2"
     exit 1
-   fi      
+   fi
 }
 
 if [ ! -z "@CC@" ]; then
@@ -77,7 +77,7 @@ if [ ! -z "@USER_OVERRIDE@" ]; then
 fi
 
 echo "Checkout the source for @CMAKE_CREATE_VERSION@"
-cd @CMAKE_RELEASE_DIRECTORY@ 
+cd @CMAKE_RELEASE_DIRECTORY@
 if [ ! -z "@GIT_COMMAND@" ]; then
    # clone the repo without creating any source files in the directory
    # matching the branch being built (i.e. master CMake-2-8, etc)
@@ -97,9 +97,9 @@ else
    exit 1
 fi
 
-cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build 
+cd @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build
 
-if [ ! -z "@CONFIGURE_WITH_CMAKE@" ]; then 
+if [ ! -z "@CONFIGURE_WITH_CMAKE@" ]; then
     echo  "Run cmake to configure cmake"
     @CMAKE_CONFIGURE_PATH@ ../@CMAKE_CREATE_VERSION@
     check_exit_value $? "Configure cmake" || exit 1
@@ -125,7 +125,7 @@ if [ -z "@SKIP_TESTS@" ]; then
     check_exit_value $? "Test cmake" || exit 1
 fi
 
-# loop over binary generators 
+# loop over binary generators
 generators="@CPACK_BINARY_GENERATORS@"
 for GEN in $generators; do
     echo "Create $GEN package"
@@ -133,7 +133,7 @@ for GEN in $generators; do
     check_exit_value $? "Create $GEN package" || exit 1
 done
 
-# loop over source generators 
+# loop over source generators
 generators="@CPACK_SOURCE_GENERATORS@"
 for GEN in $generators; do
     echo "Create $GEN package"

@@ -96,7 +96,7 @@ ADD_DOCS(cmake-gui ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in)
 GET_TARGET_PROPERTY(CMD cmake LOCATION)
 ADD_CUSTOM_COMMAND(
   OUTPUT ${CMake_BINARY_DIR}/Docs/cmake.txt
-  COMMAND ${CMD} 
+  COMMAND ${CMD}
   ARGS --copyright ${CMake_BINARY_DIR}/Docs/Copyright.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.html

@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmReturnCommand;
     }
@@ -46,7 +46,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "return";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -54,7 +54,7 @@ public:
     {
     return "Return from a file, directory or function.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -72,7 +72,7 @@ public:
       "of the function. Note that a macro "
       "is not a function and does not handle return like a function does.";
     }
-  
+
   cmTypeMacro(cmReturnCommand, cmCommand);
 };
 

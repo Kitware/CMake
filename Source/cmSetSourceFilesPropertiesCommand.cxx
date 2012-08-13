@@ -40,14 +40,14 @@ bool cmSetSourceFilesPropertiesCommand
     ++j;
     }
 
-  // now call the worker function 
+  // now call the worker function
   std::string errors;
-  bool ret = 
+  bool ret =
     cmSetSourceFilesPropertiesCommand
-    ::RunCommand(this->Makefile, 
+    ::RunCommand(this->Makefile,
                  args.begin(),
                  args.begin() + numFiles,
-                 args.begin() + numFiles, 
+                 args.begin() + numFiles,
                  args.end(), errors);
   if (!ret)
     {

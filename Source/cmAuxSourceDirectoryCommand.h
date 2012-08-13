@@ -29,7 +29,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAuxSourceDirectoryCommand;
     }
@@ -45,7 +45,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return "aux_source_directory";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -53,7 +53,7 @@ public:
     {
     return "Find all source files in a directory.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -77,7 +77,7 @@ public:
       "one would have to manually rerun CMake to generate a build system "
       "incorporating the new file.";
     }
-  
+
   cmTypeMacro(cmAuxSourceDirectoryCommand, cmCommand);
 };
 

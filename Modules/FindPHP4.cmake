@@ -52,7 +52,7 @@ MARK_AS_ADVANCED(
 
 IF(APPLE)
 # this is a hack for now
-  SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS 
+  SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
    "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -Wl,-flat_namespace")
   FOREACH(symbol
     __efree
@@ -76,7 +76,7 @@ IF(APPLE)
     _zend_wrong_param_count
     _zval_used_for_init
     )
-    SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS 
+    SET(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
       "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS},-U,${symbol}")
   ENDFOREACH(symbol)
 ENDIF(APPLE)

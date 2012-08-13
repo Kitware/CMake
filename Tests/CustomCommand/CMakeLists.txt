@@ -56,9 +56,9 @@ ADD_CUSTOM_COMMAND(
 #
 ################################################################
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}//doc1.dvi # test 2 slashes
-  DEPENDS ${PROJECT_SOURCE_DIR}/doc1.tex 
-  COMMAND   ${CMAKE_COMMAND}  
-  ARGS      -E copy ${PROJECT_SOURCE_DIR}/doc1.tex 
+  DEPENDS ${PROJECT_SOURCE_DIR}/doc1.tex
+  COMMAND   ${CMAKE_COMMAND}
+  ARGS      -E copy ${PROJECT_SOURCE_DIR}/doc1.tex
   ${PROJECT_BINARY_DIR}/doc1.dvi
   )
 
@@ -131,13 +131,13 @@ ADD_CUSTOM_COMMAND(
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.pre
   DEPENDS ${PROJECT_SOURCE_DIR}/foo.in
           TDocument # Ensure doc1.h generates before this target
-  COMMAND   ${CMAKE_COMMAND}  
-  ARGS      -E copy ${PROJECT_SOURCE_DIR}/foo.in 
+  COMMAND   ${CMAKE_COMMAND}
+  ARGS      -E copy ${PROJECT_SOURCE_DIR}/foo.in
   ${PROJECT_BINARY_DIR}/foo.pre
   )
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
-  DEPENDS   ${PROJECT_BINARY_DIR}/foo.pre 
+  DEPENDS   ${PROJECT_BINARY_DIR}/foo.pre
   COMMAND   ${CMAKE_COMMAND}
   ARGS      -E copy ${PROJECT_BINARY_DIR}/foo.pre
   ${PROJECT_BINARY_DIR}/foo.c
@@ -161,7 +161,7 @@ CONFIGURE_FILE(
   )
 
 # add the executable
-ADD_EXECUTABLE(CustomCommand 
+ADD_EXECUTABLE(CustomCommand
   ${PROJECT_BINARY_DIR}/foo.h
   ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/wrapped.c
@@ -186,7 +186,7 @@ TARGET_LINK_LIBRARIES(CustomCommand GeneratedHeader)
 # Test for using just the target name as executable in the COMMAND
 # section. Has to be recognized and replaced by CMake with the output
 # actual location of the executable.
-# Additionally the generator is created in an extra subdir after the 
+# Additionally the generator is created in an extra subdir after the
 # ADD_CUSTOM_COMMAND() is used.
 #
 # Test the same for ADD_CUSTOM_TARGET()
@@ -197,11 +197,11 @@ ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/generated_extern.cxx
 
 ADD_EXECUTABLE(CustomCommandUsingTargetTest main.cxx ${CMAKE_CURRENT_BINARY_DIR}/generated_extern.cxx )
 
-ADD_CUSTOM_TARGET(RunTarget 
+ADD_CUSTOM_TARGET(RunTarget
   COMMAND generator_extern ${CMAKE_CURRENT_BINARY_DIR}/run_target.cxx
   )
 
-ADD_CUSTOM_COMMAND(TARGET CustomCommandUsingTargetTest POST_BUILD 
+ADD_CUSTOM_COMMAND(TARGET CustomCommandUsingTargetTest POST_BUILD
                    COMMAND dummy_generator ${CMAKE_CURRENT_BINARY_DIR}/generated_dummy.cxx)
 
 ADD_SUBDIRECTORY(GeneratorInExtraDir)

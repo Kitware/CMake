@@ -32,7 +32,7 @@ public:
                     const cmDocumentationSection& section,
                     const char* name);
   virtual void PrintPreformatted(std::ostream& os, const char* text);
-  virtual void PrintParagraph(std::ostream& os, const char* text); 
+  virtual void PrintParagraph(std::ostream& os, const char* text);
   virtual void PrintIndex(std::ostream& ,
                           std::vector<const cmDocumentationSection *>&);
 private:

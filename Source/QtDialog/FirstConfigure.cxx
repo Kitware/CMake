@@ -25,7 +25,7 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
   l->addWidget(this->CompilerSetupOptions[1]);
   l->addWidget(this->CompilerSetupOptions[2]);
   l->addWidget(this->CompilerSetupOptions[3]);
-  
+
   this->CompilerSetupOptions[0]->setChecked(true);
 
   QObject::connect(this->CompilerSetupOptions[0], SIGNAL(toggled(bool)),
@@ -47,7 +47,7 @@ void StartCompilerSetup::setGenerators(const QStringList& gens)
   this->GeneratorOptions->clear();
   this->GeneratorOptions->addItems(gens);
 };
-    
+
 void StartCompilerSetup::setCurrentGenerator(const QString& gen)
 {
   int idx = this->GeneratorOptions->findText(gen);
@@ -237,7 +237,7 @@ void CrossCompilerSetup::setProcessor(const QString& t)
 {
   this->systemProcessor->setText(t);
 }
-    
+
 QString CrossCompilerSetup::getFindRoot() const
 {
   return this->crossFindRoot->text();
@@ -313,10 +313,10 @@ FirstConfigure::FirstConfigure()
 
   this->mNativeCompilerSetupPage = new NativeCompilerSetup(this);
   this->setPage(NativeSetup, this->mNativeCompilerSetupPage);
-  
+
   this->mCrossCompilerSetupPage = new CrossCompilerSetup(this);
   this->setPage(CrossSetup, this->mCrossCompilerSetupPage);
-  
+
   this->mToolchainCompilerSetupPage = new ToolchainCompilerSetup(this);
   this->setPage(ToolchainSetup, this->mToolchainCompilerSetupPage);
 }
@@ -370,14 +370,14 @@ void FirstConfigure::loadFromSettings()
 void FirstConfigure::saveToSettings()
 {
   QSettings settings;
-  
+
   // save generator
   settings.beginGroup("Settings/StartPath");
   QString lastGen = this->mStartCompilerSetupPage->getGenerator();
   settings.setValue("LastGenerator", lastGen);
   settings.endGroup();
 
-  // save compiler setup 
+  // save compiler setup
   settings.beginGroup("Settings/Compiler");
   settings.setValue("CCompiler", this->mNativeCompilerSetupPage->getCCompiler());
   settings.setValue("CXXCompiler", this->mNativeCompilerSetupPage->getCXXCompiler());
@@ -419,7 +419,7 @@ bool FirstConfigure::crossCompilerToolChainFile() const
 {
   return this->mStartCompilerSetupPage->crossCompilerToolChainFile();
 }
-  
+
 QString FirstConfigure::getCrossCompilerToolChainFile() const
 {
   return this->mToolchainCompilerSetupPage->toolchainFile();

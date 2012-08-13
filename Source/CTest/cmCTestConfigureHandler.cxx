@@ -106,7 +106,7 @@ int cmCTestConfigureHandler::ProcessHandler()
       std::string end_time = this->CTest->CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
          << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
-         << "\t<EndConfigureTime>" << 
+         << "\t<EndConfigureTime>" <<
         static_cast<unsigned int>(cmSystemTools::GetTime())
          << "</EndConfigureTime>\n"
          << "<ElapsedMinutes>"

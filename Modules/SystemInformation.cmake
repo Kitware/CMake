@@ -23,33 +23,33 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES INCLUDE_DIRECTORIES "${DumpInformation_BINAR
 CONFIGURE_FILE("${CMAKE_ROOT}/Modules/SystemInformation.in" "${RESULT_FILE}")
 
 
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=== VARIABLES\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=================================================================\n")
 GET_CMAKE_PROPERTY(res VARIABLES)
 FOREACH(var ${res})
   FILE(APPEND "${RESULT_FILE}" "${var} \"${${var}}\"\n")
 ENDFOREACH(var ${res})
 
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=== COMMANDS\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=================================================================\n")
 GET_CMAKE_PROPERTY(res COMMANDS)
 FOREACH(var ${res})
   FILE(APPEND "${RESULT_FILE}" "${var}\n")
 ENDFOREACH(var ${res})
 
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=== MACROS\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=================================================================\n")
 FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllMacros.txt "")
 GET_CMAKE_PROPERTY(res MACROS)
@@ -57,11 +57,11 @@ FOREACH(var ${res})
   FILE(APPEND "${RESULT_FILE}" "${var}\n")
 ENDFOREACH(var ${res})
 
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=== OTHER\n")
-FILE(APPEND "${RESULT_FILE}" 
+FILE(APPEND "${RESULT_FILE}"
   "=================================================================\n")
 GET_DIRECTORY_PROPERTY(res INCLUDE_DIRECTORIES)
 FOREACH(var ${res})
@@ -80,13 +80,13 @@ FILE(APPEND "${RESULT_FILE}" "INCLUDE_REGULAR_EXPRESSION: ${res}\n")
 # binary tree
 MACRO(DUMP_FILE THE_FILE)
   IF (EXISTS "${THE_FILE}")
-    FILE(APPEND "${RESULT_FILE}" 
+    FILE(APPEND "${RESULT_FILE}"
       "\n=================================================================\n")
-    FILE(APPEND "${RESULT_FILE}" 
+    FILE(APPEND "${RESULT_FILE}"
       "=== ${THE_FILE}\n")
-    FILE(APPEND "${RESULT_FILE}" 
+    FILE(APPEND "${RESULT_FILE}"
       "=================================================================\n")
-  
+
     FILE(READ "${THE_FILE}" FILE_CONTENTS LIMIT 50000)
     FILE(APPEND "${RESULT_FILE}" "${FILE_CONTENTS}")
   ENDIF (EXISTS "${THE_FILE}")

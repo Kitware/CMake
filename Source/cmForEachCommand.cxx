@@ -25,7 +25,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
   else if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endforeach"))
     {
     // if this is the endofreach for this statement
-    if (!this->Depth) 
+    if (!this->Depth)
       {
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
@@ -45,7 +45,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       std::string tmps;
       cmListFileArgument arg;
       for( ; j != this->Args.end(); ++j)
-        {   
+        {
         // set the variable to the loop value
         mf.AddDefinition(this->Args[0].c_str(),j->c_str());
         // Invoke all the functions that were collected in the block.
@@ -83,10 +83,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       this->Depth--;
       }
     }
-  
+
   // record the command
   this->Functions.push_back(lff);
-  
+
   // always return true
   return true;
 }
@@ -121,7 +121,7 @@ bool cmForEachCommand
     {
     return this->HandleInMode(args);
     }
-  
+
   // create a function blocker
   cmForEachFunctionBlocker *f = new cmForEachFunctionBlocker();
   if ( args.size() > 1 )
@@ -157,7 +157,7 @@ bool cmForEachCommand
           step = 1;
           }
         }
-      if ( 
+      if (
         (start > stop && step > 0) ||
         (start < stop && step < 0) ||
         step == 0
@@ -198,7 +198,7 @@ bool cmForEachCommand
     f->Args = args;
     }
   this->Makefile->AddFunctionBlocker(f);
-  
+
   return true;
 }
 

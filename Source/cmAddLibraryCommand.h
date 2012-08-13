@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddLibraryCommand;
     }
@@ -50,7 +50,7 @@ public:
     {
     return "Add a library to the project using the specified source files.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -134,7 +134,7 @@ public:
       "Object libraries cannot be imported, exported, installed, or linked."
       ;
     }
-  
+
   cmTypeMacro(cmAddLibraryCommand, cmCommand);
 };
 

@@ -27,7 +27,7 @@ ENDIF()
 
 # Disable deprecation warnings for standard C functions.
 # really only needed for newer versions of VS, but should
-# not hurt other versions, and this will work into the 
+# not hurt other versions, and this will work into the
 # future
 IF(MSVC OR _INTEL_WINDOWS)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
@@ -56,9 +56,9 @@ ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
 
 # use the ansi CXX compile flag for building cmake
 IF (CMAKE_ANSI_CXXFLAGS)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")  
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
 ENDIF (CMAKE_ANSI_CXXFLAGS)
 
 IF (CMAKE_ANSI_CFLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")  
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
 ENDIF (CMAKE_ANSI_CFLAGS)

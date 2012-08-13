@@ -26,11 +26,11 @@ SET(PERL_POSSIBLE_BIN_PATHS
 
 IF(WIN32)
   GET_FILENAME_COMPONENT(
-    ActivePerl_CurrentVersion 
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl;CurrentVersion]" 
+    ActivePerl_CurrentVersion
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl;CurrentVersion]"
     NAME)
   SET(PERL_POSSIBLE_BIN_PATHS ${PERL_POSSIBLE_BIN_PATHS}
-    "C:/Perl/bin" 
+    "C:/Perl/bin"
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\ActiveState\\ActivePerl\\${ActivePerl_CurrentVersion}]/bin
     )
 ENDIF(WIN32)
@@ -73,7 +73,7 @@ ENDIF(PERL_EXECUTABLE)
 # Deprecated settings for compatibility with CMake1.4
 SET(PERL ${PERL_EXECUTABLE})
 
-# handle the QUIETLY and REQUIRED arguments and set PERL_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set PERL_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Perl

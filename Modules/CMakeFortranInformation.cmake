@@ -52,7 +52,7 @@ IF(CMAKE_Fortran_SIZEOF_DATA_PTR)
 ENDIF()
 
 # This should be included before the _INIT variables are
-# used to initialize the cache.  Since the rule variables 
+# used to initialize the cache.  Since the rule variables
 # have if blocks on them, users can still define them here.
 # But, it should still be after the platform file so changes can
 # be made to those values.
@@ -70,7 +70,7 @@ IF(CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran)
 ENDIF()
 
 
-# Fortran needs cmake to do a requires step during its build process to 
+# Fortran needs cmake to do a requires step during its build process to
 # catch any modules
 SET(CMAKE_NEEDS_REQUIRES_STEP_Fortran_FLAG 1)
 
@@ -102,7 +102,7 @@ IF(NOT DEFINED CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS)
 ENDIF()
 
 IF(NOT DEFINED CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG)
-  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG ${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG}) 
+  SET(CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG ${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG})
 ENDIF()
 
 IF(NOT DEFINED CMAKE_SHARED_LIBRARY_RUNTIME_Fortran_FLAG_SEP)
@@ -165,7 +165,7 @@ ENDIF(NOT CMAKE_INCLUDE_FLAG_SEP_Fortran)
 SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
 SET(CMAKE_Fortran_FLAGS_INIT "$ENV{FFLAGS} ${CMAKE_Fortran_FLAGS_INIT}")
-# avoid just having a space as the initial value for the cache 
+# avoid just having a space as the initial value for the cache
 IF(CMAKE_Fortran_FLAGS_INIT STREQUAL " ")
   SET(CMAKE_Fortran_FLAGS_INIT)
 ENDIF(CMAKE_Fortran_FLAGS_INIT STREQUAL " ")

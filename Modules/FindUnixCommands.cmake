@@ -21,7 +21,7 @@ FIND_PROGRAM(BASH
   bash
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
@@ -33,7 +33,7 @@ FIND_PROGRAM(CP
   cp
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
@@ -45,7 +45,7 @@ FIND_PROGRAM(GZIP
   gzip
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
@@ -57,7 +57,7 @@ FIND_PROGRAM(MV
   mv
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
@@ -69,7 +69,7 @@ FIND_PROGRAM(RM
   rm
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )
@@ -78,13 +78,13 @@ MARK_AS_ADVANCED(
 )
 
 FIND_PROGRAM(TAR
-  NAMES 
-  tar 
+  NAMES
+  tar
   gtar
   PATH
   ${CYGWIN_INSTALL_PATH}/bin
   /bin
-  /usr/bin 
+  /usr/bin
   /usr/local/bin
   /sbin
 )

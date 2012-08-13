@@ -13,7 +13,7 @@
 #  License text for the above reference.)
 
 # This should be included before the _INIT variables are
-# used to initialize the cache.  Since the rule variables 
+# used to initialize the cache.  Since the rule variables
 # have if blocks on them, users can still define them here.
 # But, it should still be after the platform file so changes can
 # be made to those values.

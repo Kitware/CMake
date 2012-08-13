@@ -67,8 +67,8 @@ bool cmIncludeDirectoryCommand
 // output from a program and passing it into a command the cleanup doesn't
 // always happen
 //
-void cmIncludeDirectoryCommand::AddDirectory(const char *i, 
-                                             bool before, 
+void cmIncludeDirectoryCommand::AddDirectory(const char *i,
+                                             bool before,
                                              bool system)
 {
   // break apart any line feed arguments
@@ -91,7 +91,7 @@ void cmIncludeDirectoryCommand::AddDirectory(const char *i,
   // remove any leading or trailing spaces and \r
   std::string::size_type b = ret.find_first_not_of(" \r");
   std::string::size_type e = ret.find_last_not_of(" \r");
-  if ((b!=ret.npos) && (e!=ret.npos))  
+  if ((b!=ret.npos) && (e!=ret.npos))
     {
     ret.assign(ret, b, 1+e-b);   // copy the remaining substring
     }

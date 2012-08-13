@@ -17,7 +17,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-static const char* SLAHeader = 
+static const char* SLAHeader =
 "data 'LPic' (5000) {\n"
 "    $\"0002 0011 0003 0001 0000 0000 0002 0000\"\n"
 "    $\"0008 0003 0000 0001 0004 0000 0004 0005\"\n"
@@ -29,7 +29,7 @@ static const char* SLAHeader =
 "};\n"
 "\n";
 
-static const char* SLASTREnglish = 
+static const char* SLASTREnglish =
 "resource 'STR#' (5002, \"English\") {\n"
 "    {\n"
 "        \"English\",\n"
@@ -90,7 +90,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
     return 0;
     }
   this->SetOptionIfNotSet("CPACK_COMMAND_SETFILE", setfile_path.c_str());
-  
+
   const std::string rez_path = cmSystemTools::FindProgram("Rez",
     paths, false);
   if(rez_path.empty())
@@ -222,7 +222,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   // Get optional arguments ...
   const std::string cpack_package_icon = this->GetOption("CPACK_PACKAGE_ICON")
     ? this->GetOption("CPACK_PACKAGE_ICON") : "";
-  
+
   const std::string cpack_dmg_volume_name =
     this->GetOption("CPACK_DMG_VOLUME_NAME")
     ? this->GetOption("CPACK_DMG_VOLUME_NAME")
@@ -233,8 +233,8 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     ? this->GetOption("CPACK_DMG_FORMAT") : "UDZO";
 
   // Get optional arguments ...
-  std::string cpack_license_file = 
-    this->GetOption("CPACK_RESOURCE_FILE_LICENSE") ? 
+  std::string cpack_license_file =
+    this->GetOption("CPACK_RESOURCE_FILE_LICENSE") ?
     this->GetOption("CPACK_RESOURCE_FILE_LICENSE") : "";
 
   const std::string cpack_dmg_background_image =
@@ -405,7 +405,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     cmOStringStream detach_command;
     detach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     detach_command << " detach";
-    detach_command << " \"" << temp_mount.str() << "\""; 
+    detach_command << " \"" << temp_mount.str() << "\"";
 
     if(!this->RunCommand(detach_command))
       {
@@ -416,7 +416,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       return 0;
       }
     }
-  
+
   if(!cpack_license_file.empty())
   {
     std::string sla_r = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
@@ -460,7 +460,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     udco_image_command << " convert \"" << temp_image << "\"";
     udco_image_command << " -format UDCO";
     udco_image_command << " -o \"" << temp_udco << "\"";
-    
+
     std::string error;
     if(!this->RunCommand(udco_image_command, &error))
       {
@@ -476,17 +476,17 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     unflatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     unflatten_command << " unflatten ";
     unflatten_command << "\"" << temp_udco << "\"";
-    
+
     if(!this->RunCommand(unflatten_command, &error))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error unflattening dmg for adding SLA." << std::endl
-        << error 
+        << error
         << std::endl);
       return 0;
       }
- 
-    // Rez the SLA 
+
+    // Rez the SLA
     cmOStringStream embed_sla_command;
     embed_sla_command << this->GetOption("CPACK_COMMAND_REZ");
     embed_sla_command << " \"" << sla_r << "\"";
@@ -496,8 +496,8 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     if(!this->RunCommand(embed_sla_command, &error))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "Error adding SLA." << std::endl 
-        << error 
+        "Error adding SLA." << std::endl
+        << error
         << std::endl);
       return 0;
       }
@@ -507,7 +507,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     flatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     flatten_command << " flatten ";
     flatten_command << "\"" << temp_udco << "\"";
-    
+
     if(!this->RunCommand(flatten_command, &error))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -530,7 +530,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   final_image_command << " -imagekey";
   final_image_command << " zlib-level=9";
   final_image_command << " -o \"" << output_file << "\"";
-  
+
   if(!this->RunCommand(final_image_command))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

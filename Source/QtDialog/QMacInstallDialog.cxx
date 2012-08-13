@@ -15,11 +15,11 @@ QMacInstallDialog::QMacInstallDialog(QWidget*w)
 {
   this->Internals = new QMacInstallDialogInternals;
   this->Internals->setupUi(this);
-  QObject::connect(this->Internals->choosePathButton, SIGNAL(pressed()), 
+  QObject::connect(this->Internals->choosePathButton, SIGNAL(pressed()),
                    this, SLOT(ShowBrowser()));
-  QObject::connect(this->Internals->skipInstallButton, SIGNAL(pressed()), 
+  QObject::connect(this->Internals->skipInstallButton, SIGNAL(pressed()),
                    this, SLOT(SkipInstall()));
-  QObject::connect(this->Internals->doInstallButton, SIGNAL(pressed()), 
+  QObject::connect(this->Internals->doInstallButton, SIGNAL(pressed()),
                    this, SLOT(DoInstall()));
   this->Internals->InstallPrefix->setText("/usr/bin/");
 
@@ -31,7 +31,7 @@ QMacInstallDialog::~QMacInstallDialog()
 }
 
 void QMacInstallDialog::DoInstall()
-{  
+{
   QDir installDir(this->Internals->InstallPrefix->text());
   QString installTo = installDir.path();
   if(!cmSystemTools::FileExists(installTo.toLocal8Bit().data()))
@@ -42,7 +42,7 @@ void QMacInstallDialog::DoInstall()
     message += installDir.path();
     QString title = tr("Create Directory");
     QMessageBox::StandardButton btn;
-    btn = QMessageBox::information(this, title, message, 
+    btn = QMessageBox::information(this, title, message,
                                    QMessageBox::Yes | QMessageBox::No);
     if(btn == QMessageBox::Yes)
       {
@@ -52,7 +52,7 @@ void QMacInstallDialog::DoInstall()
   QDir cmExecDir(QApplication::applicationDirPath());
   cmExecDir.cd("../bin");
   QFileInfoList list = cmExecDir.entryInfoList();
-  for (int i = 0; i < list.size(); ++i) 
+  for (int i = 0; i < list.size(); ++i)
     {
     QFileInfo fileInfo = list.at(i);
     QString filename = fileInfo.fileName();
@@ -75,7 +75,7 @@ void QMacInstallDialog::DoInstall()
         message += newName;
         QString title = tr("Error Removing file");
         QMessageBox::StandardButton btn =
-          QMessageBox::critical(this, title, message, 
+          QMessageBox::critical(this, title, message,
                                 QMessageBox::Ok|QMessageBox::Abort);
         if(btn == QMessageBox::Abort)
           {
@@ -93,7 +93,7 @@ void QMacInstallDialog::DoInstall()
       message += newName;
       QString title = tr("Error Creating Symlink");
       QMessageBox::StandardButton btn =
-        QMessageBox::critical(this, title, message, 
+        QMessageBox::critical(this, title, message,
                               QMessageBox::Ok|QMessageBox::Abort);
       if(btn == QMessageBox::Abort)
         {
@@ -112,7 +112,7 @@ void QMacInstallDialog::SkipInstall()
 
 void QMacInstallDialog::ShowBrowser()
 {
-  QString dir = QFileDialog::getExistingDirectory(this, 
+  QString dir = QFileDialog::getExistingDirectory(this,
     tr("Enter Install Prefix"), this->Internals->InstallPrefix->text());
   if(!dir.isEmpty())
     {

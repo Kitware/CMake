@@ -4,13 +4,13 @@
 # If multiple versions of QT are found on the machine, then
 # The user must set the option DESIRED_QT_VERSION to the version
 # they want to use.  If only one version of qt is found on the machine,
-# then the DESIRED_QT_VERSION is set to that version and the 
+# then the DESIRED_QT_VERSION is set to that version and the
 # matching FindQt3 or FindQt4 module is included.
 # Once the user sets DESIRED_QT_VERSION, then the FindQt3 or FindQt4 module
 # is included.
 #
-#  QT_REQUIRED if this is set to TRUE then if CMake can 
-#              not find QT4 or QT3 an error is raised 
+#  QT_REQUIRED if this is set to TRUE then if CMake can
+#              not find QT4 or QT3 an error is raised
 #              and a message is sent to the user.
 #
 #  DESIRED_QT_VERSION OPTION is created
@@ -72,7 +72,7 @@ ENDIF(QT_QMAKE_EXECUTABLE_FINDQT)
 
 IF(QT_QMAKE_EXECUTABLE_FINDQT)
   EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE_FINDQT}
-    ARGS "-query QT_INSTALL_HEADERS" 
+    ARGS "-query QT_INSTALL_HEADERS"
     OUTPUT_VARIABLE qt_headers )
 ENDIF(QT_QMAKE_EXECUTABLE_FINDQT)
 
@@ -94,7 +94,7 @@ IF(QT4_QGLOBAL_H_FILE)
 ENDIF(QT4_QGLOBAL_H_FILE)
 
 FIND_FILE( QT3_QGLOBAL_H_FILE qglobal.h
-  "${QT_SEARCH_PATH}/Qt/include" 
+  "${QT_SEARCH_PATH}/Qt/include"
  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"

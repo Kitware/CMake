@@ -3,7 +3,7 @@
 # This file illustrates the shadow-class C++ interface generated
 # by SWIG.
 
-import example 
+import example
 
 # ----- Object creation -----
 

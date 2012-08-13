@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
     return 1;
     }
   std::string arg = argv[1];
-  if ( (arg.find_first_of(" ") != arg.npos) && 
+  if ( (arg.find_first_of(" ") != arg.npos) &&
        (arg.find_first_of("\"") == arg.npos) )
     {
     arg = "\"" + arg + "\"";
@@ -32,7 +32,7 @@ int main (int argc, char *argv[])
   for ( cc = 2; cc < argc; cc ++ )
     {
     std::string arg = argv[cc];
-    if ( (arg.find_first_of(" ") != arg.npos) && 
+    if ( (arg.find_first_of(" ") != arg.npos) &&
          (arg.find_first_of("\"") == arg.npos) )
       {
       arg = "\"" + arg + "\"";

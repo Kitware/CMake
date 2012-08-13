@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmTryRunCommand;
     }
@@ -49,7 +49,7 @@ public:
     {
     return "Try compiling and then running some code.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -101,10 +101,10 @@ public:
 
   cmTypeMacro(cmTryRunCommand, cmCoreTryCompile);
 private:
-  void RunExecutable(const std::string& runArgs, 
+  void RunExecutable(const std::string& runArgs,
                      std::string* runOutputContents);
-  void DoNotRunExecutable(const std::string& runArgs, 
-                          const std::string& srcFile, 
+  void DoNotRunExecutable(const std::string& runArgs,
+                          const std::string& srcFile,
                           std::string* runOutputContents);
 
   std::string CompileResultVariable;

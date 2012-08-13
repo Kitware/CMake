@@ -58,7 +58,7 @@ public:
    */
   virtual void CallVisualStudioMacro(MacroName m,
                                      const char* vsSolutionFile = 0);
-  
+
   // return true if target is fortran only
   bool TargetIsFortranOnly(cmTarget& t);
 

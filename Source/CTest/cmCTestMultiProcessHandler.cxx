@@ -48,7 +48,7 @@ cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
 }
 
   // Set the tests
-void 
+void
 cmCTestMultiProcessHandler::SetTests(TestMap& tests,
                                      PropertiesMap& properties)
 {
@@ -178,7 +178,7 @@ void cmCTestMultiProcessHandler::EraseTest(int test)
 //---------------------------------------------------------
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
-  size_t processors = 
+  size_t processors =
     static_cast<int>(this->Properties[test]->Processors);
   //If this is set to run serially, it must run alone.
   //Also, if processors setting is set higher than the -j
@@ -205,7 +205,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
       }
     }
 
-  // copy the depend tests locally because when 
+  // copy the depend tests locally because when
   // a test is finished it will be removed from the depend list
   // and we don't want to be iterating a list while removing from it
   TestSet depends = this->Tests[test];
@@ -240,7 +240,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
     this->StartTestProcess(test);
     return true;
     }
-  // This test was not able to start because it is waiting 
+  // This test was not able to start because it is waiting
   // on depends to run
   return false;
 }
@@ -351,7 +351,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
     while(std::getline(fin, line))
       {
       if(line == "---") break;
-      std::vector<cmsys::String> parts = 
+      std::vector<cmsys::String> parts =
         cmSystemTools::SplitString(line.c_str(), ' ');
       //Format: <name> <previous_runs> <avg_cost>
       if(parts.size() < 3) break;
@@ -552,7 +552,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
       }
     cmOStringStream indexStr;
     indexStr << " #" << p.Index << ":";
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, 
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
       std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
       << indexStr.str().c_str());
     cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
@@ -603,7 +603,7 @@ void cmCTestMultiProcessHandler::CheckResume()
         << std::endl
         << "----------------------------------------------------------"
         << std::endl;
-        
+
       std::ifstream fin;
       fin.open(fname.c_str());
       std::string line;

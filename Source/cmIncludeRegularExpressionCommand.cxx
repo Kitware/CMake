@@ -21,12 +21,12 @@ bool cmIncludeRegularExpressionCommand
     return false;
     }
   this->Makefile->SetIncludeRegularExpression(args[0].c_str());
-  
+
   if(args.size() > 1)
     {
     this->Makefile->SetComplainRegularExpression(args[1].c_str());
     }
-  
+
   return true;
 }
 

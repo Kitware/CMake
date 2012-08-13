@@ -5,7 +5,7 @@
 #    define CM_TEST_LIB_EXPORT  __declspec( dllimport )
 #  endif
 #else
-#  define CM_TEST_LIB_EXPORT 
+#  define CM_TEST_LIB_EXPORT
 #endif
 
 CM_TEST_LIB_EXPORT float Lib2Func();

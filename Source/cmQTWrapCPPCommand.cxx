@@ -12,7 +12,7 @@
 #include "cmQTWrapCPPCommand.h"
 
 // cmQTWrapCPPCommand
-bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn, 
+bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
                                      cmExecutionStatus &)
 {
   if(argsIn.size() < 3 )

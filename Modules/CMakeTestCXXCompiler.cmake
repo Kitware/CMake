@@ -21,12 +21,12 @@ INCLUDE(CMakeTestCompilerCommon)
 # any makefiles or projects.
 IF(NOT CMAKE_CXX_COMPILER_WORKS)
   PrintTestCompilerStatus("CXX" "")
-  FILE(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx 
+  FILE(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     "#ifndef __cplusplus\n"
     "# error \"The CMAKE_CXX_COMPILER is set to a C compiler\"\n"
     "#endif\n"
     "int main(){return 0;}\n")
-  TRY_COMPILE(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR} 
+  TRY_COMPILE(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
   SET(CXX_TEST_WAS_RUN 1)

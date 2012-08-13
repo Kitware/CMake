@@ -100,7 +100,7 @@ SET(CMAKE_Fortran_CREATE_SHARED_MODULE
       "<CMAKE_Fortran_COMPILER>  <LANGUAGE_COMPILE_FLAGS> <CMAKE_SHARED_MODULE_CREATE_Fortran_FLAGS> <LINK_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
 
 
-#  We can use $ENV{INTEL_LICENSE_FILE} to try and get at the installation location for ICC. 
+#  We can use $ENV{INTEL_LICENSE_FILE} to try and get at the installation location for ICC.
 # We also need to consider to use cce (which is the 64bit compiler) and not JUST the 32bit compiler.
 # I have no idea what the best way to do that would be.
 

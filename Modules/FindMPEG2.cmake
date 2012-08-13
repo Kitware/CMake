@@ -20,7 +20,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(MPEG2_INCLUDE_DIR 
+FIND_PATH(MPEG2_INCLUDE_DIR
   NAMES mpeg2.h mpeg2dec/mpeg2.h
   PATHS /usr/local/livid
 )
@@ -34,13 +34,13 @@ FIND_LIBRARY( MPEG2_vo_LIBRARY vo
 )
 
 
-# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(MPEG2 DEFAULT_MSG MPEG2_mpeg2_LIBRARY MPEG2_INCLUDE_DIR)
 
 IF(MPEG2_FOUND)
-  SET( MPEG2_LIBRARIES ${MPEG2_mpeg2_LIBRARY} 
+  SET( MPEG2_LIBRARIES ${MPEG2_mpeg2_LIBRARY}
                         ${MPEG2_vo_LIBRARY})
 
   #some native mpeg2 installations will depend

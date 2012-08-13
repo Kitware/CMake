@@ -16,7 +16,7 @@
 
 class cmDocumentationSection;
 
-class cmPropertyDefinitionMap : 
+class cmPropertyDefinitionMap :
 public std::map<cmStdString,cmPropertyDefinition>
 {
 public:

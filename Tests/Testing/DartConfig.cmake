@@ -9,7 +9,7 @@ SET (DROP_SITE_USER "")
 SET (DROP_SITE_PASSWORD "")
 SET (TRIGGER_SITE "")
 
-# Dart server configuration 
+# Dart server configuration
 # SET (CVS_WEB_URL "")
 # SET (CVS_WEB_CVSROOT "")
 # SET (USE_DOXYGEN "Off")

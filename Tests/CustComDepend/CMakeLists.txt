@@ -10,5 +10,5 @@ add_custom_command(
   ${CustComDepend_BINARY_DIR}/bar.c
   DEPENDS ${CustComDepend_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/foo
 )
-  
+
 add_library(bar SHARED ${CustComDepend_BINARY_DIR}/bar.c)

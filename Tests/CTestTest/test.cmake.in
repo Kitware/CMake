@@ -6,13 +6,13 @@
 # this is the cvs module name that should be checked out
 SET (CTEST_MODULE_NAME SmallAndFast)
 
-# these are the the name of the source and binary directory on disk. 
+# these are the the name of the source and binary directory on disk.
 # They will be appended to DASHBOARD_ROOT
 SET (CTEST_SOURCE_NAME SmallAndFast)
 SET (CTEST_BINARY_NAME SmallAndFastBuild)
 
 # which ctest command to use for running the dashboard
-SET (CTEST_COMMAND 
+SET (CTEST_COMMAND
   "\"${CTEST_EXECUTABLE_NAME}\" --version"
   "\"${CTEST_EXECUTABLE_NAME}\" -D Experimental -A \"${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}\""
   )
@@ -54,7 +54,7 @@ MEMORYCHECK_COMMAND_OPTIONS:STRING=@MEMORYCHECK_COMMAND_OPTIONS@
 COVERAGE_COMMAND:FILEPATH=@COVERAGE_COMMAND@
 ")
 
-# if you do not want to use the default location for a 
+# if you do not want to use the default location for a
 # dashboard then set this variable to the directory
 # the dashboard should be in
 SET (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@/Tests/CTestTest")

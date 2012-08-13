@@ -9,5 +9,5 @@ SET(CMAKE_CROSSCOMPILING ON)
 ADD_EXECUTABLE(CrossCompile main.c)
 
 TRY_RUN(run_result compile_result
-    ${CrossCompile_BINARY_DIR}  
+    ${CrossCompile_BINARY_DIR}
     ${CrossCompile_SOURCE_DIR}/main.c)

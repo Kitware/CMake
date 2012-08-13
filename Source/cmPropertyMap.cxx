@@ -43,7 +43,7 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
 #ifdef CMAKE_STRICT
   if (!this->CMakeInstance)
     {
-    cmSystemTools::Error("CMakeInstance not set on a property map!"); 
+    cmSystemTools::Error("CMakeInstance not set on a property map!");
     abort();
     }
   else
@@ -85,10 +85,10 @@ void cmPropertyMap::AppendProperty(const char* name, const char* value,
 }
 
 const char *cmPropertyMap
-::GetPropertyValue(const char *name, 
-                   cmProperty::ScopeType scope, 
+::GetPropertyValue(const char *name,
+                   cmProperty::ScopeType scope,
                    bool &chain) const
-{ 
+{
   chain = false;
   if (!name)
     {
@@ -99,7 +99,7 @@ const char *cmPropertyMap
 #ifdef CMAKE_STRICT
   if (!this->CMakeInstance)
     {
-    cmSystemTools::Error("CMakeInstance not set on a property map!"); 
+    cmSystemTools::Error("CMakeInstance not set on a property map!");
     abort();
     }
   else

@@ -31,7 +31,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmVariableWatchCommand;
     }
@@ -67,7 +67,7 @@ public:
     {
     return "Watch the CMake variable for change.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -80,7 +80,7 @@ public:
       "will be executed. The command will receive the following arguments:"
       " COMMAND(<variable> <access> <value> <current list file> <stack>)";
     }
-  
+
   cmTypeMacro(cmVariableWatchCommand, cmCommand);
 
   void VariableAccessed(const std::string& variable, int access_type,

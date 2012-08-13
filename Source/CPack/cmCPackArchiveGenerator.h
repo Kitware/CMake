@@ -33,7 +33,7 @@ public:
    */
   cmCPackArchiveGenerator(cmArchiveWrite::Compress, cmArchiveWrite::Type);
   virtual ~cmCPackArchiveGenerator();
-  // Used to add a header to the archive 
+  // Used to add a header to the archive
   virtual int GenerateHeader(std::ostream* os);
   // component support
   virtual bool SupportsComponentInstallation() const;

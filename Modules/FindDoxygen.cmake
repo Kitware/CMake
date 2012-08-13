@@ -39,13 +39,13 @@ ENDIF(Doxygen_FIND_QUIETLY)
 
 # ===== Rationale for OS X AppBundle mods below =====
 #     With the OS X GUI version, Doxygen likes to be installed to /Applications and
-#     it contains the doxygen executable in the bundle. In the versions I've 
-#     seen, it is located in Resources, but in general, more often binaries are 
+#     it contains the doxygen executable in the bundle. In the versions I've
+#     seen, it is located in Resources, but in general, more often binaries are
 #     located in MacOS.
 #
-#     NOTE: The official Doxygen.app that is distributed for OS X uses non-standard 
+#     NOTE: The official Doxygen.app that is distributed for OS X uses non-standard
 #     conventions.  Instead of the command-line "doxygen" tool being placed in
-#     Doxygen.app/Contents/MacOS, "Doxywizard" is placed there instead and 
+#     Doxygen.app/Contents/MacOS, "Doxywizard" is placed there instead and
 #     "doxygen" is placed in Contents/Resources.  This is most likely done
 #     so that something happens when people double-click on the Doxygen.app
 #     package.  Unfortunately, CMake gets confused by this as when it sees the
@@ -59,7 +59,7 @@ if(APPLE)
     SET(CMAKE_FIND_APPBUNDLE "NEVER")
 endif()
 #     FYI:
-#     In the older versions of OS X Doxygen, dot was included with the 
+#     In the older versions of OS X Doxygen, dot was included with the
 #     Doxygen bundle. But the new versions require you to download
 #     Graphviz.app which contains "dot" in it's bundle.
 # ============== End OSX stuff ================
@@ -91,7 +91,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen REQUIRED_VARS DOXYGEN_EXECUTABLE VERSI
 IF(NOT DOXYGEN_SKIP_DOT)
   FIND_PROGRAM(DOXYGEN_DOT_EXECUTABLE
     NAMES dot
-    PATHS 
+    PATHS
       "$ENV{ProgramFiles}/Graphviz 2.21/bin"
       "C:/Program Files/Graphviz 2.21/bin"
       "$ENV{ProgramFiles}/ATT/Graphviz/bin"
@@ -102,13 +102,13 @@ IF(NOT DOXYGEN_SKIP_DOT)
       /Applications/Doxygen.app/Contents/MacOS
     DOC "Graphviz Dot tool for using Doxygen"
   )
-  
+
   if(DOXYGEN_DOT_EXECUTABLE)
     set(DOXYGEN_DOT_FOUND TRUE)
     # The Doxyfile wants the path to Dot, not the entire path and executable
     get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
   endif()
-  
+
 endif(NOT DOXYGEN_SKIP_DOT)
 
 #

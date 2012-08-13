@@ -22,7 +22,7 @@
  *
  * cmProcess wraps the kwsys process stuff in a c++ class.
  */
-class cmProcess 
+class cmProcess
 {
 public:
   cmProcess();
@@ -37,7 +37,7 @@ public:
 
   // return the process status
   int GetProcessStatus();
-  // Report the status of the program 
+  // Report the status of the program
   int ReportStatus();
   int GetId() { return this->Id; }
   void SetId(int id) { this->Id = id;}

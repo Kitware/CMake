@@ -58,7 +58,7 @@ public:
       "  ctest_test([BUILD build_dir] [APPEND]\n"
       "             [START start number] [END end number]\n"
       "             [STRIDE stride number] [EXCLUDE exclude regex ]\n"
-      "             [INCLUDE include regex] [RETURN_VALUE res] \n" 
+      "             [INCLUDE include regex] [RETURN_VALUE res] \n"
       "             [EXCLUDE_LABEL exclude regex] \n"
       "             [INCLUDE_LABEL label regex] \n"
       "             [PARALLEL_LEVEL level] \n"

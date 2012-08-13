@@ -10,7 +10,7 @@
 # Set Source files properties such as CPLUSPLUS and SWIG_FLAGS to specify
 # special behavior of SWIG. Also global CMAKE_SWIG_FLAGS can be used to add
 # special flags to all swig calls.
-# Another special variable is CMAKE_SWIG_OUTDIR, it allows one to specify 
+# Another special variable is CMAKE_SWIG_OUTDIR, it allows one to specify
 # where to write all the swig generated module (swig -outdir option)
 # The name-specific variable SWIG_MODULE_<name>_EXTRA_DEPS may be used
 # to specify extra dependencies for the generated modules.
@@ -52,7 +52,7 @@ MACRO(SWIG_MODULE_INITIALIZE name language)
     MESSAGE(FATAL_ERROR "SWIG Error: Language \"${language}\" not found")
   ELSEIF("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PYTHON")
     # when swig is used without the -interface it will produce in the module.py
-    # a 'import _modulename' statement, which implies having a corresponding 
+    # a 'import _modulename' statement, which implies having a corresponding
     # _modulename.so (*NIX), _modulename.pyd (Win32).
     SET(SWIG_MODULE_${name}_REAL_NAME "_${name}")
   ELSEIF("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PERL")
@@ -93,13 +93,13 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   ENDIF("${swig_source_file_flags}" STREQUAL "NOTFOUND")
   SET(swig_source_file_fullname "${infile}")
   IF(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_SOURCE_DIR}")
-    STRING(REGEX REPLACE 
+    STRING(REGEX REPLACE
       "^${CMAKE_CURRENT_SOURCE_DIR}" ""
       swig_source_file_relative_path
       "${swig_source_file_path}")
   ELSE(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_SOURCE_DIR}")
     IF(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_BINARY_DIR}")
-      STRING(REGEX REPLACE 
+      STRING(REGEX REPLACE
         "^${CMAKE_CURRENT_BINARY_DIR}" ""
         swig_source_file_relative_path
         "${swig_source_file_path}")
@@ -178,7 +178,7 @@ MACRO(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     "${swig_source_file_fullname}"
     MAIN_DEPENDENCY "${swig_source_file_fullname}"
     DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
-    COMMENT "Swig source") 
+    COMMENT "Swig source")
   SET_SOURCE_FILES_PROPERTIES("${swig_generated_file_fullname}" ${swig_extra_generated_files}
     PROPERTIES GENERATED 1)
   SET(${outfiles} "${swig_generated_file_fullname}" ${swig_extra_generated_files})

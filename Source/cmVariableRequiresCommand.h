@@ -24,7 +24,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmVariableRequiresCommand;
     }
@@ -35,7 +35,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -48,7 +48,7 @@ public:
     {
     return "Deprecated. Use the if() command instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -63,12 +63,12 @@ public:
       "tested, if that variable is false nothing else is done. If "
       "TEST_VARIABLE is true, then "
       "the next argument (RESULT_VARIABLE) is a variable that is set to true "
-      "if all the required variables are set. " 
+      "if all the required variables are set. "
       "The rest of the arguments are variables that must be true or not "
       "set to NOTFOUND to avoid an error.  If any are not true, an error "
       "is reported.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

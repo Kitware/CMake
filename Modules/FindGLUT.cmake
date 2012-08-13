@@ -21,7 +21,7 @@
 #  License text for the above reference.)
 
 IF (WIN32)
-  FIND_PATH( GLUT_INCLUDE_DIR NAMES GL/glut.h 
+  FIND_PATH( GLUT_INCLUDE_DIR NAMES GL/glut.h
     PATHS  ${GLUT_ROOT_PATH}/include )
   FIND_LIBRARY( GLUT_glut_LIBRARY NAMES glut glut32 freeglut
     PATHS
@@ -29,17 +29,17 @@ IF (WIN32)
     ${GLUT_ROOT_PATH}/Release
     )
 ELSE (WIN32)
-  
+
   IF (APPLE)
     # These values for Apple could probably do with improvement.
     FIND_PATH( GLUT_INCLUDE_DIR glut.h
       /System/Library/Frameworks/GLUT.framework/Versions/A/Headers
       ${OPENGL_LIBRARY_DIR}
       )
-    SET(GLUT_glut_LIBRARY "-framework GLUT" CACHE STRING "GLUT library for OSX") 
+    SET(GLUT_glut_LIBRARY "-framework GLUT" CACHE STRING "GLUT library for OSX")
     SET(GLUT_cocoa_LIBRARY "-framework Cocoa" CACHE STRING "Cocoa framework for OSX")
   ELSE (APPLE)
-    
+
     FIND_PATH( GLUT_INCLUDE_DIR GL/glut.h
       /usr/include/GL
       /usr/openwin/share/include
@@ -47,21 +47,21 @@ ELSE (WIN32)
       /opt/graphics/OpenGL/include
       /opt/graphics/OpenGL/contrib/libglut
       )
-  
+
     FIND_LIBRARY( GLUT_glut_LIBRARY glut
       /usr/openwin/lib
       )
-    
+
     FIND_LIBRARY( GLUT_Xi_LIBRARY Xi
       /usr/openwin/lib
       )
-    
+
     FIND_LIBRARY( GLUT_Xmu_LIBRARY Xmu
       /usr/openwin/lib
       )
-    
+
   ENDIF (APPLE)
-  
+
 ENDIF (WIN32)
 
 INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
@@ -76,7 +76,7 @@ IF (GLUT_FOUND)
     ${GLUT_Xi_LIBRARY}
     ${GLUT_cocoa_LIBRARY}
     )
-    
+
   #The following deprecated settings are for backwards compatibility with CMake1.4
   SET (GLUT_LIBRARY ${GLUT_LIBRARIES})
   SET (GLUT_INCLUDE_PATH ${GLUT_INCLUDE_DIR})

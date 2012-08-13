@@ -22,7 +22,7 @@ IF(NOT home)
 ENDIF()
 
 FIND_PROGRAM(KWSTYLE_EXECUTABLE
-  NAMES KWStyle 
+  NAMES KWStyle
   PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Kitware Inc.\\KWStyle 1.0.0]/bin"
   "${home}/Dashboards/Support/KWStyle/bin"

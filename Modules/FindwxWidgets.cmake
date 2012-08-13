@@ -3,9 +3,9 @@
 # configuration to use. wxWidgets is a modular library. To specify the
 # modules that you will use, you need to name them as components to
 # the package:
-# 
+#
 # FIND_PACKAGE(wxWidgets COMPONENTS core base ...)
-# 
+#
 # There are two search branches: a windows style and a unix style. For
 # windows, the following variables are searched for and set to
 # defaults in case of multiple choices. Change them if the defaults
@@ -22,7 +22,7 @@
 #                          - Set to TRUE to exclude linking of
 #                            commonly required libs (e.g., png tiff
 #                            jpeg zlib regex expat).
-# 
+#
 # For unix style it uses the wx-config utility. You can select between
 # debug/release, unicode/ansi, universal/non-universal, and
 # static/shared in the QtDialog or ccmake interfaces by turning ON/OFF
@@ -140,7 +140,7 @@
 
 # FIXME: This and all the DBG_MSG calls should be removed after the
 # module stabilizes.
-# 
+#
 # Helper macro to control the debugging output globally. There are
 # two versions for controlling how verbose your output should be.
 MACRO(DBG_MSG _MSG)
@@ -418,7 +418,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
   #-------------------------------------------------------------------
 
   # Look for an installation tree.
-  FIND_PATH(wxWidgets_ROOT_DIR 
+  FIND_PATH(wxWidgets_ROOT_DIR
     NAMES include/wx/wx.h
     PATHS
       $ENV{wxWidgets_ROOT_DIR}
@@ -427,7 +427,7 @@ IF(wxWidgets_FIND_STYLE STREQUAL "win32")
       C:/
       D:/
       $ENV{ProgramFiles}
-    PATH_SUFFIXES 
+    PATH_SUFFIXES
       wxWidgets-2.9.4
       wxWidgets-2.9.3
       wxWidgets-2.9.2
@@ -680,7 +680,7 @@ ELSE(wxWidgets_FIND_STYLE STREQUAL "win32")
       ENDIF(_wx_result_yes EQUAL 0 AND _wx_result_no EQUAL 0)
     ENDMACRO(WX_CONFIG_SELECT_QUERY_BOOL)
 
-    # 
+    #
     # Set wxWidgets_SELECT_OPTIONS to wx-config options for selecting
     # among multiple builds.
     #
@@ -845,12 +845,12 @@ FIND_PROGRAM(wxWidgets_wxrc_EXECUTABLE wxrc
   ${wxWidgets_ROOT_DIR}/utils/wxrc/vc_msw
   )
 
-# 
+#
 # WX_SPLIT_ARGUMENTS_ON(<keyword> <left> <right> <arg1> <arg2> ...)
-# 
+#
 # Sets <left> and <right> to contain arguments to the left and right,
 # respectively, of <keyword>.
-# 
+#
 # Example usage:
 #  FUNCTION(WXWIDGETS_ADD_RESOURCES outfiles)
 #    WX_SPLIT_ARGUMENTS_ON(OPTIONS wxrc_files wxrc_options ${ARGN})
@@ -858,7 +858,7 @@ FIND_PROGRAM(wxWidgets_wxrc_EXECUTABLE wxrc
 #  ENDFUNCTION(WXWIDGETS_ADD_RESOURCES)
 #
 #  WXWIDGETS_ADD_RESOURCES(sources ${xrc_files} OPTIONS -e -o file.C)
-# 
+#
 # NOTE: This is a generic piece of code that should be renamed to
 # SPLIT_ARGUMENTS_ON and put in a file serving the same purpose as
 # FindPackageStandardArgs.cmake. At the time of this writing
@@ -929,13 +929,13 @@ FUNCTION(WX_GET_DEPENDENCIES_FROM_XML
   SET(${_depends} ${${_depends}} PARENT_SCOPE)
 ENDFUNCTION(WX_GET_DEPENDENCIES_FROM_XML)
 
-# 
+#
 # WXWIDGETS_ADD_RESOURCES(<sources> <xrc_files>
 #                         OPTIONS <options> [NO_CPP_CODE])
-# 
+#
 # Adds a custom command for resource file compilation of the
 # <xrc_files> and appends the output files to <sources>.
-# 
+#
 # Example usages:
 #   WXWIDGETS_ADD_RESOURCES(sources xrc/main_frame.xrc)
 #   WXWIDGETS_ADD_RESOURCES(sources ${xrc_files} OPTIONS -e -o altname.cxx)
@@ -986,7 +986,7 @@ FUNCTION(WXWIDGETS_ADD_RESOURCES _outfiles)
 
   #
   # Parse options.
-  # 
+  #
   # If NO_CPP_CODE option specified, then produce .xrs file rather
   # than a .cpp file (i.e., don't add the default --cpp-code option).
   LIST(FIND rc_options NO_CPP_CODE index)
@@ -1015,7 +1015,7 @@ FUNCTION(WXWIDGETS_ADD_RESOURCES _outfiles)
   ENDIF(outfile_opt)
   #STRING(REGEX REPLACE "--output=[^;]*;?" "" rc_options "${rc_options}")
   #STRING(REGEX REPLACE ";$" "" rc_options "${rc_options}")
-  
+
   IF(NOT IS_ABSOLUTE "${outfile}")
     SET(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfile}")
   ENDIF(NOT IS_ABSOLUTE "${outfile}")

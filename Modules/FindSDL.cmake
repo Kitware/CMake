@@ -6,22 +6,22 @@
 #
 # This module responds to the the flag:
 # SDL_BUILDING_LIBRARY
-# If this is defined, then no SDL_main will be linked in because 
+# If this is defined, then no SDL_main will be linked in because
 # only applications need main().
 # Otherwise, it is assumed you are building an application and this
 # module will attempt to locate and set the the proper link flags
 # as part of the returned SDL_LIBRARY variable.
 #
-# Don't forget to include SDLmain.h and SDLmain.m your project for the 
+# Don't forget to include SDLmain.h and SDLmain.m your project for the
 # OS X framework based version. (Other versions link to -lSDLmain which
-# this module will try to find on your behalf.) Also for OS X, this 
+# this module will try to find on your behalf.) Also for OS X, this
 # module will automatically add the -framework Cocoa on your behalf.
 #
 #
 # Additional Note: If you see an empty SDL_LIBRARY_TEMP in your configuration
-# and no SDL_LIBRARY, it means CMake did not find your SDL library 
-# (SDL.dll, libsdl.so, SDL.framework, etc). 
-# Set SDL_LIBRARY_TEMP to point to your SDL library, and configure again. 
+# and no SDL_LIBRARY, it means CMake did not find your SDL library
+# (SDL.dll, libsdl.so, SDL.framework, etc).
+# Set SDL_LIBRARY_TEMP to point to your SDL library, and configure again.
 # Similarly, if you see an empty SDLMAIN_LIBRARY, you should set this value
 # as appropriate. These values are used to generate the final SDL_LIBRARY
 # variable, but when these values are unset, SDL_LIBRARY does not get created.
@@ -32,18 +32,18 @@
 # used in building SDL.
 # l.e.galup  9-20-02
 #
-# Modified by Eric Wing. 
+# Modified by Eric Wing.
 # Added code to assist with automated building by using environmental variables
 # and providing a more controlled/consistent search behavior.
-# Added new modifications to recognize OS X frameworks and 
-# additional Unix paths (FreeBSD, etc). 
+# Added new modifications to recognize OS X frameworks and
+# additional Unix paths (FreeBSD, etc).
 # Also corrected the header search path to follow "proper" SDL guidelines.
 # Added a search for SDLmain which is needed by some platforms.
 # Added a search for threads which is needed by some platforms.
 # Added needed compile switches for MinGW.
 #
 # On OSX, this will prefer the Framework version (if found) over others.
-# People will have to manually change the cache values of 
+# People will have to manually change the cache values of
 # SDL_LIBRARY to override this selection or set the CMake environment
 # CMAKE_INCLUDE_PATH to modify the search paths.
 #
@@ -84,7 +84,7 @@ FIND_PATH(SDL_INCLUDE_DIR SDL.h
 
 # SDL-1.1 is the name used by FreeBSD ports...
 # don't confuse it for the version number.
-FIND_LIBRARY(SDL_LIBRARY_TEMP 
+FIND_LIBRARY(SDL_LIBRARY_TEMP
   NAMES SDL SDL-1.1
   HINTS
   $ENV{SDLDIR}
@@ -98,11 +98,11 @@ FIND_LIBRARY(SDL_LIBRARY_TEMP
 
 IF(NOT SDL_BUILDING_LIBRARY)
   IF(NOT ${SDL_INCLUDE_DIR} MATCHES ".framework")
-    # Non-OS X framework versions expect you to also dynamically link to 
-    # SDLmain. This is mainly for Windows and OS X. Other (Unix) platforms 
+    # Non-OS X framework versions expect you to also dynamically link to
+    # SDLmain. This is mainly for Windows and OS X. Other (Unix) platforms
     # seem to provide SDLmain for compatibility even though they don't
     # necessarily need it.
-    FIND_LIBRARY(SDLMAIN_LIBRARY 
+    FIND_LIBRARY(SDLMAIN_LIBRARY
       NAMES SDLmain SDLmain-1.1
       HINTS
       $ENV{SDLDIR}
@@ -117,8 +117,8 @@ IF(NOT SDL_BUILDING_LIBRARY)
 ENDIF(NOT SDL_BUILDING_LIBRARY)
 
 # SDL may require threads on your system.
-# The Apple build may not need an explicit flag because one of the 
-# frameworks may already provide it. 
+# The Apple build may not need an explicit flag because one of the
+# frameworks may already provide it.
 # But for non-OSX systems, I will use the CMake Threads package.
 IF(NOT APPLE)
   FIND_PACKAGE(Threads)
@@ -140,15 +140,15 @@ IF(SDL_LIBRARY_TEMP)
   ENDIF(NOT SDL_BUILDING_LIBRARY)
 
   # For OS X, SDL uses Cocoa as a backend so it must link to Cocoa.
-  # CMake doesn't display the -framework Cocoa string in the UI even 
+  # CMake doesn't display the -framework Cocoa string in the UI even
   # though it actually is there if I modify a pre-used variable.
   # I think it has something to do with the CACHE STRING.
-  # So I use a temporary variable until the end so I can set the 
+  # So I use a temporary variable until the end so I can set the
   # "real" variable in one-shot.
   IF(APPLE)
     SET(SDL_LIBRARY_TEMP ${SDL_LIBRARY_TEMP} "-framework Cocoa")
   ENDIF(APPLE)
-    
+
   # For threads, as mentioned Apple doesn't need this.
   # In fact, there seems to be a problem if I used the Threads package
   # and try using this line, so I'm just skipping it entirely for OS X.

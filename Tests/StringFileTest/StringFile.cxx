@@ -26,6 +26,6 @@ int main(int, char*[])
   res += CheckMethod(relpath, "../../X11R6/bin/xnest");
   res += CheckMethod(configvar,
                      "@$@$junk =~ s/#$xyz#/$foo_bar{$wibble}->{$xyz}/;@@");
-  
+
   return res;
 }

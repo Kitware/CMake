@@ -53,15 +53,15 @@ IF(STAGE2)
   SET(TEST2_LIBRARY "TEST2_LIBRARY-NOTFOUND" CACHE FILEPATH "Force find." FORCE)
   SET(TEST4_LIBRARY "TEST4_LIBRARY-NOTFOUND" CACHE FILEPATH "Force find." FORCE)
 
-  FIND_LIBRARY(TEST1_LIBRARY 
+  FIND_LIBRARY(TEST1_LIBRARY
     NAMES ${t1NAMES}
     PATHS ${LIBPATHS}
     DOC "First library")
-  FIND_LIBRARY(TEST2_LIBRARY 
+  FIND_LIBRARY(TEST2_LIBRARY
     NAMES ${t2NAMES}
     PATHS ${LIBPATHS}
     DOC "Second library")
-  FIND_LIBRARY(TEST4_LIBRARY 
+  FIND_LIBRARY(TEST4_LIBRARY
     NAMES ${t4NAMES}
     PATHS ${LIBPATHS}
     DOC "Fourth library")
@@ -200,7 +200,7 @@ ELSE(STAGE2)
     RUNTIME DESTINATION MyTest/bin        COMPONENT Runtime     # .exe, .dll
     LIBRARY DESTINATION MyTest/lib        COMPONENT Runtime     # .so, mod.dll
     ARCHIVE DESTINATION MyTest/lib/static COMPONENT Development # .a, .lib
-    PUBLIC_HEADER DESTINATION MyTest/include COMPONENT Development 
+    PUBLIC_HEADER DESTINATION MyTest/include COMPONENT Development
     )
 
   INSTALL(TARGETS test4 PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -227,11 +227,11 @@ ELSE(STAGE2)
     scripts/sample_script scripts/sample_script.bat)
 
 # "export" the targets collected in "SimpleInstallS1"
-  INSTALL(EXPORT SimpleInstallS1 FILE SimpleInstallS1Config.cmake 
-                                 DESTINATION MyTest/lib 
+  INSTALL(EXPORT SimpleInstallS1 FILE SimpleInstallS1Config.cmake
+                                 DESTINATION MyTest/lib
                                  NAMESPACE S1_ )
 
-  EXPORT(TARGETS SimpleInstall test1 test2 test3 
+  EXPORT(TARGETS SimpleInstall test1 test2 test3
          FILE "${CMAKE_CURRENT_BINARY_DIR}/SimpleInstallS1Config.cmake"
          NAMESPACE S2_ )
 
@@ -299,9 +299,9 @@ ELSE(STAGE2)
     ADDITIONAL_MAKE_CLEAN_FILES
     "${CMAKE_INSTALL_PREFIX}/InstallScriptOut.cmake;${CMAKE_INSTALL_PREFIX}/InstallScript4Out.cmake")
 
-  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES PRE_INSTALL_SCRIPT 
+  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES PRE_INSTALL_SCRIPT
     ${CMAKE_CURRENT_SOURCE_DIR}/PreInstall.cmake)
-  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES POST_INSTALL_SCRIPT 
+  SET_TARGET_PROPERTIES(SimpleInstall PROPERTIES POST_INSTALL_SCRIPT
     ${CMAKE_CURRENT_SOURCE_DIR}/PostInstall.cmake)
   SET_TARGET_PROPERTIES(test4 PROPERTIES VERSION 1.2 SOVERSION 3
         INSTALL_NAME_DIR @executable_path/../lib)

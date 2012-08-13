@@ -1,5 +1,5 @@
 # - define a bunch of backwards compatibility variables
-#  CMAKE_ANSI_CXXFLAGS - flag for ansi c++ 
+#  CMAKE_ANSI_CXXFLAGS - flag for ansi c++
 #  CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
 #  INCLUDE(TestForANSIStreamHeaders)
 #  INCLUDE(CheckIncludeFileCXX)
@@ -37,7 +37,7 @@ IF(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
       # if the compiler liked the flag then set CMAKE_ANSI_CXXFLAGS
       # to the flag
       IF(CMAKE_CXX_ACCEPTS_FLAGS)
-        SET(CMAKE_ANSI_CXXFLAGS ${CMAKE_TRY_ANSI_CXX_FLAGS} CACHE INTERNAL 
+        SET(CMAKE_ANSI_CXXFLAGS ${CMAKE_TRY_ANSI_CXX_FLAGS} CACHE INTERNAL
         "What flags are required by the c++ compiler to make it ansi." )
       ENDIF(CMAKE_CXX_ACCEPTS_FLAGS)
     ENDIF( CMAKE_TRY_ANSI_CXX_FLAGS MATCHES ".+")

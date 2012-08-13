@@ -16,7 +16,7 @@
 
 ###############################################
 #
-#       configuration/system dependent settings  
+#       configuration/system dependent settings
 #
 ###############################################
 

@@ -9,7 +9,7 @@
  *  Copyright (c) 2004 __MyCompanyName__. All rights reserved.
  *
  */
- 
+
 
 #ifndef MAIN_H
 #define MAIN_H 1
@@ -28,10 +28,10 @@ public:
   // constructor
   Main(int argc, char * const argv[]);
   //virtual ~Main();
-        
+
 
 private:
-        
+
 
   /* here are our X variables */
   Display *dis;
@@ -53,7 +53,7 @@ private:
 
 /*** START MAIN.CPP ***/
 
-// modified from Brian Hammond's Howdy program at 
+// modified from Brian Hammond's Howdy program at
 // http://www.insanityengine.com/doc/x11/xintro.html
 // jeff louie 02.05.2004
 
@@ -73,11 +73,11 @@ Main::Main (int argc, char * const argv[]) {
   init_x();
 
   // event loop
-  while(1) {     
+  while(1) {
   // get the next event and stuff it into our event variable.
   // Note:  only events we set the mask for are detected!
   XNextEvent(dis, &event);
-                                
+
 
   switch (event.type) {
   int x;
@@ -115,19 +115,19 @@ Main::Main (int argc, char * const argv[]) {
   }
 }
 
-void Main::init_x() {  
+void Main::init_x() {
   unsigned long black,white;
 
   dis=XOpenDisplay(NULL);
   screen=DefaultScreen(dis);
   black=BlackPixel(dis,screen),
     white=WhitePixel(dis, screen);
-  win=XCreateSimpleWindow(dis,DefaultRootWindow(dis),0,0, 
+  win=XCreateSimpleWindow(dis,DefaultRootWindow(dis),0,0,
                           300, 300, 5,black, white);
   XSetStandardProperties(dis,win,"Hello World","Hi",None,NULL,0,NULL);
   XSelectInput(dis, win, ExposureMask|ButtonPressMask|KeyPressMask);
   // get Graphics Context
-  gc=XCreateGC(dis, win, 0,0);        
+  gc=XCreateGC(dis, win, 0,0);
   XSetBackground(dis,gc,white);
   XSetForeground(dis,gc,black);
   XClearWindow(dis, win);
@@ -137,8 +137,8 @@ void Main::init_x() {
 void Main::close_x() {
   XFreeGC(dis, gc);
   XDestroyWindow(dis,win);
-  XCloseDisplay(dis);     
-  exit(1);                                
+  XCloseDisplay(dis);
+  exit(1);
 };
 
 void Main::redraw() {

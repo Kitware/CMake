@@ -99,7 +99,7 @@ void cmGlobalVisualStudio71Generator
 ::WriteSLNFile(std::ostream& fout,
                cmLocalGenerator* root,
                std::vector<cmLocalGenerator*>& generators)
-{ 
+{
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
 
@@ -156,7 +156,7 @@ cmGlobalVisualStudio71Generator
 
 //----------------------------------------------------------------------------
 // Write a dsp file into the SLN file,
-// Note, that dependencies from executables to 
+// Note, that dependencies from executables to
 // the libraries it uses are also done here
 void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
@@ -166,11 +166,11 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 {
   // check to see if this is a fortran build
   const char* ext = ".vcproj";
-  const char* project = 
+  const char* project =
     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"";
   if(this->TargetIsFortranOnly(t))
     {
-    ext = ".vfproj"; 
+    ext = ".vfproj";
     project = "Project(\"{6989167D-11E4-40FE-8C1A-2192A86A7E90}\") = \"";
     }
   const char* targetExt = t.GetProperty("GENERATOR_FILE_NAME_EXT");
@@ -187,7 +187,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
   fout << "\tEndProjectSection\n";
-  
+
   fout <<"EndProject\n";
 
   UtilityDependsMap::iterator ui = this->UtilityDepends.find(&t);
@@ -208,7 +208,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 
 //----------------------------------------------------------------------------
 // Write a dsp file into the SLN file,
-// Note, that dependencies from executables to 
+// Note, that dependencies from executables to
 // the libraries it uses are also done here
 void
 cmGlobalVisualStudio71Generator
@@ -238,12 +238,12 @@ cmGlobalVisualStudio71Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
-::WriteExternalProject(std::ostream& fout, 
+::WriteExternalProject(std::ostream& fout,
                        const char* name,
                        const char* location,
                        const char* typeGuid,
                        const std::set<cmStdString>& depends)
-{ 
+{
   fout << "Project(\"{"
        << (typeGuid ? typeGuid : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
        << "}\") = \""
@@ -251,7 +251,7 @@ void cmGlobalVisualStudio71Generator
        << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
-  
+
   // write out the dependencies here VS 7.1 includes dependencies with the
   // project instead of in the global section
   if(!depends.empty())
@@ -262,18 +262,18 @@ void cmGlobalVisualStudio71Generator
       {
       if(it->size() > 0)
         {
-        fout << "\t\t{" 
-             << this->GetGUID(it->c_str()) 
-             << "} = {" 
-             << this->GetGUID(it->c_str()) 
+        fout << "\t\t{"
+             << this->GetGUID(it->c_str())
+             << "} = {"
+             << this->GetGUID(it->c_str())
              << "}\n";
         }
       }
     fout << "\tEndProjectSection\n";
-    }  
+    }
 
   fout << "EndProject\n";
-  
+
 
 }
 
@@ -289,7 +289,7 @@ void cmGlobalVisualStudio71Generator
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
-    fout << "\t\t{" << guid << "}." << *i 
+    fout << "\t\t{" << guid << "}." << *i
          << ".ActiveCfg = " << *i << "|"
          << (platformMapping ? platformMapping : "Win32") << std::endl;
     if(partOfDefaultBuild)

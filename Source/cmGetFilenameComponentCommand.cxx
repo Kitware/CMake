@@ -32,7 +32,7 @@ bool cmGetFilenameComponentCommand
       return true;
       }
     }
-  
+
   std::string result;
   std::string filename = args[1];
   if(filename.find("[HKEY") != filename.npos)
@@ -79,7 +79,7 @@ bool cmGetFilenameComponentCommand
           }
         }
       }
-    cmSystemTools::SplitProgramFromArgs(filename.c_str(), 
+    cmSystemTools::SplitProgramFromArgs(filename.c_str(),
                                         result, programArgs);
     }
   else if (args[2] == "EXT")
@@ -104,7 +104,7 @@ bool cmGetFilenameComponentCommand
       result = cmSystemTools::GetRealPath(result.c_str());
       }
     }
-  else 
+  else
     {
     std::string err = "unknown component " + args[2];
     this->SetError(err.c_str());
@@ -125,7 +125,7 @@ bool cmGetFilenameComponentCommand
        args[2] == "PATH" ? cmCacheManager::FILEPATH
        : cmCacheManager::STRING);
     }
-  else 
+  else
     {
     if(programArgs.size() && storeArgs.size())
       {

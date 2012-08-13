@@ -13,7 +13,7 @@
 #  License text for the above reference.)
 
 FIND_PROGRAM(CMAKE_MAKE_PROGRAM mingw32-make.exe PATHS
-  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin" 
+  "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
   c:/MinGW/bin /MinGW/bin)
 FIND_PROGRAM(CMAKE_SH sh.exe )
 IF(CMAKE_SH)

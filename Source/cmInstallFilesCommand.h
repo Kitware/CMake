@@ -18,7 +18,7 @@
  * \brief Specifies where to install some files
  *
  * cmInstallFilesCommand specifies the relative path where a list of
- * files should be installed.  
+ * files should be installed.
  */
 class cmInstallFilesCommand : public cmCommand
 {
@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmInstallFilesCommand;
     }
@@ -50,7 +50,7 @@ public:
     {
     return "Deprecated.  Use the install(FILES ) command instead.";
     }
-  
+
   /**
    * This is called at the end after all the information
    * specified by the command is accumulated. Most commands do
@@ -90,7 +90,7 @@ public:
       "The directory <dir> is relative to the installation prefix, which "
       "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {
@@ -102,7 +102,7 @@ public:
 protected:
   void CreateInstallGenerator() const;
   std::string FindInstallSource(const char* name) const;
-  
+
  private:
   std::vector<std::string> FinalArgs;
   bool IsFilesForm;

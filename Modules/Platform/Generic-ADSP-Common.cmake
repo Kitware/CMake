@@ -14,7 +14,7 @@ IF(NOT ADSP)
   SET(CMAKE_SHARED_LIBRARY_SUFFIX "")
   SET(CMAKE_EXECUTABLE_SUFFIX ".dxe")
 
-  # if ADSP_PROCESSOR has not been set, but CMAKE_SYSTEM_PROCESSOR has, 
+  # if ADSP_PROCESSOR has not been set, but CMAKE_SYSTEM_PROCESSOR has,
   # assume that this is the processor name to use for the compiler
   IF(CMAKE_SYSTEM_PROCESSOR AND NOT ADSP_PROCESSOR)
     SET(ADSP_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})

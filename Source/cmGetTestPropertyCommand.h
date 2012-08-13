@@ -17,7 +17,7 @@
 class cmGetTestPropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmGetTestPropertyCommand;
     }

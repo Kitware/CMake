@@ -19,24 +19,24 @@
 #
 #  Expected uname -s output:
 #
-# AIX                           AIX  
-# BSD/OS                        BSD/OS  
-# FreeBSD                       FreeBSD  
-# HP-UX                         HP-UX  
-# IRIX                          IRIX  
-# Linux                         Linux  
+# AIX                           AIX
+# BSD/OS                        BSD/OS
+# FreeBSD                       FreeBSD
+# HP-UX                         HP-UX
+# IRIX                          IRIX
+# Linux                         Linux
 # GNU/kFreeBSD                  GNU/kFreeBSD
-# NetBSD                        NetBSD  
-# OpenBSD                       OpenBSD  
-# OFS/1 (Digital Unix)          OSF1  
-# SCO OpenServer 5              SCO_SV  
-# SCO UnixWare 7                UnixWare  
-# SCO UnixWare (pre release 7)  UNIX_SV  
-# SCO XENIX                     Xenix  
-# Solaris                       SunOS  
-# SunOS                         SunOS  
-# Tru64                         Tru64  
-# Ultrix                        ULTRIX  
+# NetBSD                        NetBSD
+# OpenBSD                       OpenBSD
+# OFS/1 (Digital Unix)          OSF1
+# SCO OpenServer 5              SCO_SV
+# SCO UnixWare 7                UnixWare
+# SCO UnixWare (pre release 7)  UNIX_SV
+# SCO XENIX                     Xenix
+# Solaris                       SunOS
+# SunOS                         SunOS
+# Tru64                         Tru64
+# Ultrix                        ULTRIX
 # cygwin                        CYGWIN_NT-5.1
 # MacOSX                        Darwin
 
@@ -61,7 +61,7 @@ IF(CMAKE_HOST_UNIX)
           RETURN_VALUE val)
       ENDIF("${val}" GREATER 0)
     ENDIF()
-    # check the return of the last uname -m or -p 
+    # check the return of the last uname -m or -p
     IF("${val}" GREATER 0)
         SET(CMAKE_HOST_SYSTEM_PROCESSOR "unknown")
     ENDIF("${val}" GREATER 0)
@@ -79,7 +79,7 @@ ENDIF(CMAKE_HOST_UNIX)
 
 # if a toolchain file is used, the user wants to cross compile.
 # in this case read the toolchain file and keep the CMAKE_HOST_SYSTEM_*
-# variables around so they can be used in CMakeLists.txt. 
+# variables around so they can be used in CMakeLists.txt.
 # In all other cases, the host and target platform are the same.
 IF(CMAKE_TOOLCHAIN_FILE)
   # at first try to load it as path relative to the directory from which cmake has been run
@@ -92,7 +92,7 @@ IF(CMAKE_TOOLCHAIN_FILE)
   IF(_INCLUDED_TOOLCHAIN_FILE)
     SET(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
   ELSE(_INCLUDED_TOOLCHAIN_FILE)
-    MESSAGE(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}") 
+    MESSAGE(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
     SET(CMAKE_TOOLCHAIN_FILE "NOTFOUND" CACHE FILEPATH "The CMake toolchain file" FORCE)
   ENDIF(_INCLUDED_TOOLCHAIN_FILE)
 ENDIF(CMAKE_TOOLCHAIN_FILE)
@@ -130,7 +130,7 @@ MACRO(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
     SET(${_PREFIX}_NAME kFreeBSD)
   ENDIF(${_PREFIX}_NAME MATCHES kFreeBSD)
 
-  # fix for CYGWIN which has windows version in it 
+  # fix for CYGWIN which has windows version in it
   IF(${_PREFIX}_NAME MATCHES CYGWIN)
     SET(${_PREFIX}_NAME CYGWIN)
   ENDIF(${_PREFIX}_NAME MATCHES CYGWIN)
@@ -147,17 +147,17 @@ ENDMACRO(ADJUST_CMAKE_SYSTEM_VARIABLES _PREFIX)
 ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_SYSTEM)
 ADJUST_CMAKE_SYSTEM_VARIABLES(CMAKE_HOST_SYSTEM)
 
-# this file is also executed from cpack, then we don't need to generate these files 
+# this file is also executed from cpack, then we don't need to generate these files
 # in this case there is no CMAKE_BINARY_DIR
 IF(CMAKE_BINARY_DIR)
   # write entry to the log file
   IF(PRESET_CMAKE_SYSTEM_NAME)
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
                 "The target system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
                 "The host system is: ${CMAKE_HOST_SYSTEM_NAME} - ${CMAKE_HOST_SYSTEM_VERSION} - ${CMAKE_HOST_SYSTEM_PROCESSOR}\n")
   ELSE(PRESET_CMAKE_SYSTEM_NAME)
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
                 "The system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n")
   ENDIF(PRESET_CMAKE_SYSTEM_NAME)
 
@@ -170,7 +170,7 @@ IF(CMAKE_BINARY_DIR)
 
   # configure variables set in this file for fast reload, the template file is defined at the top of this file
   CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
-                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake 
+                ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeSystem.cmake
                 IMMEDIATE @ONLY)
 
 ENDIF(CMAKE_BINARY_DIR)

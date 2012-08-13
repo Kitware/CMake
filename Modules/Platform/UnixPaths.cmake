@@ -52,7 +52,7 @@ LIST(APPEND CMAKE_SYSTEM_INCLUDE_PATH
 
   # Other
   /usr/pkg/include
-  /opt/csw/include /opt/include  
+  /opt/csw/include /opt/include
   /usr/openwin/include
   )
 
@@ -65,7 +65,7 @@ LIST(APPEND CMAKE_SYSTEM_LIBRARY_PATH
 
   # Other
   /usr/pkg/lib
-  /opt/csw/lib /opt/lib 
+  /opt/csw/lib /opt/lib
   /usr/openwin/lib
   )
 

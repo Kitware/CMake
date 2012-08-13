@@ -23,7 +23,7 @@
 # Java_VERSION_STRING = 1.5.0_17
 # and
 # Java_VERSION        = 1.5.0.17
-# 
+#
 # another example is the Java OEM, with:
 # Java_VERSION_STRING = 1.6.0-oem
 # and
@@ -102,7 +102,7 @@ IF(Java_JAVA_EXECUTABLE)
       ENDIF()
     ELSE()
       # extract major/minor version and patch level from "java -version" output
-      # Tested on linux using 
+      # Tested on linux using
       # 1. Sun / Sun OEM
       # 2. OpenJDK 1.6
       # 3. GCJ 1.5

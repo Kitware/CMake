@@ -71,7 +71,7 @@ bool cmWriteFileCommand
     }
   // If GetPermissions fails, pretend like it is ok. File open will fail if
   // the file is not writable
-  std::ofstream file(fileName.c_str(), 
+  std::ofstream file(fileName.c_str(),
                      overwrite?std::ios::out : std::ios::app);
   if ( !file )
     {
