@@ -1,3 +1,4 @@
+project(ObjectLibraryB)
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
   # VS 6 generator does not use per-target object locations.
   set(vs6 _vs6)

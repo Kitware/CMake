@@ -3739,7 +3739,7 @@ cmGlobalXCodeGenerator
 
   const char* configName = this->GetCMakeCFGIntDir();
   std::string dir = this->GetObjectsNormalDirectory(
-    this->CurrentProject, configName, gt->Target);
+    "$(PROJECT_NAME)", configName, gt->Target);
   if(this->XcodeVersion >= 21)
     {
     dir += "$(CURRENT_ARCH)/";
