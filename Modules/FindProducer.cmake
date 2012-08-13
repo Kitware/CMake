@@ -42,7 +42,7 @@
 # #include <Producer/CameraGroup>
 
 # Try the user's environment request before anything else.
-FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
+find_path(PRODUCER_INCLUDE_DIR Producer/CameraGroup
   HINTS
   $ENV{PRODUCER_DIR}
   $ENV{OSG_DIR}
@@ -59,7 +59,7 @@ FIND_PATH(PRODUCER_INCLUDE_DIR Producer/CameraGroup
     [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment;OSG_ROOT]/include
 )
 
-FIND_LIBRARY(PRODUCER_LIBRARY
+find_library(PRODUCER_LIBRARY
   NAMES Producer
   HINTS
   $ENV{PRODUCER_DIR}

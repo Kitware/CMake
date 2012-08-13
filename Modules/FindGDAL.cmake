@@ -40,7 +40,7 @@
 #
 #include "gdal.h"
 
-FIND_PATH(GDAL_INCLUDE_DIR gdal.h
+find_path(GDAL_INCLUDE_DIR gdal.h
   HINTS
     $ENV{GDAL_DIR}
     $ENV{GDAL_ROOT}
@@ -57,12 +57,12 @@ FIND_PATH(GDAL_INCLUDE_DIR gdal.h
       /opt
 )
 
-IF(UNIX)
+if(UNIX)
     # Use gdal-config to obtain the library version (this should hopefully
     # allow us to -lgdal1.x.y where x.y are correct version)
     # For some reason, libgdal development packages do not contain
     # libgdal.so...
-    FIND_PROGRAM(GDAL_CONFIG gdal-config
+    find_program(GDAL_CONFIG gdal-config
         HINTS
           $ENV{GDAL_DIR}
           $ENV{GDAL_ROOT}
@@ -85,7 +85,7 @@ IF(UNIX)
     endif()
 endif()
 
-FIND_LIBRARY(GDAL_LIBRARY
+find_library(GDAL_LIBRARY
   NAMES ${_gdal_lib} gdal gdal_i gdal1.5.0 gdal1.4.0 gdal1.3.2 GDAL
   HINTS
      $ENV{GDAL_DIR}

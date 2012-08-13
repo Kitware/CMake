@@ -18,6 +18,6 @@
 # because otherwise there would have to be a separate assembler source file
 # for each assembler on every architecture.
 
-SET(ASM_DIALECT "_NASM")
-INCLUDE(CMakeTestASMCompiler)
-SET(ASM_DIALECT)
+set(ASM_DIALECT "_NASM")
+include(CMakeTestASMCompiler)
+set(ASM_DIALECT)

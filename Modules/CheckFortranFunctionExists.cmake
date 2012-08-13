@@ -22,7 +22,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/CMakeExpandImportedTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/CMakeExpandImportedTargets.cmake")
 
 
 macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
@@ -36,7 +36,7 @@ macro(CHECK_FORTRAN_FUNCTION_EXISTS FUNCTION VARIABLE)
     else(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     endif(CMAKE_REQUIRED_LIBRARIES)
-    FILE(WRITE
+    file(WRITE
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f
     "
       program TESTFortran

@@ -25,7 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
+find_path(SDLIMAGE_INCLUDE_DIR SDL_image.h
   HINTS
   $ENV{SDLIMAGEDIR}
   $ENV{SDLDIR}
@@ -49,7 +49,7 @@ FIND_PATH(SDLIMAGE_INCLUDE_DIR SDL_image.h
   /opt/include
 )
 
-FIND_LIBRARY(SDLIMAGE_LIBRARY
+find_library(SDLIMAGE_LIBRARY
   NAMES SDL_image
   HINTS
   $ENV{SDLIMAGEDIR}
@@ -64,7 +64,7 @@ FIND_LIBRARY(SDLIMAGE_LIBRARY
   /opt
 )
 
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDLIMAGE
                                   REQUIRED_VARS SDLIMAGE_LIBRARY SDLIMAGE_INCLUDE_DIR)

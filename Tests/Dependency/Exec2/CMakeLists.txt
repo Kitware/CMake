@@ -6,7 +6,7 @@
 # Now, we must make sure that Seven gets inserted between Five and Two, and
 # not at the end. Unfortunately, if we get it wrong, the test will only
 # fail on a platform where the link order makes a difference.
-LINK_LIBRARIES( Eight Five )
+link_libraries( Eight Five )
 
-ADD_EXECUTABLE( exec2 ExecMain.c )
+add_executable( exec2 ExecMain.c )
 

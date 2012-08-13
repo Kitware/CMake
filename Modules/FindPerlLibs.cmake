@@ -9,7 +9,7 @@
 #  PERL_EXECUTABLE   = full path to the perl binary
 #
 # The minimum required version of Perl can be specified using the
-# standard syntax, e.g. FIND_PACKAGE(PerlLibs 6.0)
+# standard syntax, e.g. find_package(PerlLibs 6.0)
 #
 #  The following variables are also available if needed
 #  (introduced after CMake 2.6.4)

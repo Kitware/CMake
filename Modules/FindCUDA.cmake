@@ -855,7 +855,7 @@ function(CUDA_COMPUTE_BUILD_PATH path build_path)
   file(TO_CMAKE_PATH "${path}" bpath)
   if (IS_ABSOLUTE "${bpath}")
     # Absolute paths are generally unnessary, especially if something like
-    # FILE(GLOB_RECURSE) is used to pick up the files.
+    # file(GLOB_RECURSE) is used to pick up the files.
     file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
   endif()
 

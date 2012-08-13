@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT( Dependency )
+project( Dependency )
 
 # to test directories with only one character One was changed to 1
 # There is one executable that depends on eight libraries. The
@@ -29,25 +29,25 @@ PROJECT( Dependency )
 # Although SixB does not depend on Two, there is a dependency listed
 # in the corresponding CMakeLists.txt just because of commands used.
 
-ADD_SUBDIRECTORY(NoDepA)
-ADD_SUBDIRECTORY(NoDepB)
-ADD_SUBDIRECTORY(NoDepC)
-ADD_SUBDIRECTORY(1)
-ADD_SUBDIRECTORY(Two)
-ADD_SUBDIRECTORY(Three)
-ADD_SUBDIRECTORY(Four)
-ADD_SUBDIRECTORY(Five)
-ADD_SUBDIRECTORY(Six)
-ADD_SUBDIRECTORY(Seven)
-ADD_SUBDIRECTORY(Eight)
-ADD_SUBDIRECTORY(Exec)
-ADD_SUBDIRECTORY(Exec2)
-ADD_SUBDIRECTORY(Exec3)
-ADD_SUBDIRECTORY(Exec4)
+add_subdirectory(NoDepA)
+add_subdirectory(NoDepB)
+add_subdirectory(NoDepC)
+add_subdirectory(1)
+add_subdirectory(Two)
+add_subdirectory(Three)
+add_subdirectory(Four)
+add_subdirectory(Five)
+add_subdirectory(Six)
+add_subdirectory(Seven)
+add_subdirectory(Eight)
+add_subdirectory(Exec)
+add_subdirectory(Exec2)
+add_subdirectory(Exec3)
+add_subdirectory(Exec4)
 
 # Specific cases added to test fixes to problems found in real
 # projects.
-ADD_SUBDIRECTORY(Case1)
-ADD_SUBDIRECTORY(Case2)
-ADD_SUBDIRECTORY(Case3)
-ADD_SUBDIRECTORY(Case4)
+add_subdirectory(Case1)
+add_subdirectory(Case2)
+add_subdirectory(Case3)
+add_subdirectory(Case4)

@@ -10,7 +10,7 @@
 # the first configuration from ${CMAKE_CONFIGURATION_TYPES} if set, otherwise
 # ${CMAKE_BUILD_TYPE}.
 # This macro is used by all Check*.cmake files which use
-# TRY_COMPILE() or TRY_RUN() and support CMAKE_REQUIRED_LIBRARIES , so that
+# try_compile() or try_run() and support CMAKE_REQUIRED_LIBRARIES , so that
 # these checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
 #    cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
 #                                               CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )

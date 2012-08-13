@@ -14,8 +14,8 @@ set(text "
 # options to avoid CMake warnings about unused variables
 #
 
-MESSAGE(\"Trilinos_ALLOW_NO_PACKAGES='\${Trilinos_ALLOW_NO_PACKAGES}'\")
-MESSAGE(\"Trilinos_WARNINGS_AS_ERRORS_FLAGS='\${Trilinos_WARNINGS_AS_ERRORS_FLAGS}'\")
+message(\"Trilinos_ALLOW_NO_PACKAGES='\${Trilinos_ALLOW_NO_PACKAGES}'\")
+message(\"Trilinos_WARNINGS_AS_ERRORS_FLAGS='\${Trilinos_WARNINGS_AS_ERRORS_FLAGS}'\")
 ")
 
 file(APPEND "${source_dir}/CMakeLists.txt" "${text}")
@@ -31,8 +31,8 @@ set(text "
 # Use newer than 10.6.1 CTestConfig settings from the Trilinos project.
 # Send the Trilinos dashboards to the new Trilinos CDash server instance.
 #
-SET(CTEST_NIGHTLY_START_TIME \"04:00:00 UTC\") # 10 PM MDT or 9 PM MST
-SET(CTEST_DROP_SITE \"testing.sandia.gov\")
+set(CTEST_NIGHTLY_START_TIME \"04:00:00 UTC\") # 10 PM MDT or 9 PM MST
+set(CTEST_DROP_SITE \"testing.sandia.gov\")
 ")
 
 file(APPEND "${source_dir}/CTestConfig.cmake" "${text}")

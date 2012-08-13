@@ -11,9 +11,9 @@ target_link_libraries(foo bar)
 
 add_executable(foobar foobar.c)
 target_link_libraries(foobar foo)
-IF(UNIX)
+if(UNIX)
   target_link_libraries(foobar -L/usr/local/lib)
-ENDIF(UNIX)
+endif(UNIX)
 
 
 # check with lib version

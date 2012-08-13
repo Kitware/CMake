@@ -29,16 +29,16 @@ if (UNIX)
   pkg_check_modules(_OPENSSL QUIET openssl)
 endif (UNIX)
 
-IF (WIN32)
+if (WIN32)
   # http://www.slproweb.com/products/Win32OpenSSL.html
-  SET(_OPENSSL_ROOT_HINTS
+  set(_OPENSSL_ROOT_HINTS
     ${OPENSSL_ROOT_DIR}
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
     ENV OPENSSL_ROOT_DIR
     )
-  FILE(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
-  SET(_OPENSSL_ROOT_PATHS
+  file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
+  set(_OPENSSL_ROOT_PATHS
     "${_programfiles}/OpenSSL"
     "${_programfiles}/OpenSSL-Win32"
     "${_programfiles}/OpenSSL-Win64"
@@ -46,19 +46,19 @@ IF (WIN32)
     "C:/OpenSSL-Win32/"
     "C:/OpenSSL-Win64/"
     )
-  UNSET(_programfiles)
-  SET(_OPENSSL_ROOT_HINTS_AND_PATHS
+  unset(_programfiles)
+  set(_OPENSSL_ROOT_HINTS_AND_PATHS
     HINTS ${_OPENSSL_ROOT_HINTS}
     PATHS ${_OPENSSL_ROOT_PATHS}
     )
-ELSE ()
-  SET(_OPENSSL_ROOT_HINTS
+else ()
+  set(_OPENSSL_ROOT_HINTS
     ${OPENSSL_ROOT_DIR}
     ENV OPENSSL_ROOT_DIR
     )
-ENDIF ()
+endif ()
 
-FIND_PATH(OPENSSL_INCLUDE_DIR
+find_path(OPENSSL_INCLUDE_DIR
   NAMES
     openssl/ssl.h
   HINTS
@@ -68,8 +68,8 @@ FIND_PATH(OPENSSL_INCLUDE_DIR
     include
 )
 
-IF(WIN32 AND NOT CYGWIN)
-  IF(MSVC)
+if(WIN32 AND NOT CYGWIN)
+  if(MSVC)
     # /MD and /MDd are the standard values - if someone wants to use
     # others, the libnames have to change here too
     # use also ssl and ssleay32 in debug as fallback for openssl < 0.9.8b
@@ -84,7 +84,7 @@ IF(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
-    FIND_LIBRARY(LIB_EAY_DEBUG
+    find_library(LIB_EAY_DEBUG
       NAMES
         libeay32MDd
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
@@ -94,7 +94,7 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    FIND_LIBRARY(LIB_EAY_RELEASE
+    find_library(LIB_EAY_RELEASE
       NAMES
         libeay32MD
         libeay32
@@ -105,7 +105,7 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    FIND_LIBRARY(SSL_EAY_DEBUG
+    find_library(SSL_EAY_DEBUG
       NAMES
         ssleay32MDd
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
@@ -115,7 +115,7 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    FIND_LIBRARY(SSL_EAY_RELEASE
+    find_library(SSL_EAY_RELEASE
       NAMES
         ssleay32MD
         ssleay32
@@ -132,15 +132,15 @@ IF(WIN32 AND NOT CYGWIN)
     select_library_configurations(SSL_EAY)
 
     set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
-  ELSEIF(MINGW)
+  elseif(MINGW)
     # same player, for MingW
-    SET(LIB_EAY_NAMES libeay32)
-    SET(SSL_EAY_NAMES ssleay32)
-    IF(CMAKE_CROSS_COMPILING)
-      LIST(APPEND LIB_EAY_NAMES crypto)
-      LIST(APPEND SSL_EAY_NAMES ssl)
-    ENDIF()
-    FIND_LIBRARY(LIB_EAY
+    set(LIB_EAY_NAMES libeay32)
+    set(SSL_EAY_NAMES ssleay32)
+    if(CMAKE_CROSS_COMPILING)
+      list(APPEND LIB_EAY_NAMES crypto)
+      list(APPEND SSL_EAY_NAMES ssl)
+    endif()
+    find_library(LIB_EAY
       NAMES
         ${LIB_EAY_NAMES}
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
@@ -149,7 +149,7 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/MinGW"
     )
 
-    FIND_LIBRARY(SSL_EAY
+    find_library(SSL_EAY
       NAMES
         ${SSL_EAY_NAMES}
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
@@ -158,13 +158,13 @@ IF(WIN32 AND NOT CYGWIN)
         "lib/MinGW"
     )
 
-    MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
+    mark_as_advanced(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
     unset(LIB_EAY_NAMES)
     unset(SSL_EAY_NAMES)
-  ELSE(MSVC)
+  else(MSVC)
     # Not sure what to pick for -say- intel, let's use the toplevel ones and hope someone report issues:
-    FIND_LIBRARY(LIB_EAY
+    find_library(LIB_EAY
       NAMES
         libeay32
       HINTS
@@ -174,7 +174,7 @@ IF(WIN32 AND NOT CYGWIN)
         lib
     )
 
-    FIND_LIBRARY(SSL_EAY
+    find_library(SSL_EAY
       NAMES
         ssleay32
       HINTS
@@ -184,12 +184,12 @@ IF(WIN32 AND NOT CYGWIN)
         lib
     )
 
-    MARK_AS_ADVANCED(SSL_EAY LIB_EAY)
+    mark_as_advanced(SSL_EAY LIB_EAY)
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
-  ENDIF(MSVC)
-ELSE(WIN32 AND NOT CYGWIN)
+  endif(MSVC)
+else(WIN32 AND NOT CYGWIN)
 
-  FIND_LIBRARY(OPENSSL_SSL_LIBRARY
+  find_library(OPENSSL_SSL_LIBRARY
     NAMES
       ssl
       ssleay32
@@ -201,7 +201,7 @@ ELSE(WIN32 AND NOT CYGWIN)
       lib
   )
 
-  FIND_LIBRARY(OPENSSL_CRYPTO_LIBRARY
+  find_library(OPENSSL_CRYPTO_LIBRARY
     NAMES
       crypto
     HINTS
@@ -211,15 +211,15 @@ ELSE(WIN32 AND NOT CYGWIN)
       lib
   )
 
-  MARK_AS_ADVANCED(OPENSSL_CRYPTO_LIBRARY OPENSSL_SSL_LIBRARY)
+  mark_as_advanced(OPENSSL_CRYPTO_LIBRARY OPENSSL_SSL_LIBRARY)
 
   # compat defines
-  SET(OPENSSL_SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY})
-  SET(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+  set(OPENSSL_SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY})
+  set(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
 
-  SET(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
+  set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 
-ENDIF(WIN32 AND NOT CYGWIN)
+endif(WIN32 AND NOT CYGWIN)
 
 function(from_hex HEX DEC)
   string(TOUPPER "${HEX}" HEX)
@@ -309,4 +309,4 @@ else (OPENSSL_VERSION)
   )
 endif (OPENSSL_VERSION)
 
-MARK_AS_ADVANCED(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)
+mark_as_advanced(OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES)

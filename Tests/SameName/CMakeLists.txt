@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(SameName C)
+project(SameName C)
 
-ADD_SUBDIRECTORY(Lib1)
+add_subdirectory(Lib1)
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/Lib1)
-ADD_SUBDIRECTORY(Exe1)
+include_directories(${PROJECT_SOURCE_DIR}/Lib1)
+add_subdirectory(Exe1)

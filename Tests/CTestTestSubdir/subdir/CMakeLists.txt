@@ -1,2 +1,2 @@
-ADD_EXECUTABLE (main main.c)
-ADD_TEST (TestMain1 main)
+add_executable (main main.c)
+add_test (TestMain1 main)

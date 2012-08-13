@@ -73,12 +73,12 @@ configure_file(${SCRIPT_PATH}/release_cmake.sh.in ${SCRIPT_FILE} @ONLY)
 
 # run the script by starting a shell on the remote machine
 # then using the script file as input to the shell
-IF(RUN_LOCAL)
+if(RUN_LOCAL)
   message(FATAL_ERROR "run this command: ${RUN_SHELL} ${SCRIPT_FILE}")
-ELSE(RUN_LOCAL)
+else(RUN_LOCAL)
   remote_command("run release_cmake-${HOST}.sh on server"
     "${RUN_SHELL}" ${SCRIPT_FILE})
-ENDIF(RUN_LOCAL)
+endif(RUN_LOCAL)
 
 # now figure out which types of packages were created
 set(generators ${CPACK_BINARY_GENERATORS} ${CPACK_SOURCE_GENERATORS})

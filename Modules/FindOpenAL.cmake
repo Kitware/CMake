@@ -61,7 +61,7 @@
 # OPENAL_LIBRARY to override this selection or set the CMake environment
 # CMAKE_INCLUDE_PATH to modify the search paths.
 
-FIND_PATH(OPENAL_INCLUDE_DIR al.h
+find_path(OPENAL_INCLUDE_DIR al.h
   HINTS
   $ENV{OPENALDIR}
   PATH_SUFFIXES include/AL include/OpenAL include
@@ -75,7 +75,7 @@ FIND_PATH(OPENAL_INCLUDE_DIR al.h
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Creative\ Labs\\OpenAL\ 1.1\ Software\ Development\ Kit\\1.00.0000;InstallDir]
 )
 
-FIND_LIBRARY(OPENAL_LIBRARY
+find_library(OPENAL_LIBRARY
   NAMES OpenAL al openal OpenAL32
   HINTS
   $ENV{OPENALDIR}
@@ -93,7 +93,7 @@ FIND_LIBRARY(OPENAL_LIBRARY
 
 # handle the QUIETLY and REQUIRED arguments and set OPENAL_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenAL  DEFAULT_MSG  OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
+mark_as_advanced(OPENAL_LIBRARY OPENAL_INCLUDE_DIR)

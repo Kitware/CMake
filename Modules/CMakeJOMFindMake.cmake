@@ -13,6 +13,6 @@
 #  License text for the above reference.)
 
 
-SET (CMAKE_MAKE_PROGRAM "jom" CACHE STRING
+set (CMAKE_MAKE_PROGRAM "jom" CACHE STRING
      "Program used to build from makefiles.")
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)

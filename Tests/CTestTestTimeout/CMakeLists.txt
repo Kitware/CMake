@@ -1,28 +1,28 @@
 cmake_minimum_required (VERSION 2.8)
-PROJECT(CTestTestTimeout)
-INCLUDE(CTest)
+project(CTestTestTimeout)
+include(CTest)
 
-IF(NOT TIMEOUT)
-  IF(CYGWIN)
-    SET(TIMEOUT 4) # Cygwin CMake sometimes takes > 1 second to load!
-  ELSE()
-    SET(TIMEOUT 1)
-  ENDIF()
-ENDIF()
+if(NOT TIMEOUT)
+  if(CYGWIN)
+    set(TIMEOUT 4) # Cygwin CMake sometimes takes > 1 second to load!
+  else()
+    set(TIMEOUT 1)
+  endif()
+endif()
 
-ADD_DEFINITIONS(-DTIMEOUT=${TIMEOUT})
-ADD_EXECUTABLE (Timeout timeout.c)
+add_definitions(-DTIMEOUT=${TIMEOUT})
+add_executable (Timeout timeout.c)
 
-ADD_TEST(NAME TestTimeout
+add_test(NAME TestTimeout
   COMMAND ${CMAKE_COMMAND} -D Timeout=$<TARGET_FILE:Timeout>
                            -D Log=${CMAKE_CURRENT_BINARY_DIR}/timeout.log
                            -P ${CMAKE_CURRENT_SOURCE_DIR}/timeout.cmake
   )
-SET_TESTS_PROPERTIES(TestTimeout PROPERTIES TIMEOUT ${TIMEOUT})
+set_tests_properties(TestTimeout PROPERTIES TIMEOUT ${TIMEOUT})
 
-ADD_TEST(NAME CheckChild
+add_test(NAME CheckChild
   COMMAND ${CMAKE_COMMAND} -D Timeout=$<TARGET_FILE:Timeout>
                            -D Log=${CMAKE_CURRENT_BINARY_DIR}/timeout.log
                            -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   )
-SET_TESTS_PROPERTIES(CheckChild PROPERTIES DEPENDS TestTimeout)
+set_tests_properties(CheckChild PROPERTIES DEPENDS TestTimeout)

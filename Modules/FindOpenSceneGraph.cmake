@@ -161,7 +161,7 @@ if(OpenSceneGraph_FIND_QUIETLY)
     set(_osg_quiet "QUIET")
 endif()
 #
-# Here we call FIND_PACKAGE() on all of the components
+# Here we call find_package() on all of the components
 #
 foreach(_osg_module ${_osg_modules_to_process})
     if(OpenSceneGraph_DEBUG)
