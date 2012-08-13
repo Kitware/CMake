@@ -131,7 +131,7 @@ ENDIF(KDECONFIG_EXECUTABLE)
 
 
 
-# at first the KDE include direcory
+# at first the KDE include directory
 # kpassdlg.h comes from kdeui and doesn't exist in KDE4 anymore
 FIND_PATH(KDE3_INCLUDE_DIR kpassdlg.h
   HINTS

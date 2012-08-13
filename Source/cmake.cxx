@@ -1043,7 +1043,7 @@ int cmake::AddCMakePaths()
       {
       cMakeRoot = cMakeRoot.substr(0, slashPos);
       }
-    // is there no Modules direcory there?
+    // is there no Modules directory there?
     modules = cMakeRoot + "/Modules/CMake.cmake";
     }
 
@@ -1072,7 +1072,7 @@ int cmake::AddCMakePaths()
     {
     // next try exe
     cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
-    // is there no Modules direcory there?
+    // is there no Modules directory there?
     modules = cMakeRoot + "/Modules/CMake.cmake";
     }
   if (!cmSystemTools::FileExists(modules.c_str()))
