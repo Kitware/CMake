@@ -1,0 +1,17 @@
+CMake Error at BadAND.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<AND:>
+
+  AND requires one or more comma-separated '0' or '1' values.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Error at BadAND.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<AND:,>
+
+  AND requires one or more comma-separated '0' or '1' values.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)$
