@@ -12,6 +12,8 @@ add_custom_target(check ALL
     -Dtest_and_1=$<AND:1>
     -Dtest_and_1_0=$<AND:1,0>
     -Dtest_and_1_1=$<AND:1,1>
+    -Dtest_config_0=$<CONFIG:$<CONFIGURATION>x>
+    -Dtest_config_1=$<CONFIG:$<CONFIGURATION>>
     -Dtest_not_0=$<NOT:0>
     -Dtest_not_1=$<NOT:1>
     -Dtest_or_0=$<OR:0>

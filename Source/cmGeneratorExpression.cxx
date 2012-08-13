@@ -14,6 +14,8 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 
+#include <cmsys/String.h>
+
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
   cmMakefile* mf, const char* config,
@@ -25,6 +27,7 @@ cmGeneratorExpression::cmGeneratorExpression(
                            "_FILE(|_NAME|_DIR):" // Filename component.
                            "([A-Za-z0-9_.-]+)"   // Target name.
                            ">$");
+  this->TestConfig.compile("^\\$<CONFIG:([A-Za-z0-9_]*)>$");
 }
 
 //----------------------------------------------------------------------------
@@ -161,6 +164,12 @@ bool cmGeneratorExpression::Evaluate(const char* expr, std::string& result)
   else if(strncmp(expr, "$<OR:",5) == 0)
     {
     return cmGeneratorExpressionBool(expr+5, result, "OR", "0", "1");
+    }
+  else if(this->TestConfig.find(expr))
+    {
+    result = cmsysString_strcasecmp(this->TestConfig.match(1).c_str(),
+                                    this->Config? this->Config:"") == 0
+      ? "1":"0";
     }
   else
     {

@@ -18,6 +18,7 @@
   "Valid expressions are:\n"                                            \
   "  $<0:...>                  = empty string (ignores \"...\")\n"      \
   "  $<1:...>                  = content of \"...\"\n"                  \
+  "  $<CONFIG:cfg>             = '1' if config is \"cfg\", else '0'\n"  \
   "  $<CONFIGURATION>          = configuration name\n"                  \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
