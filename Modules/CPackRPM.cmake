@@ -639,6 +639,25 @@ SET(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
 #STRING(REGEX REPLACE " " "\\\\ " CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 SET(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 
+# if we are creating a relocatable package, omit parent directories of
+# CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
+# which is passed to the find command that generates the content-list
+if(CPACK_RPM_PACKAGE_RELOCATABLE)
+  # get a list of the elements in CPACK_RPM_PACKAGE_PREFIX and remove
+  # the final element (so the install-prefix dir itself is not omitted
+  # from the RPM's content-list)
+  string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${CPACK_RPM_PACKAGE_PREFIX}")
+  list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+  # Now generate all of the parent dirs of CPACK_RPM_PACKAGE_PREFIX
+  foreach(_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
+    list(APPEND _TMP_LIST "${_ELEM}")
+    string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
+    set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
+    separate_arguments(_OMIT_DIR)
+    list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
+  endforeach()
+endif()
+
 # Use files tree to construct files command (spec file)
 # We should not forget to include symlinks (thus -o -type l)
 # We should include directory as well (thus -type d)
@@ -647,7 +666,7 @@ SET(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 # file name by enclosing it between double quotes (thus the sed)
 # Then we must authorize any man pages extension (adding * at the end)
 # because rpmbuild may automatically compress those files
-EXECUTE_PROCESS(COMMAND find . -type f -o -type l -o (-type d -a -not -name ".")
+EXECUTE_PROCESS(COMMAND find . -type f -o -type l -o (-type d -a -not ( -name "." ${_RPM_DIRS_TO_OMIT} ) )
                 COMMAND sed s:.*/man.*/.*:&*:
                 COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
                 WORKING_DIRECTORY "${WDIR}"
