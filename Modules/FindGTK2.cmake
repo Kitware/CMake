@@ -305,9 +305,7 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
         NAMES ${_lib_list}
         PATHS
             /opt/gnome/lib
-            /opt/gnome/lib64
             /usr/openwin/lib
-            /usr/openwin/lib64
             /sw/lib
             $ENV{GTKMM_BASEPATH}/lib
             [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/lib
