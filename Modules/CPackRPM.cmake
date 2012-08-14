@@ -728,8 +728,8 @@ if(CPACK_RPM_USER_FILELIST_INTERNAL)
 
   set(CPACK_RPM_USER_INSTALL_FILES "")
   foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
-    string(REGEX REPLACE "%[A-Za-z\(\)]* " "" F_PATH ${F})
-    string(REGEX MATCH "%[A-Za-z\(\)]*" F_PREFIX ${F})
+    string(REGEX REPLACE "%[A-Za-z\(\)-\,]* " "" F_PATH ${F})
+    string(REGEX MATCH "%[A-Za-z\(\)-\,]*" F_PREFIX ${F})
 
     if(F_PREFIX)
         set(F_PREFIX "${F_PREFIX} ")
