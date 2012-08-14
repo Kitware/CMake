@@ -35,18 +35,13 @@ macro(RTI_MESSAGE_QUIETLY QUIET TYPE MSG)
   endif()
 endmacro()
 
-# Detect the CERTI installation, http://www.cert.fr/CERTI
-if ("$ENV{CERTI_HOME}" STRGREATER "")
-  file(TO_CMAKE_PATH "$ENV{CERTI_HOME}" CERTI_HOME)
-  RTI_MESSAGE_QUIETLY(RTI_FIND_QUIETLY STATUS "Using environment defined CERTI_HOME: ${CERTI_HOME}")
-endif ()
-
 set(RTI_DEFINITIONS "-DRTI_USES_STD_FSTREAM")
 
+# Detect the CERTI installation, http://www.cert.fr/CERTI
 # Detect the MAK Technologies RTI installation, http://www.mak.com/products/rti.php
 # note: the following list is ordered to find the most recent version first
 set(RTI_POSSIBLE_DIRS
-  ${CERTI_HOME}
+  ENV CERTI_HOME
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MAK Technologies\\MAK RTI 3.2 MSVC++ 8.0;Location]"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MAK RTI 3.2-win32-msvc++8.0;InstallLocation]"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MAK Technologies\\MAK RTI 2.2;Location]"

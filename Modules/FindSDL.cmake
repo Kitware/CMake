@@ -67,7 +67,7 @@
 
 find_path(SDL_INCLUDE_DIR SDL.h
   HINTS
-  $ENV{SDLDIR}
+    ENV SDLDIR
   PATH_SUFFIXES include/SDL include
   PATHS
   ~/Library/Frameworks
@@ -87,8 +87,8 @@ find_path(SDL_INCLUDE_DIR SDL.h
 find_library(SDL_LIBRARY_TEMP
   NAMES SDL SDL-1.1
   HINTS
-  $ENV{SDLDIR}
-  PATH_SUFFIXES lib64 lib
+    ENV SDLDIR
+  PATH_SUFFIXES lib
   PATHS
   /sw
   /opt/local
@@ -105,8 +105,8 @@ if(NOT SDL_BUILDING_LIBRARY)
     find_library(SDLMAIN_LIBRARY
       NAMES SDLmain SDLmain-1.1
       HINTS
-      $ENV{SDLDIR}
-      PATH_SUFFIXES lib64 lib
+        ENV SDLDIR
+      PATH_SUFFIXES lib
       PATHS
       /sw
       /opt/local

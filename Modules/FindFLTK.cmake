@@ -93,11 +93,13 @@ if(NOT FLTK_DIR)
   #
   find_path(FLTK_DIR FLTKConfig.cmake
     # Look for an environment variable FLTK_DIR.
-    $ENV{FLTK_DIR}
+    HINTS
+      ENV FLTK_DIR
 
     # Look in places relative to the system executable search path.
     ${FLTK_DIR_SEARCH}
 
+    PATHS
     # Look in standard UNIX install locations.
     /usr/local/lib/fltk
     /usr/lib/fltk

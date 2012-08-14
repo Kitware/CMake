@@ -63,7 +63,7 @@
 
 find_path(OPENAL_INCLUDE_DIR al.h
   HINTS
-  $ENV{OPENALDIR}
+    ENV OPENALDIR
   PATH_SUFFIXES include/AL include/OpenAL include
   PATHS
   ~/Library/Frameworks
@@ -78,7 +78,7 @@ find_path(OPENAL_INCLUDE_DIR al.h
 find_library(OPENAL_LIBRARY
   NAMES OpenAL al openal OpenAL32
   HINTS
-  $ENV{OPENALDIR}
+    ENV OPENALDIR
   PATH_SUFFIXES lib64 lib libs64 libs libs/Win32 libs/Win64
   PATHS
   ~/Library/Frameworks

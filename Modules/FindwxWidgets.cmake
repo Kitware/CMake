@@ -421,12 +421,12 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   find_path(wxWidgets_ROOT_DIR
     NAMES include/wx/wx.h
     PATHS
-      $ENV{wxWidgets_ROOT_DIR}
-      $ENV{WXWIN}
+      ENV wxWidgets_ROOT_DIR
+      ENV WXWIN
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWidgets_is1;Inno Setup: App Path]"  # WX 2.6.x
       C:/
       D:/
-      $ENV{ProgramFiles}
+      ENV ProgramFiles
     PATH_SUFFIXES
       wxWidgets-2.9.4
       wxWidgets-2.9.3
