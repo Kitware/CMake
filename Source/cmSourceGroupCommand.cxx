@@ -19,7 +19,7 @@ bool cmSourceGroupCommand
     {
     this->SetError("called with incorrect number of arguments");
     return false;
-    }  
+    }
 
   std::string delimiter = "\\";
   if(this->Makefile->GetDefinition("SOURCE_GROUP_DELIMITER"))
@@ -29,7 +29,7 @@ bool cmSourceGroupCommand
 
   std::vector<std::string> folders =
     cmSystemTools::tokenize(args[0], delimiter);
- 
+
   cmSourceGroup* sg = 0;
   sg = this->Makefile->GetSourceGroup(folders);
   if(!sg)
@@ -50,7 +50,7 @@ bool cmSourceGroupCommand
     sg->SetGroupRegex(args[1].c_str());
     return true;
     }
-  
+
   // Process arguments.
   bool doingFiles = false;
   for(unsigned int i=1; i < args.size(); ++i)
@@ -97,6 +97,6 @@ bool cmSourceGroupCommand
       return false;
       }
     }
-  
+
   return true;
 }

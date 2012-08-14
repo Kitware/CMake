@@ -1,5 +1,5 @@
 #ifdef _WIN32
-__declspec(dllimport) 
+__declspec(dllimport)
 #endif
 extern  void bar();
 

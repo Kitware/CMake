@@ -65,11 +65,11 @@ if (${file_text} MATCHES ".+")
             # Skip the rest of this block.
             # message("Skipping ${entry}")
             # set(skip TRUE)
-          # else (${entry} MATCHES "^_")
+          # else ()
             message("Kernel:    ${entry}")
-          # endif (${entry} MATCHES "^_")
+          # endif ()
 
-        endif(${entry} MATCHES "[^g]name = ([^ ]+)")
+        endif()
 
         # Skip the rest of the block if necessary
         if(NOT skip)
@@ -96,14 +96,14 @@ if (${file_text} MATCHES ".+")
             message("")
           endif()
 
-        endif(NOT skip)
+        endif()
 
 
-      endforeach(entry)
+      endforeach()
 
-    endif(line MATCHES "^code")
+    endif()
 
-  endforeach(line)
+  endforeach()
 
 else()
   # message("FOUND NO DEPENDS")

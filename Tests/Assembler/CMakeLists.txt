@@ -18,16 +18,16 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile")
       DEPENDS main.c
       VERBATIM
       )
-  endif(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
-endif("${CMAKE_GENERATOR}" MATCHES "Makefile")
+  endif()
+endif()
 
 
 if(SRCS)
   set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}")
   enable_language(ASM OPTIONAL)
-else(SRCS)
+else()
   message(STATUS "No assembler enabled, using C")
   set(SRCS main.c)
-endif(SRCS)
+endif()
 
 add_executable(HelloAsm ${SRCS})

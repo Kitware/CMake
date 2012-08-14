@@ -13,7 +13,7 @@
 #include "cmCPackTarCompressGenerator.h"
 
 //----------------------------------------------------------------------
-cmCPackTarCompressGenerator::cmCPackTarCompressGenerator() 
+cmCPackTarCompressGenerator::cmCPackTarCompressGenerator()
   :cmCPackArchiveGenerator(cmArchiveWrite::CompressCompress,
                            cmArchiveWrite::TypeTAR)
 {

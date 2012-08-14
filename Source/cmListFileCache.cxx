@@ -26,7 +26,7 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
                                   cmListFileFunction& function,
                                   const char* filename);
 
-bool cmListFile::ParseFile(const char* filename, 
+bool cmListFile::ParseFile(const char* filename,
                            bool topLevel,
                            cmMakefile *mf)
 {
@@ -47,7 +47,7 @@ bool cmListFile::ParseFile(const char* filename,
   if(!cmListFileLexer_SetFileName(lexer, filename))
     {
     cmListFileLexer_Delete(lexer);
-    cmSystemTools::Error("cmListFileCache: error can not open file ", 
+    cmSystemTools::Error("cmListFileCache: error can not open file ",
                          filename);
     return false;
     }
@@ -119,7 +119,7 @@ bool cmListFile::ParseFile(const char* filename,
   {
     bool hasVersion = false;
     // search for the right policy command
-    for(std::vector<cmListFileFunction>::iterator i 
+    for(std::vector<cmListFileFunction>::iterator i
           = this->Functions.begin();
         i != this->Functions.end(); ++i)
     {
@@ -129,7 +129,7 @@ bool cmListFile::ParseFile(const char* filename,
         break;
       }
     }
-    // if no policy command is found this is an error if they use any 
+    // if no policy command is found this is an error if they use any
     // non advanced functions or a lot of functions
     if(!hasVersion)
     {
@@ -152,7 +152,7 @@ bool cmListFile::ParseFile(const char* filename,
         allowedCommands.insert("option");
         allowedCommands.insert("message");
         isProblem = false;
-        for(std::vector<cmListFileFunction>::iterator i 
+        for(std::vector<cmListFileFunction>::iterator i
               = this->Functions.begin();
             i != this->Functions.end(); ++i)
         {
@@ -161,10 +161,10 @@ bool cmListFile::ParseFile(const char* filename,
           {
             isProblem = true;
             break;
-          }       
+          }
         }
       }
-      
+
       if (isProblem)
       {
       // Tell the top level cmMakefile to diagnose
@@ -181,7 +181,7 @@ bool cmListFile::ParseFile(const char* filename,
     {
     bool hasProject = false;
     // search for a project command
-    for(std::vector<cmListFileFunction>::iterator i 
+    for(std::vector<cmListFileFunction>::iterator i
           = this->Functions.begin();
         i != this->Functions.end(); ++i)
       {
@@ -256,7 +256,7 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
       parenDepth--;
       cmListFileArgument a(")",
                            false, filename, token->line);
-      function.Arguments.push_back(a);        
+      function.Arguments.push_back(a);
       }
     else if(token->type == cmListFileLexer_Token_Identifier ||
             token->type == cmListFileLexer_Token_ArgumentUnquoted)
@@ -276,7 +276,7 @@ bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
       // Error.
       cmOStringStream error;
       error << "Error in cmake code at\n"
-            << filename << ":" << cmListFileLexer_GetCurrentLine(lexer) 
+            << filename << ":" << cmListFileLexer_GetCurrentLine(lexer)
             << ":\n"
             << "Parse error.  Function missing ending \")\".  "
             << "Instead found "

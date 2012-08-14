@@ -35,7 +35,7 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   return lg;
 }
-  
+
 //----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
@@ -336,7 +336,7 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
 
 //----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS8ExtraFlagTable[] =
-{ 
+{
   {"CallingConvention", "Gd", "cdecl", "0", 0 },
   {"CallingConvention", "Gr", "fastcall", "1", 0 },
   {"CallingConvention", "Gz", "stdcall", "2", 0 },

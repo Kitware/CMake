@@ -20,20 +20,20 @@
  *
  * cmGlobalVisualStudio9Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio9Generator : 
+class cmGlobalVisualStudio9Generator :
   public cmGlobalVisualStudio8Generator
 {
 public:
   cmGlobalVisualStudio9Generator();
-  static cmGlobalGenerator* New() { 
+  static cmGlobalGenerator* New() {
     return new cmGlobalVisualStudio9Generator; }
-  
+
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalVisualStudio9Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 9 2008";}
   virtual void AddPlatformDefinitions(cmMakefile* mf);
-  
+
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
@@ -42,9 +42,9 @@ public:
 
   /**
    * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.  
+   * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages, 
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 

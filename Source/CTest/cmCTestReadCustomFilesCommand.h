@@ -25,11 +25,11 @@ class cmCTestReadCustomFilesCommand : public cmCTestCommand
 public:
 
   cmCTestReadCustomFilesCommand() {}
-  
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     cmCTestReadCustomFilesCommand* ni = new cmCTestReadCustomFilesCommand;
     ni->CTest = this->CTest;
@@ -55,7 +55,7 @@ public:
     {
     return "read CTestCustom files.";
     }
-  
+
   /**
    * More documentation.
    */

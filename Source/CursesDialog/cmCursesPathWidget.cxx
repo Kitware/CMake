@@ -14,7 +14,7 @@
 #include "cmCursesMainForm.h"
 #include "cmSystemTools.h"
 
-cmCursesPathWidget::cmCursesPathWidget(int width, int height, 
+cmCursesPathWidget::cmCursesPathWidget(int width, int height,
                                            int left, int top) :
   cmCursesStringWidget(width, height, left, top)
 {
@@ -75,8 +75,8 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
     }
 
   this->SetString(cstr.c_str());
-  touchwin(w); 
-  wrefresh(w); 
+  touchwin(w);
+  wrefresh(w);
   form_driver(form, REQ_END_FIELD);
   this->LastGlob = glob;
   this->LastString = cstr;

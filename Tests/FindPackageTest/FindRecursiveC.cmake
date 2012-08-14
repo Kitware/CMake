@@ -1,1 +1,1 @@
-FIND_PACKAGE(RecursiveC NAMES zot)
+find_package(RecursiveC NAMES zot)

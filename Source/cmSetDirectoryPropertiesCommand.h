@@ -17,7 +17,7 @@
 class cmSetDirectoryPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmSetDirectoryPropertiesCommand;
     }
@@ -46,7 +46,7 @@ public:
     {
     return "Set a property of the directory.";
     }
-  
+
   /**
    * Static entry point for use by other commands
    */
@@ -69,7 +69,7 @@ public:
         "ADDITIONAL_MAKE_CLEAN_FILES is a list of files that will be cleaned "
         "as a part of \"make clean\" stage.";
     }
-  
+
   cmTypeMacro(cmSetDirectoryPropertiesCommand, cmCommand);
 };
 

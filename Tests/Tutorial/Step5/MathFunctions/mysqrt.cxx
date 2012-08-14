@@ -14,11 +14,11 @@ double mysqrt(double x)
     {
     return 0;
     }
-  
+
   double result;
 
   // if we have both log and exp then use them
-  double delta;  
+  double delta;
 
   // use the table to help find an initial value
   result = x;

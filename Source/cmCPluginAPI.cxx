@@ -389,7 +389,7 @@ void CCONV cmAddLibrary(void *arg, const char *libname, int shared,
     {
     srcs2.push_back(srcs[i]);
     }
-  mf->AddLibrary(libname, 
+  mf->AddLibrary(libname,
                  (shared? cmTarget::SHARED_LIBRARY : cmTarget::STATIC_LIBRARY),
                   srcs2);
 }
@@ -859,13 +859,13 @@ void CCONV cmFree(void *data)
 }
 
 void CCONV DefineSourceFileProperty (void *arg, const char *name,
-  const char *briefDocs, 
+  const char *briefDocs,
   const char *longDocs,
   int chained)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
   mf->GetCMakeInstance()->DefineProperty(name,cmProperty::SOURCE_FILE,
-                                         briefDocs, longDocs, 
+                                         briefDocs, longDocs,
                                          chained != 0);
 }
 

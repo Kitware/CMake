@@ -68,18 +68,18 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   // and the CPACK_CYGWIN_PATCH_FILE and CPACK_TOPLEVEL_DIRECTORY
   // files
   std::string compressOutFile = packageDirFileName;
-  // at this point compressOutFile is the full path to 
+  // at this point compressOutFile is the full path to
   // _CPack_Package/.../package-2.5.0.tar.bz2
   // we want to create a tar _CPack_Package/.../package-2.5.0-1-src.tar.bz2
-  // with these 
-  //   _CPack_Package/.../package-2.5.0-1.patch 
+  // with these
+  //   _CPack_Package/.../package-2.5.0-1.patch
   //   _CPack_Package/.../package-2.5.0-1.sh
   //   _CPack_Package/.../package-2.5.0.tar.bz2
   // the -1 is CPACK_CYGWIN_PATCH_NUMBER
-  
+
   // first copy the patch file and the .sh file
   // to the toplevel cpack temp dir
-  
+
   // copy the patch file into place
   if(!this->GetOption("CPACK_CYGWIN_PATCH_FILE"))
     {
@@ -98,7 +98,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
     }
   if(!this->GetOption("CPACK_CYGWIN_BUILD_SCRIPT"))
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, 
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "No build script specified for cygwin sources.");
     return 0;
     }
@@ -168,7 +168,7 @@ const char* cmCPackCygwinSourceGenerator::GetPackagingInstallPrefix()
 const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
-  const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER"); 
+  const char* patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if(!patch)
     {
     cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_CYGWIN_PATCH_NUMBER"
@@ -179,4 +179,4 @@ const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
   this->OutputExtension += "-src.tar.bz2";
   return this->OutputExtension.c_str();
 }
-  
+

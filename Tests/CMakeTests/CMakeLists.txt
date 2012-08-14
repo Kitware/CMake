@@ -1,12 +1,12 @@
-SET(CMAKE_EXECUTABLE "${CMake_BIN_DIR}/cmake")
+set(CMAKE_EXECUTABLE "${CMake_BIN_DIR}/cmake")
 
 
-MACRO(AddCMakeTest TestName PreArgs)
-  CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/${TestName}Test.cmake.in"
+macro(AddCMakeTest TestName PreArgs)
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${TestName}Test.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" @ONLY IMMEDIATE)
-  ADD_TEST(CMake.${TestName} ${CMAKE_EXECUTABLE} ${PreArgs}
+  add_test(CMake.${TestName} ${CMAKE_EXECUTABLE} ${PreArgs}
     -P "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" ${ARGN})
-ENDMACRO(AddCMakeTest)
+endmacro()
 
 
 AddCMakeTest(List "")
@@ -43,12 +43,12 @@ if(HAVE_ELF_H)
   AddCMakeTest(ELF "")
 endif()
 
-SET(EndStuff_PreArgs
+set(EndStuff_PreArgs
   "-Ddir:STRING=${CMAKE_CURRENT_BINARY_DIR}/EndStuffTest"
   )
 AddCMakeTest(EndStuff "${EndStuff_PreArgs}")
 
-SET(GetPrerequisites_PreArgs
+set(GetPrerequisites_PreArgs
   "-DCTEST_CONFIGURATION_TYPE:STRING=\\\${CTEST_CONFIGURATION_TYPE}"
   )
 AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")

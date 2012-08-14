@@ -7,7 +7,7 @@ function(check msg lhs rhs)
   if(NOT "${lhs}" STREQUAL "${rhs}")
     message(FATAL_ERROR "${msg}: expected [${lhs}], got [${rhs}]")
   endif()
-endfunction(check)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Test using a development framework that sets policies for us.
@@ -52,7 +52,7 @@ if(1)
     # CMP0002 should be changed when this function is invoked
     cmake_policy(GET CMP0002 cmp)
     check(CMP0002 "OLD" "${cmp}")
-  endfunction(func1)
+  endfunction()
 
   # Unset CMP0002
   cmake_policy(VERSION 2.4)
@@ -65,8 +65,8 @@ if(1)
     cmake_policy(SET CMP0002 OLD)
     cmake_policy(GET CMP0002 cmp)
     check(CMP0002 "OLD" "${cmp}")
-  endmacro(macro1)
-endif(1)
+  endmacro()
+endif()
 cmake_policy(POP)
 
 # CMP0002 should still be NEW in this context.

@@ -1214,7 +1214,7 @@ void cmComputeLinkInformation::AddUserItem(std::string const& item,
     {
     // if this is a -l option then we might need to warn about
     // CMP0003 so put it in OldUserFlagItems, if it is not a -l
-    // or -Wl,-l (-framework -pthread), then allow it without a 
+    // or -Wl,-l (-framework -pthread), then allow it without a
     // CMP0003 as -L will not affect those other linker flags
     if(item.find("-l") == 0 ||  item.find("-Wl,-l") == 0)
       {

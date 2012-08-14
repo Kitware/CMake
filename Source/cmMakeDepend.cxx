@@ -31,8 +31,8 @@ cmMakeDepend::cmMakeDepend()
 
 
 cmMakeDepend::~cmMakeDepend()
-{ 
-  for(DependInformationMapType::iterator i = 
+{
+  for(DependInformationMapType::iterator i =
         this->DependInformationMap.begin();
       i != this->DependInformationMap.end(); ++i)
     {
@@ -162,7 +162,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
       else
         {
         //try to guess which include path to use
-        for(std::vector<std::string>::iterator t = 
+        for(std::vector<std::string>::iterator t =
               this->IncludeDirectories.begin();
             t != this->IncludeDirectories.end(); ++t)
           {
@@ -175,7 +175,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
           if (srcFile->GetFullPath() == incpath)
             {
             // set the path to the guessed path
-            info->FullPath = incpath; 
+            info->FullPath = incpath;
             found=true;
             }
           }
@@ -243,7 +243,7 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
 
 void cmMakeDepend::AddDependency(cmDependInformation* info, const char* file)
 {
-  cmDependInformation* dependInfo = 
+  cmDependInformation* dependInfo =
     this->GetDependInformation(file, info->PathOnly.c_str());
   this->GenerateDependInformation(dependInfo);
   info->AddDependencies(dependInfo);
@@ -288,7 +288,7 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
     {
     m = this->DirectoryToFileToPathMap.find("");
     }
-  
+
   if(m != this->DirectoryToFileToPathMap.end())
     {
     FileToPathMapType& map = m->second;
@@ -305,7 +305,7 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
     this->DirectoryToFileToPathMap[extraPath? extraPath: ""][fname] = fp;
     return fp;
     }
-  
+
   for(std::vector<std::string>::iterator i = this->IncludeDirectories.begin();
       i != this->IncludeDirectories.end(); ++i)
     {

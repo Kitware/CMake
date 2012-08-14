@@ -33,9 +33,9 @@ void cmDocumentationFormatterText
     os << name << "\n\n";
     }
 
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     section.GetEntries();
-  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end(); ++op)
     {
     if(op->Name.size())
@@ -58,7 +58,7 @@ void cmDocumentationFormatterText
     }
 }
 
-void cmDocumentationFormatterText::PrintPreformatted(std::ostream& os, 
+void cmDocumentationFormatterText::PrintPreformatted(std::ostream& os,
                                                      const char* text)
 {
   bool newline = true;
@@ -78,7 +78,7 @@ void cmDocumentationFormatterText::PrintPreformatted(std::ostream& os,
   os << "\n";
 }
 
-void cmDocumentationFormatterText::PrintParagraph(std::ostream& os, 
+void cmDocumentationFormatterText::PrintParagraph(std::ostream& os,
                                                   const char* text)
 {
   os << this->TextIndent;
@@ -91,7 +91,7 @@ void cmDocumentationFormatterText::SetIndent(const char* indent)
   this->TextIndent = indent;
 }
 
-void cmDocumentationFormatterText::PrintColumn(std::ostream& os, 
+void cmDocumentationFormatterText::PrintColumn(std::ostream& os,
                                                const char* text)
 {
   // Print text arranged in an indented column of fixed witdh.
@@ -100,14 +100,14 @@ void cmDocumentationFormatterText::PrintColumn(std::ostream& os,
   bool newSentence = false;
   bool firstLine = true;
   int width = this->TextWidth - static_cast<int>(strlen(this->TextIndent));
-  
+
   // Loop until the end of the text.
   while(*l)
     {
     // Parse the next word.
     const char* r = l;
     while(*r && (*r != '\n') && (*r != ' ')) { ++r; }
-    
+
     // Does it fit on this line?
     if(r-l < (width-column-(newSentence?1:0)))
       {
@@ -135,12 +135,12 @@ void cmDocumentationFormatterText::PrintColumn(std::ostream& os,
           // first line.
           os << (firstLine?"":this->TextIndent);
           }
-        
+
         // Print the word.
         os.write(l, static_cast<long>(r-l));
         newSentence = (*(r-1) == '.');
         }
-      
+
       if(*r == '\n')
         {
         // Text provided a newline.  Start a new line.
@@ -175,6 +175,6 @@ void cmDocumentationFormatterText::PrintColumn(std::ostream& os,
 
     // Move to beginning of next word.  Skip over whitespace.
     l = r;
-    while(*l && (*l == ' ')) { ++l; }    
+    while(*l && (*l == ' ')) { ++l; }
     }
 }

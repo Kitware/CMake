@@ -19,10 +19,10 @@
 inline int ctrl(int z)
 {
     return (z&037);
-} 
+}
 
-cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<std::string> 
-                                                 const& messages, const char* 
+cmCursesLongMessageForm::cmCursesLongMessageForm(std::vector<std::string>
+                                                 const& messages, const char*
                                                  title)
 {
   // Append all messages into on big string
@@ -84,7 +84,7 @@ void cmCursesLongMessageForm::UpdateStatusBar()
   curses_move(y-4,0);
   attron(A_STANDOUT);
   printw(bar);
-  attroff(A_STANDOUT);  
+  attroff(A_STANDOUT);
   curses_move(y-3,0);
   printw(version);
   pos_form_cursor(this->Form);
@@ -94,7 +94,7 @@ void cmCursesLongMessageForm::PrintKeys()
 {
   int x,y;
   getmaxyx(stdscr, y, x);
-  if ( x < cmCursesMainForm::MIN_WIDTH  || 
+  if ( x < cmCursesMainForm::MIN_WIDTH  ||
        y < cmCursesMainForm::MIN_HEIGHT )
     {
     return;
@@ -105,7 +105,7 @@ void cmCursesLongMessageForm::PrintKeys()
   curses_move(y-2,0);
   printw(firstLine);
   pos_form_cursor(this->Form);
-  
+
 }
 
 void cmCursesLongMessageForm::Render(int, int, int, int)
@@ -155,7 +155,7 @@ void cmCursesLongMessageForm::Render(int, int, int, int)
 
   this->UpdateStatusBar();
   this->PrintKeys();
-  touchwin(stdscr); 
+  touchwin(stdscr);
   refresh();
 
 }
@@ -200,8 +200,8 @@ void cmCursesLongMessageForm::HandleInput()
 
     this->UpdateStatusBar();
     this->PrintKeys();
-    touchwin(stdscr); 
-    wrefresh(stdscr); 
+    touchwin(stdscr);
+    wrefresh(stdscr);
     }
 
 }

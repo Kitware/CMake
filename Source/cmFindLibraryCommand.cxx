@@ -15,7 +15,7 @@
 #include <cmsys/stl/algorithm>
 
 cmFindLibraryCommand::cmFindLibraryCommand()
-{ 
+{
   this->EnvironmentPath = "LIB";
 }
 

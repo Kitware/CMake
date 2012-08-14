@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmMarkAsAdvancedCommand;
     }
@@ -41,7 +41,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "mark_as_advanced";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -49,7 +49,7 @@ public:
     {
     return "Mark cmake cached variables as advanced.";
     }
-  
+
   /**
    * More documentation.
    */

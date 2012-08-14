@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmOptionCommand;
     }
@@ -41,7 +41,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "option";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -49,7 +49,7 @@ public:
     {
     return "Provides an option that the user can optionally select.";
     }
-  
+
   /**
    * More documentation.
    */

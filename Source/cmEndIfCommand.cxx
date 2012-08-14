@@ -20,7 +20,7 @@ bool cmEndIfCommand::InitialPass(std::vector<std::string> const&,
     {
     return true;
     }
-  
+
   this->SetError("An ENDIF command was found outside of a proper "
                  "IF ENDIF structure. Or its arguments did not match "
                  "the opening IF command.");

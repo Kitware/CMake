@@ -889,7 +889,7 @@ bool cmDependsFortran::FindIncludeFile(const char* dir,
       }
 
     // Search the include path for the file.
-    for(std::vector<std::string>::const_iterator i = 
+    for(std::vector<std::string>::const_iterator i =
           this->IncludePath.begin(); i != this->IncludePath.end(); ++i)
       {
       fullName = *i;

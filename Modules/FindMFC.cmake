@@ -18,43 +18,43 @@
 #  License text for the above reference.)
 
 # Assume no MFC support
-SET(MFC_FOUND "NO")
+set(MFC_FOUND "NO")
 
 # Only attempt the try_compile call if it has a chance to succeed:
-SET(MFC_ATTEMPT_TRY_COMPILE 0)
-IF(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW)
-  SET(MFC_ATTEMPT_TRY_COMPILE 1)
-ENDIF(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW)
+set(MFC_ATTEMPT_TRY_COMPILE 0)
+if(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW)
+  set(MFC_ATTEMPT_TRY_COMPILE 1)
+endif()
 
-IF(MFC_ATTEMPT_TRY_COMPILE)
-  IF("MFC_HAVE_MFC" MATCHES "^MFC_HAVE_MFC$")
-    SET(CHECK_INCLUDE_FILE_VAR "afxwin.h")
-    CONFIGURE_FILE(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
+if(MFC_ATTEMPT_TRY_COMPILE)
+  if("MFC_HAVE_MFC" MATCHES "^MFC_HAVE_MFC$")
+    set(CHECK_INCLUDE_FILE_VAR "afxwin.h")
+    configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
-    MESSAGE(STATUS "Looking for MFC")
-    TRY_COMPILE(MFC_HAVE_MFC
+    message(STATUS "Looking for MFC")
+    try_compile(MFC_HAVE_MFC
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx
       CMAKE_FLAGS
       -DCMAKE_MFC_FLAG:STRING=2
       -DCOMPILE_DEFINITIONS:STRING=-D_AFXDLL
       OUTPUT_VARIABLE OUTPUT)
-    IF(MFC_HAVE_MFC)
-      MESSAGE(STATUS "Looking for MFC - found")
-      SET(MFC_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    if(MFC_HAVE_MFC)
+      message(STATUS "Looking for MFC - found")
+      set(MFC_HAVE_MFC 1 CACHE INTERNAL "Have MFC?")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if MFC exists passed with the following output:\n"
         "${OUTPUT}\n\n")
-    ELSE(MFC_HAVE_MFC)
-      MESSAGE(STATUS "Looking for MFC - not found")
-      SET(MFC_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    else()
+      message(STATUS "Looking for MFC - not found")
+      set(MFC_HAVE_MFC 0 CACHE INTERNAL "Have MFC?")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if MFC exists failed with the following output:\n"
         "${OUTPUT}\n\n")
-    ENDIF(MFC_HAVE_MFC)
-  ENDIF("MFC_HAVE_MFC" MATCHES "^MFC_HAVE_MFC$")
+    endif()
+  endif()
 
-  IF(MFC_HAVE_MFC)
-    SET(MFC_FOUND "YES")
-  ENDIF(MFC_HAVE_MFC)
-ENDIF(MFC_ATTEMPT_TRY_COMPILE)
+  if(MFC_HAVE_MFC)
+    set(MFC_FOUND "YES")
+  endif()
+endif()

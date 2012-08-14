@@ -4,7 +4,7 @@
 # -------------------------------------------------------------------------
 
 # Path to several tools (_PROG to avoid the typical GZIP env var pb)
-# Example: 
+# Example:
 #   DOXYGEN_PROG=@DOXYGEN@   (INCLUDE(${CMAKE_ROOT}/Modules/FindDoxygen.cmake))
 #   GZIP_PROG=@GZIP@         (INCLUDE(${CMAKE_ROOT}/Modules/FindCygwin.cmake))
 #   HHC_PROG=@HHC@           (INCLUDE(${CMAKE_ROOT}/Modules/FindHhc.cmake))
@@ -26,26 +26,26 @@ export WGET_PROG="@WGET@"              # wget (remote file retrieval)
 
 # PROJECT_NAME:
 # Documentation/project name. Used in some of the resulting file names and
-# xrefs to uniquify two or more projects linked together through their 
+# xrefs to uniquify two or more projects linked together through their
 # Doxygen's tag files. Mandatory for each documentation set.
 # Note: might be the same as the doxyfile's PROJECT_NAME
-# Example: 
+# Example:
 #   PROJECT_NAME=VTK
 #
 export PROJECT_NAME=CMake
 
 # PATH_TO_VTK_DOX_SCRIPTS:
 # Path to the directory holding the Perl scripts used to produce the VTK doc
-# in Doxygen format. You need the VTK source files or a local copy of 
+# in Doxygen format. You need the VTK source files or a local copy of
 # these scripts.
-# Example: 
+# Example:
 #   PATH_TO_VTK_DOX_SCRIPTS=@VTK_SOURCE_DIR@/Utilities/Doxygen
 #
 export PATH_TO_VTK_DOX_SCRIPTS="@VTK_SOURCE_DIR@/Utilities/Doxygen"
 
 # SOURCE_DIR:
 # Source directory. The top directory of the source files.
-# Example: 
+# Example:
 #   SOURCE_DIR=@VTK_SOURCE_DIR@
 #
 export SOURCE_DIR="@CMake_SOURCE_DIR@"
@@ -54,7 +54,7 @@ export SOURCE_DIR="@CMake_SOURCE_DIR@"
 # Relative path from the top directory of the source files to the directory
 # (or top directory) holding the files to document. Useful if several parts
 # of the same source directory should be documented separately.
-# Example: 
+# Example:
 #   REL_PATH_TO_TOP=.
 #   REL_PATH_TO_TOP=framework/src
 #
@@ -67,7 +67,7 @@ export REL_PATH_TO_TOP=.
 # This directory is erased at the end of this script, unless you comment
 # the corresponding line.
 # DOXTEMP might be used to simplify the syntax.
-# Example: 
+# Example:
 #   DOXTEMP=DOXTEMP=@VTK_BINARY_DIR@/Utilities/Doxygen
 #   INTERMEDIATE_DOX_DIR=$DOXTEMP/dox
 #
@@ -76,7 +76,7 @@ export INTERMEDIATE_DOX_DIR="$DOXTEMP/dox"
 
 # DOXYFILE:
 # Path to the Doxygen configuration file (i.e. doxyfile).
-# Example: 
+# Example:
 #   DOXYFILE=$DOXTEMP/doxyfile
 #
 export DOXYFILE="$DOXTEMP/doxyfile"
@@ -86,7 +86,7 @@ export DOXYFILE="$DOXTEMP/doxyfile"
 # Note: should be the same as your doxyfile's OUTPUT_DIRECTORY
 # If ON, allows the output directory to be erased when some advanced output
 # file have been produced (HTML Help, or TAR archive for example).
-# Example: 
+# Example:
 #   OUTPUT_DIRECTORY=$DOXTEMP/doc
 #   ALLOW_ERASE_OUTPUT_DIRECTORY=ON
 #
@@ -94,16 +94,16 @@ export OUTPUT_DIRECTORY="$DOXTEMP/doc"
 export ALLOW_ERASE_OUTPUT_DIRECTORY=ON
 
 # COMPILE_HTML_HELP RESULTING_HTML_HELP_FILE:
-# Compile the CHM (Compressed HTML) HTML Help file, name of the resulting 
-# file. If set to ON and name is non-empty these options will actually 
+# Compile the CHM (Compressed HTML) HTML Help file, name of the resulting
+# file. If set to ON and name is non-empty these options will actually
 # trigger the HTML-Help compiler to create the CHM. The resulting
 # file (usually index.chm) will be renamed to this name.
 # Note: if ON, the whole $OUTPUT_DIRECTORY will be erased at the end of
-#       this script, since this file is considered to be one of the 
+#       this script, since this file is considered to be one of the
 #       advanced final output, unless ALLOW_ERASE_OUTPUT_DIRECTORY is OFF
-# Note: your doxyfile should be configured to enable HTML Help creation 
+# Note: your doxyfile should be configured to enable HTML Help creation
 #       (using GENERATE_HTML = YES, GENERATE_HTMLHELP = YES)
-# Example: 
+# Example:
 #   COMPILE_HTML_HELP=ON
 #   COMPILE_HTML_HELP=@DOCUMENTATION_HTML_HELP@
 #   RESULTING_HTML_HELP_FILE=$DOXTEMP/vtk4.chm
@@ -113,10 +113,10 @@ export RESULTING_HTML_HELP_FILE="$DOXTEMP/$PROJECT_NAME.chm"
 
 # CREATE_HTML_TARZ_ARCHIVE RESULTING_HTML_TARZ_ARCHIVE_FILE:
 # Create a compressed (gzip) tar archive of the html directory (located
-# under the OUTPUT_DIRECTORY), and name of the resulting archive file. 
-# Note: your doxyfile should be configured to enable HTML creation 
+# under the OUTPUT_DIRECTORY), and name of the resulting archive file.
+# Note: your doxyfile should be configured to enable HTML creation
 #       (using GENERATE_HTML = YES)
-# Example: 
+# Example:
 #   CREATE_HTML_TARZ_ARCHIVE=ON
 #   CREATE_HTML_TARZ_ARCHIVE=@DOCUMENTATION_HTML_TARZ@
 #   RESULTING_HTML_TARZ_ARCHIVE_FILE=$DOXTEMP/vtk4-html.tar.gz

@@ -5,5 +5,5 @@
       contains
         subroutine sub
         end subroutine
-      
+
       end module test_mod

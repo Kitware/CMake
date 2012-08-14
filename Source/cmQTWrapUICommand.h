@@ -28,7 +28,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmQTWrapUICommand;
     }
@@ -52,7 +52,7 @@ public:
     {
     return "Create Qt user interfaces Wrappers.";
     }
-  
+
   /**
    * More documentation.
    */

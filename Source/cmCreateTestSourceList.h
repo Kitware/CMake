@@ -15,7 +15,7 @@
 #include "cmCommand.h"
 
 /** \class cmCreateTestSourceList
- * \brief 
+ * \brief
  *
  */
 
@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmCreateTestSourceList;
     }
@@ -41,7 +41,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "create_test_sourcelist";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -49,7 +49,7 @@ public:
     {
     return "Create a test driver and source list for building test programs.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -81,7 +81,7 @@ public:
       "CMAKE_TESTDRIVER_AFTER_TESTMAIN can be set to have code that will be "
       "placed directly after the call to the test main function.";
     }
-  
+
   cmTypeMacro(cmCreateTestSourceList, cmCommand);
 };
 

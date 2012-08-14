@@ -118,6 +118,6 @@ if (NOT ("${CPackComponentWay}" STREQUAL "default"))
     ${CPackComponentsForAll_BINARY_DIR}/MyLibCPackConfig-${CPackComponentWay}.cmake
     @ONLY)
   set(CPACK_PROJECT_CONFIG_FILE ${CPackComponentsForAll_BINARY_DIR}/MyLibCPackConfig-${CPackComponentWay}.cmake)
-endif (NOT ("${CPackComponentWay}" STREQUAL "default"))
+endif ()
 # Include CPack to introduce the appropriate targets
 include(CPack)

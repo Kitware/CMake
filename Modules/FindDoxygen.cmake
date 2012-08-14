@@ -33,19 +33,19 @@
 #  License text for the above reference.)
 
 # For backwards compatibility support
-IF(Doxygen_FIND_QUIETLY)
-  SET(DOXYGEN_FIND_QUIETLY TRUE)
-ENDIF(Doxygen_FIND_QUIETLY)
+if(Doxygen_FIND_QUIETLY)
+  set(DOXYGEN_FIND_QUIETLY TRUE)
+endif()
 
 # ===== Rationale for OS X AppBundle mods below =====
 #     With the OS X GUI version, Doxygen likes to be installed to /Applications and
-#     it contains the doxygen executable in the bundle. In the versions I've 
-#     seen, it is located in Resources, but in general, more often binaries are 
+#     it contains the doxygen executable in the bundle. In the versions I've
+#     seen, it is located in Resources, but in general, more often binaries are
 #     located in MacOS.
 #
-#     NOTE: The official Doxygen.app that is distributed for OS X uses non-standard 
+#     NOTE: The official Doxygen.app that is distributed for OS X uses non-standard
 #     conventions.  Instead of the command-line "doxygen" tool being placed in
-#     Doxygen.app/Contents/MacOS, "Doxywizard" is placed there instead and 
+#     Doxygen.app/Contents/MacOS, "Doxywizard" is placed there instead and
 #     "doxygen" is placed in Contents/Resources.  This is most likely done
 #     so that something happens when people double-click on the Doxygen.app
 #     package.  Unfortunately, CMake gets confused by this as when it sees the
@@ -54,12 +54,12 @@ ENDIF(Doxygen_FIND_QUIETLY)
 #     the app-bundle feature, just for this CMake module:
 if(APPLE)
     #  Save the old setting
-    SET(TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
+    set(TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
     # Disable the App-bundle detection feature
-    SET(CMAKE_FIND_APPBUNDLE "NEVER")
+    set(CMAKE_FIND_APPBUNDLE "NEVER")
 endif()
 #     FYI:
-#     In the older versions of OS X Doxygen, dot was included with the 
+#     In the older versions of OS X Doxygen, dot was included with the
 #     Doxygen bundle. But the new versions require you to download
 #     Graphviz.app which contains "dot" in it's bundle.
 # ============== End OSX stuff ================
@@ -68,7 +68,7 @@ endif()
 # Find Doxygen...
 #
 
-FIND_PROGRAM(DOXYGEN_EXECUTABLE
+find_program(DOXYGEN_EXECUTABLE
   NAMES doxygen
   PATHS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\doxygen_is1;Inno Setup: App Path]/bin"
@@ -77,9 +77,9 @@ FIND_PROGRAM(DOXYGEN_EXECUTABLE
   DOC "Doxygen documentation generation tool (http://www.doxygen.org)"
 )
 
-IF(DOXYGEN_EXECUTABLE)
-  EXECUTE_PROCESS(COMMAND ${DOXYGEN_EXECUTABLE} "--version" OUTPUT_VARIABLE DOXYGEN_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-ENDIF()
+if(DOXYGEN_EXECUTABLE)
+  execute_process(COMMAND ${DOXYGEN_EXECUTABLE} "--version" OUTPUT_VARIABLE DOXYGEN_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen REQUIRED_VARS DOXYGEN_EXECUTABLE VERSION_VAR DOXYGEN_VERSION)
@@ -88,10 +88,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen REQUIRED_VARS DOXYGEN_EXECUTABLE VERSI
 # Find Dot...
 #
 
-IF(NOT DOXYGEN_SKIP_DOT)
-  FIND_PROGRAM(DOXYGEN_DOT_EXECUTABLE
+if(NOT DOXYGEN_SKIP_DOT)
+  find_program(DOXYGEN_DOT_EXECUTABLE
     NAMES dot
-    PATHS 
+    PATHS
       "$ENV{ProgramFiles}/Graphviz 2.21/bin"
       "C:/Program Files/Graphviz 2.21/bin"
       "$ENV{ProgramFiles}/ATT/Graphviz/bin"
@@ -102,14 +102,14 @@ IF(NOT DOXYGEN_SKIP_DOT)
       /Applications/Doxygen.app/Contents/MacOS
     DOC "Graphviz Dot tool for using Doxygen"
   )
-  
+
   if(DOXYGEN_DOT_EXECUTABLE)
     set(DOXYGEN_DOT_FOUND TRUE)
     # The Doxyfile wants the path to Dot, not the entire path and executable
     get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
   endif()
-  
-endif(NOT DOXYGEN_SKIP_DOT)
+
+endif()
 
 #
 # Backwards compatibility...
@@ -117,7 +117,7 @@ endif(NOT DOXYGEN_SKIP_DOT)
 
 if(APPLE)
   # Restore the old app-bundle setting setting
-  SET(CMAKE_FIND_APPBUNDLE ${TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE})
+  set(CMAKE_FIND_APPBUNDLE ${TEMP_DOXYGEN_SAVE_CMAKE_FIND_APPBUNDLE})
 endif()
 
 # Maintain the _FOUND variables as "YES" or "NO" for backwards compatibility
@@ -134,10 +134,10 @@ else()
 endif()
 
 # For backwards compatibility support
-SET (DOXYGEN ${DOXYGEN_EXECUTABLE} )
-SET (DOT ${DOXYGEN_DOT_EXECUTABLE} )
+set (DOXYGEN ${DOXYGEN_EXECUTABLE} )
+set (DOT ${DOXYGEN_DOT_EXECUTABLE} )
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   DOXYGEN_EXECUTABLE
   DOXYGEN_DOT_EXECUTABLE
   DOXYGEN_DOT_PATH

@@ -20,29 +20,29 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(TIFF_INCLUDE_DIR tiff.h)
+find_path(TIFF_INCLUDE_DIR tiff.h)
 
-SET(TIFF_NAMES ${TIFF_NAMES} tiff libtiff tiff3 libtiff3)
-FIND_LIBRARY(TIFF_LIBRARY NAMES ${TIFF_NAMES} )
+set(TIFF_NAMES ${TIFF_NAMES} tiff libtiff tiff3 libtiff3)
+find_library(TIFF_LIBRARY NAMES ${TIFF_NAMES} )
 
-IF(TIFF_INCLUDE_DIR AND EXISTS "${TIFF_INCLUDE_DIR}/tiffvers.h")
-    FILE(STRINGS "${TIFF_INCLUDE_DIR}/tiffvers.h" tiff_version_str
+if(TIFF_INCLUDE_DIR AND EXISTS "${TIFF_INCLUDE_DIR}/tiffvers.h")
+    file(STRINGS "${TIFF_INCLUDE_DIR}/tiffvers.h" tiff_version_str
          REGEX "^#define[\t ]+TIFFLIB_VERSION_STR[\t ]+\"LIBTIFF, Version .*")
 
-    STRING(REGEX REPLACE "^#define[\t ]+TIFFLIB_VERSION_STR[\t ]+\"LIBTIFF, Version +([^ \\n]*).*"
+    string(REGEX REPLACE "^#define[\t ]+TIFFLIB_VERSION_STR[\t ]+\"LIBTIFF, Version +([^ \\n]*).*"
            "\\1" TIFF_VERSION_STRING "${tiff_version_str}")
-    UNSET(tiff_version_str)
-ENDIF()
+    unset(tiff_version_str)
+endif()
 
-# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set TIFF_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF
                                   REQUIRED_VARS TIFF_LIBRARY TIFF_INCLUDE_DIR
                                   VERSION_VAR TIFF_VERSION_STRING)
 
-IF(TIFF_FOUND)
-  SET( TIFF_LIBRARIES ${TIFF_LIBRARY} )
-ENDIF(TIFF_FOUND)
+if(TIFF_FOUND)
+  set( TIFF_LIBRARIES ${TIFF_LIBRARY} )
+endif()
 
-MARK_AS_ADVANCED(TIFF_INCLUDE_DIR TIFF_LIBRARY)
+mark_as_advanced(TIFF_INCLUDE_DIR TIFF_LIBRARY)

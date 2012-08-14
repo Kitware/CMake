@@ -271,7 +271,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
   // Open the specified file.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream file(fileName.c_str(), std::ios::in | 
+  std::ifstream file(fileName.c_str(), std::ios::in |
                (hexOutputArg.IsEnabled() ? std::ios::binary : std::ios::in));
 #else
   std::ifstream file(fileName.c_str(), std::ios::in);
@@ -2621,17 +2621,17 @@ namespace {
           ::curl_easy_cleanup(this->Easy);
           }
       }
-    
-    inline void release(void) 
+
+    inline void release(void)
       {
         this->Easy = 0;
         return;
       }
-    
+
   private:
     ::CURL * Easy;
   };
-  
+
 }
 #endif
 

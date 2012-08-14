@@ -29,7 +29,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmMakeDirectoryCommand;
     }
@@ -45,7 +45,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return "make_directory";}
-  
+
   /**
    * This determines if the command is invoked when in script mode.
    */
@@ -58,7 +58,7 @@ public:
     {
     return "Deprecated. Use the file(MAKE_DIRECTORY ) command instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -70,7 +70,7 @@ public:
       "parent directories that do not exist will also be created.  Use with "
       "care.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

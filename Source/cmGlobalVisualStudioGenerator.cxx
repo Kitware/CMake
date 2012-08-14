@@ -53,7 +53,7 @@ void cmGlobalVisualStudioGenerator::Generate()
       {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
-      cmTarget* allBuild = 
+      cmTarget* allBuild =
         gen[0]->GetMakefile()->
         AddUtilityCommand("ALL_BUILD", true, no_working_dir,
                           no_depends, no_commands, false,

@@ -4,11 +4,11 @@ TOP_DIR=`cd \`echo "$0" | sed -n '/\//{s/\/[^\/]*$//;p;}'\`;pwd`
 mkdirs()
 {
   (
-  mkdir -p "$TOP_DIR/@CPACK_PACKAGE_FILE_NAME@/.build" 
+  mkdir -p "$TOP_DIR/@CPACK_PACKAGE_FILE_NAME@/.build"
   )
 }
 
-# cd into 
+# cd into
 # untar source tree and apply patch
 prep()
 {
@@ -23,7 +23,7 @@ prep()
 conf()
 {
   (
-  cd "$TOP_DIR/@CPACK_PACKAGE_FILE_NAME@/.build" && 
+  cd "$TOP_DIR/@CPACK_PACKAGE_FILE_NAME@/.build" &&
   ../bootstrap --parallel=2
   )
 }
@@ -49,8 +49,8 @@ pkg()
 {
   (
   cd "$TOP_DIR/@CPACK_PACKAGE_FILE_NAME@/.build" &&
-  ./bin/cpack && 
-  mv @CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.tar.bz2 "$TOP_DIR"     
+  ./bin/cpack &&
+  mv @CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.tar.bz2 "$TOP_DIR"
   )
 }
 
@@ -59,7 +59,7 @@ spkg()
  (
   cd "$TOP_DIR/@CPACK_PACKAGE_FILE_NAME@/.build" &&
   ./bin/cpack --config  CPackSourceConfig.cmake &&
-  mv @CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@-src.tar.bz2 "$TOP_DIR" 
+  mv @CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@-src.tar.bz2 "$TOP_DIR"
   )
 }
 

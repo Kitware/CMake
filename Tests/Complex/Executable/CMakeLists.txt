@@ -1,116 +1,116 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 1.3)
+cmake_minimum_required(VERSION 1.3)
 #
-# Create exe. 
+# Create exe.
 #
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTEST_CXX_FLAGS")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DTEST_C_FLAGS")
 
 # Create an imported target for if(TARGET) test below.
-ADD_LIBRARY(ExeImportedTarget UNKNOWN IMPORTED)
+add_library(ExeImportedTarget UNKNOWN IMPORTED)
 
 # Test if(TARGET) command.
-IF(NOT TARGET CMakeTestLibrary)
-  MESSAGE(FATAL_ERROR "IF(NOT TARGET CMakeTestLibrary) returned true!")
-ENDIF(NOT TARGET CMakeTestLibrary)
-IF(NOT TARGET ExeImportedTarget)
-  MESSAGE(FATAL_ERROR "IF(NOT TARGET ExeImportedTarget) returned true!")
-ENDIF(NOT TARGET ExeImportedTarget)
-IF(TARGET LibImportedTarget)
-  MESSAGE(FATAL_ERROR "IF(TARGET LibImportedTarget) returned true!")
-ENDIF(TARGET LibImportedTarget)
-IF(TARGET NotATarget)
-  MESSAGE(FATAL_ERROR "IF(TARGET NotATarget) returned true!")
-ENDIF(TARGET NotATarget)
+if(NOT TARGET CMakeTestLibrary)
+  message(FATAL_ERROR "if(NOT TARGET CMakeTestLibrary) returned true!")
+endif()
+if(NOT TARGET ExeImportedTarget)
+  message(FATAL_ERROR "if(NOT TARGET ExeImportedTarget) returned true!")
+endif()
+if(TARGET LibImportedTarget)
+  message(FATAL_ERROR "if(TARGET LibImportedTarget) returned true!")
+endif()
+if(TARGET NotATarget)
+  message(FATAL_ERROR "if(TARGET NotATarget) returned true!")
+endif()
 
-  # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to 
-SET(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
-LINK_LIBRARIES(${COMPLEX_LIBS})
+  # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to
+set(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
+link_libraries(${COMPLEX_LIBS})
 
 # Test forcing a .cxx file to not build.
-SET_SOURCE_FILES_PROPERTIES(complex_nobuild.cxx PROPERTIES
+set_source_files_properties(complex_nobuild.cxx PROPERTIES
   HEADER_FILE_ONLY 1)
 
 # Test forcing a .c file to not build.
 # This makes sure a mixed language library is created
 # with header file only sources
-SET_SOURCE_FILES_PROPERTIES(complex_nobuild.c PROPERTIES
+set_source_files_properties(complex_nobuild.c PROPERTIES
   HEADER_FILE_ONLY 1)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-ADD_EXECUTABLE(A A.cxx A.hh A.h A.txt)
-ADD_CUSTOM_COMMAND(OUTPUT Aout.h COMMAND A > Aout.h VERBATIM)
-ADD_EXECUTABLE(complex complex testcflags.c Aout.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+add_executable(A A.cxx A.hh A.h A.txt)
+add_custom_command(OUTPUT Aout.h COMMAND A > Aout.h VERBATIM)
+add_executable(complex complex testcflags.c Aout.h)
 #  Sub1/NameConflictTest.c Sub2/NameConflictTest.c)
-ADD_EXECUTABLE(complex.file complex.file.cxx complex_nobuild.cxx
+add_executable(complex.file complex.file.cxx complex_nobuild.cxx
   complex_nobuild.c)
 
-IF (UNIX)
-  TARGET_LINK_LIBRARIES(complex ${CMAKE_DL_LIBS})
-ELSE(UNIX)
-  IF (NOT BORLAND)
-    IF(NOT MINGW)
-      TARGET_LINK_LIBRARIES(complex rpcrt4.lib)
-    ENDIF(NOT MINGW)
-  ENDIF(NOT BORLAND)
-ENDIF (UNIX)
+if (UNIX)
+  target_link_libraries(complex ${CMAKE_DL_LIBS})
+else()
+  if (NOT BORLAND)
+    if(NOT MINGW)
+      target_link_libraries(complex rpcrt4.lib)
+    endif()
+  endif()
+endif ()
 
 # Test linking to static lib when a shared lib has the same name.
-IF(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
-  ADD_DEFINITIONS(-DCOMPLEX_TEST_LINK_STATIC)
-  TARGET_LINK_LIBRARIES(complex CMakeTestLinkStatic)
-ENDIF(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
+if(CMAKE_EXE_LINK_STATIC_CXX_FLAGS)
+  add_definitions(-DCOMPLEX_TEST_LINK_STATIC)
+  target_link_libraries(complex CMakeTestLinkStatic)
+endif()
 
 # can we get the path to a source file
-GET_SOURCE_FILE_PROPERTY(A_LOCATION A.cxx LOCATION)
-IF ("${A_LOCATION}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/A.cxx")
-  ADD_DEFINITIONS(-DCMAKE_FOUND_ACXX)
-ENDIF ("${A_LOCATION}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/A.cxx")
+get_source_file_property(A_LOCATION A.cxx LOCATION)
+if ("${A_LOCATION}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/A.cxx")
+  add_definitions(-DCMAKE_FOUND_ACXX)
+endif ()
 
 # get the directory parent
-GET_DIRECTORY_PROPERTY(P_VALUE PARENT_DIRECTORY)
-IF ("${P_VALUE}" STREQUAL "${CMAKE_SOURCE_DIR}")
-  ADD_DEFINITIONS(-DCMAKE_FOUND_PARENT)
-ENDIF ("${P_VALUE}" STREQUAL "${CMAKE_SOURCE_DIR}")
+get_directory_property(P_VALUE PARENT_DIRECTORY)
+if ("${P_VALUE}" STREQUAL "${CMAKE_SOURCE_DIR}")
+  add_definitions(-DCMAKE_FOUND_PARENT)
+endif ()
 
 # get the stack of listfiles
-INCLUDE(Included.cmake)
-IF ("${LF_VALUE}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt;${CMAKE_CURRENT_SOURCE_DIR}/Included.cmake")
-  ADD_DEFINITIONS(-DCMAKE_FOUND_LISTFILE_STACK)
-ENDIF ("${LF_VALUE}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt;${CMAKE_CURRENT_SOURCE_DIR}/Included.cmake")
+include(Included.cmake)
+if ("${LF_VALUE}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt;${CMAKE_CURRENT_SOURCE_DIR}/Included.cmake")
+  add_definitions(-DCMAKE_FOUND_LISTFILE_STACK)
+endif ()
 
 # Test add/remove definitions.
-ADD_DEFINITIONS(
+add_definitions(
   -DCOMPLEX_DEFINED_PRE
   -DCOMPLEX_DEFINED
   -DCOMPLEX_DEFINED_POST
   -DCOMPLEX_DEFINED
   )
-REMOVE_DEFINITIONS(-DCOMPLEX_DEFINED)
+remove_definitions(-DCOMPLEX_DEFINED)
 
 # Test pre-build/pre-link/post-build rules for an executable.
-ADD_CUSTOM_COMMAND(TARGET complex PRE_BUILD
+add_custom_command(TARGET complex PRE_BUILD
                    COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Executable/prebuild.txt")
-ADD_CUSTOM_COMMAND(TARGET complex PRE_BUILD
+add_custom_command(TARGET complex PRE_BUILD
                    COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Executable/prelink.txt")
-ADD_CUSTOM_COMMAND(TARGET complex POST_BUILD
+add_custom_command(TARGET complex POST_BUILD
                    COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Executable/postbuild.txt")
-ADD_CUSTOM_COMMAND(TARGET complex POST_BUILD
+add_custom_command(TARGET complex POST_BUILD
                    COMMAND ${CMAKE_COMMAND}
                    ARGS -E copy
                         "${Complex_BINARY_DIR}/Executable/postbuild.txt"
                         "${Complex_BINARY_DIR}/Executable/postbuild2.txt")
 
-SET_SOURCE_FILES_PROPERTIES(complex
+set_source_files_properties(complex
   COMPILE_FLAGS
   "-DFILE_HAS_EXTRA_COMPILE_FLAGS"
   #" -DFILE_DEFINE_STRING=\\\"hello\\\""
   OBJECT_DEPENDS ${Complex_BINARY_DIR}/cmTestGeneratedHeader.h
 )
-SET_TARGET_PROPERTIES(complex PROPERTIES COMPILE_FLAGS "-DCOMPLEX_TARGET_FLAG")
-ADD_CUSTOM_COMMAND(
+set_target_properties(complex PROPERTIES COMPILE_FLAGS "-DCOMPLEX_TARGET_FLAG")
+add_custom_command(
   TARGET complex
   SOURCE ${Complex_SOURCE_DIR}/cmTestGeneratedHeader.h.in
   COMMAND ${CMAKE_COMMAND}
@@ -121,18 +121,18 @@ ADD_CUSTOM_COMMAND(
 )
 
 # Test creating an executable that is not built by default.
-ADD_EXECUTABLE(notInAllExe EXCLUDE_FROM_ALL notInAllExe.cxx)
-TARGET_LINK_LIBRARIES(notInAllExe notInAllLib)
+add_executable(notInAllExe EXCLUDE_FROM_ALL notInAllExe.cxx)
+target_link_libraries(notInAllExe notInAllLib)
 
 # Test user-value flag mapping for the VS IDE.
-IF(MSVC)
-  SET_TARGET_PROPERTIES(notInAllExe PROPERTIES
+if(MSVC)
+  set_target_properties(notInAllExe PROPERTIES
     LINK_FLAGS "/NODEFAULTLIB:LIBC;LIBCMT;MSVCRT")
-ENDIF(MSVC)
+endif()
 
 # Test creating a custom target that builds not-in-all targets.
-ADD_CUSTOM_TARGET(notInAllCustom)
-ADD_DEPENDENCIES(notInAllCustom notInAllExe)
+add_custom_target(notInAllCustom)
+add_dependencies(notInAllCustom notInAllExe)
 
 #
 # Output the files required by 'complex' to a file.
@@ -141,30 +141,30 @@ ADD_DEPENDENCIES(notInAllCustom notInAllExe)
 # has no side-effects on the current Makefile (duplicated source file
 # due to source list expansion done twice).
 #
-ADD_SUBDIRECTORY(Temp)
+add_subdirectory(Temp)
 
-IF(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
-  ADD_EXECUTABLE(testSystemDir testSystemDir.cxx)
-  SET_TARGET_PROPERTIES(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")
-ENDIF(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+  add_executable(testSystemDir testSystemDir.cxx)
+  set_target_properties(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")
+endif()
 
 #
 # Extra coverage.Not used.
 #
-INSTALL_TARGETS(/tmp complex)
-INSTALL_PROGRAMS(/tmp complex)
+install_targets(/tmp complex)
+install_programs(/tmp complex)
 
-CONFIGURE_FILE(
+configure_file(
   ${Complex_SOURCE_DIR}/Executable/cmVersion.h.in
   ${Complex_BINARY_DIR}/cmVersion.h)
 
-SOURCE_GROUP(A_GROUP ".cxx")
-SOURCE_GROUP(B_GROUP REGULAR_EXPRESSION "cxx")
-SOURCE_GROUP(C_GROUP FILES complex.cxx)
+source_group(A_GROUP ".cxx")
+source_group(B_GROUP REGULAR_EXPRESSION "cxx")
+source_group(C_GROUP FILES complex.cxx)
 
-FILE(WRITE ${Complex_BINARY_DIR}/A/libA.a "test")
-FILE(WRITE ${Complex_BINARY_DIR}/A/libC.a "test")
-FILE(WRITE ${Complex_BINARY_DIR}/B/libB.a "test")
-FILE(WRITE ${Complex_BINARY_DIR}/B/libA.a "test")
-FILE(WRITE ${Complex_BINARY_DIR}/C/libC.a "test")
-FILE(WRITE ${Complex_BINARY_DIR}/C/libB.a "test")
+file(WRITE ${Complex_BINARY_DIR}/A/libA.a "test")
+file(WRITE ${Complex_BINARY_DIR}/A/libC.a "test")
+file(WRITE ${Complex_BINARY_DIR}/B/libB.a "test")
+file(WRITE ${Complex_BINARY_DIR}/B/libA.a "test")
+file(WRITE ${Complex_BINARY_DIR}/C/libC.a "test")
+file(WRITE ${Complex_BINARY_DIR}/C/libB.a "test")

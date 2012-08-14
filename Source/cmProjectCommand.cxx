@@ -19,14 +19,14 @@ bool cmProjectCommand
     {
     this->SetError("PROJECT called with incorrect number of arguments");
     return false;
-    } 
+    }
   this->Makefile->SetProjectName(args[0].c_str());
 
   std::string bindir = args[0];
   bindir += "_BINARY_DIR";
   std::string srcdir = args[0];
   srcdir += "_SOURCE_DIR";
-  
+
   this->Makefile->AddCacheDefinition
     (bindir.c_str(),
      this->Makefile->GetCurrentOutputDirectory(),
@@ -35,7 +35,7 @@ bool cmProjectCommand
     (srcdir.c_str(),
      this->Makefile->GetCurrentDirectory(),
      "Value Computed by CMake", cmCacheManager::STATIC);
-  
+
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
 

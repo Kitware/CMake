@@ -21,7 +21,7 @@ class cmake;
 /** \class cmSourceFile
  * \brief Represent a class loaded from a makefile.
  *
- * cmSourceFile is represents a class loaded from 
+ * cmSourceFile is represents a class loaded from
  * a makefile.
  */
 class cmSourceFile

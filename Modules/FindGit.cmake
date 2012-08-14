@@ -51,7 +51,7 @@ if(GIT_EXECUTABLE)
     string(REPLACE "git version " "" GIT_VERSION_STRING "${git_version}")
   endif()
   unset(git_version)
-endif(GIT_EXECUTABLE)
+endif()
 
 # Handle the QUIETLY and REQUIRED arguments and set GIT_FOUND to TRUE if
 # all listed variables are TRUE

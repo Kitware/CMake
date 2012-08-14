@@ -13,7 +13,7 @@ int main ()
     fprintf(stderr,"failed to find undefined properties file");
     return 1;
     }
-  
+
   char buffer[1024];
   while ( fin )
     {
@@ -28,6 +28,6 @@ int main ()
       }
     }
   fin.close();
-  
+
   return result;
 }

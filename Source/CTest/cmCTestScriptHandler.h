@@ -97,7 +97,7 @@ public:
   static void SleepInSeconds(unsigned int secondsToWait);
   void UpdateElapsedTime();
 
-  /** 
+  /**
    * Return the time remaianing that the script is allowed to run in
    * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
    * not been set it returns 1e7 seconds

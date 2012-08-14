@@ -38,11 +38,11 @@
 # Then from there, they need to set a bunch of #define's
 # so you can do something like:
 # #include FT_FREETYPE_H
-# Unfortunately, using CMake's mechanisms like INCLUDE_DIRECTORIES()
+# Unfortunately, using CMake's mechanisms like include_directories()
 # wants explicit full paths and this trickery doesn't work too well.
 # I'm going to attempt to cut out the middleman and hope
 # everything still works.
-FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
+find_path(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   HINTS
   $ENV{FREETYPE_DIR}
   PATHS
@@ -51,7 +51,7 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   /usr/freeware/include
 )
 
-FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
+find_path(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
   HINTS
   $ENV{FREETYPE_DIR}/include/freetype2
   PATHS
@@ -61,7 +61,7 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
   PATH_SUFFIXES freetype2
 )
 
-FIND_LIBRARY(FREETYPE_LIBRARY
+find_library(FREETYPE_LIBRARY
   NAMES freetype libfreetype freetype219
   HINTS
   $ENV{FREETYPE_DIR}
@@ -73,38 +73,38 @@ FIND_LIBRARY(FREETYPE_LIBRARY
 )
 
 # set the user variables
-IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
-  SET(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
-ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
-SET(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
+if(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
+  set(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
+endif()
+set(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
 
-IF(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
-    FILE(STRINGS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h" freetype_version_str
+if(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+    file(STRINGS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h" freetype_version_str
          REGEX "^#[\t ]*define[\t ]+FREETYPE_(MAJOR|MINOR|PATCH)[\t ]+[0-9]+$")
 
-    UNSET(FREETYPE_VERSION_STRING)
-    FOREACH(VPART MAJOR MINOR PATCH)
-        FOREACH(VLINE ${freetype_version_str})
-            IF(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}")
-                STRING(REGEX REPLACE "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$" "\\1"
+    unset(FREETYPE_VERSION_STRING)
+    foreach(VPART MAJOR MINOR PATCH)
+        foreach(VLINE ${freetype_version_str})
+            if(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}")
+                string(REGEX REPLACE "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$" "\\1"
                        FREETYPE_VERSION_PART "${VLINE}")
-                IF(FREETYPE_VERSION_STRING)
-                    SET(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_STRING}.${FREETYPE_VERSION_PART}")
-                ELSE(FREETYPE_VERSION_STRING)
-                    SET(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_PART}")
-                ENDIF(FREETYPE_VERSION_STRING)
-                UNSET(FREETYPE_VERSION_PART)
-            ENDIF()
-        ENDFOREACH(VLINE)
-    ENDFOREACH(VPART)
-ENDIF(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+                if(FREETYPE_VERSION_STRING)
+                    set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_STRING}.${FREETYPE_VERSION_PART}")
+                else()
+                    set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_PART}")
+                endif()
+                unset(FREETYPE_VERSION_PART)
+            endif()
+        endforeach()
+    endforeach()
+endif()
 
 
 # handle the QUIETLY and REQUIRED arguments and set FREETYPE_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype
                                   REQUIRED_VARS FREETYPE_LIBRARY FREETYPE_INCLUDE_DIRS
                                   VERSION_VAR FREETYPE_VERSION_STRING)
 
-MARK_AS_ADVANCED(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR_freetype2 FREETYPE_INCLUDE_DIR_ft2build)
+mark_as_advanced(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR_freetype2 FREETYPE_INCLUDE_DIR_ft2build)

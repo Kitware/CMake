@@ -19,19 +19,19 @@
 #include "../cmSystemTools.h"
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
-                                                         int labelwidth, 
+                                                         int labelwidth,
                                                          int entrywidth) :
   Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
   this->IsNewLabel = new cmCursesLabelWidget(1, 1, 1, 1, " ");
-  this->Entry = 0; 
+  this->Entry = 0;
   this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const char* key, const cmCacheManager::CacheIterator& it, bool isNew, 
-  int labelwidth, int entrywidth) 
+  const char* key, const cmCacheManager::CacheIterator& it, bool isNew,
+  int labelwidth, int entrywidth)
   : Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
@@ -74,7 +74,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         it.GetValue());
       break;
     case cmCacheManager::UNINITIALIZED:
-      cmSystemTools::Error("Found an undefined variable: ", it.GetName());      
+      cmSystemTools::Error("Found an undefined variable: ", it.GetName());
       break;
     default:
       // TODO : put warning message here

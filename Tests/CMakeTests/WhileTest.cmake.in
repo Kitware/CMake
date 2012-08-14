@@ -10,7 +10,7 @@ while(COUNT LESS 200)
         set(NUMBERS "${NUMBERS} ${NCOUNT}")
         set(NCOUNT "${NCOUNT}0")
     endwhile()
-endwhile(COUNT LESS 200)
+endwhile()
 
 if(NOT NUMBERS STREQUAL " 0 3 30 20 3 30")
     message(SEND_ERROR "while loop nesting error, result: '${NUMBERS}'")

@@ -10,7 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFindBase.h"
-  
+
 cmFindBase::cmFindBase()
 {
   this->AlreadyInCache = false;
@@ -132,7 +132,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   bool compatibility = this->Makefile->NeedBackwardsCompatibility(2,3);
 
   // copy argsIn into args so it can be modified,
-  // in the process extract the DOC "documentation" 
+  // in the process extract the DOC "documentation"
   size_t size = argsIn.size();
   std::vector<std::string> args;
   bool foundDoc = false;
@@ -178,7 +178,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     this->AlreadyInCache = true;
     return true;
     }
-  this->AlreadyInCache = false; 
+  this->AlreadyInCache = false;
 
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
@@ -264,17 +264,17 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else if(this->Names.size() == 1)
       {
-      this->VariableDocumentation += "the " 
+      this->VariableDocumentation += "the "
         + this->Names[0] + " library be found";
       }
     else
-      { 
+      {
       this->VariableDocumentation += "one of the " + this->Names[0];
       for (unsigned int j = 1; j < this->Names.size() - 1; ++j)
         {
         this->VariableDocumentation += ", " + this->Names[j];
         }
-      this->VariableDocumentation += " or " 
+      this->VariableDocumentation += " or "
         + this->Names[this->Names.size() - 1] + " libraries be found";
       }
     }
@@ -504,7 +504,7 @@ void cmFindBase::AddPathSuffixes()
     cmSystemTools::ConvertToUnixSlashes(*i);
     // copy each finalPath combined with SearchPathSuffixes
     // to the SearchPaths ivar
-    for(std::vector<std::string>::iterator j = 
+    for(std::vector<std::string>::iterator j =
           this->SearchPathSuffixes.begin();
         j != this->SearchPathSuffixes.end(); ++j)
       {
@@ -517,7 +517,7 @@ void cmFindBase::AddPathSuffixes()
         p += std::string("/");
         }
       p +=  *j;
-      // add to all paths because the search path may be modified 
+      // add to all paths because the search path may be modified
       // later with lib being replaced for lib64 which may exist
       paths.push_back(p);
       }
@@ -535,13 +535,13 @@ void cmFindBase::PrintFindStuff()
   std::cerr << "SearchAppBundleOnly: " << this->SearchAppBundleOnly << "\n";
   std::cerr << "SearchAppBundleFirst: " << this->SearchAppBundleFirst << "\n";
   std::cerr << "VariableName " << this->VariableName << "\n";
-  std::cerr << "VariableDocumentation " 
+  std::cerr << "VariableDocumentation "
             << this->VariableDocumentation << "\n";
   std::cerr << "NoDefaultPath " << this->NoDefaultPath << "\n";
-  std::cerr << "NoCMakeEnvironmentPath " 
+  std::cerr << "NoCMakeEnvironmentPath "
             << this->NoCMakeEnvironmentPath << "\n";
   std::cerr << "NoCMakePath " << this->NoCMakePath << "\n";
-  std::cerr << "NoSystemEnvironmentPath " 
+  std::cerr << "NoSystemEnvironmentPath "
             << this->NoSystemEnvironmentPath << "\n";
   std::cerr << "NoCMakeSystemPath " << this->NoCMakeSystemPath << "\n";
   std::cerr << "EnvironmentPath " << this->EnvironmentPath << "\n";

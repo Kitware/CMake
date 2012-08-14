@@ -23,7 +23,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   std::string sourceListValue;
   std::string templateDirectory = args[0];
   this->Makefile->AddExtraDirectory(templateDirectory.c_str());
@@ -40,12 +40,12 @@ bool cmAuxSourceDirectoryCommand::InitialPass
     }
 
   // was the list already populated
-  const char *def = this->Makefile->GetDefinition(args[1].c_str());  
+  const char *def = this->Makefile->GetDefinition(args[1].c_str());
   if (def)
     {
     sourceListValue = def;
     }
-  
+
   // Load all the files in the directory
   cmsys::Directory dir;
   if(dir.Load(tdir.c_str()))
@@ -69,7 +69,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
           std::string fullname = templateDirectory;
           fullname += "/";
           fullname += file;
-          // add the file as a class file so 
+          // add the file as a class file so
           // depends can be done
           cmSourceFile* sf =
             this->Makefile->GetOrCreateSource(fullname.c_str());
@@ -83,7 +83,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
         }
       }
     }
-  this->Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());  
+  this->Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());
   return true;
 }
 

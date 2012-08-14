@@ -8,8 +8,8 @@ macro(check_line_exists TARGET_FILE REG_EXP_REF)
 
   if(_VAR_LEN GREATER 0)
     set(IS_FOUND "TRUE")
-  endif(_VAR_LEN GREATER 0)
-endmacro(check_line_exists TARGET_FILE REG_EXP_REF)
+  endif()
+endmacro()
 
 # Search and parse project section line by project name.
 # If search was successful stores found type and guid into FOUND_TYPE and FOUND_GUID variables respectively.
@@ -20,13 +20,13 @@ macro(parse_project_section TARGET_FILE PROJECT_NAME)
   check_line_exists(${TARGET_FILE} REG_EXP)
   if(NOT IS_FOUND)
     return()
-  endif(NOT IS_FOUND)
+  endif()
 
   string(REGEX REPLACE "${REG_EXP}" "\\1;\\2" _GUIDS "${FOUND_LINE}")
 
   list(GET _GUIDS 0 FOUND_TYPE)
   list(GET _GUIDS 1 FOUND_GUID)
-endmacro(parse_project_section TARGET_FILE PROJECT_NAME)
+endmacro()
 
 # Search project section line by project name and type.
 # Returns TRUE if found and FALSE otherwise
@@ -36,8 +36,8 @@ function(check_project_type TARGET_FILE PROJECT_NAME PROJECT_TYPE RESULT)
   parse_project_section(${TARGET_FILE} ${PROJECT_NAME})
   if(IS_FOUND AND FOUND_TYPE STREQUAL PROJECT_TYPE)
     set(${RESULT} "TRUE" PARENT_SCOPE)
-  endif(IS_FOUND AND FOUND_TYPE STREQUAL PROJECT_TYPE)
-endfunction(check_project_type TARGET_FILE PROJECT_NAME PROJECT_TYPE RESULT)
+  endif()
+endfunction()
 
 
 # Search project section line by project name and id.
@@ -48,8 +48,8 @@ function(check_project_guid TARGET_FILE PROJECT_NAME PROJECT_GUID RESULT)
   parse_project_section(${TARGET_FILE} ${PROJECT_NAME})
   if(IS_FOUND AND FOUND_GUID STREQUAL PROJECT_GUID)
     set(${RESULT} "TRUE" PARENT_SCOPE)
-  endif(IS_FOUND AND FOUND_GUID STREQUAL PROJECT_GUID)
-endfunction(check_project_guid TARGET_FILE PROJECT_NAME PROJECT_GUID RESULT)
+  endif()
+endfunction()
 
 
 # Search project's build configuration line by project name and target platform name.
@@ -61,7 +61,7 @@ function(check_custom_platform TARGET_FILE PROJECT_NAME PLATFORM_NAME RESULT)
   parse_project_section(${TARGET_FILE} ${PROJECT_NAME})
   if(NOT IS_FOUND)
     return()
-  endif(NOT IS_FOUND)
+  endif()
 
   # probably whould be better to use configuration name
   # extracted from CMAKE_CONFIGURATION_TYPES than just hardcoded "Debug" instead
@@ -69,7 +69,7 @@ function(check_custom_platform TARGET_FILE PROJECT_NAME PLATFORM_NAME RESULT)
   check_line_exists(${TARGET_FILE} REG_EXP)
 
   set(${RESULT} ${IS_FOUND} PARENT_SCOPE)
-endfunction(check_custom_platform TARGET_FILE PLATFORM_NAME RESULT)
+endfunction()
 
 # RunCMake test check helper
 function(check_project test name guid type platform)

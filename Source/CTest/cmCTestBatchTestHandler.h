@@ -21,7 +21,7 @@
 /** \class cmCTestBatchTestHandler
  * \brief run parallel ctest
  *
- * cmCTestBatchTestHandler 
+ * cmCTestBatchTestHandler
  */
 class cmCTestBatchTestHandler : public cmCTestMultiProcessHandler
 {

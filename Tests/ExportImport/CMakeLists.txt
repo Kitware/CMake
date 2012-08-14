@@ -14,13 +14,13 @@ set_property(
 
 if(CMAKE_CONFIGURATION_TYPES)
   set(NESTED_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
-else(CMAKE_CONFIGURATION_TYPES)
+else()
   if(CMAKE_BUILD_TYPE)
     set(NESTED_CONFIG_TYPE -C "${CMAKE_BUILD_TYPE}")
-  else(CMAKE_BUILD_TYPE)
+  else()
     set(NESTED_CONFIG_TYPE)
-  endif(CMAKE_BUILD_TYPE)
-endif(CMAKE_CONFIGURATION_TYPES)
+  endif()
+endif()
 
 if(MINGW OR MSYS)
   # Test CMAKE_GNUtoMS whether we have VS or not.

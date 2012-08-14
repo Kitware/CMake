@@ -78,7 +78,7 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   if(NOT ARGN)
     message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
     return()
-  endif(NOT ARGN)
+  endif()
 
   if(PROTOBUF_GENERATE_CPP_APPEND_PATH)
     # Create an include path for each file specified
@@ -109,7 +109,7 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
   foreach(FIL ${ARGN})
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
     get_filename_component(FIL_WE ${FIL} NAME_WE)
-    
+
     list(APPEND ${SRCS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc")
     list(APPEND ${HDRS} "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h")
 

@@ -61,7 +61,7 @@ char* cmCommandArgumentParserHelper::AddString(const char* str)
   return stVal;
 }
 
-char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key, 
+char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
                                                            const char* var)
 {
   if ( !key )
@@ -163,7 +163,7 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
     // try to expand the variable
     char* ret = this->ExpandVariable(var);
     // if the return was 0 and we want to replace empty strings
-    // then return an empty string 
+    // then return an empty string
     if(!ret && this->RemoveEmpty)
       {
       return this->AddString(ret);
@@ -175,7 +175,7 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
       }
     }
   // at this point we want to put it back because of one of these cases:
-  // - this->ReplaceAtSyntax is false  
+  // - this->ReplaceAtSyntax is false
   // - this->ReplaceAtSyntax is true, but this->RemoveEmpty is false,
   //   and the variable was not defined
   std::string ref = "@";
@@ -274,7 +274,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
   this->InputBuffer = str;
   this->InputBufferPos = 0;
   this->CurrentLine = 0;
-  
+
   this->Result = "";
 
   yyscan_t yyscanner;
@@ -292,7 +292,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
 
   if ( Verbose )
     {
-    std::cerr << "Expanding [" << str << "] produced: [" 
+    std::cerr << "Expanding [" << str << "] produced: ["
               << this->Result.c_str() << "]" << std::endl;
     }
   return 1;

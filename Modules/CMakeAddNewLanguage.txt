@@ -1,7 +1,7 @@
 CMakeDetermine(LANG)Compiler.cmake  -> this should find the compiler for LANG and configure CMake(LANG)Compiler.cmake.in
 
 CMake(LANG)Compiler.cmake.in  -> used by CMakeDetermine(LANG)Compiler.cmake
-    This file is used to store compiler information and is copied down into try 
+    This file is used to store compiler information and is copied down into try
     compile directories so that try compiles do not need to re-determine and test the LANG
 
 CMakeTest(LANG)Compiler.cmake -> test the compiler and set:

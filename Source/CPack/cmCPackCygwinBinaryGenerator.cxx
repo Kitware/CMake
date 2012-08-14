@@ -50,7 +50,7 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
   std::string manifest = "/usr/share/doc/";
   manifest += packageName;
   manifest += "/MANIFEST";
-  std::string manifestFile 
+  std::string manifestFile
     = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   // Create a MANIFEST file that contains all of the files in
   // the tar file
@@ -70,8 +70,8 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
   }
   // add the manifest file to the list of all files
   files.push_back(manifestFile);
-  
-  // create the bzip2 tar file 
+
+  // create the bzip2 tar file
   return this->Superclass::PackageFiles();
 }
 
@@ -81,8 +81,8 @@ const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
   const char* patchNumber =this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");
   if(!patchNumber)
     {
-    patchNumber = "1";  
-    cmCPackLogger(cmCPackLog::LOG_WARNING, 
+    patchNumber = "1";
+    cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_CYGWIN_PATCH_NUMBER not specified using 1"
                   << std::endl);
     }

@@ -72,15 +72,15 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
   endif()
 
   set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
-endfunction(_OPENMP_FLAG_CANDIDATES)
+endfunction()
 
 # sample openmp source code to test
-set(OpenMP_C_TEST_SOURCE 
+set(OpenMP_C_TEST_SOURCE
 "
 #include <omp.h>
-int main() { 
+int main() {
 #ifdef _OPENMP
-  return 0; 
+  return 0;
 #else
   breaks_on_purpose
 #endif
@@ -108,8 +108,8 @@ if(CMAKE_C_COMPILER_LOADED)
     if(OpenMP_FLAG_DETECTED)
       set(OpenMP_C_FLAGS_INTERNAL "${FLAG}")
       break()
-    endif(OpenMP_FLAG_DETECTED)
-  endforeach(FLAG ${OpenMP_C_FLAG_CANDIDATES})
+    endif()
+  endforeach()
 
   set(OpenMP_C_FLAGS "${OpenMP_C_FLAGS_INTERNAL}"
     CACHE STRING "C compiler flags for OpenMP parallization")
@@ -142,8 +142,8 @@ if(CMAKE_CXX_COMPILER_LOADED)
     if(OpenMP_FLAG_DETECTED)
       set(OpenMP_CXX_FLAGS_INTERNAL "${FLAG}")
       break()
-    endif(OpenMP_FLAG_DETECTED)
-  endforeach(FLAG ${OpenMP_CXX_FLAG_CANDIDATES})
+    endif()
+  endforeach()
 
   set(OpenMP_CXX_FLAGS "${OpenMP_CXX_FLAGS_INTERNAL}"
     CACHE STRING "C++ compiler flags for OpenMP parallization")

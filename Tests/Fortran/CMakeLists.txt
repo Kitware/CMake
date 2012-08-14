@@ -121,7 +121,7 @@ else()
   message("Fortran does not match c compiler")
   message("Fortran = ${CMAKE_Fortran_COMPILER_ID}")
   message("C = ${CMAKE_C_COMPILER_ID}")
-  # hack to make g77 work after CL has been enabled 
+  # hack to make g77 work after CL has been enabled
   # as a languge, cmake needs language specific versions
   # of these variables....
   if(WIN32 AND "${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
@@ -154,11 +154,11 @@ if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   add_executable(test_use_in_comment_fixedform
     test_use_in_comment_fixedform.f)
   set_property(SOURCE test_use_in_comment_fixedform.f PROPERTY Fortran_FORMAT FIXED)
-  add_executable(test_use_in_comment_freeform 
+  add_executable(test_use_in_comment_freeform
     test_use_in_comment_freeform.f90)
   set_property(SOURCE test_use_in_comment_freeform.f90 PROPERTY Fortran_FORMAT FREE)
 
-  add_executable(test_in_interface 
+  add_executable(test_in_interface
     in_interface/main.f90
     in_interface/module.f90)
 
@@ -167,7 +167,7 @@ if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
   add_executable(test_preprocess test_preprocess.F90)
 
   set(TEST_MODULE_DEPENDS 1)
-endif(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+endif()
 
 if(TEST_MODULE_DEPENDS)
   # Build the external project separately using a custom target.
@@ -175,10 +175,10 @@ if(TEST_MODULE_DEPENDS)
   if(CMAKE_CONFIGURATION_TYPES)
     set(External_CONFIG_TYPE -C "${CMAKE_CFG_INTDIR}")
     set(External_BUILD_TYPE)
-  else(CMAKE_CONFIGURATION_TYPES)
+  else()
     set(External_CONFIG_TYPE)
     set(External_BUILD_TYPE -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE})
-  endif(CMAKE_CONFIGURATION_TYPES)
+  endif()
   set(External_SOURCE_DIR "${testf_SOURCE_DIR}/External")
   set(External_BINARY_DIR "${testf_BINARY_DIR}/External")
   if("${testf_BINARY_DIR}" MATCHES " ")
@@ -211,10 +211,10 @@ if(TEST_MODULE_DEPENDS)
   # Test module output directory if available.
   if(CMAKE_Fortran_MODDIR_FLAG)
     set(Library_MODDIR "${testf_BINARY_DIR}/Library/modules")
-  else(CMAKE_Fortran_MODDIR_FLAG)
+  else()
     set(Library_MODDIR "${testf_BINARY_DIR}/Library")
-  endif(CMAKE_Fortran_MODDIR_FLAG)
+  endif()
 
   add_subdirectory(Library)
   add_subdirectory(Executable)
-endif(TEST_MODULE_DEPENDS)
+endif()

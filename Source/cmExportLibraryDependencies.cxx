@@ -26,7 +26,7 @@ bool cmExportLibraryDependenciesCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   // store the arguments for the final pass
   this->Filename = args[0];
   this->Append = false;

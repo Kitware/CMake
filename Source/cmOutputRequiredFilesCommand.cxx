@@ -28,7 +28,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
     cmSystemTools::Error("error can not open ", info->FullPath.c_str());
     return;
     }
-  
+
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
@@ -45,7 +45,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
         // if a < is not found then move on
         if(qstart == std::string::npos)
           {
-          cmSystemTools::Error("unknown include directive ", 
+          cmSystemTools::Error("unknown include directive ",
                                currentline.c_str() );
           continue;
           }
@@ -73,7 +73,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
           }
         continue;
         }
-      
+
       // Add this file and all its dependencies.
       this->AddDependency(info, includeFile.c_str());
       /// add the cxx file if it exists
@@ -89,7 +89,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
           {
           found = true;
           }
-        for(std::vector<std::string>::iterator i = 
+        for(std::vector<std::string>::iterator i =
               this->IncludeDirectories.begin();
             i != this->IncludeDirectories.end(); ++i)
           {
@@ -108,7 +108,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
             {
             found = true;
             }
-          for(std::vector<std::string>::iterator i = 
+          for(std::vector<std::string>::iterator i =
                 this->IncludeDirectories.begin();
               i != this->IncludeDirectories.end(); ++i)
             {
@@ -128,7 +128,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
             {
             found = true;
             }
-          for(std::vector<std::string>::iterator i = 
+          for(std::vector<std::string>::iterator i =
                 this->IncludeDirectories.begin();
               i != this->IncludeDirectories.end(); ++i)
             {
@@ -148,7 +148,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
             {
             found = true;
             }
-          for(std::vector<std::string>::iterator i = 
+          for(std::vector<std::string>::iterator i =
                 this->IncludeDirectories.begin();
               i != this->IncludeDirectories.end(); ++i)
             {
@@ -183,7 +183,7 @@ bool cmOutputRequiredFilesCommand
   // store the arg for final pass
   this->File = args[0];
   this->OutputFile = args[1];
-  
+
   // compute the list of files
   cmLBDepend md;
   md.SetMakefile(this->Makefile);
@@ -217,7 +217,7 @@ ListDependencies(cmDependInformation const *info,
   // add info to the visited set
   visited->insert(info);
   // now recurse with info's dependencies
-  for(cmDependInformation::DependencySetType::const_iterator d = 
+  for(cmDependInformation::DependencySetType::const_iterator d =
         info->DependencySet.begin();
       d != info->DependencySet.end(); ++d)
     {

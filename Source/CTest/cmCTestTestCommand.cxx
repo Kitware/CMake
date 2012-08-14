@@ -32,7 +32,7 @@ cmCTestTestCommand::cmCTestTestCommand()
 
 cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 {
-  const char* ctestTimeout = 
+  const char* ctestTimeout =
     this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   double timeout = this->CTest->GetTimeOut();
@@ -86,7 +86,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     }
   if(this->Values[ctt_INCLUDE_LABEL])
     {
-    handler->SetOption("LabelRegularExpression", 
+    handler->SetOption("LabelRegularExpression",
                        this->Values[ctt_INCLUDE_LABEL]);
     }
   if(this->Values[ctt_PARALLEL_LEVEL])

@@ -31,7 +31,7 @@ cmGeneratedFileStream::cmGeneratedFileStream(const char* name, bool quiet):
   // Check if the file opened.
   if(!*this && !quiet)
     {
-    cmSystemTools::Error("Cannot open file for write: ", 
+    cmSystemTools::Error("Cannot open file for write: ",
                          this->TempName.c_str());
     cmSystemTools::ReportLastSystemError("");
     }
@@ -58,7 +58,7 @@ cmGeneratedFileStream::Open(const char* name, bool quiet, bool binaryFlag)
   // Open the temporary output file.
   if ( binaryFlag )
     {
-    this->Stream::open(this->TempName.c_str(), 
+    this->Stream::open(this->TempName.c_str(),
                        std::ios::out | std::ios::binary);
     }
   else
@@ -69,7 +69,7 @@ cmGeneratedFileStream::Open(const char* name, bool quiet, bool binaryFlag)
   // Check if the file opened.
   if(!*this && !quiet)
     {
-    cmSystemTools::Error("Cannot open file for write: ", 
+    cmSystemTools::Error("Cannot open file for write: ",
                          this->TempName.c_str());
     cmSystemTools::ReportLastSystemError("");
     }

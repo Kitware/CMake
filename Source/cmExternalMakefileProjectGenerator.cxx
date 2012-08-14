@@ -49,7 +49,7 @@ const char* cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
     }
 
   // otherwise search for the matching global generator
-  for (std::vector<std::string>::const_iterator 
+  for (std::vector<std::string>::const_iterator
        it = this->SupportedGlobalGenerators.begin();
        it != this->SupportedGlobalGenerators.end();
        ++it)

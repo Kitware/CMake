@@ -1,8 +1,8 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT (CTestTestZeroTimeout)
-INCLUDE (CTest)
+cmake_minimum_required (VERSION 2.6)
+project (CTestTestZeroTimeout)
+include (CTest)
 
-ADD_EXECUTABLE (Sleep sleep.c)
+add_executable (Sleep sleep.c)
 
-ADD_TEST (TestExplicitZeroTimeout Sleep)
-SET_TESTS_PROPERTIES(TestExplicitZeroTimeout PROPERTIES TIMEOUT 0)
+add_test (TestExplicitZeroTimeout Sleep)
+set_tests_properties(TestExplicitZeroTimeout PROPERTIES TIMEOUT 0)

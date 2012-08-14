@@ -12,60 +12,60 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic
-SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")       # -shared
-SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
-SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath
-SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP "")   # : or empty
-SET(CMAKE_INCLUDE_FLAG_C "-I")       # -I
-SET(CMAKE_INCLUDE_FLAG_C_SEP "")     # , or empty
-SET(CMAKE_LIBRARY_PATH_FLAG "-L")
-SET(CMAKE_LIBRARY_PATH_TERMINATOR "")  # for the Digital Mars D compiler the link paths have to be terminated with a "/"
-SET(CMAKE_LINK_LIBRARY_FLAG "-l")
+set(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic
+set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")       # -shared
+set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
+set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath
+set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP "")   # : or empty
+set(CMAKE_INCLUDE_FLAG_C "-I")       # -I
+set(CMAKE_INCLUDE_FLAG_C_SEP "")     # , or empty
+set(CMAKE_LIBRARY_PATH_FLAG "-L")
+set(CMAKE_LIBRARY_PATH_TERMINATOR "")  # for the Digital Mars D compiler the link paths have to be terminated with a "/"
+set(CMAKE_LINK_LIBRARY_FLAG "-l")
 
-SET(CMAKE_LINK_LIBRARY_SUFFIX "")
-SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-SET(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
-SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")          # lib
-SET(CMAKE_SHARED_LIBRARY_SUFFIX ".so")          # .so
-SET(CMAKE_EXECUTABLE_SUFFIX "")          # .exe
-SET(CMAKE_DL_LIBS "dl")
+set(CMAKE_LINK_LIBRARY_SUFFIX "")
+set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+set(CMAKE_SHARED_LIBRARY_PREFIX "lib")          # lib
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")          # .so
+set(CMAKE_EXECUTABLE_SUFFIX "")          # .exe
+set(CMAKE_DL_LIBS "dl")
 
-SET(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-SET(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
+set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".so" ".a")
 
 # basically all general purpose OSs support shared libs
-SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
-SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
+set (CMAKE_SKIP_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when using shared libraries.")
-SET (CMAKE_SKIP_INSTALL_RPATH "NO" CACHE BOOL
+set (CMAKE_SKIP_INSTALL_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when installing shared libraries, but are added when building.")
 
-SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
+set(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
-IF(CMAKE_GENERATOR MATCHES "Makefiles")
-  SET(CMAKE_COLOR_MAKEFILE ON CACHE BOOL
+if(CMAKE_GENERATOR MATCHES "Makefiles")
+  set(CMAKE_COLOR_MAKEFILE ON CACHE BOOL
     "Enable/Disable color output during build."
     )
-  MARK_AS_ADVANCED(CMAKE_COLOR_MAKEFILE)
-  IF(DEFINED CMAKE_RULE_MESSAGES)
-    SET_PROPERTY(GLOBAL PROPERTY RULE_MESSAGES ${CMAKE_RULE_MESSAGES})
-  ENDIF(DEFINED CMAKE_RULE_MESSAGES)
-  IF(CMAKE_GENERATOR MATCHES "Unix Makefiles")
-    SET(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
+  mark_as_advanced(CMAKE_COLOR_MAKEFILE)
+  if(DEFINED CMAKE_RULE_MESSAGES)
+    set_property(GLOBAL PROPERTY RULE_MESSAGES ${CMAKE_RULE_MESSAGES})
+  endif()
+  if(CMAKE_GENERATOR MATCHES "Unix Makefiles")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
       "Enable/Disable output of compile commands during generation."
       )
-    MARK_AS_ADVANCED(CMAKE_EXPORT_COMPILE_COMMANDS)
-  ENDIF(CMAKE_GENERATOR MATCHES "Unix Makefiles")
-ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
+    mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
+  endif()
+endif()
 
-IF(CMAKE_GENERATOR MATCHES "Ninja")
-  SET(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  set(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
     "Enable/Disable output of compile commands during generation."
     )
-  MARK_AS_ADVANCED(CMAKE_EXPORT_COMPILE_COMMANDS)
-ENDIF(CMAKE_GENERATOR MATCHES "Ninja")
+  mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
+endif()
 
 # GetDefaultWindowsPrefixBase
 #
@@ -160,27 +160,27 @@ endfunction()
 # was initialized by the block below.  This is useful for user
 # projects to change the default prefix while still allowing the
 # command line to override it.
-IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
-ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
+if(NOT DEFINED CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
+endif()
 
 # Choose a default install prefix for this platform.
-IF(CMAKE_HOST_UNIX)
-  SET(CMAKE_INSTALL_PREFIX "/usr/local"
+if(CMAKE_HOST_UNIX)
+  set(CMAKE_INSTALL_PREFIX "/usr/local"
     CACHE PATH "Install path prefix, prepended onto install directories.")
-ELSE(CMAKE_HOST_UNIX)
+else()
   GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
-  SET(CMAKE_INSTALL_PREFIX
+  set(CMAKE_INSTALL_PREFIX
     "${CMAKE_GENERIC_PROGRAM_FILES}/${PROJECT_NAME}"
     CACHE PATH "Install path prefix, prepended onto install directories.")
-  SET(CMAKE_GENERIC_PROGRAM_FILES)
-ENDIF(CMAKE_HOST_UNIX)
+  set(CMAKE_GENERIC_PROGRAM_FILES)
+endif()
 
 # Set a variable which will be used as component name in install() commands
 # where no COMPONENT has been given:
-SET(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Unspecified")
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Unspecified")
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   CMAKE_SKIP_RPATH
   CMAKE_SKIP_INSTALL_RPATH
   CMAKE_VERBOSE_MAKEFILE

@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmOutputRequiredFilesCommand;
     }
@@ -49,7 +49,7 @@ public:
     {
     return "Deprecated.  Approximate C preprocessor dependency scanning.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -72,7 +72,7 @@ public:
     return true;
     }
 
-  
+
   cmTypeMacro(cmOutputRequiredFilesCommand, cmCommand);
   void ListDependencies(cmDependInformation const *info,
                         FILE *fout,

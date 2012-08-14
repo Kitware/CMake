@@ -18,7 +18,7 @@ class cmCommandArgumentsHelper;
 class cmCommandArgumentGroup;
 
 /* cmCommandArgumentsHelper, cmCommandArgumentGroup and cmCommandArgument (i.e.
-its derived classes cmCAXXX can be used to simplify the processing of 
+its derived classes cmCAXXX can be used to simplify the processing of
 arguments to cmake commands. Maybe they can also be used to generate
 documentation.
 
@@ -26,11 +26,11 @@ For every argument supported by a command one cmCommandArgument is created
 and added to cmCommandArgumentsHelper. cmCommand has a cmCommandArgumentsHelper
 as member variable so this should be used.
 
-The order of the arguments is defined using the Follows(arg) method. It says 
+The order of the arguments is defined using the Follows(arg) method. It says
 that this argument follows immediateley the given argument. It can be used
 with multiple arguments if the argument can follow after different arguments.
 
-Arguments can be arranged in groups using cmCommandArgumentGroup. Every 
+Arguments can be arranged in groups using cmCommandArgumentGroup. Every
 member of a group can follow any other member of the group. These groups
 can also be used to define the order.
 
@@ -42,8 +42,8 @@ For an example see cmExportCommand.cxx.
 class cmCommandArgument
 {
   public:
-    cmCommandArgument(cmCommandArgumentsHelper* args, 
-                      const char* key, 
+    cmCommandArgument(cmCommandArgumentsHelper* args,
+                      const char* key,
                       cmCommandArgumentGroup* group=0);
     virtual ~cmCommandArgument() {}
 
@@ -56,8 +56,8 @@ class cmCommandArgument
     /// Returns true if the argument was found in the argument list
     bool WasFound() const                             {return this->WasActive;}
 
-    // The following methods are only called from 
-    // cmCommandArgumentsHelper::Parse(), but making this a friend would 
+    // The following methods are only called from
+    // cmCommandArgumentsHelper::Parse(), but making this a friend would
     // give it access to everything
 
     /// Make the current argument the currently active argument
@@ -89,19 +89,19 @@ class cmCommandArgument
     virtual void DoReset() = 0;
 };
 
-/** cmCAStringVector is to be used for arguments which can consist of more 
+/** cmCAStringVector is to be used for arguments which can consist of more
 than one string, e.g. the FILES argument in INSTALL(FILES f1 f2 f3 ...). */
 class cmCAStringVector : public cmCommandArgument
 {
   public:
-    cmCAStringVector(cmCommandArgumentsHelper* args, 
-                     const char* key, 
+    cmCAStringVector(cmCommandArgumentsHelper* args,
+                     const char* key,
                      cmCommandArgumentGroup* group=0);
 
     /// Return the vector of strings
     const std::vector<std::string>& GetVector() const    {return this->Vector;}
 
-    /** Is there a keyword which should be skipped in 
+    /** Is there a keyword which should be skipped in
     the arguments (e.g. ARGS for ADD_CUSTOM_COMMAND) ? */
     void SetIgnore(const char* ignore)                   {this->Ignore=ignore;}
   private:
@@ -118,8 +118,8 @@ e.g. the executable name in ADD_EXECUTABLE(). */
 class cmCAString : public cmCommandArgument
 {
   public:
-    cmCAString(cmCommandArgumentsHelper* args, 
-               const char* key, 
+    cmCAString(cmCommandArgumentsHelper* args,
+               const char* key,
                cmCommandArgumentGroup* group=0);
 
     /// Return the string
@@ -138,8 +138,8 @@ enabled using a special argument, e.g. EXCLUDE_FROM_ALL in ADD_EXECUTABLE(). */
 class cmCAEnabler : public cmCommandArgument
 {
   public:
-    cmCAEnabler(cmCommandArgumentsHelper* args, 
-                const char* key, 
+    cmCAEnabler(cmCommandArgumentsHelper* args,
+                const char* key,
                 cmCommandArgumentGroup* group=0);
 
     /// Has it been enabled ?
@@ -156,8 +156,8 @@ disabled using a special argument.*/
 class cmCADisabler : public cmCommandArgument
 {
   public:
-    cmCADisabler(cmCommandArgumentsHelper* args, 
-                 const char* key, 
+    cmCADisabler(cmCommandArgumentsHelper* args,
+                 const char* key,
                  cmCommandArgumentGroup* group=0);
 
     /// Is it still enabled ?
@@ -170,7 +170,7 @@ class cmCADisabler : public cmCommandArgument
 };
 
 
-/** Group of arguments, needed for ordering. E.g. WIN32, EXCLUDE_FROM_ALL and 
+/** Group of arguments, needed for ordering. E.g. WIN32, EXCLUDE_FROM_ALL and
 MACSOX_BUNDLE from ADD_EXECUTABLE() are a group.
 */
 class cmCommandArgumentGroup
@@ -192,7 +192,7 @@ class cmCommandArgumentsHelper
 {
   public:
     /// Parse the argument list
-    void Parse(const std::vector<std::string>* args, 
+    void Parse(const std::vector<std::string>* args,
                std::vector<std::string>* unconsumedArgs);
     /// Add an argument.
     void AddArgument(cmCommandArgument* arg);

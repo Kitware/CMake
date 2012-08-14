@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmEndIfCommand;
     }
@@ -54,7 +54,7 @@ public:
     {
     return "Ends a list of commands in an if block.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -64,7 +64,7 @@ public:
       "  endif(expression)\n"
       "See the if command.";
     }
-  
+
   cmTypeMacro(cmEndIfCommand, cmCommand);
 };
 

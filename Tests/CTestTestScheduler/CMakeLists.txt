@@ -1,9 +1,9 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT (CTestTestScheduler)
-INCLUDE (CTest)
+cmake_minimum_required (VERSION 2.6)
+project (CTestTestScheduler)
+include (CTest)
 
-ADD_EXECUTABLE (Sleep sleep.c)
+add_executable (Sleep sleep.c)
 
-FOREACH (time RANGE 1 4)
-  ADD_TEST (TestSleep${time} Sleep ${time})
-ENDFOREACH (time RANGE 1 4)
+foreach (time RANGE 1 4)
+  add_test (TestSleep${time} Sleep ${time})
+endforeach ()

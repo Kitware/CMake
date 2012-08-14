@@ -30,7 +30,7 @@ public:
   cmTypeMacro(cmCTestMemCheckHandler, cmCTestTestHandler);
 
   void PopulateCustomVectors(cmMakefile *mf);
-  
+
   cmCTestMemCheckHandler();
 
   void Initialize();
@@ -108,13 +108,13 @@ private:
   //! Parse Valgrind/Purify/Bounds Checker result out of the output
   //string. After running, log holds the output and results hold the
   //different memmory errors.
-  bool ProcessMemCheckOutput(const std::string& str, 
+  bool ProcessMemCheckOutput(const std::string& str,
                              std::string& log, int* results);
-  bool ProcessMemCheckValgrindOutput(const std::string& str, 
+  bool ProcessMemCheckValgrindOutput(const std::string& str,
                                      std::string& log, int* results);
-  bool ProcessMemCheckPurifyOutput(const std::string& str, 
+  bool ProcessMemCheckPurifyOutput(const std::string& str,
                                    std::string& log, int* results);
-  bool ProcessMemCheckBoundsCheckerOutput(const std::string& str, 
+  bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,
                                           std::string& log, int* results);
 
   void PostProcessPurifyTest(cmCTestTestResult& res);

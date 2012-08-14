@@ -23,9 +23,9 @@ class cmGlobalBorlandMakefileGenerator : public cmGlobalNMakeMakefileGenerator
 {
 public:
   cmGlobalBorlandMakefileGenerator();
-  static cmGlobalGenerator* New() 
+  static cmGlobalGenerator* New()
     { return new cmGlobalBorlandMakefileGenerator; }
-  
+
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalBorlandMakefileGenerator::GetActualName();}
@@ -33,13 +33,13 @@ public:
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-  
+
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
    * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.  
+   * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);

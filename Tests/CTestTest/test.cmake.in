@@ -4,25 +4,25 @@
 ###################################################################
 
 # this is the cvs module name that should be checked out
-SET (CTEST_MODULE_NAME SmallAndFast)
+set (CTEST_MODULE_NAME SmallAndFast)
 
-# these are the the name of the source and binary directory on disk. 
+# these are the the name of the source and binary directory on disk.
 # They will be appended to DASHBOARD_ROOT
-SET (CTEST_SOURCE_NAME SmallAndFast)
-SET (CTEST_BINARY_NAME SmallAndFastBuild)
+set (CTEST_SOURCE_NAME SmallAndFast)
+set (CTEST_BINARY_NAME SmallAndFastBuild)
 
 # which ctest command to use for running the dashboard
-SET (CTEST_COMMAND 
+set (CTEST_COMMAND
   "\"${CTEST_EXECUTABLE_NAME}\" --version"
   "\"${CTEST_EXECUTABLE_NAME}\" -D Experimental -A \"${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}\""
   )
 
 # what cmake command to use for configuring this dashboard
-GET_FILENAME_COMPONENT(CTEST_EXECUTABLE_PATH "${CTEST_EXECUTABLE_NAME}" PATH)
-SET(CTEST_CMAKE_COMMAND "\"${CTEST_EXECUTABLE_PATH}/cmake\"")
+get_filename_component(CTEST_EXECUTABLE_PATH "${CTEST_EXECUTABLE_NAME}" PATH)
+set(CTEST_CMAKE_COMMAND "\"${CTEST_EXECUTABLE_PATH}/cmake\"")
 
-MESSAGE("CTest executable: ${CTEST_EXECUTABLE_NAME}")
-MESSAGE("CMake executable: ${CTEST_CMAKE_COMMAND}")
+message("CTest executable: ${CTEST_EXECUTABLE_NAME}")
+message("CMake executable: ${CTEST_CMAKE_COMMAND}")
 
 CTEST_SLEEP(1)
 CTEST_SLEEP(1 1 1)
@@ -33,11 +33,11 @@ CTEST_SLEEP(1 1 1)
 ####################################################################
 
 # should ctest wipe the binary tree before running
-SET (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
+set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 
 # this is the initial cache to use for the binary tree, be careful to escape
 # any quotes inside of this string if you use it
-SET (CTEST_INITIAL_CACHE "
+set (CTEST_INITIAL_CACHE "
 SITE:STRING=@SITE@
 BUILDNAME:STRING=SmallAndFast-@BUILDNAME@
 CMAKE_GENERATOR:INTERNAL=@CMAKE_GENERATOR@
@@ -54,15 +54,15 @@ MEMORYCHECK_COMMAND_OPTIONS:STRING=@MEMORYCHECK_COMMAND_OPTIONS@
 COVERAGE_COMMAND:FILEPATH=@COVERAGE_COMMAND@
 ")
 
-# if you do not want to use the default location for a 
+# if you do not want to use the default location for a
 # dashboard then set this variable to the directory
 # the dashboard should be in
-SET (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@/Tests/CTestTest")
+set (CTEST_DASHBOARD_ROOT "@CMAKE_CURRENT_BINARY_DIR@/Tests/CTestTest")
 
 
 # set any extra envionment varibles here
-SET (CTEST_ENVIRONMENT
+set (CTEST_ENVIRONMENT
 )
 
-SET (CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestTest/SmallAndFast")
-SET (CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestTest/${CTEST_BINARY_NAME}")
+set (CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestTest/SmallAndFast")
+set (CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestTest/${CTEST_BINARY_NAME}")

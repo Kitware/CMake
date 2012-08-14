@@ -16,90 +16,90 @@
 # used internally by CMake and should not be included by user code.
 # If successful, sets CMAKE_<lang>_COMPILER_ID and CMAKE_<lang>_PLATFORM_ID
 
-FUNCTION(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
+function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   # Make sure the compiler arguments are clean.
-  STRING(STRIP "${CMAKE_${lang}_COMPILER_ARG1}" CMAKE_${lang}_COMPILER_ID_ARG1)
-  STRING(REGEX REPLACE " +" ";" CMAKE_${lang}_COMPILER_ID_ARG1 "${CMAKE_${lang}_COMPILER_ID_ARG1}")
+  string(STRIP "${CMAKE_${lang}_COMPILER_ARG1}" CMAKE_${lang}_COMPILER_ID_ARG1)
+  string(REGEX REPLACE " +" ";" CMAKE_${lang}_COMPILER_ID_ARG1 "${CMAKE_${lang}_COMPILER_ID_ARG1}")
 
   # Make sure user-specified compiler flags are used.
-  IF(CMAKE_${lang}_FLAGS)
-    SET(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS})
-  ELSE(CMAKE_${lang}_FLAGS)
-    SET(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${flagvar}})
-  ENDIF(CMAKE_${lang}_FLAGS)
-  STRING(REGEX REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
+  if(CMAKE_${lang}_FLAGS)
+    set(CMAKE_${lang}_COMPILER_ID_FLAGS ${CMAKE_${lang}_FLAGS})
+  else()
+    set(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${flagvar}})
+  endif()
+  string(REGEX REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
   # Compute the directory in which to run the test.
-  SET(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+  set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
 
   # Try building with no extra flags and then try each set
   # of helper flags.  Stop when the compiler is identified.
-  FOREACH(flags "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-    IF(NOT CMAKE_${lang}_COMPILER_ID)
+  foreach(flags "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
+    if(NOT CMAKE_${lang}_COMPILER_ID)
       CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
-      FOREACH(file ${COMPILER_${lang}_PRODUCED_FILES})
+      foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
         CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
-      ENDFOREACH(file)
-    ENDIF(NOT CMAKE_${lang}_COMPILER_ID)
-  ENDFOREACH(flags)
+      endforeach()
+    endif()
+  endforeach()
 
   # If the compiler is still unknown, try to query its vendor.
-  IF(NOT CMAKE_${lang}_COMPILER_ID)
+  if(NOT CMAKE_${lang}_COMPILER_ID)
     CMAKE_DETERMINE_COMPILER_ID_VENDOR(${lang})
-  ENDIF()
+  endif()
 
   # if the format is unknown after all files have been checked, put "Unknown" in the cache
-  IF(NOT CMAKE_EXECUTABLE_FORMAT)
-    SET(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
-  ENDIF(NOT CMAKE_EXECUTABLE_FORMAT)
+  if(NOT CMAKE_EXECUTABLE_FORMAT)
+    set(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
+  endif()
 
   # Display the final identification result.
-  IF(CMAKE_${lang}_COMPILER_ID)
-    IF(CMAKE_${lang}_COMPILER_VERSION)
-      SET(_version " ${CMAKE_${lang}_COMPILER_VERSION}")
-    ELSE()
-      SET(_version "")
-    ENDIF()
-    MESSAGE(STATUS "The ${lang} compiler identification is "
+  if(CMAKE_${lang}_COMPILER_ID)
+    if(CMAKE_${lang}_COMPILER_VERSION)
+      set(_version " ${CMAKE_${lang}_COMPILER_VERSION}")
+    else()
+      set(_version "")
+    endif()
+    message(STATUS "The ${lang} compiler identification is "
       "${CMAKE_${lang}_COMPILER_ID}${_version}")
-  ELSE(CMAKE_${lang}_COMPILER_ID)
-    MESSAGE(STATUS "The ${lang} compiler identification is unknown")
-  ENDIF(CMAKE_${lang}_COMPILER_ID)
+  else()
+    message(STATUS "The ${lang} compiler identification is unknown")
+  endif()
 
-  SET(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
-  SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
-  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
+  set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
+  set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
+  set(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
-  SET(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
-ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID)
+  set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to write the compiler id source file.
-FUNCTION(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
-  FILE(READ ${CMAKE_ROOT}/Modules/${src}.in ID_CONTENT_IN)
-  STRING(CONFIGURE "${ID_CONTENT_IN}" ID_CONTENT_OUT @ONLY)
-  FILE(WRITE ${CMAKE_${lang}_COMPILER_ID_DIR}/${src} "${ID_CONTENT_OUT}")
-ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_WRITE)
+function(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
+  file(READ ${CMAKE_ROOT}/Modules/${src}.in ID_CONTENT_IN)
+  string(CONFIGURE "${ID_CONTENT_IN}" ID_CONTENT_OUT @ONLY)
+  file(WRITE ${CMAKE_${lang}_COMPILER_ID_DIR}/${src} "${ID_CONTENT_OUT}")
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to build the compiler id source file and look for output
 # files.
-FUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
+function(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
   # Create a clean working directory.
-  FILE(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
-  FILE(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
+  file(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
+  file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
   CMAKE_DETERMINE_COMPILER_ID_WRITE("${lang}" "${src}")
 
   # Construct a description of this test case.
-  SET(COMPILER_DESCRIPTION
+  set(COMPILER_DESCRIPTION
     "Compiler: ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_ARG1}
 Build flags: ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
 Id flags: ${testflags}
 ")
 
   # Compile the compiler identification source.
-  IF(COMMAND EXECUTE_PROCESS)
-    EXECUTE_PROCESS(
+  if(COMMAND EXECUTE_PROCESS)
+    execute_process(
       COMMAND ${CMAKE_${lang}_COMPILER}
               ${CMAKE_${lang}_COMPILER_ID_ARG1}
               ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
@@ -110,8 +110,8 @@ Id flags: ${testflags}
       ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
       )
-  ELSE(COMMAND EXECUTE_PROCESS)
-    EXEC_PROGRAM(
+  else()
+    exec_program(
       ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_DIR}
       ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
            ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
@@ -120,12 +120,12 @@ Id flags: ${testflags}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
       )
-  ENDIF(COMMAND EXECUTE_PROCESS)
+  endif()
 
   # Check the result of compilation.
-  IF(CMAKE_${lang}_COMPILER_ID_RESULT)
+  if(CMAKE_${lang}_COMPILER_ID_RESULT)
     # Compilation failed.
-    SET(MSG
+    set(MSG
       "Compiling the ${lang} compiler identification source file \"${src}\" failed.
 ${COMPILER_DESCRIPTION}
 The output was:
@@ -133,16 +133,16 @@ ${CMAKE_${lang}_COMPILER_ID_RESULT}
 ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
 ")
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
-    #IF(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
-    #  MESSAGE(FATAL_ERROR "${MSG}")
-    #ENDIF(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log "${MSG}")
+    #if(NOT CMAKE_${lang}_COMPILER_ID_ALLOW_FAIL)
+    #  message(FATAL_ERROR "${MSG}")
+    #endif()
 
     # No output files should be inspected.
-    SET(COMPILER_${lang}_PRODUCED_FILES)
-  ELSE(CMAKE_${lang}_COMPILER_ID_RESULT)
+    set(COMPILER_${lang}_PRODUCED_FILES)
+  else()
     # Compilation succeeded.
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Compiling the ${lang} compiler identification source file \"${src}\" succeeded.
 ${COMPILER_DESCRIPTION}
 The output was:
@@ -153,120 +153,120 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # Find the executable produced by the compiler, try all files in the
     # binary dir.
-    FILE(GLOB COMPILER_${lang}_PRODUCED_FILES
+    file(GLOB COMPILER_${lang}_PRODUCED_FILES
       RELATIVE ${CMAKE_${lang}_COMPILER_ID_DIR}
       ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
-    LIST(REMOVE_ITEM COMPILER_${lang}_PRODUCED_FILES "${src}")
-    FOREACH(file ${COMPILER_${lang}_PRODUCED_FILES})
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    list(REMOVE_ITEM COMPILER_${lang}_PRODUCED_FILES "${src}")
+    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Compilation of the ${lang} compiler identification source \""
         "${src}\" produced \"${file}\"\n\n")
-    ENDFOREACH(file)
+    endforeach()
 
-    IF(NOT COMPILER_${lang}_PRODUCED_FILES)
+    if(NOT COMPILER_${lang}_PRODUCED_FILES)
       # No executable was found.
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Compilation of the ${lang} compiler identification source \""
         "${src}\" did not produce an executable in \""
         "${CMAKE_${lang}_COMPILER_ID_DIR}\".\n\n")
-    ENDIF(NOT COMPILER_${lang}_PRODUCED_FILES)
-  ENDIF(CMAKE_${lang}_COMPILER_ID_RESULT)
+    endif()
+  endif()
 
   # Return the files produced by the compilation.
-  SET(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
-ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_BUILD lang testflags src)
+  set(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to extract the compiler id from an executable.
-FUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
+function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   # Look for a compiler id if not yet known.
-  IF(NOT CMAKE_${lang}_COMPILER_ID)
+  if(NOT CMAKE_${lang}_COMPILER_ID)
     # Read the compiler identification string from the executable file.
-    SET(COMPILER_ID)
-    SET(COMPILER_VERSION)
-    SET(PLATFORM_ID)
-    FILE(STRINGS ${file}
+    set(COMPILER_ID)
+    set(COMPILER_VERSION)
+    set(PLATFORM_ID)
+    file(STRINGS ${file}
       CMAKE_${lang}_COMPILER_ID_STRINGS LIMIT_COUNT 4 REGEX "INFO:")
-    SET(HAVE_COMPILER_TWICE 0)
-    FOREACH(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
-      IF("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
-        IF(COMPILER_ID)
-          SET(COMPILER_ID_TWICE 1)
-        ENDIF(COMPILER_ID)
-        STRING(REGEX REPLACE ".*INFO:compiler\\[([^]]*)\\].*" "\\1"
+    set(HAVE_COMPILER_TWICE 0)
+    foreach(info ${CMAKE_${lang}_COMPILER_ID_STRINGS})
+      if("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
+        if(COMPILER_ID)
+          set(COMPILER_ID_TWICE 1)
+        endif()
+        string(REGEX REPLACE ".*INFO:compiler\\[([^]]*)\\].*" "\\1"
           COMPILER_ID "${info}")
-      ENDIF("${info}" MATCHES ".*INFO:compiler\\[([^]\"]*)\\].*")
-      IF("${info}" MATCHES ".*INFO:platform\\[([^]\"]*)\\].*")
-        STRING(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
+      endif()
+      if("${info}" MATCHES ".*INFO:platform\\[([^]\"]*)\\].*")
+        string(REGEX REPLACE ".*INFO:platform\\[([^]]*)\\].*" "\\1"
           PLATFORM_ID "${info}")
-      ENDIF("${info}" MATCHES ".*INFO:platform\\[([^]\"]*)\\].*")
-      IF("${info}" MATCHES ".*INFO:arch\\[([^]\"]*)\\].*")
-        STRING(REGEX REPLACE ".*INFO:arch\\[([^]]*)\\].*" "\\1"
+      endif()
+      if("${info}" MATCHES ".*INFO:arch\\[([^]\"]*)\\].*")
+        string(REGEX REPLACE ".*INFO:arch\\[([^]]*)\\].*" "\\1"
           ARCHITECTURE_ID "${info}")
-      ENDIF("${info}" MATCHES ".*INFO:arch\\[([^]\"]*)\\].*")
-      IF("${info}" MATCHES ".*INFO:compiler_version\\[([^]\"]*)\\].*")
-        STRING(REGEX REPLACE ".*INFO:compiler_version\\[([^]]*)\\].*" "\\1" COMPILER_VERSION "${info}")
-        STRING(REGEX REPLACE "^0+([0-9])" "\\1" COMPILER_VERSION "${COMPILER_VERSION}")
-        STRING(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION "${COMPILER_VERSION}")
-      ENDIF("${info}" MATCHES ".*INFO:compiler_version\\[([^]\"]*)\\].*")
-    ENDFOREACH(info)
+      endif()
+      if("${info}" MATCHES ".*INFO:compiler_version\\[([^]\"]*)\\].*")
+        string(REGEX REPLACE ".*INFO:compiler_version\\[([^]]*)\\].*" "\\1" COMPILER_VERSION "${info}")
+        string(REGEX REPLACE "^0+([0-9])" "\\1" COMPILER_VERSION "${COMPILER_VERSION}")
+        string(REGEX REPLACE "\\.0+([0-9])" ".\\1" COMPILER_VERSION "${COMPILER_VERSION}")
+      endif()
+    endforeach()
 
     # Check if a valid compiler and platform were found.
-    IF(COMPILER_ID AND NOT COMPILER_ID_TWICE)
-      SET(CMAKE_${lang}_COMPILER_ID "${COMPILER_ID}")
-      SET(CMAKE_${lang}_PLATFORM_ID "${PLATFORM_ID}")
-      SET(MSVC_${lang}_ARCHITECTURE_ID "${ARCHITECTURE_ID}")
-      SET(CMAKE_${lang}_COMPILER_VERSION "${COMPILER_VERSION}")
-    ENDIF(COMPILER_ID AND NOT COMPILER_ID_TWICE)
+    if(COMPILER_ID AND NOT COMPILER_ID_TWICE)
+      set(CMAKE_${lang}_COMPILER_ID "${COMPILER_ID}")
+      set(CMAKE_${lang}_PLATFORM_ID "${PLATFORM_ID}")
+      set(MSVC_${lang}_ARCHITECTURE_ID "${ARCHITECTURE_ID}")
+      set(CMAKE_${lang}_COMPILER_VERSION "${COMPILER_VERSION}")
+    endif()
 
     # Check the compiler identification string.
-    IF(CMAKE_${lang}_COMPILER_ID)
+    if(CMAKE_${lang}_COMPILER_ID)
       # The compiler identification was found.
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "The ${lang} compiler identification is ${CMAKE_${lang}_COMPILER_ID}, found in \""
         "${file}\"\n\n")
-    ELSE(CMAKE_${lang}_COMPILER_ID)
+    else()
       # The compiler identification could not be found.
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "The ${lang} compiler identification could not be found in \""
         "${file}\"\n\n")
-    ENDIF(CMAKE_${lang}_COMPILER_ID)
-  ENDIF(NOT CMAKE_${lang}_COMPILER_ID)
+    endif()
+  endif()
 
   # try to figure out the executable format: ELF, COFF, Mach-O
-  IF(NOT CMAKE_EXECUTABLE_FORMAT)
-    FILE(READ ${file} CMAKE_EXECUTABLE_MAGIC LIMIT 4 HEX)
+  if(NOT CMAKE_EXECUTABLE_FORMAT)
+    file(READ ${file} CMAKE_EXECUTABLE_MAGIC LIMIT 4 HEX)
 
     # ELF files start with 0x7f"ELF"
-    IF("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
-      SET(CMAKE_EXECUTABLE_FORMAT "ELF" CACHE INTERNAL "Executable file format")
-    ENDIF("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
+    if("${CMAKE_EXECUTABLE_MAGIC}" STREQUAL "7f454c46")
+      set(CMAKE_EXECUTABLE_FORMAT "ELF" CACHE INTERNAL "Executable file format")
+    endif()
 
 #    # COFF (.exe) files start with "MZ"
-#    IF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "4d5a....")
-#      SET(CMAKE_EXECUTABLE_FORMAT "COFF" CACHE STRING "Executable file format")
-#    ENDIF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "4d5a....")
+#    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "4d5a....")
+#      set(CMAKE_EXECUTABLE_FORMAT "COFF" CACHE STRING "Executable file format")
+#    endif()
 #
 #    # Mach-O files start with CAFEBABE or FEEDFACE, according to http://radio.weblogs.com/0100490/2003/01/28.html
-#    IF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "cafebabe")
-#      SET(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
-#    ENDIF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "cafebabe")
-#    IF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface")
-#      SET(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
-#    ENDIF("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface")
+#    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "cafebabe")
+#      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
+#    endif()
+#    if("${CMAKE_EXECUTABLE_MAGIC}" MATCHES "feedface")
+#      set(CMAKE_EXECUTABLE_FORMAT "MACHO" CACHE STRING "Executable file format")
+#    endif()
 
-  ENDIF(NOT CMAKE_EXECUTABLE_FORMAT)
-  IF(NOT DEFINED CMAKE_EXECUTABLE_FORMAT)
-    SET(CMAKE_EXECUTABLE_FORMAT)
-  ENDIF()
+  endif()
+  if(NOT DEFINED CMAKE_EXECUTABLE_FORMAT)
+    set(CMAKE_EXECUTABLE_FORMAT)
+  endif()
   # Return the information extracted.
-  SET(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
-  SET(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
-  SET(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
+  set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
+  set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
+  set(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
     PARENT_SCOPE)
-  SET(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
-  SET(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
-ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
+  set(CMAKE_${lang}_COMPILER_VERSION "${CMAKE_${lang}_COMPILER_VERSION}" PARENT_SCOPE)
+  set(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to query the compiler vendor.
@@ -276,22 +276,22 @@ ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_CHECK lang)
 #   set(CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor} "Some Vendor Output")
 # We try running the compiler with the flag for each vendor and
 # matching its regular expression in the output.
-FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
+function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
 
-  IF(NOT CMAKE_${lang}_COMPILER_ID_DIR)
+  if(NOT CMAKE_${lang}_COMPILER_ID_DIR)
     # We get here when this function is called not from within CMAKE_DETERMINE_COMPILER_ID()
     # This is done e.g. for detecting the compiler ID for assemblers.
     # Compute the directory in which to run the test and Create a clean working directory.
-    SET(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
-    FILE(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
-    FILE(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
-  ENDIF(NOT CMAKE_${lang}_COMPILER_ID_DIR)
+    set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+    file(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
+    file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
+  endif()
 
 
-  FOREACH(vendor ${CMAKE_${lang}_COMPILER_ID_VENDORS})
-    SET(flags ${CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor}})
-    SET(regex ${CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor}})
-    EXECUTE_PROCESS(
+  foreach(vendor ${CMAKE_${lang}_COMPILER_ID_VENDORS})
+    set(flags ${CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor}})
+    set(regex ${CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor}})
+    execute_process(
       COMMAND ${CMAKE_${lang}_COMPILER}
       ${CMAKE_${lang}_COMPILER_ID_ARG1}
       ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
@@ -302,22 +302,22 @@ FUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
       TIMEOUT 10
       )
 
-    IF("${output}" MATCHES "${regex}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    if("${output}" MATCHES "${regex}")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
         "matched \"${regex}\":\n${output}")
-      SET(CMAKE_${lang}_COMPILER_ID "${vendor}" PARENT_SCOPE)
-      BREAK()
-    ELSE()
-      IF("${result}" MATCHES  "timeout")
-        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      set(CMAKE_${lang}_COMPILER_ID "${vendor}" PARENT_SCOPE)
+      break()
+    else()
+      if("${result}" MATCHES  "timeout")
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
           "terminated after 10 s due to timeout.")
-      ELSE()
-        FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+      else()
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Checking whether the ${lang} compiler is ${vendor} using \"${flags}\" "
           "did not match \"${regex}\":\n${output}")
-       ENDIF()
-    ENDIF()
-  ENDFOREACH()
-ENDFUNCTION(CMAKE_DETERMINE_COMPILER_ID_VENDOR)
+       endif()
+    endif()
+  endforeach()
+endfunction()

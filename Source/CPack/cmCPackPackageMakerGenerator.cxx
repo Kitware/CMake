@@ -52,7 +52,7 @@ int cmCPackPackageMakerGenerator::CopyInstallScript(const char* resdir,
   cmSystemTools::CopyFileAlways(script, dst.c_str());
   cmSystemTools::SetPermissions(dst.c_str(),0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                "copy script : " << script << "\ninto " << dst.c_str() << 
+                "copy script : " << script << "\ninto " << dst.c_str() <<
                 std::endl);
 
   return 1;
@@ -79,7 +79,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if ( !cmsys::SystemTools::MakeDirectory(packageDirFileName.c_str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "unable to create package directory " 
+                    "unable to create package directory "
                     << packageDirFileName << std::endl);
         return 0;
       }
@@ -89,7 +89,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if ( !cmsys::SystemTools::MakeDirectory(resDir.c_str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "unable to create package subdirectory " << resDir 
+                    "unable to create package subdirectory " << resDir
                     << std::endl);
         return 0;
       }
@@ -98,7 +98,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if ( !cmsys::SystemTools::MakeDirectory(resDir.c_str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "unable to create package subdirectory " << resDir 
+                    "unable to create package subdirectory " << resDir
                     << std::endl);
         return 0;
       }
@@ -135,7 +135,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       return 0;
       }
     }
-  // if preflight, postflight, or postupgrade are set 
+  // if preflight, postflight, or postupgrade are set
   // then copy them into the resource directory and make
   // them executable
   if(preflight)
@@ -206,7 +206,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
             if (!cmSystemTools::MakeDirectory(uploadDirectory.c_str()))
               {
               cmCPackLogger(cmCPackLog::LOG_ERROR,
-                            "Unable to create package upload directory " 
+                            "Unable to create package upload directory "
                             << uploadDirectory << std::endl);
               return 0;
               }
@@ -254,7 +254,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       std::string packageDir = toplevel;
       packageDir += '/';
       packageDir += compIt->first;
-      if (!this->GenerateComponentPackage(packageFile.c_str(), 
+      if (!this->GenerateComponentPackage(packageFile.c_str(),
                                           packageDir.c_str(),
                                           compIt->second))
         {
@@ -293,7 +293,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       }
     pkgCmd << "\" -r \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
            << "/Resources\" -i \""
-           << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+           << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
            << "/Info.plist\" -d \""
            << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
            << "/Description.plist\"";
@@ -324,7 +324,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   while(numTries > 0)
     {
     res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-                                          &retVal, 0, this->GeneratorVerbose, 
+                                          &retVal, 0, this->GeneratorVerbose,
                                           0);
     if ( res && !retVal )
       {
@@ -474,7 +474,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   const char *packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
   if (packageCompat && *packageCompat)
     {
-    this->PackageCompatibilityVersion = atof(packageCompat);  
+    this->PackageCompatibilityVersion = atof(packageCompat);
     }
   else if (this->GetOption("CPACK_DOWNLOAD_SITE"))
     {
@@ -500,7 +500,7 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
       << std::endl);
     return 0;
     }
-  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE", 
+  this->SetOptionIfNotSet("CPACK_INSTALLER_PROGRAM_DISK_IMAGE",
                           pkgPath.c_str());
 
   return this->Superclass::InitializeInternal();
@@ -516,7 +516,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
   if ( !inFileName )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: " << cpackVar.c_str()
-                  << " not specified. It should point to " 
+                  << " not specified. It should point to "
                   << (name ? name : "(NULL)")
                   << ".rtf, " << name
                   << ".html, or " << name << ".txt file" << std::endl);
@@ -524,7 +524,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
     }
   if ( !cmSystemTools::FileExists(inFileName) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find " 
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find "
                   << (name ? name : "(NULL)")
                   << " resource file: " << inFileName << std::endl);
     return false;
@@ -547,7 +547,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
   this->SetOption(("CPACK_RESOURCE_FILE_" + uname + "_NOPATH").c_str(),
                   (name + ext).c_str());
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " 
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: "
                 << (inFileName ? inFileName : "(NULL)")
                 << " to " << destFileName.c_str() << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
@@ -593,7 +593,7 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
   std::string output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(command, &output, &retVal, 0, 
+  bool res = cmSystemTools::RunSingleCommand(command, &output, &retVal, 0,
                                              this->GeneratorVerbose, 0);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running package maker"
     << std::endl);
@@ -612,7 +612,7 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
   // sometimes the command finishes but the directory is not yet
   // created, so try 10 times to see if it shows up
   int tries = 10;
-  while(tries > 0 && 
+  while(tries > 0 &&
         !cmSystemTools::FileExists(packageFile))
     {
     cmSystemTools::Delay(500);
@@ -632,7 +632,7 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
 }
 
 //----------------------------------------------------------------------
-std::string 
+std::string
 cmCPackPackageMakerGenerator::GetPackageName(const cmCPackComponent& component)
 {
   if (component.ArchiveFile.empty())
@@ -664,7 +664,7 @@ GenerateComponentPackage(const char *packageFile,
   // The command that will be used to run PackageMaker
   cmOStringStream pkgCmd;
 
-  if (this->PackageCompatibilityVersion < 10.5 || 
+  if (this->PackageCompatibilityVersion < 10.5 ||
       this->PackageMakerVersion < 3.0)
     {
     // Create Description.plist and Info.plist files for normal Mac OS
@@ -680,10 +680,10 @@ GenerateComponentPackage(const char *packageFile,
         << "  <key>IFPkgDescriptionTitle</key>" << std::endl
         << "  <string>" << component.DisplayName << "</string>" << std::endl
         << "  <key>IFPkgDescriptionVersion</key>" << std::endl
-        << "  <string>" << this->GetOption("CPACK_PACKAGE_VERSION") 
+        << "  <string>" << this->GetOption("CPACK_PACKAGE_VERSION")
         << "</string>" << std::endl
         << "  <key>IFPkgDescriptionDescription</key>" << std::endl
-        << "  <string>" + this->EscapeForXML(component.Description) 
+        << "  <string>" + this->EscapeForXML(component.Description)
         << "</string>" << std::endl
         << "</dict>" << std::endl
         << "</plist>" << std::endl;
@@ -692,7 +692,7 @@ GenerateComponentPackage(const char *packageFile,
     // Create the Info.plist file for this component
     std::string moduleVersionSuffix = ".";
     moduleVersionSuffix += component.Name;
-    this->SetOption("CPACK_MODULE_VERSION_SUFFIX", 
+    this->SetOption("CPACK_MODULE_VERSION_SUFFIX",
                     moduleVersionSuffix.c_str());
     std::string infoFileName = component.Name;
     infoFileName += "-Info.plist";
@@ -704,9 +704,9 @@ GenerateComponentPackage(const char *packageFile,
     pkgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
            << "\" -build -p \"" << packageFile << "\""
            << " -f \"" << packageDir << "\""
-           << " -i \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY") 
+           << " -i \"" << this->GetOption("CPACK_TOPLEVEL_DIRECTORY")
            << "/" << infoFileName << "\""
-           << " -d \"" << descriptionFile << "\""; 
+           << " -d \"" << descriptionFile << "\"";
     }
   else
     {
@@ -729,16 +729,16 @@ GenerateComponentPackage(const char *packageFile,
            << " --out \"" << packageFile << "\"";
     }
 
-  // Run PackageMaker  
+  // Run PackageMaker
   return RunPackageMaker(pkgCmd.str().c_str(), packageFile);
 }
 
 //----------------------------------------------------------------------
-void 
+void
 cmCPackPackageMakerGenerator::
 WriteDistributionFile(const char* metapackageFile)
 {
-  std::string distributionTemplate 
+  std::string distributionTemplate
     = this->FindTemplate("CPack.distribution.dist.in");
   if ( distributionTemplate.empty() )
     {
@@ -757,8 +757,8 @@ WriteDistributionFile(const char* metapackageFile)
 
   // Emit the outline for the groups
   std::map<std::string, cmCPackComponentGroup>::iterator groupIt;
-  for (groupIt = this->ComponentGroups.begin(); 
-       groupIt != this->ComponentGroups.end(); 
+  for (groupIt = this->ComponentGroups.begin();
+       groupIt != this->ComponentGroups.end();
        ++groupIt)
     {
     if (groupIt->second.ParentGroup == 0)
@@ -781,8 +781,8 @@ WriteDistributionFile(const char* metapackageFile)
   choiceOut << "</choices-outline>" << std::endl;
 
   // Create the actual choices
-  for (groupIt = this->ComponentGroups.begin(); 
-       groupIt != this->ComponentGroups.end(); 
+  for (groupIt = this->ComponentGroups.begin();
+       groupIt != this->ComponentGroups.end();
        ++groupIt)
     {
     CreateChoice(groupIt->second, choiceOut);
@@ -796,7 +796,7 @@ WriteDistributionFile(const char* metapackageFile)
 
   // Create the distribution.dist file in the metapackage to turn it
   // into a distribution package.
-  this->ConfigureFile(distributionTemplate.c_str(), 
+  this->ConfigureFile(distributionTemplate.c_str(),
                       distributionFile.c_str());
 }
 
@@ -824,13 +824,13 @@ CreateChoiceOutline(const cmCPackComponentGroup& group, cmOStringStream& out)
 }
 
 //----------------------------------------------------------------------
-void 
+void
 cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponentGroup& group,
                                            cmOStringStream& out)
 {
-  out << "<choice id=\"" << group.Name << "Choice\" " 
+  out << "<choice id=\"" << group.Name << "Choice\" "
       << "title=\"" << group.DisplayName << "\" "
-      << "start_selected=\"true\" " 
+      << "start_selected=\"true\" "
       << "start_enabled=\"true\" "
       << "start_visible=\"true\" ";
   if (!group.Description.empty())
@@ -842,21 +842,21 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponentGroup& group,
 }
 
 //----------------------------------------------------------------------
-void 
+void
 cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
                                            cmOStringStream& out)
 {
   std::string packageId = "com.";
   packageId += this->GetOption("CPACK_PACKAGE_VENDOR");
-  packageId += '.'; 
+  packageId += '.';
   packageId += this->GetOption("CPACK_PACKAGE_NAME");
   packageId += '.';
   packageId += component.Name;
 
-  out << "<choice id=\"" << component.Name << "Choice\" " 
+  out << "<choice id=\"" << component.Name << "Choice\" "
       << "title=\"" << component.DisplayName << "\" "
-      << "start_selected=\"" 
-      << (component.IsDisabledByDefault && 
+      << "start_selected=\""
+      << (component.IsDisabledByDefault &&
           !component.IsRequired? "false" : "true")
       << "\" "
       << "start_enabled=\""
@@ -905,7 +905,7 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
   std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   dirName += '/';
   dirName += component.Name;
-  unsigned long installedSize 
+  unsigned long installedSize
     = component.GetInstalledSizeInKbytes(dirName.c_str());
 
   out << "<pkg-ref id=\"" << packageId << "\" "
@@ -914,7 +914,7 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
       << "auth=\"Admin\" onConclusion=\"None\">";
   if (component.IsDownloaded)
     {
-    out << this->GetOption("CPACK_DOWNLOAD_SITE") 
+    out << this->GetOption("CPACK_DOWNLOAD_SITE")
         << this->GetPackageName(component);
     }
   else
@@ -925,9 +925,9 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
 }
 
 //----------------------------------------------------------------------
-void 
+void
 cmCPackPackageMakerGenerator::
-AddDependencyAttributes(const cmCPackComponent& component, 
+AddDependencyAttributes(const cmCPackComponent& component,
                         std::set<const cmCPackComponent *>& visited,
                         cmOStringStream& out)
 {
@@ -942,16 +942,16 @@ AddDependencyAttributes(const cmCPackComponent& component,
        dependIt != component.Dependencies.end();
        ++dependIt)
     {
-    out << " &amp;&amp; choices['" << 
+    out << " &amp;&amp; choices['" <<
       (*dependIt)->Name << "Choice'].selected";
     AddDependencyAttributes(**dependIt, visited, out);
     }
 }
 
 //----------------------------------------------------------------------
-void 
+void
 cmCPackPackageMakerGenerator::
-AddReverseDependencyAttributes(const cmCPackComponent& component, 
+AddReverseDependencyAttributes(const cmCPackComponent& component,
                                std::set<const cmCPackComponent *>& visited,
                                cmOStringStream& out)
 {

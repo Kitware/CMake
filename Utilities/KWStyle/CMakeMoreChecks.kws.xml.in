@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <Description>
-  <ErrorThreshold>10</ErrorThreshold> 
+  <ErrorThreshold>10</ErrorThreshold>
   <LineLength>79</LineLength>
   <Header>"@CMake_SOURCE_DIR@/Utilities/KWStyle/Headers",false,true</Header>
   <Functions>

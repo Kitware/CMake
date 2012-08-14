@@ -19,7 +19,7 @@
  *
  * cmInstallTargetsCommand specifies the relative path where a list of
  * targets should be installed. The targets can be executables or
- * libraries.  
+ * libraries.
  */
 class cmInstallTargetsCommand : public cmCommand
 {
@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmInstallTargetsCommand;
     }
@@ -51,7 +51,7 @@ public:
     {
     return "Deprecated. Use the install(TARGETS )  command instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -67,7 +67,7 @@ public:
       "is specified, then on systems with special runtime files "
       "(Windows DLL), the files will be copied to that directory.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

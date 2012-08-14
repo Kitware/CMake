@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddDependenciesCommand;
     }
@@ -49,7 +49,7 @@ public:
     {
     return "Add a dependency between top-level targets.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -70,7 +70,7 @@ public:
       "SET_SOURCE_FILES_PROPERTIES to add file-level dependencies to object "
       "files.";
     }
-  
+
   cmTypeMacro(cmAddDependenciesCommand, cmCommand);
 };
 

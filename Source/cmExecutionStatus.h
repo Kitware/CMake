@@ -23,19 +23,19 @@ class cmExecutionStatus : public cmObject
 {
 public:
   cmTypeMacro(cmExecutionStatus, cmObject);
-  
+
   cmExecutionStatus() { this->Clear();};
-  
-  virtual void SetReturnInvoked(bool val) 
+
+  virtual void SetReturnInvoked(bool val)
   { this->ReturnInvoked = val; }
   virtual bool GetReturnInvoked()
   { return this->ReturnInvoked; }
-                                 
-  virtual void SetBreakInvoked(bool val) 
+
+  virtual void SetBreakInvoked(bool val)
   { this->BreakInvoked = val; }
   virtual bool GetBreakInvoked()
   { return this->BreakInvoked; }
-            
+
   virtual void Clear()
     {
     this->ReturnInvoked = false;
@@ -45,7 +45,7 @@ public:
   virtual void SetNestedError(bool val) { this->NestedError = val; }
   virtual bool GetNestedError() { return this->NestedError; }
 
-                                        
+
 protected:
   bool ReturnInvoked;
   bool BreakInvoked;

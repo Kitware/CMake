@@ -29,7 +29,7 @@ if (USE_MYMATH)
   include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
   add_subdirectory (MathFunctions)
   set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
-endif (USE_MYMATH)
+endif ()
 
 # add the executable
 add_executable (Tutorial tutorial.cxx)
@@ -37,7 +37,7 @@ target_link_libraries (Tutorial  ${EXTRA_LIBS})
 
 # add the install targets
 install (TARGETS Tutorial DESTINATION bin)
-install (FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h" 
+install (FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h"
   DESTINATION include)
 
 # enable testing
@@ -49,7 +49,7 @@ add_test (TutorialRuns Tutorial 25)
 # does the usage message work?
 add_test (TutorialUsage Tutorial)
 set_tests_properties (TutorialUsage
-  PROPERTIES 
+  PROPERTIES
   PASS_REGULAR_EXPRESSION "Usage:.*number"
   )
 
@@ -59,7 +59,7 @@ macro (do_test arg result)
   set_tests_properties (TutorialComp${arg}
     PROPERTIES PASS_REGULAR_EXPRESSION ${result}
     )
-endmacro (do_test)
+endmacro ()
 
 # do a bunch of result based tests
 do_test (4 "4 is 2")

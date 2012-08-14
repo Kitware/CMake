@@ -18,7 +18,7 @@
  * \brief Get a specific component of a filename.
  *
  * cmGetFilenameComponentCommand is a utility command used to get the path,
- * name, extension or name without extension of a full filename. 
+ * name, extension or name without extension of a full filename.
  */
 class cmGetFilenameComponentCommand : public cmCommand
 {
@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmGetFilenameComponentCommand;
     }
@@ -55,7 +55,7 @@ public:
     {
     return "Get a specific component of a full filename.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -82,7 +82,7 @@ public:
       "from the program name and stored in <ARG_VAR>.  This is used to "
       "separate a program name from its arguments in a command line string.";
     }
-  
+
   cmTypeMacro(cmGetFilenameComponentCommand, cmCommand);
 };
 

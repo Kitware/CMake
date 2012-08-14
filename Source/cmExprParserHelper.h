@@ -9,7 +9,7 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef cmExprParserHelper_h 
+#ifndef cmExprParserHelper_h
 #define cmExprParserHelper_h
 
 #include "cmStandardIncludes.h"

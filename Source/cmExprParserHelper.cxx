@@ -42,7 +42,7 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
   this->InputBuffer = str;
   this->InputBufferPos = 0;
   this->CurrentLine = 0;
-  
+
   this->Result = 0;
 
   yyscan_t yyscanner;
@@ -61,7 +61,7 @@ int cmExprParserHelper::ParseString(const char* str, int verb)
 
   if ( Verbose )
     {
-    std::cerr << "Expanding [" << str << "] produced: [" 
+    std::cerr << "Expanding [" << str << "] produced: ["
               << this->Result << "]" << std::endl;
     }
   return 1;

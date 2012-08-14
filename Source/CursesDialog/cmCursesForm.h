@@ -20,7 +20,7 @@ class cmCursesForm
 public:
   cmCursesForm();
   virtual ~cmCursesForm();
-  
+
   // Description:
   // Handle user input.
   virtual void HandleInput() = 0;
@@ -59,7 +59,7 @@ public:
     }
 
   static cmCursesForm* CurrentForm;
-  
+
 
 protected:
 

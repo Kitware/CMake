@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmCursesLabelWidget.h"
 
-cmCursesLabelWidget::cmCursesLabelWidget(int width, int height, 
+cmCursesLabelWidget::cmCursesLabelWidget(int width, int height,
                                          int left, int top,
                                          const std::string& name) :
   cmCursesWidget(width, height, left, top)

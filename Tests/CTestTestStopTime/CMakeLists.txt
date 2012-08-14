@@ -1,11 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(CTestTestStopTime)
-INCLUDE(CTest)
+project(CTestTestStopTime)
+include(CTest)
 
-ADD_EXECUTABLE (Sleep sleep.c)
+add_executable (Sleep sleep.c)
 
-ADD_TEST (TestSleep Sleep 30)
-ADD_TEST (ShouldNotRun Sleep 30)
+add_test (TestSleep Sleep 30)
+add_test (ShouldNotRun Sleep 30)
 
-SET_TESTS_PROPERTIES(ShouldNotRun PROPERTIES DEPENDS TestSleep)
-SET_TESTS_PROPERTIES(ShouldNotRun PROPERTIES WILL_FAIL ON)
+set_tests_properties(ShouldNotRun PROPERTIES DEPENDS TestSleep)
+set_tests_properties(ShouldNotRun PROPERTIES WILL_FAIL ON)

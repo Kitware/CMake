@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmSubdirCommand;
     }
@@ -51,7 +51,7 @@ public:
     {
     return "Deprecated. Use the add_subdirectory() command instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -68,7 +68,7 @@ public:
       "This will cause any CMakeLists.txt files in the sub directories "
       "to be processed by CMake.  Any directories after the PREORDER flag "
       "are traversed first by makefile builds, the PREORDER flag has no "
-      "effect on IDE projects. " 
+      "effect on IDE projects. "
       " Any directories after the EXCLUDE_FROM_ALL marker "
       "will not be included in the top level makefile or project file. "
       "This is useful for having CMake create makefiles or projects for "
@@ -77,7 +77,7 @@ public:
       "the same time, but you would not want them to show up in the "
       "top level project or be built each time make is run from the top.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

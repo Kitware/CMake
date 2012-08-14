@@ -48,26 +48,26 @@ public:
    * to it.
    */
   const cmSourceFile *SourceFile;
-  
+
   /**
    * Full path to this file.
    */
   std::string FullPath;
-  
+
   /**
    * Full path not including file name.
    */
   std::string PathOnly;
-  
+
   /**
    * Name used to #include this file.
    */
   std::string IncludeName;
-  
+
   /**
    * This method adds the dependencies of another file to this one.
    */
-  void AddDependencies(cmDependInformation*);  
+  void AddDependencies(cmDependInformation*);
 };
 
 
@@ -85,11 +85,11 @@ public:
    * Destructor.
    */
   virtual ~cmMakeDepend();
-  
-  /** 
+
+  /**
    * Set the makefile that is used as a source of classes.
    */
-  virtual void SetMakefile(cmMakefile* makefile); 
+  virtual void SetMakefile(cmMakefile* makefile);
 
   /**
    * Add a directory to the search path for include files.
@@ -107,26 +107,26 @@ protected:
    * Compute the depend information for this class.
    */
   virtual void DependWalk(cmDependInformation* info);
-  
+
   /**
    * Add a dependency.  Possibly walk it for more dependencies.
    */
   virtual void AddDependency(cmDependInformation* info, const char* file);
-  
+
   /**
    * Fill in the given object with dependency information.  If the
    * information is already complete, nothing is done.
    */
   void GenerateDependInformation(cmDependInformation* info);
-  
+
   /**
    * Get an instance of cmDependInformation corresponding to the given file
    * name.
    */
-  cmDependInformation* GetDependInformation(const char* file, 
-                                            const char *extraPath);  
-  
-  /** 
+  cmDependInformation* GetDependInformation(const char* file,
+                                            const char *extraPath);
+
+  /**
    * Find the full path name for the given file name.
    * This uses the include directories.
    * TODO: Cache path conversions to reduce FileExists calls.
@@ -139,9 +139,9 @@ protected:
   cmsys::RegularExpression ComplainFileRegularExpression;
   std::vector<std::string> IncludeDirectories;
   typedef std::map<cmStdString, cmStdString> FileToPathMapType;
-  typedef std::map<cmStdString, FileToPathMapType> 
+  typedef std::map<cmStdString, FileToPathMapType>
   DirectoryToFileToPathMapType;
-  typedef std::map<cmStdString, cmDependInformation*> 
+  typedef std::map<cmStdString, cmDependInformation*>
   DependInformationMapType;
   DependInformationMapType DependInformationMap;
   DirectoryToFileToPathMapType DirectoryToFileToPathMap;

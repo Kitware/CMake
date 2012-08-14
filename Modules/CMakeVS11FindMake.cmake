@@ -15,7 +15,7 @@
 # Look for devenv as a build program.  We need to use this to support
 # Intel Fortran integration into VS.  MSBuild can not be used for that case
 # since Intel Fortran uses the older devenv file format.
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM
+find_program(CMAKE_MAKE_PROGRAM
   NAMES devenv
   HINTS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VS;EnvironmentDirectory]
@@ -39,16 +39,16 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
 # causes the compiler checks and try-compile stuff to fail. MSbuild
 # is a better choice for this.  However, VCExpress does not support
 # cross compiling needed for Win CE.
-IF(NOT CMAKE_CROSSCOMPILING)
-  FIND_PROGRAM(CMAKE_MAKE_PROGRAM
+if(NOT CMAKE_CROSSCOMPILING)
+  find_program(CMAKE_MAKE_PROGRAM
     NAMES MSBuild
     HINTS
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VS;ProductDir]
     "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;CLR Version]/"
     "c:/WINDOWS/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;CLR Version]/"
     "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\11.0;CLR Version]/")
-ENDIF()
+endif()
 
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
-SET(MSVC11 1)
-SET(MSVC_VERSION 1700)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)
+set(MSVC11 1)
+set(MSVC_VERSION 1700)

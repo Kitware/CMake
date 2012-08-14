@@ -54,7 +54,7 @@ int main()
     kwsys_ios::cerr << "Incorrect return value from plugin!"
                     << kwsys_ios::endl;
     return 1;
-    } 
+    }
   kwsys::DynamicLoader::CloseLibrary(handle);
   return 0;
 }

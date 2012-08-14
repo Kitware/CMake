@@ -25,7 +25,7 @@ function(try_cvs_checkout repository module dir result_var)
 
     message(STATUS "try_cvs_checkout -- done")
   endif()
-endfunction(try_cvs_checkout)
+endfunction()
 
 
 function(try_svn_checkout repository dir result_var)
@@ -51,4 +51,4 @@ function(try_svn_checkout repository dir result_var)
 
     message(STATUS "try_svn_checkout -- done")
   endif()
-endfunction(try_svn_checkout)
+endfunction()

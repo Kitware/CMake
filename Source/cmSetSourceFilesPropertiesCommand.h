@@ -17,7 +17,7 @@
 class cmSetSourceFilesPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmSetSourceFilesPropertiesCommand;
     }
@@ -41,7 +41,7 @@ public:
     {
     return "Source files can have properties that affect how they are built.";
     }
-  
+
   /**
    * Longer documentation.
    */
@@ -58,7 +58,7 @@ public:
         "Source file properties are visible only to targets "
         "added in the same directory (CMakeLists.txt).";
     }
-  
+
   cmTypeMacro(cmSetSourceFilesPropertiesCommand, cmCommand);
 
   static bool RunCommand(cmMakefile *mf,

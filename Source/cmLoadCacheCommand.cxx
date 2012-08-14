@@ -26,7 +26,7 @@ bool cmLoadCacheCommand
     {
     return this->ReadWithPrefix(args);
     }
-  
+
   // Cache entries to be excluded from the import list.
   // If this set is empty, all cache entries are brought in
   // and they can not be overridden.
@@ -97,7 +97,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
     this->SetError("READ_WITH_PREFIX form must specify a prefix.");
     return false;
     }
-  
+
   // Make sure the cache file exists.
   std::string cacheFile = args[0]+"/CMakeCache.txt";
   if(!cmSystemTools::FileExists(cacheFile.c_str()))
@@ -106,22 +106,22 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
     this->SetError(e.c_str());
     return false;
     }
-  
+
   // Prepare the table of variables to read.
   this->Prefix = args[2];
   for(unsigned int i=3; i < args.size(); ++i)
     {
     this->VariablesToRead.insert(args[i]);
     }
-  
+
   // Read the cache file.
-  std::ifstream fin(cacheFile.c_str());  
-  
+  std::ifstream fin(cacheFile.c_str());
+
   // This is a big hack read loop to overcome a buggy ifstream
   // implementation on HP-UX.  This should work on all platforms even
   // for small buffer sizes.
   const int bufferSize = 4096;
-  char buffer[bufferSize];  
+  char buffer[bufferSize];
   std::string line;
   while(fin)
     {
@@ -152,7 +152,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
           // Completed a line.
           this->CheckLine(line.c_str());
           line = "";
-          
+
           // Skip the newline character.
           ++i;
           }
@@ -164,7 +164,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
     // Partial last line.
     this->CheckLine(line.c_str());
     }
-  
+
   return true;
 }
 

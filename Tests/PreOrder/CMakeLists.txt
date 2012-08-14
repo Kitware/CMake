@@ -1,6 +1,6 @@
 # a simple test case
-PROJECT (PreOrder)
-SET(CMAKE_IGNORE_DEPENDENCIES_ORDERING 1)
-ADD_SUBDIRECTORY(Library)
-ADD_EXECUTABLE (PreOrder simple.cxx)
-TARGET_LINK_LIBRARIES(PreOrder simpleLib)
+project (PreOrder)
+set(CMAKE_IGNORE_DEPENDENCIES_ORDERING 1)
+add_subdirectory(Library)
+add_executable (PreOrder simple.cxx)
+target_link_libraries(PreOrder simpleLib)

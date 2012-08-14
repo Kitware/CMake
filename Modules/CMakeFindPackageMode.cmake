@@ -179,7 +179,7 @@ if(${NAME}_FOUND  OR  ${UPPERCASE_NAME}_FOUND)
     set_compile_flags_var(${NAME})
   elseif("${MODE}" STREQUAL "LINK")
     set_link_flags_var(${NAME})
-  else("${MODE}" STREQUAL "LINK")
+  else()
     message(FATAL_ERROR "Invalid mode argument ${MODE} given.")
   endif()
 

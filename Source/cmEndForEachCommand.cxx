@@ -12,7 +12,7 @@
 #include "cmEndForEachCommand.h"
 
 bool cmEndForEachCommand
-::InvokeInitialPass(std::vector<cmListFileArgument> const&, 
+::InvokeInitialPass(std::vector<cmListFileArgument> const&,
                     cmExecutionStatus &)
 {
   this->SetError("An ENDFOREACH command was found outside of a proper "

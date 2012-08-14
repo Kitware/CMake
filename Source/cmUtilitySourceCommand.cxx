@@ -22,7 +22,7 @@ bool cmUtilitySourceCommand
     }
 
   std::vector<std::string>::const_iterator arg = args.begin();
-  
+
   // The first argument is the cache entry name.
   std::string cacheEntry = *arg++;
   const char* cacheValue =
@@ -30,7 +30,7 @@ bool cmUtilitySourceCommand
   // If it exists already and appears up to date then we are done.  If
   // the string contains "(IntDir)" but that is not the
   // CMAKE_CFG_INTDIR setting then the value is out of date.
-  const char* intDir = 
+  const char* intDir =
     this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
 
   bool haveCacheValue = false;
@@ -60,21 +60,21 @@ bool cmUtilitySourceCommand
     {
     return true;
     }
-  
+
   // The second argument is the utility's executable name, which will be
   // needed later.
   std::string utilityName = *arg++;
-  
+
   // The third argument specifies the relative directory of the source
   // of the utility.
   std::string relativeSource = *arg++;
   std::string utilitySource = this->Makefile->GetCurrentDirectory();
   utilitySource = utilitySource+"/"+relativeSource;
-  
+
   // If the directory doesn't exist, the source has not been included.
   if(!cmSystemTools::FileExists(utilitySource.c_str()))
     { return true; }
-  
+
   // Make sure all the files exist in the source directory.
   while(arg != args.end())
     {
@@ -82,9 +82,9 @@ bool cmUtilitySourceCommand
     if(!cmSystemTools::FileExists(file.c_str()))
       { return true; }
     }
-  
+
   // The source exists.
-  std::string cmakeCFGout = 
+  std::string cmakeCFGout =
     this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
   std::string utilityDirectory = this->Makefile->GetCurrentOutputDirectory();
   std::string exePath;
@@ -100,7 +100,7 @@ bool cmUtilitySourceCommand
     {
     utilityDirectory += "/"+relativeSource;
     }
-  
+
   // Construct the cache entry for the executable's location.
   std::string utilityExecutable =
     utilityDirectory+"/"+cmakeCFGout+"/"
@@ -108,7 +108,7 @@ bool cmUtilitySourceCommand
 
   // make sure we remove any /./ in the name
   cmSystemTools::ReplaceString(utilityExecutable, "/./", "/");
-  
+
   // Enter the value into the cache.
   this->Makefile->AddCacheDefinition(cacheEntry.c_str(),
                                  utilityExecutable.c_str(),
@@ -121,7 +121,7 @@ bool cmUtilitySourceCommand
                                  utilityName.c_str(),
                                  "Executable to project name.",
                                  cmCacheManager::INTERNAL);
-  
+
   return true;
 }
 

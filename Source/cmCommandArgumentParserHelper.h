@@ -66,8 +66,8 @@ public:
   void SetNoEscapeMode(bool b) { this->NoEscapeMode = b; }
   void SetReplaceAtSyntax(bool b) { this->ReplaceAtSyntax = b; }
   void SetRemoveEmpty(bool b) { this->RemoveEmpty = b; }
-  
-  const char* GetError() { return this->ErrorString.c_str(); } 
+
+  const char* GetError() { return this->ErrorString.c_str(); }
   char EmptyVariable[1];
   char DCURLYVariable[3];
   char RCURLYVariable[3];
@@ -102,7 +102,7 @@ private:
   std::string ErrorString;
   bool NoEscapeMode;
   bool ReplaceAtSyntax;
-  bool RemoveEmpty; 
+  bool RemoveEmpty;
 };
 
 #endif

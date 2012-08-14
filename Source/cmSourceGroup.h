@@ -37,12 +37,12 @@ public:
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&);
-  
+
   /**
    * Set the regular expression for this group.
    */
   void SetGroupRegex(const char* regex);
-  
+
   /**
    * Add a file name to the explicit list of files for this group.
    */
@@ -57,7 +57,7 @@ public:
    * Looks up child and returns it
    */
   cmSourceGroup *lookupChild(const char *name);
-  
+
   /**
    * Get the name of this group.
    */
@@ -67,12 +67,12 @@ public:
    * Get the full path name for group.
    */
   const char* GetFullName() const;
-  
+
   /**
    * Check if the given name matches this group's regex.
    */
   bool MatchesRegex(const char* name);
-  
+
   /**
    * Check if the given name matches this group's explicit file list.
    */
@@ -88,8 +88,8 @@ public:
    * Check if the given name matches this group's regex in children.
    */
   cmSourceGroup *MatchChildrenRegex(const char *name);
-  
-  /**  
+
+  /**
    * Assign the given source file to this group.  Used only by
    * generators.
    */
@@ -100,7 +100,7 @@ public:
    * source group.
    */
   const std::vector<const cmSourceFile*>& GetSourceFiles() const;
-  
+
   std::vector<cmSourceGroup> const& GetGroupChildren() const;
 private:
   /**
@@ -109,17 +109,17 @@ private:
   std::string Name;
   // Full path to group
   std::string FullName;
-  
+
   /**
    * The regular expression matching the files in the group.
    */
   cmsys::RegularExpression GroupRegex;
-  
+
   /**
    * Set of file names explicitly added to this group.
    */
   std::set<cmStdString> GroupFiles;
-  
+
   /**
    * Vector of all source files that have been assigned to
    * this group.

@@ -15,15 +15,15 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-MACRO(ADD_FILE_DEPENDENCIES _file)
+macro(ADD_FILE_DEPENDENCIES _file)
 
-   GET_SOURCE_FILE_PROPERTY(_deps ${_file} OBJECT_DEPENDS)
-   IF (_deps)
-      SET(_deps ${_deps} ${ARGN})
-   ELSE (_deps)
-      SET(_deps ${ARGN})
-   ENDIF (_deps)
+   get_source_file_property(_deps ${_file} OBJECT_DEPENDS)
+   if (_deps)
+      set(_deps ${_deps} ${ARGN})
+   else ()
+      set(_deps ${ARGN})
+   endif ()
 
-   SET_SOURCE_FILES_PROPERTIES(${_file} PROPERTIES OBJECT_DEPENDS "${_deps}")
+   set_source_files_properties(${_file} PROPERTIES OBJECT_DEPENDS "${_deps}")
 
-ENDMACRO(ADD_FILE_DEPENDENCIES)
+endmacro()

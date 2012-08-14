@@ -16,13 +16,13 @@
 # GLU library is now found by FindOpenGL.cmake
 #
 
-MESSAGE(STATUS
+message(STATUS
   "WARNING: you are using the obsolete 'GLU' package, please use 'OpenGL' instead")
 
-INCLUDE(FindOpenGL)
+include(FindOpenGL)
 
-IF (OPENGL_GLU_FOUND)
-  SET (GLU_LIBRARY ${OPENGL_LIBRARIES})
-  SET (GLU_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
-ENDIF (OPENGL_GLU_FOUND)
+if (OPENGL_GLU_FOUND)
+  set (GLU_LIBRARY ${OPENGL_LIBRARIES})
+  set (GLU_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
+endif ()
 

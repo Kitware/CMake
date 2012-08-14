@@ -22,63 +22,63 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF (WIN32)
-  IF (CYGWIN)
+if (WIN32)
+  if (CYGWIN)
 
-    FIND_PATH(COIN3D_INCLUDE_DIRS Inventor/So.h)
-    FIND_LIBRARY(COIN3D_LIBRARIES Coin)
+    find_path(COIN3D_INCLUDE_DIRS Inventor/So.h)
+    find_library(COIN3D_LIBRARIES Coin)
 
-  ELSE (CYGWIN)
+  else ()
 
-    FIND_PATH(COIN3D_INCLUDE_DIRS Inventor/So.h
+    find_path(COIN3D_INCLUDE_DIRS Inventor/So.h
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/include"
     )
 
-    FIND_LIBRARY(COIN3D_LIBRARY_DEBUG coin2d
+    find_library(COIN3D_LIBRARY_DEBUG coin2d
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/lib"
     )
 
-    FIND_LIBRARY(COIN3D_LIBRARY_RELEASE coin2
+    find_library(COIN3D_LIBRARY_RELEASE coin2
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\SIM\\Coin3D\\2;Installation Path]/lib"
     )
 
-    IF (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
-      SET(COIN3D_LIBRARIES optimized ${COIN3D_LIBRARY_RELEASE}
+    if (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
+      set(COIN3D_LIBRARIES optimized ${COIN3D_LIBRARY_RELEASE}
                            debug ${COIN3D_LIBRARY_DEBUG})
-    ELSE (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
-      IF (COIN3D_LIBRARY_DEBUG)
-        SET (COIN3D_LIBRARIES ${COIN3D_LIBRARY_DEBUG})
-      ENDIF (COIN3D_LIBRARY_DEBUG)
-      IF (COIN3D_LIBRARY_RELEASE)
-        SET (COIN3D_LIBRARIES ${COIN3D_LIBRARY_RELEASE})
-      ENDIF (COIN3D_LIBRARY_RELEASE)
-    ENDIF (COIN3D_LIBRARY_DEBUG AND COIN3D_LIBRARY_RELEASE)
+    else ()
+      if (COIN3D_LIBRARY_DEBUG)
+        set (COIN3D_LIBRARIES ${COIN3D_LIBRARY_DEBUG})
+      endif ()
+      if (COIN3D_LIBRARY_RELEASE)
+        set (COIN3D_LIBRARIES ${COIN3D_LIBRARY_RELEASE})
+      endif ()
+    endif ()
 
-  ENDIF (CYGWIN)
+  endif ()
 
-ELSE (WIN32)
-  IF(APPLE)
-    FIND_PATH(COIN3D_INCLUDE_DIRS Inventor/So.h
-     /Library/Frameworks/Inventor.framework/Headers 
+else ()
+  if(APPLE)
+    find_path(COIN3D_INCLUDE_DIRS Inventor/So.h
+     /Library/Frameworks/Inventor.framework/Headers
     )
-    FIND_LIBRARY(COIN3D_LIBRARIES Coin
+    find_library(COIN3D_LIBRARIES Coin
       /Library/Frameworks/Inventor.framework/Libraries
-    )   
-    SET(COIN3D_LIBRARIES "-framework Coin3d" CACHE STRING "Coin3D library for OSX")
-  ELSE(APPLE)
+    )
+    set(COIN3D_LIBRARIES "-framework Coin3d" CACHE STRING "Coin3D library for OSX")
+  else()
 
-    FIND_PATH(COIN3D_INCLUDE_DIRS Inventor/So.h)
-    FIND_LIBRARY(COIN3D_LIBRARIES Coin)   
+    find_path(COIN3D_INCLUDE_DIRS Inventor/So.h)
+    find_library(COIN3D_LIBRARIES Coin)
 
-  ENDIF(APPLE)
+  endif()
 
-ENDIF (WIN32)
+endif ()
 
-# handle the QUIETLY and REQUIRED arguments and set COIN3D_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set COIN3D_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Coin3D DEFAULT_MSG COIN3D_LIBRARIES COIN3D_INCLUDE_DIRS)
 
-MARK_AS_ADVANCED(COIN3D_INCLUDE_DIRS COIN3D_LIBRARIES )
+mark_as_advanced(COIN3D_INCLUDE_DIRS COIN3D_LIBRARIES )
 
 

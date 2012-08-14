@@ -16,11 +16,11 @@ Source-
 - write diff into toplevel
 - create tar file call super class
 
-cmake-2.2.3-1 
+cmake-2.2.3-1
 
-   
+
 1. a source release
-cmake-2.2.3-2-src.tar.bz2  
+cmake-2.2.3-2-src.tar.bz2
 
 cmake-2.2.3-2.patch  has cmake-2.2.3/CYGWIN-PATCHES/cmake.README cmake-2.2.3/CYGWIN-PATCHES/setup.hint
 cmake-2.2.3-2.sh  -> script to create cygwin release

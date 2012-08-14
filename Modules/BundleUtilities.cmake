@@ -184,17 +184,17 @@ function(get_bundle_main_executable bundle result_var)
       if(line_is_main_executable)
         string(REGEX REPLACE "^.*<string>(.*)</string>.*$" "\\1" bundle_executable "${line}")
         break()
-      endif(line_is_main_executable)
+      endif()
 
       if(line MATCHES "^.*<key>CFBundleExecutable</key>.*$")
         set(line_is_main_executable 1)
-      endif(line MATCHES "^.*<key>CFBundleExecutable</key>.*$")
-    endforeach(line)
+      endif()
+    endforeach()
 
     if(NOT "${bundle_executable}" STREQUAL "")
       if(EXISTS "${bundle}/Contents/MacOS/${bundle_executable}")
         set(result "${bundle}/Contents/MacOS/${bundle_executable}")
-      else(EXISTS "${bundle}/Contents/MacOS/${bundle_executable}")
+      else()
 
         # Ultimate goal:
         # If not in "Contents/MacOS" then scan the bundle for matching files. If
@@ -207,9 +207,9 @@ function(get_bundle_main_executable bundle result_var)
         # for the bundle to be in Contents/MacOS, it's an error if it's not:
         #
         set(result "error: '${bundle}/Contents/MacOS/${bundle_executable}' does not exist")
-      endif(EXISTS "${bundle}/Contents/MacOS/${bundle_executable}")
-    endif(NOT "${bundle_executable}" STREQUAL "")
-  else(EXISTS "${bundle}/Contents/Info.plist")
+      endif()
+    endif()
+  else()
     #
     # More inclusive technique... (This one would work on Windows and Linux
     # too, if a developer followed the typical Mac bundle naming convention...)
@@ -217,10 +217,10 @@ function(get_bundle_main_executable bundle result_var)
     # If there is no Info.plist file, try to find an executable with the same
     # base name as the .app directory:
     #
-  endif(EXISTS "${bundle}/Contents/Info.plist")
+  endif()
 
   set(${result_var} "${result}" PARENT_SCOPE)
-endfunction(get_bundle_main_executable)
+endfunction()
 
 
 function(get_dotapp_dir exe dotapp_dir_var)
@@ -240,9 +240,9 @@ function(get_dotapp_dir exe dotapp_dir_var)
       if(sname MATCHES "\\.app$")
         set(done 1)
         set(dotapp_dir "${sdir}/${sname}")
-      endif(sname MATCHES "\\.app$")
-    endwhile(NOT ${done})
-  else(s MATCHES "^.*/.*\\.app/.*$")
+      endif()
+    endwhile()
+  else()
     # Otherwise use a directory containing the exe
     #   (typical of a non-bundle executable on Mac, Windows or Linux)
     #
@@ -250,14 +250,14 @@ function(get_dotapp_dir exe dotapp_dir_var)
     if(is_executable)
       get_filename_component(sdir "${s}" PATH)
       set(dotapp_dir "${sdir}")
-    else(is_executable)
+    else()
       set(dotapp_dir "${s}")
-    endif(is_executable)
-  endif(s MATCHES "^.*/.*\\.app/.*$")
+    endif()
+  endif()
 
 
   set(${dotapp_dir_var} "${dotapp_dir}" PARENT_SCOPE)
-endfunction(get_dotapp_dir)
+endfunction()
 
 
 function(get_bundle_and_executable app bundle_var executable_var valid_var)
@@ -273,13 +273,13 @@ function(get_bundle_and_executable app bundle_var executable_var valid_var)
           set(${executable_var} "${executable}" PARENT_SCOPE)
           set(valid 1)
           #message(STATUS "info: handled .app directory case...")
-        else(EXISTS "${app}" AND EXISTS "${executable}")
+        else()
           message(STATUS "warning: *NOT* handled - .app directory case...")
-        endif(EXISTS "${app}" AND EXISTS "${executable}")
-      else(app MATCHES "\\.app$")
+        endif()
+      else()
         message(STATUS "warning: *NOT* handled - directory but not .app case...")
-      endif(app MATCHES "\\.app$")
-    else(IS_DIRECTORY "${app}")
+      endif()
+    else()
       # Is it an executable file?
       is_file_executable("${app}" is_executable)
       if(is_executable)
@@ -296,21 +296,21 @@ function(get_bundle_and_executable app bundle_var executable_var valid_var)
           set(valid 1)
           #message(STATUS "info: handled executable file in any dir case...")
         endif()
-      else(is_executable)
+      else()
         message(STATUS "warning: *NOT* handled - not .app dir, not executable file...")
-      endif(is_executable)
-    endif(IS_DIRECTORY "${app}")
-  else(EXISTS "${app}")
+      endif()
+    endif()
+  else()
     message(STATUS "warning: *NOT* handled - directory/file does not exist...")
-  endif(EXISTS "${app}")
+  endif()
 
   if(NOT valid)
     set(${bundle_var} "error: not a bundle" PARENT_SCOPE)
     set(${executable_var} "error: not a bundle" PARENT_SCOPE)
-  endif(NOT valid)
+  endif()
 
   set(${valid_var} ${valid} PARENT_SCOPE)
-endfunction(get_bundle_and_executable)
+endfunction()
 
 
 function(get_bundle_all_executables bundle exes_var)
@@ -321,11 +321,11 @@ function(get_bundle_all_executables bundle exes_var)
     is_file_executable("${f}" is_executable)
     if(is_executable)
       set(exes ${exes} "${f}")
-    endif(is_executable)
-  endforeach(f)
+    endif()
+  endforeach()
 
   set(${exes_var} "${exes}" PARENT_SCOPE)
-endfunction(get_bundle_all_executables)
+endfunction()
 
 
 function(get_item_key item key_var)
@@ -335,7 +335,7 @@ function(get_item_key item key_var)
   endif()
   string(REGEX REPLACE "\\." "_" ${key_var} "${item_name}")
   set(${key_var} ${${key_var}} PARENT_SCOPE)
-endfunction(get_item_key)
+endfunction()
 
 
 function(clear_bundle_keys keys_var)
@@ -346,9 +346,9 @@ function(clear_bundle_keys keys_var)
     set(${key}_EMBEDDED_ITEM PARENT_SCOPE)
     set(${key}_RESOLVED_EMBEDDED_ITEM PARENT_SCOPE)
     set(${key}_COPYFLAG PARENT_SCOPE)
-  endforeach(key)
+  endforeach()
   set(${keys_var} PARENT_SCOPE)
-endfunction(clear_bundle_keys)
+endfunction()
 
 
 function(set_bundle_key_values keys_var context item exepath dirs copyflag)
@@ -370,12 +370,12 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
       # opening "${item_name}.framework/" to the closing "/${item_name}":
       #
       string(REGEX REPLACE "^.*(${item_name}.framework/.*/${item_name}).*$" "${default_embedded_path}/\\1" embedded_item "${item}")
-    else(item MATCHES "[^/]+\\.framework/")
+    else()
       # For other items, just use the same name as the original, but in the
       # embedded path:
       #
       set(embedded_item "${default_embedded_path}/${item_name}")
-    endif(item MATCHES "[^/]+\\.framework/")
+    endif()
 
     # Replace @executable_path and resolve ".." references:
     #
@@ -391,7 +391,7 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
     #
     if(NOT copyflag)
       set(resolved_embedded_item "${resolved_item}")
-    endif(NOT copyflag)
+    endif()
 
     set(${keys_var} ${${keys_var}} PARENT_SCOPE)
     set(${key}_ITEM "${item}" PARENT_SCOPE)
@@ -400,10 +400,10 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
     set(${key}_EMBEDDED_ITEM "${embedded_item}" PARENT_SCOPE)
     set(${key}_RESOLVED_EMBEDDED_ITEM "${resolved_embedded_item}" PARENT_SCOPE)
     set(${key}_COPYFLAG "${copyflag}" PARENT_SCOPE)
-  else(NOT length_before EQUAL length_after)
+  else()
     #message("warning: item key '${key}' already in the list, subsequent references assumed identical to first")
-  endif(NOT length_before EQUAL length_after)
-endfunction(set_bundle_key_values)
+  endif()
+endfunction()
 
 
 function(get_bundle_keys app libs dirs keys_var)
@@ -432,8 +432,8 @@ function(get_bundle_keys app libs dirs keys_var)
       get_prerequisites("${lib}" prereqs 1 1 "${exepath}" "${dirs}")
       foreach(pr ${prereqs})
         set_bundle_key_values(${keys_var} "${lib}" "${pr}" "${exepath}" "${dirs}" 1)
-      endforeach(pr)
-    endforeach(lib)
+      endforeach()
+    endforeach()
 
     # For each executable found in the bundle, accumulate keys as we go.
     # The list of keys should be complete when all prerequisites of all
@@ -450,8 +450,8 @@ function(get_bundle_keys app libs dirs keys_var)
       get_prerequisites("${exe}" prereqs 1 1 "${exepath}" "${dirs}")
       foreach(pr ${prereqs})
         set_bundle_key_values(${keys_var} "${exe}" "${pr}" "${exepath}" "${dirs}" 1)
-      endforeach(pr)
-    endforeach(exe)
+      endforeach()
+    endforeach()
 
     # Propagate values to caller's scope:
     #
@@ -463,9 +463,9 @@ function(get_bundle_keys app libs dirs keys_var)
       set(${key}_EMBEDDED_ITEM "${${key}_EMBEDDED_ITEM}" PARENT_SCOPE)
       set(${key}_RESOLVED_EMBEDDED_ITEM "${${key}_RESOLVED_EMBEDDED_ITEM}" PARENT_SCOPE)
       set(${key}_COPYFLAG "${${key}_COPYFLAG}" PARENT_SCOPE)
-    endforeach(key)
-  endif(valid)
-endfunction(get_bundle_keys)
+    endforeach()
+  endif()
+endfunction()
 
 
 function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
@@ -485,10 +485,10 @@ function(copy_resolved_item_into_bundle resolved_item resolved_embedded_item)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
     if(UNIX AND NOT APPLE)
       file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-    endif(UNIX AND NOT APPLE)
+    endif()
   endif()
 
-endfunction(copy_resolved_item_into_bundle)
+endfunction()
 
 
 function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_item)
@@ -527,10 +527,10 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
     endif()
     if(UNIX AND NOT APPLE)
       file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-    endif(UNIX AND NOT APPLE)
+    endif()
   endif()
 
-endfunction(copy_resolved_framework_into_bundle)
+endfunction()
 
 
 function(fixup_bundle_item resolved_embedded_item exepath dirs)
@@ -580,10 +580,10 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
 
     if(NOT "${${rkey}_EMBEDDED_ITEM}" STREQUAL "")
       set(changes ${changes} "-change" "${pr}" "${${rkey}_EMBEDDED_ITEM}")
-    else(NOT "${${rkey}_EMBEDDED_ITEM}" STREQUAL "")
+    else()
       message("warning: unexpected reference to '${pr}'")
-    endif(NOT "${${rkey}_EMBEDDED_ITEM}" STREQUAL "")
-  endforeach(pr)
+    endif()
+  endforeach()
 
   if(BU_CHMOD_BUNDLE_ITEMS)
     execute_process(COMMAND chmod u+w "${resolved_embedded_item}")
@@ -595,7 +595,7 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   execute_process(COMMAND install_name_tool
     ${changes} -id "${${ikey}_EMBEDDED_ITEM}" "${resolved_embedded_item}"
   )
-endfunction(fixup_bundle_item)
+endfunction()
 
 
 function(fixup_bundle app libs dirs)
@@ -620,9 +620,9 @@ function(fixup_bundle app libs dirs)
       math(EXPR i ${i}+1)
       if(${${key}_COPYFLAG})
         message(STATUS "${i}/${n}: copying '${${key}_RESOLVED_ITEM}'")
-      else(${${key}_COPYFLAG})
+      else()
         message(STATUS "${i}/${n}: *NOT* copying '${${key}_RESOLVED_ITEM}'")
-      endif(${${key}_COPYFLAG})
+      endif()
 
       set(show_status 0)
       if(show_status)
@@ -634,7 +634,7 @@ function(fixup_bundle app libs dirs)
         message(STATUS "resolved_embedded_item='${${key}_RESOLVED_EMBEDDED_ITEM}'")
         message(STATUS "copyflag='${${key}_COPYFLAG}'")
         message(STATUS "")
-      endif(show_status)
+      endif()
 
       if(${${key}_COPYFLAG})
         set(item "${${key}_ITEM}")
@@ -645,8 +645,8 @@ function(fixup_bundle app libs dirs)
           copy_resolved_item_into_bundle("${${key}_RESOLVED_ITEM}"
             "${${key}_RESOLVED_EMBEDDED_ITEM}")
         endif()
-      endif(${${key}_COPYFLAG})
-    endforeach(key)
+      endif()
+    endforeach()
 
     message(STATUS "fixup_bundle: fixing...")
     foreach(key ${keys})
@@ -654,28 +654,28 @@ function(fixup_bundle app libs dirs)
       if(APPLE)
         message(STATUS "${i}/${n}: fixing up '${${key}_RESOLVED_EMBEDDED_ITEM}'")
         fixup_bundle_item("${${key}_RESOLVED_EMBEDDED_ITEM}" "${exepath}" "${dirs}")
-      else(APPLE)
+      else()
         message(STATUS "${i}/${n}: fix-up not required on this platform '${${key}_RESOLVED_EMBEDDED_ITEM}'")
-      endif(APPLE)
-    endforeach(key)
+      endif()
+    endforeach()
 
     message(STATUS "fixup_bundle: cleaning up...")
     clear_bundle_keys(keys)
 
     message(STATUS "fixup_bundle: verifying...")
     verify_app("${app}")
-  else(valid)
+  else()
     message(SEND_ERROR "error: fixup_bundle: not a valid bundle")
-  endif(valid)
+  endif()
 
   message(STATUS "fixup_bundle: done")
-endfunction(fixup_bundle)
+endfunction()
 
 
 function(copy_and_fixup_bundle src dst libs dirs)
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${src}" "${dst}")
   fixup_bundle("${dst}" "${libs}" "${dirs}")
-endfunction(copy_and_fixup_bundle)
+endfunction()
 
 
 function(verify_bundle_prerequisites bundle result_var info_var)
@@ -720,23 +720,23 @@ function(verify_bundle_prerequisites bundle result_var info_var)
             set(external_prereqs ${external_prereqs} "${p}")
           endif()
         endif()
-      endforeach(p)
+      endforeach()
 
       if(external_prereqs)
         # Found non-system/somehow-unacceptable prerequisites:
         set(result 0)
         set(info ${info} "external prerequisites found:\nf='${f}'\nexternal_prereqs='${external_prereqs}'\n")
-      endif(external_prereqs)
-    endif(is_executable)
-  endforeach(f)
+      endif()
+    endif()
+  endforeach()
 
   if(result)
     set(info "Verified ${count} executable files in '${bundle}'")
-  endif(result)
+  endif()
 
   set(${result_var} "${result}" PARENT_SCOPE)
   set(${info_var} "${info}" PARENT_SCOPE)
-endfunction(verify_bundle_prerequisites)
+endfunction()
 
 
 function(verify_bundle_symlinks bundle result_var info_var)
@@ -749,7 +749,7 @@ function(verify_bundle_symlinks bundle result_var info_var)
 
   set(${result_var} "${result}" PARENT_SCOPE)
   set(${info_var} "${info}" PARENT_SCOPE)
-endfunction(verify_bundle_symlinks)
+endfunction()
 
 
 function(verify_app app)
@@ -778,9 +778,9 @@ function(verify_app app)
     message(STATUS "verified='${verified}'")
     message(STATUS "info='${info}'")
     message(STATUS "")
-  endif(verified)
+  endif()
 
   if(NOT verified)
     message(FATAL_ERROR "error: verify_app failed")
-  endif(NOT verified)
-endfunction(verify_app)
+  endif()
+endfunction()

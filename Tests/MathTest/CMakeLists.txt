@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(MathTest)
+project(MathTest)
 
 
 # Expression test
 
-SET(expressions
+set(expressions
   "5 * ( 3 + 4)"
   "(1 | 2 | 4 | 8) & 16"
   "1 +(3*4) + 10 >> 2"
@@ -12,18 +12,18 @@ SET(expressions
   "10000 / (20 / 4)"
   )
 
-SET(FILE_EXPRESSIONS "")
-FOREACH(expression
+set(FILE_EXPRESSIONS "")
+foreach(expression
     ${expressions})
-  MATH(EXPR expr "${expression}")
-  SET(FILE_EXPRESSIONS "${FILE_EXPRESSIONS}TEST_EXPRESSION(${expression}, ${expr})\n")
-ENDFOREACH(expression)
+  math(EXPR expr "${expression}")
+  set(FILE_EXPRESSIONS "${FILE_EXPRESSIONS}TEST_EXPRESSION(${expression}, ${expr})\n")
+endforeach()
 
-CONFIGURE_FILE(
+configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/MathTestTests.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/MathTestTests.h"
   @ONLY)
 
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
-ADD_EXECUTABLE(MathTest MathTestExec.cxx)
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+add_executable(MathTest MathTestExec.cxx)
 

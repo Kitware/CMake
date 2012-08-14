@@ -15,7 +15,7 @@ void cmDumpInformationPrintFile(const char* name, FILE* fout)
     fflush(fout);
     return;
     }
-  
+
   FILE* fin = fopen(name, "r");
   if(fin)
     {
@@ -59,7 +59,7 @@ int main(int,char *[])
       DumpInformation_BINARY_DIR "/AllMacros.txt",
       DumpInformation_BINARY_DIR "/OtherProperties.txt",
       DumpInformation_BINARY_DIR "/../../Source/cmConfigure.h",
-      DumpInformation_BINARY_DIR "/../../CMakeCache.txt", 
+      DumpInformation_BINARY_DIR "/../../CMakeCache.txt",
       DumpInformation_BINARY_DIR "/../../CMakeFiles/CMakeOutput.log",
       DumpInformation_BINARY_DIR "/../../CMakeFiles/CMakeError.log",
       DumpInformation_BINARY_DIR "/../../Bootstrap.cmk/cmake_bootstrap.log",
@@ -75,6 +75,6 @@ int main(int,char *[])
     {
     cmDumpInformationPrintFile(*f, stdout);
     }
-  
+
   return 0;
-} 
+}

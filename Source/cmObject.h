@@ -27,7 +27,7 @@ public:
    * Need virtual destructor to destroy real command type.
    */
   virtual ~cmObject() {}
-  
+
   /**
    * The class name of the command.
    */
@@ -38,7 +38,7 @@ public:
    */
   static bool IsTypeOf(const char *type)
     { return !strcmp("cmObject", type); }
-  
+
   /**
    * Returns true if this object is an instance of the given class or
    * a subclass of it.

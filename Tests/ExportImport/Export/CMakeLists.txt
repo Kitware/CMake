@@ -56,7 +56,7 @@ add_library(testLib6 STATIC testLib6.cxx testLib6c.c)
 set(VS6)
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
   set(VS6 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+endif()
 
 # Test using the target_link_libraries command to set the
 # LINK_INTERFACE_LIBRARIES* properties.  We construct two libraries
@@ -129,7 +129,7 @@ install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
 # Install testLib5.dll outside the export.
 if(WIN32)
   install(TARGETS testLib5 RUNTIME DESTINATION bin)
-endif(WIN32)
+endif()
 
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3

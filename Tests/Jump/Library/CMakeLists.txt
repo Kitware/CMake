@@ -1,2 +1,2 @@
-ADD_SUBDIRECTORY(Static)
-ADD_SUBDIRECTORY(Shared)
+add_subdirectory(Static)
+add_subdirectory(Shared)

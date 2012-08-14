@@ -73,10 +73,10 @@ bool cmSetTestsPropertiesCommand
   // now loop over all the targets
   int i;
   for(i = 0; i < numFiles; ++i)
-    {   
+    {
     std::string errors;
-    bool ret = 
-      cmSetTestsPropertiesCommand::SetOneTest(args[i].c_str(), 
+    bool ret =
+      cmSetTestsPropertiesCommand::SetOneTest(args[i].c_str(),
                                               propertyPairs,
                                               this->Makefile, errors);
     if (!ret)
@@ -91,7 +91,7 @@ bool cmSetTestsPropertiesCommand
 
 
 bool cmSetTestsPropertiesCommand
-::SetOneTest(const char *tname, 
+::SetOneTest(const char *tname,
              std::vector<std::string> &propertyPairs,
              cmMakefile *mf, std::string &errors)
 {
@@ -106,11 +106,11 @@ bool cmSetTestsPropertiesCommand
       }
     }
   else
-    { 
+    {
     errors = "Can not find test to add properties to: ";
     errors += tname;
     return false;
-    } 
+    }
 
   return true;
 }

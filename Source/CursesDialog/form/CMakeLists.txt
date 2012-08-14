@@ -9,14 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-PROJECT(CMAKE_FORM)
+project(CMAKE_FORM)
 
-INCLUDE_REGULAR_EXPRESSION("^.*$")
-INCLUDE_DIRECTORIES(${CURSES_INCLUDE_PATH} "${CMAKE_CURRENT_BINARY_DIR}")
+include_regular_expression("^.*$")
+include_directories(${CURSES_INCLUDE_PATH} "${CMAKE_CURRENT_BINARY_DIR}")
 
-CONFIGURE_FILE(cmFormConfigure.h.in "${CMAKE_CURRENT_BINARY_DIR}/cmFormConfigure.h")
+configure_file(cmFormConfigure.h.in "${CMAKE_CURRENT_BINARY_DIR}/cmFormConfigure.h")
 
-SET(  FORM_SRCS
+set(  FORM_SRCS
              fld_arg.c
              fld_attr.c
              fld_current.c
@@ -58,9 +58,9 @@ SET(  FORM_SRCS
              fty_regex.c
    )
              
-INCLUDE_DIRECTORIES(${CMAKE_FORM_SOURCE_DIR})
-ADD_LIBRARY(cmForm ${FORM_SRCS} )
-TARGET_LINK_LIBRARIES(cmForm ${CURSES_LIBRARY})
-IF(CURSES_EXTRA_LIBRARY)
-  TARGET_LINK_LIBRARIES(cmForm ${CURSES_EXTRA_LIBRARY})
-ENDIF(CURSES_EXTRA_LIBRARY)
+include_directories(${CMAKE_FORM_SOURCE_DIR})
+add_library(cmForm ${FORM_SRCS} )
+target_link_libraries(cmForm ${CURSES_LIBRARY})
+if(CURSES_EXTRA_LIBRARY)
+  target_link_libraries(cmForm ${CURSES_EXTRA_LIBRARY})
+endif()

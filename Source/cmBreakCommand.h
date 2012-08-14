@@ -25,7 +25,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmBreakCommand;
     }
@@ -46,7 +46,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "break";}
-  
+
   /**
    * Succinct documentation.
    */
@@ -54,7 +54,7 @@ public:
     {
     return "Break from an enclosing foreach or while loop.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -64,7 +64,7 @@ public:
       "  break()\n"
       "Breaks from an enclosing foreach loop or while loop";
     }
-  
+
   cmTypeMacro(cmBreakCommand, cmCommand);
 };
 

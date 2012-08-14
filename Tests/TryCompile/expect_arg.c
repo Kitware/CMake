@@ -10,7 +10,7 @@ int main(int ac, char*av[])
     }
   if(ac == 3)
     {
-    if(strcmp(av[1], "arg1") ==0 
+    if(strcmp(av[1], "arg1") ==0
        && strcmp(av[2], "arg2") ==0)
       {
       printf("arg1 and arg2 present and accounted for!\n");

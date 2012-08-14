@@ -168,7 +168,7 @@ static cmCTestBuildCompileErrorWarningRex
 cmCTestWarningErrorFileLine[] = {
     { "^Warning W[0-9]+ ([a-zA-Z.\\:/0-9_+ ~-]+) ([0-9]+):", 1, 2 },
     { "^([a-zA-Z./0-9_+ ~-]+):([0-9]+):", 1, 2 },
-    { "^([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 }, 
+    { "^([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
     { "^[0-9]+>([a-zA-Z.\\:/0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
     { "^([a-zA-Z./0-9_+ ~-]+)\\(([0-9]+)\\)", 1, 2 },
     { "\"([a-zA-Z./0-9_+ ~-]+)\", line ([0-9]+)", 1, 2 },
@@ -289,7 +289,7 @@ std::string cmCTestBuildHandler::GetMakeCommand()
   std::string makeCommand
     = this->CTest->GetCTestConfiguration("MakeCommand");
   cmCTestLog(this->CTest,
-             HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand << 
+             HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand <<
              "\n");
 
   std::string configType = this->CTest->GetConfigType();
@@ -392,7 +392,7 @@ int cmCTestBuildHandler::ProcessHandler()
     {
     this->CustomWarningMatches.push_back(cmCTestWarningMatches[cc]);
     }
-  
+
   for ( cc = 0; cmCTestWarningExceptions[cc]; cc ++ )
     {
     this->CustomWarningExceptions.push_back(cmCTestWarningExceptions[cc]);
@@ -557,7 +557,7 @@ void cmCTestBuildHandler::GenerateXMLHeader(std::ostream& os)
   this->CTest->StartXML(os, this->AppendXML);
   os << "<Build>\n"
      << "\t<StartDateTime>" << this->StartBuild << "</StartDateTime>\n"
-     << "\t<StartBuildTime>" << 
+     << "\t<StartBuildTime>" <<
     static_cast<unsigned int>(this->StartBuildTime)
      << "</StartBuildTime>\n"
      << "<BuildCommand>"
@@ -998,7 +998,7 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
         // dashboard.
         cmCTestBuildErrorWarning errorwarning;
         errorwarning.LogLine     = 1;
-        errorwarning.Text 
+        errorwarning.Text
           = "*** WARNING non-zero return value in ctest from: ";
         errorwarning.Text        += argv[0];
         errorwarning.PreContext  = "";
@@ -1150,7 +1150,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
         {
         // This is not an error or warning.
         // So, figure out if this is a post-context line
-        if ( this->ErrorsAndWarnings.size() && 
+        if ( this->ErrorsAndWarnings.size() &&
              this->LastErrorOrWarning != this->ErrorsAndWarnings.end() &&
              this->PostContextCount < this->MaxPostContext )
           {

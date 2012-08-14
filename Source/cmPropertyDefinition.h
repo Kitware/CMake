@@ -29,7 +29,7 @@ public:
   /// Define this property
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
-                      const char *FullDescription, 
+                      const char *FullDescription,
                       const char *DocumentationSection,
                       bool chained);
 
@@ -44,7 +44,7 @@ public:
 
   /// Get the section if any
   const std::string &GetDocumentationSection() const {
-    return this->DocumentationSection; }; 
+    return this->DocumentationSection; };
 
   /// Get the scope
   cmProperty::ScopeType GetScope() const {
@@ -56,7 +56,7 @@ public:
 
   /// Get the documentation (full version)
   const std::string &GetFullDescription() const {
-    return this->FullDescription; }; 
+    return this->FullDescription; };
 
 protected:
   std::string Name;

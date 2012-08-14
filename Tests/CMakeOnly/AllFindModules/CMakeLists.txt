@@ -13,7 +13,7 @@ file(GLOB FIND_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../Modules/Find*.cmake
 macro(do_find MODULE_NAME)
     message(STATUS "   Checking Find${MODULE_NAME}")
     find_package(${MODULE_NAME})
-endmacro(do_find)
+endmacro()
 
 # It is only possible to use either Qt3 or Qt4 in one project.
 # Since FindQt will complain if both are found we explicitly request Qt4 here
@@ -35,15 +35,15 @@ foreach(FIND_MODULE ${FIND_MODULES})
         do_find(${MODULE_NAME})
     endif ()
 
-endforeach(FIND_MODULE)
+endforeach()
 
 # Qt4 is not present, so we can check Qt3
 if (NOT QT4_FOUND)
     set(DESIRED_QT_VERSION 3)
     foreach(FIND_MODULE ${NO_QT4_MODULES} "Qt")
         do_find(${FIND_MODULE})
-    endforeach(FIND_MODULE)
-endif (NOT QT4_FOUND)
+    endforeach()
+endif ()
 
 macro(check_version_string MODULE_NAME VERSION_VAR)
     if (${MODULE_NAME}_FOUND)
@@ -65,7 +65,7 @@ macro(check_version_string MODULE_NAME VERSION_VAR)
             message(SEND_ERROR "${MODULE_NAME}_FOUND is set but version number variable ${VERSION_VAR} is NOT DEFINED")
         endif()
     endif ()
-endmacro(check_version_string)
+endmacro()
 
 # If any of these modules reported that it was found a version number should have been
 # reported.
@@ -73,12 +73,12 @@ endmacro(check_version_string)
 foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HSPELL
         JASPER LIBLZMA LIBXML2 LIBXSLT PERL PKG_CONFIG PostgreSQL TIFF ZLIB)
     check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
-endforeach(VTEST)
+endforeach()
 
 foreach(VTEST BISON Boost CUDA DOXYGEN FLEX GIF GTK2 LibArchive OPENSCENEGRAPH
         RUBY SWIG)
     check_version_string(${VTEST} ${VTEST}_VERSION)
-endforeach(VTEST)
+endforeach()
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
 check_version_string(SUBVERSION Subversion_VERSION_SVN)

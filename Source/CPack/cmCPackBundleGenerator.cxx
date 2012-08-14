@@ -91,8 +91,8 @@ int cmCPackBundleGenerator::PackageFiles()
     }
 
   // Get optional arguments ...
-  const std::string cpack_bundle_startup_command = 
-    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") 
+  const std::string cpack_bundle_startup_command =
+    this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND")
     ? this->GetOption("CPACK_BUNDLE_STARTUP_COMMAND") : "";
 
   // The staging directory contains everything that will end-up inside the

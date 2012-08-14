@@ -1,3 +1,3 @@
-ADD_LIBRARY( Three ThreeSrc.c )
-TARGET_LINK_LIBRARIES( Three One Four )
+add_library( Three ThreeSrc.c )
+target_link_libraries( Three One Four )
 

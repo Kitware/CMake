@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmIncludeRegularExpressionCommand;
     }
@@ -37,7 +37,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -50,7 +50,7 @@ public:
     {
     return "Set the regular expression used for dependency checking.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -66,7 +66,7 @@ public:
       "  regex_match    = \"^.*$\" (match everything)\n"
       "  regex_complain = \"^$\" (match empty string only)";
     }
-  
+
   cmTypeMacro(cmIncludeRegularExpressionCommand, cmCommand);
 };
 

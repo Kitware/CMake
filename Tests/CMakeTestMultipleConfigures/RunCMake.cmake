@@ -143,7 +143,7 @@ function(analyze_directory_diffs d1 d2 diff_count_var)
   endif()
 
   set(${diff_count_var} ${diffs} PARENT_SCOPE)
-endfunction(analyze_directory_diffs)
+endfunction()
 
 
 # Analyze diffs between b1:b2, b2:b3, b3:b4, b4:b5 ... bN-1:bN.

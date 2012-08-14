@@ -152,10 +152,10 @@ extern int putenv (char *__string) __THROW;
 
 // if std:: is not supported, then just #define it away
 #ifdef CMAKE_NO_STD_NAMESPACE
-#define std 
+#define std
 #endif
 
-// if the compiler does not support ansi for scoping of vars use a 
+// if the compiler does not support ansi for scoping of vars use a
 // #define hack
 #ifdef CMAKE_NO_ANSI_FOR_SCOPE
 #define for if(false) {} else for
@@ -178,7 +178,7 @@ namespace std { typedef ios ios_base; }
 #endif
 
 #ifdef __DECCXX_VER
-# if __DECCXX_VER <= 60390008 
+# if __DECCXX_VER <= 60390008
 #  define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
 # endif
 #endif
@@ -200,7 +200,7 @@ using ::cerr;
 using ::cin;
 using ::ifstream;
 using ::ofstream;
-  
+
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
   using ::ostringstream;
   using ::istringstream;
@@ -208,7 +208,7 @@ using ::ofstream;
   using ::ostrstream;
   using ::istrstream;
 #endif
-  
+
 using ::endl;
 using ::ends;
 using ::flush;
@@ -324,8 +324,8 @@ struct cmDocumentationEntry
   std::string Full;
   cmDocumentationEntry(){};
   cmDocumentationEntry(const char *doc[3])
-  { if (doc[0]) this->Name = doc[0]; 
-  if (doc[1]) this->Brief = doc[1]; 
+  { if (doc[0]) this->Name = doc[0];
+  if (doc[1]) this->Brief = doc[1];
   if (doc[2]) this->Full = doc[2]; };
   cmDocumentationEntry(const char *n, const char *b, const char *f)
   { if (n) this->Name = n; if (b) this->Brief = b; if (f) this->Full = f; };
@@ -353,7 +353,7 @@ public:
 # pragma reset woff 1375 /* base class destructor not virtual */
 #endif
 
-// All subclasses of cmCommand or cmCTestGenericHandler should 
+// All subclasses of cmCommand or cmCTestGenericHandler should
 // invoke this macro.
 #define cmTypeMacro(thisClass,superclass) \
 virtual const char* GetNameOfClass() { return #thisClass; } \

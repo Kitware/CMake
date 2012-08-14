@@ -17,7 +17,7 @@
 class cmDefinePropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmDefinePropertyCommand;
     }
@@ -41,7 +41,7 @@ public:
     {
     return "Define and document custom properties.";
     }
-  
+
   /**
    * Longer documentation.
    */
@@ -80,7 +80,7 @@ public:
         "Corresponding options to the get_property command will retrieve the "
         "documentation.";
     }
-  
+
   cmTypeMacro(cmDefinePropertyCommand, cmCommand);
 private:
   std::string PropertyName;

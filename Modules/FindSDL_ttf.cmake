@@ -8,8 +8,8 @@
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
 #
-# Created by Eric Wing. This was influenced by the FindSDL.cmake 
-# module, but with modifications to recognize OS X frameworks and 
+# Created by Eric Wing. This was influenced by the FindSDL.cmake
+# module, but with modifications to recognize OS X frameworks and
 # additional Unix paths (FreeBSD, etc).
 
 #=============================================================================
@@ -25,7 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(SDLTTF_INCLUDE_DIR SDL_ttf.h
+find_path(SDLTTF_INCLUDE_DIR SDL_ttf.h
   HINTS
   $ENV{SDLTTFDIR}
   $ENV{SDLDIR}
@@ -44,12 +44,12 @@ FIND_PATH(SDLTTF_INCLUDE_DIR SDL_ttf.h
   /opt/local/include/SDL # DarwinPorts
   /opt/local/include
   /opt/csw/include/SDL # Blastwave
-  /opt/csw/include 
+  /opt/csw/include
   /opt/include/SDL
   /opt/include
 )
 
-FIND_LIBRARY(SDLTTF_LIBRARY 
+find_library(SDLTTF_LIBRARY
   NAMES SDL_ttf
   HINTS
   $ENV{SDLTTFDIR}
@@ -64,7 +64,7 @@ FIND_LIBRARY(SDLTTF_LIBRARY
     PATH_SUFFIXES lib64 lib
 )
 
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDLTTF
                                   REQUIRED_VARS SDLTTF_LIBRARY SDLTTF_INCLUDE_DIR)
