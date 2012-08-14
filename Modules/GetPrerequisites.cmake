@@ -168,6 +168,7 @@ function(is_file_executable file result_var)
   if(UNIX)
     if(NOT file_cmd)
       find_program(file_cmd "file")
+      mark_as_advanced(file_cmd)
     endif()
 
     if(file_cmd)
