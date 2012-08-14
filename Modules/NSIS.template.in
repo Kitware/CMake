@@ -481,7 +481,7 @@ Loop:
 	StrCmp "$R2" "$\r" RTrim
 	StrCmp "$R2" ";" RTrim
 	GoTo Done
-RTrim:	
+RTrim:
 	StrCpy $R1 "$R1" -1
 	Goto Loop
 Done:
