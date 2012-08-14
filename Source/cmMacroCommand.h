@@ -20,11 +20,11 @@ class cmMacroFunctionBlocker : public cmFunctionBlocker
 public:
   cmMacroFunctionBlocker() {this->Depth=0;}
   virtual ~cmMacroFunctionBlocker() {}
-  virtual bool IsFunctionBlocked(const cmListFileFunction&, 
+  virtual bool IsFunctionBlocked(const cmListFileFunction&,
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
   virtual bool ShouldRemove(const cmListFileFunction&, cmMakefile &mf);
-  
+
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   int Depth;

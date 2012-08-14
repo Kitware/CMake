@@ -5,7 +5,7 @@
 #  CUPS_INCLUDE_DIR - the Cups include directory
 #  CUPS_LIBRARIES - Libraries needed to use Cups
 #  CUPS_VERSION_STRING - version of Cups found (since CMake 2.8.8)
-#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which 
+#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
 #  features this function (i.e. at least 1.1.19)
 
 #=============================================================================
@@ -32,7 +32,7 @@ if (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES AND CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
 
     # ippDeleteAttribute is new in cups-1.1.19 (and used by kdeprint)
     CHECK_LIBRARY_EXISTS(cups ippDeleteAttribute "" CUPS_HAS_IPP_DELETE_ATTRIBUTE)
-endif (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES AND CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
+endif ()
 
 if (CUPS_INCLUDE_DIR AND EXISTS "${CUPS_INCLUDE_DIR}/cups/cups.h")
     file(STRINGS "${CUPS_INCLUDE_DIR}/cups/cups.h" cups_version_str
@@ -46,13 +46,13 @@ if (CUPS_INCLUDE_DIR AND EXISTS "${CUPS_INCLUDE_DIR}/cups/cups.h")
                        CUPS_VERSION_PART "${VLINE}")
                 if(CUPS_VERSION_STRING)
                     set(CUPS_VERSION_STRING "${CUPS_VERSION_STRING}.${CUPS_VERSION_PART}")
-                else(CUPS_VERSION_STRING)
+                else()
                     set(CUPS_VERSION_STRING "${CUPS_VERSION_PART}")
-                endif(CUPS_VERSION_STRING)
+                endif()
             endif()
-        endforeach(VLINE)
-    endforeach(VPART)
-endif (CUPS_INCLUDE_DIR AND EXISTS "${CUPS_INCLUDE_DIR}/cups/cups.h")
+        endforeach()
+    endforeach()
+endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
@@ -60,10 +60,10 @@ if (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cups
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR CUPS_HAS_IPP_DELETE_ATTRIBUTE
                                       VERSION_VAR CUPS_VERSION_STRING)
-else (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
+else ()
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cups
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR
                                       VERSION_VAR CUPS_VERSION_STRING)
-endif (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
-  
+endif ()
+
 mark_as_advanced(CUPS_INCLUDE_DIR CUPS_LIBRARIES)

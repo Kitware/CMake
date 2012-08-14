@@ -74,7 +74,7 @@ if(dirs_added)
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${SVNCMD} add ${depth_empty} ${dirs_added}
     )
-endif(dirs_added)
+endif()
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
   COMMAND ${SVNCMD} add ${files_added}

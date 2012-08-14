@@ -13,12 +13,12 @@
 #  License text for the above reference.)
 
 # VCExpress does not support cross compiling, which is necessary for Win CE
-SET( _CMAKE_MAKE_PROGRAM_NAMES devenv)
-IF(NOT CMAKE_CROSSCOMPILING)
-  SET( _CMAKE_MAKE_PROGRAM_NAMES ${_CMAKE_MAKE_PROGRAM_NAMES} VCExpress)
-ENDIF(NOT CMAKE_CROSSCOMPILING)
+set( _CMAKE_MAKE_PROGRAM_NAMES devenv)
+if(NOT CMAKE_CROSSCOMPILING)
+  set( _CMAKE_MAKE_PROGRAM_NAMES ${_CMAKE_MAKE_PROGRAM_NAMES} VCExpress)
+endif()
 
-FIND_PROGRAM(CMAKE_MAKE_PROGRAM
+find_program(CMAKE_MAKE_PROGRAM
   NAMES ${_CMAKE_MAKE_PROGRAM_NAMES}
   HINTS
   [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VS;EnvironmentDirectory]
@@ -34,6 +34,6 @@ FIND_PROGRAM(CMAKE_MAKE_PROGRAM
   "/Program Files/Microsoft Visual Studio 9.0/Common7/IDE/"
   "/Program Files/Microsoft Visual Studio 9/Common7/IDE/"
   )
-MARK_AS_ADVANCED(CMAKE_MAKE_PROGRAM)
-SET(MSVC90 1)
-SET(MSVC_VERSION 1500)
+mark_as_advanced(CMAKE_MAKE_PROGRAM)
+set(MSVC90 1)
+set(MSVC_VERSION 1500)

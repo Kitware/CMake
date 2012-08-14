@@ -44,10 +44,10 @@ macro(__cygwin_compiler_gnu lang)
   # building a shared library, shared module, or executable that links
   # to other libraries to select whether to use the static or shared
   # versions of the libraries.
-  FOREACH(type SHARED_LIBRARY SHARED_MODULE EXE)
-    SET(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-Bstatic")
-    SET(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
-  ENDFOREACH(type)
+  foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
+    set(CMAKE_${type}_LINK_STATIC_${lang}_FLAGS "-Wl,-Bstatic")
+    set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
+  endforeach()
 
   set(CMAKE_EXE_EXPORTS_${lang}_FLAG "-Wl,--export-all-symbols")
   # TODO: Is -Wl,--enable-auto-import now always default?

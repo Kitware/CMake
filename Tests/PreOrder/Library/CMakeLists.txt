@@ -1,2 +1,2 @@
-ADD_LIBRARY(simpleLib simpleLib.cxx )
+add_library(simpleLib simpleLib.cxx )
 

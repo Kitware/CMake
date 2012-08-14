@@ -18,35 +18,35 @@
 #
 # Build the documentation ?
 #
-OPTION(BUILD_DOCUMENTATION "Build the documentation (Doxygen)." OFF)
-MARK_AS_ADVANCED(BUILD_DOCUMENTATION)
+option(BUILD_DOCUMENTATION "Build the documentation (Doxygen)." OFF)
+mark_as_advanced(BUILD_DOCUMENTATION)
 
-IF (BUILD_DOCUMENTATION)
+if (BUILD_DOCUMENTATION)
 
   #
   # Check for the tools
   #
-  FIND_PACKAGE(UnixCommands)
-  FIND_PACKAGE(Doxygen)
-  FIND_PACKAGE(Gnuplot)
-  FIND_PACKAGE(HTMLHelp)
-  FIND_PACKAGE(Perl)
-  FIND_PACKAGE(Wget)
+  find_package(UnixCommands)
+  find_package(Doxygen)
+  find_package(Gnuplot)
+  find_package(HTMLHelp)
+  find_package(Perl)
+  find_package(Wget)
 
-  OPTION(DOCUMENTATION_HTML_HELP 
+  option(DOCUMENTATION_HTML_HELP
     "Build the HTML Help file (CHM)." OFF)
 
-  OPTION(DOCUMENTATION_HTML_TARZ 
+  option(DOCUMENTATION_HTML_TARZ
     "Build a compressed tar archive of the HTML doc." OFF)
 
-  MARK_AS_ADVANCED(
+  mark_as_advanced(
     DOCUMENTATION_HTML_HELP
     DOCUMENTATION_HTML_TARZ
     )
 
-  # 
+  #
   # The documentation process is controled by a batch file.
   # We will probably need bash to create the custom target
   #
 
-ENDIF (BUILD_DOCUMENTATION)
+endif ()

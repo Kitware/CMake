@@ -34,7 +34,7 @@ static void cmDocumentationPrintDocbookChar(std::ostream& os, char c)
     case '<':
       os << "&lt;";
       break;
-    case '>': 
+    case '>':
       os << "&gt;";
       break;
     case '&':
@@ -126,13 +126,13 @@ void cmDocumentationFormatterDocbook
 
   std::string prefix = this->ComputeSectionLinkPrefix(name);
 
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     section.GetEntries();
 
   if (!entries.empty())
     {
     os << "<itemizedlist>\n";
-    for(std::vector<cmDocumentationEntry>::const_iterator op 
+    for(std::vector<cmDocumentationEntry>::const_iterator op
           = entries.begin(); op != entries.end(); ++ op )
       {
       if(op->Name.size())
@@ -147,7 +147,7 @@ void cmDocumentationFormatterDocbook
     os << "</itemizedlist>\n" ;
     }
 
-  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end();)
     {
     if(op->Name.size())
@@ -160,8 +160,8 @@ void cmDocumentationFormatterDocbook
           cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
 
           // make sure that each id exists only once.  Since it seems
-          // not easily possible to determine which link refers to which id, 
-          // we have at least to make sure that the duplicated id's get a 
+          // not easily possible to determine which link refers to which id,
+          // we have at least to make sure that the duplicated id's get a
           // different name (by appending an increasing number), Alex
           std::string id = prefix;
           id += "_";
@@ -191,7 +191,7 @@ void cmDocumentationFormatterDocbook
         if(op->Full.size())
           {
           // a line break seems to be simply a line break with docbook
-          os << "\n    ";  
+          os << "\n    ";
           this->PrintFormatted(os, op->Full.c_str());
           }
         os << "\n";
@@ -210,7 +210,7 @@ void cmDocumentationFormatterDocbook
     }
 }
 
-void cmDocumentationFormatterDocbook::PrintPreformatted(std::ostream& os, 
+void cmDocumentationFormatterDocbook::PrintPreformatted(std::ostream& os,
                                                      const char* text)
 {
   os << "<literallayout>";
@@ -218,7 +218,7 @@ void cmDocumentationFormatterDocbook::PrintPreformatted(std::ostream& os,
   os << "</literallayout>\n    ";
 }
 
-void cmDocumentationFormatterDocbook::PrintParagraph(std::ostream& os, 
+void cmDocumentationFormatterDocbook::PrintParagraph(std::ostream& os,
                                                   const char* text)
 {
   os << "<para>";
@@ -232,7 +232,7 @@ void cmDocumentationFormatterDocbook::PrintHeader(const char* docname,
                                                   std::ostream& os)
 {
   // this one is used to ensure that we don't create multiple link targets
-  // with the same name. We can clear it here since we are at the 
+  // with the same name. We can clear it here since we are at the
   // start of a document here.
   this->EmittedLinkIds.clear();
 

@@ -168,10 +168,10 @@ typedef struct
   /* new functions added after 2.4 */
   void *(CCONV *CreateNewSourceFile) (void *mf);
   void (CCONV *DefineSourceFileProperty) (void *mf, const char *name,
-                                          const char *briefDocs, 
+                                          const char *briefDocs,
                                           const char *longDocs,
                                           int chained);
-  
+
   /* this is the end of the C function stub API structure */
 } cmCAPI;
 

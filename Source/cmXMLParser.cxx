@@ -34,7 +34,7 @@ cmXMLParser::~cmXMLParser()
 int cmXMLParser::Parse(const char* string)
 {
   return (int)this->InitializeParser() &&
-    this->ParseChunk(string, strlen(string)) && 
+    this->ParseChunk(string, strlen(string)) &&
     this->CleanupParser();
 }
 
@@ -79,7 +79,7 @@ int cmXMLParser::InitializeParser()
 }
 
 //----------------------------------------------------------------------------
-int cmXMLParser::ParseChunk(const char* inputString, 
+int cmXMLParser::ParseChunk(const char* inputString,
                             std::string::size_type length)
 {
   if ( !this->Parser )
@@ -116,11 +116,11 @@ int cmXMLParser::CleanupParser()
       result = 0;
       }
     }
-  
+
   // Clean up the parser.
   XML_ParserFree(static_cast<XML_Parser>(this->Parser));
   this->Parser = 0;
-  
+
   return result;
 }
 
@@ -128,7 +128,7 @@ int cmXMLParser::CleanupParser()
 int cmXMLParser::ParseBuffer(const char* buffer, std::string::size_type count)
 {
   // Pass the buffer to the expat XML parser.
-  if(!XML_Parse(static_cast<XML_Parser>(this->Parser), buffer, 
+  if(!XML_Parse(static_cast<XML_Parser>(this->Parser), buffer,
                 static_cast<int>(count), 0))
     {
     this->ReportXmlParseError();

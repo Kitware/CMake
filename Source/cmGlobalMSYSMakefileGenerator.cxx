@@ -22,7 +22,7 @@ cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
   this->UseLinkScript = false;
 }
 
-std::string 
+std::string
 cmGlobalMSYSMakefileGenerator::FindMinGW(std::string const& makeloc)
 {
   std::string fstab = makeloc;
@@ -45,8 +45,8 @@ cmGlobalMSYSMakefileGenerator::FindMinGW(std::string const& makeloc)
 }
 
 void cmGlobalMSYSMakefileGenerator
-::EnableLanguage(std::vector<std::string>const& l, 
-                 cmMakefile *mf, 
+::EnableLanguage(std::vector<std::string>const& l,
+                 cmMakefile *mf,
                  bool optional)
 {
   this->FindMakeProgram(mf);

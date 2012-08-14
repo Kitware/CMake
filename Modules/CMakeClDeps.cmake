@@ -20,18 +20,18 @@
 # in front of each include path, so it can remove it.
 #
 
-IF(MSVC_C_ARCHITECTURE_ID AND CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
-  STRING(REPLACE "cmake.exe" "cmcldeps.exe"  CMAKE_CMCLDEPS_EXECUTABLE ${CMAKE_COMMAND})
-  SET(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
-  FILE(WRITE ${showdir}/foo.h "\n")
-  FILE(WRITE ${showdir}/main.c "#include \"foo.h\" \nint main(){}\n")
-  EXECUTE_PROCESS(COMMAND ${CMAKE_C_COMPILER} /nologo /showIncludes ${showdir}/main.c
+if(MSVC_C_ARCHITECTURE_ID AND CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
+  string(REPLACE "cmake.exe" "cmcldeps.exe"  CMAKE_CMCLDEPS_EXECUTABLE ${CMAKE_COMMAND})
+  set(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
+  file(WRITE ${showdir}/foo.h "\n")
+  file(WRITE ${showdir}/main.c "#include \"foo.h\" \nint main(){}\n")
+  execute_process(COMMAND ${CMAKE_C_COMPILER} /nologo /showIncludes ${showdir}/main.c
                   WORKING_DIRECTORY ${showdir} OUTPUT_VARIABLE showOut)
-  STRING(REPLACE main.c "" showOut1 ${showOut})
-  STRING(REPLACE "/" "\\" header1 ${showdir}/foo.h)
-  STRING(TOLOWER ${header1} header2)
-  STRING(REPLACE ${header2} "" showOut2 ${showOut1})
-  STRING(REPLACE "\n" "" showOut3 ${showOut2})
-  SET(SET_CMAKE_CMCLDEPS_EXECUTABLE   "SET(CMAKE_CMCLDEPS_EXECUTABLE \"${CMAKE_CMCLDEPS_EXECUTABLE}\")")
-  SET(SET_CMAKE_CL_SHOWINCLUDE_PREFIX "SET(CMAKE_CL_SHOWINCLUDE_PREFIX \"${showOut3}\")")
-ENDIF()
+  string(REPLACE main.c "" showOut1 ${showOut})
+  string(REPLACE "/" "\\" header1 ${showdir}/foo.h)
+  string(TOLOWER ${header1} header2)
+  string(REPLACE ${header2} "" showOut2 ${showOut1})
+  string(REPLACE "\n" "" showOut3 ${showOut2})
+  set(SET_CMAKE_CMCLDEPS_EXECUTABLE   "set(CMAKE_CMCLDEPS_EXECUTABLE \"${CMAKE_CMCLDEPS_EXECUTABLE}\")")
+  set(SET_CMAKE_CL_SHOWINCLUDE_PREFIX "set(CMAKE_CL_SHOWINCLUDE_PREFIX \"${showOut3}\")")
+endif()

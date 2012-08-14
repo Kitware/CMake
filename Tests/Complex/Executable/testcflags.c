@@ -18,7 +18,7 @@ int TestCFlags(char* m)
   return 0;
 #endif
   /* TEST_C_FLAGS should be defined in a c file */
-#ifndef TEST_C_FLAGS  
+#ifndef TEST_C_FLAGS
   strcpy(m, "CMake CMAKE_C_FLAGS (TEST_C_FLAGS) not found in c file.");
   return 0;
 #endif

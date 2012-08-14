@@ -1,3 +1,3 @@
-ADD_LIBRARY( Seven SevenSrc.c )
-TARGET_LINK_LIBRARIES( Seven Two )
+add_library( Seven SevenSrc.c )
+target_link_libraries( Seven Two )
 

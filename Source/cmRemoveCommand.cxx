@@ -30,13 +30,13 @@ bool cmRemoveCommand
     {
     return true;
     }
-  
+
   // expand the variable
   std::vector<std::string> varArgsExpanded;
   cmSystemTools::ExpandListArgument(cacheValue, varArgsExpanded);
-  
+
   // expand the args
-  // check for REMOVE(VAR v1 v2 ... vn) 
+  // check for REMOVE(VAR v1 v2 ... vn)
   std::vector<std::string> argsExpanded;
   std::vector<std::string> temp;
   for(unsigned int j = 1; j < args.size(); ++j)
@@ -44,7 +44,7 @@ bool cmRemoveCommand
     temp.push_back(args[j]);
     }
   cmSystemTools::ExpandList(temp, argsExpanded);
-  
+
   // now create the new value
   std::string value;
   for(unsigned int j = 0; j < varArgsExpanded.size(); ++j)
@@ -67,7 +67,7 @@ bool cmRemoveCommand
       value += varArgsExpanded[j];
       }
     }
-  
+
   // add the definition
   this->Makefile->AddDefinition(variable, value.c_str());
 

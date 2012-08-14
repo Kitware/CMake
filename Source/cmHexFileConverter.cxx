@@ -22,8 +22,8 @@
 // might go to SystemTools ?
 static bool cm_IsHexChar(char c)
 {
-  return (((c >= '0') && (c <= '9')) 
-         || ((c >= 'a') && (c <= 'f')) 
+  return (((c >= '0') && (c <= '9'))
+         || ((c >= 'a') && (c <= 'f'))
          || ((c >= 'A') && (c <= 'F')));
 }
 
@@ -45,7 +45,7 @@ static unsigned int ChompStrlen(const char* line)
   return length;
 }
 
-static bool OutputBin(FILE* file, const char * buf, 
+static bool OutputBin(FILE* file, const char * buf,
                       unsigned int startIndex, unsigned int stopIndex)
 {
   bool success = true;
@@ -77,7 +77,7 @@ static bool OutputBin(FILE* file, const char * buf,
 static bool ConvertMotorolaSrecLine(const char* buf, FILE* outFile)
 {
   unsigned int slen = ChompStrlen(buf);
-  if ((slen < MOTOROLA_SREC_MIN_LINE_LENGTH) 
+  if ((slen < MOTOROLA_SREC_MIN_LINE_LENGTH)
        || (slen > MOTOROLA_SREC_MAX_LINE_LENGTH))
     {
     return false;
@@ -125,7 +125,7 @@ static bool ConvertMotorolaSrecLine(const char* buf, FILE* outFile)
 static bool ConvertIntelHexLine(const char* buf, FILE* outFile)
 {
   unsigned int slen = ChompStrlen(buf);
-  if ((slen < INTEL_HEX_MIN_LINE_LENGTH) 
+  if ((slen < INTEL_HEX_MIN_LINE_LENGTH)
        || (slen > INTEL_HEX_MAX_LINE_LENGTH))
     {
     return false;
@@ -148,7 +148,7 @@ static bool ConvertIntelHexLine(const char* buf, FILE* outFile)
     dataStart = 9;
     }
   // ignore extra address records
-  else if ((buf[8] == '2') || (buf[8] == '3') || (buf[8] == '4') 
+  else if ((buf[8] == '2') || (buf[8] == '3') || (buf[8] == '4')
             || (buf[8] == '5'))
     {
     return true;

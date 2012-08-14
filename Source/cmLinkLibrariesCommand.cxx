@@ -19,7 +19,7 @@ bool cmLinkLibrariesCommand
     {
     return true;
     }
-  // add libraries, nothe that there is an optional prefix 
+  // add libraries, nothe that there is an optional prefix
   // of debug and optimized than can be used
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
@@ -50,10 +50,10 @@ bool cmLinkLibrariesCommand
       }
     else
       {
-      this->Makefile->AddLinkLibrary(i->c_str());  
+      this->Makefile->AddLinkLibrary(i->c_str());
       }
     }
-  
+
   return true;
 }
 

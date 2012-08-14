@@ -20,24 +20,24 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(JPEG_INCLUDE_DIR jpeglib.h)
+find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
-SET(JPEG_NAMES ${JPEG_NAMES} jpeg)
-FIND_LIBRARY(JPEG_LIBRARY NAMES ${JPEG_NAMES} )
+set(JPEG_NAMES ${JPEG_NAMES} jpeg)
+find_library(JPEG_LIBRARY NAMES ${JPEG_NAMES} )
 
-# handle the QUIETLY and REQUIRED arguments and set JPEG_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set JPEG_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(JPEG DEFAULT_MSG JPEG_LIBRARY JPEG_INCLUDE_DIR)
 
-IF(JPEG_FOUND)
-  SET(JPEG_LIBRARIES ${JPEG_LIBRARY})
-ENDIF(JPEG_FOUND)
+if(JPEG_FOUND)
+  set(JPEG_LIBRARIES ${JPEG_LIBRARY})
+endif()
 
 # Deprecated declarations.
-SET (NATIVE_JPEG_INCLUDE_PATH ${JPEG_INCLUDE_DIR} )
-IF(JPEG_LIBRARY)
-  GET_FILENAME_COMPONENT (NATIVE_JPEG_LIB_PATH ${JPEG_LIBRARY} PATH)
-ENDIF(JPEG_LIBRARY)
+set (NATIVE_JPEG_INCLUDE_PATH ${JPEG_INCLUDE_DIR} )
+if(JPEG_LIBRARY)
+  get_filename_component (NATIVE_JPEG_LIB_PATH ${JPEG_LIBRARY} PATH)
+endif()
 
-MARK_AS_ADVANCED(JPEG_LIBRARY JPEG_INCLUDE_DIR )
+mark_as_advanced(JPEG_LIBRARY JPEG_INCLUDE_DIR )

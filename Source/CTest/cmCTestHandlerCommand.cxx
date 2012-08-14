@@ -91,7 +91,7 @@ bool cmCTestHandlerCommand
     }
   else
     {
-    const char* bdir = 
+    const char* bdir =
       this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
     if(bdir)
       {

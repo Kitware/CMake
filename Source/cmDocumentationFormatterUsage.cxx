@@ -28,9 +28,9 @@ void cmDocumentationFormatterUsage
     os << name << "\n";
     }
 
-  const std::vector<cmDocumentationEntry> &entries = 
+  const std::vector<cmDocumentationEntry> &entries =
     section.GetEntries();
-  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin(); 
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end(); ++op)
     {
     if(op->Name.size())

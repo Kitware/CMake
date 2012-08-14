@@ -17,7 +17,7 @@
 class cmSetTargetPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmSetTargetPropertiesCommand;
     }
@@ -41,12 +41,12 @@ public:
     {
     return "Targets can have properties that affect how they are built.";
     }
-  
+
   /**
    *  Used by this command and cmSetPropertiesCommand
    */
-  static bool SetOneTarget(const char *tname, 
-                           std::vector<std::string> &propertyPairs, 
+  static bool SetOneTarget(const char *tname,
+                           std::vector<std::string> &propertyPairs,
                            cmMakefile *mf);
 
   /**
@@ -159,7 +159,7 @@ public:
         "part of the default build when you select \"Build Solution\"."
         ;
     }
-  
+
   cmTypeMacro(cmSetTargetPropertiesCommand, cmCommand);
 };
 

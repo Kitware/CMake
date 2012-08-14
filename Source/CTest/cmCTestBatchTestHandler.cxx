@@ -56,7 +56,7 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::fstream& fout)
   fout << "srun ";
   //fout << "--jobid=" << test << " ";
   fout << "-J=" << properties->Name << " ";
- 
+
   //Write dependency information
   /*if(this->Tests[test].size() > 0)
     {

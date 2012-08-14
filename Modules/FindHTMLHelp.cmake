@@ -18,26 +18,26 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF(WIN32)
+if(WIN32)
 
-  FIND_PROGRAM(HTML_HELP_COMPILER
+  find_program(HTML_HELP_COMPILER
     hhc
     "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]"
     "$ENV{ProgramFiles}/HTML Help Workshop"
-    "C:/Program Files/HTML Help Workshop" 
+    "C:/Program Files/HTML Help Workshop"
     )
 
-  GET_FILENAME_COMPONENT(HTML_HELP_COMPILER_PATH "${HTML_HELP_COMPILER}" PATH)
+  get_filename_component(HTML_HELP_COMPILER_PATH "${HTML_HELP_COMPILER}" PATH)
 
-  FIND_PATH(HTML_HELP_INCLUDE_PATH 
-    htmlhelp.h 
+  find_path(HTML_HELP_INCLUDE_PATH
+    htmlhelp.h
     "${HTML_HELP_COMPILER_PATH}/include"
     "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]/include"
     "$ENV{ProgramFiles}/HTML Help Workshop/include"
-    "C:/Program Files/HTML Help Workshop/include" 
+    "C:/Program Files/HTML Help Workshop/include"
     )
 
-  FIND_LIBRARY(HTML_HELP_LIBRARY 
+  find_library(HTML_HELP_LIBRARY
     htmlhelp
     "${HTML_HELP_COMPILER_PATH}/lib"
     "[HKEY_CURRENT_USER\\Software\\Microsoft\\HTML Help Workshop;InstallDir]/lib"
@@ -45,10 +45,10 @@ IF(WIN32)
     "C:/Program Files/HTML Help Workshop/lib"
     )
 
-  MARK_AS_ADVANCED(
+  mark_as_advanced(
     HTML_HELP_COMPILER
     HTML_HELP_INCLUDE_PATH
     HTML_HELP_LIBRARY
     )
 
-ENDIF(WIN32)
+endif()

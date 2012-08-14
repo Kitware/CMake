@@ -22,10 +22,10 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
 }
 
 void cmGlobalMinGWMakefileGenerator
-::EnableLanguage(std::vector<std::string>const& l, 
-                 cmMakefile *mf, 
+::EnableLanguage(std::vector<std::string>const& l,
+                 cmMakefile *mf,
                  bool optional)
-{ 
+{
   this->FindMakeProgram(mf);
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;

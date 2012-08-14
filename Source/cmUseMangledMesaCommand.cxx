@@ -17,7 +17,7 @@
 // cmUseMangledMesaCommand
 bool cmUseMangledMesaCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
-{ 
+{
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h
   // arguement two : directory for output of edited headers
@@ -55,11 +55,11 @@ bool cmUseMangledMesaCommand
     path += *i;
     this->CopyAndFullPathMesaHeader(path.c_str(), destDir);
     }
-  
+
   return true;
 }
 
-void 
+void
 cmUseMangledMesaCommand::
 CopyAndFullPathMesaHeader(const char* source,
                           const char* outdir)
@@ -74,7 +74,7 @@ CopyAndFullPathMesaHeader(const char* source,
   std::ofstream fout(tempOutputFile.c_str());
   if(!fout)
     {
-    cmSystemTools::Error("Could not open file for write in copy operation: ", 
+    cmSystemTools::Error("Could not open file for write in copy operation: ",
                          tempOutputFile.c_str(), outdir);
     cmSystemTools::ReportLastSystemError("");
     return;
@@ -88,7 +88,7 @@ CopyAndFullPathMesaHeader(const char* source,
     }
   // now copy input to output and expand variables in the
   // input file at the same time
-  std::string inLine;  
+  std::string inLine;
   // regular expression for any #include line
   cmsys::RegularExpression includeLine(
     "^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
@@ -108,7 +108,7 @@ CopyAndFullPathMesaHeader(const char* source,
         }
       else if(glLine.find(includeFile.c_str()))
         {
-        fout << "#include \"" << outdir << "/" << 
+        fout << "#include \"" << outdir << "/" <<
           includeLine.match(1).c_str() << "\"\n";
         }
       else

@@ -266,12 +266,12 @@ bool cmExecuteProcessCommand
     }
   if(!output_file.empty())
     {
-    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDOUT, 
+    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDOUT,
                              output_file.c_str());
     }
   if(!error_file.empty())
     {
-    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR, 
+    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR,
                              error_file.c_str());
     }
 
@@ -326,12 +326,12 @@ bool cmExecuteProcessCommand
   // Store the output obtained.
   if(!output_variable.empty() && tempOutput.size())
     {
-    this->Makefile->AddDefinition(output_variable.c_str(), 
+    this->Makefile->AddDefinition(output_variable.c_str(),
                                   &*tempOutput.begin());
     }
   if(!merge_output && !error_variable.empty() && tempError.size())
     {
-    this->Makefile->AddDefinition(error_variable.c_str(), 
+    this->Makefile->AddDefinition(error_variable.c_str(),
                                   &*tempError.begin());
     }
 

@@ -35,8 +35,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(CheckSymbolExists)
+include(CheckSymbolExists)
 
-MACRO(CHECK_CXX_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
+macro(CHECK_CXX_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   _CHECK_SYMBOL_EXISTS("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckSymbolExists.cxx" "${SYMBOL}" "${FILES}" "${VARIABLE}" )
-ENDMACRO(CHECK_CXX_SYMBOL_EXISTS)
+endmacro()

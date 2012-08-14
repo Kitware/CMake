@@ -1,18 +1,18 @@
 cpack.cxx
-   
-cmCPackGenerators  -- creates cmCPackGenericGenerator's via NewGenerator 
+
+cmCPackGenerators  -- creates cmCPackGenericGenerator's via NewGenerator
   - a cmCPackGenericGenerator factory
 
 
 cmCPackGenericGenerator::Initialize
    this->InitializeInternal
-     CPACK_INCLUDE_TOPLEVEL_DIRECTORY = 0 turns off 
+     CPACK_INCLUDE_TOPLEVEL_DIRECTORY = 0 turns off
 
 
 // binary package run
 cmCPackGenericGenerator::ProcessGenerator   // DoPackage
   cmCPackGenericGenerator::PrepareNames  -- sets a bunch of CPACK_vars
-  cmCPackGenericGenerator::InstallProject  
+  cmCPackGenericGenerator::InstallProject
      run preinstall  (make preinstall/fast)
      call ReadListFile(cmake_install.cmake)
   glob recurse in install directory to get list of files
@@ -22,9 +22,9 @@ cmCPackGenericGenerator::ProcessGenerator   // DoPackage
 // source package run
 cmCPackGenericGenerator::ProcessGenerator   // DoPackage
   cmCPackGenericGenerator::PrepareNames  -- sets a bunch of CPACK_vars
-  cmCPackGenericGenerator::InstallProject  --> 
+  cmCPackGenericGenerator::InstallProject  -->
      if set CPACK_INSTALLED_DIRECTORIES
-        glob the files in that directory 
+        glob the files in that directory
         copy those files to the tmp install directory _CPack something
   glob recurse in install directory to get list of files
      this->CompressFiles with the list of files
@@ -35,12 +35,12 @@ packages.  It is controled based on values set in CPACK_ variables.
 
 
 InstallProject
-   1. CPACK_INSTALL_COMMANDS       - a list of commands used to install the package 
+   1. CPACK_INSTALL_COMMANDS       - a list of commands used to install the package
 
    2. CPACK_INSTALLED_DIRECTORIES  - copy this directory to CPACK_TEMPORARY_DIRECTORY
 
    3. CPACK_INSTALL_CMAKE_PROJECTS - a cmake install script
-         - run make preinstall 
+         - run make preinstall
          - run cmake_install.cmake
              - set CMAKE_INSTALL_PREFIX to the temp directory
              - CPACK_BUILD_CONFIG check this and set the BUILD_TYPE to it
@@ -59,10 +59,10 @@ rename cmCPackGenericGenerator::ProcessGenerator  -> cmCPackGenerator::DoPackage
 break up cmCPackGenerator::InstallProject so it calls the following:
 
 // run user provided install commands
-  cmCPackGenerator::RunInstallCommands(); 
+  cmCPackGenerator::RunInstallCommands();
 // copy entire directories that need no processing like source trees
-  cmCPackGenerator::CopyPreInstalledDirectories();  
+  cmCPackGenerator::CopyPreInstalledDirectories();
 // run the cmake install scripts if provided
-  cmCPackGenerator::RunCMakeInstallScripts()  
+  cmCPackGenerator::RunCMakeInstallScripts()
 
 -

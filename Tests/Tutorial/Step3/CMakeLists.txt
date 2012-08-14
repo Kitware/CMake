@@ -24,7 +24,7 @@ if (USE_MYMATH)
   include_directories ("${PROJECT_SOURCE_DIR}/MathFunctions")
   add_subdirectory (MathFunctions)
   set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
-endif (USE_MYMATH)
+endif ()
 
 # add the executable
 add_executable (Tutorial tutorial.cxx)
@@ -32,7 +32,7 @@ target_link_libraries (Tutorial  ${EXTRA_LIBS})
 
 # add the install targets
 install (TARGETS Tutorial DESTINATION bin)
-install (FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h" 
+install (FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h"
   DESTINATION include)
 
 
@@ -44,7 +44,7 @@ add_test (TutorialRuns Tutorial 25)
 
 # does it sqrt of 25
 add_test (TutorialComp25 Tutorial 25)
-set_tests_properties (TutorialComp25 
+set_tests_properties (TutorialComp25
   PROPERTIES PASS_REGULAR_EXPRESSION "25 is 5"
   )
 
@@ -63,6 +63,6 @@ set_tests_properties (TutorialSmall
 # does the usage message work?
 add_test (TutorialUsage Tutorial)
 set_tests_properties (TutorialUsage
-  PROPERTIES 
+  PROPERTIES
   PASS_REGULAR_EXPRESSION "Usage:.*number"
   )

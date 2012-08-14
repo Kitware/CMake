@@ -1,120 +1,120 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(TryCompile)
+project(TryCompile)
 
-MACRO(TEST_ASSERT value msg)
-  IF (NOT ${value})
-    MESSAGE (SEND_ERROR "Assertion failure:" ${msg} )
-  ENDIF (NOT ${value})
-ENDMACRO(TEST_ASSERT)
+macro(TEST_ASSERT value msg)
+  if (NOT ${value})
+    message (SEND_ERROR "Assertion failure:" ${msg} )
+  endif ()
+endmacro()
 
-MACRO(TEST_FAIL value msg)
-  IF (${value})
-    MESSAGE (SEND_ERROR "Failing test succeeded:" ${msg} )
-  ENDIF (${value})
-ENDMACRO(TEST_FAIL)
+macro(TEST_FAIL value msg)
+  if (${value})
+    message (SEND_ERROR "Failing test succeeded:" ${msg} )
+  endif ()
+endmacro()
 
-MACRO(TEST_EXPECT_EXACT command expected)
-  IF(NOT "x${result}" STREQUAL "x${expected}")
-    MESSAGE(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
-  ENDIF(NOT "x${result}" STREQUAL "x${expected}")
-ENDMACRO(TEST_EXPECT_EXACT command expected)
+macro(TEST_EXPECT_EXACT command expected)
+  if(NOT "x${result}" STREQUAL "x${expected}")
+    message(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
+  endif()
+endmacro()
 
-MACRO(TEST_EXPECT_CONTAINS command expected)
-  IF(NOT "${result}" MATCHES "${expected}")
-    MESSAGE(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
-  ENDIF(NOT "${result}" MATCHES "${expected}")
-ENDMACRO(TEST_EXPECT_CONTAINS command expected)
+macro(TEST_EXPECT_CONTAINS command expected)
+  if(NOT "${result}" MATCHES "${expected}")
+    message(SEND_ERROR "${CMAKE_CURRENT_LIST_LINE}: TEST \"${command}\" failed: \"${result}\" expected: \"${expected}\"")
+  endif()
+endmacro()
 
 
 # try to compile a file that should compile
 # also check that COPY_FILE works
-TRY_COMPILE(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+try_compile(SHOULD_PASS
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT
     COPY_FILE ${TryCompile_BINARY_DIR}/CopyOfPass
     )
 
-IF(NOT SHOULD_PASS)
-  MESSAGE(SEND_ERROR "should pass failed ${TRY_OUT}")
-ENDIF(NOT SHOULD_PASS)
-IF(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
-   MESSAGE(SEND_ERROR "COPY_FILE to \"${TryCompile_BINARY_DIR}/CopyOfPass\" failed")
-ELSE(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
-   FILE(REMOVE "${TryCompile_BINARY_DIR}/CopyOfPass")
-ENDIF(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
+if(NOT SHOULD_PASS)
+  message(SEND_ERROR "should pass failed ${TRY_OUT}")
+endif()
+if(NOT EXISTS "${TryCompile_BINARY_DIR}/CopyOfPass")
+   message(SEND_ERROR "COPY_FILE to \"${TryCompile_BINARY_DIR}/CopyOfPass\" failed")
+else()
+   file(REMOVE "${TryCompile_BINARY_DIR}/CopyOfPass")
+endif()
 
 # try to compile a file that should not compile
-TRY_COMPILE(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+try_compile(SHOULD_FAIL
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
-IF(SHOULD_FAIL)
-   MESSAGE(SEND_ERROR "Should fail passed ${TRY_OUT}")
-ENDIF(SHOULD_FAIL)
+if(SHOULD_FAIL)
+   message(SEND_ERROR "Should fail passed ${TRY_OUT}")
+endif()
 
 # try to compile a file that should compile
-TRY_COMPILE(SHOULD_PASS
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+try_compile(SHOULD_PASS
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT)
-IF(NOT SHOULD_PASS)
-  MESSAGE(SEND_ERROR "should pass failed ${TRY_OUT}")
-ENDIF(NOT SHOULD_PASS)
+if(NOT SHOULD_PASS)
+  message(SEND_ERROR "should pass failed ${TRY_OUT}")
+endif()
 
 # try to compile a file that should not compile
-TRY_COMPILE(SHOULD_FAIL
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp 
+try_compile(SHOULD_FAIL
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/fail.c
     OUTPUT_VARIABLE TRY_OUT)
-IF(SHOULD_FAIL)
-   MESSAGE(SEND_ERROR "Should fail passed ${TRY_OUT}")
-ENDIF(SHOULD_FAIL)
+if(SHOULD_FAIL)
+   message(SEND_ERROR "Should fail passed ${TRY_OUT}")
+endif()
 
-IF(NOT SHOULD_FAIL)
-  IF(SHOULD_PASS)
-    MESSAGE("All Tests passed, ignore all previous output.")
-  ELSE(SHOULD_PASS)
-    MESSAGE("Test failed")
-  ENDIF(SHOULD_PASS)
-ELSE(NOT SHOULD_FAIL)
-  MESSAGE("Test failed")
-ENDIF(NOT SHOULD_FAIL)
-TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE   
-  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp 
+if(NOT SHOULD_FAIL)
+  if(SHOULD_PASS)
+    message("All Tests passed, ignore all previous output.")
+  else()
+    message("Test failed")
+  endif()
+else()
+  message("Test failed")
+endif()
+try_compile(CMAKE_ANSI_FOR_SCOPE
+  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
-IF (CMAKE_ANSI_FOR_SCOPE)
-   MESSAGE("Compiler supports ansi for")
-ELSE(CMAKE_ANSI_FOR_SCOPE)
-   MESSAGE("Compiler does not support ansi for scope")
-ENDIF(CMAKE_ANSI_FOR_SCOPE)
+if (CMAKE_ANSI_FOR_SCOPE)
+   message("Compiler supports ansi for")
+else()
+   message("Compiler does not support ansi for scope")
+endif()
 
-TRY_COMPILE(CMAKE_ANSI_FOR_SCOPE
-  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp 
+try_compile(CMAKE_ANSI_FOR_SCOPE
+  ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx OUTPUT_VARIABLE OUT)
-IF (CMAKE_ANSI_FOR_SCOPE)
-   MESSAGE("Compiler supports ansi for")
-ELSE(CMAKE_ANSI_FOR_SCOPE)
-   MESSAGE("Compiler does not support ansi for scope")
-ENDIF(CMAKE_ANSI_FOR_SCOPE)        
+if (CMAKE_ANSI_FOR_SCOPE)
+   message("Compiler supports ansi for")
+else()
+   message("Compiler does not support ansi for scope")
+endif()
 
-MESSAGE("use the module now")
-INCLUDE(${CMAKE_ROOT}/Modules/TestForANSIForScope.cmake)
-IF (CMAKE_ANSI_FOR_SCOPE)
-   MESSAGE("Compiler supports ansi for")
-ELSE(CMAKE_ANSI_FOR_SCOPE)
-   MESSAGE("Compiler does not support ansi for scope")
-ENDIF(CMAKE_ANSI_FOR_SCOPE)
+message("use the module now")
+include(${CMAKE_ROOT}/Modules/TestForANSIForScope.cmake)
+if (CMAKE_ANSI_FOR_SCOPE)
+   message("Compiler supports ansi for")
+else()
+   message("Compiler does not support ansi for scope")
+endif()
 
-MESSAGE("Testing try_compile project mode")
-TRY_COMPILE(TEST_INNER
+message("Testing try_compile project mode")
+try_compile(TEST_INNER
   ${TryCompile_BINARY_DIR}/CMakeFiles/Inner
   ${TryCompile_SOURCE_DIR}/Inner
   TryCompileInner innerexe
   OUTPUT_VARIABLE output)
 TEST_ASSERT(TEST_INNER "try_compile project mode failed:\n${output}")
 
-ADD_EXECUTABLE(TryCompile pass.c)
+add_executable(TryCompile pass.c)
 
 ######################################
 
@@ -123,73 +123,73 @@ ADD_EXECUTABLE(TryCompile pass.c)
 # try to run a file that should compile and run without error
 # also check that OUTPUT_VARIABLE contains both the compile output
 # and the run output
-TRY_RUN(SHOULD_RUN SHOULD_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+try_run(SHOULD_RUN SHOULD_COMPILE
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/exit_success.c
     OUTPUT_VARIABLE TRY_OUT)
-IF(NOT SHOULD_COMPILE)
-  MESSAGE(SEND_ERROR "exit_success failed compiling: ${TRY_OUT}")
-ENDIF(NOT SHOULD_COMPILE)
-IF(NOT "${SHOULD_RUN}" STREQUAL "0")
-  MESSAGE(SEND_ERROR "exit_success failed running with exit code ${SHOULD_RUN}")
-ENDIF(NOT "${SHOULD_RUN}" STREQUAL "0")
+if(NOT SHOULD_COMPILE)
+  message(SEND_ERROR "exit_success failed compiling: ${TRY_OUT}")
+endif()
+if(NOT "${SHOULD_RUN}" STREQUAL "0")
+  message(SEND_ERROR "exit_success failed running with exit code ${SHOULD_RUN}")
+endif()
 # check the compile output for the filename
-IF(NOT "${TRY_OUT}" MATCHES "exit_success")
-  MESSAGE(SEND_ERROR " TRY_OUT didn't contain \"exit_success\": \"${TRY_OUT}\"")
-ENDIF(NOT "${TRY_OUT}" MATCHES "exit_success")
+if(NOT "${TRY_OUT}" MATCHES "exit_success")
+  message(SEND_ERROR " TRY_OUT didn't contain \"exit_success\": \"${TRY_OUT}\"")
+endif()
 # check the run output
-IF(NOT "${TRY_OUT}" MATCHES "hello world")
-  MESSAGE(SEND_ERROR " TRY_OUT didn't contain \"hello world\": \"${TRY_OUT}\"")
-ENDIF(NOT "${TRY_OUT}" MATCHES "hello world")
+if(NOT "${TRY_OUT}" MATCHES "hello world")
+  message(SEND_ERROR " TRY_OUT didn't contain \"hello world\": \"${TRY_OUT}\"")
+endif()
 
-TRY_RUN(ARG_TEST_RUN ARG_TEST_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+try_run(ARG_TEST_RUN ARG_TEST_COMPILE
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/expect_arg.c
     OUTPUT_VARIABLE TRY_OUT
     ARGS arg1 arg2)
-IF(NOT ARG_TEST_COMPILE)
-  MESSAGE(SEND_ERROR "expect_arg failed compiling: ${TRY_OUT}")
-ENDIF(NOT ARG_TEST_COMPILE)
-IF(NOT "${ARG_TEST_RUN}" STREQUAL "0")
-  MESSAGE(SEND_ERROR "expect_arg failed running with exit code ${ARG_TEST_RUN} ${TRY_OUT}")
-ENDIF(NOT "${ARG_TEST_RUN}" STREQUAL "0")
+if(NOT ARG_TEST_COMPILE)
+  message(SEND_ERROR "expect_arg failed compiling: ${TRY_OUT}")
+endif()
+if(NOT "${ARG_TEST_RUN}" STREQUAL "0")
+  message(SEND_ERROR "expect_arg failed running with exit code ${ARG_TEST_RUN} ${TRY_OUT}")
+endif()
 
 # try to run a file that should compile and run, but return an error
-TRY_RUN(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
-    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp  
+try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/exit_with_error.c
     COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
     RUN_OUTPUT_VARIABLE RUN_OUTPUT)
 
-IF(NOT SHOULD_COMPILE)
-  MESSAGE(STATUS " exit_with_error failed compiling: ${COMPILE_OUTPUT}")
-ENDIF(NOT SHOULD_COMPILE)
-IF("${SHOULD_EXIT_WITH_ERROR}" STREQUAL "0")
-  MESSAGE(SEND_ERROR " exit_with_error passed with exit code ${SHOULD_EXIT_WITH_ERROR}")
-ENDIF("${SHOULD_EXIT_WITH_ERROR}" STREQUAL "0")
+if(NOT SHOULD_COMPILE)
+  message(STATUS " exit_with_error failed compiling: ${COMPILE_OUTPUT}")
+endif()
+if("${SHOULD_EXIT_WITH_ERROR}" STREQUAL "0")
+  message(SEND_ERROR " exit_with_error passed with exit code ${SHOULD_EXIT_WITH_ERROR}")
+endif()
 
 # check the compile output, it should contain the filename
-IF(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
-  MESSAGE(SEND_ERROR " COMPILE_OUT didn't contain \"exit_with_error\": \"${COMPILE_OUTPUT}\"")
-ENDIF(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
+if(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
+  message(SEND_ERROR " COMPILE_OUT didn't contain \"exit_with_error\": \"${COMPILE_OUTPUT}\"")
+endif()
 #... but not the run time output
-IF("${COMPILE_OUTPUT}" MATCHES "hello world")
-  MESSAGE(SEND_ERROR " COMPILE_OUT contains the run output: \"${COMPILE_OUTPUT}\"")
-ENDIF("${COMPILE_OUTPUT}" MATCHES "hello world")
+if("${COMPILE_OUTPUT}" MATCHES "hello world")
+  message(SEND_ERROR " COMPILE_OUT contains the run output: \"${COMPILE_OUTPUT}\"")
+endif()
 # check the run output, it should stdout
-IF(NOT "${RUN_OUTPUT}" MATCHES "hello world")
-  MESSAGE(SEND_ERROR " RUN_OUTPUT didn't contain \"hello world\": \"${RUN_OUTPUT}\"")
-ENDIF(NOT "${RUN_OUTPUT}" MATCHES "hello world")
+if(NOT "${RUN_OUTPUT}" MATCHES "hello world")
+  message(SEND_ERROR " RUN_OUTPUT didn't contain \"hello world\": \"${RUN_OUTPUT}\"")
+endif()
 
 #######################################################################
 #
 # also test that the CHECK_C_SOURCE_COMPILES, CHECK_CXX_SOURCE_COMPILES
 # CHECK_C_SOURCE_RUNS and CHECK_CXX_SOURCE_RUNS macros work
 
-INCLUDE(CheckCSourceCompiles)
-INCLUDE(CheckCXXSourceCompiles)
-INCLUDE(CheckCSourceRuns)
-INCLUDE(CheckCXXSourceRuns)
+include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)
+include(CheckCSourceRuns)
+include(CheckCXXSourceRuns)
 
 CHECK_C_SOURCE_COMPILES("I dont build" C_BUILD_SHOULD_FAIL)
 CHECK_C_SOURCE_COMPILES("int main() {return 0;}" C_BUILD_SHOULD_WORK)
@@ -211,27 +211,27 @@ TEST_ASSERT(CXX_BUILD_SHOULD_WORK "CHECK_CXX_SOURCE_COMPILES() failed")
 TEST_FAIL(CXX_RUN_SHOULD_FAIL "CHECK_CXX_SOURCE_RUNS() succeeded, but should have failed")
 TEST_ASSERT(CXX_RUN_SHOULD_WORK "CHECK_CXX_SOURCE_RUNS() failed")
 
-FOREACH(lang C CXX)
-  IF(NOT "${CMAKE_${lang}_COMPILER_ID}" MATCHES "^(PathScale)$")
-    SET(${lang}_DD --)
-  ENDIF()
-ENDFOREACH()
+foreach(lang C CXX)
+  if(NOT "${CMAKE_${lang}_COMPILER_ID}" MATCHES "^(PathScale)$")
+    set(${lang}_DD --)
+  endif()
+endforeach()
 
-UNSET(C_BOGUS_FLAG CACHE)
-INCLUDE(CheckCCompilerFlag)
+unset(C_BOGUS_FLAG CACHE)
+include(CheckCCompilerFlag)
 CHECK_C_COMPILER_FLAG(${C_DD}-_this_is_not_a_flag_ C_BOGUS_FLAG)
 TEST_FAIL(C_BOGUS_FLAG "CHECK_C_COMPILER_FLAG() succeeded, but should have failed")
 
-UNSET(CXX_BOGUS_FLAG CACHE)
-INCLUDE(CheckCXXCompilerFlag)
+unset(CXX_BOGUS_FLAG CACHE)
+include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(${CXX_DD}-_this_is_not_a_flag_ CXX_BOGUS_FLAG)
 TEST_FAIL(CXX_BOGUS_FLAG "CHECK_CXX_COMPILER_FLAG() succeeded, but should have failed")
 
-IF("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  UNSET(C_STRICT_PROTOTYPES CACHE)
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  unset(C_STRICT_PROTOTYPES CACHE)
   CHECK_C_COMPILER_FLAG("-Werror;-Wstrict-prototypes" C_STRICT_PROTOTYPES)
   TEST_ASSERT(C_STRICT_PROTOTYPES "CHECK_C_COMPILER_FLAG failed -Werror -Wstrict-prototypes")
-ENDIF()
+endif()
 
 #######################################################################
 #

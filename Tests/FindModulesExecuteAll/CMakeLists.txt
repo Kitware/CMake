@@ -23,8 +23,8 @@ foreach(module ${all_modules})
 # disabled for now, since too many modules break:
 #  if(NOT DEFINED ${packageNameUpper}_FOUND)
 #    message(SEND_ERROR "${packageNameUpper}_FOUND not defined !")
-#  endif(NOT DEFINED ${packageNameUpper}_FOUND)
+#  endif()
 
-endforeach(module ${all_modules})
+endforeach()
 
 add_executable(FindModulesExecuteAll main.c)

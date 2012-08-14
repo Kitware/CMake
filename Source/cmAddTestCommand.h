@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddTestCommand;
     }
@@ -50,7 +50,7 @@ public:
     {
     return "Add a test to the project with the specified arguments.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -91,7 +91,7 @@ public:
       "executable file produced by target \"myexe\"."
       ;
     }
-  
+
   cmTypeMacro(cmAddTestCommand, cmCommand);
 private:
   bool HandleNameMode(std::vector<std::string> const& args);

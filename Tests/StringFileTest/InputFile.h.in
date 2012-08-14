@@ -3,7 +3,7 @@
 /* This should be configured to a define.  */
 #cmakedefine TEST_DEFINED @TEST_DEFINED@
 /* This should be configured to a commented undef with the curlies in place */
-#cmakedefine TEST_NOT_DEFINED ${TEST_NOT_DEFINED} 
+#cmakedefine TEST_NOT_DEFINED ${TEST_NOT_DEFINED}
 
 /* This complicated line should be configured unchanged: */
 static const char* configvar =
@@ -34,5 +34,5 @@ int CheckMethod(const char* var, const char* val )
   return 1;
 #else
   return 0;
-#endif  
+#endif
 }

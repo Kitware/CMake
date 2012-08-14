@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   cmsysProcess_SetTimeout(cp, 0);
   cmsysProcess_Execute(cp);
-  
+
   std::vector<char> tempOutput;
   char* data;
   int length;
@@ -111,9 +111,9 @@ int main(int argc, char* argv[])
       }
     cmsys_ios::cout.write(data, length);
     }
-  
+
   cmsysProcess_WaitForExit(cp, 0);
-  
+
   bool result = true;
   if(cmsysProcess_GetState(cp) == cmsysProcess_State_Exited)
     {
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     std::cerr << error_str << std::endl;
     result = false;
     }
-  
+
   cmsysProcess_Delete(cp);
 
   return 0;

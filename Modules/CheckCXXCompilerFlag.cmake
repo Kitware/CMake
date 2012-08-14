@@ -21,11 +21,11 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-INCLUDE(CheckCXXSourceCompiles)
+include(CheckCXXSourceCompiles)
 
-MACRO (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
-   SET(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
-   SET(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
+   set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+   set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
    CHECK_CXX_SOURCE_COMPILES("int main() { return 0;}" ${_RESULT}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "command line option .* is valid for .* but not for C\\\\+\\\\+" # GNU
@@ -43,6 +43,6 @@ MACRO (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
      FAIL_REGEX "File with unknown suffix passed to linker" # PGI
      FAIL_REGEX "WARNING: unknown flag:"                    # Open64
      )
-   SET (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
-ENDMACRO (CHECK_CXX_COMPILER_FLAG)
+   set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
+endmacro ()
 

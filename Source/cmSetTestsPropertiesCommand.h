@@ -17,7 +17,7 @@
 class cmSetTestsPropertiesCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmSetTestsPropertiesCommand;
     }
@@ -70,7 +70,7 @@ public:
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
 
-  static bool SetOneTest(const char *tname, 
+  static bool SetOneTest(const char *tname,
                          std::vector<std::string> &propertyPairs,
                          cmMakefile *mf,
                          std::string &errors);

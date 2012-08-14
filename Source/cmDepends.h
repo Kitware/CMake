@@ -30,7 +30,7 @@ public:
   /** Instances need to know the build directory name and the relative
       path from the build directory to the target file.  */
   cmDepends(cmLocalGenerator* lg=0, const char* targetDir="");
-  
+
   /** at what level will the compile be done from */
   void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;};
 
@@ -48,7 +48,7 @@ public:
 
   /** should this be verbose in its output */
   void SetVerbose(bool verb) { this->Verbose = verb; }
-    
+
   /** Virtual destructor to cleanup subclasses properly.  */
   virtual ~cmDepends();
 
@@ -69,7 +69,7 @@ public:
   void Clear(const char *file);
 
   /** Set the file comparison object */
-  void SetFileComparison(cmFileTimeComparison* fc) { 
+  void SetFileComparison(cmFileTimeComparison* fc) {
     this->FileComparison = fc; }
 
 protected:

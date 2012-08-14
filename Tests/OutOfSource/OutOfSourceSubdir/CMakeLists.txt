@@ -1,62 +1,62 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-IF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
-  SET(BUILD_SHARED_LIBS 1)
+if ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
+  set(BUILD_SHARED_LIBS 1)
 
   # Construct a source file outside the tree whose full path is close to
   # the path length limit.  This will cause the full path to the object
   # file in the build tree to exceed the maximum path length which will
   # test cmLocalGenerator::CreateSafeUniqueObjectFileName.
-  GET_FILENAME_COMPONENT(DEEPDIR
+  get_filename_component(DEEPDIR
     ${OutOfSource_BINARY_DIR}/../OutOfSourceDeep/deeper ABSOLUTE)
 
   # Test giving the generator a custom limit.
-  SET(CMAKE_OBJECT_PATH_MAX 220)
+  set(CMAKE_OBJECT_PATH_MAX 220)
 
   # Use a separate variable for computation.
-  SET(MAXPATH "${CMAKE_OBJECT_PATH_MAX}")
+  set(MAXPATH "${CMAKE_OBJECT_PATH_MAX}")
 
   # VS8 adds "OutOfSource/SubDir/OutOfSourceSubdir/../../../" to the
   # path of the source file for no good reason.  Reduce the length
   # limit by 46 characters to account for it.  It should still be long
   # enough to require special object file name conversion.
-  IF(${CMAKE_GENERATOR} MATCHES "Visual Studio (8|10)")
-    MATH(EXPR MAXPATH "${MAXPATH} - 46")
-  ENDIF()
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio (8|10)")
+    math(EXPR MAXPATH "${MAXPATH} - 46")
+  endif()
 
   # Ninja imposes a maximum path component count of 30.  Permit more
   # path components in the source path.
-  IF(${CMAKE_GENERATOR} MATCHES "Ninja")
-    MATH(EXPR MAXPATH "${MAXPATH} - 44")
-  ENDIF()
+  if(${CMAKE_GENERATOR} MATCHES "Ninja")
+    math(EXPR MAXPATH "${MAXPATH} - 44")
+  endif()
 
   # MAXPATH less 25 for last /and/deeper/simple.cxx part and small safety
-  MATH(EXPR MAXPATH "${MAXPATH} - 25")
-  STRING(LENGTH "${DEEPDIR}" DEEPDIR_LEN)
-  WHILE("${DEEPDIR_LEN}" LESS "${MAXPATH}")
-    SET(DEEPDIR ${DEEPDIR}/and/deeper)
-    STRING(LENGTH "${DEEPDIR}" DEEPDIR_LEN)
-  ENDWHILE("${DEEPDIR_LEN}" LESS "${MAXPATH}")
-  SET(DEEPSRC ${DEEPDIR}/simple.cxx)
-  STRING(LENGTH "${DEEPSRC}" DEEPSRC_LEN)
-  CONFIGURE_FILE(simple.cxx.in ${DEEPSRC} COPYONLY)
+  math(EXPR MAXPATH "${MAXPATH} - 25")
+  string(LENGTH "${DEEPDIR}" DEEPDIR_LEN)
+  while("${DEEPDIR_LEN}" LESS "${MAXPATH}")
+    set(DEEPDIR ${DEEPDIR}/and/deeper)
+    string(LENGTH "${DEEPDIR}" DEEPDIR_LEN)
+  endwhile()
+  set(DEEPSRC ${DEEPDIR}/simple.cxx)
+  string(LENGTH "${DEEPSRC}" DEEPSRC_LEN)
+  configure_file(simple.cxx.in ${DEEPSRC} COPYONLY)
 
   # Watcom WMake seems to have problems with long command lines.  Just
   # disable this part of the test until it is resolved.
-  IF(${CMAKE_GENERATOR} MATCHES "Watcom WMake")
-    SET(DEEPSRC "")
-    ADD_DEFINITIONS(-DNO_DEEPSRC)
-  ENDIF(${CMAKE_GENERATOR} MATCHES "Watcom WMake")
+  if(${CMAKE_GENERATOR} MATCHES "Watcom WMake")
+    set(DEEPSRC "")
+    add_definitions(-DNO_DEEPSRC)
+  endif()
 
-  ADD_LIBRARY(testlib testlib.cxx)
-  ADD_EXECUTABLE (simple simple.cxx ../simple.cxx ${DEEPSRC})
-  TARGET_LINK_LIBRARIES(simple testlib outlib)
-ENDIF ("${PROJECT_SOURCE_DIR}" STREQUAL "${ANOTHER_PROJ_SOURCE_DIR}")
+  add_library(testlib testlib.cxx)
+  add_executable (simple simple.cxx ../simple.cxx ${DEEPSRC})
+  target_link_libraries(simple testlib outlib)
+endif ()
 
 # test getting a definition from a subdir
-SET (WEASELS SIZZLING)
+set (WEASELS SIZZLING)
 
-GET_DIRECTORY_PROPERTY(incDirs INCLUDE_DIRECTORIES)
-IF(NOT incDirs)
-   MESSAGE(FATAL_ERROR "GET_DIRECTORY_PROPERTY(INCLUDE_DIRECTORIES) returned empty list")
-ENDIF(NOT incDirs)
+get_directory_property(incDirs INCLUDE_DIRECTORIES)
+if(NOT incDirs)
+   message(FATAL_ERROR "get_directory_property(INCLUDE_DIRECTORIES) returned empty list")
+endif()

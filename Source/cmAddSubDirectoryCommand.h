@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmAddSubDirectoryCommand;
     }
@@ -51,7 +51,7 @@ public:
     {
     return "Add a subdirectory to the build.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -90,7 +90,7 @@ public:
       "project build system to satisfy the dependency."
       ;
     }
-  
+
   cmTypeMacro(cmAddSubDirectoryCommand, cmCommand);
 };
 

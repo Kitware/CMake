@@ -18,7 +18,7 @@
  * \brief Define a command to search for an executable program.
  *
  * cmFindFileCommand is used to define a CMake variable
- * that specifies an executable program. The command searches 
+ * that specifies an executable program. The command searches
  * in the current path (e.g., PATH environment variable) for
  * an executable that matches one of the supplied names.
  */
@@ -29,7 +29,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmFindFileCommand;
     }
@@ -42,7 +42,7 @@ public:
     {
     return "Find the full path to a file.";
     }
-  
+
   cmTypeMacro(cmFindFileCommand, cmFindPathCommand);
 protected:
   virtual void GenerateDocumentation();

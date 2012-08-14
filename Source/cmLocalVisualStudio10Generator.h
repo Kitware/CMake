@@ -31,7 +31,7 @@ public:
 
 
   /**
-   * Generate the makefile for this directory. 
+   * Generate the makefile for this directory.
    */
   virtual void Generate();
   virtual void ReadAndStoreExternalGUID(const char* name,

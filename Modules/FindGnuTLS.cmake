@@ -26,44 +26,44 @@
 # Note that this doesn't try to find the gnutls-extra package.
 
 
-IF (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
+if (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
    # in cache already
-   SET(gnutls_FIND_QUIETLY TRUE)
-ENDIF (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
+   set(gnutls_FIND_QUIETLY TRUE)
+endif ()
 
-IF (NOT WIN32)
+if (NOT WIN32)
    # try using pkg-config to get the directories and then use these values
-   # in the FIND_PATH() and FIND_LIBRARY() calls
+   # in the find_path() and find_library() calls
    # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
-   FIND_PACKAGE(PkgConfig QUIET)
+   find_package(PkgConfig QUIET)
    PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
-   SET(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
-   SET(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
-ENDIF (NOT WIN32)
+   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
+   set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
+endif ()
 
-FIND_PATH(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
+find_path(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
    HINTS
    ${PC_GNUTLS_INCLUDEDIR}
    ${PC_GNUTLS_INCLUDE_DIRS}
    )
 
-FIND_LIBRARY(GNUTLS_LIBRARY NAMES gnutls libgnutls
+find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
    HINTS
    ${PC_GNUTLS_LIBDIR}
    ${PC_GNUTLS_LIBRARY_DIRS}
    )
 
-MARK_AS_ADVANCED(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
+mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
-# handle the QUIETLY and REQUIRED arguments and set GNUTLS_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set GNUTLS_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GnuTLS
                                   REQUIRED_VARS GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR
                                   VERSION_VAR GNUTLS_VERSION_STRING)
 
-IF(GNUTLS_FOUND)
-    SET(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
-    SET(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
-ENDIF()
+if(GNUTLS_FOUND)
+    set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
+    set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
+endif()
 

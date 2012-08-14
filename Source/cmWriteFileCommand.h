@@ -24,7 +24,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmWriteFileCommand;
     }
@@ -53,7 +53,7 @@ public:
     {
     return "Deprecated. Use the file(WRITE ) command instead.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -71,7 +71,7 @@ public:
       "lead to an infinite loop. Use configure_file if you want to generate "
       "input files to CMake.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

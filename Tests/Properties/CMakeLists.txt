@@ -2,15 +2,15 @@
 cmake_minimum_required (VERSION 2.6)
 project (Properties)
 
-# these first three tests really test both properties and the management of 
-# cmSourceFile objects by CMake. 
+# these first three tests really test both properties and the management of
+# cmSourceFile objects by CMake.
 
 # test properties on a build tree file that is relative (yuck)
 configure_file(properties.h.in "${Properties_BINARY_DIR}/properties.h")
 set_source_files_properties(properties.h PROPERTIES TEST1 1)
 get_source_file_property(RESULT1 properties.h TEST1)
 
-# test properties on a headerfile in the source tree 
+# test properties on a headerfile in the source tree
 # accessed without an extenion (also yuck)
 set_source_files_properties(properties2 PROPERTIES TEST2 1)
 get_source_file_property(RESULT2 properties2 TEST2)
@@ -27,7 +27,7 @@ get_property(GLOBALRESULT GLOBAL PROPERTY GLOBALTEST DEFINED)
 if (GLOBALRESULT)
     message(SEND_ERROR "Error: global prop defined when it should not be, "
             "result is GLOBALRESULT=${GLOBALRESULT}")
-endif (GLOBALRESULT)
+endif ()
 
 define_property(GLOBAL PROPERTY GLOBALTEST
   BRIEF_DOCS "A test property"
@@ -38,8 +38,8 @@ get_property(GLOBALRESULT GLOBAL PROPERTY GLOBALTEST DEFINED)
 if (NOT GLOBALRESULT)
     message(SEND_ERROR "Error: global prop not defined "
             "result is GLOBALRESULT=${GLOBALRESULT}")
-endif (NOT GLOBALRESULT)
-  
+endif ()
+
 set_property(GLOBAL PROPERTY GLOBALTEST 1)
 set_property(DIRECTORY PROPERTY DIRECTORYTEST 1)
 set_property(SOURCE SubDir/properties3.cxx PROPERTY SOURCETEST 1)
@@ -50,26 +50,26 @@ get_property(SOURCERESULT
   PROPERTY SOURCETEST
   )
 
-if (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND 
+if (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND
     DIRECTORYRESULT AND SOURCERESULT)
   add_executable (Properties SubDir/properties3.cxx properties)
-else (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND 
+else (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND
     DIRECTORYRESULT AND SOURCERESULT)
-  message(SEND_ERROR 
+  message(SEND_ERROR
     "Error: test results are RESULT1=${RESULT1} RESULT2=${RESULT2} "
     "RESULT3=${RESULT3} GLOBALRESULT=${GLOBALRESULT} "
     "DIRECTORYRESULT=${DIRECTORYRESULT} "
     "SOURCERESULT=${SOURCERESULT}")
-endif (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND 
+endif (RESULT1 AND RESULT2 AND RESULT3 AND GLOBALRESULT AND
   DIRECTORYRESULT AND SOURCERESULT)
 
 # test the target property
 set_property(TARGET Properties PROPERTY TARGETTEST 1)
 get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST)
 if (NOT TARGETRESULT)
-    message(SEND_ERROR 
+    message(SEND_ERROR
       "Error: target result is TARGETRESULT=${TARGETRESULT}")
-endif (NOT TARGETRESULT)
+endif ()
 
 # test APPEND and APPEND_STRING set_property()
 set_property(TARGET Properties PROPERTY FOO foo)
@@ -92,9 +92,9 @@ endif ()
 # test get_property SET
 get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST SET)
 if (NOT TARGETRESULT)
-    message(SEND_ERROR 
+    message(SEND_ERROR
       "Error: target prop not set, result is TARGETRESULT=${TARGETRESULT}")
-endif (NOT TARGETRESULT)
+endif ()
 
 # test unsetting a property
 set_property(TARGET Properties PROPERTY TARGETTEST)
@@ -102,7 +102,7 @@ get_property(TARGETRESULT TARGET Properties PROPERTY TARGETTEST SET)
 if (TARGETRESULT)
     message(SEND_ERROR "Error: target prop not unset, "
             "result is TARGETRESULT=${TARGETRESULT}")
-endif (TARGETRESULT)
+endif ()
 
 
 
@@ -114,7 +114,7 @@ if(NOT RESULT4)
   message(SEND_ERROR "Error: target result is"
     " RESULT4=${RESULT4}"
     " Properties_SOURCES=[${Properties_SOURCES}]")
-endif(NOT RESULT4)
+endif()
 
 # test CACHE properties
 macro(check_cache_props)
@@ -123,8 +123,8 @@ macro(check_cache_props)
     if(NOT "x${result}" STREQUAL "x${expect_${prop}}")
       message(SEND_ERROR "CACHE property ${prop} is [${result}], not [${expect_${prop}}]")
     endif()
-  endforeach(prop)
-endmacro(check_cache_props)
+  endforeach()
+endmacro()
 set(expect_VALUE "ON")
 set(expect_TYPE "BOOL")
 set(expect_HELPSTRING "sample cache entry")

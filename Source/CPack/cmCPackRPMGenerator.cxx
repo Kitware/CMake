@@ -230,7 +230,7 @@ int cmCPackRPMGenerator::PackageFiles()
       }
     }
 
-  if (!this->IsSet("RPMBUILD_EXECUTABLE")) 
+  if (!this->IsSet("RPMBUILD_EXECUTABLE"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find rpmbuild" << std::endl);
     retval = 0;

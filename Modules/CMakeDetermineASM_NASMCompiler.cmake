@@ -14,14 +14,14 @@
 
 # Find the nasm assembler. yasm (http://www.tortall.net/projects/yasm/) is nasm compatible
 
-SET(CMAKE_ASM_NASM_COMPILER_INIT nasm yasm)
+set(CMAKE_ASM_NASM_COMPILER_INIT nasm yasm)
 
-IF(NOT CMAKE_ASM_NASM_COMPILER)
-  FIND_PROGRAM(CMAKE_ASM_NASM_COMPILER nasm
+if(NOT CMAKE_ASM_NASM_COMPILER)
+  find_program(CMAKE_ASM_NASM_COMPILER nasm
     "$ENV{ProgramFiles}/NASM")
-ENDIF(NOT CMAKE_ASM_NASM_COMPILER)
+endif()
 
 # Load the generic DetermineASM compiler file with the DIALECT set properly:
-SET(ASM_DIALECT "_NASM")
-INCLUDE(CMakeDetermineASMCompiler)
-SET(ASM_DIALECT)
+set(ASM_DIALECT "_NASM")
+include(CMakeDetermineASMCompiler)
+set(ASM_DIALECT)

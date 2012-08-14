@@ -8,7 +8,7 @@ int main (int argc, char *argv[])
     fprintf(stderr, "Missing name of file to create.\n");
     return EXIT_FAILURE;
     }
-  
+
   FILE *stream = fopen(argv[1], "w");
   if(stream == NULL)
     {
@@ -23,6 +23,6 @@ int main (int argc, char *argv[])
     }
 
   fprintf(stdout, ">> Creating %s!\n", argv[1]);
-  
+
   return EXIT_SUCCESS;
 }

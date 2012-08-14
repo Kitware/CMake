@@ -5,5 +5,5 @@
 #    define BAR_EXPORT  __declspec( dllimport )
 #  endif
 #else
-#  define BAR_EXPORT 
+#  define BAR_EXPORT
 #endif

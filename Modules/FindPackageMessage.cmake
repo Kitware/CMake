@@ -11,12 +11,12 @@
 #
 # Example:
 #
-#  IF(X11_FOUND)
+#  if(X11_FOUND)
 #    FIND_PACKAGE_MESSAGE(X11 "Found X11: ${X11_X11_LIB}"
 #      "[${X11_X11_LIB}][${X11_INCLUDE_DIR}]")
-#  ELSE(X11_FOUND)
+#  else()
 #   ...
-#  ENDIF(X11_FOUND)
+#  endif()
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.
@@ -31,19 +31,19 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FUNCTION(FIND_PACKAGE_MESSAGE pkg msg details)
+function(FIND_PACKAGE_MESSAGE pkg msg details)
   # Avoid printing a message repeatedly for the same find result.
-  IF(NOT ${pkg}_FIND_QUIETLY)
-    STRING(REGEX REPLACE "[\n]" "" details "${details}")
-    SET(DETAILS_VAR FIND_PACKAGE_MESSAGE_DETAILS_${pkg})
-    IF(NOT "${details}" STREQUAL "${${DETAILS_VAR}}")
+  if(NOT ${pkg}_FIND_QUIETLY)
+    string(REGEX REPLACE "[\n]" "" details "${details}")
+    set(DETAILS_VAR FIND_PACKAGE_MESSAGE_DETAILS_${pkg})
+    if(NOT "${details}" STREQUAL "${${DETAILS_VAR}}")
       # The message has not yet been printed.
-      MESSAGE(STATUS "${msg}")
+      message(STATUS "${msg}")
 
       # Save the find details in the cache to avoid printing the same
       # message again.
-      SET("${DETAILS_VAR}" "${details}"
+      set("${DETAILS_VAR}" "${details}"
         CACHE INTERNAL "Details about finding ${pkg}")
-    ENDIF(NOT "${details}" STREQUAL "${${DETAILS_VAR}}")
-  ENDIF(NOT ${pkg}_FIND_QUIETLY)
-ENDFUNCTION(FIND_PACKAGE_MESSAGE)
+    endif()
+  endif()
+endfunction()

@@ -66,10 +66,10 @@ if(ARMADILLO_INCLUDE_DIR)
     # WARNING: The number of spaces before the version name is not one.
     string(REGEX REPLACE ".*#define ARMA_VERSION_NAME\ +\"([0-9a-zA-Z\ _-]+)\".*" "\\1" ARMADILLO_VERSION_NAME "${_armadillo_HEADER_CONTENTS}")
 
-  endif(EXISTS "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/arma_version.hpp")
+  endif()
 
   set(ARMADILLO_VERSION_STRING "${ARMADILLO_VERSION_MAJOR}.${ARMADILLO_VERSION_MINOR}.${ARMADILLO_VERSION_PATCH}")
-endif (ARMADILLO_INCLUDE_DIR)
+endif ()
 
 #======================
 
@@ -84,7 +84,7 @@ find_package_handle_standard_args(Armadillo
 if (ARMADILLO_FOUND)
   set(ARMADILLO_INCLUDE_DIRS ${ARMADILLO_INCLUDE_DIR})
   set(ARMADILLO_LIBRARIES ${ARMADILLO_LIBRARY})
-endif (ARMADILLO_FOUND)
+endif ()
 
 
 # Hide internal variables

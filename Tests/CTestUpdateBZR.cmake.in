@@ -74,7 +74,7 @@ if(dirs_added)
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${BZR} add ${dirs_added}
     )
-endif(dirs_added)
+endif()
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
   COMMAND ${BZR} add ${files_added}

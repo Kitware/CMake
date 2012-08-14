@@ -15,11 +15,11 @@
 # This file is included in CMakeSystemSpecificInformation.cmake if
 # the CodeBlocks extra generator has been selected.
 
-FIND_PROGRAM(CMAKE_CODEBLOCKS_EXECUTABLE NAMES codeblocks DOC "The CodeBlocks executable")
+find_program(CMAKE_CODEBLOCKS_EXECUTABLE NAMES codeblocks DOC "The CodeBlocks executable")
 
-IF(CMAKE_CODEBLOCKS_EXECUTABLE)
-   SET(CMAKE_OPEN_PROJECT_COMMAND "${CMAKE_CODEBLOCKS_EXECUTABLE} <PROJECT_FILE>" )
-ENDIF(CMAKE_CODEBLOCKS_EXECUTABLE)
+if(CMAKE_CODEBLOCKS_EXECUTABLE)
+   set(CMAKE_OPEN_PROJECT_COMMAND "${CMAKE_CODEBLOCKS_EXECUTABLE} <PROJECT_FILE>" )
+endif()
 
 # Determine builtin macros and include dirs:
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/CMakeExtraGeneratorDetermineCompilerMacrosAndIncludeDirs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeExtraGeneratorDetermineCompilerMacrosAndIncludeDirs.cmake)

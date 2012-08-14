@@ -34,7 +34,7 @@
 ;; cmake executable variable used to run cmake --help-command
 ;; on commands in cmake-mode
 ;;
-;; cmake-command-help Written by James Bigler 
+;; cmake-command-help Written by James Bigler
 ;;
 
 (defcustom cmake-mode-cmake-executable "cmake"
@@ -191,11 +191,11 @@ the indentation.  Otherwise it retains the same position on the line"
   (setq save-point (point))
   (goto-char (point-min))
   (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
-    (replace-match 
-     (concat 
-      (match-string 1) 
-      (downcase (match-string 2)) 
-      (match-string 3)) 
+    (replace-match
+     (concat
+      (match-string 1)
+      (downcase (match-string 2))
+      (match-string 3))
      t))
   (goto-char save-point)
   )

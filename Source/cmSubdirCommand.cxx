@@ -39,13 +39,13 @@ bool cmSubdirCommand
       }
 
     // if they specified a relative path then compute the full
-    std::string srcPath = 
-      std::string(this->Makefile->GetCurrentDirectory()) + 
+    std::string srcPath =
+      std::string(this->Makefile->GetCurrentDirectory()) +
         "/" + i->c_str();
     if (cmSystemTools::FileIsDirectory(srcPath.c_str()))
       {
-      std::string binPath = 
-        std::string(this->Makefile->GetCurrentOutputDirectory()) + 
+      std::string binPath =
+        std::string(this->Makefile->GetCurrentOutputDirectory()) +
         "/" + i->c_str();
       this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
                                   excludeFromAll, preorder, false);
@@ -55,8 +55,8 @@ bool cmSubdirCommand
       {
       // we must compute the binPath from the srcPath, we just take the last
       // element from the source path and use that
-      std::string binPath = 
-        std::string(this->Makefile->GetCurrentOutputDirectory()) + 
+      std::string binPath =
+        std::string(this->Makefile->GetCurrentOutputDirectory()) +
         "/" + cmSystemTools::GetFilenameName(i->c_str());
       this->Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
                                   excludeFromAll, preorder, false);
@@ -65,7 +65,7 @@ bool cmSubdirCommand
       {
       std::string error = "Incorrect SUBDIRS command. Directory: ";
       error += *i + " does not exists.";
-      this->SetError(error.c_str());   
+      this->SetError(error.c_str());
       res = false;
       }
     }

@@ -28,7 +28,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmProjectCommand;
     }
@@ -39,7 +39,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -52,7 +52,7 @@ public:
     {
     return "Set a name for the entire project.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -73,7 +73,7 @@ public:
       "the file pointed to by that variable will be included as the last step "
       "of the project command.";
     }
-  
+
   cmTypeMacro(cmProjectCommand, cmCommand);
 };
 

@@ -16,27 +16,27 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
-  MESSAGE(STATUS "Check for STD namespace")
-  TRY_COMPILE(CMAKE_STD_NAMESPACE  ${CMAKE_BINARY_DIR} 
+if("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
+  message(STATUS "Check for STD namespace")
+  try_compile(CMAKE_STD_NAMESPACE  ${CMAKE_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForSTDNamespace.cxx
     OUTPUT_VARIABLE OUTPUT)
-  IF (CMAKE_STD_NAMESPACE)
-    MESSAGE(STATUS "Check for STD namespace - found")
-    SET (CMAKE_NO_STD_NAMESPACE 0 CACHE INTERNAL 
+  if (CMAKE_STD_NAMESPACE)
+    message(STATUS "Check for STD namespace - found")
+    set (CMAKE_NO_STD_NAMESPACE 0 CACHE INTERNAL
          "Does the compiler support std::.")
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining if the CXX compiler has std namespace passed with "
       "the following output:\n${OUTPUT}\n\n")
-  ELSE (CMAKE_STD_NAMESPACE)
-    MESSAGE(STATUS "Check for STD namespace - not found")
-    SET (CMAKE_NO_STD_NAMESPACE 1 CACHE INTERNAL 
+  else ()
+    message(STATUS "Check for STD namespace - not found")
+    set (CMAKE_NO_STD_NAMESPACE 1 CACHE INTERNAL
        "Does the compiler support std::.")
-    FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "Determining if the CXX compiler has std namespace failed with "
       "the following output:\n${OUTPUT}\n\n")
-  ENDIF (CMAKE_STD_NAMESPACE)
-ENDIF("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
+  endif ()
+endif()
 
 
 

@@ -10,7 +10,7 @@
 # the first configuration from ${CMAKE_CONFIGURATION_TYPES} if set, otherwise
 # ${CMAKE_BUILD_TYPE}.
 # This macro is used by all Check*.cmake files which use
-# TRY_COMPILE() or TRY_RUN() and support CMAKE_REQUIRED_LIBRARIES , so that
+# try_compile() or try_run() and support CMAKE_REQUIRED_LIBRARIES , so that
 # these checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
 #    cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
 #                                               CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
@@ -76,16 +76,16 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
             # guard against infinite loop: abort after 100 iterations ( 100 is arbitrary chosen)
             if ("${_CCSR_LOOP_COUNTER}" LESS 100)
                set(_CHECK_FOR_IMPORTED_TARGETS TRUE)
-#                else ("${_CCSR_LOOP_COUNTER}" LESS 1)
+#                else ()
 #                   message(STATUS "********* aborting loop, counter : ${_CCSR_LOOP_COUNTER}")
-            endif ("${_CCSR_LOOP_COUNTER}" LESS 100)
+            endif ()
 
             # if one of the imported configurations equals ${CMAKE_TRY_COMPILE_CONFIGURATION},
             # use it, otherwise simply use the first one:
             list(FIND _importedConfigs "${CEIT_CONFIGURATION}" _configIndexToUse)
             if("${_configIndexToUse}" EQUAL -1)
               set(_configIndexToUse 0)
-            endif("${_configIndexToUse}" EQUAL -1)
+            endif()
             list(GET _importedConfigs ${_configIndexToUse} _importedConfigToUse)
 
             get_target_property(_importedLocation "${_CURRENT_LIB}" IMPORTED_LOCATION_${_importedConfigToUse})
@@ -98,18 +98,18 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
 #                  message(STATUS "Appending link interface lib ${_currentLinkInterfaceLib}")
                   if(_currentLinkInterfaceLib)
                      list(APPEND _CCSR_NEW_REQ_LIBS "${_currentLinkInterfaceLib}" )
-                  endif(_currentLinkInterfaceLib)
-               endforeach(_currentLinkInterfaceLib "${_linkInterfaceLibs}")
-            endif(_linkInterfaceLibs)
-         else(_importedConfigs)
+                  endif()
+               endforeach()
+            endif()
+         else()
             # "Normal" libraries are just used as they are.
             list(APPEND _CCSR_NEW_REQ_LIBS "${_CURRENT_LIB}" )
 #            message(STATUS "Appending lib directly: ${_CURRENT_LIB}")
-         endif(_importedConfigs)
-      endforeach(_CURRENT_LIB ${_CCSR_REQ_LIBS})
+         endif()
+      endforeach()
 
       set(_CCSR_REQ_LIBS ${_CCSR_NEW_REQ_LIBS} )
-   endwhile(_CHECK_FOR_IMPORTED_TARGETS)
+   endwhile()
 
    # Finally we iterate once more over all libraries. This loop only removes
    # all remaining imported target names (there shouldn't be any left anyway).
@@ -119,10 +119,10 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
       if (NOT _importedConfigs)
          list(APPEND _CCSR_NEW_REQ_LIBS "${_CURRENT_LIB}" )
 #         message(STATUS "final: appending ${_CURRENT_LIB}")
-      else (NOT _importedConfigs)
+      else ()
 #             message(STATUS "final: skipping ${_CURRENT_LIB}")
-      endif (NOT _importedConfigs)
-   endforeach(_CURRENT_LIB ${_CCSR_REQ_LIBS})
+      endif ()
+   endforeach()
 #   message(STATUS "setting -${_RESULT}- to -${_CCSR_NEW_REQ_LIBS}-")
    set(${_RESULT} "${_CCSR_NEW_REQ_LIBS}" PARENT_SCOPE)
 

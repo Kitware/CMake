@@ -57,7 +57,7 @@ void cmTest::SetCommand(std::vector<std::string> const& command)
 const char *cmTest::GetProperty(const char* prop) const
 {
   bool chain = false;
-  const char *retVal = 
+  const char *retVal =
     this->Properties.GetPropertyValue(prop, cmProperty::TEST, chain);
   if (chain)
     {
@@ -149,14 +149,14 @@ void cmTest::DefineProperties(cmake *cm)
     "not to run concurrently.");
 
   cm->DefineProperty
-    ("MEASUREMENT", cmProperty::TEST, 
+    ("MEASUREMENT", cmProperty::TEST,
      "Specify a CDASH measurement and value to be reported for a test.",
      "If set to a name then that name will be reported to CDASH as a "
      "named measurement with a value of 1. You may also specify a value "
      "by setting MEASUREMENT to \"measurement=value\".");
 
   cm->DefineProperty
-    ("PASS_REGULAR_EXPRESSION", cmProperty::TEST, 
+    ("PASS_REGULAR_EXPRESSION", cmProperty::TEST,
      "The output must match this regular expression for the test to pass.",
      "If set, the test output will be checked "
      "against the specified regular expressions and at least one of the"
@@ -183,7 +183,7 @@ void cmTest::DefineProperties(cmake *cm)
      "any other tests.");
 
   cm->DefineProperty
-    ("TIMEOUT", cmProperty::TEST, 
+    ("TIMEOUT", cmProperty::TEST,
      "How many seconds to allow for this test.",
      "This property if set will limit a test to not take more than "
      "the specified number of seconds to run. If it exceeds that the "
@@ -192,7 +192,7 @@ void cmTest::DefineProperties(cmake *cm)
      "CTEST_TESTING_TIMEOUT.");
 
   cm->DefineProperty
-    ("WILL_FAIL", cmProperty::TEST, 
+    ("WILL_FAIL", cmProperty::TEST,
      "If set to true, this will invert the pass/fail flag of the test.",
      "This property can be used for tests that are expected to fail and "
      "return a non zero return code.");

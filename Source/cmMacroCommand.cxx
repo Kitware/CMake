@@ -56,7 +56,7 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args, 
+  virtual bool InvokeInitialPass(const std::vector<cmListFileArgument>& args,
                                  cmExecutionStatus &);
 
   virtual bool InitialPass(std::vector<std::string> const&,
@@ -66,7 +66,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return this->Args[0].c_str(); }
-  
+
   /**
    * Succinct documentation.
    */
@@ -164,7 +164,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
         {
         variable = "${";
         variable += this->Args[j];
-        variable += "}"; 
+        variable += "}";
         cmSystemTools::ReplaceString(tmps, variable.c_str(),
                                      expandedArgs[j-1].c_str());
         }
@@ -270,7 +270,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
   else if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endmacro"))
     {
     // if this is the endmacro for this macro then execute
-    if (!this->Depth) 
+    if (!this->Depth)
       {
       std::string name = this->Args[0];
       std::vector<std::string>::size_type cc;
@@ -287,7 +287,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       f->Functions = this->Functions;
       mf.RecordPolicies(f->Policies);
       std::string newName = "_" + this->Args[0];
-      mf.GetCMakeInstance()->RenameCommand(this->Args[0].c_str(), 
+      mf.GetCMakeInstance()->RenameCommand(this->Args[0].c_str(),
                                            newName.c_str());
       mf.AddCommand(f);
 
@@ -341,7 +341,7 @@ bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
   cmMacroFunctionBlocker *f = new cmMacroFunctionBlocker();
   for(std::vector<std::string>::const_iterator j = args.begin();
       j != args.end(); ++j)
-    {   
+    {
     f->Args.push_back(*j);
     }
   this->Makefile->AddFunctionBlocker(f);

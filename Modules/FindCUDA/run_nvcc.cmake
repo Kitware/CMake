@@ -139,7 +139,7 @@ macro(cuda_execute_process status command)
     endforeach()
     # Echo the command
     execute_process(COMMAND ${CMAKE_COMMAND} -E echo ${cuda_execute_process_string})
-  endif(verbose)
+  endif()
   # Run the command
   execute_process(COMMAND ${ARGN} RESULT_VARIABLE CUDA_result )
 endmacro()
@@ -277,4 +277,4 @@ if( build_cubin )
     -P "${CUDA_parse_cubin}"
     )
 
-endif( build_cubin )
+endif()

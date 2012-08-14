@@ -74,7 +74,7 @@ private:
   cmCTestTestHandler * TestHandler;
   cmCTest * CTest;
   cmProcess * TestProcess;
-  //If the executable to run is ctest, don't create a new process; 
+  //If the executable to run is ctest, don't create a new process;
   //just instantiate a new cmTest.  (Can be disabled for a single test
   //if this option is set to false.)
   //bool OptimizeForCTest;

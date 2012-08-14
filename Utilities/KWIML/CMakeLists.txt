@@ -13,8 +13,8 @@
 # Import the KWIML directory tree into a subdirectory under a parent
 # project and configure the library as follows:
 #
-#  SET(KWIML myIML)
-#  SUBDIRS(KWIML)
+#  set(KWIML myIML)
+#  subdirs(KWIML)
 #
 # Optional settings are as follows:
 #
@@ -22,8 +22,8 @@
 #    Headers will go in a directory called "${KWIML}" under this root.
 #    For example:
 #
-#      SET(KWIML_HEADER_ROOT ${PROJECT_BINARY_DIR})
-#      INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+#      set(KWIML_HEADER_ROOT ${PROJECT_BINARY_DIR})
+#      include_directories(${PROJECT_BINARY_DIR})
 #
 #  KWIML_INSTALL_INCLUDE_DIR = install KWIML with "make install"
 #    Specify a value relative to the install prefix and do NOT start with '/'.

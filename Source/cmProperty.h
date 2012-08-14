@@ -14,7 +14,7 @@
 
 #include "cmStandardIncludes.h"
 
-class cmProperty 
+class cmProperty
 {
 public:
   enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, CACHE,

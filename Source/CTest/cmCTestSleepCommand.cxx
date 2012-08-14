@@ -47,7 +47,7 @@ bool cmCTestSleepCommand
       }
     return true;
     }
-  
+
   this->SetError("called with incorrect number of arguments");
   return false;
 }

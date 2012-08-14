@@ -76,7 +76,7 @@ if (${depend_text} MATCHES ".+")
       list(APPEND dependency_list "${file_absolute}")
     endif()
 
-  endforeach(file)
+  endforeach()
 
 else()
   # message("FOUND NO DEPENDS")

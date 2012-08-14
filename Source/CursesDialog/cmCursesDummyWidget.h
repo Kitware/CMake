@@ -20,7 +20,7 @@ class cmCursesDummyWidget : public cmCursesWidget
 {
 public:
   cmCursesDummyWidget(int width, int height, int left, int top);
-  
+
   // Description:
   // Handle user input. Called by the container of this widget
   // when this widget has focus. Returns true if the input was

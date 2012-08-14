@@ -20,11 +20,11 @@ bool cmAddSubDirectoryCommand::InitialPass
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   // store the binpath
   std::string srcArg = args[0];
   std::string binArg;
-  
+
   bool excludeFromAll = false;
 
   // process the rest of the arguments looking for optional args

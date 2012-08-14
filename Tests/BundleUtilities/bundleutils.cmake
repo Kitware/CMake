@@ -31,7 +31,7 @@ configure_file("${MODULE}" "${OUTPUT_MODULE}" COPYONLY)
 # this shouldn't be necessary except for the non-bundle case on Mac
 function(gp_item_default_embedded_path_override item path)
   set(path "@executable_path" PARENT_SCOPE)
-endfunction(gp_item_default_embedded_path_override)
+endfunction()
 
 include(BundleUtilities)
 fixup_bundle("${OUTPUT}" "${OUTPUT_MODULE}" "${INPUTDIR}")
@@ -42,4 +42,4 @@ execute_process(COMMAND "${OUTPUT}" RESULT_VARIABLE result OUTPUT_VARIABLE out E
 
 if(NOT result STREQUAL "0")
   message(FATAL_ERROR " failed to execute test program\n${out}")
-endif(NOT result STREQUAL "0")
+endif()

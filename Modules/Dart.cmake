@@ -3,10 +3,10 @@
 # It supports using the old Dart 1 Tcl client for driving dashboard
 # submissions as well as testing with CTest.  This module should be included
 # in the CMakeLists.txt file at the top of a project.  Typical usage:
-#  INCLUDE(Dart)
-#  IF(BUILD_TESTING)
+#  include(Dart)
+#  if(BUILD_TESTING)
 #    # ... testing related CMake code ...
-#  ENDIF(BUILD_TESTING)
+#  endif()
 # The BUILD_TESTING option is created by the Dart module to determine
 # whether testing support should be enabled.  The default is ON.
 
@@ -32,10 +32,10 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-OPTION(BUILD_TESTING "Build the testing tree." ON)
+option(BUILD_TESTING "Build the testing tree." ON)
 
-IF(BUILD_TESTING)
-  FIND_PACKAGE(Dart QUIET)
+if(BUILD_TESTING)
+  find_package(Dart QUIET)
 
   #
   # Section #1:
@@ -44,58 +44,58 @@ IF(BUILD_TESTING)
   # on the client and configure site name and build name.
   #
 
-  SET(RUN_FROM_DART 1)
-  INCLUDE(CTest)
-  SET(RUN_FROM_DART)
+  set(RUN_FROM_DART 1)
+  include(CTest)
+  set(RUN_FROM_DART)
 
-  FIND_PROGRAM(COMPRESSIONCOMMAND NAMES gzip compress zip 
+  find_program(COMPRESSIONCOMMAND NAMES gzip compress zip
     DOC "Path to program used to compress files for transfer to the dart server")
-  FIND_PROGRAM(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
-  FIND_PROGRAM(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
-  OPTION(DART_VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes." 
+  find_program(GUNZIPCOMMAND gunzip DOC "Path to gunzip executable")
+  find_program(JAVACOMMAND java DOC "Path to java command, used by the Dart server to create html.")
+  option(DART_VERBOSE_BUILD "Show the actual output of the build, or if off show a . for each 1024 bytes."
     OFF)
-  OPTION(DART_BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )  
-  OPTION(DART_BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )  
+  option(DART_BUILD_ERROR_REPORT_LIMIT "Limit of reported errors, -1 reports all." -1 )
+  option(DART_BUILD_WARNING_REPORT_LIMIT "Limit of reported warnings, -1 reports all." -1 )
 
-  SET(VERBOSE_BUILD ${DART_VERBOSE_BUILD})
-  SET(BUILD_ERROR_REPORT_LIMIT ${DART_BUILD_ERROR_REPORT_LIMIT})
-  SET(BUILD_WARNING_REPORT_LIMIT ${DART_BUILD_WARNING_REPORT_LIMIT})
-  SET (DELIVER_CONTINUOUS_EMAIL "Off" CACHE BOOL "Should Dart server send email when build errors are found in Continuous builds?")
+  set(VERBOSE_BUILD ${DART_VERBOSE_BUILD})
+  set(BUILD_ERROR_REPORT_LIMIT ${DART_BUILD_ERROR_REPORT_LIMIT})
+  set(BUILD_WARNING_REPORT_LIMIT ${DART_BUILD_WARNING_REPORT_LIMIT})
+  set (DELIVER_CONTINUOUS_EMAIL "Off" CACHE BOOL "Should Dart server send email when build errors are found in Continuous builds?")
 
-  MARK_AS_ADVANCED(
+  mark_as_advanced(
     COMPRESSIONCOMMAND
-    DART_BUILD_ERROR_REPORT_LIMIT     
-    DART_BUILD_WARNING_REPORT_LIMIT 
+    DART_BUILD_ERROR_REPORT_LIMIT
+    DART_BUILD_WARNING_REPORT_LIMIT
     DART_TESTING_TIMEOUT
     DART_VERBOSE_BUILD
     DELIVER_CONTINUOUS_EMAIL
     GUNZIPCOMMAND
-    JAVACOMMAND 
+    JAVACOMMAND
     )
 
-  SET(HAVE_DART)
-  IF(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
-    SET(HAVE_DART 1)
-  ENDIF(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
+  set(HAVE_DART)
+  if(EXISTS "${DART_ROOT}/Source/Client/Dart.conf.in")
+    set(HAVE_DART 1)
+  endif()
 
   #
   # Section #2:
-  # 
+  #
   # Make necessary directories and configure testing scripts
   #
   # find a tcl shell command
-  IF(HAVE_DART)
-    FIND_PACKAGE(Tclsh)
-  ENDIF(HAVE_DART)
+  if(HAVE_DART)
+    find_package(Tclsh)
+  endif()
 
 
-  IF (HAVE_DART)
+  if (HAVE_DART)
     # make directories in the binary tree
-    FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Dashboard"
+    file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Dashboard"
       "${PROJECT_BINARY_DIR}/Testing/HTML/TestingResults/Sites/${SITE}/${BUILDNAME}")
 
     # configure files
-    CONFIGURE_FILE(
+    configure_file(
       "${DART_ROOT}/Source/Client/Dart.conf.in"
       "${PROJECT_BINARY_DIR}/DartConfiguration.tcl" )
 
@@ -107,16 +107,16 @@ IF(BUILD_TESTING)
     #
 
     # add testing targets
-    SET(DART_EXPERIMENTAL_NAME Experimental)
-    IF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-      SET(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
-    ENDIF(DART_EXPERIMENTAL_USE_PROJECT_NAME)
-  ENDIF (HAVE_DART)
-  
-  SET(RUN_FROM_CTEST_OR_DART 1)
-  INCLUDE(CTestTargets)
-  SET(RUN_FROM_CTEST_OR_DART)
-ENDIF(BUILD_TESTING)
+    set(DART_EXPERIMENTAL_NAME Experimental)
+    if(DART_EXPERIMENTAL_USE_PROJECT_NAME)
+      set(DART_EXPERIMENTAL_NAME "${DART_EXPERIMENTAL_NAME}${PROJECT_NAME}")
+    endif()
+  endif ()
+
+  set(RUN_FROM_CTEST_OR_DART 1)
+  include(CTestTargets)
+  set(RUN_FROM_CTEST_OR_DART)
+endif()
 
 #
 # End of Dart.cmake

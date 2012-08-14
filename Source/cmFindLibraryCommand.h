@@ -29,7 +29,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmFindLibraryCommand;
     }
@@ -59,7 +59,7 @@ public:
     return "Find a library.";
     }
   cmTypeMacro(cmFindLibraryCommand, cmFindBase);
-  
+
 protected:
   void AddArchitecturePaths(const char* suffix);
   void AddArchitecturePath(std::string const& dir,

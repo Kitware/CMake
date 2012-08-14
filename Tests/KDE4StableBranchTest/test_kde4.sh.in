@@ -2,9 +2,9 @@
 
 # This shell script tests whether cmake is able to build the latest
 # stable KDE4 release, or at least some part of it.
-# It downloads automoc from KDE svn, builds and installs it, then it 
+# It downloads automoc from KDE svn, builds and installs it, then it
 # downloads phonon from KDE svn, builds and installs it, and finally
-# it downloads kdelibs (currently from the 4.3 branch), and builds 
+# it downloads kdelibs (currently from the 4.3 branch), and builds
 # a (small) part of it, i.e. libkdecore and one unit test depending on it.
 #
 # <neundorf AT kde.org>

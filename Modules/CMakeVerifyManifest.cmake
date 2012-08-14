@@ -4,7 +4,7 @@
 # side by side manifests for a project match.  To run this
 # script, cd to a directory and run the script with cmake -P.
 # On the command line you can pass in versions that are OK even
-# if not found in the .manifest files. For example, 
+# if not found in the .manifest files. For example,
 # cmake -Dallow_versions=8.0.50608.0 -PCmakeVerifyManifest.cmake
 # could be used to allow an embeded manifest of 8.0.50608.0
 # to be used in a project even if that version was not found
@@ -40,14 +40,14 @@ function(crt_version file list_var)
   foreach(s ${strings})
     set(has_match 1)
     string(REGEX
-      REPLACE ".*<assembly.*\"Microsoft.VC...CRT\".*version=\"([^\"]*)\".*</assembly>.*$" "\\1" 
+      REPLACE ".*<assembly.*\"Microsoft.VC...CRT\".*version=\"([^\"]*)\".*</assembly>.*$" "\\1"
       version "${s}")
     if(NOT "${version}" STREQUAL "")
       list(APPEND version_list ${version})
     else()
       message(FATAL_ERROR "Parse error could not find version in [${s}]")
     endif()
-  endforeach(s)
+  endforeach()
   if(NOT DEFINED has_match)
     message("Information: no embeded manifest in: ${file}")
     return()
@@ -57,25 +57,25 @@ function(crt_version file list_var)
   if(version_list)
     set(${list_var} ${version_list} PARENT_SCOPE)
   endif()
-endfunction(crt_version)
+endfunction()
 set(fatal_error FALSE)
 
 # check_version:
-# 
+#
 # test a file against the shipped manifest versions
 # for a directory
 function(check_version file manifest_versions)
   set(manifest_versions ${manifest_versions} ${allow_versions})
   # collect versions for a given file
   crt_version(${file} file_versions)
-  # see if the versions 
+  # see if the versions
   foreach(ver ${file_versions})
     list(FIND manifest_versions "${ver}" found_version)
     if("${found_version}" EQUAL -1)
       message("ERROR: ${file} uses ${ver} not found in shipped manifests:[${manifest_versions}].")
       set(fatal_error TRUE PARENT_SCOPE)
     endif()
-  endforeach(ver)
+  endforeach()
   list(LENGTH file_versions len)
   if(${len} GREATER 1)
     message("WARNING: found more than one version of MICROSOFT.VC80.CRT referenced in ${file}: [${file_versions}]")
@@ -88,7 +88,7 @@ set(manifest_version_list )
 file(GLOB_RECURSE manifest_files "*.manifest")
 foreach(f ${manifest_files})
   crt_version("${f}" manifest_version_list)
-endforeach(f)
+endforeach()
 list(LENGTH manifest_version_list LEN)
 if(LEN EQUAL 0)
   message(FATAL_ERROR "No .manifest files found, no version check can be done.")

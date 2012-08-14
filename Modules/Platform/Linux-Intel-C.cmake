@@ -1,2 +1,2 @@
-INCLUDE(Platform/Linux-Intel)
+include(Platform/Linux-Intel)
 __linux_compiler_intel(C)

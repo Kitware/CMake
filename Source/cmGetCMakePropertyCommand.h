@@ -17,7 +17,7 @@
 class cmGetCMakePropertyCommand : public cmCommand
 {
 public:
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       return new cmGetCMakePropertyCommand;
     }
@@ -46,7 +46,7 @@ public:
     {
     return "Get a property of the CMake instance.";
     }
-  
+
   /**
    * Longer documentation.
    */
@@ -63,7 +63,7 @@ public:
         "\n"
         "See also the more general get_property() command.";
     }
-  
+
   cmTypeMacro(cmGetCMakePropertyCommand, cmCommand);
 };
 

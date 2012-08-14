@@ -29,25 +29,25 @@ bool cmSiteNameCommand
   paths.push_back("/bin");
   paths.push_back("/sbin");
   paths.push_back("/usr/local/bin");
-  
+
   const char* cacheValue
     = this->Makefile->GetDefinition(args[0].c_str());
   if(cacheValue)
     {
     return true;
     }
-  
+
   const char *temp = this->Makefile->GetDefinition("HOSTNAME");
   std::string hostname_cmd;
   if(temp)
     {
     hostname_cmd = temp;
     }
-  else 
+  else
     {
     hostname_cmd = cmSystemTools::FindProgram("hostname", paths);
     }
-  
+
   std::string siteName = "unknown";
 #if defined(_WIN32) && !defined(__CYGWIN__)
   std::string host;
@@ -64,7 +64,7 @@ bool cmSiteNameCommand
     std::string host;
     cmSystemTools::RunSingleCommand(hostname_cmd.c_str(),
       &host, 0, 0, cmSystemTools::OUTPUT_NONE);
-    
+
     // got the hostname
     if (host.length())
       {

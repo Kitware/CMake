@@ -70,7 +70,7 @@ if(dirs_added)
     WORKING_DIRECTORY ${TOP}/user-source
     COMMAND ${HG} add ${dirs_added}
     )
-endif(dirs_added)
+endif()
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
   COMMAND ${HG} add ${files_added}

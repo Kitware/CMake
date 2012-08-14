@@ -1,9 +1,9 @@
 # this test creates a static library and an executable
-# the source to the library is then changed 
+# the source to the library is then changed
 # and the build is done on the executable and if things
 # are working the executable should relink with the new
 # value.  The subdir Project contains the CMakelists.txt
-# and source files for the test project. 
+# and source files for the test project.
 cmake_minimum_required (VERSION 2.6)
 project(BuildDepends)
 
@@ -15,7 +15,7 @@ set(CMAKE_SUPPRESS_REGENERATION 1)
 # Xcode needs some help with the fancy dependencies in this test.
 if("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(HELP_XCODE 1)
-endif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+endif()
 function(help_xcode_depends)
   if(HELP_XCODE)
     file(GLOB_RECURSE MACRO_OBJS
@@ -24,9 +24,9 @@ function(help_xcode_depends)
     if(MACRO_OBJS)
       message("Helping Xcode by removing objects [${MACRO_OBJS}]")
       file(REMOVE ${MACRO_OBJS})
-    endif(MACRO_OBJS)
-  endif(HELP_XCODE)
-endfunction(help_xcode_depends)
+    endif()
+  endif()
+endfunction()
 
 if("${CMAKE_GENERATOR}" MATCHES "Ninja")
   set(HELP_NINJA 1) # TODO Why is this needed?
@@ -48,7 +48,7 @@ list(APPEND _cmake_options "-DCMAKE_FORCE_DEPFILES=1")
 
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
-write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx 
+write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
   "const char* foo() { return \"foo\";}" )
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
@@ -63,45 +63,45 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
 help_xcode_depends()
 
 message("Building project first time")
-try_compile(RESULT 
+try_compile(RESULT
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
   CMAKE_FLAGS ${_cmake_options}
   OUTPUT_VARIABLE OUTPUT)
 if(HELP_XCODE)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-endif(HELP_XCODE)
+endif()
 
 message("Output from first build:\n${OUTPUT}")
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project (1)!")
-endif(NOT RESULT)
+endif()
 
 set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-  set(bar 
+  set(bar
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
 set(zot ${BuildDepends_BINARY_DIR}/Project/zot${CMAKE_EXECUTABLE_SUFFIX})
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-  set(zot 
+  set(zot
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
 
 message("Running ${bar}  ")
@@ -111,9 +111,9 @@ message("Run result: ${runResult} Output: \"${out}\"")
 
 if("${out}" STREQUAL "foo ")
   message("Worked!")
-else("${out}" STREQUAL "foo ")
+else()
   message(SEND_ERROR "Project did not initially build properly: ${out}")
-endif("${out}" STREQUAL "foo ")
+endif()
 
 message("Running ${zot}  ")
 execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
@@ -123,9 +123,9 @@ message("Run result: ${runResult} Output: \"${out}\"")
 set(VALUE_UNCHANGED "[zot] [zot_custom] [zot_macro_dir] [zot_macro_tgt] ")
 if("${out}" STREQUAL "${VALUE_UNCHANGED}")
   message("Worked!")
-else("${out}" STREQUAL "${VALUE_UNCHANGED}")
+else()
   message(SEND_ERROR "Project did not initially build properly: ${out}")
-endif("${out}" STREQUAL "${VALUE_UNCHANGED}")
+endif()
 
 message("Waiting 3 seconds...")
 # any additional argument will cause ${bar} to wait forever
@@ -150,7 +150,7 @@ endif()
 help_xcode_depends()
 
 message("Building project second time")
-try_compile(RESULT 
+try_compile(RESULT
   ${BuildDepends_BINARY_DIR}/Project
   ${BuildDepends_SOURCE_DIR}/Project
   testRebuild
@@ -159,12 +159,12 @@ try_compile(RESULT
 
 # Xcode is in serious need of help here
 if(HELP_XCODE OR HELP_NINJA)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
     OUTPUT_VARIABLE OUTPUT)
-  try_compile(RESULT 
+  try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
     testRebuild
@@ -174,16 +174,16 @@ endif()
 message("Output from second build:\n${OUTPUT}")
 if(NOT RESULT)
   message(SEND_ERROR "Could not build test project (2)!")
-endif(NOT RESULT)
-if(EXISTS 
+endif()
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
-if(EXISTS 
+if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-endif(EXISTS 
+endif(EXISTS
   "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
 
 message("Running ${bar}  ")
@@ -193,9 +193,9 @@ message("Run result: ${runResult} Output: \"${out}\"")
 
 if("${out}" STREQUAL "foo changed ")
   message("Worked!")
-else("${out}" STREQUAL "foo changed ")
+else()
   message(SEND_ERROR "Project did not rebuild properly!")
-endif("${out}" STREQUAL "foo changed ")
+endif()
 
 message("Running ${zot}  ")
 execute_process(COMMAND ${zot} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
@@ -207,9 +207,9 @@ set(VALUE_CHANGED
   )
 if("${out}" STREQUAL "${VALUE_CHANGED}")
   message("Worked!")
-else("${out}" STREQUAL "${VALUE_CHANGED}")
+else()
   message(SEND_ERROR "Project did not rebuild properly!")
-endif("${out}" STREQUAL "${VALUE_CHANGED}")
+endif()
 
 if(TEST_LINK_DEPENDS)
   set(linkdep ${BuildDepends_BINARY_DIR}/Project/linkdep${CMAKE_EXECUTABLE_SUFFIX})

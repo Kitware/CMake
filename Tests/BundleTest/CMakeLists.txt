@@ -1,28 +1,28 @@
 cmake_minimum_required (VERSION 2.6)
-PROJECT(BundleTest)
-SET(MACOSX_BUNDLE_INFO_STRING "bundle_info_string")
-SET(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
+project(BundleTest)
+set(MACOSX_BUNDLE_INFO_STRING "bundle_info_string")
+set(CMAKE_MacOSX_Content_COMPILE_OBJECT "\"${CMAKE_COMMAND}\" -E copy_if_different <SOURCE> <OBJECT>")
 
-ADD_CUSTOM_COMMAND(
+add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   COMMAND /bin/cp
   ARGS "${CMAKE_CURRENT_SOURCE_DIR}/randomResourceFile.plist.in"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist")
 
-SET_SOURCE_FILES_PROPERTIES(
+set_source_files_properties(
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION Resources
   )
 
-SET_SOURCE_FILES_PROPERTIES(
+set_source_files_properties(
   SomeRandomFile.txt
   "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION MacOS
   )
 
-SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
 
 # Test building a bundle linking to a shared library where the
 # shared library links to CoreFoundation, but the executable does not
@@ -31,74 +31,74 @@ SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/foobar")
 # if CMake's dependency chaining for libraries with "-framework
 # blah" style dependencies gets broken...
 #
-ADD_LIBRARY(BundleTestLib SHARED BundleLib.cxx)
-TARGET_LINK_LIBRARIES(BundleTestLib "-framework CoreFoundation")
+add_library(BundleTestLib SHARED BundleLib.cxx)
+target_link_libraries(BundleTestLib "-framework CoreFoundation")
 
-ADD_EXECUTABLE(BundleTest
+add_executable(BundleTest
   MACOSX_BUNDLE
   BundleTest.cxx
   SomeRandomFile.txt
   "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   )
-TARGET_LINK_LIBRARIES(BundleTest BundleTestLib)
+target_link_libraries(BundleTest BundleTestLib)
 #
-# DO NOT: TARGET_LINK_LIBRARIES(BundleTest "-framework CoreFoundation")
+# DO NOT: target_link_libraries(BundleTest "-framework CoreFoundation")
 #   (see above comments about CoreFoundation)
 #
 
 # Test bundle installation.
-#INSTALL(TARGETS BundleTestLib DESTINATION Applications/BundleTestExe.app/Contents/Plugins)
-INSTALL(TARGETS BundleTestLib DESTINATION Applications/SecondBundleExe.app/Contents/Plugins)
-INSTALL(TARGETS BundleTest DESTINATION Applications)
+#install(TARGETS BundleTestLib DESTINATION Applications/BundleTestExe.app/Contents/Plugins)
+install(TARGETS BundleTestLib DESTINATION Applications/SecondBundleExe.app/Contents/Plugins)
+install(TARGETS BundleTest DESTINATION Applications)
 
 # Test whether bundles respect the output name.  Since the library is
 # installed into a location that uses this output name this will fail if the
 # bundle does not respect the name.  Also the executable will not be found by
 # the test driver if this does not work.
-SET_TARGET_PROPERTIES(BundleTest PROPERTIES OUTPUT_NAME BundleTestExe)
+set_target_properties(BundleTest PROPERTIES OUTPUT_NAME BundleTestExe)
 
 # Test executable versioning if it is supported.
-IF(NOT XCODE)
-  SET_TARGET_PROPERTIES(BundleTest PROPERTIES VERSION 1)
-ENDIF(NOT XCODE)
+if(NOT XCODE)
+  set_target_properties(BundleTest PROPERTIES VERSION 1)
+endif()
 
 # Make sure the executable can find its installed library.
-SET_TARGET_PROPERTIES(BundleTestLib PROPERTIES
+set_target_properties(BundleTestLib PROPERTIES
   INSTALL_NAME_DIR "@executable_path/../Plugins")
 
-INCLUDE(CPack)
+include(CPack)
 
 # test the framework find stuff
-IF(EXISTS /usr/lib/libtcl.dylib
+if(EXISTS /usr/lib/libtcl.dylib
     AND EXISTS /System/Library/Frameworks/Tcl.framework)
-  SET(TCL NOTFOUND)
-  FIND_LIBRARY(TCL tcl)
-  MESSAGE("frame: ${TCL}")
-  IF(NOT "${TCL}" MATCHES .framework)
-    MESSAGE(FATAL_ERROR "Could not find tcl framework, found ${TCL}")
-  ENDIF(NOT "${TCL}" MATCHES .framework)
-  SET(TCL NOTFOUND)
-  SET(CMAKE_FIND_FRAMEWORK LAST)
-  FIND_LIBRARY(TCL tcl)
-  IF("${TCL}" MATCHES .framework)
-    MESSAGE(FATAL_ERROR "Found framework and should have found dylib ${TCL}")
-  ENDIF("${TCL}" MATCHES .framework)
-  SET(TCL NOTFOUND)
-  SET(CMAKE_FIND_FRAMEWORK NEVER)
-  FIND_LIBRARY(TCL tcl)
-  IF("${TCL}" MATCHES .framework)
-    MESSAGE(FATAL_ERROR "Found framework and should have found dylib ${TCL}")
-  ENDIF("${TCL}" MATCHES .framework)
-  MESSAGE("not frame: ${TCL}")
-  SET(TCL NOTFOUND)
-  SET(CMAKE_FIND_FRAMEWORK FIRST)
-  FIND_LIBRARY(TCL tcl)
-  IF(NOT "${TCL}" MATCHES .framework)
-    MESSAGE(FATAL_ERROR "Could not find tcl framework, found ${TCL}")
-  ENDIF(NOT "${TCL}" MATCHES .framework)
-  MESSAGE("frame: ${TCL}")
-ENDIF(EXISTS /usr/lib/libtcl.dylib
+  set(TCL NOTFOUND)
+  find_library(TCL tcl)
+  message("frame: ${TCL}")
+  if(NOT "${TCL}" MATCHES .framework)
+    message(FATAL_ERROR "Could not find tcl framework, found ${TCL}")
+  endif()
+  set(TCL NOTFOUND)
+  set(CMAKE_FIND_FRAMEWORK LAST)
+  find_library(TCL tcl)
+  if("${TCL}" MATCHES .framework)
+    message(FATAL_ERROR "Found framework and should have found dylib ${TCL}")
+  endif()
+  set(TCL NOTFOUND)
+  set(CMAKE_FIND_FRAMEWORK NEVER)
+  find_library(TCL tcl)
+  if("${TCL}" MATCHES .framework)
+    message(FATAL_ERROR "Found framework and should have found dylib ${TCL}")
+  endif()
+  message("not frame: ${TCL}")
+  set(TCL NOTFOUND)
+  set(CMAKE_FIND_FRAMEWORK FIRST)
+  find_library(TCL tcl)
+  if(NOT "${TCL}" MATCHES .framework)
+    message(FATAL_ERROR "Could not find tcl framework, found ${TCL}")
+  endif()
+  message("frame: ${TCL}")
+endif(EXISTS /usr/lib/libtcl.dylib
   AND EXISTS /System/Library/Frameworks/Tcl.framework)
 
-SUBDIRS(BundleSubDir)
+subdirs(BundleSubDir)

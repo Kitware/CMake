@@ -1,13 +1,13 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT (CTestTestCostSerial)
-INCLUDE (CTest)
+cmake_minimum_required (VERSION 2.6)
+project (CTestTestCostSerial)
+include (CTest)
 
-ADD_EXECUTABLE (Sleep sleep.c)
+add_executable (Sleep sleep.c)
 
-FOREACH (index RANGE 1 3)
-  ADD_TEST (TestSleep${index} Sleep)
-ENDFOREACH (index RANGE 1 3)
+foreach (index RANGE 1 3)
+  add_test (TestSleep${index} Sleep)
+endforeach ()
 
-SET_TESTS_PROPERTIES(TestSleep1 PROPERTIES COST -500)
-SET_TESTS_PROPERTIES(TestSleep2 PROPERTIES COST 12)
-SET_TESTS_PROPERTIES(TestSleep3 PROPERTIES COST 0)
+set_tests_properties(TestSleep1 PROPERTIES COST -500)
+set_tests_properties(TestSleep2 PROPERTIES COST 12)
+set_tests_properties(TestSleep3 PROPERTIES COST 0)

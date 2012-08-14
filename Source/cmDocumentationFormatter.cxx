@@ -19,7 +19,7 @@ cmDocumentationFormatter::~cmDocumentationFormatter()
 {
 }
 
-void cmDocumentationFormatter::PrintFormatted(std::ostream& os, 
+void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
                                               const char* text)
 {
   if(!text)

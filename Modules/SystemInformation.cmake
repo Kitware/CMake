@@ -12,92 +12,92 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-CMAKE_MINIMUM_REQUIRED(VERSION ${CMAKE_VERSION})
-PROJECT(DumpInformation)
+cmake_minimum_required(VERSION ${CMAKE_VERSION})
+project(DumpInformation)
 
 # first get the standard information for th platform
-INCLUDE_DIRECTORIES("This does not exists")
-GET_DIRECTORY_PROPERTY(incl INCLUDE_DIRECTORIES)
-SET_DIRECTORY_PROPERTIES(PROPERTIES INCLUDE_DIRECTORIES "${DumpInformation_BINARY_DIR};${DumpInformation_SOURCE_DIR}")
+include_directories("This does not exists")
+get_directory_property(incl INCLUDE_DIRECTORIES)
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${DumpInformation_BINARY_DIR};${DumpInformation_SOURCE_DIR}")
 
-CONFIGURE_FILE("${CMAKE_ROOT}/Modules/SystemInformation.in" "${RESULT_FILE}")
+configure_file("${CMAKE_ROOT}/Modules/SystemInformation.in" "${RESULT_FILE}")
 
 
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=== VARIABLES\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=================================================================\n")
-GET_CMAKE_PROPERTY(res VARIABLES)
-FOREACH(var ${res})
-  FILE(APPEND "${RESULT_FILE}" "${var} \"${${var}}\"\n")
-ENDFOREACH(var ${res})
+get_cmake_property(res VARIABLES)
+foreach(var ${res})
+  file(APPEND "${RESULT_FILE}" "${var} \"${${var}}\"\n")
+endforeach()
 
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=== COMMANDS\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=================================================================\n")
-GET_CMAKE_PROPERTY(res COMMANDS)
-FOREACH(var ${res})
-  FILE(APPEND "${RESULT_FILE}" "${var}\n")
-ENDFOREACH(var ${res})
+get_cmake_property(res COMMANDS)
+foreach(var ${res})
+  file(APPEND "${RESULT_FILE}" "${var}\n")
+endforeach()
 
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=== MACROS\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=================================================================\n")
-FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllMacros.txt "")
-GET_CMAKE_PROPERTY(res MACROS)
-FOREACH(var ${res})
-  FILE(APPEND "${RESULT_FILE}" "${var}\n")
-ENDFOREACH(var ${res})
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/AllMacros.txt "")
+get_cmake_property(res MACROS)
+foreach(var ${res})
+  file(APPEND "${RESULT_FILE}" "${var}\n")
+endforeach()
 
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "\n=================================================================\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=== OTHER\n")
-FILE(APPEND "${RESULT_FILE}" 
+file(APPEND "${RESULT_FILE}"
   "=================================================================\n")
-GET_DIRECTORY_PROPERTY(res INCLUDE_DIRECTORIES)
-FOREACH(var ${res})
-  FILE(APPEND "${RESULT_FILE}" "INCLUDE_DIRECTORY: ${var}\n")
-ENDFOREACH(var)
+get_directory_property(res INCLUDE_DIRECTORIES)
+foreach(var ${res})
+  file(APPEND "${RESULT_FILE}" "INCLUDE_DIRECTORY: ${var}\n")
+endforeach()
 
-GET_DIRECTORY_PROPERTY(res LINK_DIRECTORIES)
-FOREACH(var ${res})
-  FILE(APPEND "${RESULT_FILE}" "LINK_DIRECTORIES: ${var}\n")
-ENDFOREACH(var)
+get_directory_property(res LINK_DIRECTORIES)
+foreach(var ${res})
+  file(APPEND "${RESULT_FILE}" "LINK_DIRECTORIES: ${var}\n")
+endforeach()
 
-GET_DIRECTORY_PROPERTY(res INCLUDE_REGULAR_EXPRESSION)
-FILE(APPEND "${RESULT_FILE}" "INCLUDE_REGULAR_EXPRESSION: ${res}\n")
+get_directory_property(res INCLUDE_REGULAR_EXPRESSION)
+file(APPEND "${RESULT_FILE}" "INCLUDE_REGULAR_EXPRESSION: ${res}\n")
 
 # include other files if they are present, such as when run from within the
 # binary tree
-MACRO(DUMP_FILE THE_FILE)
-  IF (EXISTS "${THE_FILE}")
-    FILE(APPEND "${RESULT_FILE}" 
+macro(DUMP_FILE THE_FILE)
+  if (EXISTS "${THE_FILE}")
+    file(APPEND "${RESULT_FILE}"
       "\n=================================================================\n")
-    FILE(APPEND "${RESULT_FILE}" 
+    file(APPEND "${RESULT_FILE}"
       "=== ${THE_FILE}\n")
-    FILE(APPEND "${RESULT_FILE}" 
+    file(APPEND "${RESULT_FILE}"
       "=================================================================\n")
-  
-    FILE(READ "${THE_FILE}" FILE_CONTENTS LIMIT 50000)
-    FILE(APPEND "${RESULT_FILE}" "${FILE_CONTENTS}")
-  ENDIF (EXISTS "${THE_FILE}")
-ENDMACRO(DUMP_FILE)
+
+    file(READ "${THE_FILE}" FILE_CONTENTS LIMIT 50000)
+    file(APPEND "${RESULT_FILE}" "${FILE_CONTENTS}")
+  endif ()
+endmacro()
 
 DUMP_FILE("../CMakeCache.txt")
 DUMP_FILE("../CMakeFiles/CMakeOutput.log")
 DUMP_FILE("../CMakeFiles/CMakeError.log")
 DUMP_FILE("../CMakeFiles/CMakeSystem.cmake")
 
-FOREACH (EXTRA_FILE ${EXTRA_DUMP_FILES})
+foreach (EXTRA_FILE ${EXTRA_DUMP_FILES})
   DUMP_FILE("${EXTRA_FILE}")
-ENDFOREACH (EXTRA_FILE)
+endforeach ()
 

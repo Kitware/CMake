@@ -22,12 +22,12 @@ bool cmGetDirectoryPropertyCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  
+
   std::vector<std::string>::const_iterator i = args.begin();
   std::string variable = *i;
   ++i;
   std::string output = "";
-    
+
   // get the directory argument if there is one
   cmMakefile *dir = this->Makefile;
   if (*i == "DIRECTORY")
@@ -52,7 +52,7 @@ bool cmGetDirectoryPropertyCommand
     sd = cmSystemTools::CollapseFullPath(sd.c_str());
 
     // lookup the makefile from the directory name
-    cmLocalGenerator *lg = 
+    cmLocalGenerator *lg =
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       FindLocalGenerator(sd.c_str());
     if (!lg)
@@ -69,7 +69,7 @@ bool cmGetDirectoryPropertyCommand
 
   // OK, now we have the directory to process, we just get the requested
   // information out of it
-  
+
   if ( *i == "DEFINITION" )
     {
     ++i;

@@ -17,8 +17,8 @@
 /** \class cmCMakePolicyCommand
  * \brief Set how CMake should handle policies
  *
- * cmCMakePolicyCommand sets how CMake should deal with backwards 
- * compatibility policies.   
+ * cmCMakePolicyCommand sets how CMake should deal with backwards
+ * compatibility policies.
  */
 class cmCMakePolicyCommand : public cmCommand
 {
@@ -26,7 +26,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmCMakePolicyCommand;
     }
@@ -47,7 +47,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const {return "cmake_policy";}
-  
+
  /**
    * Succinct documentation.
    */
@@ -55,7 +55,7 @@ public:
     {
     return "Manage CMake Policy settings.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -129,7 +129,7 @@ public:
       "closest nested policy stack entry."
       ;
     }
-  
+
   cmTypeMacro(cmCMakePolicyCommand, cmCommand);
 private:
   bool HandleSetMode(std::vector<std::string> const& args);

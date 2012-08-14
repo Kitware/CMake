@@ -215,7 +215,7 @@ ${_desc_${macro}}
         message(AUTHOR_WARNING "No FortranCInterface mangling known for ${f}")
       endif()
     endif()
-  endforeach(f)
+  endforeach()
 
   # Store the content.
   configure_file(${FortranCInterface_SOURCE_DIR}/Macro.h.in ${FILE} @ONLY)

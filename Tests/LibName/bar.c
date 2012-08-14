@@ -1,7 +1,7 @@
 #ifdef _WIN32
-__declspec(dllexport) 
+__declspec(dllexport)
 #endif
-  
+
 extern  void foo()
 {
 }

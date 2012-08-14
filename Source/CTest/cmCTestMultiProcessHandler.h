@@ -19,16 +19,16 @@
 /** \class cmCTestMultiProcessHandler
  * \brief run parallel ctest
  *
- * cmCTestMultiProcessHandler 
+ * cmCTestMultiProcessHandler
  */
-class cmCTestMultiProcessHandler 
+class cmCTestMultiProcessHandler
 {
   friend class TestComparator;
 public:
   struct TestSet : public std::set<int> {};
   struct TestMap : public std::map<int, TestSet> {};
   struct TestList : public std::vector<int> {};
-  struct PropertiesMap : public 
+  struct PropertiesMap : public
      std::map<int, cmCTestTestHandler::cmCTestTestProperties*> {};
 
   cmCTestMultiProcessHandler();

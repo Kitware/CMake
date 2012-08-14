@@ -120,7 +120,7 @@ bool cmCMakeMinimumRequired
   {
     this->Makefile->SetPolicyVersion(version_string.c_str());
   }
-  
+
   return true;
 }
 

@@ -27,7 +27,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmSubdirDependsCommand;
     }
@@ -51,7 +51,7 @@ public:
     {
     return "Deprecated.  Does nothing.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -62,7 +62,7 @@ public:
       "Does not do anything.  This command used to help projects order "
       "parallel builds correctly.  This functionality is now automatic.";
     }
-  
+
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

@@ -20,25 +20,25 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(MPEG_INCLUDE_DIR mpeg2dec/include/video_out.h
+find_path(MPEG_INCLUDE_DIR mpeg2dec/include/video_out.h
   /usr/local/livid
 )
 
-FIND_LIBRARY(MPEG_mpeg2_LIBRARY mpeg2
+find_library(MPEG_mpeg2_LIBRARY mpeg2
   /usr/local/livid/mpeg2dec/libmpeg2/.libs
 )
 
-FIND_LIBRARY( MPEG_vo_LIBRARY vo
+find_library( MPEG_vo_LIBRARY vo
   /usr/local/livid/mpeg2dec/libvo/.libs
 )
 
-# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if 
+# handle the QUIETLY and REQUIRED arguments and set MPEG2_FOUND to TRUE if
 # all listed variables are TRUE
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(MPEG DEFAULT_MSG MPEG_INCLUDE_DIR MPEG_mpeg2_LIBRARY MPEG_vo_LIBRARY)
 
-IF(MPEG_FOUND)
-  SET( MPEG_LIBRARIES ${MPEG_mpeg2_LIBRARY} ${MPEG_vo_LIBRARY} )
-ENDIF(MPEG_FOUND)
+if(MPEG_FOUND)
+  set( MPEG_LIBRARIES ${MPEG_mpeg2_LIBRARY} ${MPEG_vo_LIBRARY} )
+endif()
 
-MARK_AS_ADVANCED(MPEG_INCLUDE_DIR MPEG_mpeg2_LIBRARY MPEG_vo_LIBRARY)
+mark_as_advanced(MPEG_INCLUDE_DIR MPEG_mpeg2_LIBRARY MPEG_vo_LIBRARY)

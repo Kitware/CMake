@@ -25,23 +25,23 @@
 #include <signal.h>
 extern "C" void TrapsForSignalsCFunction(int sig);
 
-  
+
 // a class for loadabple commands
 class cmLoadedCommand : public cmCommand
 {
 public:
   cmLoadedCommand() {
-    memset(&this->info,0,sizeof(this->info)); 
+    memset(&this->info,0,sizeof(this->info));
     this->info.CAPI = &cmStaticCAPI;
   }
-  
+
   ///! clean up any memory allocated by the plugin
   ~cmLoadedCommand();
-    
+
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
       cmLoadedCommand *newC = new cmLoadedCommand;
       // we must copy when we clone
@@ -53,7 +53,7 @@ public:
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
-  virtual bool InitialPass(std::vector<std::string> const& args, 
+  virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &);
 
   /**
@@ -70,7 +70,7 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return info.Name; }
-  
+
   /**
    * Succinct documentation.
    */
@@ -79,7 +79,7 @@ public:
       if (this->info.GetTerseDocumentation)
         {
         cmLoadedCommand::InstallSignalHandlers(info.Name);
-        const char* ret = info.GetTerseDocumentation(); 
+        const char* ret = info.GetTerseDocumentation();
         cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
         return ret;
         }
@@ -101,7 +101,7 @@ public:
         {
         cmLoadedCommand::LastName = "????";
         }
-      
+
       if(!remove)
         {
         signal(SIGSEGV, TrapsForSignalsCFunction);
@@ -119,7 +119,7 @@ public:
         signal(SIGILL,  0);
         }
     }
-  
+
   /**
    * More documentation.
    */
@@ -137,7 +137,7 @@ public:
         return "LoadedCommand without any additional documentation";
         }
     }
-  
+
   cmTypeMacro(cmLoadedCommand, cmCommand);
 
   cmLoadedCommandInfo info;
@@ -164,7 +164,7 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
     {
     free(this->info.Error);
     }
-  
+
   // create argc and argv and then invoke the command
   int argc = static_cast<int> (args.size());
   char **argv = 0;
@@ -179,10 +179,10 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
     }
   cmLoadedCommand::InstallSignalHandlers(info.Name);
   int result = info.InitialPass((void *)&info,
-                                (void *)this->Makefile,argc,argv); 
+                                (void *)this->Makefile,argc,argv);
   cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
   cmFreeArguments(argc,argv);
-  
+
   if (result)
     {
     return true;
@@ -249,7 +249,7 @@ bool cmLoadCommandCommand
     // expand variables
     std::string exp = args[j];
     cmSystemTools::ExpandRegistryValues(exp);
-    
+
     // Glob the entry in case of wildcards.
     cmSystemTools::GlobDirs(exp.c_str(), path);
     }
@@ -298,7 +298,7 @@ bool cmLoadCommandCommand
     initFunction = (CM_INIT_FUNCTION)(
       cmsys::DynamicLoader::GetSymbolAddress(lib, initFuncName.c_str()));
     }
-  // if the symbol is found call it to set the name on the 
+  // if the symbol is found call it to set the name on the
   // function blocker
   if(initFunction)
     {

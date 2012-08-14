@@ -25,50 +25,50 @@
 #  License text for the above reference.)
 
 # use pkg-config to get the directories and then use these values
-# in the FIND_PATH() and FIND_LIBRARY() calls
-FIND_PACKAGE(PkgConfig QUIET)
+# in the find_path() and find_library() calls
+find_package(PkgConfig QUIET)
 PKG_CHECK_MODULES(PC_LIBXSLT QUIET libxslt)
-SET(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
+set(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
 
-FIND_PATH(LIBXSLT_INCLUDE_DIR NAMES libxslt/xslt.h
+find_path(LIBXSLT_INCLUDE_DIR NAMES libxslt/xslt.h
     HINTS
    ${PC_LIBXSLT_INCLUDEDIR}
    ${PC_LIBXSLT_INCLUDE_DIRS}
   )
 
-FIND_LIBRARY(LIBXSLT_LIBRARIES NAMES xslt libxslt
+find_library(LIBXSLT_LIBRARIES NAMES xslt libxslt
     HINTS
    ${PC_LIBXSLT_LIBDIR}
    ${PC_LIBXSLT_LIBRARY_DIRS}
   )
 
-FIND_LIBRARY(LIBXSLT_EXSLT_LIBRARY NAMES exslt libexslt
+find_library(LIBXSLT_EXSLT_LIBRARY NAMES exslt libexslt
     HINTS
     ${PC_LIBXSLT_LIBDIR}
     ${PC_LIBXSLT_LIBRARY_DIRS}
   )
 
-SET(LIBXSLT_EXSLT_LIBRARIES ${LIBXSLT_EXSLT_LIBRARY} )
+set(LIBXSLT_EXSLT_LIBRARIES ${LIBXSLT_EXSLT_LIBRARY} )
 
-FIND_PROGRAM(LIBXSLT_XSLTPROC_EXECUTABLE xsltproc)
+find_program(LIBXSLT_XSLTPROC_EXECUTABLE xsltproc)
 
-IF(PC_LIBXSLT_VERSION)
-    SET(LIBXSLT_VERSION_STRING ${PC_LIBXSLT_VERSION})
-ELSEIF(LIBXSLT_INCLUDE_DIR AND EXISTS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig.h")
-    FILE(STRINGS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig.h" libxslt_version_str
+if(PC_LIBXSLT_VERSION)
+    set(LIBXSLT_VERSION_STRING ${PC_LIBXSLT_VERSION})
+elseif(LIBXSLT_INCLUDE_DIR AND EXISTS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig.h")
+    file(STRINGS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig.h" libxslt_version_str
          REGEX "^#define[\t ]+LIBXSLT_DOTTED_VERSION[\t ]+\".*\"")
 
-    STRING(REGEX REPLACE "^#define[\t ]+LIBXSLT_DOTTED_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
+    string(REGEX REPLACE "^#define[\t ]+LIBXSLT_DOTTED_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
            LIBXSLT_VERSION_STRING "${libxslt_version_str}")
-    UNSET(libxslt_version_str)
-ENDIF()
+    unset(libxslt_version_str)
+endif()
 
-INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXslt
                                   REQUIRED_VARS LIBXSLT_LIBRARIES LIBXSLT_INCLUDE_DIR
                                   VERSION_VAR LIBXSLT_VERSION_STRING)
 
-MARK_AS_ADVANCED(LIBXSLT_INCLUDE_DIR
+mark_as_advanced(LIBXSLT_INCLUDE_DIR
                  LIBXSLT_LIBRARIES
                  LIBXSLT_EXSLT_LIBRARY
                  LIBXSLT_XSLTPROC_EXECUTABLE)

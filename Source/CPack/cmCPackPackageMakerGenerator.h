@@ -67,8 +67,8 @@ protected:
   // Generate a package in the file packageFile for the given
   // component.  All of the files within this component are stored in
   // the directory packageDir. Returns true if successful, false
-  // otherwise. 
-  bool GenerateComponentPackage(const char *packageFile, 
+  // otherwise.
+  bool GenerateComponentPackage(const char *packageFile,
                                 const char *packageDir,
                                 const cmCPackComponent& component);
 
@@ -87,14 +87,14 @@ protected:
 
   // Subroutine of WriteDistributionFile that writes out the
   // reverse dependency attributes for inter-component dependencies.
-  void 
+  void
   AddReverseDependencyAttributes(const cmCPackComponent& component,
                                  std::set<const cmCPackComponent *>& visited,
                                  cmOStringStream& out);
 
   // Generates XML that encodes the hierarchy of component groups and
   // their components in a form that can be used by distribution
-  // metapackages. 
+  // metapackages.
   void CreateChoiceOutline(const cmCPackComponentGroup& group,
                            cmOStringStream& out);
 
@@ -111,7 +111,7 @@ protected:
   // Escape the given string to make it usable as an XML attribute
   // value.
   std::string EscapeForXML(std::string str);
-  
+
   double PackageMakerVersion;
   double PackageCompatibilityVersion;
 };

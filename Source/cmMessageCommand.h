@@ -24,7 +24,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmMessageCommand;
     }
@@ -53,7 +53,7 @@ public:
     {
     return "Display a message to the user.";
     }
-  
+
   /**
    * More documentation.
    */
@@ -83,7 +83,7 @@ public:
       "Indented text is considered pre-formatted."
       ;
     }
-  
+
   cmTypeMacro(cmMessageCommand, cmCommand);
 };
 

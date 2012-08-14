@@ -71,13 +71,13 @@ void cmSourceGroup::SetGroupRegex(const char* regex)
     this->GroupRegex.compile("^$");
     }
 }
-  
+
 //----------------------------------------------------------------------------
 void cmSourceGroup::AddGroupFile(const char* name)
 {
   this->GroupFiles.insert(name);
 }
-  
+
 //----------------------------------------------------------------------------
 const char* cmSourceGroup::GetName() const
 {
@@ -89,7 +89,7 @@ const char* cmSourceGroup::GetFullName() const
 {
   return this->FullName.c_str();
 }
-  
+
 //----------------------------------------------------------------------------
 bool cmSourceGroup::MatchesRegex(const char* name)
 {
@@ -137,12 +137,12 @@ cmSourceGroup *cmSourceGroup::lookupChild(const char* name)
   // st
   for(;iter!=end; ++iter)
     {
-    std::string sgName = iter->GetName(); 
+    std::string sgName = iter->GetName();
 
     // look if descenened is the one were looking for
     if(sgName == name)
       {
-      return &(*iter); // if it so return it 
+      return &(*iter); // if it so return it
       }
     }
 

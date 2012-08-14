@@ -28,7 +28,7 @@ if(NOT XIAR)
   endforeach()
   find_program(XIAR NAMES xiar HINTS ${_intel_xiar_hints})
   mark_as_advanced(XIAR)
-endif(NOT XIAR)
+endif()
 
 macro(__linux_compiler_intel lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "-fPIC")

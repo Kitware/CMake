@@ -1,53 +1,53 @@
 # a simple C only test case
 cmake_minimum_required (VERSION 2.6)
-PROJECT (MacroTest)
+project (MacroTest)
 
-MACRO(FAILED testname)
-  MESSAGE(SEND_ERROR "${testname} failed ${ARGN}")
-ENDMACRO(FAILED)
+macro(FAILED testname)
+  message(SEND_ERROR "${testname} failed ${ARGN}")
+endmacro()
 
-MACRO(PASS testname)
-  MESSAGE("${testname} passed ${ARGN}")
-ENDMACRO(PASS)
+macro(PASS testname)
+  message("${testname} passed ${ARGN}")
+endmacro()
 
 # test ARGC
-MACRO(weird_name)
-  IF("${ARGC}" EQUAL "3")
+macro(weird_name)
+  if("${ARGC}" EQUAL "3")
     PASS("ARGC")
-  ELSE("${ARGC}" EQUAL "3")
+  else()
     FAILED("ARGC" "Got: ${ARGC}")
-  ENDIF("${ARGC}" EQUAL "3")
-ENDMACRO(weird_name)
+  endif()
+endmacro()
 WeIrD_nAmE(a1 a2 a3)
 
 # test ARGN
-MACRO(test_argn_macro argument)
-  IF("${ARGN}" EQUAL "3")
+macro(test_argn_macro argument)
+  if("${ARGN}" EQUAL "3")
     PASS("ARGN")
-  ELSE("${ARGN}" EQUAL "3")
+  else()
     FAILED("ARGN" "Got: ${ARGN}")
-  ENDIF("${ARGN}" EQUAL "3")
-ENDMACRO(test_argn_macro)
+  endif()
+endmacro()
 Test_Argn_Macro(ignored 3)
 
 # case test
-MACRO(strange_macro m)
-  SET("${m}" strange_macro)
-ENDMACRO(strange_macro m)
+macro(strange_macro m)
+  set("${m}" strange_macro)
+endmacro()
 STRANGE_MACRO(var)
 set(second_var "second_var")
-IF("${var}" STREQUAL "strange_macro" AND "${second_var}" STREQUAL "second_var")
+if("${var}" STREQUAL "strange_macro" AND "${second_var}" STREQUAL "second_var")
   PASS("Case Test" "(${var} ${second_var})")
-ELSE("${var}" STREQUAL "strange_macro" AND "${second_var}" STREQUAL "second_var")
+else()
   FAILED("Case test" "(${var} ${second_var})")
-ENDIF("${var}" STREQUAL "strange_macro" AND "${second_var}" STREQUAL "second_var")
+endif()
 
 # test backing up command
-MACRO(ADD_EXECUTABLE exec)
+macro(ADD_EXECUTABLE exec)
   _ADD_EXECUTABLE("mini${exec}" ${ARGN})
-ENDMACRO(ADD_EXECUTABLE)
+endmacro()
 
-INCLUDE(CheckCSourceCompiles)
+include(CheckCSourceCompiles)
 Check_C_Source_Compiles(
 "
 #include <stdio.h>
@@ -62,13 +62,13 @@ int main(int ac, char*av[]){
   return 0;
 }"
 SOME_CHECK)
-IF(SOME_CHECK)
-  MESSAGE("CheckCSourceCompiles works")
-ELSE(SOME_CHECK)
-  MESSAGE(FATAL_ERROR "CheckCSourceCompiles does not work")
-ENDIF(SOME_CHECK)
+if(SOME_CHECK)
+  message("CheckCSourceCompiles works")
+else()
+  message(FATAL_ERROR "CheckCSourceCompiles does not work")
+endif()
 
-INCLUDE(CheckCXXSourceCompiles)
+include(CheckCXXSourceCompiles)
 Check_CXX_Source_Compiles(
 "
 #include <stdio.h>
@@ -77,15 +77,15 @@ int main(int ac, char*av[]){
   return 0;
 }"
 SOME_CHECK)
-IF(SOME_CHECK)
-  MESSAGE("CheckCXXSourceCompiles works")
-ELSE(SOME_CHECK)
-  MESSAGE(FATAL_ERROR "CheckCXXSourceCompiles does not work")
-ENDIF(SOME_CHECK)
+if(SOME_CHECK)
+  message("CheckCXXSourceCompiles works")
+else()
+  message(FATAL_ERROR "CheckCXXSourceCompiles does not work")
+endif()
 
-ADD_EXECUTABLE(MacroTest macroTest.c)
+add_executable(MacroTest macroTest.c)
 
-MACRO(GET_CURRENT_FILE var)
-  SET(${var} ${CMAKE_CURRENT_LIST_FILE})
-ENDMACRO(GET_CURRENT_FILE)
-INCLUDE(context.cmake)
+macro(GET_CURRENT_FILE var)
+  set(${var} ${CMAKE_CURRENT_LIST_FILE})
+endmacro()
+include(context.cmake)

@@ -28,7 +28,7 @@ public:
   /**
    * This is a virtual constructor for the command.
    */
-  virtual cmCommand* Clone() 
+  virtual cmCommand* Clone()
     {
     return new cmEnableLanguageCommand;
     }
@@ -39,7 +39,7 @@ public:
    */
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  
+
   /**
    * The name of the command as specified in CMakeList.txt.
    */
@@ -52,7 +52,7 @@ public:
     {
     return "Enable a language (CXX/C/Fortran/etc)";
     }
-  
+
   /**
    * More documentation.
    */
@@ -67,7 +67,7 @@ public:
       "If OPTIONAL is used, use the CMAKE_<languageName>_COMPILER_WORKS "
       "variable to check whether the language has been enabled successfully.";
     }
-  
+
   cmTypeMacro(cmEnableLanguageCommand, cmCommand);
 };
 

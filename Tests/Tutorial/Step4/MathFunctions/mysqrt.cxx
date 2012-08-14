@@ -11,7 +11,7 @@ double mysqrt(double x)
     {
     return 0;
     }
-  
+
   double result;
 
   // if we have both log and exp then use them
@@ -19,7 +19,7 @@ double mysqrt(double x)
   result = exp(log(x)*0.5);
   fprintf(stdout,"Computing sqrt of %g to be %g using log\n",x,result);
 #else
-  double delta;  
+  double delta;
   result = x;
 
   // do ten iterations

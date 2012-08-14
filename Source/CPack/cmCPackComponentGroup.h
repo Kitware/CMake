@@ -18,7 +18,7 @@
 class cmCPackComponentGroup;
 
 /** \class cmCPackInstallationType
- * \brief A certain type of installation, which encompasses a 
+ * \brief A certain type of installation, which encompasses a
  * set of components.
  */
 class cmCPackInstallationType
@@ -90,7 +90,7 @@ public:
   std::vector<std::string> Directories;
 
   /// Get the total installed size of all of the files in this
-  /// component, in bytes. installDir is the directory into which the 
+  /// component, in bytes. installDir is the directory into which the
   /// component was installed.
   unsigned long GetInstalledSize(const char* installDir) const;
 

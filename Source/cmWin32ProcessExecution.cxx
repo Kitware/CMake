@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmWin32ProcessExecution.h"
 
-#include "cmSystemTools.h"   
+#include "cmSystemTools.h"
 
 #include <malloc.h>
 #include <io.h>
@@ -48,26 +48,26 @@
 void DisplayErrorMessage()
 {
   LPVOID lpMsgBuf;
-  FormatMessage( 
-    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-    FORMAT_MESSAGE_FROM_SYSTEM | 
+  FormatMessage(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+    FORMAT_MESSAGE_FROM_SYSTEM |
     FORMAT_MESSAGE_IGNORE_INSERTS,
     NULL,
     GetLastError(),
     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
     (LPTSTR) &lpMsgBuf,
     0,
-    NULL 
+    NULL
     );
   // Process any inserts in lpMsgBuf.
-  // ... 
+  // ...
   // Display the string.
   MessageBox( NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
   // Free the buffer.
   LocalFree( lpMsgBuf );
 }
- 
-// Code from a Borland web site with the following explaination : 
+
+// Code from a Borland web site with the following explaination :
 /* In this article, I will explain how to spawn a console application
  * and redirect its standard input/output using anonymous pipes. An
  * anonymous pipe is a pipe that goes only in one direction (read
@@ -93,74 +93,74 @@ void DisplayErrorMessage()
  * monitor the read end of the stdout pipe to check for display on our
  * child process. Every time there is something availabe for reading,
  * we will display it in our app. Consequently, we check for input in
- * our app and send it off to the write end of the stdin pipe. */ 
+ * our app and send it off to the write end of the stdin pipe. */
 
-inline bool IsWinNT() 
-//check if we're running NT 
+inline bool IsWinNT()
+//check if we're running NT
 {
   OSVERSIONINFO osv;
   osv.dwOSVersionInfoSize = sizeof(osv);
   GetVersionEx(&osv);
-  return (osv.dwPlatformId == VER_PLATFORM_WIN32_NT); 
+  return (osv.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 bool cmWin32ProcessExecution::BorlandRunCommand(
-  const char* command, const char* dir, 
-  std::string& output, int& retVal, bool verbose, int /* timeout */, 
-  bool hideWindows) 
+  const char* command, const char* dir,
+  std::string& output, int& retVal, bool verbose, int /* timeout */,
+  bool hideWindows)
 {
   //verbose = true;
-  //std::cerr << std::endl 
-  //        << "WindowsRunCommand(" << command << ")" << std::endl 
+  //std::cerr << std::endl
+  //        << "WindowsRunCommand(" << command << ")" << std::endl
   //        << std::flush;
   const int BUFFER_SIZE = 4096;
   char buf[BUFFER_SIZE];
- 
-//i/o buffer 
+
+//i/o buffer
   STARTUPINFO si;
   SECURITY_ATTRIBUTES sa;
   SECURITY_DESCRIPTOR sd;
- 
-//security information for pipes 
+
+//security information for pipes
   PROCESS_INFORMATION pi;
   HANDLE newstdin,newstdout,read_stdout,write_stdin;
- 
-//pipe handles 
-  if (IsWinNT()) 
-//initialize security descriptor (Windows NT) 
+
+//pipe handles
+  if (IsWinNT())
+//initialize security descriptor (Windows NT)
     {
     InitializeSecurityDescriptor(&sd,SECURITY_DESCRIPTOR_REVISION);
     SetSecurityDescriptorDacl(&sd, true, NULL, false);
     sa.lpSecurityDescriptor = &sd;
- 
+
     }
   else sa.lpSecurityDescriptor = NULL;
   sa.nLength = sizeof(SECURITY_ATTRIBUTES);
   sa.bInheritHandle = true;
- 
-//allow inheritable handles 
-  if (!CreatePipe(&newstdin,&write_stdin,&sa,0)) 
-//create stdin pipe 
+
+//allow inheritable handles
+  if (!CreatePipe(&newstdin,&write_stdin,&sa,0))
+//create stdin pipe
     {
     return false;
     }
-  if (!CreatePipe(&read_stdout,&newstdout,&sa,0)) 
-//create stdout pipe 
+  if (!CreatePipe(&read_stdout,&newstdout,&sa,0))
+//create stdout pipe
     {
     CloseHandle(newstdin);
     CloseHandle(write_stdin);
     return false;
- 
+
     }
   GetStartupInfo(&si);
- 
-//set startupinfo for the spawned process 
+
+//set startupinfo for the spawned process
   /* The dwFlags member tells CreateProcess how to make the
    * process. STARTF_USESTDHANDLES validates the hStd*
    * members. STARTF_USESHOWWINDOW validates the wShowWindow
-   * member. */ 
-  
+   * member. */
+
   si.cb = sizeof(STARTUPINFO);
   si.dwFlags = STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
   si.hStdOutput = newstdout;
@@ -170,12 +170,12 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
     {
     si.wShowWindow = SW_HIDE;
     }
- 
+
 //set the new handles for the child process si.hStdInput = newstdin;
   char* commandAndArgs = strcpy(new char[strlen(command)+1], command);
   if (!CreateProcess(NULL,commandAndArgs,NULL,NULL,TRUE,
-                     0, // CREATE_NEW_CONSOLE, 
-                     NULL,dir,&si,&pi)) 
+                     0, // CREATE_NEW_CONSOLE,
+                     NULL,dir,&si,&pi))
     {
     std::cerr << "CreateProcess failed " << commandAndArgs << std::endl;
     CloseHandle(newstdin);
@@ -184,37 +184,37 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
     CloseHandle(write_stdin);
     delete [] commandAndArgs;
     return false;
- 
+
     }
   delete [] commandAndArgs;
   unsigned long exit=0;
- 
-//process exit code unsigned 
+
+//process exit code unsigned
   unsigned long bread;
- 
-//bytes read unsigned 
+
+//bytes read unsigned
   unsigned long avail;
- 
-//bytes available 
+
+//bytes available
   memset(buf, 0, sizeof(buf));
-  for(;;) 
-//main program loop 
+  for(;;)
+//main program loop
     {
     Sleep(10);
-//check to see if there is any data to read from stdout 
+//check to see if there is any data to read from stdout
     //std::cout << "Peek for data..." << std::endl;
     PeekNamedPipe(read_stdout,buf,1023,&bread,&avail,NULL);
-    if (bread != 0) 
+    if (bread != 0)
       {
       memset(buf, 0, sizeof(buf));
-      if (avail > 1023) 
+      if (avail > 1023)
         {
-        while (bread >= 1023) 
+        while (bread >= 1023)
           {
           //std::cout << "Read data..." << std::endl;
           ReadFile(read_stdout,buf,1023,&bread,NULL);
- 
-          //read the stdout pipe 
+
+          //read the stdout pipe
           memset(buf, 0, sizeof(buf));
           output += buf;
           if (verbose)
@@ -223,39 +223,39 @@ bool cmWin32ProcessExecution::BorlandRunCommand(
             }
           }
         }
-      else 
+      else
         {
         ReadFile(read_stdout,buf,1023,&bread,NULL);
         output += buf;
-        if(verbose) 
+        if(verbose)
           {
           cmSystemTools::Stdout(buf);
           }
- 
+
         }
- 
+
       }
- 
+
     //std::cout << "Check for process..." << std::endl;
     GetExitCodeProcess(pi.hProcess,&exit);
- 
-//while the process is running 
+
+//while the process is running
     if (exit != STILL_ACTIVE) break;
- 
+
     }
   WaitForSingleObject(pi.hProcess, INFINITE);
   GetExitCodeProcess(pi.hProcess,&exit);
   CloseHandle(pi.hThread);
   CloseHandle(pi.hProcess);
   CloseHandle(newstdin);
- 
-//clean stuff up 
+
+//clean stuff up
   CloseHandle(newstdout);
   CloseHandle(read_stdout);
   CloseHandle(write_stdin);
   retVal = exit;
   return true;
- 
+
 }
 
 bool cmWin32ProcessExecution::StartProcess(
@@ -279,7 +279,7 @@ bool cmWin32ProcessExecution::Wait(int timeout)
 static void *_PyPopenProcs = NULL;
 
 static BOOL RealPopenCreateProcess(const char *cmdstring,
-                                   const char *path, 
+                                   const char *path,
                                    const char *szConsoleSpawn,
                                    HANDLE hStdin,
                                    HANDLE hStdout,
@@ -314,7 +314,7 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
     ++comshell;
 
     if (GetVersion() < 0x80000000 &&
-        STRICMP(comshell, "command.com") != 0) 
+        STRICMP(comshell, "command.com") != 0)
       {
       /* NT/2000 and not using command.com. */
       x = i + (int)strlen(s3) + (int)strlen(cmdstring) + 1;
@@ -323,7 +323,7 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
       //sprintf(s2, "%s%s%s", s1, s3, cmdstring);
       sprintf(s2, "%s", cmdstring);
       }
-    else 
+    else
       {
       /*
        * Oh gag, we're on Win9x or using COMMAND.COM. Use
@@ -337,22 +337,22 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
           x = i+1;
       modulepath[x] = '\0';
       /* Create the full-name to w9xpopen, so we can test it exists */
-      strncat(modulepath, 
-              szConsoleSpawn, 
+      strncat(modulepath,
+              szConsoleSpawn,
               (sizeof(modulepath)/sizeof(modulepath[0]))
               -strlen(modulepath));
-      if (stat(modulepath, &statinfo) != 0) 
+      if (stat(modulepath, &statinfo) != 0)
         {
-          /* Eeek - file-not-found - possibly an embedding 
-             situation - see if we can locate it in sys.prefix 
+          /* Eeek - file-not-found - possibly an embedding
+             situation - see if we can locate it in sys.prefix
           */
-        strncpy(modulepath, 
-                ".", 
+        strncpy(modulepath,
+                ".",
                 sizeof(modulepath)/sizeof(modulepath[0]));
         if (modulepath[strlen(modulepath)-1] != '\\')
           strcat(modulepath, "\\");
-        strncat(modulepath, 
-                szConsoleSpawn, 
+        strncat(modulepath,
+                szConsoleSpawn,
                 (sizeof(modulepath)/sizeof(modulepath[0]))
                 -strlen(modulepath));
         /* No where else to look - raise an easily identifiable
@@ -361,20 +361,20 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
            unaware this shim EXE is used, and it will confuse them.
            (well, it confused me for a while ;-)
         */
-        if (stat(modulepath, &statinfo) != 0) 
+        if (stat(modulepath, &statinfo) != 0)
           {
-          std::cout 
+          std::cout
             << "Can not locate '" << modulepath
             << "' which is needed "
             "for popen to work with your shell "
-            "or platform." << std::endl;    
+            "or platform." << std::endl;
           free(s1);
           free(s2);
           return FALSE;
           }
         }
       x = i + (int)strlen(s3) + (int)strlen(cmdstring) + 1 +
-        (int)strlen(modulepath) + 
+        (int)strlen(modulepath) +
         (int)strlen(szConsoleSpawn) + 1;
       if(s2)
         {
@@ -399,22 +399,22 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
 
   /* Could be an else here to try cmd.exe / command.com in the path
      Now we'll just error out.. */
-  else 
+  else
     {
     std::cout << "Cannot locate a COMSPEC environment variable to "
-              << "use as the shell" << std::endl; 
+              << "use as the shell" << std::endl;
     free(s2);
     free(s1);
     return FALSE;
     }
-  
+
   ZeroMemory(&siStartInfo, sizeof(STARTUPINFO));
   siStartInfo.cb = sizeof(STARTUPINFO);
   siStartInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
   siStartInfo.hStdInput = hStdin;
   siStartInfo.hStdOutput = hStdout;
   siStartInfo.hStdError = hStderr;
-  siStartInfo.wShowWindow = SW_SHOWDEFAULT; 
+  siStartInfo.wShowWindow = SW_SHOWDEFAULT;
   if(hideWindows)
     {
     siStartInfo.wShowWindow = SW_HIDE;
@@ -430,7 +430,7 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
                     NULL,
                     path,
                     &siStartInfo,
-                    &piProcInfo) ) 
+                    &piProcInfo) )
     {
     /* Close the handles now so anyone waiting is woken. */
     CloseHandle(piProcInfo.hThread);
@@ -477,9 +477,9 @@ static BOOL RealPopenCreateProcess(const char *cmdstring,
 
 /* The following code is based off of KB: Q190351 */
 
-bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring, 
+bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
                                           const char* path,
-                                          int mode, 
+                                          int mode,
                                           int n)
 {
   HANDLE hProcess;
@@ -496,11 +496,11 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
   this->hChildStdinWrDup = 0;
   this->hChildStdoutRdDup = 0;
   this->hChildStderrRdDup = 0;
-  
+
   saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
   saAttr.bInheritHandle = TRUE;
   saAttr.lpSecurityDescriptor = NULL;
-  
+
   fd1 = 0;
   fd2 = 0;
   fd3 = 0;
@@ -510,7 +510,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     this->Output += "CreatePipeError\n";
     return false;
     }
-    
+
   /* Create new output read handle and the input write handle. Set
    * the inheritance properties to FALSE. Otherwise, the child inherits
    * the these handles; resulting in non-closeable handles to the pipes
@@ -549,7 +549,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
      that we're using. */
   CloseHandle(hChildStdoutRd);
 
-  if (n != POPEN_4) 
+  if (n != POPEN_4)
     {
     if (!CreatePipe(&this->hChildStderrRd, &this->hChildStderrWr, &saAttr, 0))
       {
@@ -570,11 +570,11 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
     CloseHandle(hChildStderrRd);
 
     }
-          
-  switch (n) 
+
+  switch (n)
     {
     case POPEN_1:
-      switch (mode & (_O_RDONLY | _O_TEXT | _O_BINARY | _O_WRONLY)) 
+      switch (mode & (_O_RDONLY | _O_TEXT | _O_BINARY | _O_WRONLY))
         {
         case _O_WRONLY | _O_TEXT:
           /* Case for writing to child Stdin in text mode. */
@@ -606,18 +606,18 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
           break;
         }
       break;
-        
+
     case POPEN_2:
-    case POPEN_4: 
-      //if ( 1 ) 
+    case POPEN_4:
+      //if ( 1 )
         {
         fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
         fd2 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
         break;
         }
-        
+
     case POPEN_3:
-      //if ( 1) 
+      //if ( 1)
         {
         fd1 = _open_osfhandle(TO_INTPTR(this->hChildStdinWrDup), mode);
         fd2 = _open_osfhandle(TO_INTPTR(this->hChildStdoutRdDup), mode);
@@ -626,7 +626,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
         }
     }
 
-  if (n == POPEN_4) 
+  if (n == POPEN_4)
     {
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
@@ -652,7 +652,7 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
       return 0;
       }
     }
-  else 
+  else
     {
     if (!RealPopenCreateProcess(cmdstring,
                                 path,
@@ -852,15 +852,15 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
         break;
         }
       }
-    }  
+    }
 
-  
+
   if (WaitForSingleObject(hProcess, INFINITE) != WAIT_FAILED &&
-      GetExitCodeProcess(hProcess, &exit_code)) 
+      GetExitCodeProcess(hProcess, &exit_code))
     {
     result = exit_code;
-    } 
-  else 
+    }
+  else
     {
     /* Indicate failure - this will cause the file object
      * to raise an I/O error and translate the last Win32
@@ -868,7 +868,7 @@ bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
      * last errors that overlap the normal errno table,
      * but that's a consistent problem with the file object.
      */
-    if (result != EOF) 
+    if (result != EOF)
       {
       /* If the error wasn't from the fclose(), then
        * set errno for the file object error handling.
@@ -897,7 +897,7 @@ int cmWin32ProcessExecution::Windows9xHack(const char* command)
   PROCESS_INFORMATION pi;
   DWORD exit_code=0;
 
-  if (!command) 
+  if (!command)
     {
     cmSystemTools::Error("Windows9xHack: Command not specified");
     return 1;
@@ -911,7 +911,7 @@ int cmWin32ProcessExecution::Windows9xHack(const char* command)
   si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
   si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
-  
+
   char * app = 0;
   char* cmd = new char[ strlen(command) + 1 ];
   strcpy(cmd, command);
@@ -925,9 +925,9 @@ int cmWin32ProcessExecution::Windows9xHack(const char* command)
     );
   delete [] cmd;
 
-  if (bRet) 
+  if (bRet)
     {
-    if (WaitForSingleObject(pi.hProcess, INFINITE) != WAIT_FAILED) 
+    if (WaitForSingleObject(pi.hProcess, INFINITE) != WAIT_FAILED)
       {
       GetExitCodeProcess(pi.hProcess, &exit_code);
       }

@@ -99,15 +99,15 @@ int main(int argc, char** argv)
     }
 
   QApplication app(argc, argv);
-  
+
   // clean out standard Qt paths for plugins, which we don't use anyway
   // when creating Mac bundles, it potentially causes problems
   foreach(QString p, QApplication::libraryPaths())
     {
     QApplication::removeLibraryPath(p);
     }
-  
-  // if arg for install 
+
+  // if arg for install
   for(int i =0; i < argc; i++)
     {
     if(strcmp(argv[i], "--mac-install") == 0)
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
       return 0;
       }
     }
-  // tell the cmake library where cmake is 
+  // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
 #if defined(Q_OS_MAC)
   cmExecDir.cd("../../../");
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
   QString transfile = QString("cmake_%1").arg(QLocale::system().name());
   translator.load(transfile, translationsDir.path());
   app.installTranslator(&translator);
-  
+
   // app setup
   app.setApplicationName("CMakeSetup");
   app.setOrganizationName("Kitware");
@@ -139,16 +139,16 @@ int main(int argc, char** argv)
   appIcon.addFile(":/Icons/CMakeSetup32.png");
   appIcon.addFile(":/Icons/CMakeSetup128.png");
   app.setWindowIcon(appIcon);
-  
+
   CMakeSetupDialog dialog;
   dialog.show();
- 
+
   cmsys::CommandLineArguments arg;
   arg.Initialize(argc, argv);
   std::string binaryDirectory;
   std::string sourceDirectory;
   typedef cmsys::CommandLineArguments argT;
-  arg.AddArgument("-B", argT::CONCAT_ARGUMENT, 
+  arg.AddArgument("-B", argT::CONCAT_ARGUMENT,
                   &binaryDirectory, "Binary Directory");
   arg.AddArgument("-H", argT::CONCAT_ARGUMENT,
                   &sourceDirectory, "Source Directory");
@@ -199,7 +199,7 @@ int main(int argc, char** argv)
         }
       }
     }
-  
+
   return app.exec();
 }
 

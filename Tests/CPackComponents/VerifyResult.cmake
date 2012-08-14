@@ -4,7 +4,7 @@ message(STATUS "")
 
 if(NOT CPackComponents_BINARY_DIR)
   message(FATAL_ERROR "CPackComponents_BINARY_DIR not set")
-endif(NOT CPackComponents_BINARY_DIR)
+endif()
 
 set(expected_file_mask "")
 
@@ -18,15 +18,15 @@ if(WIN32)
     )
   if(NSIS_MAKENSIS_EXECUTABLE)
     set(expected_file_mask "${CPackComponents_BINARY_DIR}/MyLib-*.exe")
-  endif(NSIS_MAKENSIS_EXECUTABLE)
-endif(WIN32)
+  endif()
+endif()
 
 if(APPLE)
   # Always expect the *.dmg installer - PackageMaker should always
   # be installed on a development Mac:
   #
   set(expected_file_mask "${CPackComponents_BINARY_DIR}/MyLib-*.dmg")
-endif(APPLE)
+endif()
 
 if(expected_file_mask)
   set(expected_count 1)
@@ -38,11 +38,11 @@ if(expected_file_mask)
 
   if(NOT expected_file)
     message(FATAL_ERROR "error: expected_file does not exist: CPackComponents test fails.")
-  endif(NOT expected_file)
+  endif()
 
   list(LENGTH expected_file actual_count)
   message(STATUS "actual_count='${actual_count}'")
   if(NOT actual_count EQUAL expected_count)
     message(FATAL_ERROR "error: expected_count does not match actual_count: CPackComponents test fails.")
-  endif(NOT actual_count EQUAL expected_count)
-endif(expected_file_mask)
+  endif()
+endif()

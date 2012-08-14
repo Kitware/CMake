@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct 
+typedef struct
 {
   char *LibraryName;
   int Argc;
@@ -24,8 +24,8 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
   char *ccDep[1];
   char *ccOut[1];
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
- 
-  cmVTKWrapTclData *cdata = 
+
+  cmVTKWrapTclData *cdata =
     (cmVTKWrapTclData *)malloc(sizeof(cmVTKWrapTclData));
   cdata->LibraryName = "BOO";
   cdata->Argc = argc;
@@ -36,33 +36,33 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
   /* already, if so use that value and don't look for the program */
   if(!info->CAPI->IsOn(mf,"TEST_COMMAND_TEST1"))
     {
-    info->CAPI->AddDefinition(mf, "TEST_DEF", "HOO");  
+    info->CAPI->AddDefinition(mf, "TEST_DEF", "HOO");
     return 1;
     }
-  
-  info->CAPI->AddDefinition(mf, "TEST_DEF", "HOO");  
+
+  info->CAPI->AddDefinition(mf, "TEST_DEF", "HOO");
   cdata->LibraryName = "HOO";
 
-  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE", "ON", 
+  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE", "ON",
     "Test cache variable",
     CM_CACHE_BOOL);
-  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE1", "", 
+  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE1", "",
     "Test cache variable 1",
     CM_CACHE_PATH);
-  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE2", "", 
+  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE2", "",
     "Test cache variable 2",
     CM_CACHE_FILEPATH);
-  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE3", "", 
+  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE3", "",
     "Test cache variable 3",
     CM_CACHE_STRING);
-  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE4", "", 
+  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE4", "",
     "Test cache variable 4",
     CM_CACHE_INTERNAL);
-  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE5", "", 
+  info->CAPI->AddCacheDefinition(mf, "SOME_CACHE_VARIABLE5", "",
     "Test cache variable 5",
     CM_CACHE_STATIC);
 
-  
+
   file = info->CAPI->ExpandVariablesInString(mf, "${CMAKE_COMMAND}", 0, 0);
 
   str = info->CAPI->GetFilenameWithoutExtension(file);
@@ -140,7 +140,7 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
                                1, ccDep,
                                1, ccOut,
                                "LoadedCommand");
-  
+
 
   ccArgs[2] = argv[1];
   ccArgs[3] = argv[2];
@@ -171,22 +171,22 @@ static int CCONV InitialPass(void *inf, void *mf, int argc, char *argv[])
     return 0;
     }
   info->CAPI->ExecuteCommand(mf,"SET",2,args);
-  
+
   /* make sure we can find the source file */
   if (!info->CAPI->GetSource(mf,argv[1]))
     {
     info->CAPI->SetError(mf, "Source file could not be found!");
-    return 0;    
+    return 0;
     }
 
   return 1;
 }
 
-static void  CCONV FinalPass(void *inf, void *mf) 
+static void  CCONV FinalPass(void *inf, void *mf)
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
   /* get our client data from initial pass */
-  cmVTKWrapTclData *cdata = 
+  cmVTKWrapTclData *cdata =
     (cmVTKWrapTclData *)info->CAPI->GetClientData(info);
   if (strcmp(info->CAPI->GetDefinition(mf, "TEST_DEF"),"HOO") ||
       strcmp(cdata->LibraryName,"HOO"))
@@ -194,11 +194,11 @@ static void  CCONV FinalPass(void *inf, void *mf)
     fprintf(stderr,"*** Failed LOADED COMMAND Final Pass\n");
     }
 }
-static void CCONV Destructor(void *inf) 
+static void CCONV Destructor(void *inf)
 {
   cmLoadedCommandInfo *info = (cmLoadedCommandInfo *)inf;
   /* get our client data from initial pass */
-  cmVTKWrapTclData *cdata = 
+  cmVTKWrapTclData *cdata =
     (cmVTKWrapTclData *)info->CAPI->GetClientData(info);
   free(cdata);
 }

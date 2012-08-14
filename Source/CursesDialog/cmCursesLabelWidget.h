@@ -23,7 +23,7 @@ public:
   cmCursesLabelWidget(int width, int height, int left, int top,
                       const std::string& name);
   virtual ~cmCursesLabelWidget();
-  
+
   // Description:
   // Handle user input. Called by the container of this widget
   // when this widget has focus. Returns true if the input was

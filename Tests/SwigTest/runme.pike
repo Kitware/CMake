@@ -42,12 +42,12 @@ int main()
 
     /* See if we can force 's' to be garbage-collected */
     s = 0;
-    
+
     /* Now we should be down to only 1 shape */
     write("%d shapes remain\n", Shape_nshapes_get());
-    
+
     /* Done */
     write("Goodbye\n");
-    
+
     return 0;
 }

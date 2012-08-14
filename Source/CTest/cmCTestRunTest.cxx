@@ -59,7 +59,7 @@ bool cmCTestRunTest::CheckOutput()
       {
       // Store this line of output.
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                 this->GetIndex() << ": " << line << std::endl);  
+                 this->GetIndex() << ": " << line << std::endl);
       this->ProcessOutput += line;
       this->ProcessOutput += "\n";
       }
@@ -79,7 +79,7 @@ void cmCTestRunTest::CompressOutput()
   int ret;
   z_stream strm;
 
-  unsigned char* in = 
+  unsigned char* in =
     reinterpret_cast<unsigned char*>(
     const_cast<char*>(this->ProcessOutput.c_str()));
   //zlib makes the guarantee that this is the maximum output size
@@ -112,7 +112,7 @@ void cmCTestRunTest::CompressOutput()
     }
 
   (void)deflateEnd(&strm);
- 
+
   unsigned char *encoded_buffer
     = new unsigned char[static_cast<int>(outSize * 1.5)];
 
@@ -169,11 +169,11 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         }
       }
     if ( !found )
-      { 
+      {
       reason = "Required regular expression not found.";
       forceFail = true;
       }
-    reason +=  "Regex=["; 
+    reason +=  "Regex=[";
     for ( passIt = this->TestProperties->RequiredRegularExpressions.begin();
           passIt != this->TestProperties->RequiredRegularExpressions.end();
           ++ passIt )
@@ -201,10 +201,10 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     }
   if (res == cmsysProcess_State_Exited)
     {
-    bool success = 
-      !forceFail &&  (retVal == 0 || 
+    bool success =
+      !forceFail &&  (retVal == 0 ||
       this->TestProperties->RequiredRegularExpressions.size());
-    if((success && !this->TestProperties->WillFail) 
+    if((success && !this->TestProperties->WillFail)
       || (!success && this->TestProperties->WillFail))
       {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
@@ -312,10 +312,10 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       << std::endl;
     if(this->TestResult.Reason.size())
       {
-      *this->TestHandler->LogFile << reasonType << ":\n" 
+      *this->TestHandler->LogFile << reasonType << ":\n"
         << this->TestResult.Reason << "\n";
       }
-    else 
+    else
       {
       if(pass)
         {
@@ -333,14 +333,14 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       << "----------------------------------------------------------"
       << std::endl << std::endl;
     }
-  // if the test actually started and ran 
-  // record the results in TestResult 
+  // if the test actually started and ran
+  // record the results in TestResult
   if(started)
     {
     bool compress = !this->TestHandler->MemCheck &&
       this->CompressionRatio < 1 &&
       this->CTest->ShouldCompressTestOutput();
-    this->TestResult.Output = compress ? this->CompressedOutput 
+    this->TestResult.Output = compress ? this->CompressedOutput
       : this->ProcessOutput;
     this->TestResult.CompressOutput = compress;
     this->TestResult.ReturnValue = this->TestProcess->GetExitValue();
@@ -378,7 +378,7 @@ void cmCTestRunTest::MemCheckPostProcess()
     {
     return;
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index 
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
              << ": process test output now: "
              << this->TestProperties->Name.c_str() << " "
              << this->TestResult.Name.c_str() << std::endl);
@@ -390,7 +390,7 @@ void cmCTestRunTest::MemCheckPostProcess()
     }
   else if(handler->MemoryTesterStyle == cmCTestMemCheckHandler::PURIFY)
     {
-    handler->PostProcessPurifyTest(this->TestResult); 
+    handler->PostProcessPurifyTest(this->TestResult);
     }
 }
 
@@ -411,7 +411,7 @@ bool cmCTestRunTest::StartTest(size_t total)
   this->TestResult.ReturnValue = -1;
   this->TestResult.CompletionStatus = "Failed to start";
   this->TestResult.Status = cmCTestTestHandler::BAD_COMMAND;
-  this->TestResult.TestCount = this->TestProperties->Index;  
+  this->TestResult.TestCount = this->TestProperties->Index;
   this->TestResult.Name = this->TestProperties->Name;
   this->TestResult.Path = this->TestProperties->Directory.c_str();
 
@@ -438,7 +438,7 @@ bool cmCTestRunTest::StartTest(size_t total)
     this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
     return false;
     }
-  
+
   // Check if all required files exist
   for(std::vector<std::string>::iterator i =
     this->TestProperties->RequiredFiles.begin();
@@ -465,9 +465,9 @@ bool cmCTestRunTest::StartTest(size_t total)
   if (this->ActualCommand == "")
     {
     // if the command was not found create a TestResult object
-    // that has that information 
+    // that has that information
     this->TestProcess = new cmProcess;
-    *this->TestHandler->LogFile << "Unable to find executable: " 
+    *this->TestHandler->LogFile << "Unable to find executable: "
                    << args[1].c_str() << std::endl;
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to find executable: "
                << args[1].c_str() << std::endl);
@@ -536,7 +536,7 @@ void cmCTestRunTest::ComputeArguments()
 
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
              << this->Index << ": "
-             << (this->TestHandler->MemCheck?"MemCheck":"Test") 
+             << (this->TestHandler->MemCheck?"MemCheck":"Test")
              << " command: " << testCommand
              << std::endl);
 }
@@ -544,7 +544,7 @@ void cmCTestRunTest::ComputeArguments()
 //----------------------------------------------------------------------
 void cmCTestRunTest::DartProcessing()
 {
-  if (!this->ProcessOutput.empty() && 
+  if (!this->ProcessOutput.empty() &&
      this->ProcessOutput.find("<DartMeasurement") != this->ProcessOutput.npos)
     {
     if (this->TestHandler->DartStuff.find(this->ProcessOutput.c_str()))
@@ -695,7 +695,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 
   cmOStringStream indexStr;
   indexStr << " #" << this->Index << ":";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, 
+  cmCTestLog(this->CTest, HANDLER_OUTPUT,
              std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
              << indexStr.str().c_str());
   cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
@@ -704,17 +704,17 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
   outname.resize(maxTestNameWidth + 4, '.');
 
   *this->TestHandler->LogFile << this->TestProperties->Index << "/"
-    << this->TestHandler->TotalNumberOfTests << " Testing: " 
+    << this->TestHandler->TotalNumberOfTests << " Testing: "
     << this->TestProperties->Name << std::endl;
   *this->TestHandler->LogFile << this->TestProperties->Index << "/"
     << this->TestHandler->TotalNumberOfTests
     << " Test: " << this->TestProperties->Name.c_str() << std::endl;
   *this->TestHandler->LogFile << "Command: \"" << this->ActualCommand << "\"";
-  
+
   for (std::vector<std::string>::iterator i = this->Arguments.begin();
        i != this->Arguments.end(); ++i)
     {
-    *this->TestHandler->LogFile 
+    *this->TestHandler->LogFile
       << " \"" << i->c_str() << "\"";
     }
   *this->TestHandler->LogFile << std::endl
@@ -730,6 +730,6 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
     << this->ProcessOutput.c_str() << "<end of output>" << std::endl;
 
   cmCTestLog(this->CTest, HANDLER_OUTPUT, outname.c_str());
-  cmCTestLog(this->CTest, DEBUG, "Testing " 
+  cmCTestLog(this->CTest, DEBUG, "Testing "
              << this->TestProperties->Name.c_str() << " ... ");
 }

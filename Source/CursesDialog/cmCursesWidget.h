@@ -22,7 +22,7 @@ class cmCursesWidget
 public:
   cmCursesWidget(int width, int height, int left, int top);
   virtual ~cmCursesWidget();
-  
+
   /**
    * Handle user input. Called by the container of this widget
    * when this widget has focus. Returns true if the input was

@@ -33,19 +33,19 @@ bool cmFLTKWrapUICommand
 
   std::vector<std::string> newArgs;
   this->Makefile->ExpandSourceListArguments(args,newArgs, 1);
-  
-  // get the list of GUI files from which .cxx and .h will be generated 
+
+  // get the list of GUI files from which .cxx and .h will be generated
   std::string outputDirectory = this->Makefile->GetCurrentOutputDirectory();
 
-  // Some of the generated files are *.h so the directory "GUI" 
+  // Some of the generated files are *.h so the directory "GUI"
   // where they are created have to be added to the include path
   this->Makefile->AddIncludeDirectory( outputDirectory.c_str() );
 
-  for(std::vector<std::string>::iterator i = (newArgs.begin() + 1); 
+  for(std::vector<std::string>::iterator i = (newArgs.begin() + 1);
       i != newArgs.end(); i++)
     {
     cmSourceFile *curr = this->Makefile->GetSource(i->c_str());
-    // if we should use the source GUI 
+    // if we should use the source GUI
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
       {
@@ -107,11 +107,11 @@ bool cmFLTKWrapUICommand
   std::string varName = this->Target;
   varName += "_FLTK_UI_SRCS";
   this->Makefile->AddDefinition(varName.c_str(), sourceListValue.c_str());
-  
+
   return true;
 }
 
-void cmFLTKWrapUICommand::FinalPass() 
+void cmFLTKWrapUICommand::FinalPass()
 {
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
@@ -119,7 +119,7 @@ void cmFLTKWrapUICommand::FinalPass()
   cmTarget* target = this->Makefile->FindTarget(this->Target.c_str());
   if(!target)
     {
-    std::string msg = 
+    std::string msg =
       "FLTK_WRAP_UI was called with a target that was never created: ";
     msg += this->Target;
     msg +=".  The problem was found while processing the source directory: ";
@@ -128,12 +128,12 @@ void cmFLTKWrapUICommand::FinalPass()
     cmSystemTools::Message(msg.c_str(),"Warning");
     return;
     }
-  std::vector<cmSourceFile*> const& srcs = 
+  std::vector<cmSourceFile*> const& srcs =
     target->GetSourceFiles();
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)
     {
-    if (srcs[i]->GetFullPath() == 
+    if (srcs[i]->GetFullPath() ==
         this->GeneratedSourcesClasses[0]->GetFullPath())
       {
       found = true;
@@ -142,7 +142,7 @@ void cmFLTKWrapUICommand::FinalPass()
     }
   if (!found)
     {
-    std::string msg = 
+    std::string msg =
       "In CMake 2.2 the FLTK_WRAP_UI command sets a variable to the list of "
       "source files that should be added to your executable or library. It "
       "appears that you have not added these source files to your target. "
@@ -153,13 +153,13 @@ void cmFLTKWrapUICommand::FinalPass()
       "of sources to add to your target when you call ADD_LIBRARY or "
       "ADD_EXECUTABLE. For now CMake will add the sources to your target "
       "for you as was done in CMake 2.0 and earlier. In the future this may "
-      "become an error."; 
+      "become an error.";
     msg +="The problem was found while processing the source directory: ";
     msg += this->Makefile->GetStartDirectory();
     cmSystemTools::Message(msg.c_str(),"Warning");
     // first we add the rules for all the .fl to .h and .cxx files
     size_t lastHeadersClass = this->GeneratedSourcesClasses.size();
-    
+
     // Generate code for all the .fl files
     for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
       {

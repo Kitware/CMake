@@ -42,11 +42,11 @@ bool cmOptionCommand
     this->SetError(m.c_str());
     return false;
     }
-  
+
   std::string initialValue = "Off";
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  cmCacheManager::CacheIterator it = 
+  cmCacheManager::CacheIterator it =
     this->Makefile->GetCacheManager()->GetCacheIterator(args[0].c_str());
   if(!it.IsAtEnd())
     {

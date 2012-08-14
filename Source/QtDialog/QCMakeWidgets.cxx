@@ -69,7 +69,7 @@ void QCMakeFilePathEditor::chooseFile()
   this->fileDialogExists(true);
   path = QFileDialog::getOpenFileName(this, title, info.absolutePath());
   this->fileDialogExists(false);
-  
+
   if(!path.isEmpty())
     {
     this->setText(QDir::fromNativeSeparators(path));

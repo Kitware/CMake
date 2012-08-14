@@ -13,27 +13,27 @@
 #
 # Build the documentation
 #
-INCLUDE (${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
+include (${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
-IF (BUILD_DOCUMENTATION)
+if (BUILD_DOCUMENTATION)
 
   #
   # Configure the script and the doxyfile, then add target
   #
-  IF(NOT DOT_PATH)
-    GET_FILENAME_COMPONENT(DOT_PATH ${DOT} PATH)
-  ENDIF(NOT DOT_PATH)
+  if(NOT DOT_PATH)
+    get_filename_component(DOT_PATH ${DOT} PATH)
+  endif()
 
-  CONFIGURE_FILE(
+  configure_file(
     ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in
     ${CMake_BINARY_DIR}/Utilities/Doxygen/doxyfile)
 
-  CONFIGURE_FILE(
+  configure_file(
     ${CMake_SOURCE_DIR}/Utilities/Doxygen/doc_makeall.sh.in
     ${CMake_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
 
-  ADD_CUSTOM_TARGET(DoxygenDoc
+  add_custom_target(DoxygenDoc
     ${BASH}
     ${CMake_BINARY_DIR}/Utilities/Doxygen/doc_makeall.sh)
 
-ENDIF (BUILD_DOCUMENTATION)
+endif ()

@@ -64,7 +64,7 @@ protected:
         return true;
         }
       }
-    
+
     return false;
     }
 };
@@ -73,11 +73,11 @@ protected:
 class QCMakeAdvancedFilter : public QSortFilterProxyModel
 {
 public:
-  QCMakeAdvancedFilter(QObject* o) 
+  QCMakeAdvancedFilter(QObject* o)
     : QSortFilterProxyModel(o), ShowAdvanced(false) {}
 
-  void setShowAdvanced(bool f) 
-  { 
+  void setShowAdvanced(bool f)
+  {
     this->ShowAdvanced = f;
     this->invalidate();
   }
@@ -102,7 +102,7 @@ protected:
         }
       return false;
       }
-    
+
     // check children
     int num = m->rowCount(idx);
     for(int i=0; i<num; i++)
@@ -134,9 +134,9 @@ QCMakeCacheView::QCMakeCacheView(QWidget* p)
   // our delegate for creating our editors
   QCMakeCacheModelDelegate* delegate = new QCMakeCacheModelDelegate(this);
   this->setItemDelegate(delegate);
-  
+
   this->setUniformRowHeights(true);
- 
+
   this->setEditTriggers(QAbstractItemView::AllEditTriggers);
 
   // tab, backtab doesn't step through items
@@ -153,13 +153,13 @@ bool QCMakeCacheView::event(QEvent* e)
     }
   return QTreeView::event(e);
 }
-  
+
 QCMakeCacheModel* QCMakeCacheView::cacheModel() const
 {
   return this->CacheModel;
 }
- 
-QModelIndex QCMakeCacheView::moveCursor(CursorAction act, 
+
+QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
   Qt::KeyboardModifiers mod)
 {
   // want home/end to go to begin/end of rows, not columns
@@ -173,7 +173,7 @@ QModelIndex QCMakeCacheView::moveCursor(CursorAction act,
     }
   return QTreeView::moveCursor(act, mod);
 }
-  
+
 void QCMakeCacheView::setShowAdvanced(bool s)
 {
 #if QT_VERSION >= 040300
@@ -224,7 +224,7 @@ void QCMakeCacheModel::clear()
 {
   this->QStandardItemModel::clear();
   this->NewPropertyCount = 0;
-  
+
   QStringList labels;
   labels << tr("Name") << tr("Value");
   this->setHorizontalHeaderLabels(labels);
@@ -281,7 +281,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
     this->breakProperties(newProps2, newPropsTree2);
 
     QStandardItem* root = this->invisibleRootItem();
-    
+
     foreach(QString key, newPropsTree.keys())
       {
       QCMakePropertyList props2 = newPropsTree[key];
@@ -308,12 +308,12 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
         this->setPropertyData(this->indexFromItem(items[0]), prop, true);
         }
       }
-    
+
     foreach(QString key, newPropsTree2.keys())
       {
       QCMakePropertyList props2 = newPropsTree2[key];
 
-      QStandardItem* parentItem = 
+      QStandardItem* parentItem =
         new QStandardItem(key.isEmpty() ? tr("Ungrouped Entries") : key);
       root->appendRow(parentItem);
       parentItem->setData(1, GroupRole);
@@ -330,7 +330,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
         }
       }
   }
-  
+
   this->blockSignals(b);
   this->reset();
 }
@@ -361,7 +361,7 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
   this->reset();
 }
 
-void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1, 
+void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
     const QCMakeProperty& prop, bool isNew)
 {
   QModelIndex idx2 = idx1.sibling(idx1.row(), 1);
@@ -370,7 +370,7 @@ void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
   this->setData(idx1, prop.Help, QCMakeCacheModel::HelpRole);
   this->setData(idx1, prop.Type, QCMakeCacheModel::TypeRole);
   this->setData(idx1, prop.Advanced, QCMakeCacheModel::AdvancedRole);
-  
+
   if(prop.Type == QCMakeProperty::BOOL)
   {
     int check = prop.Value.toBool() ? Qt::Checked : Qt::Unchecked;
@@ -394,7 +394,7 @@ void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
   }
 }
 
-void QCMakeCacheModel::getPropertyData(const QModelIndex& idx1, 
+void QCMakeCacheModel::getPropertyData(const QModelIndex& idx1,
     QCMakeProperty& prop) const
 {
   QModelIndex idx2 = idx1.sibling(idx1.row(), 1);
@@ -457,7 +457,7 @@ void QCMakeCacheModel::breakProperties(const QSet<QCMakeProperty>& props,
     }
   result = tmp;
 }
-  
+
 QCMakePropertyList QCMakeCacheModel::properties() const
 {
   QCMakePropertyList props;
@@ -488,7 +488,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
         this->getPropertyData(idx, prop);
         props.append(prop);
       }
-      
+
       // go to the next in the tree
       while(!idxs.isEmpty() && !idxs.last().sibling(idxs.last().row()+1, 0).isValid())
       {
@@ -503,7 +503,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
 
   return props;
 }
-  
+
 bool QCMakeCacheModel::insertProperty(QCMakeProperty::PropertyType t,
                       const QString& name, const QString& description,
                       const QVariant& value, bool advanced)
@@ -554,7 +554,7 @@ Qt::ItemFlags QCMakeCacheModel::flags (const QModelIndex& idx) const
 
 QModelIndex QCMakeCacheModel::buddy(const QModelIndex& idx) const
 {
-  if(!this->hasChildren(idx) && 
+  if(!this->hasChildren(idx) &&
      this->data(idx, TypeRole).toInt() != QCMakeProperty::BOOL)
   {
     return this->index(idx.row(), 1, idx.parent());
@@ -572,7 +572,7 @@ void QCMakeCacheModelDelegate::setFileDialogFlag(bool f)
   this->FileDialogFlag = f;
 }
 
-QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p, 
+QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
     const QStyleOptionViewItem&, const QModelIndex& idx) const
 {
   QModelIndex var = idx.sibling(idx.row(), 0);
@@ -584,7 +584,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
   else if(type == QCMakeProperty::PATH)
     {
     QCMakePathEditor* editor =
-      new QCMakePathEditor(p, 
+      new QCMakePathEditor(p,
       var.data(Qt::DisplayRole).toString());
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
         SLOT(setFileDialogFlag(bool)));
@@ -593,7 +593,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
   else if(type == QCMakeProperty::FILEPATH)
     {
     QCMakeFilePathEditor* editor =
-      new QCMakeFilePathEditor(p, 
+      new QCMakeFilePathEditor(p,
       var.data(Qt::DisplayRole).toString());
     QObject::connect(editor, SIGNAL(fileDialogExists(bool)), this,
         SLOT(setFileDialogFlag(bool)));
@@ -602,7 +602,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
   else if(type == QCMakeProperty::STRING &&
           var.data(QCMakeCacheModel::StringsRole).isValid())
     {
-    QCMakeComboBox* editor = 
+    QCMakeComboBox* editor =
       new QCMakeComboBox(p, var.data(QCMakeCacheModel::StringsRole).toStringList());
     editor->setFrame(false);
     return editor;
@@ -613,7 +613,7 @@ QWidget* QCMakeCacheModelDelegate::createEditor(QWidget* p,
   return editor;
 }
 
-bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model, 
+bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
        const QStyleOptionViewItem& option, const QModelIndex& index)
 {
   Qt::ItemFlags flags = model->flags(index);
@@ -637,7 +637,7 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
       {
       return true;
       }
-    } 
+    }
   else if (e->type() == QEvent::KeyPress)
     {
     if(static_cast<QKeyEvent*>(e)->key() != Qt::Key_Space &&
@@ -645,8 +645,8 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
       {
       return false;
       }
-    } 
-  else 
+    }
+  else
     {
     return false;
     }
@@ -660,7 +660,7 @@ bool QCMakeCacheModelDelegate::editorEvent(QEvent* e, QAbstractItemModel* model,
     }
   return success;
 }
-  
+
 // Issue 205903 fixed in Qt 4.5.0.
 // Can remove this function and FileDialogFlag when minimum Qt version is 4.5
 bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* evt)
@@ -682,7 +682,7 @@ void QCMakeCacheModelDelegate::setModelData(QWidget* editor,
   QItemDelegate::setModelData(editor, model, index);
   const_cast<QCMakeCacheModelDelegate*>(this)->recordChange(model, index);
 }
-  
+
 QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
   QSize sz = QItemDelegate::sizeHint(option, index);
@@ -695,7 +695,7 @@ QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option, con
 
   return sz;
 }
-  
+
 QSet<QCMakeProperty> QCMakeCacheModelDelegate::changes() const
 {
   return mChanges;
@@ -721,7 +721,7 @@ void QCMakeCacheModelDelegate::recordChange(QAbstractItemModel* model, const QMo
     QCMakeProperty prop;
     idx = idx.sibling(idx.row(), 0);
     cache_model->getPropertyData(idx, prop);
-    
+
     // clean out an old one
     QSet<QCMakeProperty>::iterator iter = mChanges.find(prop);
     if(iter != mChanges.end())

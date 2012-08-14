@@ -1,6 +1,6 @@
 # a simple objc++ test case that uses Cocoa framework
-PROJECT (ObjC++)
+project (ObjC++)
 
-ADD_EXECUTABLE (ObjC++ objc++.mm)
-TARGET_LINK_LIBRARIES(ObjC++ "-framework Cocoa")
+add_executable (ObjC++ objc++.mm)
+target_link_libraries(ObjC++ "-framework Cocoa")
 

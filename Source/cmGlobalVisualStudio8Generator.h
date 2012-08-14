@@ -24,9 +24,9 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator();
-  static cmGlobalGenerator* New() { 
+  static cmGlobalGenerator* New() {
     return new cmGlobalVisualStudio8Generator; }
-  
+
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalVisualStudio8Generator::GetActualName();}
@@ -36,7 +36,7 @@ public:
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-  
+
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 

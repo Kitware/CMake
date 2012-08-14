@@ -1,36 +1,36 @@
-SET(WIN32 1)
+set(WIN32 1)
 
-SET(CMAKE_STATIC_LIBRARY_PREFIX "")
-SET(CMAKE_STATIC_LIBRARY_SUFFIX ".lib")
-SET(CMAKE_SHARED_LIBRARY_PREFIX "")          # lib
-SET(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")          # .so
-SET(CMAKE_IMPORT_LIBRARY_PREFIX "")
-SET(CMAKE_IMPORT_LIBRARY_SUFFIX ".lib")
-SET(CMAKE_EXECUTABLE_SUFFIX ".exe")          # .exe
-SET(CMAKE_LINK_LIBRARY_SUFFIX ".lib")
-SET(CMAKE_DL_LIBS "")
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
+set(CMAKE_STATIC_LIBRARY_SUFFIX ".lib")
+set(CMAKE_SHARED_LIBRARY_PREFIX "")          # lib
+set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")          # .so
+set(CMAKE_IMPORT_LIBRARY_PREFIX "")
+set(CMAKE_IMPORT_LIBRARY_SUFFIX ".lib")
+set(CMAKE_EXECUTABLE_SUFFIX ".exe")          # .exe
+set(CMAKE_LINK_LIBRARY_SUFFIX ".lib")
+set(CMAKE_DL_LIBS "")
 
-SET(CMAKE_FIND_LIBRARY_PREFIXES "")
-SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
+set(CMAKE_FIND_LIBRARY_PREFIXES "")
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 
 # for borland make long command lines are redirected to a file
 # with the following syntax, see Windows-bcc32.cmake for use
-IF(CMAKE_GENERATOR MATCHES "Borland")
-  SET(CMAKE_START_TEMP_FILE "@&&|\n")
-  SET(CMAKE_END_TEMP_FILE "\n|")
-ENDIF(CMAKE_GENERATOR MATCHES "Borland")
+if(CMAKE_GENERATOR MATCHES "Borland")
+  set(CMAKE_START_TEMP_FILE "@&&|\n")
+  set(CMAKE_END_TEMP_FILE "\n|")
+endif()
 
 # for nmake make long command lines are redirected to a file
 # with the following syntax, see Windows-bcc32.cmake for use
-IF(CMAKE_GENERATOR MATCHES "NMake")
-  SET(CMAKE_START_TEMP_FILE "@<<\n")
-  SET(CMAKE_END_TEMP_FILE "\n<<")
-ENDIF(CMAKE_GENERATOR MATCHES "NMake")
+if(CMAKE_GENERATOR MATCHES "NMake")
+  set(CMAKE_START_TEMP_FILE "@<<\n")
+  set(CMAKE_END_TEMP_FILE "\n<<")
+endif()
 
-INCLUDE(Platform/WindowsPaths)
+include(Platform/WindowsPaths)
 
 # uncomment these out to debug nmake and borland makefiles
-#SET(CMAKE_START_TEMP_FILE "")
-#SET(CMAKE_END_TEMP_FILE "")
-#SET(CMAKE_VERBOSE_MAKEFILE 1)
+#set(CMAKE_START_TEMP_FILE "")
+#set(CMAKE_END_TEMP_FILE "")
+#set(CMAKE_VERBOSE_MAKEFILE 1)
 
