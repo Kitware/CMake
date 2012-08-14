@@ -447,7 +447,8 @@ protected:
                               std::string const& link);
   static int ExecuteEchoColor(std::vector<std::string>& args);
   static int ExecuteLinkScript(std::vector<std::string>& args);
-  static int VisualStudioLink(std::vector<std::string>& args, int type);
+  static int VisualStudioLink(std::vector<std::string>& args, int type,
+                              bool no_rsp_expand);
   static int VisualStudioLinkIncremental(std::vector<std::string>& args,
                                          int type,
                                          bool verbose);
