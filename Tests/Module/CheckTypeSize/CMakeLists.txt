@@ -12,7 +12,13 @@ check_type_size(__int64     SIZEOF___INT64)
 check_type_size(size_t      SIZEOF_SIZE_T)
 check_type_size(ssize_t     SIZEOF_SSIZE_T)
 
+set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
+set(CMAKE_EXTRA_INCLUDE_FILES somestruct.h)
+check_type_size("((struct somestruct*)0)->someint" SIZEOF_STRUCTMEMBER_INT)
+check_type_size("((struct somestruct*)0)->someptr" SIZEOF_STRUCTMEMBER_PTR)
+check_type_size("((struct somestruct*)0)->somechar" SIZEOF_STRUCTMEMBER_CHAR)
+
 configure_file(config.h.in config.h)
-include_directories(${CheckTypeSize_BINARY_DIR})
+include_directories("${CheckTypeSize_BINARY_DIR}")
 
 add_executable(CheckTypeSize CheckTypeSize.c)

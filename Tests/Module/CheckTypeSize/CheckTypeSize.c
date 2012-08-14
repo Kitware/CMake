@@ -1,4 +1,5 @@
 #include "config.h"
+#include "somestruct.h"
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -29,6 +30,7 @@
 int main()
 {
   int result = 0;
+  struct somestruct x;
 
   /* void* */
 #if !defined(HAVE_SIZEOF_DATA_PTR)
@@ -118,5 +120,41 @@ int main()
   NODEF(SIZEOF_SSIZE_T);
 #endif
 
-  return result;
+  /* struct somestruct::someint */
+#if defined(SIZEOF_STRUCTMEMBER_INT)
+  CHECK(x.someint, SIZEOF_STRUCTMEMBER_INT);
+  CHECK(x.someint, SIZEOF_INT);
+# if !defined(HAVE_SIZEOF_STRUCTMEMBER_INT)
+  NODEF(HAVE_SIZEOF_STRUCTMEMBER_INT);
+# endif
+#elif defined(HAVE_SIZEOF_STRUCTMEMBER_INT)
+  NODEF(SIZEOF_STRUCTMEMBER_INT);
+#endif
+
+  /* struct somestruct::someptr */
+#if defined(SIZEOF_STRUCTMEMBER_PTR)
+  CHECK(x.someptr, SIZEOF_STRUCTMEMBER_PTR);
+  CHECK(x.someptr, SIZEOF_DATA_PTR);
+# if !defined(HAVE_SIZEOF_STRUCTMEMBER_PTR)
+  NODEF(HAVE_SIZEOF_STRUCTMEMBER_PTR);
+# endif
+#elif defined(HAVE_SIZEOF_STRUCTMEMBER_PTR)
+  NODEF(SIZEOF_STRUCTMEMBER_PTR);
+#endif
+
+  /* struct somestruct::someint */
+#if defined(SIZEOF_STRUCTMEMBER_CHAR)
+  CHECK(x.somechar, SIZEOF_STRUCTMEMBER_CHAR);
+  CHECK(x.somechar, SIZEOF_CHAR);
+# if !defined(HAVE_SIZEOF_STRUCTMEMBER_CHAR)
+  NODEF(HAVE_SIZEOF_STRUCTMEMBER_CHAR);
+# endif
+#elif defined(HAVE_SIZEOF_STRUCTMEMBER_CHAR)
+  NODEF(SIZEOF_STRUCTMEMBER_CHAR);
+#endif
+
+  /* to avoid possible warnings about unused or write-only variable */
+  x.someint = result;
+
+  return x.someint;
 }
