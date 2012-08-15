@@ -160,9 +160,7 @@ if (CMAKE_CROSSCOMPILING
     set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
   endif ()
 
-endif (CMAKE_CROSSCOMPILING
-    AND "${CMAKE_C_COMPILER_ID}" MATCHES "GNU"
-    AND NOT _CMAKE_TOOLCHAIN_PREFIX)
+endif ()
 
 include(${CMAKE_ROOT}/Modules/CMakeClDeps.cmake)
 include(CMakeFindBinUtils)
