@@ -86,3 +86,14 @@ TEST("REVERSE result" "ken;brad;bill;andy")
 set(result bill andy bill brad ken ken ken)
 list(REMOVE_DUPLICATES result)
 TEST("REMOVE_DUPLICATES result" "bill;andy;brad;ken")
+
+# these commands should just do nothing if the list is already empty
+set(result "")
+list(REMOVE_DUPLICATES result)
+TEST("REMOVE_DUPLICATES empty result" "")
+
+list(REVERSE result)
+TEST("REVERSE empty result" "")
+
+list(SORT result)
+TEST("SORT empty result" "")
