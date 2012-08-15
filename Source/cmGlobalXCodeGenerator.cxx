@@ -787,6 +787,10 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode += ".fortran.f90";
     }
+  else if(lang == "ASM")
+    {
+    sourcecode += ".asm";
+    }
   //else
   //  {
   //  // Already specialized above or we leave sourcecode == "sourcecode"
