@@ -7,7 +7,8 @@ set(SRCS)
 
 # (at least) the following toolchains can process assembler files directly
 # and also generate assembler files from C:
-if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode")
+if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode" AND
+    NOT CMAKE_OSX_ARCHITECTURES)
   if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|Clang|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
     set(C_FLAGS "${CMAKE_C_FLAGS}")
     separate_arguments(C_FLAGS)
