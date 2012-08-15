@@ -51,6 +51,7 @@ private:
   std::vector<char> Data;
   std::stack<size_t> Barriers;
   cmsys::RegularExpression TargetInfo;
+  cmsys::RegularExpression TestConfig;
   std::set<cmTarget*> Targets;
   bool Evaluate();
   bool Evaluate(const char* expr, std::string& result);
