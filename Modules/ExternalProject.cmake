@@ -21,6 +21,8 @@
 #    [SVN_TRUST_CERT 1 ]         # Trust the Subversion server site certificate
 #    [GIT_REPOSITORY url]        # URL of git repo
 #    [GIT_TAG tag]               # Git branch name, commit id or tag
+#    [HG_REPOSITORY url]         # URL of mercurial repo
+#    [HG_TAG tag]                # Mercurial branch name, commit id or tag
 #    [URL /.../src.tgz]          # Full path or URL of source
 #    [URL_MD5 md5]               # MD5 checksum of file at URL
 #    [TIMEOUT seconds]           # Time allowed for file download operations
@@ -324,6 +326,67 @@ execute_process(
   )
 if(error_code)
   message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${gitclone_stampfile}'\")
+endif()
+
+"
+)
+
+endfunction()
+
+function(_ep_write_hgclone_script script_filename source_dir hg_EXECUTABLE hg_repository hg_tag src_name work_dir hgclone_infofile hgclone_stampfile)
+  file(WRITE ${script_filename}
+"if(\"${hg_tag}\" STREQUAL \"\")
+  message(FATAL_ERROR \"Tag for hg checkout should not be empty.\")
+endif()
+
+set(run 0)
+
+if(\"${hgclone_infofile}\" IS_NEWER_THAN \"${hgclone_stampfile}\")
+  set(run 1)
+endif()
+
+if(NOT run)
+  message(STATUS \"Avoiding repeated hg clone, stamp file is up to date: '${hgclone_stampfile}'\")
+  return()
+endif()
+
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E remove_directory \"${source_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
+endif()
+
+execute_process(
+  COMMAND \"${hg_EXECUTABLE}\" clone \"${hg_repository}\" \"${src_name}\"
+  WORKING_DIRECTORY \"${work_dir}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to clone repository: '${hg_repository}'\")
+endif()
+
+execute_process(
+  COMMAND \"${hg_EXECUTABLE}\" update ${hg_tag}
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to checkout tag: '${hg_tag}'\")
+endif()
+
+# Complete success, update the script-last-run stamp file:
+#
+execute_process(
+  COMMAND \${CMAKE_COMMAND} -E copy
+    \"${hgclone_infofile}\"
+    \"${hgclone_stampfile}\"
+  WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+  RESULT_VARIABLE error_code
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to copy script-last-run stamp file: '${hgclone_stampfile}'\")
 endif()
 
 "
@@ -1027,6 +1090,7 @@ function(_ep_add_download_command name)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
   get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
+  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
   get_property(url TARGET ${name} PROPERTY _EP_URL)
 
   # TODO: Perhaps file:// should be copied to download dir before extraction.
@@ -1148,6 +1212,46 @@ function(_ep_add_download_command name)
     set(comment "Performing download step (git clone) for '${name}'")
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
     list(APPEND depends ${stamp_dir}/${name}-gitinfo.txt)
+  elseif(hg_repository)
+    find_package(Hg)
+    if(NOT HG_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find hg for clone of ${name}")
+    endif()
+
+    get_property(hg_tag TARGET ${name} PROPERTY _EP_HG_TAG)
+    if(NOT hg_tag)
+      set(hg_tag "tip")
+    endif()
+
+    # For the download step, and the hg clone operation, only the repository
+    # should be recorded in a configured RepositoryInfo file. If the repo
+    # changes, the clone script should be run again. But if only the tag
+    # changes, avoid running the clone script again. Let the 'always' running
+    # update step checkout the new tag.
+    #
+    set(repository ${hg_repository})
+    set(module)
+    set(tag)
+    configure_file(
+      "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
+      "${stamp_dir}/${name}-hginfo.txt"
+      @ONLY
+      )
+
+    get_filename_component(src_name "${source_dir}" NAME)
+    get_filename_component(work_dir "${source_dir}" PATH)
+
+    # Since hg clone doesn't succeed if the non-empty source_dir exists,
+    # create a cmake script to invoke as download command.
+    # The script will delete the source directory and then call hg clone.
+    #
+    _ep_write_hgclone_script(${tmp_dir}/${name}-hgclone.cmake ${source_dir}
+      ${HG_EXECUTABLE} ${hg_repository} ${hg_tag} ${src_name} ${work_dir}
+      ${stamp_dir}/${name}-hginfo.txt ${stamp_dir}/${name}-hgclone-lastrun.txt
+      )
+    set(comment "Performing download step (hg clone) for '${name}'")
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-hgclone.cmake)
+    list(APPEND depends ${stamp_dir}/${name}-hginfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
     get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
@@ -1196,7 +1300,7 @@ function(_ep_add_download_command name)
   else()
     _ep_is_dir_empty("${source_dir}" empty)
     if(${empty})
-      message(SEND_ERROR "error: no download info for '${name}' -- please specify existing/non-empty SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY, GIT_REPOSITORY or DOWNLOAD_COMMAND")
+      message(SEND_ERROR "error: no download info for '${name}' -- please specify existing/non-empty SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY, GIT_REPOSITORY, HG_REPOSITORY or DOWNLOAD_COMMAND")
     endif()
   endif()
 
@@ -1226,6 +1330,7 @@ function(_ep_add_update_command name)
   get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
   get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
+  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
 
   set(work_dir)
   set(comment)
@@ -1278,6 +1383,27 @@ function(_ep_add_update_command name)
     set(cmd ${GIT_EXECUTABLE} fetch
       COMMAND ${GIT_EXECUTABLE} checkout ${git_tag}
       COMMAND ${GIT_EXECUTABLE} submodule update --recursive
+      )
+    set(always 1)
+  elseif(hg_repository)
+    if(NOT HG_EXECUTABLE)
+      message(FATAL_ERROR "error: could not find hg for pull of ${name}")
+    endif()
+    set(work_dir ${source_dir})
+    set(comment "Performing update step (hg pull) for '${name}'")
+    get_property(hg_tag TARGET ${name} PROPERTY _EP_HG_TAG)
+    if(NOT hg_tag)
+      set(hg_tag "tip")
+    endif()
+    if("${HG_VERSION_STRING}" STREQUAL "2.1")
+      message(WARNING "Mercurial 2.1 does not distinguish an empty pull from a failed pull:
+ http://mercurial.selenic.com/wiki/UpgradeNotes#A2.1.1:_revert_pull_return_code_change.2C_compile_issue_on_OS_X
+ http://thread.gmane.org/gmane.comp.version-control.mercurial.devel/47656
+Update to Mercurial >= 2.1.1.
+")
+    endif()
+    set(cmd ${HG_EXECUTABLE} pull
+      COMMAND ${HG_EXECUTABLE} update ${hg_tag}
       )
     set(always 1)
   endif()
