@@ -139,11 +139,7 @@ if(UNIX)
         )
     endif()
 
-  endif(GTK_gtk_INCLUDE_PATH
-     AND GTK_glibconfig_INCLUDE_PATH
-     AND GTK_glib_INCLUDE_PATH
-     AND GTK_gtk_LIBRARY
-     AND GTK_glib_LIBRARY)
+  endif()
 
   mark_as_advanced(
     GTK_gdk_LIBRARY

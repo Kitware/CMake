@@ -804,9 +804,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       NOT "$ENV{COVFILE}" STREQUAL "" OR
       CMAKE_RUN_LONG_TESTS)
       set(CTEST_RUN_CPackTestAllGenerators ${CTEST_TEST_CPACK})
-    endif(CMAKE_CXX_FLAGS MATCHES "-ftest-coverage" OR
-      NOT "$ENV{COVFILE}" STREQUAL "" OR
-      CMAKE_RUN_LONG_TESTS)
+    endif()
   endif()
 
   if(CTEST_RUN_CPackTestAllGenerators)
@@ -1227,9 +1225,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/testfromsubdir.obj"
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SubDirSpaces")
-  endif (MAKE_IS_GNU OR
-    "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-    "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+  endif ()
 
   if (WIN32)
     add_test(SubDir ${CMAKE_CTEST_COMMAND}

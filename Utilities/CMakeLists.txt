@@ -81,8 +81,7 @@ if(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
     string(REPLACE ";" "\\;" _PATH "PATH=${Qt_BIN_DIR};%PATH%")
     set(cmake-gui-PATH COMMAND set "${_PATH}")
   endif()
-endif(BUILD_QtDialog AND "${CMAKE_GENERATOR}" MATCHES "${WIN_SHELL_GENS}"
-  AND EXISTS "${QT_QMAKE_EXECUTABLE}" AND NOT CMAKE_NO_AUTO_QT_ENV)
+endif()
 
 # add the docs for the executables
 ADD_DOCS(ctest      ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt)

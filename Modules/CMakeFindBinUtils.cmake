@@ -39,9 +39,7 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
   mark_as_advanced(CMAKE_LINKER)
 
 # in all other cases search for ar, ranlib, etc.
-else("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
-   OR "${CMAKE_C_COMPILER_ID}" MATCHES "MSVC"
-   OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+else()
 
   find_program(CMAKE_AR NAMES ${_CMAKE_TOOLCHAIN_PREFIX}ar HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
@@ -58,9 +56,7 @@ else("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
 
   mark_as_advanced(CMAKE_AR CMAKE_RANLIB CMAKE_STRIP CMAKE_LINKER CMAKE_NM CMAKE_OBJDUMP CMAKE_OBJCOPY)
 
-endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
-   OR "${CMAKE_C_COMPILER_ID}" MATCHES "MSVC"
-   OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+endif()
 
 
 # on Apple there really should be install_name_tool

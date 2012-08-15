@@ -93,16 +93,14 @@ if(EXISTS
   message("found debug")
   set(bar
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
-endif(EXISTS
-  "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+endif()
 set(zot ${BuildDepends_BINARY_DIR}/Project/zot${CMAKE_EXECUTABLE_SUFFIX})
 if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
   set(zot
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
-endif(EXISTS
-  "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
+endif()
 
 message("Running ${bar}  ")
 execute_process(COMMAND ${bar} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
@@ -178,13 +176,11 @@ endif()
 if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-endif(EXISTS
-  "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+endif()
 if(EXISTS
     "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
   message("found debug")
-endif(EXISTS
-  "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
+endif()
 
 message("Running ${bar}  ")
 execute_process(COMMAND ${bar} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
