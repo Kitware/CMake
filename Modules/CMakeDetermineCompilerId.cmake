@@ -66,6 +66,15 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     message(STATUS "The ${lang} compiler identification is unknown")
   endif()
 
+  # Check if compiler id detection gave us the compiler tool.
+  if(NOT CMAKE_${lang}_COMPILER)
+    if(CMAKE_${lang}_COMPILER_ID_TOOL)
+      set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}" PARENT_SCOPE)
+    else()
+      set(CMAKE_${lang}_COMPILER "CMAKE_${lang}_COMPILER-NOTFOUND" PARENT_SCOPE)
+    endif()
+  endif()
+
   set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
   set(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
@@ -98,28 +107,31 @@ Id flags: ${testflags}
 ")
 
   # Compile the compiler identification source.
-  if(COMMAND EXECUTE_PROCESS)
-    execute_process(
-      COMMAND ${CMAKE_${lang}_COMPILER}
-              ${CMAKE_${lang}_COMPILER_ID_ARG1}
-              ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-              ${testflags}
-              "${src}"
-      WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
-      OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-      ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-      RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
-      )
+  if(0)
   else()
-    exec_program(
-      ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_DIR}
-      ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
-           ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-           ${testflags}
-           \"${src}\"
-      OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-      RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
-      )
+    if(COMMAND EXECUTE_PROCESS)
+      execute_process(
+        COMMAND ${CMAKE_${lang}_COMPILER}
+                ${CMAKE_${lang}_COMPILER_ID_ARG1}
+                ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+                ${testflags}
+                "${src}"
+        WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
+        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
+        )
+    else()
+      exec_program(
+        ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_DIR}
+        ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
+             ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+             ${testflags}
+             \"${src}\"
+        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
+        )
+    endif()
   endif()
 
   # Check the result of compilation.
@@ -153,14 +165,18 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # Find the executable produced by the compiler, try all files in the
     # binary dir.
-    file(GLOB COMPILER_${lang}_PRODUCED_FILES
+    file(GLOB files
       RELATIVE ${CMAKE_${lang}_COMPILER_ID_DIR}
       ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
-    list(REMOVE_ITEM COMPILER_${lang}_PRODUCED_FILES "${src}")
-    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Compilation of the ${lang} compiler identification source \""
-        "${src}\" produced \"${file}\"\n\n")
+    list(REMOVE_ITEM files "${src}")
+    set(COMPILER_${lang}_PRODUCED_FILES "")
+    foreach(file ${files})
+      if(NOT IS_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}/${file})
+        list(APPEND COMPILER_${lang}_PRODUCED_FILES ${file})
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Compilation of the ${lang} compiler identification source \""
+          "${src}\" produced \"${file}\"\n\n")
+      endif()
     endforeach()
 
     if(NOT COMPILER_${lang}_PRODUCED_FILES)
