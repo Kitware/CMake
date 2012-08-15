@@ -30,6 +30,8 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(CMAKE_Fortran_PLATFORM_ID "Windows")
   set(CMAKE_Fortran_COMPILER_ID "Intel")
   set(CMAKE_Fortran_COMPILER "${CMAKE_GENERATOR_FC}")
+elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+  set(CMAKE_Fortran_COMPILER_XCODE_TYPE sourcecode.fortran.f90)
 else()
   if(NOT CMAKE_Fortran_COMPILER)
     # prefer the environment variable CC

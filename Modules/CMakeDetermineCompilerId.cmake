@@ -107,7 +107,41 @@ Id flags: ${testflags}
 ")
 
   # Compile the compiler identification source.
-  if(0)
+  if("${CMAKE_GENERATOR}" MATCHES "Xcode")
+    set(id_lang "${lang}")
+    set(id_type ${CMAKE_${lang}_COMPILER_XCODE_TYPE})
+    set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
+    get_filename_component(id_src "${src}" NAME)
+    if(NOT ${XCODE_VERSION} VERSION_LESS 3)
+      set(v 3)
+      set(ext xcodeproj)
+    elseif(NOT ${XCODE_VERSION} VERSION_LESS 2)
+      set(v 2)
+      set(ext xcodeproj)
+    else()
+      set(v 1)
+      set(ext xcode)
+    endif()
+    configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-${v}.pbxproj.in
+      ${id_dir}/CompilerId${lang}.${ext}/project.pbxproj @ONLY IMMEDIATE)
+    execute_process(COMMAND xcodebuild
+      WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
+      OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+      ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+      RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
+      )
+
+    # Match the link line from xcodebuild output of the form
+    #  Ld ...
+    #      ...
+    #      /path/to/cc ...CompilerId${lang}/...
+    # to extract the compiler front-end for the language.
+    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}/\\./CompilerId${lang}[ \t\n\\\"]")
+      set(_comp "${CMAKE_MATCH_2}")
+      if(EXISTS "${_comp}")
+        set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+      endif()
+    endif()
   else()
     if(COMMAND EXECUTE_PROCESS)
       execute_process(
