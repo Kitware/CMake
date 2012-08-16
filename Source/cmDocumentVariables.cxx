@@ -283,6 +283,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "see CMAKE_BUILD_TOOL.",false,
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_VS_PLATFORM_TOOLSET", cmProperty::VARIABLE,
+     "Visual Studio Platform Toolset name.",
+     "VS 10 and above use MSBuild under the hood and support multiple "
+     "compiler toolchains.  "
+     "CMake may specify a toolset explicitly, such as \"v110\" for "
+     "VS 11 or \"Windows7.1SDK\" for 64-bit support in VS 10 Express.  "
+     "CMake provides the name of the chosen toolset in this variable."
+     ,false,
+     "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_MINOR_VERSION", cmProperty::VARIABLE,
      "The Minor version of cmake (i.e. the 4 in X.4.X).",
      "This specifies the minor version of the CMake"
