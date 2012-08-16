@@ -70,11 +70,6 @@ if(BUILD_TESTING)
       "Should the tests that run a full sub ctest process be run?"
       OFF)
     mark_as_advanced(CTEST_TEST_CTEST)
-
-    option(TEST_KDE4_STABLE_BRANCH
-      "Should the KDE4 stable branch test be run?"
-      OFF)
-    mark_as_advanced(TEST_KDE4_STABLE_BRANCH)
   endif ()
 
   # Should tests that use CVS be run?
@@ -2104,43 +2099,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       set_tests_properties ( CTestTest2
         PROPERTIES TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
     endif ()
-  endif ()
-
-  if (CMAKE_RUN_LONG_TESTS AND TEST_KDE4_STABLE_BRANCH)
-    if(UNIX)
-      if(NOT QT4_FOUND)
-         find_package(Qt4)
-      endif()
-
-      set(TRY_BUILD_KDE4 TRUE)
-      if(QT4_FOUND)
-        # check whether it's Qt 4.5 in a cmake 2.4. compatible way:
-        if(NOT EXISTS "${QT_QTNETWORK_INCLUDE_DIR}/QAbstractNetworkCache")
-          set(TRY_BUILD_KDE4 FALSE)
-        endif()
-      else()
-        set(TRY_BUILD_KDE4 FALSE)
-      endif()
-
-      find_package(Perl)
-      if(NOT PERL_FOUND)
-        set(TRY_BUILD_KDE4 FALSE)
-      endif()
-
-      find_package(ZLIB)
-      if(NOT ZLIB_FOUND)
-        set(TRY_BUILD_KDE4 FALSE)
-      endif()
-
-      if(TRY_BUILD_KDE4)
-        file(MAKE_DIRECTORY ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest)
-        set(TEST_KDE4_BASE_DIR ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest)
-        configure_file(${CMake_SOURCE_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh.in ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh @ONLY)
-        execute_process(COMMAND chmod 755 ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh )
-        add_test(KDE4StableBranchTest ${CMake_BINARY_DIR}/Tests/KDE4StableBranchTest/test_kde4.sh)
-      endif()
-
-    endif()
   endif ()
 
   if("${CMAKE_TEST_GENERATOR}" MATCHES Xcode)
