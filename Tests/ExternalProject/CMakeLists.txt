@@ -541,7 +541,7 @@ if(do_hg_tests)
   set(proj TutorialStep1-HG-byhash)
   ExternalProject_Add(${proj}
     HG_REPOSITORY "${local_hg_repo}"
-    HG_TAG cb1047431377
+    HG_TAG dd2ce38a6b8a
     UPDATE_COMMAND ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
