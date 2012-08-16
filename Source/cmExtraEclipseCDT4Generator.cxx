@@ -602,10 +602,10 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
       // handle framework include dirs on OSX, the remainder after the
       // Frameworks/ part has to be stripped
       //   /System/Library/Frameworks/GLUT.framework/Headers
-      cmsys::RegularExpression frameworkRegex("(.+/Frameworks)/.+\\.framework/");
-      if(frameworkRegex.find(dir.c_str()))
+      cmsys::RegularExpression frameworkRx("(.+/Frameworks)/.+\\.framework/");
+      if(frameworkRx.find(dir.c_str()))
         {
-        dir = frameworkRegex.match(1);
+        dir = frameworkRx.match(1);
         }
 
       if(emittedDirs.find(dir) == emittedDirs.end())
