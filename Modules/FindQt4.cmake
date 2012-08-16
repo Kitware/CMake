@@ -487,10 +487,10 @@ get_filename_component(qt_install_version "[HKEY_CURRENT_USER\\Software\\trollte
 # Debian uses qmake-qt4
 # macports' Qt uses qmake-mac
 find_program(QT_QMAKE_EXECUTABLE NAMES qmake qmake4 qmake-qt4 qmake-mac PATHS
+  $ENV{QTDIR}/bin
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\${qt_install_version};InstallDir]/bin"
-  $ENV{QTDIR}/bin
   DOC "The qmake executable for the Qt installation to use"
 )
 
