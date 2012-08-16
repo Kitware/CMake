@@ -42,7 +42,10 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
     # split the output into lines and then remove leading and trailing spaces from each of them:
     string(REGEX MATCHALL "[^\n]+\n" _includeLines "${CMAKE_MATCH_1}")
     foreach(nextLine ${_includeLines})
-      string(STRIP "${nextLine}" _includePath)
+      # on OSX, gcc says things like this:  "/System/Library/Frameworks (framework directory)", strip the last part
+      string(REGEX REPLACE "\\(framework directory\\)" "" nextLineNoFramework "${nextLine}")
+      # strip spaces at the beginning and the end
+      string(STRIP "${nextLineNoFramework}" _includePath)
       list(APPEND ${_resultIncludeDirs} "${_includePath}")
     endforeach()
 
