@@ -312,13 +312,14 @@ if(MSVC)
       set(__install__libs ${__install__libs}
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0chs.dll"
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0cht.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0enu.dll"
-        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0esp.dll"
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0deu.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0enu.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0esn.dll"
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0fra.dll"
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0ita.dll"
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0jpn.dll"
         "${MSVC${v}_MFCLOC_DIR}/mfc${v}0kor.dll"
+        "${MSVC${v}_MFCLOC_DIR}/mfc${v}0rus.dll"
         )
     endmacro()
 
