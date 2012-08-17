@@ -354,7 +354,9 @@ cmNinjaTargetGenerator
       // TODO but why doesn't it work with cmcldeps?
       const std::string projectName  = mf->GetProjectName() ?
                                        mf->GetProjectName() : "";
-      if (projectName != "CMAKE_TRY_COMPILE")
+      if (projectName != "CMAKE_TRY_COMPILE"
+          && (mf->GetDefinition("CMAKE_C_COMPILER") ||
+              mf->GetDefinition("CMAKE_CXX_COMPILER")))
         {
         useClDeps = true;
         std::string qu = "\"";
@@ -399,9 +401,10 @@ cmNinjaTargetGenerator
   if(useClDeps)
     {
     std::string cl = mf->GetDefinition("CMAKE_C_COMPILER");
-    cl = "\"" + cl + "\" ";
-    cmdLine =   clDepsBinary + " " + lang + " $in \"$DEP_FILE\" $out "
-              + clShowPrefix + " " + cl   + cmdLine;
+    if (cl.empty())
+      cl = mf->GetDefinition("CMAKE_CXX_COMPILER");
+    cmdLine =   clDepsBinary + " "   + lang + " $in \"$DEP_FILE\" $out "
+              + clShowPrefix + " \"" + cl   + "\" " + cmdLine;
     }
 
   // Write the rule for compiling file of the given language.
