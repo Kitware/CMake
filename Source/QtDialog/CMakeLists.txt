@@ -19,7 +19,6 @@ if(NOT QT4_FOUND)
 endif()
 
 include(${QT_USE_FILE})
-set(CMAKE_PACKAGE_QTGUI TRUE)
 set(SRCS
   AddCacheEntry.cxx
   AddCacheEntry.h
@@ -118,5 +117,6 @@ if(APPLE OR WIN32)
   ")
 endif()
 
+set(CMAKE_PACKAGE_QTGUI TRUE)
 configure_file("${QtDialog_SOURCE_DIR}/QtDialogCPack.cmake.in"
   "${QtDialog_BINARY_DIR}/QtDialogCPack.cmake" @ONLY)
