@@ -342,26 +342,26 @@ cmNinjaTargetGenerator
   cmMakefile* mf = this->GetMakefile();
 
   bool useClDeps = false;
+  std::string clBinary;
   std::string clDepsBinary;
   std::string clShowPrefix;
   if (lang == "C" || lang == "CXX" || lang == "RC")
     {
-    const char* depsPtr = mf->GetDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
-    const char* showPtr = mf->GetDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
-    if (depsPtr && showPtr)
+    clDepsBinary = mf->GetSafeDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
+    if (!clDepsBinary.empty() &&
+        !this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile())
       {
-      // don't wrap for try_compile,
-      // TODO but why doesn't it work with cmcldeps?
-      const std::string projectName  = mf->GetProjectName() ?
-                                       mf->GetProjectName() : "";
-      if (projectName != "CMAKE_TRY_COMPILE"
-          && (mf->GetDefinition("CMAKE_C_COMPILER") ||
-              mf->GetDefinition("CMAKE_CXX_COMPILER")))
+      clShowPrefix = mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
+      clBinary = mf->GetDefinition("CMAKE_C_COMPILER") ?
+                 mf->GetSafeDefinition("CMAKE_C_COMPILER") :
+                 mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
+      if (!clBinary.empty() && !clShowPrefix.empty())
         {
         useClDeps = true;
-        std::string qu = "\"";
-        clDepsBinary = qu + depsPtr + qu;
-        clShowPrefix = qu + showPtr + qu;
+        const std::string quote = " \"";
+        clBinary     = quote + clBinary     + "\" ";
+        clDepsBinary = quote + clDepsBinary + "\" ";
+        clShowPrefix = quote + clShowPrefix + "\" ";
         vars.DependencyFile = "$DEP_FILE";
         }
       }
@@ -395,17 +395,14 @@ cmNinjaTargetGenerator
        i != compileCmds.end(); ++i)
     this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
 
-  std::string cmdLine =
-    this->GetLocalGenerator()->BuildCommandLine(compileCmds);
-
+  std::string cmdLine;
   if(useClDeps)
     {
-    std::string cl = mf->GetDefinition("CMAKE_C_COMPILER");
-    if (cl.empty())
-      cl = mf->GetDefinition("CMAKE_CXX_COMPILER");
-    cmdLine =   clDepsBinary + " "   + lang + " $in \"$DEP_FILE\" $out "
-              + clShowPrefix + " \"" + cl   + "\" " + cmdLine;
+    cmdLine = clDepsBinary + lang + " $in \"$DEP_FILE\" $out " +
+              clShowPrefix + clBinary;
     }
+  cmdLine += this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+
 
   // Write the rule for compiling file of the given language.
   cmOStringStream comment;
