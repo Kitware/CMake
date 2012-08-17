@@ -57,6 +57,7 @@ function(ProcessorCount var)
     # Mac, FreeBSD, OpenBSD (systems with sysctl):
     find_program(ProcessorCount_cmd_sysctl sysctl
       PATHS /usr/sbin /sbin)
+    mark_as_advanced(ProcessorCount_cmd_sysctl)
     if(ProcessorCount_cmd_sysctl)
       execute_process(COMMAND ${ProcessorCount_cmd_sysctl} -n hw.ncpu
         ERROR_QUIET
@@ -69,6 +70,7 @@ function(ProcessorCount var)
   if(NOT count)
     # Linux (systems with getconf):
     find_program(ProcessorCount_cmd_getconf getconf)
+    mark_as_advanced(ProcessorCount_cmd_getconf)
     if(ProcessorCount_cmd_getconf)
       execute_process(COMMAND ${ProcessorCount_cmd_getconf} _NPROCESSORS_ONLN
         ERROR_QUIET
@@ -82,6 +84,7 @@ function(ProcessorCount var)
     # HPUX (systems with machinfo):
     find_program(ProcessorCount_cmd_machinfo machinfo
       PATHS /usr/contrib/bin)
+    mark_as_advanced(ProcessorCount_cmd_machinfo)
     if(ProcessorCount_cmd_machinfo)
       execute_process(COMMAND ${ProcessorCount_cmd_machinfo}
         ERROR_QUIET
@@ -97,6 +100,7 @@ function(ProcessorCount var)
     # IRIX (systems with hinv):
     find_program(ProcessorCount_cmd_hinv hinv
       PATHS /sbin)
+    mark_as_advanced(ProcessorCount_cmd_hinv)
     if(ProcessorCount_cmd_hinv)
       execute_process(COMMAND ${ProcessorCount_cmd_hinv}
         ERROR_QUIET
@@ -112,6 +116,7 @@ function(ProcessorCount var)
     # AIX (systems with lsconf):
     find_program(ProcessorCount_cmd_lsconf lsconf
       PATHS /usr/sbin)
+    mark_as_advanced(ProcessorCount_cmd_lsconf)
     if(ProcessorCount_cmd_lsconf)
       execute_process(COMMAND ${ProcessorCount_cmd_lsconf}
         ERROR_QUIET
@@ -126,6 +131,7 @@ function(ProcessorCount var)
   if(NOT count)
     # QNX (systems with pidin):
     find_program(ProcessorCount_cmd_pidin pidin)
+    mark_as_advanced(ProcessorCount_cmd_pidin)
     if(ProcessorCount_cmd_pidin)
       execute_process(COMMAND ${ProcessorCount_cmd_pidin} info
         ERROR_QUIET
@@ -140,6 +146,7 @@ function(ProcessorCount var)
   if(NOT count)
     # Sun (systems where uname -X emits "NumCPU" in its output):
     find_program(ProcessorCount_cmd_uname uname)
+    mark_as_advanced(ProcessorCount_cmd_uname)
     if(ProcessorCount_cmd_uname)
       execute_process(COMMAND ${ProcessorCount_cmd_uname} -X
         ERROR_QUIET
