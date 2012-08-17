@@ -83,6 +83,7 @@ protected:
   // Return false if dependencies must be regenerated and true
   // otherwise.
   virtual bool CheckDependencies(std::istream& internalDepends,
+                                 const char* internalDependsFileName,
                            std::map<std::string, DependencyVector>& validDeps);
 
   // Finalize the dependency information for the target.
