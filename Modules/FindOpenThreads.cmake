@@ -15,10 +15,15 @@
 # correspond to the ./configure --prefix=$OPENTHREADS_DIR
 # used in building osg.
 #
+# [CMake 2.8.10]:
+# The CMake variables OPENTHREADS_DIR or OSG_DIR can now be used as well to influence
+# detection, instead of needing to specify an environment variable.
+#
 # Created by Eric Wing.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
+# Copyright 2012 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -53,7 +58,6 @@
 
 find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     HINTS
-        # enough environment variables?
         $ENV{OPENTHREADS_INCLUDE_DIR}
         $ENV{OPENTHREADS_DIR}
         $ENV{OSG_INCLUDE_DIR}
@@ -61,6 +65,8 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
         $ENV{OSGDIR}
         $ENV{OpenThreads_ROOT}
         $ENV{OSG_ROOT}
+        ${OPENTHREADS_DIR}
+        ${OSG_DIR}
     PATHS
         /sw # Fink
         /opt/local # DarwinPorts
@@ -81,6 +87,8 @@ find_library(OPENTHREADS_LIBRARY
         $ENV{OSGDIR}
         $ENV{OpenThreads_ROOT}
         $ENV{OSG_ROOT}
+        ${OPENTHREADS_DIR}
+        ${OSG_DIR}
     PATHS
         /sw
         /opt/local
@@ -101,6 +109,8 @@ find_library(OPENTHREADS_LIBRARY_DEBUG
         $ENV{OSGDIR}
         $ENV{OpenThreads_ROOT}
         $ENV{OSG_ROOT}
+        ${OPENTHREADS_DIR}
+        ${OSG_DIR}
     PATHS
         /sw
         /opt/local

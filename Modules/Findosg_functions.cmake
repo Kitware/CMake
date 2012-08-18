@@ -1,11 +1,12 @@
 #
 # This CMake file contains two macros to assist with searching for OSG
-# libraries and nodekits.
+# libraries and nodekits.  Please see FindOpenSceneGraph.cmake for full
+# documentation.
 #
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
-# Copyright 2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2009-2012 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -30,6 +31,8 @@ function(OSG_FIND_PATH module header)
             $ENV{OSG_DIR}
             $ENV{OSGDIR}
             $ENV{OSG_ROOT}
+            ${${module_uc}_DIR}
+            ${OSG_DIR}
        PATH_SUFFIXES include
        PATHS
             /sw # Fink
@@ -54,6 +57,8 @@ function(OSG_FIND_LIBRARY module library)
             $ENV{OSG_DIR}
             $ENV{OSGDIR}
             $ENV{OSG_ROOT}
+            ${${module_uc}_DIR}
+            ${OSG_DIR}
        PATH_SUFFIXES lib64 lib
        PATHS
             /sw # Fink
@@ -70,6 +75,8 @@ function(OSG_FIND_LIBRARY module library)
             $ENV{OSG_DIR}
             $ENV{OSGDIR}
             $ENV{OSG_ROOT}
+            ${${module_uc}_DIR}
+            ${OSG_DIR}
        PATH_SUFFIXES lib64 lib
        PATHS
             /sw # Fink
