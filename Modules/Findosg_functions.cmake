@@ -27,10 +27,10 @@ function(OSG_FIND_PATH module header)
    # Try the user's environment request before anything else.
    find_path(${module_uc}_INCLUDE_DIR ${header}
        HINTS
-            $ENV{${module_uc}_DIR}
-            $ENV{OSG_DIR}
-            $ENV{OSGDIR}
-            $ENV{OSG_ROOT}
+            ENV ${module_uc}_DIR
+            ENV OSG_DIR
+            ENV OSGDIR
+            ENV OSG_ROOT
             ${${module_uc}_DIR}
             ${OSG_DIR}
        PATH_SUFFIXES include
@@ -53,13 +53,13 @@ function(OSG_FIND_LIBRARY module library)
    find_library(${module_uc}_LIBRARY
        NAMES ${library}
        HINTS
-            $ENV{${module_uc}_DIR}
-            $ENV{OSG_DIR}
-            $ENV{OSGDIR}
-            $ENV{OSG_ROOT}
+            ENV ${module_uc}_DIR
+            ENV OSG_DIR
+            ENV OSGDIR
+            ENV OSG_ROOT
             ${${module_uc}_DIR}
             ${OSG_DIR}
-       PATH_SUFFIXES lib64 lib
+       PATH_SUFFIXES lib
        PATHS
             /sw # Fink
             /opt/local # DarwinPorts
@@ -71,13 +71,13 @@ function(OSG_FIND_LIBRARY module library)
    find_library(${module_uc}_LIBRARY_DEBUG
        NAMES ${library}d
        HINTS
-            $ENV{${module_uc}_DIR}
-            $ENV{OSG_DIR}
-            $ENV{OSGDIR}
-            $ENV{OSG_ROOT}
+            ENV ${module_uc}_DIR
+            ENV OSG_DIR
+            ENV OSGDIR
+            ENV OSG_ROOT
             ${${module_uc}_DIR}
             ${OSG_DIR}
-       PATH_SUFFIXES lib64 lib
+       PATH_SUFFIXES lib
        PATHS
             /sw # Fink
             /opt/local # DarwinPorts

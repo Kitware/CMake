@@ -22,24 +22,18 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# QuickTime on OS X looks different than QuickTime for Windows,
-# so I am going to case the two.
-
-if(APPLE)
-  find_path(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h)
-  find_library(QUICKTIME_LIBRARY QuickTime)
-else()
-  find_path(QUICKTIME_INCLUDE_DIR QuickTime.h
-    HINTS
-    $ENV{QUICKTIME_DIR}/include
-    $ENV{QUICKTIME_DIR}
-  )
-  find_library(QUICKTIME_LIBRARY QuickTime
-    HINTS
-    $ENV{QUICKTIME_DIR}/lib
-    $ENV{QUICKTIME_DIR}
-  )
-endif()
+find_path(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h QuickTime.h
+  HINTS
+    ENV QUICKTIME_DIR
+  PATH_SUFFIXES
+    include
+)
+find_library(QUICKTIME_LIBRARY QuickTime
+  HINTS
+    ENV QUICKTIME_DIR
+  PATH_SUFFIXES
+    lib
+)
 
 # handle the QUIETLY and REQUIRED arguments and set QUICKTIME_FOUND to TRUE if
 # all listed variables are TRUE

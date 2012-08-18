@@ -73,7 +73,7 @@ if(NOT FLTK2_DIR)
   #
   find_path(FLTK2_DIR FLTK2Config.cmake
     # Look for an environment variable FLTK2_DIR.
-    $ENV{FLTK2_DIR}
+    ENV FLTK2_DIR
 
     # Look in places relative to the system executable search path.
     ${FLTK2_DIR_SEARCH}

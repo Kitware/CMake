@@ -28,7 +28,7 @@
 
 find_path(GIF_INCLUDE_DIR gif_lib.h
   HINTS
-  $ENV{GIF_DIR}
+    ENV GIF_DIR
   PATH_SUFFIXES include
   PATHS
   ~/Library/Frameworks
@@ -41,8 +41,8 @@ set(POTENTIAL_GIF_LIBS gif libgif ungif libungif giflib giflib4)
 find_library(GIF_LIBRARY
   NAMES ${POTENTIAL_GIF_LIBS}
   HINTS
-  $ENV{GIF_DIR}
-  PATH_SUFFIXES lib64 lib
+    ENV GIF_DIR
+  PATH_SUFFIXES lib
   PATHS
   ~/Library/Frameworks
   /usr/freeware

@@ -98,7 +98,7 @@ function(_gtest_find_library _name)
     find_library(${_name}
         NAMES ${ARGN}
         HINTS
-            $ENV{GTEST_ROOT}
+            ENV GTEST_ROOT
             ${GTEST_ROOT}
         PATH_SUFFIXES ${_gtest_libpath_suffixes}
     )

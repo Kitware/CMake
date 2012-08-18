@@ -58,13 +58,13 @@
 
 find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
     HINTS
-        $ENV{OPENTHREADS_INCLUDE_DIR}
-        $ENV{OPENTHREADS_DIR}
-        $ENV{OSG_INCLUDE_DIR}
-        $ENV{OSG_DIR}
-        $ENV{OSGDIR}
-        $ENV{OpenThreads_ROOT}
-        $ENV{OSG_ROOT}
+        ENV OPENTHREADS_INCLUDE_DIR
+        ENV OPENTHREADS_DIR
+        ENV OSG_INCLUDE_DIR
+        ENV OSG_DIR
+        ENV OSGDIR
+        ENV OpenThreads_ROOT
+        ENV OSG_ROOT
         ${OPENTHREADS_DIR}
         ${OSG_DIR}
     PATHS
@@ -80,13 +80,13 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
 find_library(OPENTHREADS_LIBRARY
     NAMES OpenThreads OpenThreadsWin32
     HINTS
-        $ENV{OPENTHREADS_LIBRARY_DIR}
-        $ENV{OPENTHREADS_DIR}
-        $ENV{OSG_LIBRARY_DIR}
-        $ENV{OSG_DIR}
-        $ENV{OSGDIR}
-        $ENV{OpenThreads_ROOT}
-        $ENV{OSG_ROOT}
+        ENV OPENTHREADS_LIBRARY_DIR
+        ENV OPENTHREADS_DIR
+        ENV OSG_LIBRARY_DIR
+        ENV OSG_DIR
+        ENV OSGDIR
+        ENV OpenThreads_ROOT
+        ENV OSG_ROOT
         ${OPENTHREADS_DIR}
         ${OSG_DIR}
     PATHS
@@ -95,20 +95,20 @@ find_library(OPENTHREADS_LIBRARY
         /opt/csw
         /opt
         /usr/freeware
-    PATH_SUFFIXES lib64 lib
+    PATH_SUFFIXES lib
 )
 
 find_library(OPENTHREADS_LIBRARY_DEBUG
     NAMES OpenThreadsd OpenThreadsWin32d
     HINTS
-        $ENV{OPENTHREADS_DEBUG_LIBRARY_DIR}
-        $ENV{OPENTHREADS_LIBRARY_DIR}
-        $ENV{OPENTHREADS_DIR}
-        $ENV{OSG_LIBRARY_DIR}
-        $ENV{OSG_DIR}
-        $ENV{OSGDIR}
-        $ENV{OpenThreads_ROOT}
-        $ENV{OSG_ROOT}
+        ENV OPENTHREADS_DEBUG_LIBRARY_DIR
+        ENV OPENTHREADS_LIBRARY_DIR
+        ENV OPENTHREADS_DIR
+        ENV OSG_LIBRARY_DIR
+        ENV OSG_DIR
+        ENV OSGDIR
+        ENV OpenThreads_ROOT
+        ENV OSG_ROOT
         ${OPENTHREADS_DIR}
         ${OSG_DIR}
     PATHS
@@ -117,7 +117,7 @@ find_library(OPENTHREADS_LIBRARY_DEBUG
         /opt/csw
         /opt
         /usr/freeware
-    PATH_SUFFIXES lib64 lib
+    PATH_SUFFIXES lib
 )
 
 if(OPENTHREADS_LIBRARY_DEBUG)
