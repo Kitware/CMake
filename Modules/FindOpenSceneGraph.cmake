@@ -26,6 +26,10 @@
 #    OSGDIR
 #    OSG_ROOT
 #
+# [CMake 2.8.10]:
+# The CMake variable OSG_DIR can now be used as well to influence detection, instead of needing
+# to specify an environment variable.
+#
 # This module defines the following output variables:
 #
 #    OPENSCENEGRAPH_FOUND - Was the OSG and all of the specified components found?
@@ -49,7 +53,7 @@
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
-# Copyright 2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2009-2012 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
