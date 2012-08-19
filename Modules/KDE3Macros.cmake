@@ -223,31 +223,30 @@ macro(KDE3_AUTOMOC)
 
       if (EXISTS ${_abs_FILE} AND NOT _skip)
 
-         file(READ ${_abs_FILE} _contents)
+         file(STRINGS ${_abs_FILE} _match REGEX "#include +[^ ]+\\.moc[\">]")
 
          get_filename_component(_abs_PATH ${_abs_FILE} PATH)
 
-         string(REGEX MATCHALL "#include +[^ ]+\\.moc[\">]" _match "${_contents}")
-         if(_match)
-            foreach (_current_MOC_INC ${_match})
-               string(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
+         foreach (_current_MOC_INC IN LISTS _match)
+            string(REGEX MATCH "[^ <\"]+\\.moc" _current_MOC "${_current_MOC_INC}")
 
-               get_filename_component(_basename ${_current_MOC} NAME_WE)
-#               set(_header ${CMAKE_CURRENT_SOURCE_DIR}/${_basename}.h)
-               set(_header ${_abs_PATH}/${_basename}.h)
-               set(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
+            get_filename_component(_basename ${_current_MOC} NAME_WE)
+#            set(_header ${CMAKE_CURRENT_SOURCE_DIR}/${_basename}.h)
+            set(_header ${_abs_PATH}/${_basename}.h)
+            set(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
 
-               add_custom_command(OUTPUT ${_moc}
-                  COMMAND ${QT_MOC_EXECUTABLE}
-                  ARGS ${_header} -o ${_moc}
-                  DEPENDS ${_header}
-               )
+            add_custom_command(OUTPUT ${_moc}
+               COMMAND ${QT_MOC_EXECUTABLE}
+               ARGS ${_header} -o ${_moc}
+               DEPENDS ${_header}
+            )
 
-               ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+            ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
 
-            endforeach ()
-         endif()
-
+         endforeach ()
+         unset(_match)
+         unset(_header)
+         unset(_moc)
       endif ()
    endforeach ()
 endmacro()
