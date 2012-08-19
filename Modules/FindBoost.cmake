@@ -729,7 +729,7 @@ set(Boost_ERROR_REASON)
     #
     set(BOOST_VERSION 0)
     set(BOOST_LIB_VERSION "")
-    file(READ "${Boost_INCLUDE_DIR}/boost/version.hpp" _boost_VERSION_HPP_CONTENTS)
+    file(STRINGS "${Boost_INCLUDE_DIR}/boost/version.hpp" _boost_VERSION_HPP_CONTENTS REGEX "#define BOOST_(LIB_)?VERSION ")
     if(Boost_DEBUG)
       message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                      "location of version.hpp: ${Boost_INCLUDE_DIR}/boost/version.hpp")
@@ -737,6 +737,7 @@ set(Boost_ERROR_REASON)
 
     string(REGEX REPLACE ".*#define BOOST_VERSION ([0-9]+).*" "\\1" Boost_VERSION "${_boost_VERSION_HPP_CONTENTS}")
     string(REGEX REPLACE ".*#define BOOST_LIB_VERSION \"([0-9_]+)\".*" "\\1" Boost_LIB_VERSION "${_boost_VERSION_HPP_CONTENTS}")
+    unset(_boost_VERSION_HPP_CONTENTS)
 
     set(Boost_LIB_VERSION ${Boost_LIB_VERSION} CACHE INTERNAL "The library version string for boost libraries")
     set(Boost_VERSION ${Boost_VERSION} CACHE INTERNAL "The version number for boost libraries")

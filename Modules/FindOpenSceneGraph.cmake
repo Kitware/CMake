@@ -103,7 +103,8 @@ if(OSG_INCLUDE_DIR)
     endif()
 
     if(EXISTS "${_osg_Version_file}")
-      file(READ "${_osg_Version_file}" _osg_Version_contents)
+      file(STRINGS "${_osg_Version_file}" _osg_Version_contents
+           REGEX "#define (OSG_VERSION_[A-Z]+|OPENSCENEGRAPH_[A-Z]+_VERSION)[ \t]+[0-9]+")
     else()
       set(_osg_Version_contents "unknown")
     endif()
@@ -130,6 +131,7 @@ if(OSG_INCLUDE_DIR)
         message(WARNING "[ FindOpenSceneGraph.cmake:${CMAKE_CURRENT_LIST_LINE} ] "
             "Failed to parse version number, please report this as a bug")
     endif()
+    unset(_osg_Version_contents)
 
     set(OPENSCENEGRAPH_VERSION "${_osg_VERSION_MAJOR}.${_osg_VERSION_MINOR}.${_osg_VERSION_PATCH}"
                                 CACHE INTERNAL "The version of OSG which was detected")
