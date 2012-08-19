@@ -827,9 +827,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Tell cmake to use MFC for an executable or dll.",
      "This can be set in a CMakeLists.txt file and will "
      "enable MFC in the application.  It should be set "
-     "to 1 for static the static MFC library, and 2 for "
-     "the shared MFC library.  This is used in visual "
-     "studio 6 and 7 project files.   The CMakeSetup "
+     "to 1 for the static MFC library, and 2 for "
+     "the shared MFC library.  This is used in Visual "
+     "Studio 6 and 7 project files.   The CMakeSetup "
      "dialog used MFC and the CMakeLists.txt looks like this:\n"
      "  add_definitions(-D_AFXDLL)\n"
      "  set(CMAKE_MFC_FLAG 2)\n"
