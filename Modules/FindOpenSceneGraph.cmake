@@ -145,23 +145,6 @@ if(OSG_INCLUDE_DIR)
     endif()
 endif()
 
-#
-# Version checking
-#
-if(OpenSceneGraph_FIND_VERSION AND OPENSCENEGRAPH_VERSION)
-    if(OpenSceneGraph_FIND_VERSION_EXACT)
-        if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION})
-            set(_osg_version_not_exact TRUE)
-        endif()
-    else()
-        # version is too low
-        if(NOT OPENSCENEGRAPH_VERSION VERSION_EQUAL ${OpenSceneGraph_FIND_VERSION} AND
-                NOT OPENSCENEGRAPH_VERSION VERSION_GREATER ${OpenSceneGraph_FIND_VERSION})
-            set(_osg_version_not_high_enough TRUE)
-        endif()
-    endif()
-endif()
-
 set(_osg_quiet)
 if(OpenSceneGraph_FIND_QUIETLY)
     set(_osg_quiet "QUIET")
@@ -190,63 +173,22 @@ if(OPENSCENEGRAPH_INCLUDE_DIR)
 endif()
 
 #
-# Inform the users with an error message based on
-# what version they have vs. what version was
-# required.
+# Check each module to see if it's found
 #
+set(_osg_component_founds)
 if(OpenSceneGraph_FIND_REQUIRED)
-    set(_osg_version_output_type FATAL_ERROR)
-else()
-    set(_osg_version_output_type STATUS)
-endif()
-if(_osg_version_not_high_enough)
-    set(_osg_EPIC_FAIL TRUE)
-    if(NOT OpenSceneGraph_FIND_QUIETLY)
-        message(${_osg_version_output_type}
-            "ERROR: Version ${OpenSceneGraph_FIND_VERSION} or higher of the OSG "
-            "is required.  Version ${OPENSCENEGRAPH_VERSION} was found.")
-    endif()
-elseif(_osg_version_not_exact)
-    set(_osg_EPIC_FAIL TRUE)
-    if(NOT OpenSceneGraph_FIND_QUIETLY)
-        message(${_osg_version_output_type}
-            "ERROR: Version ${OpenSceneGraph_FIND_VERSION} of the OSG is required "
-            "(exactly), version ${OPENSCENEGRAPH_VERSION} was found.")
-    endif()
-else()
-
-    #
-    # Check each module to see if it's found
-    #
-    if(OpenSceneGraph_FIND_REQUIRED)
-        set(_osg_missing_message)
-        foreach(_osg_module ${_osg_modules_to_process})
-            string(TOUPPER ${_osg_module} _osg_module_UC)
-            if(NOT ${_osg_module_UC}_FOUND)
-                set(_osg_missing_nodekit_fail true)
-                set(_osg_missing_message "${_osg_missing_message} ${_osg_module}")
-            endif()
-        endforeach()
-
-        if(_osg_missing_nodekit_fail)
-            message(FATAL_ERROR "ERROR: Missing the following osg "
-                "libraries: ${_osg_missing_message}.\n"
-                "Consider using CMAKE_PREFIX_PATH or the OSG_DIR "
-                "environment variable.  See the "
-                "${CMAKE_CURRENT_LIST_FILE} for more details.")
-        endif()
-    endif()
-
-    include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenSceneGraph DEFAULT_MSG OPENSCENEGRAPH_LIBRARIES OPENSCENEGRAPH_INCLUDE_DIR)
+    foreach(_osg_module ${_osg_modules_to_process})
+        string(TOUPPER ${_osg_module} _osg_module_UC)
+        list(APPEND _osg_component_founds ${_osg_module_UC}_FOUND)
+    endforeach()
 endif()
 
-if(_osg_EPIC_FAIL)
-    # Zero out everything, we didn't meet version requirements
-    set(OPENSCENEGRAPH_FOUND FALSE)
-    set(OPENSCENEGRAPH_LIBRARIES)
-    set(OPENSCENEGRAPH_INCLUDE_DIR)
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenSceneGraph
+                                  REQUIRED_VARS OPENSCENEGRAPH_LIBRARIES OPENSCENEGRAPH_INCLUDE_DIR ${_osg_component_founds}
+                                  VERSION_VAR OPENSCENEGRAPH_VERSION)
+
+unset(_osg_component_founds)
 
 set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIR})
 
