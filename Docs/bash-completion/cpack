@@ -8,7 +8,7 @@ _cpack()
     case "$prev" in
         -G)
             COMPREPLY=( $( compgen -W '$( cpack --help 2>/dev/null |
-                grep "^  .*=\ .*" 2> /dev/null | grep -v "^  -" 2>/dev/null |
+                grep "^  .*= .*" 2> /dev/null | grep -v "^  -" 2>/dev/null |
                 cut -d" " -f 3 )' -- "$cur" ) )
             return
             ;;

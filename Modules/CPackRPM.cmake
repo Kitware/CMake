@@ -259,7 +259,7 @@ if(RPMBUILD_EXECUTABLE)
                   OUTPUT_VARIABLE _TMP_VERSION
                   ERROR_QUIET
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
-  string(REGEX REPLACE "^.*\ " ""
+  string(REGEX REPLACE "^.* " ""
          RPMBUILD_EXECUTABLE_VERSION
          ${_TMP_VERSION})
   if(CPACK_RPM_PACKAGE_DEBUG)
