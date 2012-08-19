@@ -74,22 +74,22 @@ int LibsharedExcluded::libshared_excluded() const {
 
 #endif
 
-int libshared() {
+int libshared(void) {
   return 0;
 }
 
-int libshared_exported() {
+int libshared_exported(void) {
   return 0;
 }
 
-int libshared_deprecated() {
+int libshared_deprecated(void) {
   return 0;
 }
 
-int libshared_not_exported() {
+int libshared_not_exported(void) {
   return 0;
 }
 
-int libshared_excluded() {
+int libshared_excluded(void) {
   return 0;
 }

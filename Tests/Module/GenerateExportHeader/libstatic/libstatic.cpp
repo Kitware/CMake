@@ -70,18 +70,18 @@ int LibstaticExcluded::libstatic_excluded() const {
   return 0;
 }
 
-int libstatic_exported() {
+int libstatic_exported(void) {
   return 0;
 }
 
-int libstatic_deprecated() {
+int libstatic_deprecated(void) {
   return 0;
 }
 
-int libstatic_not_exported() {
+int libstatic_not_exported(void) {
   return 0;
 }
 
-int libstatic_excluded() {
+int libstatic_excluded(void) {
   return 0;
 }

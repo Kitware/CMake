@@ -47,12 +47,12 @@ public:
 
 #endif
 
-LIBSHARED_AND_STATIC_EXPORT int libshared_and_static_exported();
+LIBSHARED_AND_STATIC_EXPORT int libshared_and_static_exported(void);
 
-LIBSHARED_AND_STATIC_DEPRECATED_EXPORT int libshared_and_static_deprecated();
+LIBSHARED_AND_STATIC_DEPRECATED_EXPORT int libshared_and_static_deprecated(void);
 
-int libshared_and_static_not_exported();
+int libshared_and_static_not_exported(void);
 
-int LIBSHARED_AND_STATIC_NO_EXPORT libshared_and_static_excluded();
+int LIBSHARED_AND_STATIC_NO_EXPORT libshared_and_static_excluded(void);
 
 #endif
