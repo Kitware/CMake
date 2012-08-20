@@ -598,6 +598,16 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
     if (!inc->empty())
       {
       std::string dir = cmSystemTools::CollapseFullPath(inc->c_str());
+
+      // handle framework include dirs on OSX, the remainder after the
+      // Frameworks/ part has to be stripped
+      //   /System/Library/Frameworks/GLUT.framework/Headers
+      cmsys::RegularExpression frameworkRx("(.+/Frameworks)/.+\\.framework/");
+      if(frameworkRx.find(dir.c_str()))
+        {
+        dir = frameworkRx.match(1);
+        }
+
       if(emittedDirs.find(dir) == emittedDirs.end())
         {
         emittedDirs.insert(dir);
