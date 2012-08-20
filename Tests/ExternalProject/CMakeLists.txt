@@ -6,6 +6,7 @@ include(ExternalProject)
 find_package(CVS)
 find_package(Subversion)
 find_package(Git)
+find_package(Hg)
 
 option(ExternalProjectTest_USE_FOLDERS "Enable folder grouping in IDEs." ON)
 if(ExternalProjectTest_USE_FOLDERS)
@@ -511,6 +512,76 @@ if(do_git_tests)
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 endif()
 
+set(do_hg_tests 0)
+
+if(HG_EXECUTABLE)
+  set(do_hg_tests 1)
+endif()
+
+if(do_hg_tests)
+  set(local_hg_repo "../../LocalRepositories/HG")
+
+  # Unzip/untar the hg repository in our source folder so that other
+  # projects below may use it to test hg args of ExternalProject_Add
+  #
+  set(proj SetupLocalHGRepository)
+  ExternalProject_Add(${proj}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/HG
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/hgrepo.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND "${HG_EXECUTABLE}" --version
+    INSTALL_COMMAND ""
+  )
+  set_property(TARGET ${proj}
+    PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
+
+
+  # hg by commit id:
+  #
+  set(proj TutorialStep1-HG-byhash)
+  ExternalProject_Add(${proj}
+    HG_REPOSITORY "${local_hg_repo}"
+    HG_TAG dd2ce38a6b8a
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalHGRepository"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "HG")
+
+  # hg by explicit branch/tag name:
+  #
+  set(proj TutorialStep1-HG-bytag)
+  ExternalProject_Add(${proj}
+    HG_REPOSITORY "${local_hg_repo}"
+    HG_TAG "default"
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalHGRepository"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "HG")
+
+  # Live hg / tip (no HG_TAG):
+  #
+  # Mercurial 2.1 does not distinguish an empty pull from a failed pull,
+  # so do not run the test with that version.
+  if(NOT "${HG_VERSION_STRING}" STREQUAL "2.1")
+    set(proj TutorialStep1-HG-tip)
+    ExternalProject_Add(${proj}
+      HG_REPOSITORY "${local_hg_repo}"
+      CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      INSTALL_COMMAND ""
+      DEPENDS "SetupLocalHGRepository"
+      LOG_UPDATE 1
+    )
+    set_property(TARGET ${proj} PROPERTY FOLDER "HG")
+  endif()
+endif()
+
 
 # Test the testable built/installed products:
 #
@@ -581,5 +652,5 @@ endif()
 message(STATUS "can_build_tutorial_step5='${can_build_tutorial_step5}'")
 message(STATUS "do_cvs_tests='${do_cvs_tests}'")
 message(STATUS "do_svn_tests='${do_svn_tests}'")
-message(STATUS "do_git_tests='${do_git_tests}'")
-message(STATUS "GIT_EXECUTABLE='${GIT_EXECUTABLE}'")
+message(STATUS "do_git_tests='${do_git_tests}' GIT_EXECUTABLE='${GIT_EXECUTABLE}'")
+message(STATUS "do_hg_tests='${do_hg_tests}'   HG_EXECUTABLE='${HG_EXECUTABLE}'")
