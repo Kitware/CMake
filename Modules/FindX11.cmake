@@ -324,6 +324,11 @@ if (UNIX)
      set(X11_SM_FOUND TRUE)
   endif()
 
+  # Most of the X11 headers will be in the same directories, avoid
+  # creating a huge list of duplicates.
+  if (X11_INCLUDE_DIR)
+     list(REMOVE_DUPLICATES X11_INCLUDE_DIR)
+  endif ()
 
   # Deprecated variable for backwards compatibility with CMake 1.4
   if (X11_X11_INCLUDE_PATH AND X11_LIBRARIES)
