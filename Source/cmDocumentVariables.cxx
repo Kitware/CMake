@@ -1365,7 +1365,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      false,
      "Variables that Control the Build");
   cm->DefineProperty
-    ("CMAKE_POSITION_INDEPENDENT_FLAGS", cmProperty::VARIABLE,
+    ("CMAKE_POSITION_INDEPENDENT_CODE", cmProperty::VARIABLE,
      "Default value for POSITION_INDEPENDENT_CODE of targets.",
      "This variable is used to initialize the "
      "POSITION_INDEPENDENT_CODE property on all the targets. "
