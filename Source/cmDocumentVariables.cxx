@@ -595,7 +595,21 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "If \"make install\" is invoked or INSTALL is built"
      ", this directory is pre-pended onto all install "
      "directories. This variable defaults to /usr/local"
-     " on UNIX and c:/Program Files on Windows.",false,
+     " on UNIX and c:/Program Files on Windows.\n"
+     "On UNIX one can use the DESTDIR mechanism in order"
+     " to relocate the whole installation. "
+     "DESTDIR means DESTination DIRectory. It is "
+     "commonly used by makefile users "
+     "in order to install software at non-default location. "
+     "It is usually invoked like this:\n"
+     " make DESTDIR=/home/john install\n"
+     "which will install the concerned software using the"
+     " installation prefix, e.g. \"/usr/local\" pre-pended with "
+     "the DESTDIR value which finally gives \"/home/john/usr/local\".\n"
+     "WARNING: DESTDIR may not be used on Windows because installation"
+     " prefix usually contains a drive letter like in \"C:/Program Files\""
+     " which cannot be pre-pended with some other prefix."
+     ,false,
      "Variables That Change Behavior");
 
   cm->DefineProperty
