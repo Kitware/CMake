@@ -38,7 +38,7 @@ bool cmDependsJava::WriteDependencies(const char *src, const char *,
   return true;
 }
 
-bool cmDependsJava::CheckDependencies(std::istream&,
+bool cmDependsJava::CheckDependencies(std::istream&, const char*,
                              std::map<std::string, DependencyVector >&)
 {
   return true;
