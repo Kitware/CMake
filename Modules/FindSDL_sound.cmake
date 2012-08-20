@@ -75,39 +75,33 @@ mark_as_advanced(SDL_SOUND_EXTRAS)
 # Find SDL_sound.h
 find_path(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   HINTS
-  $ENV{SDLSOUNDDIR}/include
-  $ENV{SDLSOUNDDIR}
-  $ENV{SDLDIR}/include
-  $ENV{SDLDIR}
+    ENV SDLSOUNDDIR
+    ENV SDLDIR
+  PATH_SUFFIXES
+    include include/SDL
   PATHS
-  /usr/local/include/SDL
-  /usr/include/SDL
   /usr/local/include/SDL12
   /usr/local/include/SDL11 # FreeBSD ports
   /usr/include/SDL12
   /usr/include/SDL11
-  /sw/include/SDL # Fink
-  /sw/include
-  /opt/local/include/SDL # DarwinPorts
-  /opt/local/include
-  /opt/csw/include/SDL # Blastwave
-  /opt/csw/include
-  /opt/include/SDL
-  /opt/include
+  /sw # Fink
+  /opt/local # DarwinPorts
+  /opt/csw # Blastwave
+  /opt
   )
 
 find_library(SDL_SOUND_LIBRARY
   NAMES SDL_sound
   HINTS
-  $ENV{SDLSOUNDDIR}/lib
-  $ENV{SDLSOUNDDIR}
-  $ENV{SDLDIR}/lib
-  $ENV{SDLDIR}
+    ENV SDLSOUNDDIR
+    ENV SDLDIR
+  PATH_SUFFIXES
+    lib
   PATHS
-  /sw/lib
-  /opt/local/lib
-  /opt/csw/lib
-  /opt/lib
+  /sw
+  /opt/local
+  /opt/csw
+  /opt
   )
 
 if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
@@ -212,37 +206,35 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
      find_library(MIKMOD_LIBRARY
          NAMES libmikmod-coreaudio mikmod
          PATHS
-         $ENV{MIKMODDIR}/lib
-         $ENV{MIKMODDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV MIKMODDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
        )
        if(MIKMOD_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${MIKMOD_LIBRARY})
-       endif()
-     endif()
+       endif(MIKMOD_LIBRARY)
+     endif("${MY_OUTPUT}" MATCHES "MikMod_")
 
      # Find ModPlug
      if("${MY_OUTPUT}" MATCHES "MODPLUG_")
        find_library(MODPLUG_LIBRARY
          NAMES modplug
          PATHS
-         $ENV{MODPLUGDIR}/lib
-         $ENV{MODPLUGDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV MODPLUGDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
        )
        if(MODPLUG_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${MODPLUG_LIBRARY})
@@ -255,18 +247,16 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        find_library(VORBIS_LIBRARY
          NAMES vorbis Vorbis VORBIS
          PATHS
-         $ENV{VORBISDIR}/lib
-         $ENV{VORBISDIR}
-         $ENV{OGGDIR}/lib
-         $ENV{OGGDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV VORBISDIR
+           ENV OGGDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
          )
        if(VORBIS_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${VORBIS_LIBRARY})
@@ -275,18 +265,16 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        find_library(OGG_LIBRARY
          NAMES ogg Ogg OGG
          PATHS
-         $ENV{OGGDIR}/lib
-         $ENV{OGGDIR}
-         $ENV{VORBISDIR}/lib
-         $ENV{VORBISDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV OGGDIR
+           ENV VORBISDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
          )
        if(OGG_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${OGG_LIBRARY})
@@ -299,16 +287,15 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        find_library(SMPEG_LIBRARY
          NAMES smpeg SMPEG Smpeg SMpeg
          PATHS
-         $ENV{SMPEGDIR}/lib
-         $ENV{SMPEGDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV SMPEGDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
          )
        if(SMPEG_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${SMPEG_LIBRARY})
@@ -321,16 +308,15 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        find_library(FLAC_LIBRARY
          NAMES flac FLAC
          PATHS
-         $ENV{FLACDIR}/lib
-         $ENV{FLACDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV FLACDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
          )
        if(FLAC_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${FLAC_LIBRARY})
@@ -346,16 +332,15 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
        find_library(SPEEX_LIBRARY
          NAMES speex SPEEX
          PATHS
-         $ENV{SPEEXDIR}/lib
-         $ENV{SPEEXDIR}
-         $ENV{SDLSOUNDDIR}/lib
-         $ENV{SDLSOUNDDIR}
-         $ENV{SDLDIR}/lib
-         $ENV{SDLDIR}
-         /sw/lib
-         /opt/local/lib
-         /opt/csw/lib
-       /opt/lib
+           ENV SPEEXDIR
+           ENV SDLSOUNDDIR
+           ENV SDLDIR
+           /sw
+           /opt/local
+           /opt/csw
+           /opt
+         PATH_SUFFIXES
+           lib
          )
        if(SPEEX_LIBRARY)
          set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${SPEEX_LIBRARY})
@@ -367,20 +352,16 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
          find_library(OGG_LIBRARY
            NAMES ogg Ogg OGG
            PATHS
-           $ENV{OGGDIR}/lib
-           $ENV{OGGDIR}
-           $ENV{VORBISDIR}/lib
-           $ENV{VORBISDIR}
-           $ENV{SPEEXDIR}/lib
-           $ENV{SPEEXDIR}
-           $ENV{SDLSOUNDDIR}/lib
-           $ENV{SDLSOUNDDIR}
-           $ENV{SDLDIR}/lib
-           $ENV{SDLDIR}
-           /sw/lib
-           /opt/local/lib
-           /opt/csw/lib
-         /opt/lib
+             ENV OGGDIR
+             ENV VORBISDIR
+             ENV SPEEXDIR
+             ENV SDLSOUNDDIR
+             ENV SDLDIR
+             /sw
+             /opt/local
+             /opt/csw
+             /opt
+           PATH_SUFFIXES lib
            )
          if(OGG_LIBRARY)
            set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${OGG_LIBRARY})

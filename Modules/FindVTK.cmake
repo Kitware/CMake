@@ -90,7 +90,7 @@ if(_VTK_40_ALLOW AND NOT VTK_DIR)
   find_path(VTK_DIR
     NAMES UseVTK.cmake
     PATH_SUFFIXES vtk-4.0 vtk
-    HINTS $ENV{VTK_DIR}
+    HINTS ENV VTK_DIR
 
     PATHS
 

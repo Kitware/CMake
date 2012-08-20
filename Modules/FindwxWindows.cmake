@@ -106,18 +106,6 @@ if(WIN32_STYLE_FIND)
   ## fix the root dir to avoid mixing of headers/libs from different
   ## versions/builds:
 
-  set (WXWINDOWS_POSSIBLE_ROOT_PATHS
-    $ENV{WXWIN}
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWidgets_is1;Inno Setup: App Path]"  ## WX 2.6.x
-    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]"  ## WX 2.4.x
-    C:\\wxWidgets-2.6.2
-    D:\\wxWidgets-2.6.2
-    C:\\wxWidgets-2.6.1
-    D:\\wxWidgets-2.6.1
-    C:\\wxWindows-2.4.2
-    D:\\wxWindows-2.4.2
-    )
-
   ## WX supports monolithic and multiple smaller libs (since 2.5.x), we prefer monolithic for now.
   ## monolithic = WX is built as a single big library
   ## e.g. compile on WIN32 as  "nmake -f makefile.vc MONOLITHIC=1 BUILD=debug SHARED=0 USE_OPENGL=1" (JW)
@@ -132,7 +120,18 @@ if(WIN32_STYLE_FIND)
   ## avoid mixing of headers and libs between multiple installed WX versions,
   ## select just one tree here:
   find_path(WXWINDOWS_ROOT_DIR  include/wx/wx.h
-    ${WXWINDOWS_POSSIBLE_ROOT_PATHS} )
+    HINTS
+      ENV WXWIN
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWidgets_is1;Inno Setup: App Path]"  ## WX 2.6.x
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\wxWindows_is1;Inno Setup: App Path]"  ## WX 2.4.x
+    PATHS
+      C:/wxWidgets-2.6.2
+      D:/wxWidgets-2.6.2
+      C:/wxWidgets-2.6.1
+      D:/wxWidgets-2.6.1
+      C:/wxWindows-2.4.2
+      D:/wxWindows-2.4.2
+  )
   # message("DBG found WXWINDOWS_ROOT_DIR: ${WXWINDOWS_ROOT_DIR}")
 
 
@@ -600,8 +599,10 @@ else()
     # wx-config should be in your path anyhow, usually no need to set WXWIN or
     # search in ../wx or ../../wx
     find_program(CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE wx-config
-      $ENV{WXWIN}
-      $ENV{WXWIN}/bin
+      HINTS
+        ENV WXWIN
+        $ENV{WXWIN}/bin
+      PATHS
       ../wx/bin
       ../../wx/bin )
 

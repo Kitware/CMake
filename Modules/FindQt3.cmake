@@ -91,17 +91,18 @@ if (QT_MT_REQUIRED)
     qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
     qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321 qt-mt3
     PATHS
-  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
-  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
-  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/lib"
-    $ENV{QTDIR}/lib
-    ${GLOB_PATHS_LIB}
-    /usr/local/qt/lib
-    /usr/lib/qt/lib
-    /usr/lib/qt3/lib
-    /usr/lib/qt3/lib64
-    /usr/share/qt3/lib
-    C:/Progra~1/qt/lib
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]"
+      ENV QTDIR
+      ${GLOB_PATHS_LIB}
+      /usr/local/qt
+      /usr/lib/qt
+      /usr/lib/qt3
+      /usr/share/qt3
+      C:/Progra~1/qt
+    PATH_SUFFIXES
+      lib
     )
 
 else ()
@@ -111,17 +112,18 @@ else ()
     qt-mt qt-mt${qt_version_str_lib} qt-mtnc${qt_version_str_lib}
     qt-mtedu${qt_version_str_lib} qt-mt230nc qt-mtnc321 qt-mt3
     PATHS
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/lib"
-    $ENV{QTDIR}/lib
-    ${GLOB_PATHS_LIB}
-    /usr/local/qt/lib
-    /usr/lib/qt/lib
-    /usr/lib/qt3/lib
-    /usr/lib/qt3/lib64
-    /usr/share/qt3/lib
-    C:/Progra~1/qt/lib
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]"
+      ENV QTDIR
+      ${GLOB_PATHS_LIB}
+      /usr/local/qt
+      /usr/lib/qt
+      /usr/lib/qt3
+      /usr/share/qt3
+      C:/Progra~1/qt/lib
+    PATH_SUFFIXES
+      lib
     )
 endif ()
 
@@ -129,35 +131,37 @@ endif ()
 find_library(QT_QASSISTANTCLIENT_LIBRARY
   NAMES qassistantclient
   PATHS
-  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
-  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
-  "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/lib"
-  $ENV{QTDIR}/lib
-  ${GLOB_PATHS_LIB}
-  /usr/local/qt/lib
-  /usr/lib/qt3/lib
-  /usr/lib/qt3/lib64
-  /usr/share/qt3/lib
-  C:/Progra~1/qt/lib
+    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]"
+    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]"
+    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]"
+    ENV QTDIR
+    ${GLOB_PATHS_LIB}
+    /usr/local/qt
+    /usr/lib/qt3
+    /usr/share/qt3
+    C:/Progra~1/qt
+  PATH_SUFFIXES
+    lib
   )
 
 # qt 3 should prefer QTDIR over the PATH
 find_program(QT_MOC_EXECUTABLE
   NAMES moc-qt3 moc
   HINTS
-  $ENV{QTDIR}/bin
+    ENV QTDIR
   PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
-  $ENV{QTDIR}/bin
   ${GLOB_PATHS_BIN}
-  /usr/local/qt/bin
-  /usr/lib/qt/bin
-  /usr/lib/qt3/bin
-  /usr/share/qt3/bin
-  C:/Progra~1/qt/bin
-  /usr/X11R6/bin
+    /usr/local/qt
+    /usr/lib/qt
+    /usr/lib/qt3
+    /usr/share/qt3
+    C:/Progra~1/qt
+    /usr/X11R6
+  PATH_SUFFIXES
+    bin
   )
 
 if(QT_MOC_EXECUTABLE)
@@ -168,18 +172,20 @@ endif()
 find_program(QT_UIC_EXECUTABLE
   NAMES uic-qt3 uic
   HINTS
-  $ENV{QTDIR}/bin
+    ENV QTDIR
   PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
   ${GLOB_PATHS_BIN}
-  /usr/local/qt/bin
-  /usr/lib/qt/bin
-  /usr/lib/qt3/bin
-  /usr/share/qt3/bin
-  C:/Progra~1/qt/bin
-  /usr/X11R6/bin
+    /usr/local/qt
+    /usr/lib/qt
+    /usr/lib/qt3
+    /usr/share/qt3
+    C:/Progra~1/qt
+    /usr/X11R6
+  PATH_SUFFIXES
+    bin
   )
 
 if(QT_UIC_EXECUTABLE)
@@ -189,13 +195,15 @@ endif()
 if (WIN32)
   find_library(QT_QTMAIN_LIBRARY qtmain
     HINTS
-    $ENV{QTDIR}/lib
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]/lib"
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/lib"
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/lib"
+      ENV QTDIR
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.1;InstallDir]"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]"
     PATHS
-    "$ENV{ProgramFiles}/qt/lib"
-    "C:/Program Files/qt/lib"
+      "$ENV{ProgramFiles}/qt"
+      "C:/Program Files/qt"
+    PATH_SUFFIXES
+      lib
     DOC "This Library is only needed by and included with Qt3 on MSWindows. It should be NOTFOUND, undefined or IGNORE otherwise."
     )
 endif ()
