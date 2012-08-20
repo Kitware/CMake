@@ -29,10 +29,11 @@ find_path(HSPELL_INCLUDE_DIR hspell.h)
 find_library(HSPELL_LIBRARIES NAMES hspell)
 
 if (HSPELL_INCLUDE_DIR)
-    file(READ "${HSPELL_INCLUDE_DIR}/hspell.h" HSPELL_H)
+    file(STRINGS "${HSPELL_INCLUDE_DIR}/hspell.h" HSPELL_H REGEX "#define HSPELL_VERSION_M(AJO|INO)R [0-9]+")
     string(REGEX REPLACE ".*#define HSPELL_VERSION_MAJOR ([0-9]+).*" "\\1" HSPELL_VERSION_MAJOR "${HSPELL_H}")
     string(REGEX REPLACE ".*#define HSPELL_VERSION_MINOR ([0-9]+).*" "\\1" HSPELL_VERSION_MINOR "${HSPELL_H}")
     set(HSPELL_VERSION_STRING "${HSPELL_VERSION_MAJOR}.${HSPELL_VERSION_MINOR}")
+    unset(HSPELL_H)
 endif()
 
 # handle the QUIETLY and REQUIRED arguments and set HSPELL_FOUND to TRUE if

@@ -74,9 +74,9 @@ endif()
 
 if(QT_INCLUDE_DIR)
   #extract the version string from qglobal.h
-  file(READ ${QT_INCLUDE_DIR}/qglobal.h QGLOBAL_H)
-  string(REGEX MATCH "#define[\t ]+QT_VERSION_STR[\t ]+\"[0-9]+.[0-9]+.[0-9]+[a-z]*\"" QGLOBAL_H "${QGLOBAL_H}")
+  file(STRINGS ${QT_INCLUDE_DIR}/qglobal.h QGLOBAL_H REGEX "#define[\t ]+QT_VERSION_STR[\t ]+\"[0-9]+.[0-9]+.[0-9]+[a-z]*\"")
   string(REGEX REPLACE ".*\"([0-9]+.[0-9]+.[0-9]+[a-z]*)\".*" "\\1" qt_version_str "${QGLOBAL_H}")
+  unset(QGLOBAL_H)
 
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
