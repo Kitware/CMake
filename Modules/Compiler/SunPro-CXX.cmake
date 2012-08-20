@@ -12,7 +12,7 @@ set(CMAKE_CXX_FLAGS_INIT "")
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g")
 set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT "-xO2 -xspace -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-xO3 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-g -xO2")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-g -xO2 -DNDEBUG")
 
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
