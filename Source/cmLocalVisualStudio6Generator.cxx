@@ -418,25 +418,42 @@ void cmLocalVisualStudio6Generator
 
     // Add per-source and per-configuration preprocessor definitions.
     std::map<cmStdString, cmStdString> cdmap;
-    this->AppendDefines(compileFlags,
-                        (*sf)->GetProperty("COMPILE_DEFINITIONS"), lang);
+
+      {
+      std::set<std::string> targetCompileDefinitions;
+
+      this->AppendDefines(targetCompileDefinitions,
+                        (*sf)->GetProperty("COMPILE_DEFINITIONS"));
+      this->JoinDefines(targetCompileDefinitions, compileFlags, lang);
+      }
+
     if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_DEBUG"))
       {
-      this->AppendDefines(cdmap["DEBUG"], cdefs, lang);
+      std::set<std::string> debugCompileDefinitions;
+      this->AppendDefines(debugCompileDefinitions, cdefs);
+      this->JoinDefines(debugCompileDefinitions, cdmap["DEBUG"], lang);
       }
     if(const char* cdefs = (*sf)->GetProperty("COMPILE_DEFINITIONS_RELEASE"))
       {
-      this->AppendDefines(cdmap["RELEASE"], cdefs, lang);
+      std::set<std::string> releaseCompileDefinitions;
+      this->AppendDefines(releaseCompileDefinitions, cdefs);
+      this->JoinDefines(releaseCompileDefinitions, cdmap["RELEASE"], lang);
       }
     if(const char* cdefs =
        (*sf)->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"))
       {
-      this->AppendDefines(cdmap["MINSIZEREL"], cdefs, lang);
+      std::set<std::string> minsizerelCompileDefinitions;
+      this->AppendDefines(minsizerelCompileDefinitions, cdefs);
+      this->JoinDefines(minsizerelCompileDefinitions, cdmap["MINSIZEREL"],
+                        lang);
       }
     if(const char* cdefs =
        (*sf)->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"))
       {
-      this->AppendDefines(cdmap["RELWITHDEBINFO"], cdefs, lang);
+      std::set<std::string> relwithdebinfoCompileDefinitions;
+      this->AppendDefines(relwithdebinfoCompileDefinitions, cdefs);
+      this->JoinDefines(relwithdebinfoCompileDefinitions,
+                        cdmap["RELWITHDEBINFO"], lang);
       }
 
     bool excludedFromBuild =
@@ -1653,43 +1670,56 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-target and per-configuration preprocessor definitions.
+    std::set<std::string> definesSet;
+    std::set<std::string> debugDefinesSet;
+    std::set<std::string> releaseDefinesSet;
+    std::set<std::string> minsizeDefinesSet;
+    std::set<std::string> debugrelDefinesSet;
+
+    this->AppendDefines(
+      definesSet,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
+    this->AppendDefines(
+      debugDefinesSet,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"));
+    this->AppendDefines(
+      releaseDefinesSet,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"));
+    this->AppendDefines(
+      minsizeDefinesSet,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
+    this->AppendDefines(
+      debugrelDefinesSet,
+      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
+
+    this->AppendDefines(
+      definesSet,
+      target.GetProperty("COMPILE_DEFINITIONS"));
+    this->AppendDefines(
+      debugDefinesSet,
+      target.GetProperty("COMPILE_DEFINITIONS_DEBUG"));
+    this->AppendDefines(
+      releaseDefinesSet,
+      target.GetProperty("COMPILE_DEFINITIONS_RELEASE"));
+    this->AppendDefines(
+      minsizeDefinesSet,
+      target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
+    this->AppendDefines(
+      debugrelDefinesSet,
+      target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
+
     std::string defines = " ";
     std::string debugDefines = " ";
     std::string releaseDefines = " ";
     std::string minsizeDefines = " ";
     std::string debugrelDefines = " ";
 
-    this->AppendDefines(
-      defines,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines(
-      debugDefines,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"),0);
-    this->AppendDefines(
-      releaseDefines,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines(
-      minsizeDefines,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines(
-      debugrelDefines,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
+    this->JoinDefines(definesSet, defines, 0);
+    this->JoinDefines(debugDefinesSet, debugDefines, 0);
+    this->JoinDefines(releaseDefinesSet, releaseDefines, 0);
+    this->JoinDefines(minsizeDefinesSet, minsizeDefines, 0);
+    this->JoinDefines(debugrelDefinesSet, debugrelDefines, 0);
 
-    this->AppendDefines(
-      defines,
-      target.GetProperty("COMPILE_DEFINITIONS"), 0);
-    this->AppendDefines(
-      debugDefines,
-      target.GetProperty("COMPILE_DEFINITIONS_DEBUG"), 0);
-    this->AppendDefines(
-      releaseDefines,
-      target.GetProperty("COMPILE_DEFINITIONS_RELEASE"), 0);
-    this->AppendDefines(
-      minsizeDefines,
-      target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"), 0);
-    this->AppendDefines(
-      debugrelDefines,
-      target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"), 0);
     flags += defines;
     flagsDebug += debugDefines;
     flagsRelease += releaseDefines;

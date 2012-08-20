@@ -154,8 +154,14 @@ public:
    * Encode a list of preprocessor definitions for the compiler
    * command line.
    */
-  void AppendDefines(std::string& defines, const char* defines_list,
-                     const char* lang);
+  void AppendDefines(std::set<std::string>& defines,
+                     const char* defines_list);
+  /**
+   * Join a set of defines into a definesString with a space separator.
+   */
+  void JoinDefines(const std::set<std::string>& defines,
+                   std::string &definesString,
+                   const char* lang);
 
   /** Lookup and append options associated with a particular feature.  */
   void AppendFeatureOptions(std::string& flags, const char* lang,
