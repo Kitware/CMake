@@ -37,3 +37,15 @@
 /* ssize_t */
 #cmakedefine HAVE_SIZEOF_SSIZE_T
 @SIZEOF_SSIZE_T_CODE@
+
+/* struct somestruct::someint */
+#cmakedefine HAVE_SIZEOF_STRUCTMEMBER_INT
+@SIZEOF_STRUCTMEMBER_INT_CODE@
+
+/* struct somestruct::someptr */
+#cmakedefine HAVE_SIZEOF_STRUCTMEMBER_PTR
+@SIZEOF_STRUCTMEMBER_PTR_CODE@
+
+/* struct somestruct::somechar */
+#cmakedefine HAVE_SIZEOF_STRUCTMEMBER_CHAR
+@SIZEOF_STRUCTMEMBER_CHAR_CODE@
