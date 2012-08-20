@@ -913,14 +913,6 @@ endfunction()
 
 macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
-  if( ${format} MATCHES "PTX" )
-    set( compile_to_ptx ON )
-  elseif( ${format} MATCHES "OBJ")
-    set( compile_to_ptx OFF )
-  else()
-    message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS: '${format}'.  Use OBJ or PTX.")
-  endif()
-
   # Set up all the command line flags here, so that they can be overridden on a per target basis.
 
   set(nvcc_flags "")
@@ -1016,12 +1008,12 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   # Only add the CMAKE_{C,CXX}_FLAGS if we are propagating host flags.  We
   # always need to set the SHARED_FLAGS, though.
   if(CUDA_PROPAGATE_HOST_FLAGS)
-    set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CMAKE_${CUDA_C_OR_CXX}_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
+    set(_cuda_host_flags "set(CMAKE_HOST_FLAGS ${CMAKE_${CUDA_C_OR_CXX}_FLAGS} ${CUDA_HOST_SHARED_FLAGS})")
   else()
-    set(CUDA_HOST_FLAGS "set(CMAKE_HOST_FLAGS ${CUDA_HOST_SHARED_FLAGS})")
+    set(_cuda_host_flags "set(CMAKE_HOST_FLAGS ${CUDA_HOST_SHARED_FLAGS})")
   endif()
 
-  set(CUDA_NVCC_FLAGS_CONFIG "# Build specific configuration flags")
+  set(_cuda_nvcc_flags_config "# Build specific configuration flags")
   # Loop over all the configuration types to generate appropriate flags for run_nvcc.cmake
   foreach(config ${CUDA_configuration_types})
     string(TOUPPER ${config} config_upper)
@@ -1046,20 +1038,14 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         set(_cuda_C_FLAGS "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       endif()
 
-      set(CUDA_HOST_FLAGS "${CUDA_HOST_FLAGS}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
+      set(_cuda_host_flags "${_cuda_host_flags}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
     endif()
 
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
     # like it is currently), we can remove the quotes around the
     # ${CUDA_NVCC_FLAGS_${config_upper}} variable like the CMAKE_HOST_FLAGS_<CONFIG> variable.
-    set(CUDA_NVCC_FLAGS_CONFIG "${CUDA_NVCC_FLAGS_CONFIG}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
+    set(_cuda_nvcc_flags_config "${_cuda_nvcc_flags_config}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
-
-  if(compile_to_ptx)
-    # Don't use any of the host compilation flags for PTX targets.
-    set(CUDA_HOST_FLAGS)
-    set(CUDA_NVCC_FLAGS_CONFIG)
-  endif()
 
   # Get the list of definitions from the directory property
   get_directory_property(CUDA_NVCC_DEFINITIONS COMPILE_DEFINITIONS)
@@ -1082,6 +1068,30 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
     if(${file} MATCHES ".*\\.cu$" AND NOT _is_header)
+
+      # Allow per source file overrides of the format.
+      get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)
+      if(NOT _cuda_source_format)
+        set(_cuda_source_format ${format})
+      endif()
+
+      if( ${_cuda_source_format} MATCHES "PTX" )
+        set( compile_to_ptx ON )
+      elseif( ${_cuda_source_format} MATCHES "OBJ")
+        set( compile_to_ptx OFF )
+      else()
+        message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS for file '${file}': '${_cuda_source_format}'.  Use OBJ or PTX.")
+      endif()
+
+
+      if(compile_to_ptx)
+        # Don't use any of the host compilation flags for PTX targets.
+        set(CUDA_HOST_FLAGS)
+        set(CUDA_NVCC_FLAGS_CONFIG)
+      else()
+        set(CUDA_HOST_FLAGS ${_cuda_host_flags})
+        set(CUDA_NVCC_FLAGS_CONFIG ${_cuda_nvcc_flags_config})
+      endif()
 
       # Determine output directory
       cuda_compute_build_path("${file}" cuda_build_path)
