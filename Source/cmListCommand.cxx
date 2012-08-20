@@ -429,6 +429,12 @@ bool cmListCommand
     this->SetError("sub-command REVERSE requires a list as an argument.");
     return false;
     }
+  else if(args.size() > 2)
+    {
+    this->SetError(
+      "sub-command REVERSE only takes one argument.");
+    return false;
+    }
 
   const std::string& listName = args[1];
   // expand the variable
@@ -461,6 +467,12 @@ bool cmListCommand
     {
     this->SetError(
       "sub-command REMOVE_DUPLICATES requires a list as an argument.");
+    return false;
+    }
+  else if(args.size() > 2)
+    {
+    this->SetError(
+      "sub-command REMOVE_DUPLICATES only takes one argument.");
     return false;
     }
 
@@ -504,6 +516,12 @@ bool cmListCommand
   if(args.size() < 2)
     {
     this->SetError("sub-command SORT requires a list as an argument.");
+    return false;
+    }
+  else if(args.size() > 2)
+    {
+    this->SetError(
+      "sub-command SORT only takes one argument.");
     return false;
     }
 
