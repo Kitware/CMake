@@ -1,4 +1,4 @@
-project(ObjectLibraryA)
+project(ObjectLibraryA C)
 # Add -fPIC so objects can be used in shared libraries.
 # TODO: Need property for this.
 if(CMAKE_SHARED_LIBRARY_C_FLAGS AND NOT WATCOM)
