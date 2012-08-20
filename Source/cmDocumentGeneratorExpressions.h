@@ -16,6 +16,9 @@
   "Generator expressions are evaluted during build system generation "  \
   "to produce information specific to each build configuration.  "      \
   "Valid expressions are:\n"                                            \
+  "  $<0:...>                  = empty string (ignores \"...\")\n"      \
+  "  $<1:...>                  = content of \"...\"\n"                  \
+  "  $<CONFIG:cfg>             = '1' if config is \"cfg\", else '0'\n"  \
   "  $<CONFIGURATION>          = configuration name\n"                  \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
@@ -25,6 +28,12 @@
   "versions can produce the directory and file name components:\n"      \
   "  $<TARGET_FILE_DIR:tgt>/$<TARGET_FILE_NAME:tgt>\n"                  \
   "  $<TARGET_LINKER_FILE_DIR:tgt>/$<TARGET_LINKER_FILE_NAME:tgt>\n"    \
-  "  $<TARGET_SONAME_FILE_DIR:tgt>/$<TARGET_SONAME_FILE_NAME:tgt>\n"
+  "  $<TARGET_SONAME_FILE_DIR:tgt>/$<TARGET_SONAME_FILE_NAME:tgt>\n"    \
+  "Boolean expressions:\n"                                              \
+  "  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'\n"    \
+  "  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'\n"    \
+  "  $<NOT:?>                  = '0' if '?' is '1', else '1'\n"         \
+  "where '?' is always either '0' or '1'.\n"                            \
+  ""
 
 #endif

@@ -14,6 +14,8 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 
+#include <cmsys/String.h>
+
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
   cmMakefile* mf, const char* config,
@@ -25,6 +27,7 @@ cmGeneratorExpression::cmGeneratorExpression(
                            "_FILE(|_NAME|_DIR):" // Filename component.
                            "([A-Za-z0-9_.-]+)"   // Target name.
                            ">$");
+  this->TestConfig.compile("^\\$<CONFIG:([A-Za-z0-9_]*)>$");
 }
 
 //----------------------------------------------------------------------------
@@ -103,6 +106,26 @@ bool cmGeneratorExpression::Evaluate()
 }
 
 //----------------------------------------------------------------------------
+static bool cmGeneratorExpressionBool(const char* c, std::string& result,
+                                      const char* name,
+                                      const char* a, const char* b)
+{
+  result = a;
+  while((c[0] == '0' || c[0] == '1') && (c[1] == ',' || c[1] == '>'))
+    {
+    if(c[0] == b[0]) { result = b; }
+    c += 2;
+    }
+  if(c[0])
+    {
+    result = name;
+    result += " requires one or more comma-separated '0' or '1' values.";
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorExpression::Evaluate(const char* expr, std::string& result)
 {
   if(this->TargetInfo.find(expr))
@@ -115,6 +138,38 @@ bool cmGeneratorExpression::Evaluate(const char* expr, std::string& result)
   else if(strcmp(expr, "$<CONFIGURATION>") == 0)
     {
     result = this->Config? this->Config : "";
+    }
+  else if(strncmp(expr, "$<0:",4) == 0)
+    {
+    result = "";
+    }
+  else if(strncmp(expr, "$<1:",4) == 0)
+    {
+    result = std::string(expr+4, strlen(expr)-5);
+    }
+  else if(strncmp(expr, "$<NOT:",6) == 0)
+    {
+    const char* c = expr+6;
+    if((c[0] != '0' && c[0] != '1') || c[1] != '>' || c[2])
+      {
+      result = "NOT requires exactly one '0' or '1' value.";
+      return false;
+      }
+    result = c[0] == '1'? "0" : "1";
+    }
+  else if(strncmp(expr, "$<AND:",6) == 0)
+    {
+    return cmGeneratorExpressionBool(expr+6, result, "AND", "1", "0");
+    }
+  else if(strncmp(expr, "$<OR:",5) == 0)
+    {
+    return cmGeneratorExpressionBool(expr+5, result, "OR", "0", "1");
+    }
+  else if(this->TestConfig.find(expr))
+    {
+    result = cmsysString_strcasecmp(this->TestConfig.match(1).c_str(),
+                                    this->Config? this->Config:"") == 0
+      ? "1":"0";
     }
   else
     {

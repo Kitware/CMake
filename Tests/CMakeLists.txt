@@ -551,6 +551,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     FAIL_REGULAR_EXPRESSION "Unexpected: ")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ArgumentExpansion")
 
+  add_test(GeneratorExpression  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/GeneratorExpression"
+    "${CMake_BINARY_DIR}/Tests/GeneratorExpression"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project GeneratorExpression
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/GeneratorExpression")
+
   add_test(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/CustomCommand"
