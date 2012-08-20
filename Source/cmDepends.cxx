@@ -243,8 +243,8 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
         // The dependee exists, but the depender doesn't. Regenerate if the
         // internalDepends file is older than the dependee.
         int result = 0;
-        if((!this->FileComparison->FileTimeCompare(internalDependsFileName, dependee,
-                                              &result) || result < 0))
+        if((!this->FileComparison->FileTimeCompare(internalDependsFileName,
+                                             dependee, &result) || result < 0))
           {
           // The depends-file is older than the dependee.
           regenerate = true;
