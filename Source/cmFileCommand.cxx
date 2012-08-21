@@ -2667,6 +2667,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   long inactivity_timeout = 0;
   std::string verboseLog;
   std::string statusVar;
+  std::string caFile;
+  bool checkSSL = false;
+  bool verifySSL = false;
   std::string expectedHash;
   std::string hashMatchMSG;
   cmsys::auto_ptr<cmCryptoHash> hash;
@@ -2719,6 +2722,33 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         return false;
         }
       statusVar = *i;
+      }
+    else if(*i == "SSL_VERIFY")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        verifySSL = cmSystemTools::IsOn(i->c_str());
+        checkSSL = true;
+        }
+      else
+        {
+        this->SetError("SSL_VERIFY missing bool value.");
+        return false;
+        }
+      }
+    else if(*i == "SSL_CAINFO_FILE")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        caFile = *i;
+        }
+      else
+        {
+        this->SetError("SSL_CAFILE missing file value.");
+        return false;
+        }
       }
     else if(*i == "EXPECTED_MD5")
       {
@@ -2835,6 +2865,43 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "DOWNLOAD cannot set debug function: ");
+
+  // check to see if SSL verification is requested
+  const char* verifyValue =
+    this->Makefile->GetDefinition("CMAKE_CURLOPT_SSL_VERIFYPEER");
+  // if there is a cmake variable or if the command has SSL_VERIFY requested
+  if(verifyValue || checkSSL)
+    {
+    // the args to the command come first
+    bool verify = verifySSL;
+    if(!verify && verifyValue)
+      {
+      verify = cmSystemTools::IsOn(verifyValue);
+      }
+    if(verify)
+      {
+      res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
+      check_curl_result(res, "Unable to set SSL Verify on: ");
+      }
+    else
+      {
+      res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+      check_curl_result(res, "Unable to set SSL Verify off: ");
+      }
+    }
+  // check to see if a CAINFO file has been specified
+  const char* cainfo =
+    this->Makefile->GetDefinition("CMAKE_CURLOPT_CAINFO_FILE");
+  // command arg comes first
+  if(caFile.size())
+    {
+    cainfo = caFile.c_str();
+    }
+  if(cainfo)
+    {
+    res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo);
+    check_curl_result(res, "Unable to set SSL Verify CAINFO: ");
+    }
 
   cmFileCommandVectorOfChar chunkDebug;
 
