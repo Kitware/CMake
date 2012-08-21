@@ -76,7 +76,6 @@ cmGlobalGenerator::~cmGlobalGenerator()
     }
 
   this->ClearGeneratorTargets();
-  this->ExportSets.clear();
 }
 
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
