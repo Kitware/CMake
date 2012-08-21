@@ -19,6 +19,12 @@ add_CMakeOnly_test(CheckCXXCompilerFlag)
 
 add_CMakeOnly_test(CheckLanguage)
 
+add_CMakeOnly_test(CompilerIdC)
+add_CMakeOnly_test(CompilerIdCXX)
+if(CMAKE_Fortran_COMPILER)
+  add_CMakeOnly_test(CompilerIdFortran)
+endif()
+
 add_CMakeOnly_test(AllFindModules)
 
 add_CMakeOnly_test(TargetScope)
