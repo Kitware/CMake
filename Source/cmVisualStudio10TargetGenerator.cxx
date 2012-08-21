@@ -413,7 +413,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       }
     if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
-      this->WriteString("<WindowsAppContainer>true</WindowsAppContainer>\n", 2);
+      this->WriteString("<WindowsAppContainer>true"
+                        "</WindowsAppContainer>\n", 2);
       }
     this->WriteString("</PropertyGroup>\n", 1);
     }
