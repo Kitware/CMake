@@ -1391,8 +1391,30 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_<LANG>_COMPILER_ID", cmProperty::VARIABLE,
-     "An internal variable subject to change.",
-     "This is used in determining the compiler and is subject to change.",
+     "Compiler identification string.",
+     "A short string unique to the compiler vendor.  "
+     "Possible values include:\n"
+     "  Absoft = Absoft Fortran (absoft.com)\n"
+     "  ADSP = Analog VisualDSP++ (analog.com)\n"
+     "  Clang = LLVM Clang (clang.llvm.org)\n"
+     "  Cray = Cray Compiler (cray.com)\n"
+     "  Embarcadero, Borland = Embarcadero (embarcadero.com)\n"
+     "  G95 = G95 Fortran (g95.org)\n"
+     "  GNU = GNU Compiler Collection (gcc.gnu.org)\n"
+     "  HP = Hewlett-Packard Compiler (hp.com)\n"
+     "  Intel = Intel Compiler (intel.com)\n"
+     "  MIPSpro = SGI MIPSpro (sgi.com)\n"
+     "  MSVC = Microsoft Visual Studio (microsoft.com)\n"
+     "  PGI = The Portland Group (pgroup.com)\n"
+     "  PathScale = PathScale (pathscale.com)\n"
+     "  SDCC = Small Device C Compiler (sdcc.sourceforge.net)\n"
+     "  SunPro = Oracle Solaris Studio (oracle.com)\n"
+     "  TI_DSP = Texas Instruments (ti.com)\n"
+     "  TinyCC = Tiny C Compiler (tinycc.org)\n"
+     "  Watcom = Open Watcom (openwatcom.org)\n"
+     "  XL, VisualAge, zOS = IBM XL (ibm.com)\n"
+     "This variable is not guaranteed to be defined for all "
+     "compilers or languages.",
      false,
      "Variables for Languages");
 
@@ -1412,10 +1434,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_<LANG>_COMPILER_VERSION", cmProperty::VARIABLE,
-     "An internal variable subject to change.",
+     "Compiler version string.",
      "Compiler version in major[.minor[.patch[.tweak]]] format.  "
-     "This variable is reserved for internal use by CMake and is not "
-     "guaranteed to be set.",
+     "This variable is not guaranteed to be defined for all "
+     "compilers or languages.",
      false,
      "Variables for Languages");
 
