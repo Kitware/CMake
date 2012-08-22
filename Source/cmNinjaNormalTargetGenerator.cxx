@@ -468,16 +468,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   }
 
   cmMakefile* mf = this->GetMakefile();
-  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
-    {
-    const std::string pdbPath = this->GetTargetPDB();
-    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                          ConvertToNinjaPath(pdbPath.c_str()).c_str(),
-                          cmLocalGenerator::SHELL);
-    EnsureParentDirectoryExists(pdbPath);
-    }
-  else
+  if (!this->SetMsvcTargetPdbVariable(vars))
     {
     // It is common to place debug symbols at a specific place,
     // so we need a plain target name in the rule available.

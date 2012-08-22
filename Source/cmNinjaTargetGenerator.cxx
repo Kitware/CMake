@@ -311,6 +311,21 @@ std::string cmNinjaTargetGenerator::GetTargetPDB() const
   return targetFullPathPDB.c_str();
 }
 
+bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
+{
+  cmMakefile* mf = this->GetMakefile();
+  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
+    {
+    const std::string pdbPath = this->GetTargetPDB();
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                          ConvertToNinjaPath(pdbPath.c_str()).c_str(),
+                          cmLocalGenerator::SHELL);
+    EnsureParentDirectoryExists(pdbPath);
+    return true;
+    }
+  return false;
+}
 
 void
 cmNinjaTargetGenerator
@@ -537,17 +552,7 @@ cmNinjaTargetGenerator
   vars["DEP_FILE"] = objectFileName + ".d";;
   EnsureParentDirectoryExists(objectFileName);
 
-  // TODO move to GetTargetPDB
-  cmMakefile* mf = this->GetMakefile();
-  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
-    {
-    const std::string pdbPath = this->GetTargetPDB();
-    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                          ConvertToNinjaPath(pdbPath.c_str()).c_str(),
-                          cmLocalGenerator::SHELL);
-    EnsureParentDirectoryExists(pdbPath);
-    }
+  this->SetMsvcTargetPdbVariable(vars);
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
     {
@@ -643,14 +648,14 @@ cmNinjaTargetGenerator
 
 void
 cmNinjaTargetGenerator
-::EnsureDirectoryExists(const std::string& dir)
+::EnsureDirectoryExists(const std::string& dir) const
 {
   cmSystemTools::MakeDirectory(dir.c_str());
 }
 
 void
 cmNinjaTargetGenerator
-::EnsureParentDirectoryExists(const std::string& path)
+::EnsureParentDirectoryExists(const std::string& path) const
 {
   EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
 }
