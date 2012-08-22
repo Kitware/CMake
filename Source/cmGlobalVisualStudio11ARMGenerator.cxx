@@ -14,19 +14,16 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
+cmGlobalVisualStudio11ARMGenerator::cmGlobalVisualStudio11ARMGenerator()
+{
+  this->ArchitectureId = "ARM";
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio11ARMGenerator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates Visual Studio 11 ARM project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio11ARMGenerator
-::AddPlatformDefinitions(cmMakefile* mf)
-{
-  this->cmGlobalVisualStudio11Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "ARM");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "ARM");
 }

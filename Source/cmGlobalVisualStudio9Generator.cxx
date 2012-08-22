@@ -19,15 +19,8 @@
 
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator()
 {
+  this->VersionId = "MSVC90";
   this->FindMakeProgramFile = "CMakeVS9FindMake.cmake";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio9Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC90", "1");
 }
 
 //----------------------------------------------------------------------------

@@ -112,7 +112,6 @@ protected:
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget* target);
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout,

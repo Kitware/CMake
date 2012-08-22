@@ -38,7 +38,6 @@ public:
   virtual const char* GetName() const {
     return cmGlobalVisualStudio10Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 10";}
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;

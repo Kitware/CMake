@@ -84,6 +84,8 @@ protected:
 
   virtual const char* GetIDEVersion() = 0;
 
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
+
   virtual bool ComputeTargetDepends();
   class VSDependSet: public std::set<cmStdString> {};
   class VSDependMap: public std::map<cmTarget*, VSDependSet> {};
@@ -96,6 +98,9 @@ protected:
   std::string GetUtilityDepend(cmTarget* target);
   typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
+  const char* ArchitectureId;
+  const char* VersionId;
+
 private:
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 

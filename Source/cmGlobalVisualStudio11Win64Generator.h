@@ -18,7 +18,7 @@ class cmGlobalVisualStudio11Win64Generator :
   public cmGlobalVisualStudio11Generator
 {
 public:
-  cmGlobalVisualStudio11Win64Generator() {}
+  cmGlobalVisualStudio11Win64Generator();
   static cmGlobalGenerator* New() {
     return new cmGlobalVisualStudio11Win64Generator; }
 

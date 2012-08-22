@@ -19,19 +19,12 @@
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator()
 {
+  this->VersionId = "MSVC10";
   this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  mf->AddDefinition("MSVC10", "1");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
 }
 
 //----------------------------------------------------------------------------
