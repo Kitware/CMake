@@ -3,7 +3,7 @@ project(add_definitions_command_with_target_prop)
 
 add_definitions(-DCMAKE_IS_FUN -DCMAKE_IS=Fun)
 
-add_executable(add_definitions_command_with_target_prop_executable ../main.cpp)
+add_executable(add_definitions_command_with_target_prop_executable ../compiletest.cpp)
 
 set_target_properties(add_definitions_command_with_target_prop_executable PROPERTIES COMPILE_DEFINITIONS CMAKE_IS_="Fun")
 

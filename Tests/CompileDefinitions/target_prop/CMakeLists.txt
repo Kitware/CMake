@@ -1,7 +1,7 @@
 
 project(target_prop)
 
-add_executable(target_prop_executable ../main.cpp)
+add_executable(target_prop_executable ../compiletest.cpp)
 
 set_target_properties(target_prop_executable PROPERTIES COMPILE_DEFINITIONS CMAKE_IS_FUN)
 
