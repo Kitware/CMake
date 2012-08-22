@@ -22,8 +22,35 @@
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
+#include "cmVS11CLFlagTable.h"
+#include "cmVS11LinkFlagTable.h"
+#include "cmVS11LibFlagTable.h"
 
 #include <cmsys/auto_ptr.hxx>
+
+static cmVS7FlagTable const*
+cmVSGetCLFlagTable(cmLocalVisualStudioGenerator* lg)
+{
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11CLFlagTable; }
+  return cmVS10CLFlagTable;
+}
+
+static cmVS7FlagTable const*
+cmVSGetLibFlagTable(cmLocalVisualStudioGenerator* lg)
+{
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11LibFlagTable; }
+  return cmVS10LibFlagTable;
+}
+
+static cmVS7FlagTable const*
+cmVSGetLinkFlagTable(cmLocalVisualStudioGenerator* lg)
+{
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11LinkFlagTable; }
+  return cmVS10LinkFlagTable;
+}
 
 static std::string cmVS10EscapeXML(std::string arg)
 {
@@ -957,7 +984,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmVisualStudioGeneratorOptions
         clOptions(this->LocalGenerator,
                   cmVisualStudioGeneratorOptions::Compiler,
-                  cmVS10CLFlagTable, 0, this);
+                  cmVSGetCLFlagTable(this->LocalGenerator), 0, this);
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
@@ -1151,7 +1178,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   cmsys::auto_ptr<Options> pOptions(
     new Options(this->LocalGenerator, Options::Compiler,
-                cmVS10CLFlagTable));
+                cmVSGetCLFlagTable(this->LocalGenerator)));
   Options& clOptions = *pOptions;
 
   std::string flags;
@@ -1311,7 +1338,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     cmVisualStudioGeneratorOptions
       libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
-                 cmVS10LibFlagTable, 0, this);
+                 cmVSGetLibFlagTable(this->LocalGenerator), 0, this);
     libOptions.Parse(libflags?libflags:"");
     libOptions.Parse(libflagsConfig?libflagsConfig:"");
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
@@ -1391,7 +1418,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   cmVisualStudioGeneratorOptions
     linkOptions(this->LocalGenerator,
                 cmVisualStudioGeneratorOptions::Linker,
-                cmVS10LinkFlagTable, 0, this);
+                cmVSGetLinkFlagTable(this->LocalGenerator), 0, this);
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
     flags += " /SUBSYSTEM:WINDOWS";
