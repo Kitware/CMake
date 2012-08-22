@@ -67,6 +67,10 @@
 
 #elif defined(__DECC)
 # define COMPILER_ID "Compaq"
+  /* __DECC_VER = VVRRTPPPP */
+# define COMPILER_VERSION_MAJOR DEC(__DECC_VER/10000000)
+# define COMPILER_VERSION_MINOR DEC(__DECC_VER/100000  % 100)
+# define COMPILER_VERSION_PATCH DEC(__DECC_VER         % 10000)
 
 #elif defined(__IBMC__)
 # if defined(__COMPILER_VER__)
