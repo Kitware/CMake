@@ -187,15 +187,17 @@ macro (QT4_ADD_RESOURCES outfiles )
     if(EXISTS "${infile}")
       #  parse file for dependencies
       #  all files are absolute paths or relative to the location of the qrc file
-      file(STRINGS "${infile}" _RC_FILES REGEX "<file[^>]*>[^<]+")
-      foreach(_RC_FILE IN LISTS _RC_FILES)
-        string(REGEX REPLACE "^<file[^>]*>([^<]*)" "\\1" _RC_FILE "${_RC_FILE}")
+      file(STRINGS "${infile}" _RC_FILE_CONTENTS REGEX "<file[^>]*>[^<]+")
+      string(REGEX MATCHALL "<file[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
+      foreach(_RC_FILE ${_RC_FILES})
+        string(REGEX REPLACE "^<file[^>]*>" "" _RC_FILE "${_RC_FILE}")
         if(NOT IS_ABSOLUTE "${_RC_FILE}")
           set(_RC_FILE "${rc_path}/${_RC_FILE}")
         endif()
         set(_RC_DEPENDS ${_RC_DEPENDS} "${_RC_FILE}")
       endforeach()
       unset(_RC_FILES)
+      unset(_RC_FILE_CONTENTS)
       # Since this cmake macro is doing the dependency scanning for these files,
       # let's make a configured file and add it as a dependency so cmake is run
       # again when dependencies need to be recomputed.
