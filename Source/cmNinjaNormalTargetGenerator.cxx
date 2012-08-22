@@ -459,23 +459,23 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
   }
 
-  std::string path;
   if (!this->TargetNameImport.empty()) {
-    path = this->GetLocalGenerator()->ConvertToOutputFormat(
-                    targetOutputImplib.c_str(), cmLocalGenerator::SHELL);
-    vars["TARGET_IMPLIB"] = path;
-    EnsureParentDirectoryExists(path);
+    const std::string impLibPath = this->GetLocalGenerator()
+      ->ConvertToOutputFormat(targetOutputImplib.c_str(),
+                              cmLocalGenerator::SHELL);
+    vars["TARGET_IMPLIB"] = impLibPath;
+    EnsureParentDirectoryExists(impLibPath);
   }
 
   cmMakefile* mf = this->GetMakefile();
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
     {
-    path = this->GetTargetPDB();
+    const std::string pdbPath = this->GetTargetPDB();
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                          ConvertToNinjaPath(path.c_str()).c_str(),
+                          ConvertToNinjaPath(pdbPath.c_str()).c_str(),
                           cmLocalGenerator::SHELL);
-    EnsureParentDirectoryExists(path);
+    EnsureParentDirectoryExists(pdbPath);
     }
   else
     {
@@ -494,9 +494,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
     {
-    path = GetTarget()->GetSupportDirectory();
-    vars["OBJECT_DIR"] = ConvertToNinjaPath(path.c_str());
-    EnsureDirectoryExists(path);
+    const std::string objPath = GetTarget()->GetSupportDirectory();
+    vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath.c_str());
+    EnsureDirectoryExists(objPath);
     // ar.exe can't handle backslashes in rsp files (implictly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
@@ -527,10 +527,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // If we have any PRE_LINK commands, we need to go back to HOME_OUTPUT for
   // the link commands.
   if (!preLinkCmdLines.empty()) {
-    path = this->GetLocalGenerator()->ConvertToOutputFormat(
-      this->GetMakefile()->GetHomeOutputDirectory(),
-      cmLocalGenerator::SHELL);
-    preLinkCmdLines.push_back("cd " + path);
+    const std::string homeOutDir = this->GetLocalGenerator()
+      ->ConvertToOutputFormat(this->GetMakefile()->GetHomeOutputDirectory(),
+                              cmLocalGenerator::SHELL);
+    preLinkCmdLines.push_back("cd " + homeOutDir);
   }
 
   vars["PRE_LINK"] =

@@ -542,9 +542,11 @@ cmNinjaTargetGenerator
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
     {
+    const std::string pdbPath = this->GetTargetPDB();
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                        ConvertToNinjaPath(GetTargetPDB().c_str()).c_str(),
-                        cmLocalGenerator::SHELL);
+                          ConvertToNinjaPath(pdbPath.c_str()).c_str(),
+                          cmLocalGenerator::SHELL);
+    EnsureParentDirectoryExists(pdbPath);
     }
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
