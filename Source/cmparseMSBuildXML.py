@@ -148,7 +148,7 @@ class Property:
           self.argumentProperty = child.getAttribute("Property")
           self.argumentIsRequired = child.getAttribute("IsRequired")
         if child.nodeName == self.prefix_type+"Value":
-          va = Property(self.prefix_type,["Name","Switch"])
+          va = Property(self.prefix_type,["Name","DisplayName","Switch"])
           va.suffix_type = "Value"
           va.populate(child)
           self.values.append(va)
@@ -203,11 +203,11 @@ class MSBuildToCMake:
         if child.nodeName == "EnumProperty":
           self.enumProperties.append(Property("Enum",["Name","Category"],child))
         if child.nodeName == "StringProperty":
-          self.stringProperties.append(Property("String",["Name","Subtype","Separator","Category","Visible","IncludeInCommandLine","Switch","ReadOnly"],child))
+          self.stringProperties.append(Property("String",["Name","Subtype","Separator","Category","Visible","IncludeInCommandLine","Switch","DisplayName","ReadOnly"],child))
         if child.nodeName == "StringListProperty":
-           self.stringListProperties.append(Property("StringList",["Name","Category","Switch","Subtype"],child))
+           self.stringListProperties.append(Property("StringList",["Name","Category","Switch","DisplayName","Subtype"],child))
         if child.nodeName == "BoolProperty":
-           self.boolProperties.append(Property("Bool",["ReverseSwitch","Name","Category","Switch","SwitchPrefix","IncludeInCommandLine"],child))
+           self.boolProperties.append(Property("Bool",["ReverseSwitch","Name","Category","Switch","DisplayName","SwitchPrefix","IncludeInCommandLine"],child))
         if child.nodeName == "IntProperty":
            self.intProperties.append(Property("Int",["Name","Category","Visible"],child))
       self.populate(child,spaces+"----")
@@ -226,15 +226,15 @@ class MSBuildToCMake:
       for j in i.values:
         #hardcore Brad King's manual fixes for cmVS10CLFlagTable.h
         if i.attributes["Name"] == "PrecompiledHeader" and j.attributes["Switch"] != "":
-          toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
+          toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.attributes["DisplayName"]+"\", \""+j.attributes["Name"]+"\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
         else:
           #default (normal, non-hardcoded) case
-          toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
+          toReturn+="  {\""+i.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.attributes["DisplayName"]+"\", \""+j.attributes["Name"]+"\", 0},\n"
       toReturn += "\n"
 
     if lastProp != {}:
       for j in lastProp.values:
-          toReturn+="  {\""+lastProp.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.DisplayName+"\", \""+j.attributes["Name"]+"\", 0},\n"
+          toReturn+="  {\""+lastProp.attributes["Name"]+"\", \""+j.attributes["Switch"]+"\",\n   \""+j.attributes["DisplayName"]+"\", \""+j.attributes["Name"]+"\", 0},\n"
       toReturn += "\n"
 
     toReturn += "\n  //Bool Properties\n"
@@ -250,17 +250,17 @@ class MSBuildToCMake:
       if i.argumentProperty != "":
         if i.attributes["ReverseSwitch"] != "":
           toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \"\", \"false\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
-          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
+          toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["ReverseSwitch"]+"\", \""+i.attributes["DisplayName"]+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
         if i.attributes["Switch"] != "":
           toReturn += "  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\", \"\", \"true\",\n   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},\n"
-          toReturn += "  {\""+i.argumentProperty+"\", \""+i.attributes["Switch"]+"\", \""+i.DisplayName+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
+          toReturn += "  {\""+i.argumentProperty+"\", \""+i.attributes["Switch"]+"\", \""+i.attributes["DisplayName"]+"\", \"\",\n   cmVS7FlagTable::UserValueRequired},\n"
 
     toReturn += "\n  //String List Properties\n"
     for i in self.stringListProperties:
       if i.attributes["Switch"] == "":
         toReturn += "  // Skip [" + i.attributes["Name"] + "] - no command line Switch.\n";
       else:
-        toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\",\n   \""+i.DisplayName+"\",\n   \"\", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},\n"
+        toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+"\",\n   \""+i.attributes["DisplayName"]+"\",\n   \"\", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},\n"
 
     toReturn += "\n  //String Properties\n"
     for i in self.stringProperties:
@@ -276,7 +276,7 @@ class MSBuildToCMake:
         else:
           toReturn += "  // Skip [" + i.attributes["Name"] + "] - no command line Switch.\n";
       else:
-        toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+i.attributes["Separator"]+"\",\n   \""+i.DisplayName+"\",\n   \"\", cmVS7FlagTable::UserValue},\n"
+        toReturn +="  {\""+i.attributes["Name"]+"\", \""+i.attributes["Switch"]+i.attributes["Separator"]+"\",\n   \""+i.attributes["DisplayName"]+"\",\n   \"\", cmVS7FlagTable::UserValue},\n"
 
     toReturn += "  {0,0,0,0,0}\n};"
     return toReturn
