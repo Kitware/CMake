@@ -110,6 +110,8 @@
 
 #elif defined(_CRAYC)
 # define COMPILER_ID "Cray"
+# define COMPILER_VERSION_MAJOR DEC(_RELEASE)
+# define COMPILER_VERSION_MINOR DEC(_RELEASE_MINOR)
 
 #elif defined(__TI_COMPILER_VERSION__)
 # define COMPILER_ID "TI_DSP"
