@@ -40,7 +40,6 @@ public:
 
   virtual void Generate() = 0;
 
-  std::string GetTargetPDB() const;
   std::string GetTargetName() const;
 
 protected:

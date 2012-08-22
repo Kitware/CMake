@@ -295,21 +295,6 @@ std::string cmNinjaTargetGenerator::GetTargetName() const
   return this->Target->GetName();
 }
 
-std::string cmNinjaTargetGenerator::GetTargetPDB() const
-{
-  std::string targetFullPathPDB;
-  if(this->Target->GetType() == cmTarget::EXECUTABLE ||
-     this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-     this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    targetFullPathPDB = this->Target->GetDirectory(this->GetConfigName());
-    targetFullPathPDB += "/";
-    targetFullPathPDB += this->Target->GetPDBName(this->GetConfigName());
-    }
-
-  return targetFullPathPDB.c_str();
-}
 
 bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
 {
@@ -317,7 +302,17 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
   if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
     {
-    const std::string pdbPath = this->GetTargetPDB();
+    std::string pdbPath;
+    if(this->Target->GetType() == cmTarget::EXECUTABLE ||
+       this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+       this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+       this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+      {
+      pdbPath = this->Target->GetDirectory(this->GetConfigName());
+      pdbPath += "/";
+      pdbPath += this->Target->GetPDBName(this->GetConfigName());
+    }
+
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                           ConvertToNinjaPath(pdbPath.c_str()).c_str(),
                           cmLocalGenerator::SHELL);
