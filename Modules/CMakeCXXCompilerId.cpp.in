@@ -149,9 +149,16 @@
 #  define COMPILER_VERSION_TWEAK DEC(_MSC_BUILD)
 # endif
 
+/* Analog VisualDSP++ >= 4.5.6 */
+#elif defined(__VISUALDSPVERSION__)
+# define COMPILER_ID "ADSP"
+  /* __VISUALDSPVERSION__ = 0xVVRRPP00 */
+# define COMPILER_VERSION_MAJOR HEX(__VISUALDSPVERSION__>>24)
+# define COMPILER_VERSION_MINOR HEX(__VISUALDSPVERSION__>>16 & 0xFF)
+# define COMPILER_VERSION_PATCH HEX(__VISUALDSPVERSION__>>8  & 0xFF)
+
+/* Analog VisualDSP++ < 4.5.6 */
 #elif defined(__ADSPBLACKFIN__) || defined(__ADSPTS__) || defined(__ADSP21000__)
-/* Analog Devices C++ compiler for Blackfin, TigerSHARC and
-   SHARC (21000) DSPs */
 # define COMPILER_ID "ADSP"
 
 #elif defined(_SGI_COMPILER_VERSION) || defined(_COMPILER_VERSION)
