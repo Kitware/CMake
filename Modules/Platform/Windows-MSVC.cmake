@@ -1,6 +1,42 @@
-set(WIN32 1)
 
-include(Platform/cl)
+#=============================================================================
+# Copyright 2001-2012 Kitware, Inc.
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
+# This module is shared by multiple languages; use include blocker.
+if(__WINDOWS_MSVC)
+  return()
+endif()
+set(__WINDOWS_MSVC 1)
+
+set(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
+set(CMAKE_LINK_LIBRARY_FLAG "")
+set(MSVC 1)
+
+# hack: if a new cmake (which uses CMAKE__LINKER) runs on an old build tree
+# (where link was hardcoded) and where CMAKE_LINKER isn't in the cache
+# and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
+# hardcode CMAKE_LINKER here to link, so it behaves as it did before, Alex
+if(NOT DEFINED CMAKE_LINKER)
+   set(CMAKE_LINKER link)
+endif()
+
+if(CMAKE_VERBOSE_MAKEFILE)
+  set(CMAKE_CL_NOLOGO)
+else()
+  set(CMAKE_CL_NOLOGO "/nologo")
+endif()
+
+set(WIN32 1)
 
 set(CMAKE_CREATE_WIN32_EXE /subsystem:windows)
 set(CMAKE_CREATE_CONSOLE_EXE /subsystem:console)
@@ -79,43 +115,16 @@ if("${MSVC_VERSION}" GREATER 1599)
 endif()
 
 # default to Debug builds
-if(MSVC_VERSION GREATER 1310)
-  # for 2005 make sure the manifest is put in the dll with mt
-  set(CMAKE_CXX_CREATE_SHARED_LIBRARY "<CMAKE_COMMAND> -E vs_link_dll ${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
-  set(CMAKE_CXX_CREATE_SHARED_MODULE "<CMAKE_COMMAND> -E vs_link_dll ${CMAKE_CXX_CREATE_SHARED_MODULE}")
-  # create a C shared library
-  set(CMAKE_C_CREATE_SHARED_LIBRARY "${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
-  # create a C shared module just copy the shared library rule
-  set(CMAKE_C_CREATE_SHARED_MODULE "${CMAKE_CXX_CREATE_SHARED_MODULE}")
-  set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_COMMAND> -E vs_link_exe ${CMAKE_CXX_LINK_EXECUTABLE}")
-  set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_COMMAND> -E vs_link_exe ${CMAKE_C_LINK_EXECUTABLE}")
+set(CMAKE_BUILD_TYPE_INIT Debug)
 
-  set(CMAKE_BUILD_TYPE_INIT Debug)
-  set (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /EHsc /GR")
-  set (CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1")
-  set (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
-  set (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
-  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-  set (CMAKE_C_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000")
-  set (CMAKE_C_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi  /Ob0 /Od /RTC1")
-  set (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
-  set (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
-  set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-  set (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ")
-  set (CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT}")
+if(MSVC_VERSION GREATER 1310)
+  set(_RTC1 "/RTC1")
+  set(_FLAGS_CXX " /GR /EHsc")
+  set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib")
 else()
-  set(CMAKE_BUILD_TYPE_INIT Debug)
-  set (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /GX /GR")
-  set (CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi  /Ob0 /Od /GZ")
-  set (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
-  set (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
-  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-  set (CMAKE_C_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000")
-  set (CMAKE_C_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od /GZ")
-  set (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
-  set (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
-  set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-  set (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
+  set(_RTC1 "/GZ")
+  set(_FLAGS_CXX " /GR /GX")
+  set(CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
 endif()
 
 set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
@@ -163,3 +172,33 @@ set (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT
 set (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT ${CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT ${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT})
+
+macro(__windows_compiler_msvc lang)
+  if(NOT "${CMAKE_${lang}_COMPILER_VERSION}" VERSION_LESS 14)
+    # for 2005 make sure the manifest is put in the dll with mt
+    set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll ")
+    set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe ")
+  endif()
+  set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
+    "${_CMAKE_VS_LINK_DLL}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /dll /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_FLAGS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
+
+  set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
+  set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_LINKER> /lib ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
+
+  set(CMAKE_${lang}_COMPILE_OBJECT
+    "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <FLAGS> <DEFINES> /Fo<OBJECT> /Fd<TARGET_PDB> -c <SOURCE>${CMAKE_END_TEMP_FILE}")
+  set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE
+    "<CMAKE_${lang}_COMPILER> > <PREPROCESSED_SOURCE> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <FLAGS> <DEFINES> -E <SOURCE>${CMAKE_END_TEMP_FILE}")
+  set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE
+    "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <FLAGS> <DEFINES> /FoNUL /FAs /Fa<ASSEMBLY_SOURCE> /c <SOURCE>${CMAKE_END_TEMP_FILE}")
+
+  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+  set(CMAKE_${lang}_LINK_EXECUTABLE
+    "${_CMAKE_VS_LINK_EXE}<CMAKE_${lang}_COMPILER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} <FLAGS> /Fe<TARGET> /Fd<TARGET_PDB> -link /implib:<TARGET_IMPLIB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
+
+  set(CMAKE_${lang}_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000${_FLAGS_${lang}}")
+  set(CMAKE_${lang}_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od ${_RTC1}")
+  set(CMAKE_${lang}_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
+  set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
+  set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
+endmacro()
