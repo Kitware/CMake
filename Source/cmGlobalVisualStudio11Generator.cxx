@@ -16,7 +16,6 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator()
 {
-  this->VersionId = "MSVC11";
   this->FindMakeProgramFile = "CMakeVS11FindMake.cmake";
   this->ExpressEdition = false; // TODO: VS 11 Express support
   this->PlatformToolset = "v110";

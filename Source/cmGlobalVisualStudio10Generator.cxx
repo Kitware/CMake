@@ -19,7 +19,6 @@
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator()
 {
-  this->VersionId = "MSVC10";
   this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(

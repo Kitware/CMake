@@ -19,7 +19,6 @@
 
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator()
 {
-  this->VersionId = "MSVC90";
   this->FindMakeProgramFile = "CMakeVS9FindMake.cmake";
 }
 
