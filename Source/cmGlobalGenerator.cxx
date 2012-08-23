@@ -376,22 +376,24 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     std::string loadedLang = "CMAKE_";
     loadedLang +=  lang;
     loadedLang += "_COMPILER_LOADED";
-    // If the existing build tree was already configured with this
-    // version of CMake then try to load the configured file first
-    // to avoid duplicate compiler tests.
-    unsigned int cacheMajor = mf->GetCacheMajorVersion();
-    unsigned int cacheMinor = mf->GetCacheMinorVersion();
-    unsigned int selfMajor = cmVersion::GetMajorVersion();
-    unsigned int selfMinor = cmVersion::GetMinorVersion();
-    if((this->CMakeInstance->GetIsInTryCompile() ||
-        (selfMajor == cacheMajor && selfMinor == cacheMinor))
-       && !mf->GetDefinition(loadedLang.c_str()))
+    if(!mf->GetDefinition(loadedLang.c_str()))
       {
       fpath = rootBin;
       fpath += "/CMake";
       fpath += lang;
       fpath += "Compiler.cmake";
-      if(cmSystemTools::FileExists(fpath.c_str()))
+
+      // If the existing build tree was already configured with this
+      // version of CMake then try to load the configured file first
+      // to avoid duplicate compiler tests.
+      unsigned int cacheMajor = mf->GetCacheMajorVersion();
+      unsigned int cacheMinor = mf->GetCacheMinorVersion();
+      unsigned int selfMajor = cmVersion::GetMajorVersion();
+      unsigned int selfMinor = cmVersion::GetMinorVersion();
+      if((this->CMakeInstance->GetIsInTryCompile() ||
+          (cacheMajor == 0 && cacheMinor == 0) ||
+          (selfMajor == cacheMajor && selfMinor == cacheMinor)) &&
+         cmSystemTools::FileExists(fpath.c_str()))
         {
         if(!mf->ReadListFile(0,fpath.c_str()))
           {
