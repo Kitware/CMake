@@ -30,8 +30,6 @@ set(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 
 # for nmake we need to compute some information about the compiler
 # that is being used.
-# the compiler may be free command line, 6, 7, or 71, and
-# each have properties that must be determined.
 # to avoid running these tests with each cmake run, the
 # test results are saved in CMakeCPlatform.cmake, a file
 # that is automatically copied into try_compile directories
@@ -96,34 +94,6 @@ if(CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "Ninja")
         "Determining the version of compiler failed with the following output:\n"
         "${CMAKE_COMPILER_OUTPUT}\n\n")
     endif()
-    # try to figure out if we are running the free command line
-    # tools from Microsoft.  These tools do not provide debug libraries,
-    # so the link flags used have to be different.
-    make_directory("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp2")
-    set(testForFreeVCFile
-      "${CMAKE_ROOT}/Modules/CMakeTestForFreeVC.cxx")
-    string(REGEX REPLACE "/" "\\\\" testForFreeVCFile "${testForFreeVCFile}")
-    message(STATUS "Check if this is a free VC compiler")
-    exec_program(${CMAKE_TEST_COMPILER} ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp2
-      ARGS /nologo /MD /EHsc
-      \"${testForFreeVCFile}\"
-      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT
-      RETURN_VALUE CMAKE_COMPILER_RETURN
-      )
-    if(CMAKE_COMPILER_RETURN)
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining if this is a free VC compiler failed with the following output:\n"
-        "${CMAKE_COMPILER_OUTPUT}\n\n")
-      message(STATUS "Check if this is a free VC compiler - yes")
-      set(CMAKE_USING_VC_FREE_TOOLS 1)
-    else()
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining if this is a free VC compiler passed with the following output:\n"
-        "${CMAKE_COMPILER_OUTPUT}\n\n")
-      message(STATUS "Check if this is a free VC compiler - no")
-      set(CMAKE_USING_VC_FREE_TOOLS 0)
-    endif()
-    make_directory("${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp3")
   endif()
 endif()
 
@@ -166,32 +136,17 @@ if(MSVC_VERSION GREATER 1310)
   set (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ")
   set (CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT}")
 else()
-  if(CMAKE_USING_VC_FREE_TOOLS)
-    message(STATUS "Using FREE VC TOOLS, NO DEBUG available")
-    set(CMAKE_BUILD_TYPE_INIT Release)
-    set (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /GX /GR")
-    set (CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MTd /Zi  /Ob0 /Od /GZ")
-    set (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MT /O1 /Ob1 /D NDEBUG")
-    set (CMAKE_CXX_FLAGS_RELEASE_INIT "/MT /O2 /Ob2 /D NDEBUG")
-    set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2 /Ob1 /D NDEBUG")
-    set (CMAKE_C_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000")
-    set (CMAKE_C_FLAGS_DEBUG_INIT "/D_DEBUG /MTd /Zi  /Ob0 /Od /GZ")
-    set (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MT /O1 /Ob1 /D NDEBUG")
-    set (CMAKE_C_FLAGS_RELEASE_INIT "/MT /O2 /Ob2 /D NDEBUG")
-    set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2 /Ob1 /D NDEBUG")
-  else()
-    set(CMAKE_BUILD_TYPE_INIT Debug)
-    set (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /GX /GR")
-    set (CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi  /Ob0 /Od /GZ")
-    set (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
-    set (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
-    set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-    set (CMAKE_C_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000")
-    set (CMAKE_C_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od /GZ")
-    set (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
-    set (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
-    set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
-  endif()
+  set(CMAKE_BUILD_TYPE_INIT Debug)
+  set (CMAKE_CXX_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000 /GX /GR")
+  set (CMAKE_CXX_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi  /Ob0 /Od /GZ")
+  set (CMAKE_CXX_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
+  set (CMAKE_CXX_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
+  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
+  set (CMAKE_C_FLAGS_INIT "/DWIN32 /D_WINDOWS /W3 /Zm1000")
+  set (CMAKE_C_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od /GZ")
+  set (CMAKE_C_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
+  set (CMAKE_C_FLAGS_RELEASE_INIT "/MD /O2 /Ob2 /D NDEBUG")
+  set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
   set (CMAKE_C_STANDARD_LIBRARIES_INIT "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib")
 endif()
 

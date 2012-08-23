@@ -383,12 +383,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "into all executables and libraries.",false,
      "Variables that Provide Information");
   cm->DefineProperty
-    ("CMAKE_USING_VC_FREE_TOOLS", cmProperty::VARIABLE,
-     "True if free visual studio tools being used.",
-     "This is set to true if the compiler is Visual "
-     "Studio free tools.",false,
-     "Variables that Provide Information");
-  cm->DefineProperty
     ("CMAKE_VERBOSE_MAKEFILE", cmProperty::VARIABLE,
      "Create verbose makefiles if on.",
      "This variable defaults to false. You can set "
