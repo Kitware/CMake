@@ -1,8 +1,3 @@
-# try to load any previously computed information for C on this platform
-include( ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake OPTIONAL)
-# try to load any previously computed information for CXX on this platform
-include( ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake OPTIONAL)
-
 set(WIN32 1)
 
 include(Platform/cl)
@@ -19,81 +14,54 @@ if(NOT CMAKE_NO_BUILD_TYPE AND CMAKE_GENERATOR MATCHES "Visual Studio")
      "Semicolon separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
   mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
 endif()
-# does the compiler support pdbtype and is it the newer compiler
-if(CMAKE_GENERATOR MATCHES  "Visual Studio 8")
-  set(CMAKE_COMPILER_2005 1)
-endif()
 
 # make sure to enable languages after setting configuration types
 enable_language(RC)
 set(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 
-# for nmake we need to compute some information about the compiler
-# that is being used.
-# to avoid running these tests with each cmake run, the
-# test results are saved in CMakeCPlatform.cmake, a file
-# that is automatically copied into try_compile directories
-# by the global generator.
-set(MSVC_IDE 1)
-if(CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "Ninja")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(MSVC_IDE 0)
-  if(NOT CMAKE_VC_COMPILER_TESTS_RUN)
-    set(CMAKE_VC_COMPILER_TESTS 1)
-    set(testNmakeCLVersionFile
-      "${CMAKE_ROOT}/Modules/CMakeTestNMakeCLVersion.c")
-    string(REGEX REPLACE "/" "\\\\" testNmakeCLVersionFile "${testNmakeCLVersionFile}")
-    message(STATUS "Check for CL compiler version")
-    set(CMAKE_TEST_COMPILER ${CMAKE_C_COMPILER})
-    if (NOT CMAKE_C_COMPILER)
-      set(CMAKE_TEST_COMPILER ${CMAKE_CXX_COMPILER})
-    endif()
-    exec_program(${CMAKE_TEST_COMPILER}
-      ARGS /nologo -EP \"${testNmakeCLVersionFile}\"
-      OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT
-      RETURN_VALUE CMAKE_COMPILER_RETURN
-      )
-    if(NOT CMAKE_COMPILER_RETURN)
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Determining the version of compiler passed with the following output:\n"
-        "${CMAKE_COMPILER_OUTPUT}\n\n")
-      string(REGEX REPLACE "\n" " " compilerVersion "${CMAKE_COMPILER_OUTPUT}")
-      string(REGEX REPLACE ".*VERSION=(.*)" "\\1"
-        compilerVersion "${compilerVersion}")
-      message(STATUS "Check for CL compiler version - ${compilerVersion}")
-      set(MSVC60)
-      set(MSVC70)
-      set(MSVC71)
-      set(MSVC80)
-      set(CMAKE_COMPILER_2005)
-      if("${compilerVersion}" LESS 1300)
-        set(MSVC60 1)
-        set(CMAKE_COMPILER_SUPPORTS_PDBTYPE 1)
-      endif()
-      if("${compilerVersion}" EQUAL 1300)
-        set(MSVC70 1)
-        set(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
-      endif()
-      if("${compilerVersion}" EQUAL 1310)
-        set(MSVC71 1)
-        set(CMAKE_COMPILER_SUPPORTS_PDBTYPE 0)
-      endif()
-      if("${compilerVersion}" EQUAL 1400)
-        set(MSVC80 1)
-        set(CMAKE_COMPILER_2005 1)
-      endif()
-      if("${compilerVersion}" EQUAL 1500)
-        set(MSVC90 1)
-      endif()
-      if("${compilerVersion}" EQUAL 1600)
-        set(MSVC10 1)
-      endif()
-      set(MSVC_VERSION "${compilerVersion}")
-    else()
-      message(STATUS "Check for CL compiler version - failed")
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "Determining the version of compiler failed with the following output:\n"
-        "${CMAKE_COMPILER_OUTPUT}\n\n")
-    endif()
+else()
+  set(MSVC_IDE 1)
+endif()
+
+if(NOT MSVC_VERSION)
+  if(CMAKE_C_COMPILER_VERSION)
+    set(_compiler_version ${CMAKE_C_COMPILER_VERSION})
+  else()
+    set(_compiler_version ${CMAKE_CXX_COMPILER_VERSION})
+  endif()
+  if("${_compiler_version}" MATCHES "^([0-9]+)\\.([0-9]+)")
+    math(EXPR MSVC_VERSION "${CMAKE_MATCH_1}*100 + ${CMAKE_MATCH_2}")
+  else()
+    message(FATAL_ERROR "MSVC compiler version not detected properly: ${_compiler_version}")
+  endif()
+
+  set(MSVC10)
+  set(MSVC11)
+  set(MSVC60)
+  set(MSVC70)
+  set(MSVC71)
+  set(MSVC80)
+  set(MSVC90)
+  set(CMAKE_COMPILER_2005)
+  set(CMAKE_COMPILER_SUPPORTS_PDBTYPE)
+  if(NOT "${_compiler_version}" VERSION_LESS 17)
+    set(MSVC11 1)
+  elseif(NOT  "${_compiler_version}" VERSION_LESS 16)
+    set(MSVC10 1)
+  elseif(NOT  "${_compiler_version}" VERSION_LESS 15)
+    set(MSVC90 1)
+  elseif(NOT  "${_compiler_version}" VERSION_LESS 14)
+    set(MSVC80 1)
+    set(CMAKE_COMPILER_2005 1)
+  elseif(NOT  "${_compiler_version}" VERSION_LESS 13.10)
+    set(MSVC71 1)
+  elseif(NOT  "${_compiler_version}" VERSION_LESS 13)
+    set(MSVC70 1)
+  else()
+    set(MSVC60 1)
+    set(CMAKE_COMPILER_SUPPORTS_PDBTYPE 1)
   endif()
 endif()
 
@@ -195,14 +163,3 @@ set (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT
 set (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT ${CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT ${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT})
-
-# save computed information for this platform
-if(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake")
-  configure_file(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCPlatform.cmake IMMEDIATE)
-endif()
-
-if(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
-  configure_file(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in
-               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXPlatform.cmake IMMEDIATE)
-endif()

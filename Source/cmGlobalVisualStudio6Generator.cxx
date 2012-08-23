@@ -32,7 +32,6 @@ std::string GetVS6TargetName(const std::string& targetName)
 
 cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 {
-  this->VersionId = "MSVC60";
   this->FindMakeProgramFile = "CMakeVS6FindMake.cmake";
 }
 
