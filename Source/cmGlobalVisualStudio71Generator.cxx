@@ -18,6 +18,7 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator()
 {
+  this->VersionId = "MSVC71";
   this->FindMakeProgramFile = "CMakeVS71FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
@@ -31,14 +32,6 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio71Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  this->cmGlobalVisualStudio7Generator::AddPlatformDefinitions(mf);
-  mf->RemoveDefinition("MSVC70");
-  mf->AddDefinition("MSVC71", "1");
 }
 
 //----------------------------------------------------------------------------

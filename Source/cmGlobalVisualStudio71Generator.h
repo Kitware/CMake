@@ -53,7 +53,6 @@ public:
 
 protected:
   virtual const char* GetIDEVersion() { return "7.1"; }
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout,
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
