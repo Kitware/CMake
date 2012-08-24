@@ -158,9 +158,6 @@ public:
   void AddSources(std::vector<std::string> const& srcs);
   cmSourceFile* AddSource(const char* src);
 
-  /**
-   * Get the list of the source files used by this target
-   */
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
 
   //* how we identify a library, by name and type
