@@ -63,5 +63,5 @@ endif()
 
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeRCCompiler.cmake.in
-               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeRCCompiler.cmake IMMEDIATE)
+               ${CMAKE_PLATFORM_INFO_DIR}/CMakeRCCompiler.cmake IMMEDIATE)
 set(CMAKE_RC_COMPILER_ENV_VAR "RC")

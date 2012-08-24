@@ -167,7 +167,7 @@ if(MSVC_CXX_ARCHITECTURE_ID)
 endif()
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
-  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake
+  ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
   @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
   )
 

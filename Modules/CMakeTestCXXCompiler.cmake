@@ -1,6 +1,6 @@
 
 #=============================================================================
-# Copyright 2003-2009 Kitware, Inc.
+# Copyright 2003-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -12,7 +12,18 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(CMAKE_CXX_COMPILER_FORCED)
+  # The compiler configuration was forced by the user.
+  # Assume the user has configured all compiler information.
+  set(CMAKE_CXX_COMPILER_WORKS TRUE)
+  return()
+endif()
+
 include(CMakeTestCompilerCommon)
+
+# Remove any cached result from an older CMake version.
+# We now store this in CMakeCXXCompiler.cmake.
+unset(CMAKE_CXX_COMPILER_WORKS CACHE)
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
 # determine that that selected C++ compiler can actually compile
@@ -29,6 +40,9 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   try_compile(CMAKE_CXX_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCXXCompiler.cxx
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
+  # Move result from cache to normal variable.
+  set(CMAKE_CXX_COMPILER_WORKS ${CMAKE_CXX_COMPILER_WORKS})
+  unset(CMAKE_CXX_COMPILER_WORKS CACHE)
   set(CXX_TEST_WAS_RUN 1)
 endif()
 
@@ -48,22 +62,19 @@ else()
       "Determining if the CXX compiler works passed with "
       "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
   endif()
-  set(CMAKE_CXX_COMPILER_WORKS 1 CACHE INTERNAL "")
 
-  if(CMAKE_CXX_COMPILER_FORCED)
-    # The compiler configuration was forced by the user.
-    # Assume the user has configured all compiler information.
-  else()
-    # Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
-    include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
-    CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
-    configure_file(
-      ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake
-      @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
-      )
-    include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake)
-  endif()
+  # Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+  CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
+
+  # Re-configure to save learned information.
+  configure_file(
+    ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
+    ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
+    @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+    )
+  include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake)
+
   if(CMAKE_CXX_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_CXX_ABI_FILES})
       include(${f})

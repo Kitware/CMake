@@ -197,7 +197,7 @@ if(MSVC_Fortran_ARCHITECTURE_ID)
 endif()
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
-  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake
+  ${CMAKE_PLATFORM_INFO_DIR}/CMakeFortranCompiler.cmake
   @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
   )
 set(CMAKE_Fortran_COMPILER_ENV_VAR "FC")
