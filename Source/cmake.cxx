@@ -2438,9 +2438,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
 
   this->PreLoadCMakeFiles();
 
-  std::string systemFile = this->GetHomeOutputDirectory();
-  systemFile += "/CMakeSystem.cmake";
-
   if ( noconfigure )
     {
     return 0;
