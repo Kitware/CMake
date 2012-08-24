@@ -98,7 +98,7 @@ bool cmDepends::Check(const char *makeFile, const char *internalFile,
   // Check whether dependencies must be regenerated.
   bool okay = true;
   std::ifstream fin(internalFile);
-  if(!(fin && this->CheckDependencies(fin, validDeps)))
+  if(!(fin && this->CheckDependencies(fin, internalFile, validDeps)))
     {
     // Clear all dependencies so they will be regenerated.
     this->Clear(makeFile);
@@ -143,6 +143,7 @@ bool cmDepends::WriteDependencies(const char*, const char*,
 
 //----------------------------------------------------------------------------
 bool cmDepends::CheckDependencies(std::istream& internalDepends,
+                                  const char* internalDependsFileName,
                             std::map<std::string, DependencyVector>& validDeps)
 {
   // Parse dependencies from the stream.  If any dependee is missing
@@ -186,8 +187,11 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
       }
       */
 
-    // Dependencies must be regenerated if the dependee does not exist
-    // or if the depender exists and is older than the dependee.
+    // Dependencies must be regenerated
+    // * if the dependee does not exist
+    // * if the depender exists and is older than the dependee.
+    // * if the depender does not exist, but the dependee is newer than the
+    //   depends file
     bool regenerate = false;
     const char* dependee = this->Dependee+1;
     const char* depender = this->Depender;
@@ -211,24 +215,49 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
         cmSystemTools::Stdout(msg.str().c_str());
         }
       }
-    else if(dependerExists)
+    else
       {
-      // The dependee and depender both exist.  Compare file times.
-      int result = 0;
-      if((!this->FileComparison->FileTimeCompare(depender, dependee,
-                                             &result) || result < 0))
+      if(dependerExists)
         {
-        // The depender is older than the dependee.
-        regenerate = true;
-
-        // Print verbose output.
-        if(this->Verbose)
+        // The dependee and depender both exist.  Compare file times.
+        int result = 0;
+        if((!this->FileComparison->FileTimeCompare(depender, dependee,
+                                              &result) || result < 0))
           {
-          cmOStringStream msg;
-          msg << "Dependee \"" << dependee
-              << "\" is newer than depender \""
-              << depender << "\"." << std::endl;
-          cmSystemTools::Stdout(msg.str().c_str());
+          // The depender is older than the dependee.
+          regenerate = true;
+
+          // Print verbose output.
+          if(this->Verbose)
+            {
+            cmOStringStream msg;
+            msg << "Dependee \"" << dependee
+                << "\" is newer than depender \""
+                << depender << "\"." << std::endl;
+            cmSystemTools::Stdout(msg.str().c_str());
+            }
+          }
+        }
+      else
+        {
+        // The dependee exists, but the depender doesn't. Regenerate if the
+        // internalDepends file is older than the dependee.
+        int result = 0;
+        if((!this->FileComparison->FileTimeCompare(internalDependsFileName,
+                                             dependee, &result) || result < 0))
+          {
+          // The depends-file is older than the dependee.
+          regenerate = true;
+
+          // Print verbose output.
+          if(this->Verbose)
+            {
+            cmOStringStream msg;
+            msg << "Dependee \"" << dependee
+                << "\" is newer than depends file \""
+                << internalDependsFileName << "\"." << std::endl;
+            cmSystemTools::Stdout(msg.str().c_str());
+            }
           }
         }
       }
