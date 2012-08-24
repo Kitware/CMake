@@ -67,6 +67,12 @@ private:
 
   };
 
+  // Extended revision structure to include info about external it refers to.
+  struct Revision : public cmCTestVC::Revision
+  {
+    cmCTestSVN::SVNInfo* SVNInfo;
+  };
+
   std::string LoadInfo();
   void LoadModifications();
   void LoadRevisions();
