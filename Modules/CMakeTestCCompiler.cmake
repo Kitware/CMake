@@ -58,11 +58,6 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the C compiler works failed with "
     "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")
-  # if the compiler is broken make sure to remove the platform file
-  # since Windows-cl configures both c/cxx files both need to be removed
-  # when c or c++ fails
-  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake )
-  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake )
   message(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${__CMAKE_C_COMPILER_OUTPUT}\n\n"

@@ -48,11 +48,6 @@ endif()
 
 if(NOT CMAKE_CXX_COMPILER_WORKS)
   PrintTestCompilerStatus("CXX" " -- broken")
-  # if the compiler is broken make sure to remove the platform file
-  # since Windows-cl configures both c/cxx files both need to be removed
-  # when c or c++ fails
-  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake )
-  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake )
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the CXX compiler works failed with "
     "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
