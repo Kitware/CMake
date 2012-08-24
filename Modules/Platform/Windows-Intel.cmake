@@ -98,11 +98,14 @@ macro(__windows_compiler_intel lang)
   set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "/DNDEBUG /MD /Zi /O2")
 
   if(_INTEL_COMPILER_SUPPORTS_MANIFEST)
+    if(CMAKE_GENERATOR MATCHES "Ninja")
+      set(NO_RSP_EXPAND _no_rsp_expand)
+    endif()
     set(CMAKE_${lang}_LINK_EXECUTABLE
-      "<CMAKE_COMMAND> -E vs_link_exe ${CMAKE_${lang}_LINK_EXECUTABLE}")
+      "<CMAKE_COMMAND> -E vs_link_exe${NO_RSP_EXPAND} ${CMAKE_${lang}_LINK_EXECUTABLE}")
     set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
-      "<CMAKE_COMMAND> -E vs_link_dll ${CMAKE_${lang}_CREATE_SHARED_LIBRARY}")
+      "<CMAKE_COMMAND> -E vs_link_dll${NO_RSP_EXPAND} ${CMAKE_${lang}_CREATE_SHARED_LIBRARY}")
     set(CMAKE_${lang}_CREATE_SHARED_MODULE
-      "<CMAKE_COMMAND> -E vs_link_dll ${CMAKE_${lang}_CREATE_SHARED_MODULE}")
+      "<CMAKE_COMMAND> -E vs_link_dll${NO_RSP_EXPAND} ${CMAKE_${lang}_CREATE_SHARED_MODULE}")
   endif()
 endmacro()

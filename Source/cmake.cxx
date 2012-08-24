@@ -1682,11 +1682,19 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
     else if (args[1] == "vs_link_exe")
       {
-      return cmake::VisualStudioLink(args, 1);
+      return cmake::VisualStudioLink(args, 1, false);
       }
     else if (args[1] == "vs_link_dll")
       {
-      return cmake::VisualStudioLink(args, 2);
+      return cmake::VisualStudioLink(args, 2, false);
+      }
+    else if (args[1] == "vs_link_exe_no_rsp_expand")
+      {
+      return cmake::VisualStudioLink(args, 1, true);
+      }
+    else if (args[1] == "vs_link_dll_no_rsp_expand")
+      {
+      return cmake::VisualStudioLink(args, 2, true);
       }
 #ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
@@ -3998,7 +4006,8 @@ static bool cmakeCheckStampList(const char* stampList)
 // For visual studio 2005 and newer manifest files need to be embeded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
-int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
+int cmake::VisualStudioLink(std::vector<std::string>& args, int type,
+                            bool no_rsp_expand)
 {
   if(args.size() < 2)
     {
@@ -4013,13 +4022,12 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {
-    // check for nmake temporary files
-    if((*i)[0] == '@' && i->find("@CMakeFiles") != 0 )
+    // check for nmake temporary files (there are two rsp files)
+    if(!no_rsp_expand && (*i)[0] == '@' && i->find("@CMakeFiles") != 0 )
       {
       std::ifstream fin(i->substr(1).c_str());
       std::string line;
-      while(cmSystemTools::GetLineFromStream(fin,
-                                             line))
+      while(cmSystemTools::GetLineFromStream(fin, line))
         {
         cmSystemTools::ParseWindowsCommandLine(line.c_str(), expandedArgs);
         }
