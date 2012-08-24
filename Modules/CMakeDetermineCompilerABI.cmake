@@ -19,7 +19,7 @@
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
 function(CMAKE_DETERMINE_COMPILER_ABI lang src)
-  if(NOT DEFINED CMAKE_DETERMINE_${lang}_ABI_COMPILED)
+  if(NOT DEFINED CMAKE_${lang}_ABI_COMPILED)
     message(STATUS "Detecting ${lang} compiler ABI info")
 
     # Compile the ABI identification source.
@@ -28,7 +28,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
       set(CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
     endif()
-    try_compile(CMAKE_DETERMINE_${lang}_ABI_COMPILED
+    try_compile(CMAKE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
       CMAKE_FLAGS "${CMAKE_FLAGS}"
                   "-DCMAKE_${lang}_STANDARD_LIBRARIES="
@@ -39,9 +39,13 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
       )
+    # Move result from cache to normal variable.
+    set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED})
+    unset(CMAKE_${lang}_ABI_COMPILED CACHE)
+    set(CMAKE_${lang}_ABI_COMPILED ${CMAKE_${lang}_ABI_COMPILED} PARENT_SCOPE)
 
     # Load the resulting information strings.
-    if(CMAKE_DETERMINE_${lang}_ABI_COMPILED)
+    if(CMAKE_${lang}_ABI_COMPILED)
       message(STATUS "Detecting ${lang} compiler ABI info - done")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
