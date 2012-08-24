@@ -67,6 +67,9 @@ private:
 
   };
 
+  // Extended revision structure to include info about external it refers to.
+  struct Revision;
+
   std::string LoadInfo();
   void LoadModifications();
   void LoadRevisions();
@@ -74,8 +77,8 @@ private:
   void GuessBase(std::vector<Change> const& changes);
   const char* LocalPath(std::string const& path);
 
-  void DoRevision(Revision const& revision,
-                  std::vector<Change> const& changes);
+  void DoRevisionSVN(Revision const& revision,
+                     std::vector<Change> const& changes);
 
   void WriteXMLGlobal(std::ostream& xml);
 
