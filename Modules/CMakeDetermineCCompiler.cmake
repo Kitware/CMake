@@ -39,76 +39,66 @@ if(NOT CMAKE_C_COMPILER_NAMES)
   set(CMAKE_C_COMPILER_NAMES cc)
 endif()
 
-if(NOT CMAKE_C_COMPILER)
-  set(CMAKE_C_COMPILER_INIT NOTFOUND)
-
-  # prefer the environment variable CC
-  if($ENV{CC} MATCHES ".+")
-    get_filename_component(CMAKE_C_COMPILER_INIT $ENV{CC} PROGRAM PROGRAM_ARGS CMAKE_C_FLAGS_ENV_INIT)
-    if(CMAKE_C_FLAGS_ENV_INIT)
-      set(CMAKE_C_COMPILER_ARG1 "${CMAKE_C_FLAGS_ENV_INIT}" CACHE STRING "First argument to C compiler")
-    endif()
-    if(NOT EXISTS ${CMAKE_C_COMPILER_INIT})
-      message(FATAL_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}.")
-    endif()
-  endif()
-
-  # next try prefer the compiler specified by the generator
-  if(CMAKE_GENERATOR_CC)
-    if(NOT CMAKE_C_COMPILER_INIT)
-      set(CMAKE_C_COMPILER_INIT ${CMAKE_GENERATOR_CC})
-    endif()
-  endif()
-
-  # finally list compilers to try
-  if(NOT CMAKE_C_COMPILER_INIT)
-    set(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}cc ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc clang)
-  endif()
-
-  _cmake_find_compiler(C)
-
-else()
-
-  # we only get here if CMAKE_C_COMPILER was specified using -D or a pre-made CMakeCache.txt
-  # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-  # if CMAKE_C_COMPILER is a list of length 2, use the first item as
-  # CMAKE_C_COMPILER and the 2nd one as CMAKE_C_COMPILER_ARG1
-
-  list(LENGTH CMAKE_C_COMPILER _CMAKE_C_COMPILER_LIST_LENGTH)
-  if("${_CMAKE_C_COMPILER_LIST_LENGTH}" EQUAL 2)
-    list(GET CMAKE_C_COMPILER 1 CMAKE_C_COMPILER_ARG1)
-    list(GET CMAKE_C_COMPILER 0 CMAKE_C_COMPILER)
-  endif()
-
-  # if a compiler was specified by the user but without path,
-  # now try to find it with the full path
-  # if it is found, force it into the cache,
-  # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
-  # if the C compiler already had a path, reuse it for searching the CXX compiler
-  get_filename_component(_CMAKE_USER_C_COMPILER_PATH "${CMAKE_C_COMPILER}" PATH)
-  if(NOT _CMAKE_USER_C_COMPILER_PATH)
-    find_program(CMAKE_C_COMPILER_WITH_PATH NAMES ${CMAKE_C_COMPILER})
-    mark_as_advanced(CMAKE_C_COMPILER_WITH_PATH)
-    if(CMAKE_C_COMPILER_WITH_PATH)
-      set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_WITH_PATH} CACHE STRING "C compiler" FORCE)
-    endif()
-  endif()
-endif()
-mark_as_advanced(CMAKE_C_COMPILER)
-
-if (NOT _CMAKE_TOOLCHAIN_LOCATION)
-  get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
-endif ()
-
-# Build a small source file to identify the compiler.
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
-  set(CMAKE_C_COMPILER_ID_RUN 1)
-  set(CMAKE_C_PLATFORM_ID "Windows")
-  set(CMAKE_C_COMPILER_ID "MSVC")
-endif()
+elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+  set(CMAKE_C_COMPILER_XCODE_TYPE sourcecode.c.c)
+else()
+  if(NOT CMAKE_C_COMPILER)
+    set(CMAKE_C_COMPILER_INIT NOTFOUND)
 
-if(NOT CMAKE_C_COMPILER_ID_RUN)
-  set(CMAKE_C_COMPILER_ID_RUN 1)
+    # prefer the environment variable CC
+    if($ENV{CC} MATCHES ".+")
+      get_filename_component(CMAKE_C_COMPILER_INIT $ENV{CC} PROGRAM PROGRAM_ARGS CMAKE_C_FLAGS_ENV_INIT)
+      if(CMAKE_C_FLAGS_ENV_INIT)
+        set(CMAKE_C_COMPILER_ARG1 "${CMAKE_C_FLAGS_ENV_INIT}" CACHE STRING "First argument to C compiler")
+      endif()
+      if(NOT EXISTS ${CMAKE_C_COMPILER_INIT})
+        message(FATAL_ERROR "Could not find compiler set in environment variable CC:\n$ENV{CC}.")
+      endif()
+    endif()
+
+    # next try prefer the compiler specified by the generator
+    if(CMAKE_GENERATOR_CC)
+      if(NOT CMAKE_C_COMPILER_INIT)
+        set(CMAKE_C_COMPILER_INIT ${CMAKE_GENERATOR_CC})
+      endif()
+    endif()
+
+    # finally list compilers to try
+    if(NOT CMAKE_C_COMPILER_INIT)
+      set(CMAKE_C_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}cc ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc clang)
+    endif()
+
+    _cmake_find_compiler(C)
+
+  else()
+
+    # we only get here if CMAKE_C_COMPILER was specified using -D or a pre-made CMakeCache.txt
+    # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
+    # if CMAKE_C_COMPILER is a list of length 2, use the first item as
+    # CMAKE_C_COMPILER and the 2nd one as CMAKE_C_COMPILER_ARG1
+
+    list(LENGTH CMAKE_C_COMPILER _CMAKE_C_COMPILER_LIST_LENGTH)
+    if("${_CMAKE_C_COMPILER_LIST_LENGTH}" EQUAL 2)
+      list(GET CMAKE_C_COMPILER 1 CMAKE_C_COMPILER_ARG1)
+      list(GET CMAKE_C_COMPILER 0 CMAKE_C_COMPILER)
+    endif()
+
+    # if a compiler was specified by the user but without path,
+    # now try to find it with the full path
+    # if it is found, force it into the cache,
+    # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
+    # if the C compiler already had a path, reuse it for searching the CXX compiler
+    get_filename_component(_CMAKE_USER_C_COMPILER_PATH "${CMAKE_C_COMPILER}" PATH)
+    if(NOT _CMAKE_USER_C_COMPILER_PATH)
+      find_program(CMAKE_C_COMPILER_WITH_PATH NAMES ${CMAKE_C_COMPILER})
+      mark_as_advanced(CMAKE_C_COMPILER_WITH_PATH)
+      if(CMAKE_C_COMPILER_WITH_PATH)
+        set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_WITH_PATH} CACHE STRING "C compiler" FORCE)
+      endif()
+    endif()
+  endif()
+  mark_as_advanced(CMAKE_C_COMPILER)
 
   # Each entry in this list is a set of extra flags to try
   # adding to the compile line to see if it helps produce
@@ -120,6 +110,11 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
     # Try enabling ANSI mode on HP.
     "-Aa"
     )
+endif()
+
+# Build a small source file to identify the compiler.
+if(NOT CMAKE_C_COMPILER_ID_RUN)
+  set(CMAKE_C_COMPILER_ID_RUN 1)
 
   # Try to identify the compiler.
   set(CMAKE_C_COMPILER_ID)
@@ -138,6 +133,10 @@ if(NOT CMAKE_C_COMPILER_ID_RUN)
     set(CMAKE_COMPILER_IS_CYGWIN 1)
   endif()
 endif()
+
+if (NOT _CMAKE_TOOLCHAIN_LOCATION)
+  get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_C_COMPILER}" PATH)
+endif ()
 
 # If we have a gcc cross compiler, they have usually some prefix, like
 # e.g. powerpc-linux-gcc, arm-elf-gcc or i586-mingw32msvc-gcc, optionally
