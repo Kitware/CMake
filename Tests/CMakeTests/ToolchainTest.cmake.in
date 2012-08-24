@@ -6,7 +6,7 @@
 macro(MARK_AS_ADVANCED)
 endmacro()
 # set this to a place where we are allowed to write
-set(CMAKE_PLATFORM_ROOT_BIN "${CMAKE_CURRENT_BINARY_DIR}")
+set(CMAKE_PLATFORM_INFO_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
 # don't run the compiler detection
 set(CMAKE_C_COMPILER_ID_RUN 1)

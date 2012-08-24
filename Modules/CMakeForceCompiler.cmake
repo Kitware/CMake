@@ -46,7 +46,6 @@ macro(CMAKE_FORCE_C_COMPILER compiler id)
   set(CMAKE_C_COMPILER "${compiler}")
   set(CMAKE_C_COMPILER_ID_RUN TRUE)
   set(CMAKE_C_COMPILER_ID ${id})
-  set(CMAKE_C_COMPILER_WORKS TRUE)
   set(CMAKE_C_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.
@@ -59,7 +58,6 @@ macro(CMAKE_FORCE_CXX_COMPILER compiler id)
   set(CMAKE_CXX_COMPILER "${compiler}")
   set(CMAKE_CXX_COMPILER_ID_RUN TRUE)
   set(CMAKE_CXX_COMPILER_ID ${id})
-  set(CMAKE_CXX_COMPILER_WORKS TRUE)
   set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.
@@ -72,7 +70,6 @@ macro(CMAKE_FORCE_Fortran_COMPILER compiler id)
   set(CMAKE_Fortran_COMPILER "${compiler}")
   set(CMAKE_Fortran_COMPILER_ID_RUN TRUE)
   set(CMAKE_Fortran_COMPILER_ID ${id})
-  set(CMAKE_Fortran_COMPILER_WORKS TRUE)
   set(CMAKE_Fortran_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.

@@ -1,6 +1,6 @@
 
 #=============================================================================
-# Copyright 2003-2009 Kitware, Inc.
+# Copyright 2003-2012 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -12,7 +12,18 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(CMAKE_C_COMPILER_FORCED)
+  # The compiler configuration was forced by the user.
+  # Assume the user has configured all compiler information.
+  set(CMAKE_C_COMPILER_WORKS TRUE)
+  return()
+endif()
+
 include(CMakeTestCompilerCommon)
+
+# Remove any cached result from an older CMake version.
+# We now store this in CMakeCCompiler.cmake.
+unset(CMAKE_C_COMPILER_WORKS CACHE)
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
 # determine that that selected C compiler can actually compile
@@ -36,6 +47,9 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   try_compile(CMAKE_C_COMPILER_WORKS ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler.c
     OUTPUT_VARIABLE __CMAKE_C_COMPILER_OUTPUT)
+  # Move result from cache to normal variable.
+  set(CMAKE_C_COMPILER_WORKS ${CMAKE_C_COMPILER_WORKS})
+  unset(CMAKE_C_COMPILER_WORKS CACHE)
   set(C_TEST_WAS_RUN 1)
 endif()
 
@@ -47,8 +61,8 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   # if the compiler is broken make sure to remove the platform file
   # since Windows-cl configures both c/cxx files both need to be removed
   # when c or c++ fails
-  file(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake )
-  file(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake )
+  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake )
+  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake )
   message(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${__CMAKE_C_COMPILER_OUTPUT}\n\n"
@@ -60,22 +74,19 @@ else()
       "Determining if the C compiler works passed with "
       "the following output:\n${__CMAKE_C_COMPILER_OUTPUT}\n\n")
   endif()
-  set(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
-  if(CMAKE_C_COMPILER_FORCED)
-    # The compiler configuration was forced by the user.
-    # Assume the user has configured all compiler information.
-  else()
-    # Try to identify the ABI and configure it into CMakeCCompiler.cmake
-    include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
-    CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
-    configure_file(
-      ${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake
-      @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
-      )
-    include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake)
-  endif()
+  # Try to identify the ABI and configure it into CMakeCCompiler.cmake
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
+  CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
+
+  # Re-configure to save learned information.
+  configure_file(
+    ${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
+    ${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake
+    @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+    )
+  include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake)
+
   if(CMAKE_C_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_C_ABI_FILES})
       include(${f})

@@ -1,7 +1,7 @@
 # try to load any previously computed information for C on this platform
-include( ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake OPTIONAL)
+include( ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake OPTIONAL)
 # try to load any previously computed information for CXX on this platform
-include( ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake OPTIONAL)
+include( ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake OPTIONAL)
 
 set(WIN32 1)
 
@@ -245,12 +245,12 @@ set (CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT ${CMAKE_EXE_LINKER_FLAGS_RELEASE_INI
 set (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT ${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT})
 
 # save computed information for this platform
-if(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake")
+if(NOT EXISTS "${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake")
   configure_file(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in
-    ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCPlatform.cmake IMMEDIATE)
+    ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake IMMEDIATE)
 endif()
 
-if(NOT EXISTS "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake")
+if(NOT EXISTS "${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake")
   configure_file(${CMAKE_ROOT}/Modules/Platform/Windows-cl.cmake.in
-               ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXPlatform.cmake IMMEDIATE)
+                 ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake IMMEDIATE)
 endif()
