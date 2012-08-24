@@ -47,8 +47,8 @@ if(NOT CMAKE_C_COMPILER_WORKS)
   # if the compiler is broken make sure to remove the platform file
   # since Windows-cl configures both c/cxx files both need to be removed
   # when c or c++ fails
-  file(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake )
-  file(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake )
+  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake )
+  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake )
   message(FATAL_ERROR "The C compiler \"${CMAKE_C_COMPILER}\" "
     "is not able to compile a simple test program.\nIt fails "
     "with the following output:\n ${__CMAKE_C_COMPILER_OUTPUT}\n\n"
@@ -71,10 +71,10 @@ else()
     CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
     configure_file(
       ${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake
+      ${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
-    include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCCompiler.cmake)
+    include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake)
   endif()
   if(CMAKE_C_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_C_ABI_FILES})

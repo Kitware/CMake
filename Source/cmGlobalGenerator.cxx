@@ -315,9 +315,11 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     {
     rootBin = this->ConfiguredFilesPath;
     }
+  rootBin += "/";
+  rootBin += cmVersion::GetCMakeVersion();
 
   // set the dir for parent files so they can be used by modules
-  mf->AddDefinition("CMAKE_PLATFORM_ROOT_BIN",rootBin.c_str());
+  mf->AddDefinition("CMAKE_PLATFORM_INFO_DIR",rootBin.c_str());
 
   // find and make sure CMAKE_MAKE_PROGRAM is defined
   this->FindMakeProgram(mf);
@@ -386,14 +388,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       // If the existing build tree was already configured with this
       // version of CMake then try to load the configured file first
       // to avoid duplicate compiler tests.
-      unsigned int cacheMajor = mf->GetCacheMajorVersion();
-      unsigned int cacheMinor = mf->GetCacheMinorVersion();
-      unsigned int selfMajor = cmVersion::GetMajorVersion();
-      unsigned int selfMinor = cmVersion::GetMinorVersion();
-      if((this->CMakeInstance->GetIsInTryCompile() ||
-          (cacheMajor == 0 && cacheMinor == 0) ||
-          (selfMajor == cacheMajor && selfMinor == cacheMinor)) &&
-         cmSystemTools::FileExists(fpath.c_str()))
+      if(cmSystemTools::FileExists(fpath.c_str()))
         {
         if(!mf->ReadListFile(0,fpath.c_str()))
           {

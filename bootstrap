@@ -160,6 +160,9 @@ CMAKE_PROBLEMATIC_FILES="\
   CMakeSystem.cmake \
   CMakeCCompiler.cmake \
   CMakeCXXCompiler.cmake \
+  */CMakeSystem.cmake \
+  */CMakeCCompiler.cmake \
+  */CMakeCXXCompiler.cmake \
   Source/cmConfigure.h \
   Source/CTest/Curl/config.h \
   Utilities/cmexpat/expatConfig.h \

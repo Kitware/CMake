@@ -87,10 +87,10 @@ else()
 
     configure_file(
       ${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake
+      ${CMAKE_PLATFORM_INFO_DIR}/CMakeFortranCompiler.cmake
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
-    include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeFortranCompiler.cmake)
+    include(${CMAKE_PLATFORM_INFO_DIR}/CMakeFortranCompiler.cmake)
   endif()
   if(CMAKE_Fortran_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_Fortran_ABI_FILES})

@@ -23,7 +23,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     message(STATUS "Detecting ${lang} compiler ABI info")
 
     # Compile the ABI identification source.
-    set(BIN "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeDetermineCompilerABI_${lang}.bin")
+    set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
     set(CMAKE_FLAGS )
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
       set(CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")

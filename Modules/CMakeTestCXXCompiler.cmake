@@ -37,8 +37,8 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   # if the compiler is broken make sure to remove the platform file
   # since Windows-cl configures both c/cxx files both need to be removed
   # when c or c++ fails
-  file(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCPlatform.cmake )
-  file(REMOVE ${CMAKE_PLATFORM_ROOT_BIN}/CMakeCXXPlatform.cmake )
+  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCPlatform.cmake )
+  file(REMOVE ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXPlatform.cmake )
   file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
     "Determining if the CXX compiler works failed with "
     "the following output:\n${__CMAKE_CXX_COMPILER_OUTPUT}\n\n")
@@ -64,10 +64,10 @@ else()
     CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
     configure_file(
       ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake
+      ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
       @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
       )
-    include(${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeCXXCompiler.cmake)
+    include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake)
   endif()
   if(CMAKE_CXX_SIZEOF_DATA_PTR)
     foreach(f ${CMAKE_CXX_ABI_FILES})
