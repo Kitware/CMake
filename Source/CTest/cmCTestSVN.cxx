@@ -110,6 +110,9 @@ std::string cmCTestSVN::LoadInfo()
 //----------------------------------------------------------------------------
 void cmCTestSVN::NoteOldRevision()
 {
+  // Info for root repository
+  this->Repositories.push_back( SVNInfo("") );
+  this->RootInfo = &(this->Repositories.back());
   this->OldRevision = this->LoadInfo();
   this->Log << "Revision before update: " << this->OldRevision << "\n";
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
