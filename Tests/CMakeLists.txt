@@ -213,6 +213,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
   ADD_TEST_MACRO(EmptyLibrary EmptyLibrary)
+  ADD_TEST_MACRO(CompileDefinitions CompileDefinitions)
   set_tests_properties(EmptyLibrary PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error: CMake can not determine linker language for target:test")
   ADD_TEST_MACRO(CrossCompile CrossCompile)

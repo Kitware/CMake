@@ -184,46 +184,43 @@ std::string
 cmNinjaTargetGenerator::
 ComputeDefines(cmSourceFile *source, const std::string& language)
 {
-  std::string defines;
+  std::set<std::string> defines;
 
   // Add the export symbol definition for shared library objects.
   if(const char* exportMacro = this->Target->GetExportMacro())
     {
-    this->LocalGenerator->AppendDefines(defines, exportMacro,
-                                        language.c_str());
+    this->LocalGenerator->AppendDefines(defines, exportMacro);
     }
 
   // Add preprocessor definitions for this target and configuration.
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Makefile->GetProperty("COMPILE_DEFINITIONS"),
-     language.c_str());
+     this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Target->GetProperty("COMPILE_DEFINITIONS"),
-     language.c_str());
+     this->Target->GetProperty("COMPILE_DEFINITIONS"));
   this->LocalGenerator->AppendDefines
     (defines,
-     source->GetProperty("COMPILE_DEFINITIONS"),
-     language.c_str());
+     source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(this->GetConfigName());
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Makefile->GetProperty(defPropName.c_str()),
-     language.c_str());
+     this->Makefile->GetProperty(defPropName.c_str()));
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Target->GetProperty(defPropName.c_str()),
-     language.c_str());
+     this->Target->GetProperty(defPropName.c_str()));
   this->LocalGenerator->AppendDefines
     (defines,
-     source->GetProperty(defPropName.c_str()),
-     language.c_str());
+     source->GetProperty(defPropName.c_str()));
   }
 
-  return defines;
+  std::string definesString;
+  this->LocalGenerator->JoinDefines(defines, definesString,
+     language.c_str());
+
+  return definesString;
 }
 
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
