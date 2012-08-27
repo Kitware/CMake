@@ -111,6 +111,7 @@ cmQtAutomoc::cmQtAutomoc()
 void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
+  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   const char* targetName = target->GetName();
   // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
   std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
@@ -193,11 +194,22 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
       }
     }
 
-  const char* tmp = makefile->GetProperty("INCLUDE_DIRECTORIES");
-  std::string _moc_incs = (tmp!=0 ? tmp : "");
-  tmp = makefile->GetProperty("DEFINITIONS");
+  std::vector<std::string> includeDirs = target->GetIncludeDirectories();
+  localGen->GetIncludeDirectories(includeDirs, target, "CXX");
+  std::string _moc_incs = "";
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
+      incDirIt != includeDirs.end();
+      ++incDirIt)
+    {
+    _moc_incs += sep;
+    sep = ";";
+    _moc_incs += *incDirIt;
+    }
+
+  const char* tmp = makefile->GetProperty("DEFINITIONS");
   std::string _moc_defs = (tmp!=0 ? tmp : "");
-  tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
+  tmp = target->GetProperty("COMPILE_DEFINITIONS");
   std::string _moc_compile_defs = (tmp!=0 ? tmp : "");
   tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
   std::string _moc_options = (tmp!=0 ? tmp : "");
