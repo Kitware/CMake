@@ -321,9 +321,28 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
 
+  this->CurrentCompileSettingsStr = this->MakeCompileSettingsString(makefile);
+
   this->RelaxedMode = makefile->IsOn("AM_RELAXED_MODE");
 
   return true;
+}
+
+
+std::string cmQtAutomoc::MakeCompileSettingsString(cmMakefile* makefile)
+{
+  std::string s;
+  s += makefile->GetSafeDefinition("AM_MOC_DEFINITIONS");
+  s += " ~~~ ";
+  s += makefile->GetSafeDefinition("AM_MOC_INCLUDES");
+  s += " ~~~ ";
+  s += makefile->GetSafeDefinition("AM_MOC_OPTIONS");
+  s += " ~~~ ";
+  s += makefile->IsOn("AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE") ? "TRUE"
+                                                                     : "FALSE";
+  s += " ~~~ ";
+
+  return s;
 }
 
 
@@ -336,8 +355,8 @@ bool cmQtAutomoc::ReadOldMocDefinitionsFile(cmMakefile* makefile,
 
   if (makefile->ReadListFile(0, filename.c_str()))
     {
-    this->OldMocDefinitionsStr =
-                         makefile->GetSafeDefinition("AM_OLD_MOC_DEFINITIONS");
+    this->OldCompileSettingsStr =
+                        makefile->GetSafeDefinition("AM_OLD_COMPILE_SETTINGS");
     }
   return true;
 }
@@ -352,9 +371,9 @@ void cmQtAutomoc::WriteOldMocDefinitionsFile(const char* targetDirectory)
   std::fstream outfile;
   outfile.open(filename.c_str(),
                std::ios::out | std::ios::trunc);
-  outfile << "set(AM_OLD_MOC_DEFINITIONS "
+  outfile << "set(AM_OLD_COMPILE_SETTINGS "
               << cmLocalGenerator::EscapeForCMake(
-                       this->Join(this->MocDefinitions, ' ').c_str()) << ")\n";
+                 this->CurrentCompileSettingsStr.c_str()) << ")\n";
 
   outfile.close();
 }
@@ -471,7 +490,7 @@ void cmQtAutomoc::Init()
 bool cmQtAutomoc::RunAutomoc()
 {
   if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
-    || (this->OldMocDefinitionsStr != this->Join(this->MocDefinitions, ' ')))
+    || (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr))
     {
     this->GenerateAll = true;
     }
