@@ -17,9 +17,9 @@
 #include "cmSourceFile.h"
 
 /** \class cmQTWrapCPPCommand
- * \brief Create moc file rules for QT classes
+ * \brief Create moc file rules for Qt classes
  *
- * cmQTWrapCPPCommand is used to create wrappers for QT classes into
+ * cmQTWrapCPPCommand is used to create wrappers for Qt classes into
  * normal C++
  */
 class cmQTWrapCPPCommand : public cmCommand
