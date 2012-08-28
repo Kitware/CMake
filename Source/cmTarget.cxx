@@ -1071,7 +1071,7 @@ void cmTarget::DefineProperties(cmake *cm)
     ("VS_KEYWORD", cmProperty::TARGET,
      "Visual Studio project keyword.",
      "Can be set to change the visual studio keyword, for example "
-     "QT integration works better if this is set to Qt4VSv1.0. ");
+     "Qt integration works better if this is set to Qt4VSv1.0. ");
   cm->DefineProperty
     ("VS_SCC_PROVIDER", cmProperty::TARGET,
      "Visual Studio Source Code Control Provider.",

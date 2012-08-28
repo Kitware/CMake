@@ -138,7 +138,7 @@ public:
         "are used to initialize these properties.\n"
         "PROJECT_LABEL can be used to change the name of "
         "the target in an IDE like visual studio.  VS_KEYWORD can be set "
-        "to change the visual studio keyword, for example QT integration "
+        "to change the visual studio keyword, for example Qt integration "
         "works better if this is set to Qt4VSv1.0.\n"
         "VS_SCC_PROJECTNAME, VS_SCC_LOCALPATH, VS_SCC_PROVIDER and "
         "VS_SCC_AUXPATH can be set "
