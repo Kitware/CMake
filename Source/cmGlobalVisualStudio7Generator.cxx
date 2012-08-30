@@ -18,7 +18,6 @@
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
 {
-  this->VersionId = "MSVC70";
   this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
 }
 
