@@ -163,7 +163,7 @@ set(_CMAKE_ASM_COMPILER_ENV_VAR "${CMAKE_ASM${ASM_DIALECT}_COMPILER_ENV_VAR}")
 
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeASMCompiler.cmake.in
-  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeASM${ASM_DIALECT}Compiler.cmake IMMEDIATE @ONLY)
+  ${CMAKE_PLATFORM_INFO_DIR}/CMakeASM${ASM_DIALECT}Compiler.cmake IMMEDIATE @ONLY)
 
 set(_CMAKE_ASM_COMPILER)
 set(_CMAKE_ASM_COMPILER_ARG1)

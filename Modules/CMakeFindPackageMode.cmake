@@ -47,6 +47,8 @@ macro(ENABLE_LANGUAGE)
   # But in --find-package mode, we don't want (and can't) enable any language.
 endmacro()
 
+set(CMAKE_PLATFORM_INFO_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY})
+
 include(CMakeDetermineSystem)
 
 # short-cut some tests on Darwin, see Darwin-GNU.cmake:

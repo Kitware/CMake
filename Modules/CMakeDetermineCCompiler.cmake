@@ -169,7 +169,7 @@ if(MSVC_C_ARCHITECTURE_ID)
 endif()
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
-  "${CMAKE_PLATFORM_ROOT_BIN}/CMakeCCompiler.cmake"
+  ${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake
   @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
   )
 set(CMAKE_C_COMPILER_ENV_VAR "CC")

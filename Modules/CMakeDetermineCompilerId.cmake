@@ -30,7 +30,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   string(REGEX REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
   # Compute the directory in which to run the test.
-  set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+  set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})
 
   # Try building with no extra flags and then try each set
   # of helper flags.  Stop when the compiler is identified.
@@ -393,7 +393,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
     # We get here when this function is called not from within CMAKE_DETERMINE_COMPILER_ID()
     # This is done e.g. for detecting the compiler ID for assemblers.
     # Compute the directory in which to run the test and Create a clean working directory.
-    set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+    set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})
     file(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
     file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
   endif()
