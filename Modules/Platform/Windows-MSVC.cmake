@@ -56,9 +56,9 @@ enable_language(RC)
 set(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-  set(MSVC_IDE 0)
-else()
   set(MSVC_IDE 1)
+else()
+  set(MSVC_IDE 0)
 endif()
 
 if(NOT MSVC_VERSION)
