@@ -46,9 +46,10 @@ find_path(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   HINTS
     ENV FREETYPE_DIR
   PATHS
-  /usr/local/X11R6/include
-  /usr/local/X11/include
-  /usr/freeware/include
+    /usr/local/X11R6
+    /usr/local/X11
+    /usr/freeware
+  PATH_SUFFIXES include/freetype2 include
 )
 
 find_path(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h
