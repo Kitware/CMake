@@ -3,6 +3,7 @@
 # SDLNET_LIBRARY, the name of the library to link against
 # SDLNET_FOUND, if false, do not try to link against
 # SDLNET_INCLUDE_DIR, where to find the headers
+# SDLNET_VERSION_STRING - human-readable string containing the version of SDL_net
 #
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
@@ -57,7 +58,24 @@ find_library(SDLNET_LIBRARY
   /opt
 )
 
+if(SDLNET_INCLUDE_DIR AND EXISTS "${SDLNET_INCLUDE_DIR}/SDL_net.h")
+  file(STRINGS "${SDLNET_INCLUDE_DIR}/SDL_net.h" SDLNET_VERSION_MAJOR_LINE REGEX "^#define[ \t]+SDL_NET_MAJOR_VERSION[ \t]+[0-9]+$")
+  file(STRINGS "${SDLNET_INCLUDE_DIR}/SDL_net.h" SDLNET_VERSION_MINOR_LINE REGEX "^#define[ \t]+SDL_NET_MINOR_VERSION[ \t]+[0-9]+$")
+  file(STRINGS "${SDLNET_INCLUDE_DIR}/SDL_net.h" SDLNET_VERSION_PATCH_LINE REGEX "^#define[ \t]+SDL_NET_PATCHLEVEL[ \t]+[0-9]+$")
+  string(REGEX REPLACE "^#define[ \t]+SDL_NET_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDLNET_VERSION_MAJOR "${SDLNET_VERSION_MAJOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SDL_NET_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDLNET_VERSION_MINOR "${SDLNET_VERSION_MINOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SDL_NET_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDLNET_VERSION_PATCH "${SDLNET_VERSION_PATCH_LINE}")
+  set(SDLNET_VERSION_STRING ${SDLNET_VERSION_MAJOR}.${SDLNET_VERSION_MINOR}.${SDLNET_VERSION_PATCH})
+  unset(SDLNET_VERSION_MAJOR_LINE)
+  unset(SDLNET_VERSION_MINOR_LINE)
+  unset(SDLNET_VERSION_PATCH_LINE)
+  unset(SDLNET_VERSION_MAJOR)
+  unset(SDLNET_VERSION_MINOR)
+  unset(SDLNET_VERSION_PATCH)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDLNET
-                                  REQUIRED_VARS SDLNET_LIBRARY SDLNET_INCLUDE_DIR)
+                                  REQUIRED_VARS SDLNET_LIBRARY SDLNET_INCLUDE_DIR
+                                  VERSION_VAR SDLNET_VERSION_STRING)
