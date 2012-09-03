@@ -78,8 +78,8 @@ private:
 
   void GuessBase(SVNInfo &svninfo, std::vector<Change> const& changes);
 
-  void DoRevision(Revision const& revision,
-                  std::vector<Change> const& changes);
+  void DoRevisionSVN(Revision const& revision,
+                     std::vector<Change> const& changes);
 
   void WriteXMLGlobal(std::ostream& xml);
 

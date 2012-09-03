@@ -354,7 +354,7 @@ private:
     {
     if(strcmp(name, "logentry") == 0)
       {
-      this->SVN->DoRevision(this->Rev, this->Changes);
+      this->SVN->DoRevisionSVN(this->Rev, this->Changes);
       }
     else if(strcmp(name, "path") == 0 && !this->CData.empty())
       {
@@ -423,8 +423,8 @@ void cmCTestSVN::LoadRevisions(SVNInfo &svninfo)
 }
 
 //----------------------------------------------------------------------------
-void cmCTestSVN::DoRevision(Revision const& revision,
-                            std::vector<Change> const& changes)
+void cmCTestSVN::DoRevisionSVN(Revision const& revision,
+                               std::vector<Change> const& changes)
 {
   // Guess the base checkout path from the changes if necessary.
   if(this->RootInfo->Base.empty() && !changes.empty())
