@@ -482,6 +482,56 @@ void cmCTestSVN::WriteXMLGlobal(std::ostream& xml)
 }
 
 //----------------------------------------------------------------------------
+class cmCTestSVN::ExternalParser: public cmCTestVC::LineParser
+{
+public:
+  ExternalParser(cmCTestSVN* svn, const char* prefix): SVN(svn)
+    {
+    this->SetLog(&svn->Log, prefix);
+    this->RegexExternal.compile("^X..... +(.+)$");
+    }
+private:
+  cmCTestSVN* SVN;
+  cmsys::RegularExpression RegexExternal;
+  bool ProcessLine()
+    {
+    if(this->RegexExternal.find(this->Line))
+      {
+      this->DoPath(this->RegexExternal.match(1));
+      }
+    return true;
+    }
+
+  void DoPath(std::string const& path)
+    {
+    // Get local path relative to the source directory
+    std::string local_path;
+    if(path.size() > this->SVN->SourceDirectory.size() &&
+       strncmp(path.c_str(), this->SVN->SourceDirectory.c_str(),
+               this->SVN->SourceDirectory.size()) == 0)
+      {
+      local_path = path.c_str() + this->SVN->SourceDirectory.size() + 1;
+      }
+    else
+      {
+      local_path = path;
+      }
+    this->SVN->Repositories.push_back( SVNInfo(local_path.c_str()) );
+    }
+};
+
+//----------------------------------------------------------------------------
+void cmCTestSVN::LoadExternals()
+{
+  // Run "svn status" to get the list of external repositories
+  const char* svn = this->CommandLineTool.c_str();
+  const char* svn_status[] = {svn, "status", 0};
+  ExternalParser out(this, "external-out> ");
+  OutputLogger err(this->Log, "external-err> ");
+  this->RunChild(svn_status, &out, &err);
+}
+
+//----------------------------------------------------------------------------
 std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const
 {
   std::string local_path;
