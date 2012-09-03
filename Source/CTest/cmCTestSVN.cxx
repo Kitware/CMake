@@ -448,3 +448,29 @@ void cmCTestSVN::WriteXMLGlobal(std::ostream& xml)
 
   xml << "\t<SVNPath>" << this->Base << "</SVNPath>\n";
 }
+
+//----------------------------------------------------------------------------
+std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const
+{
+  std::string local_path;
+
+  // Add local path prefix if not empty
+  if (!this->LocalPath.empty())
+    {
+    local_path += this->LocalPath;
+    local_path += "/";
+    }
+
+  // Add path with base prefix removed
+  if(path.size() > this->Base.size() &&
+     strncmp(path.c_str(), this->Base.c_str(), this->Base.size()) == 0)
+    {
+    local_path += (path.c_str() + this->Base.size());
+    }
+  else
+    {
+    local_path += path;
+  }
+
+  return local_path;
+}

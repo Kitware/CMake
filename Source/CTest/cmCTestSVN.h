@@ -42,6 +42,31 @@ private:
   // Directory under repository root checked out in working tree.
   std::string Base;
 
+  // Information about an SVN repository (root repository or external)
+  struct SVNInfo {
+
+    SVNInfo(const char* path) : LocalPath(path) {}
+    // Remove base from the filename
+    std::string BuildLocalPath(std::string const& path) const;
+
+    // LocalPath relative to the main source directory.
+    std::string LocalPath;
+
+    // URL of repository directory checked out in the working tree.
+    std::string URL;
+
+    // URL of repository root directory.
+    std::string Root;
+
+    // Directory under repository root checked out in working tree.
+    std::string Base;
+
+    // Old and new repository revisions.
+    std::string OldRevision;
+    std::string NewRevision;
+
+  };
+
   std::string LoadInfo();
   void LoadModifications();
   void LoadRevisions();
