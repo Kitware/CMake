@@ -48,7 +48,7 @@ public:
              const char* prefix,
              std::string& rev,
              SVNInfo& svninfo):
-      Rev(rev), SVNInfo(svninfo)
+      Rev(rev), SVNRepo(svninfo)
     {
     this->SetLog(&svn->Log, prefix);
     this->RegexRev.compile("^Revision: ([0-9]+)");
@@ -57,7 +57,7 @@ public:
     }
 private:
   std::string& Rev;
-  cmCTestSVN::SVNInfo& SVNInfo;
+  cmCTestSVN::SVNInfo& SVNRepo;
   cmsys::RegularExpression RegexRev;
   cmsys::RegularExpression RegexURL;
   cmsys::RegularExpression RegexRoot;
@@ -69,11 +69,11 @@ private:
       }
     else if(this->RegexURL.find(this->Line))
       {
-      this->SVNInfo.URL = this->RegexURL.match(1);
+      this->SVNRepo.URL = this->RegexURL.match(1);
       }
     else if(this->RegexRoot.find(this->Line))
       {
-      this->SVNInfo.Root = this->RegexRoot.match(1);
+      this->SVNRepo.Root = this->RegexRoot.match(1);
       }
     return true;
     }
@@ -301,12 +301,12 @@ class cmCTestSVN::LogParser: public cmCTestVC::OutputLogger,
 {
 public:
   LogParser(cmCTestSVN* svn, const char* prefix, SVNInfo& svninfo):
-    OutputLogger(svn->Log, prefix), SVN(svn), SVNInfo(svninfo)
+    OutputLogger(svn->Log, prefix), SVN(svn), SVNRepo(svninfo)
   { this->InitializeParser(); }
   ~LogParser() { this->CleanupParser(); }
 private:
   cmCTestSVN* SVN;
-  cmCTestSVN::SVNInfo& SVNInfo;
+  cmCTestSVN::SVNInfo& SVNRepo;
 
   typedef cmCTestSVN::Revision Revision;
   typedef cmCTestSVN::Change Change;
@@ -328,7 +328,7 @@ private:
     if(strcmp(name, "logentry") == 0)
       {
       this->Rev = Revision();
-      this->Rev.SVNInfo = &SVNInfo;
+      this->Rev.SVNInfo = &SVNRepo;
       if(const char* rev = this->FindAttribute(atts, "revision"))
         {
         this->Rev.Rev = rev;
@@ -359,7 +359,7 @@ private:
     else if(strcmp(name, "path") == 0 && !this->CData.empty())
       {
       std::string orig_path(&this->CData[0], this->CData.size());
-      std::string new_path = SVNInfo.BuildLocalPath( orig_path );
+      std::string new_path = SVNRepo.BuildLocalPath( orig_path );
       this->CurChange.Path.assign(new_path);
       this->Changes.push_back(this->CurChange);
       }
