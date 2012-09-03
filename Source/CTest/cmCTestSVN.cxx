@@ -116,9 +116,15 @@ void cmCTestSVN::NoteOldRevision()
   // Info for root repository
   this->Repositories.push_back( SVNInfo("") );
   this->RootInfo = &(this->Repositories.back());
+  // Info for the external repositories
+  this->LoadExternals();
 
-    // Get info for the root repositiry
-    SVNInfo& svninfo = *RootInfo;
+  // Get info for all the repositories
+  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  for( ; itbeg != itend ; itbeg++)
+    {
+    SVNInfo& svninfo = *itbeg;
     svninfo.OldRevision = this->LoadInfo(svninfo);
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' before update: " << svninfo.OldRevision << "\n";
@@ -126,6 +132,7 @@ void cmCTestSVN::NoteOldRevision()
                "   Old revision of external repository '"
                << svninfo.LocalPath << "' is: "
                << svninfo.OldRevision << "\n");
+    }
 
   // Set the global old revision to the one of the root
   this->OldRevision = this->RootInfo->OldRevision;
@@ -135,8 +142,12 @@ void cmCTestSVN::NoteOldRevision()
 //----------------------------------------------------------------------------
 void cmCTestSVN::NoteNewRevision()
 {
-  // Get info for the root repository
-    SVNInfo& svninfo = *RootInfo;
+  // Get info for the external repositories
+  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  for( ; itbeg != itend ; itbeg++)
+    {
+    SVNInfo& svninfo = *itbeg;
     svninfo.NewRevision = this->LoadInfo(svninfo);
     this->Log << "Revision for repository '" << svninfo.LocalPath
               << "' after update: " << svninfo.NewRevision << "\n";
@@ -162,6 +173,8 @@ void cmCTestSVN::NoteNewRevision()
       }
     this->Log << "Repository '" << svninfo.LocalPath
               << "' Base = " << svninfo.Base << "\n";
+
+  }
 
   // Set the global new revision to the one of the root
   this->NewRevision = this->RootInfo->NewRevision;
@@ -374,9 +387,14 @@ private:
 //----------------------------------------------------------------------------
 void cmCTestSVN::LoadRevisions()
 {
-    // Get revision of the root repository
-    SVNInfo& svninfo = *RootInfo;
+  // Get revisions for all the external repositories
+  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  for( ; itbeg != itend ; itbeg++)
+    {
+    SVNInfo& svninfo = *itbeg;
     LoadRevisions(svninfo);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -413,6 +431,14 @@ void cmCTestSVN::DoRevision(Revision const& revision,
     {
     this->GuessBase(*this->RootInfo, changes);
     }
+
+  // Ignore changes in the old revision for external repositories
+  if(revision.Rev == revision.SVNInfo->OldRevision
+     && revision.SVNInfo->LocalPath != "")
+    {
+    return;
+    }
+
   this->cmCTestGlobalVC::DoRevision(revision, changes);
 }
 
