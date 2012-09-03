@@ -3,6 +3,8 @@ set(HOST magrathea)
 set(MAKE_PROGRAM "make")
 set(CC gcc332s)
 set(CXX c++332s)
+set(CFLAGS   -DDT_RUNPATH=29)
+set(CXXFLAGS -DDT_RUNPATH=29)
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 CURSES_LIBRARY:FILEPATH=/usr/i686-gcc-332s/lib/libncurses.a
