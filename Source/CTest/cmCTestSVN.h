@@ -71,6 +71,7 @@ private:
   SVNInfo* RootInfo;
 
   std::string LoadInfo(SVNInfo& svninfo);
+  void LoadExternals();
   void LoadModifications();
   void LoadRevisions();
   void LoadRevisions(SVNInfo& svninfo);
@@ -87,10 +88,12 @@ private:
   class LogParser;
   class StatusParser;
   class UpdateParser;
+  class ExternalParser;
   friend class InfoParser;
   friend class LogParser;
   friend class StatusParser;
   friend class UpdateParser;
+  friend class ExternalParser;
 };
 
 #endif
