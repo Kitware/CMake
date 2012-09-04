@@ -187,7 +187,7 @@ macro (QT4_ADD_RESOURCES outfiles )
     if(EXISTS "${infile}")
       #  parse file for dependencies
       #  all files are absolute paths or relative to the location of the qrc file
-      file(STRINGS "${infile}" _RC_FILE_CONTENTS REGEX "<file[^>]*>[^<]+")
+      file(READ "${infile}" _RC_FILE_CONTENTS)
       string(REGEX MATCHALL "<file[^<]+" _RC_FILES "${_RC_FILE_CONTENTS}")
       foreach(_RC_FILE ${_RC_FILES})
         string(REGEX REPLACE "^<file[^>]*>" "" _RC_FILE "${_RC_FILE}")
