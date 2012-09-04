@@ -25,7 +25,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_path(SDLTTF_INCLUDE_DIR SDL_ttf.h
+find_path(SDL_TTF_INCLUDE_DIR SDL_ttf.h
   HINTS
     ENV SDLTTFDIR
     ENV SDLDIR
@@ -43,7 +43,7 @@ find_path(SDLTTF_INCLUDE_DIR SDL_ttf.h
   /opt
 )
 
-find_library(SDLTTF_LIBRARY
+find_library(SDL_TTF_LIBRARY
   NAMES SDL_ttf
   HINTS
     ENV SDLTTFDIR
@@ -58,7 +58,17 @@ find_library(SDLTTF_LIBRARY
     PATH_SUFFIXES lib
 )
 
+set(SDL_TTF_LIBRARIES ${SDL_TTF_LIBRARY})
+set(SDL_TTF_INCLUDE_DIRS ${SDL_TTF_INCLUDE_DIR})
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDLTTF
-                                  REQUIRED_VARS SDLTTF_LIBRARY SDLTTF_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_ttf
+                                  REQUIRED_VARS SDL_TTF_LIBRARIES SDL_TTF_INCLUDE_DIRS)
+
+# for backward compatiblity
+set(SDLTTF_LIBRARY ${SDL_TTF_LIBRARIES})
+set(SDLTTF_INCLUDE_DIR ${SDL_TTF_INCLUDE_DIRS})
+set(SDLTTF_FOUND ${SDL_TTF_FOUND})
+
+mark_as_advanced(SDL_TTF_LIBRARY SDL_TTF_INCLUDE_DIR)
