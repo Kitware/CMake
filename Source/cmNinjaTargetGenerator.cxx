@@ -355,8 +355,7 @@ cmNinjaTargetGenerator
   if (lang == "C" || lang == "CXX" || lang == "RC")
     {
     clDepsBinary = mf->GetSafeDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
-    if (!clDepsBinary.empty() &&
-        !this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile())
+    if (!clDepsBinary.empty() && !mf->GetIsSourceFileTryCompile())
       {
       clShowPrefix = mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
       clBinary = mf->GetDefinition("CMAKE_C_COMPILER") ?

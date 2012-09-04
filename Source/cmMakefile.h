@@ -128,6 +128,8 @@ public:
                  const std::vector<std::string> *cmakeArgs,
                  std::string *output);
 
+  bool GetIsSourceFileTryCompile() const;
+
   /**
    * Specify the makefile generator. This is platform/compiler
    * dependent, although the interface is through a generic
