@@ -18,6 +18,11 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+struct cmCTestSVN::Revision: public cmCTestVC::Revision
+{
+  cmCTestSVN::SVNInfo* SVNInfo;
+};
+
 //----------------------------------------------------------------------------
 cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
