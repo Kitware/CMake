@@ -1,16 +1,16 @@
-# Locate SDL library
+# - Locate SDL library
 # This module defines
-# SDL_LIBRARY, the name of the library to link against
-# SDL_FOUND, if false, do not try to link to SDL
-# SDL_INCLUDE_DIR, where to find SDL.h
+#  SDL_LIBRARY, the name of the library to link against
+#  SDL_FOUND, if false, do not try to link to SDL
+#  SDL_INCLUDE_DIR, where to find SDL.h
 #
 # This module responds to the the flag:
-# SDL_BUILDING_LIBRARY
-# If this is defined, then no SDL_main will be linked in because
-# only applications need main().
-# Otherwise, it is assumed you are building an application and this
-# module will attempt to locate and set the the proper link flags
-# as part of the returned SDL_LIBRARY variable.
+#  SDL_BUILDING_LIBRARY
+#    If this is defined, then no SDL_main will be linked in because
+#    only applications need main().
+#    Otherwise, it is assumed you are building an application and this
+#    module will attempt to locate and set the the proper link flags
+#    as part of the returned SDL_LIBRARY variable.
 #
 # Don't forget to include SDLmain.h and SDLmain.m your project for the
 # OS X framework based version. (Other versions link to -lSDLmain which
