@@ -763,7 +763,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property is true by default for SHARED and MODULE library "
      "targets and false otherwise.  "
      "This property is initialized by the value of the variable "
-     "CMAKE_POSITION_INDEPENDENT_CODE if it is set when a target is"
+     "CMAKE_POSITION_INDEPENDENT_CODE if it is set when a target is "
      "created.");
 
   cm->DefineProperty
