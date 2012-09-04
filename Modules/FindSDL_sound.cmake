@@ -77,17 +77,7 @@ find_path(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   HINTS
     ENV SDLSOUNDDIR
     ENV SDLDIR
-  PATH_SUFFIXES
-    include include/SDL
-  PATHS
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11 # FreeBSD ports
-  /usr/include/SDL12
-  /usr/include/SDL11
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
+  PATH_SUFFIXES SDL SDL12 SDL11
   )
 
 find_library(SDL_SOUND_LIBRARY
@@ -95,13 +85,6 @@ find_library(SDL_SOUND_LIBRARY
   HINTS
     ENV SDLSOUNDDIR
     ENV SDLDIR
-  PATH_SUFFIXES
-    lib
-  PATHS
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
   )
 
 if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)

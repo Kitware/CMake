@@ -70,18 +70,7 @@
 find_path(SDL_INCLUDE_DIR SDL.h
   HINTS
     ENV SDLDIR
-  PATH_SUFFIXES include/SDL include
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11 # FreeBSD ports
-  /usr/include/SDL12
-  /usr/include/SDL11
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
+  PATH_SUFFIXES SDL SDL12 SDL11
 )
 
 # SDL-1.1 is the name used by FreeBSD ports...
@@ -90,12 +79,6 @@ find_library(SDL_LIBRARY_TEMP
   NAMES SDL SDL-1.1
   HINTS
     ENV SDLDIR
-  PATH_SUFFIXES lib
-  PATHS
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
 )
 
 if(NOT SDL_BUILDING_LIBRARY)
