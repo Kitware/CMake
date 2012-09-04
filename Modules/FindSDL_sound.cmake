@@ -1,34 +1,33 @@
-# Locates the SDL_sound library
-
+# - Locates the SDL_sound library
+#
 # This module depends on SDL being found and
 # must be called AFTER FindSDL.cmake is called.
-
+#
 # This module defines
-# SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
-# SDL_SOUND_FOUND, if false, do not try to link to SDL
-# SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
-# to link against. This is a read-only variable and is marked INTERNAL.
-# SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
-# flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
-# This is available mostly for cases this module failed to anticipate for
-# and you must add additional flags. This is marked as ADVANCED.
-
+#  SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
+#  SDL_SOUND_FOUND, if false, do not try to link to SDL_sound
+#  SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
+#    to link against. This is a read-only variable and is marked INTERNAL.
+#  SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
+#    flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
+#    This is available mostly for cases this module failed to anticipate for
+#    and you must add additional flags. This is marked as ADVANCED.
 #
 # This module also defines (but you shouldn't need to use directly)
-# SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
-# against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
+#   SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
+#   against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
 # And might define the following as needed
-# MIKMOD_LIBRARY
-# MODPLUG_LIBRARY
-# OGG_LIBRARY
-# VORBIS_LIBRARY
-# SMPEG_LIBRARY
-# FLAC_LIBRARY
-# SPEEX_LIBRARY
+#   MIKMOD_LIBRARY
+#   MODPLUG_LIBRARY
+#   OGG_LIBRARY
+#   VORBIS_LIBRARY
+#   SMPEG_LIBRARY
+#   FLAC_LIBRARY
+#   SPEEX_LIBRARY
 #
 # Typically, you should not use these variables directly, and you should use
 # SDL_SOUND_LIBRARIES which contains SDL_SOUND_LIBRARY and the other audio libraries
-# (if needed) to successfully compile on your system .
+# (if needed) to successfully compile on your system.
 #
 # Created by Eric Wing.
 # This module is a bit more complicated than the other FindSDL* family modules.
@@ -54,7 +53,6 @@
 # People will have to manually change the cache values of
 # SDL_LIBRARY to override this selectionor set the CMake environment
 # CMAKE_INCLUDE_PATH to modify the search paths.
-#
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.
