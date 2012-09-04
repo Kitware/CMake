@@ -455,11 +455,12 @@ std::string cmInstallTargetGenerator::GetDestDirPath(std::string const& file)
   // Construct the path of the file on disk after installation on
   // which tweaks may be performed.
   std::string toDestDirPath = "$ENV{DESTDIR}";
-  if(file[0] != '/')
+  if(file[0] != '/' && file[0] != '$')
     {
     toDestDirPath += "/";
     }
-  return toDestDirPath + file;
+  toDestDirPath += file;
+  return toDestDirPath;
 }
 
 //----------------------------------------------------------------------------
