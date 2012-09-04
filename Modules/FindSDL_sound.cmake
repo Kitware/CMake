@@ -12,6 +12,7 @@
 #    flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
 #    This is available mostly for cases this module failed to anticipate for
 #    and you must add additional flags. This is marked as ADVANCED.
+#  SDL_SOUND_VERSION_STRING, human-readable string containing the version of SDL_sound
 #
 # This module also defines (but you shouldn't need to use directly)
 #   SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
@@ -375,7 +376,24 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP}" CACHE INTERNAL "SDL_sound and dependent libraries")
  endif()
 
+if(SDL_SOUND_INCLUDE_DIR AND EXISTS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h")
+  file(STRINGS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h" SDL_SOUND_VERSION_MAJOR_LINE REGEX "^#define[ \t]+SOUND_VER_MAJOR[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h" SDL_SOUND_VERSION_MINOR_LINE REGEX "^#define[ \t]+SOUND_VER_MINOR[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h" SDL_SOUND_VERSION_PATCH_LINE REGEX "^#define[ \t]+SOUND_VER_PATCH[ \t]+[0-9]+$")
+  string(REGEX REPLACE "^#define[ \t]+SOUND_VER_MAJOR[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_MAJOR "${SDL_SOUND_VERSION_MAJOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SOUND_VER_MINOR[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_MINOR "${SDL_SOUND_VERSION_MINOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SOUND_VER_PATCH[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_PATCH "${SDL_SOUND_VERSION_PATCH_LINE}")
+  set(SDL_SOUND_VERSION_STRING ${SDL_SOUND_VERSION_MAJOR}.${SDL_SOUND_VERSION_MINOR}.${SDL_SOUND_VERSION_PATCH})
+  unset(SDL_SOUND_VERSION_MAJOR_LINE)
+  unset(SDL_SOUND_VERSION_MINOR_LINE)
+  unset(SDL_SOUND_VERSION_PATCH_LINE)
+  unset(SDL_SOUND_VERSION_MAJOR)
+  unset(SDL_SOUND_VERSION_MINOR)
+  unset(SDL_SOUND_VERSION_PATCH)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_SOUND
-                                  REQUIRED_VARS SDL_SOUND_LIBRARIES SDL_SOUND_INCLUDE_DIR)
+                                  REQUIRED_VARS SDL_SOUND_LIBRARIES SDL_SOUND_INCLUDE_DIR
+                                  VERSION_VAR SDL_SOUND_VERSION_STRING)
