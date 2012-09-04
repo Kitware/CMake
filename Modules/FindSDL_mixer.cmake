@@ -1,8 +1,14 @@
-# Locate SDL_mixer library
-# This module defines
-# SDLMIXER_LIBRARY, the name of the library to link against
-# SDLMIXER_FOUND, if false, do not try to link to SDL
-# SDLMIXER_INCLUDE_DIR, where to find SDL/SDL.h
+# - Locate SDL_mixer library
+# This module defines:
+#  SDL_MIXER_LIBRARIES, the name of the library to link against
+#  SDL_MIXER_INCLUDE_DIRS, where to find the headers
+#  SDL_MIXER_FOUND, if false, do not try to link against
+#  SDL_MIXER_VERSION_STRING - human-readable string containing the version of SDL_mixer
+#
+# For backward compatiblity the following variables are also set:
+#  SDLMIXER_LIBRARY (same value as SDL_MIXER_LIBRARIES)
+#  SDLMIXER_INCLUDE_DIR (same value as SDL_MIXER_INCLUDE_DIRS)
+#  SDLMIXER_FOUND (same value as SDL_MIXER_FOUND)
 #
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
