@@ -189,6 +189,32 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   endif()
 endif()
 
+if (NOT _CMAKE_TOOLCHAIN_LOCATION)
+  get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_Fortran_COMPILER}" PATH)
+endif ()
+
+# if we have a fortran cross compiler, they have usually some prefix, like
+# e.g. powerpc-linux-gfortran, arm-elf-gfortran or i586-mingw32msvc-gfortran , optionally
+# with a 3-component version number at the end (e.g. arm-eabi-gcc-4.5.2).
+# The other tools of the toolchain usually have the same prefix
+# NAME_WE cannot be used since then this test will fail for names lile
+# "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
+# "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
+if (CMAKE_CROSSCOMPILING
+    AND "${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU"
+    AND NOT _CMAKE_TOOLCHAIN_PREFIX)
+  get_filename_component(COMPILER_BASENAME "${CMAKE_Fortran_COMPILER}" NAME)
+  if (COMPILER_BASENAME MATCHES "^(.+-)g?fortran(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
+    set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+  endif ()
+
+  # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
+  # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
+  if ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+    set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+  endif ()
+endif ()
+
 include(CMakeFindBinUtils)
 
 if(MSVC_Fortran_ARCHITECTURE_ID)
