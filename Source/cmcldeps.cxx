@@ -238,7 +238,9 @@ int main() {
   // needed to suppress filename output of msvc tools
   std::string srcfilename;
   std::string::size_type pos = srcfile.rfind("\\");
-  if (pos != std::string::npos) {
+  if (pos == std::string::npos) {
+    srcfilename = srcfile;
+  } else {
     srcfilename = srcfile.substr(pos + 1);
   }
 
