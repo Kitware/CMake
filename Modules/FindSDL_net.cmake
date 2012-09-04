@@ -36,32 +36,14 @@ find_path(SDL_NET_INCLUDE_DIR SDL_net.h
   HINTS
     ENV SDLNETDIR
     ENV SDLDIR
-  PATH_SUFFIXES include include/SDL
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11 # FreeBSD ports
-  /usr/include/SDL12
-  /usr/include/SDL11
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
+  PATH_SUFFIXES SDL SDL12 SDL11
 )
+
 find_library(SDL_NET_LIBRARY
   NAMES SDL_net
   HINTS
     ENV SDLNETDIR
     ENV SDLDIR
-  PATH_SUFFIXES lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
 )
 
 if(SDL_NET_INCLUDE_DIR AND EXISTS "${SDL_NET_INCLUDE_DIR}/SDL_net.h")
