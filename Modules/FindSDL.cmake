@@ -3,6 +3,7 @@
 #  SDL_LIBRARY, the name of the library to link against
 #  SDL_FOUND, if false, do not try to link to SDL
 #  SDL_INCLUDE_DIR, where to find SDL.h
+#  SDL_VERSION_STRING, human-readable string containing the version of SDL
 #
 # This module responds to the the flag:
 #  SDL_BUILDING_LIBRARY
@@ -167,7 +168,24 @@ if(SDL_LIBRARY_TEMP)
   set(SDL_LIBRARY_TEMP "${SDL_LIBRARY_TEMP}" CACHE INTERNAL "")
 endif()
 
+if(SDL_INCLUDE_DIR AND EXISTS "${SDL_INCLUDE_DIR}/SDL_version.h")
+  file(STRINGS "${SDL_INCLUDE_DIR}/SDL_version.h" SDL_VERSION_MAJOR_LINE REGEX "^#define[ \t]+SDL_MAJOR_VERSION[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_INCLUDE_DIR}/SDL_version.h" SDL_VERSION_MINOR_LINE REGEX "^#define[ \t]+SDL_MINOR_VERSION[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_INCLUDE_DIR}/SDL_version.h" SDL_VERSION_PATCH_LINE REGEX "^#define[ \t]+SDL_PATCHLEVEL[ \t]+[0-9]+$")
+  string(REGEX REPLACE "^#define[ \t]+SDL_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_VERSION_MAJOR "${SDL_VERSION_MAJOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SDL_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_VERSION_MINOR "${SDL_VERSION_MINOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SDL_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_VERSION_PATCH "${SDL_VERSION_PATCH_LINE}")
+  set(SDL_VERSION_STRING ${SDL_VERSION_MAJOR}.${SDL_VERSION_MINOR}.${SDL_VERSION_PATCH})
+  unset(SDL_VERSION_MAJOR_LINE)
+  unset(SDL_VERSION_MINOR_LINE)
+  unset(SDL_VERSION_PATCH_LINE)
+  unset(SDL_VERSION_MAJOR)
+  unset(SDL_VERSION_MINOR)
+  unset(SDL_VERSION_PATCH)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL
-                                  REQUIRED_VARS SDL_LIBRARY SDL_INCLUDE_DIR)
+                                  REQUIRED_VARS SDL_LIBRARY SDL_INCLUDE_DIR
+                                  VERSION_VAR SDL_VERSION_STRING)
