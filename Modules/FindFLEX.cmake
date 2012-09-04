@@ -94,7 +94,7 @@ if(FLEX_EXECUTABLE)
     # older versions of flex printed "/full/path/to/executable version X.Y"
     # newer versions use "basename(executable) X.Y"
     get_filename_component(FLEX_EXE_NAME "${FLEX_EXECUTABLE}" NAME)
-    string(REGEX REPLACE "^.*${FLEX_EXE_NAME}\"? (version )?([0-9]+[^ ]*)$" "\\2"
+    string(REGEX REPLACE "^.*${FLEX_EXE_NAME}\"? (version )?([0-9]+[^ ]*)( .*)?$" "\\2"
       FLEX_VERSION "${FLEX_version_output}")
     unset(FLEX_EXE_NAME)
   endif()
