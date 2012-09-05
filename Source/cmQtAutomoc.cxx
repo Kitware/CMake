@@ -207,9 +207,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     _moc_incs += *incDirIt;
     }
 
-  const char* tmp = makefile->GetProperty("DEFINITIONS");
-  std::string _moc_defs = (tmp!=0 ? tmp : "");
-  tmp = target->GetProperty("COMPILE_DEFINITIONS");
+  const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
   std::string _moc_compile_defs = (tmp!=0 ? tmp : "");
   tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
   std::string _moc_options = (tmp!=0 ? tmp : "");
@@ -222,8 +220,6 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
           cmLocalGenerator::EscapeForCMake(automocTargetName.c_str()).c_str());
   makefile->AddDefinition("_moc_incs",
           cmLocalGenerator::EscapeForCMake(_moc_incs.c_str()).c_str());
-  makefile->AddDefinition("_moc_defs",
-          cmLocalGenerator::EscapeForCMake(_moc_defs.c_str()).c_str());
   makefile->AddDefinition("_moc_compile_defs",
           cmLocalGenerator::EscapeForCMake(_moc_compile_defs.c_str()).c_str());
   makefile->AddDefinition("_moc_options",
@@ -326,7 +322,6 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->MocCompileDefinitionsStr = makefile->GetSafeDefinition(
                                                  "AM_MOC_COMPILE_DEFINITIONS");
-  this->MocDefinitionsStr = makefile->GetSafeDefinition("AM_MOC_DEFINITIONS");
   this->MocIncludesStr = makefile->GetSafeDefinition("AM_MOC_INCLUDES");
   this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
@@ -344,7 +339,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
 std::string cmQtAutomoc::MakeCompileSettingsString(cmMakefile* makefile)
 {
   std::string s;
-  s += makefile->GetSafeDefinition("AM_MOC_DEFINITIONS");
+  s += makefile->GetSafeDefinition("AM_MOC_COMPILE_DEFINITIONS");
   s += " ~~~ ";
   s += makefile->GetSafeDefinition("AM_MOC_INCLUDES");
   s += " ~~~ ";
@@ -399,32 +394,11 @@ void cmQtAutomoc::Init()
 
   std::vector<std::string> cdefList;
   cmSystemTools::ExpandListArgument(this->MocCompileDefinitionsStr, cdefList);
-  if (!cdefList.empty())
+  for(std::vector<std::string>::const_iterator it = cdefList.begin();
+      it != cdefList.end();
+      ++it)
     {
-    for(std::vector<std::string>::const_iterator it = cdefList.begin();
-        it != cdefList.end();
-        ++it)
-      {
-      this->MocDefinitions.push_back("-D" + (*it));
-      }
-    }
-  else
-    {
-    std::string tmpMocDefs = this->MocDefinitionsStr;
-    cmSystemTools::ReplaceString(tmpMocDefs, " ", ";");
-
-    std::vector<std::string> defList;
-    cmSystemTools::ExpandListArgument(tmpMocDefs, defList);
-
-    for(std::vector<std::string>::const_iterator it = defList.begin();
-        it != defList.end();
-        ++it)
-      {
-      if (this->StartsWith(*it, "-D"))
-        {
-        this->MocDefinitions.push_back(*it);
-        }
-      }
+    this->MocDefinitions.push_back("-D" + (*it));
     }
 
   cmSystemTools::ExpandListArgument(this->MocOptionsStr, this->MocOptions);
