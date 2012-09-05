@@ -7,6 +7,7 @@ set(MAKE_PROGRAM "make")
 set(CC "xlc_r")
 set(CXX "xlC_r")
 set(FC "xlf")
+set(LDFLAGS "-Wl,-bmaxdata:0x80000000") # Push "Segmentation fault in extend_brk" over horizon
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
