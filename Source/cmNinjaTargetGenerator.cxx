@@ -167,14 +167,11 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Append old-style preprocessor definition flags.
   this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
 
-  if (language != "RC")
-    {
-    // Add target-specific and source-specific flags.
-    this->LocalGenerator->AppendFlags(flags,
-                            this->Target->GetProperty("COMPILE_FLAGS"));
-    this->LocalGenerator->AppendFlags(flags,
-                                  source->GetProperty("COMPILE_FLAGS"));
-    }
+  // Add target-specific and source-specific flags.
+  this->LocalGenerator->AppendFlags(flags,
+                                   this->Target->GetProperty("COMPILE_FLAGS"));
+  this->LocalGenerator->AppendFlags(flags,
+                                    source->GetProperty("COMPILE_FLAGS"));
 
   // TODO: Handle Apple frameworks.
 
