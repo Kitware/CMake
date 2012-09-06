@@ -209,6 +209,12 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 
   const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
   std::string _moc_compile_defs = (tmp!=0 ? tmp : "");
+  tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
+  if (tmp)
+    {
+    _moc_compile_defs += ";";
+    _moc_compile_defs += tmp;
+    }
   tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
   std::string _moc_options = (tmp!=0 ? tmp : "");
 
