@@ -69,6 +69,10 @@ curl_easy_strerror(CURLcode error)
   case CURLE_URL_MALFORMAT:
     return "URL using bad/illegal format or missing URL";
 
+  case CURLE_NOT_BUILT_IN:
+    return "A requested feature, protocol or option was not found built-in in"
+      " this libcurl due to a build-time decision.";
+
   case CURLE_COULDNT_RESOLVE_PROXY:
     return "couldn't resolve proxy name";
 
@@ -287,7 +291,6 @@ curl_easy_strerror(CURLcode error)
     return "Error in the SSH layer";
 
     /* error codes not used by current libcurl */
-  case CURLE_URL_MALFORMAT_USER:
   case CURLE_FTP_USER_PASSWORD_INCORRECT:
   case CURLE_MALFORMAT_USER:
   case CURLE_BAD_CALLING_ORDER:
