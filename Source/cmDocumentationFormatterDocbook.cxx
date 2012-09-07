@@ -120,40 +120,31 @@ void cmDocumentationFormatterDocbook
     section.GetEntries();
 
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
-      op != entries.end();)
+      op != entries.end(); ++op)
     {
     if(op->Name.size())
       {
-      for(;op != entries.end() && op->Name.size(); ++op)
+      os << "<sect2 id=\"";
+      this->PrintId(os, prefix.c_str(), op->Name);
+      os << "\">\n<title>";
+      cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
+      os << "</title>\n";
+      if(op->Full.size())
         {
-        if(op->Name.size())
-          {
-          os << "    <para id=\"";
-          this->PrintId(os, prefix.c_str(), op->Name);
-          os << "\"><sect2><title>";
-          cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-          os << "</title></sect2> ";
-          }
+        os << "<abstract>\n<para>";
         cmDocumentationPrintDocbookEscapes(os, op->Brief.c_str());
-        if(op->Name.size())
-          {
-          os << "</para>\n";
-          }
-
-        if(op->Full.size())
-          {
-          // a line break seems to be simply a line break with docbook
-          os << "\n    ";
-          this->PrintFormatted(os, op->Full.c_str());
-          }
-        os << "\n";
+        os << "</para>\n</abstract>\n";
+        this->PrintFormatted(os, op->Full.c_str());
         }
+      else
+        {
+        this->PrintFormatted(os, op->Brief.c_str());
+        }
+      os << "</sect2>\n";
       }
     else
       {
       this->PrintFormatted(os, op->Brief.c_str());
-      os << "\n";
-      ++op;
       }
     }
   if(name)
