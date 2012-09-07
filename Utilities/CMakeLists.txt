@@ -143,9 +143,10 @@ if(BUILD_TESTING)
     if("${_help}" MATCHES "--path" AND "${_help}" MATCHES "--nonet")
       # We provide DTDs in the 'xml' directory so that xmllint can run without
       # network access.  Note that xmllints's --path option accepts a
-      # space-separated list of %-encoded paths, so the spaces in the path
-      # need to be encoded.
-      string(REPLACE " " "%20" _dtd_dir "${CMAKE_CURRENT_SOURCE_DIR}/xml")
+      # space-separated list of url-encoded paths.
+      set(_dtd_dir "${CMAKE_CURRENT_SOURCE_DIR}/xml")
+      string(REPLACE " " "%20" _dtd_dir "${_dtd_dir}")
+      string(REPLACE ":" "%3A" _dtd_dir "${_dtd_dir}")
       add_test(CMake.HTML
         ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
         --path ${_dtd_dir}/xhtml1
