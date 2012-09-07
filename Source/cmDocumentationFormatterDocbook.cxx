@@ -129,24 +129,6 @@ void cmDocumentationFormatterDocbook
   const std::vector<cmDocumentationEntry> &entries =
     section.GetEntries();
 
-  if (!entries.empty())
-    {
-    os << "<itemizedlist>\n";
-    for(std::vector<cmDocumentationEntry>::const_iterator op
-          = entries.begin(); op != entries.end(); ++ op )
-      {
-      if(op->Name.size())
-        {
-        os << "    <listitem><link linkend=\"" << prefix << "_";
-        cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-        os << "\"><emphasis><literal>";
-        cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-        os << "</literal></emphasis></link></listitem>\n";
-        }
-      }
-    os << "</itemizedlist>\n" ;
-    }
-
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end();)
     {
