@@ -115,11 +115,28 @@ void cmDocumentationFormatterDocbook
   std::string prefix = this->ComputeSectionLinkPrefix(name);
   const std::vector<cmDocumentationEntry> &entries = section.GetEntries();
 
+  bool hasSubSections = false;
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end(); ++op)
     {
     if(op->Name.size())
       {
+      hasSubSections = true;
+      break;
+      }
+    }
+
+  bool inAbstract = false;
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
+      op != entries.end(); ++op)
+    {
+    if(op->Name.size())
+      {
+      if(inAbstract)
+        {
+        os << "</abstract>\n";
+        inAbstract = false;
+        }
       os << "<sect2 id=\"";
       this->PrintId(os, prefix.c_str(), op->Name);
       os << "\">\n<title>";
@@ -140,6 +157,11 @@ void cmDocumentationFormatterDocbook
       }
     else
       {
+      if(hasSubSections && op == entries.begin())
+        {
+        os << "<abstract>\n";
+        inAbstract = true;
+        }
       this->PrintFormatted(os, op->Brief.c_str());
       }
     }
@@ -157,9 +179,9 @@ void cmDocumentationFormatterDocbook
 void cmDocumentationFormatterDocbook
 ::PrintPreformatted(std::ostream& os, const char* text)
 {
-  os << "<programlisting>";
+  os << "<para>\n<programlisting>";
   cmDocumentationPrintDocbookEscapes(os, text);
-  os << "</programlisting>\n";
+  os << "</programlisting>\n</para>\n";
 }
 
 void cmDocumentationFormatterDocbook
