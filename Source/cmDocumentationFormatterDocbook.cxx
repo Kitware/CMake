@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmDocumentationFormatterDocbook.h"
 #include "cmDocumentationSection.h"
+#include <algorithm>
+#include <ctype.h> // for isalnum
 //----------------------------------------------------------------------------
 
 // this function is a copy of the one in the HTML formatter
@@ -107,21 +109,9 @@ void cmDocumentationFormatterDocbook
 {
   if(name)
     {
-    std::string id = "section_";
-    id += name;
-    if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
-      {
-      this->EmittedLinkIds.insert(id);
-      os << "<sect1 id=\"section_" << name << "\">\n"
-            "<title>\n" << name << "</title>\n";
-      }
-    else
-      {
-      static unsigned int i=0;
-      i++;
-      os << "<sect1 id=\"section_" << name << i << "\">\n"
-            "<title>\n" << name << "</title>\n";
-      }
+    os << "<sect1 id=\"";
+    this->PrintId(os, 0, name);
+    os << "\">\n<title>" << name << "</title>\n";
     }
 
   std::string prefix = this->ComputeSectionLinkPrefix(name);
@@ -138,28 +128,8 @@ void cmDocumentationFormatterDocbook
         {
         if(op->Name.size())
           {
-          os << "    <para id=\"" << prefix << "_";
-          cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-
-          // make sure that each id exists only once.  Since it seems
-          // not easily possible to determine which link refers to which id,
-          // we have at least to make sure that the duplicated id's get a
-          // different name (by appending an increasing number), Alex
-          std::string id = prefix;
-          id += "_";
-          id += op->Name;
-          if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
-            {
-            this->EmittedLinkIds.insert(id);
-            }
-          else
-            {
-            static unsigned int i=0;
-            i++;
-            os << i;
-            }
-          // continue as normal...
-
+          os << "    <para id=\"";
+          this->PrintId(os, prefix.c_str(), op->Name);
           os << "\"><sect2><title>";
           cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
           os << "</title></sect2> ";
@@ -213,6 +183,8 @@ void cmDocumentationFormatterDocbook::PrintHeader(const char* docname,
                                                   const char* appname,
                                                   std::ostream& os)
 {
+  this->docname = docname;
+
   // this one is used to ensure that we don't create multiple link targets
   // with the same name. We can clear it here since we are at the
   // start of a document here.
@@ -235,3 +207,28 @@ void cmDocumentationFormatterDocbook::PrintFooter(std::ostream& os)
   os << "</article>\n";
 }
 
+//----------------------------------------------------------------------------
+void cmDocumentationFormatterDocbook
+::PrintId(std::ostream& os, const char* prefix, std::string id)
+{
+  std::replace_if(id.begin(), id.end(), std::not1(std::ptr_fun(isalnum)), '_');
+  if(prefix)
+    {
+    id = std::string(prefix) + "." + id;
+    }
+  os << this->docname << '.' << id;
+
+  // make sure that each id exists only once.  Since it seems
+  // not easily possible to determine which link refers to which id,
+  // we have at least to make sure that the duplicated id's get a
+  // different name (by appending an increasing number), Alex
+  if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
+    {
+    this->EmittedLinkIds.insert(id);
+    }
+  else
+    {
+    static unsigned int i=0;
+    os << i++;
+    }
+}
