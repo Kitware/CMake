@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFileCommand.h"
+#include "cmCryptoHash.h"
 #include "cmake.h"
 #include "cmHexFileConverter.h"
 #include "cmInstallType.h"
@@ -2666,7 +2667,12 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   long inactivity_timeout = 0;
   std::string verboseLog;
   std::string statusVar;
-  std::string expectedMD5sum;
+  std::string caFile;
+  bool checkSSL = false;
+  bool verifySSL = false;
+  std::string expectedHash;
+  std::string hashMatchMSG;
+  cmsys::auto_ptr<cmCryptoHash> hash;
   bool showProgress = false;
 
   while(i != args.end())
@@ -2717,6 +2723,33 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         }
       statusVar = *i;
       }
+    else if(*i == "SSL_VERIFY")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        verifySSL = cmSystemTools::IsOn(i->c_str());
+        checkSSL = true;
+        }
+      else
+        {
+        this->SetError("SSL_VERIFY missing bool value.");
+        return false;
+        }
+      }
+    else if(*i == "SSL_CAINFO_FILE")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        caFile = *i;
+        }
+      else
+        {
+        this->SetError("SSL_CAFILE missing file value.");
+        return false;
+        }
+      }
     else if(*i == "EXPECTED_MD5")
       {
       ++i;
@@ -2725,48 +2758,68 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("DOWNLOAD missing sum value for EXPECTED_MD5.");
         return false;
         }
-      expectedMD5sum = cmSystemTools::LowerCase(*i);
+      hash = cmsys::auto_ptr<cmCryptoHash>(cmCryptoHash::New("MD5"));
+      hashMatchMSG = "MD5 sum";
+      expectedHash = cmSystemTools::LowerCase(*i);
       }
     else if(*i == "SHOW_PROGRESS")
       {
       showProgress = true;
       }
+    else if(*i == "EXPECTED_HASH")
+      {
+      ++i;
+      if(i != args.end())
+        {
+        hash = cmsys::auto_ptr<cmCryptoHash>(cmCryptoHash::New(i->c_str()));
+        if(!hash.get())
+          {
+          std::string err = "DOWNLOAD bad SHA type: ";
+          err += *i;
+          this->SetError(err.c_str());
+          return false;
+          }
+        hashMatchMSG = *i;
+        hashMatchMSG += " hash";
+
+        ++i;
+        }
+      if(i != args.end())
+        {
+        expectedHash = cmSystemTools::LowerCase(*i);
+        }
+      else
+        {
+        this->SetError("DOWNLOAD missing time for EXPECTED_HASH.");
+        return false;
+        }
+      }
     ++i;
     }
-
-  // If file exists already, and caller specified an expected md5 sum,
-  // and the existing file already has the expected md5 sum, then simply
+  // If file exists already, and caller specified an expected md5 or sha,
+  // and the existing file already has the expected hash, then simply
   // return.
   //
-  if(cmSystemTools::FileExists(file.c_str()) &&
-    !expectedMD5sum.empty())
+  if(cmSystemTools::FileExists(file.c_str()) && hash.get())
     {
-    char computedMD5[32];
-
-    if (!cmSystemTools::ComputeFileMD5(file.c_str(), computedMD5))
+    bool alreadyHaveFile = false;
+    std::string msg;
+    std::string actualHash = hash->HashFile(file.c_str());
+    if(actualHash == expectedHash)
       {
-      this->SetError("DOWNLOAD cannot compute MD5 sum on pre-existing file");
-      return false;
-      }
-
-    std::string actualMD5sum = cmSystemTools::LowerCase(
-      std::string(computedMD5, 32));
-
-    if (expectedMD5sum == actualMD5sum)
-      {
+      msg = "returning early; file already exists with expected ";
+      msg += hashMatchMSG;
+      msg += "\"";
       if(statusVar.size())
         {
         cmOStringStream result;
-        result << (int)0 << ";\""
-          "returning early: file already exists with expected MD5 sum\"";
+        result << (int)0 << ";\"" << msg;
         this->Makefile->AddDefinition(statusVar.c_str(),
                                       result.str().c_str());
         }
-
       return true;
       }
     }
-
   // Make sure parent directory exists so we can write to the file
   // as we receive downloaded bits from curl...
   //
@@ -2798,7 +2851,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     }
 
   cURLEasyGuard g_curl(curl);
-
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   check_curl_result(res, "DOWNLOAD cannot set url: ");
 
@@ -2813,6 +2865,43 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION,
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "DOWNLOAD cannot set debug function: ");
+
+  // check to see if SSL verification is requested
+  const char* verifyValue =
+    this->Makefile->GetDefinition("CMAKE_CURLOPT_SSL_VERIFYPEER");
+  // if there is a cmake variable or if the command has SSL_VERIFY requested
+  if(verifyValue || checkSSL)
+    {
+    // the args to the command come first
+    bool verify = verifySSL;
+    if(!verify && verifyValue)
+      {
+      verify = cmSystemTools::IsOn(verifyValue);
+      }
+    if(verify)
+      {
+      res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
+      check_curl_result(res, "Unable to set SSL Verify on: ");
+      }
+    else
+      {
+      res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+      check_curl_result(res, "Unable to set SSL Verify off: ");
+      }
+    }
+  // check to see if a CAINFO file has been specified
+  const char* cainfo =
+    this->Makefile->GetDefinition("CMAKE_CURLOPT_CAINFO_FILE");
+  // command arg comes first
+  if(caFile.size())
+    {
+    cainfo = caFile.c_str();
+    }
+  if(cainfo)
+    {
+    res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo);
+    check_curl_result(res, "Unable to set SSL Verify CAINFO: ");
+    }
 
   cmFileCommandVectorOfChar chunkDebug;
 
@@ -2888,26 +2977,22 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   // Verify MD5 sum if requested:
   //
-  if (!expectedMD5sum.empty())
+  if (hash.get())
     {
-    char computedMD5[32];
-
-    if (!cmSystemTools::ComputeFileMD5(file.c_str(), computedMD5))
+    std::string actualHash = hash->HashFile(file.c_str());
+    if (actualHash.size() == 0)
       {
-      this->SetError("DOWNLOAD cannot compute MD5 sum on downloaded file");
+      this->SetError("DOWNLOAD cannot compute hash on downloaded file");
       return false;
       }
 
-    std::string actualMD5sum = cmSystemTools::LowerCase(
-      std::string(computedMD5, 32));
-
-    if (expectedMD5sum != actualMD5sum)
+    if (expectedHash != actualHash)
       {
       cmOStringStream oss;
-      oss << "DOWNLOAD MD5 mismatch" << std::endl
+      oss << "DOWNLOAD HASH mismatch" << std::endl
         << "  for file: [" << file << "]" << std::endl
-        << "    expected MD5 sum: [" << expectedMD5sum << "]" << std::endl
-        << "      actual MD5 sum: [" << actualMD5sum << "]" << std::endl
+        << "    expected hash: [" << expectedHash << "]" << std::endl
+        << "      actual hash: [" << actualHash << "]" << std::endl
         ;
       this->SetError(oss.str().c_str());
       return false;
