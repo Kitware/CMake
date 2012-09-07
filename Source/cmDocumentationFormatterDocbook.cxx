@@ -96,28 +96,24 @@ void cmDocumentationPrintDocbookEscapes(std::ostream& os, const char* text)
     }
 }
 
-
+//----------------------------------------------------------------------------
 cmDocumentationFormatterDocbook::cmDocumentationFormatterDocbook()
 :cmDocumentationFormatter()
 {
 }
 
+//----------------------------------------------------------------------------
 void cmDocumentationFormatterDocbook
 ::PrintSection(std::ostream& os,
                const cmDocumentationSection &section,
                const char* name)
 {
-  if(name)
-    {
-    os << "<sect1 id=\"";
-    this->PrintId(os, 0, name);
-    os << "\">\n<title>" << name << "</title>\n";
-    }
+  os << "<sect1 id=\"";
+  this->PrintId(os, 0, name);
+  os << "\">\n<title>" << name << "</title>\n";
 
   std::string prefix = this->ComputeSectionLinkPrefix(name);
-
-  const std::vector<cmDocumentationEntry> &entries =
-    section.GetEntries();
+  const std::vector<cmDocumentationEntry> &entries = section.GetEntries();
 
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end(); ++op)
@@ -147,32 +143,36 @@ void cmDocumentationFormatterDocbook
       this->PrintFormatted(os, op->Brief.c_str());
       }
     }
-  if(name)
+
+  // empty sections are not allowed in docbook.
+  if(entries.empty())
     {
-    os << "</sect1>\n";
+    os << "<para/>\n";
     }
-}
 
-void cmDocumentationFormatterDocbook::PrintPreformatted(std::ostream& os,
-                                                     const char* text)
-{
-  os << "<literallayout>";
-  cmDocumentationPrintDocbookEscapes(os, text);
-  os << "</literallayout>\n    ";
-}
-
-void cmDocumentationFormatterDocbook::PrintParagraph(std::ostream& os,
-                                                  const char* text)
-{
-  os << "<para>";
-  cmDocumentationPrintDocbookEscapes(os, text);
-  os << "</para>";
+  os << "</sect1>\n";
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterDocbook::PrintHeader(const char* docname,
-                                                  const char* appname,
-                                                  std::ostream& os)
+void cmDocumentationFormatterDocbook
+::PrintPreformatted(std::ostream& os, const char* text)
+{
+  os << "<programlisting>";
+  cmDocumentationPrintDocbookEscapes(os, text);
+  os << "</programlisting>\n";
+}
+
+void cmDocumentationFormatterDocbook
+::PrintParagraph(std::ostream& os, const char* text)
+{
+  os << "<para>";
+  cmDocumentationPrintDocbookEscapes(os, text);
+  os << "</para>\n";
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentationFormatterDocbook
+::PrintHeader(const char* docname, const char* appname, std::ostream& os)
 {
   this->docname = docname;
 
@@ -182,8 +182,8 @@ void cmDocumentationFormatterDocbook::PrintHeader(const char* docname,
   this->EmittedLinkIds.clear();
 
   os << "<?xml version=\"1.0\" ?>\n"
-        "<!DOCTYPE article PUBLIC \"-//OASIS//DTD DocBook V4.2//EN\" "
-        "\"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd\" [\n"
+        "<!DOCTYPE article PUBLIC \"-//OASIS//DTD DocBook V4.5//EN\" "
+        "\"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n"
         "<!ENTITY % addindex \"IGNORE\">\n"
         "<!ENTITY % English \"INCLUDE\"> ]>\n"
         "<article>\n"
