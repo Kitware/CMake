@@ -148,13 +148,6 @@ static const char *cmDocumentationStandardSeeAlso[][3] =
    "The list is member-post-only but one may sign up on the CMake web page. "
    "Please first read the full documentation at "
    "http://www.cmake.org before posting questions to the list."},
-  {0,
-   "Summary of helpful links:\n"
-   "  Home: http://www.cmake.org\n"
-   "  Docs: http://www.cmake.org/HTML/Documentation.html\n"
-   "  Mail: http://www.cmake.org/HTML/MailingLists.html\n"
-   "  FAQ:  http://www.cmake.org/Wiki/CMake_FAQ\n"
-   , 0},
   {0,0,0}
 };
 
