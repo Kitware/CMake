@@ -2802,7 +2802,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   //
   if(cmSystemTools::FileExists(file.c_str()) && hash.get())
     {
-    bool alreadyHaveFile = false;
     std::string msg;
     std::string actualHash = hash->HashFile(file.c_str());
     if(actualHash == expectedHash)
