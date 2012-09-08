@@ -210,11 +210,4 @@ function(GETTEXT_PROCESS_PO_FILES _lang)
 
 endfunction()
 
-if (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
-   set(GETTEXT_FOUND TRUE)
-else ()
-   set(GETTEXT_FOUND FALSE)
-   if (GetText_REQUIRED)
-      message(FATAL_ERROR "GetText not found")
-   endif ()
-endif ()
+set(GETTEXT_FOUND ${Gettext_FOUND})
