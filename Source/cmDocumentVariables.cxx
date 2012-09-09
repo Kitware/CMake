@@ -1,6 +1,8 @@
 #include "cmDocumentVariables.h"
 #include "cmake.h"
 
+#include <cmsys/ios/sstream>
+
 void cmDocumentVariables::DefineVariables(cmake* cm)
 {
   // Subsection: variables defined by cmake, that give
@@ -992,12 +994,33 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      false,
      "Variables That Describe the System");
 
-  cm->DefineProperty
-    ("MSVC80", cmProperty::VARIABLE,
-     "True when using Microsoft Visual C 8.0",
-     "Set to true when the compiler is version 8.0 of Microsoft Visual C.",
-     false,
-     "Variables That Describe the System");
+  int msvc_versions[] = { 60, 70, 71, 80, 90, 100, 110, 0 };
+  for (int i = 0; msvc_versions[i] != 0; i ++)
+    {
+    const char minor = (char)('0' + (msvc_versions[i] % 10));
+    cmStdString varName = "MSVC";
+    cmsys_ios::ostringstream majorStr;
+
+    majorStr << (msvc_versions[i] / 10);
+    varName += majorStr.str();
+    if (msvc_versions[i] < 100)
+      {
+      varName += minor;
+      }
+
+    cmStdString verString = majorStr.str() + "." + minor;
+
+    cmStdString shortStr = "True when using Microsoft Visual C " + verString;
+    cmStdString fullStr = "Set to true when the compiler is version " +
+                          verString +
+                          " of Microsoft Visual C.";
+    cm->DefineProperty
+      (varName.c_str(), cmProperty::VARIABLE,
+       shortStr.c_str(),
+       fullStr.c_str(),
+       false,
+       "Variables That Describe the System");
+    }
 
   cm->DefineProperty
     ("MSVC_IDE", cmProperty::VARIABLE,
@@ -1017,6 +1040,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "  1400 = VS  8.0\n"
      "  1500 = VS  9.0\n"
      "  1600 = VS 10.0\n"
+     "  1700 = VS 11.0\n"
      "",
      false,
      "Variables That Describe the System");
