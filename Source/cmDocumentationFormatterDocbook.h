@@ -37,7 +37,7 @@ public:
 private:
   void PrintId(std::ostream& os, const char* prefix, std::string id);
   std::set<std::string> EmittedLinkIds;
-  std::string docname;
+  std::string Docname;
 };
 
 #endif

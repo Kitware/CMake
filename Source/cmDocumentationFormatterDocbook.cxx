@@ -196,7 +196,7 @@ void cmDocumentationFormatterDocbook
 void cmDocumentationFormatterDocbook
 ::PrintHeader(const char* docname, const char* appname, std::ostream& os)
 {
-  this->docname = docname;
+  this->Docname = docname;
 
   // this one is used to ensure that we don't create multiple link targets
   // with the same name. We can clear it here since we are at the
@@ -229,7 +229,7 @@ void cmDocumentationFormatterDocbook
     {
     id = std::string(prefix) + "." + id;
     }
-  os << this->docname << '.' << id;
+  os << this->Docname << '.' << id;
 
   // make sure that each id exists only once.  Since it seems
   // not easily possible to determine which link refers to which id,
