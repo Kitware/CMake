@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <ctype.h> // for isalnum
 
-static bool cmIsAlnum(char c)
+static int cmIsAlnum(int c)
 {
   return isalnum(c);
 }
