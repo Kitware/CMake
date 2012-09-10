@@ -13,6 +13,12 @@
 #include "cmDocumentationSection.h"
 #include <algorithm>
 #include <ctype.h> // for isalnum
+
+static int cmIsAlnum(int c)
+{
+  return isalnum(c);
+}
+
 //----------------------------------------------------------------------------
 
 // this function is a copy of the one in the HTML formatter
@@ -224,7 +230,8 @@ void cmDocumentationFormatterDocbook::PrintFooter(std::ostream& os)
 void cmDocumentationFormatterDocbook
 ::PrintId(std::ostream& os, const char* prefix, std::string id)
 {
-  std::replace_if(id.begin(), id.end(), std::not1(std::ptr_fun(isalnum)), '_');
+  std::replace_if(id.begin(), id.end(),
+                  std::not1(std::ptr_fun(cmIsAlnum)), '_');
   if(prefix)
     {
     id = std::string(prefix) + "." + id;
