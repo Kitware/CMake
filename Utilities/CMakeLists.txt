@@ -27,7 +27,6 @@ set(MAN_FILES
   )
 set(TEXT_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.txt
-  ${CMake_BINARY_DIR}/Docs/cmake.docbook
   ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
   ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
   ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
@@ -43,6 +42,9 @@ set(HTML_FILES
   ${CMake_BINARY_DIR}/Docs/cmake-modules.html
   ${CMake_BINARY_DIR}/Docs/cmake-commands.html
   ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
+  )
+set(DOCBOOK_FILES
+  ${CMake_BINARY_DIR}/Docs/cmake.docbook
   )
 
 macro(ADD_DOCS target dependency)
@@ -63,11 +65,9 @@ macro(ADD_DOCS target dependency)
       )
     set(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
     list(APPEND MAN_FILES ${CMake_BINARY_DIR}/Docs/${target}.1)
-    list(APPEND TEXT_FILES
-      ${CMake_BINARY_DIR}/Docs/${target}.txt
-      ${CMake_BINARY_DIR}/Docs/${target}.docbook
-      )
+    list(APPEND TEXT_FILES ${CMake_BINARY_DIR}/Docs/${target}.txt)
     list(APPEND HTML_FILES ${CMake_BINARY_DIR}/Docs/${target}.html)
+    list(APPEND DOCBOOK_FILES ${CMake_BINARY_DIR}/Docs/${target}.docbook)
   endif()
 endmacro()
 
@@ -124,7 +124,11 @@ add_custom_command(
   )
 
 install_files(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
-install_files(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
+install_files(${CMAKE_DOC_DIR} FILES
+  ${TEXT_FILES}
+  ${HTML_FILES}
+  ${DOCBOOK_FILES}
+  )
 install(FILES cmake.m4 DESTINATION share/aclocal)
 
 # Drive documentation generation.
@@ -151,6 +155,11 @@ if(BUILD_TESTING)
         ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
         --path ${_dtd_dir}/xhtml1
         ${HTML_FILES}
+        )
+      add_test(CMake.DocBook
+        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
+        --path ${_dtd_dir}/docbook-4.5
+        ${DOCBOOK_FILES}
         )
     endif()
   endif()

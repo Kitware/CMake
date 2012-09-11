@@ -11,6 +11,14 @@
 ============================================================================*/
 #include "cmDocumentationFormatterDocbook.h"
 #include "cmDocumentationSection.h"
+#include <algorithm>
+#include <ctype.h> // for isalnum
+
+static int cmIsAlnum(int c)
+{
+  return isalnum(c);
+}
+
 //----------------------------------------------------------------------------
 
 // this function is a copy of the one in the HTML formatter
@@ -94,151 +102,116 @@ void cmDocumentationPrintDocbookEscapes(std::ostream& os, const char* text)
     }
 }
 
-
+//----------------------------------------------------------------------------
 cmDocumentationFormatterDocbook::cmDocumentationFormatterDocbook()
 :cmDocumentationFormatter()
 {
 }
 
+//----------------------------------------------------------------------------
 void cmDocumentationFormatterDocbook
 ::PrintSection(std::ostream& os,
                const cmDocumentationSection &section,
                const char* name)
 {
-  if(name)
-    {
-    std::string id = "section_";
-    id += name;
-    if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
-      {
-      this->EmittedLinkIds.insert(id);
-      os << "<sect1 id=\"section_" << name << "\">\n"
-            "<title>\n" << name << "</title>\n";
-      }
-    else
-      {
-      static unsigned int i=0;
-      i++;
-      os << "<sect1 id=\"section_" << name << i << "\">\n"
-            "<title>\n" << name << "</title>\n";
-      }
-    }
+  os << "<sect1 id=\"";
+  this->PrintId(os, 0, name);
+  os << "\">\n<title>" << name << "</title>\n";
 
   std::string prefix = this->ComputeSectionLinkPrefix(name);
+  const std::vector<cmDocumentationEntry> &entries = section.GetEntries();
 
-  const std::vector<cmDocumentationEntry> &entries =
-    section.GetEntries();
-
-  if (!entries.empty())
-    {
-    os << "<itemizedlist>\n";
-    for(std::vector<cmDocumentationEntry>::const_iterator op
-          = entries.begin(); op != entries.end(); ++ op )
-      {
-      if(op->Name.size())
-        {
-        os << "    <listitem><link linkend=\"" << prefix << "_";
-        cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-        os << "\"><emphasis><literal>";
-        cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-        os << "</literal></emphasis></link></listitem>\n";
-        }
-      }
-    os << "</itemizedlist>\n" ;
-    }
-
+  bool hasSubSections = false;
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
-      op != entries.end();)
+      op != entries.end(); ++op)
     {
     if(op->Name.size())
       {
-      for(;op != entries.end() && op->Name.size(); ++op)
+      hasSubSections = true;
+      break;
+      }
+    }
+
+  bool inAbstract = false;
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
+      op != entries.end(); ++op)
+    {
+    if(op->Name.size())
+      {
+      if(inAbstract)
         {
-        if(op->Name.size())
-          {
-          os << "    <para id=\"" << prefix << "_";
-          cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-
-          // make sure that each id exists only once.  Since it seems
-          // not easily possible to determine which link refers to which id,
-          // we have at least to make sure that the duplicated id's get a
-          // different name (by appending an increasing number), Alex
-          std::string id = prefix;
-          id += "_";
-          id += op->Name;
-          if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
-            {
-            this->EmittedLinkIds.insert(id);
-            }
-          else
-            {
-            static unsigned int i=0;
-            i++;
-            os << i;
-            }
-          // continue as normal...
-
-          os << "\"><sect2><title>";
-          cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
-          os << "</title></sect2> ";
-          }
-        cmDocumentationPrintDocbookEscapes(os, op->Brief.c_str());
-        if(op->Name.size())
-          {
-          os << "</para>\n";
-          }
-
-        if(op->Full.size())
-          {
-          // a line break seems to be simply a line break with docbook
-          os << "\n    ";
-          this->PrintFormatted(os, op->Full.c_str());
-          }
-        os << "\n";
+        os << "</abstract>\n";
+        inAbstract = false;
         }
+      os << "<sect2 id=\"";
+      this->PrintId(os, prefix.c_str(), op->Name);
+      os << "\">\n<title>";
+      cmDocumentationPrintDocbookEscapes(os, op->Name.c_str());
+      os << "</title>\n";
+      if(op->Full.size())
+        {
+        os << "<abstract>\n<para>";
+        cmDocumentationPrintDocbookEscapes(os, op->Brief.c_str());
+        os << "</para>\n</abstract>\n";
+        this->PrintFormatted(os, op->Full.c_str());
+        }
+      else
+        {
+        this->PrintFormatted(os, op->Brief.c_str());
+        }
+      os << "</sect2>\n";
       }
     else
       {
+      if(hasSubSections && op == entries.begin())
+        {
+        os << "<abstract>\n";
+        inAbstract = true;
+        }
       this->PrintFormatted(os, op->Brief.c_str());
-      os << "\n";
-      ++op;
       }
     }
-  if(name)
+
+  // empty sections are not allowed in docbook.
+  if(entries.empty())
     {
-    os << "</sect1>\n";
+    os << "<para/>\n";
     }
-}
 
-void cmDocumentationFormatterDocbook::PrintPreformatted(std::ostream& os,
-                                                     const char* text)
-{
-  os << "<literallayout>";
-  cmDocumentationPrintDocbookEscapes(os, text);
-  os << "</literallayout>\n    ";
-}
-
-void cmDocumentationFormatterDocbook::PrintParagraph(std::ostream& os,
-                                                  const char* text)
-{
-  os << "<para>";
-  cmDocumentationPrintDocbookEscapes(os, text);
-  os << "</para>";
+  os << "</sect1>\n";
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentationFormatterDocbook::PrintHeader(const char* docname,
-                                                  const char* appname,
-                                                  std::ostream& os)
+void cmDocumentationFormatterDocbook
+::PrintPreformatted(std::ostream& os, const char* text)
 {
+  os << "<para>\n<programlisting>";
+  cmDocumentationPrintDocbookEscapes(os, text);
+  os << "</programlisting>\n</para>\n";
+}
+
+void cmDocumentationFormatterDocbook
+::PrintParagraph(std::ostream& os, const char* text)
+{
+  os << "<para>";
+  cmDocumentationPrintDocbookEscapes(os, text);
+  os << "</para>\n";
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentationFormatterDocbook
+::PrintHeader(const char* docname, const char* appname, std::ostream& os)
+{
+  this->Docname = docname;
+
   // this one is used to ensure that we don't create multiple link targets
   // with the same name. We can clear it here since we are at the
   // start of a document here.
   this->EmittedLinkIds.clear();
 
   os << "<?xml version=\"1.0\" ?>\n"
-        "<!DOCTYPE article PUBLIC \"-//OASIS//DTD DocBook V4.2//EN\" "
-        "\"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd\" [\n"
+        "<!DOCTYPE article PUBLIC \"-//OASIS//DTD DocBook V4.5//EN\" "
+        "\"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd\" [\n"
         "<!ENTITY % addindex \"IGNORE\">\n"
         "<!ENTITY % English \"INCLUDE\"> ]>\n"
         "<article>\n"
@@ -253,3 +226,29 @@ void cmDocumentationFormatterDocbook::PrintFooter(std::ostream& os)
   os << "</article>\n";
 }
 
+//----------------------------------------------------------------------------
+void cmDocumentationFormatterDocbook
+::PrintId(std::ostream& os, const char* prefix, std::string id)
+{
+  std::replace_if(id.begin(), id.end(),
+                  std::not1(std::ptr_fun(cmIsAlnum)), '_');
+  if(prefix)
+    {
+    id = std::string(prefix) + "." + id;
+    }
+  os << this->Docname << '.' << id;
+
+  // make sure that each id exists only once.  Since it seems
+  // not easily possible to determine which link refers to which id,
+  // we have at least to make sure that the duplicated id's get a
+  // different name (by appending an increasing number), Alex
+  if (this->EmittedLinkIds.find(id) == this->EmittedLinkIds.end())
+    {
+    this->EmittedLinkIds.insert(id);
+    }
+  else
+    {
+    static unsigned int i=0;
+    os << i++;
+    }
+}

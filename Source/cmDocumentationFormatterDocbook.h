@@ -35,7 +35,9 @@ public:
   virtual void PrintPreformatted(std::ostream& os, const char* text);
   virtual void PrintParagraph(std::ostream& os, const char* text);
 private:
+  void PrintId(std::ostream& os, const char* prefix, std::string id);
   std::set<std::string> EmittedLinkIds;
+  std::string Docname;
 };
 
 #endif
