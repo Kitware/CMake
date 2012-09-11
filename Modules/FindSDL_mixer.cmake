@@ -1,8 +1,14 @@
-# Locate SDL_mixer library
-# This module defines
-# SDLMIXER_LIBRARY, the name of the library to link against
-# SDLMIXER_FOUND, if false, do not try to link to SDL
-# SDLMIXER_INCLUDE_DIR, where to find SDL/SDL.h
+# - Locate SDL_mixer library
+# This module defines:
+#  SDL_MIXER_LIBRARIES, the name of the library to link against
+#  SDL_MIXER_INCLUDE_DIRS, where to find the headers
+#  SDL_MIXER_FOUND, if false, do not try to link against
+#  SDL_MIXER_VERSION_STRING - human-readable string containing the version of SDL_mixer
+#
+# For backward compatiblity the following variables are also set:
+#  SDLMIXER_LIBRARY (same value as SDL_MIXER_LIBRARIES)
+#  SDLMIXER_INCLUDE_DIR (same value as SDL_MIXER_INCLUDE_DIRS)
+#  SDLMIXER_FOUND (same value as SDL_MIXER_FOUND)
 #
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
@@ -14,6 +20,7 @@
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.
+# Copyright 2012 Benjamin Eikel
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -25,40 +32,48 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_path(SDLMIXER_INCLUDE_DIR SDL_mixer.h
+find_path(SDL_MIXER_INCLUDE_DIR SDL_mixer.h
   HINTS
     ENV SDLMIXERDIR
     ENV SDLDIR
-  PATH_SUFFIXES include include/SDL
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11 # FreeBSD ports
-  /usr/include/SDL12
-  /usr/include/SDL11
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
+  PATH_SUFFIXES SDL SDL12 SDL11
 )
 
-find_library(SDLMIXER_LIBRARY
+find_library(SDL_MIXER_LIBRARY
   NAMES SDL_mixer
   HINTS
     ENV SDLMIXERDIR
     ENV SDLDIR
-  PATH_SUFFIXES lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
 )
+
+if(SDL_MIXER_INCLUDE_DIR AND EXISTS "${SDL_MIXER_INCLUDE_DIR}/SDL_mixer.h")
+  file(STRINGS "${SDL_MIXER_INCLUDE_DIR}/SDL_mixer.h" SDL_MIXER_VERSION_MAJOR_LINE REGEX "^#define[ \t]+SDL_MIXER_MAJOR_VERSION[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_MIXER_INCLUDE_DIR}/SDL_mixer.h" SDL_MIXER_VERSION_MINOR_LINE REGEX "^#define[ \t]+SDL_MIXER_MINOR_VERSION[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_MIXER_INCLUDE_DIR}/SDL_mixer.h" SDL_MIXER_VERSION_PATCH_LINE REGEX "^#define[ \t]+SDL_MIXER_PATCHLEVEL[ \t]+[0-9]+$")
+  string(REGEX REPLACE "^#define[ \t]+SDL_MIXER_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_MIXER_VERSION_MAJOR "${SDL_MIXER_VERSION_MAJOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SDL_MIXER_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_MIXER_VERSION_MINOR "${SDL_MIXER_VERSION_MINOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SDL_MIXER_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_MIXER_VERSION_PATCH "${SDL_MIXER_VERSION_PATCH_LINE}")
+  set(SDL_MIXER_VERSION_STRING ${SDL_MIXER_VERSION_MAJOR}.${SDL_MIXER_VERSION_MINOR}.${SDL_MIXER_VERSION_PATCH})
+  unset(SDL_MIXER_VERSION_MAJOR_LINE)
+  unset(SDL_MIXER_VERSION_MINOR_LINE)
+  unset(SDL_MIXER_VERSION_PATCH_LINE)
+  unset(SDL_MIXER_VERSION_MAJOR)
+  unset(SDL_MIXER_VERSION_MINOR)
+  unset(SDL_MIXER_VERSION_PATCH)
+endif()
+
+set(SDL_MIXER_LIBRARIES ${SDL_MIXER_LIBRARY})
+set(SDL_MIXER_INCLUDE_DIRS ${SDL_MIXER_INCLUDE_DIR})
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDLMIXER
-                                  REQUIRED_VARS SDLMIXER_LIBRARY SDLMIXER_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_mixer
+                                  REQUIRED_VARS SDL_MIXER_LIBRARIES SDL_MIXER_INCLUDE_DIRS
+                                  VERSION_VAR SDL_MIXER_VERSION_STRING)
+
+# for backward compatiblity
+set(SDLMIXER_LIBRARY ${SDL_MIXER_LIBRARIES})
+set(SDLMIXER_INCLUDE_DIR ${SDL_MIXER_INCLUDE_DIRS})
+set(SDLMIXER_FOUND ${SDL_MIXER_FOUND})
+
+mark_as_advanced(SDL_MIXER_LIBRARY SDL_MIXER_INCLUDE_DIR)
