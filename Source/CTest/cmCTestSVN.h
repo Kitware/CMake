@@ -33,24 +33,50 @@ private:
   virtual void NoteNewRevision();
   virtual bool UpdateImpl();
 
-  // URL of repository directory checked out in the working tree.
-  std::string URL;
+  // Information about an SVN repository (root repository or external)
+  struct SVNInfo {
 
-  // URL of repository root directory.
-  std::string Root;
+    SVNInfo(const char* path) : LocalPath(path) {}
+    // Remove base from the filename
+    std::string BuildLocalPath(std::string const& path) const;
 
-  // Directory under repository root checked out in working tree.
-  std::string Base;
+    // LocalPath relative to the main source directory.
+    std::string LocalPath;
 
-  std::string LoadInfo();
+    // URL of repository directory checked out in the working tree.
+    std::string URL;
+
+    // URL of repository root directory.
+    std::string Root;
+
+    // Directory under repository root checked out in working tree.
+    std::string Base;
+
+    // Old and new repository revisions.
+    std::string OldRevision;
+    std::string NewRevision;
+
+  };
+
+  // Extended revision structure to include info about external it refers to.
+  struct Revision;
+
+  // Info of all the repositories (root, externals and nested ones).
+  std::list<SVNInfo> Repositories;
+
+  // Pointer to the infos of the root repository.
+  SVNInfo* RootInfo;
+
+  std::string LoadInfo(SVNInfo& svninfo);
+  void LoadExternals();
   void LoadModifications();
   void LoadRevisions();
+  void LoadRevisions(SVNInfo& svninfo);
 
-  void GuessBase(std::vector<Change> const& changes);
-  const char* LocalPath(std::string const& path);
+  void GuessBase(SVNInfo &svninfo, std::vector<Change> const& changes);
 
-  void DoRevision(Revision const& revision,
-                  std::vector<Change> const& changes);
+  void DoRevisionSVN(Revision const& revision,
+                     std::vector<Change> const& changes);
 
   void WriteXMLGlobal(std::ostream& xml);
 
@@ -59,10 +85,12 @@ private:
   class LogParser;
   class StatusParser;
   class UpdateParser;
+  class ExternalParser;
   friend class InfoParser;
   friend class LogParser;
   friend class StatusParser;
   friend class UpdateParser;
+  friend class ExternalParser;
 };
 
 #endif
