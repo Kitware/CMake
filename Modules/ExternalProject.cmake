@@ -24,7 +24,8 @@
 #    [HG_REPOSITORY url]         # URL of mercurial repo
 #    [HG_TAG tag]                # Mercurial branch name, commit id or tag
 #    [URL /.../src.tgz]          # Full path or URL of source
-#    [URL_MD5 md5]               # MD5 checksum of file at URL
+#    [URL_HASH ALGO=value]       # Hash of file at URL
+#    [URL_MD5 md5]               # Equivalent to URL_HASH MD5=md5
 #    [TIMEOUT seconds]           # Time allowed for file download operations
 #   #--Update/Patch step----------
 #    [UPDATE_COMMAND cmd...]     # Source work-tree update command
@@ -184,6 +185,9 @@ if(_ep_func)
   set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
 endif()
 
+# Save regex matching supported hash algorithm names.
+set(_ep_hash_algos "MD5|SHA1|SHA224|SHA256|SHA384|SHA512")
+set(_ep_hash_regex "^(${_ep_hash_algos})=([0-9A-Fa-f]+)$")
 
 function(_ep_parse_arguments f name ns args)
   # Transfer the arguments to this function into target properties for the
@@ -395,7 +399,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_downloadfile_script script_filename remote local timeout md5)
+function(_ep_write_downloadfile_script script_filename remote local timeout hash)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
     set(timeout_msg "${timeout} seconds")
@@ -404,10 +408,10 @@ function(_ep_write_downloadfile_script script_filename remote local timeout md5)
     set(timeout_msg "none")
   endif()
 
-  if(md5)
-    set(md5_args EXPECTED_MD5 ${md5})
+  if("${hash}" MATCHES "${_ep_hash_regex}")
+    set(hash_args EXPECTED_HASH ${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
   else()
-    set(md5_args "# no EXPECTED_MD5")
+    set(hash_args "# no EXPECTED_HASH")
   endif()
 
   file(WRITE ${script_filename}
@@ -420,7 +424,7 @@ file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
   SHOW_PROGRESS
-  ${md5_args}
+  ${hash_args}
   ${timeout_args}
   STATUS status
   LOG log)
@@ -443,48 +447,30 @@ message(STATUS \"downloading... done\")
 endfunction()
 
 
-function(_ep_write_verifyfile_script script_filename local md5)
-  file(WRITE ${script_filename}
-"message(STATUS \"verifying file...
-     file='${local}'\")
-
-set(verified 0)
-
-# If an expected md5 checksum exists, compare against it:
-#
-if(NOT \"${md5}\" STREQUAL \"\")
-  execute_process(COMMAND \${CMAKE_COMMAND} -E md5sum \"${local}\"
-    OUTPUT_VARIABLE ov
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    RESULT_VARIABLE rv)
-
-  if(NOT rv EQUAL 0)
-    message(FATAL_ERROR \"error: computing md5sum of '${local}' failed\")
-  endif()
-
-  string(REGEX MATCH \"^([0-9A-Fa-f]+)\" md5_actual \"\${ov}\")
-
-  string(TOLOWER \"\${md5_actual}\" md5_actual)
-  string(TOLOWER \"${md5}\" md5)
-
-  if(NOT \"\${md5}\" STREQUAL \"\${md5_actual}\")
-    message(FATAL_ERROR \"error: md5sum of '${local}' does not match expected value
-  md5_expected: \${md5}
-    md5_actual: \${md5_actual}
-\")
-  endif()
-
-  set(verified 1)
-endif()
-
-if(verified)
+function(_ep_write_verifyfile_script script_filename local hash)
+  if("${hash}" MATCHES "${_ep_hash_regex}")
+    set(algo "${CMAKE_MATCH_1}")
+    string(TOLOWER "${CMAKE_MATCH_2}" expect_value)
+    set(script_content "set(expect_value \"${expect_value}\")
+file(${algo} \"\${file}\" actual_value)
+if(\"\${actual_value}\" STREQUAL \"\${expect_value}\")
   message(STATUS \"verifying file... done\")
 else()
-  message(STATUS \"verifying file... warning: did not verify file - no URL_MD5 checksum argument? corrupt file?\")
-endif()
-"
-)
-
+  message(FATAL_ERROR \"error: ${algo} hash of
+  \${file}
+does not match expected value
+  expected: \${expect_value}
+    actual: \${actual_value}
+\")
+endif()")
+  else()
+    set(script_content "message(STATUS \"verifying file... warning: did not verify file - no URL_HASH specified?\")")
+  endif()
+  file(WRITE ${script_filename} "set(file \"${local}\")
+message(STATUS \"verifying file...
+     file='\${file}'\")
+${script_content}
+")
 endfunction()
 
 
@@ -1254,10 +1240,22 @@ function(_ep_add_download_command name)
     list(APPEND depends ${stamp_dir}/${name}-hginfo.txt)
   elseif(url)
     get_filename_component(work_dir "${source_dir}" PATH)
+    get_property(hash TARGET ${name} PROPERTY _EP_URL_HASH)
+    if(hash AND NOT "${hash}" MATCHES "${_ep_hash_regex}")
+      message(FATAL_ERROR "URL_HASH is set to\n  ${hash}\n"
+        "but must be ALGO=value where ALGO is\n  ${_ep_hash_algos}\n"
+        "and value is a hex string.")
+    endif()
     get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
+    if(md5 AND NOT "MD5=${md5}" MATCHES "${_ep_hash_regex}")
+      message(FATAL_ERROR "URL_MD5 is set to\n  ${md5}\nbut must be a hex string.")
+    endif()
+    if(md5 AND NOT hash)
+      set(hash "MD5=${md5}")
+    endif()
     set(repository "external project URL")
     set(module "${url}")
-    set(tag "${md5}")
+    set(tag "${hash}")
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
@@ -1283,7 +1281,7 @@ function(_ep_add_download_command name)
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
-        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "${timeout}" "${md5}")
+        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake" "${url}" "${file}" "${timeout}" "${hash}")
         set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
           COMMAND)
         set(comment "Performing download step (download, verify and extract) for '${name}'")
@@ -1291,7 +1289,7 @@ function(_ep_add_download_command name)
         set(file "${url}")
         set(comment "Performing download step (verify and extract) for '${name}'")
       endif()
-      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${md5}")
+      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake
         COMMAND)
       _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
