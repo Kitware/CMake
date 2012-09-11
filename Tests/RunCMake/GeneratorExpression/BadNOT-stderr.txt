@@ -1,9 +1,17 @@
 CMake Error at BadNOT.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
+    \$<NOT>
+
+  \$<NOT> expression requires exactly one parameter.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++CMake Error at BadNOT.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
     \$<NOT:>
 
-  NOT requires exactly one '0' or '1' value.
+  \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
@@ -12,7 +20,7 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
     \$<NOT:,>
 
-  NOT requires exactly one '0' or '1' value.
+  \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
@@ -21,6 +29,24 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
     \$<NOT:0,1>
 
-  NOT requires exactly one '0' or '1' value.
+  \$<NOT> expression requires exactly one parameter.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Error at BadNOT.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<NOT:01>
+
+  \$<NOT> parameter must resolve to exactly one '0' or '1' value.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Error at BadNOT.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<NOT:nothing>
+
+  \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

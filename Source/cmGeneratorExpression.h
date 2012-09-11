@@ -19,6 +19,8 @@ class cmTarget;
 class cmMakefile;
 class cmListFileBacktrace;
 
+class cmGeneratorExpressionEvaluator;
+
 /** \class cmGeneratorExpression
  * \brief Evaluate generate-time query expression syntax.
  *
@@ -36,24 +38,29 @@ public:
                         cmListFileBacktrace const& backtrace,
                         bool quiet = false);
 
+  ~cmGeneratorExpression();
+
   /** Evaluate generator expressions in a string.  */
   const char* Process(std::string const& input);
   const char* Process(const char* input);
+
+  void Parse(const char* input);
+  const char* Evaluate(cmMakefile* mf, const char* config,
+                        bool quiet = false);
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const
     { return this->Targets; }
 private:
+  std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
   cmMakefile* Makefile;
   const char* Config;
   cmListFileBacktrace const& Backtrace;
   bool Quiet;
-  std::vector<char> Data;
-  std::stack<size_t> Barriers;
-  cmsys::RegularExpression TargetInfo;
-  cmsys::RegularExpression TestConfig;
+
   std::set<cmTarget*> Targets;
-  bool Evaluate();
-  bool Evaluate(const char* expr, std::string& result);
-  bool EvaluateTargetInfo(std::string& result);
+  const char* Input;
+  bool NeedsParsing;
+
+  std::string Output;
 };
