@@ -134,10 +134,6 @@ else()
     )
 endif()
 
-if (NOT _CMAKE_TOOLCHAIN_LOCATION)
-  get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_Fortran_COMPILER}" PATH)
-endif ()
-
 # Build a small source file to identify the compiler.
 if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_RUN 1)
@@ -192,6 +188,10 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
     set(CMAKE_COMPILER_IS_CYGWIN 1)
   endif()
 endif()
+
+if (NOT _CMAKE_TOOLCHAIN_LOCATION)
+  get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_Fortran_COMPILER}" PATH)
+endif ()
 
 # if we have a fortran cross compiler, they have usually some prefix, like
 # e.g. powerpc-linux-gfortran, arm-elf-gfortran or i586-mingw32msvc-gfortran , optionally
