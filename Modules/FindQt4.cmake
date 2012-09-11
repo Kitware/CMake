@@ -885,6 +885,18 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
                  NAMES ${QT_MODULE}${QT_LIBINFIX}_debug ${QT_MODULE}${QT_LIBINFIX}d ${QT_MODULE}${QT_LIBINFIX}d4
                  PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
         )
+    if(QT_${_upper_qt_module}_LIBRARY_RELEASE MATCHES "/${QT_MODULE}\\.framework$")
+      if(NOT EXISTS "${QT_${_upper_qt_module}_LIBRARY_RELEASE}/${QT_MODULE}")
+        # Release framework library file does not exist... Force to NOTFOUND:
+        set(QT_${_upper_qt_module}_LIBRARY_RELEASE "QT_${_upper_qt_module}_LIBRARY_RELEASE-NOTFOUND" CACHE FILEPATH "Path to a library." FORCE)
+      endif()
+    endif()
+    if(QT_${_upper_qt_module}_LIBRARY_DEBUG MATCHES "/${QT_MODULE}\\.framework$")
+      if(NOT EXISTS "${QT_${_upper_qt_module}_LIBRARY_DEBUG}/${QT_MODULE}")
+        # Debug framework library file does not exist... Force to NOTFOUND:
+        set(QT_${_upper_qt_module}_LIBRARY_DEBUG "QT_${_upper_qt_module}_LIBRARY_DEBUG-NOTFOUND" CACHE FILEPATH "Path to a library." FORCE)
+      endif()
+    endif()
   endforeach()
 
   # QtUiTools is sometimes not in the same directory as the other found libraries
