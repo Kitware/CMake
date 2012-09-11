@@ -76,7 +76,7 @@ endif ()
 
 
 # Checks 'REQUIRED', 'QUIET' and versions.
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Armadillo
   REQUIRED_VARS ARMADILLO_LIBRARY ARMADILLO_INCLUDE_DIR
   VERSION_VAR ARMADILLO_VERSION_STRING)
