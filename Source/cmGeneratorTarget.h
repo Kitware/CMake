@@ -66,4 +66,6 @@ private:
   void operator=(cmGeneratorTarget const&);
 };
 
+typedef std::map<cmTarget*, cmGeneratorTarget*> cmGeneratorTargetsType;
+
 #endif

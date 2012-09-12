@@ -1075,8 +1075,10 @@ void cmGlobalGenerator::CreateGeneratorTargets()
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    cmTargets& targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    cmGeneratorTargetsType generatorTargets;
+
+    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
+    cmTargets& targets = mf->GetTargets();
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
@@ -1084,14 +1086,16 @@ void cmGlobalGenerator::CreateGeneratorTargets()
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
       this->GeneratorTargets[t] = gt;
       this->ComputeTargetObjects(gt);
+      generatorTargets[t] = gt;
       }
+    mf->SetGeneratorTargets(generatorTargets);
     }
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::ClearGeneratorTargets()
 {
-  for(GeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
+  for(cmGeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
       i != this->GeneratorTargets.end(); ++i)
     {
     delete i->second;
@@ -1102,7 +1106,7 @@ void cmGlobalGenerator::ClearGeneratorTargets()
 //----------------------------------------------------------------------------
 cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
 {
-  GeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
+  cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
   if(ti == this->GeneratorTargets.end())
     {
     this->CMakeInstance->IssueMessage(

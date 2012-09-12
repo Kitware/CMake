@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmNewLineStyle.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -519,6 +520,16 @@ public:
    */
   const cmTargets &GetTargets() const { return this->Targets; }
 
+  const cmGeneratorTargetsType &GetGeneratorTargets() const
+    {
+      return this->GeneratorTargets;
+    }
+
+  void SetGeneratorTargets(const cmGeneratorTargetsType &targets)
+    {
+      this->GeneratorTargets = targets;
+    }
+
   cmTarget* FindTarget(const char* name);
 
   /** Find a target to use in place of the given name.  The target
@@ -865,6 +876,7 @@ protected:
 
   // libraries, classes, and executables
   cmTargets Targets;
+  cmGeneratorTargetsType GeneratorTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests
