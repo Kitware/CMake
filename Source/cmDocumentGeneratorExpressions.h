@@ -12,7 +12,7 @@
 #ifndef cmDocumentGeneratorExpressions_h
 #define cmDocumentGeneratorExpressions_h
 
-#define CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS                       \
+#define CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS                      \
   "Generator expressions are evaluted during build system generation "  \
   "to produce information specific to each build configuration.  "      \
   "Valid expressions are:\n"                                            \
@@ -35,11 +35,20 @@
   "  $<TARGET_FILE_DIR:tgt>/$<TARGET_FILE_NAME:tgt>\n"                  \
   "  $<TARGET_LINKER_FILE_DIR:tgt>/$<TARGET_LINKER_FILE_NAME:tgt>\n"    \
   "  $<TARGET_SONAME_FILE_DIR:tgt>/$<TARGET_SONAME_FILE_NAME:tgt>\n"    \
+  "  $<TARGET_PROPERTY:tgt,prop>   = The value of the property prop\n"  \
+  "the target tgt. Note that tgt is not added as a dependency of the "  \
+  "target this expression is evaluated on.\n" \
   "Boolean expressions:\n"                                              \
   "  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'\n"    \
   "  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'\n"    \
   "  $<NOT:?>                  = '0' if '?' is '1', else '1'\n"         \
   "where '?' is always either '0' or '1'.\n"                            \
+
+#define CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS                       \
+  CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS \
+  "Expressions with an implicit 'this' target:"                         \
+  "  $<TARGET_PROPERTY:prop>   = The value of the property prop on\n"   \
+  "the target on which the generator expression is evaluated.\n"        \
   ""
 
 #endif

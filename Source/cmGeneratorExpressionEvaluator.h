@@ -15,6 +15,11 @@
 #include <vector>
 #include <string>
 
+#include "cmListFileCache.h"
+
+class cmTarget;
+class cmGeneratorTarget;
+
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionContext
 {
@@ -22,7 +27,7 @@ struct cmGeneratorExpressionContext
   std::set<cmTarget*> Targets;
   cmMakefile *Makefile;
   const char *Config;
-  cmTarget *Target;
+  cmGeneratorTarget *Target;
   bool Quiet;
   bool HadError;
 };
