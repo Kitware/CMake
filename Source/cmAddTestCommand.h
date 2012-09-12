@@ -81,7 +81,7 @@ public:
       "\n"
       "Arguments after COMMAND may use \"generator expressions\" with the "
       "syntax \"$<...>\".  "
-      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+      CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS
       "Example usage:\n"
       "  add_test(NAME mytest\n"
       "           COMMAND testDriver --config $<CONFIGURATION>\n"

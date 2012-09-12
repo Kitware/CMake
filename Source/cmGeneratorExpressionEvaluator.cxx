@@ -240,6 +240,46 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 //----------------------------------------------------------------------------
+static const struct TargetPropertyNode: public cmGeneratorExpressionNode
+{
+  TargetPropertyNode() {}
+
+  // This node handles errors on parameter count itself.
+  virtual int NumExpectedParameters() const { return -1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content) const
+  {
+    if (parameters.size() != 1 && parameters.size() != 2)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:...> expression requires one or two parameters");
+      return std::string();
+      }
+    cmGeneratorTarget* target = context->Target;
+    std::string propertyName = *parameters.begin();
+    if (parameters.size() == 2)
+      {
+      target = context->Makefile->FindGeneratorTargetToUse(
+                                                parameters.begin()->c_str());
+
+      if (!target)
+        {
+        cmOStringStream e;
+        e << "Target \""
+          << target
+          << "\" not found.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        }
+      propertyName = parameters.at(1);
+      }
+    const char *prop = target->GetProperty(propertyName.c_str());
+    return prop ? prop : "";
+  }
+} targetPropertyNode;
+
+//----------------------------------------------------------------------------
 template<bool linker, bool soname>
 struct TargetFilesystemArtifactResultCreator
 {
@@ -460,7 +500,10 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &angle_rNode;
   else if (identifier == "COMMA")
     return &commaNode;
+  else if (identifier == "TARGET_PROPERTY")
+    return &targetPropertyNode;
   return 0;
+
 }
 
 //----------------------------------------------------------------------------
