@@ -20,6 +20,12 @@
   "  $<1:...>                  = content of \"...\"\n"                  \
   "  $<CONFIG:cfg>             = '1' if config is \"cfg\", else '0'\n"  \
   "  $<CONFIGURATION>          = configuration name\n"                  \
+  "  $<BOOL:...>               = '1' if the '...' is true, else '0'\n"  \
+  "  $<STREQUAL:a,b>           = '1' if a is STREQUAL b, else '0'\n"    \
+  "  $<ANGLE-R>                = A literal '>'. Used to compare "       \
+  "strings which contain a '>' for example.\n"                          \
+  "  $<COMMA>                  = A literal ','. Used to compare "       \
+  "strings which contain a ',' for example.\n"                          \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \

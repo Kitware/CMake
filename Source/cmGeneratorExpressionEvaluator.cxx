@@ -138,6 +138,66 @@ static const struct NotNode : public cmGeneratorExpressionNode
 } notNode;
 
 //----------------------------------------------------------------------------
+static const struct BoolNode : public cmGeneratorExpressionNode
+{
+  BoolNode() {}
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *) const
+  {
+    return !cmSystemTools::IsOff(parameters.begin()->c_str()) ? "1" : "0";
+  }
+} boolNode;
+
+//----------------------------------------------------------------------------
+static const struct StrEqualNode : public cmGeneratorExpressionNode
+{
+  StrEqualNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *) const
+  {
+    return *parameters.begin() == parameters.at(1) ? "1" : "0";
+  }
+} strEqualNode;
+
+//----------------------------------------------------------------------------
+static const struct Angle_RNode : public cmGeneratorExpressionNode
+{
+  Angle_RNode() {}
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *) const
+  {
+    return ">";
+  }
+} angle_rNode;
+
+//----------------------------------------------------------------------------
+static const struct CommaNode : public cmGeneratorExpressionNode
+{
+  CommaNode() {}
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *) const
+  {
+    return ",";
+  }
+} commaNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -392,6 +452,14 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetLinkerFileDirNode;
   else if (identifier == "TARGET_SONAME_FILE_DIR")
     return &targetSoNameFileDirNode;
+  else if (identifier == "STREQUAL")
+    return &strEqualNode;
+  else if (identifier == "BOOL")
+    return &boolNode;
+  else if (identifier == "ANGLE-R")
+    return &angle_rNode;
+  else if (identifier == "COMMA")
+    return &commaNode;
   return 0;
 }
 
