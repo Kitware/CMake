@@ -21,6 +21,8 @@ class cmListFileBacktrace;
 
 class cmGeneratorExpressionEvaluator;
 
+class cmCompiledGeneratorExpression;
+
 /** \class cmGeneratorExpression
  * \brief Evaluate generate-time query expression syntax.
  *
@@ -33,34 +35,42 @@ class cmGeneratorExpressionEvaluator;
 class cmGeneratorExpression
 {
 public:
-  /** Construct with an evaluation context and configuration.  */
-  cmGeneratorExpression(cmMakefile* mf, const char* config,
-                        cmListFileBacktrace const& backtrace,
-                        bool quiet = false);
+  /** Construct. */
+  cmGeneratorExpression(cmListFileBacktrace const& backtrace);
 
-  ~cmGeneratorExpression();
+  const cmCompiledGeneratorExpression Parse(std::string const& input);
+  const cmCompiledGeneratorExpression Parse(const char* input);
 
-  /** Evaluate generator expressions in a string.  */
-  const char* Process(std::string const& input);
-  const char* Process(const char* input);
+private:
+  cmListFileBacktrace const& Backtrace;
+};
 
-  void Parse(const char* input);
+class cmCompiledGeneratorExpression
+{
+public:
   const char* Evaluate(cmMakefile* mf, const char* config,
-                        bool quiet = false);
+                        bool quiet = false) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const
     { return this->Targets; }
+
+  ~cmCompiledGeneratorExpression();
+
 private:
-  std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
-  cmMakefile* Makefile;
-  const char* Config;
+  cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
+                      std::vector<cmGeneratorExpressionEvaluator*> evaluators,
+                      const char *input, bool needsParsing);
+
+  friend class cmGeneratorExpression;
+
+private:
+  const std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
   cmListFileBacktrace const& Backtrace;
-  bool Quiet;
 
-  std::set<cmTarget*> Targets;
-  const char* Input;
-  bool NeedsParsing;
+  mutable std::set<cmTarget*> Targets;
+  const char* const Input;
+  const bool NeedsParsing;
 
-  std::string Output;
+  mutable std::string Output;
 };

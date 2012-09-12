@@ -22,48 +22,40 @@
 
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
-  cmMakefile* mf, const char* config,
-  cmListFileBacktrace const& backtrace, bool quiet):
-  Makefile(mf), Config(config), Backtrace(backtrace), Quiet(quiet),
-  NeedsParsing(true)
+  cmListFileBacktrace const& backtrace):
+  Backtrace(backtrace)
 {
 }
 
 //----------------------------------------------------------------------------
-const char* cmGeneratorExpression::Process(std::string const& input)
+const cmCompiledGeneratorExpression
+cmGeneratorExpression::Parse(std::string const& input)
 {
-  return this->Process(input.c_str());
+  return this->Parse(input.c_str());
 }
 
 //----------------------------------------------------------------------------
-const char* cmGeneratorExpression::Process(const char* input)
+const cmCompiledGeneratorExpression
+cmGeneratorExpression::Parse(const char* input)
 {
-  this->Parse(input);
-  return this->Evaluate(this->Makefile, this->Config, this->Quiet);
-}
-
-//----------------------------------------------------------------------------
-void cmGeneratorExpression::Parse(const char* input)
-{
-  this->Evaluators.clear();
-
-  this->Input = input;
   cmGeneratorExpressionLexer l;
-  std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(this->Input);
-  this->NeedsParsing = l.GetSawGeneratorExpression();
+  std::vector<cmGeneratorExpressionToken> tokens = l.Tokenize(input);
+  bool needsParsing = l.GetSawGeneratorExpression();
+  std::vector<cmGeneratorExpressionEvaluator*> evaluators;
 
-  if (!this->NeedsParsing)
+  if (needsParsing)
     {
-    return;
+    cmGeneratorExpressionParser p(tokens);
+    p.Parse(evaluators);
     }
 
-  cmGeneratorExpressionParser p(tokens);
-  p.Parse(this->Evaluators);
+  return cmCompiledGeneratorExpression(this->Backtrace, evaluators, input,
+                                       needsParsing);
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorExpression::Evaluate(
-  cmMakefile* mf, const char* config, bool quiet)
+const char *cmCompiledGeneratorExpression::Evaluate(
+  cmMakefile* mf, const char* config, bool quiet) const
 {
   if (!this->NeedsParsing)
     {
@@ -99,8 +91,19 @@ const char *cmGeneratorExpression::Evaluate(
   return this->Output.c_str();
 }
 
+cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
+                      cmListFileBacktrace const& backtrace,
+                      std::vector<cmGeneratorExpressionEvaluator*> evaluators,
+                      const char *input, bool needsParsing)
+  : Backtrace(backtrace), Evaluators(evaluators), Input(input),
+    NeedsParsing(needsParsing)
+{
+
+}
+
+
 //----------------------------------------------------------------------------
-cmGeneratorExpression::~cmGeneratorExpression()
+cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 {
   std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
                                                   = this->Evaluators.begin();
