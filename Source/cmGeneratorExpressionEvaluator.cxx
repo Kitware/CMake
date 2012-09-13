@@ -462,3 +462,33 @@ std::string GeneratorExpressionContent::Evaluate(
 
   return node->Evaluate(parameters, context, this);
 }
+
+//----------------------------------------------------------------------------
+static void deleteAll(const std::vector<cmGeneratorExpressionEvaluator*> &container)
+{
+  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
+                                                  = container.begin();
+  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
+                                                  = container.end();
+  for ( ; it != end; ++it)
+    {
+    delete *it;
+    }
+}
+
+//----------------------------------------------------------------------------
+GeneratorExpressionContent::~GeneratorExpressionContent()
+{
+  deleteAll(this->IdentifierChildren);
+
+  typedef std::vector<cmGeneratorExpressionEvaluator*> EvaluatorVector;
+  typedef std::vector<cmGeneratorExpressionToken> TokenVector;
+  std::vector<EvaluatorVector>::const_iterator pit =
+                                                  this->ParamChildren.begin();
+  const std::vector<EvaluatorVector>::const_iterator pend =
+                                                  this->ParamChildren.end();
+  for ( ; pit != pend; ++pit)
+    {
+    deleteAll(*pit);
+    }
+}
