@@ -19,7 +19,7 @@ class cmTarget;
 class cmMakefile;
 class cmListFileBacktrace;
 
-class cmGeneratorExpressionEvaluator;
+struct cmGeneratorExpressionEvaluator;
 
 class cmCompiledGeneratorExpression;
 
@@ -43,11 +43,10 @@ public:
   const cmCompiledGeneratorExpression& Parse(const char* input);
 
 private:
-  cmListFileBacktrace const& Backtrace;
-private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);
 
+  cmListFileBacktrace const& Backtrace;
   cmCompiledGeneratorExpression *CompiledExpression;
 };
 
@@ -65,21 +64,19 @@ public:
 
 private:
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
-                      std::vector<cmGeneratorExpressionEvaluator*> evaluators,
-                      const char *input, bool needsParsing);
+              const std::vector<cmGeneratorExpressionEvaluator*> &evaluators,
+              const char *input, bool needsParsing);
 
   friend class cmGeneratorExpression;
 
-private:
-  const std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
-  cmListFileBacktrace const& Backtrace;
+  cmCompiledGeneratorExpression(const cmCompiledGeneratorExpression &);
+  void operator=(const cmCompiledGeneratorExpression &);
 
-  mutable std::set<cmTarget*> Targets;
+  cmListFileBacktrace const& Backtrace;
+  const std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
   const char* const Input;
   const bool NeedsParsing;
 
+  mutable std::set<cmTarget*> Targets;
   mutable std::string Output;
-private:
-  cmCompiledGeneratorExpression(const cmCompiledGeneratorExpression &);
-  void operator=(const cmCompiledGeneratorExpression &);
 };

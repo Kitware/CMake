@@ -56,9 +56,9 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 {
   virtual bool GeneratesContent() const { return false; }
 
-  std::string Evaluate(const std::vector<std::string> &parameters,
-                       cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content) const
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *) const
   {
     // Unreachable
     return std::string();
@@ -70,9 +70,9 @@ static const struct OneNode : public cmGeneratorExpressionNode
 {
   virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
 
-  std::string Evaluate(const std::vector<std::string> &parameters,
-                       cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content) const
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *) const
   {
     // Unreachable
     return std::string();
@@ -136,7 +136,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   virtual int NumExpectedParameters() const { return 0; }
 
-  std::string Evaluate(const std::vector<std::string> &parameters,
+  std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *) const
   {
@@ -428,7 +428,7 @@ std::string GeneratorExpressionContent::Evaluate(
   }
 
   int numExpected = node->NumExpectedParameters();
-  if ((numExpected != -1 && numExpected != parameters.size()))
+  if ((numExpected != -1 && unsigned int(numExpected) != parameters.size()))
     {
     if (numExpected == 0)
       {
