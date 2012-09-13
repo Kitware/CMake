@@ -75,7 +75,7 @@ static void extendResult(std::vector<cmGeneratorExpressionEvaluator*> &result,
 void cmGeneratorExpressionParser::ParseGeneratorExpression(
                         std::vector<cmGeneratorExpressionEvaluator*> &result)
 {
-  uint nestedLevel = this->NestingLevel;
+  unsigned int nestedLevel = this->NestingLevel;
   ++this->NestingLevel;
 
   std::vector<cmGeneratorExpressionToken>::const_iterator startToken

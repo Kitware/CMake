@@ -46,7 +46,7 @@ struct cmGeneratorExpressionEvaluator
 
 struct TextContent : public cmGeneratorExpressionEvaluator
 {
-  TextContent(const char *start, uint length)
+  TextContent(const char *start, unsigned int length)
     : Content(start), Length(length)
   {
 
@@ -62,25 +62,25 @@ struct TextContent : public cmGeneratorExpressionEvaluator
     return cmGeneratorExpressionEvaluator::Text;
   }
 
-  void Extend(uint length)
+  void Extend(unsigned int length)
   {
     this->Length += length;
   }
 
-  uint GetLength()
+  unsigned int GetLength()
   {
     return this->Length;
   }
 
 private:
   const char *Content;
-  uint Length;
+  unsigned int Length;
 };
 
 //----------------------------------------------------------------------------
 struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
-  GeneratorExpressionContent(const char *startContent, uint length);
+  GeneratorExpressionContent(const char *startContent, unsigned int length);
   void SetIdentifier(std::vector<cmGeneratorExpressionEvaluator*> identifier)
   {
     this->IdentifierChildren = identifier;
@@ -105,7 +105,7 @@ private:
   std::vector<cmGeneratorExpressionEvaluator*> IdentifierChildren;
   std::vector<std::vector<cmGeneratorExpressionEvaluator*> > ParamChildren;
   const char *StartContent;
-  uint ContentLength;
+  unsigned int ContentLength;
 };
 
 #endif
