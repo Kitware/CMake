@@ -995,17 +995,18 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   int msvc_versions[] = { 60, 70, 71, 80, 90, 100, 110, 0 };
   for (int i = 0; msvc_versions[i] != 0; i ++)
     {
+    const char minor = '0' + ((char)msvc_versions[i] % 10);
     cmStdString varName = "MSVC";
     cmsys_ios::ostringstream majorStr;
+
     majorStr << (msvc_versions[i] / 10);
     varName += majorStr.str();
     if (msvc_versions[i] < 100)
       {
-      varName += ('0' + msvc_versions[i] % 10);
+      varName += minor;
       }
 
-    cmStdString verString = majorStr.str() + ".";
-    verString += ('0' + msvc_versions[i] % 10);
+    cmStdString verString = majorStr.str() + "." + minor;
 
     cmStdString shortStr = "True when using Microsoft Visual C " + verString;
     cmStdString fullStr = "Set to true when the compiler is version " +
