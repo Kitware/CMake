@@ -52,7 +52,7 @@ struct cmGeneratorExpressionNode
 };
 
 //----------------------------------------------------------------------------
-static const struct : public cmGeneratorExpressionNode
+static const struct ZeroNode : public cmGeneratorExpressionNode
 {
   virtual bool GeneratesContent() const { return false; }
 
@@ -66,7 +66,7 @@ static const struct : public cmGeneratorExpressionNode
 } zeroNode;
 
 //----------------------------------------------------------------------------
-static const struct : public cmGeneratorExpressionNode
+static const struct OneNode : public cmGeneratorExpressionNode
 {
   virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
 
@@ -81,7 +81,7 @@ static const struct : public cmGeneratorExpressionNode
 
 //----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
-static const struct : public cmGeneratorExpressionNode \
+static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
 /* We let -1 carry the meaning 'at least one' */ \
   virtual int NumExpectedParameters() const { return -1; } \
@@ -115,7 +115,7 @@ BOOLEAN_OP_NODE(orNode, OR, 0, 1)
 #undef BOOLEAN_OP_NODE
 
 //----------------------------------------------------------------------------
-static const struct : public cmGeneratorExpressionNode
+static const struct NotNode : public cmGeneratorExpressionNode
 {
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -132,7 +132,7 @@ static const struct : public cmGeneratorExpressionNode
 } notNode;
 
 //----------------------------------------------------------------------------
-static const struct : public cmGeneratorExpressionNode
+static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   virtual int NumExpectedParameters() const { return 0; }
 
@@ -145,7 +145,7 @@ static const struct : public cmGeneratorExpressionNode
 } configurationNode;
 
 //----------------------------------------------------------------------------
-static const struct : public cmGeneratorExpressionNode
+static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
   virtual int NumExpectedParameters() const { return 1; }
 
