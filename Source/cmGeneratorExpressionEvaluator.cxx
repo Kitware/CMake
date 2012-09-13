@@ -428,7 +428,7 @@ std::string GeneratorExpressionContent::Evaluate(
   }
 
   int numExpected = node->NumExpectedParameters();
-  if ((numExpected != -1 && unsigned int(numExpected) != parameters.size()))
+  if ((numExpected != -1 && (unsigned int)numExpected != parameters.size()))
     {
     if (numExpected == 0)
       {
