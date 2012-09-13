@@ -103,7 +103,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
                       cmListFileBacktrace const& backtrace,
-                      std::vector<cmGeneratorExpressionEvaluator*> evaluators,
+                      const std::vector<cmGeneratorExpressionEvaluator*> &evaluators,
                       const char *input, bool needsParsing)
   : Backtrace(backtrace), Evaluators(evaluators), Input(input),
     NeedsParsing(needsParsing)
