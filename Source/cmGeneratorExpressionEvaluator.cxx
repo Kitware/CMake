@@ -464,12 +464,12 @@ std::string GeneratorExpressionContent::Evaluate(
 }
 
 //----------------------------------------------------------------------------
-static void deleteAll(const std::vector<cmGeneratorExpressionEvaluator*> &container)
+static void deleteAll(const std::vector<cmGeneratorExpressionEvaluator*> &c)
 {
   std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
-                                                  = container.begin();
+                                                  = c.begin();
   const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
-                                                  = container.end();
+                                                  = c.end();
   for ( ; it != end; ++it)
     {
     delete *it;

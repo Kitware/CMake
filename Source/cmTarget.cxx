@@ -1649,7 +1649,7 @@ cmTargetTraceDependencies
     for(cmCustomCommandLine::const_iterator cli = cit->begin();
         cli != cit->end(); ++cli)
       {
-      cmCompiledGeneratorExpression cge = ge.Parse(*cli);
+      const cmCompiledGeneratorExpression &cge = ge.Parse(*cli);
       cge.Evaluate(this->Makefile, 0, true);
       std::set<cmTarget*> geTargets = cge.GetTargets();
       targets.insert(geTargets.begin(), geTargets.end());

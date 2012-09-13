@@ -30,6 +30,7 @@ struct cmGeneratorExpressionContext
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionEvaluator
 {
+  cmGeneratorExpressionEvaluator() {}
   virtual ~cmGeneratorExpressionEvaluator() {}
 
   enum Type
@@ -42,6 +43,10 @@ struct cmGeneratorExpressionEvaluator
 
   virtual std::string Evaluate(cmGeneratorExpressionContext *context
                               ) const = 0;
+
+private:
+  cmGeneratorExpressionEvaluator(const cmGeneratorExpressionEvaluator &);
+  void operator=(const cmGeneratorExpressionEvaluator &);
 };
 
 struct TextContent : public cmGeneratorExpressionEvaluator

@@ -37,12 +37,18 @@ class cmGeneratorExpression
 public:
   /** Construct. */
   cmGeneratorExpression(cmListFileBacktrace const& backtrace);
+  ~cmGeneratorExpression();
 
-  const cmCompiledGeneratorExpression Parse(std::string const& input);
-  const cmCompiledGeneratorExpression Parse(const char* input);
+  const cmCompiledGeneratorExpression& Parse(std::string const& input);
+  const cmCompiledGeneratorExpression& Parse(const char* input);
 
 private:
   cmListFileBacktrace const& Backtrace;
+private:
+  cmGeneratorExpression(const cmGeneratorExpression &);
+  void operator=(const cmGeneratorExpression &);
+
+  cmCompiledGeneratorExpression *CompiledExpression;
 };
 
 class cmCompiledGeneratorExpression
@@ -73,4 +79,7 @@ private:
   const bool NeedsParsing;
 
   mutable std::string Output;
+private:
+  cmCompiledGeneratorExpression(const cmCompiledGeneratorExpression &);
+  void operator=(const cmCompiledGeneratorExpression &);
 };
