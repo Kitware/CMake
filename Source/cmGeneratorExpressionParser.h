@@ -21,7 +21,7 @@
 
 class cmMakefile;
 class cmTarget;
-class cmGeneratorExpressionEvaluator;
+struct cmGeneratorExpressionEvaluator;
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionParser
