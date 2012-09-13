@@ -101,6 +101,8 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 
   std::string GetOriginalExpression() const;
 
+  ~GeneratorExpressionContent();
+
 private:
   std::vector<cmGeneratorExpressionEvaluator*> IdentifierChildren;
   std::vector<std::vector<cmGeneratorExpressionEvaluator*> > ParamChildren;
