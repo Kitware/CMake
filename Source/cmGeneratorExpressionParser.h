@@ -39,7 +39,7 @@ private:
 private:
   std::vector<cmGeneratorExpressionToken>::const_iterator it;
   const std::vector<cmGeneratorExpressionToken> Tokens;
-  uint NestingLevel;
+  unsigned int NestingLevel;
 };
 
 #endif
