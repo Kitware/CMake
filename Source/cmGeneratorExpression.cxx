@@ -23,19 +23,19 @@
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
   cmListFileBacktrace const& backtrace):
-  Backtrace(backtrace)
+  Backtrace(backtrace), CompiledExpression(0)
 {
 }
 
 //----------------------------------------------------------------------------
-const cmCompiledGeneratorExpression
+const cmCompiledGeneratorExpression &
 cmGeneratorExpression::Parse(std::string const& input)
 {
   return this->Parse(input.c_str());
 }
 
 //----------------------------------------------------------------------------
-const cmCompiledGeneratorExpression
+const cmCompiledGeneratorExpression &
 cmGeneratorExpression::Parse(const char* input)
 {
   cmGeneratorExpressionLexer l;
@@ -49,8 +49,18 @@ cmGeneratorExpression::Parse(const char* input)
     p.Parse(evaluators);
     }
 
-  return cmCompiledGeneratorExpression(this->Backtrace, evaluators, input,
-                                       needsParsing);
+  delete this->CompiledExpression;
+  this->CompiledExpression = new cmCompiledGeneratorExpression(
+                                      this->Backtrace,
+                                      evaluators,
+                                      input,
+                                      needsParsing);
+  return *this->CompiledExpression;
+}
+
+cmGeneratorExpression::~cmGeneratorExpression()
+{
+  delete this->CompiledExpression;
 }
 
 //----------------------------------------------------------------------------
