@@ -170,6 +170,12 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
   }
 } configurationTestNode;
 
+#if defined(__BORLANDC__)
+# pragma warn -8008 /* condition is always true */
+// Borland gets confused about the template argument bools
+// used in if statements.
+#endif
+
 //----------------------------------------------------------------------------
 template<bool linker, bool soname, bool dirQual, bool nameQual>
 struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
