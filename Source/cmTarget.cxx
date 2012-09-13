@@ -1623,7 +1623,11 @@ cmTargetTraceDependencies
 {
   // Transform command names that reference targets built in this
   // project to corresponding target-level dependencies.
-  cmGeneratorExpression ge(this->Makefile, 0, cc.GetBacktrace(), true);
+  cmGeneratorExpression ge(cc.GetBacktrace());
+
+  // Add target-level dependencies referenced by generator expressions.
+  std::set<cmTarget*> targets;
+
   for(cmCustomCommandLines::const_iterator cit = cc.GetCommandLines().begin();
       cit != cc.GetCommandLines().end(); ++cit)
     {
@@ -1645,12 +1649,13 @@ cmTargetTraceDependencies
     for(cmCustomCommandLine::const_iterator cli = cit->begin();
         cli != cit->end(); ++cli)
       {
-      ge.Process(*cli);
+      cmCompiledGeneratorExpression cge = ge.Parse(*cli);
+      cge.Evaluate(this->Makefile, 0, true);
+      std::set<cmTarget*> geTargets = cge.GetTargets();
+      targets.insert(geTargets.begin(), geTargets.end());
       }
     }
 
-  // Add target-level dependencies referenced by generator expressions.
-  std::set<cmTarget*> targets = ge.GetTargets();
   for(std::set<cmTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
