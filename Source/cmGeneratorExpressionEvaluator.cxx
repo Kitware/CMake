@@ -181,6 +181,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 
 #if defined(__BORLANDC__)
 # pragma warn -8008 /* condition is always true */
+# pragma warn -8066 /* unreachable code */
 // Borland gets confused about the template argument bools
 // used in if statements.
 #endif
