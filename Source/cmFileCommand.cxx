@@ -2857,6 +2857,11 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
   check_curl_result(res, "DOWNLOAD cannot set http failure option: ");
 
+  res = ::curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; "
+    "Windows NT 5.1; ru; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7 "
+    "(.NET CLR 3.5.30729)");
+  check_curl_result(res, "DOWNLOAD cannot set user agent option: ");
+
   res = ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                            cmWriteToFileCallback);
   check_curl_result(res, "DOWNLOAD cannot set write function: ");
