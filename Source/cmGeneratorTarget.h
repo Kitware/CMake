@@ -58,6 +58,9 @@ public:
 
   void UseObjectLibraries(std::vector<std::string>& objs);
 
+  /** Add the target output files to the global generator manifest.  */
+  void GenerateTargetManifest(const char* config);
+
 private:
   void ClassifySources();
   void LookupObjectLibraries();
