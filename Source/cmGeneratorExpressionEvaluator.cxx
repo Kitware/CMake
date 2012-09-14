@@ -54,6 +54,8 @@ struct cmGeneratorExpressionNode
 //----------------------------------------------------------------------------
 static const struct ZeroNode : public cmGeneratorExpressionNode
 {
+  ZeroNode() {}
+
   virtual bool GeneratesContent() const { return false; }
 
   std::string Evaluate(const std::vector<std::string> &,
@@ -68,6 +70,8 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 //----------------------------------------------------------------------------
 static const struct OneNode : public cmGeneratorExpressionNode
 {
+  OneNode() {}
+
   virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
 
   std::string Evaluate(const std::vector<std::string> &,
@@ -83,6 +87,7 @@ static const struct OneNode : public cmGeneratorExpressionNode
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
+  OP ## Node () {} \
 /* We let -1 carry the meaning 'at least one' */ \
   virtual int NumExpectedParameters() const { return -1; } \
  \
@@ -117,6 +122,7 @@ BOOLEAN_OP_NODE(orNode, OR, 0, 1)
 //----------------------------------------------------------------------------
 static const struct NotNode : public cmGeneratorExpressionNode
 {
+  NotNode() {}
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content) const
@@ -134,6 +140,7 @@ static const struct NotNode : public cmGeneratorExpressionNode
 //----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
+  ConfigurationNode() {}
   virtual int NumExpectedParameters() const { return 0; }
 
   std::string Evaluate(const std::vector<std::string> &,
@@ -147,6 +154,8 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
 //----------------------------------------------------------------------------
 static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
+  ConfigurationTestNode() {}
+
   virtual int NumExpectedParameters() const { return 1; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
@@ -180,6 +189,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 template<bool linker, bool soname, bool dirQual, bool nameQual>
 struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 {
+  TargetFilesystemArtifact() {}
+
   virtual int NumExpectedParameters() const { return 1; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
