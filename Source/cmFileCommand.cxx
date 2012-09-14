@@ -2667,9 +2667,8 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   long inactivity_timeout = 0;
   std::string verboseLog;
   std::string statusVar;
-  std::string caFile;
-  bool checkTLS = false;
-  bool verifyTLS = false;
+  bool tls_verify = this->Makefile->IsOn("CMAKE_TLS_VERIFY");
+  const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
   std::string expectedHash;
   std::string hashMatchMSG;
   cmsys::auto_ptr<cmCryptoHash> hash;
@@ -2728,8 +2727,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       ++i;
       if(i != args.end())
         {
-        verifyTLS = cmSystemTools::IsOn(i->c_str());
-        checkTLS = true;
+        tls_verify = cmSystemTools::IsOn(i->c_str());
         }
       else
         {
@@ -2742,7 +2740,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       ++i;
       if(i != args.end())
         {
-        caFile = *i;
+        cainfo = i->c_str();
         }
       else
         {
@@ -2866,37 +2864,19 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   check_curl_result(res, "DOWNLOAD cannot set debug function: ");
 
   // check to see if TLS verification is requested
-  const char* verifyValue =
-    this->Makefile->GetDefinition("CMAKE_TLS_VERIFY");
-  // if there is a cmake variable or if the command has TLS_VERIFY requested
-  if(verifyValue || checkTLS)
+  if(tls_verify)
     {
-    // the args to the command come first
-    bool verify = verifyTLS;
-    if(!verify && verifyValue)
-      {
-      verify = cmSystemTools::IsOn(verifyValue);
-      }
-    if(verify)
-      {
-      res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-      check_curl_result(res, "Unable to set TLS/SSL Verify on: ");
-      }
-    else
-      {
-      res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-      check_curl_result(res, "Unable to set TLS/SSL Verify off: ");
-      }
+    res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
+    check_curl_result(res, "Unable to set TLS/SSL Verify on: ");
+    }
+  else
+    {
+    res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+    check_curl_result(res, "Unable to set TLS/SSL Verify off: ");
     }
   // check to see if a CAINFO file has been specified
-  const char* cainfo =
-    this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
   // command arg comes first
-  if(caFile.size())
-    {
-    cainfo = caFile.c_str();
-    }
-  if(cainfo)
+  if(cainfo && *cainfo)
     {
     res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo);
     check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
