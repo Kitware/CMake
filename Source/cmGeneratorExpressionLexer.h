@@ -45,14 +45,14 @@ public:
 
   std::vector<cmGeneratorExpressionToken> Tokenize(const char *input);
 
-  bool GetSawGeneratorExpression()
+  bool GetSawGeneratorExpression() const
   {
     return this->SawGeneratorExpression;
   }
 
 private:
-  bool SawGeneratorExpression;
   bool SawBeginExpression;
+  bool SawGeneratorExpression;
 };
 
 #endif
