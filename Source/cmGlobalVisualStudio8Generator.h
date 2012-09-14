@@ -79,7 +79,7 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name,
+    std::ostream& fout, const char* name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const char* platformMapping = NULL);
   virtual bool ComputeTargetDepends();
