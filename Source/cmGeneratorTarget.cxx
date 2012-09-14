@@ -315,3 +315,79 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
 {
   return this->Target->GetIncludeDirectories(config);
 }
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GenerateTargetManifest(const char* config)
+{
+  if (this->Target->IsImported())
+    {
+    return;
+    }
+  cmMakefile* mf = this->Target->GetMakefile();
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+
+  // Get the names.
+  std::string name;
+  std::string soName;
+  std::string realName;
+  std::string impName;
+  std::string pdbName;
+  if(this->GetType() == cmTarget::EXECUTABLE)
+    {
+    this->Target->GetExecutableNames(name, realName, impName, pdbName,
+                                     config);
+    }
+  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    this->Target->GetLibraryNames(name, soName, realName, impName, pdbName,
+                                  config);
+    }
+  else
+    {
+    return;
+    }
+
+  // Get the directory.
+  std::string dir = this->Target->GetDirectory(config, false);
+
+  // Add each name.
+  std::string f;
+  if(!name.empty())
+    {
+    f = dir;
+    f += "/";
+    f += name;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!soName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += soName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!realName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += realName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!pdbName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += pdbName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!impName.empty())
+    {
+    f = this->Target->GetDirectory(config, true);
+    f += "/";
+    f += impName;
+    gg->AddToManifest(config? config:"", f);
+    }
+}

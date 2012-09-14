@@ -410,9 +410,6 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0);
 
-  /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const char* config);
-
   /**
    * Compute whether this target must be relinked before installing.
    */

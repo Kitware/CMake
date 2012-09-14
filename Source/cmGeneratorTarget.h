@@ -74,6 +74,9 @@ public:
 
   bool IsSystemIncludeDirectory(const char *dir, const char *config);
 
+  /** Add the target output files to the global generator manifest.  */
+  void GenerateTargetManifest(const char* config);
+
   void ClassifySources();
   void LookupObjectLibraries();
 
