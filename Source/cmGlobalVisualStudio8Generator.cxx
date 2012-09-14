@@ -374,7 +374,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name,
+  std::ostream& fout, const char* name, cmTarget::TargetType type,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
@@ -392,6 +392,15 @@ cmGlobalVisualStudio8Generator
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Build.0 = " << *i << "|"
+           << (platformMapping ? platformMapping : this->GetPlatformName())
+           << "\n";
+      }
+    bool needsDeploy = (type == cmTarget::EXECUTABLE ||
+                        type == cmTarget::SHARED_LIBRARY);
+    if(this->TargetsWindowsCE() && needsDeploy)
+      {
+      fout << "\t\t{" << guid << "}." << *i
+           << "|" << this->GetPlatformName() << ".Deploy.0 = " << *i << "|"
            << (platformMapping ? platformMapping : this->GetPlatformName())
            << "\n";
       }
