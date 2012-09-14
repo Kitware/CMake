@@ -26,8 +26,8 @@
 #    [URL /.../src.tgz]          # Full path or URL of source
 #    [URL_HASH ALGO=value]       # Hash of file at URL
 #    [URL_MD5 md5]               # Equivalent to URL_HASH MD5=md5
-#    [SSL_VERIFYPEER bool]       # Should certificate for https be checked
-#    [CAINFO_FILE file]          # Path to a certificate authority file
+#    [TLS_VERIFY bool]           # Should certificate for https be checked
+#    [TLS_CAINFO file]           # Path to a certificate authority file
 #    [TIMEOUT seconds]           # Time allowed for file download operations
 #   #--Update/Patch step----------
 #    [UPDATE_COMMAND cmd...]     # Source work-tree update command
@@ -401,7 +401,7 @@ endif()
 endfunction()
 
 
-function(_ep_write_downloadfile_script script_filename remote local timeout hash ssl_verify cainfo_file)
+function(_ep_write_downloadfile_script script_filename remote local timeout hash tls_verify tls_cainfo)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
     set(timeout_msg "${timeout} seconds")
@@ -416,25 +416,25 @@ function(_ep_write_downloadfile_script script_filename remote local timeout hash
     set(hash_args "# no EXPECTED_HASH")
   endif()
   # check for curl globals in the project
-  if(DEFINED CMAKE_CURLOPT_SSL_VERIFYPEER)
-    set(ssl_verify "set(CMAKE_CURLOPT_SSL_VERIFYPEER ${CMAKE_CURLOPT_SSL_VERIFYPEER})")
+  if(DEFINED CMAKE_TLS_VERIFY)
+    set(tls_verify "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
   endif()
-  if(DEFINED CMAKE_CURLOPT_CAINFO_FILE)
-    set(ssl_cainfo "set(CMAKE_CURLOPT_CAINFO_FILE \"${CMAKE_CURLOPT_CAINFO_FILE}\")")
+  if(DEFINED CMAKE_TLS_CAINFO)
+    set(tls_cainfo "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
   endif()
 
   # now check for curl locals so that the local values
   # will override the globals
 
-  # check for ssl_verify argument
-  string(LENGTH "${ssl_verify}" ssl_verify_len)
-  if(ssl_verify_len GREATER 0)
-    set(ssl_verify "set(CMAKE_CURLOPT_SSL_VERIFYPEER ${ssl_verify})")
+  # check for tls_verify argument
+  string(LENGTH "${tls_verify}" tls_verify_len)
+  if(tls_verify_len GREATER 0)
+    set(tls_verify "set(CMAKE_TLS_VERIFY ${tls_verify})")
   endif()
-  # check for cainfo_file argument
-  string(LENGTH "${cainfo_file}" cainfo_file_len)
-  if(cainfo_file_len GREATER 0)
-    set(ssl_cainfo "set(CMAKE_CURLOPT_CAINFO_FILE \"${cainfo_file}\")")
+  # check for tls_cainfo argument
+  string(LENGTH "${tls_cainfo}" tls_cainfo_len)
+  if(tls_cainfo_len GREATER 0)
+    set(tls_cainfo "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
 
   file(WRITE ${script_filename}
@@ -443,8 +443,8 @@ function(_ep_write_downloadfile_script script_filename remote local timeout hash
      dst='${local}'
      timeout='${timeout_msg}'\")
 
-${ssl_verify}
-${ssl_cainfo}
+${tls_verify}
+${tls_cainfo}
 
 file(DOWNLOAD
   \"${remote}\"
@@ -1307,10 +1307,10 @@ function(_ep_add_download_command name)
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
-        get_property(ssl_verify TARGET ${name} PROPERTY _EP_SSL_VERIFYPEER)
-        get_property(cainfo_file TARGET ${name} PROPERTY _EP_CAINFO_FILE)
+        get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+        get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
         _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake"
-          "${url}" "${file}" "${timeout}" "${hash}" "${ssl_verify}" "${cainfo_file}")
+          "${url}" "${file}" "${timeout}" "${hash}" "${tls_verify}" "${tls_cainfo}")
         set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
           COMMAND)
         set(comment "Performing download step (download, verify and extract) for '${name}'")

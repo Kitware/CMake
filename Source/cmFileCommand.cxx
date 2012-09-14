@@ -2668,8 +2668,8 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   std::string verboseLog;
   std::string statusVar;
   std::string caFile;
-  bool checkSSL = false;
-  bool verifySSL = false;
+  bool checkTLS = false;
+  bool verifyTLS = false;
   std::string expectedHash;
   std::string hashMatchMSG;
   cmsys::auto_ptr<cmCryptoHash> hash;
@@ -2723,21 +2723,21 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         }
       statusVar = *i;
       }
-    else if(*i == "SSL_VERIFY")
+    else if(*i == "TLS_VERIFY")
       {
       ++i;
       if(i != args.end())
         {
-        verifySSL = cmSystemTools::IsOn(i->c_str());
-        checkSSL = true;
+        verifyTLS = cmSystemTools::IsOn(i->c_str());
+        checkTLS = true;
         }
       else
         {
-        this->SetError("SSL_VERIFY missing bool value.");
+        this->SetError("TLS_VERIFY missing bool value.");
         return false;
         }
       }
-    else if(*i == "SSL_CAINFO_FILE")
+    else if(*i == "TLS_CAINFO")
       {
       ++i;
       if(i != args.end())
@@ -2746,7 +2746,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         }
       else
         {
-        this->SetError("SSL_CAFILE missing file value.");
+        this->SetError("TLS_CAFILE missing file value.");
         return false;
         }
       }
@@ -2865,14 +2865,14 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "DOWNLOAD cannot set debug function: ");
 
-  // check to see if SSL verification is requested
+  // check to see if TLS verification is requested
   const char* verifyValue =
-    this->Makefile->GetDefinition("CMAKE_CURLOPT_SSL_VERIFYPEER");
-  // if there is a cmake variable or if the command has SSL_VERIFY requested
-  if(verifyValue || checkSSL)
+    this->Makefile->GetDefinition("CMAKE_TLS_VERIFY");
+  // if there is a cmake variable or if the command has TLS_VERIFY requested
+  if(verifyValue || checkTLS)
     {
     // the args to the command come first
-    bool verify = verifySSL;
+    bool verify = verifyTLS;
     if(!verify && verifyValue)
       {
       verify = cmSystemTools::IsOn(verifyValue);
@@ -2880,17 +2880,17 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     if(verify)
       {
       res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-      check_curl_result(res, "Unable to set SSL Verify on: ");
+      check_curl_result(res, "Unable to set TLS/SSL Verify on: ");
       }
     else
       {
       res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-      check_curl_result(res, "Unable to set SSL Verify off: ");
+      check_curl_result(res, "Unable to set TLS/SSL Verify off: ");
       }
     }
   // check to see if a CAINFO file has been specified
   const char* cainfo =
-    this->Makefile->GetDefinition("CMAKE_CURLOPT_CAINFO_FILE");
+    this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
   // command arg comes first
   if(caFile.size())
     {
@@ -2899,7 +2899,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   if(cainfo)
     {
     res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo);
-    check_curl_result(res, "Unable to set SSL Verify CAINFO: ");
+    check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
     }
 
   cmFileCommandVectorOfChar chunkDebug;
