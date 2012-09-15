@@ -546,7 +546,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
     this->LocalGenerator
-      ->OutputLinkLibraries(linklibs, *this->Target, relink);
+      ->OutputLinkLibraries(linklibs, *this->GeneratorTarget, relink);
     }
 
   // Construct object file lists that may be needed to expand the

@@ -319,7 +319,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
+  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->GeneratorTarget,
+                                            relink);
 
   // Construct object file lists that may be needed to expand the
   // rule.

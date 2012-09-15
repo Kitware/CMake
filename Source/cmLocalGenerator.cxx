@@ -679,7 +679,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
   std::string linkLibs; // should be set
   std::string flags; // should be set
   std::string linkFlags; // should be set
-  this->GetTargetFlags(linkLibs, flags, linkFlags, *target.Target);
+  this->GetTargetFlags(linkLibs, flags, linkFlags, &target);
   cmLocalGenerator::RuleVariables vars;
   vars.Language = llang;
   vars.Objects = objs.c_str();
@@ -1451,7 +1451,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
                                  std::string& flags,
                                  std::string& linkFlags,
-                                 cmTarget& target)
+                                 cmGeneratorTarget* target)
 {
   std::string buildType =
     this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
@@ -1459,12 +1459,12 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
   const char* libraryLinkVariable =
     "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
-  switch(target.GetType())
+  switch(target->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
       {
       const char* targetLinkFlags =
-        target.GetProperty("STATIC_LIBRARY_FLAGS");
+        target->GetProperty("STATIC_LIBRARY_FLAGS");
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
@@ -1474,7 +1474,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         std::string build = "STATIC_LIBRARY_FLAGS_";
         build += buildType;
-        targetLinkFlags = target.GetProperty(build.c_str());
+        targetLinkFlags = target->GetProperty(build.c_str());
         if(targetLinkFlags)
           {
           linkFlags += targetLinkFlags;
@@ -1500,7 +1500,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(this->Makefile->IsOn("WIN32") &&
          !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
         {
-        const std::vector<cmSourceFile*>& sources = target.GetSourceFiles();
+        const std::vector<cmSourceFile*>& sources = target->GetSourceFiles();
         for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
             i != sources.end(); ++i)
           {
@@ -1515,7 +1515,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
             }
           }
         }
-      const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
+      const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
@@ -1525,7 +1525,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         std::string configLinkFlags = "LINK_FLAGS_";
         configLinkFlags += buildType;
-        targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
+        targetLinkFlags = target->GetProperty(configLinkFlags.c_str());
         if(targetLinkFlags)
           {
           linkFlags += targetLinkFlags;
@@ -1533,7 +1533,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           }
         }
       cmOStringStream linklibsStr;
-      this->OutputLinkLibraries(linklibsStr, target, false);
+      this->OutputLinkLibraries(linklibsStr, *target, false);
       linkLibs = linklibsStr.str();
       }
       break;
@@ -1549,17 +1549,17 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build.c_str());
         linkFlags += " ";
         }
-      const char* linkLanguage = target.GetLinkerLanguage();
+      const char* linkLanguage = target->Target->GetLinkerLanguage();
       if(!linkLanguage)
         {
         cmSystemTools::Error
           ("CMake can not determine linker language for target:",
-           target.GetName());
+           target->Target->GetName());
         return;
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
       cmOStringStream linklibs;
-      this->OutputLinkLibraries(linklibs, target, false);
+      this->OutputLinkLibraries(linklibs, *target, false);
       linkLibs = linklibs.str();
       if(cmSystemTools::IsOn
          (this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
@@ -1569,7 +1569,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(sFlagVar.c_str());
         linkFlags += " ";
         }
-      if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
+      if ( target->GetPropertyAsBool("WIN32_EXECUTABLE") )
         {
         linkFlags +=
           this->Makefile->GetSafeDefinition("CMAKE_CREATE_WIN32_EXE");
@@ -1581,7 +1581,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           this->Makefile->GetSafeDefinition("CMAKE_CREATE_CONSOLE_EXE");
         linkFlags += " ";
         }
-      if (target.IsExecutableWithExports())
+      if (target->Target->IsExecutableWithExports())
         {
         std::string exportFlagVar = "CMAKE_EXE_EXPORTS_";
         exportFlagVar += linkLanguage;
@@ -1591,7 +1591,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           this->Makefile->GetSafeDefinition(exportFlagVar.c_str());
         linkFlags += " ";
         }
-      const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
+      const char* targetLinkFlags = target->GetProperty("LINK_FLAGS");
       if(targetLinkFlags)
         {
         linkFlags += targetLinkFlags;
@@ -1601,7 +1601,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         std::string configLinkFlags = "LINK_FLAGS_";
         configLinkFlags += buildType;
-        targetLinkFlags = target.GetProperty(configLinkFlags.c_str());
+        targetLinkFlags = target->GetProperty(configLinkFlags.c_str());
         if(targetLinkFlags)
           {
           linkFlags += targetLinkFlags;
@@ -1653,12 +1653,11 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
  * to the name of the library.  This will not link a library against itself.
  */
 void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                           cmTarget& tgt,
+                                           cmGeneratorTarget& tgt,
                                            bool relink)
 {
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmGeneratorTarget* gtgt = this->GlobalGenerator->GetGeneratorTarget(&tgt);
-  cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(config);
+  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
   if(!pcli)
     {
     return;
@@ -1679,7 +1678,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
   linkFlagsVar += linkLanguage;
   linkFlagsVar += "_FLAGS";
-  if( gtgt->GetType() == cmTarget::EXECUTABLE )
+  if( tgt.GetType() == cmTarget::EXECUTABLE )
     {
     linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar.c_str());
     linkLibs += " ";

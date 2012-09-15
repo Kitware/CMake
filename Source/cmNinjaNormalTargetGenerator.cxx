@@ -423,7 +423,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
                                             vars["LINK_FLAGS"],
-                                            *this->GetTarget());
+                                            this->GetGeneratorTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
 
