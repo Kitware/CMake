@@ -2953,25 +2953,6 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetCreateRuleVariable()
-{
-  switch(this->GetType())
-    {
-    case cmTarget::STATIC_LIBRARY:
-      return "_CREATE_STATIC_LIBRARY";
-    case cmTarget::SHARED_LIBRARY:
-      return "_CREATE_SHARED_LIBRARY";
-    case cmTarget::MODULE_LIBRARY:
-      return "_CREATE_SHARED_MODULE";
-    case cmTarget::EXECUTABLE:
-      return "_LINK_EXECUTABLE";
-    default:
-      break;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::GetSuffixVariableInternal(bool implib)
 {
   switch(this->GetType())

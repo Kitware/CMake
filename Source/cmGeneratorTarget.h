@@ -69,6 +69,11 @@ public:
 
   void GetAppleArchs(const char* config,
                      std::vector<std::string>& archVec);
+
+  ///! Return the rule variable used to create this type of target,
+  //  need to add CMAKE_(LANG) for full name.
+  const char* GetCreateRuleVariable();
+
 private:
   void ClassifySources();
   void LookupObjectLibraries();

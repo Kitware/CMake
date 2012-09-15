@@ -670,7 +670,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
     }
   std::string createRule = "CMAKE_";
   createRule += llang;
-  createRule += target.Target->GetCreateRuleVariable();
+  createRule += target.GetCreateRuleVariable();
   std::string targetName = target.Target->GetFullName();
   // Executable :
   // Shared Library:

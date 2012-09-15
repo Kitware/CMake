@@ -336,3 +336,22 @@ void cmGeneratorTarget::GetAppleArchs(const char* config,
     cmSystemTools::ExpandListArgument(std::string(archs), archVec);
     }
 }
+
+//----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetCreateRuleVariable()
+{
+  switch(this->GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      return "_CREATE_STATIC_LIBRARY";
+    case cmTarget::SHARED_LIBRARY:
+      return "_CREATE_SHARED_LIBRARY";
+    case cmTarget::MODULE_LIBRARY:
+      return "_CREATE_SHARED_MODULE";
+    case cmTarget::EXECUTABLE:
+      return "_LINK_EXECUTABLE";
+    default:
+      break;
+    }
+  return "";
+}
