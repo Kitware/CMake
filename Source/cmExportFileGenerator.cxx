@@ -128,7 +128,9 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 void
 cmExportFileGenerator
 ::SetImportDetailProperties(const char* config, std::string const& suffix,
-                            cmTarget* target, ImportPropertyMap& properties)
+                            cmTarget* target, ImportPropertyMap& properties,
+                            std::vector<std::string>& missingTargets
+                           )
 {
   // Get the makefile in which to lookup target information.
   cmMakefile* mf = target->GetMakefile();
@@ -164,13 +166,13 @@ cmExportFileGenerator
     {
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
-                                iface->Languages, properties);
+                                iface->Languages, properties, missingTargets);
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                                iface->Libraries, properties);
+                                iface->Libraries, properties, missingTargets);
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
-                                iface->SharedDeps, properties);
+                                iface->SharedDeps, properties, missingTargets);
     if(iface->Multiplicity > 0)
       {
       std::string prop = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
@@ -189,7 +191,9 @@ cmExportFileGenerator
                         cmTarget* target,
                         const char* propName,
                         std::vector<std::string> const& libs,
-                        ImportPropertyMap& properties)
+                        ImportPropertyMap& properties,
+                        std::vector<std::string>& missingTargets
+                       )
 {
   // Skip the property if there are no libraries.
   if(libs.empty())
@@ -234,8 +238,10 @@ cmExportFileGenerator
 
         if (targetOccurrences == 1)
           {
-          link_libs += namespaces[0];
-          link_libs += *li;
+          std::string missingTarget = namespaces[0];
+          missingTarget += *li;
+          link_libs += missingTarget;
+          missingTargets.push_back(missingTarget);
           }
         else
           {
@@ -435,6 +441,23 @@ cmExportFileGenerator
     }
   os << "  )\n"
      << "\n";
+}
+
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
+                                const std::vector<std::string>& missingTargets)
+{
+  os << "# Make sure the targets which have been exported in some other \n"
+        "# export set exist.\n";
+  for(unsigned int i=0; i<missingTargets.size(); ++i)
+    {
+    os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
+       << "  MESSAGE(FATAL_ERROR \"Required imported target \\\""
+       << missingTargets[i] << "\\\" not found ! \")\n"
+       << "ENDIF()\n";
+    }
+  os << "\n";
 }
 
 
