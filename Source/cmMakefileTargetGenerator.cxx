@@ -1022,7 +1022,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "SET(CMAKE_TARGET_LINKED_INFO_FILES\n";
   std::set<cmTarget const*> emitted;
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+                              this->GeneratorTarget->GetLinkInformation(cfg))
     {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
     for(cmComputeLinkInformation::ItemVector::const_iterator
@@ -1590,7 +1591,8 @@ void cmMakefileTargetGenerator
 
   // Loop over all library dependencies.
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+                              this->GeneratorTarget->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& libDeps = cli->GetDepends();
     for(std::vector<std::string>::const_iterator j = libDeps.begin();

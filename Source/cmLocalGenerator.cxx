@@ -1656,7 +1656,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
                                            bool relink)
 {
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
+  cmGeneratorTarget* gtgt = this->GlobalGenerator->GetGeneratorTarget(&tgt);
+  cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(config);
   if(!pcli)
     {
     return;
@@ -1677,7 +1678,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   std::string linkFlagsVar = "CMAKE_SHARED_LIBRARY_LINK_";
   linkFlagsVar += linkLanguage;
   linkFlagsVar += "_FLAGS";
-  if( tgt.GetType() == cmTarget::EXECUTABLE )
+  if( gtgt->GetType() == cmTarget::EXECUTABLE )
     {
     linkLibs = this->Makefile->GetSafeDefinition(linkFlagsVar.c_str());
     linkLibs += " ";

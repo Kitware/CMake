@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 
+class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGlobalGenerator;
 class cmLocalGenerator;
@@ -25,6 +26,7 @@ class cmGeneratorTarget
 {
 public:
   cmGeneratorTarget(cmTarget*);
+  ~cmGeneratorTarget();
 
   int GetType() const;
   const char *GetName() const;
@@ -60,6 +62,10 @@ public:
 
   /** Add the target output files to the global generator manifest.  */
   void GenerateTargetManifest(const char* config);
+
+  std::map<cmStdString, cmComputeLinkInformation*> LinkInformation;
+
+  cmComputeLinkInformation* GetLinkInformation(const char* config);
 
 private:
   void ClassifySources();

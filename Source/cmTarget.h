@@ -22,17 +22,7 @@ class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
-class cmComputeLinkInformation;
 class cmListFileBacktrace;
-
-struct cmTargetLinkInformationMap:
-  public std::map<cmStdString, cmComputeLinkInformation*>
-{
-  typedef std::map<cmStdString, cmComputeLinkInformation*> derived;
-  cmTargetLinkInformationMap() {}
-  cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
-  ~cmTargetLinkInformationMap();
-};
 
 class cmTargetInternals;
 class cmTargetInternalPointer
@@ -397,8 +387,6 @@ public:
   std::string GetInstallNameDirForInstallTree(const char* config,
                                               bool for_xcode = false);
 
-  cmComputeLinkInformation* GetLinkInformation(const char* config);
-
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 
@@ -595,8 +583,6 @@ private:
   struct ImportInfo;
   ImportInfo const* GetImportInfo(const char* config);
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
-
-  cmTargetLinkInformationMap LinkInformation;
 
   bool ComputeLinkInterface(const char* config, LinkInterface& iface);
 
