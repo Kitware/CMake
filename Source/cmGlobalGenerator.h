@@ -127,8 +127,8 @@ public:
   void SetCMakeInstance(cmake *cm);
 
   ///! Get the CMake instance
-  cmake *GetCMakeInstance() { return this->CMakeInstance; };
-  const cmake *GetCMakeInstance() const { return this->CMakeInstance; };
+  cmake *GetCMakeInstance() { return this->CMakeInstance; }
+  const cmake *GetCMakeInstance() const { return this->CMakeInstance; }
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const {
@@ -151,7 +151,7 @@ public:
   void AddInstallComponent(const char* component);
 
   const std::set<cmStdString>* GetInstallComponents() const
-  { return &InstallComponents; }
+    { return &this->InstallComponents; }
 
   ///! Add one installed target to the sets of the exports
   void AddTargetToExports(const char* exportSet, cmTarget* target,
@@ -222,7 +222,7 @@ public:
   /** Get the manifest of all targets that will be built for each
       configuration.  This is valid during generation only.  */
   cmTargetManifest const& GetTargetManifest() const
-  { return this->TargetManifest; }
+    { return this->TargetManifest; }
 
   /** Get the content of a directory.  Directory listings are loaded
       from disk at most once and cached.  During the generation step
@@ -328,8 +328,7 @@ protected:
   cmLocalGenerator* CurrentLocalGenerator;
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
-  std::map<cmLocalGenerator*, std::set<cmTarget *> >
-  LocalGeneratorToTargetMap;
+  std::map<cmLocalGenerator*, std::set<cmTarget *> > LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;
