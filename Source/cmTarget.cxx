@@ -1652,7 +1652,15 @@ cmTargetTraceDependencies
       const cmCompiledGeneratorExpression &cge = ge.Parse(*cli);
       cge.Evaluate(this->Makefile, 0, true);
       std::set<cmTarget*> geTargets = cge.GetTargets();
-      targets.insert(geTargets.begin(), geTargets.end());
+      // A handful of machines on the dashboard don't have the
+      // iterator overload below, so we have to do it manually.
+//       targets.insert(geTargets.begin(), geTargets.end());
+      std::set<cmTarget*>::const_iterator it = geTargets.begin();
+      const std::set<cmTarget*>::const_iterator end = geTargets.end();
+      for ( ; it != end; ++it)
+        {
+        targets.insert(*it);
+        }
       }
     }
 
