@@ -2907,7 +2907,8 @@ const char *cmTarget::GetProperty(const char* prop,
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
       // CMake time.
-      this->SetProperty("LOCATION", this->GetLocation(0));
+      this->Properties.SetProperty("LOCATION", this->GetLocation(0),
+                                   cmProperty::TARGET);
       }
 
     // Support "LOCATION_<CONFIG>".
@@ -2918,7 +2919,9 @@ const char *cmTarget::GetProperty(const char* prop,
         return 0;
         }
       std::string configName = prop+9;
-      this->SetProperty(prop, this->GetLocation(configName.c_str()));
+      this->Properties.SetProperty(prop,
+                                   this->GetLocation(configName.c_str()),
+                                   cmProperty::TARGET);
       }
     else
       {
@@ -2933,7 +2936,9 @@ const char *cmTarget::GetProperty(const char* prop,
             {
             return 0;
             }
-          this->SetProperty(prop, this->GetLocation(configName.c_str()));
+          this->Properties.SetProperty(prop,
+                                       this->GetLocation(configName.c_str()),
+                                       cmProperty::TARGET);
           }
         }
       }
@@ -3038,7 +3043,8 @@ const char *cmTarget::GetProperty(const char* prop,
       // Append this list entry.
       ss << sname;
       }
-    this->SetProperty("SOURCES", ss.str().c_str());
+    this->Properties.SetProperty("SOURCES", ss.str().c_str(),
+                                 cmProperty::TARGET);
     }
 
   // the type property returns what type the target is
