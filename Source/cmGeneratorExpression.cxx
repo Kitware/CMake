@@ -72,7 +72,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
     return this->Input;
     }
 
-  this->Output.clear();
+  this->Output = "";
 
   std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
                                                   = this->Evaluators.begin();
@@ -91,7 +91,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
     this->Output += (*it)->Evaluate(&context);
     if (context.HadError)
       {
-      this->Output.clear();
+      this->Output = "";
       break;
       }
     }
