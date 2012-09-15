@@ -25,3 +25,8 @@ void cmExportSet::AddTargetExport(cmTargetExport const* te)
 {
   this->TargetExports.push_back(te);
 }
+
+void cmExportSet::AddInstallation(cmInstallExportGenerator const* installation)
+{
+  this->Installations.push_back(installation);
+}

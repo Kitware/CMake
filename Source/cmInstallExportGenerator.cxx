@@ -42,6 +42,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   ,Makefile(mf)
 {
   this->EFGen = new cmExportInstallFileGenerator(this);
+  exportSet->AddInstallation(this);
 }
 
 //----------------------------------------------------------------------------

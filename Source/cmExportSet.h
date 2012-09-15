@@ -14,6 +14,7 @@
 
 #include "cmSystemTools.h"
 class cmTargetExport;
+class cmInstallExportGenerator;
 
 /// A set of targets that were installed with the same EXPORT parameter.
 class cmExportSet
@@ -26,13 +27,20 @@ public:
 
   void AddTargetExport(cmTargetExport const* tgt);
 
+  void AddInstallation(cmInstallExportGenerator const* installation);
+
   std::string const& GetName() const { return this->Name; }
+
   std::vector<cmTargetExport const*> const* GetTargetExports() const
      { return &this->TargetExports; }
+
+  std::vector<cmInstallExportGenerator const*> const* GetInstallations() const
+     { return &this->Installations; }
 
 private:
   std::vector<cmTargetExport const*> TargetExports;
   std::string Name;
+  std::vector<cmInstallExportGenerator const*> Installations;
 };
 
 #endif
