@@ -555,9 +555,9 @@ void cmLocalGenerator::GenerateTargetManifest()
 }
 
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
-                                                      const char* lang,
-                                                      cmSourceFile& source,
-                                                      cmTarget& target)
+                                                    const char* lang,
+                                                    cmSourceFile& source,
+                                                    cmGeneratorTarget& target)
 {
   std::string objectDir = cmSystemTools::GetFilenamePath(std::string(ofname));
   objectDir = this->Convert(objectDir.c_str(),START_OUTPUT,SHELL);
@@ -577,7 +577,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += " ";
     {
     std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, &target, lang);
+    this->GetIncludeDirectories(includes, target.Target, lang);
     flags += this->GetIncludeFlags(includes, lang);
     }
   flags += this->Makefile->GetDefineFlags();
@@ -636,7 +636,8 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     );
 }
 
-void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
+void cmLocalGenerator::AddBuildTargetRule(const char* llang,
+                                          cmGeneratorTarget& target)
 {
   cmStdString objs;
   std::vector<std::string> objVector;
@@ -669,8 +670,8 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
     }
   std::string createRule = "CMAKE_";
   createRule += llang;
-  createRule += target.GetCreateRuleVariable();
-  std::string targetName = target.GetFullName();
+  createRule += target.Target->GetCreateRuleVariable();
+  std::string targetName = target.Target->GetFullName();
   // Executable :
   // Shared Library:
   // Static Library:
@@ -678,7 +679,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
   std::string linkLibs; // should be set
   std::string flags; // should be set
   std::string linkFlags; // should be set
-  this->GetTargetFlags(linkLibs, flags, linkFlags, target);
+  this->GetTargetFlags(linkLibs, flags, linkFlags, *target.Target);
   cmLocalGenerator::RuleVariables vars;
   vars.Language = llang;
   vars.Objects = objs.c_str();
@@ -715,7 +716,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
     // Store this command line.
     commandLines.push_back(commandLine);
     }
-  std::string targetFullPath = target.GetFullPath();
+  std::string targetFullPath = target.Target->GetFullPath();
   // Generate a meaningful comment for the command.
   std::string comment = "Linking ";
   comment += llang;
@@ -729,7 +730,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
     comment.c_str(),
     this->Makefile->GetStartOutputDirectory()
     );
-  target.AddSourceFile
+  target.Target->AddSourceFile
     (this->Makefile->GetSource(targetFullPath.c_str()));
 }
 
@@ -737,11 +738,11 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang, cmTarget& target)
 void cmLocalGenerator
 ::CreateCustomTargetsAndCommands(std::set<cmStdString> const& lang)
 {
-  cmTargets &tgts = this->Makefile->GetTargets();
-  for(cmTargets::iterator l = tgts.begin();
+  cmGeneratorTargetsType tgts = this->Makefile->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    cmTarget& target = l->second;
+    cmGeneratorTarget& target = *l->second;
     switch(target.GetType())
       {
       case cmTarget::STATIC_LIBRARY:
@@ -749,12 +750,12 @@ void cmLocalGenerator
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::EXECUTABLE:
         {
-        const char* llang = target.GetLinkerLanguage();
+        const char* llang = target.Target->GetLinkerLanguage();
         if(!llang)
           {
           cmSystemTools::Error
             ("CMake can not determine linker language for target:",
-             target.GetName());
+             target.Target->GetName());
           return;
           }
         // if the language is not in the set lang then create custom
@@ -1780,7 +1781,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
-                                            cmTarget* target,
+                                            cmGeneratorTarget* target,
                                             const char *lang,
                                             const char* config)
 {

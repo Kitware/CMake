@@ -134,7 +134,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->AddFeatureFlags(flags, language.c_str());
 
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                                                  this->GetTarget(),
+                                                  this->GeneratorTarget,
                                                   language.c_str(),
                                                   this->GetConfigName());
 

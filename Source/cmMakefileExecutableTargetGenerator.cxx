@@ -210,7 +210,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add language feature flags.
   this->AddFeatureFlags(flags, linkLanguage);
 
-  this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+  this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                              linkLanguage, this->ConfigName);
 
   // Add target-specific linker flags.

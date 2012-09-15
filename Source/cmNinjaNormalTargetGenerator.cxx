@@ -434,7 +434,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                ? vars["FLAGS"]
                                : vars["ARCH_FLAGS"]);
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                             this->GetTarget(),
+                             this->GetGeneratorTarget(),
                              this->TargetLinkLanguage,
                              this->GetConfigName());
   if (targetType == cmTarget::EXECUTABLE) {

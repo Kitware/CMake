@@ -315,3 +315,24 @@ cmGeneratorTarget::GetLinkInformation(const char* config)
     }
   return i->second;
 }
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetAppleArchs(const char* config,
+                             std::vector<std::string>& archVec)
+{
+  const char* archs = 0;
+  if(config && *config)
+    {
+    std::string defVarName = "OSX_ARCHITECTURES_";
+    defVarName += cmSystemTools::UpperCase(config);
+    archs = this->Target->GetProperty(defVarName.c_str());
+    }
+  if(!archs)
+    {
+    archs = this->Target->GetProperty("OSX_ARCHITECTURES");
+    }
+  if(archs)
+    {
+    cmSystemTools::ExpandListArgument(std::string(archs), archVec);
+    }
+}

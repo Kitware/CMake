@@ -16,6 +16,7 @@
 
 class cmMakefile;
 class cmGlobalGenerator;
+class cmGeneratorTarget;
 class cmTarget;
 class cmTargetManifest;
 class cmSourceFile;
@@ -135,7 +136,7 @@ public:
   std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; };
 
 
-  void AddArchitectureFlags(std::string& flags, cmTarget* target,
+  void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,
                             const char *lang, const char* config);
 
   void AddLanguageFlags(std::string& flags, const char* lang,
@@ -354,12 +355,12 @@ protected:
 
   /** Convert a target to a utility target for unsupported
    *  languages of a generator */
-  void AddBuildTargetRule(const char* llang, cmTarget& target);
+  void AddBuildTargetRule(const char* llang, cmGeneratorTarget& target);
   ///! add a custom command to build a .o file that is part of a target
   void AddCustomCommandToCreateObject(const char* ofname,
                                       const char* lang,
                                       cmSourceFile& source,
-                                      cmTarget& target);
+                                      cmGeneratorTarget& target);
   // Create Custom Targets and commands for unsupported languages
   // The set passed in should contain the languages supported by the
   // generator directly.  Any targets containing files that are not

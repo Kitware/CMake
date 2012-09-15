@@ -1713,7 +1713,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   // Set target-specific architectures.
   std::vector<std::string> archs;
-  target.GetAppleArchs(configName, archs);
+  {
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
+  gtgt->GetAppleArchs(configName, archs);
+  }
   if(!archs.empty())
     {
     // Enable ARCHS attribute.

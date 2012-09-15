@@ -67,6 +67,8 @@ public:
 
   cmComputeLinkInformation* GetLinkInformation(const char* config);
 
+  void GetAppleArchs(const char* config,
+                     std::vector<std::string>& archVec);
 private:
   void ClassifySources();
   void LookupObjectLibraries();

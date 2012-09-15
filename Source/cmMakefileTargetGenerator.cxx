@@ -259,7 +259,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     // Add language feature flags.
     this->AddFeatureFlags(flags, lang);
 
-    this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+    this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                                lang, this->ConfigName);
 
     // Fortran-specific flags computed for this target.
