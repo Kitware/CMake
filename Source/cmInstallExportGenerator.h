@@ -34,7 +34,10 @@ public:
                            cmMakefile* mf);
   ~cmInstallExportGenerator();
 
-  cmExportSet* GetExportSet() {return ExportSet;}
+  cmExportSet* GetExportSet() {return this->ExportSet;}
+
+  const std::string& GetNamespace() const { return this->Namespace; }
+
 protected:
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);

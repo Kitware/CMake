@@ -46,7 +46,8 @@ protected:
                                            const char* config,
                                            std::string const& suffix);
   virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee);
+                                          cmTarget* dependee,
+                                          int occurrences);
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(const char* config,

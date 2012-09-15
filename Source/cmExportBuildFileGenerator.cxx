@@ -135,7 +135,8 @@ cmExportBuildFileGenerator
 void
 cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee)
+                             cmTarget* dependee,
+                             int occurrences)
 {
   if(!this->ExportCommand || !this->ExportCommand->ErrorMessage.empty())
     {
@@ -143,10 +144,20 @@ cmExportBuildFileGenerator
     }
 
   cmOStringStream e;
-  e << "called with target \"" << depender->GetName()
-    << "\" which requires target \"" << dependee->GetName()
-    << "\" that is not in the export list.\n"
-    << "If the required target is not easy to reference in this call, "
-    << "consider using the APPEND option with multiple separate calls.";
+  if (occurrences == 0)
+    {
+    e << "called with target \"" << depender->GetName()
+      << "\" which requires target \"" << dependee->GetName()
+      << "\" that is not in the export list.\n"
+      << "If the required target is not easy to reference in this call, "
+      << "consider using the APPEND option with multiple separate calls.";
+    }
+  else
+    {
+    e << "called with target \"" << depender->GetName()
+      << "\" which requires target \"" << dependee->GetName()
+      << "\" that is exported " << occurrences << " times in other "
+      << "export ""lists.\n";
+    }
   this->ExportCommand->ErrorMessage = e.str();
 }
