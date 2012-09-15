@@ -58,7 +58,8 @@ protected:
                                            const char* config,
                                            std::string const& suffix);
   virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee);
+                                          cmTarget* dependee,
+                                          int occurrences);
 
   /** Generate a per-configuration file for the targets.  */
   bool GenerateImportFileConfig(const char* config);

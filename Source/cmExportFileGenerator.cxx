@@ -11,10 +11,15 @@
 ============================================================================*/
 #include "cmExportFileGenerator.h"
 
+#include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmInstallExportGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetExport.h"
 #include "cmVersion.h"
 
 #include <cmsys/auto_ptr.hxx>
@@ -224,17 +229,28 @@ cmExportFileGenerator
         }
       else
         {
-        // The target is not in the export.
-        if(!this->AppendMode)
+        std::vector<std::string> namespaces = this->FindNamespaces(mf, *li);
+        int targetOccurrences = (int)namespaces.size();
+
+        if (targetOccurrences == 1)
           {
-          // We are not appending, so all exported targets should be
-          // known here.  This is probably user-error.
-          this->ComplainAboutMissingTarget(target, tgt);
+          link_libs += namespaces[0];
+          link_libs += *li;
           }
-        // Assume the target will be exported by another command.
-        // Append it with the export namespace.
-        link_libs += this->Namespace;
-        link_libs += *li;
+        else
+          {
+          // The target is not in the export.
+          if(!this->AppendMode)
+            {
+            // We are not appending, so all exported targets should be
+            // known here.  This is probably user-error.
+            this->ComplainAboutMissingTarget(target, tgt, targetOccurrences);
+            }
+          // Assume the target will be exported by another command.
+          // Append it with the export namespace.
+          link_libs += this->Namespace;
+          link_libs += *li;
+          }
         }
       }
     else
@@ -249,6 +265,48 @@ cmExportFileGenerator
   prop += suffix;
   properties[prop] = link_libs;
 }
+
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmExportFileGenerator::FindNamespaces(cmMakefile* mf,
+                                                       const std::string& name)
+{
+  std::vector<std::string> namespaces;
+  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+  const cmExportSetMap& exportSets = gg->GetExportSets();
+
+  for(cmExportSetMap::const_iterator expIt = exportSets.begin();
+      expIt != exportSets.end();
+      ++expIt)
+    {
+    const cmExportSet* exportSet = expIt->second;
+    std::vector<cmTargetExport const*> const* targets =
+                                                 exportSet->GetTargetExports();
+
+    bool containsTarget = false;
+    for(unsigned int i=0; i<targets->size(); i++)
+      {
+      if (name == (*targets)[i]->Target->GetName())
+        {
+        containsTarget = true;
+        break;
+        }
+      }
+
+    if (containsTarget)
+      {
+      std::vector<cmInstallExportGenerator const*> const* installs =
+                                                 exportSet->GetInstallations();
+      for(unsigned int i=0; i<installs->size(); i++)
+        {
+        namespaces.push_back((*installs)[i]->GetNamespace());
+        }
+      }
+    }
+
+  return namespaces;
+}
+
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::GenerateImportHeaderCode(std::ostream& os,

@@ -83,7 +83,12 @@ protected:
   /** Each subclass knows how to complain about a target that is
       missing from an export set.  */
   virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee) = 0;
+                                          cmTarget* dependee,
+                                          int occurrences) = 0;
+
+  std::vector<std::string> FindNamespaces(cmMakefile* mf,
+                                          const std::string& name);
+
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
