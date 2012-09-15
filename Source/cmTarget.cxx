@@ -799,12 +799,10 @@ std::vector<cmSourceFile*> const& cmTarget::GetSourceFiles()
 void cmTarget::AddSourceFile(cmSourceFile* sf)
 {
   typedef cmTargetInternals::SourceEntriesType SourceEntriesType;
-  SourceEntriesType::iterator i = this->Internal->SourceEntries.find(sf);
-  if(i == this->Internal->SourceEntries.end())
+  if (std::find(this->SourceFiles.begin(), this->SourceFiles.end(), sf)
+                                            == this->SourceFiles.end())
     {
     typedef cmTargetInternals::SourceEntry SourceEntry;
-    SourceEntriesType::value_type entry(sf, SourceEntry());
-    i = this->Internal->SourceEntries.insert(entry).first;
     this->SourceFiles.push_back(sf);
     }
 }
