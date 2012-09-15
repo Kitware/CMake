@@ -205,22 +205,22 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     targetValidator.compile("^[A-Za-z0-9_]+$");
     if (!targetValidator.find(name.c_str()))
       {
-      reportError(context, content->GetOriginalExpression(),
-                  "Expression syntax not recognized.");
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
       return std::string();
       }
     cmTarget* target = context->Makefile->FindTargetToUse(name.c_str());
     if(!target)
       {
-      reportError(context, content->GetOriginalExpression(),
-                  "No target \"" + name + "\"");
+      ::reportError(context, content->GetOriginalExpression(),
+                    "No target \"" + name + "\"");
       return std::string();
       }
     if(target->GetType() >= cmTarget::UTILITY &&
       target->GetType() != cmTarget::UNKNOWN_LIBRARY)
       {
-      reportError(context, content->GetOriginalExpression(),
-                  "Target \"" + name + "\" is not an executable or library.");
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Target \"" + name + "\" is not an executable or library.");
       return std::string();
       }
     context->Targets.insert(target);
@@ -237,9 +237,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       // The file used to link to the target (.so, .lib, .a).
       if(!target->IsLinkable())
         {
-        reportError(context, content->GetOriginalExpression(),
-                    "TARGET_LINKER_FILE is allowed only for libraries and "
-                    "executables with ENABLE_EXPORTS.");
+        ::reportError(context, content->GetOriginalExpression(),
+                      "TARGET_LINKER_FILE is allowed only for libraries and "
+                      "executables with ENABLE_EXPORTS.");
         return std::string();
         }
       result = target->GetFullPath(context->Config,
@@ -250,16 +250,16 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       // The target soname file (.so.1).
       if(target->IsDLLPlatform())
         {
-        reportError(context, content->GetOriginalExpression(),
-                    "TARGET_SONAME_FILE is not allowed "
-                    "for DLL target platforms.");
+        ::reportError(context, content->GetOriginalExpression(),
+                      "TARGET_SONAME_FILE is not allowed "
+                      "for DLL target platforms.");
         return std::string();
         }
       if(target->GetType() != cmTarget::SHARED_LIBRARY)
         {
-        reportError(context, content->GetOriginalExpression(),
-                    "TARGET_SONAME_FILE is allowed only for "
-                    "SHARED libraries.");
+        ::reportError(context, content->GetOriginalExpression(),
+                      "TARGET_SONAME_FILE is allowed only for "
+                      "SHARED libraries.");
         return std::string();
         }
       result = target->GetDirectory(context->Config);
