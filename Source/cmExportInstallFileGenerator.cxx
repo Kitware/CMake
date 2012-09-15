@@ -188,8 +188,9 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
+      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
-                                      te->Target, properties);
+                                      te->Target, properties, missingTargets);
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -198,6 +199,7 @@ cmExportInstallFileGenerator
       //                              properties);
 
       // Generate code in the export file.
+      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, te->Target, properties);
       this->GenerateImportedFileChecksCode(os, te->Target, properties,
                                            importedLocations);
