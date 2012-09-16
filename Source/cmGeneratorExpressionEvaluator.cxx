@@ -220,7 +220,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       target->GetType() != cmTarget::UNKNOWN_LIBRARY)
       {
       ::reportError(context, content->GetOriginalExpression(),
-                    "Target \"" + name + "\" is not an executable or library.");
+                  "Target \"" + name + "\" is not an executable or library.");
       return std::string();
       }
     context->Targets.insert(target);
