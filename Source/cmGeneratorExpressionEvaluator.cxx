@@ -302,7 +302,7 @@ TargetFilesystemArtifact<false, true, true, false> targetSoNameFileDirNode;
 
 //----------------------------------------------------------------------------
 static const
-cmGeneratorExpressionNode* const GetNode(const std::string &identifier)
+cmGeneratorExpressionNode* GetNode(const std::string &identifier)
 {
   if (identifier == "0")
     return &zeroNode;
