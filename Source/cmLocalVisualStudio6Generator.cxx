@@ -862,10 +862,13 @@ cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target)
   // the length threatens this problem.
   unsigned int maxIncludeLength = 3000;
   bool useShortPath = false;
+
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
   for(int j=0; j < 2; ++j)
     {
     std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, &target);
+    this->GetIncludeDirectories(includes, gt);
 
     std::vector<std::string>::iterator i;
     for(i = includes.begin(); i != includes.end(); ++i)

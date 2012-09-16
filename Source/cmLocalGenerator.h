@@ -206,7 +206,7 @@ public:
 
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
-                             cmTarget* target,
+                             cmGeneratorTarget* target,
                              const char* lang = "C");
 
   /** Compute the language used to compile the given source file.  */

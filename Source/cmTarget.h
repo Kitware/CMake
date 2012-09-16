@@ -437,9 +437,6 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
-  /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories();
-
   /** Append to @a base the mac content directory and return it. */
   std::string BuildMacContentDirectory(const std::string& base,
                                        const char* config = 0,

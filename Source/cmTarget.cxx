@@ -4560,30 +4560,6 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmTarget::GetIncludeDirectories()
-{
-  std::vector<std::string> includes;
-  const char *prop = this->GetProperty("INCLUDE_DIRECTORIES");
-  if(prop)
-    {
-    cmSystemTools::ExpandListArgument(prop, includes);
-    }
-
-  std::set<std::string> uniqueIncludes;
-  std::vector<std::string> orderedAndUniqueIncludes;
-  for(std::vector<std::string>::const_iterator
-      li = includes.begin(); li != includes.end(); ++li)
-    {
-    if(uniqueIncludes.insert(*li).second)
-      {
-      orderedAndUniqueIncludes.push_back(*li);
-      }
-    }
-
-  return orderedAndUniqueIncludes;
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkDirectory(const char* config)
 {
   std::string fpath;

@@ -152,7 +152,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Add include directory flags.
   {
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target,
+  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               language.c_str());
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),

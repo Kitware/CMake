@@ -1133,13 +1133,13 @@ void cmGlobalGenerator::CheckLocalGenerators()
     {
     manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
     this->LocalGenerators[i]->ConfigureFinalPass();
-    cmTargets & targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
-    for (cmTargets::iterator l = targets.begin();
+    cmGeneratorTargetsType targets =
+      this->LocalGenerators[i]->GetMakefile()->GetGeneratorTargets();
+    for (cmGeneratorTargetsType::iterator l = targets.begin();
          l != targets.end(); l++)
       {
       const cmTarget::LinkLibraryVectorType& libs =
-        l->second.GetOriginalLinkLibraries();
+        l->second->Target->GetOriginalLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();
           lib != libs.end(); ++lib)
         {
@@ -1155,14 +1155,14 @@ void cmGlobalGenerator::CheckLocalGenerators()
             }
           std::string text = notFoundMap[varName];
           text += "\n    linked by target \"";
-          text += l->second.GetName();
+          text += l->second->GetName();
           text += "\" in directory ";
           text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
           notFoundMap[varName] = text;
           }
         }
       std::vector<std::string> incs;
-      this->LocalGenerators[i]->GetIncludeDirectories(incs, &l->second);
+      this->LocalGenerators[i]->GetIncludeDirectories(incs, l->second);
 
       for( std::vector<std::string>::const_iterator incDir = incs.begin();
             incDir != incs.end(); ++incDir)

@@ -577,7 +577,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   flags += " ";
     {
     std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, target.Target, lang);
+    this->GetIncludeDirectories(includes, &target, lang);
     flags += this->GetIncludeFlags(includes, lang);
     }
   flags += this->Makefile->GetDefineFlags();
@@ -1320,7 +1320,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
-                                             cmTarget* target,
+                                             cmGeneratorTarget* target,
                                              const char* lang)
 {
   // Need to decide whether to automatically include the source and

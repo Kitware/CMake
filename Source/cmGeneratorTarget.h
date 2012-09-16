@@ -74,6 +74,9 @@ public:
   //  need to add CMAKE_(LANG) for full name.
   const char* GetCreateRuleVariable();
 
+  /** Get the include directories for this target.  */
+  std::vector<std::string> GetIncludeDirectories();
+
 private:
   void ClassifySources();
   void LookupObjectLibraries();
