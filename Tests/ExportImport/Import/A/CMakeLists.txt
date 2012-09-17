@@ -1,8 +1,9 @@
+# Import targets from the exported install tree.
+include(${CMAKE_INSTALL_PREFIX}/lib/exp/exp.cmake)
+
 # Import targets from the exported build tree.
 include(${Import_BINARY_DIR}/../Export/ExportBuildTree.cmake)
 
-# Import targets from the exported install tree.
-include(${CMAKE_INSTALL_PREFIX}/lib/exp/exp.cmake)
 
 # Try referencing an executable imported from the install tree.
 add_custom_command(
