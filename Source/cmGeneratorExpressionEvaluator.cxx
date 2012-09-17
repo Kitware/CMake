@@ -179,12 +179,116 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
   }
 } configurationTestNode;
 
-#if defined(__BORLANDC__)
-# pragma warn -8008 /* condition is always true */
-# pragma warn -8066 /* unreachable code */
-// Borland gets confused about the template argument bools
-// used in if statements.
-#endif
+//----------------------------------------------------------------------------
+template<bool linker, bool soname>
+struct TargetFilesystemArtifactResultCreator
+{
+  static std::string Create(cmTarget* target,
+                            cmGeneratorExpressionContext *context,
+                            const GeneratorExpressionContent *content,
+                            bool hadError);
+};
+
+//----------------------------------------------------------------------------
+template<>
+struct TargetFilesystemArtifactResultCreator<false, true>
+{
+  static std::string Create(cmTarget* target,
+                            cmGeneratorExpressionContext *context,
+                            const GeneratorExpressionContent *content,
+                            bool *hadError)
+  {
+    // The target soname file (.so.1).
+    if(target->IsDLLPlatform())
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_SONAME_FILE is not allowed "
+                    "for DLL target platforms.");
+      *hadError = true;
+      return std::string();
+      }
+    if(target->GetType() != cmTarget::SHARED_LIBRARY)
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_SONAME_FILE is allowed only for "
+                    "SHARED libraries.");
+      *hadError = true;
+      return std::string();
+      }
+    std::string result = target->GetDirectory(context->Config);
+    result += "/";
+    result += target->GetSOName(context->Config);
+    return result;
+  }
+};
+
+//----------------------------------------------------------------------------
+template<>
+struct TargetFilesystemArtifactResultCreator<true, false>
+{
+  static std::string Create(cmTarget* target,
+                            cmGeneratorExpressionContext *context,
+                            const GeneratorExpressionContent *content,
+                            bool *hadError)
+  {
+    // The file used to link to the target (.so, .lib, .a).
+    if(!target->IsLinkable())
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_LINKER_FILE is allowed only for libraries and "
+                    "executables with ENABLE_EXPORTS.");
+      *hadError = true;
+      return std::string();
+      }
+    return target->GetFullPath(context->Config,
+                               target->HasImportLibrary());
+  }
+};
+
+//----------------------------------------------------------------------------
+template<>
+struct TargetFilesystemArtifactResultCreator<false, false>
+{
+  static std::string Create(cmTarget* target,
+                            cmGeneratorExpressionContext *context,
+                            const GeneratorExpressionContent *,
+                            bool *)
+  {
+    return target->GetFullPath(context->Config, false, true);
+  }
+};
+
+
+//----------------------------------------------------------------------------
+template<bool dirQual, bool nameQual>
+struct TargetFilesystemArtifactResultGetter
+{
+  static std::string Get(const std::string &result);
+};
+
+//----------------------------------------------------------------------------
+template<>
+struct TargetFilesystemArtifactResultGetter<false, true>
+{
+  static std::string Get(const std::string &result)
+  { return cmSystemTools::GetFilenameName(result); }
+};
+
+//----------------------------------------------------------------------------
+template<>
+struct TargetFilesystemArtifactResultGetter<true, false>
+{
+  static std::string Get(const std::string &result)
+  { return cmSystemTools::GetFilenamePath(result); }
+};
+
+//----------------------------------------------------------------------------
+template<>
+struct TargetFilesystemArtifactResultGetter<false, false>
+{
+  static std::string Get(const std::string &result)
+  { return result; }
+};
 
 //----------------------------------------------------------------------------
 template<bool linker, bool soname, bool dirQual, bool nameQual>
@@ -225,58 +329,19 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       }
     context->Targets.insert(target);
 
-    std::string result;
-
-    // TODO: static_assert(!(linker && soname))
-    if (!linker && !soname)
+    bool hadError;
+    std::string result =
+                TargetFilesystemArtifactResultCreator<linker, soname>::Create(
+                          target,
+                          context,
+                          content,
+                          &hadError);
+    if (hadError)
       {
-        result = target->GetFullPath(context->Config, false, true);
+      return std::string();
       }
-    else if (linker)
-      {
-      // The file used to link to the target (.so, .lib, .a).
-      if(!target->IsLinkable())
-        {
-        ::reportError(context, content->GetOriginalExpression(),
-                      "TARGET_LINKER_FILE is allowed only for libraries and "
-                      "executables with ENABLE_EXPORTS.");
-        return std::string();
-        }
-      result = target->GetFullPath(context->Config,
-                                   target->HasImportLibrary());
-      }
-    else if (soname)
-      {
-      // The target soname file (.so.1).
-      if(target->IsDLLPlatform())
-        {
-        ::reportError(context, content->GetOriginalExpression(),
-                      "TARGET_SONAME_FILE is not allowed "
-                      "for DLL target platforms.");
-        return std::string();
-        }
-      if(target->GetType() != cmTarget::SHARED_LIBRARY)
-        {
-        ::reportError(context, content->GetOriginalExpression(),
-                      "TARGET_SONAME_FILE is allowed only for "
-                      "SHARED libraries.");
-        return std::string();
-        }
-      result = target->GetDirectory(context->Config);
-      result += "/";
-      result += target->GetSOName(context->Config);
-      }
-
-  // TODO: static_assert(!(name && dir))
-  if(nameQual)
-    {
-    return cmSystemTools::GetFilenameName(result);
-    }
-  else if (dirQual)
-    {
-    return cmSystemTools::GetFilenamePath(result);
-    }
-  return result;
+    return
+        TargetFilesystemArtifactResultGetter<dirQual, nameQual>::Get(result);
   }
 };
 
