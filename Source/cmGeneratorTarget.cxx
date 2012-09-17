@@ -379,3 +379,17 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 
   return orderedAndUniqueIncludes;
 }
+
+//----------------------------------------------------------------------------
+const char *cmGeneratorTarget::GetCompileDefinitions(const char *config)
+{
+  if (!config)
+    {
+    return this->Target->GetProperty("COMPILE_DEFINITIONS");
+    }
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName +=
+    cmSystemTools::UpperCase(config);
+
+  return this->Target->GetProperty(defPropName.c_str());
+}

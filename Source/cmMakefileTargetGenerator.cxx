@@ -302,12 +302,11 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->AppendDefines
-      (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"));
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName +=
-      cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
+      (defines, this->GeneratorTarget->GetCompileDefinitions());
+
     this->LocalGenerator->AppendDefines
-      (defines, this->Target->GetProperty(defPropName.c_str()));
+      (defines, this->GeneratorTarget->GetCompileDefinitions(
+                            this->LocalGenerator->ConfigurationName.c_str()));
 
     std::string definesString;
     this->LocalGenerator->JoinDefines(defines, definesString, lang);
