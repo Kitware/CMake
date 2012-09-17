@@ -554,7 +554,7 @@ endif()
 # Qt GUI
 option(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
 if(BUILD_QtDialog)
-  subdirs(QtDialog)
+  add_subdirectory(QtDialog)
 endif()
 
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)
