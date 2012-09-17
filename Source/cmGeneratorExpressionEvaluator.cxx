@@ -185,8 +185,7 @@ struct TargetFilesystemArtifactResultCreator
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
-                            const GeneratorExpressionContent *content,
-                            bool hadError);
+                            const GeneratorExpressionContent *content);
 };
 
 //----------------------------------------------------------------------------
@@ -195,8 +194,7 @@ struct TargetFilesystemArtifactResultCreator<false, true>
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
-                            const GeneratorExpressionContent *content,
-                            bool *hadError)
+                            const GeneratorExpressionContent *content)
   {
     // The target soname file (.so.1).
     if(target->IsDLLPlatform())
@@ -204,7 +202,6 @@ struct TargetFilesystemArtifactResultCreator<false, true>
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is not allowed "
                     "for DLL target platforms.");
-      *hadError = true;
       return std::string();
       }
     if(target->GetType() != cmTarget::SHARED_LIBRARY)
@@ -212,7 +209,6 @@ struct TargetFilesystemArtifactResultCreator<false, true>
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is allowed only for "
                     "SHARED libraries.");
-      *hadError = true;
       return std::string();
       }
     std::string result = target->GetDirectory(context->Config);
@@ -228,8 +224,7 @@ struct TargetFilesystemArtifactResultCreator<true, false>
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
-                            const GeneratorExpressionContent *content,
-                            bool *hadError)
+                            const GeneratorExpressionContent *content)
   {
     // The file used to link to the target (.so, .lib, .a).
     if(!target->IsLinkable())
@@ -237,7 +232,6 @@ struct TargetFilesystemArtifactResultCreator<true, false>
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE is allowed only for libraries and "
                     "executables with ENABLE_EXPORTS.");
-      *hadError = true;
       return std::string();
       }
     return target->GetFullPath(context->Config,
@@ -251,8 +245,7 @@ struct TargetFilesystemArtifactResultCreator<false, false>
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
-                            const GeneratorExpressionContent *,
-                            bool *)
+                            const GeneratorExpressionContent *)
   {
     return target->GetFullPath(context->Config, false, true);
   }
@@ -329,14 +322,12 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       }
     context->Targets.insert(target);
 
-    bool hadError;
     std::string result =
                 TargetFilesystemArtifactResultCreator<linker, soname>::Create(
                           target,
                           context,
-                          content,
-                          &hadError);
-    if (hadError)
+                          content);
+    if (context->HadError)
       {
       return std::string();
       }
