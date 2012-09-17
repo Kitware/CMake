@@ -1681,22 +1681,6 @@ void cmLocalVisualStudio6Generator
 
     this->AppendDefines(
       definesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
-    this->AppendDefines(
-      debugDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"));
-    this->AppendDefines(
-      releaseDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"));
-    this->AppendDefines(
-      minsizeDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
-    this->AppendDefines(
-      debugrelDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
-
-    this->AppendDefines(
-      definesSet,
       target.GetProperty("COMPILE_DEFINITIONS"));
     this->AppendDefines(
       debugDefinesSet,

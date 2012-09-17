@@ -1078,11 +1078,30 @@ void cmGlobalGenerator::CreateGeneratorTargets()
     cmGeneratorTargetsType generatorTargets;
 
     cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
+    const char *noconfig_compile_definitions =
+                                      mf->GetProperty("COMPILE_DEFINITIONS");
+
+    std::vector<std::string> configs;
+    mf->GetConfigurations(configs);
+
     cmTargets& targets = mf->GetTargets();
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+
+      {
+      t->AppendProperty("COMPILE_DEFINITIONS", noconfig_compile_definitions);
+      for(std::vector<std::string>::const_iterator ci = configs.begin();
+          ci != configs.end(); ++ci)
+        {
+        std::string defPropName = "COMPILE_DEFINITIONS_";
+        defPropName += cmSystemTools::UpperCase(*ci);
+        t->AppendProperty(defPropName.c_str(),
+                          mf->GetProperty(defPropName.c_str()));
+        }
+      }
+
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
       this->GeneratorTargets[t] = gt;
       this->ComputeTargetObjects(gt);
