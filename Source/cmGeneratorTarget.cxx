@@ -28,6 +28,36 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
 }
 
 //----------------------------------------------------------------------------
+int cmGeneratorTarget::GetType() const
+{
+  return this->Target->GetType();
+}
+
+//----------------------------------------------------------------------------
+const char *cmGeneratorTarget::GetName() const
+{
+  return this->Target->GetName();
+}
+
+//----------------------------------------------------------------------------
+const char *cmGeneratorTarget::GetProperty(const char *prop)
+{
+  return this->Target->GetProperty(prop);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::GetPropertyAsBool(const char *prop)
+{
+  return this->Target->GetPropertyAsBool(prop);
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles()
+{
+  return this->Target->GetSourceFiles();
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::ClassifySources()
 {
   cmsys::RegularExpression header(CM_HEADER_REGEX);

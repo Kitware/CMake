@@ -26,6 +26,12 @@ class cmGeneratorTarget
 public:
   cmGeneratorTarget(cmTarget*);
 
+  int GetType() const;
+  const char *GetName() const;
+  const char *GetProperty(const char *prop);
+  bool GetPropertyAsBool(const char *prop);
+  std::vector<cmSourceFile*> const& GetSourceFiles();
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
