@@ -1,6 +1,8 @@
 #include "cmDocumentVariables.h"
 #include "cmake.h"
 
+#include <cmsys/ios/sstream>
+
 void cmDocumentVariables::DefineVariables(cmake* cm)
 {
   // Subsection: variables defined by cmake, that give
@@ -995,7 +997,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   int msvc_versions[] = { 60, 70, 71, 80, 90, 100, 110, 0 };
   for (int i = 0; msvc_versions[i] != 0; i ++)
     {
-    const char minor = '0' + (char)(msvc_versions[i] % 10);
+    const char minor = (char)('0' + (msvc_versions[i] % 10));
     cmStdString varName = "MSVC";
     cmsys_ios::ostringstream majorStr;
 
