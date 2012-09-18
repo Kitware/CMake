@@ -9,6 +9,7 @@
 #    [TMP_DIR dir]               # Directory to store temporary files
 #    [STAMP_DIR dir]             # Directory to store step timestamps
 #   #--Download step--------------
+#    [FILENAME fname]            # The downloaded filename.
 #    [DOWNLOAD_DIR dir]          # Directory to store downloaded files
 #    [DOWNLOAD_COMMAND cmd...]   # Command to download source tree
 #    [CVS_REPOSITORY cvsroot]    # CVSROOT of CVS repository
@@ -1104,6 +1105,7 @@ function(_ep_add_download_command name)
   get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
   get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
   get_property(url TARGET ${name} PROPERTY _EP_URL)
+  get_property(fname TARGET ${name} PROPERTY _EP_FILENAME)
 
   # TODO: Perhaps file:// should be copied to download dir before extraction.
   string(REGEX REPLACE "^file://" "" url "${url}")
@@ -1296,7 +1298,9 @@ function(_ep_add_download_command name)
     else()
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
-        string(REGEX MATCH "[^/\\?]*$" fname "${url}")
+        if ("${fname}" STREQUAL "")
+            string(REGEX MATCH "[^/\\?]*$" fname "${url}")
+        endif()
         if(NOT "${fname}" MATCHES "(\\.|=)(bz2|tar|tgz|tar\\.gz|zip)$")
           string(REGEX MATCH "([^/\\?]+(\\.|=)(bz2|tar|tgz|tar\\.gz|zip))/.*$" match_result "${url}")
           set(fname "${CMAKE_MATCH_1}")
