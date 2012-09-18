@@ -14,6 +14,7 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionParser.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 static void reportError(cmGeneratorExpressionContext *context,
@@ -264,7 +265,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *) const
+                       cmGeneratorExpressionDAGChecker *dagCheckerParent
+                      ) const
   {
     if (parameters.size() != 1 && parameters.size() != 2)
       {
@@ -289,6 +291,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       propertyName = parameters.at(1);
       }
+
+    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
+                                               target->GetName(),
+                                               propertyName,
+                                               content,
+                                               dagCheckerParent);
+
+    if (!dagChecker.check())
+      {
+      dagChecker.reportError(context, content->GetOriginalExpression());
+      return std::string();
+      }
+
     const char *prop = target->GetProperty(propertyName.c_str());
     return prop ? prop : "";
   }
