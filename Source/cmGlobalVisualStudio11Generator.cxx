@@ -17,7 +17,10 @@
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator()
 {
   this->FindMakeProgramFile = "CMakeVS11FindMake.cmake";
-  this->ExpressEdition = false; // TODO: VS 11 Express support
+  std::string vc11Express;
+  this->ExpressEdition = cmSystemTools::ReadRegistryValue(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\11.0\\Setup\\VC;"
+    "ProductDir", vc11Express, cmSystemTools::KeyWOW64_32);
   this->PlatformToolset = "v110";
 }
 
