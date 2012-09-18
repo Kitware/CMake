@@ -17,6 +17,8 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 
 #include <assert.h>
 
@@ -289,10 +291,26 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 {
   std::vector<std::string> includes;
   const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
-  if(prop)
+  if(!prop)
     {
-    cmSystemTools::ExpandListArgument(prop, includes);
+    return includes;
     }
+
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                              this->GetName(),
+                                              "INCLUDE_DIRECTORIES", 0, 0);
+
+  cmSystemTools::ExpandListArgument(ge.Parse(prop)
+                                    .Evaluate(this->Makefile,
+                                              config,
+                                              false,
+                                              this,
+                                              &dagChecker),
+                                    includes);
 
   std::set<std::string> uniqueIncludes;
   std::vector<std::string> orderedAndUniqueIncludes;
