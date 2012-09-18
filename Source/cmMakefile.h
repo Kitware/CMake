@@ -535,6 +535,7 @@ public:
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
   cmTarget* FindTargetToUse(const char* name);
+  cmGeneratorTarget* FindGeneratorTargetToUse(const char* name);
 
   /**
    * Mark include directories as system directories.
