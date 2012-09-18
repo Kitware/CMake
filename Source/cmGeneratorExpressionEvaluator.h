@@ -32,6 +32,8 @@ struct cmGeneratorExpressionContext
   bool HadError;
 };
 
+struct cmGeneratorExpressionDAGChecker;
+
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionEvaluator
 {
@@ -46,8 +48,8 @@ struct cmGeneratorExpressionEvaluator
 
   virtual Type GetType() const = 0;
 
-  virtual std::string Evaluate(cmGeneratorExpressionContext *context
-                              ) const = 0;
+  virtual std::string Evaluate(cmGeneratorExpressionContext *context,
+                              cmGeneratorExpressionDAGChecker *) const = 0;
 
 private:
   cmGeneratorExpressionEvaluator(const cmGeneratorExpressionEvaluator &);
@@ -62,7 +64,8 @@ struct TextContent : public cmGeneratorExpressionEvaluator
 
   }
 
-  std::string Evaluate(cmGeneratorExpressionContext *) const
+  std::string Evaluate(cmGeneratorExpressionContext *,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     return std::string(this->Content, this->Length);
   }
@@ -107,7 +110,8 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
     return cmGeneratorExpressionEvaluator::Generator;
   }
 
-  std::string Evaluate(cmGeneratorExpressionContext *context) const;
+  std::string Evaluate(cmGeneratorExpressionContext *context,
+                       cmGeneratorExpressionDAGChecker *) const;
 
   std::string GetOriginalExpression() const;
 
