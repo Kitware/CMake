@@ -2199,9 +2199,9 @@ int cmake::ActualConfigure()
         {"10.0", "Visual Studio 10"},
         {"11.0", "Visual Studio 11"},
         {0, 0}};
-      for(size_t b=0; b < vsVerions.size() && installedCompiler.empty(); b++)
+      for(int i=0; version[i].MSVersion != 0; i++)
         {
-        for(int i =0; version[i].MSVersion != 0; i++)
+        for(size_t b=0; b < vsVerions.size(); b++)
           {
           std::string reg = vsregBase + vsVerions[b] + version[i].MSVersion;
           reg += ";InstallDir]";
@@ -2210,6 +2210,7 @@ int cmake::ActualConfigure()
           if (!(reg == "/registry"))
             {
             installedCompiler = version[i].GeneratorName;
+            break;
             }
           }
         }
