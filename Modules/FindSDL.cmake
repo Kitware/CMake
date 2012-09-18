@@ -133,10 +133,12 @@ endif()
 
 if(SDL_LIBRARY_TEMP)
   # For SDLmain
-  if(NOT SDL_BUILDING_LIBRARY)
-    if(SDLMAIN_LIBRARY)
-      set(SDL_LIBRARY_TEMP ${SDLMAIN_LIBRARY} ${SDL_LIBRARY_TEMP})
+  if(SDLMAIN_LIBRARY AND NOT SDL_BUILDING_LIBRARY)
+    list(FIND SDL_LIBRARY_TEMP "${SDLMAIN_LIBRARY}" _SDL_MAIN_INDEX)
+    if(_SDL_MAIN_INDEX EQUAL -1)
+      list(APPEND SDL_LIBRARY_TEMP "${SDLMAIN_LIBRARY}")
     endif()
+    unset(_SDL_MAIN_INDEX)
   endif()
 
   # For OS X, SDL uses Cocoa as a backend so it must link to Cocoa.
