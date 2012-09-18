@@ -19,17 +19,6 @@ cmGlobalVisualStudio9Win64Generator::cmGlobalVisualStudio9Win64Generator()
   this->ArchitectureId = "x64";
 }
 
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio9Win64Generator::CreateLocalGenerator()
-{
-  cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9);
-  lg->SetPlatformName(this->GetPlatformName());
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
-  lg->SetGlobalGenerator(this);
-  return lg;
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Win64Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
