@@ -2857,6 +2857,9 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
   check_curl_result(res, "DOWNLOAD cannot set http failure option: ");
 
+  res = ::curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/" LIBCURL_VERSION);
+  check_curl_result(res, "DOWNLOAD cannot set user agent option: ");
+
   res = ::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                            cmWriteToFileCallback);
   check_curl_result(res, "DOWNLOAD cannot set write function: ");
