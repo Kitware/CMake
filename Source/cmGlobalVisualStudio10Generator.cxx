@@ -205,6 +205,8 @@ std::string cmGlobalVisualStudio10Generator
     {
     makeCommand += "Debug";
     }
+  makeCommand += " /p:VisualStudioVersion=";
+  makeCommand += this->GetIDEVersion();
   if ( additionalOptions )
     {
     makeCommand += " ";

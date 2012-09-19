@@ -34,15 +34,14 @@ find_program(CMAKE_MAKE_PROGRAM
 
 # if devenv is not found, then use MSBuild.
 # it is expected that if devenv is not found, then we are
-# dealing with Visual Studio Express.  VCExpress has random
-# failures when being run as a command line build tool which
-# causes the compiler checks and try-compile stuff to fail. MSbuild
-# is a better choice for this.  However, VCExpress does not support
-# cross compiling needed for Win CE.
+# dealing with Visual Studio Express.
 if(NOT CMAKE_CROSSCOMPILING)
+  set(_FDIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkDir32]")
+  set(_FVER "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkVer32]")
   find_program(CMAKE_MAKE_PROGRAM
     NAMES MSBuild
     HINTS
+    ${_FDIR}/${_FVER}
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VS;ProductDir]
     "$ENV{SYSTEMROOT}/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;CLR Version]/"
     "c:/WINDOWS/Microsoft.NET/Framework/[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;CLR Version]/"

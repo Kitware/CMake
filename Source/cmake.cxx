@@ -2184,6 +2184,7 @@ int cmake::ActualConfigure()
       std::vector<std::string> vsVerions;
       vsVerions.push_back("VisualStudio\\");
       vsVerions.push_back("VCExpress\\");
+      vsVerions.push_back("WDExpress\\");
       struct VSRegistryEntryName
       {
         const char* MSVersion;
@@ -2196,10 +2197,11 @@ int cmake::ActualConfigure()
         {"8.0", "Visual Studio 8 2005"},
         {"9.0", "Visual Studio 9 2008"},
         {"10.0", "Visual Studio 10"},
+        {"11.0", "Visual Studio 11"},
         {0, 0}};
-      for(size_t b=0; b < vsVerions.size() && installedCompiler.empty(); b++)
+      for(int i=0; version[i].MSVersion != 0; i++)
         {
-        for(int i =0; version[i].MSVersion != 0; i++)
+        for(size_t b=0; b < vsVerions.size(); b++)
           {
           std::string reg = vsregBase + vsVerions[b] + version[i].MSVersion;
           reg += ";InstallDir]";
@@ -2208,6 +2210,7 @@ int cmake::ActualConfigure()
           if (!(reg == "/registry"))
             {
             installedCompiler = version[i].GeneratorName;
+            break;
             }
           }
         }

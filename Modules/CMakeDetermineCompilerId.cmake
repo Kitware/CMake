@@ -143,7 +143,7 @@ Id flags: ${testflags}
       set(id_toolset "")
     endif()
     if("${CMAKE_MAKE_PROGRAM}" MATCHES "[Mm][Ss][Bb][Uu][Ii][Ll][Dd]")
-      set(build /p:Configuration=Debug /p:Platform=@id_arch@)
+      set(build /p:Configuration=Debug /p:Platform=@id_arch@ /p:VisualStudioVersion=${vs_version}.0)
     elseif("${CMAKE_MAKE_PROGRAM}" MATCHES "[Mm][Ss][Dd][Ee][Vv]")
       set(build /make)
     else()
