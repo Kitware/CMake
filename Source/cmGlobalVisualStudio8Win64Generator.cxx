@@ -27,7 +27,7 @@ void cmGlobalVisualStudio8Win64Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.Name = this->GetName();
-  entry.Brief = "Generates Visual Studio .NET 2005 Win64 project files.";
+  entry.Brief = "Generates Visual Studio 8 2005 Win64 project files.";
   entry.Full = "";
 }
 

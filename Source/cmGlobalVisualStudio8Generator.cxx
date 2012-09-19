@@ -48,7 +48,7 @@ void cmGlobalVisualStudio8Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
   entry.Name = this->GetName();
-  entry.Brief = "Generates Visual Studio .NET 2005 project files.";
+  entry.Brief = "Generates Visual Studio 8 2005 project files.";
   entry.Full = "";
 }
 
