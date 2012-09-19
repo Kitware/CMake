@@ -22,4 +22,5 @@ include(Compiler/GNU)
 
 macro(__compiler_clang lang)
   __compiler_gnu(${lang})
+  set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
 endmacro()
