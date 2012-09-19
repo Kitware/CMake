@@ -124,7 +124,7 @@ If neither the QUIET nor REQUIRED options are given then the
 FindXXX.cmake module should look for the package and complain without
 error if the module is not found.
 
-A package can be provide sub-components.
+A package can provide sub-components.
 Those components can be listed after the COMPONENTS (or REQUIRED)
 or OPTIONAL_COMPONENTS keywords.  The set of all listed components will be
 specified in a XXX_FIND_COMPONENTS variable.
