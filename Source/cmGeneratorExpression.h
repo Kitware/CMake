@@ -9,6 +9,10 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+
+#ifndef cmGeneratorExpression_h
+#define cmGeneratorExpression_h
+
 #include "cmStandardIncludes.h"
 
 #include <stack>
@@ -80,3 +84,5 @@ private:
   mutable std::set<cmTarget*> Targets;
   mutable std::string Output;
 };
+
+#endif
