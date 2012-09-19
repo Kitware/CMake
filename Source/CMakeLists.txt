@@ -183,6 +183,12 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
+  cmGeneratorExpressionEvaluator.cxx
+  cmGeneratorExpressionEvaluator.h
+  cmGeneratorExpressionLexer.cxx
+  cmGeneratorExpressionLexer.h
+  cmGeneratorExpressionParser.cxx
+  cmGeneratorExpressionParser.h
   cmGeneratorExpression.cxx
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
