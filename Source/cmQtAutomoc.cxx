@@ -194,8 +194,9 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
       }
     }
 
-  std::vector<std::string> includeDirs = target->GetIncludeDirectories();
-  localGen->GetIncludeDirectories(includeDirs, target, "CXX");
+  std::vector<std::string> includeDirs;
+  cmGeneratorTarget gtgt(target);
+  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX");
   std::string _moc_incs = "";
   const char* sep = "";
   for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
