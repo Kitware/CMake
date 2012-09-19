@@ -167,11 +167,41 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Append old-style preprocessor definition flags.
   this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
 
-  // Add target-specific and source-specific flags.
-  this->LocalGenerator->AppendFlags(flags,
-                                   this->Target->GetProperty("COMPILE_FLAGS"));
-  this->LocalGenerator->AppendFlags(flags,
-                                    source->GetProperty("COMPILE_FLAGS"));
+  // Add target-specific flags.
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
+    {
+    std::string langIncludeExpr = "CMAKE_";
+    langIncludeExpr += language;
+    langIncludeExpr += "_FLAG_REGEX";
+    const char* regex = this->Makefile->
+      GetDefinition(langIncludeExpr.c_str());
+    if(regex)
+      {
+      cmsys::RegularExpression r(regex);
+      std::vector<std::string> args;
+      cmSystemTools::ParseWindowsCommandLine(
+        this->Target->GetProperty("COMPILE_FLAGS"),
+        args);
+      for(std::vector<std::string>::iterator i = args.begin();
+          i != args.end(); ++i)
+        {
+        if(r.find(i->c_str()))
+          {
+          this->LocalGenerator->AppendFlags
+            (flags, i->c_str());
+          }
+        }
+      }
+    else
+      {
+      this->LocalGenerator->AppendFlags
+        (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+      }
+    }
+
+    // Add source file specific flags.
+    this->LocalGenerator->AppendFlags(flags,
+      source->GetProperty("COMPILE_FLAGS"));
 
   // TODO: Handle Apple frameworks.
 
