@@ -97,11 +97,11 @@ protected:
   void CreateGeneratorTarget();
 
   cmTarget* Target;
-  cmGeneratorTarget* GeneratorTarget;
   bool ImportLibrary;
   std::string FilePermissions;
   bool Optional;
   NamelinkModeType NamelinkMode;
+  cmGeneratorTarget* GeneratorTarget;
 };
 
 #endif
