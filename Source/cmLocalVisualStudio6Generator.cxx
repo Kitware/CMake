@@ -862,10 +862,13 @@ cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target)
   // the length threatens this problem.
   unsigned int maxIncludeLength = 3000;
   bool useShortPath = false;
+
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
   for(int j=0; j < 2; ++j)
     {
     std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, &target);
+    this->GetIncludeDirectories(includes, gt);
 
     std::vector<std::string>::iterator i;
     for(i = includes.begin(); i != includes.end(); ++i)
@@ -1676,37 +1679,25 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-    this->AppendDefines(
-      definesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
-    this->AppendDefines(
-      debugDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_DEBUG"));
-    this->AppendDefines(
-      releaseDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELEASE"));
-    this->AppendDefines(
-      minsizeDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
-    this->AppendDefines(
-      debugrelDefinesSet,
-      this->Makefile->GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
+
+    cmGeneratorTarget* gt =
+      this->GlobalGenerator->GetGeneratorTarget(&target);
 
     this->AppendDefines(
       definesSet,
-      target.GetProperty("COMPILE_DEFINITIONS"));
+      gt->GetCompileDefinitions());
     this->AppendDefines(
       debugDefinesSet,
-      target.GetProperty("COMPILE_DEFINITIONS_DEBUG"));
+      gt->GetCompileDefinitions("DEBUG"));
     this->AppendDefines(
       releaseDefinesSet,
-      target.GetProperty("COMPILE_DEFINITIONS_RELEASE"));
+      gt->GetCompileDefinitions("RELEASE"));
     this->AppendDefines(
       minsizeDefinesSet,
-      target.GetProperty("COMPILE_DEFINITIONS_MINSIZEREL"));
+      gt->GetCompileDefinitions("MINSIZEREL"));
     this->AppendDefines(
       debugrelDefinesSet,
-      target.GetProperty("COMPILE_DEFINITIONS_RELWITHDEBINFO"));
+      gt->GetCompileDefinitions("RELWITHDEBINFO"));
 
     std::string defines = " ";
     std::string debugDefines = " ";
@@ -1776,8 +1767,10 @@ void cmLocalVisualStudio6Generator
                      const std::string extraOptions,
                      std::string& options)
 {
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
   // Compute the link information for this configuration.
-  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+  cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
   if(!pcli)
     {
     return;

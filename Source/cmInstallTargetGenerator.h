@@ -15,6 +15,8 @@
 #include "cmInstallGenerator.h"
 #include "cmTarget.h"
 
+class cmGeneratorTarget;
+
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
  */
@@ -92,7 +94,10 @@ protected:
   void AddRanlibRule(std::ostream& os, Indent const& indent,
                      const std::string& toDestDirPath);
 
+  void CreateGeneratorTarget();
+
   cmTarget* Target;
+  cmGeneratorTarget* GeneratorTarget;
   bool ImportLibrary;
   std::string FilePermissions;
   bool Optional;

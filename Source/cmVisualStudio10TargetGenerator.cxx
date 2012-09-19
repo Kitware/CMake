@@ -1452,7 +1452,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   // Replace spaces in libs with ;
   cmSystemTools::ReplaceString(libs, " ", ";");
   cmComputeLinkInformation* pcli =
-    this->Target->GetLinkInformation(config.c_str());
+    this->GeneratorTarget->GetLinkInformation(config.c_str());
   if(!pcli)
     {
     cmSystemTools::Error
@@ -1594,7 +1594,8 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget);
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
