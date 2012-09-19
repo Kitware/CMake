@@ -21,7 +21,6 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
-  this->ArchitectureId = "X86";
 }
 
 //----------------------------------------------------------------------------
@@ -51,14 +50,6 @@ void cmGlobalVisualStudio8Generator
   entry.Name = this->GetName();
   entry.Brief = "Generates Visual Studio .NET 2005 project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC80", "1");
 }
 
 //----------------------------------------------------------------------------

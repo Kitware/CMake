@@ -55,13 +55,6 @@ void cmGlobalVisualStudio7Generator
 
 }
 
-void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  mf->AddDefinition("MSVC70", "1");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
-}
-
 std::string cmGlobalVisualStudio7Generator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName,

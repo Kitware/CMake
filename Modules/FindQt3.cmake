@@ -144,7 +144,7 @@ find_library(QT_QASSISTANTCLIENT_LIBRARY
     lib
   )
 
-# qt 3 should prefer QTDIR over the PATH
+# Qt 3 should prefer QTDIR over the PATH
 find_program(QT_MOC_EXECUTABLE
   NAMES moc-qt3 moc
   HINTS
@@ -168,7 +168,7 @@ if(QT_MOC_EXECUTABLE)
   set ( QT_WRAP_CPP "YES")
 endif()
 
-# qt 3 should prefer QTDIR over the PATH
+# Qt 3 should prefer QTDIR over the PATH
 find_program(QT_UIC_EXECUTABLE
   NAMES uic-qt3 uic
   HINTS

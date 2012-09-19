@@ -160,6 +160,9 @@ CMAKE_PROBLEMATIC_FILES="\
   CMakeSystem.cmake \
   CMakeCCompiler.cmake \
   CMakeCXXCompiler.cmake \
+  */CMakeSystem.cmake \
+  */CMakeCCompiler.cmake \
+  */CMakeCXXCompiler.cmake \
   Source/cmConfigure.h \
   Source/CTest/Curl/config.h \
   Utilities/cmexpat/expatConfig.h \
@@ -199,6 +202,9 @@ CMAKE_CXX_SOURCES="\
   cmInstallDirectoryGenerator \
   cmGeneratedFileStream \
   cmGeneratorTarget \
+  cmGeneratorExpressionEvaluator \
+  cmGeneratorExpressionLexer \
+  cmGeneratorExpressionParser \
   cmGeneratorExpression \
   cmGlobalGenerator \
   cmLocalGenerator \

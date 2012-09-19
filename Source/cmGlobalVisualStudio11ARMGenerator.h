@@ -18,7 +18,7 @@ class cmGlobalVisualStudio11ARMGenerator :
   public cmGlobalVisualStudio11Generator
 {
 public:
-  cmGlobalVisualStudio11ARMGenerator() {}
+  cmGlobalVisualStudio11ARMGenerator();
   static cmGlobalGenerator* New() {
     return new cmGlobalVisualStudio11ARMGenerator; }
 
@@ -31,7 +31,5 @@ public:
 
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
 };
 #endif

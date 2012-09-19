@@ -1,4 +1,4 @@
-# - Find QT 4
+# - Find Qt 4
 # This module can be used to find Qt4.
 # The most important issue is that the Qt4 qmake is available via the system path.
 # This qmake is then used to detect basically everything else.
@@ -482,7 +482,7 @@ endmacro ()
 function(_QT4_QUERY_QMAKE VAR RESULT)
   execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query ${VAR}
     RESULT_VARIABLE return_code
-    OUTPUT_VARIABLE output ERROR_VARIABLE output
+    OUTPUT_VARIABLE output
     OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
   if(NOT return_code)
     file(TO_CMAKE_PATH "${output}" output)
@@ -885,6 +885,18 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
                  NAMES ${QT_MODULE}${QT_LIBINFIX}_debug ${QT_MODULE}${QT_LIBINFIX}d ${QT_MODULE}${QT_LIBINFIX}d4
                  PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
         )
+    if(QT_${_upper_qt_module}_LIBRARY_RELEASE MATCHES "/${QT_MODULE}\\.framework$")
+      if(NOT EXISTS "${QT_${_upper_qt_module}_LIBRARY_RELEASE}/${QT_MODULE}")
+        # Release framework library file does not exist... Force to NOTFOUND:
+        set(QT_${_upper_qt_module}_LIBRARY_RELEASE "QT_${_upper_qt_module}_LIBRARY_RELEASE-NOTFOUND" CACHE FILEPATH "Path to a library." FORCE)
+      endif()
+    endif()
+    if(QT_${_upper_qt_module}_LIBRARY_DEBUG MATCHES "/${QT_MODULE}\\.framework$")
+      if(NOT EXISTS "${QT_${_upper_qt_module}_LIBRARY_DEBUG}/${QT_MODULE}")
+        # Debug framework library file does not exist... Force to NOTFOUND:
+        set(QT_${_upper_qt_module}_LIBRARY_DEBUG "QT_${_upper_qt_module}_LIBRARY_DEBUG-NOTFOUND" CACHE FILEPATH "Path to a library." FORCE)
+      endif()
+    endif()
   endforeach()
 
   # QtUiTools is sometimes not in the same directory as the other found libraries

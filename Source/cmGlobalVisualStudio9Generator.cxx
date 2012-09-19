@@ -23,14 +23,6 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio9Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC90", "1");
-}
-
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";

@@ -54,12 +54,12 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
    unset(gettext_version)
 endif()
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
                                   REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
                                   VERSION_VAR GETTEXT_VERSION_STRING)
 
-include(CMakeParseArguments)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
 function(_GETTEXT_GET_UNIQUE_TARGET_NAME _name _unique_name)
    set(propertyName "_GETTEXT_UNIQUE_COUNTER_${_name}")
@@ -210,11 +210,4 @@ function(GETTEXT_PROCESS_PO_FILES _lang)
 
 endfunction()
 
-if (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE )
-   set(GETTEXT_FOUND TRUE)
-else ()
-   set(GETTEXT_FOUND FALSE)
-   if (GetText_REQUIRED)
-      message(FATAL_ERROR "GetText not found")
-   endif ()
-endif ()
+set(GETTEXT_FOUND ${Gettext_FOUND})

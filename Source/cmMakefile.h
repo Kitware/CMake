@@ -20,6 +20,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmNewLineStyle.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -127,6 +128,8 @@ public:
                  bool fast,
                  const std::vector<std::string> *cmakeArgs,
                  std::string *output);
+
+  bool GetIsSourceFileTryCompile() const;
 
   /**
    * Specify the makefile generator. This is platform/compiler
@@ -517,11 +520,22 @@ public:
    */
   const cmTargets &GetTargets() const { return this->Targets; }
 
+  const cmGeneratorTargetsType &GetGeneratorTargets() const
+    {
+      return this->GeneratorTargets;
+    }
+
+  void SetGeneratorTargets(const cmGeneratorTargetsType &targets)
+    {
+      this->GeneratorTargets = targets;
+    }
+
   cmTarget* FindTarget(const char* name);
 
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
   cmTarget* FindTargetToUse(const char* name);
+  cmGeneratorTarget* FindGeneratorTargetToUse(const char* name);
 
   /**
    * Mark include directories as system directories.
@@ -863,6 +877,7 @@ protected:
 
   // libraries, classes, and executables
   cmTargets Targets;
+  cmGeneratorTargetsType GeneratorTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests

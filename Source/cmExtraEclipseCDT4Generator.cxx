@@ -884,11 +884,13 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
        it != this->GlobalGenerator->GetLocalGenerators().end();
        ++it)
     {
-    cmTargets & targets = (*it)->GetMakefile()->GetTargets();
-    for (cmTargets::iterator l = targets.begin(); l != targets.end(); ++l)
+    cmGeneratorTargetsType targets = (*it)->GetMakefile()
+                                        ->GetGeneratorTargets();
+    for (cmGeneratorTargetsType::iterator l = targets.begin();
+         l != targets.end(); ++l)
       {
       std::vector<std::string> includeDirs;
-      (*it)->GetIncludeDirectories(includeDirs, &l->second);
+      (*it)->GetIncludeDirectories(includeDirs, l->second);
       this->AppendIncludeDirectories(fout, includeDirs, emmited);
       }
     }

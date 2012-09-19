@@ -92,7 +92,8 @@ public:
   static bool GetErrorOccuredFlag()
     {
       return cmSystemTools::s_ErrorOccured ||
-        cmSystemTools::s_FatalErrorOccured;
+        cmSystemTools::s_FatalErrorOccured ||
+        GetInterruptFlag();
     }
   ///! If this is set to true, cmake stops processing commands.
   static void SetFatalErrorOccured()

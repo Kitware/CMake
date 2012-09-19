@@ -47,13 +47,13 @@ endif()
 # it can be found in http://tukaani.org/xz/
 # Avoid using old codebase
 if (LIBLZMA_LIBRARY)
-   include(CheckLibraryExists)
+   include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
    CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY} lzma_auto_decoder "" LIBLZMA_HAS_AUTO_DECODER)
    CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY} lzma_easy_encoder "" LIBLZMA_HAS_EASY_ENCODER)
    CHECK_LIBRARY_EXISTS(${LIBLZMA_LIBRARY} lzma_lzma_preset "" LIBLZMA_HAS_LZMA_PRESET)
 endif ()
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibLZMA  REQUIRED_VARS  LIBLZMA_INCLUDE_DIR
                                                           LIBLZMA_LIBRARY
                                                           LIBLZMA_HAS_AUTO_DECODER

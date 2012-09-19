@@ -22,14 +22,6 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio11Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  mf->AddDefinition("MSVC11", "1");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
-}
-
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";

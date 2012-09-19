@@ -728,18 +728,24 @@ if(CPACK_RPM_USER_FILELIST_INTERNAL)
 
   set(CPACK_RPM_USER_INSTALL_FILES "")
   foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
-    string(REGEX REPLACE "%[A-Za-z\(\)]* " "" F_PATH ${F})
-    string(REGEX MATCH "%[A-Za-z\(\)]*" F_PREFIX ${F})
+    string(REGEX REPLACE "%[A-Za-z0-9\(\),-]* " "" F_PATH ${F})
+    string(REGEX MATCH "%[A-Za-z0-9\(\),-]*" F_PREFIX ${F})
 
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: F_PREFIX=<${F_PREFIX}>, F_PATH=<${F_PATH}>")
+    endif()
     if(F_PREFIX)
-        set(F_PREFIX "${F_PREFIX} ")
+      set(F_PREFIX "${F_PREFIX} ")
     endif()
     # Rebuild the user list file
     set(CPACK_RPM_USER_INSTALL_FILES "${CPACK_RPM_USER_INSTALL_FILES}${F_PREFIX}\"${F_PATH}\"\n")
 
     # Remove from CPACK_RPM_INSTALL_FILES and CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
     list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${F_PATH})
-    list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
+    # ABSOLUTE destination files list may not exists at all
+    if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+      list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
+    endif()
 
   endforeach()
 

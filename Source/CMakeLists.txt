@@ -183,6 +183,12 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
+  cmGeneratorExpressionEvaluator.cxx
+  cmGeneratorExpressionEvaluator.h
+  cmGeneratorExpressionLexer.cxx
+  cmGeneratorExpressionLexer.h
+  cmGeneratorExpressionParser.cxx
+  cmGeneratorExpressionParser.h
   cmGeneratorExpression.cxx
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
@@ -548,7 +554,7 @@ endif()
 # Qt GUI
 option(BUILD_QtDialog "Build Qt dialog for CMake" FALSE)
 if(BUILD_QtDialog)
-  subdirs(QtDialog)
+  add_subdirectory(QtDialog)
 endif()
 
 include (${CMake_BINARY_DIR}/Source/LocalUserOptions.cmake OPTIONAL)

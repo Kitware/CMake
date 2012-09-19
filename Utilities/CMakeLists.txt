@@ -27,7 +27,6 @@ set(MAN_FILES
   )
 set(TEXT_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.txt
-  ${CMake_BINARY_DIR}/Docs/cmake.docbook
   ${CMake_BINARY_DIR}/Docs/cmake-policies.txt
   ${CMake_BINARY_DIR}/Docs/cmake-properties.txt
   ${CMake_BINARY_DIR}/Docs/cmake-variables.txt
@@ -43,6 +42,9 @@ set(HTML_FILES
   ${CMake_BINARY_DIR}/Docs/cmake-modules.html
   ${CMake_BINARY_DIR}/Docs/cmake-commands.html
   ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
+  )
+set(DOCBOOK_FILES
+  ${CMake_BINARY_DIR}/Docs/cmake.docbook
   )
 
 macro(ADD_DOCS target dependency)
@@ -63,11 +65,9 @@ macro(ADD_DOCS target dependency)
       )
     set(DOC_FILES ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/${target}.txt)
     list(APPEND MAN_FILES ${CMake_BINARY_DIR}/Docs/${target}.1)
-    list(APPEND TEXT_FILES
-      ${CMake_BINARY_DIR}/Docs/${target}.txt
-      ${CMake_BINARY_DIR}/Docs/${target}.docbook
-      )
+    list(APPEND TEXT_FILES ${CMake_BINARY_DIR}/Docs/${target}.txt)
     list(APPEND HTML_FILES ${CMake_BINARY_DIR}/Docs/${target}.html)
+    list(APPEND DOCBOOK_FILES ${CMake_BINARY_DIR}/Docs/${target}.docbook)
   endif()
 endmacro()
 
@@ -124,7 +124,11 @@ add_custom_command(
   )
 
 install_files(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
-install_files(${CMAKE_DOC_DIR} FILES ${HTML_FILES} ${TEXT_FILES})
+install_files(${CMAKE_DOC_DIR} FILES
+  ${TEXT_FILES}
+  ${HTML_FILES}
+  ${DOCBOOK_FILES}
+  )
 install(FILES cmake.m4 DESTINATION share/aclocal)
 
 # Drive documentation generation.
@@ -141,16 +145,21 @@ if(BUILD_TESTING)
     execute_process(COMMAND ${LIBXML2_XMLLINT_EXECUTABLE} --help
       OUTPUT_VARIABLE _help ERROR_VARIABLE _err)
     if("${_help}" MATCHES "--path" AND "${_help}" MATCHES "--nonet")
-      # We provide the XHTML DTD and its dependencies in the 'xml'
-      # directory so that xmllint can run without network access.
-      # However, it's --path option accepts a space-separated list of
-      # paths so it cannot handle spaces in the path to the source tree.
-      # Therefore we run the tool with the current work directory set to
-      # the 'xml' directory and use '.' as the path.
+      # We provide DTDs in the 'xml' directory so that xmllint can run without
+      # network access.  Note that xmllints's --path option accepts a
+      # space-separated list of url-encoded paths.
+      set(_dtd_dir "${CMAKE_CURRENT_SOURCE_DIR}/xml")
+      string(REPLACE " " "%20" _dtd_dir "${_dtd_dir}")
+      string(REPLACE ":" "%3A" _dtd_dir "${_dtd_dir}")
       add_test(CMake.HTML
-        ${CMAKE_CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_SOURCE_DIR}/xml
-        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet --path .
+        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
+        --path ${_dtd_dir}/xhtml1
         ${HTML_FILES}
+        )
+      add_test(CMake.DocBook
+        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
+        --path ${_dtd_dir}/docbook-4.5
+        ${DOCBOOK_FILES}
         )
     endif()
   endif()

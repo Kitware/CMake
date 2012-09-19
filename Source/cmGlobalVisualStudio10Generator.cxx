@@ -29,9 +29,12 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator()
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC10", "1");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "X86");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "X86");
+  cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);
+  if(!this->PlatformToolset.empty())
+    {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET",
+                      this->PlatformToolset.c_str());
+    }
 }
 
 //----------------------------------------------------------------------------

@@ -14,6 +14,12 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
+cmGlobalVisualStudio11Win64Generator::cmGlobalVisualStudio11Win64Generator()
+{
+  this->ArchitectureId = "x64";
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio11Win64Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const
 {
@@ -28,6 +34,4 @@ void cmGlobalVisualStudio11Win64Generator
 {
   this->cmGlobalVisualStudio11Generator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", "x64");
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", "x64");
 }

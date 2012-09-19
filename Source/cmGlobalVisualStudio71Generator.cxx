@@ -34,14 +34,6 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio71Generator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  this->cmGlobalVisualStudio7Generator::AddPlatformDefinitions(mf);
-  mf->RemoveDefinition("MSVC70");
-  mf->AddDefinition("MSVC71", "1");
-}
-
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio71Generator::GetUserMacrosDirectory()
 {
   // Macros not supported on Visual Studio 7.1 and earlier because

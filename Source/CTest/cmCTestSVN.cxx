@@ -18,6 +18,11 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+struct cmCTestSVN::Revision: public cmCTestVC::Revision
+{
+  cmCTestSVN::SVNInfo* SVNInfo;
+};
+
 //----------------------------------------------------------------------------
 cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log):
   cmCTestGlobalVC(ct, log)
@@ -44,8 +49,11 @@ void cmCTestSVN::CleanupImpl()
 class cmCTestSVN::InfoParser: public cmCTestVC::LineParser
 {
 public:
-  InfoParser(cmCTestSVN* svn, const char* prefix, std::string& rev):
-    SVN(svn), Rev(rev)
+  InfoParser(cmCTestSVN* svn,
+             const char* prefix,
+             std::string& rev,
+             SVNInfo& svninfo):
+      Rev(rev), SVNRepo(svninfo)
     {
     this->SetLog(&svn->Log, prefix);
     this->RegexRev.compile("^Revision: ([0-9]+)");
@@ -53,8 +61,8 @@ public:
     this->RegexRoot.compile("^Repository Root: +([^ ]+) *$");
     }
 private:
-  cmCTestSVN* SVN;
   std::string& Rev;
+  cmCTestSVN::SVNInfo& SVNRepo;
   cmsys::RegularExpression RegexRev;
   cmsys::RegularExpression RegexURL;
   cmsys::RegularExpression RegexRoot;
@@ -66,11 +74,11 @@ private:
       }
     else if(this->RegexURL.find(this->Line))
       {
-      this->SVN->URL = this->RegexURL.match(1);
+      this->SVNRepo.URL = this->RegexURL.match(1);
       }
     else if(this->RegexRoot.find(this->Line))
       {
-      this->SVN->Root = this->RegexRoot.match(1);
+      this->SVNRepo.Root = this->RegexRoot.match(1);
       }
     return true;
     }
@@ -95,13 +103,13 @@ static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
 }
 
 //----------------------------------------------------------------------------
-std::string cmCTestSVN::LoadInfo()
+std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 {
   // Run "svn info" to get the repository info from the work tree.
   const char* svn = this->CommandLineTool.c_str();
-  const char* svn_info[] = {svn, "info", 0};
+  const char* svn_info[] = {svn, "info", svninfo.LocalPath.c_str(), 0};
   std::string rev;
-  InfoParser out(this, "info-out> ", rev);
+  InfoParser out(this, "info-out> ", rev, svninfo);
   OutputLogger err(this->Log, "info-err> ");
   this->RunChild(svn_info, &out, &err);
   return rev;
@@ -110,55 +118,94 @@ std::string cmCTestSVN::LoadInfo()
 //----------------------------------------------------------------------------
 void cmCTestSVN::NoteOldRevision()
 {
-  this->OldRevision = this->LoadInfo();
-  this->Log << "Revision before update: " << this->OldRevision << "\n";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Old revision of repository is: "
-             << this->OldRevision << "\n");
+  // Info for root repository
+  this->Repositories.push_back( SVNInfo("") );
+  this->RootInfo = &(this->Repositories.back());
+  // Info for the external repositories
+  this->LoadExternals();
+
+  // Get info for all the repositories
+  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  for( ; itbeg != itend ; itbeg++)
+    {
+    SVNInfo& svninfo = *itbeg;
+    svninfo.OldRevision = this->LoadInfo(svninfo);
+    this->Log << "Revision for repository '" << svninfo.LocalPath
+              << "' before update: " << svninfo.OldRevision << "\n";
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               "   Old revision of external repository '"
+               << svninfo.LocalPath << "' is: "
+               << svninfo.OldRevision << "\n");
+    }
+
+  // Set the global old revision to the one of the root
+  this->OldRevision = this->RootInfo->OldRevision;
   this->PriorRev.Rev = this->OldRevision;
 }
 
 //----------------------------------------------------------------------------
 void cmCTestSVN::NoteNewRevision()
 {
-  this->NewRevision = this->LoadInfo();
-  this->Log << "Revision after update: " << this->NewRevision << "\n";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   New revision of repository is: "
-             << this->NewRevision << "\n");
-
-  // this->Root = ""; // uncomment to test GuessBase
-  this->Log << "URL = " << this->URL << "\n";
-  this->Log << "Root = " << this->Root << "\n";
-
-  // Compute the base path the working tree has checked out under
-  // the repository root.
-  if(!this->Root.empty() && cmCTestSVNPathStarts(this->URL, this->Root))
+  // Get info for the external repositories
+  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  for( ; itbeg != itend ; itbeg++)
     {
-    this->Base = cmCTest::DecodeURL(this->URL.substr(this->Root.size()));
-    this->Base += "/";
-    }
-  this->Log << "Base = " << this->Base << "\n";
+    SVNInfo& svninfo = *itbeg;
+    svninfo.NewRevision = this->LoadInfo(svninfo);
+    this->Log << "Revision for repository '" << svninfo.LocalPath
+              << "' after update: " << svninfo.NewRevision << "\n";
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               "   New revision of external repository '"
+               << svninfo.LocalPath << "' is: "
+               << svninfo.NewRevision << "\n");
+
+    // svninfo.Root = ""; // uncomment to test GuessBase
+    this->Log << "Repository '" << svninfo.LocalPath
+              << "' URL = " << svninfo.URL << "\n";
+    this->Log << "Repository '" << svninfo.LocalPath
+              << "' Root = " << svninfo.Root << "\n";
+
+    // Compute the base path the working tree has checked out under
+    // the repository root.
+    if(!svninfo.Root.empty()
+       && cmCTestSVNPathStarts(svninfo.URL, svninfo.Root))
+      {
+      svninfo.Base = cmCTest::DecodeURL(
+            svninfo.URL.substr(svninfo.Root.size()));
+      svninfo.Base += "/";
+      }
+    this->Log << "Repository '" << svninfo.LocalPath
+              << "' Base = " << svninfo.Base << "\n";
+
+  }
+
+  // Set the global new revision to the one of the root
+  this->NewRevision = this->RootInfo->NewRevision;
 }
 
 //----------------------------------------------------------------------------
-void cmCTestSVN::GuessBase(std::vector<Change> const& changes)
+void cmCTestSVN::GuessBase(SVNInfo& svninfo,
+                           std::vector<Change> const& changes)
 {
   // Subversion did not give us a good repository root so we need to
   // guess the base path from the URL and the paths in a revision with
   // changes under it.
 
   // Consider each possible URL suffix from longest to shortest.
-  for(std::string::size_type slash = this->URL.find('/');
-      this->Base.empty() && slash != std::string::npos;
-      slash = this->URL.find('/', slash+1))
+  for(std::string::size_type slash = svninfo.URL.find('/');
+      svninfo.Base.empty() && slash != std::string::npos;
+      slash = svninfo.URL.find('/', slash+1))
     {
     // If the URL suffix is a prefix of at least one path then it is the base.
-    std::string base = cmCTest::DecodeURL(this->URL.substr(slash));
+    std::string base = cmCTest::DecodeURL(svninfo.URL.substr(slash));
     for(std::vector<Change>::const_iterator ci = changes.begin();
-        this->Base.empty() && ci != changes.end(); ++ci)
+        svninfo.Base.empty() && ci != changes.end(); ++ci)
       {
       if(cmCTestSVNPathStarts(ci->Path, base))
         {
-        this->Base = base;
+        svninfo.Base = base;
         }
       }
     }
@@ -167,25 +214,9 @@ void cmCTestSVN::GuessBase(std::vector<Change> const& changes)
   // base lie under its path.  If no base was found then the working
   // tree must be a checkout of the entire repo and this will match
   // the leading slash in all paths.
-  this->Base += "/";
+  svninfo.Base += "/";
 
-  this->Log << "Guessed Base = " << this->Base << "\n";
-}
-
-//----------------------------------------------------------------------------
-const char* cmCTestSVN::LocalPath(std::string const& path)
-{
-  if(path.size() > this->Base.size() &&
-     strncmp(path.c_str(), this->Base.c_str(), this->Base.size()) == 0)
-    {
-    // This path lies under the base, so return a relative path.
-    return path.c_str() + this->Base.size();
-    }
-  else
-    {
-    // This path does not lie under the base, so ignore it.
-    return 0;
-    }
+  this->Log << "Guessed Base = " << svninfo.Base << "\n";
 }
 
 //----------------------------------------------------------------------------
@@ -274,11 +305,13 @@ class cmCTestSVN::LogParser: public cmCTestVC::OutputLogger,
                              private cmXMLParser
 {
 public:
-  LogParser(cmCTestSVN* svn, const char* prefix):
-    OutputLogger(svn->Log, prefix), SVN(svn) { this->InitializeParser(); }
+  LogParser(cmCTestSVN* svn, const char* prefix, SVNInfo& svninfo):
+    OutputLogger(svn->Log, prefix), SVN(svn), SVNRepo(svninfo)
+  { this->InitializeParser(); }
   ~LogParser() { this->CleanupParser(); }
 private:
   cmCTestSVN* SVN;
+  cmCTestSVN::SVNInfo& SVNRepo;
 
   typedef cmCTestSVN::Revision Revision;
   typedef cmCTestSVN::Change Change;
@@ -300,6 +333,7 @@ private:
     if(strcmp(name, "logentry") == 0)
       {
       this->Rev = Revision();
+      this->Rev.SVNInfo = &SVNRepo;
       if(const char* rev = this->FindAttribute(atts, "revision"))
         {
         this->Rev.Rev = rev;
@@ -325,11 +359,13 @@ private:
     {
     if(strcmp(name, "logentry") == 0)
       {
-      this->SVN->DoRevision(this->Rev, this->Changes);
+      this->SVN->DoRevisionSVN(this->Rev, this->Changes);
       }
     else if(strcmp(name, "path") == 0 && !this->CData.empty())
       {
-      this->CurChange.Path.assign(&this->CData[0], this->CData.size());
+      std::string orig_path(&this->CData[0], this->CData.size());
+      std::string new_path = SVNRepo.BuildLocalPath( orig_path );
+      this->CurChange.Path.assign(new_path);
       this->Changes.push_back(this->CurChange);
       }
     else if(strcmp(name, "author") == 0 && !this->CData.empty())
@@ -356,36 +392,58 @@ private:
 //----------------------------------------------------------------------------
 void cmCTestSVN::LoadRevisions()
 {
+  // Get revisions for all the external repositories
+  std::list<SVNInfo>::iterator itbeg = this->Repositories.begin();
+  std::list<SVNInfo>::iterator itend = this->Repositories.end();
+  for( ; itbeg != itend ; itbeg++)
+    {
+    SVNInfo& svninfo = *itbeg;
+    LoadRevisions(svninfo);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmCTestSVN::LoadRevisions(SVNInfo &svninfo)
+{
   // We are interested in every revision included in the update.
   std::string revs;
-  if(atoi(this->OldRevision.c_str()) < atoi(this->NewRevision.c_str()))
+  if(atoi(svninfo.OldRevision.c_str()) < atoi(svninfo.NewRevision.c_str()))
     {
-    revs = "-r" + this->OldRevision + ":" + this->NewRevision;
+    revs = "-r" + svninfo.OldRevision + ":" + svninfo.NewRevision;
     }
   else
     {
-    revs = "-r" + this->NewRevision;
+    revs = "-r" + svninfo.NewRevision;
     }
 
   // Run "svn log" to get all global revisions of interest.
   const char* svn = this->CommandLineTool.c_str();
-  const char* svn_log[] = {svn, "log", "--xml", "-v", revs.c_str(), 0};
+  const char* svn_log[] = {svn, "log", "--xml", "-v", revs.c_str(),
+                           svninfo.LocalPath.c_str(), 0};
   {
-  LogParser out(this, "log-out> ");
+  LogParser out(this, "log-out> ", svninfo);
   OutputLogger err(this->Log, "log-err> ");
   this->RunChild(svn_log, &out, &err);
   }
 }
 
 //----------------------------------------------------------------------------
-void cmCTestSVN::DoRevision(Revision const& revision,
-                            std::vector<Change> const& changes)
+void cmCTestSVN::DoRevisionSVN(Revision const& revision,
+                               std::vector<Change> const& changes)
 {
   // Guess the base checkout path from the changes if necessary.
-  if(this->Base.empty() && !changes.empty())
+  if(this->RootInfo->Base.empty() && !changes.empty())
     {
-    this->GuessBase(changes);
+    this->GuessBase(*this->RootInfo, changes);
     }
+
+  // Ignore changes in the old revision for external repositories
+  if(revision.Rev == revision.SVNInfo->OldRevision
+     && revision.SVNInfo->LocalPath != "")
+    {
+    return;
+    }
+
   this->cmCTestGlobalVC::DoRevision(revision, changes);
 }
 
@@ -446,5 +504,81 @@ void cmCTestSVN::WriteXMLGlobal(std::ostream& xml)
 {
   this->cmCTestGlobalVC::WriteXMLGlobal(xml);
 
-  xml << "\t<SVNPath>" << this->Base << "</SVNPath>\n";
+  xml << "\t<SVNPath>" << this->RootInfo->Base << "</SVNPath>\n";
+}
+
+//----------------------------------------------------------------------------
+class cmCTestSVN::ExternalParser: public cmCTestVC::LineParser
+{
+public:
+  ExternalParser(cmCTestSVN* svn, const char* prefix): SVN(svn)
+    {
+    this->SetLog(&svn->Log, prefix);
+    this->RegexExternal.compile("^X..... +(.+)$");
+    }
+private:
+  cmCTestSVN* SVN;
+  cmsys::RegularExpression RegexExternal;
+  bool ProcessLine()
+    {
+    if(this->RegexExternal.find(this->Line))
+      {
+      this->DoPath(this->RegexExternal.match(1));
+      }
+    return true;
+    }
+
+  void DoPath(std::string const& path)
+    {
+    // Get local path relative to the source directory
+    std::string local_path;
+    if(path.size() > this->SVN->SourceDirectory.size() &&
+       strncmp(path.c_str(), this->SVN->SourceDirectory.c_str(),
+               this->SVN->SourceDirectory.size()) == 0)
+      {
+      local_path = path.c_str() + this->SVN->SourceDirectory.size() + 1;
+      }
+    else
+      {
+      local_path = path;
+      }
+    this->SVN->Repositories.push_back( SVNInfo(local_path.c_str()) );
+    }
+};
+
+//----------------------------------------------------------------------------
+void cmCTestSVN::LoadExternals()
+{
+  // Run "svn status" to get the list of external repositories
+  const char* svn = this->CommandLineTool.c_str();
+  const char* svn_status[] = {svn, "status", 0};
+  ExternalParser out(this, "external-out> ");
+  OutputLogger err(this->Log, "external-err> ");
+  this->RunChild(svn_status, &out, &err);
+}
+
+//----------------------------------------------------------------------------
+std::string cmCTestSVN::SVNInfo::BuildLocalPath(std::string const& path) const
+{
+  std::string local_path;
+
+  // Add local path prefix if not empty
+  if (!this->LocalPath.empty())
+    {
+    local_path += this->LocalPath;
+    local_path += "/";
+    }
+
+  // Add path with base prefix removed
+  if(path.size() > this->Base.size() &&
+     strncmp(path.c_str(), this->Base.c_str(), this->Base.size()) == 0)
+    {
+    local_path += (path.c_str() + this->Base.size());
+    }
+  else
+    {
+    local_path += path;
+  }
+
+  return local_path;
 }

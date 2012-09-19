@@ -134,7 +134,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->AddFeatureFlags(flags, language.c_str());
 
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                                                  this->GetTarget(),
+                                                  this->GeneratorTarget,
                                                   language.c_str(),
                                                   this->GetConfigName());
 
@@ -152,7 +152,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Add include directory flags.
   {
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target,
+  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               language.c_str());
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
@@ -184,46 +184,37 @@ std::string
 cmNinjaTargetGenerator::
 ComputeDefines(cmSourceFile *source, const std::string& language)
 {
-  std::string defines;
+  std::set<std::string> defines;
 
   // Add the export symbol definition for shared library objects.
   if(const char* exportMacro = this->Target->GetExportMacro())
     {
-    this->LocalGenerator->AppendDefines(defines, exportMacro,
-                                        language.c_str());
+    this->LocalGenerator->AppendDefines(defines, exportMacro);
     }
 
   // Add preprocessor definitions for this target and configuration.
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Makefile->GetProperty("COMPILE_DEFINITIONS"),
-     language.c_str());
+     this->GeneratorTarget->GetCompileDefinitions());
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Target->GetProperty("COMPILE_DEFINITIONS"),
-     language.c_str());
-  this->LocalGenerator->AppendDefines
-    (defines,
-     source->GetProperty("COMPILE_DEFINITIONS"),
-     language.c_str());
+     source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(this->GetConfigName());
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Makefile->GetProperty(defPropName.c_str()),
-     language.c_str());
+     this->GeneratorTarget->GetCompileDefinitions(this->GetConfigName()));
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Target->GetProperty(defPropName.c_str()),
-     language.c_str());
-  this->LocalGenerator->AppendDefines
-    (defines,
-     source->GetProperty(defPropName.c_str()),
-     language.c_str());
+     source->GetProperty(defPropName.c_str()));
   }
 
-  return defines;
+  std::string definesString;
+  this->LocalGenerator->JoinDefines(defines, definesString,
+     language.c_str());
+
+  return definesString;
 }
 
 cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
@@ -234,7 +225,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->Target->GetLinkInformation(this->GetConfigName());
+    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 
@@ -295,22 +286,32 @@ std::string cmNinjaTargetGenerator::GetTargetName() const
   return this->Target->GetName();
 }
 
-std::string cmNinjaTargetGenerator::GetTargetPDB() const
+
+bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
 {
-  std::string targetFullPathPDB;
-  if(this->Target->GetType() == cmTarget::EXECUTABLE ||
-     this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
-     this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+  cmMakefile* mf = this->GetMakefile();
+  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
     {
-    targetFullPathPDB = this->Target->GetDirectory(this->GetConfigName());
-    targetFullPathPDB += "/";
-    targetFullPathPDB += this->Target->GetPDBName(this->GetConfigName());
+    std::string pdbPath;
+    if(this->Target->GetType() == cmTarget::EXECUTABLE ||
+       this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+       this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+       this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+      {
+      pdbPath = this->Target->GetDirectory(this->GetConfigName());
+      pdbPath += "/";
+      pdbPath += this->Target->GetPDBName(this->GetConfigName());
     }
 
-  return targetFullPathPDB.c_str();
+    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                          ConvertToNinjaPath(pdbPath.c_str()).c_str(),
+                          cmLocalGenerator::SHELL);
+    EnsureParentDirectoryExists(pdbPath);
+    return true;
+    }
+  return false;
 }
-
 
 void
 cmNinjaTargetGenerator
@@ -348,8 +349,7 @@ cmNinjaTargetGenerator
   if (lang == "C" || lang == "CXX" || lang == "RC")
     {
     clDepsBinary = mf->GetSafeDefinition("CMAKE_CMCLDEPS_EXECUTABLE");
-    if (!clDepsBinary.empty() &&
-        !this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile())
+    if (!clDepsBinary.empty() && !mf->GetIsSourceFileTryCompile())
       {
       clShowPrefix = mf->GetSafeDefinition("CMAKE_CL_SHOWINCLUDE_PREFIX");
       clBinary = mf->GetDefinition("CMAKE_C_COMPILER") ?
@@ -537,15 +537,7 @@ cmNinjaTargetGenerator
   vars["DEP_FILE"] = objectFileName + ".d";;
   EnsureParentDirectoryExists(objectFileName);
 
-  // TODO move to GetTargetPDB
-  cmMakefile* mf = this->GetMakefile();
-  if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
-      mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
-    {
-    vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                        ConvertToNinjaPath(GetTargetPDB().c_str()).c_str(),
-                        cmLocalGenerator::SHELL);
-    }
+  this->SetMsvcTargetPdbVariable(vars);
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
     {
@@ -641,14 +633,14 @@ cmNinjaTargetGenerator
 
 void
 cmNinjaTargetGenerator
-::EnsureDirectoryExists(const std::string& dir)
+::EnsureDirectoryExists(const std::string& dir) const
 {
   cmSystemTools::MakeDirectory(dir.c_str());
 }
 
 void
 cmNinjaTargetGenerator
-::EnsureParentDirectoryExists(const std::string& path)
+::EnsureParentDirectoryExists(const std::string& path) const
 {
   EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
 }

@@ -44,7 +44,7 @@ foreach(i ${squish_env_vars})
 endforeach()
 
 if (QT4_INSTALLED)
-  # record qt lib directory
+  # record Qt lib directory
   set ( ENV{${SQUISH_LIBQTDIR}} ${squish_libqtdir} )
 endif ()
 

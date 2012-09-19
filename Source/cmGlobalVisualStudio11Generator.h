@@ -28,7 +28,6 @@ public:
   virtual const char* GetName() const {
     return cmGlobalVisualStudio11Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 11";}
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   virtual void WriteSLNHeader(std::ostream& fout);
 

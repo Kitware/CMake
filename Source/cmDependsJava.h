@@ -32,7 +32,8 @@ protected:
   virtual bool WriteDependencies(const char *src, const char *file,
     std::ostream& makeDepends, std::ostream& internalDepends);
   virtual bool CheckDependencies(std::istream& internalDepends,
-                  std::map<std::string, DependencyVector >& validDeps);
+                                 const char* internalDependsFileName,
+                           std::map<std::string, DependencyVector>& validDeps);
 
 private:
   cmDependsJava(cmDependsJava const&); // Purposely not implemented.

@@ -15,7 +15,6 @@
 #include "cmSourceFile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
-#include "cmComputeLinkInformation.h"
 #include "cmDocumentCompileDefinitions.h"
 #include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
@@ -761,7 +760,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "The POSITION_INDEPENDENT_CODE property determines whether position "
      "independent executables or shared libraries will be created.  "
      "This property is true by default for SHARED and MODULE library "
-     "targets and false otherwise.");
+     "targets and false otherwise.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_POSITION_INDEPENDENT_CODE if it is set when a target is "
+     "created.");
 
   cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
@@ -903,7 +905,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "Build an executable with a WinMain entry point on windows.",
      "When this property is set to true the executable when linked "
      "on Windows will be created with a WinMain() entry point instead "
-     "of of just main()."
+     "of just main().  "
      "This makes it a GUI executable instead of a console application.  "
      "See the CMAKE_MFC_FLAG variable documentation to configure use "
      "of MFC for WinMain executables.  "
@@ -1068,7 +1070,7 @@ void cmTarget::DefineProperties(cmake *cm)
     ("VS_KEYWORD", cmProperty::TARGET,
      "Visual Studio project keyword.",
      "Can be set to change the visual studio keyword, for example "
-     "QT integration works better if this is set to Qt4VSv1.0. ");
+     "Qt integration works better if this is set to Qt4VSv1.0. ");
   cm->DefineProperty
     ("VS_SCC_PROVIDER", cmProperty::TARGET,
      "Visual Studio Source Code Control Provider.",
@@ -1620,7 +1622,11 @@ cmTargetTraceDependencies
 {
   // Transform command names that reference targets built in this
   // project to corresponding target-level dependencies.
-  cmGeneratorExpression ge(this->Makefile, 0, cc.GetBacktrace(), true);
+  cmGeneratorExpression ge(cc.GetBacktrace());
+
+  // Add target-level dependencies referenced by generator expressions.
+  std::set<cmTarget*> targets;
+
   for(cmCustomCommandLines::const_iterator cit = cc.GetCommandLines().begin();
       cit != cc.GetCommandLines().end(); ++cit)
     {
@@ -1642,12 +1648,17 @@ cmTargetTraceDependencies
     for(cmCustomCommandLine::const_iterator cli = cit->begin();
         cli != cit->end(); ++cli)
       {
-      ge.Process(*cli);
+      const cmCompiledGeneratorExpression &cge = ge.Parse(*cli);
+      cge.Evaluate(this->Makefile, 0, true);
+      std::set<cmTarget*> geTargets = cge.GetTargets();
+      for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
+          it != geTargets.end(); ++it)
+        {
+        targets.insert(*it);
+        }
       }
     }
 
-  // Add target-level dependencies referenced by generator expressions.
-  std::set<cmTarget*> targets = ge.GetTargets();
   for(std::set<cmTarget*>::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
@@ -2942,25 +2953,6 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetCreateRuleVariable()
-{
-  switch(this->GetType())
-    {
-    case cmTarget::STATIC_LIBRARY:
-      return "_CREATE_STATIC_LIBRARY";
-    case cmTarget::SHARED_LIBRARY:
-      return "_CREATE_SHARED_LIBRARY";
-    case cmTarget::MODULE_LIBRARY:
-      return "_CREATE_SHARED_MODULE";
-    case cmTarget::EXECUTABLE:
-      return "_LINK_EXECUTABLE";
-    default:
-      break;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::GetSuffixVariableInternal(bool implib)
 {
   switch(this->GetType())
@@ -3503,76 +3495,6 @@ bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GenerateTargetManifest(const char* config)
-{
-  cmMakefile* mf = this->Makefile;
-  cmLocalGenerator* lg = mf->GetLocalGenerator();
-  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
-
-  // Get the names.
-  std::string name;
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  std::string pdbName;
-  if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    this->GetExecutableNames(name, realName, impName, pdbName, config);
-    }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    }
-  else
-    {
-    return;
-    }
-
-  // Get the directory.
-  std::string dir = this->GetDirectory(config, false);
-
-  // Add each name.
-  std::string f;
-  if(!name.empty())
-    {
-    f = dir;
-    f += "/";
-    f += name;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!soName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += soName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!realName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += realName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!pdbName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += pdbName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!impName.empty())
-    {
-    f = this->GetDirectory(config, true);
-    f += "/";
-    f += impName;
-    gg->AddToManifest(config? config:"", f);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::SetPropertyDefault(const char* property,
                                   const char* default_value)
 {
@@ -3964,27 +3886,6 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
       {
       languages.insert(lang);
       }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetAppleArchs(const char* config,
-                             std::vector<std::string>& archVec)
-{
-  const char* archs = 0;
-  if(config && *config)
-    {
-    std::string defVarName = "OSX_ARCHITECTURES_";
-    defVarName += cmSystemTools::UpperCase(config);
-    archs = this->GetProperty(defVarName.c_str());
-    }
-  if(!archs)
-    {
-    archs = this->GetProperty("OSX_ARCHITECTURES");
-    }
-  if(archs)
-    {
-    cmSystemTools::ExpandListArgument(std::string(archs), archVec);
     }
 }
 
@@ -4659,56 +4560,6 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-cmComputeLinkInformation*
-cmTarget::GetLinkInformation(const char* config)
-{
-  // Lookup any existing information for this configuration.
-  std::map<cmStdString, cmComputeLinkInformation*>::iterator
-    i = this->LinkInformation.find(config?config:"");
-  if(i == this->LinkInformation.end())
-    {
-    // Compute information for this configuration.
-    cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this, config);
-    if(!info || !info->Compute())
-      {
-      delete info;
-      info = 0;
-      }
-
-    // Store the information for this configuration.
-    std::map<cmStdString, cmComputeLinkInformation*>::value_type
-      entry(config?config:"", info);
-    i = this->LinkInformation.insert(entry).first;
-    }
-  return i->second;
-}
-
-//----------------------------------------------------------------------------
-std::vector<std::string> cmTarget::GetIncludeDirectories()
-{
-  std::vector<std::string> includes;
-  const char *prop = this->GetProperty("INCLUDE_DIRECTORIES");
-  if(prop)
-    {
-    cmSystemTools::ExpandListArgument(prop, includes);
-    }
-
-  std::set<std::string> uniqueIncludes;
-  std::vector<std::string> orderedAndUniqueIncludes;
-  for(std::vector<std::string>::const_iterator
-      li = includes.begin(); li != includes.end(); ++li)
-    {
-    if(uniqueIncludes.insert(*li).second)
-      {
-      orderedAndUniqueIncludes.push_back(*li);
-      }
-    }
-
-  return orderedAndUniqueIncludes;
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkDirectory(const char* config)
 {
   std::string fpath;
@@ -4763,29 +4614,6 @@ std::string cmTarget::GetMacContentDirectory(const char* config,
   fpath += "/";
   fpath = this->BuildMacContentDirectory(fpath, config, includeMacOS);
   return fpath;
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInformationMap
-::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()
-{
-  // Ideally cmTarget instances should never be copied.  However until
-  // we can make a sweep to remove that, this copy constructor avoids
-  // allowing the resources (LinkInformation) from getting copied.  In
-  // the worst case this will lead to extra cmComputeLinkInformation
-  // instances.  We also enforce in debug mode that the map be emptied
-  // when copied.
-  static_cast<void>(r);
-  assert(r.empty());
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
-{
-  for(derived::iterator i = this->begin(); i != this->end(); ++i)
-    {
-    delete i->second;
-    }
 }
 
 //----------------------------------------------------------------------------

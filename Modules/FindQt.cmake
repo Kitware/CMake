@@ -1,7 +1,7 @@
-# - Searches for all installed versions of QT.
+# - Searches for all installed versions of Qt.
 # This should only be used if your project can work with multiple
-# versions of QT.  If not, you should just directly use FindQt4 or FindQt3.
-# If multiple versions of QT are found on the machine, then
+# versions of Qt.  If not, you should just directly use FindQt4 or FindQt3.
+# If multiple versions of Qt are found on the machine, then
 # The user must set the option DESIRED_QT_VERSION to the version
 # they want to use.  If only one version of qt is found on the machine,
 # then the DESIRED_QT_VERSION is set to that version and the
@@ -10,7 +10,7 @@
 # is included.
 #
 #  QT_REQUIRED if this is set to TRUE then if CMake can
-#              not find QT4 or QT3 an error is raised
+#              not find Qt4 or Qt3 an error is raised
 #              and a message is sent to the user.
 #
 #  DESIRED_QT_VERSION OPTION is created
@@ -62,7 +62,7 @@ if(QT_QMAKE_EXECUTABLE_FINDQT)
   exec_program(${QT_QMAKE_EXECUTABLE_FINDQT} ARGS "-query QT_VERSION"
     OUTPUT_VARIABLE QTVERSION)
   if(QTVERSION MATCHES "4.*")
-    set(QT_QMAKE_EXECUTABLE ${QT_QMAKE_EXECUTABLE_FINDQT} CACHE PATH "QT4 qmake program.")
+    set(QT_QMAKE_EXECUTABLE ${QT_QMAKE_EXECUTABLE_FINDQT} CACHE PATH "Qt4 qmake program.")
     set(QT4_INSTALLED TRUE)
   endif()
   if(QTVERSION MATCHES "Unknown")
@@ -115,14 +115,14 @@ endif()
 
 if(QT3_INSTALLED AND QT4_INSTALLED )
   # force user to pick if we have both
-  set(DESIRED_QT_VERSION 0 CACHE STRING "Pick a version of QT to use: 3 or 4")
+  set(DESIRED_QT_VERSION 0 CACHE STRING "Pick a version of Qt to use: 3 or 4")
 else()
   # if only one found then pick that one
   if(QT3_INSTALLED)
-    set(DESIRED_QT_VERSION 3 CACHE STRING "Pick a version of QT to use: 3 or 4")
+    set(DESIRED_QT_VERSION 3 CACHE STRING "Pick a version of Qt to use: 3 or 4")
   endif()
   if(QT4_INSTALLED)
-    set(DESIRED_QT_VERSION 4 CACHE STRING "Pick a version of QT to use: 3 or 4")
+    set(DESIRED_QT_VERSION 4 CACHE STRING "Pick a version of Qt to use: 3 or 4")
   endif()
 endif()
 
@@ -139,21 +139,21 @@ endif()
 
 if(NOT QT3_INSTALLED AND NOT QT4_INSTALLED)
   if(QT_REQUIRED)
-    message(SEND_ERROR "CMake was unable to find any QT versions, put qmake in your path, or set QT_QMAKE_EXECUTABLE.")
+    message(SEND_ERROR "CMake was unable to find any Qt versions, put qmake in your path, or set QT_QMAKE_EXECUTABLE.")
   endif()
 else()
   if(NOT QT_FOUND AND NOT DESIRED_QT_VERSION)
     if(QT_REQUIRED)
-      message(SEND_ERROR "Multiple versions of QT found please set DESIRED_QT_VERSION")
+      message(SEND_ERROR "Multiple versions of Qt found please set DESIRED_QT_VERSION")
     else()
-      message("Multiple versions of QT found please set DESIRED_QT_VERSION")
+      message("Multiple versions of Qt found please set DESIRED_QT_VERSION")
     endif()
   endif()
   if(NOT QT_FOUND AND DESIRED_QT_VERSION)
     if(QT_REQUIRED)
-      message(FATAL_ERROR "CMake was unable to find QT version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE, if those are set then QT_QT_LIBRARY or QT_LIBRARY_DIR.")
+      message(FATAL_ERROR "CMake was unable to find Qt version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE, if those are set then QT_QT_LIBRARY or QT_LIBRARY_DIR.")
     else()
-      message( "CMake was unable to find desired QT version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE.")
+      message( "CMake was unable to find desired Qt version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE.")
     endif()
   endif()
 endif()

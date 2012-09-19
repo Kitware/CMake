@@ -21,6 +21,7 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
+  this->ArchitectureId = "X86";
 }
 
 //----------------------------------------------------------------------------
@@ -486,6 +487,13 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
       vsTargetDepend.insert(this->GetUtilityDepend(dep));
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
 }
 
 //----------------------------------------------------------------------------

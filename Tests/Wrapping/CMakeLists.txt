@@ -40,7 +40,7 @@ endif()
 set(WRAP ${EXECUTABLE_OUTPUT_PATH}/${CMAKE_CFG_INTDIR}/Wrap${EXE_EXT})
 
 #
-# QT Wrappers
+# Qt Wrappers
 #
 
 set (QT_WRAP_CPP "On")
@@ -48,7 +48,7 @@ set (QT_MOC_EXE "echo")
 include( FindQt3 )
 
 if (QT_FOUND AND QT_WRAP_UI)
-  message("found qt 3 test it...")
+  message("found Qt 3 test it...")
   include_directories( ${QT_INCLUDE_DIR} )
   include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -67,8 +67,8 @@ if (QT_FOUND AND QT_WRAP_UI)
   qt_wrap_ui (myqtlib QTUI_H_SRCS QTUI_S_SRCS ${QTUI_SRCS})
   qt_wrap_cpp (myqtlib QT_MOC_SRCS ${SRCS} vtkTestMoc.h)
 
-  message("QT files are ${QTUI_S_SRCS}")
-  message("QT other files are ${QTUI_H_SRCS}")
+  message("Qt files are ${QTUI_S_SRCS}")
+  message("Qt other files are ${QTUI_H_SRCS}")
   add_definitions(${QT_DEFINITIONS})
   add_library(myqtlib ${QTUI_S_SRCS} ${QT_MOC_SRCS})
   add_executable (qtwrapping qtwrappingmain.cxx)

@@ -22,8 +22,35 @@
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
+#include "cmVS11CLFlagTable.h"
+#include "cmVS11LinkFlagTable.h"
+#include "cmVS11LibFlagTable.h"
 
 #include <cmsys/auto_ptr.hxx>
+
+static cmVS7FlagTable const*
+cmVSGetCLFlagTable(cmLocalVisualStudioGenerator* lg)
+{
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11CLFlagTable; }
+  return cmVS10CLFlagTable;
+}
+
+static cmVS7FlagTable const*
+cmVSGetLibFlagTable(cmLocalVisualStudioGenerator* lg)
+{
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11LibFlagTable; }
+  return cmVS10LibFlagTable;
+}
+
+static cmVS7FlagTable const*
+cmVSGetLinkFlagTable(cmLocalVisualStudioGenerator* lg)
+{
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11LinkFlagTable; }
+  return cmVS10LinkFlagTable;
+}
 
 static std::string cmVS10EscapeXML(std::string arg)
 {
@@ -413,7 +440,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       }
     if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
-      this->WriteString("<Immersive>true</Immersive>\n", 2);
+      this->WriteString("<WindowsAppContainer>true"
+                        "</WindowsAppContainer>\n", 2);
       }
     this->WriteString("</PropertyGroup>\n", 1);
     }
@@ -957,7 +985,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmVisualStudioGeneratorOptions
         clOptions(this->LocalGenerator,
                   cmVisualStudioGeneratorOptions::Compiler,
-                  cmVS10CLFlagTable, 0, this);
+                  cmVSGetCLFlagTable(this->LocalGenerator), 0, this);
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
@@ -1151,7 +1179,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   cmsys::auto_ptr<Options> pOptions(
     new Options(this->LocalGenerator, Options::Compiler,
-                cmVS10CLFlagTable));
+                cmVSGetCLFlagTable(this->LocalGenerator)));
   Options& clOptions = *pOptions;
 
   std::string flags;
@@ -1204,6 +1232,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
   clOptions.FixExceptionHandlingDefault();
+  clOptions.AddFlag("PrecompiledHeader", "NotUsing");
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   clOptions.AddDefines
@@ -1311,7 +1340,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     cmVisualStudioGeneratorOptions
       libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
-                 cmVS10LibFlagTable, 0, this);
+                 cmVSGetLibFlagTable(this->LocalGenerator), 0, this);
     libOptions.Parse(libflags?libflags:"");
     libOptions.Parse(libflagsConfig?libflagsConfig:"");
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
@@ -1391,7 +1420,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   cmVisualStudioGeneratorOptions
     linkOptions(this->LocalGenerator,
                 cmVisualStudioGeneratorOptions::Linker,
-                cmVS10LinkFlagTable, 0, this);
+                cmVSGetLinkFlagTable(this->LocalGenerator), 0, this);
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
     flags += " /SUBSYSTEM:WINDOWS";
@@ -1423,7 +1452,7 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
   // Replace spaces in libs with ;
   cmSystemTools::ReplaceString(libs, " ", ";");
   cmComputeLinkInformation* pcli =
-    this->Target->GetLinkInformation(config.c_str());
+    this->GeneratorTarget->GetLinkInformation(config.c_str());
   if(!pcli)
     {
     cmSystemTools::Error
@@ -1565,7 +1594,8 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget);
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {

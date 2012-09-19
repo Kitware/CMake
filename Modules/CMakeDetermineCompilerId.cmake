@@ -30,7 +30,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   string(REGEX REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
   # Compute the directory in which to run the test.
-  set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+  set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})
 
   # Try building with no extra flags and then try each set
   # of helper flags.  Stop when the compiler is identified.
@@ -66,6 +66,15 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     message(STATUS "The ${lang} compiler identification is unknown")
   endif()
 
+  # Check if compiler id detection gave us the compiler tool.
+  if(NOT CMAKE_${lang}_COMPILER)
+    if(CMAKE_${lang}_COMPILER_ID_TOOL)
+      set(CMAKE_${lang}_COMPILER "${CMAKE_${lang}_COMPILER_ID_TOOL}" PARENT_SCOPE)
+    else()
+      set(CMAKE_${lang}_COMPILER "CMAKE_${lang}_COMPILER-NOTFOUND" PARENT_SCOPE)
+    endif()
+  endif()
+
   set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_PLATFORM_ID "${CMAKE_${lang}_PLATFORM_ID}" PARENT_SCOPE)
   set(MSVC_${lang}_ARCHITECTURE_ID "${MSVC_${lang}_ARCHITECTURE_ID}"
@@ -98,28 +107,126 @@ Id flags: ${testflags}
 ")
 
   # Compile the compiler identification source.
-  if(COMMAND EXECUTE_PROCESS)
+  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([0-9]+)( .NET)?( 200[358])? *((Win64|IA64|ARM))?")
+    set(vs_version ${CMAKE_MATCH_1})
+    set(vs_arch ${CMAKE_MATCH_4})
+    set(id_lang "${lang}")
+    set(id_cl cl.exe)
+    if(NOT "${vs_version}" VERSION_LESS 10)
+      set(v 10)
+      set(ext vcxproj)
+    elseif(NOT "${vs_version}" VERSION_LESS 7)
+      set(id_version ${vs_version}.00)
+      set(v 7)
+      set(ext vcproj)
+    else()
+      set(v 6)
+      set(ext dsp)
+    endif()
+    if("${vs_arch}" STREQUAL "Win64")
+      set(id_machine_7 17)
+      set(id_machine_10 MachineX64)
+      set(id_arch x64)
+    elseif("${vs_arch}" STREQUAL "IA64")
+      set(id_machine_7 5)
+      set(id_machine_10 MachineIA64)
+      set(id_arch ia64)
+    else()
+      set(id_machine_6 x86)
+      set(id_machine_7 1)
+      set(id_machine_10 MachineX86)
+      set(id_arch Win32)
+    endif()
+    if(CMAKE_VS_PLATFORM_TOOLSET)
+      set(id_toolset "<PlatformToolset>${CMAKE_VS_PLATFORM_TOOLSET}</PlatformToolset>")
+    else()
+      set(id_toolset "")
+    endif()
+    if("${CMAKE_MAKE_PROGRAM}" MATCHES "[Mm][Ss][Bb][Uu][Ii][Ll][Dd]")
+      set(build /p:Configuration=Debug /p:Platform=@id_arch@)
+    elseif("${CMAKE_MAKE_PROGRAM}" MATCHES "[Mm][Ss][Dd][Ee][Vv]")
+      set(build /make)
+    else()
+      set(build /build Debug)
+    endif()
+    set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
+    get_filename_component(id_src "${src}" NAME)
+    configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
+      ${id_dir}/CompilerId${lang}.${ext} @ONLY IMMEDIATE)
     execute_process(
-      COMMAND ${CMAKE_${lang}_COMPILER}
-              ${CMAKE_${lang}_COMPILER_ID_ARG1}
-              ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-              ${testflags}
-              "${src}"
+      COMMAND ${CMAKE_MAKE_PROGRAM} CompilerId${lang}.${ext} ${build}
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
       )
-  else()
-    exec_program(
-      ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_DIR}
-      ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
-           ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
-           ${testflags}
-           \"${src}\"
+    # Match the compiler location line printed out.
+    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "CMAKE_${lang}_COMPILER=([^%\r\n]+)[\r\n]")
+      set(_comp "${CMAKE_MATCH_1}")
+      if(EXISTS "${_comp}")
+        file(TO_CMAKE_PATH "${_comp}" _comp)
+        set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+      endif()
+    endif()
+  elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
+    set(id_lang "${lang}")
+    set(id_type ${CMAKE_${lang}_COMPILER_XCODE_TYPE})
+    set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
+    get_filename_component(id_src "${src}" NAME)
+    if(NOT ${XCODE_VERSION} VERSION_LESS 3)
+      set(v 3)
+      set(ext xcodeproj)
+    elseif(NOT ${XCODE_VERSION} VERSION_LESS 2)
+      set(v 2)
+      set(ext xcodeproj)
+    else()
+      set(v 1)
+      set(ext xcode)
+    endif()
+    configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-${v}.pbxproj.in
+      ${id_dir}/CompilerId${lang}.${ext}/project.pbxproj @ONLY IMMEDIATE)
+    execute_process(COMMAND xcodebuild
+      WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-      RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
+      ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+      RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
       )
+
+    # Match the link line from xcodebuild output of the form
+    #  Ld ...
+    #      ...
+    #      /path/to/cc ...CompilerId${lang}/...
+    # to extract the compiler front-end for the language.
+    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}/\\./CompilerId${lang}[ \t\n\\\"]")
+      set(_comp "${CMAKE_MATCH_2}")
+      if(EXISTS "${_comp}")
+        set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
+      endif()
+    endif()
+  else()
+    if(COMMAND EXECUTE_PROCESS)
+      execute_process(
+        COMMAND ${CMAKE_${lang}_COMPILER}
+                ${CMAKE_${lang}_COMPILER_ID_ARG1}
+                ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+                ${testflags}
+                "${src}"
+        WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
+        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
+        )
+    else()
+      exec_program(
+        ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_DIR}
+        ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
+             ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+             ${testflags}
+             \"${src}\"
+        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        RETURN_VALUE CMAKE_${lang}_COMPILER_ID_RESULT
+        )
+    endif()
   endif()
 
   # Check the result of compilation.
@@ -153,14 +260,18 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # Find the executable produced by the compiler, try all files in the
     # binary dir.
-    file(GLOB COMPILER_${lang}_PRODUCED_FILES
+    file(GLOB files
       RELATIVE ${CMAKE_${lang}_COMPILER_ID_DIR}
       ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
-    list(REMOVE_ITEM COMPILER_${lang}_PRODUCED_FILES "${src}")
-    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
-      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "Compilation of the ${lang} compiler identification source \""
-        "${src}\" produced \"${file}\"\n\n")
+    list(REMOVE_ITEM files "${src}")
+    set(COMPILER_${lang}_PRODUCED_FILES "")
+    foreach(file ${files})
+      if(NOT IS_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}/${file})
+        list(APPEND COMPILER_${lang}_PRODUCED_FILES ${file})
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Compilation of the ${lang} compiler identification source \""
+          "${src}\" produced \"${file}\"\n\n")
+      endif()
     endforeach()
 
     if(NOT COMPILER_${lang}_PRODUCED_FILES)
@@ -282,7 +393,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
     # We get here when this function is called not from within CMAKE_DETERMINE_COMPILER_ID()
     # This is done e.g. for detecting the compiler ID for assemblers.
     # Compute the directory in which to run the test and Create a clean working directory.
-    set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CompilerId${lang})
+    set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})
     file(REMOVE_RECURSE ${CMAKE_${lang}_COMPILER_ID_DIR})
     file(MAKE_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR})
   endif()

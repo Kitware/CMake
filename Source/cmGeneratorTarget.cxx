@@ -14,8 +14,11 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
+#include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
+
+#include <assert.h>
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
@@ -25,6 +28,45 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
   this->ClassifySources();
   this->LookupObjectLibraries();
+}
+
+cmGeneratorTarget::~cmGeneratorTarget()
+{
+  for(std::map<cmStdString, cmComputeLinkInformation*>::iterator i
+                  = LinkInformation.begin(); i != LinkInformation.end(); ++i)
+    {
+    delete i->second;
+    }
+}
+
+//----------------------------------------------------------------------------
+int cmGeneratorTarget::GetType() const
+{
+  return this->Target->GetType();
+}
+
+//----------------------------------------------------------------------------
+const char *cmGeneratorTarget::GetName() const
+{
+  return this->Target->GetName();
+}
+
+//----------------------------------------------------------------------------
+const char *cmGeneratorTarget::GetProperty(const char *prop)
+{
+  return this->Target->GetProperty(prop);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::GetPropertyAsBool(const char *prop)
+{
+  return this->Target->GetPropertyAsBool(prop);
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles()
+{
+  return this->Target->GetSourceFiles();
 }
 
 //----------------------------------------------------------------------------
@@ -174,4 +216,180 @@ void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs)
       objs.push_back(obj);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GenerateTargetManifest(const char* config)
+{
+  cmMakefile* mf = this->Target->GetMakefile();
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+
+  // Get the names.
+  std::string name;
+  std::string soName;
+  std::string realName;
+  std::string impName;
+  std::string pdbName;
+  if(this->GetType() == cmTarget::EXECUTABLE)
+    {
+    this->Target->GetExecutableNames(name, realName, impName, pdbName,
+                                     config);
+    }
+  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    this->Target->GetLibraryNames(name, soName, realName, impName, pdbName,
+                                  config);
+    }
+  else
+    {
+    return;
+    }
+
+  // Get the directory.
+  std::string dir = this->Target->GetDirectory(config, false);
+
+  // Add each name.
+  std::string f;
+  if(!name.empty())
+    {
+    f = dir;
+    f += "/";
+    f += name;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!soName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += soName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!realName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += realName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!pdbName.empty())
+    {
+    f = dir;
+    f += "/";
+    f += pdbName;
+    gg->AddToManifest(config? config:"", f);
+    }
+  if(!impName.empty())
+    {
+    f = this->Target->GetDirectory(config, true);
+    f += "/";
+    f += impName;
+    gg->AddToManifest(config? config:"", f);
+    }
+}
+
+//----------------------------------------------------------------------------
+cmComputeLinkInformation*
+cmGeneratorTarget::GetLinkInformation(const char* config)
+{
+  // Lookup any existing information for this configuration.
+  std::map<cmStdString, cmComputeLinkInformation*>::iterator
+    i = this->LinkInformation.find(config?config:"");
+  if(i == this->LinkInformation.end())
+    {
+    // Compute information for this configuration.
+    cmComputeLinkInformation* info =
+      new cmComputeLinkInformation(this->Target, config);
+    if(!info || !info->Compute())
+      {
+      delete info;
+      info = 0;
+      }
+
+    // Store the information for this configuration.
+    std::map<cmStdString, cmComputeLinkInformation*>::value_type
+      entry(config?config:"", info);
+    i = this->LinkInformation.insert(entry).first;
+    }
+  return i->second;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetAppleArchs(const char* config,
+                             std::vector<std::string>& archVec)
+{
+  const char* archs = 0;
+  if(config && *config)
+    {
+    std::string defVarName = "OSX_ARCHITECTURES_";
+    defVarName += cmSystemTools::UpperCase(config);
+    archs = this->Target->GetProperty(defVarName.c_str());
+    }
+  if(!archs)
+    {
+    archs = this->Target->GetProperty("OSX_ARCHITECTURES");
+    }
+  if(archs)
+    {
+    cmSystemTools::ExpandListArgument(std::string(archs), archVec);
+    }
+}
+
+//----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetCreateRuleVariable()
+{
+  switch(this->GetType())
+    {
+    case cmTarget::STATIC_LIBRARY:
+      return "_CREATE_STATIC_LIBRARY";
+    case cmTarget::SHARED_LIBRARY:
+      return "_CREATE_SHARED_LIBRARY";
+    case cmTarget::MODULE_LIBRARY:
+      return "_CREATE_SHARED_MODULE";
+    case cmTarget::EXECUTABLE:
+      return "_LINK_EXECUTABLE";
+    default:
+      break;
+    }
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
+{
+  std::vector<std::string> includes;
+  const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
+  if(prop)
+    {
+    cmSystemTools::ExpandListArgument(prop, includes);
+    }
+
+  std::set<std::string> uniqueIncludes;
+  std::vector<std::string> orderedAndUniqueIncludes;
+  for(std::vector<std::string>::const_iterator
+      li = includes.begin(); li != includes.end(); ++li)
+    {
+    if(uniqueIncludes.insert(*li).second)
+      {
+      orderedAndUniqueIncludes.push_back(*li);
+      }
+    }
+
+  return orderedAndUniqueIncludes;
+}
+
+//----------------------------------------------------------------------------
+const char *cmGeneratorTarget::GetCompileDefinitions(const char *config)
+{
+  if (!config)
+    {
+    return this->Target->GetProperty("COMPILE_DEFINITIONS");
+    }
+  std::string defPropName = "COMPILE_DEFINITIONS_";
+  defPropName +=
+    cmSystemTools::UpperCase(config);
+
+  return this->Target->GetProperty(defPropName.c_str());
 }

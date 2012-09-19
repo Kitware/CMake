@@ -17,9 +17,9 @@
 #include "cmSourceFile.h"
 
 /** \class cmQTWrapUICommand
- * \brief Create .h and .cxx files rules for QT user interfaces files
+ * \brief Create .h and .cxx files rules for Qt user interfaces files
  *
- * cmQTWrapUICommand is used to create wrappers for QT classes into normal C++
+ * cmQTWrapUICommand is used to create wrappers for Qt classes into normal C++
  */
 class cmQTWrapUICommand : public cmCommand
 {

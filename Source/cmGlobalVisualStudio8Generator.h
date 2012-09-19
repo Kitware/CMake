@@ -72,7 +72,6 @@ protected:
   void AddCheckTarget();
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(std::ostream& fout,
@@ -82,7 +81,5 @@ protected:
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
                                    const char* path, cmTarget &t);
-
-  const char* ArchitectureId;
 };
 #endif
