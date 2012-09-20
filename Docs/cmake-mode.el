@@ -68,9 +68,9 @@ set the path with these commands:
                                        "\\|" "[ \t\r\n]"
                                        "\\)*"))
 (defconst cmake-regex-block-open
-  "^\\([iI][fF]\\|[mM][aA][cC][rR][oO]\\|[fF][oO][rR][eE][aA][cC][hH]\\|[eE][lL][sS][eE]\\|[eE][lL][sS][eE][iI][fF]\\|[wW][hH][iI][lL][eE]\\|[fF][uU][nN][cC][tT][iI][oO][nN]\\)$")
+  "^\\(if\\|macro\\|foreach\\|else\\|elseif\\|while\\|function\\)$")
 (defconst cmake-regex-block-close
-  "^[ \t]*\\([eE][nN][dD][iI][fF]\\|[eE][nN][dD][fF][oO][rR][eE][aA][cC][hH]\\|[eE][nN][dD][mM][aA][cC][rR][oO]\\|[eE][lL][sS][eE]\\|[eE][lL][sS][eE][iI][fF]\\|[eE][nN][dD][wW][hH][iI][lL][eE]\\|[eE][nN][dD][fF][uU][nN][cC][tT][iI][oO][nN]\\)[ \t]*(")
+  "^[ \t]*\\(endif\\|endforeach\\|endmacro\\|else\\|elseif\\|endwhile\\|endfunction\\)[ \t]*(")
 
 ;------------------------------------------------------------------------------
 
@@ -126,6 +126,7 @@ set the path with these commands:
           (beginning-of-line)
 
           (let ((point-start (point))
+                (case-fold-search t)  ;; case-insensitive
                 token)
 
             ; Search back for the last indented line.
