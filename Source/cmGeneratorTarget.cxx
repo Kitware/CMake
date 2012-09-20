@@ -299,9 +299,14 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
   for(std::vector<std::string>::const_iterator
       li = includes.begin(); li != includes.end(); ++li)
     {
-    if(uniqueIncludes.insert(*li).second)
+    std::string inc = *li;
+    if (!cmSystemTools::IsOff(inc.c_str()))
       {
-      orderedAndUniqueIncludes.push_back(*li);
+      cmSystemTools::ConvertToUnixSlashes(inc);
+      }
+    if(uniqueIncludes.insert(inc).second)
+      {
+      orderedAndUniqueIncludes.push_back(inc);
       }
     }
 
