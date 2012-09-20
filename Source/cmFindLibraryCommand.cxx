@@ -220,18 +220,19 @@ struct cmFindLibraryHelper
   // Keep track of the best library file found so far.
   typedef std::vector<std::string>::size_type size_type;
   std::string BestPath;
-  size_type BestPrefix;
-  size_type BestSuffix;
 
   // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>
   bool OpenBSD;
-  unsigned int BestMajor;
-  unsigned int BestMinor;
 
-  // Current name under consideration.
-  cmsys::RegularExpression NameRegex;
-  bool TryRawName;
-  std::string RawName;
+  // Current names under consideration.
+  struct Name
+  {
+    bool TryRaw;
+    std::string Raw;
+    cmsys::RegularExpression Regex;
+    Name(): TryRaw(false) {}
+  };
+  std::vector<Name> Names;
 
   // Current full path under consideration.
   std::string TestPath;
@@ -249,8 +250,9 @@ struct cmFindLibraryHelper
                            suffix) - this->Suffixes.begin();
     }
   bool HasValidSuffix(std::string const& name);
-  void SetName(std::string const& name);
+  void AddName(std::string const& name);
   bool CheckDirectory(std::string const& path);
+  bool CheckDirectoryForName(std::string const& path, Name& name);
 };
 
 //----------------------------------------------------------------------------
@@ -273,14 +275,6 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   this->OpenBSD =
     this->Makefile->GetCMakeInstance()
     ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
-
-  this->TryRawName = false;
-
-  // No library file has yet been found.
-  this->BestPrefix = this->Prefixes.size();
-  this->BestSuffix = this->Suffixes.size();
-  this->BestMajor = 0;
-  this->BestMinor = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -353,11 +347,13 @@ bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
 }
 
 //----------------------------------------------------------------------------
-void cmFindLibraryHelper::SetName(std::string const& name)
+void cmFindLibraryHelper::AddName(std::string const& name)
 {
+  Name entry;
+
   // Consider checking the raw name too.
-  this->TryRawName = this->HasValidSuffix(name);
-  this->RawName = name;
+  entry.TryRaw = this->HasValidSuffix(name);
+  entry.Raw = name;
 
   // Build a regular expression to match library names.
   std::string regex = "^";
@@ -369,21 +365,37 @@ void cmFindLibraryHelper::SetName(std::string const& name)
     regex += "(\\.[0-9]+\\.[0-9]+)?";
     }
   regex += "$";
-  this->NameRegex.compile(regex.c_str());
+  entry.Regex.compile(regex.c_str());
+  this->Names.push_back(entry);
 }
 
 //----------------------------------------------------------------------------
 bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
+{
+  for(std::vector<Name>::iterator i = this->Names.begin();
+      i != this->Names.end(); ++i)
+    {
+    if(this->CheckDirectoryForName(path, *i))
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
+                                                Name& name)
 {
   // If the original library name provided by the user matches one of
   // the suffixes, try it first.  This allows users to search
   // specifically for a static library on some platforms (on MS tools
   // one cannot tell just from the library name whether it is a static
   // library or an import library).
-  if(this->TryRawName)
+  if(name.TryRaw)
     {
     this->TestPath = path;
-    this->TestPath += this->RawName;
+    this->TestPath += name.Raw;
     if(cmSystemTools::FileExists(this->TestPath.c_str(), true))
       {
       this->BestPath =
@@ -392,6 +404,12 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
       return true;
       }
     }
+
+  // No library file has yet been found.
+  size_type bestPrefix = this->Prefixes.size();
+  size_type bestSuffix = this->Suffixes.size();
+  unsigned int bestMajor = 0;
+  unsigned int bestMinor = 0;
 
   // Search for a file matching the library name regex.
   std::string dir = path;
@@ -406,7 +424,7 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
 #else
     std::string const& testName = origName;
 #endif
-    if(this->NameRegex.find(testName))
+    if(name.Regex.find(testName))
       {
       this->TestPath = path;
       this->TestPath += origName;
@@ -416,25 +434,25 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
         // best name found so far.  Earlier prefixes are preferred,
         // followed by earlier suffixes.  For OpenBSD, shared library
         // version extensions are compared.
-        size_type prefix = this->GetPrefixIndex(this->NameRegex.match(1));
-        size_type suffix = this->GetSuffixIndex(this->NameRegex.match(2));
+        size_type prefix = this->GetPrefixIndex(name.Regex.match(1));
+        size_type suffix = this->GetSuffixIndex(name.Regex.match(2));
         unsigned int major = 0;
         unsigned int minor = 0;
         if(this->OpenBSD)
           {
-          sscanf(this->NameRegex.match(3).c_str(), ".%u.%u", &major, &minor);
+          sscanf(name.Regex.match(3).c_str(), ".%u.%u", &major, &minor);
           }
-        if(this->BestPath.empty() || prefix < this->BestPrefix ||
-           (prefix == this->BestPrefix && suffix < this->BestSuffix) ||
-           (prefix == this->BestPrefix && suffix == this->BestSuffix &&
-            (major > this->BestMajor ||
-             (major == this->BestMajor && minor > this->BestMinor))))
+        if(this->BestPath.empty() || prefix < bestPrefix ||
+           (prefix == bestPrefix && suffix < bestSuffix) ||
+           (prefix == bestPrefix && suffix == bestSuffix &&
+            (major > bestMajor ||
+             (major == bestMajor && minor > bestMinor))))
           {
           this->BestPath = this->TestPath;
-          this->BestPrefix = prefix;
-          this->BestSuffix = suffix;
-          this->BestMajor = major;
-          this->BestMinor = minor;
+          bestPrefix = prefix;
+          bestSuffix = suffix;
+          bestMajor = major;
+          bestMinor = minor;
           }
         }
       }
@@ -454,7 +472,7 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
     {
     // Switch to searching for this name.
     std::string const& name = *ni;
-    helper.SetName(name);
+    helper.AddName(name);
 
     // Search every directory.
     for(std::vector<std::string>::const_iterator
