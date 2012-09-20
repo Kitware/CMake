@@ -1231,9 +1231,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   clOptions.AddFlag("PrecompiledHeader", "NotUsing");
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
-  clOptions.AddDefines(this->GeneratorTarget->GetCompileDefinitions());
+  clOptions.AddDefines(
+                     this->GeneratorTarget->GetCompileDefinitions().c_str());
   clOptions.AddDefines(this->GeneratorTarget->GetCompileDefinitions(
-                                                        configName.c_str()));
+                                                configName.c_str()).c_str());
   clOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 

@@ -314,7 +314,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetCompileDefinitions(const char *config)
+std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
 {
   if (!config)
     {
