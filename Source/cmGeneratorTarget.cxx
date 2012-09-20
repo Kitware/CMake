@@ -342,5 +342,20 @@ std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
 
   const char *prop = this->Target->GetProperty(defPropName.c_str());
 
-  return prop ? prop : "";
+  if (!prop)
+    {
+    return "";
+    }
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                             this->GetName(),
+                                             defPropName, 0, 0);
+  return ge.Parse(prop).Evaluate(this->Makefile,
+                                 config,
+                                 false,
+                                 this,
+                                 &dagChecker);
 }

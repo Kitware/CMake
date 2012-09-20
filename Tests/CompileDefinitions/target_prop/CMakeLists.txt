@@ -7,3 +7,9 @@ set_target_properties(target_prop_executable PROPERTIES COMPILE_DEFINITIONS CMAK
 
 set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_IS_REALLY="Very Fun" CMAKE_IS=Fun)
 set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_IS_FUN CMAKE_IS_="Fun")
+
+set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS
+  TEST_GENERATOR_EXPRESSIONS
+    "$<1:CMAKE_IS_DECLARATIVE>"
+    "$<0:GE_NOT_DEFINED>"
+)
