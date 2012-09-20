@@ -299,7 +299,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     std::string name = *parameters.begin();
 
     cmsys::RegularExpression targetValidator;
-    targetValidator.compile("^[A-Za-z0-9_]+$");
+    targetValidator.compile("^[A-Za-z0-9_.-]+$");
     if (!targetValidator.find(name.c_str()))
       {
       ::reportError(context, content->GetOriginalExpression(),
