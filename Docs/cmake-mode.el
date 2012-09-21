@@ -68,9 +68,9 @@ set the path with these commands:
                                        "\\|" "[ \t\r\n]"
                                        "\\)*"))
 (defconst cmake-regex-block-open
-  "^\\([iI][fF]\\|[mM][aA][cC][rR][oO]\\|[fF][oO][rR][eE][aA][cC][hH]\\|[eE][lL][sS][eE]\\|[eE][lL][sS][eE][iI][fF]\\|[wW][hH][iI][lL][eE]\\|[fF][uU][nN][cC][tT][iI][oO][nN]\\)$")
+  "^\\(if\\|macro\\|foreach\\|else\\|elseif\\|while\\|function\\)$")
 (defconst cmake-regex-block-close
-  "^[ \t]*\\([eE][nN][dD][iI][fF]\\|[eE][nN][dD][fF][oO][rR][eE][aA][cC][hH]\\|[eE][nN][dD][mM][aA][cC][rR][oO]\\|[eE][lL][sS][eE]\\|[eE][lL][sS][eE][iI][fF]\\|[eE][nN][dD][wW][hH][iI][lL][eE]\\|[eE][nN][dD][fF][uU][nN][cC][tT][iI][oO][nN]\\)[ \t]*(")
+  "^[ \t]*\\(endif\\|endforeach\\|endmacro\\|else\\|elseif\\|endwhile\\|endfunction\\)[ \t]*(")
 
 ;------------------------------------------------------------------------------
 
@@ -126,6 +126,7 @@ set the path with these commands:
           (beginning-of-line)
 
           (let ((point-start (point))
+                (case-fold-search t)  ;; case-insensitive
                 token)
 
             ; Search back for the last indented line.
@@ -229,13 +230,26 @@ the indentation.  Otherwise it retains the same position on the line"
 ;;
 (defvar cmake-tab-width 2)
 
+;;
+;; Keymap.
+;;
+(defvar cmake-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "\C-ch" 'cmake-help-command)
+    (define-key map "\C-cl" 'cmake-help-list-commands)
+    (define-key map "\C-cu" 'unscreamify-cmake-buffer)
+    map)
+  "Keymap used in cmake-mode buffers.")
+
 ;------------------------------------------------------------------------------
 
 ;;
 ;; CMake mode startup function.
 ;;
 (defun cmake-mode ()
-  "Major mode for editing CMake listfiles."
+  "Major mode for editing CMake listfiles.
+
+\\{cmake-mode-map}"
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'cmake-mode)
@@ -261,6 +275,9 @@ the indentation.  Otherwise it retains the same position on the line"
   ; Setup comment syntax.
   (make-local-variable 'comment-start)
   (setq comment-start "#")
+
+  ; Setup keymap.
+  (use-local-map cmake-mode-map)
 
   ; Run user hooks.
   (run-hooks 'cmake-mode-hook))
