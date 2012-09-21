@@ -106,7 +106,9 @@ elseif(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
         (NOT "x$ENV{SDKROOT}" MATCHES "/" OR IS_DIRECTORY "$ENV{SDKROOT}"))
   # Use the value of SDKROOT from the environment.
   set(_CMAKE_OSX_SYSROOT_DEFAULT "$ENV{SDKROOT}")
-else()
+elseif("${CMAKE_GENERATOR}" MATCHES Xcode
+       OR CMAKE_OSX_ARCHITECTURES MATCHES "[^;]"
+       OR NOT EXISTS "/usr/include/sys/types.h")
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
   set(_CMAKE_OSX_SDKS_DIR "")
   if(OSX_DEVELOPER_ROOT)
