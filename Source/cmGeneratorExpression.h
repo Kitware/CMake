@@ -9,6 +9,10 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+
+#ifndef cmGeneratorExpression_h
+#define cmGeneratorExpression_h
+
 #include "cmStandardIncludes.h"
 
 #include <stack>
@@ -16,10 +20,12 @@
 #include <cmsys/RegularExpression.hxx>
 
 class cmTarget;
+class cmGeneratorTarget;
 class cmMakefile;
 class cmListFileBacktrace;
 
 struct cmGeneratorExpressionEvaluator;
+struct cmGeneratorExpressionDAGChecker;
 
 class cmCompiledGeneratorExpression;
 
@@ -54,7 +60,9 @@ class cmCompiledGeneratorExpression
 {
 public:
   const char* Evaluate(cmMakefile* mf, const char* config,
-                        bool quiet = false) const;
+                       bool quiet = false,
+                       cmGeneratorTarget *target = 0,
+                       cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const
@@ -80,3 +88,5 @@ private:
   mutable std::set<cmTarget*> Targets;
   mutable std::string Output;
 };
+
+#endif

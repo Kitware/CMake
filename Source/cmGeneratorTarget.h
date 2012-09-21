@@ -74,7 +74,7 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories();
 
-  const char *GetCompileDefinitions(const char *config = 0);
+  std::string GetCompileDefinitions(const char *config = 0);
 
 private:
   void ClassifySources();

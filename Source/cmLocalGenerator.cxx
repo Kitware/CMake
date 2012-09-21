@@ -1390,6 +1390,11 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       }
     }
 
+  if(!target)
+    {
+    return;
+    }
+
   // Load implicit include directories for this language.
   std::string impDirVar = "CMAKE_";
   impDirVar += lang;
@@ -1407,10 +1412,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 
   // Get the target-specific include directories.
   std::vector<std::string> includes;
-  if(target)
-    {
-    includes = target->GetIncludeDirectories();
-    }
+
+  includes = target->GetIncludeDirectories();
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.

@@ -105,10 +105,13 @@ void cmIncludeDirectoryCommand::AddDirectory(const char *i,
     cmSystemTools::ConvertToUnixSlashes(ret);
     if(!cmSystemTools::FileIsFullPath(ret.c_str()))
       {
-      std::string tmp = this->Makefile->GetStartDirectory();
-      tmp += "/";
-      tmp += ret;
-      ret = tmp;
+      if(ret[0] != '$' && ret[1] != '<')
+        {
+        std::string tmp = this->Makefile->GetStartDirectory();
+        tmp += "/";
+        tmp += ret;
+        ret = tmp;
+        }
       }
     }
   this->Makefile->AddIncludeDirectory(ret.c_str(), before);

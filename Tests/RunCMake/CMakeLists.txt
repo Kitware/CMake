@@ -46,6 +46,7 @@ macro(add_RunCMake_test test)
 endmacro()
 
 add_RunCMake_test(GeneratorExpression)
+add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
 
