@@ -3116,6 +3116,8 @@ void cmGlobalXCodeGenerator
                                 this->CreateString("YES"));
     }
 
+  const char* sdkString =
+      this->CurrentMakefile->GetDefinition("CMAKE_OSX_SDKSTRING");
   const char* sysroot =
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   const char* sysrootDefault =
@@ -3130,8 +3132,14 @@ void cmGlobalXCodeGenerator
     cmSystemTools::ExpandListArgument(std::string(osxArch),
                                       this->Architectures);
     flagsUsed = true;
-    buildSettings->AddAttribute("SDKROOT",
+
+    if (sdkString)
+        buildSettings->AddAttribute("SDKROOT",
+                                this->CreateString(sdkString));
+    else
+        buildSettings->AddAttribute("SDKROOT",
                                 this->CreateString(sysroot));
+
     std::string archString;
     const char* sep = "";
     for( std::vector<std::string>::iterator i =
