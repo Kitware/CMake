@@ -1796,46 +1796,34 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     {
     std::vector<std::string> archs;
     target->GetAppleArchs(config, archs);
-    const char* sysroot =
-      this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
-    const char* sysrootDefault =
-      this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT_DEFAULT");
+    const char* sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    if(sysroot && sysroot[0] == '/' && !sysroot[1])
+      { sysroot = 0; }
+    std::string sysrootFlagVar =
+      std::string("CMAKE_") + lang + "_SYSROOT_FLAG";
+    const char* sysrootFlag =
+      this->Makefile->GetDefinition(sysrootFlagVar.c_str());
     const char* deploymentTarget =
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-    std::string isysrootVar = std::string("CMAKE_") + lang + "_HAS_ISYSROOT";
-    bool hasIsysroot = this->Makefile->IsOn(isysrootVar.c_str());
     std::string deploymentTargetFlagVar =
       std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar.c_str());
-    bool flagsUsed = false;
-    if(!archs.empty() && sysroot && lang && (lang[0] =='C' || lang[0] == 'F'))
+    if(!archs.empty() && lang && (lang[0] =='C' || lang[0] == 'F'))
       {
-      // if there is more than one arch add the -arch and
-      // -isysroot flags, or if there is one arch flag, but
-      // it is not the default -arch flag for the system, then
-      // add it.  Otherwize do not add -arch and -isysroot
-      if(archs[0] != "")
+      for(std::vector<std::string>::iterator i = archs.begin();
+          i != archs.end(); ++i)
         {
-        for( std::vector<std::string>::iterator i = archs.begin();
-             i != archs.end(); ++i)
-          {
-          flags += " -arch ";
-          flags += *i;
-          }
-        if(hasIsysroot)
-          {
-          flags += " -isysroot ";
-          flags += sysroot;
-          }
-        flagsUsed = true;
+        flags += " -arch ";
+        flags += *i;
         }
       }
 
-    if(!flagsUsed && sysroot && sysrootDefault &&
-       strcmp(sysroot, sysrootDefault) != 0 && hasIsysroot)
+    if(sysrootFlag && *sysrootFlag && sysroot && *sysroot)
       {
-      flags += " -isysroot ";
+      flags += " ";
+      flags += sysrootFlag;
+      flags += " ";
       flags += sysroot;
       }
 

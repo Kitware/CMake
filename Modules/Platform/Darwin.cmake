@@ -59,28 +59,18 @@ if(NOT DEFINED CMAKE_INSTALL_NAME_TOOL)
   mark_as_advanced(CMAKE_INSTALL_NAME_TOOL)
 endif()
 
-# Set the assumed (Pre 10.5 or Default) location of the developer tools
-set(OSX_DEVELOPER_ROOT "/Developer")
-
-# Use the xcode-select tool if it's available (Xcode >= 3.0 installations)
-find_program(CMAKE_XCODE_SELECT xcode-select)
-mark_as_advanced(CMAKE_XCODE_SELECT)
-if(CMAKE_XCODE_SELECT)
-  execute_process(COMMAND ${CMAKE_XCODE_SELECT} "-print-path"
-    OUTPUT_VARIABLE OSX_DEVELOPER_ROOT
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
-
-# Find installed SDKs
-# Start with Xcode-4.3+ default SDKs directory
-set(_CMAKE_OSX_SDKS_DIR
-  "${OSX_DEVELOPER_ROOT}/Platforms/MacOSX.platform/Developer/SDKs")
-file(GLOB _CMAKE_OSX_SDKS "${_CMAKE_OSX_SDKS_DIR}/*")
-
-# If not present, try pre-4.3 SDKs directory
-if(NOT _CMAKE_OSX_SDKS)
-set(_CMAKE_OSX_SDKS_DIR "${OSX_DEVELOPER_ROOT}/SDKs")
-  file(GLOB _CMAKE_OSX_SDKS "${_CMAKE_OSX_SDKS_DIR}/*")
+# Ask xcode-select where to find /Developer or fall back to ancient location.
+execute_process(COMMAND xcode-select -print-path
+  OUTPUT_VARIABLE _stdout
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_VARIABLE _stderr
+  RESULT_VARIABLE _failed)
+if(NOT _failed AND IS_DIRECTORY ${_stdout})
+  set(OSX_DEVELOPER_ROOT ${_stdout})
+elseif(IS_DIRECTORY "/Developer")
+  set(OSX_DEVELOPER_ROOT "/Developer")
+else()
+  set(OSX_DEVELOPER_ROOT "")
 endif()
 
 execute_process(COMMAND sw_vers -productVersion
@@ -107,32 +97,37 @@ endif()
 
 # Environment variable set by the user overrides our default.
 # Use the same environment variable that Xcode uses.
-set(ENV_SDKROOT "$ENV{SDKROOT}")
-
-# Set CMAKE_OSX_SYSROOT_DEFAULT based on _CURRENT_OSX_VERSION,
-# accounting for the known specially named SDKs.
-set(CMAKE_OSX_SYSROOT_DEFAULT
-  "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CURRENT_OSX_VERSION}.sdk")
-
-if(_CURRENT_OSX_VERSION STREQUAL "10.4")
-  set(CMAKE_OSX_SYSROOT_DEFAULT
-    "${_CMAKE_OSX_SDKS_DIR}/MacOSX10.4u.sdk")
-endif()
-
-if(_CURRENT_OSX_VERSION STREQUAL "10.3")
-  set(CMAKE_OSX_SYSROOT_DEFAULT
-    "${_CMAKE_OSX_SDKS_DIR}/MacOSX10.3.9.sdk")
-endif()
-
-# Use environment or default as initial cache value:
-if(NOT ENV_SDKROOT STREQUAL "")
-  set(CMAKE_OSX_SYSROOT_VALUE ${ENV_SDKROOT})
+if(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND EXISTS "$ENV{SDKROOT}")
+  set(_CMAKE_OSX_SYSROOT_DEFAULT "$ENV{SDKROOT}")
 else()
-  set(CMAKE_OSX_SYSROOT_VALUE ${CMAKE_OSX_SYSROOT_DEFAULT})
+  # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
+  set(_CMAKE_OSX_SDKS_DIR "")
+  if(OSX_DEVELOPER_ROOT)
+    foreach(d Platforms/MacOSX.platform/Developer/SDKs SDKs)
+      file(GLOB _CMAKE_OSX_SDKS ${OSX_DEVELOPER_ROOT}/${d}/*)
+      if(_CMAKE_OSX_SDKS)
+        set(_CMAKE_OSX_SDKS_DIR ${OSX_DEVELOPER_ROOT}/${d})
+        break()
+      endif()
+    endforeach()
+  endif()
+
+  if(_CMAKE_OSX_SDKS_DIR)
+    # Select SDK for current OSX version accounting for the known
+    # specially named SDKs.
+    set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.4 "u")
+    set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.3 ".9")
+    set(_CMAKE_OSX_SDKS_VER ${_CURRENT_OSX_VERSION}${_CMAKE_OSX_SDKS_VER_SUFFIX_${_CURRENT_OSX_VERSION}})
+    set(_CMAKE_OSX_SYSROOT_DEFAULT
+      "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
+  else()
+    # Assume developer files are in root (such as Xcode 4.5 command-line tools).
+    set(_CMAKE_OSX_SYSROOT_DEFAULT "")
+  endif()
 endif()
 
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
-set(CMAKE_OSX_SYSROOT ${CMAKE_OSX_SYSROOT_VALUE} CACHE PATH
+set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_DEFAULT}" CACHE PATH
   "The product will be built against the headers and libraries located inside the indicated SDK.")
 
 #----------------------------------------------------------------------------
