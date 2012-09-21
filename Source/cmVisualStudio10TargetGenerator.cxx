@@ -1225,21 +1225,15 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     flags += " ";
     flags += targetFlags;
     }
-  std::string configUpper = cmSystemTools::UpperCase(configName);
-  std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName += configUpper;
-
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
   clOptions.FixExceptionHandlingDefault();
   clOptions.AddFlag("PrecompiledHeader", "NotUsing");
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
-  clOptions.AddDefines
-    (this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
-  clOptions.AddDefines(this->Target->GetProperty("COMPILE_DEFINITIONS"));
-  clOptions.AddDefines(this->Makefile->GetProperty(defPropName.c_str()));
-  clOptions.AddDefines(this->Target->GetProperty(defPropName.c_str()));
+  clOptions.AddDefines(this->GeneratorTarget->GetCompileDefinitions());
+  clOptions.AddDefines(this->GeneratorTarget->GetCompileDefinitions(
+                                                        configName.c_str()));
   clOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 

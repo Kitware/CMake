@@ -617,14 +617,17 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
           "         <Option compiler=\"" << compiler << "\" />\n"
           "         <Compiler>\n";
 
+    cmGeneratorTarget *gtgt = this->GlobalGenerator
+                                  ->GetGeneratorTarget(target);
+
     // the compilerdefines for this target
-    const char* cdefs = target->GetMakefile()->GetProperty(
-                                                        "COMPILE_DEFINITIONS");
-    if(cdefs)
+    std::string cdefs = gtgt->GetCompileDefinitions();
+
+    if(cdefs.empty())
       {
       // Expand the list.
       std::vector<std::string> defs;
-      cmSystemTools::ExpandListArgument(cdefs, defs);
+      cmSystemTools::ExpandListArgument(cdefs.c_str(), defs);
       for(std::vector<std::string>::const_iterator di = defs.begin();
           di != defs.end(); ++di)
         {
