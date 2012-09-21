@@ -297,7 +297,8 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
     }
 
   const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmGeneratorExpression ge((cmListFileBacktrace()));
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
 
   cmGeneratorExpressionDAGChecker dagChecker(cmListFileBacktrace(),
                                               this->GetName(),
@@ -346,7 +347,8 @@ std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
     return "";
     }
 
-  cmGeneratorExpression ge((cmListFileBacktrace()));
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
 
   cmGeneratorExpressionDAGChecker dagChecker(cmListFileBacktrace(),
                                              this->GetName(),
