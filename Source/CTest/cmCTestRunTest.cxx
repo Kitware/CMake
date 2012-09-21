@@ -206,7 +206,13 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     bool success =
       !forceFail &&  (retVal == 0 ||
       this->TestProperties->RequiredRegularExpressions.size());
-    if((success && !this->TestProperties->WillFail)
+    if(this->TestProperties->SkipReturnCode >= 0
+      && this->TestProperties->SkipReturnCode == retVal)
+      {
+      this->TestResult.Status = cmCTestTestHandler::NOT_RUN;
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***Skipped ");
+      }
+    else if((success && !this->TestProperties->WillFail)
       || (!success && this->TestProperties->WillFail))
       {
       this->TestResult.Status = cmCTestTestHandler::COMPLETED;
