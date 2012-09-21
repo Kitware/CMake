@@ -77,6 +77,10 @@ execute_process(COMMAND sw_vers -productVersion
   OUTPUT_VARIABLE CURRENT_OSX_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+# Save CMAKE_OSX_ARCHITECTURES from the environment.
+set(CMAKE_OSX_ARCHITECTURES "$ENV{CMAKE_OSX_ARCHITECTURES}" CACHE STRING
+  "Build architectures for OSX")
+
 #----------------------------------------------------------------------------
 # _CURRENT_OSX_VERSION - as a two-component string: 10.5, 10.6, ...
 #
@@ -95,12 +99,16 @@ endif()
 #----------------------------------------------------------------------------
 # CMAKE_OSX_SYSROOT
 
-# Environment variable set by the user overrides our default.
-# Use the same environment variable that Xcode uses.
-if(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
-    (NOT "x$ENV{SDKROOT}" MATCHES "/" OR IS_DIRECTORY "$ENV{SDKROOT}"))
+if(CMAKE_OSX_SYSROOT)
+  # Use the existing value without further computation to choose a default.
+  set(_CMAKE_OSX_SYSROOT_DEFAULT "${CMAKE_OSX_SYSROOT}")
+elseif(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
+        (NOT "x$ENV{SDKROOT}" MATCHES "/" OR IS_DIRECTORY "$ENV{SDKROOT}"))
+  # Use the value of SDKROOT from the environment.
   set(_CMAKE_OSX_SYSROOT_DEFAULT "$ENV{SDKROOT}")
-else()
+elseif("${CMAKE_GENERATOR}" MATCHES Xcode
+       OR CMAKE_OSX_ARCHITECTURES MATCHES "[^;]"
+       OR NOT EXISTS "/usr/include/sys/types.h")
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
   set(_CMAKE_OSX_SDKS_DIR "")
   if(OSX_DEVELOPER_ROOT)
@@ -182,29 +190,6 @@ endfunction()
 
 # Make sure the combination of SDK and Deployment Target are allowed
 SanityCheckSDKAndDeployTarget("${CMAKE_OSX_SYSROOT}" "${CMAKE_OSX_DEPLOYMENT_TARGET}")
-
-# set _CMAKE_OSX_MACHINE to uname -m
-execute_process(COMMAND uname -m
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  OUTPUT_VARIABLE _CMAKE_OSX_MACHINE)
-
-# check for Power PC and change to ppc
-if(_CMAKE_OSX_MACHINE MATCHES "Power")
-  set(_CMAKE_OSX_MACHINE ppc)
-endif()
-
-# check for environment variable CMAKE_OSX_ARCHITECTURES
-# if it is set.
-if(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
-  set(CMAKE_OSX_ARCHITECTURES_VALUE "$ENV{CMAKE_OSX_ARCHITECTURES}")
-else()
-  set(CMAKE_OSX_ARCHITECTURES_VALUE "")
-endif()
-
-# now put _CMAKE_OSX_MACHINE into the cache
-set(CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES_VALUE} CACHE STRING
-  "Build architectures for OSX")
-
 
 if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
   set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
