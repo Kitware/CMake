@@ -97,7 +97,8 @@ endif()
 
 # Environment variable set by the user overrides our default.
 # Use the same environment variable that Xcode uses.
-if(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND EXISTS "$ENV{SDKROOT}")
+if(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
+    (NOT "x$ENV{SDKROOT}" MATCHES "/" OR IS_DIRECTORY "$ENV{SDKROOT}"))
   set(_CMAKE_OSX_SYSROOT_DEFAULT "$ENV{SDKROOT}")
 else()
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
@@ -127,8 +128,40 @@ else()
 endif()
 
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
-set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_DEFAULT}" CACHE PATH
+# Choose the type based on the current value.
+set(_CMAKE_OSX_SYSROOT_TYPE STRING)
+foreach(v CMAKE_OSX_SYSROOT _CMAKE_OSX_SYSROOT_DEFAULT)
+  if("x${${v}}" MATCHES "/")
+    set(_CMAKE_OSX_SYSROOT_TYPE PATH)
+    break()
+  endif()
+endforeach()
+set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_DEFAULT}" CACHE ${_CMAKE_OSX_SYSROOT_TYPE}
   "The product will be built against the headers and libraries located inside the indicated SDK.")
+
+# Transform the cached value to something we can use.
+if(CMAKE_OSX_SYSROOT)
+  if("x${CMAKE_OSX_SYSROOT}" MATCHES "/")
+    # This is a path to the SDK.  Make sure it exists.
+    if(NOT IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
+      message(WARNING "Ignoring CMAKE_OSX_SYSROOT value:\n ${CMAKE_OSX_SYSROOT}\n"
+        "because the directory does not exist.")
+      set(CMAKE_OSX_SYSROOT "")
+    endif()
+  elseif(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
+    # For non-Xcode generators transform the sdk name into a path.
+    execute_process(
+      COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version Path
+      OUTPUT_VARIABLE _stdout
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_VARIABLE _stderr
+      RESULT_VARIABLE _failed
+      )
+    if(NOT _failed AND IS_DIRECTORY "${_stdout}")
+      set(CMAKE_OSX_SYSROOT "${_stdout}")
+    endif()
+  endif()
+endif()
 
 #----------------------------------------------------------------------------
 function(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
