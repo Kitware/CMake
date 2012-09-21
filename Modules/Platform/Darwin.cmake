@@ -77,6 +77,10 @@ execute_process(COMMAND sw_vers -productVersion
   OUTPUT_VARIABLE CURRENT_OSX_VERSION
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+# Save CMAKE_OSX_ARCHITECTURES from the environment.
+set(CMAKE_OSX_ARCHITECTURES "$ENV{CMAKE_OSX_ARCHITECTURES}" CACHE STRING
+  "Build architectures for OSX")
+
 #----------------------------------------------------------------------------
 # _CURRENT_OSX_VERSION - as a two-component string: 10.5, 10.6, ...
 #
@@ -182,29 +186,6 @@ endfunction()
 
 # Make sure the combination of SDK and Deployment Target are allowed
 SanityCheckSDKAndDeployTarget("${CMAKE_OSX_SYSROOT}" "${CMAKE_OSX_DEPLOYMENT_TARGET}")
-
-# set _CMAKE_OSX_MACHINE to uname -m
-execute_process(COMMAND uname -m
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  OUTPUT_VARIABLE _CMAKE_OSX_MACHINE)
-
-# check for Power PC and change to ppc
-if(_CMAKE_OSX_MACHINE MATCHES "Power")
-  set(_CMAKE_OSX_MACHINE ppc)
-endif()
-
-# check for environment variable CMAKE_OSX_ARCHITECTURES
-# if it is set.
-if(NOT "$ENV{CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
-  set(CMAKE_OSX_ARCHITECTURES_VALUE "$ENV{CMAKE_OSX_ARCHITECTURES}")
-else()
-  set(CMAKE_OSX_ARCHITECTURES_VALUE "")
-endif()
-
-# now put _CMAKE_OSX_MACHINE into the cache
-set(CMAKE_OSX_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES_VALUE} CACHE STRING
-  "Build architectures for OSX")
-
 
 if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
   set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
