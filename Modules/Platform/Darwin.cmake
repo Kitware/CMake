@@ -99,10 +99,12 @@ endif()
 #----------------------------------------------------------------------------
 # CMAKE_OSX_SYSROOT
 
-# Environment variable set by the user overrides our default.
-# Use the same environment variable that Xcode uses.
-if(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
-    (NOT "x$ENV{SDKROOT}" MATCHES "/" OR IS_DIRECTORY "$ENV{SDKROOT}"))
+if(CMAKE_OSX_SYSROOT)
+  # Use the existing value without further computation to choose a default.
+  set(_CMAKE_OSX_SYSROOT_DEFAULT "${CMAKE_OSX_SYSROOT}")
+elseif(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
+        (NOT "x$ENV{SDKROOT}" MATCHES "/" OR IS_DIRECTORY "$ENV{SDKROOT}"))
+  # Use the value of SDKROOT from the environment.
   set(_CMAKE_OSX_SYSROOT_DEFAULT "$ENV{SDKROOT}")
 else()
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
