@@ -316,13 +316,13 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
 {
-  if (!config)
+  std::string defPropName = "COMPILE_DEFINITIONS";
+  if (config)
     {
-    return this->Target->GetProperty("COMPILE_DEFINITIONS");
+    defPropName += "_" + cmSystemTools::UpperCase(config);
     }
-  std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName +=
-    cmSystemTools::UpperCase(config);
 
-  return this->Target->GetProperty(defPropName.c_str());
+  const char *prop = this->Target->GetProperty(defPropName.c_str());
+
+  return prop ? prop : "";
 }
