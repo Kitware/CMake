@@ -300,7 +300,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
   cmListFileBacktrace lfbt;
   cmGeneratorExpression ge(lfbt);
 
-  cmGeneratorExpressionDAGChecker dagChecker(cmListFileBacktrace(),
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                               this->GetName(),
                                               "INCLUDE_DIRECTORIES", 0, 0);
 
@@ -350,7 +350,7 @@ std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
   cmListFileBacktrace lfbt;
   cmGeneratorExpression ge(lfbt);
 
-  cmGeneratorExpressionDAGChecker dagChecker(cmListFileBacktrace(),
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                              this->GetName(),
                                              defPropName, 0, 0);
   return ge.Parse(prop).Evaluate(this->Makefile,
