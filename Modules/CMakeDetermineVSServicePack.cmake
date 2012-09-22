@@ -9,6 +9,7 @@
 #    vc90sp1
 #    vc100
 #    vc100sp1
+#    vc110
 #
 # Usage:
 # ===========================
@@ -54,6 +55,8 @@ function(_DetermineVSServicePackFromCompiler _OUT_VAR _cl_version)
        set(_version "vc100")
    elseif(${_cl_version} VERSION_EQUAL "16.00.40219.01")
        set(_version "vc100sp1")
+   elseif(${_cl_version} VERSION_EQUAL "17.00.50727.1")
+       set(_version "vc110")
    else()
        set(_version "")
    endif()
