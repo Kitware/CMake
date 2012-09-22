@@ -148,6 +148,8 @@ set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_DEFAULT}" CACHE ${_CMAKE_OSX_SYSROOT
   "The product will be built against the headers and libraries located inside the indicated SDK.")
 
 # Transform the cached value to something we can use.
+set(_CMAKE_OSX_SYSROOT_ORIG "${CMAKE_OSX_SYSROOT}")
+set(_CMAKE_OSX_SYSROOT_PATH "")
 if(CMAKE_OSX_SYSROOT)
   if("x${CMAKE_OSX_SYSROOT}" MATCHES "/")
     # This is a path to the SDK.  Make sure it exists.
@@ -155,9 +157,11 @@ if(CMAKE_OSX_SYSROOT)
       message(WARNING "Ignoring CMAKE_OSX_SYSROOT value:\n ${CMAKE_OSX_SYSROOT}\n"
         "because the directory does not exist.")
       set(CMAKE_OSX_SYSROOT "")
+      set(_CMAKE_OSX_SYSROOT_ORIG "")
     endif()
-  elseif(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
-    # For non-Xcode generators transform the sdk name into a path.
+    set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
+  else()
+    # Transform the sdk name into a path.
     execute_process(
       COMMAND xcodebuild -sdk ${CMAKE_OSX_SYSROOT} -version Path
       OUTPUT_VARIABLE _stdout
@@ -166,30 +170,36 @@ if(CMAKE_OSX_SYSROOT)
       RESULT_VARIABLE _failed
       )
     if(NOT _failed AND IS_DIRECTORY "${_stdout}")
-      set(CMAKE_OSX_SYSROOT "${_stdout}")
+      set(_CMAKE_OSX_SYSROOT_PATH "${_stdout}")
+      # For non-Xcode generators use the path.
+      if(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
+        set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
+      endif()
     endif()
   endif()
 endif()
 
-#----------------------------------------------------------------------------
-function(SanityCheckSDKAndDeployTarget _sdk_path _deploy)
-  if(_deploy STREQUAL "")
-    return()
-  endif()
-
-  if(_sdk_path STREQUAL "")
-    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET='${_deploy}' but CMAKE_OSX_SYSROOT is empty... - either set CMAKE_OSX_SYSROOT to a valid SDK or set CMAKE_OSX_DEPLOYMENT_TARGET to empty")
-  endif()
-
-  string(REGEX REPLACE "(.*MacOSX*)(....)(.*\\.sdk)" "\\2" SDK "${_sdk_path}")
-  if(_deploy GREATER "${SDK}")
-    message(FATAL_ERROR "CMAKE_OSX_DEPLOYMENT_TARGET (${_deploy}) is greater than CMAKE_OSX_SYSROOT SDK (${_sdk_path}). Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${SDK} or lower")
-  endif()
-endfunction()
-#----------------------------------------------------------------------------
-
 # Make sure the combination of SDK and Deployment Target are allowed
-SanityCheckSDKAndDeployTarget("${CMAKE_OSX_SYSROOT}" "${CMAKE_OSX_DEPLOYMENT_TARGET}")
+if(CMAKE_OSX_DEPLOYMENT_TARGET)
+  if("${_CMAKE_OSX_SYSROOT_PATH}" MATCHES "^.*/MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk")
+    set(_sdk_ver "${CMAKE_MATCH_1}")
+  elseif("${_CMAKE_OSX_SYSROOT_ORIG}" MATCHES "^macosx([0-9]+\\.[0-9]+)$")
+    set(_sdk_ver "${CMAKE_MATCH_1}")
+  else()
+    message(FATAL_ERROR
+      "CMAKE_OSX_DEPLOYMENT_TARGET is '${CMAKE_OSX_DEPLOYMENT_TARGET}' "
+      "but CMAKE_OSX_SYSROOT:\n \"${_CMAKE_OSX_SYSROOT_ORIG}\"\n"
+      "is not set to a MacOSX SDK with a recognized version.  "
+      "Either set CMAKE_OSX_SYSROOT to a valid SDK or set "
+      "CMAKE_OSX_DEPLOYMENT_TARGET to empty.")
+  endif()
+  if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER "${_sdk_ver}")
+    message(FATAL_ERROR
+      "CMAKE_OSX_DEPLOYMENT_TARGET (${CMAKE_OSX_DEPLOYMENT_TARGET}) "
+      "is greater than CMAKE_OSX_SYSROOT SDK:\n ${_CMAKE_OSX_SYSROOT_ORIG}\n"
+      "Please set CMAKE_OSX_DEPLOYMENT_TARGET to ${_sdk_ver} or lower.")
+  endif()
+endif()
 
 if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
   set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
