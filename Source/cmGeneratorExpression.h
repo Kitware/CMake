@@ -51,7 +51,9 @@ public:
   cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(const char* input);
 
   enum PreprocessContext {
-    StripAllGeneratorExpressions
+    StripAllGeneratorExpressions,
+    BuildInterface,
+    InstallInterface
   };
 
   static std::string Preprocess(const std::string &input,
