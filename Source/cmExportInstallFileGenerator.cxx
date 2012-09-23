@@ -59,6 +59,14 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                       cmGeneratorExpression::InstallInterface,
                                       properties);
         }
+      this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                                    te->Target,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties);
+      this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
+                                    te->Target,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties);
 
       this->GenerateInterfaceProperties(te->Target, os, properties);
       }

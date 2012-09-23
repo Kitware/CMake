@@ -41,6 +41,12 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                         cmGeneratorExpression::BuildInterface,
                                         properties);
         }
+      this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
+                                      cmGeneratorExpression::BuildInterface,
+                                      properties);
+      this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
+                                      cmGeneratorExpression::BuildInterface,
+                                      properties);
 
       this->GenerateInterfaceProperties(te, os, properties);
       }
