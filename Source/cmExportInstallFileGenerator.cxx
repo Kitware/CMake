@@ -68,6 +68,14 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         {
         ImportPropertyMap properties;
 
+        this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                                      te->Target,
+                                      cmGeneratorExpression::InstallInterface,
+                                      properties);
+        this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
+                                      te->Target,
+                                      cmGeneratorExpression::InstallInterface,
+                                      properties);
         this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES",
                                       te->Target,
                                       cmGeneratorExpression::InstallInterface,
