@@ -52,6 +52,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   this->GenerateExpectedTargetsCode(os, expectedTargets);
   }
 
+  std::vector<std::string> missingTargets;
+
   // Create all the imported targets.
   for(std::vector<cmTarget*>::const_iterator
         tei = allTargets.begin();
@@ -59,7 +61,20 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     {
     cmTarget* te = *tei;
     this->GenerateImportTargetCode(os, te);
+
+    ImportPropertyMap properties;
+
+    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+
+    this->GenerateInterfaceProperties(te, os, properties);
     }
+
+  this->GenerateMissingTargetsCheckCode(os, missingTargets);
 
   // Generate import file content for each configuration.
   for(std::vector<std::string>::const_iterator
