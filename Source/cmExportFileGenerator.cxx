@@ -208,7 +208,8 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
         || closePos < commaPos // Implied 'this' target
         || nextOpenPos < commaPos) // Non-literal
       {
-      break;
+      lastPos = nameStartPos;
+      continue;
       }
 
     const std::string targetName = input.substr(nameStartPos,

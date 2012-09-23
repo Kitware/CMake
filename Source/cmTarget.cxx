@@ -720,6 +720,28 @@ void cmTarget::DefineProperties(cmake *cm)
      "for the named configuration.");
 
   cm->DefineProperty
+    ("INTERFACE_INCLUDE_DIRECTORIES", cmProperty::TARGET,
+     "List of public include directories for a library.",
+     "Targets may populate this property to publish the include directories "
+     "required to compile against the headers for the target.  Consuming "
+     "targets can add entries to their own INCLUDE_DIRECTORIES property such "
+     "as $<TARGET_PROPERTY:foo,INTERFACE_INCLUDE_DIRECTORIES> to use the "
+     "include directories specified in the interface of 'foo'."
+     "\n"
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+
+  cm->DefineProperty
+    ("INTERFACE_COMPILE_DEFINITIONS", cmProperty::TARGET,
+     "List of public compile definitions for a library.",
+     "Targets may populate this property to publish the compile definitions "
+     "required to compile against the headers for the target.  Consuming "
+     "targets can add entries to their own COMPILE_DEFINITIONS property such "
+     "as $<TARGET_PROPERTY:foo,INTERFACE_COMPILE_DEFINITIONS> to use the "
+     "compile definitions specified in the interface of 'foo'."
+     "\n"
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+
+  cm->DefineProperty
     ("LINK_INTERFACE_MULTIPLICITY", cmProperty::TARGET,
      "Repetition count for STATIC libraries with cyclic dependencies.",
      "When linking to a STATIC library target with cyclic dependencies the "
