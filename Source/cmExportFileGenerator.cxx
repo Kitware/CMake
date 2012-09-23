@@ -453,8 +453,15 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
   for(unsigned int i=0; i<missingTargets.size(); ++i)
     {
     os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
-       << "  MESSAGE(FATAL_ERROR \"Required imported target \\\""
+       << "  IF(CMAKE_FIND_PACKAGE_NAME)\n"
+       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
+       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
+       << "\"Required imported target \\\"" << missingTargets[i]
+       << "\\\" not found ! \")\n"
+       << "  ELSE()\n"
+       << "    MESSAGE(FATAL_ERROR \"Required imported target \\\""
        << missingTargets[i] << "\\\" not found ! \")\n"
+       << "  ENDIF()\n"
        << "ENDIF()\n";
     }
   os << "\n";

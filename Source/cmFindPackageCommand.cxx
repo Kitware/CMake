@@ -840,6 +840,8 @@ bool cmFindPackageCommand
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 {
+  this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name.c_str());
+
   // Store the list of components.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
   this->AddFindDefinition(components_var.c_str(), components.c_str());
