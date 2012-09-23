@@ -32,6 +32,10 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(NOT SDL_IMAGE_INCLUDE_DIR AND SDLIMAGE_INCLUDE_DIR)
+  set(SDL_IMAGE_INCLUDE_DIR ${SDLIMAGE_INCLUDE_DIR} CACHE PATH "directory cache
+entry initialized from old variable name")
+endif()
 find_path(SDL_IMAGE_INCLUDE_DIR SDL_image.h
   HINTS
     ENV SDLIMAGEDIR
@@ -39,6 +43,10 @@ find_path(SDL_IMAGE_INCLUDE_DIR SDL_image.h
   PATH_SUFFIXES SDL SDL12 SDL11
 )
 
+if(NOT SDL_IMAGE_LIBRARY AND SDLIMAGE_LIBRARY)
+  set(SDL_IMAGE_LIBRARY ${SDLIMAGE_LIBRARY} CACHE FILEPATH "file cache entry
+initialized from old variable name")
+endif()
 find_library(SDL_IMAGE_LIBRARY
   NAMES SDL_image
   HINTS

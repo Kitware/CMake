@@ -32,6 +32,10 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(NOT SDL_NET_INCLUDE_DIR AND SDLNET_INCLUDE_DIR)
+  set(SDL_NET_INCLUDE_DIR ${SDLNET_INCLUDE_DIR} CACHE PATH "directory cache
+entry initialized from old variable name")
+endif()
 find_path(SDL_NET_INCLUDE_DIR SDL_net.h
   HINTS
     ENV SDLNETDIR
@@ -39,6 +43,10 @@ find_path(SDL_NET_INCLUDE_DIR SDL_net.h
   PATH_SUFFIXES SDL SDL12 SDL11
 )
 
+if(NOT SDL_NET_LIBRARY AND SDLNET_LIBRARY)
+  set(SDL_NET_LIBRARY ${SDLNET_LIBRARY} CACHE FILEPATH "file cache entry
+initialized from old variable name")
+endif()
 find_library(SDL_NET_LIBRARY
   NAMES SDL_net
   HINTS
