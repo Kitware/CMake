@@ -286,6 +286,13 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
   }
 } configurationTestNode;
 
+
+//----------------------------------------------------------------------------
+static const char* targetPropertyTransitiveWhitelist[] = {
+    "INTERFACE_INCLUDE_DIRECTORIES"
+  , "INTERFACE_COMPILE_DEFINITIONS"
+};
+
 //----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
@@ -394,7 +401,28 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 
     const char *prop = target->GetProperty(propertyName.c_str());
-    return prop ? prop : "";
+    if (!prop)
+      {
+      return std::string();
+      }
+
+    for (size_t i = 0;
+         i < (sizeof(targetPropertyTransitiveWhitelist) /
+              sizeof(*targetPropertyTransitiveWhitelist));
+         ++i)
+      {
+      if (targetPropertyTransitiveWhitelist[i] == propertyName)
+        {
+        cmGeneratorExpression ge(context->Backtrace);
+        return ge.Parse(prop)->Evaluate(context->Makefile,
+                            context->Config,
+                            context->Quiet,
+                            context->HeadTarget,
+                            target,
+                            &dagChecker);
+        }
+      }
+    return prop;
   }
 } targetPropertyNode;
 
