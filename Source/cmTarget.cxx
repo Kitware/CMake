@@ -2301,7 +2301,7 @@ void cmTarget::Emit(const LibraryID lib,
       // be preserved.
 
       // This variable will keep track of the libraries that were
-      // emitted directory from the current node, and not from a
+      // emitted directly from the current node, and not from a
       // recursive call. This way, if we come across a library that
       // has already been emitted, we repeat it iff it has been
       // emitted here.
@@ -2419,7 +2419,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 //----------------------------------------------------------------------------
 void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
 {
-  // Wipe wipe out maps caching information affected by this property.
+  // Wipe out maps caching information affected by this property.
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
     this->Internal->ImportInfoMap.clear();
