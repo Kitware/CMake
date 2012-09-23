@@ -96,6 +96,31 @@ static const struct OneNode : public cmGeneratorExpressionNode
 } oneNode;
 
 //----------------------------------------------------------------------------
+static const struct OneNode buildInterfaceNode;
+
+//----------------------------------------------------------------------------
+static const struct ZeroNode installInterfaceNode;
+
+//----------------------------------------------------------------------------
+static const struct NullNode : public cmGeneratorExpressionNode
+{
+  NullNode() {}
+
+  virtual bool GeneratesContent() const { return false; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return std::string();
+  }
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+} nullNode;
+
+//----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
@@ -593,6 +618,12 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &commaNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
+  else if (identifier == "BUILD_INTERFACE")
+    return &buildInterfaceNode;
+  else if (identifier == "INSTALL_INTERFACE")
+    return &installInterfaceNode;
+  else if (identifier == "EXPORT_NAMESPACE")
+    return &nullNode;
   return 0;
 
 }
