@@ -25,6 +25,8 @@ if (Qt5Widgets_FOUND)
     qt5_add_resources(${ARGN})
   endmacro()
   set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+  # Remove this when the minimum version of Qt is 4.6.
+  add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 else()
   set(QT_MIN_VERSION "4.4.0")
   find_package(Qt4 REQUIRED)
