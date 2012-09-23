@@ -32,6 +32,10 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(NOT SDL_TTF_INCLUDE_DIR AND SDLTTF_INCLUDE_DIR)
+  set(SDL_TTF_INCLUDE_DIR ${SDLTTF_INCLUDE_DIR} CACHE PATH "directory cache
+entry initialized from old variable name")
+endif()
 find_path(SDL_TTF_INCLUDE_DIR SDL_ttf.h
   HINTS
     ENV SDLTTFDIR
@@ -39,6 +43,10 @@ find_path(SDL_TTF_INCLUDE_DIR SDL_ttf.h
   PATH_SUFFIXES SDL SDL12 SDL11
 )
 
+if(NOT SDL_TTF_LIBRARY AND SDLTTF_LIBRARY)
+  set(SDL_TTF_LIBRARY ${SDLTTF_LIBRARY} CACHE FILEPATH "file cache entry
+initialized from old variable name")
+endif()
 find_library(SDL_TTF_LIBRARY
   NAMES SDL_ttf
   HINTS

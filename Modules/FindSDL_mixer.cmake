@@ -32,6 +32,10 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(NOT SDL_MIXER_INCLUDE_DIR AND SDLMIXER_INCLUDE_DIR)
+  set(SDL_MIXER_INCLUDE_DIR ${SDLMIXER_INCLUDE_DIR} CACHE PATH "directory cache
+entry initialized from old variable name")
+endif()
 find_path(SDL_MIXER_INCLUDE_DIR SDL_mixer.h
   HINTS
     ENV SDLMIXERDIR
@@ -39,6 +43,10 @@ find_path(SDL_MIXER_INCLUDE_DIR SDL_mixer.h
   PATH_SUFFIXES SDL SDL12 SDL11
 )
 
+if(NOT SDL_MIXER_LIBRARY AND SDLMIXER_LIBRARY)
+  set(SDL_MIXER_LIBRARY ${SDLMIXER_LIBRARY} CACHE FILEPATH "file cache entry
+initialized from old variable name")
+endif()
 find_library(SDL_MIXER_LIBRARY
   NAMES SDL_mixer
   HINTS
