@@ -26,6 +26,12 @@
   "strings which contain a '>' for example.\n"                          \
   "  $<COMMA>                  = A literal ','. Used to compare "       \
   "strings which contain a ',' for example.\n"                          \
+  "  $<INSTALL_INTERFACE:...>  = content of \"...\" when the property " \
+  "is exported using install(EXPORT), and empty otherwise.\n"           \
+  "  $<BUILD_INTERFACE:...>    = content of \"...\" when the property " \
+  "is exported using export(), or when the target is used by another "  \
+  "target in the same buildsystem. Expands to the empty string "        \
+  "otherwise.\n"                                                        \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \

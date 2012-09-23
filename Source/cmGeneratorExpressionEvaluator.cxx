@@ -96,6 +96,12 @@ static const struct OneNode : public cmGeneratorExpressionNode
 } oneNode;
 
 //----------------------------------------------------------------------------
+static const struct OneNode buildInterfaceNode;
+
+//----------------------------------------------------------------------------
+static const struct ZeroNode installInterfaceNode;
+
+//----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
@@ -593,6 +599,10 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &commaNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
+  else if (identifier == "BUILD_INTERFACE")
+    return &buildInterfaceNode;
+  else if (identifier == "INSTALL_INTERFACE")
+    return &installInterfaceNode;
   return 0;
 
 }
