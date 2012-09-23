@@ -184,7 +184,7 @@ static const struct Angle_RNode : public cmGeneratorExpressionNode
 
   virtual int NumExpectedParameters() const { return 0; }
 
-  std::string Evaluate(const std::vector<std::string> &parameters,
+  std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
@@ -200,7 +200,7 @@ static const struct CommaNode : public cmGeneratorExpressionNode
 
   virtual int NumExpectedParameters() const { return 0; }
 
-  std::string Evaluate(const std::vector<std::string> &parameters,
+  std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
