@@ -58,11 +58,12 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
   // Now extract any include paths from the targets
   std::set<std::string> uniqueIncludes;
   std::vector<std::string> orderedAndUniqueIncludes;
-  cmTargets & targets = this->Makefile->GetTargets();
-  for (cmTargets::iterator l = targets.begin(); l != targets.end(); ++l)
+  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  for (cmGeneratorTargetsType::iterator l = targets.begin();
+       l != targets.end(); ++l)
     {
     const std::vector<std::string>& includes =
-      l->second.GetIncludeDirectories();
+      l->second->GetIncludeDirectories();
     for(std::vector<std::string>::const_iterator j = includes.begin();
         j != includes.end(); ++j)
       {

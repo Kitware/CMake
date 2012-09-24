@@ -636,9 +636,11 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       // the include directories for this target
       std::set<std::string> uniqIncludeDirs;
 
+      cmGeneratorTarget *gtgt = this->GlobalGenerator
+                                    ->GetGeneratorTarget(target);
       std::vector<std::string> includes;
       target->GetMakefile()->GetLocalGenerator()->
-        GetIncludeDirectories(includes, target);
+        GetIncludeDirectories(includes, gtgt);
       for(std::vector<std::string>::const_iterator dirIt=includes.begin();
           dirIt != includes.end();
           ++dirIt)

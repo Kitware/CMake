@@ -259,7 +259,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     // Add language feature flags.
     this->AddFeatureFlags(flags, lang);
 
-    this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+    this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                                lang, this->ConfigName);
 
     // Fortran-specific flags computed for this target.
@@ -302,16 +302,11 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->AppendDefines
-      (defines, this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
+      (defines, this->GeneratorTarget->GetCompileDefinitions());
+
     this->LocalGenerator->AppendDefines
-      (defines, this->Target->GetProperty("COMPILE_DEFINITIONS"));
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName +=
-      cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
-    this->LocalGenerator->AppendDefines
-      (defines, this->Makefile->GetProperty(defPropName.c_str()));
-    this->LocalGenerator->AppendDefines
-      (defines, this->Target->GetProperty(defPropName.c_str()));
+      (defines, this->GeneratorTarget->GetCompileDefinitions(
+                            this->LocalGenerator->ConfigurationName.c_str()));
 
     std::string definesString;
     this->LocalGenerator->JoinDefines(defines, definesString, lang);
@@ -1022,7 +1017,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "SET(CMAKE_TARGET_LINKED_INFO_FILES\n";
   std::set<cmTarget const*> emitted;
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+                              this->GeneratorTarget->GetLinkInformation(cfg))
     {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
     for(cmComputeLinkInformation::ItemVector::const_iterator
@@ -1061,7 +1057,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   *this->InfoFileStream
     << "SET(CMAKE_C_TARGET_INCLUDE_PATH\n";
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget);
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
@@ -1546,7 +1543,8 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
   emitted.insert("/System/Library/Frameworks");
 #endif
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget);
   std::vector<std::string>::iterator i;
   // check all include directories for frameworks as this
   // will already have added a -F for the framework
@@ -1590,7 +1588,8 @@ void cmMakefileTargetGenerator
 
   // Loop over all library dependencies.
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli =
+                              this->GeneratorTarget->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& libDeps = cli->GetDepends();
     for(std::vector<std::string>::const_iterator j = libDeps.begin();
@@ -1850,7 +1849,8 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
 
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target, lang);
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget, lang);
 
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, lang, useResponseFile);
@@ -1953,7 +1953,8 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
      this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG"))
     {
     std::vector<std::string> includes;
-    this->LocalGenerator->GetIncludeDirectories(includes, this->Target);
+    this->LocalGenerator->GetIncludeDirectories(includes,
+                                                this->GeneratorTarget);
     for(std::vector<std::string>::const_iterator idi = includes.begin();
         idi != includes.end(); ++idi)
       {

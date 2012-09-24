@@ -630,7 +630,8 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::string linkLibs;
     std::string flags;
     std::string linkFlags;
-    lg->GetTargetFlags(linkLibs, flags, linkFlags, *tgt);
+    cmGeneratorTarget gtgt(tgt);
+    lg->GetTargetFlags(linkLibs, flags, linkFlags, &gtgt);
 
     printf("%s\n", linkLibs.c_str() );
 
