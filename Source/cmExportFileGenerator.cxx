@@ -234,7 +234,7 @@ cmExportFileGenerator
       else
         {
         std::vector<std::string> namespaces = this->FindNamespaces(mf, *li);
-        unsigned int targetOccurrences = namespaces.size();
+        size_t targetOccurrences = namespaces.size();
 
         if (targetOccurrences == 1)
           {
