@@ -17,6 +17,7 @@
 cmFindLibraryCommand::cmFindLibraryCommand()
 {
   this->EnvironmentPath = "LIB";
+  this->NamesPerDirAllowed = true;
 }
 
 //----------------------------------------------------------------------------
@@ -44,6 +45,9 @@ void cmFindLibraryCommand::GenerateDocumentation()
                                "SEARCH_XXX", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SUBDIR", "lib");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "NAMES name1 [name2 ...]",
+                               "NAMES name1 [name2 ...] [NAMES_PER_DIR]");
   cmSystemTools::ReplaceString(
     this->GenericDocumentation,
     "XXX_EXTRA_PREFIX_ENTRY",
@@ -52,6 +56,12 @@ void cmFindLibraryCommand::GenerateDocumentation()
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX",
                                "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
   this->GenericDocumentation +=
+    "\n"
+    "When more than one value is given to the NAMES option this command "
+    "by default will consider one name at a time and search every directory "
+    "for it.  "
+    "The NAMES_PER_DIR option tells this command to consider one directory "
+    "at a time and search for all names in it."
     "\n"
     "If the library found is a framework, then VAR will be set to "
     "the full path to the framework <fullPath>/A.framework. "
@@ -465,6 +475,42 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
 //----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindNormalLibrary()
 {
+  if(this->NamesPerDir)
+    {
+    return this->FindNormalLibraryNamesPerDir();
+    }
+  else
+    {
+    return this->FindNormalLibraryDirsPerName();
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
+{
+  // Search for all names in each directory.
+  cmFindLibraryHelper helper(this->Makefile);
+  for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end() ; ++ni)
+    {
+    helper.AddName(*ni);
+    }
+  // Search every directory.
+  for(std::vector<std::string>::const_iterator
+        p = this->SearchPaths.begin(); p != this->SearchPaths.end(); ++p)
+    {
+    if(helper.CheckDirectory(*p))
+      {
+      return helper.BestPath;
+      }
+    }
+  // Couldn't find the library.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
+{
   // Search the entire path for each name.
   cmFindLibraryHelper helper(this->Makefile);
   for(std::vector<std::string>::const_iterator ni = this->Names.begin();
@@ -491,6 +537,44 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 
 //----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindFrameworkLibrary()
+{
+  if(this->NamesPerDir)
+    {
+    return this->FindFrameworkLibraryNamesPerDir();
+    }
+  else
+    {
+    return this->FindFrameworkLibraryDirsPerName();
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
+{
+  std::string fwPath;
+  // Search for all names in each search path.
+  for(std::vector<std::string>::const_iterator di = this->SearchPaths.begin();
+      di != this->SearchPaths.end(); ++di)
+    {
+    for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+        ni != this->Names.end() ; ++ni)
+      {
+      fwPath = *di;
+      fwPath += *ni;
+      fwPath += ".framework";
+      if(cmSystemTools::FileIsDirectory(fwPath.c_str()))
+        {
+        return cmSystemTools::CollapseFullPath(fwPath.c_str());
+        }
+      }
+    }
+
+  // No framework found.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
 {
   std::string fwPath;
   // Search for each name in all search paths.

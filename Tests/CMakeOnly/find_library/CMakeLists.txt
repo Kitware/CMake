@@ -59,3 +59,16 @@ foreach(lib64
     )
   test_find_library_subst(${lib64})
 endforeach()
+
+test_find_library("" A/libtestA.a
+  NAMES testA testB
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/A ${CMAKE_CURRENT_SOURCE_DIR}/B
+  )
+test_find_library("" B/libtestB.a
+  NAMES testB testA
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/A ${CMAKE_CURRENT_SOURCE_DIR}/B
+  )
+test_find_library("" A/libtestA.a
+  NAMES testB testA NAMES_PER_DIR
+  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/A ${CMAKE_CURRENT_SOURCE_DIR}/B
+  )
