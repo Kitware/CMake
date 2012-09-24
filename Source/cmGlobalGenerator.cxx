@@ -21,7 +21,7 @@
 #include "cmQtAutomoc.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
-#include "cmExportInstallFileGenerator.h"
+#include "cmTargetExport.h"
 #include "cmComputeTargetDepends.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -76,12 +76,12 @@ cmGlobalGenerator::~cmGlobalGenerator()
     }
 
   this->ClearGeneratorTargets();
-  this->ClearExportSets();
 }
 
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
                                                 cmMakefile *mf,
-                                                bool optional) {
+                                                bool optional)
+{
   std::string langComp = "CMAKE_";
   langComp += lang;
   langComp += "_COMPILER";
@@ -817,7 +817,7 @@ void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorTargets();
-  this->ClearExportSets();
+  this->ExportSets.clear();
   // Delete any existing cmLocalGenerators
   unsigned int i;
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1488,52 +1488,6 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
     this->InstallComponents.insert(component);
     }
 }
-
-void cmGlobalGenerator::AddTargetToExports(const char* exportSetName,
-                                           cmTarget* target,
-                                           cmInstallTargetGenerator* archive,
-                                           cmInstallTargetGenerator* runTime,
-                                           cmInstallTargetGenerator* library,
-                                           cmInstallTargetGenerator* framework,
-                                           cmInstallTargetGenerator* bundle,
-                                           cmInstallFilesGenerator* headers)
-{
-  if ((exportSetName) && (*exportSetName) && (target))
-    {
-    cmTargetExport* te = new cmTargetExport(target, archive, runTime, library,
-                                            framework, bundle, headers);
-    this->ExportSets[exportSetName].push_back(te);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::ClearExportSets()
-{
-  for(std::map<cmStdString, std::vector<cmTargetExport*> >::iterator
-        setIt = this->ExportSets.begin();
-      setIt != this->ExportSets.end(); ++setIt)
-    {
-    for(unsigned int i = 0; i < setIt->second.size(); ++i)
-      {
-      delete setIt->second[i];
-      }
-    }
-  this->ExportSets.clear();
-}
-
-const std::vector<cmTargetExport*>* cmGlobalGenerator::GetExportSet(
-                                                        const char* name) const
-{
-  std::map<cmStdString, std::vector<cmTargetExport*> >::const_iterator
-                                     exportSetIt = this->ExportSets.find(name);
-  if (exportSetIt != this->ExportSets.end())
-    {
-    return &exportSetIt->second;
-    }
-
-  return 0;
-}
-
 
 void cmGlobalGenerator::EnableInstallTarget()
 {

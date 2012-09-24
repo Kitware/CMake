@@ -176,6 +176,10 @@ set(SRCS
   cmExportFileGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExportSet.h
+  cmExportSet.cxx
+  cmExportSetMap.h
+  cmExportSetMap.cxx
   cmExtraCodeBlocksGenerator.cxx
   cmExtraCodeBlocksGenerator.h
   cmExtraEclipseCDT4Generator.cxx
@@ -259,6 +263,7 @@ set(SRCS
   cmSystemTools.h
   cmTarget.cxx
   cmTarget.h
+  cmTargetExport.h
   cmTest.cxx
   cmTest.h
   cmTestGenerator.cxx

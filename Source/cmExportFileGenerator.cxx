@@ -11,10 +11,15 @@
 ============================================================================*/
 #include "cmExportFileGenerator.h"
 
+#include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmInstallExportGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmTargetExport.h"
 #include "cmVersion.h"
 
 #include <cmsys/auto_ptr.hxx>
@@ -123,7 +128,9 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 void
 cmExportFileGenerator
 ::SetImportDetailProperties(const char* config, std::string const& suffix,
-                            cmTarget* target, ImportPropertyMap& properties)
+                            cmTarget* target, ImportPropertyMap& properties,
+                            std::vector<std::string>& missingTargets
+                           )
 {
   // Get the makefile in which to lookup target information.
   cmMakefile* mf = target->GetMakefile();
@@ -159,13 +166,13 @@ cmExportFileGenerator
     {
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
-                                iface->Languages, properties);
+                                iface->Languages, properties, missingTargets);
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                                iface->Libraries, properties);
+                                iface->Libraries, properties, missingTargets);
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
-                                iface->SharedDeps, properties);
+                                iface->SharedDeps, properties, missingTargets);
     if(iface->Multiplicity > 0)
       {
       std::string prop = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
@@ -184,7 +191,9 @@ cmExportFileGenerator
                         cmTarget* target,
                         const char* propName,
                         std::vector<std::string> const& libs,
-                        ImportPropertyMap& properties)
+                        ImportPropertyMap& properties,
+                        std::vector<std::string>& missingTargets
+                       )
 {
   // Skip the property if there are no libraries.
   if(libs.empty())
@@ -224,17 +233,30 @@ cmExportFileGenerator
         }
       else
         {
-        // The target is not in the export.
-        if(!this->AppendMode)
+        std::vector<std::string> namespaces = this->FindNamespaces(mf, *li);
+        unsigned int targetOccurrences = namespaces.size();
+
+        if (targetOccurrences == 1)
           {
-          // We are not appending, so all exported targets should be
-          // known here.  This is probably user-error.
-          this->ComplainAboutMissingTarget(target, tgt);
+          std::string missingTarget = namespaces[0];
+          missingTarget += *li;
+          link_libs += missingTarget;
+          missingTargets.push_back(missingTarget);
           }
-        // Assume the target will be exported by another command.
-        // Append it with the export namespace.
-        link_libs += this->Namespace;
-        link_libs += *li;
+        else
+          {
+          // The target is not in the export.
+          if(!this->AppendMode)
+            {
+            // We are not appending, so all exported targets should be
+            // known here.  This is probably user-error.
+            this->ComplainAboutMissingTarget(target, tgt, targetOccurrences);
+            }
+          // Assume the target will be exported by another command.
+          // Append it with the export namespace.
+          link_libs += this->Namespace;
+          link_libs += *li;
+          }
         }
       }
     else
@@ -249,6 +271,48 @@ cmExportFileGenerator
   prop += suffix;
   properties[prop] = link_libs;
 }
+
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmExportFileGenerator::FindNamespaces(cmMakefile* mf,
+                                                       const std::string& name)
+{
+  std::vector<std::string> namespaces;
+  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+  const cmExportSetMap& exportSets = gg->GetExportSets();
+
+  for(cmExportSetMap::const_iterator expIt = exportSets.begin();
+      expIt != exportSets.end();
+      ++expIt)
+    {
+    const cmExportSet* exportSet = expIt->second;
+    std::vector<cmTargetExport const*> const* targets =
+                                                 exportSet->GetTargetExports();
+
+    bool containsTarget = false;
+    for(unsigned int i=0; i<targets->size(); i++)
+      {
+      if (name == (*targets)[i]->Target->GetName())
+        {
+        containsTarget = true;
+        break;
+        }
+      }
+
+    if (containsTarget)
+      {
+      std::vector<cmInstallExportGenerator const*> const* installs =
+                                                 exportSet->GetInstallations();
+      for(unsigned int i=0; i<installs->size(); i++)
+        {
+        namespaces.push_back((*installs)[i]->GetNamespace());
+        }
+      }
+    }
+
+  return namespaces;
+}
+
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::GenerateImportHeaderCode(std::ostream& os,
@@ -377,6 +441,30 @@ cmExportFileGenerator
     }
   os << "  )\n"
      << "\n";
+}
+
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
+                                const std::vector<std::string>& missingTargets)
+{
+  os << "# Make sure the targets which have been exported in some other \n"
+        "# export set exist.\n";
+  for(unsigned int i=0; i<missingTargets.size(); ++i)
+    {
+    os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
+       << "  IF(CMAKE_FIND_PACKAGE_NAME)\n"
+       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
+       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
+       << "\"Required imported target \\\"" << missingTargets[i]
+       << "\\\" not found ! \")\n"
+       << "  ELSE()\n"
+       << "    MESSAGE(FATAL_ERROR \"Required imported target \\\""
+       << missingTargets[i] << "\\\" not found ! \")\n"
+       << "  ENDIF()\n"
+       << "ENDIF()\n";
+    }
+  os << "\n";
 }
 
 

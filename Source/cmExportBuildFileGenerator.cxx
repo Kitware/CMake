@@ -72,8 +72,9 @@ cmExportBuildFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
+      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
-                                      target, properties);
+                                      target, properties, missingTargets);
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -82,6 +83,7 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
+      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, target, properties);
       }
     }
@@ -135,7 +137,8 @@ cmExportBuildFileGenerator
 void
 cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee)
+                             cmTarget* dependee,
+                             int occurrences)
 {
   if(!this->ExportCommand || !this->ExportCommand->ErrorMessage.empty())
     {
@@ -143,10 +146,20 @@ cmExportBuildFileGenerator
     }
 
   cmOStringStream e;
-  e << "called with target \"" << depender->GetName()
-    << "\" which requires target \"" << dependee->GetName()
-    << "\" that is not in the export list.\n"
-    << "If the required target is not easy to reference in this call, "
-    << "consider using the APPEND option with multiple separate calls.";
+  if (occurrences == 0)
+    {
+    e << "called with target \"" << depender->GetName()
+      << "\" which requires target \"" << dependee->GetName()
+      << "\" that is not in the export list.\n"
+      << "If the required target is not easy to reference in this call, "
+      << "consider using the APPEND option with multiple separate calls.";
+    }
+  else
+    {
+    e << "called with target \"" << depender->GetName()
+      << "\" which requires target \"" << dependee->GetName()
+      << "\" that is exported " << occurrences << " times in other "
+      << "export ""lists.\n";
+    }
   this->ExportCommand->ErrorMessage = e.str();
 }

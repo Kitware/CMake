@@ -840,6 +840,8 @@ bool cmFindPackageCommand
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 {
+  this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name.c_str());
+
   // Store the list of components.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
   this->AddFindDefinition(components_var.c_str(), components.c_str());
@@ -1016,6 +1018,9 @@ bool cmFindPackageCommand::HandlePackageMode()
 
   std::string foundVar = this->Name;
   foundVar += "_FOUND";
+  std::string notFoundMessageVar = this->Name;
+  notFoundMessageVar += "_NOT_FOUND_MESSAGE";
+  std::string notFoundMessage;
 
   // If the directory for the config file was found, try to read the file.
   bool result = true;
@@ -1033,6 +1038,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       // has set Foo_FOUND to FALSE itself:
       this->Makefile->RemoveDefinition(foundVar.c_str());
       }
+    this->Makefile->RemoveDefinition(notFoundMessageVar.c_str());
 
     // Set the version variables before loading the config file.
     // It may override them.
@@ -1051,6 +1057,8 @@ bool cmFindPackageCommand::HandlePackageMode()
         // we get here if the Config file has set Foo_FOUND actively to FALSE
         found = false;
         configFileSetFOUNDFalse = true;
+        notFoundMessage = this->Makefile->GetSafeDefinition(
+                                                   notFoundMessageVar.c_str());
         }
       }
     else
@@ -1071,6 +1079,10 @@ bool cmFindPackageCommand::HandlePackageMode()
         "  " << this->FileFound << "\n"
         "but it set " << foundVar << " to FALSE so package \"" <<
         this->Name << "\" is considered to be NOT FOUND.";
+      if (!notFoundMessage.empty())
+        {
+        e << " Reason given by package: \n" << notFoundMessage << "\n";
+        }
       }
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.

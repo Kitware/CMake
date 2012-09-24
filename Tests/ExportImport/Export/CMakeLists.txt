@@ -87,6 +87,18 @@ target_link_libraries(testLibCycleA testLibCycleB)
 target_link_libraries(testLibCycleB testLibCycleA)
 set_property(TARGET testLibCycleA PROPERTY LINK_INTERFACE_MULTIPLICITY 3)
 
+# Test exporting dependent libraries into different exports
+add_library(testLibRequired testLibRequired.c)
+add_library(testLibDepends testLibDepends.c)
+target_link_libraries(testLibDepends testLibRequired)
+
+install(TARGETS testLibRequired EXPORT RequiredExp DESTINATION lib )
+install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredConfig.cmake DESTINATION lib/cmake/testLibRequired)
+
+install(TARGETS testLibDepends EXPORT DependsExp DESTINATION lib )
+install(EXPORT DependsExp FILE testLibDependsConfig.cmake DESTINATION lib/cmake/testLibDepends)
+
+
 # Install and export from install tree.
 install(
   TARGETS

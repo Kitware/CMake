@@ -18,6 +18,9 @@ XXX_VERSION_YY          Expect Version YY if true. Make sure at most one of thes
 XXX_WRAP_YY             If False, do not try to use the relevent CMake wrapping command.
 XXX_YY_FOUND            If False, optional YY part of XXX sytem is not available.
 XXX_FOUND               Set to false, or undefined, if we haven't found, or don't want to use XXX.
+XXX_NOT_FOUND_MESSAGE   Should be set by config-files in the case that it has set XXX_FOUND to FALSE.
+                        The contained message will be printed by the find_package() command and by
+                        find_package_handle_standard_args() to inform the user about the problem.
 XXX_RUNTIME_LIBRARY_DIRS Optionally, the runtime library search path for use when running an executable linked to shared libraries.
                          The list should be used by user code to create the PATH on windows or LD_LIBRARY_PATH on unix.
                          This should not be a cache entry.
@@ -124,7 +127,7 @@ If neither the QUIET nor REQUIRED options are given then the
 FindXXX.cmake module should look for the package and complain without
 error if the module is not found.
 
-A package can be provide sub-components.
+A package can provide sub-components.
 Those components can be listed after the COMPONENTS (or REQUIRED)
 or OPTIONAL_COMPONENTS keywords.  The set of all listed components will be
 specified in a XXX_FIND_COMPONENTS variable.

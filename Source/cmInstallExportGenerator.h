@@ -17,8 +17,7 @@
 class cmExportInstallFileGenerator;
 class cmInstallFilesGenerator;
 class cmInstallTargetGenerator;
-class cmTarget;
-class cmTargetExport;
+class cmExportSet;
 class cmMakefile;
 
 /** \class cmInstallExportGenerator
@@ -27,24 +26,27 @@ class cmMakefile;
 class cmInstallExportGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallExportGenerator(const char* name,
+  cmInstallExportGenerator(cmExportSet* exportSet,
                            const char* dest, const char* file_permissions,
                            const std::vector<std::string>& configurations,
                            const char* component,
                            const char* filename, const char* name_space,
                            cmMakefile* mf);
   ~cmInstallExportGenerator();
-protected:
-  typedef std::vector<cmTargetExport*> ExportSet;
 
+  cmExportSet* GetExportSet() {return this->ExportSet;}
+
+  const std::string& GetNamespace() const { return this->Namespace; }
+
+protected:
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
-  void GenerateImportFile(ExportSet const* exportSet);
-  void GenerateImportFile(const char* config, ExportSet const* exportSet);
+  void GenerateImportFile(cmExportSet const* exportSet);
+  void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   void ComputeTempDir();
 
-  std::string Name;
+  cmExportSet* ExportSet;
   std::string FilePermissions;
   std::string FileName;
   std::string Namespace;
