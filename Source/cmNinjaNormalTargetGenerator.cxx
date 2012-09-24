@@ -423,7 +423,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
                                             vars["LINK_FLAGS"],
-                                            *this->GetTarget());
+                                            this->GetGeneratorTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
 
@@ -434,7 +434,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                ? vars["FLAGS"]
                                : vars["ARCH_FLAGS"]);
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                             this->GetTarget(),
+                             this->GetGeneratorTarget(),
                              this->TargetLinkLanguage,
                              this->GetConfigName());
   if (targetType == cmTarget::EXECUTABLE) {

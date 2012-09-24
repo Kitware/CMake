@@ -68,6 +68,13 @@
 #  CUDA_HOST_COMPILATION_CPP (Default ON)
 #  -- Set to OFF for C compilation of host code.
 #
+#  CUDA_HOST_COMPILER (Default CMAKE_C_COMPILER, $(VCInstallDir)/bin for VS)
+#  -- Set the host compiler to be used by nvcc.  Ignored if -ccbin or
+#     --compiler-bindir is already present in the CUDA_NVCC_FLAGS or
+#     CUDA_NVCC_FLAGS_<CONFIG> variables.  For Visual Studio targets
+#     $(VCInstallDir)/bin is a special value that expands out to the path when
+#     the command is run from withing VS.
+#
 #  CUDA_NVCC_FLAGS
 #  CUDA_NVCC_FLAGS_<CONFIG>
 #  -- Additional NVCC command line arguments.  NOTE: multiple arguments must be
@@ -389,6 +396,12 @@ option(CUDA_HOST_COMPILATION_CPP "Generated file extension" ON)
 
 # Extra user settable flags
 set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
+else()
+  set(CUDA_HOST_COMPILER "${CMAKE_C_COMPILER}" CACHE FILEPATH "Host side compiler used by NVCC")
+endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
 option(CUDA_PROPAGATE_HOST_FLAGS "Propage C/CXX_FLAGS and friends to the host compiler via -Xcompile" ON)
@@ -932,12 +945,11 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   endif()
 
   # This needs to be passed in at this stage, because VS needs to fill out the
-  # value of VCInstallDir from within VS.
+  # value of VCInstallDir from within VS.  Note that CCBIN is only used if
+  # -ccbin or --compiler-bindir isn't used and CUDA_HOST_COMPILER matches
+  # $(VCInstallDir)/bin.
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-      # Add nvcc flag for 64b Windows
-      set(ccbin_flags -D "\"CCBIN:PATH=$(VCInstallDir)bin\"" )
-    endif()
+    set(ccbin_flags -D "\"CCBIN:PATH=$(VCInstallDir)bin\"" )
   endif()
 
   # Figure out which configure we will use and pass that in as an argument to

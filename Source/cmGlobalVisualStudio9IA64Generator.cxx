@@ -19,17 +19,6 @@ cmGlobalVisualStudio9IA64Generator::cmGlobalVisualStudio9IA64Generator()
   this->ArchitectureId = "Itanium";
 }
 
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio9IA64Generator::CreateLocalGenerator()
-{
-  cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9);
-  lg->SetPlatformName(this->GetPlatformName());
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
-  lg->SetGlobalGenerator(this);
-  return lg;
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9IA64Generator
 ::GetDocumentation(cmDocumentationEntry& entry) const

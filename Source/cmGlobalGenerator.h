@@ -19,6 +19,8 @@
 #include "cmTargetDepend.h" // For cmTargetDependSet
 #include "cmSystemTools.h" // for cmSystemTools::OutputOption
 #include "cmExportSetMap.h" // For cmExportSetMap
+#include "cmGeneratorTarget.h"
+
 class cmake;
 class cmGeneratorTarget;
 class cmMakefile;
@@ -372,8 +374,7 @@ private:
   TargetDependMap TargetDependencies;
 
   // Per-target generator information.
-  typedef std::map<cmTarget*, cmGeneratorTarget*> GeneratorTargetsType;
-  GeneratorTargetsType GeneratorTargets;
+  cmGeneratorTargetsType GeneratorTargets;
   void CreateGeneratorTargets();
   void ClearGeneratorTargets();
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;

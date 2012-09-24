@@ -52,6 +52,9 @@ protected:
   cmTarget* GetTarget() const
   { return this->Target; }
 
+  cmGeneratorTarget* GetGeneratorTarget() const
+  { return this->GeneratorTarget; }
+
   cmLocalNinjaGenerator* GetLocalGenerator() const
   { return this->LocalGenerator; }
 
