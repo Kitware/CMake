@@ -492,19 +492,22 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 //----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindFrameworkLibrary()
 {
-  // Search for a framework of each name in the entire search path.
+  std::string fwPath;
+  // Search for each name in all search paths.
   for(std::vector<std::string>::const_iterator ni = this->Names.begin();
       ni != this->Names.end() ; ++ni)
     {
-    // Search the paths for a framework with this name.
-    std::string fwName = *ni;
-    fwName += ".framework";
-    std::string fwPath = cmSystemTools::FindDirectory(fwName.c_str(),
-                                                      this->SearchPaths,
-                                                      true);
-    if(!fwPath.empty())
+    for(std::vector<std::string>::const_iterator
+          di = this->SearchPaths.begin();
+        di != this->SearchPaths.end(); ++di)
       {
-      return fwPath;
+      fwPath = *di;
+      fwPath += *ni;
+      fwPath += ".framework";
+      if(cmSystemTools::FileIsDirectory(fwPath.c_str()))
+        {
+        return cmSystemTools::CollapseFullPath(fwPath.c_str());
+        }
       }
     }
 
