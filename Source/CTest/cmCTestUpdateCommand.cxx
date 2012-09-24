@@ -44,6 +44,8 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "SVNOptions", "CTEST_SVN_OPTIONS");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "BZRCommand", "CTEST_BZR_COMMAND");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "BZRUpdateOptions", "CTEST_BZR_UPDATE_OPTIONS");

@@ -33,6 +33,9 @@ private:
   virtual void NoteNewRevision();
   virtual bool UpdateImpl();
 
+  bool RunSVNCommand(std::vector<char const*> const& parameters,
+    OutputParser* out, OutputParser* err);
+
   // Information about an SVN repository (root repository or external)
   struct SVNInfo {
 
