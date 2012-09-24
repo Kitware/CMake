@@ -1219,6 +1219,7 @@ endif()
 #  Notification to end user about what was found
 # ------------------------------------------------------------------------
 
+set(Boost_LIBRARIES "")
 if(Boost_FOUND)
   if(NOT Boost_FIND_QUIETLY)
     message(STATUS "Boost version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
@@ -1232,7 +1233,7 @@ if(Boost_FOUND)
       if(NOT Boost_FIND_QUIETLY)
         message (STATUS "  ${COMPONENT}")
       endif()
-      set(Boost_LIBRARIES ${Boost_LIBRARIES} ${Boost_${UPPERCOMPONENT}_LIBRARY})
+      list(APPEND Boost_LIBRARIES ${Boost_${UPPERCOMPONENT}_LIBRARY})
     endif()
   endforeach()
 else()
