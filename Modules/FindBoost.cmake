@@ -603,8 +603,6 @@ endif()
 set(_boost_INCLUDE_SEARCH_DIRS_SYSTEM
   C:/boost/include
   C:/boost
-  "$ENV{ProgramFiles}/boost/include"
-  "$ENV{ProgramFiles}/boost"
   /sw/local/include
 )
 
@@ -697,8 +695,12 @@ if( NOT Boost_INCLUDE_DIR )
           _boost_BOOSTIFIED_VERSION ${_boost_VER})
     endif()
 
-    list(APPEND _boost_PATH_SUFFIXES "boost-${_boost_BOOSTIFIED_VERSION}")
-    list(APPEND _boost_PATH_SUFFIXES "boost_${_boost_BOOSTIFIED_VERSION}")
+    list(APPEND _boost_PATH_SUFFIXES
+      "boost-${_boost_BOOSTIFIED_VERSION}"
+      "boost_${_boost_BOOSTIFIED_VERSION}"
+      "boost/boost-${_boost_BOOSTIFIED_VERSION}"
+      "boost/boost_${_boost_BOOSTIFIED_VERSION}"
+      )
 
   endforeach()
 
@@ -861,10 +863,6 @@ set(_boost_LIBRARY_SEARCH_DIRS_ALWAYS
 set(_boost_LIBRARY_SEARCH_DIRS_SYSTEM
   C:/boost/lib
   C:/boost
-  "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}/lib"
-  "$ENV{ProgramFiles}/boost/boost_${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}/lib"
-  "$ENV{ProgramFiles}/boost/lib"
-  "$ENV{ProgramFiles}/boost"
   /sw/local/lib
 )
 set(_boost_LIBRARY_SEARCH_DIRS ${_boost_LIBRARY_SEARCH_DIRS_ALWAYS})
