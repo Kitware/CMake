@@ -69,7 +69,6 @@ private:
   std::string Builddir;
   std::string MocExecutable;
   std::string MocCompileDefinitionsStr;
-  std::string MocDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
   std::string ProjectBinaryDir;

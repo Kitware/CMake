@@ -210,7 +210,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Add language feature flags.
   this->AddFeatureFlags(flags, linkLanguage);
 
-  this->LocalGenerator->AddArchitectureFlags(flags, this->Target,
+  this->LocalGenerator->AddArchitectureFlags(flags, this->GeneratorTarget,
                                              linkLanguage, this->ConfigName);
 
   // Add target-specific linker flags.
@@ -319,7 +319,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Collect up flags to link in needed libraries.
   cmOStringStream linklibs;
-  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->Target, relink);
+  this->LocalGenerator->OutputLinkLibraries(linklibs, *this->GeneratorTarget,
+                                            relink);
 
   // Construct object file lists that may be needed to expand the
   // rule.

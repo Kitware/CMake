@@ -348,7 +348,11 @@ void QCMake::interrupt()
 bool QCMake::interruptCallback(void* cd)
 {
   QCMake* self = reinterpret_cast<QCMake*>(cd);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   return self->InterruptFlag;
+#else
+  return self->InterruptFlag.load();
+#endif
 }
 
 void QCMake::progressCallback(const char* msg, float percent, void* cd)
