@@ -12,13 +12,20 @@ create_header(bar)
 create_header(bat)
 create_header(foo)
 create_header(baz)
+create_header(bang)
+create_header(bing)
+create_header(bung)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/bar")
+include_directories("$<1:${CMAKE_CURRENT_BINARY_DIR}/bang>")
 
 add_executable(TargetIncludeDirectories main.cpp)
 set_property(TARGET TargetIncludeDirectories APPEND PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/bat")
 set_property(TARGET TargetIncludeDirectories APPEND PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/foo")
+set_property(TARGET TargetIncludeDirectories APPEND PROPERTY
+    INCLUDE_DIRECTORIES "$<1:${CMAKE_CURRENT_BINARY_DIR}/bing>")
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/baz")
+include_directories("$<1:${CMAKE_CURRENT_BINARY_DIR}/bung>")

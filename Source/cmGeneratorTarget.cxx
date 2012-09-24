@@ -17,6 +17,8 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 
 #include <assert.h>
 
@@ -219,78 +221,6 @@ void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs)
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GenerateTargetManifest(const char* config)
-{
-  cmMakefile* mf = this->Target->GetMakefile();
-  cmLocalGenerator* lg = mf->GetLocalGenerator();
-  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
-
-  // Get the names.
-  std::string name;
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  std::string pdbName;
-  if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    this->Target->GetExecutableNames(name, realName, impName, pdbName,
-                                     config);
-    }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    this->Target->GetLibraryNames(name, soName, realName, impName, pdbName,
-                                  config);
-    }
-  else
-    {
-    return;
-    }
-
-  // Get the directory.
-  std::string dir = this->Target->GetDirectory(config, false);
-
-  // Add each name.
-  std::string f;
-  if(!name.empty())
-    {
-    f = dir;
-    f += "/";
-    f += name;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!soName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += soName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!realName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += realName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!pdbName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += pdbName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!impName.empty())
-    {
-    f = this->Target->GetDirectory(config, true);
-    f += "/";
-    f += impName;
-    gg->AddToManifest(config? config:"", f);
-    }
-}
-
-//----------------------------------------------------------------------------
 cmComputeLinkInformation*
 cmGeneratorTarget::GetLinkInformation(const char* config)
 {
@@ -361,19 +291,40 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 {
   std::vector<std::string> includes;
   const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
-  if(prop)
+  if(!prop)
     {
-    cmSystemTools::ExpandListArgument(prop, includes);
+    return includes;
     }
+
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                              this->GetName(),
+                                              "INCLUDE_DIRECTORIES", 0, 0);
+
+  cmSystemTools::ExpandListArgument(ge.Parse(prop)
+                                    .Evaluate(this->Makefile,
+                                              config,
+                                              false,
+                                              this,
+                                              &dagChecker),
+                                    includes);
 
   std::set<std::string> uniqueIncludes;
   std::vector<std::string> orderedAndUniqueIncludes;
   for(std::vector<std::string>::const_iterator
       li = includes.begin(); li != includes.end(); ++li)
     {
-    if(uniqueIncludes.insert(*li).second)
+    std::string inc = *li;
+    if (!cmSystemTools::IsOff(inc.c_str()))
       {
-      orderedAndUniqueIncludes.push_back(*li);
+      cmSystemTools::ConvertToUnixSlashes(inc);
+      }
+    if(uniqueIncludes.insert(inc).second)
+      {
+      orderedAndUniqueIncludes.push_back(inc);
       }
     }
 
@@ -381,15 +332,30 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetCompileDefinitions(const char *config)
+std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
 {
-  if (!config)
+  std::string defPropName = "COMPILE_DEFINITIONS";
+  if (config)
     {
-    return this->Target->GetProperty("COMPILE_DEFINITIONS");
+    defPropName += "_" + cmSystemTools::UpperCase(config);
     }
-  std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName +=
-    cmSystemTools::UpperCase(config);
 
-  return this->Target->GetProperty(defPropName.c_str());
+  const char *prop = this->Target->GetProperty(defPropName.c_str());
+
+  if (!prop)
+    {
+    return "";
+    }
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                             this->GetName(),
+                                             defPropName, 0, 0);
+  return ge.Parse(prop).Evaluate(this->Makefile,
+                                 config,
+                                 false,
+                                 this,
+                                 &dagChecker);
 }

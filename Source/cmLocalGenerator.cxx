@@ -533,11 +533,10 @@ void cmLocalGenerator::GenerateTargetManifest()
   this->Makefile->GetConfigurations(configNames);
 
   // Add our targets to the manifest for each configuration.
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin();
-      t != targets.end(); ++t)
+  cmTargets& targets = this->Makefile->GetTargets();
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    cmGeneratorTarget& target = *t->second;
+    cmTarget& target = t->second;
     if(configNames.empty())
       {
       target.GenerateTargetManifest(0);
@@ -1391,6 +1390,11 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       }
     }
 
+  if(!target)
+    {
+    return;
+    }
+
   // Load implicit include directories for this language.
   std::string impDirVar = "CMAKE_";
   impDirVar += lang;
@@ -1408,10 +1412,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 
   // Get the target-specific include directories.
   std::vector<std::string> includes;
-  if(target)
-    {
-    includes = target->GetIncludeDirectories();
-    }
+
+  includes = target->GetIncludeDirectories();
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.

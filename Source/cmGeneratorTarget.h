@@ -60,9 +60,6 @@ public:
 
   void UseObjectLibraries(std::vector<std::string>& objs);
 
-  /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const char* config);
-
   std::map<cmStdString, cmComputeLinkInformation*> LinkInformation;
 
   cmComputeLinkInformation* GetLinkInformation(const char* config);
@@ -77,7 +74,7 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories();
 
-  const char *GetCompileDefinitions(const char *config = 0);
+  std::string GetCompileDefinitions(const char *config = 0);
 
 private:
   void ClassifySources();

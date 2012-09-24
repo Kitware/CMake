@@ -724,10 +724,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     flags += targetFlags;
     }
 
-  std::string configUpper = cmSystemTools::UpperCase(configName);
-  std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName += configUpper;
-
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Makefile->GetDefineFlags();
   Options::Tool t = Options::Compiler;
@@ -744,11 +740,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
-  targetOptions.AddDefines
-    (this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
-  targetOptions.AddDefines(target.GetProperty("COMPILE_DEFINITIONS"));
-  targetOptions.AddDefines(this->Makefile->GetProperty(defPropName.c_str()));
-  targetOptions.AddDefines(target.GetProperty(defPropName.c_str()));
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+  targetOptions.AddDefines(gt->GetCompileDefinitions().c_str());
+  targetOptions.AddDefines(gt->GetCompileDefinitions(configName).c_str());
   targetOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
@@ -819,8 +814,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputAdditionalOptions(fout, "\t\t\t\t", "\n");
   fout << "\t\t\t\tAdditionalIncludeDirectories=\"";
   std::vector<std::string> includes;
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   this->GetIncludeDirectories(includes, gt);
   std::vector<std::string>::iterator i = includes.begin();
   for(;i != includes.end(); ++i)

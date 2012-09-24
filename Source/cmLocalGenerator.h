@@ -157,6 +157,11 @@ public:
    */
   void AppendDefines(std::set<std::string>& defines,
                      const char* defines_list);
+  void AppendDefines(std::set<std::string>& defines,
+                     std::string defines_list)
+  {
+    this->AppendDefines(defines, defines_list.c_str());
+  }
   /**
    * Join a set of defines into a definesString with a space separator.
    */
