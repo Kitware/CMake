@@ -20,8 +20,9 @@ class cmInstallFilesGenerator;
  *
  * This struct holds pointers to target and all relevant generators.
  */
-struct cmTargetExport
+class cmTargetExport
 {
+public:
   cmTarget* Target; ///< The target
 
   ///@name Generators
