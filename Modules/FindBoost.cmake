@@ -282,6 +282,7 @@ if (NOT Boost_NO_BOOST_CMAKE)
   # Note that args are passed in the Boost_FIND_xxxxx variables, so there is no
   # need to delegate them to this find_package call.
   find_package(Boost QUIET NO_MODULE)
+  mark_as_advanced(Boost_DIR)
 
   # If we found boost-cmake, then we're done.  Print out what we found.
   # Otherwise let the rest of the module try to find it.
