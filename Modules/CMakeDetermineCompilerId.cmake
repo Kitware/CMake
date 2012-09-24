@@ -185,12 +185,20 @@ Id flags: ${testflags}
     endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-${v}.pbxproj.in
       ${id_dir}/CompilerId${lang}.${ext}/project.pbxproj @ONLY IMMEDIATE)
+    unset(_ENV_MACOSX_DEPLOYMENT_TARGET)
+    if(DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
+      set(_ENV_MACOSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+      set(ENV{MACOSX_DEPLOYMENT_TARGET} "")
+    endif()
     execute_process(COMMAND xcodebuild
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
       OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
       RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
       )
+    if(DEFINED _ENV_MACOSX_DEPLOYMENT_TARGET)
+      set(ENV{MACOSX_DEPLOYMENT_TARGET} "${_ENV_MACOSX_DEPLOYMENT_TARGET}")
+    endif()
 
     # Match the link line from xcodebuild output of the form
     #  Ld ...
