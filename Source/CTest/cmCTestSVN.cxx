@@ -316,9 +316,10 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
 
   std::vector<cmStdString> parsedUserOptions =
     cmSystemTools::ParseArguments(userOptions.c_str());
-  for(std::size_t i = 0; i < parsedUserOptions.size(); ++i)
+  for(std::vector<cmStdString>::iterator i = parsedUserOptions.begin();
+      i != parsedUserOptions.end(); ++i)
     {
-    args.push_back(parsedUserOptions[i].c_str());
+    args.push_back(i->c_str());
     }
 
   args.push_back(0);
