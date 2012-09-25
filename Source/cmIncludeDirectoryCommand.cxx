@@ -55,6 +55,11 @@ bool cmIncludeDirectoryCommand
   return true;
 }
 
+static bool StartsWithGeneratorExpression(const std::string &input)
+{
+  return input[0] == '$' && input[1] == '<';
+}
+
 // do a lot of cleanup on the arguments because this is one place where folks
 // sometimes take the output of a program and pass it directly into this
 // command not thinking that a single argument could be filled with spaces
@@ -105,7 +110,7 @@ void cmIncludeDirectoryCommand::AddDirectory(const char *i,
     cmSystemTools::ConvertToUnixSlashes(ret);
     if(!cmSystemTools::FileIsFullPath(ret.c_str()))
       {
-      if(ret[0] != '$' && ret[1] != '<')
+      if(!StartsWithGeneratorExpression(ret))
         {
         std::string tmp = this->Makefile->GetStartDirectory();
         tmp += "/";
