@@ -412,7 +412,7 @@ function(_ep_write_downloadfile_script script_filename remote local timeout hash
   endif()
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
-    set(hash_args EXPECTED_HASH ${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
+    set(hash_args EXPECTED_HASH ${CMAKE_MATCH_1}=${CMAKE_MATCH_2})
   else()
     set(hash_args "# no EXPECTED_HASH")
   endif()

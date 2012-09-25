@@ -2767,30 +2767,31 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     else if(*i == "EXPECTED_HASH")
       {
       ++i;
-      if(i != args.end())
+      if(i == args.end())
         {
-        hash = cmsys::auto_ptr<cmCryptoHash>(cmCryptoHash::New(i->c_str()));
-        if(!hash.get())
-          {
-          std::string err = "DOWNLOAD bad SHA type: ";
-          err += *i;
-          this->SetError(err.c_str());
-          return false;
-          }
-        hashMatchMSG = *i;
-        hashMatchMSG += " hash";
-
-        ++i;
-        }
-      if(i != args.end())
-        {
-        expectedHash = cmSystemTools::LowerCase(*i);
-        }
-      else
-        {
-        this->SetError("DOWNLOAD missing time for EXPECTED_HASH.");
+        this->SetError("DOWNLOAD missing ALGO=value for EXPECTED_HASH.");
         return false;
         }
+      std::string::size_type pos = i->find("=");
+      if(pos == std::string::npos)
+        {
+        std::string err =
+          "DOWNLOAD EXPECTED_HASH expects ALGO=value but got: ";
+        err += *i;
+        this->SetError(err.c_str());
+        return false;
+        }
+      std::string algo = i->substr(0, pos);
+      expectedHash = cmSystemTools::LowerCase(i->substr(pos+1));
+      hash = cmsys::auto_ptr<cmCryptoHash>(cmCryptoHash::New(algo.c_str()));
+      if(!hash.get())
+        {
+        std::string err = "DOWNLOAD EXPECTED_HASH given unknown ALGO: ";
+        err += algo;
+        this->SetError(err.c_str());
+        return false;
+        }
+      hashMatchMSG = algo + " hash";
       }
     ++i;
     }
