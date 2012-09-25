@@ -29,3 +29,4 @@ set_property(TARGET TargetIncludeDirectories APPEND PROPERTY
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/baz")
 include_directories("$<1:${CMAKE_CURRENT_BINARY_DIR}/bung>")
+include_directories("sing$<1:/ting>")
