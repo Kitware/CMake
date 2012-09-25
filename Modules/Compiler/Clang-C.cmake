@@ -1,1 +1,2 @@
-include(Compiler/GNU-C)
+include(Compiler/Clang)
+__compiler_clang(C)
