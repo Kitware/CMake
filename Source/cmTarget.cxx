@@ -746,12 +746,16 @@ void cmTarget::DefineProperties(cmake *cm)
      "Output name for MS debug symbols .pdb file.",
      "Set the base name for debug symbols file created for an "
      "executable or library target.  "
-     "If not set, the logical target name is used by default.");
+     "If not set, the logical target name is used by default.  "
+     "\n"
+     "This property is not implemented by the Visual Studio 6 generator.");
 
   cm->DefineProperty
     ("PDB_NAME_<CONFIG>", cmProperty::TARGET,
      "Per-configuration name for MS debug symbols .pdb file.  ",
-     "This is the configuration-specific version of PDB_NAME.");
+     "This is the configuration-specific version of PDB_NAME.  "
+     "\n"
+     "This property is not implemented by the Visual Studio 6 generator.");
 
   cm->DefineProperty
     ("PRE_INSTALL_SCRIPT", cmProperty::TARGET,
@@ -1208,7 +1212,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "This property specifies the directory into which the MS debug symbols "
      "will be placed.  "
      "This property is initialized by the value of the variable "
-     "CMAKE_PDB_OUTPUT_DIRECTORY if it is set when a target is created.");
+     "CMAKE_PDB_OUTPUT_DIRECTORY if it is set when a target is created."
+     "\n"
+     "This property is not implemented by the Visual Studio 6 generator.");
   cm->DefineProperty
     ("PDB_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
      "Per-configuration output directory for MS debug symbols .pdb files.",
@@ -1217,7 +1223,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "a per-configuration subdirectory to the specified directory. "
      "This property is initialized by the value of the variable "
      "CMAKE_PDB_OUTPUT_DIRECTORY_<CONFIG> "
-     "if it is set when a target is created.");
+     "if it is set when a target is created."
+     "\n"
+     "This property is not implemented by the Visual Studio 6 generator.");
 
   cm->DefineProperty
     ("ARCHIVE_OUTPUT_NAME", cmProperty::TARGET,
