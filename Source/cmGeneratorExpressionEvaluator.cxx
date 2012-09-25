@@ -150,7 +150,7 @@ static const struct BoolNode : public cmGeneratorExpressionNode
 {
   BoolNode() {}
 
-  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+  virtual int NumExpectedParameters() const { return 1; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *,
@@ -527,7 +527,7 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &strEqualNode;
   else if (identifier == "BOOL")
     return &boolNode;
-  else if (identifier == "RANGLE")
+  else if (identifier == "ANGLE-R")
     return &angle_rNode;
   else if (identifier == "COMMA")
     return &commaNode;
