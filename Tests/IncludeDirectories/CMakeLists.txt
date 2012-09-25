@@ -36,8 +36,6 @@ else()
     "-ISrcProp")
 endif()
 
-include_directories(a<path)
-
 add_executable(IncludeDirectories main.cpp)
 
 if(USE_FULLPATH)
