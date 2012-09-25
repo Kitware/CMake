@@ -6,6 +6,7 @@
 #include "bang.h"
 #include "bing.h"
 #include "bung.h"
+#include "ting.h"
 
 int main(int, char**)
 {
