@@ -37,7 +37,7 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
   // Create all the imported targets.
-  for(std::vector<cmTargetExport const*>::const_iterator
+  for(std::vector<cmTargetExport*>::const_iterator
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
       tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
@@ -163,7 +163,7 @@ cmExportInstallFileGenerator
     }
 
   // Add each target in the set to the export.
-  for(std::vector<cmTargetExport const*>::const_iterator
+  for(std::vector<cmTargetExport*>::const_iterator
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
       tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {

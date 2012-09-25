@@ -25,20 +25,20 @@ public:
   /// Destructor
   ~cmExportSet();
 
-  void AddTargetExport(cmTargetExport const* tgt);
+  void AddTargetExport(cmTargetExport* tgt);
 
   void AddInstallation(cmInstallExportGenerator const* installation);
 
   std::string const& GetName() const { return this->Name; }
 
-  std::vector<cmTargetExport const*> const* GetTargetExports() const
+  std::vector<cmTargetExport*> const* GetTargetExports() const
      { return &this->TargetExports; }
 
   std::vector<cmInstallExportGenerator const*> const* GetInstallations() const
      { return &this->Installations; }
 
 private:
-  std::vector<cmTargetExport const*> TargetExports;
+  std::vector<cmTargetExport*> TargetExports;
   std::string Name;
   std::vector<cmInstallExportGenerator const*> Installations;
 };
