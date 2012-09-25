@@ -127,6 +127,11 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
         parameters.resize(parameters.size() + 1);
         ++this->it;
         }
+      if (this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
+        {
+        extendText(*(parameters.end() - 1), this->it);
+        ++this->it;
+        }
       if (this->it == this->Tokens.end())
         {
         break;
