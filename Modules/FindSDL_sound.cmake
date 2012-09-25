@@ -1,34 +1,34 @@
-# Locates the SDL_sound library
-
+# - Locates the SDL_sound library
+#
 # This module depends on SDL being found and
 # must be called AFTER FindSDL.cmake is called.
-
+#
 # This module defines
-# SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
-# SDL_SOUND_FOUND, if false, do not try to link to SDL
-# SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
-# to link against. This is a read-only variable and is marked INTERNAL.
-# SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
-# flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
-# This is available mostly for cases this module failed to anticipate for
-# and you must add additional flags. This is marked as ADVANCED.
-
+#  SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
+#  SDL_SOUND_FOUND, if false, do not try to link to SDL_sound
+#  SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
+#    to link against. This is a read-only variable and is marked INTERNAL.
+#  SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
+#    flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
+#    This is available mostly for cases this module failed to anticipate for
+#    and you must add additional flags. This is marked as ADVANCED.
+#  SDL_SOUND_VERSION_STRING, human-readable string containing the version of SDL_sound
 #
 # This module also defines (but you shouldn't need to use directly)
-# SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
-# against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
+#   SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
+#   against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
 # And might define the following as needed
-# MIKMOD_LIBRARY
-# MODPLUG_LIBRARY
-# OGG_LIBRARY
-# VORBIS_LIBRARY
-# SMPEG_LIBRARY
-# FLAC_LIBRARY
-# SPEEX_LIBRARY
+#   MIKMOD_LIBRARY
+#   MODPLUG_LIBRARY
+#   OGG_LIBRARY
+#   VORBIS_LIBRARY
+#   SMPEG_LIBRARY
+#   FLAC_LIBRARY
+#   SPEEX_LIBRARY
 #
 # Typically, you should not use these variables directly, and you should use
 # SDL_SOUND_LIBRARIES which contains SDL_SOUND_LIBRARY and the other audio libraries
-# (if needed) to successfully compile on your system .
+# (if needed) to successfully compile on your system.
 #
 # Created by Eric Wing.
 # This module is a bit more complicated than the other FindSDL* family modules.
@@ -54,10 +54,10 @@
 # People will have to manually change the cache values of
 # SDL_LIBRARY to override this selectionor set the CMake environment
 # CMAKE_INCLUDE_PATH to modify the search paths.
-#
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.
+# Copyright 2012 Benjamin Eikel
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -77,17 +77,7 @@ find_path(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   HINTS
     ENV SDLSOUNDDIR
     ENV SDLDIR
-  PATH_SUFFIXES
-    include include/SDL
-  PATHS
-  /usr/local/include/SDL12
-  /usr/local/include/SDL11 # FreeBSD ports
-  /usr/include/SDL12
-  /usr/include/SDL11
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
+  PATH_SUFFIXES SDL SDL12 SDL11
   )
 
 find_library(SDL_SOUND_LIBRARY
@@ -95,13 +85,6 @@ find_library(SDL_SOUND_LIBRARY
   HINTS
     ENV SDLSOUNDDIR
     ENV SDLDIR
-  PATH_SUFFIXES
-    lib
-  PATHS
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
   )
 
 if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
@@ -176,7 +159,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    # in the SDL_LIBRARY string after the "-framework".
    # But if I quote the stuff in INCLUDE_DIRECTORIES, it doesn't work.
    file(WRITE ${PROJECT_BINARY_DIR}/CMakeTmp/CMakeLists.txt
-     "project(DetermineSoundLibs)
+     "cmake_minimum_required(VERSION 2.8)
+        project(DetermineSoundLibs)
         include_directories(${SDL_INCLUDE_DIR} ${SDL_SOUND_INCLUDE_DIR})
         add_executable(DetermineSoundLibs DetermineSoundLibs.c)
         target_link_libraries(DetermineSoundLibs ${TMP_TRY_LIBS})"
@@ -376,7 +360,24 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    set(SDL_SOUND_LIBRARIES "${SDL_SOUND_EXTRAS} ${SDL_SOUND_LIBRARIES_TMP}" CACHE INTERNAL "SDL_sound and dependent libraries")
  endif()
 
+if(SDL_SOUND_INCLUDE_DIR AND EXISTS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h")
+  file(STRINGS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h" SDL_SOUND_VERSION_MAJOR_LINE REGEX "^#define[ \t]+SOUND_VER_MAJOR[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h" SDL_SOUND_VERSION_MINOR_LINE REGEX "^#define[ \t]+SOUND_VER_MINOR[ \t]+[0-9]+$")
+  file(STRINGS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h" SDL_SOUND_VERSION_PATCH_LINE REGEX "^#define[ \t]+SOUND_VER_PATCH[ \t]+[0-9]+$")
+  string(REGEX REPLACE "^#define[ \t]+SOUND_VER_MAJOR[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_MAJOR "${SDL_SOUND_VERSION_MAJOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SOUND_VER_MINOR[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_MINOR "${SDL_SOUND_VERSION_MINOR_LINE}")
+  string(REGEX REPLACE "^#define[ \t]+SOUND_VER_PATCH[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_PATCH "${SDL_SOUND_VERSION_PATCH_LINE}")
+  set(SDL_SOUND_VERSION_STRING ${SDL_SOUND_VERSION_MAJOR}.${SDL_SOUND_VERSION_MINOR}.${SDL_SOUND_VERSION_PATCH})
+  unset(SDL_SOUND_VERSION_MAJOR_LINE)
+  unset(SDL_SOUND_VERSION_MINOR_LINE)
+  unset(SDL_SOUND_VERSION_PATCH_LINE)
+  unset(SDL_SOUND_VERSION_MAJOR)
+  unset(SDL_SOUND_VERSION_MINOR)
+  unset(SDL_SOUND_VERSION_PATCH)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_SOUND
-                                  REQUIRED_VARS SDL_SOUND_LIBRARIES SDL_SOUND_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_sound
+                                  REQUIRED_VARS SDL_SOUND_LIBRARY SDL_SOUND_INCLUDE_DIR
+                                  VERSION_VAR SDL_SOUND_VERSION_STRING)
