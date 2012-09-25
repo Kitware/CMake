@@ -3984,6 +3984,12 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name)
   return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name);
 }
 
+cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
+{
+  cmTarget *t = this->FindTargetToUse(name);
+  return this->LocalGenerator->GetGlobalGenerator()->GetGeneratorTarget(t);
+}
+
 //----------------------------------------------------------------------------
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
                                    bool isCustom)

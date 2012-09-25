@@ -134,7 +134,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->AddFeatureFlags(flags, language.c_str());
 
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                                                  this->GetTarget(),
+                                                  this->GeneratorTarget,
                                                   language.c_str(),
                                                   this->GetConfigName());
 
@@ -152,7 +152,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Add include directory flags.
   {
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->Target,
+  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
                                               language.c_str());
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
@@ -225,10 +225,7 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
   // Add preprocessor definitions for this target and configuration.
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Makefile->GetProperty("COMPILE_DEFINITIONS"));
-  this->LocalGenerator->AppendDefines
-    (defines,
-     this->Target->GetProperty("COMPILE_DEFINITIONS"));
+     this->GeneratorTarget->GetCompileDefinitions());
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty("COMPILE_DEFINITIONS"));
@@ -237,10 +234,7 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
   defPropName += cmSystemTools::UpperCase(this->GetConfigName());
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Makefile->GetProperty(defPropName.c_str()));
-  this->LocalGenerator->AppendDefines
-    (defines,
-     this->Target->GetProperty(defPropName.c_str()));
+     this->GeneratorTarget->GetCompileDefinitions(this->GetConfigName()));
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty(defPropName.c_str()));
@@ -261,7 +255,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->Target->GetLinkInformation(this->GetConfigName());
+    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 

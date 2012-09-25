@@ -22,17 +22,7 @@ class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
-class cmComputeLinkInformation;
 class cmListFileBacktrace;
-
-struct cmTargetLinkInformationMap:
-  public std::map<cmStdString, cmComputeLinkInformation*>
-{
-  typedef std::map<cmStdString, cmComputeLinkInformation*> derived;
-  cmTargetLinkInformationMap() {}
-  cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
-  ~cmTargetLinkInformationMap();
-};
 
 class cmTargetInternals;
 class cmTargetInternalPointer
@@ -330,10 +320,6 @@ public:
   ///! Return the preferred linker language for this target
   const char* GetLinkerLanguage(const char* config = 0);
 
-  ///! Return the rule variable used to create this type of target,
-  //  need to add CMAKE_(LANG) for full name.
-  const char* GetCreateRuleVariable();
-
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const char* config=0, bool implib = false);
@@ -400,8 +386,6 @@ public:
   std::string GetInstallNameDirForInstallTree(const char* config,
                                               bool for_xcode = false);
 
-  cmComputeLinkInformation* GetLinkInformation(const char* config);
-
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 
@@ -418,9 +402,6 @@ public:
   // information to forward these property changes to the targets
   // until we have per-target object file properties.
   void GetLanguages(std::set<cmStdString>& languages) const;
-
-  /** Get the list of OS X target architectures to be built.  */
-  void GetAppleArchs(const char* config, std::vector<std::string>& archVec);
 
   /** Return whether this target is an executable with symbol exports
       enabled.  */
@@ -458,9 +439,6 @@ public:
   /** Return whether this target uses the default value for its output
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
-
-  /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories();
 
   /** Append to @a base the mac content directory and return it. */
   std::string BuildMacContentDirectory(const std::string& base,
@@ -598,8 +576,6 @@ private:
   struct ImportInfo;
   ImportInfo const* GetImportInfo(const char* config);
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
-
-  cmTargetLinkInformationMap LinkInformation;
 
   bool ComputeLinkInterface(const char* config, LinkInterface& iface);
 

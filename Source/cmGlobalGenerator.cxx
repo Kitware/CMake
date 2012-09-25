@@ -1075,23 +1075,46 @@ void cmGlobalGenerator::CreateGeneratorTargets()
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    cmTargets& targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    cmGeneratorTargetsType generatorTargets;
+
+    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
+    const char *noconfig_compile_definitions =
+                                      mf->GetProperty("COMPILE_DEFINITIONS");
+
+    std::vector<std::string> configs;
+    mf->GetConfigurations(configs);
+
+    cmTargets& targets = mf->GetTargets();
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+
+      {
+      t->AppendProperty("COMPILE_DEFINITIONS", noconfig_compile_definitions);
+      for(std::vector<std::string>::const_iterator ci = configs.begin();
+          ci != configs.end(); ++ci)
+        {
+        std::string defPropName = "COMPILE_DEFINITIONS_";
+        defPropName += cmSystemTools::UpperCase(*ci);
+        t->AppendProperty(defPropName.c_str(),
+                          mf->GetProperty(defPropName.c_str()));
+        }
+      }
+
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
       this->GeneratorTargets[t] = gt;
       this->ComputeTargetObjects(gt);
+      generatorTargets[t] = gt;
       }
+    mf->SetGeneratorTargets(generatorTargets);
     }
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::ClearGeneratorTargets()
 {
-  for(GeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
+  for(cmGeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
       i != this->GeneratorTargets.end(); ++i)
     {
     delete i->second;
@@ -1102,7 +1125,7 @@ void cmGlobalGenerator::ClearGeneratorTargets()
 //----------------------------------------------------------------------------
 cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
 {
-  GeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
+  cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
   if(ti == this->GeneratorTargets.end())
     {
     this->CMakeInstance->IssueMessage(
@@ -1129,13 +1152,13 @@ void cmGlobalGenerator::CheckLocalGenerators()
     {
     manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
     this->LocalGenerators[i]->ConfigureFinalPass();
-    cmTargets & targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
-    for (cmTargets::iterator l = targets.begin();
+    cmGeneratorTargetsType targets =
+      this->LocalGenerators[i]->GetMakefile()->GetGeneratorTargets();
+    for (cmGeneratorTargetsType::iterator l = targets.begin();
          l != targets.end(); l++)
       {
       const cmTarget::LinkLibraryVectorType& libs =
-        l->second.GetOriginalLinkLibraries();
+        l->second->Target->GetOriginalLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();
           lib != libs.end(); ++lib)
         {
@@ -1151,14 +1174,14 @@ void cmGlobalGenerator::CheckLocalGenerators()
             }
           std::string text = notFoundMap[varName];
           text += "\n    linked by target \"";
-          text += l->second.GetName();
+          text += l->second->GetName();
           text += "\" in directory ";
           text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
           notFoundMap[varName] = text;
           }
         }
       std::vector<std::string> incs;
-      this->LocalGenerators[i]->GetIncludeDirectories(incs, &l->second);
+      this->LocalGenerators[i]->GetIncludeDirectories(incs, l->second);
 
       for( std::vector<std::string>::const_iterator incDir = incs.begin();
             incDir != incs.end(); ++incDir)

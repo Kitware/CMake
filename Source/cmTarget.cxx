@@ -15,7 +15,6 @@
 #include "cmSourceFile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
-#include "cmComputeLinkInformation.h"
 #include "cmDocumentCompileDefinitions.h"
 #include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
@@ -2954,25 +2953,6 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc)
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetCreateRuleVariable()
-{
-  switch(this->GetType())
-    {
-    case cmTarget::STATIC_LIBRARY:
-      return "_CREATE_STATIC_LIBRARY";
-    case cmTarget::SHARED_LIBRARY:
-      return "_CREATE_SHARED_LIBRARY";
-    case cmTarget::MODULE_LIBRARY:
-      return "_CREATE_SHARED_MODULE";
-    case cmTarget::EXECUTABLE:
-      return "_LINK_EXECUTABLE";
-    default:
-      break;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::GetSuffixVariableInternal(bool implib)
 {
   switch(this->GetType())
@@ -3980,27 +3960,6 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetAppleArchs(const char* config,
-                             std::vector<std::string>& archVec)
-{
-  const char* archs = 0;
-  if(config && *config)
-    {
-    std::string defVarName = "OSX_ARCHITECTURES_";
-    defVarName += cmSystemTools::UpperCase(config);
-    archs = this->GetProperty(defVarName.c_str());
-    }
-  if(!archs)
-    {
-    archs = this->GetProperty("OSX_ARCHITECTURES");
-    }
-  if(archs)
-    {
-    cmSystemTools::ExpandListArgument(std::string(archs), archVec);
-    }
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::IsChrpathUsed(const char* config)
 {
 #if defined(CMAKE_USE_ELF_PARSER)
@@ -4671,56 +4630,6 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-cmComputeLinkInformation*
-cmTarget::GetLinkInformation(const char* config)
-{
-  // Lookup any existing information for this configuration.
-  std::map<cmStdString, cmComputeLinkInformation*>::iterator
-    i = this->LinkInformation.find(config?config:"");
-  if(i == this->LinkInformation.end())
-    {
-    // Compute information for this configuration.
-    cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this, config);
-    if(!info || !info->Compute())
-      {
-      delete info;
-      info = 0;
-      }
-
-    // Store the information for this configuration.
-    std::map<cmStdString, cmComputeLinkInformation*>::value_type
-      entry(config?config:"", info);
-    i = this->LinkInformation.insert(entry).first;
-    }
-  return i->second;
-}
-
-//----------------------------------------------------------------------------
-std::vector<std::string> cmTarget::GetIncludeDirectories()
-{
-  std::vector<std::string> includes;
-  const char *prop = this->GetProperty("INCLUDE_DIRECTORIES");
-  if(prop)
-    {
-    cmSystemTools::ExpandListArgument(prop, includes);
-    }
-
-  std::set<std::string> uniqueIncludes;
-  std::vector<std::string> orderedAndUniqueIncludes;
-  for(std::vector<std::string>::const_iterator
-      li = includes.begin(); li != includes.end(); ++li)
-    {
-    if(uniqueIncludes.insert(*li).second)
-      {
-      orderedAndUniqueIncludes.push_back(*li);
-      }
-    }
-
-  return orderedAndUniqueIncludes;
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkDirectory(const char* config)
 {
   std::string fpath;
@@ -4775,29 +4684,6 @@ std::string cmTarget::GetMacContentDirectory(const char* config,
   fpath += "/";
   fpath = this->BuildMacContentDirectory(fpath, config, includeMacOS);
   return fpath;
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInformationMap
-::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()
-{
-  // Ideally cmTarget instances should never be copied.  However until
-  // we can make a sweep to remove that, this copy constructor avoids
-  // allowing the resources (LinkInformation) from getting copied.  In
-  // the worst case this will lead to extra cmComputeLinkInformation
-  // instances.  We also enforce in debug mode that the map be emptied
-  // when copied.
-  static_cast<void>(r);
-  assert(r.empty());
-}
-
-//----------------------------------------------------------------------------
-cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
-{
-  for(derived::iterator i = this->begin(); i != this->end(); ++i)
-    {
-    delete i->second;
-    }
 }
 
 //----------------------------------------------------------------------------
