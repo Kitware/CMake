@@ -57,6 +57,7 @@ struct cmTarget::OutputInfo
 {
   std::string OutDir;
   std::string ImpDir;
+  std::string PdbDir;
 };
 
 //----------------------------------------------------------------------------
@@ -741,6 +742,18 @@ void cmTarget::DefineProperties(cmake *cm)
      "Use OUTPUT_NAME_<CONFIG> instead.");
 
   cm->DefineProperty
+    ("PDB_NAME", cmProperty::TARGET,
+     "Output name for MS debug symbols .pdb file.",
+     "Set the base name for debug symbols file created for an "
+     "executable or library target.  "
+     "If not set, the logical target name is used by default.");
+
+  cm->DefineProperty
+    ("PDB_NAME_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration name for MS debug symbols .pdb file.  ",
+     "This is the configuration-specific version of PDB_NAME.");
+
+  cm->DefineProperty
     ("PRE_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
@@ -1190,6 +1203,23 @@ void cmTarget::DefineProperties(cmake *cm)
      CM_TARGET_OUTDIR_CONFIG_DOC(RUNTIME));
 
   cm->DefineProperty
+    ("PDB_OUTPUT_DIRECTORY", cmProperty::TARGET,
+     "Output directory for MS debug symbols .pdb files.",
+     "This property specifies the directory into which the MS debug symbols "
+     "will be placed.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_PDB_OUTPUT_DIRECTORY if it is set when a target is created.");
+  cm->DefineProperty
+    ("PDB_OUTPUT_DIRECTORY_<CONFIG>", cmProperty::TARGET,
+     "Per-configuration output directory for MS debug symbols .pdb files.",
+     "This is a per-configuration version of PDB_OUTPUT_DIRECTORY, "
+     "but multi-configuration generators (VS, Xcode) do NOT append "
+     "a per-configuration subdirectory to the specified directory. "
+     "This property is initialized by the value of the variable "
+     "CMAKE_PDB_OUTPUT_DIRECTORY_<CONFIG> "
+     "if it is set when a target is created.");
+
+  cm->DefineProperty
     ("ARCHIVE_OUTPUT_NAME", cmProperty::TARGET,
      "Output name for ARCHIVE target files.",
      "This property specifies the base name for archive target files. "
@@ -1263,6 +1293,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
+  this->SetPropertyDefault("PDB_OUTPUT_DIRECTORY", 0);
   this->SetPropertyDefault("Fortran_FORMAT", 0);
   this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
   this->SetPropertyDefault("GNUtoMS", 0);
@@ -1282,6 +1313,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     "ARCHIVE_OUTPUT_DIRECTORY_",
     "LIBRARY_OUTPUT_DIRECTORY_",
     "RUNTIME_OUTPUT_DIRECTORY_",
+    "PDB_OUTPUT_DIRECTORY_",
     0};
   for(std::vector<std::string>::iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
@@ -2539,6 +2571,7 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config)
     OutputInfo info;
     this->ComputeOutputDir(config, false, info.OutDir);
     this->ComputeOutputDir(config, true, info.ImpDir);
+    this->ComputePDBOutputDir(config, info.PdbDir);
     OutputInfoMapType::value_type entry(config_upper, info);
     i = this->Internal->OutputInfoMap.insert(entry).first;
     }
@@ -2559,6 +2592,17 @@ std::string cmTarget::GetDirectory(const char* config, bool implib)
     {
     // Return the directory in which the target will be built.
     return implib? info->ImpDir : info->OutDir;
+    }
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetPDBDirectory(const char* config)
+{
+  if(OutputInfo const* info = this->GetOutputInfo(config))
+    {
+    // Return the directory in which the target will be built.
+    return info->PdbDir;
     }
   return "";
 }
@@ -3028,6 +3072,28 @@ std::string cmTarget::GetPDBName(const char* config)
   std::string base;
   std::string suffix;
   this->GetFullNameInternal(config, false, prefix, base, suffix);
+
+  std::vector<std::string> props;
+  std::string configUpper =
+    cmSystemTools::UpperCase(config? config : "");
+  if(!configUpper.empty())
+    {
+    // PDB_NAME_<CONFIG>
+    props.push_back("PDB_NAME_" + configUpper);
+    }
+
+  // PDB_NAME
+  props.push_back("PDB_NAME");
+
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
+    {
+    if(const char* outName = this->GetProperty(i->c_str()))
+      {
+      base = outName;
+      break;
+      }
+    }
   return prefix+base+".pdb";
 }
 
@@ -3412,7 +3478,7 @@ void cmTarget::GetLibraryNames(std::string& name,
     }
 
   // The program database file name.
-  pdbName = prefix+base+".pdb";
+  pdbName = this->GetPDBName(config);
 }
 
 //----------------------------------------------------------------------------
@@ -3491,7 +3557,7 @@ void cmTarget::GetExecutableNames(std::string& name,
   impName = this->GetFullNameInternal(config, true);
 
   // The program database file name.
-  pdbName = prefix+base+".pdb";
+  pdbName = this->GetPDBName(config);
 }
 
 //----------------------------------------------------------------------------
@@ -3570,7 +3636,7 @@ void cmTarget::GenerateTargetManifest(const char* config)
     }
   if(!pdbName.empty())
     {
-    f = dir;
+    f = this->GetPDBDirectory(config);
     f += "/";
     f += pdbName;
     gg->AddToManifest(config? config:"", f);
@@ -3877,6 +3943,65 @@ bool cmTarget::ComputeOutputDir(const char* config,
     }
 
   return usesDefaultOutputDir;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::ComputePDBOutputDir(const char* config, std::string& out)
+{
+  // Look for a target property defining the target output directory
+  // based on the target type.
+  std::string targetTypeName = "PDB";
+  const char* propertyName = 0;
+  std::string propertyNameStr = targetTypeName;
+  if(!propertyNameStr.empty())
+    {
+    propertyNameStr += "_OUTPUT_DIRECTORY";
+    propertyName = propertyNameStr.c_str();
+    }
+
+  // Check for a per-configuration output directory target property.
+  std::string configUpper = cmSystemTools::UpperCase(config? config : "");
+  const char* configProp = 0;
+  std::string configPropStr = targetTypeName;
+  if(!configPropStr.empty())
+    {
+    configPropStr += "_OUTPUT_DIRECTORY_";
+    configPropStr += configUpper;
+    configProp = configPropStr.c_str();
+    }
+
+  // Select an output directory.
+  if(const char* config_outdir = this->GetProperty(configProp))
+    {
+    // Use the user-specified per-configuration output directory.
+    out = config_outdir;
+
+    // Skip per-configuration subdirectory.
+    config = 0;
+    }
+  else if(const char* outdir = this->GetProperty(propertyName))
+    {
+    // Use the user-specified output directory.
+    out = outdir;
+    }
+  if(out.empty())
+    {
+    // Default to the current output directory.
+    out = ".";
+    }
+
+  // Convert the output path to a full path in case it is
+  // specified as a relative path.  Treat a relative path as
+  // relative to the current output directory for this makefile.
+  out = (cmSystemTools::CollapseFullPath
+         (out.c_str(), this->Makefile->GetStartOutputDirectory()));
+
+  // The generator may add the configuration's subdirectory.
+  if(config && *config)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      AppendDirectoryForConfig("/", config, "", out);
+    }
 }
 
 //----------------------------------------------------------------------------

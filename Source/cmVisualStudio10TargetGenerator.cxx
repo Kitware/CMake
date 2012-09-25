@@ -1284,9 +1284,8 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
   if(this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
     {
-    // TODO: PDB for object library?
     this->WriteString("<ProgramDataBaseFileName>", 3);
-    *this->BuildFileStream << this->Target->GetDirectory(configName.c_str())
+    *this->BuildFileStream << this->Target->GetPDBDirectory(configName.c_str())
                            << "/"
                            << this->Target->GetPDBName(configName.c_str())
                            << "</ProgramDataBaseFileName>\n";
@@ -1511,9 +1510,8 @@ void cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const&
                                   config.c_str());
     }
 
-  std::string dir = this->Target->GetDirectory(config.c_str());
-  dir += "/";
-  std::string pdb = dir;
+  std::string pdb = this->Target->GetPDBDirectory(config.c_str());
+  pdb += "/";
   pdb += targetNamePDB;
   std::string imLib = this->Target->GetDirectory(config.c_str(), true);
   imLib += "/";
