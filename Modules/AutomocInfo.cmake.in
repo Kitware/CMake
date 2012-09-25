@@ -1,7 +1,6 @@
 set(AM_SOURCES @_moc_files@ )
 set(AM_HEADERS @_moc_headers@ )
 set(AM_MOC_COMPILE_DEFINITIONS @_moc_compile_defs@)
-set(AM_MOC_DEFINITIONS @_moc_defs@)
 set(AM_MOC_INCLUDES @_moc_incs@)
 set(AM_MOC_OPTIONS @_moc_options@)
 set(AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE "@CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE@")
