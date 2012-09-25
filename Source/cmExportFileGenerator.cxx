@@ -286,7 +286,7 @@ std::vector<std::string> cmExportFileGenerator::FindNamespaces(cmMakefile* mf,
       ++expIt)
     {
     const cmExportSet* exportSet = expIt->second;
-    std::vector<cmTargetExport const*> const* targets =
+    std::vector<cmTargetExport*> const* targets =
                                                  exportSet->GetTargetExports();
 
     bool containsTarget = false;
