@@ -12,6 +12,9 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode" AND
   if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|Clang|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
     set(C_FLAGS "${CMAKE_C_FLAGS}")
     separate_arguments(C_FLAGS)
+    if(CMAKE_OSX_SYSROOT AND CMAKE_C_SYSROOT_FLAG AND NOT ";${C_FLAGS};" MATCHES ";${CMAKE_C_SYSROOT_FLAG};")
+      list(APPEND C_FLAGS ${CMAKE_C_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT})
+    endif()
     set(SRCS main.s)
     add_custom_command(
       OUTPUT main.s
