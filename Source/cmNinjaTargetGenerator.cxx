@@ -514,8 +514,6 @@ void
 cmNinjaTargetGenerator
 ::WriteObjectBuildStatement(cmSourceFile* source)
 {
-  cmNinjaDeps emptyDeps;
-
   std::string comment;
   const std::string language = source->GetLanguage();
   std::string rule = this->LanguageCompilerRule(language);
@@ -539,11 +537,12 @@ cmNinjaTargetGenerator
   cmNinjaDeps orderOnlyDeps;
   this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
 
+  cmNinjaDeps implicitDeps;
   if(const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
     std::vector<std::string> depList;
     cmSystemTools::ExpandListArgument(objectDeps, depList);
     std::transform(depList.begin(), depList.end(),
-                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+                   std::back_inserter(implicitDeps), MapToNinjaPath());
   }
 
   // Add order-only dependencies on custom command outputs.
@@ -625,7 +624,7 @@ cmNinjaTargetGenerator
                                      rule,
                                      outputs,
                                      explicitDeps,
-                                     emptyDeps,
+                                     implicitDeps,
                                      orderOnlyDeps,
                                      vars);
 
