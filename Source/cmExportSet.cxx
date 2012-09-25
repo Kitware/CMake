@@ -21,7 +21,7 @@ cmExportSet::~cmExportSet()
     }
 }
 
-void cmExportSet::AddTargetExport(cmTargetExport const* te)
+void cmExportSet::AddTargetExport(cmTargetExport* te)
 {
   this->TargetExports.push_back(te);
 }
