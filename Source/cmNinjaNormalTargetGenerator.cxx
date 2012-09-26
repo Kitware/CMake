@@ -179,7 +179,7 @@ cmNinjaNormalTargetGenerator
         } else {
           responseFlag = "@";
         }
-        rspfile = "$out.rsp";
+        rspfile = "$RSP_FILE";
         responseFlag += rspfile;
         rspcontent = "$in $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
@@ -549,6 +549,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   int commandLineLengthLimit = -1;
 #endif
 
+  std::string rspfile = std::string("CMakeFiles/") +
+                                        this->GetTarget()->GetName() + ".rsp";
+
   // Write the build statement for this target.
   cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
                                      comment.str(),
@@ -558,6 +561,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                      implicitDeps,
                                      emptyDeps,
                                      vars,
+                                     rspfile,
                                      commandLineLengthLimit);
 
   if (targetOutput != targetOutputReal) {
