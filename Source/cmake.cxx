@@ -628,10 +628,14 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
 
 
     std::string linkLibs;
+    std::string frameworkPath;
+    std::string linkPath;
     std::string flags;
     std::string linkFlags;
     cmGeneratorTarget gtgt(tgt);
-    lg->GetTargetFlags(linkLibs, flags, linkFlags, &gtgt);
+    lg->GetTargetFlags(linkLibs, frameworkPath, linkPath, flags, linkFlags,
+                       &gtgt);
+    linkLibs = frameworkPath + linkPath + linkLibs;
 
     printf("%s\n", linkLibs.c_str() );
 
