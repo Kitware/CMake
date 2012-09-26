@@ -420,12 +420,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaDeps explicitDeps = this->GetObjects();
   cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
 
+  std::string frameworkPath;
+  std::string linkPath;
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
                                             vars["LINK_FLAGS"],
+                                            frameworkPath,
+                                            linkPath,
                                             this->GetGeneratorTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
+  vars["LINK_FLAGS"] += frameworkPath + linkPath;
 
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating

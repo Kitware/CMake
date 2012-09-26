@@ -335,11 +335,16 @@ public:
   void GetTargetFlags(std::string& linkLibs,
                       std::string& flags,
                       std::string& linkFlags,
+                      std::string& frameworkPath,
+                      std::string& linkPath,
                       cmGeneratorTarget* target);
 
 protected:
   ///! put all the libraries for a target on into the given stream
-  virtual void OutputLinkLibraries(std::ostream&, cmGeneratorTarget&,
+  virtual void OutputLinkLibraries(std::string& linkLibraries,
+                                   std::string& frameworkPath,
+                                   std::string& linkPath,
+                                   cmGeneratorTarget &,
                                    bool relink);
 
   // Expand rule variables in CMake of the type found in language rules
