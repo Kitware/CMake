@@ -542,11 +542,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
   // Collect up flags to link in needed libraries.
-  cmOStringStream linklibs;
+  std::string linkLibs;
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
-    this->LocalGenerator
-      ->OutputLinkLibraries(linklibs, *this->GeneratorTarget, relink);
+    std::string frameworkPath;
+    std::string linkPath;
+    this->LocalGenerator->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
+                                              *this->GeneratorTarget, relink);
+    linkLibs = frameworkPath + linkPath + linkLibs;
     }
 
   // Construct object file lists that may be needed to expand the
@@ -587,8 +590,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                          cmLocalGenerator::SHELL);
   vars.ObjectDir = objdir.c_str();
   vars.Target = targetOutPathReal.c_str();
-  std::string linkString = linklibs.str();
-  vars.LinkLibraries = linkString.c_str();
+  vars.LinkLibraries = linkLibs.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
   if (this->Target->HasSOName(this->ConfigName))
     {
