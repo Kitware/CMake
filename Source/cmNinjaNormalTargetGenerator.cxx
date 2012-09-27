@@ -554,10 +554,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   int linkRuleLength = this->GetGlobalGenerator()->
                                  GetRuleCmdLength(this->LanguageLinkerRule());
 
-  int commandLineLengthLimit;
-  if (this->GetMakefile()->IsDefinitionSet("CMAKE_FORCE_RESPONSE_FILE")) {
-    commandLineLengthLimit = 1;
-  } else {
+  int commandLineLengthLimit = 1;
+  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  if (!this->GetMakefile()->IsDefinitionSet(forceRspFile) &&
+      cmSystemTools::GetEnv(forceRspFile) == 0) {
 #ifdef _WIN32
     commandLineLengthLimit = 8000 - linkRuleLength;
 #elif defined(__linux) || defined(__APPLE__)
