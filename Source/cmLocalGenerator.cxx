@@ -676,9 +676,13 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
   // Static Library:
   // Shared Module:
   std::string linkLibs; // should be set
+  std::string frameworkPath;
+  std::string linkPath;
   std::string flags; // should be set
   std::string linkFlags; // should be set
-  this->GetTargetFlags(linkLibs, flags, linkFlags, &target);
+  this->GetTargetFlags(linkLibs, frameworkPath, linkPath, flags, linkFlags,
+                       &target);
+  linkLibs = frameworkPath + linkPath + linkLibs;
   cmLocalGenerator::RuleVariables vars;
   vars.Language = llang;
   vars.Objects = objs.c_str();
@@ -1453,6 +1457,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
 void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
                                  std::string& flags,
                                  std::string& linkFlags,
+                                 std::string& frameworkPath,
+                                 std::string& linkPath,
                                  cmGeneratorTarget* target)
 {
   std::string buildType =
@@ -1534,9 +1540,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           linkFlags += " ";
           }
         }
-      cmOStringStream linklibsStr;
-      this->OutputLinkLibraries(linklibsStr, *target, false);
-      linkLibs = linklibsStr.str();
+      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target, false);
       }
       break;
     case cmTarget::EXECUTABLE:
@@ -1560,9 +1564,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         return;
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
-      cmOStringStream linklibs;
-      this->OutputLinkLibraries(linklibs, *target, false);
-      linkLibs = linklibs.str();
+      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target, false);
       if(cmSystemTools::IsOn
          (this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
@@ -1654,10 +1656,13 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
  * targetLibrary should be a NULL pointer.  For libraries, it should point
  * to the name of the library.  This will not link a library against itself.
  */
-void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
-                                           cmGeneratorTarget& tgt,
+void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
+                                           std::string& frameworkPath,
+                                           std::string& linkPath,
+                                           cmGeneratorTarget &tgt,
                                            bool relink)
 {
+  cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
   if(!pcli)
@@ -1691,9 +1696,9 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
   for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
       fdi != fwDirs.end(); ++fdi)
     {
-    linkLibs += "-F";
-    linkLibs += this->Convert(fdi->c_str(), NONE, SHELL, false);
-    linkLibs += " ";
+    frameworkPath = " -F";
+    frameworkPath += this->Convert(fdi->c_str(), NONE, SHELL, false);
+    frameworkPath += " ";
     }
 
   // Append the library search path flags.
@@ -1702,10 +1707,10 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
       libDir != libDirs.end(); ++libDir)
     {
     std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
-    linkLibs += libPathFlag;
-    linkLibs += libpath;
-    linkLibs += libPathTerminator;
-    linkLibs += " ";
+    linkPath += " " + libPathFlag;
+    linkPath += libpath;
+    linkPath += libPathTerminator;
+    linkPath += " ";
     }
 
   // Append the link items.
@@ -1777,6 +1782,8 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
     {
     fout << stdLibs << " ";
     }
+
+  linkLibraries = fout.str();
 }
 
 

@@ -170,9 +170,11 @@ cmNinjaNormalTargetGenerator
       vars.Objects = "$in";
       vars.LinkLibraries = "$LINK_LIBRARIES";
     } else {
-        // handle response file
-        std::string cmakeLinkVar = std::string("CMAKE_") +
-                        this->TargetLinkLanguage + "_RESPONSE_FILE_LINK_FLAG";
+        std::string cmakeVarLang = "CMAKE_";
+        cmakeVarLang += this->TargetLinkLanguage;
+
+        // build response file name
+        std::string cmakeLinkVar =  cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
         const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar.c_str());
         if(flag) {
           responseFlag = flag;
@@ -181,7 +183,14 @@ cmNinjaNormalTargetGenerator
         }
         rspfile = "$RSP_FILE";
         responseFlag += rspfile;
-        rspcontent = "$in $LINK_LIBRARIES";
+
+        // build response file content
+        std::string linkOptionVar = cmakeVarLang;
+        linkOptionVar += "_COMPILER_LINKER_OPTION_FLAG_";
+        linkOptionVar += cmTarget::GetTargetTypeName(targetType);
+        const std::string linkOption =
+                GetMakefile()->GetSafeDefinition(linkOptionVar.c_str());
+        rspcontent = "$in " + linkOption + " $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
     }
@@ -420,12 +429,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaDeps explicitDeps = this->GetObjects();
   cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
 
+  std::string frameworkPath;
+  std::string linkPath;
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
                                             vars["LINK_FLAGS"],
+                                            frameworkPath,
+                                            linkPath,
                                             this->GetGeneratorTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
+  vars["LINK_PATH"] = frameworkPath + linkPath;
 
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating
@@ -539,15 +553,20 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   int linkRuleLength = this->GetGlobalGenerator()->
                                  GetRuleCmdLength(this->LanguageLinkerRule());
+
+  int commandLineLengthLimit = 1;
+  const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
+  if (!this->GetMakefile()->IsDefinitionSet(forceRspFile) &&
+      cmSystemTools::GetEnv(forceRspFile) == 0) {
 #ifdef _WIN32
-  int commandLineLengthLimit = 8000 - linkRuleLength;
+    commandLineLengthLimit = 8000 - linkRuleLength;
 #elif defined(__linux) || defined(__APPLE__)
-  // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
-  int commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))
-                                    - linkRuleLength - 1000;
+    // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
+    commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))- linkRuleLength - 1000;
 #else
-  int commandLineLengthLimit = -1;
+    commandLineLengthLimit = -1;
 #endif
+  }
 
   const std::string rspfile = std::string
                               (cmake::GetCMakeFilesDirectoryPostSlash()) +
