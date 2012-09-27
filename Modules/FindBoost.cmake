@@ -1,245 +1,138 @@
-# - Try to find Boost include dirs and libraries
-# Usage of this module as follows:
+# - Find Boost include dirs and libraries
+# Use this module by invoking find_package with the form:
+#  find_package(Boost
+#    [version] [EXACT]      # Minimum or EXACT version e.g. 1.36.0
+#    [REQUIRED]             # Fail with error if Boost is not found
+#    [COMPONENTS <libs>...] # Boost libraries by their canonical name
+#    )                      # e.g. "date_time" for "libboost_date_time"
+# This module finds headers and requested component libraries OR a CMake
+# package configuration file provided by a "Boost CMake" build.  For the
+# latter case skip to the "Boost CMake" section below.  For the former
+# case results are reported in variables:
+#  Boost_FOUND            - True if headers and requested libraries were found
+#  Boost_INCLUDE_DIRS     - Boost include directories
+#  Boost_LIBRARY_DIRS     - Link directories for Boost libraries
+#  Boost_LIBRARIES        - Boost component libraries to be linked
+#  Boost_<C>_FOUND        - True if component <C> was found (<C> is upper-case)
+#  Boost_<C>_LIBRARY      - Libraries to link for component <C> (may include
+#                           target_link_libraries debug/optimized keywords)
+#  Boost_VERSION          - BOOST_VERSION value from boost/version.hpp
+#  Boost_LIB_VERSION      - Version string appended to library filenames
+#  Boost_MAJOR_VERSION    - Boost major version number (X in X.y.z)
+#  Boost_MINOR_VERSION    - Boost minor version number (Y in x.Y.z)
+#  Boost_SUBMINOR_VERSION - Boost subminor version number (Z in x.y.Z)
+#  Boost_LIB_DIAGNOSTIC_DEFINITIONS (Windows)
+#                         - Pass to add_definitions() to have diagnostic
+#                           information about Boost's automatic linking
+#                           displayed during compilation
 #
-# NOTE: Take note of the Boost_ADDITIONAL_VERSIONS variable below.
-# Due to Boost naming conventions and limitations in CMake this find
-# module is NOT future safe with respect to Boost version numbers,
-# and may break.
+# This module reads hints about search locations from variables:
+#  BOOST_ROOT             - Preferred installation prefix
+#   (or BOOSTROOT)
+#  BOOST_INCLUDEDIR       - Preferred include directory e.g. <prefix>/include
+#  BOOST_LIBRARYDIR       - Preferred library directory e.g. <prefix>/lib
+#  Boost_NO_SYSTEM_PATHS  - Set to ON to disable searching in locations not
+#                           specified by these hint variables. Default is OFF.
+#  Boost_ADDITIONAL_VERSIONS
+#                         - List of Boost versions not known to this module
+#                           (Boost install locations may contain the version)
+# and saves search results persistently in CMake cache entries:
+#  Boost_INCLUDE_DIR         - Directory containing Boost headers
+#  Boost_LIBRARY_DIR         - Directory containing Boost libraries
+#  Boost_<C>_LIBRARY_DEBUG   - Component <C> library debug variant
+#  Boost_<C>_LIBRARY_RELEASE - Component <C> library release variant
+# Users may set the these hints or results as cache entries.  Projects should
+# not read these entries directly but instead use the above result variables.
+# Note that some hint names start in upper-case "BOOST".  One may specify
+# these as environment variables if they are not specified as CMake variables
+# or cache entries.
 #
-# == Using Header-Only libraries from within Boost: ==
+# This module first searches for the Boost header files using the above hint
+# variables (excluding BOOST_LIBRARYDIR) and saves the result in
+# Boost_INCLUDE_DIR.  Then it searches for requested component libraries using
+# the above hints (excluding BOOST_INCLUDEDIR and Boost_ADDITIONAL_VERSIONS),
+# "lib" directories near Boost_INCLUDE_DIR, and the library name configuration
+# settings below.  It saves the library directory in Boost_LIBRARY_DIR and
+# individual library locations in Boost_<C>_LIBRARY_DEBUG and
+# Boost_<C>_LIBRARY_RELEASE.  When one changes settings used by previous
+# searches in the same build tree (excluding environment variables) this
+# module discards previous search results affected by the changes and searches
+# again.
 #
-#   find_package( Boost 1.36.0 )
-#   if(Boost_FOUND)
-#      include_directories(${Boost_INCLUDE_DIRS})
-#      add_executable(foo foo.cc)
-#   endif()
+# Boost libraries come in many variants encoded in their file name.  Users or
+# projects may tell this module which variant to find by setting variables:
+#  Boost_USE_MULTITHREADED  - Set to OFF to use the non-multithreaded
+#                             libraries ('mt' tag).  Default is ON.
+#  Boost_USE_STATIC_LIBS    - Set to ON to force the use of the static
+#                             libraries.  Default is OFF.
+#  Boost_USE_STATIC_RUNTIME - Set to ON or OFF to specify whether to use
+#                             libraries linked statically to the C++ runtime
+#                             ('s' tag).  Default is platform dependent.
+#  Boost_USE_DEBUG_PYTHON   - Set to ON to use libraries compiled with a
+#                             debug Python build ('y' tag). Default is OFF.
+#  Boost_USE_STLPORT        - Set to ON to use libraries compiled with
+#                             STLPort ('p' tag).  Default is OFF.
+#  Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS
+#                           - Set to ON to use libraries compiled with
+#                             STLPort deprecated "native iostreams"
+#                             ('n' tag).  Default is OFF.
+#  Boost_COMPILER           - Set to the compiler-specific library suffix
+#                             (e.g. "-gcc43").  Default is auto-computed
+#                             for the C++ compiler in use.
+#  Boost_THREADAPI          - Suffix for "thread" component library name,
+#                             such as "pthread" or "win32".  Names with
+#                             and without this suffix will both be tried.
+# Other variables one may set to control this module are:
+#  Boost_DEBUG              - Set to ON to enable debug output from FindBoost.
+#                             Please enable this before filing any bug report.
+#  Boost_DETAILED_FAILURE_MSG
+#                           - Set to ON to add detailed information to the
+#                             failure message even when the REQUIRED option
+#                             is not given to the find_package call.
+#  Boost_REALPATH           - Set to ON to resolve symlinks for discovered
+#                             libraries to assist with packaging.  For example,
+#                             the "system" component library may be resolved to
+#                             "/usr/lib/libboost_system.so.1.42.0" instead of
+#                             "/usr/lib/libboost_system.so".  This does not
+#                             affect linking and should not be enabled unless
+#                             the user needs this information.
+# On Visual Studio and Borland compilers Boost headers request automatic
+# linking to corresponding libraries.  This requires matching libraries to be
+# linked explicitly or available in the link library search path.  In this
+# case setting Boost_USE_STATIC_LIBS to OFF may not achieve dynamic linking.
+# Boost automatic linking typically requests static libraries with a few
+# exceptions (such as Boost.Python).  Use
+#  add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+# to ask Boost to report information about automatic linking requests.
 #
+# Example to find Boost headers only:
+#  find_package(Boost 1.36.0)
+#  if(Boost_FOUND)
+#    include_directories(${Boost_INCLUDE_DIRS})
+#    add_executable(foo foo.cc)
+#  endif()
+# Example to find Boost headers and some libraries:
+#  set(Boost_USE_STATIC_LIBS        ON)
+#  set(Boost_USE_MULTITHREADED      ON)
+#  set(Boost_USE_STATIC_RUNTIME    OFF)
+#  find_package(Boost 1.36.0 COMPONENTS date_time filesystem system ...)
+#  if(Boost_FOUND)
+#    include_directories(${Boost_INCLUDE_DIRS})
+#    add_executable(foo foo.cc)
+#    target_link_libraries(foo ${Boost_LIBRARIES})
+#  endif()
 #
-# == Using actual libraries from within Boost: ==
+# Boost CMake ----------------------------------------------------------
 #
-#   set(Boost_USE_STATIC_LIBS        ON)
-#   set(Boost_USE_MULTITHREADED      ON)
-#   set(Boost_USE_STATIC_RUNTIME    OFF)
-#   find_package( Boost 1.36.0 COMPONENTS date_time filesystem system ... )
+# If Boost was built using the boost-cmake project it provides a package
+# configuration file for use with find_package's Config mode.  This module
+# looks for the package configuration file called BoostConfig.cmake or
+# boost-config.cmake and stores the result in cache entry "Boost_DIR".  If
+# found, the package configuration file is loaded and this module returns with
+# no further action.  See documentation of the Boost CMake package
+# configuration for details on what it provides.
 #
-#   if(Boost_FOUND)
-#      include_directories(${Boost_INCLUDE_DIRS})
-#      add_executable(foo foo.cc)
-#      target_link_libraries(foo ${Boost_LIBRARIES})
-#   endif()
-#
-#
-# The components list needs to contain actual names of boost libraries only,
-# such as "date_time" for "libboost_date_time".  If you're using parts of
-# Boost that contain header files only (e.g. foreach) you do not need to
-# specify COMPONENTS.
-#
-# You should provide a minimum version number that should be used. If you provide this
-# version number and specify the REQUIRED attribute, this module will fail if it
-# can't find the specified or a later version. If you specify a version number this is
-# automatically put into the considered list of version numbers and thus doesn't need
-# to be specified in the Boost_ADDITIONAL_VERSIONS variable (see below).
-#
-# NOTE for Visual Studio Users:
-#     Automatic linking is used on MSVC & Borland compilers by default when
-#     #including things in Boost.  It's important to note that setting
-#     Boost_USE_STATIC_LIBS to OFF is NOT enough to get you dynamic linking,
-#     should you need this feature.  Automatic linking typically uses static
-#     libraries with a few exceptions (Boost.Python is one).
-#
-#     Please see the section below near Boost_LIB_DIAGNOSTIC_DEFINITIONS for
-#     more details.  Adding a target_link_libraries() as shown in the example
-#     above appears to cause VS to link dynamically if Boost_USE_STATIC_LIBS
-#     gets set to OFF.  It is suggested you avoid automatic linking since it
-#     will make your application less portable.
-#
-# =========== The mess that is Boost_ADDITIONAL_VERSIONS (sorry?) ============
-#
-# OK, so the Boost_ADDITIONAL_VERSIONS variable can be used to specify a list of
-# boost version numbers that should be taken into account when searching
-# for Boost. Unfortunately boost puts the version number into the
-# actual filename for the libraries, so this variable will certainly be needed
-# in the future when new Boost versions are released.
-#
-# Currently this module searches for the following version numbers:
-# 1.33, 1.33.0, 1.33.1, 1.34, 1.34.0, 1.34.1, 1.35, 1.35.0, 1.35.1,
-# 1.36, 1.36.0, 1.36.1, 1.37, 1.37.0, 1.38, 1.38.0, 1.39, 1.39.0,
-# 1.40, 1.40.0, 1.41, 1.41.0, 1.42, 1.42.0, 1.43, 1.43.0, 1.44, 1.44.0,
-# 1.45, 1.45.0, 1.46, 1.46.0, 1.46.1, 1.47, 1.47.0, 1.48, 1.48.0,
-# 1.49, 1.49.0, 1.50, 1.50.0, 1.51, 1.51.0, 1.52, 1.52.0,
-# 1.53, 1.53.0, 1.54, 1.54.0, 1.55, 1.55.0, 1.56, 1.56.0
-#
-# NOTE: If you add a new major 1.x version in Boost_ADDITIONAL_VERSIONS you should
-# add both 1.x and 1.x.0 as shown above.  Official Boost include directories
-# omit the 3rd version number from include paths if it is 0 although not all
-# binary Boost releases do so.
-#
-# set(Boost_ADDITIONAL_VERSIONS "1.78" "1.78.0" "1.79" "1.79.0")
-#
-# ===================================== ============= ========================
-#
-# Variables used by this module, they can change the default behaviour and
-# need to be set before calling find_package:
-#
-#   Boost_USE_MULTITHREADED      Can be set to OFF to use the non-multithreaded
-#                                boost libraries.  If not specified, defaults
-#                                to ON.
-#
-#   Boost_USE_STATIC_LIBS        Can be set to ON to force the use of the static
-#                                boost libraries. Defaults to OFF.
-#
-#   Boost_NO_SYSTEM_PATHS        Set to TRUE to suppress searching in system
-#                                paths (or other locations outside of BOOST_ROOT
-#                                or BOOST_INCLUDEDIR).  Useful when specifying
-#                                BOOST_ROOT. Defaults to OFF.
-#                                  [Since CMake 2.8.3]
-#
-#   Boost_NO_BOOST_CMAKE         Do not do a find_package call in config mode
-#                                before searching for a regular boost install.
-#                                This will avoid finding boost-cmake installs.
-#                                Defaults to OFF.
-#                                  [Since CMake 2.8.6]
-#
-#   Boost_USE_STATIC_RUNTIME     If enabled, searches for boost libraries
-#                                linked against a static C++ standard library
-#                                ('s' ABI tag). This option should be set to
-#                                ON or OFF because the default behavior
-#                                if not specified is platform dependent
-#                                for backwards compatibility.
-#                                  [Since CMake 2.8.3]
-#
-#   Boost_USE_DEBUG_PYTHON       If enabled, searches for boost libraries
-#                                compiled against a special debug build of
-#                                Python ('y' ABI tag). Defaults to OFF.
-#                                  [Since CMake 2.8.3]
-#
-#   Boost_USE_STLPORT            If enabled, searches for boost libraries
-#                                compiled against the STLPort standard
-#                                library ('p' ABI tag). Defaults to OFF.
-#                                  [Since CMake 2.8.3]
-#
-#   Boost_USE_STLPORT_DEPRECATED_NATIVE_IOSTREAMS
-#                                If enabled, searches for boost libraries
-#                                compiled against the deprecated STLPort
-#                                "native iostreams" feature ('n' ABI tag).
-#                                Defaults to OFF.
-#                                  [Since CMake 2.8.3]
-#
-# Other Variables used by this module which you may want to set.
-#
-#   Boost_ADDITIONAL_VERSIONS    A list of version numbers to use for searching
-#                                the boost include directory.  Please see
-#                                the documentation above regarding this
-#                                annoying, but necessary variable :(
-#
-#   Boost_DEBUG                  Set this to TRUE to enable debugging output
-#                                of FindBoost.cmake if you are having problems.
-#                                Please enable this before filing any bug
-#                                reports.
-#
-#   Boost_DETAILED_FAILURE_MSG   FindBoost doesn't output detailed information
-#                                about why it failed or how to fix the problem
-#                                unless this is set to TRUE or the REQUIRED
-#                                keyword is specified in find_package().
-#                                  [Since CMake 2.8.0]
-#
-#   Boost_COMPILER               Set this to the compiler suffix used by Boost
-#                                (e.g. "-gcc43") if FindBoost has problems finding
-#                                the proper Boost installation
-#
-#   Boost_THREADAPI                When building boost.thread, sometimes the name of the
-#                                library contains an additional "pthread" or "win32"
-#                                string known as the threadapi.  This can happen when
-#                                compiling against pthreads on Windows or win32 threads
-#                                on Cygwin.  You may specify this variable and if set
-#                                when FindBoost searches for the Boost threading library
-#                                it will first try to match the threadapi you specify.
-#                                  For Example: libboost_thread_win32-mgw45-mt-1_43.a
-#                                might be found if you specified "win32" here before
-#                                falling back on libboost_thread-mgw45-mt-1_43.a.
-#                                  [Since CMake 2.8.3]
-#
-#   Boost_REALPATH               Resolves symbolic links for discovered boost libraries
-#                                to assist with packaging.  For example, instead of
-#                                Boost_SYSTEM_LIBRARY_RELEASE being resolved to
-#                                "/usr/lib/libboost_system.so" it would be
-#                                "/usr/lib/libboost_system.so.1.42.0" instead.
-#                                This does not affect linking and should not be
-#                                enabled unless the user needs this information.
-#                                  [Since CMake 2.8.3]
-#
-
-
-#
-# These last three variables are available also as environment variables:
-# Also, note they are completely UPPERCASE, except Boost_DIR.
-#
-#   Boost_DIR or                 The preferred installation prefix for searching for
-#   BOOST_ROOT or BOOSTROOT      Boost.  Set this if the module has problems finding
-#                                the proper Boost installation.
-#
-#                                Note that Boost_DIR behaves exactly as <package>_DIR
-#                                variables are documented to behave in find_package's
-#                                Config mode.  That is, if it is set as a -D argument
-#                                to CMake, it must point to the location of the
-#                                BoostConfig.cmake or Boost-config.cmake file.  If it
-#                                is set as an environment variable, it must point to
-#                                the root of the boost installation.  BOOST_ROOT and
-#                                BOOSTROOT, on the other hand, will point to the root
-#                                in either case.
-#
-#                                To prevent falling back on the system paths, set
-#                                Boost_NO_SYSTEM_PATHS to true.
-#
-#                                To avoid finding boost-cmake installations, set
-#                                Boost_NO_BOOST_CMAKE to true.
-#
-#   BOOST_INCLUDEDIR             Set this to the include directory of Boost, if the
-#                                module has problems finding the proper Boost installation
-#
-#   BOOST_LIBRARYDIR             Set this to the lib directory of Boost, if the
-#                                module has problems finding the proper Boost installation
-#
-#   Boost_INCLUDE_DIR            CMake cache entries storing Boost include directory
-#   Boost_LIBRARY_DIR            and library directory.
-#
-# Variables defined by this module:
-#
-#   Boost_FOUND                         System has Boost, this means the include dir was
-#                                       found, as well as all the libraries specified in
-#                                       the COMPONENTS list.
-#
-#   Boost_INCLUDE_DIRS                  Boost include directories
-#
-#   Boost_LIBRARIES                     Link to these to use the Boost libraries that you
-#                                       specified: not cached
-#
-#   Boost_LIBRARY_DIRS                  The path to where the Boost library files are.
-#
-#   Boost_VERSION                       The version number of the boost libraries that
-#                                       have been found, same as in version.hpp from Boost
-#
-#   Boost_LIB_VERSION                   The version number in filename form as
-#                                       it's appended to the library filenames
-#
-#   Boost_MAJOR_VERSION                 major version number of boost
-#   Boost_MINOR_VERSION                 minor version number of boost
-#   Boost_SUBMINOR_VERSION              subminor version number of boost
-#
-#   Boost_LIB_DIAGNOSTIC_DEFINITIONS    [WIN32 Only] You can call
-#                                       add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
-#                                       to have diagnostic information about Boost's
-#                                       automatic linking outputted during compilation time.
-#
-# For each component you specify in find_package(), the following (UPPER-CASE)
-# variables are set.  You can use these variables if you would like to pick and
-# choose components for your targets instead of just using Boost_LIBRARIES.
-#
-#   Boost_${COMPONENT}_FOUND            True IF the Boost library "component" was found.
-#
-#   Boost_${COMPONENT}_LIBRARY          Contains the libraries for the specified Boost
-#                                       "component" (includes debug and optimized keywords
-#                                       when needed).
+# Set Boost_NO_BOOST_CMAKE to ON to disable the search for boost-cmake.
 
 #=============================================================================
 # Copyright 2006-2012 Kitware, Inc.
