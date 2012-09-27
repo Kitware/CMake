@@ -131,9 +131,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       outpathImp += "/";
       }
     }
+
+  std::string pdbOutputPath = this->Target->GetPDBDirectory();
+  cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
+  pdbOutputPath += "/";
+
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathReal = outpath + targetNameReal;
-  std::string targetFullPathPDB = outpath + targetNamePDB;
+  std::string targetFullPathPDB =  pdbOutputPath + targetNamePDB;
   std::string targetFullPathImport = outpathImp + targetNameImport;
   std::string targetOutPathPDB =
     this->Convert(targetFullPathPDB.c_str(),

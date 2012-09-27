@@ -328,8 +328,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       }
     }
 
+  std::string pdbOutputPath = this->Target->GetPDBDirectory();
+  cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
+  pdbOutputPath += "/";
+
   std::string targetFullPath = outpath + targetName;
-  std::string targetFullPathPDB = outpath + targetNamePDB;
+  std::string targetFullPathPDB = pdbOutputPath + targetNamePDB;
   std::string targetFullPathSO = outpath + targetNameSO;
   std::string targetFullPathReal = outpath + targetNameReal;
   std::string targetFullPathImport = outpathImp + targetNameImport;
