@@ -106,6 +106,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                         const cmNinjaDeps& implicitDeps,
                                         const cmNinjaDeps& orderOnlyDeps,
                                         const cmNinjaVars& variables,
+                                        const std::string& rspfile,
                                         int cmdLineLimit)
 {
   // Make sure there is a rule.
@@ -181,12 +182,17 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   // check if a response file rule should be used
   std::string buildstr = build.str();
-  const std::string assignments = variable_assignments.str();
+  std::string assignments = variable_assignments.str();
   const std::string args = arguments.str();
   if (cmdLineLimit > 0
       && args.size() + buildstr.size() + assignments.size()
-         > (size_t) cmdLineLimit)
-    buildstr += "_RSPFILE";
+                                                    > (size_t) cmdLineLimit) {
+    buildstr += "_RSP_FILE";
+    variable_assignments.clear();
+    cmGlobalNinjaGenerator::WriteVariable(variable_assignments,
+                                          "RSP_FILE", rspfile, "", 1);
+    assignments += variable_assignments.str();
+  }
 
   os << buildstr << args << assignments;
 }
