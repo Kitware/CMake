@@ -49,6 +49,8 @@ protected:
   cmStdString VariableDocumentation;
   cmStdString VariableName;
   std::vector<std::string> Names;
+  bool NamesPerDir;
+  bool NamesPerDirAllowed;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   cmStdString EnvironmentPath; // LIB,INCLUDE

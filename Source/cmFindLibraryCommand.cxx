@@ -17,6 +17,7 @@
 cmFindLibraryCommand::cmFindLibraryCommand()
 {
   this->EnvironmentPath = "LIB";
+  this->NamesPerDirAllowed = true;
 }
 
 //----------------------------------------------------------------------------
@@ -44,6 +45,9 @@ void cmFindLibraryCommand::GenerateDocumentation()
                                "SEARCH_XXX", "library");
   cmSystemTools::ReplaceString(this->GenericDocumentation,
                                "XXX_SUBDIR", "lib");
+  cmSystemTools::ReplaceString(this->GenericDocumentation,
+                               "NAMES name1 [name2 ...]",
+                               "NAMES name1 [name2 ...] [NAMES_PER_DIR]");
   cmSystemTools::ReplaceString(
     this->GenericDocumentation,
     "XXX_EXTRA_PREFIX_ENTRY",
@@ -52,6 +56,12 @@ void cmFindLibraryCommand::GenerateDocumentation()
                                "CMAKE_FIND_ROOT_PATH_MODE_XXX",
                                "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
   this->GenericDocumentation +=
+    "\n"
+    "When more than one value is given to the NAMES option this command "
+    "by default will consider one name at a time and search every directory "
+    "for it.  "
+    "The NAMES_PER_DIR option tells this command to consider one directory "
+    "at a time and search for all names in it."
     "\n"
     "If the library found is a framework, then VAR will be set to "
     "the full path to the framework <fullPath>/A.framework. "
@@ -220,18 +230,19 @@ struct cmFindLibraryHelper
   // Keep track of the best library file found so far.
   typedef std::vector<std::string>::size_type size_type;
   std::string BestPath;
-  size_type BestPrefix;
-  size_type BestSuffix;
 
   // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>
   bool OpenBSD;
-  unsigned int BestMajor;
-  unsigned int BestMinor;
 
-  // Current name under consideration.
-  cmsys::RegularExpression NameRegex;
-  bool TryRawName;
-  std::string RawName;
+  // Current names under consideration.
+  struct Name
+  {
+    bool TryRaw;
+    std::string Raw;
+    cmsys::RegularExpression Regex;
+    Name(): TryRaw(false) {}
+  };
+  std::vector<Name> Names;
 
   // Current full path under consideration.
   std::string TestPath;
@@ -249,8 +260,9 @@ struct cmFindLibraryHelper
                            suffix) - this->Suffixes.begin();
     }
   bool HasValidSuffix(std::string const& name);
-  void SetName(std::string const& name);
+  void AddName(std::string const& name);
   bool CheckDirectory(std::string const& path);
+  bool CheckDirectoryForName(std::string const& path, Name& name);
 };
 
 //----------------------------------------------------------------------------
@@ -273,14 +285,6 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   this->OpenBSD =
     this->Makefile->GetCMakeInstance()
     ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
-
-  this->TryRawName = false;
-
-  // No library file has yet been found.
-  this->BestPrefix = this->Prefixes.size();
-  this->BestSuffix = this->Suffixes.size();
-  this->BestMajor = 0;
-  this->BestMinor = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -353,11 +357,13 @@ bool cmFindLibraryHelper::HasValidSuffix(std::string const& name)
 }
 
 //----------------------------------------------------------------------------
-void cmFindLibraryHelper::SetName(std::string const& name)
+void cmFindLibraryHelper::AddName(std::string const& name)
 {
+  Name entry;
+
   // Consider checking the raw name too.
-  this->TryRawName = this->HasValidSuffix(name);
-  this->RawName = name;
+  entry.TryRaw = this->HasValidSuffix(name);
+  entry.Raw = name;
 
   // Build a regular expression to match library names.
   std::string regex = "^";
@@ -369,21 +375,37 @@ void cmFindLibraryHelper::SetName(std::string const& name)
     regex += "(\\.[0-9]+\\.[0-9]+)?";
     }
   regex += "$";
-  this->NameRegex.compile(regex.c_str());
+  entry.Regex.compile(regex.c_str());
+  this->Names.push_back(entry);
 }
 
 //----------------------------------------------------------------------------
 bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
+{
+  for(std::vector<Name>::iterator i = this->Names.begin();
+      i != this->Names.end(); ++i)
+    {
+    if(this->CheckDirectoryForName(path, *i))
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
+                                                Name& name)
 {
   // If the original library name provided by the user matches one of
   // the suffixes, try it first.  This allows users to search
   // specifically for a static library on some platforms (on MS tools
   // one cannot tell just from the library name whether it is a static
   // library or an import library).
-  if(this->TryRawName)
+  if(name.TryRaw)
     {
     this->TestPath = path;
-    this->TestPath += this->RawName;
+    this->TestPath += name.Raw;
     if(cmSystemTools::FileExists(this->TestPath.c_str(), true))
       {
       this->BestPath =
@@ -392,6 +414,12 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
       return true;
       }
     }
+
+  // No library file has yet been found.
+  size_type bestPrefix = this->Prefixes.size();
+  size_type bestSuffix = this->Suffixes.size();
+  unsigned int bestMajor = 0;
+  unsigned int bestMinor = 0;
 
   // Search for a file matching the library name regex.
   std::string dir = path;
@@ -406,7 +434,7 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
 #else
     std::string const& testName = origName;
 #endif
-    if(this->NameRegex.find(testName))
+    if(name.Regex.find(testName))
       {
       this->TestPath = path;
       this->TestPath += origName;
@@ -416,25 +444,25 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
         // best name found so far.  Earlier prefixes are preferred,
         // followed by earlier suffixes.  For OpenBSD, shared library
         // version extensions are compared.
-        size_type prefix = this->GetPrefixIndex(this->NameRegex.match(1));
-        size_type suffix = this->GetSuffixIndex(this->NameRegex.match(2));
+        size_type prefix = this->GetPrefixIndex(name.Regex.match(1));
+        size_type suffix = this->GetSuffixIndex(name.Regex.match(2));
         unsigned int major = 0;
         unsigned int minor = 0;
         if(this->OpenBSD)
           {
-          sscanf(this->NameRegex.match(3).c_str(), ".%u.%u", &major, &minor);
+          sscanf(name.Regex.match(3).c_str(), ".%u.%u", &major, &minor);
           }
-        if(this->BestPath.empty() || prefix < this->BestPrefix ||
-           (prefix == this->BestPrefix && suffix < this->BestSuffix) ||
-           (prefix == this->BestPrefix && suffix == this->BestSuffix &&
-            (major > this->BestMajor ||
-             (major == this->BestMajor && minor > this->BestMinor))))
+        if(this->BestPath.empty() || prefix < bestPrefix ||
+           (prefix == bestPrefix && suffix < bestSuffix) ||
+           (prefix == bestPrefix && suffix == bestSuffix &&
+            (major > bestMajor ||
+             (major == bestMajor && minor > bestMinor))))
           {
           this->BestPath = this->TestPath;
-          this->BestPrefix = prefix;
-          this->BestSuffix = suffix;
-          this->BestMajor = major;
-          this->BestMinor = minor;
+          bestPrefix = prefix;
+          bestSuffix = suffix;
+          bestMajor = major;
+          bestMinor = minor;
           }
         }
       }
@@ -447,6 +475,42 @@ bool cmFindLibraryHelper::CheckDirectory(std::string const& path)
 //----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindNormalLibrary()
 {
+  if(this->NamesPerDir)
+    {
+    return this->FindNormalLibraryNamesPerDir();
+    }
+  else
+    {
+    return this->FindNormalLibraryDirsPerName();
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
+{
+  // Search for all names in each directory.
+  cmFindLibraryHelper helper(this->Makefile);
+  for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+      ni != this->Names.end() ; ++ni)
+    {
+    helper.AddName(*ni);
+    }
+  // Search every directory.
+  for(std::vector<std::string>::const_iterator
+        p = this->SearchPaths.begin(); p != this->SearchPaths.end(); ++p)
+    {
+    if(helper.CheckDirectory(*p))
+      {
+      return helper.BestPath;
+      }
+    }
+  // Couldn't find the library.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
+{
   // Search the entire path for each name.
   cmFindLibraryHelper helper(this->Makefile);
   for(std::vector<std::string>::const_iterator ni = this->Names.begin();
@@ -454,7 +518,7 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
     {
     // Switch to searching for this name.
     std::string const& name = *ni;
-    helper.SetName(name);
+    helper.AddName(name);
 
     // Search every directory.
     for(std::vector<std::string>::const_iterator
@@ -474,19 +538,60 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 //----------------------------------------------------------------------------
 std::string cmFindLibraryCommand::FindFrameworkLibrary()
 {
-  // Search for a framework of each name in the entire search path.
+  if(this->NamesPerDir)
+    {
+    return this->FindFrameworkLibraryNamesPerDir();
+    }
+  else
+    {
+    return this->FindFrameworkLibraryDirsPerName();
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindFrameworkLibraryNamesPerDir()
+{
+  std::string fwPath;
+  // Search for all names in each search path.
+  for(std::vector<std::string>::const_iterator di = this->SearchPaths.begin();
+      di != this->SearchPaths.end(); ++di)
+    {
+    for(std::vector<std::string>::const_iterator ni = this->Names.begin();
+        ni != this->Names.end() ; ++ni)
+      {
+      fwPath = *di;
+      fwPath += *ni;
+      fwPath += ".framework";
+      if(cmSystemTools::FileIsDirectory(fwPath.c_str()))
+        {
+        return cmSystemTools::CollapseFullPath(fwPath.c_str());
+        }
+      }
+    }
+
+  // No framework found.
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindLibraryCommand::FindFrameworkLibraryDirsPerName()
+{
+  std::string fwPath;
+  // Search for each name in all search paths.
   for(std::vector<std::string>::const_iterator ni = this->Names.begin();
       ni != this->Names.end() ; ++ni)
     {
-    // Search the paths for a framework with this name.
-    std::string fwName = *ni;
-    fwName += ".framework";
-    std::string fwPath = cmSystemTools::FindDirectory(fwName.c_str(),
-                                                      this->SearchPaths,
-                                                      true);
-    if(!fwPath.empty())
+    for(std::vector<std::string>::const_iterator
+          di = this->SearchPaths.begin();
+        di != this->SearchPaths.end(); ++di)
       {
-      return fwPath;
+      fwPath = *di;
+      fwPath += *ni;
+      fwPath += ".framework";
+      if(cmSystemTools::FileIsDirectory(fwPath.c_str()))
+        {
+        return cmSystemTools::CollapseFullPath(fwPath.c_str());
+        }
       }
     }
 
