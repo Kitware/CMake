@@ -11,11 +11,14 @@
 ============================================================================*/
 #include "cmExportInstallFileGenerator.h"
 
+#include "cmExportSet.h"
+#include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
-#include "cmExportSet.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
@@ -308,6 +311,72 @@ cmExportInstallFileGenerator
     importedLocations.insert(prop);
     }
 }
+
+//----------------------------------------------------------------------------
+void
+cmExportInstallFileGenerator::HandleMissingTarget(
+  std::string& link_libs, std::vector<std::string>& missingTargets,
+  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
+{
+  std::string name = dependee->GetName();
+  std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
+  int targetOccurrences = (int)namespaces.size();
+  if (targetOccurrences == 1)
+    {
+    std::string missingTarget = namespaces[0];
+    missingTarget += name;
+    link_libs += missingTarget;
+    missingTargets.push_back(missingTarget);
+    }
+  else
+    {
+    // We are not appending, so all exported targets should be
+    // known here.  This is probably user-error.
+    this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
+    }
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string>
+cmExportInstallFileGenerator
+::FindNamespaces(cmMakefile* mf, const std::string& name)
+{
+  std::vector<std::string> namespaces;
+  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+  const cmExportSetMap& exportSets = gg->GetExportSets();
+
+  for(cmExportSetMap::const_iterator expIt = exportSets.begin();
+      expIt != exportSets.end();
+      ++expIt)
+    {
+    const cmExportSet* exportSet = expIt->second;
+    std::vector<cmTargetExport*> const* targets =
+                                                 exportSet->GetTargetExports();
+
+    bool containsTarget = false;
+    for(unsigned int i=0; i<targets->size(); i++)
+      {
+      if (name == (*targets)[i]->Target->GetName())
+        {
+        containsTarget = true;
+        break;
+        }
+      }
+
+    if (containsTarget)
+      {
+      std::vector<cmInstallExportGenerator const*> const* installs =
+                                                 exportSet->GetInstallations();
+      for(unsigned int i=0; i<installs->size(); i++)
+        {
+        namespaces.push_back((*installs)[i]->GetNamespace());
+        }
+      }
+    }
+
+  return namespaces;
+}
+
 
 //----------------------------------------------------------------------------
 void
