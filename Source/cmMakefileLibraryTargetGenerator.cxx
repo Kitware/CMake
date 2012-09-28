@@ -551,8 +551,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     std::string frameworkPath;
     std::string linkPath;
-    this->LocalGenerator->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                              *this->GeneratorTarget, relink);
+    this->LocalGenerator
+      ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
+                            *this->GeneratorTarget, relink);
     linkLibs = frameworkPath + linkPath + linkLibs;
     }
 
