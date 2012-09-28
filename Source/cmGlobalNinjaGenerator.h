@@ -84,7 +84,6 @@ public:
                          const cmNinjaDeps& implicitDeps,
                          const cmNinjaDeps& orderOnlyDeps,
                          const cmNinjaVars& variables,
-                         const std::string& rspfile = std::string(),
                          int cmdLineLimit = -1);
 
   /**
