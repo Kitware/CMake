@@ -84,15 +84,13 @@ protected:
                                            const char* config,
                                            std::string const& suffix) = 0;
 
-  /** Each subclass knows how to complain about a target that is
-      missing from an export set.  */
-  virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee,
-                                          int occurrences) = 0;
-
-  std::vector<std::string> FindNamespaces(cmMakefile* mf,
-                                          const std::string& name);
-
+  /** Each subclass knows how to deal with a target that is  missing from an
+   *  export set.  */
+  virtual void HandleMissingTarget(std::string& link_libs,
+                                   std::vector<std::string>& missingTargets,
+                                   cmMakefile* mf,
+                                   cmTarget* depender,
+                                   cmTarget* dependee) = 0;
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
