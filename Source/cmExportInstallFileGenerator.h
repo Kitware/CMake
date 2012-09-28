@@ -57,9 +57,19 @@ protected:
   virtual void GenerateImportTargetsConfig(std::ostream& os,
                                            const char* config,
                                            std::string const& suffix);
-  virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee,
-                                          int occurrences);
+  virtual void HandleMissingTarget(std::string& link_libs,
+                                   std::vector<std::string>& missingTargets,
+                                   cmMakefile* mf,
+                                   cmTarget* depender,
+                                   cmTarget* dependee);
+
+  void ComplainAboutMissingTarget(cmTarget* depender,
+                                  cmTarget* dependee,
+                                  int occurrences);
+
+  std::vector<std::string> FindNamespaces(cmMakefile* mf,
+                                          const std::string& name);
+
 
   /** Generate a per-configuration file for the targets.  */
   bool GenerateImportFileConfig(const char* config);
