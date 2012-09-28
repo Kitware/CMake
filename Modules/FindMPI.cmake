@@ -576,6 +576,11 @@ foreach (lang C CXX Fortran)
       try_regular_compiler(${lang} regular_compiler_worked)
     endif()
 
+    set(MPI_${lang}_FIND_QUIETLY ${MPI_FIND_QUIETLY})
+    set(MPI_${lang}_FIND_REQUIRED ${MPI_FIND_REQUIRED})
+    set(MPI_${lang}_FIND_VERSION ${MPI_FIND_VERSION})
+    set(MPI_${lang}_FIND_VERSION_EXACT ${MPI_FIND_VERSION_EXACT})
+
     if (regular_compiler_worked)
       find_package_handle_standard_args(MPI_${lang} DEFAULT_MSG MPI_${lang}_COMPILER)
     else()
