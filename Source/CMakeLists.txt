@@ -183,6 +183,8 @@ set(SRCS
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
+  cmGeneratorExpressionDAGChecker.cxx
+  cmGeneratorExpressionDAGChecker.h
   cmGeneratorExpressionEvaluator.cxx
   cmGeneratorExpressionEvaluator.h
   cmGeneratorExpressionLexer.cxx

@@ -13,6 +13,8 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 static void reportError(cmGeneratorExpressionContext *context,
@@ -47,7 +49,8 @@ struct cmGeneratorExpressionNode
 
   virtual std::string Evaluate(const std::vector<std::string> &parameters,
                                cmGeneratorExpressionContext *context,
-                               const GeneratorExpressionContent *content
+                               const GeneratorExpressionContent *content,
+                               cmGeneratorExpressionDAGChecker *dagChecker
                               ) const = 0;
 };
 
@@ -60,7 +63,8 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
-                       const GeneratorExpressionContent *) const
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     // Unreachable
     return std::string();
@@ -76,7 +80,8 @@ static const struct OneNode : public cmGeneratorExpressionNode
 
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
-                       const GeneratorExpressionContent *) const
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     // Unreachable
     return std::string();
@@ -93,7 +98,8 @@ static const struct OP ## Node : public cmGeneratorExpressionNode \
  \
   std::string Evaluate(const std::vector<std::string> &parameters, \
                        cmGeneratorExpressionContext *context, \
-                       const GeneratorExpressionContent *content) const \
+                       const GeneratorExpressionContent *content, \
+                       cmGeneratorExpressionDAGChecker *) const \
   { \
     std::vector<std::string>::const_iterator it = parameters.begin(); \
     const std::vector<std::string>::const_iterator end = parameters.end(); \
@@ -123,9 +129,11 @@ BOOLEAN_OP_NODE(orNode, OR, 0, 1)
 static const struct NotNode : public cmGeneratorExpressionNode
 {
   NotNode() {}
+
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content) const
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     if (*parameters.begin() != "0" && *parameters.begin() != "1")
       {
@@ -138,14 +146,80 @@ static const struct NotNode : public cmGeneratorExpressionNode
 } notNode;
 
 //----------------------------------------------------------------------------
+static const struct BoolNode : public cmGeneratorExpressionNode
+{
+  BoolNode() {}
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return !cmSystemTools::IsOff(parameters.begin()->c_str()) ? "1" : "0";
+  }
+} boolNode;
+
+//----------------------------------------------------------------------------
+static const struct StrEqualNode : public cmGeneratorExpressionNode
+{
+  StrEqualNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return *parameters.begin() == parameters.at(1) ? "1" : "0";
+  }
+} strEqualNode;
+
+//----------------------------------------------------------------------------
+static const struct Angle_RNode : public cmGeneratorExpressionNode
+{
+  Angle_RNode() {}
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return ">";
+  }
+} angle_rNode;
+
+//----------------------------------------------------------------------------
+static const struct CommaNode : public cmGeneratorExpressionNode
+{
+  CommaNode() {}
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return ",";
+  }
+} commaNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
+
   virtual int NumExpectedParameters() const { return 0; }
 
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *) const
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     return context->Config ? context->Config : "";
   }
@@ -160,7 +234,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content) const
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     if (!context->Config)
       {
@@ -178,6 +253,61 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     return *parameters.begin() == context->Config ? "1" : "0";
   }
 } configurationTestNode;
+
+//----------------------------------------------------------------------------
+static const struct TargetPropertyNode : public cmGeneratorExpressionNode
+{
+  TargetPropertyNode() {}
+
+  // This node handles errors on parameter count itself.
+  virtual int NumExpectedParameters() const { return -1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagCheckerParent
+                      ) const
+  {
+    if (parameters.size() != 1 && parameters.size() != 2)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:...> expression requires one or two parameters");
+      return std::string();
+      }
+    cmGeneratorTarget* target = context->Target;
+    std::string propertyName = *parameters.begin();
+    if (parameters.size() == 2)
+      {
+      target = context->Makefile->FindGeneratorTargetToUse(
+                                                parameters.begin()->c_str());
+
+      if (!target)
+        {
+        cmOStringStream e;
+        e << "Target \""
+          << target
+          << "\" not found.";
+        reportError(context, content->GetOriginalExpression(), e.str());
+        }
+      propertyName = parameters.at(1);
+      }
+
+    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
+                                               target->GetName(),
+                                               propertyName,
+                                               content,
+                                               dagCheckerParent);
+
+    if (!dagChecker.check())
+      {
+      dagChecker.reportError(context, content->GetOriginalExpression());
+      return std::string();
+      }
+
+    const char *prop = target->GetProperty(propertyName.c_str());
+    return prop ? prop : "";
+  }
+} targetPropertyNode;
 
 //----------------------------------------------------------------------------
 template<bool linker, bool soname>
@@ -293,7 +423,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content) const
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
   {
     // Lookup the referenced target.
     std::string name = *parameters.begin();
@@ -392,7 +523,18 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetLinkerFileDirNode;
   else if (identifier == "TARGET_SONAME_FILE_DIR")
     return &targetSoNameFileDirNode;
+  else if (identifier == "STREQUAL")
+    return &strEqualNode;
+  else if (identifier == "BOOL")
+    return &boolNode;
+  else if (identifier == "ANGLE-R")
+    return &angle_rNode;
+  else if (identifier == "COMMA")
+    return &commaNode;
+  else if (identifier == "TARGET_PROPERTY")
+    return &targetPropertyNode;
   return 0;
+
 }
 
 //----------------------------------------------------------------------------
@@ -412,7 +554,8 @@ std::string GeneratorExpressionContent::GetOriginalExpression() const
 
 //----------------------------------------------------------------------------
 std::string GeneratorExpressionContent::Evaluate(
-                                  cmGeneratorExpressionContext *context) const
+                            cmGeneratorExpressionContext *context,
+                            cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   std::string identifier;
   {
@@ -422,7 +565,7 @@ std::string GeneratorExpressionContent::Evaluate(
                                           = this->IdentifierChildren.end();
   for ( ; it != end; ++it)
     {
-    identifier += (*it)->Evaluate(context);
+    identifier += (*it)->Evaluate(context, dagChecker);
     if (context->HadError)
       {
       return std::string();
@@ -465,7 +608,7 @@ std::string GeneratorExpressionContent::Evaluate(
                                                                 = pit->end();
       for ( ; it != end; ++it)
         {
-        result += (*it)->Evaluate(context);
+        result += (*it)->Evaluate(context, dagChecker);
         if (context->HadError)
           {
           return std::string();
@@ -491,7 +634,7 @@ std::string GeneratorExpressionContent::Evaluate(
                                                               pit->end();
     for ( ; it != end; ++it)
       {
-      parameter += (*it)->Evaluate(context);
+      parameter += (*it)->Evaluate(context, dagChecker);
       if (context->HadError)
         {
         return std::string();
@@ -534,7 +677,7 @@ std::string GeneratorExpressionContent::Evaluate(
     return std::string();
     }
 
-  return node->Evaluate(parameters, context, this);
+  return node->Evaluate(parameters, context, this, dagChecker);
 }
 
 //----------------------------------------------------------------------------

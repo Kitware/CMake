@@ -17,6 +17,8 @@
 #include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
+#include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 
 #include <assert.h>
 
@@ -289,19 +291,40 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 {
   std::vector<std::string> includes;
   const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
-  if(prop)
+  if(!prop)
     {
-    cmSystemTools::ExpandListArgument(prop, includes);
+    return includes;
     }
+
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                              this->GetName(),
+                                              "INCLUDE_DIRECTORIES", 0, 0);
+
+  cmSystemTools::ExpandListArgument(ge.Parse(prop)
+                                    .Evaluate(this->Makefile,
+                                              config,
+                                              false,
+                                              this,
+                                              &dagChecker),
+                                    includes);
 
   std::set<std::string> uniqueIncludes;
   std::vector<std::string> orderedAndUniqueIncludes;
   for(std::vector<std::string>::const_iterator
       li = includes.begin(); li != includes.end(); ++li)
     {
-    if(uniqueIncludes.insert(*li).second)
+    std::string inc = *li;
+    if (!cmSystemTools::IsOff(inc.c_str()))
       {
-      orderedAndUniqueIncludes.push_back(*li);
+      cmSystemTools::ConvertToUnixSlashes(inc);
+      }
+    if(uniqueIncludes.insert(inc).second)
+      {
+      orderedAndUniqueIncludes.push_back(inc);
       }
     }
 
@@ -309,15 +332,30 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetCompileDefinitions(const char *config)
+std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
 {
-  if (!config)
+  std::string defPropName = "COMPILE_DEFINITIONS";
+  if (config)
     {
-    return this->Target->GetProperty("COMPILE_DEFINITIONS");
+    defPropName += "_" + cmSystemTools::UpperCase(config);
     }
-  std::string defPropName = "COMPILE_DEFINITIONS_";
-  defPropName +=
-    cmSystemTools::UpperCase(config);
 
-  return this->Target->GetProperty(defPropName.c_str());
+  const char *prop = this->Target->GetProperty(defPropName.c_str());
+
+  if (!prop)
+    {
+    return "";
+    }
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                             this->GetName(),
+                                             defPropName, 0, 0);
+  return ge.Parse(prop).Evaluate(this->Makefile,
+                                 config,
+                                 false,
+                                 this,
+                                 &dagChecker);
 }

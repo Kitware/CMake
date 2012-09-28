@@ -1647,16 +1647,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro);
     }
-  this->AppendDefines
-    (ppDefs, this->CurrentMakefile->GetProperty("COMPILE_DEFINITIONS"));
-  this->AppendDefines(ppDefs, target.GetProperty("COMPILE_DEFINITIONS"));
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
+  this->AppendDefines(ppDefs, gtgt->GetCompileDefinitions().c_str());
   if(configName)
     {
-    std::string defVarName = "COMPILE_DEFINITIONS_";
-    defVarName += cmSystemTools::UpperCase(configName);
-    this->AppendDefines
-      (ppDefs, this->CurrentMakefile->GetProperty(defVarName.c_str()));
-    this->AppendDefines(ppDefs, target.GetProperty(defVarName.c_str()));
+    this->AppendDefines(ppDefs,
+                        gtgt->GetCompileDefinitions(configName).c_str());
     }
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
@@ -1713,10 +1709,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   // Set target-specific architectures.
   std::vector<std::string> archs;
-  {
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
   gtgt->GetAppleArchs(configName, archs);
-  }
+
   if(!archs.empty())
     {
     // Enable ARCHS attribute.
@@ -1953,7 +1947,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   BuildObjectListOrString dirs(this, this->XcodeVersion >= 30);
   BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
   std::vector<std::string> includes;
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
   this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt);
   std::set<cmStdString> emitted;
   emitted.insert("/System/Library/Frameworks");

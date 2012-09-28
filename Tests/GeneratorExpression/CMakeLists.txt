@@ -22,6 +22,23 @@ add_custom_target(check ALL
     -Dtest_or_1=$<OR:1>
     -Dtest_or_1_0=$<OR:1,0>
     -Dtest_or_1_1=$<OR:1,1>
+    -Dtest_bool_notfound=$<BOOL:NOTFOUND>
+    -Dtest_bool_foo_notfound=$<BOOL:Foo-NOTFOUND>
+    -Dtest_bool_true=$<BOOL:True>
+    -Dtest_bool_false=$<BOOL:False>
+    -Dtest_bool_on=$<BOOL:On>
+    -Dtest_bool_off=$<BOOL:Off>
+    -Dtest_bool_no=$<BOOL:No>
+    -Dtest_bool_n=$<BOOL:N>
+    -Dtest_strequal_yes_yes=$<STREQUAL:Yes,Yes>
+    -Dtest_strequal_yes_yes_cs=$<STREQUAL:Yes,yes>
+    -Dtest_strequal_yes_no=$<STREQUAL:Yes,No>
+    -Dtest_strequal_no_yes=$<STREQUAL:No,Yes>
+    -Dtest_strequal_angle_r=$<STREQUAL:$<ANGLE-R>,$<ANGLE-R>>
+    -Dtest_strequal_comma=$<STREQUAL:$<COMMA>,$<COMMA>>
+    -Dtest_strequal_angle_r_comma=$<STREQUAL:$<ANGLE-R>,$<COMMA>>
+    -Dtest_angle_r=$<ANGLE-R>
+    -Dtest_comma=$<COMMA>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done"
   VERBATIM
