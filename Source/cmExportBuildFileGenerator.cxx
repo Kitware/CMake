@@ -135,10 +135,28 @@ cmExportBuildFileGenerator
 
 //----------------------------------------------------------------------------
 void
+cmExportBuildFileGenerator::HandleMissingTarget(
+  std::string& link_libs, std::vector<std::string>& missingTargets,
+  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
+{
+  // The target is not in the export.
+  if(!this->AppendMode)
+    {
+    // We are not appending, so all exported targets should be
+    // known here.  This is probably user-error.
+    this->ComplainAboutMissingTarget(depender, dependee);
+    }
+  // Assume the target will be exported by another command.
+  // Append it with the export namespace.
+  link_libs += this->Namespace;
+  link_libs += dependee->GetName();
+}
+
+//----------------------------------------------------------------------------
+void
 cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee,
-                             int occurrences)
+                             cmTarget* dependee)
 {
   if(!this->ExportCommand || !this->ExportCommand->ErrorMessage.empty())
     {
@@ -146,20 +164,10 @@ cmExportBuildFileGenerator
     }
 
   cmOStringStream e;
-  if (occurrences == 0)
-    {
-    e << "called with target \"" << depender->GetName()
-      << "\" which requires target \"" << dependee->GetName()
-      << "\" that is not in the export list.\n"
-      << "If the required target is not easy to reference in this call, "
-      << "consider using the APPEND option with multiple separate calls.";
-    }
-  else
-    {
-    e << "called with target \"" << depender->GetName()
-      << "\" which requires target \"" << dependee->GetName()
-      << "\" that is exported " << occurrences << " times in other "
-      << "export ""lists.\n";
-    }
+  e << "called with target \"" << depender->GetName()
+    << "\" which requires target \"" << dependee->GetName()
+    << "\" that is not in the export list.\n"
+    << "If the required target is not easy to reference in this call, "
+    << "consider using the APPEND option with multiple separate calls.";
   this->ExportCommand->ErrorMessage = e.str();
 }
