@@ -38,11 +38,11 @@ cmCTestSVN::~cmCTestSVN()
 //----------------------------------------------------------------------------
 void cmCTestSVN::CleanupImpl()
 {
-  const char* svn = this->CommandLineTool.c_str();
-  const char* svn_cleanup[] = {svn, "cleanup", 0};
+  std::vector<const char*> svn_cleanup;
+  svn_cleanup.push_back("cleanup");
   OutputLogger out(this->Log, "cleanup-out> ");
   OutputLogger err(this->Log, "cleanup-err> ");
-  this->RunChild(svn_cleanup, &out, &err);
+  this->RunSVNCommand(svn_cleanup, &out, &err);
 }
 
 //----------------------------------------------------------------------------
@@ -106,12 +106,13 @@ static bool cmCTestSVNPathStarts(std::string const& p1, std::string const& p2)
 std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 {
   // Run "svn info" to get the repository info from the work tree.
-  const char* svn = this->CommandLineTool.c_str();
-  const char* svn_info[] = {svn, "info", svninfo.LocalPath.c_str(), 0};
+  std::vector<const char*> svn_info;
+  svn_info.push_back("info");
+  svn_info.push_back(svninfo.LocalPath.c_str());
   std::string rev;
   InfoParser out(this, "info-out> ", rev, svninfo);
   OutputLogger err(this->Log, "info-err> ");
-  this->RunChild(svn_info, &out, &err);
+  this->RunSVNCommand(svn_info, &out, &err);
   return rev;
 }
 
@@ -285,19 +286,52 @@ bool cmCTestSVN::UpdateImpl()
     }
 
   std::vector<char const*> svn_update;
-  svn_update.push_back(this->CommandLineTool.c_str());
   svn_update.push_back("update");
-  svn_update.push_back("--non-interactive");
   for(std::vector<cmStdString>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     svn_update.push_back(ai->c_str());
     }
-  svn_update.push_back(0);
 
   UpdateParser out(this, "up-out> ");
   OutputLogger err(this->Log, "up-err> ");
-  return this->RunUpdateCommand(&svn_update[0], &out, &err);
+  return this->RunSVNCommand(svn_update, &out, &err);
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
+    OutputParser* out, OutputParser* err)
+{
+  if(parameters.empty()) return false;
+
+  std::vector<char const*> args;
+  args.push_back(this->CommandLineTool.c_str());
+
+  args.insert(args.end(), parameters.begin(), parameters.end());
+
+  args.push_back("--non-interactive");
+
+  std::string userOptions =
+    this->CTest->GetCTestConfiguration("SVNOptions");
+
+  std::vector<cmStdString> parsedUserOptions =
+    cmSystemTools::ParseArguments(userOptions.c_str());
+  for(std::vector<cmStdString>::iterator i = parsedUserOptions.begin();
+      i != parsedUserOptions.end(); ++i)
+    {
+    args.push_back(i->c_str());
+    }
+
+  args.push_back(0);
+
+  if(strcmp(parameters[0], "update") == 0)
+    {
+    return RunUpdateCommand(&args[0], out, err);
+    }
+  else
+    {
+    return RunChild(&args[0], out, err);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -417,14 +451,15 @@ void cmCTestSVN::LoadRevisions(SVNInfo &svninfo)
     }
 
   // Run "svn log" to get all global revisions of interest.
-  const char* svn = this->CommandLineTool.c_str();
-  const char* svn_log[] = {svn, "log", "--xml", "-v", revs.c_str(),
-                           svninfo.LocalPath.c_str(), 0};
-  {
+  std::vector<const char*> svn_log;
+  svn_log.push_back("log");
+  svn_log.push_back("--xml");
+  svn_log.push_back("-v");
+  svn_log.push_back(revs.c_str());
+  svn_log.push_back(svninfo.LocalPath.c_str());
   LogParser out(this, "log-out> ", svninfo);
   OutputLogger err(this->Log, "log-err> ");
-  this->RunChild(svn_log, &out, &err);
-  }
+  this->RunSVNCommand(svn_log, &out, &err);
 }
 
 //----------------------------------------------------------------------------
@@ -492,11 +527,11 @@ private:
 void cmCTestSVN::LoadModifications()
 {
   // Run "svn status" which reports local modifications.
-  const char* svn = this->CommandLineTool.c_str();
-  const char* svn_status[] = {svn, "status", "--non-interactive", 0};
+  std::vector<const char*> svn_status;
+  svn_status.push_back("status");
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
-  this->RunChild(svn_status, &out, &err);
+  this->RunSVNCommand(svn_status, &out, &err);
 }
 
 //----------------------------------------------------------------------------
@@ -550,11 +585,11 @@ private:
 void cmCTestSVN::LoadExternals()
 {
   // Run "svn status" to get the list of external repositories
-  const char* svn = this->CommandLineTool.c_str();
-  const char* svn_status[] = {svn, "status", 0};
+  std::vector<const char*> svn_status;
+  svn_status.push_back("status");
   ExternalParser out(this, "external-out> ");
   OutputLogger err(this->Log, "external-err> ");
-  this->RunChild(svn_status, &out, &err);
+  this->RunSVNCommand(svn_status, &out, &err);
 }
 
 //----------------------------------------------------------------------------

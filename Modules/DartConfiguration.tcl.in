@@ -44,6 +44,7 @@ CVSUpdateOptions: @CVS_UPDATE_OPTIONS@
 
 # Subversion options
 SVNCommand: @SVNCOMMAND@
+SVNOptions: @CTEST_SVN_OPTIONS@
 SVNUpdateOptions: @SVN_UPDATE_OPTIONS@
 
 # Git options
