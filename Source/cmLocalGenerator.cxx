@@ -1537,7 +1537,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           linkFlags += " ";
           }
         }
-      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target, false);
+      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
+                                *target, false);
       }
       break;
     case cmTarget::EXECUTABLE:
@@ -1561,7 +1562,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         return;
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
-      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath, *target, false);
+      this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
+                                *target, false);
       if(cmSystemTools::IsOn
          (this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
