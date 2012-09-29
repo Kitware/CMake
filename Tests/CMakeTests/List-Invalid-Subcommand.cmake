@@ -1,1 +1,1 @@
-list(NO_SUCH_SUBCOMMAND)
+list(NO_SUCH_SUBCOMMAND mylist)
