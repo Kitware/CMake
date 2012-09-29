@@ -1,0 +1,1 @@
+list(REMOVE_ITEM)
