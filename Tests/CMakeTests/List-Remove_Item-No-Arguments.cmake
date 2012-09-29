@@ -1,1 +1,1 @@
-list(REMOVE_ITEM)
+list(REMOVE_ITEM mylist)

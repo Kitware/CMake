@@ -1,1 +1,1 @@
-list(FIND)
+list(FIND mylist)
