@@ -1,3 +1,5 @@
+include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
+
 macro(TEST command expected)
   if("x${result}" STREQUAL "x${expected}")
     #message("TEST \"${command}\" success: \"${result}\" expected: \"${expected}\"")
@@ -97,3 +99,45 @@ TEST("REVERSE empty result" "")
 
 list(SORT result)
 TEST("SORT empty result" "")
+
+set(No-Arguments-RESULT 1)
+set(No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-No-Arguments.cmake:1 \\(list\\):.*list must be called with at least one argument.*")
+
+set(Get-No-Arguments-STDERR ".*CMake Error at List-Get-No-Arguments.cmake:1 \\(list\\):.*list sub-command GET requires at least three arguments.*")
+set(Append-No-Arguments-STDERR ".*CMake Error at List-Append-No-Arguments.cmake:1 \\(list\\):.*list sub-command APPEND requires at least one argument.*")
+set(Find-No-Arguments-STDERR ".*CMake Error at List-Find-No-Arguments.cmake:1 \\(list\\):.*list sub-command FIND requires three arguments.*")
+set(Insert-No-Arguments-STDERR ".*CMake Error at List-Insert-No-Arguments.cmake:1 \\(list\\):.*list sub-command INSERT requires at least three arguments.*")
+set(Remove_Item-No-Arguments-STDERR ".*CMake Error at List-Remove_Item-No-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_ITEM requires two or more arguments.*")
+set(Reverse-No-Arguments-STDERR ".*CMake Error at List-Reverse-No-Arguments.cmake:1 \\(list\\):.*list sub-command REVERSE requires a list as an argument.*")
+set(Remove_Duplicates-No-Arguments-STDERR ".*CMake Error at List-Remove_Duplicates-No-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_DUPLICATES requires a list as an argument.*")
+set(Sort-No-Arguments-STDERR ".*CMake Error at List-Sort-No-Arguments.cmake:1 \\(list\\):.*list sub-command SORT requires a list as an argument.*")
+set(Remove_At-No-Arguments-STDERR ".*CMake Error at List-Remove_At-No-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_AT requires at least two arguments.*")
+
+foreach(cmd IN ITEMS Append Find Get Insert Length Reverse Remove_At Remove_Duplicates Remove_Item Sort)
+  set(${cmd}-No-Arguments-RESULT 1)
+  string(TOUPPER ${cmd} cmd_upper)
+  set(_test_file_name "${CMAKE_CURRENT_BINARY_DIR}/List-${cmd}-No-Arguments.cmake")
+  file(WRITE "${_test_file_name}" "list(${cmd_upper})\n")
+  check_cmake_test_single(List "${cmd}-No-Arguments" "${_test_file_name}")
+endforeach()
+
+set(Length-Too-Many-Arguments-RESULT 1)
+set(Length-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Length-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command LENGTH requires two arguments.*")
+
+set(Reverse-Too-Many-Arguments-RESULT 1)
+set(Reverse-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Reverse-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command REVERSE only takes one argument.*")
+
+set(Remove_Duplicates-Too-Many-Arguments-RESULT 1)
+set(Remove_Duplicates-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Remove_Duplicates-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_DUPLICATES only takes one argument.*")
+
+set(Sort-Too-Many-Arguments-RESULT 1)
+set(Sort-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Sort-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command SORT only takes one argument.*")
+
+
+check_cmake_test(List
+  No-Arguments
+  Length-Too-Many-Arguments
+  Reverse-Too-Many-Arguments
+  Remove_Duplicates-Too-Many-Arguments
+  Sort-Too-Many-Arguments
+)
