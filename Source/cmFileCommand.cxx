@@ -22,6 +22,7 @@
 #endif
 
 #undef GetCurrentDirectory
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -705,11 +706,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
 bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool recurse)
 {
-  if ( args.size() < 2 )
-    {
-    this->SetError("GLOB requires at least a variable name");
-    return false;
-    }
+  // File commands has at least one argument
+  assert(args.size() > 1);
 
   std::vector<std::string>::const_iterator i = args.begin();
 
@@ -843,11 +841,8 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
 bool cmFileCommand::HandleMakeDirectoryCommand(
   std::vector<std::string> const& args)
 {
-  if(args.size() < 2 )
-    {
-    this->SetError("called with incorrect number of arguments");
-    return false;
-    }
+  // File command has at least one argument
+  assert(args.size() > 1);
 
   std::vector<std::string>::const_iterator i = args.begin();
 
