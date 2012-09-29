@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmDocumentGeneratorExpressions.h"
 #include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
@@ -204,6 +205,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "are not supported by the native build tool.  "
      "The VS6 IDE does not support definition values with spaces "
      "(but NMake does).\n"
+     "Contents of COMPILE_DEFINITIONS may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
      CM_DOCUMENT_COMPILE_DEFINITIONS_DISCLAIMER);
 
   cm->DefineProperty
@@ -497,8 +501,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "to the include_directories command."
      "\n"
      "The target property values are used by the generators to set "
-     "the include paths for the compiler. "
-     "See also the include_directories command.");
+     "the include paths for the compiler.  "
+     "See also the include_directories command.\n"
+     "Contents of INCLUDE_DIRECTORIES may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,
