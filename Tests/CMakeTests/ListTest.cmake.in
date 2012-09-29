@@ -140,6 +140,20 @@ set(Sort-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@
 set(Remove_At-No-Arguments-RESULT 1)
 set(Remove_At-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Remove_At-No-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_AT requires at least two arguments.*")
 
+set(Invalid-Subcommand-RESULT 1)
+set(Invalid-Subcommand-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Invalid-Subcommand.cmake:1 \\(list\\):.*list does not recognize sub-command NO_SUCH_SUBCOMMAND.*")
+
+foreach(cmd Get Insert Remove_At)
+  set(${cmd}-Invalid-Index-RESULT 1)
+  set(${cmd}-Invalid-Index-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-${cmd}-Invalid-Index.cmake:2 \\(list\\):.*list index: 3 out of range \\(-3, 2\\).*")
+endforeach()
+
+foreach(cmd Remove_Item Reverse Remove_Duplicates Sort Remove_At)
+  string(TOUPPER ${cmd} Cmd)
+  set(${cmd}-Nonexistent-List-RESULT 1)
+  set(${cmd}-Nonexistent-List-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-${cmd}-Nonexistent-List.cmake:2 \\(list\\):.*sub-command ${Cmd} requires list to be present.*")
+endforeach()
+
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(List
   No-Arguments
@@ -156,4 +170,13 @@ check_cmake_test(List
   Sort-No-Arguments
   Sort-Too-Many-Arguments
   Remove_At-No-Arguments
+  Invalid-Subcommand
+  Get-Invalid-Index
+  Insert-Invalid-Index
+  Remove_Item-Nonexistent-List
+  Reverse-Nonexistent-List
+  Remove_Duplicates-Nonexistent-List
+  Sort-Nonexistent-List
+  Remove_At-Nonexistent-List
+  Remove_At-Invalid-Index
 )
