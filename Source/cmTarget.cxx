@@ -2020,9 +2020,8 @@ bool cmTarget::NameResolvesToFramework(const std::string& libname)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
+bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType)
 {
-  (void)llt; // TODO: What is this?
   if(this->NameResolvesToFramework(libname.c_str()))
     {
     std::string frameworkDir = libname;
