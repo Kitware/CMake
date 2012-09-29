@@ -71,7 +71,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")
     else()
-      message(STATUS "Looking for ${_description} - not found.")
+      message(STATUS "Looking for ${_description} - not found")
       set(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if files ${INCLUDE} "
