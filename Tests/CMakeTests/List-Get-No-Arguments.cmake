@@ -1,1 +1,1 @@
-list(GET)
+list(GET mylist)

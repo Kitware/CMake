@@ -1,1 +1,1 @@
-list(REMOVE_AT)
+list(REMOVE_AT mylist)
