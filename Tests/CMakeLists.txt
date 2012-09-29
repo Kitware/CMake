@@ -1254,12 +1254,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   if(CMAKE_TEST_MSVC)
     ADD_TEST_MACRO(ForceInclude foo)
+    ADD_TEST_MACRO(PDBDirectoryAndName myexe)
     ADD_TEST_MACRO(PrecompiledHeader foo)
   endif()
   if(CMAKE_TEST_MSVC OR
       "${CMAKE_TEST_GENERATOR}" MATCHES "(MSYS|MinGW) Makefiles")
     ADD_TEST_MACRO(ModuleDefinition example_exe)
-    ADD_TEST_MACRO(PDBDirectoryAndName myexe)
   endif()
 
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
