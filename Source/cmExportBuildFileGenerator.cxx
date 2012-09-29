@@ -136,8 +136,8 @@ cmExportBuildFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator::HandleMissingTarget(
-  std::string& link_libs, std::vector<std::string>& missingTargets,
-  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
+  std::string& link_libs, std::vector<std::string>&,
+  cmMakefile*, cmTarget* depender, cmTarget* dependee)
 {
   // The target is not in the export.
   if(!this->AppendMode)
