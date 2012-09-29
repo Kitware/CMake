@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(PDBDirectoryAndName C)
 
-if(NOT MSVC)
-    MESSAGE(FATAL_ERROR "The PDB file test works only with MSVC")
+# Make sure the proper compiler is in use.
+if(NOT MSVC AND NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
+  message(FATAL_ERROR "The PDBDirectoryAndName test works only with MSVC or Intel")
 endif()
 
 set(my_targets "")
@@ -55,6 +56,10 @@ target_link_libraries(myexe2 mylibA mylibD)
 
 # The PDB_NAME and PDB_OUTPUT_DIRECTORY options do not work in VS 6.
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+  return()
+endif()
+# PDB output not fully implemented for Intel
+if("${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
   return()
 endif()
 
