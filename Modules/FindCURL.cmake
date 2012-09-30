@@ -24,13 +24,15 @@
 find_path(CURL_INCLUDE_DIR NAMES curl/curl.h)
 mark_as_advanced(CURL_INCLUDE_DIR)
 
-# Look for the library.
+# Look for the library (sorted from most current/relevant entry to least).
 find_library(CURL_LIBRARY NAMES
     curl
   # Windows MSVC prebuilts:
     curllib
     libcurl_imp
     curllib_static
+  # Windows older "Win32 - MSVC" prebuilts (libcurl.lib, e.g. libcurl-7.15.5-win32-msvc.zip):
+    libcurl
 )
 mark_as_advanced(CURL_LIBRARY)
 
