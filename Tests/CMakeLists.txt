@@ -57,6 +57,8 @@ if(BUILD_TESTING)
 
   add_subdirectory(FindPackageModeMakefileTest)
 
+  add_subdirectory(CTestTestMemcheck)
+
   # Collect a list of all test build directories.
   set(TEST_BUILD_DIRS)
 
