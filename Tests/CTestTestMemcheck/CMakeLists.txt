@@ -24,6 +24,9 @@ endforeach ()
 
 file(TO_NATIVE_PATH "${CMAKE_COMMAND}" CMAKE_COMMAND_NATIVE)
 string(REPLACE "\\" "\\\\" CMAKE_COMMAND_NATIVE "{CMAKE_COMMAND_NATIVE}")
+string(REPLACE "(" "\\(" CMAKE_COMMAND_NATIVE "{CMAKE_COMMAND_NATIVE}")
+string(REPLACE ")" "\\)" CMAKE_COMMAND_NATIVE "{CMAKE_COMMAND_NATIVE}")
+string(REPLACE "+" "\\+" CMAKE_COMMAND_NATIVE "{CMAKE_COMMAND_NATIVE}")
 set_tests_properties(CTestTestMemcheckUnknown PROPERTIES
     PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND}\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/Unknown/test.cmake\n")
 
