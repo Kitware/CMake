@@ -1939,8 +1939,12 @@ void cmLocalUnixMakefileGenerator3
     for(ImplicitDependFileMap::const_iterator pi = implicitPairs.begin();
         pi != implicitPairs.end(); ++pi)
       {
-      cmakefileStream << "  \"" << pi->second << "\" ";
-      cmakefileStream << "\"" << pi->first << "\"\n";
+      for(cmDepends::DependencyVector::const_iterator di = pi->second.begin();
+          di != pi->second.end(); ++ di)
+        {
+        cmakefileStream << "  \"" << *di << "\" ";
+        cmakefileStream << "\"" << pi->first << "\"\n";
+        }
       }
     cmakefileStream << "  )\n";
 
@@ -2204,7 +2208,7 @@ cmLocalUnixMakefileGenerator3::AddImplicitDepends(cmTarget const& tgt,
                                                   const char* obj,
                                                   const char* src)
 {
-  this->ImplicitDepends[tgt.GetName()][lang][obj] = src;
+  this->ImplicitDepends[tgt.GetName()][lang][obj].push_back(src);
 }
 
 //----------------------------------------------------------------------------
