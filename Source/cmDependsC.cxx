@@ -98,16 +98,18 @@ cmDependsC::~cmDependsC()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsC::WriteDependencies(const char *src, const char *obj,
-  std::ostream& makeDepends, std::ostream& internalDepends)
+bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
+                                   const std::string& obj,
+                                   std::ostream& makeDepends,
+                                   std::ostream& internalDepends)
 {
   // Make sure this is a scanning instance.
-  if(!src || src[0] == '\0')
+  if(sources.empty() || sources.begin()->empty())
     {
     cmSystemTools::Error("Cannot scan dependencies without a source file.");
     return false;
     }
-  if(!obj || obj[0] == '\0')
+  if(obj.empty())
     {
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
@@ -134,12 +136,18 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   if (!haveDeps)
     {
     // Walk the dependency graph starting with the source file.
-    bool first = true;
-    UnscannedEntry root;
-    root.FileName = src;
-    this->Unscanned.push(root);
+    int srcFiles = (int)sources.size();
     this->Encountered.clear();
-    this->Encountered.insert(src);
+
+    for(std::set<std::string>::const_iterator srcIt = sources.begin();
+        srcIt != sources.end(); ++srcIt)
+      {
+      UnscannedEntry root;
+      root.FileName = *srcIt;
+      this->Unscanned.push(root);
+      this->Encountered.insert(*srcIt);
+      }
+
     std::set<cmStdString> scanned;
 
     // Use reserve to allocate enough memory for tempPathStr
@@ -155,7 +163,8 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
 
       // If not a full path, find the file in the include path.
       std::string fullName;
-      if(first || cmSystemTools::FileIsFullPath(current.FileName.c_str()))
+      if((srcFiles>0)
+         || cmSystemTools::FileIsFullPath(current.FileName.c_str()))
         {
         if(cmSystemTools::FileExists(current.FileName.c_str(), true))
           {
@@ -260,7 +269,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
           }
         }
 
-      first = false;
+      srcFiles--;
       }
     }
 
@@ -269,7 +278,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
   internalDepends << obj << std::endl;
-  for(std::set<cmStdString>::iterator i=dependencies.begin();
+  for(std::set<cmStdString>::const_iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
     makeDepends << obj << ": " <<
