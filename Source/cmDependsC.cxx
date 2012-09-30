@@ -113,32 +113,26 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
     return false;
     }
 
+  std::set<cmStdString> dependencies;
+  bool haveDeps = false;
+
   if (this->ValidDeps != 0)
     {
     std::map<std::string, DependencyVector>::const_iterator tmpIt =
                                                     this->ValidDeps->find(obj);
     if (tmpIt!= this->ValidDeps->end())
       {
-      // Write the dependencies to the output stream.  Makefile rules
-      // written by the original local generator for this directory
-      // convert the dependencies to paths relative to the home output
-      // directory.  We must do the same here.
-      internalDepends << obj << std::endl;
       for(DependencyVector::const_iterator i=tmpIt->second.begin();
          i != tmpIt->second.end(); ++i)
         {
-        makeDepends << obj << ": " <<
-           this->LocalGenerator->Convert(i->c_str(),
-                                         cmLocalGenerator::HOME_OUTPUT,
-                                         cmLocalGenerator::MAKEFILE)
-           << std::endl;
-        internalDepends << " " << i->c_str() << std::endl;
+        dependencies.insert(*i);
         }
-      makeDepends << std::endl;
-      return true;
+      haveDeps = true;
       }
     }
 
+  if (!haveDeps)
+  {
   // Walk the dependency graph starting with the source file.
   bool first = true;
   UnscannedEntry root;
@@ -146,7 +140,6 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
   this->Unscanned.push(root);
   this->Encountered.clear();
   this->Encountered.insert(src);
-  std::set<cmStdString> dependencies;
   std::set<cmStdString> scanned;
 
   // Use reserve to allocate enough memory for tempPathStr
@@ -269,6 +262,7 @@ bool cmDependsC::WriteDependencies(const char *src, const char *obj,
 
     first = false;
     }
+  }
 
   // Write the dependencies to the output stream.  Makefile rules
   // written by the original local generator for this directory
