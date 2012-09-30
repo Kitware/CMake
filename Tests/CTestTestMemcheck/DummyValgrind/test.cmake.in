@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.1)
 
 # Settings:
-set(CTEST_DASHBOARD_ROOT                "@CMake_BINARY_DIR@/Tests/CTestTestMemcheck")
+set(CTEST_DASHBOARD_ROOT                "@CMAKE_CURRENT_BINARY_DIR@")
 set(CTEST_SITE                          "@SITE@")
 set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-MemcheckDummyValgrind")
 
-set(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestMemcheck/DummyValgrind")
-set(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestMemcheck/DummyValgrind")
+set(CTEST_SOURCE_DIRECTORY              "@CMAKE_CURRENT_SOURCE_DIR@/DummyValgrind")
+set(CTEST_BINARY_DIRECTORY              "@CMAKE_CURRENT_BINARY_DIR@/DummyValgrind")
 set(CTEST_CVS_COMMAND                   "@CVSCOMMAND@")
 set(CTEST_CMAKE_GENERATOR               "@CMAKE_TEST_GENERATOR@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
@@ -15,7 +15,7 @@ set(CTEST_NOTES_FILES                   "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIP
 
 find_program(CTEST_MEMORYCHECK_COMMAND
     NAMES valgrind
-    HINTS "@CMake_BINARY_DIR@/Tests/CTestTestMemcheck"
+    HINTS "@CMAKE_CURRENT_BINARY_DIR@"
     NO_DEFAULT_PATH
     NO_CMAKE_ENVIRONMENT_PATH
     NO_CMAKE_PATH
