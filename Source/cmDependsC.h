@@ -32,8 +32,6 @@ public:
   virtual ~cmDependsC();
 
 protected:
-  typedef std::vector<char> t_CharBuffer;
-
   // Implement writing/checking methods required by superclass.
   virtual bool WriteDependencies(const char *src,
                                  const char *file,
@@ -82,7 +80,6 @@ protected:
   const std::map<std::string, DependencyVector>* ValidDeps;
   std::set<cmStdString> Encountered;
   std::queue<UnscannedEntry> Unscanned;
-  t_CharBuffer Buffer;
 
   std::map<cmStdString, cmIncludeLines *> FileCache;
   std::map<cmStdString, cmStdString> HeaderLocationCache;
