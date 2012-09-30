@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 2.1)
 # Settings:
 set(CTEST_DASHBOARD_ROOT                "@CMake_BINARY_DIR@/Tests/CTestTestMemcheck")
 set(CTEST_SITE                          "@SITE@")
-set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-MemcheckDummyValgrind")
+set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-MemcheckDummyValgrindFailPre")
 
-set(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestMemcheck/DummyValgrind")
-set(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestMemcheck/DummyValgrind")
+set(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestMemcheck/DummyValgrindFailPre")
+set(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestMemcheck/DummyValgrindFailPre")
 set(CTEST_CVS_COMMAND                   "@CVSCOMMAND@")
 set(CTEST_CMAKE_GENERATOR               "@CMAKE_TEST_GENERATOR@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
