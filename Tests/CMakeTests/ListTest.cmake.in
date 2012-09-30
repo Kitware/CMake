@@ -148,7 +148,7 @@ foreach(cmd Remove_Item Reverse Remove_Duplicates Sort Remove_At)
 endforeach()
 
 set(Get-CMP0007-Warn-RESULT 0)
-set(Get-CMP0007-Warn-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Get-CMP0007-Warn.cmake:3 \\(list\\):.*Policy CMP0007 is not set:.*")
+set(Get-CMP0007-Warn-STDERR ".*CMake Warning \\(dev\\) at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Get-CMP0007-Warn.cmake:3 \\(list\\):.*Policy CMP0007 is not set:.*")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(List
