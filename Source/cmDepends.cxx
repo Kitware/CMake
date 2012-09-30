@@ -50,6 +50,7 @@ bool cmDepends::Write(std::ostream &makeDepends,
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(srcStr, pairs);
 
+  std::map<std::string, std::set<std::string> > dependencies;
   for(std::vector<std::string>::iterator si = pairs.begin();
       si != pairs.end();)
     {
@@ -62,9 +63,14 @@ bool cmDepends::Write(std::ostream &makeDepends,
     obj = this->LocalGenerator->Convert(obj.c_str(),
                                         cmLocalGenerator::HOME_OUTPUT,
                                         cmLocalGenerator::MAKEFILE);
+    dependencies[obj].insert(src);
+    }
+  for(std::map<std::string, std::set<std::string> >::const_iterator
+      it = dependencies.begin(); it != dependencies.end(); ++it)
+    {
 
     // Write the dependencies for this pair.
-    if(!this->WriteDependencies(src.c_str(), obj.c_str(),
+    if(!this->WriteDependencies(it->second, it->first,
                                 makeDepends, internalDepends))
       {
       return false;
@@ -134,8 +140,9 @@ void cmDepends::Clear(const char *file)
 }
 
 //----------------------------------------------------------------------------
-bool cmDepends::WriteDependencies(const char*, const char*,
-                                  std::ostream&, std::ostream&)
+bool cmDepends::WriteDependencies(
+    const std::set<std::string>&, const std::string&,
+    std::ostream&, std::ostream&)
 {
   // This should be implemented by the subclass.
   return false;

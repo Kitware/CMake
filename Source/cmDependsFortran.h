@@ -66,7 +66,7 @@ protected:
 
   // Implement writing/checking methods required by superclass.
   virtual bool WriteDependencies(
-    const char *src, const char *file,
+    const std::set<std::string>& sources, const std::string& file,
     std::ostream& makeDepends, std::ostream& internalDepends);
 
   // Actually write the depenencies to the streams.
