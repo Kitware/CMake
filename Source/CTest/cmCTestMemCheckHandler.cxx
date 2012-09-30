@@ -247,7 +247,8 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
 {
   std::vector<cmStdString>::size_type pp;
   std::string memcheckcommand = "";
-  memcheckcommand = this->MemoryTester;
+  memcheckcommand
+    = cmSystemTools::ConvertToOutputPath(this->MemoryTester.c_str());
   for ( pp = 0; pp < this->MemoryTesterOptions.size(); pp ++ )
     {
     args.push_back(this->MemoryTesterOptions[pp]);
@@ -410,29 +411,25 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
         "MemoryCheckCommand").c_str()) )
     {
     this->MemoryTester
-      = cmSystemTools::ConvertToOutputPath(this->CTest->GetCTestConfiguration(
-          "MemoryCheckCommand").c_str());
+      = this->CTest->GetCTestConfiguration("MemoryCheckCommand").c_str();
     }
   else if ( cmSystemTools::FileExists(this->CTest->GetCTestConfiguration(
         "PurifyCommand").c_str()) )
     {
     this->MemoryTester
-      = cmSystemTools::ConvertToOutputPath(this->CTest->GetCTestConfiguration(
-          "PurifyCommand").c_str());
+      = this->CTest->GetCTestConfiguration("PurifyCommand").c_str();
     }
   else if ( cmSystemTools::FileExists(this->CTest->GetCTestConfiguration(
         "ValgrindCommand").c_str()) )
     {
     this->MemoryTester
-      = cmSystemTools::ConvertToOutputPath(this->CTest->GetCTestConfiguration(
-          "ValgrindCommand").c_str());
+      = this->CTest->GetCTestConfiguration("ValgrindCommand").c_str();
     }
   else if ( cmSystemTools::FileExists(this->CTest->GetCTestConfiguration(
         "BoundsCheckerCommand").c_str()) )
     {
     this->MemoryTester
-      = cmSystemTools::ConvertToOutputPath(this->CTest->GetCTestConfiguration(
-          "BoundsCheckerCommand").c_str());
+      = this->CTest->GetCTestConfiguration("BoundsCheckerCommand").c_str();
     }
   else
     {
