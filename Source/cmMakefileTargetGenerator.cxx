@@ -153,14 +153,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         }
       }
     }
-  for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->OSXContent.begin();
-      si != this->GeneratorTarget->OSXContent.end(); ++si)
-    {
-    cmTarget::SourceFileFlags tsFlags =
-      this->Target->GetTargetSourceFileFlags(*si);
-    this->WriteMacOSXContentRules(**si, tsFlags.MacFolder);
-    }
+  this->WriteMacOSXContentRules(this->GeneratorTarget->HeaderSources);
+  this->WriteMacOSXContentRules(this->GeneratorTarget->ExtraSources);
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
@@ -350,6 +344,22 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     this->LocalGenerator->AppendFlags
       (flags, this->Target->GetProperty("COMPILE_FLAGS"));
     *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmMakefileTargetGenerator::WriteMacOSXContentRules(
+  std::vector<cmSourceFile*> const& sources)
+{
+  for(std::vector<cmSourceFile*>::const_iterator
+        si = sources.begin(); si != sources.end(); ++si)
+    {
+    cmTarget::SourceFileFlags tsFlags =
+      this->Target->GetTargetSourceFileFlags(*si);
+    if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
+      {
+      this->WriteMacOSXContentRules(**si, tsFlags.MacFolder);
+      }
     }
 }
 

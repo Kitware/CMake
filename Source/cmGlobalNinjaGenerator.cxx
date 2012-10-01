@@ -341,6 +341,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   : cmGlobalGenerator()
   , BuildFileStream(0)
   , RulesFileStream(0)
+  , CompileCommandsStream(0)
   , Rules()
   , AllDependencies()
 {
@@ -385,6 +386,12 @@ void cmGlobalNinjaGenerator::Generate()
   this->WriteTargetAliases(*this->BuildFileStream);
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
+  if (cmSystemTools::GetErrorOccuredFlag()) {
+    this->RulesFileStream->setstate(std::ios_base::failbit);
+    this->BuildFileStream->setstate(std::ios_base::failbit);
+  }
+
+  this->CloseCompileCommandsStream();
   this->CloseRulesFileStream();
   this->CloseBuildFileStream();
 }
@@ -618,6 +625,46 @@ void cmGlobalNinjaGenerator::CloseRulesFileStream()
    }
 }
 
+void cmGlobalNinjaGenerator::AddCXXCompileCommand(
+                                      const std::string &commandLine,
+                                      const std::string &sourceFile)
+{
+  // Compute Ninja's build file path.
+  std::string buildFileDir =
+    this->GetCMakeInstance()->GetHomeOutputDirectory();
+  if (!this->CompileCommandsStream)
+    {
+    std::string buildFilePath = buildFileDir + "/compile_commands.json";
+
+    // Get a stream where to generate things.
+    this->CompileCommandsStream =
+      new cmGeneratedFileStream(buildFilePath.c_str());
+    *this->CompileCommandsStream << "[";
+    } else {
+    *this->CompileCommandsStream << "," << std::endl;
+    }
+
+  *this->CompileCommandsStream << "\n{\n"
+     << "  \"directory\": \""
+     << cmGlobalGenerator::EscapeJSON(buildFileDir) << "\",\n"
+     << "  \"command\": \""
+     << cmGlobalGenerator::EscapeJSON(commandLine) << "\",\n"
+     << "  \"file\": \""
+     << cmGlobalGenerator::EscapeJSON(sourceFile) << "\"\n"
+     << "}";
+}
+
+void cmGlobalNinjaGenerator::CloseCompileCommandsStream()
+{
+  if (this->CompileCommandsStream)
+    {
+    *this->CompileCommandsStream << "\n]";
+    delete this->CompileCommandsStream;
+    this->CompileCommandsStream = 0;
+    }
+
+}
+
 void cmGlobalNinjaGenerator::WriteDisclaimer(std::ostream& os)
 {
   os
@@ -754,6 +801,8 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
 
   this->WriteTargetAll(os);
   this->WriteTargetRebuildManifest(os);
+  this->WriteTargetClean(os);
+  this->WriteTargetHelp(os);
 }
 
 void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
@@ -819,4 +868,44 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                   "A missing CMake input file is not an error.",
                   implicitDeps,
                   cmNinjaDeps());
+}
+
+void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
+{
+  WriteRule(*this->RulesFileStream,
+            "CLEAN",
+            "ninja -t clean",
+            "Cleaning all built files...",
+            "Rule for cleaning all built files.",
+            /*depfile=*/ "",
+            /*restat=*/ false,
+            /*generator=*/ false);
+  WriteBuild(os,
+             "Clean all the built files.",
+             "CLEAN",
+             /*outputs=*/ cmNinjaDeps(1, "clean"),
+             /*explicitDeps=*/ cmNinjaDeps(),
+             /*implicitDeps=*/ cmNinjaDeps(),
+             /*orderOnlyDeps=*/ cmNinjaDeps(),
+             /*variables=*/ cmNinjaVars());
+}
+
+void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
+{
+  WriteRule(*this->RulesFileStream,
+            "HELP",
+            "ninja -t targets",
+            "All primary targets available:",
+            "Rule for printing all primary targets available.",
+            /*depfile=*/ "",
+            /*restat=*/ false,
+            /*generator=*/ false);
+  WriteBuild(os,
+             "Print all primary targets available.",
+             "HELP",
+             /*outputs=*/ cmNinjaDeps(1, "help"),
+             /*explicitDeps=*/ cmNinjaDeps(),
+             /*implicitDeps=*/ cmNinjaDeps(),
+             /*orderOnlyDeps=*/ cmNinjaDeps(),
+             /*variables=*/ cmNinjaVars());
 }

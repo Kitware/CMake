@@ -37,9 +37,6 @@ private:
   bool ReadInt(std::ifstream& in, int& v);
   bool ReadCoverageArray(std::ifstream& in, cmStdString const&);
   bool ReadUntil(std::ifstream& in, char until);
-  typedef std::map<int, int> FileLineCoverage;
-  std::map<cmStdString, FileLineCoverage> FileToCoverage;
-  std::map<int, int> FileCoverage;
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };

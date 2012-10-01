@@ -88,6 +88,9 @@ protected:
 
   std::string PlatformToolset;
   bool ExpressEdition;
+
+  bool UseFolderProperty();
+
 private:
   struct LongestSourcePath
   {

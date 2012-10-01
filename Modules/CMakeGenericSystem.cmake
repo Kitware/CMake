@@ -12,7 +12,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic 
+SET(CMAKE_SHARED_LIBRARY_C_FLAGS "")            # -pic
 SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared")       # -shared
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")         # +s, flag for exe link to use shared lib
 SET(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "")       # -rpath
@@ -42,7 +42,7 @@ SET (CMAKE_SKIP_RPATH "NO" CACHE BOOL
 SET (CMAKE_SKIP_INSTALL_RPATH "NO" CACHE BOOL
      "If set, runtime paths are not added when installing shared libraries, but are added when building.")
 
-SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.") 
+SET(CMAKE_VERBOSE_MAKEFILE FALSE CACHE BOOL "If this value is on, makefiles will be generated without the .SILENT directive, and all commands will be echoed to the console during the make.  This is useful for debugging only. With Visual Studio IDE projects all commands are done without /nologo.")
 
 IF(CMAKE_GENERATOR MATCHES "Makefiles")
   SET(CMAKE_COLOR_MAKEFILE ON CACHE BOOL
@@ -60,6 +60,12 @@ IF(CMAKE_GENERATOR MATCHES "Makefiles")
   ENDIF(CMAKE_GENERATOR MATCHES "Unix Makefiles")
 ENDIF(CMAKE_GENERATOR MATCHES "Makefiles")
 
+IF(CMAKE_GENERATOR MATCHES "Ninja")
+  SET(CMAKE_EXPORT_COMPILE_COMMANDS OFF CACHE BOOL
+    "Enable/Disable output of compile commands during generation."
+    )
+  MARK_AS_ADVANCED(CMAKE_EXPORT_COMPILE_COMMANDS)
+ENDIF(CMAKE_GENERATOR MATCHES "Ninja")
 
 # GetDefaultWindowsPrefixBase
 #
@@ -77,6 +83,8 @@ function(GetDefaultWindowsPrefixBase var)
   #
   if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(arch_hint "x64")
+  elseif("${CMAKE_GENERATOR}" MATCHES "ARM")
+    set(arch_hint "ARM")
   elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(arch_hint "x64")
   elseif("$ENV{LIB}" MATCHES "(amd64|ia64)")
@@ -167,6 +175,10 @@ ELSE(CMAKE_HOST_UNIX)
     CACHE PATH "Install path prefix, prepended onto install directories.")
   SET(CMAKE_GENERIC_PROGRAM_FILES)
 ENDIF(CMAKE_HOST_UNIX)
+
+# Set a variable which will be used as component name in install() commands
+# where no COMPONENT has been given:
+SET(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Unspecified")
 
 MARK_AS_ADVANCED(
   CMAKE_SKIP_RPATH

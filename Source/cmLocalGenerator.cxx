@@ -1548,13 +1548,10 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
            target.GetName());
         return;
         }
-      std::string langVar = "CMAKE_";
-      langVar += linkLanguage;
-      std::string flagsVar = langVar + "_FLAGS";
+      this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
       std::string sharedFlagsVar = "CMAKE_SHARED_LIBRARY_";
       sharedFlagsVar += linkLanguage;
       sharedFlagsVar += "_FLAGS";
-      flags += this->Makefile->GetSafeDefinition(flagsVar.c_str());
       flags += " ";
       flags += this->Makefile->GetSafeDefinition(sharedFlagsVar.c_str());
       flags += " ";

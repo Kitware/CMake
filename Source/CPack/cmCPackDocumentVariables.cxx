@@ -77,4 +77,35 @@ void cmCPackDocumentVariables::DefineVariables(cmake* cm)
          "which is done right before packaging the files."
          " The script is not called by e.g.: make install.", false,
          "Variables common to all CPack generators");
+
+  cm->DefineProperty
+        ("CPACK_ABSOLUTE_DESTINATION_FILES", cmProperty::VARIABLE,
+         "List of files which have been installed using "
+         " an ABSOLUTE DESTINATION path.",
+         "This variable is a Read-Only variable which is set internally"
+         " by CPack during installation and before packaging using"
+         " CMAKE_ABSOLUTE_DESTINATION_FILES defined in cmake_install.cmake "
+         "scripts. The value can be used within CPack project configuration"
+         " file and/or CPack<GEN>.cmake file of <GEN> generator.", false,
+         "Variables common to all CPack generators");
+
+  cm->DefineProperty
+        ("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION", cmProperty::VARIABLE,
+         "Ask CPack to warn each time a file with absolute INSTALL"
+         " DESTINATION is encountered.",
+         "This variable triggers the definition of "
+         "CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION when CPack runs"
+         " cmake_install.cmake scripts.", false,
+         "Variables common to all CPack generators");
+
+  cm->DefineProperty
+        ("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION", cmProperty::VARIABLE,
+         "Ask CPack to error out as soon as a file with absolute INSTALL"
+         " DESTINATION is encountered.",
+         "The fatal error is emitted before the installation of "
+         "the offending file takes place. Some CPack generators, like NSIS,"
+         "enforce this internally. "
+         "This variable triggers the definition of"
+         "CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION when CPack runs"
+         "Variables common to all CPack generators");
 }

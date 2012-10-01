@@ -47,7 +47,7 @@ CONFIGURE_FILE(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 
 # Testing
 IF(BUILD_TESTING)
-  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles")
+  IF("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_TEST_GENERATOR}" MATCHES Ninja AND NOT WIN32))
     SET(TEST_CompileCommandOutput 1)
   ENDIF()
 
@@ -699,6 +699,31 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ENDIF(CTEST_RUN_CPackComponents)
 
   IF(CTEST_RUN_CPackComponentsForAll)
+    # Analyze 'cpack --help' output for list of available generators:
+    execute_process(COMMAND ${CMAKE_CPACK_COMMAND} --help
+      RESULT_VARIABLE result
+      OUTPUT_VARIABLE stdout
+      ERROR_VARIABLE stderr)
+
+    string(REPLACE ";" "\\;" stdout "${stdout}")
+    string(REPLACE "\n" "E;" stdout "${stdout}")
+
+    set(collecting 0)
+    set(ACTIVE_CPACK_GENERATORS)
+    foreach(eline ${stdout})
+      string(REGEX REPLACE "^(.*)E$" "\\1" line "${eline}")
+      if(collecting AND NOT line STREQUAL "")
+        string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\1" gen "${line}")
+        string(REGEX REPLACE "^  ([^ ]+) += (.*)$" "\\2" doc "${line}")
+        list(APPEND ACTIVE_CPACK_GENERATORS ${gen})
+      endif()
+      if(line STREQUAL "Generators")
+        set(collecting 1)
+      endif()
+    endforeach()
+    # ACTIVE_CPACK_GENERATORS variable
+    # now contains the list of 'active generators'
+
     set(CPackComponentsForAll_EXTRA_OPTIONS)
     set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
     # set up list of CPack generators
@@ -706,18 +731,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     if(APPLE)
       list(APPEND GENLST "DragNDrop")
     endif(APPLE)
-    if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
-        find_program(RPMBUILD NAMES rpmbuild)
-    endif(CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
-    if (RPMBUILD)
-       list(APPEND GENLST "RPM")
-    endif(RPMBUILD)
-    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-       find_program(DPKG NAMES dpkg)
-       if (DPKG)
-          list(APPEND GENLST "DEB")
-       endif(DPKG)
-    endif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    if (NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+      list(FIND ACTIVE_CPACK_GENERATORS "RPM" RPM_ACTIVE)
+      if (NOT ${RPM_ACTIVE} EQUAL -1)
+        list(APPEND GENLST "RPM")
+      endif(NOT ${RPM_ACTIVE} EQUAL -1)
+    endif(NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+    list(FIND ACTIVE_CPACK_GENERATORS "DEB" DEB_ACTIVE)
+    if (NOT ${DEB_ACTIVE} EQUAL -1)
+      list(APPEND GENLST "DEB")
+    endif(NOT ${DEB_ACTIVE} EQUAL -1)
+
     # set up list of component packaging ways
     list(APPEND CWAYLST "default")
     list(APPEND CWAYLST "OnePackPerGroup")
@@ -1708,6 +1732,42 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION
       "Reading ctest configuration file: ${CTEST_TEST_ESCAPED_BINARY_DIR}.Tests.CTestTestConfigFileInBuildDir2.CTestConfig.cmake")
 
+  # test coverage for mumps
+  # create a MumpsCoverage dir in the binary tree under Testing to
+  # avoid the .NoDartCoverage files in the cmake testing tree
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCoverage/DartConfiguration.tcl")
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/gtm_coverage.mcov.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCoverage/gtm_coverage.mcov")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCoverage")
+  add_test(NAME CTestGTMCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/MumpsCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestGTMCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*XINDEX.m.*Total LOC:.*127.*Percentage Coverage: 85.83.*"
+      ENVIRONMENT COVFILE=)
+
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/DartConfiguration.cache.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage/DartConfiguration.tcl")
+  configure_file(
+    "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/cache_coverage.cmcov.in"
+    "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage/cache_coverage.cmcov")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/MumpsCoverage/VistA-FOIA"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage")
+  add_test(NAME CTestCacheCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/MumpsCacheCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestCacheCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*XINDEX.m.*Total LOC:.*125.*Percentage Coverage: 85.60.*"
+      ENVIRONMENT COVFILE=)
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.

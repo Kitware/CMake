@@ -31,7 +31,7 @@
 #  include "cmCPackCygwinSourceGenerator.h"
 #endif
 
-#if !defined(_WIN32) && !defined(__APPLE__) \
+#if !defined(_WIN32) \
  && !defined(__QNXNTO__) && !defined(__BEOS__)
 #  include "cmCPackDebGenerator.h"
 #  include "cmCPackRPMGenerator.h"
@@ -40,44 +40,90 @@
 
 #include "cmCPackLog.h"
 
+#if defined(__BORLANDC__)
+# pragma warn -8008 /* condition is always true */
+#endif
+
 //----------------------------------------------------------------------
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
-  this->RegisterGenerator("TGZ", "Tar GZip compression",
-    cmCPackTGZGenerator::CreateGenerator);
-  this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
-    cmCPackSTGZGenerator::CreateGenerator);
-  this->RegisterGenerator("NSIS", "Null Soft Installer",
-    cmCPackNSISGenerator::CreateGenerator);
+  if (cmCPackTGZGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("TGZ", "Tar GZip compression",
+      cmCPackTGZGenerator::CreateGenerator);
+    }
+  if (cmCPackSTGZGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
+      cmCPackSTGZGenerator::CreateGenerator);
+    }
+  if (cmCPackNSISGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("NSIS", "Null Soft Installer",
+      cmCPackNSISGenerator::CreateGenerator);
+    }
 #ifdef __CYGWIN__
-  this->RegisterGenerator("CygwinBinary", "Cygwin Binary Installer",
-                          cmCPackCygwinBinaryGenerator::CreateGenerator);
-  this->RegisterGenerator("CygwinSource", "Cygwin Source Installer",
-                          cmCPackCygwinSourceGenerator::CreateGenerator);
+  if (cmCPackCygwinBinaryGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("CygwinBinary", "Cygwin Binary Installer",
+                            cmCPackCygwinBinaryGenerator::CreateGenerator);
+    }
+  if (cmCPackCygwinSourceGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("CygwinSource", "Cygwin Source Installer",
+                            cmCPackCygwinSourceGenerator::CreateGenerator);
+    }
 #endif
 
-  this->RegisterGenerator("ZIP", "ZIP file format",
-    cmCPackZIPGenerator::CreateGenerator);
-  this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
-    cmCPackTarBZip2Generator::CreateGenerator);
-  this->RegisterGenerator("TZ", "Tar Compress compression",
-    cmCPackTarCompressGenerator::CreateGenerator);
+  if (cmCPackZIPGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("ZIP", "ZIP file format",
+      cmCPackZIPGenerator::CreateGenerator);
+    }
+  if (cmCPackTarBZip2Generator::CanGenerate())
+    {
+    this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
+      cmCPackTarBZip2Generator::CreateGenerator);
+    }
+  if (cmCPackTarCompressGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("TZ", "Tar Compress compression",
+      cmCPackTarCompressGenerator::CreateGenerator);
+    }
 #ifdef __APPLE__
-  this->RegisterGenerator("DragNDrop", "Mac OSX Drag And Drop",
-    cmCPackDragNDropGenerator::CreateGenerator);
-  this->RegisterGenerator("Bundle", "Mac OSX bundle",
-    cmCPackBundleGenerator::CreateGenerator);
-  this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
-    cmCPackPackageMakerGenerator::CreateGenerator);
-  this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
-    cmCPackOSXX11Generator::CreateGenerator);
+  if (cmCPackDragNDropGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("DragNDrop", "Mac OSX Drag And Drop",
+      cmCPackDragNDropGenerator::CreateGenerator);
+    }
+  if (cmCPackBundleGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("Bundle", "Mac OSX bundle",
+      cmCPackBundleGenerator::CreateGenerator);
+    }
+  if (cmCPackPackageMakerGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("PackageMaker", "Mac OSX Package Maker installer",
+      cmCPackPackageMakerGenerator::CreateGenerator);
+    }
+  if (cmCPackOSXX11Generator::CanGenerate())
+    {
+    this->RegisterGenerator("OSXX11", "Mac OSX X11 bundle",
+      cmCPackOSXX11Generator::CreateGenerator);
+    }
 #endif
-#if !defined(_WIN32) && !defined(__APPLE__) \
+#if !defined(_WIN32) \
   && !defined(__QNXNTO__) && !defined(__BEOS__)
-  this->RegisterGenerator("DEB", "Debian packages",
-    cmCPackDebGenerator::CreateGenerator);
-  this->RegisterGenerator("RPM", "RPM packages",
-    cmCPackRPMGenerator::CreateGenerator);
+  if (cmCPackDebGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("DEB", "Debian packages",
+      cmCPackDebGenerator::CreateGenerator);
+    }
+  if (cmCPackRPMGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("RPM", "RPM packages",
+      cmCPackRPMGenerator::CreateGenerator);
+    }
 #endif
 }
 

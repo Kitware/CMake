@@ -62,9 +62,30 @@ void cmCPackGenerator::DisplayVerboseOutput(const char* msg,
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::PrepareNames()
-{  
+{
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
     "Create temp directory." << std::endl);
+
+  // checks CPACK_SET_DESTDIR support
+  if (IsOn("CPACK_SET_DESTDIR"))
+    {
+      if (SETDESTDIR_UNSUPPORTED==SupportsSetDestdir())
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+                        "CPACK_SET_DESTDIR is set to ON but the '"
+                        << Name << "' generator does NOT support it."
+                        << std::endl);
+          return 0;
+        }
+      else if (SETDESTDIR_SHOULD_NOT_BE_USED==SupportsSetDestdir())
+        {
+          cmCPackLogger(cmCPackLog::LOG_WARNING,
+                        "CPACK_SET_DESTDIR is set to ON but it is "
+                        << "usually a bad idea to do that with '"
+                        << Name << "' generator. Use at your own risk."
+                        << std::endl);
+        }
+  }
 
   std::string tempDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
   tempDirectory += "/_CPack_Packages/";
@@ -388,8 +409,11 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
                                    std::string>(targetFile,inFileRelative));
           }
         /* If it is not a symlink then do a plain copy */
-        else if ( !cmSystemTools::CopyFileIfDifferent(inFile.c_str(),
-            filePath.c_str()) )
+        else if (!(
+            cmSystemTools::CopyFileIfDifferent(inFile.c_str(),filePath.c_str())
+            &&
+            cmSystemTools::CopyFileTime(inFile.c_str(),filePath.c_str())
+                ) )
           {
           cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: "
             << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
@@ -828,8 +852,35 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           filesBefore = glB.GetFiles();
           std::sort(filesBefore.begin(),filesBefore.end());
           }
+
+        // If CPack was asked to warn on ABSOLUTE INSTALL DESTINATION
+        // then forward request to cmake_install.cmake script
+        if (this->GetOption("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION"))
+          {
+            mf->AddDefinition("CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION",
+                              "1");
+          }
+        // If current CPack generator does support
+        // ABSOLUTE INSTALL DESTINATION or CPack has been asked for
+        // then ask cmake_install.cmake script to error out
+        // as soon as it occurs (before installing file)
+        if (!SupportsAbsoluteDestination() ||
+            this->GetOption("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION"))
+          {
+            mf->AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION",
+                              "1");
+          }
         // do installation
         int res = mf->ReadListFile(0, installFile.c_str());
+        // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
+        // to CPack (may be used by generators like CPack RPM or DEB)
+        // in order to transparently handle ABSOLUTE PATH
+        if (mf->GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"))
+          {
+            mf->AddDefinition("CPACK_ABSOLUTE_DESTINATION_FILES",
+                mf->GetDefinition("CMAKE_ABSOLUTE_DESTINATION_FILES"));
+          }
+
         // Now rebuild the list of files after installation
         // of the current component (if we are in component install)
         if (componentInstall)
@@ -953,6 +1004,8 @@ int cmCPackGenerator::DoPackage()
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
     "Create package using " << this->Name.c_str() << std::endl);
 
+  // Prepare CPack internal name and check
+  // values for many CPACK_xxx vars
   if ( !this->PrepareNames() )
     {
     return 0;
@@ -1428,6 +1481,19 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
             }
       }
   return initialPackageFileName + suffix;
+}
+
+//----------------------------------------------------------------------
+enum cmCPackGenerator::CPackSetDestdirSupport
+cmCPackGenerator::SupportsSetDestdir() const
+{
+  return cmCPackGenerator::SETDESTDIR_SUPPORTED;
+}
+
+//----------------------------------------------------------------------
+bool cmCPackGenerator::SupportsAbsoluteDestination() const
+{
+  return true;
 }
 
 //----------------------------------------------------------------------

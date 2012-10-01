@@ -337,6 +337,8 @@ IF (WIN32)
       cmGlobalVisualStudio11Generator.cxx
       cmGlobalVisualStudio11Win64Generator.h
       cmGlobalVisualStudio11Win64Generator.cxx
+      cmGlobalVisualStudio11ARMGenerator.h
+      cmGlobalVisualStudio11ARMGenerator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx
@@ -423,6 +425,9 @@ SET(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageCommand.cxx
   CTest/cmCTestCoverageHandler.cxx
+  CTest/cmParseMumpsCoverage.cxx
+  CTest/cmParseCacheCoverage.cxx
+  CTest/cmParseGTMCoverage.cxx
   CTest/cmParsePHPCoverage.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx

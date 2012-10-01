@@ -31,6 +31,17 @@ public:
   cmCPackDebGenerator();
   virtual ~cmCPackDebGenerator();
 
+  static bool CanGenerate()
+    {
+#ifdef __APPLE__
+    // on MacOS enable CPackDeb iff dpkg is found
+    return cmSystemTools::FindProgram("dpkg") != "" ? true : false;
+#else
+    // legacy behavior on other systems
+    return true;
+#endif
+    }
+
 protected:
   virtual int InitializeInternal();
   /**

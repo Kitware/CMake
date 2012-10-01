@@ -60,7 +60,7 @@ void cmInstallGenerator
   std::string dest = this->GetInstallDestination();
   if (cmSystemTools::FileIsFullPath(dest.c_str()))
      {
-     os << "list(APPEND CPACK_ABSOLUTE_DESTINATION_FILES\n";
+     os << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n";
      os << indent << " \"";
      for(std::vector<std::string>::const_iterator fi = files.begin();
                fi != files.end(); ++fi)
@@ -80,6 +80,16 @@ void cmInstallGenerator
                  }
              }
      os << "\")\n";
+     os << indent << "IF (CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << indent << "message(WARNING \"ABSOLUTE path INSTALL "
+        << "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
+     os << indent << "ENDIF (CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+
+     os << indent << "IF (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << indent << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
+        << "DESTINATION forbidden (by caller): "
+        << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
+     os << indent << "ENDIF (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
      }
   os << "FILE(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
   if(optional)

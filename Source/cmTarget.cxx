@@ -700,9 +700,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "Setting this property tells CMake what imported configurations are "
      "suitable for use when building the <CONFIG> configuration.  "
      "The first configuration in the list found to be provided by the "
-     "imported target is selected.  If no matching configurations are "
-     "available the imported target is considered to be not found.  "
-     "This property is ignored for non-imported targets.",
+     "imported target is selected.  If this property is set and no matching "
+     "configurations are available, then the imported target is considered "
+     "to be not found.  This property is ignored for non-imported targets.",
      false /* TODO: make this chained */ );
 
   cm->DefineProperty
@@ -832,7 +832,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "plugins. If you use it on normal shared libraries which other targets "
      "link against, on some platforms a linker will insert a full path to "
      "the library (as specified at link time) into the dynamic section of "
-     "the dependant binary. Therefore, once installed, dynamic linker may "
+     "the dependent binary. Therefore, once installed, dynamic loader may "
      "eventually fail to locate the library for the binary.");
 
   cm->DefineProperty

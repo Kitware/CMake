@@ -523,6 +523,16 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
     cm->DefineProperty
+    ("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME",  cmProperty::VARIABLE,
+     "Default component used in install() commands.",
+     "If an install() command is used without the COMPONENT argument, "
+     "these files will be grouped into a default component. The name of this "
+     "default install component will be taken from this variable.  "
+     "It defaults to \"Unspecified\". ",
+     false,
+     "Variables That Change Behavior");
+
+    cm->DefineProperty
     ("CMAKE_FIND_LIBRARY_PREFIXES",  cmProperty::VARIABLE,
      "Prefixes to prepend when looking for libraries.",
      "This specifies what prefixes to add to library names when "
@@ -833,6 +843,36 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Default is ON.",false,
      "Variables That Change Behavior");
 
+  cm->DefineProperty
+    ("CMAKE_ABSOLUTE_DESTINATION_FILES", cmProperty::VARIABLE,
+      "List of files which have been installed using "
+      " an ABSOLUTE DESTINATION path.",
+      "This variable is defined by CMake-generated cmake_install.cmake "
+      "scripts."
+      " It can be used (read-only) by program or script that source those"
+      " install scripts. This is used by some CPack generators (e.g. RPM).",
+      false,
+      "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION", cmProperty::VARIABLE,
+      "Ask cmake_install.cmake script to warn each time a file with "
+      "absolute INSTALL DESTINATION is encountered.",
+      "This variable is used by CMake-generated cmake_install.cmake"
+      " scripts. If ones set this variable to ON while running the"
+      " script, it may get warning messages from the script.", false,
+      "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION", cmProperty::VARIABLE,
+      "Ask cmake_install.cmake script to error out as soon as "
+      "a file with absolute INSTALL DESTINATION is encountered.",
+      "The fatal error is emitted before the installation of "
+      "the offending file takes place."
+      " This variable is used by CMake-generated cmake_install.cmake"
+      " scripts. If ones set this variable to ON while running the"
+      " script, it may get fatal error messages from the script.",false,
+      "Variables That Change Behavior");
 
   // Variables defined by CMake that describe the system
 

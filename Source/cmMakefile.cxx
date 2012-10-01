@@ -354,6 +354,22 @@ bool cmMakefile::GetBacktrace(cmListFileBacktrace& backtrace) const
 }
 
 //----------------------------------------------------------------------------
+void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff)
+{
+  cmOStringStream msg;
+  msg << lff.FilePath << "(" << lff.Line << "):  ";
+  msg << lff.Name << "(";
+  for(std::vector<cmListFileArgument>::const_iterator i =
+        lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
+    {
+    msg << i->Value;
+    msg << " ";
+    }
+  msg << ")";
+  cmSystemTools::Message(msg.str().c_str());
+}
+
+//----------------------------------------------------------------------------
 bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
                                 cmExecutionStatus &status)
 {
@@ -385,20 +401,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
        || pcmd->IsScriptable()))
 
       {
-      // if trace is one, print out invoke information
+      // if trace is enabled, print out invoke information
       if(this->GetCMakeInstance()->GetTrace())
         {
-        cmOStringStream msg;
-        msg << lff.FilePath << "(" << lff.Line << "):  ";
-        msg << lff.Name << "(";
-        for(std::vector<cmListFileArgument>::const_iterator i =
-              lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
-          {
-          msg << i->Value;
-          msg << " ";
-          }
-        msg << ")";
-        cmSystemTools::Message(msg.str().c_str());
+        this->PrintCommandTrace(lff);
         }
       // Try invoking the command.
       if(!pcmd->InvokeInitialPass(lff.Arguments,status) ||
