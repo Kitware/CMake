@@ -291,6 +291,12 @@ public:
       output directory is given.  */
   std::string GetDirectory(const char* config = 0, bool implib = false);
 
+  /** Get the directory in which this targets .pdb files will be placed.
+      If the configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      pdb output directory is given.  */
+  std::string GetPDBDirectory(const char* config = 0);
+
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
       target property.  */
@@ -571,6 +577,7 @@ private:
   struct OutputInfo;
   OutputInfo const* GetOutputInfo(const char* config);
   bool ComputeOutputDir(const char* config, bool implib, std::string& out);
+  void ComputePDBOutputDir(const char* config, std::string& out);
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;

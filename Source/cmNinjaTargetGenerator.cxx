@@ -329,10 +329,10 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
        this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
        this->Target->GetType() == cmTarget::MODULE_LIBRARY)
       {
-      pdbPath = this->Target->GetDirectory(this->GetConfigName());
+      pdbPath = this->Target->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
       pdbPath += this->Target->GetPDBName(this->GetConfigName());
-    }
+      }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                           ConvertToNinjaPath(pdbPath.c_str()).c_str(),

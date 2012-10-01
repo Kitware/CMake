@@ -1211,6 +1211,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_PDB_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
+     "Where to put all the MS debug symbol files.",
+     "This variable is used to initialize the "
+     "PDB_OUTPUT_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_AUTOMOC", cmProperty::VARIABLE,
      "Whether to handle moc automatically for Qt targets.",
      "This variable is used to initialize the "
