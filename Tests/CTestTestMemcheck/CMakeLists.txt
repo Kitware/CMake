@@ -3,12 +3,15 @@ foreach (_retval 0 1)
 endforeach ()
 
 # create binaries that we will use as a pseudo memory checker
-add_executable(valgrind "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
-add_executable(purify "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
-add_executable(BC "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+add_executable(pseudo_valgrind "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+set_target_properties(pseudo_valgrind PROPERTIES OUTPUT_NAME valgrind)
+add_executable(pseudo_purify "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+set_target_properties(pseudo_purify PROPERTIES OUTPUT_NAME purify)
+add_executable(pseudo_BC "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+set_target_properties(pseudo_BC PROPERTIES OUTPUT_NAME BC)
 
 # binary to be used as pre- and post-memcheck command that fails
-add_executable(fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.c")
+add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.c")
 
 foreach  (_test IN ITEMS Unknown NotExist DummyValgrind DummyValgrindPrePost
         DummyValgrindFailPre DummyValgrindFailPost DummyPurify DummyBC)
@@ -16,9 +19,14 @@ foreach  (_test IN ITEMS Unknown NotExist DummyValgrind DummyValgrindPrePost
         "${CMAKE_CURRENT_SOURCE_DIR}/${_test}/test.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/${_test}/test.cmake"
         @ONLY ESCAPE_QUOTES)
-    add_test(CTestTestMemcheck${_test} ${CMAKE_CTEST_COMMAND}
+    add_test(NAME CTestTestMemcheck${_test}
+        COMMAND ${CMAKE_CTEST_COMMAND}
         -S "${CMAKE_CURRENT_BINARY_DIR}/${_test}/test.cmake" -V
         --output-log "${CMAKE_CURRENT_BINARY_DIR}/${_test}/testOutput.log"
+        -D PSEUDO_BC=$<TARGET_FILE:pseudo_BC>
+        -D PSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
+        -D PSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
+        -D ERROR_COMMAND=$<TARGET_FILE:memcheck_fail>
         )
 endforeach ()
 
