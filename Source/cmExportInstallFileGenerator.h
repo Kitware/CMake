@@ -18,6 +18,7 @@ class cmInstallExportGenerator;
 class cmInstallFilesGenerator;
 class cmInstallTargetGenerator;
 class cmTargetExport;
+class cmExportSet;
 
 /** \class cmExportInstallFileGenerator
  * \brief Generate a file exporting targets from an install tree.
@@ -40,15 +41,6 @@ public:
       files.  */
   cmExportInstallFileGenerator(cmInstallExportGenerator* iegen);
 
-  /** Set the name of the export associated with the files.  This is
-      the name given to the install(EXPORT) command mode.  */
-  void SetName(const char* name) { this->Name = name; }
-
-  /** Set the set of targets to be exported.  These are the targets
-      associated with the export name.  */
-  void SetExportSet(std::vector<cmTargetExport*> const* eSet)
-    { this->ExportSet = eSet; }
-
   /** Get the per-config file generated for each configuraiton.  This
       maps from the configuration name to the file temporary location
       for installation.  */
@@ -65,8 +57,19 @@ protected:
   virtual void GenerateImportTargetsConfig(std::ostream& os,
                                            const char* config,
                                            std::string const& suffix);
-  virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee);
+  virtual void HandleMissingTarget(std::string& link_libs,
+                                   std::vector<std::string>& missingTargets,
+                                   cmMakefile* mf,
+                                   cmTarget* depender,
+                                   cmTarget* dependee);
+
+  void ComplainAboutMissingTarget(cmTarget* depender,
+                                  cmTarget* dependee,
+                                  int occurrences);
+
+  std::vector<std::string> FindNamespaces(cmMakefile* mf,
+                                          const std::string& name);
+
 
   /** Generate a per-configuration file for the targets.  */
   bool GenerateImportFileConfig(const char* config);
@@ -81,44 +84,12 @@ protected:
 
   void ComplainAboutImportPrefix(cmInstallTargetGenerator* itgen);
 
-  cmInstallExportGenerator* InstallExportGenerator;
-  std::string Name;
-  std::vector<cmTargetExport*> const* ExportSet;
+  cmInstallExportGenerator* IEGen;
 
   std::string ImportPrefix;
 
   // The import file generated for each configuration.
   std::map<cmStdString, cmStdString> ConfigImportFiles;
-};
-
-/*
-  cmTargetExport is used in cmGlobalGenerator to collect the install
-  generators for targets associated with an export.
-*/
-class cmTargetExport
-{
-public:
-  cmTargetExport(cmTarget* tgt,
-                 cmInstallTargetGenerator* archive,
-                 cmInstallTargetGenerator* runtime,
-                 cmInstallTargetGenerator* library,
-                 cmInstallTargetGenerator* framework,
-                 cmInstallTargetGenerator* bundle,
-                 cmInstallFilesGenerator* headers
-                ) : Target(tgt), ArchiveGenerator(archive),
-                    RuntimeGenerator(runtime), LibraryGenerator(library),
-                    FrameworkGenerator(framework), BundleGenerator(bundle),
-                    HeaderGenerator(headers) {}
-
-  cmTarget* Target;
-  cmInstallTargetGenerator* ArchiveGenerator;
-  cmInstallTargetGenerator* RuntimeGenerator;
-  cmInstallTargetGenerator* LibraryGenerator;
-  cmInstallTargetGenerator* FrameworkGenerator;
-  cmInstallTargetGenerator* BundleGenerator;
-  cmInstallFilesGenerator* HeaderGenerator;
-private:
-  cmTargetExport();
 };
 
 #endif

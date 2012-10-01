@@ -72,8 +72,9 @@ cmExportBuildFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
+      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
-                                      target, properties);
+                                      target, properties, missingTargets);
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -82,6 +83,7 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
+      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, target, properties);
       }
     }
@@ -129,6 +131,25 @@ cmExportBuildFileGenerator
                              "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
     properties[prop] = value;
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportBuildFileGenerator::HandleMissingTarget(
+  std::string& link_libs, std::vector<std::string>&,
+  cmMakefile*, cmTarget* depender, cmTarget* dependee)
+{
+  // The target is not in the export.
+  if(!this->AppendMode)
+    {
+    // We are not appending, so all exported targets should be
+    // known here.  This is probably user-error.
+    this->ComplainAboutMissingTarget(depender, dependee);
+    }
+  // Assume the target will be exported by another command.
+  // Append it with the export namespace.
+  link_libs += this->Namespace;
+  link_libs += dependee->GetName();
 }
 
 //----------------------------------------------------------------------------

@@ -11,14 +11,19 @@
 ============================================================================*/
 #include "cmExportInstallFileGenerator.h"
 
+#include "cmExportSet.h"
+#include "cmExportSetMap.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmTargetExport.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
 ::cmExportInstallFileGenerator(cmInstallExportGenerator* iegen):
-  InstallExportGenerator(iegen)
+  IEGen(iegen)
 {
 }
 
@@ -36,10 +41,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
   // Create all the imported targets.
   for(std::vector<cmTargetExport*>::const_iterator
-        tei = this->ExportSet->begin();
-      tei != this->ExportSet->end(); ++tei)
+        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
+      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
-    cmTargetExport* te = *tei;
+    cmTargetExport const* te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
       {
       this->GenerateImportTargetCode(os, te->Target);
@@ -47,8 +52,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     else
       {
       cmOStringStream e;
-      e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
-        << "includes target \"" << te->Target->GetName()
+      e << "INSTALL(EXPORT \""
+        << this->IEGen->GetExportSet()->GetName()
+        << "\" ...) " << "includes target \"" << te->Target->GetName()
         << "\" more than once in the export set.";
       cmSystemTools::Error(e.str().c_str());
       return false;
@@ -84,7 +90,7 @@ bool
 cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config)
 {
   // Skip configurations not enabled for this export.
-  if(!this->InstallExportGenerator->InstallsForConfig(config))
+  if(!this->IEGen->InstallsForConfig(config))
     {
     return true;
     }
@@ -140,7 +146,7 @@ cmExportInstallFileGenerator
 {
   // Add code to compute the installation prefix relative to the
   // import file location.
-  const char* installDest = this->InstallExportGenerator->GetDestination();
+  const char* installDest = this->IEGen->GetDestination();
   if(!cmSystemTools::FileIsFullPath(installDest))
     {
     std::string dest = installDest;
@@ -161,11 +167,11 @@ cmExportInstallFileGenerator
 
   // Add each target in the set to the export.
   for(std::vector<cmTargetExport*>::const_iterator
-        tei = this->ExportSet->begin();
-      tei != this->ExportSet->end(); ++tei)
+        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
+      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
     // Collect import properties for this target.
-    cmTargetExport* te = *tei;
+    cmTargetExport const* te = *tei;
     ImportPropertyMap properties;
     std::set<std::string> importedLocations;
     this->SetImportLocationProperty(config, suffix, te->ArchiveGenerator,
@@ -185,8 +191,9 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
+      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
-                                      te->Target, properties);
+                                      te->Target, properties, missingTargets);
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -195,6 +202,7 @@ cmExportInstallFileGenerator
       //                              properties);
 
       // Generate code in the export file.
+      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, te->Target, properties);
       this->GenerateImportedFileChecksCode(os, te->Target, properties,
                                            importedLocations);
@@ -306,12 +314,80 @@ cmExportInstallFileGenerator
 
 //----------------------------------------------------------------------------
 void
+cmExportInstallFileGenerator::HandleMissingTarget(
+  std::string& link_libs, std::vector<std::string>& missingTargets,
+  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
+{
+  std::string name = dependee->GetName();
+  std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
+  int targetOccurrences = (int)namespaces.size();
+  if (targetOccurrences == 1)
+    {
+    std::string missingTarget = namespaces[0];
+    missingTarget += name;
+    link_libs += missingTarget;
+    missingTargets.push_back(missingTarget);
+    }
+  else
+    {
+    // We are not appending, so all exported targets should be
+    // known here.  This is probably user-error.
+    this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
+    }
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string>
+cmExportInstallFileGenerator
+::FindNamespaces(cmMakefile* mf, const std::string& name)
+{
+  std::vector<std::string> namespaces;
+  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+  const cmExportSetMap& exportSets = gg->GetExportSets();
+
+  for(cmExportSetMap::const_iterator expIt = exportSets.begin();
+      expIt != exportSets.end();
+      ++expIt)
+    {
+    const cmExportSet* exportSet = expIt->second;
+    std::vector<cmTargetExport*> const* targets =
+                                                 exportSet->GetTargetExports();
+
+    bool containsTarget = false;
+    for(unsigned int i=0; i<targets->size(); i++)
+      {
+      if (name == (*targets)[i]->Target->GetName())
+        {
+        containsTarget = true;
+        break;
+        }
+      }
+
+    if (containsTarget)
+      {
+      std::vector<cmInstallExportGenerator const*> const* installs =
+                                                 exportSet->GetInstallations();
+      for(unsigned int i=0; i<installs->size(); i++)
+        {
+        namespaces.push_back((*installs)[i]->GetNamespace());
+        }
+      }
+    }
+
+  return namespaces;
+}
+
+
+//----------------------------------------------------------------------------
+void
 cmExportInstallFileGenerator
 ::ComplainAboutImportPrefix(cmInstallTargetGenerator* itgen)
 {
-  const char* installDest = this->InstallExportGenerator->GetDestination();
+  const char* installDest = this->IEGen->GetDestination();
   cmOStringStream e;
-  e << "INSTALL(EXPORT \"" << this->Name << "\") given absolute "
+  e << "INSTALL(EXPORT \""
+    << this->IEGen->GetExportSet()->GetName()
+    << "\") given absolute "
     << "DESTINATION \"" << installDest << "\" but the export "
     << "references an installation of target \""
     << itgen->GetTarget()->GetName() << "\" which has relative "
@@ -322,12 +398,24 @@ cmExportInstallFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
-::ComplainAboutMissingTarget(cmTarget* depender, cmTarget* dependee)
+::ComplainAboutMissingTarget(cmTarget* depender,
+                             cmTarget* dependee,
+                             int occurrences)
 {
   cmOStringStream e;
-  e << "INSTALL(EXPORT \"" << this->Name << "\" ...) "
+  e << "INSTALL(EXPORT \""
+    << this->IEGen->GetExportSet()->GetName()
+    << "\" ...) "
     << "includes target \"" << depender->GetName()
-    << "\" which requires target \"" << dependee->GetName()
-    << "\" that is not in the export set.";
+    << "\" which requires target \"" << dependee->GetName() << "\" ";
+  if (occurrences == 0)
+    {
+    e << "that is not in the export set.";
+    }
+  else
+    {
+    e << "that is not in this export set, but " << occurrences
+    << " times in others.";
+    }
   cmSystemTools::Error(e.str().c_str());
 }

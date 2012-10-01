@@ -17,6 +17,8 @@
 #include "cmInstallTargetGenerator.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallCommandArguments.h"
+#include "cmTargetExport.h"
+#include "cmExportSet.h"
 
 #include <cmsys/Glob.hxx>
 
@@ -735,11 +737,16 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     // this is not a namelink-only rule.
     if(!exports.GetString().empty() && !namelinkOnly)
       {
+      cmTargetExport *te = new cmTargetExport;
+      te->Target = &target;
+      te->ArchiveGenerator = archiveGenerator;
+      te->BundleGenerator = bundleGenerator;
+      te->FrameworkGenerator = frameworkGenerator;
+      te->HeaderGenerator = publicHeaderGenerator;
+      te->LibraryGenerator = libraryGenerator;
+      te->RuntimeGenerator = runtimeGenerator;
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-        ->AddTargetToExports(exports.GetCString(), &target,
-                             archiveGenerator, runtimeGenerator,
-                             libraryGenerator, frameworkGenerator,
-                             bundleGenerator, publicHeaderGenerator);
+        ->GetExportSets()[exports.GetString()]->AddTargetExport(te);
       }
     }
 
@@ -1264,7 +1271,9 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator =
     new cmInstallExportGenerator(
-      exp.GetCString(), ica.GetDestination().c_str(),
+      this->Makefile->GetLocalGenerator()
+          ->GetGlobalGenerator()->GetExportSets()[exp.GetString()],
+      ica.GetDestination().c_str(),
       ica.GetPermissions().c_str(), ica.GetConfigurations(),
       ica.GetComponent().c_str(), fname.c_str(),
       name_space.GetCString(), this->Makefile);

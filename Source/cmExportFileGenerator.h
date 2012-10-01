@@ -60,17 +60,21 @@ protected:
                                       ImportPropertyMap const& properties,
                                const std::set<std::string>& importedLocations);
   void GenerateImportedFileCheckLoop(std::ostream& os);
+  void GenerateMissingTargetsCheckCode(std::ostream& os,
+                               const std::vector<std::string>& missingTargets);
 
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
   void SetImportDetailProperties(const char* config,
                                  std::string const& suffix, cmTarget* target,
-                                 ImportPropertyMap& properties);
+                                 ImportPropertyMap& properties,
+                                 std::vector<std::string>& missingTargets);
   void SetImportLinkProperty(std::string const& suffix,
                              cmTarget* target, const char* propName,
                              std::vector<std::string> const& libs,
-                             ImportPropertyMap& properties);
+                             ImportPropertyMap& properties,
+                             std::vector<std::string>& missingTargets);
 
   /** Each subclass knows how to generate its kind of export file.  */
   virtual bool GenerateMainFile(std::ostream& os) = 0;
@@ -80,10 +84,13 @@ protected:
                                            const char* config,
                                            std::string const& suffix) = 0;
 
-  /** Each subclass knows how to complain about a target that is
-      missing from an export set.  */
-  virtual void ComplainAboutMissingTarget(cmTarget* depender,
-                                          cmTarget* dependee) = 0;
+  /** Each subclass knows how to deal with a target that is  missing from an
+   *  export set.  */
+  virtual void HandleMissingTarget(std::string& link_libs,
+                                   std::vector<std::string>& missingTargets,
+                                   cmMakefile* mf,
+                                   cmTarget* depender,
+                                   cmTarget* dependee) = 0;
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
