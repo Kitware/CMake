@@ -81,11 +81,7 @@
 #endif
 
 #if !KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H
-# if defined(_WIN32)
-extern __declspec(dllimport) char **environ;
-# else
 extern char **environ;
-# endif
 #endif
 
 #ifdef __CYGWIN__
@@ -1669,7 +1665,7 @@ kwsys_stl::string SystemTools::EscapeChars(
   kwsys_stl::string n;
   if (str)
     {
-    if (!chars_to_escape | !*chars_to_escape)
+    if (!chars_to_escape || !*chars_to_escape)
       {
       n.append(str);
       }

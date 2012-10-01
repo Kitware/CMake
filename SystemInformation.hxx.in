@@ -25,13 +25,22 @@ namespace @KWSYS_NAMESPACE@
 {
 
 
-// forward declare the implementation class  
+// forward declare the implementation class
 class SystemInformationImplementation;
-  
-class @KWSYS_NAMESPACE@_EXPORT SystemInformation 
-{
 
+class @KWSYS_NAMESPACE@_EXPORT SystemInformation
+{
+#if @KWSYS_USE_LONG_LONG@
+  typedef long long LongLong;
+#elif @KWSYS_USE___INT64@
+  typedef __int64 LongLong;
+#else
+# error "No Long Long"
+#endif
+  friend class SystemInformationImplementation;
+  SystemInformationImplementation* Implementation;
 public:
+
   SystemInformation ();
   ~SystemInformation ();
 
@@ -40,6 +49,7 @@ public:
   kwsys_stl::string GetTypeID();
   kwsys_stl::string GetFamilyID();
   kwsys_stl::string GetModelID();
+  kwsys_stl::string GetModelName();
   kwsys_stl::string GetSteppingCode();
   const char * GetExtendedProcessorName();
   const char * GetProcessorSerialNumber();
@@ -49,12 +59,26 @@ public:
   int GetProcessorAPICID();
   int GetProcessorCacheXSize(long int);
   bool DoesCPUSupportFeature(long int);
-  
-  const char * GetOSName();
+
+  // returns an informative general description of the cpu
+  // on this system.
+  kwsys_stl::string GetCPUDescription();
+
   const char * GetHostname();
+  kwsys_stl::string GetFullyQualifiedDomainName();
+
+  const char * GetOSName();
   const char * GetOSRelease();
   const char * GetOSVersion();
   const char * GetOSPlatform();
+
+  int GetOSIsWindows();
+  int GetOSIsLinux();
+  int GetOSIsApple();
+
+  // returns an informative general description of the os
+  // on this system.
+  kwsys_stl::string GetOSDescription();
 
   bool Is64Bits();
 
@@ -63,19 +87,31 @@ public:
 
   bool DoesCPUSupportCPUID();
 
+  // Retrieve id of the current running process
+  LongLong GetProcessId();
+
   // Retrieve memory information in megabyte.
   size_t GetTotalVirtualMemory();
   size_t GetAvailableVirtualMemory();
   size_t GetTotalPhysicalMemory();
-  size_t GetAvailablePhysicalMemory();  
+  size_t GetAvailablePhysicalMemory();
+
+  // returns an informative general description if the ram
+  // on this system
+  kwsys_stl::string GetMemoryDescription();
+
+  // Retrieve physical memory information in kib
+  LongLong GetMemoryTotal();
+  LongLong GetMemoryUsed();
+
+  // enable/disable stack trace signal handler.
+  static
+  void SetStackTraceOnError(int enable);
 
   /** Run the different checks */
   void RunCPUCheck();
   void RunOSCheck();
   void RunMemoryCheck();
-private:
-  SystemInformationImplementation* Implementation;
-
 };
 } // namespace @KWSYS_NAMESPACE@
 
