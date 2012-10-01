@@ -701,7 +701,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SYSTEM_IGNORE_PATH", cmProperty::VARIABLE,
      "Path to be ignored by FIND_XXX() commands.",
-     "Specifies directories to be ignored by searches in FIND_XXX() commands "
+     "Specifies directories to be ignored by searches in FIND_XXX() "
+     "commands.  "
      "This is useful in cross-compiled environments where some system "
      "directories contain incompatible but possibly linkable libraries. For "
      "example, on cross-compiled cluster environments, this allows a user to "
@@ -716,7 +717,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_IGNORE_PATH", cmProperty::VARIABLE,
      "Path to be ignored by FIND_XXX() commands.",
-     "Specifies directories to be ignored by searches in FIND_XXX() commands "
+     "Specifies directories to be ignored by searches in FIND_XXX() "
+     "commands.  "
      "This is useful in cross-compiled environments where some system "
      "directories contain incompatible but possibly linkable libraries. For "
      "example, on cross-compiled cluster environments, this allows a user to "

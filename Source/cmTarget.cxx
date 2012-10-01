@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmDocumentGeneratorExpressions.h"
 #include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
@@ -205,6 +206,9 @@ void cmTarget::DefineProperties(cmake *cm)
      "are not supported by the native build tool.  "
      "The VS6 IDE does not support definition values with spaces "
      "(but NMake does).\n"
+     "Contents of COMPILE_DEFINITIONS may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
      CM_DOCUMENT_COMPILE_DEFINITIONS_DISCLAIMER);
 
   cm->DefineProperty
@@ -498,8 +502,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "to the include_directories command."
      "\n"
      "The target property values are used by the generators to set "
-     "the include paths for the compiler. "
-     "See also the include_directories command.");
+     "the include paths for the compiler.  "
+     "See also the include_directories command.\n"
+     "Contents of INCLUDE_DIRECTORIES may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,
@@ -2053,9 +2060,8 @@ bool cmTarget::NameResolvesToFramework(const std::string& libname)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType llt)
+bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType)
 {
-  (void)llt; // TODO: What is this?
   if(this->NameResolvesToFramework(libname.c_str()))
     {
     std::string frameworkDir = libname;
@@ -2335,7 +2341,7 @@ void cmTarget::Emit(const LibraryID lib,
       // be preserved.
 
       // This variable will keep track of the libraries that were
-      // emitted directory from the current node, and not from a
+      // emitted directly from the current node, and not from a
       // recursive call. This way, if we come across a library that
       // has already been emitted, we repeat it iff it has been
       // emitted here.
@@ -2453,7 +2459,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 //----------------------------------------------------------------------------
 void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
 {
-  // Wipe wipe out maps caching information affected by this property.
+  // Wipe out maps caching information affected by this property.
   if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
     {
     this->Internal->ImportInfoMap.clear();

@@ -893,7 +893,7 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
     << "The \"" << this->GetName() << "\" generator does not support "
     << "duplicate custom targets.  "
     << "Consider using a Makefiles generator or fix the project to not "
-    << "use duplicat target names.";
+    << "use duplicate target names.";
   cmSystemTools::Error(e.str().c_str());
   return false;
 }
