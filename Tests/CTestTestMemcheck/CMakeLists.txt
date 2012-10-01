@@ -31,7 +31,6 @@ foreach  (_test IN ITEMS Unknown NotExist DummyValgrind DummyValgrindPrePost
         )
 endforeach ()
 
-file(TO_NATIVE_PATH "${CMAKE_COMMAND}" CMAKE_COMMAND_NATIVE)
 string(REPLACE "\\" "\\\\" CMAKE_COMMAND_NATIVE "${CMAKE_COMMAND_NATIVE}")
 string(REPLACE "(" "\\(" CMAKE_COMMAND_NATIVE "${CMAKE_COMMAND_NATIVE}")
 string(REPLACE ")" "\\)" CMAKE_COMMAND_NATIVE "${CMAKE_COMMAND_NATIVE}")
