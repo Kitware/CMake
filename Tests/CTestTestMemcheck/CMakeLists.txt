@@ -14,7 +14,8 @@ set_target_properties(pseudo_BC PROPERTIES OUTPUT_NAME BC)
 add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.c")
 
 foreach  (_test IN ITEMS Unknown NotExist DummyValgrind DummyValgrindPrePost
-        DummyValgrindFailPre DummyValgrindFailPost DummyPurify DummyBC)
+        DummyValgrindFailPre DummyValgrindFailPost DummyPurify DummyBC
+        DummyValgrindIgnoreMemcheck)
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/${_test}/test.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/${_test}/test.cmake"
@@ -54,6 +55,10 @@ set_tests_properties(CTestTestMemcheckDummyValgrindFailPre
 set_tests_properties(CTestTestMemcheckDummyValgrindFailPost
     PROPERTIES
     PASS_REGULAR_EXPRESSION "\nProblem running command: ${CMAKE_CURRENT_BINARY_DIR}[^\n]*fail[^\n]*\n(.*\n)?Problem executing post-memcheck command\\(s\\\).\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindFailPost/test.cmake\n")
+
+set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
+    PROPERTIES
+    PASS_REGULAR_EXPRESSION "\n2/2 Test #2: RunCMakeAgain .*\n1/1 MemCheck #1: RunCMake .*\n-- Processing memory checking output: \nMemory checking results:\n$")
 
 set_tests_properties(CTestTestMemcheckDummyPurify PROPERTIES
     PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/DummyPurify/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyPurify/test.cmake\n")
