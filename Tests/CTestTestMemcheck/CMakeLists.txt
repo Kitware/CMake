@@ -63,13 +63,12 @@ set_tests_properties(CTestTestMemcheckDummyValgrind CTestTestMemcheckDummyValgri
     PROPERTIES
     PASS_REGULAR_EXPRESSION "${NORMAL_CTEST_OUTPUT}")
 
-set_tests_properties(CTestTestMemcheckDummyValgrindFailPre
-    PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nProblem running command: ${CMAKE_CURRENT_BINARY_DIR}[^\n]*fail[^\n]*\n(.*\n)?Problem executing pre-memcheck command\\(s\\\).\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindFailPre/test.cmake\n")
-
-set_tests_properties(CTestTestMemcheckDummyValgrindFailPost
-    PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nProblem running command: ${CMAKE_CURRENT_BINARY_DIR}[^\n]*fail[^\n]*\n(.*\n)?Problem executing post-memcheck command\\(s\\\).\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindFailPost/test.cmake\n")
+foreach (_pp Pre Post)
+    string(TOLOWER ${_pp} _pp_lower)
+    set_tests_properties(CTestTestMemcheckDummyValgrindFail${_pp}
+        PROPERTIES
+        PASS_REGULAR_EXPRESSION "\nProblem running command: ${CMAKE_CURRENT_BINARY_DIR}[^\n]*fail[^\n]*\n(.*\n)?Problem executing ${_pp_lower}-memcheck command\\(s\\\).\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindFail${_pp}/test.cmake\n")
+endforeach ()
 
 set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
     PROPERTIES
