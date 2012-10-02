@@ -5,6 +5,15 @@ endforeach ()
 # create binaries that we will use as a pseudo memory checker
 add_executable(pseudo_valgrind "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
 set_target_properties(pseudo_valgrind PROPERTIES OUTPUT_NAME valgrind)
+
+# Xcode 2.x forgets to create the output directory before linking
+# the individual architectures.
+if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
+    add_custom_command(TARGET valgrind
+                       PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
+    )
+endif()
+
 add_executable(pseudo_purify "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
 set_target_properties(pseudo_purify PROPERTIES OUTPUT_NAME purify)
 add_executable(pseudo_BC "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
@@ -41,11 +50,13 @@ set_tests_properties(CTestTestMemcheckUnknown PROPERTIES
 set_tests_properties(CTestTestMemcheckNotExist PROPERTIES
     PASS_REGULAR_EXPRESSION "Memory checker \\(MemoryCheckCommand\\) not set, or cannot find the specified program.")
 
+set(NORMAL_CTEST_OUTPUT "\n-- Processing memory checking output: \nMemory checking results:\n(BullseyeCoverage[^\n]*\n)?")
+
 # It is a valid result if valgrind does not output any files (can e.g. happen
 # if you have not compiled in debug mode), so these tests will not fail.
 set_tests_properties(CTestTestMemcheckDummyValgrind CTestTestMemcheckDummyValgrindPrePost
     PROPERTIES
-    PASS_REGULAR_EXPRESSION "\n-- Processing memory checking output: \nMemory checking results:\n$")
+    PASS_REGULAR_EXPRESSION "${NORMAL_CTEST_OUTPUT}")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindFailPre
     PROPERTIES
@@ -57,7 +68,7 @@ set_tests_properties(CTestTestMemcheckDummyValgrindFailPost
 
 set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
     PROPERTIES
-    PASS_REGULAR_EXPRESSION "\n2/2 Test #2: RunCMakeAgain .*\n1/1 MemCheck #1: RunCMake .*\n-- Processing memory checking output: \nMemory checking results:\n$")
+    PASS_REGULAR_EXPRESSION "\n2/2 Test #2: RunCMakeAgain .*\n1/1 MemCheck #1: RunCMake .*${NORMAL_CTEST_OUTPUT}")
 
 set_tests_properties(CTestTestMemcheckDummyPurify PROPERTIES
     PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/DummyPurify/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyPurify/test.cmake\n")
