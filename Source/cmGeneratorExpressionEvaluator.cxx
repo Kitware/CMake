@@ -288,6 +288,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           << target
           << "\" not found.";
         reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
         }
       propertyName = parameters.at(1);
       }
