@@ -142,10 +142,6 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
         --this->NestingLevel;
         ++this->it;
         }
-      if (parameters.empty())
-        {
-          // ERROR
-        }
     }
 
   if (nestedLevel != this->NestingLevel)
