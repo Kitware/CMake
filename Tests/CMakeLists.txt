@@ -697,6 +697,29 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
 
+  # On Windows run the CPackWiXGenerator test
+  # if the WiX Toolset seems to be available
+  if(WIN32)
+    file(TO_CMAKE_PATH "$ENV{WIX}" WIX_ROOT)
+
+    find_program(WIX_LIGHT_EXECUTABLE light
+      PATHS "${WIX_ROOT}/bin"
+      DOC "WiX Toolset light.exe location")
+
+    if(WIX_LIGHT_EXECUTABLE)
+      add_test(CPackWiXGenerator ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator"
+        "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project CPackWiXGenerator
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --test-command ${CMAKE_CMAKE_COMMAND}
+          "-DCPackWiXGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+          -P "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator/RunCPackVerifyResult.cmake")
+    endif()
+  endif()
+
   if(CTEST_RUN_CPackComponents)
     set(CPackComponents_EXTRA_OPTIONS)
     if(APPLE)
