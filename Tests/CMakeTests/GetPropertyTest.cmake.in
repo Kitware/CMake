@@ -11,6 +11,23 @@ if (NOT FOO_FULL STREQUAL "NOTFOUND")
   message(SEND_ERROR "property FOO has FULL_DOCS set to '${FOO_FULL}'")
 endif ()
 
+get_property(test_brief GLOBAL PROPERTY ENABLED_FEATURES BRIEF_DOCS)
+get_property(test_full GLOBAL PROPERTY ENABLED_FEATURES FULL_DOCS)
+
+if(test_brief STREQUAL "NOTFOUND")
+  message(SEND_ERROR "property ENABLED_FEATURES has no BRIEF_DOCS")
+endif()
+
+if(test_full STREQUAL "NOTFOUND")
+  message(SEND_ERROR "property ENABLED_FEATURES has no FULL_DOCS")
+endif()
+
+set(test_var alpha)
+get_property(result VARIABLE PROPERTY test_var)
+if(NOT result STREQUAL "alpha")
+  message(SEND_ERROR "bad value of VARIABLE PROPERTY test_var: got '${result}' instead of 'alpha'")
+endif()
+
 set(Missing-Argument-RESULT 1)
 set(Missing-Argument-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?GetProperty-Missing-Argument.cmake:1 \\(get_property\\):.*get_property called with incorrect number of arguments.*")
 
