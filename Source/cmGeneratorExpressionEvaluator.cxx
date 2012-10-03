@@ -237,11 +237,6 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    if (!context->Config)
-      {
-      return std::string();
-      }
-
     cmsys::RegularExpression configValidator;
     configValidator.compile("^[A-Za-z0-9_]*$");
     if (!configValidator.find(parameters.begin()->c_str()))
@@ -250,6 +245,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                   "Expression syntax not recognized.");
       return std::string();
       }
+    if (!context->Config)
+      {
+      return parameters.front().empty() ? "1" : "0";
+      }
+
     return *parameters.begin() == context->Config ? "1" : "0";
   }
 } configurationTestNode;
