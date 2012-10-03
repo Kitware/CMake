@@ -37,6 +37,8 @@ add_custom_target(check ALL
     -Dtest_strequal_angle_r=$<STREQUAL:$<ANGLE-R>,$<ANGLE-R>>
     -Dtest_strequal_comma=$<STREQUAL:$<COMMA>,$<COMMA>>
     -Dtest_strequal_angle_r_comma=$<STREQUAL:$<ANGLE-R>,$<COMMA>>
+    -Dtest_strequal_both_empty=$<STREQUAL:,>
+    -Dtest_strequal_one_empty=$<STREQUAL:something,>
     -Dtest_angle_r=$<ANGLE-R>
     -Dtest_comma=$<COMMA>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
