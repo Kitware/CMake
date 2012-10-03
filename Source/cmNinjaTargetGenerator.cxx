@@ -678,8 +678,8 @@ cmNinjaTargetGenerator
     }
   else
     {
-    const std::string fullPath = std::string(this->GetGlobalGenerator()
-                                 ->GetCMakeInstance()->GetHomeOutputDirectory())
+    const std::string fullPath = std::string(this->GetGlobalGenerator()->
+                                 GetCMakeInstance()->GetHomeOutputDirectory())
                                    + "/" + path;
     cmSystemTools::MakeDirectory(fullPath.c_str());
     }
