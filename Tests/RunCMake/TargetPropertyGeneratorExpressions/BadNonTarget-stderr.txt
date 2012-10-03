@@ -1,0 +1,6 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<TARGET_PROPERTY:NonExistant,INCLUDE_DIRECTORIES>
+
+  Target "NonExistant" not found.$
