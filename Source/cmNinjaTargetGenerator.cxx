@@ -368,7 +368,7 @@ cmNinjaTargetGenerator
   std::string flags = "$FLAGS";
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
-
+  vars.ObjectDir = "$OBJECT_DIR";
 
   cmMakefile* mf = this->GetMakefile();
 
@@ -566,6 +566,13 @@ cmNinjaTargetGenerator
   vars["DEP_FILE"] = objectFileName + ".d";;
   EnsureParentDirectoryExists(objectFileName);
 
+  std::string objectDir = cmSystemTools::GetFilenamePath(objectFileName);
+  objectDir = this->GetLocalGenerator()->Convert(objectDir.c_str(),
+                            cmLocalGenerator::START_OUTPUT,
+                            cmLocalGenerator::SHELL);
+  vars["OBJECT_DIR"] = objectDir;
+
+
   this->SetMsvcTargetPdbVariable(vars);
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
@@ -590,6 +597,7 @@ cmNinjaTargetGenerator
 
     compileObjectVars.Source = escapedSourceFileName.c_str();
     compileObjectVars.Object = objectFileName.c_str();
+    compileObjectVars.ObjectDir = objectDir.c_str();
     compileObjectVars.Flags = vars["FLAGS"].c_str();
     compileObjectVars.Defines = vars["DEFINES"].c_str();
 
