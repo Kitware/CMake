@@ -151,7 +151,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
                        "_GTK2_FIND_INCLUDE_DIR( ${_var} ${_hdr} )")
     endif()
 
-    set(_relatives
+    set(_gtk_packages
         # If these ever change, things will break.
         ${GTK2_ADDITIONAL_SUFFIXES}
         glibmm-2.4
@@ -172,8 +172,15 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         sigc++-2.0
     )
 
-    set(_suffixes include lib)
-    foreach(_d ${_relatives})
+    #
+    # NOTE: The following suffixes cause searching for header files in both of
+    # these directories:
+    #         /usr/include/<pkg>
+    #         /usr/lib/<pkg>/include
+    #
+
+    set(_suffixes)
+    foreach(_d ${_gtk_packages})
         list(APPEND _suffixes ${_d})
         list(APPEND _suffixes ${_d}/include) # for /usr/lib/gtk-2.0/include
     endforeach()
@@ -186,15 +193,23 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
     find_path(${_var} ${_hdr}
         PATHS
             /usr/local/lib64
+            /usr/local/lib
             /usr/lib64
-            /opt/gnome
-            /opt/openwin
-            /usr/openwin
-            /sw
-            /opt/local
-            ENV GTKMM_BASEPATH
-            [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
-            [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+            /usr/lib
+            /opt/gnome/include
+            /opt/gnome/lib
+            /opt/openwin/include
+            /usr/openwin/lib
+            /sw/include
+            /sw/lib
+            /opt/local/include
+            /opt/local/lib
+            $ENV{GTKMM_BASEPATH}/include
+            $ENV{GTKMM_BASEPATH}/lib
+            [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/include
+            [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/lib
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]/include
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]/lib
         PATH_SUFFIXES
             ${_suffixes}
     )
