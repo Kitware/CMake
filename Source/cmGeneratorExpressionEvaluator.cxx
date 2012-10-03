@@ -278,14 +278,15 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     std::string propertyName = *parameters.begin();
     if (parameters.size() == 2)
       {
+      std::string targetName = parameters.front();
       target = context->Makefile->FindGeneratorTargetToUse(
-                                                parameters.begin()->c_str());
+                                                targetName.c_str());
 
       if (!target)
         {
         cmOStringStream e;
         e << "Target \""
-          << target
+          << targetName
           << "\" not found.";
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
