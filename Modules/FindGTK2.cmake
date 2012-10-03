@@ -190,8 +190,15 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
                        "include suffixes = ${_suffixes}")
     endif()
 
+    if(CMAKE_LIBRARY_ARCHITECTURE)
+      set(_gtk2_arch_dir /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE})
+      if(GTK2_DEBUG)
+        message(STATUS "Adding ${_gtk2_arch_dir} to search path for multiarch support")
+      endif()
+    endif()
     find_path(${_var} ${_hdr}
         PATHS
+            ${_gtk2_arch_dir}
             /usr/local/lib64
             /usr/local/lib
             /usr/lib64
