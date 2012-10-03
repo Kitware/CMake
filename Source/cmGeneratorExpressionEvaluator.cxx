@@ -274,11 +274,42 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "$<TARGET_PROPERTY:...> expression requires one or two parameters");
       return std::string();
       }
+    cmsys::RegularExpression nameValidator;
+    nameValidator.compile("^[A-Za-z0-9_.-]+$");
+
     cmGeneratorTarget* target = context->Target;
     std::string propertyName = *parameters.begin();
     if (parameters.size() == 2)
       {
+      if (parameters.begin()->empty() && parameters.at(1).empty())
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+            "target name and property name.");
+        return std::string();
+        }
+      if (parameters.begin()->empty())
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+            "target name.");
+        return std::string();
+        }
+
       std::string targetName = parameters.front();
+      propertyName = parameters.at(1);
+      if (!nameValidator.find(targetName.c_str()))
+        {
+        if (!nameValidator.find(propertyName.c_str()))
+          {
+          ::reportError(context, content->GetOriginalExpression(),
+                        "Target name and property name not supported.");
+          return std::string();
+          }
+        ::reportError(context, content->GetOriginalExpression(),
+                      "Target name not supported.");
+        return std::string();
+        }
       target = context->Makefile->FindGeneratorTargetToUse(
                                                 targetName.c_str());
 
@@ -291,7 +322,21 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
         }
-      propertyName = parameters.at(1);
+      }
+
+    if (propertyName.empty())
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:...> expression requires a non-empty property "
+          "name.");
+      return std::string();
+      }
+
+    if (!nameValidator.find(propertyName.c_str()))
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Property name not supported.");
+      return std::string();
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
