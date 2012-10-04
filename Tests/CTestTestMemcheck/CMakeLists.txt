@@ -9,7 +9,7 @@ set_target_properties(pseudo_valgrind PROPERTIES OUTPUT_NAME valgrind)
 # Xcode 2.x forgets to create the output directory before linking
 # the individual architectures.
 if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]")
-    add_custom_command(TARGET valgrind
+    add_custom_command(TARGET pseudo_valgrind
                        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
     )
 endif()
