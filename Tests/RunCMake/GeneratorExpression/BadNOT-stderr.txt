@@ -20,7 +20,7 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
     \$<NOT:,>
 
-  \$<NOT> parameter must resolve to exactly one '0' or '1' value.
+  \$<NOT> expression requires exactly one parameter.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +

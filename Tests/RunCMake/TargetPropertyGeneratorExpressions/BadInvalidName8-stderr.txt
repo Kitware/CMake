@@ -1,0 +1,6 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<TARGET_PROPERTY:>
+
+  \$<TARGET_PROPERTY:...> expression requires a non-empty property name.

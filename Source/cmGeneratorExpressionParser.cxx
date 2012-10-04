@@ -118,10 +118,16 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     colonToken = this->it;
     parameters.resize(parameters.size() + 1);
     ++this->it;
+    while (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
+      {
+      commaTokens.push_back(this->it);
+      parameters.resize(parameters.size() + 1);
+      ++this->it;
+      }
     while(this->it->TokenType != cmGeneratorExpressionToken::EndExpression)
       {
       this->ParseContent(*(parameters.end() - 1));
-      if (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
+      while (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
         {
         commaTokens.push_back(this->it);
         parameters.resize(parameters.size() + 1);
@@ -141,10 +147,6 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
         {
         --this->NestingLevel;
         ++this->it;
-        }
-      if (parameters.empty())
-        {
-          // ERROR
         }
     }
 
