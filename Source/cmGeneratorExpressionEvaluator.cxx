@@ -173,7 +173,7 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    return *parameters.begin() == parameters.at(1) ? "1" : "0";
+    return *parameters.begin() == parameters[1] ? "1" : "0";
   }
 } strEqualNode;
 
@@ -281,7 +281,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     std::string propertyName = *parameters.begin();
     if (parameters.size() == 2)
       {
-      if (parameters.begin()->empty() && parameters.at(1).empty())
+      if (parameters.begin()->empty() && parameters[1].empty())
         {
         reportError(context, content->GetOriginalExpression(),
             "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
@@ -297,7 +297,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
 
       std::string targetName = parameters.front();
-      propertyName = parameters.at(1);
+      propertyName = parameters[1];
       if (!nameValidator.find(targetName.c_str()))
         {
         if (!nameValidator.find(propertyName.c_str()))
