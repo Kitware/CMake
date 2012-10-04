@@ -4,7 +4,9 @@ project(GeneratorExpression NONE)
 add_custom_target(check ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_0=$<0:nothing>
+    -Dtest_0_with_comma=$<0:-Wl,--no-undefined>
     -Dtest_1=$<1:content>
+    -Dtest_1_with_comma=$<1:-Wl,--no-undefined>
     -Dconfig=$<CONFIGURATION>
     -Dtest_and_0=$<AND:0>
     -Dtest_and_0_0=$<AND:0,0>
