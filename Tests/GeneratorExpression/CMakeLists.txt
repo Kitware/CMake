@@ -30,6 +30,7 @@ add_custom_target(check ALL
     -Dtest_bool_off=$<BOOL:Off>
     -Dtest_bool_no=$<BOOL:No>
     -Dtest_bool_n=$<BOOL:N>
+    -Dtest_bool_empty=$<BOOL:>
     -Dtest_strequal_yes_yes=$<STREQUAL:Yes,Yes>
     -Dtest_strequal_yes_yes_cs=$<STREQUAL:Yes,yes>
     -Dtest_strequal_yes_no=$<STREQUAL:Yes,No>
