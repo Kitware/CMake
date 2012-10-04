@@ -63,6 +63,7 @@ private:
 
   // Extended revision structure to include info about external it refers to.
   struct Revision;
+  friend struct Revision;
 
   // Info of all the repositories (root, externals and nested ones).
   std::list<SVNInfo> Repositories;
