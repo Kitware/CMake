@@ -16,6 +16,26 @@ set(SHA384-Works-RESULT 0)
 set(SHA384-Works-STDERR "1de9560b4e030e02051ea408200ffc55d70c97ac64ebf822461a5c786f495c36df43259b14483bc8d364f0106f4971ee")
 set(SHA512-Works-RESULT 0)
 set(SHA512-Works-STDERR "3982a1b4e651768bec70ab1fb97045cb7a659f4ba7203d501c52ab2e803071f9d5fd272022df15f27727fc67f8cd022e710e29010b2a9c0b467c111e2f6abf51")
+set(TIMESTAMP-BadArg1-RESULT 1)
+set(TIMESTAMP-BadArg1-STDERR "string sub-command TIMESTAMP requires at least one argument")
+set(TIMESTAMP-BadArg2-RESULT 1)
+set(TIMESTAMP-BadArg2-STDERR "string TIMESTAMP sub-command does not recognize option UTF")
+set(TIMESTAMP-BadArg3-RESULT 1)
+set(TIMESTAMP-BadArg3-STDERR "string sub-command TIMESTAMP takes at most three arguments")
+set(TIMESTAMP-DefaultFormatLocal-RESULT 0)
+set(TIMESTAMP-DefaultFormatLocal-STDERR "~[0-9]*-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]~")
+set(TIMESTAMP-DefaultFormatUTC-RESULT 0)
+set(TIMESTAMP-DefaultFormatUTC-STDERR "~[0-9]*-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]Z~")
+set(TIMESTAMP-CustomFormatLocal-RESULT 0)
+set(TIMESTAMP-CustomFormatLocal-STDERR "~([0-5][0-9])|60~")
+set(TIMESTAMP-CustomFormatUTC-RESULT 0)
+set(TIMESTAMP-CustomFormatUTC-STDERR "~([0-5][0-9])|60~")
+set(TIMESTAMP-UnknownSpecifier-RESULT 0)
+set(TIMESTAMP-UnknownSpecifier-STDERR "~%g~")
+set(TIMESTAMP-IncompleteSpecifier-RESULT 0)
+set(TIMESTAMP-IncompleteSpecifier-STDERR "~foobar%~")
+set(TIMESTAMP-AllSpecifiers-RESULT 0)
+set(TIMESTAMP-AllSpecifiers-STDERR "~[0-9]+(;[0-9]+)*~")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(String
@@ -28,6 +48,16 @@ check_cmake_test(String
   SHA256-Works
   SHA384-Works
   SHA512-Works
+  TIMESTAMP-BadArg1
+  TIMESTAMP-BadArg2
+  TIMESTAMP-BadArg3
+  TIMESTAMP-DefaultFormatLocal
+  TIMESTAMP-DefaultFormatUTC
+  TIMESTAMP-CustomFormatLocal
+  TIMESTAMP-CustomFormatUTC
+  TIMESTAMP-UnknownSpecifier
+  TIMESTAMP-IncompleteSpecifier
+  TIMESTAMP-AllSpecifiers
   )
 
 # Execute each test listed in StringTestScript.cmake:
