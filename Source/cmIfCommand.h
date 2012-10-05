@@ -114,7 +114,7 @@ public:
       "will be evaluated. Possible expressions are:\n"
       "  if(<constant>)\n"
       "True if the constant is 1, ON, YES, TRUE, Y, or a non-zero number.  "
-      "False if the constant is 0, OFF, NO, FALSE, N, IGNORE, \"\", "
+      "False if the constant is 0, OFF, NO, FALSE, N, IGNORE, NOTFOUND, '', "
       "or ends in the suffix '-NOTFOUND'.  "
       "Named boolean constants are case-insensitive.  "
       "If the argument is not one of these constants, "
