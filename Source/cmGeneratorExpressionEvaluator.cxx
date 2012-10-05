@@ -307,7 +307,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           return std::string();
           }
         ::reportError(context, content->GetOriginalExpression(),
-                      "Target name not supported");
+                      "Target name not supported.");
         return std::string();
         }
       target = context->Makefile->FindGeneratorTargetToUse(
