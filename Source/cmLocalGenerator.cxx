@@ -608,7 +608,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
     // Store this command line.
     commandLines.push_back(commandLine);
     }
-  std::string targetFullPath = target.Target->GetFullPath();
+  std::string targetFullPath = target.GetFullPath();
   // Generate a meaningful comment for the command.
   std::string comment = "Linking ";
   comment += llang;
