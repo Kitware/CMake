@@ -1556,7 +1556,7 @@ class ArtifactDirTag;
 template<typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content);
 };
@@ -1565,12 +1565,12 @@ struct TargetFilesystemArtifactResultCreator
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
     // The target soname file (.so.1).
-    if(target->IsDLLPlatform())
+    if(target->Target->IsDLLPlatform())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is not allowed "
@@ -1584,9 +1584,9 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "SHARED libraries.");
       return std::string();
       }
-    std::string result = target->GetDirectory(context->Config);
+    std::string result = target->Target->GetDirectory(context->Config);
     result += "/";
-    result += target->GetSOName(context->Config);
+    result += target->Target->GetSOName(context->Config);
     return result;
   }
 };
@@ -1595,11 +1595,11 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
-    std::string language = target->GetLinkerLanguage(context->Config);
+    std::string language = target->Target->GetLinkerLanguage(context->Config);
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
 
@@ -1610,7 +1610,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
       }
 
-    cmTarget::TargetType targetType = target->GetType();
+    cmTarget::TargetType targetType = target->Target->GetType();
 
     if(targetType != cmTarget::SHARED_LIBRARY &&
        targetType != cmTarget::MODULE_LIBRARY &&
@@ -1622,9 +1622,9 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
       }
 
-    std::string result = target->GetPDBDirectory(context->Config);
+    std::string result = target->Target->GetPDBDirectory(context->Config);
     result += "/";
-    result += target->GetPDBName(context->Config);
+    result += target->Target->GetPDBName(context->Config);
     return result;
   }
 };
@@ -1633,12 +1633,12 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
     // The file used to link to the target (.so, .lib, .a).
-    if(!target->IsLinkable())
+    if(!target->Target->IsLinkable())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE is allowed only for libraries and "
@@ -1646,7 +1646,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
       return std::string();
       }
     return target->GetFullPath(context->Config,
-                               target->HasImportLibrary());
+                               target->Target->HasImportLibrary());
   }
 };
 
@@ -1654,7 +1654,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
 template<>
 struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *)
   {
@@ -1716,7 +1716,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "Expression syntax not recognized.");
       return std::string();
       }
-    cmTarget* target = context->Makefile->FindTargetToUse(name);
+    cmGeneratorTarget* target =
+        context->Makefile->FindGeneratorTargetToUse(name);
     if(!target)
       {
       ::reportError(context, content->GetOriginalExpression(),
@@ -1739,8 +1740,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "be used while evaluating link libraries");
       return std::string();
       }
-    context->DependTargets.insert(target);
-    context->AllTargets.insert(target);
+    context->DependTargets.insert(target->Target);
+    context->AllTargets.insert(target->Target);
 
     std::string result =
                 TargetFilesystemArtifactResultCreator<ArtifactT>::Create(

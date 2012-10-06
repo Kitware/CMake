@@ -529,7 +529,7 @@ const char* cmGeneratorTarget::GetLocation(const std::string& config) const
     }
   else
     {
-    location = this->Target->GetFullPath(config, false);
+    location = this->GetFullPath(config, false);
     }
   return location.c_str();
 }
@@ -1179,6 +1179,86 @@ void cmGeneratorTarget::GenerateTargetManifest(
     f += "/";
     f += impName;
     gg->AddToManifest(config, f);
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetFullPath(const std::string& config,
+                                           bool implib, bool realname) const
+{
+  if(this->Target->IsImported())
+    {
+    return this->Target->ImportedGetFullPath(config, implib);
+    }
+  else
+    {
+    return this->NormalGetFullPath(config, implib, realname);
+    }
+}
+
+std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
+                                                 bool implib,
+                                                 bool realname) const
+{
+  std::string fpath = this->Target->GetDirectory(config, implib);
+  fpath += "/";
+  if(this->Target->IsAppBundleOnApple())
+    {
+    fpath = this->Target->BuildMacContentDirectory(fpath, config, false);
+    fpath += "/";
+    }
+
+  // Add the full name of the target.
+  if(implib)
+    {
+    fpath += this->Target->GetFullName(config, true);
+    }
+  else if(realname)
+    {
+    fpath += this->NormalGetRealName(config);
+    }
+  else
+    {
+    fpath += this->Target->GetFullName(config, false);
+    }
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::NormalGetRealName(const std::string& config) const
+{
+  // This should not be called for imported targets.
+  // TODO: Split cmTarget into a class hierarchy to get compile-time
+  // enforcement of the limited imported target API.
+  if(this->Target->IsImported())
+    {
+    std::string msg =  "NormalGetRealName called on imported target: ";
+    msg += this->GetName();
+    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, msg);
+    }
+
+  if(this->GetType() == cmTarget::EXECUTABLE)
+    {
+    // Compute the real name that will be built.
+    std::string name;
+    std::string realName;
+    std::string impName;
+    std::string pdbName;
+    this->Target->GetExecutableNames(name, realName, impName, pdbName, config);
+    return realName;
+    }
+  else
+    {
+    // Compute the real name that will be built.
+    std::string name;
+    std::string soName;
+    std::string realName;
+    std::string impName;
+    std::string pdbName;
+    this->Target->GetLibraryNames(name, soName, realName,
+                                  impName, pdbName, config);
+    return realName;
     }
 }
 

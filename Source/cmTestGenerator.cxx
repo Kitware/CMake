@@ -82,7 +82,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   // be translated.
   std::string exe = command[0];
   cmMakefile* mf = this->Test->GetMakefile();
-  cmTarget* target = mf->FindTargetToUse(exe);
+  cmGeneratorTarget* target = mf->FindGeneratorTargetToUse(exe);
   if(target && target->GetType() == cmTarget::EXECUTABLE)
     {
     // Use the target file on disk.
