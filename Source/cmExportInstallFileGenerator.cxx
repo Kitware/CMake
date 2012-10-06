@@ -358,12 +358,14 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
+      cmGeneratorTarget *gtgt = te->Target->GetMakefile()->GetLocalGenerator()
+                    ->GetGlobalGenerator()->GetGeneratorTarget(te->Target);
       this->SetImportDetailProperties(config, suffix,
-                                      te->Target, properties, missingTargets);
+                                      gtgt, properties, missingTargets);
 
       this->SetImportLinkInterface(config, suffix,
                                    cmGeneratorExpression::InstallInterface,
-                                   te->Target, properties, missingTargets);
+                                   gtgt, properties, missingTargets);
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff

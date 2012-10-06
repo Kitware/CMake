@@ -148,11 +148,11 @@ cmExportBuildFileGenerator
       if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         this->SetImportDetailProperties(config, suffix,
-                                        target->Target,
+                                        target,
                                         properties, missingTargets);
         this->SetImportLinkInterface(config, suffix,
                                      cmGeneratorExpression::BuildInterface,
-                                     target->Target,
+                                     target,
                                      properties, missingTargets);
         }
 
