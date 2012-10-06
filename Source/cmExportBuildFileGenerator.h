@@ -68,7 +68,7 @@ protected:
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(const std::string& config,
                                  std::string const& suffix,
-                                 cmTarget* target,
+                                 cmGeneratorTarget* target,
                                  ImportPropertyMap& properties);
 
   std::string InstallNameDir(cmTarget* target, const std::string& config);
@@ -78,7 +78,7 @@ protected:
 
   std::vector<std::string> Targets;
   cmExportSet *ExportSet;
-  std::vector<cmTarget*> Exports;
+  std::vector<cmGeneratorTarget*> Exports;
   cmMakefile* Makefile;
   cmListFileBacktrace Backtrace;
 };
