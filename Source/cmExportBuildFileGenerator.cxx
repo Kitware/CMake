@@ -11,12 +11,11 @@
 ============================================================================*/
 #include "cmExportBuildFileGenerator.h"
 
-#include "cmExportCommand.h"
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
-  this->ExportCommand = 0;
+  this->Makefile = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -39,12 +38,10 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       }
     else
       {
-      if(this->ExportCommand && this->ExportCommand->ErrorMessage.empty())
-        {
-        cmOStringStream e;
-        e << "given target \"" << te->GetName() << "\" more than once.";
-        this->ExportCommand->ErrorMessage = e.str();
-        }
+      cmOStringStream e;
+      e << "given target \"" << te->GetName() << "\" more than once.";
+      this->Makefile->GetCMakeInstance()
+          ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(), this->Backtrace);
       return false;
       }
     if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -220,18 +217,20 @@ cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* depender,
                              cmTarget* dependee)
 {
-  if(!this->ExportCommand || !this->ExportCommand->ErrorMessage.empty())
+  if(cmSystemTools::GetErrorOccuredFlag())
     {
     return;
     }
 
   cmOStringStream e;
-  e << "called with target \"" << depender->GetName()
+  e << "export called with target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName()
     << "\" that is not in the export list.\n"
     << "If the required target is not easy to reference in this call, "
     << "consider using the APPEND option with multiple separate calls.";
-  this->ExportCommand->ErrorMessage = e.str();
+
+  this->Makefile->GetCMakeInstance()
+      ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(), this->Backtrace);
 }
 
 std::string

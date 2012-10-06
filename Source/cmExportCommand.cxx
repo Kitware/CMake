@@ -169,7 +169,7 @@ bool cmExportCommand
   ebfg.SetNamespace(this->Namespace.GetCString());
   ebfg.SetAppendMode(this->Append.IsEnabled());
   ebfg.SetExports(&targets);
-  ebfg.SetCommand(this);
+  ebfg.SetMakefile(this->Makefile);
   ebfg.SetExportOld(this->ExportOld.IsEnabled());
 
   cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()

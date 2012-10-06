@@ -13,8 +13,7 @@
 #define cmExportBuildFileGenerator_h
 
 #include "cmExportFileGenerator.h"
-
-class cmExportCommand;
+#include "cmListFileCache.h"
 
 /** \class cmExportBuildFileGenerator
  * \brief Generate a file exporting targets from a build tree.
@@ -37,8 +36,11 @@ public:
   /** Set whether to append generated code to the output file.  */
   void SetAppendMode(bool append) { this->AppendMode = append; }
 
-  /** Set the command instance through which errors should be reported.  */
-  void SetCommand(cmExportCommand* cmd) { this->ExportCommand = cmd; }
+  void SetMakefile(cmMakefile *mf) {
+    this->Makefile = mf;
+    this->Makefile->GetBacktrace(this->Backtrace);
+  }
+
 protected:
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
@@ -64,7 +66,8 @@ protected:
   std::string InstallNameDir(cmTarget* target, const std::string& config);
 
   std::vector<cmTarget*> const* Exports;
-  cmExportCommand* ExportCommand;
+  cmMakefile* Makefile;
+  cmListFileBacktrace Backtrace;
 };
 
 #endif
