@@ -21,20 +21,19 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::vector<cmTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
-  for(std::vector<cmTarget*>::const_iterator
-        tei = this->Exports->begin();
-      tei != this->Exports->end(); ++tei)
+  for(std::vector<std::string>::const_iterator
+        tei = this->Targets.begin();
+      tei != this->Targets.end(); ++tei)
     {
-    expectedTargets += sep + this->Namespace + (*tei)->GetExportName();
+    cmTarget *te = this->Makefile->FindTargetToUse(tei->c_str());
+    expectedTargets += sep + this->Namespace + te->GetExportName();
     sep = " ";
-    cmTarget* te = *tei;
     if(this->ExportedTargets.insert(te).second)
       {
-      allTargets.push_back(te);
+      this->Exports.push_back(te);
       }
     else
       {
@@ -57,8 +56,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Create all the imported targets.
   for(std::vector<cmTarget*>::const_iterator
-        tei = allTargets.begin();
-      tei != allTargets.end(); ++tei)
+        tei = this->Exports.begin();
+      tei != this->Exports.end(); ++tei)
     {
     cmTarget* te = *tei;
     this->GenerateImportTargetCode(os, te);
@@ -113,8 +112,8 @@ cmExportBuildFileGenerator
                             std::vector<std::string> &missingTargets)
 {
   for(std::vector<cmTarget*>::const_iterator
-        tei = this->Exports->begin();
-      tei != this->Exports->end(); ++tei)
+        tei = this->Exports.begin();
+      tei != this->Exports.end(); ++tei)
     {
     // Collect import properties for this target.
     cmTarget* target = *tei;
