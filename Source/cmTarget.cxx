@@ -2918,7 +2918,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         gg->CreateGenerationObjects();
         cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
         this->Properties.SetProperty(
-                prop, gt->Target->GetFullPath(configName, false).c_str());
+                prop, gt->GetFullPath(configName, false).c_str());
         }
       }
     // Support "<CONFIG>_LOCATION".
@@ -2942,7 +2942,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
           gg->CreateGenerationObjects();
           cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
           this->Properties.SetProperty(
-                  prop, gt->Target->GetFullPath(configName, false).c_str());
+                  prop, gt->GetFullPath(configName, false).c_str());
           }
         }
       }
@@ -3759,44 +3759,6 @@ bool cmTarget::IsImportedSharedLibWithoutSOName(
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::NormalGetRealName(const std::string& config) const
-{
-  // This should not be called for imported targets.
-  // TODO: Split cmTarget into a class hierarchy to get compile-time
-  // enforcement of the limited imported target API.
-  if(this->IsImported())
-    {
-    std::string msg =  "NormalGetRealName called on imported target: ";
-    msg += this->GetName();
-    this->GetMakefile()->
-      IssueMessage(cmake::INTERNAL_ERROR,
-                   msg);
-    }
-
-  if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    // Compute the real name that will be built.
-    std::string name;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetExecutableNames(name, realName, impName, pdbName, config);
-    return realName;
-    }
-  else
-    {
-    // Compute the real name that will be built.
-    std::string name;
-    std::string soName;
-    std::string realName;
-    std::string impName;
-    std::string pdbName;
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    return realName;
-    }
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFullName(const std::string& config,
                                   bool implib) const
 {
@@ -3825,48 +3787,6 @@ void cmTarget::GetFullNameComponents(std::string& prefix, std::string& base,
                                      bool implib) const
 {
   this->GetFullNameInternal(config, implib, prefix, base, suffix);
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetFullPath(const std::string& config, bool implib,
-                                  bool realname) const
-{
-  if(this->IsImported())
-    {
-    return this->ImportedGetFullPath(config, implib);
-    }
-  else
-    {
-    return this->NormalGetFullPath(config, implib, realname);
-    }
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::NormalGetFullPath(const std::string& config,
-                                        bool implib, bool realname) const
-{
-  std::string fpath = this->GetDirectory(config, implib);
-  fpath += "/";
-  if(this->IsAppBundleOnApple())
-    {
-    fpath = this->BuildMacContentDirectory(fpath, config, false);
-    fpath += "/";
-    }
-
-  // Add the full name of the target.
-  if(implib)
-    {
-    fpath += this->GetFullName(config, true);
-    }
-  else if(realname)
-    {
-    fpath += this->NormalGetRealName(config);
-    }
-  else
-    {
-    fpath += this->GetFullName(config, false);
-    }
-  return fpath;
 }
 
 //----------------------------------------------------------------------------
