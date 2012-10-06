@@ -74,10 +74,10 @@ public:
 
   bool IsSystemIncludeDirectory(const char *dir, const char *config);
 
-private:
   void ClassifySources();
   void LookupObjectLibraries();
 
+private:
   std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   cmGeneratorTarget(cmGeneratorTarget const&);

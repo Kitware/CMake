@@ -1058,6 +1058,9 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->AddHelperCommands();
     }
 
+  // Create per-target generator information.
+  this->CreateGeneratorTargets();
+
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1071,8 +1074,7 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GenerateTargetManifest();
     }
 
-  // Create per-target generator information.
-  this->CreateGeneratorTargets();
+  this->ComputeGeneratorTargetObjects();
 
   this->ProcessEvaluationFiles();
 
@@ -1263,7 +1265,6 @@ void cmGlobalGenerator::CreateGeneratorTargets()
 
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
       this->GeneratorTargets[t] = gt;
-      this->ComputeTargetObjects(gt);
       generatorTargets[t] = gt;
       }
 
@@ -1277,6 +1278,25 @@ void cmGlobalGenerator::CreateGeneratorTargets()
       }
 
     mf->SetGeneratorTargets(generatorTargets);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::ComputeGeneratorTargetObjects()
+{
+  // Construct per-target generator information.
+  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
+    cmGeneratorTargetsType targets = mf->GetGeneratorTargets();
+    for(cmGeneratorTargetsType::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmGeneratorTarget* gt = ti->second;
+      gt->ClassifySources();
+      gt->LookupObjectLibraries();
+      this->ComputeTargetObjects(gt);
+      }
     }
 }
 

@@ -25,8 +25,6 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
-  this->ClassifySources();
-  this->LookupObjectLibraries();
 }
 
 //----------------------------------------------------------------------------
