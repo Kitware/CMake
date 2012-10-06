@@ -2078,6 +2078,18 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name,
   return 0;
 }
 
+
+//----------------------------------------------------------------------------
+cmGeneratorTarget*
+cmGlobalGenerator::FindGeneratorTarget(const char* project, const char* name)
+{
+  if (cmTarget *t = this->FindTarget(project, name))
+    {
+    return this->GetGeneratorTarget(t);
+    }
+  return 0;
+}
+
 //----------------------------------------------------------------------------
 bool
 cmGlobalGenerator::NameResolvesToFramework(const std::string& libname) const
