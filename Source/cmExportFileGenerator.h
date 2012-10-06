@@ -92,13 +92,14 @@ protected:
   // Collect properties with detailed information about targets beyond
   // their location on disk.
   void SetImportDetailProperties(const std::string& config,
-                                 std::string const& suffix, cmTarget* target,
+                                 std::string const& suffix,
+                                 cmGeneratorTarget* target,
                                  ImportPropertyMap& properties,
                                  std::vector<std::string>& missingTargets);
 
   template <typename T>
   void SetImportLinkProperty(std::string const& suffix,
-                             cmTarget* target, const std::string& propName,
+                             cmGeneratorTarget* target, const std::string& propName,
                              std::vector<T> const& entries,
                              ImportPropertyMap& properties,
                              std::vector<std::string>& missingTargets);
@@ -148,7 +149,7 @@ protected:
   void SetImportLinkInterface(const std::string& config,
                     std::string const& suffix,
                     cmGeneratorExpression::PreprocessContext preprocessRule,
-                    cmTarget* target, ImportPropertyMap& properties,
+                    cmGeneratorTarget* target, ImportPropertyMap& properties,
                     std::vector<std::string>& missingTargets);
 
   enum FreeTargetsReplace {
