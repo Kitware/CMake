@@ -389,13 +389,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
 
   std::string targetOutput = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
+    this->GetGeneratorTarget()->GetFullPath(this->GetConfigName()).c_str());
   std::string targetOutputReal = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
+    this->GetGeneratorTarget()->GetFullPath(this->GetConfigName(),
                                    /*implib=*/false,
                                    /*realpath=*/true).c_str());
   std::string targetOutputImplib = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
+    this->GetGeneratorTarget()->GetFullPath(this->GetConfigName(),
                                    /*implib=*/true).c_str());
 
   if (this->GetTarget()->IsAppBundleOnApple())

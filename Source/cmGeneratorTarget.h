@@ -51,6 +51,14 @@ public:
   void GetCustomCommands(std::vector<cmSourceFile*>&) const;
   void GetExpectedResxHeaders(std::set<std::string>&) const;
 
+  /** Get the full path to the target according to the settings in its
+      makefile and the configuration type.  */
+  std::string GetFullPath(const char* config=0, bool implib = false,
+                          bool realname = false) const;
+  std::string NormalGetFullPath(const char* config, bool implib,
+                                bool realname) const;
+  std::string NormalGetRealName(const char* config) const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;

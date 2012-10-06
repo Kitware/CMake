@@ -389,11 +389,6 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const char* config) const;
 
-  /** Get the full path to the target according to the settings in its
-      makefile and the configuration type.  */
-  std::string GetFullPath(const char* config=0, bool implib = false,
-                          bool realname = false) const;
-
   /** Get the names of the library needed to generate a build rule
       that takes into account shared library version numbers.  This
       should be called only on a library target.  */
@@ -653,14 +648,6 @@ private:
   std::string GetFullNameImported(const char* config, bool implib) const;
 
   std::string ImportedGetFullPath(const char* config, bool implib) const;
-  std::string NormalGetFullPath(const char* config, bool implib,
-                                bool realname) const;
-
-  /** Get the real name of the target.  Allowed only for non-imported
-      targets.  When a library or executable file is versioned this is
-      the full versioned name.  If the target is not versioned this is
-      the same as GetFullName.  */
-  std::string NormalGetRealName(const char* config) const;
 
   /** Append to @a base the mac content directory and return it. */
   std::string BuildMacContentDirectory(const std::string& base,
