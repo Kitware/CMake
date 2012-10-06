@@ -30,8 +30,13 @@ public:
   cmExportBuildFileGenerator();
 
   /** Set the list of targets to export.  */
-  void SetExports(std::vector<cmTarget*> const* exports)
-    { this->Exports = exports; }
+  void SetTargets(std::vector<std::string> const& targets)
+    { this->Targets = targets; }
+  std::vector<std::string> const& GetTargets() const
+    { return this->Targets; }
+  void AppendTargets(std::vector<std::string> const& targets)
+    { this->Targets.insert(this->Targets.end(),
+      targets.begin(), targets.end()); }
 
   /** Set whether to append generated code to the output file.  */
   void SetAppendMode(bool append) { this->AppendMode = append; }
@@ -65,7 +70,8 @@ protected:
 
   std::string InstallNameDir(cmTarget* target, const std::string& config);
 
-  std::vector<cmTarget*> const* Exports;
+  std::vector<std::string> Targets;
+  std::vector<cmTarget*> Exports;
   cmMakefile* Makefile;
   cmListFileBacktrace Backtrace;
 };
