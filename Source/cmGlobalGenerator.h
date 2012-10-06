@@ -31,6 +31,7 @@ class cmExternalMakefileProjectGenerator;
 class cmTarget;
 class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
+class cmExportBuildFileGenerator;
 
 /** \class cmGlobalGenerator
  * \brief Responable for overseeing the generation process for the entire tree
@@ -293,18 +294,13 @@ public:
 
   void ProcessEvaluationFiles();
 
-  void AddExportedTargetsFile(const std::string &filename)
-  {
-    this->ExportedTargetsFiles.insert(filename);
-  }
-
-  bool IsExportedTargetsFile(const std::string &filename) const
-  {
-    const std::set<std::string>::const_iterator it
-                                  = this->ExportedTargetsFiles.find(filename);
-    return it != this->ExportedTargetsFiles.end();
-  }
-
+  std::map<std::string, cmExportBuildFileGenerator*>& GetBuildExportSets()
+    {return this->BuildExportSets;}
+  void AddBuildExportSet(cmExportBuildFileGenerator*);
+  bool IsExportedTargetsFile(const std::string &filename) const;
+  bool GenerateImportFile(const std::string &file);
+  cmExportBuildFileGenerator*
+  GetExportedTargetsFile(const std::string &filename) const;
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
@@ -356,6 +352,7 @@ protected:
   bool InstallTargetEnabled;
   // Sets of named target exports
   cmExportSetMap ExportSets;
+  std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.
@@ -384,7 +381,6 @@ private:
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
   std::map<cmStdString, int> LanguageToLinkerPreference;
   std::map<cmStdString, cmStdString> LanguageToOriginalSharedLibFlags;
-  std::set<std::string> ExportedTargetsFiles;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };

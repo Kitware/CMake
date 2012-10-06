@@ -127,6 +127,7 @@ bool cmIncludeCommand
         return false;
         }
       }
+    gg->GenerateImportFile(fname_abs);
     }
 
   std::string fullFilePath;

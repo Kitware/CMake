@@ -27,6 +27,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmExportBuildFileGenerator.h"
 
 #include <cmsys/Directory.hxx>
 
@@ -76,6 +77,12 @@ cmGlobalGenerator::~cmGlobalGenerator()
       ++li)
     {
     delete *li;
+    }
+  for(std::map<std::string, cmExportBuildFileGenerator*>::iterator
+        i = this->BuildExportSets.begin();
+      i != this->BuildExportSets.end(); ++i)
+    {
+    delete i->second;
     }
   this->LocalGenerators.clear();
 
@@ -181,6 +188,33 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
     }
   mf->AddCacheDefinition(langComp.c_str(), path.c_str(),
                          doc.c_str(), cmCacheManager::FILEPATH);
+}
+
+void cmGlobalGenerator::AddBuildExportSet(cmExportBuildFileGenerator* gen)
+{
+  this->BuildExportSets[gen->GetMainExportFileName()] = gen;
+}
+
+bool cmGlobalGenerator::GenerateImportFile(const std::string &file)
+{
+  std::map<std::string, cmExportBuildFileGenerator*>::iterator it
+                                          = this->BuildExportSets.find(file);
+  if (it != this->BuildExportSets.end())
+    {
+    bool result = it->second->GenerateImportFile();
+    delete it->second;
+    it->second = 0;
+    this->BuildExportSets.erase(it);
+    return result;
+    }
+  return false;
+}
+
+bool cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
+{
+  const std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it
+                                      = this->BuildExportSets.find(filename);
+  return it != this->BuildExportSets.end();
 }
 
 // Find the make program for the generator, required for try compiles
@@ -966,6 +1000,14 @@ void cmGlobalGenerator::Configure()
     }
 }
 
+cmExportBuildFileGenerator*
+cmGlobalGenerator::GetExportedTargetsFile(const std::string &filename) const
+{
+  std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it
+    = this->BuildExportSets.find(filename);
+  return it == this->BuildExportSets.end() ? 0 : it->second;
+}
+
 bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
 {
   // If the property is not enabled then okay.
@@ -1091,6 +1133,19 @@ void cmGlobalGenerator::Generate()
     }
   this->SetCurrentLocalGenerator(0);
 
+  for (std::map<std::string, cmExportBuildFileGenerator*>::iterator
+      it = this->BuildExportSets.begin(); it != this->BuildExportSets.end();
+      ++it)
+    {
+    if (!it->second->GenerateImportFile()
+        && !cmSystemTools::GetErrorOccuredFlag())
+      {
+      this->GetCMakeInstance()
+          ->IssueMessage(cmake::FATAL_ERROR, "Could not write export file.",
+                        cmListFileBacktrace());
+      return;
+      }
+    }
   // Update rule hashes.
   this->CheckRuleHashes();
 
