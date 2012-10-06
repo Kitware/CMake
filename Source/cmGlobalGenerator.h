@@ -211,6 +211,8 @@ public:
 
   void AddAlias(const char *name, cmTarget *tgt);
   bool IsAlias(const char *name) const;
+  cmGeneratorTarget* FindGeneratorTarget(const char* project,
+                                         const char* name);
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
