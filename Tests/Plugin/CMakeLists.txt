@@ -50,37 +50,15 @@ if(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG AND
   # Verify that targets export with proper IMPORTED SONAME properties.
   export(TARGETS example_mod_1 example_mod_2 NAMESPACE exp_
     FILE ${CMAKE_CURRENT_BINARY_DIR}/mods.cmake)
-  include(${CMAKE_CURRENT_BINARY_DIR}/mods.cmake)
-  get_property(configs TARGET exp_example_mod_1 PROPERTY IMPORTED_CONFIGURATIONS)
-  foreach(c ${configs})
-    string(TOUPPER "${c}" CONFIG)
-    get_property(soname1 TARGET exp_example_mod_1 PROPERTY IMPORTED_SONAME_${CONFIG})
-    get_property(soname2 TARGET exp_example_mod_2 PROPERTY IMPORTED_NO_SONAME_${CONFIG})
-    if(soname1)
-      message(STATUS "exp_example_mod_1 has IMPORTED_SONAME_${CONFIG} as expected: ${soname1}")
-    else()
-      message(SEND_ERROR "exp_example_mod_1 does not have IMPORTED_SONAME_${CONFIG} but should")
-    endif()
-    if(soname2)
-      message(STATUS "exp_example_mod_2 has IMPORTED_NO_SONAME_${CONFIG} as expected: ${soname2}")
-    else()
-      message(SEND_ERROR "exp_example_mod_2 does not have IMPORTED_NO_SONAME_${CONFIG} but should")
-    endif()
-  endforeach()
 
-  # Parse the binary to check for SONAME if possible.
-  if("${CMAKE_EXECUTABLE_FORMAT}" MATCHES "ELF")
-    find_program(READELF_EXE readelf)
-    if(READELF_EXE)
-      add_custom_target(check_mod_soname ALL COMMAND
-        ${CMAKE_COMMAND} -Dreadelf=${READELF_EXE}
-                         -Dmod1=$<TARGET_FILE:example_mod_1>
-                         -Dmod2=$<TARGET_FILE:example_mod_2>
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/check_mod_soname.cmake
-        )
-      add_dependencies(check_mod_soname example_mod_1 example_mod_2)
-    endif()
-  endif()
+  include(ExternalProject)
+  ExternalProject_Add(PluginTest
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/PluginTest"
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/PluginTest"
+    DOWNLOAD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  add_dependencies(PluginTest example_mod_1 example_mod_2)
 endif()
 
 # TODO:
