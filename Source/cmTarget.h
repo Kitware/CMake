@@ -674,7 +674,6 @@ private:
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::string Location;
   std::string ExportMacro;
   std::set<cmStdString> Utilities;
   bool RecordDependencies;
