@@ -1774,7 +1774,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       else
         {
         outDir = this->Target->GetDirectory(config->c_str()) + "/";
-        targetNameFull = this->Target->GetFullName(config->c_str());
+        targetNameFull = this->GeneratorTarget->GetFullName(config->c_str());
         }
       this->ConvertToWindowsSlash(intermediateDir);
       this->ConvertToWindowsSlash(outDir);

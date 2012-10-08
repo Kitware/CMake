@@ -1112,7 +1112,8 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(j->first.c_str());
+      cmGeneratorTarget* tgt = this->GlobalGenerator->GetGeneratorTarget(
+          this->GlobalGenerator->FindTarget(j->first.c_str()));
       if(tgt)
         {
         lib = cmSystemTools::GetFilenameWithoutExtension
@@ -1328,11 +1329,11 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    outputName = target.GetFullName();
-    outputNameDebug = target.GetFullName("Debug");
-    outputNameRelease = target.GetFullName("Release");
-    outputNameMinSizeRel = target.GetFullName("MinSizeRel");
-    outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
+    outputName = gt->GetFullName();
+    outputNameDebug = gt->GetFullName("Debug");
+    outputNameRelease = gt->GetFullName("Release");
+    outputNameMinSizeRel = gt->GetFullName("MinSizeRel");
+    outputNameRelWithDebInfo = gt->GetFullName("RelWithDebInfo");
     }
   else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
     {
@@ -1429,10 +1430,10 @@ void cmLocalVisualStudio6Generator
     fullPathImpRelease += "/";
     fullPathImpMinSizeRel += "/";
     fullPathImpRelWithDebInfo += "/";
-    fullPathImpDebug += target.GetFullName("Debug", true);
-    fullPathImpRelease += target.GetFullName("Release", true);
-    fullPathImpMinSizeRel += target.GetFullName("MinSizeRel", true);
-    fullPathImpRelWithDebInfo += target.GetFullName("RelWithDebInfo", true);
+    fullPathImpDebug += gt->GetFullName("Debug", true);
+    fullPathImpRelease += gt->GetFullName("Release", true);
+    fullPathImpMinSizeRel += gt->GetFullName("MinSizeRel", true);
+    fullPathImpRelWithDebInfo += gt->GetFullName("RelWithDebInfo", true);
 
     targetImplibFlagDebug = "/implib:";
     targetImplibFlagRelease = "/implib:";
