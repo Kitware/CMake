@@ -666,7 +666,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     // Get the install_name directory for the build tree.
     install_name_dir =
-      this->Target->GetInstallNameDirForBuildTree(this->ConfigName);
+      this->GeneratorTarget->GetInstallNameDirForBuildTree(this->ConfigName);
 
     // Set the rule variable replacement value.
     if(install_name_dir.empty())
