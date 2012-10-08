@@ -576,7 +576,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
       }
     }
   location += "/";
-  location += this->Target->GetFullName("", false);
+  location += this->GetFullName("", false);
   return location.c_str();
 }
 
@@ -896,7 +896,7 @@ std::string
 cmGeneratorTarget::GetAppBundleDirectory(const std::string& config,
                                          bool contentOnly) const
 {
-  std::string fpath = this->Target->GetFullName(config, false);
+  std::string fpath = this->GetFullName(config, false);
   fpath += ".app/Contents";
   if(!contentOnly)
     fpath += "/MacOS";
@@ -1655,7 +1655,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
   // Add the full name of the target.
   if(implib)
     {
-    fpath += this->Target->GetFullName(config, true);
+    fpath += this->GetFullName(config, true);
     }
   else if(realname)
     {
@@ -1663,7 +1663,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
     }
   else
     {
-    fpath += this->Target->GetFullName(config, false);
+    fpath += this->GetFullName(config, false);
     }
   return fpath;
 }
