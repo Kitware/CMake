@@ -600,6 +600,15 @@ std::string cmGeneratorTarget::GetSOName(const char* config) const
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
+                                              std::string& base,
+                                     std::string& suffix, const char* config,
+                                     bool implib) const
+{
+  this->Target->GetFullNameInternal(config, implib, prefix, base, suffix);
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::ClassifySources()
 {
   cmsys::RegularExpression header(CM_HEADER_REGEX);

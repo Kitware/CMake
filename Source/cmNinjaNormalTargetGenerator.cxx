@@ -520,7 +520,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::string prefix;
     std::string base;
     std::string suffix;
-    this->GetTarget()->GetFullNameComponents(prefix, base, suffix);
+    this->GetGeneratorTarget()->GetFullNameComponents(prefix, base, suffix);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
     if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))
