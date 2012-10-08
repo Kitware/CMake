@@ -650,6 +650,49 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetSOName(const std::string& config) const
+{
+  if(this->Target->IsImported())
+    {
+    // Lookup the imported soname.
+    if(cmTarget::ImportInfo const* info = this->Target->GetImportInfo(config))
+      {
+      if(info->NoSOName)
+        {
+        // The imported library has no builtin soname so the name
+        // searched at runtime will be just the filename.
+        return cmSystemTools::GetFilenameName(info->Location);
+        }
+      else
+        {
+        // Use the soname given if any.
+        if(info->SOName.find("@rpath/") == 0)
+          {
+          return info->SOName.substr(6);
+          }
+        return info->SOName;
+        }
+      }
+    else
+      {
+      return "";
+      }
+    }
+  else
+    {
+    // Compute the soname that will be built.
+    std::string name;
+    std::string soName;
+    std::string realName;
+    std::string impName;
+    std::string pdbName;
+    this->Target->GetLibraryNames(name, soName, realName,
+                                  impName, pdbName, config);
+    return soName;
+    }
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetModuleDefinitionFile(const std::string& config) const
 {
