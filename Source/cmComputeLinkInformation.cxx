@@ -788,7 +788,10 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
     {
     if(tgt)
       {
-      std::string soName = tgt->GetSOName(this->Config);
+      cmGeneratorTarget *gtgt = tgt->GetMakefile()->GetLocalGenerator()
+                                   ->GetGlobalGenerator()
+                                   ->GetGeneratorTarget(tgt);
+      std::string soName = gtgt->GetSOName(this->Config);
       const char* soname = soName.empty()? 0 : soName.c_str();
       order->AddRuntimeLibrary(lib, soname);
       }
@@ -1784,7 +1787,10 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
 
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
-  std::string soName = target->GetSOName(this->Config);
+  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
+  std::string soName = gtgt->GetSOName(this->Config);
   const char* soname = soName.empty()? 0 : soName.c_str();
 
   // Include this library in the runtime path ordering.

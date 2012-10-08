@@ -62,6 +62,9 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const char* config) const;
 
+  /** Get the soname of the target.  Allowed only for a shared library.  */
+  std::string GetSOName(const char* config) const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
