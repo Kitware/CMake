@@ -73,6 +73,16 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const char* config) const;
 
+  /** @return the Mac framework directory without the base. */
+  std::string GetFrameworkDirectory(const char* config, bool rootDir) const;
+
+  /** @return the Mac CFBundle directory without the base */
+  std::string GetCFBundleDirectory(const char* config, bool contentOnly) const;
+
+  /** @return the Mac App directory without the base */
+  std::string GetAppBundleDirectory(const char* config,
+                                    bool contentOnly) const;
+
   /** Return the install name directory for the target in the
     * build tree.  For example: "\@rpath/", "\@loader_path/",
     * or "/full/path/to/library".  */

@@ -451,16 +451,6 @@ public:
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
-  /** @return the Mac framework directory without the base. */
-  std::string GetFrameworkDirectory(const char* config, bool rootDir) const;
-
-  /** @return the Mac CFBundle directory without the base */
-  std::string GetCFBundleDirectory(const char* config, bool contentOnly) const;
-
-  /** @return the Mac App directory without the base */
-  std::string GetAppBundleDirectory(const char* config,
-                                    bool contentOnly) const;
-
   std::vector<std::string> GetIncludeDirectories(const char *config) const;
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);

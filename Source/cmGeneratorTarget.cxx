@@ -600,6 +600,51 @@ std::string cmGeneratorTarget::GetSOName(const char* config) const
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetCFBundleDirectory(const char* config,
+                                           bool contentOnly) const
+{
+  std::string fpath;
+  fpath += this->Target->GetOutputName(config, false);
+  fpath += ".";
+  const char *ext = this->GetProperty("BUNDLE_EXTENSION");
+  if (!ext)
+    {
+    ext = "bundle";
+    }
+  fpath += ext;
+  fpath += "/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetAppBundleDirectory(const char* config,
+                                            bool contentOnly) const
+{
+  std::string fpath = this->Target->GetFullName(config, false);
+  fpath += ".app/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetFrameworkDirectory(const char* config,
+                                                     bool rootDir) const
+{
+  std::string fpath;
+  fpath += this->Target->GetOutputName(config, false);
+  fpath += ".framework";
+  if(!rootDir)
+    {
+    fpath += "/Versions/";
+    fpath += this->Target->GetFrameworkVersion();
+    }
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetInstallNameDirForBuildTree(const char* config) const
 {
@@ -683,15 +728,15 @@ cmGeneratorTarget::BuildMacContentDirectory(const std::string& base,
   std::string fpath = base;
   if(this->Target->IsAppBundleOnApple())
     {
-    fpath += this->Target->GetAppBundleDirectory(config, contentOnly);
+    fpath += this->GetAppBundleDirectory(config, contentOnly);
     }
   if(this->Target->IsFrameworkOnApple())
     {
-    fpath += this->Target->GetFrameworkDirectory(config, contentOnly);
+    fpath += this->GetFrameworkDirectory(config, contentOnly);
     }
   if(this->Target->IsCFBundleOnApple())
     {
-    fpath += this->Target->GetCFBundleDirectory(config, contentOnly);
+    fpath += this->GetCFBundleDirectory(config, contentOnly);
     }
   return fpath;
 }
