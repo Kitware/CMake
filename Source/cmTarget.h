@@ -377,9 +377,6 @@ public:
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const char* config) const;
 
-  /** Get the soname of the target.  Allowed only for a shared library.  */
-  std::string GetSOName(const char* config) const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const char* config) const;
 
@@ -698,7 +695,13 @@ private:
   bool ComputePDBOutputDir(const char* config, std::string& out) const;
 
   // Cache import information from properties for each configuration.
-  struct ImportInfo;
+  struct ImportInfo{
+    bool NoSOName;
+    std::string Location;
+    std::string SOName;
+    std::string ImportLibrary;
+    cmTarget::LinkInterface LinkInterface;
+  };
   ImportInfo const* GetImportInfo(const char* config,
                                         cmTarget const* workingTarget) const;
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
