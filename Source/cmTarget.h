@@ -360,9 +360,6 @@ public:
   /** Get the full name of the target according to the settings in its
       makefile.  */
   std::string GetFullName(const char* config=0, bool implib = false) const;
-  void GetFullNameComponents(std::string& prefix,
-                             std::string& base, std::string& suffix,
-                             const char* config=0, bool implib = false) const;
 
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const char* config) const;

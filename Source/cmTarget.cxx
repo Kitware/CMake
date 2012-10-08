@@ -2773,14 +2773,6 @@ cmTarget::GetFullNameImported(const char* config, bool implib) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetFullNameComponents(std::string& prefix, std::string& base,
-                                     std::string& suffix, const char* config,
-                                     bool implib) const
-{
-  this->GetFullNameInternal(config, implib, prefix, base, suffix);
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmTarget::ImportedGetFullPath(const char* config, bool implib) const
 {

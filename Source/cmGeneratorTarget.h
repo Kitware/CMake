@@ -76,6 +76,10 @@ public:
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const char* config) const;
 
+  void GetFullNameComponents(std::string& prefix,
+                             std::string& base, std::string& suffix,
+                             const char* config=0, bool implib = false) const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
