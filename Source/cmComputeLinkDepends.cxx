@@ -547,9 +547,12 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
 //----------------------------------------------------------------------------
 void cmComputeLinkDepends::AddDirectLinkEntries()
 {
+  cmGeneratorTarget *gtgt = this->Target->GetMakefile()->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
   // Add direct link dependencies in this configuration.
-  cmTarget::LinkImplementation const* impl =
-    this->Target->GetLinkImplementation(this->Config, this->HeadTarget);
+  cmGeneratorTarget::LinkImplementation const* impl =
+    gtgt->GetLinkImplementation(this->Config, this->HeadTarget);
   this->AddLinkEntries(-1, impl->Libraries);
   for(std::vector<std::string>::const_iterator
         wi = impl->WrongConfigLibraries.begin();

@@ -185,6 +185,10 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(const char *config) const;
 
+  void GetDirectLinkLibraries(const char *config,
+                              std::vector<std::string> &libs,
+                              cmTarget *head) const;
+
   bool IsSystemIncludeDirectory(const char *dir, const char *config) const;
 
   /** Add the target output files to the global generator manifest.  */
@@ -298,6 +302,25 @@ public:
   const char* GetLinkerLanguage(const char* config = 0,
                                 cmTarget const* head = 0) const;
 
+  /** The link implementation specifies the direct library
+      dependencies needed by the object files of the target.  */
+  struct LinkImplementation
+  {
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+
+    // Libraries linked directly in this configuration.
+    std::vector<std::string> Libraries;
+
+    // Libraries linked directly in other configurations.
+    // Needed only for OLD behavior of CMP0003.
+    std::vector<std::string> WrongConfigLibraries;
+  };
+  typedef std::map<cmStdString, LinkImplementation> LinkImplMapType;
+
+  LinkImplementation const* GetLinkImplementation(const char* config,
+                                                  cmTarget const* head) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -322,11 +345,16 @@ private:
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable LinkInterfaceMapType LinkInterfaceMap;
   mutable bool PolicyWarnedCMP0022;
+  mutable LinkImplMapType LinkImplMap;
 
   std::string GetFullNameInternal(const char* config, bool implib) const;
   void GetFullNameInternal(const char* config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix) const;
+  void ComputeLinkImplementation(const char* config,
+                                 LinkImplementation& impl,
+                                 cmTarget const* head) const;
+
 
   typedef std::map<TargetConfigPair, LinkClosure> LinkClosureMapType;
   mutable LinkClosureMapType LinkClosureMap;
