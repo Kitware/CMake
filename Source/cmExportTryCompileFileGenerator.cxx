@@ -119,7 +119,7 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
     }
 }
 std::string
-cmExportTryCompileFileGenerator::InstallNameDir(cmTarget* target,
+cmExportTryCompileFileGenerator::InstallNameDir(cmGeneratorTarget* target,
                                                 const std::string& config)
 {
   std::string install_name_dir;

@@ -176,7 +176,7 @@ private:
 
   virtual void ReplaceInstallPrefix(std::string &input);
 
-  virtual std::string InstallNameDir(cmTarget* target,
+  virtual std::string InstallNameDir(cmGeneratorTarget* target,
                                      const std::string& config) = 0;
 };
 
