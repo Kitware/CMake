@@ -368,11 +368,6 @@ public:
   ///! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config = "") const;
 
-  /** Get the full name of the target according to the settings in its
-      makefile.  */
-  std::string GetFullName(const std::string& config="",
-                          bool implib = false) const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
 
@@ -575,11 +570,6 @@ private:
 
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
-  std::string GetFullNameInternal(const std::string& config,
-                                  bool implib) const;
-  void GetFullNameInternal(const std::string& config, bool implib,
-                           std::string& outPrefix, std::string& outBase,
-                           std::string& outSuffix) const;
 
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
