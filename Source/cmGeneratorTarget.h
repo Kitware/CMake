@@ -115,6 +115,15 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const std::string& config) const;
 
+  /** Return the install name directory for the target in the
+    * build tree.  For example: "\@rpath/", "\@loader_path/",
+    * or "/full/path/to/library".  */
+  std::string GetInstallNameDirForBuildTree(const std::string& config) const;
+
+  /** Return the install name directory for the target in the
+    * install tree.  For example: "\@rpath/" or "\@loader_path/". */
+  std::string GetInstallNameDirForInstallTree() const;
+
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const std::string& config) const;
 
