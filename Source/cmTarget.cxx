@@ -5401,45 +5401,6 @@ std::string cmTarget::GetAppBundleDirectory(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::BuildMacContentDirectory(const std::string& base,
-                                               const std::string& config,
-                                               bool contentOnly) const
-{
-  std::string fpath = base;
-  if(this->IsAppBundleOnApple())
-    {
-    fpath += this->GetAppBundleDirectory(config, contentOnly);
-    }
-  if(this->IsFrameworkOnApple())
-    {
-    fpath += this->GetFrameworkDirectory(config, contentOnly);
-    }
-  if(this->IsCFBundleOnApple())
-    {
-    fpath += this->GetCFBundleDirectory(config, contentOnly);
-    }
-  return fpath;
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetMacContentDirectory(const std::string& config,
-                                             bool implib) const
-{
-  // Start with the output directory for the target.
-  std::string fpath = this->GetDirectory(config, implib);
-  fpath += "/";
-  bool contentOnly = true;
-  if(this->IsFrameworkOnApple())
-    {
-    // additional files with a framework go into the version specific
-    // directory
-    contentOnly = false;
-    }
-  fpath = this->BuildMacContentDirectory(fpath, config, contentOnly);
-  return fpath;
-}
-
-//----------------------------------------------------------------------------
 cmTargetInternalPointer::cmTargetInternalPointer()
 {
   this->Pointer = new cmTargetInternals;
