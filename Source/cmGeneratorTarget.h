@@ -80,6 +80,15 @@ public:
                              std::string& base, std::string& suffix,
                              const char* config=0, bool implib = false) const;
 
+  /** Append to @a base the mac content directory and return it. */
+  std::string BuildMacContentDirectory(const std::string& base,
+                                       const char* config = 0,
+                                       bool contentOnly = true) const;
+
+  /** @return the mac content directory for this target. */
+  std::string GetMacContentDirectory(const char* config = 0,
+                                     bool implib = false) const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
