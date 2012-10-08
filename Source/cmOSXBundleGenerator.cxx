@@ -21,6 +21,7 @@ cmOSXBundleGenerator::
 cmOSXBundleGenerator(cmGeneratorTarget* target,
                      const char* configName)
  : Target(target->Target)
+ , GeneratorTarget(target)
  , Makefile(target->Target->GetMakefile())
  , LocalGenerator(Makefile->GetLocalGenerator())
  , ConfigName(configName)
@@ -215,7 +216,7 @@ cmOSXBundleGenerator::InitMacOSXContentDirectory(const char* pkgloc)
   // Construct the full path to the content subdirectory.
 
   std::string macdir =
-    this->Target->GetMacContentDirectory(this->ConfigName,
+    this->GeneratorTarget->GetMacContentDirectory(this->ConfigName,
                                          /*implib*/ false);
   macdir += "/";
   macdir += pkgloc;

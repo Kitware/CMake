@@ -457,10 +457,6 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib) const;
 
-  /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const char* config,
-                                     bool implib) const;
-
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
@@ -586,10 +582,6 @@ private:
 
   std::string ImportedGetFullPath(const char* config, bool implib) const;
 
-  /** Append to @a base the mac content directory and return it. */
-  std::string BuildMacContentDirectory(const std::string& base,
-                                       const char* config,
-                                       bool contentOnly) const;
 
 private:
   std::string Name;
