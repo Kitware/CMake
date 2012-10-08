@@ -893,7 +893,7 @@ cmExportFileGenerator
         {
         if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
           {
-          value = this->InstallNameDir(target->Target, config);
+          value = this->InstallNameDir(target, config);
           }
         prop = "IMPORTED_SONAME";
         value += target->GetSOName(config);
