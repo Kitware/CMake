@@ -196,6 +196,52 @@ public:
    */
   void TraceDependencies();
 
+  /** The link interface specifies transitive library dependencies and
+      other information needed by targets that link to this target.  */
+  struct LinkInterface
+  {
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+
+    // Libraries listed in the interface.
+    std::vector<std::string> Libraries;
+
+    // Shared library dependencies needed for linking on some platforms.
+    std::vector<std::string> SharedDeps;
+
+    // Number of repetitions of a strongly connected component of two
+    // or more static libraries.
+    int Multiplicity;
+
+    // Libraries listed for other configurations.
+    // Needed only for OLD behavior of CMP0003.
+    std::vector<std::string> WrongConfigLibraries;
+
+    bool ImplementationIsInterface;
+
+    LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
+  };
+
+  // Cache link interface computation from each configuration.
+  struct OptionalLinkInterface: public LinkInterface
+  {
+    OptionalLinkInterface(): Exists(false) {}
+    bool Exists;
+  };
+  typedef std::map<TargetConfigPair, OptionalLinkInterface>
+                                                        LinkInterfaceMapType;
+
+  /** Get the link interface for the given configuration.  Returns 0
+      if the target cannot be linked.  */
+  LinkInterface const* GetLinkInterface(const char* config,
+                                        cmTarget const*) const;
+  void GetTransitivePropertyLinkLibraries(const char* config,
+                                        cmTarget const *headTarget,
+                                        std::vector<std::string> &libs) const;
+
+  bool ComputeLinkInterface(const char* config, LinkInterface& iface,
+                                    cmTarget const*headTarget) const;
+
   void ClassifySources();
   void LookupObjectLibraries();
 
@@ -274,6 +320,8 @@ private:
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
   mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
+  mutable LinkInterfaceMapType LinkInterfaceMap;
+  mutable bool PolicyWarnedCMP0022;
 
   std::string GetFullNameInternal(const char* config, bool implib) const;
   void GetFullNameInternal(const char* config, bool implib,
