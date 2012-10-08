@@ -460,14 +460,6 @@ public:
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;
 
-  /** @return the Mac framework directory without the base. */
-  std::string GetFrameworkDirectory(const std::string& config,
-                                    bool rootDir) const;
-
-  /** @return the Mac CFBundle directory without the base */
-  std::string GetCFBundleDirectory(const std::string& config,
-                                   bool contentOnly) const;
-
   std::vector<std::string> GetIncludeDirectories(
                      const std::string& config,
                      const std::string& language) const;
