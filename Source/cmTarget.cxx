@@ -3587,20 +3587,6 @@ bool cmTarget::IsImportedSharedLibWithoutSOName(
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFullName(const std::string& config,
-                                  bool implib) const
-{
-  if(this->IsImported())
-    {
-    return this->GetFullNameImported(config, implib);
-    }
-  else
-    {
-    return this->GetFullNameInternal(config, implib);
-    }
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmTarget::GetFullNameImported(const std::string& config, bool implib) const
 {

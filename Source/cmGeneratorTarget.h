@@ -119,6 +119,11 @@ public:
   std::string GetAppBundleDirectory(const std::string& config,
                                     bool contentOnly) const;
 
+  /** Get the full name of the target according to the settings in its
+      makefile.  */
+  std::string GetFullName(const std::string& config="",
+                          bool implib = false) const;
+
   /** Return the install name directory for the target in the
     * build tree.  For example: "\@rpath/", "\@loader_path/",
     * or "/full/path/to/library".  */
