@@ -567,7 +567,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
 
   if(this->Target->IsAppBundleOnApple())
     {
-    std::string macdir = this->Target->BuildMacContentDirectory("", "",
+    std::string macdir = this->BuildMacContentDirectory("", "",
                                                                 false);
     if(!macdir.empty())
       {
@@ -1527,7 +1527,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
   fpath += "/";
   if(this->Target->IsAppBundleOnApple())
     {
-    fpath = this->Target->BuildMacContentDirectory(fpath, config, false);
+    fpath = this->BuildMacContentDirectory(fpath, config, false);
     fpath += "/";
     }
 
