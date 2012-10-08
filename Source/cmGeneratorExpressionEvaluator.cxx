@@ -1093,7 +1093,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     else if (std::find_if(transBegin, transEnd,
                           cmStrCmp(interfacePropertyName)) != transEnd)
       {
-      const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
+      const cmGeneratorTarget::LinkImplementation *impl =
+                                                  gtgt->GetLinkImplementation(
                                                     context->Config,
                                                     headTarget);
       if(impl)

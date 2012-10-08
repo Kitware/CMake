@@ -250,23 +250,6 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
-  /** The link implementation specifies the direct library
-      dependencies needed by the object files of the target.  */
-  struct LinkImplementation
-  {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-
-    // Libraries linked directly in this configuration.
-    std::vector<std::string> Libraries;
-
-    // Libraries linked directly in other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<std::string> WrongConfigLibraries;
-  };
-  LinkImplementation const* GetLinkImplementation(const char* config,
-                                                  cmTarget const* head) const;
-
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
   std::string CheckCMP0004(std::string const& item) const;
@@ -548,10 +531,6 @@ private:
                                         cmTarget const* workingTarget) const;
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
                                         cmTarget const* head) const;
-
-  void ComputeLinkImplementation(const char* config,
-                                 LinkImplementation& impl,
-                                 cmTarget const* head) const;
 
   void ClearLinkMaps();
 
