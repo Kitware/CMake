@@ -73,6 +73,10 @@ public:
                                 bool realname) const;
   std::string NormalGetRealName(const char* config) const;
 
+  /** Get the full name of the target according to the settings in its
+      makefile.  */
+  std::string GetFullName(const char* config=0, bool implib = false) const;
+
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const char* config, bool rootDir) const;
 

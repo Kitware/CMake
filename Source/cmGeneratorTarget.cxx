@@ -299,7 +299,7 @@ const char* cmGeneratorTarget::NormalGetLocation(const char* config) const
       }
     }
   location += "/";
-  location += this->Target->GetFullName(config, false);
+  location += this->GetFullName(config, false);
   return location.c_str();
 }
 
@@ -622,11 +622,25 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const char* config,
 std::string cmGeneratorTarget::GetAppBundleDirectory(const char* config,
                                             bool contentOnly) const
 {
-  std::string fpath = this->Target->GetFullName(config, false);
+  std::string fpath = this->GetFullName(config, false);
   fpath += ".app/Contents";
   if(!contentOnly)
     fpath += "/MacOS";
   return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetFullName(const char* config, bool implib) const
+{
+  if(this->Target->IsImported())
+    {
+    return this->Target->GetFullNameImported(config, implib);
+    }
+  else
+    {
+    return this->Target->GetFullNameInternal(config, implib);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2539,7 +2553,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const char* config,
   // Add the full name of the target.
   if(implib)
     {
-    fpath += this->Target->GetFullName(config, true);
+    fpath += this->GetFullName(config, true);
     }
   else if(realname)
     {
@@ -2547,7 +2561,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const char* config,
     }
   else
     {
-    fpath += this->Target->GetFullName(config, false);
+    fpath += this->GetFullName(config, false);
     }
   return fpath;
 }
