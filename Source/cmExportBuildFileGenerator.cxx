@@ -324,7 +324,7 @@ cmExportBuildFileGenerator
 }
 
 std::string
-cmExportBuildFileGenerator::InstallNameDir(cmTarget* target,
+cmExportBuildFileGenerator::InstallNameDir(cmGeneratorTarget* target,
                                            const std::string& config)
 {
   std::string install_name_dir;
