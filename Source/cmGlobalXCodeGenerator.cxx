@@ -2609,7 +2609,8 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     }
   else
     {
-    fullName = cmtarget.GetFullName(defConfig.c_str());
+    cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&cmtarget);
+    fullName = gtgt->GetFullName(defConfig.c_str());
     }
   fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("0"));
@@ -3571,7 +3572,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
             std::string universalFile = universal;
             universalFile += *arch;
             universalFile += "/";
-            universalFile += t->GetFullName(configName);
+            universalFile += gt->GetFullName(configName);
             makefileStream << "\t/bin/rm -f "
                            <<
               this->ConvertToRelativeForMake(universalFile.c_str())
