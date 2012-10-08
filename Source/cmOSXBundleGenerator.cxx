@@ -217,7 +217,7 @@ cmOSXBundleGenerator::InitMacOSXContentDirectory(const char* pkgloc)
   // Construct the full path to the content subdirectory.
 
   std::string macdir =
-    this->GT->Target->GetMacContentDirectory(this->ConfigName,
+    this->GT->GetMacContentDirectory(this->ConfigName,
                                          /*implib*/ false);
   macdir += "/";
   macdir += pkgloc;
