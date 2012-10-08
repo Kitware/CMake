@@ -1079,7 +1079,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
 
       std::vector<std::string> libs;
-      target->GetTransitivePropertyLinkLibraries(context->Config,
+      gtgt->GetTransitivePropertyLinkLibraries(context->Config,
                                                  headTarget, libs);
       if (!libs.empty())
         {

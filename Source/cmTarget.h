@@ -250,40 +250,6 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
-  /** The link interface specifies transitive library dependencies and
-      other information needed by targets that link to this target.  */
-  struct LinkInterface
-  {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-
-    // Libraries listed in the interface.
-    std::vector<std::string> Libraries;
-
-    // Shared library dependencies needed for linking on some platforms.
-    std::vector<std::string> SharedDeps;
-
-    // Number of repetitions of a strongly connected component of two
-    // or more static libraries.
-    int Multiplicity;
-
-    // Libraries listed for other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<std::string> WrongConfigLibraries;
-
-    bool ImplementationIsInterface;
-
-    LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
-  };
-
-  /** Get the link interface for the given configuration.  Returns 0
-      if the target cannot be linked.  */
-  LinkInterface const* GetLinkInterface(const char* config,
-                                        cmTarget const* headTarget) const;
-  void GetTransitivePropertyLinkLibraries(const char* config,
-                                        cmTarget const* headTarget,
-                                        std::vector<std::string> &libs) const;
-
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
   struct LinkImplementation
@@ -576,15 +542,11 @@ private:
     std::string Location;
     std::string SOName;
     std::string ImportLibrary;
-    cmTarget::LinkInterface LinkInterface;
+    cmGeneratorTarget::LinkInterface LinkInterface;
   };
   ImportInfo const* GetImportInfo(const char* config,
                                         cmTarget const* workingTarget) const;
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
-                                        cmTarget const* head) const;
-
-
-  bool ComputeLinkInterface(const char* config, LinkInterface& iface,
                                         cmTarget const* head) const;
 
   void ComputeLinkImplementation(const char* config,

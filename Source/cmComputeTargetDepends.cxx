@@ -278,8 +278,12 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                                std::set<cmStdString> &emitted)
 {
   cmTarget const* depender = this->Targets[depender_index];
-  if(cmTarget::LinkInterface const* iface =
-                                dependee->GetLinkInterface(config, depender))
+  cmGeneratorTarget *gtgt = depender->GetMakefile()->GetLocalGenerator()
+                                    ->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(dependee);
+
+  if(cmGeneratorTarget::LinkInterface const* iface =
+                                gtgt->GetLinkInterface(config, depender))
     {
     for(std::vector<std::string>::const_iterator
         lib = iface->Libraries.begin();

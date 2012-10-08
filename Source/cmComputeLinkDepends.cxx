@@ -353,8 +353,11 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
+    cmGeneratorTarget *gtgt = entry.Target->GetMakefile()->GetLocalGenerator()
+                                          ->GetGlobalGenerator()
+                                          ->GetGeneratorTarget(entry.Target);
+    if(cmGeneratorTarget::LinkInterface const* iface =
+       gtgt->GetLinkInterface(this->Config, this->HeadTarget))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -388,7 +391,8 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
 //----------------------------------------------------------------------------
 void
 cmComputeLinkDepends
-::FollowSharedDeps(int depender_index, cmTarget::LinkInterface const* iface,
+::FollowSharedDeps(int depender_index,
+                   cmGeneratorTarget::LinkInterface const* iface,
                    bool follow_interface)
 {
   // Follow dependencies if we have not followed them already.
@@ -452,8 +456,11 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
+    cmGeneratorTarget *gtgt = entry.Target->GetMakefile()->GetLocalGenerator()
+                                          ->GetGlobalGenerator()
+                                          ->GetGeneratorTarget(entry.Target);
+    if(cmGeneratorTarget::LinkInterface const* iface =
+       gtgt->GetLinkInterface(this->Config, this->HeadTarget))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -952,8 +959,11 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     {
     if(cmTarget const* target = this->EntryList[*ni].Target)
       {
-      if(cmTarget::LinkInterface const* iface =
-         target->GetLinkInterface(this->Config, this->HeadTarget))
+      cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                      ->GetGlobalGenerator()
+                                      ->GetGeneratorTarget(target);
+      if(cmGeneratorTarget::LinkInterface const* iface =
+         gtgt->GetLinkInterface(this->Config, this->HeadTarget))
         {
         if(iface->Multiplicity > count)
           {
