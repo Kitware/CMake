@@ -548,7 +548,7 @@ cmMakefileTargetGenerator
       this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
     targetFullPathPDB = this->Target->GetPDBDirectory(this->ConfigName);
     targetFullPathPDB += "/";
-    targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
+    targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
     }
   if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
     {

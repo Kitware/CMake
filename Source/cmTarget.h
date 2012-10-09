@@ -377,9 +377,6 @@ public:
                              const std::string& config="",
                              bool implib = false) const;
 
-  /** Get the name of the pdb file for the target.  */
-  std::string GetPDBName(const std::string& config) const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
 
