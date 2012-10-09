@@ -670,9 +670,19 @@ cmNinjaTargetGenerator
 
 void
 cmNinjaTargetGenerator
-::EnsureDirectoryExists(const std::string& dir) const
+::EnsureDirectoryExists(const std::string& path) const
 {
-  cmSystemTools::MakeDirectory(dir.c_str());
+  if (cmSystemTools::FileIsFullPath(path.c_str()))
+    {
+    cmSystemTools::MakeDirectory(path.c_str());
+    }
+  else
+    {
+    const std::string fullPath = std::string(this->GetGlobalGenerator()->
+                                 GetCMakeInstance()->GetHomeOutputDirectory())
+                                   + "/" + path;
+    cmSystemTools::MakeDirectory(fullPath.c_str());
+    }
 }
 
 void
