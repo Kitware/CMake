@@ -284,12 +284,6 @@ public:
    */
   bool FindSourceFiles();
 
-  /** Whether this library has \@rpath and platform supports it.  */
-  bool HasMacOSXRpathInstallNameDir(const char* config) const;
-
-  /** Whether this library defaults to \@rpath.  */
-  bool MacOSXRpathInstallNameDirDefault() const;
-
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const char* config) const;
