@@ -125,7 +125,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    this->Target->Target->GetExecutableNames(targetName, targetNameReal,
+    this->Target->GetExecutableNames(targetName, targetNameReal,
                                      targetNameImport, targetNamePDB,
                                      config);
     if(this->ImportLibrary)
@@ -372,13 +372,16 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
 {
   std::string fname;
   // Compute the name of the library.
+  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   if(target->GetType() == cmTarget::EXECUTABLE)
     {
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target->GetExecutableNames(targetName, targetNameReal,
+    gtgt->GetExecutableNames(targetName, targetNameReal,
                                targetNameImport, targetNamePDB,
                                config);
     if(nameType == NameImplib)
