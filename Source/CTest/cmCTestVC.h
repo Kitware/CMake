@@ -67,6 +67,9 @@ protected:
   virtual void NoteNewRevision();
   virtual bool WriteXMLUpdates(std::ostream& xml);
 
+#if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
+public: // Sun CC 5.1 needs help to allow cmCTestSVN::Revision to see this
+#endif
   /** Basic information about one revision of a tree or file.  */
   struct Revision
   {
@@ -80,6 +83,7 @@ protected:
     std::string Log;
   };
 
+protected:
   struct File;
   friend struct File;
 
