@@ -250,6 +250,11 @@ private:
   mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
 
+  std::string GetFullNameInternal(const char* config, bool implib) const;
+  void GetFullNameInternal(const char* config, bool implib,
+                           std::string& outPrefix, std::string& outBase,
+                           std::string& outSuffix) const;
+
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
 };

@@ -639,7 +639,7 @@ cmGeneratorTarget::GetFullName(const char* config, bool implib) const
     }
   else
     {
-    return this->Target->GetFullNameInternal(config, implib);
+    return this->GetFullNameInternal(config, implib);
     }
 }
 
@@ -730,7 +730,7 @@ void cmGeneratorTarget::GetFullNameComponents(std::string& prefix,
                                      std::string& suffix, const char* config,
                                      bool implib) const
 {
-  this->Target->GetFullNameInternal(config, implib, prefix, base, suffix);
+  this->GetFullNameInternal(config, implib, prefix, base, suffix);
 }
 
 //----------------------------------------------------------------------------
@@ -2652,7 +2652,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->Target->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, false, prefix, base, suffix);
 
   // The library name.
   name = prefix+base+suffix;
@@ -2681,7 +2681,7 @@ void cmGeneratorTarget::GetLibraryNames(std::string& name,
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    impName = this->Target->GetFullNameInternal(config, true);
+    impName = this->GetFullNameInternal(config, true);
     }
   else
     {
@@ -2727,7 +2727,7 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->Target->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, false, prefix, base, suffix);
 
   // The executable name.
   name = prefix+base+suffix;
@@ -2748,11 +2748,161 @@ void cmGeneratorTarget::GetExecutableNames(std::string& name,
 #endif
 
   // The import library name.
-  impName = this->Target->GetFullNameInternal(config, true);
+  impName = this->GetFullNameInternal(config, true);
 
   // The program database file name.
   pdbName = this->GetPDBName(config);
 }
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetFullNameInternal(const char* config, bool implib) const
+{
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(config, implib, prefix, base, suffix);
+  return prefix+base+suffix;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetFullNameInternal(const char* config,
+                                   bool implib,
+                                   std::string& outPrefix,
+                                   std::string& outBase,
+                                   std::string& outSuffix) const
+{
+  // Use just the target name for non-main target types.
+  if(this->GetType() != cmTarget::STATIC_LIBRARY &&
+     this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::EXECUTABLE)
+    {
+    outPrefix = "";
+    outBase = this->GetName();
+    outSuffix = "";
+    return;
+    }
+
+  // Return an empty name for the import library if this platform
+  // does not support import libraries.
+  if(implib &&
+     !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+    {
+    outPrefix = "";
+    outBase = "";
+    outSuffix = "";
+    return;
+    }
+
+  // The implib option is only allowed for shared libraries, module
+  // libraries, and executables.
+  if(this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::EXECUTABLE)
+    {
+    implib = false;
+    }
+
+  // Compute the full name for main target types.
+  const char* targetPrefix = (implib
+                              ? this->GetProperty("IMPORT_PREFIX")
+                              : this->GetProperty("PREFIX"));
+  const char* targetSuffix = (implib
+                              ? this->GetProperty("IMPORT_SUFFIX")
+                              : this->GetProperty("SUFFIX"));
+  const char* configPostfix = 0;
+  if(config && *config)
+    {
+    std::string configProp = cmSystemTools::UpperCase(config);
+    configProp += "_POSTFIX";
+    configPostfix = this->GetProperty(configProp.c_str());
+    // Mac application bundles and frameworks have no postfix.
+    if(configPostfix &&
+       (this->Target->IsAppBundleOnApple()
+         || this->Target->IsFrameworkOnApple()))
+      {
+      configPostfix = 0;
+      }
+    }
+  const char* prefixVar = this->Target->GetPrefixVariableInternal(implib);
+  const char* suffixVar = this->Target->GetSuffixVariableInternal(implib);
+
+  // Check for language-specific default prefix and suffix.
+  if(const char* ll = this->Target->GetLinkerLanguage(config, this->Target))
+    {
+    if(!targetSuffix && suffixVar && *suffixVar)
+      {
+      std::string langSuff = suffixVar + std::string("_") + ll;
+      targetSuffix = this->Makefile->GetDefinition(langSuff.c_str());
+      }
+    if(!targetPrefix && prefixVar && *prefixVar)
+      {
+      std::string langPrefix = prefixVar + std::string("_") + ll;
+      targetPrefix = this->Makefile->GetDefinition(langPrefix.c_str());
+      }
+    }
+
+  // if there is no prefix on the target use the cmake definition
+  if(!targetPrefix && prefixVar)
+    {
+    targetPrefix = this->Makefile->GetSafeDefinition(prefixVar);
+    }
+  // if there is no suffix on the target use the cmake definition
+  if(!targetSuffix && suffixVar)
+    {
+    targetSuffix = this->Makefile->GetSafeDefinition(suffixVar);
+    }
+
+  // frameworks have directory prefix but no suffix
+  std::string fw_prefix;
+  if(this->Target->IsFrameworkOnApple())
+    {
+    fw_prefix = this->Target->GetOutputName(config, false);
+    fw_prefix += ".framework/";
+    targetPrefix = fw_prefix.c_str();
+    targetSuffix = 0;
+    }
+
+  if(this->Target->IsCFBundleOnApple())
+    {
+    fw_prefix = this->Target->GetOutputName(config, false);
+    fw_prefix += ".";
+    const char *ext = this->GetProperty("BUNDLE_EXTENSION");
+    if (!ext)
+      {
+      ext = "bundle";
+      }
+    fw_prefix += ext;
+    fw_prefix += "/Contents/MacOS/";
+    targetPrefix = fw_prefix.c_str();
+    targetSuffix = 0;
+    }
+
+  // Begin the final name with the prefix.
+  outPrefix = targetPrefix?targetPrefix:"";
+
+  // Append the target name or property-specified name.
+  outBase += this->Target->GetOutputName(config, implib);
+
+  // Append the per-configuration postfix.
+  outBase += configPostfix?configPostfix:"";
+
+  // Name shared libraries with their version number on some platforms.
+  if(const char* soversion = this->GetProperty("SOVERSION"))
+    {
+    if(this->GetType() == cmTarget::SHARED_LIBRARY && !implib &&
+       this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
+      {
+      outBase += "-";
+      outBase += soversion;
+      }
+    }
+
+  // Append the suffix.
+  outSuffix = targetSuffix?targetSuffix:"";
+}
+
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetPDBName(const char* config) const
@@ -2760,7 +2910,7 @@ std::string cmGeneratorTarget::GetPDBName(const char* config) const
   std::string prefix;
   std::string base;
   std::string suffix;
-  this->Target->GetFullNameInternal(config, false, prefix, base, suffix);
+  this->GetFullNameInternal(config, false, prefix, base, suffix);
 
   std::vector<std::string> props;
   std::string configUpper =
