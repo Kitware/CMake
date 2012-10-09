@@ -1,0 +1,6 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<TARGET_PROPERTY:,ValidProperty>
+
+  \$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty target name.

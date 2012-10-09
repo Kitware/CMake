@@ -173,7 +173,7 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    return *parameters.begin() == parameters.at(1) ? "1" : "0";
+    return *parameters.begin() == parameters[1] ? "1" : "0";
   }
 } strEqualNode;
 
@@ -237,11 +237,6 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    if (!context->Config)
-      {
-      return std::string();
-      }
-
     cmsys::RegularExpression configValidator;
     configValidator.compile("^[A-Za-z0-9_]*$");
     if (!configValidator.find(parameters.begin()->c_str()))
@@ -250,6 +245,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                   "Expression syntax not recognized.");
       return std::string();
       }
+    if (!context->Config)
+      {
+      return parameters.front().empty() ? "1" : "0";
+      }
+
     return *parameters.begin() == context->Config ? "1" : "0";
   }
 } configurationTestNode;
@@ -274,22 +274,69 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "$<TARGET_PROPERTY:...> expression requires one or two parameters");
       return std::string();
       }
+    cmsys::RegularExpression nameValidator;
+    nameValidator.compile("^[A-Za-z0-9_.-]+$");
+
     cmGeneratorTarget* target = context->Target;
     std::string propertyName = *parameters.begin();
     if (parameters.size() == 2)
       {
+      if (parameters.begin()->empty() && parameters[1].empty())
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+            "target name and property name.");
+        return std::string();
+        }
+      if (parameters.begin()->empty())
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "$<TARGET_PROPERTY:tgt,prop> expression requires a non-empty "
+            "target name.");
+        return std::string();
+        }
+
+      std::string targetName = parameters.front();
+      propertyName = parameters[1];
+      if (!nameValidator.find(targetName.c_str()))
+        {
+        if (!nameValidator.find(propertyName.c_str()))
+          {
+          ::reportError(context, content->GetOriginalExpression(),
+                        "Target name and property name not supported.");
+          return std::string();
+          }
+        ::reportError(context, content->GetOriginalExpression(),
+                      "Target name not supported.");
+        return std::string();
+        }
       target = context->Makefile->FindGeneratorTargetToUse(
-                                                parameters.begin()->c_str());
+                                                targetName.c_str());
 
       if (!target)
         {
         cmOStringStream e;
         e << "Target \""
-          << target
+          << targetName
           << "\" not found.";
         reportError(context, content->GetOriginalExpression(), e.str());
+        return std::string();
         }
-      propertyName = parameters.at(1);
+      }
+
+    if (propertyName.empty())
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:...> expression requires a non-empty property "
+          "name.");
+      return std::string();
+      }
+
+    if (!nameValidator.find(propertyName.c_str()))
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Property name not supported.");
+      return std::string();
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
