@@ -127,6 +127,9 @@ If neither the QUIET nor REQUIRED options are given then the
 FindXXX.cmake module should look for the package and complain without
 error if the module is not found.
 
+FIND_PACKAGE() will set the variable CMAKE_FIND_PACKAGE_NAME to
+contain the actual name of the package.
+
 A package can provide sub-components.
 Those components can be listed after the COMPONENTS (or REQUIRED)
 or OPTIONAL_COMPONENTS keywords.  The set of all listed components will be
