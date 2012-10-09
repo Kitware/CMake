@@ -54,7 +54,7 @@
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
-# Copyright 2008-2009 Philip Lowman <philip@yhbt.com>
+# Copyright 2008-2012 Philip Lowman <philip@yhbt.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -66,10 +66,13 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Version 1.4 (10/4/2012) (CMake 2.8.10)
+#   * 12596: Missing paths for FindGTK2 on NetBSD
+#   * 12049: Fixed detection of GTK include files in the lib folder on
+#            multiarch systems.
 # Version 1.3 (11/9/2010) (CMake 2.8.4)
 #   * 11429: Add support for detecting GTK2 built with Visual Studio 10.
 #            Thanks to Vincent Levesque for the patch.
-
 # Version 1.2 (8/30/2010) (CMake 2.8.3)
 #   * Merge patch for detecting gdk-pixbuf library (split off
 #     from core GTK in 2.21).  Thanks to Vincent Untz for the patch
@@ -151,7 +154,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
                        "_GTK2_FIND_INCLUDE_DIR( ${_var} ${_hdr} )")
     endif()
 
-    set(_relatives
+    set(_gtk_packages
         # If these ever change, things will break.
         ${GTK2_ADDITIONAL_SUFFIXES}
         glibmm-2.4
@@ -172,8 +175,15 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         sigc++-2.0
     )
 
-    set(_suffixes include lib)
-    foreach(_d ${_relatives})
+    #
+    # NOTE: The following suffixes cause searching for header files in both of
+    # these directories:
+    #         /usr/include/<pkg>
+    #         /usr/lib/<pkg>/include
+    #
+
+    set(_suffixes)
+    foreach(_d ${_gtk_packages})
         list(APPEND _suffixes ${_d})
         list(APPEND _suffixes ${_d}/include) # for /usr/lib/gtk-2.0/include
     endforeach()
@@ -183,18 +193,35 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
                        "include suffixes = ${_suffixes}")
     endif()
 
+    if(CMAKE_LIBRARY_ARCHITECTURE)
+      set(_gtk2_arch_dir /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE})
+      if(GTK2_DEBUG)
+        message(STATUS "Adding ${_gtk2_arch_dir} to search path for multiarch support")
+      endif()
+    endif()
     find_path(${_var} ${_hdr}
         PATHS
+            ${_gtk2_arch_dir}
             /usr/local/lib64
+            /usr/local/lib
             /usr/lib64
-            /opt/gnome
-            /opt/openwin
-            /usr/openwin
-            /sw
-            /opt/local
-            ENV GTKMM_BASEPATH
-            [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
-            [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+            /usr/lib
+            /opt/gnome/include
+            /opt/gnome/lib
+            /opt/openwin/include
+            /usr/openwin/lib
+            /sw/include
+            /sw/lib
+            /opt/local/include
+            /opt/local/lib
+            /usr/pkg/lib
+            /usr/pkg/include/glib
+            $ENV{GTKMM_BASEPATH}/include
+            $ENV{GTKMM_BASEPATH}/lib
+            [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/include
+            [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/lib
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]/include
+            [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]/lib
         PATH_SUFFIXES
             ${_suffixes}
     )
