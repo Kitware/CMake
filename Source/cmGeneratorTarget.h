@@ -160,6 +160,9 @@ public:
   std::vector<cmSourceFile*> const*
   GetSourceDepends(cmSourceFile const* sf) const;
 
+  /** Get the name of the pdb file for the target.  */
+  std::string GetPDBName(const std::string& config="") const;
+
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const std::string& config) const;
 
