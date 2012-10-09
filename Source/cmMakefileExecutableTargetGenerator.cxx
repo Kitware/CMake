@@ -25,7 +25,7 @@ cmMakefileExecutableTargetGenerator
   cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
-  this->Target->GetExecutableNames(
+  this->GeneratorTarget->GetExecutableNames(
     this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
     this->TargetNamePDB, this->ConfigName);
 
@@ -94,7 +94,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetNameReal;
   std::string targetNameImport;
   std::string targetNamePDB;
-  this->Target->GetExecutableNames
+  this->GeneratorTarget->GetExecutableNames
     (targetName, targetNameReal, targetNameImport, targetNamePDB,
      this->ConfigName);
 

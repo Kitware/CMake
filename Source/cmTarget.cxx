@@ -3968,68 +3968,6 @@ void cmTarget::ComputeVersionedName(std::string& vName,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetExecutableNames(std::string& name,
-                                  std::string& realName,
-                                  std::string& impName,
-                                  std::string& pdbName,
-                                  const std::string& config) const
-{
-  // This should not be called for imported targets.
-  // TODO: Split cmTarget into a class hierarchy to get compile-time
-  // enforcement of the limited imported target API.
-  if(this->IsImported())
-    {
-    std::string msg =
-      "GetExecutableNames called on imported target: ";
-    msg += this->GetName();
-    this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
-    }
-
-  // This versioning is supported only for executables and then only
-  // when the platform supports symbolic links.
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  const char* version = 0;
-#else
-  // Check for executable version properties.
-  const char* version = this->GetProperty("VERSION");
-  if(this->GetType() != cmTarget::EXECUTABLE || this->Makefile->IsOn("XCODE"))
-    {
-    version = 0;
-    }
-#endif
-
-  // Get the components of the executable name.
-  std::string prefix;
-  std::string base;
-  std::string suffix;
-  this->GetFullNameInternal(config, false, prefix, base, suffix);
-
-  // The executable name.
-  name = prefix+base+suffix;
-
-  // The executable's real name on disk.
-#if defined(__CYGWIN__)
-  realName = prefix+base;
-#else
-  realName = name;
-#endif
-  if(version)
-    {
-    realName += "-";
-    realName += version;
-    }
-#if defined(__CYGWIN__)
-  realName += suffix;
-#endif
-
-  // The import library name.
-  impName = this->GetFullNameInternal(config, true);
-
-  // The program database file name.
-  pdbName = this->GetPDBName(config);
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HasImplibGNUtoMS() const
 {
   return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
