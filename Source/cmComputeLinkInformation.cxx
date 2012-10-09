@@ -1778,7 +1778,10 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
   // @loader_path or full paths.
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    if(!target->HasMacOSXRpathInstallNameDir(this->Config))
+    cmGeneratorTarget *gtgt = this->Target->GetMakefile()->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(target);
+    if(!gtgt->HasMacOSXRpathInstallNameDir(this->Config))
       {
       return;
       }
