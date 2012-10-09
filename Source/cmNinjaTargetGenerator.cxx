@@ -322,7 +322,7 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       {
       pdbPath = this->Target->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
-      pdbPath += this->Target->GetPDBName(this->GetConfigName());
+      pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
       }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
