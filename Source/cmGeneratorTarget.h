@@ -145,6 +145,9 @@ public:
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
+  /** Get the name of the pdb file for the target.  */
+  std::string GetPDBName(const char* config=0) const;
+
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const char* config) const;
 
