@@ -570,11 +570,6 @@ private:
 
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
-  std::string GetFullNameInternal(const std::string& config,
-                                  bool implib) const;
-  void GetFullNameInternal(const std::string& config, bool implib,
-                           std::string& outPrefix, std::string& outBase,
-                           std::string& outSuffix) const;
 
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
