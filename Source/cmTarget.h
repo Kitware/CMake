@@ -380,13 +380,6 @@ public:
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const char* config) const;
 
-  /** Get the names of the library needed to generate a build rule
-      that takes into account shared library version numbers.  This
-      should be called only on a library target.  */
-  void GetLibraryNames(std::string& name, std::string& soName,
-                       std::string& realName, std::string& impName,
-                       std::string& pdbName, const char* config) const;
-
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS() const;
 
