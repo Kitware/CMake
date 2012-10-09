@@ -284,6 +284,11 @@ private:
 
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
 
+  std::string GetFullNameInternal(const std::string& config, bool implib) const;
+  void GetFullNameInternal(const std::string& config, bool implib,
+                           std::string& outPrefix, std::string& outBase,
+                           std::string& outSuffix) const;
+
   struct CompatibleInterfacesBase
   {
     std::set<std::string> PropsBool;
