@@ -163,6 +163,13 @@ public:
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const char *config) const;
 
+  /** Get the names of the executable needed to generate a build rule
+      that takes into account executable version numbers.  This should
+      be called only on an executable target.  */
+  void GetExecutableNames(std::string& name, std::string& realName,
+                          std::string& impName,
+                          std::string& pdbName, const char* config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
