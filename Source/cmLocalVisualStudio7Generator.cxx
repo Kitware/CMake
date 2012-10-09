@@ -1144,7 +1144,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string targetNameFull;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
+    gt->GetLibraryNames(targetName, targetNameSO, targetNameFull,
                            targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.

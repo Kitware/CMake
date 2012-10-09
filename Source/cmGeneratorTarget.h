@@ -191,6 +191,13 @@ public:
                           std::string& impName, std::string& pdbName,
                           const std::string& config) const;
 
+  /** Get the names of the library needed to generate a build rule
+      that takes into account shared library version numbers.  This
+      should be called only on a library target.  */
+  void GetLibraryNames(std::string& name, std::string& soName,
+                       std::string& realName, std::string& impName,
+                       std::string& pdbName, const std::string& config) const;
+
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
