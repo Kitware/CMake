@@ -88,6 +88,7 @@
 #if !defined(CMAKE_BOOT_MINGW)
 # include "cmExtraCodeBlocksGenerator.h"
 #endif
+#include "cmExtraSublimeTextGenerator.h"
 
 #ifdef CMAKE_USE_KDEVELOP
 # include "cmGlobalKdevelopGenerator.h"
@@ -1856,6 +1857,8 @@ void cmake::AddDefaultExtraGenerators()
 
   this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(),
                           &cmExtraCodeBlocksGenerator::New);
+  this->AddExtraGenerator(cmExtraSublimeTextGenerator::GetActualName(),
+                          &cmExtraSublimeTextGenerator::New);
 
 #ifdef CMAKE_USE_ECLIPSE
   this->AddExtraGenerator(cmExtraEclipseCDT4Generator::GetActualName(),
