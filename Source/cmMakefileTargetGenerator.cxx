@@ -63,7 +63,7 @@ cmMakefileTargetGenerator::~cmMakefileTargetGenerator()
 }
 
 cmMakefileTargetGenerator *
-cmMakefileTargetGenerator::New(cmTarget *tgt)
+cmMakefileTargetGenerator::New(cmGeneratorTarget *tgt)
 {
   cmMakefileTargetGenerator *result = 0;
 
