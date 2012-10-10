@@ -21,6 +21,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
+class cmGeneratorTarget;
 class cmOrderDirectories;
 
 /** \class cmComputeLinkInformation
@@ -75,7 +76,7 @@ private:
 
   // Context information.
   cmTarget const* Target;
-  cmTarget const* HeadTarget;
+  cmGeneratorTarget const* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;

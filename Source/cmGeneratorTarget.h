@@ -34,6 +34,11 @@ struct cmTargetLinkInformationMap:
   ~cmTargetLinkInformationMap();
 };
 
+struct TargetConfigPair : public std::pair<cmTarget const*, std::string> {
+  TargetConfigPair(cmTarget const* tgt, const std::string &config)
+    : std::pair<cmTarget const*, std::string>(tgt, config) {}
+};
+
 class cmGeneratorTarget
 {
 public:
@@ -118,6 +123,22 @@ public:
   cmGlobalGenerator* GlobalGenerator;
 
   std::string ModuleDefinitionFile;
+
+  /** Link information from the transitive closure of the link
+      implementation and the interfaces of its dependencies.  */
+  struct LinkClosure
+  {
+    // The preferred linker language.
+    std::string LinkerLanguage;
+
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+  };
+
+  LinkClosure const* GetLinkClosure(const char* config,
+                                    cmTarget const* head) const;
+  void ComputeLinkClosure(const char* config, LinkClosure& lc,
+                          cmTarget const* head) const;
 
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
@@ -258,6 +279,9 @@ private:
   void GetFullNameInternal(const char* config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix) const;
+
+  typedef std::map<TargetConfigPair, LinkClosure> LinkClosureMapType;
+  mutable LinkClosureMapType LinkClosureMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
