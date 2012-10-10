@@ -21,11 +21,12 @@
 
 class cmSourceFile;
 class cmOSXBundleGenerator;
+class cmGeneratorTarget;
 
 class cmNinjaNormalTargetGenerator : public cmNinjaTargetGenerator
 {
 public:
-  cmNinjaNormalTargetGenerator(cmTarget* target);
+  cmNinjaNormalTargetGenerator(cmGeneratorTarget* target);
   ~cmNinjaNormalTargetGenerator();
 
   void Generate();

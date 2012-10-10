@@ -18,10 +18,10 @@
 
 //----------------------------------------------------------------------------
 cmOSXBundleGenerator::
-cmOSXBundleGenerator(cmTarget* target,
+cmOSXBundleGenerator(cmGeneratorTarget* target,
                      const char* configName)
- : Target(target)
- , Makefile(target->GetMakefile())
+ : Target(target->Target)
+ , Makefile(target->Target->GetMakefile())
  , LocalGenerator(Makefile->GetLocalGenerator())
  , ConfigName(configName)
  , MacContentFolders(0)
