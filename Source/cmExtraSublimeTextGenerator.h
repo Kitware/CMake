@@ -54,7 +54,8 @@ private:
                     const char* make,
                     const cmMakefile* makefile,
                     const char* compiler,
-                    bool firstTarget = true);
+                    std::set<std::string>& includeDirs,
+                    std::set<std::string>& defines, bool firstTarget);
 
 };
 
