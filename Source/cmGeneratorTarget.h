@@ -165,6 +165,20 @@ public:
 
   std::string GetModuleDefinitionFile(const std::string& config) const;
 
+  /** Link information from the transitive closure of the link
+      implementation and the interfaces of its dependencies.  */
+  struct LinkClosure
+  {
+    // The preferred linker language.
+    std::string LinkerLanguage;
+
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+  };
+
+  LinkClosure const* GetLinkClosure(const std::string& config) const;
+  void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
+
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
       time config name placeholder if needed for the generator.  */
@@ -300,6 +314,9 @@ private:
   void GetFullNameInternal(const std::string& config, bool implib,
                            std::string& outPrefix, std::string& outBase,
                            std::string& outSuffix) const;
+
+  typedef std::map<std::string, LinkClosure> LinkClosureMapType;
+  mutable LinkClosureMapType LinkClosureMap;
 
   struct CompatibleInterfacesBase
   {

@@ -20,6 +20,7 @@ class cmake;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmTarget;
+class cmGeneratorTarget;
 class cmOrderDirectories;
 
 /** \class cmComputeLinkInformation
