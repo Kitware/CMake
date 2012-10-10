@@ -77,8 +77,21 @@ public:
   /** Add the target output files to the global generator manifest.  */
   void GenerateTargetManifest(const char* config);
 
+  /**
+   * Trace through the source files in this target and add al source files
+   * that they depend on, used by all generators
+   */
+  void TraceDependencies();
+
   void ClassifySources();
   void LookupObjectLibraries();
+
+  /** Get sources that must be built before the given source.  */
+  std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf);
+
+  struct SourceEntry { std::vector<cmSourceFile*> Depends; };
+  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
+  SourceEntriesType SourceEntries;
 
 private:
   std::map<std::string, std::vector<std::string> > SystemIncludesCache;
