@@ -27,6 +27,13 @@
 #include <errno.h>
 #include "assert.h"
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/hash_set.hxx>
+#define UNORDERED_SET cmsys::hash_set
+#else
+#define UNORDERED_SET std::set
+#endif
+
 //----------------------------------------------------------------------------
 void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
                      cmTarget *target, cmake *cm)
@@ -1022,6 +1029,223 @@ std::string cmGeneratorTarget::GetInstallNameDirForInstallTree() const
   else
     {
     return "";
+    }
+}
+
+//----------------------------------------------------------------------------
+class cmTargetCollectLinkLanguages
+{
+public:
+  cmTargetCollectLinkLanguages(cmGeneratorTarget const* target,
+                               const std::string& config,
+                               UNORDERED_SET<std::string>& languages,
+                               cmTarget const* head):
+    Config(config), Languages(languages), HeadTarget(head),
+    Makefile(target->Target->GetMakefile()), Target(target)
+  { this->Visited.insert(target->Target); }
+
+  void Visit(cmLinkItem const& item)
+    {
+    if(!item.Target)
+      {
+      if(item.find("::") != std::string::npos)
+        {
+        bool noMessage = false;
+        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        std::stringstream e;
+        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
+          {
+          case cmPolicies::WARN:
+            {
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0028) << "\n";
+            messageType = cmake::AUTHOR_WARNING;
+            }
+            break;
+          case cmPolicies::OLD:
+            noMessage = true;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            // Issue the fatal message.
+            break;
+          }
+
+        if(!noMessage)
+          {
+          e << "Target \"" << this->Target->GetName()
+            << "\" links to target \"" << item
+            << "\" but the target was not found.  Perhaps a find_package() "
+            "call is missing for an IMPORTED target, or an ALIAS target is "
+            "missing?";
+          this->Makefile->GetCMakeInstance()->IssueMessage(
+            messageType, e.str(), this->Target->Target->GetBacktrace());
+          }
+        }
+      return;
+      }
+    if(!this->Visited.insert(item.Target).second)
+      {
+      return;
+      }
+
+    cmTarget::LinkInterface const* iface =
+      item.Target->GetLinkInterface(this->Config, this->HeadTarget);
+    if(!iface) { return; }
+
+    for(std::vector<std::string>::const_iterator
+          li = iface->Languages.begin(); li != iface->Languages.end(); ++li)
+      {
+      this->Languages.insert(*li);
+      }
+
+    for(std::vector<cmLinkItem>::const_iterator
+          li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
+      {
+      this->Visit(*li);
+      }
+    }
+private:
+  std::string Config;
+  UNORDERED_SET<std::string>& Languages;
+  cmTarget const* HeadTarget;
+  cmMakefile* Makefile;
+  const cmGeneratorTarget* Target;
+  std::set<cmTarget const*> Visited;
+};
+
+//----------------------------------------------------------------------------
+cmGeneratorTarget::LinkClosure const*
+cmGeneratorTarget::GetLinkClosure(const std::string& config) const
+{
+  std::string key(cmSystemTools::UpperCase(config));
+  LinkClosureMapType::iterator
+    i = this->LinkClosureMap.find(key);
+  if(i == this->LinkClosureMap.end())
+    {
+    LinkClosure lc;
+    this->ComputeLinkClosure(config, lc);
+    LinkClosureMapType::value_type entry(key, lc);
+    i = this->LinkClosureMap.insert(entry).first;
+    }
+  return &i->second;
+}
+
+//----------------------------------------------------------------------------
+class cmTargetSelectLinker
+{
+  int Preference;
+  cmGeneratorTarget const* Target;
+  cmMakefile* Makefile;
+  cmGlobalGenerator* GG;
+  std::set<std::string> Preferred;
+public:
+  cmTargetSelectLinker(cmGeneratorTarget const* target)
+      : Preference(0), Target(target)
+    {
+    this->Makefile = this->Target->Makefile;
+    this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+    }
+  void Consider(const char* lang)
+    {
+    int preference = this->GG->GetLinkerPreference(lang);
+    if(preference > this->Preference)
+      {
+      this->Preference = preference;
+      this->Preferred.clear();
+      }
+    if(preference == this->Preference)
+      {
+      this->Preferred.insert(lang);
+      }
+    }
+  std::string Choose()
+    {
+    if(this->Preferred.empty())
+      {
+      return "";
+      }
+    else if(this->Preferred.size() > 1)
+      {
+      std::stringstream e;
+      e << "Target " << this->Target->GetName()
+        << " contains multiple languages with the highest linker preference"
+        << " (" << this->Preference << "):\n";
+      for(std::set<std::string>::const_iterator
+            li = this->Preferred.begin(); li != this->Preferred.end(); ++li)
+        {
+        e << "  " << *li << "\n";
+        }
+      e << "Set the LINKER_LANGUAGE property for this target.";
+      cmake* cm = this->Makefile->GetCMakeInstance();
+      cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                       this->Target->Target->GetBacktrace());
+      }
+    return *this->Preferred.begin();
+    }
+};
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
+                                           LinkClosure& lc) const
+{
+  // Get languages built in this target.
+  UNORDERED_SET<std::string> languages;
+  cmTarget::LinkImplementation const* impl =
+                            this->Target->GetLinkImplementation(config);
+  for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
+      li != impl->Languages.end(); ++li)
+    {
+    languages.insert(*li);
+    }
+
+  // Add interface languages from linked targets.
+  cmTargetCollectLinkLanguages cll(this, config, languages, this->Target);
+  for(std::vector<cmLinkImplItem>::const_iterator li = impl->Libraries.begin();
+      li != impl->Libraries.end(); ++li)
+    {
+    cll.Visit(*li);
+    }
+
+  // Store the transitive closure of languages.
+  for(UNORDERED_SET<std::string>::const_iterator li = languages.begin();
+      li != languages.end(); ++li)
+    {
+    lc.Languages.push_back(*li);
+    }
+
+  // Choose the language whose linker should be used.
+  if(this->GetProperty("HAS_CXX"))
+    {
+    lc.LinkerLanguage = "CXX";
+    }
+  else if(const char* linkerLang = this->GetProperty("LINKER_LANGUAGE"))
+    {
+    lc.LinkerLanguage = linkerLang;
+    }
+  else
+    {
+    // Find the language with the highest preference value.
+    cmTargetSelectLinker tsl(this);
+
+    // First select from the languages compiled directly in this target.
+    for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
+        li != impl->Languages.end(); ++li)
+      {
+      tsl.Consider(li->c_str());
+      }
+
+    // Now consider languages that propagate from linked targets.
+    for(UNORDERED_SET<std::string>::const_iterator sit = languages.begin();
+        sit != languages.end(); ++sit)
+      {
+      std::string propagates = "CMAKE_"+*sit+"_LINKER_PREFERENCE_PROPAGATES";
+      if(this->Makefile->IsOn(propagates))
+        {
+        tsl.Consider(sit->c_str());
+        }
+      }
+
+    lc.LinkerLanguage = tsl.Choose();
     }
 }
 
@@ -2058,7 +2282,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
 std::string
 cmGeneratorTarget::GetLinkerLanguage(const std::string& config) const
 {
-  return this->Target->GetLinkClosure(config)->LinkerLanguage;
+  return this->GetLinkClosure(config)->LinkerLanguage;
 }
 
 //----------------------------------------------------------------------------
