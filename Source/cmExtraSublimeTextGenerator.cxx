@@ -234,11 +234,17 @@ void cmExtraSublimeTextGenerator
   // Write the beginning of the build systems section to the project file
   fout << ",\n\t\"build_systems\":\n\t[\n\t";
 
+  // Set of include directories over all targets (sublime text/sublimeclang
+  // doesn't currently support these settings per build system, only project
+  // wide
+  std::set<std::string> includeDirs;
+  std::set<std::string> defines;
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler = "";
-  this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str(), true);
+  this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str(),
+                     includeDirs, defines, true);
   this->AppendTarget(fout, "clean", 0, make.c_str(), mf, compiler.c_str(),
-                     false);
+                     includeDirs, defines, false);
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
@@ -281,7 +287,7 @@ void cmExtraSublimeTextGenerator
             {
             this->AppendTarget(fout, ti->first.c_str(), 0,
                                make.c_str(), makefile, compiler.c_str(),
-                               false);
+                               includeDirs, defines, false);
             }
           }
           break;
@@ -297,7 +303,8 @@ void cmExtraSublimeTextGenerator
             }
 
           this->AppendTarget(fout, ti->first.c_str(), 0,
-                             make.c_str(), makefile, compiler.c_str(), false);
+                             make.c_str(), makefile, compiler.c_str(),
+                             includeDirs, defines, false);
           break;
         case cmTarget::EXECUTABLE:
         case cmTarget::STATIC_LIBRARY:
@@ -306,11 +313,13 @@ void cmExtraSublimeTextGenerator
         case cmTarget::OBJECT_LIBRARY:
           {
           this->AppendTarget(fout, ti->first.c_str(), &ti->second,
-                             make.c_str(), makefile, compiler.c_str(), false);
+                             make.c_str(), makefile, compiler.c_str(),
+                             includeDirs, defines, false);
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
           this->AppendTarget(fout, fastTarget.c_str(), &ti->second,
-                             make.c_str(), makefile, compiler.c_str(), false);
+                             make.c_str(), makefile, compiler.c_str(),
+                             includeDirs, defines, false);
           }
           break;
         default:
@@ -319,7 +328,41 @@ void cmExtraSublimeTextGenerator
       }
     }
   // End of build_systems
-  fout << "\n\t]\n";
+  fout << "\n\t]";
+
+  // Write the settings section with sublimeclang options
+  fout << ",\n\t\"settings\":\n\t{\n\t";
+  fout << "\t\"sublimeclang_options\":\n\t\t[\n\t\t";
+  std::set<std::string>::const_iterator stringSetIter = includeDirs.begin();
+  while (stringSetIter != includeDirs.end())
+    {
+    const std::string &includeDir = *stringSetIter;
+    const std::string &relative = cmSystemTools::RelativePath(
+                       lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
+                       includeDir.c_str());
+    fout << "\t\"-I" << relative << "\"";
+    stringSetIter++;
+    if (stringSetIter != includeDirs.end())
+      {
+      fout << ",";
+      }
+    fout << "\n\t\t";
+  }
+  stringSetIter = defines.begin();
+  while (stringSetIter != defines.end())
+    {
+    fout << "\t\"-D" << *stringSetIter << "\"";
+    stringSetIter++;
+    if (stringSetIter != defines.end())
+      {
+      fout << ",";
+      }
+    fout << "\n\t\t";
+  }
+  // End of the sublimeclang_options section
+  fout << "]\n\t";
+  // End of the settings section
+  fout << "}\n";
 
   // End of file
   fout << "}";
@@ -332,8 +375,72 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               const char* make,
                                               const cmMakefile* makefile,
                                               const char* compiler,
+                                              std::set<std::string>&
+                                                              includeDirs,
+                                              std::set<std::string>& defines,
                                               bool firstTarget)
 {
+  if (target != 0)
+    {
+      // the compilerdefines for this target
+      cmGeneratorTarget *gtgt = this->GlobalGenerator
+                                    ->GetGeneratorTarget(target);
+      std::string cdefs = gtgt->GetCompileDefinitions();
+
+      if(cdefs.empty())
+        {
+        // Expand the list.
+        std::vector<std::string> defs;
+        cmSystemTools::ExpandListArgument(cdefs.c_str(), defs);
+        for(std::vector<std::string>::const_iterator di = defs.begin();
+            di != defs.end(); ++di)
+          {
+          cmXMLSafe safedef(di->c_str());
+          defines.insert(safedef.str());
+          }
+        }
+
+      // the include directories for this target
+      std::vector<std::string> includes;
+      target->GetMakefile()->GetLocalGenerator()->
+        GetIncludeDirectories(includes, gtgt);
+      for(std::vector<std::string>::const_iterator dirIt=includes.begin();
+          dirIt != includes.end();
+          ++dirIt)
+        {
+        includeDirs.insert(*dirIt);
+        }
+
+      std::string systemIncludeDirs = makefile->GetSafeDefinition(
+                                "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
+      if (!systemIncludeDirs.empty())
+        {
+        std::vector<std::string> dirs;
+        cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+        for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
+            dirIt != dirs.end();
+            ++dirIt)
+          {
+          includeDirs.insert(*dirIt);
+          }
+        }
+
+      systemIncludeDirs = makefile->GetSafeDefinition(
+                            "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
+      if (!systemIncludeDirs.empty())
+        {
+        std::vector<std::string> dirs;
+        cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+        for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
+            dirIt != dirs.end();
+            ++dirIt)
+          {
+          includeDirs.insert(*dirIt);
+          }
+        }
+    }
+
+  // Write out the build_system data for this target
   std::string makefileName = makefile->GetStartOutputDirectory();
   makefileName += "/Makefile";
   if (!firstTarget)
