@@ -21,11 +21,12 @@
 class cmTarget;
 class cmMakefile;
 class cmLocalGenerator;
+class cmGeneratorTarget;
 
 class cmOSXBundleGenerator
 {
 public:
-  cmOSXBundleGenerator(cmTarget* target,
+  cmOSXBundleGenerator(cmGeneratorTarget* target,
                        const char* configName);
 
   // create an app bundle at a given root, and return

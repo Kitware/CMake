@@ -64,18 +64,20 @@ void cmLocalNinjaGenerator::Generate()
       }
     }
 
-  cmTargets& targets = this->GetMakefile()->GetTargets();
-  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+  cmGeneratorTargetsType targets = this->GetMakefile()->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(&t->second);
+      if (t->first->IsImported())
+        continue;
+    cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(t->second);
     if(tg)
       {
       tg->Generate();
       // Add the target to "all" if required.
       if (!this->GetGlobalNinjaGenerator()->IsExcluded(
             this->GetGlobalNinjaGenerator()->GetLocalGenerators()[0],
-            t->second))
-        this->GetGlobalNinjaGenerator()->AddDependencyToAll(&t->second);
+            *t->second->Target))
+        this->GetGlobalNinjaGenerator()->AddDependencyToAll(t->second->Target);
       delete tg;
       }
     }
