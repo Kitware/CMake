@@ -19,6 +19,8 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 
+#include <queue>
+
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
 {
@@ -267,6 +269,284 @@ void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs)
       objs.push_back(obj);
       }
     }
+}
+
+//----------------------------------------------------------------------------
+class cmTargetTraceDependencies
+{
+public:
+  cmTargetTraceDependencies(cmGeneratorTarget* target);
+  void Trace();
+private:
+  cmTarget* Target;
+  cmMakefile* Makefile;
+  cmGlobalGenerator* GlobalGenerator;
+  typedef cmTarget::SourceEntry SourceEntry;
+  SourceEntry* CurrentEntry;
+  std::queue<cmSourceFile*> SourceQueue;
+  std::set<cmSourceFile*> SourcesQueued;
+  typedef std::map<cmStdString, cmSourceFile*> NameMapType;
+  NameMapType NameMap;
+
+  void QueueSource(cmSourceFile* sf);
+  void FollowName(std::string const& name);
+  void FollowNames(std::vector<std::string> const& names);
+  bool IsUtility(std::string const& dep);
+  void CheckCustomCommand(cmCustomCommand const& cc);
+  void CheckCustomCommands(const std::vector<cmCustomCommand>& commands);
+};
+
+//----------------------------------------------------------------------------
+cmTargetTraceDependencies
+::cmTargetTraceDependencies(cmGeneratorTarget* target):
+  Target(target->Target)
+{
+  // Convenience.
+  this->Makefile = this->Target->GetMakefile();
+  this->GlobalGenerator =
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  this->CurrentEntry = 0;
+
+  // Queue all the source files already specified for the target.
+  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
+  for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+      si != sources.end(); ++si)
+    {
+    this->QueueSource(*si);
+    }
+
+  // Queue pre-build, pre-link, and post-build rule dependencies.
+  this->CheckCustomCommands(this->Target->GetPreBuildCommands());
+  this->CheckCustomCommands(this->Target->GetPreLinkCommands());
+  this->CheckCustomCommands(this->Target->GetPostBuildCommands());
+}
+
+//----------------------------------------------------------------------------
+void cmTargetTraceDependencies::Trace()
+{
+  // Process one dependency at a time until the queue is empty.
+  while(!this->SourceQueue.empty())
+    {
+    // Get the next source from the queue.
+    cmSourceFile* sf = this->SourceQueue.front();
+    this->SourceQueue.pop();
+    this->CurrentEntry = &this->Target->GetSourceEntries()[sf];
+
+    // Queue dependencies added explicitly by the user.
+    if(const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS"))
+      {
+      std::vector<std::string> objDeps;
+      cmSystemTools::ExpandListArgument(additionalDeps, objDeps);
+      this->FollowNames(objDeps);
+      }
+
+    // Queue the source needed to generate this file, if any.
+    this->FollowName(sf->GetFullPath());
+
+    // Queue dependencies added programatically by commands.
+    this->FollowNames(sf->GetDepends());
+
+    // Queue custom command dependencies.
+    if(cmCustomCommand const* cc = sf->GetCustomCommand())
+      {
+      this->CheckCustomCommand(*cc);
+      }
+    }
+  this->CurrentEntry = 0;
+}
+
+//----------------------------------------------------------------------------
+void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
+{
+  if(this->SourcesQueued.insert(sf).second)
+    {
+    this->SourceQueue.push(sf);
+
+    // Make sure this file is in the target.
+    this->Target->AddSourceFile(sf);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTargetTraceDependencies::FollowName(std::string const& name)
+{
+  NameMapType::iterator i = this->NameMap.find(name);
+  if(i == this->NameMap.end())
+    {
+    // Check if we know how to generate this file.
+    cmSourceFile* sf = this->Makefile->GetSourceFileWithOutput(name.c_str());
+    NameMapType::value_type entry(name, sf);
+    i = this->NameMap.insert(entry).first;
+    }
+  if(cmSourceFile* sf = i->second)
+    {
+    // Record the dependency we just followed.
+    if(this->CurrentEntry)
+      {
+      this->CurrentEntry->Depends.push_back(sf);
+      }
+
+    this->QueueSource(sf);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetTraceDependencies::FollowNames(std::vector<std::string> const& names)
+{
+  for(std::vector<std::string>::const_iterator i = names.begin();
+      i != names.end(); ++i)
+    {
+    this->FollowName(*i);
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
+{
+  // Dependencies on targets (utilities) are supposed to be named by
+  // just the target name.  However for compatibility we support
+  // naming the output file generated by the target (assuming there is
+  // no output-name property which old code would not have set).  In
+  // that case the target name will be the file basename of the
+  // dependency.
+  std::string util = cmSystemTools::GetFilenameName(dep);
+  if(cmSystemTools::GetFilenameLastExtension(util) == ".exe")
+    {
+    util = cmSystemTools::GetFilenameWithoutLastExtension(util);
+    }
+
+  // Check for a target with this name.
+  if(cmTarget* t = this->Makefile->FindTargetToUse(util.c_str()))
+    {
+    // If we find the target and the dep was given as a full path,
+    // then make sure it was not a full path to something else, and
+    // the fact that the name matched a target was just a coincidence.
+    if(cmSystemTools::FileIsFullPath(dep.c_str()))
+      {
+      if(t->GetType() >= cmTarget::EXECUTABLE &&
+         t->GetType() <= cmTarget::MODULE_LIBRARY)
+        {
+        // This is really only for compatibility so we do not need to
+        // worry about configuration names and output names.
+        std::string tLocation = t->GetLocation(0);
+        tLocation = cmSystemTools::GetFilenamePath(tLocation);
+        std::string depLocation = cmSystemTools::GetFilenamePath(dep);
+        depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        if(depLocation == tLocation)
+          {
+          this->Target->AddUtility(util.c_str());
+          return true;
+          }
+        }
+      }
+    else
+      {
+      // The original name of the dependency was not a full path.  It
+      // must name a target, so add the target-level dependency.
+      this->Target->AddUtility(util.c_str());
+      return true;
+      }
+    }
+
+  // The dependency does not name a target built in this project.
+  return false;
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetTraceDependencies
+::CheckCustomCommand(cmCustomCommand const& cc)
+{
+  // Transform command names that reference targets built in this
+  // project to corresponding target-level dependencies.
+  cmGeneratorExpression ge(cc.GetBacktrace());
+
+  // Add target-level dependencies referenced by generator expressions.
+  std::set<cmTarget*> targets;
+
+  for(cmCustomCommandLines::const_iterator cit = cc.GetCommandLines().begin();
+      cit != cc.GetCommandLines().end(); ++cit)
+    {
+    std::string const& command = *cit->begin();
+    // Check for a target with this name.
+    if(cmTarget* t = this->Makefile->FindTargetToUse(command.c_str()))
+      {
+      if(t->GetType() == cmTarget::EXECUTABLE)
+        {
+        // The command refers to an executable target built in
+        // this project.  Add the target-level dependency to make
+        // sure the executable is up to date before this custom
+        // command possibly runs.
+        this->Target->AddUtility(command.c_str());
+        }
+      }
+
+    // Check for target references in generator expressions.
+    for(cmCustomCommandLine::const_iterator cli = cit->begin();
+        cli != cit->end(); ++cli)
+      {
+      const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
+                                                              = ge.Parse(*cli);
+      cge->Evaluate(this->Makefile, 0, true);
+      std::set<cmTarget*> geTargets = cge->GetTargets();
+      for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
+          it != geTargets.end(); ++it)
+        {
+        targets.insert(*it);
+        }
+      }
+    }
+
+  for(std::set<cmTarget*>::iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
+    {
+    this->Target->AddUtility((*ti)->GetName());
+    }
+
+  // Queue the custom command dependencies.
+  std::vector<std::string> const& depends = cc.GetDepends();
+  for(std::vector<std::string>::const_iterator di = depends.begin();
+      di != depends.end(); ++di)
+    {
+    std::string const& dep = *di;
+    if(!this->IsUtility(dep))
+      {
+      // The dependency does not name a target and may be a file we
+      // know how to generate.  Queue it.
+      this->FollowName(dep);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmTargetTraceDependencies
+::CheckCustomCommands(const std::vector<cmCustomCommand>& commands)
+{
+  for(std::vector<cmCustomCommand>::const_iterator cli = commands.begin();
+      cli != commands.end(); ++cli)
+    {
+    this->CheckCustomCommand(*cli);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::TraceDependencies()
+{
+  // CMake-generated targets have no dependencies to trace.  Normally tracing
+  // would find nothing anyway, but when building CMake itself the "install"
+  // target command ends up referencing the "cmake" target but we do not
+  // really want the dependency because "install" depend on "all" anyway.
+  if(this->GetType() == cmTarget::GLOBAL_TARGET)
+    {
+    return;
+    }
+
+  // Use a helper object to trace the dependencies.
+  cmTargetTraceDependencies tracer(this);
+  tracer.Trace();
 }
 
 //----------------------------------------------------------------------------

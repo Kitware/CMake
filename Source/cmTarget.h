@@ -34,6 +34,8 @@ class cmGlobalGenerator;
 class cmComputeLinkInformation;
 class cmListFileBacktrace;
 class cmTarget;
+class cmGeneratorTarget;
+class cmTargetTraceDependencies;
 
 struct cmTargetLinkInformationMap:
   public std::map<std::pair<cmTarget*, std::string>, cmComputeLinkInformation*>
@@ -347,12 +349,6 @@ public:
   void GetTargetVersion(bool soversion, int& major, int& minor, int& patch);
 
   /**
-   * Trace through the source files in this target and add al source files
-   * that they depend on, used by all generators
-   */
-  void TraceDependencies();
-
-  /**
    * Make sure the full path to all source files is known.
    */
   bool FindSourceFiles();
@@ -570,6 +566,9 @@ private:
 
   std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
 
+  struct SourceEntry { std::vector<cmSourceFile*> Depends; };
+  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
+
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
    */
@@ -658,6 +657,8 @@ private:
                                        const char* config,
                                        bool contentOnly);
 
+  SourceEntriesType& GetSourceEntries() const;
+
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -733,6 +734,8 @@ private:
 
   // Internal representation details.
   friend class cmTargetInternals;
+  friend class cmGeneratorTarget;
+  friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
   void ConstructSourceFileFlags();
