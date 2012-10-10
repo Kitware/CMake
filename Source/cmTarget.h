@@ -53,11 +53,6 @@ private:
   cmTargetInternals* Pointer;
 };
 
-struct TargetConfigPair : public std::pair<cmTarget const*, std::string> {
-  TargetConfigPair(cmTarget const* tgt, const std::string &config)
-    : std::pair<cmTarget const*, std::string>(tgt, config) {}
-};
-
 /** \class cmTarget
  * \brief Represent a library or executable target loaded from a makefile.
  *
@@ -305,19 +300,6 @@ public:
   };
   LinkImplementation const* GetLinkImplementation(const char* config,
                                                   cmTarget const* head) const;
-
-  /** Link information from the transitive closure of the link
-      implementation and the interfaces of its dependencies.  */
-  struct LinkClosure
-  {
-    // The preferred linker language.
-    std::string LinkerLanguage;
-
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-  };
-  LinkClosure const* GetLinkClosure(const char* config,
-                                    cmTarget const* head) const;
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
@@ -608,8 +590,6 @@ private:
   void ComputeLinkImplementation(const char* config,
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
-  void ComputeLinkClosure(const char* config, LinkClosure& lc,
-                          cmTarget const* head) const;
 
   void ClearLinkMaps();
 

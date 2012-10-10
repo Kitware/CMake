@@ -18,6 +18,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
+#include "cmGeneratorTarget.h"
 #include "cmake.h"
 
 #include <ctype.h>
@@ -244,8 +245,10 @@ cmComputeLinkInformation
 {
   // Store context information.
   this->Target = target;
-  this->HeadTarget = headTarget;
   this->Makefile = this->Target->GetMakefile();
+  this->HeadTarget = this->Makefile->GetLocalGenerator()
+                                   ->GetGlobalGenerator()
+                                   ->GetGeneratorTarget(headTarget);
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
@@ -509,7 +512,8 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config, this->HeadTarget);
+  cmComputeLinkDepends cld(this->Target, this->Config,
+                           this->HeadTarget->Target);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -578,8 +582,13 @@ bool cmComputeLinkInformation::Compute()
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
-  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config,
-                                                          this->HeadTarget);
+
+  cmGeneratorTarget *gtgt = this->Target->GetMakefile()->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
+
+  cmGeneratorTarget::LinkClosure const* lc = gtgt->GetLinkClosure(this->Config,
+                                                    this->HeadTarget->Target);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
@@ -1989,8 +1998,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // Add runtime paths required by the languages to always be
   // present.  This is done even when skipping rpath support.
   {
-  cmTarget::LinkClosure const* lc =
-    this->Target->GetLinkClosure(this->Config, this->HeadTarget);
+  cmGeneratorTarget *gtgt = this->Makefile->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
+  cmGeneratorTarget::LinkClosure const* lc =
+    gtgt->GetLinkClosure(this->Config, this->HeadTarget->Target);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
