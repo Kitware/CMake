@@ -2178,7 +2178,7 @@ cmGeneratorTarget::GetLinkInformation(const char* config,
     {
     // Compute information for this configuration.
     cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this->Target, config, headTarget);
+      new cmComputeLinkInformation(this, config, headTarget);
     if(!info || !info->Compute())
       {
       delete info;
