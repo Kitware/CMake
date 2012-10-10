@@ -315,18 +315,6 @@ public:
   LinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
 
-  /** Link information from the transitive closure of the link
-      implementation and the interfaces of its dependencies.  */
-  struct LinkClosure
-  {
-    // The preferred linker language.
-    std::string LinkerLanguage;
-
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-  };
-  LinkClosure const* GetLinkClosure(const std::string& config) const;
-
   cmTarget const* FindTargetToLink(std::string const& name) const;
 
   /** Strip off leading and trailing whitespace from an item named in
@@ -662,7 +650,6 @@ private:
   LinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
-  void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
