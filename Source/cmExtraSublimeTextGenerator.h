@@ -45,7 +45,22 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
-
+  void GetFileList(const std::vector<cmLocalGenerator*>& lgs,
+                   std::vector<std::string>& allFiles);
+  void GetFileStringAndFolderSet(const std::vector<cmLocalGenerator*>& lgs,
+                                 const cmMakefile* mf,
+                                 const std::vector<std::string>& allFiles,
+                                 std::stringstream& fileIncludePatternsStream,
+                                 std::set<std::string>&
+                                   folderIncludePatternsSet);
+  /** Appends all targets as build systems to the project file and get all
+   * include directories and compiler definitions used.
+   */
+  void AppendAllTargets(const std::vector<cmLocalGenerator*>& lgs,
+                        const cmMakefile* mf,
+                        cmGeneratedFileStream& fout,
+                        std::set<std::string>& includeDirs,
+                        std::set<std::string>& defines);
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
                                const char* target);
   void AppendTarget(cmGeneratedFileStream& fout,
