@@ -17,7 +17,10 @@
 #include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
-static void reportError(cmGeneratorExpressionContext *context,
+#if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x510
+static
+#endif
+void reportError(cmGeneratorExpressionContext *context,
                         const std::string &expr, const std::string &result)
 {
   context->HadError = true;
