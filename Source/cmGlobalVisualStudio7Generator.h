@@ -105,10 +105,10 @@ protected:
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout,
                            const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectConfigurations(std::ostream& fout,
-                                          const char* name,
-                                          bool partOfDefaultBuild,
-                                          const char* platformMapping = NULL);
+  virtual void WriteProjectConfigurations(
+    std::ostream& fout, const char* name,
+    const std::set<std::string>& configsPartOfDefaultBuild,
+    const char* platformMapping = NULL);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget* target);
@@ -136,8 +136,8 @@ protected:
 
   std::string ConvertToSolutionPath(const char* path);
 
-  bool IsPartOfDefaultBuild(const char* project,
-                            cmTarget* target);
+  std::set<std::string> IsPartOfDefaultBuild(const char* project,
+                                             cmTarget* target);
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;
 
