@@ -227,6 +227,13 @@ void cmExtraSublimeTextGenerator
   fout << "],\n";
   fout << "\t\t\t\"file_include_patterns\": [" <<
           fileIncludePatternsStream.str() << "]\n";
+  fout << "\t\t},\n\t";
+  // In order for SublimeClang's path resolution to work, the directory that
+  // contains the sublime-project file must be included here. We just ensure
+  // that no files or subfolders are included
+  fout << "\t{\n\t\t\t\"path\": \"./\",\n";
+  fout << "\t\t\t\"folder_exclude_patterns\": [\"*\"],\n";
+  fout << "\t\t\t\"file_exclude_patterns\": [\"*\"]\n";
   fout << "\t\t}\n\t";
   // End of the folders section
   fout << "]";
@@ -340,9 +347,13 @@ void cmExtraSublimeTextGenerator
     const std::string &relative = cmSystemTools::RelativePath(
                        lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
                        includeDir.c_str());
-    fout << "\t\"-I" << relative << "\"";
+    // It appears that a relative path to the sublime-project file doesn't
+    // always work. So we use ${folder:${project_path:<project_filename>}}
+    // that SublimeClang will expand to the correct path
+    fout << "\t\"-I${folder:${project_path:" << mf->GetProjectName() <<
+            ".sublime-project}}/" << relative << "\"";
     stringSetIter++;
-    if (stringSetIter != includeDirs.end())
+    if ((stringSetIter != includeDirs.end()) || (!defines.empty()))
       {
       fout << ",";
       }
@@ -387,7 +398,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                     ->GetGeneratorTarget(target);
       std::string cdefs = gtgt->GetCompileDefinitions();
 
-      if(cdefs.empty())
+      if(!cdefs.empty())
         {
         // Expand the list.
         std::vector<std::string> defs;
