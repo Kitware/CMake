@@ -623,7 +623,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     // the compilerdefines for this target
     std::string cdefs = gtgt->GetCompileDefinitions();
 
-    if(cdefs.empty())
+    if(!cdefs.empty())
       {
       // Expand the list.
       std::vector<std::string> defs;
