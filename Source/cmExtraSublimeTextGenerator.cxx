@@ -106,11 +106,107 @@ void cmExtraSublimeTextGenerator
     return;
     }
 
-  // A set of folders to include in the project
-  std::set<std::string> folderIncludePatternsSet;
   // Collect all files, this includes source files and list files
   std::vector<std::string> allFiles;
+  GetFileList(lgs, allFiles);
+  // A set of folders to include in the project
+  std::set<std::string> folderIncludePatternsSet;
   std::stringstream fileIncludePatternsStream;
+  GetFileStringAndFolderSet(lgs, mf, allFiles, fileIncludePatternsStream,
+                            folderIncludePatternsSet);
+  // Write the folder entries to the project file
+  const std::string &homeRelative = cmSystemTools::RelativePath(
+                     lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
+                     lgs[0]->GetMakefile()->GetHomeDirectory());
+  fout << "{\n";
+  fout << "\t\"folders\":\n\t[\n\t";
+  fout << "\t{\n\t\t\t\"path\": \"" << homeRelative << "\",\n";
+  fout << "\t\t\t\"folder_include_patterns\": [";
+  std::set<std::string>::const_iterator folderIter =
+          folderIncludePatternsSet.begin();
+  while (folderIter != folderIncludePatternsSet.end())
+    {
+    fout << "\"" << *folderIter << "\"";
+    folderIter++;
+    if (folderIter != folderIncludePatternsSet.end())
+      {
+        fout << ", ";
+      }
+    }
+  fout << "],\n";
+  fout << "\t\t\t\"file_include_patterns\": [" <<
+          fileIncludePatternsStream.str() << "]\n";
+  fout << "\t\t},\n\t";
+  // In order for SublimeClang's path resolution to work, the directory that
+  // contains the sublime-project file must be included here. We just ensure
+  // that no files or subfolders are included
+  fout << "\t{\n\t\t\t\"path\": \"./\",\n";
+  fout << "\t\t\t\"folder_exclude_patterns\": [\"*\"],\n";
+  fout << "\t\t\t\"file_exclude_patterns\": [\"*\"]\n";
+  fout << "\t\t}\n\t";
+  // End of the folders section
+  fout << "]";
+
+  // Write the beginning of the build systems section to the project file
+  fout << ",\n\t\"build_systems\":\n\t[\n\t";
+
+  // Set of include directories over all targets (sublime text/sublimeclang
+  // doesn't currently support these settings per build system, only project
+  // wide
+  std::set<std::string> includeDirs;
+  std::set<std::string> defines;
+  AppendAllTargets(lgs, mf, fout, includeDirs, defines);
+  // End of build_systems
+  fout << "\n\t]";
+
+  // Write the settings section with sublimeclang options
+  fout << ",\n\t\"settings\":\n\t{\n\t";
+  fout << "\t\"sublimeclang_options\":\n\t\t[\n\t\t";
+  std::set<std::string>::const_iterator stringSetIter = includeDirs.begin();
+  while (stringSetIter != includeDirs.end())
+    {
+    const std::string &includeDir = *stringSetIter;
+    const std::string &relative = cmSystemTools::RelativePath(
+                       lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
+                       includeDir.c_str());
+    // It appears that a relative path to the sublime-project file doesn't
+    // always work. So we use ${folder:${project_path:<project_filename>}}
+    // that SublimeClang will expand to the correct path
+    fout << "\t\"-I${folder:${project_path:" << mf->GetProjectName() <<
+            ".sublime-project}}/" << relative << "\"";
+    stringSetIter++;
+    if ((stringSetIter != includeDirs.end()) || (!defines.empty()))
+      {
+      fout << ",";
+      }
+    fout << "\n\t\t";
+  }
+  stringSetIter = defines.begin();
+  while (stringSetIter != defines.end())
+    {
+    fout << "\t\"-D" << *stringSetIter << "\"";
+    stringSetIter++;
+    if (stringSetIter != defines.end())
+      {
+      fout << ",";
+      }
+    fout << "\n\t\t";
+  }
+  // End of the sublimeclang_options section
+  fout << "]\n\t";
+  // End of the settings section
+  fout << "}\n";
+
+  // End of file
+  fout << "}";
+}
+
+// Get a list of all files and a set of all directories and subdirectories
+// with source files
+void cmExtraSublimeTextGenerator
+  ::GetFileList(const std::vector<cmLocalGenerator*>& lgs,
+                std::vector<std::string>& allFiles)
+{
   for (std::vector<cmLocalGenerator *>::const_iterator
        it = lgs.begin();
        it != lgs.end();
@@ -152,7 +248,15 @@ void cmExtraSublimeTextGenerator
         }
       }
     }
+}
 
+void cmExtraSublimeTextGenerator::
+  GetFileStringAndFolderSet(const std::vector<cmLocalGenerator*>& lgs,
+                            const cmMakefile* mf,
+                            const std::vector<std::string>& allFiles,
+                            std::stringstream& fileIncludePatternsStream,
+                            std::set<std::string>& folderIncludePatternsSet)
+{
   // Convert
   const char* cmakeRoot = mf->GetDefinition("CMAKE_ROOT");
   for (std::vector<std::string>::const_iterator jt = allFiles.begin();
@@ -205,47 +309,15 @@ void cmExtraSublimeTextGenerator
         }
       }
     }
-  // Write the folder entries to the project file
-  const std::string &homeRelative = cmSystemTools::RelativePath(
-                     lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
-                     lgs[0]->GetMakefile()->GetHomeDirectory());
-  fout << "{\n";
-  fout << "\t\"folders\":\n\t[\n\t";
-  fout << "\t{\n\t\t\t\"path\": \"" << homeRelative << "\",\n";
-  fout << "\t\t\t\"folder_include_patterns\": [";
-  std::set<std::string>::const_iterator folderIter =
-          folderIncludePatternsSet.begin();
-  while (folderIter != folderIncludePatternsSet.end())
-    {
-    fout << "\"" << *folderIter << "\"";
-    folderIter++;
-    if (folderIter != folderIncludePatternsSet.end())
-      {
-        fout << ", ";
-      }
-    }
-  fout << "],\n";
-  fout << "\t\t\t\"file_include_patterns\": [" <<
-          fileIncludePatternsStream.str() << "]\n";
-  fout << "\t\t},\n\t";
-  // In order for SublimeClang's path resolution to work, the directory that
-  // contains the sublime-project file must be included here. We just ensure
-  // that no files or subfolders are included
-  fout << "\t{\n\t\t\t\"path\": \"./\",\n";
-  fout << "\t\t\t\"folder_exclude_patterns\": [\"*\"],\n";
-  fout << "\t\t\t\"file_exclude_patterns\": [\"*\"]\n";
-  fout << "\t\t}\n\t";
-  // End of the folders section
-  fout << "]";
+}
 
-  // Write the beginning of the build systems section to the project file
-  fout << ",\n\t\"build_systems\":\n\t[\n\t";
-
-  // Set of include directories over all targets (sublime text/sublimeclang
-  // doesn't currently support these settings per build system, only project
-  // wide
-  std::set<std::string> includeDirs;
-  std::set<std::string> defines;
+void cmExtraSublimeTextGenerator::
+  AppendAllTargets(const std::vector<cmLocalGenerator*>& lgs,
+                   const cmMakefile* mf,
+                   cmGeneratedFileStream& fout,
+                   std::set<std::string>& includeDirs,
+                   std::set<std::string>& defines)
+{
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string compiler = "";
   this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str(),
@@ -334,49 +406,6 @@ void cmExtraSublimeTextGenerator
         }
       }
     }
-  // End of build_systems
-  fout << "\n\t]";
-
-  // Write the settings section with sublimeclang options
-  fout << ",\n\t\"settings\":\n\t{\n\t";
-  fout << "\t\"sublimeclang_options\":\n\t\t[\n\t\t";
-  std::set<std::string>::const_iterator stringSetIter = includeDirs.begin();
-  while (stringSetIter != includeDirs.end())
-    {
-    const std::string &includeDir = *stringSetIter;
-    const std::string &relative = cmSystemTools::RelativePath(
-                       lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
-                       includeDir.c_str());
-    // It appears that a relative path to the sublime-project file doesn't
-    // always work. So we use ${folder:${project_path:<project_filename>}}
-    // that SublimeClang will expand to the correct path
-    fout << "\t\"-I${folder:${project_path:" << mf->GetProjectName() <<
-            ".sublime-project}}/" << relative << "\"";
-    stringSetIter++;
-    if ((stringSetIter != includeDirs.end()) || (!defines.empty()))
-      {
-      fout << ",";
-      }
-    fout << "\n\t\t";
-  }
-  stringSetIter = defines.begin();
-  while (stringSetIter != defines.end())
-    {
-    fout << "\t\"-D" << *stringSetIter << "\"";
-    stringSetIter++;
-    if (stringSetIter != defines.end())
-      {
-      fout << ",";
-      }
-    fout << "\n\t\t";
-  }
-  // End of the sublimeclang_options section
-  fout << "]\n\t";
-  // End of the settings section
-  fout << "}\n";
-
-  // End of file
-  fout << "}";
 }
 
 // Generate the build_system entry for one target
