@@ -7,6 +7,8 @@
 #include "bing.h"
 #include "bung.h"
 #include "ting.h"
+#include "arguments.h"
+#include "list.h"
 
 int main(int, char**)
 {
