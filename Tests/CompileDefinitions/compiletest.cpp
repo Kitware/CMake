@@ -34,6 +34,15 @@ enum {
 #ifdef GE_NOT_DEFINED
 #error Expect not defined generator expression
 #endif
+
+#ifndef ARGUMENT
+#error Expected define expanded from list
+#endif
+#ifndef LIST
+#error Expected define expanded from list
+#endif
+
+// TEST_GENERATOR_EXPRESSIONS
 #endif
 
 int main(int argc, char **argv)
