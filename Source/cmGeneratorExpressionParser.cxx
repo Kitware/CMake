@@ -14,6 +14,8 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 
+#include "assert.h"
+
 //----------------------------------------------------------------------------
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
                       const std::vector<cmGeneratorExpressionToken> &tokens)
@@ -124,6 +126,11 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
       parameters.resize(parameters.size() + 1);
       ++this->it;
       }
+    while (this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
+      {
+      extendText(*(parameters.end() - 1), this->it);
+      ++this->it;
+      }
     while(this->it->TokenType != cmGeneratorExpressionToken::EndExpression)
       {
       this->ParseContent(*(parameters.end() - 1));
@@ -133,7 +140,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
         parameters.resize(parameters.size() + 1);
         ++this->it;
         }
-      if (this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
+      while (this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
         {
         extendText(*(parameters.end() - 1), this->it);
         ++this->it;
@@ -233,7 +240,7 @@ void cmGeneratorExpressionParser::ParseContent(
         }
       else
         {
-        // TODO: Unreachable. Assert?
+          assert(!"Got unexpected syntax token.");
         }
       ++this->it;
       return;
