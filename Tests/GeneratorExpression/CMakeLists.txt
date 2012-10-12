@@ -49,6 +49,28 @@ add_custom_target(check ALL
     -Dtest_colons_3=$<1:Qt5::Core>
     -Dtest_colons_4=$<1:C:\\CMake>
     -Dtest_colons_5=$<1:C:/CMake>
+    -Dtest_incomplete_1=$<
+    -Dtest_incomplete_2=$<something
+    -Dtest_incomplete_3=$<something:
+    -Dtest_incomplete_4=$<something:,
+    -Dtest_incomplete_5=$something:,>
+    -Dtest_incomplete_6=<something:,>
+    -Dtest_incomplete_7=$<something::
+    -Dtest_incomplete_8=$<something:,
+    -Dtest_incomplete_9=$<something:,,
+    -Dtest_incomplete_10=$<something:,:
+    -Dtest_incomplete_11=$<something,,
+    -Dtest_incomplete_12=$<,,
+    -Dtest_incomplete_13=$<some$<1:special>thing
+    -Dtest_incomplete_14=$<<something
+    -Dtest_incomplete_15=$<some$<thing
+    -Dtest_incomplete_16=$<<some$<thing
+    -Dtest_incomplete_17=$<1:some$thing>
+    -Dtest_incomplete_18=$<1:some,thing
+    -Dtest_incomplete_19=$<1:some,thing$<ANGLE-R>
+    -Dtest_incomplete_20=$<CONFIGURATION$<ANGLE-R>
+    -Dtest_incomplete_21=$<BOOL:something$<ANGLE-R>
+    -Dtest_incomplete_22=$<BOOL:something
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done"
   VERBATIM
