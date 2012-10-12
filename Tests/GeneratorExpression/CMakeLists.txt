@@ -44,6 +44,11 @@ add_custom_target(check ALL
     -Dtest_strequal_one_empty=$<STREQUAL:something,>
     -Dtest_angle_r=$<ANGLE-R>
     -Dtest_comma=$<COMMA>
+    -Dtest_colons_1=$<1::>
+    -Dtest_colons_2=$<1:::>
+    -Dtest_colons_3=$<1:Qt5::Core>
+    -Dtest_colons_4=$<1:C:\\CMake>
+    -Dtest_colons_5=$<1:C:/CMake>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done"
   VERBATIM
