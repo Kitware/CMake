@@ -86,7 +86,6 @@ void cmExtraSublimeTextGenerator::Generate()
 }
 
 
-/* create the project file */
 void cmExtraSublimeTextGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
@@ -206,8 +205,6 @@ void cmExtraSublimeTextGenerator
   fout << "}";
 }
 
-// Get a list of all files and a set of all directories and subdirectories
-// with source files
 void cmExtraSublimeTextGenerator
   ::GetFileList(const std::vector<cmLocalGenerator*>& lgs,
                 std::vector<std::string>& allFiles)
