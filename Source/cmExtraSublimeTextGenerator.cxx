@@ -29,7 +29,12 @@
 #  define PATH_SEP "/"
 #endif
 
-/* Some useful URLs:
+/*
+Sublime Text 2 Generator
+Author: Morné Chamberlain
+This generator was initially based off of the CodeBlocks generator.
+
+Some useful URLs:
 Homepage:
 http://www.sublimetext.com/
 
@@ -257,7 +262,6 @@ void cmExtraSublimeTextGenerator::
                             std::stringstream& fileIncludePatternsStream,
                             std::set<std::string>& folderIncludePatternsSet)
 {
-  // Convert
   const char* cmakeRoot = mf->GetDefinition("CMAKE_ROOT");
   for (std::vector<std::string>::const_iterator jt = allFiles.begin();
        jt != allFiles.end();
@@ -481,8 +485,17 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
     }
 
   // Write out the build_system data for this target
-  std::string makefileName = makefile->GetStartOutputDirectory();
-  makefileName += "/Makefile";
+  std::string makefileName = makefile->GetHomeOutputDirectory();
+  // Ninja uses ninja.build files (look for a way to get the output file name
+  // from cmMakefile)
+  if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+    {
+      makefileName += "/build.ninja";
+    }
+    else
+    {
+      makefileName += "/Makefile";
+    }
   if (!firstTarget)
     {
     fout << ",\n\t";
@@ -513,20 +526,28 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     command += target;
     command += "\"";
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
     {
-    // no escaping of spaces in this case, see
-    // http://public.kitware.com/Bug/view.php?id=10014
-    std::string makefileName = makefile;
+    std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"-f\", \"";
     command += makefileName + "\"";
-    command += ", \"VERBOSE=1\", \"";
+    command += ", \"-v\", \"";
     command += target;
     command += "\"";
     }
   else
     {
-    std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
+    std::string makefileName;
+    if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+      {
+        // no escaping of spaces in this case, see
+        // http://public.kitware.com/Bug/view.php?id=10014
+        makefileName = makefile;
+      }
+      else
+      {
+        makefileName = cmSystemTools::ConvertToOutputPath(makefile);
+      }
     command += ", \"-f\", \"";
     command += makefileName + "\"";
     command += ", \"VERBOSE=1\", \"";
