@@ -47,7 +47,7 @@ void cmExtraSublimeTextGenerator
     "Project files for Sublime Text 2 will be created in the top directory "
     "and in every subdirectory which features a CMakeLists.txt file "
     "containing a PROJECT() call. "
-    "Additionally a hierarchy of makefiles is generated into the "
+    "Additionally Makefiles (or build.ninja files) are generated into the "
     "build tree.  The appropriate make program can build the project through "
     "the default make target.  A \"make install\" target is also provided.";
 }
@@ -142,6 +142,18 @@ void cmExtraSublimeTextGenerator
 
   // Write the settings section with sublimeclang options
   fout << ",\n\t\"settings\":\n\t{\n\t";
+  // Check if the CMAKE_SUBLIMECLANG_DISABLED flag has been set. If it has
+  // disable sublimeclang for this project.
+  const char* sublimeclangDisabledValue =
+    lgs[0]->GetMakefile()->GetSafeDefinition("CMAKE_SUBLIMECLANG_DISABLED");
+  bool sublimeclangEnabled = cmSystemTools::IsOff(sublimeclangDisabledValue);
+  // Per project sublimeclang settings override default and user settings,
+  // so we only write the sublimeclang_enabled setting to the project file
+  // if it is set to be disabled.
+  if (!sublimeclangEnabled)
+    {
+      fout << "\t\"sublimeclang_enabled\": false,\n\t";
+    }
   fout << "\t\"sublimeclang_options\":\n\t\t[\n\t\t";
   std::set<std::string>::const_iterator stringSetIter = includeDirs.begin();
   while (stringSetIter != includeDirs.end())
