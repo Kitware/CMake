@@ -107,26 +107,38 @@ void cmExtraSublimeTextGenerator
   const std::string &sourceRootRelativeToOutput = cmSystemTools::RelativePath(
                      lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
                      lgs[0]->GetMakefile()->GetHomeDirectory());
-  const std::string &outputRelativeToSourceRoot = cmSystemTools::RelativePath(
-                     lgs[0]->GetMakefile()->GetHomeDirectory(),
-                     lgs[0]->GetMakefile()->GetHomeOutputDirectory());
   // Write the folder entries to the project file
   fout << "{\n";
   fout << "\t\"folders\":\n\t[\n\t";
-  fout << "\t{\n\t\t\t\"path\": \"" << sourceRootRelativeToOutput << "\",\n";
-  fout << "\t\t\t\"folder_exclude_patterns\": [\"" <<
-          outputRelativeToSourceRoot << "\"],\n";
-  fout << "\t\t\t\"file_exclude_patterns\": []\n";
-  fout << "\t\t},\n\t";
+  if (!sourceRootRelativeToOutput.empty())
+    {
+      fout << "\t{\n\t\t\t\"path\": \"" << sourceRootRelativeToOutput << "\"";
+      const std::string &outputRelativeToSourceRoot =
+        cmSystemTools::RelativePath(lgs[0]->GetMakefile()->GetHomeDirectory(),
+                                    lgs[0]->GetMakefile()->
+                                      GetHomeOutputDirectory());
+      fout << ",\n\t\t\t\"folder_exclude_patterns\": [\"" <<
+              outputRelativeToSourceRoot << "\"]";
+    }
+  else
+    {
+      fout << "\t{\n\t\t\t\"path\": \"./\"";
+    }
+  fout << "\n\t\t}";
   // In order for SublimeClang's path resolution to work, the directory that
   // contains the sublime-project file must be included here. We just ensure
-  // that no files or subfolders are included
-  fout << "\t{\n\t\t\t\"path\": \"./\",\n";
-  fout << "\t\t\t\"folder_exclude_patterns\": [\"*\"],\n";
-  fout << "\t\t\t\"file_exclude_patterns\": [\"*\"]\n";
-  fout << "\t\t}\n\t";
+  // that no files or subfolders are included.
+  // In the case of an in-source build, however, this must not be used, since
+  // it'll end up excluding the source directory.
+  if (!sourceRootRelativeToOutput.empty())
+  {
+    fout << ",\n\t\t{\n\t\t\t\"path\": \"./\",\n";
+    fout << "\t\t\t\"folder_exclude_patterns\": [\"*\"],\n";
+    fout << "\t\t\t\"file_exclude_patterns\": [\"*\"]\n";
+    fout << "\t\t}";
+  }
   // End of the folders section
-  fout << "]";
+  fout << "\n\t]";
 
   // Write the beginning of the build systems section to the project file
   fout << ",\n\t\"build_systems\":\n\t[\n\t";
