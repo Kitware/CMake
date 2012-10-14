@@ -896,6 +896,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       " script, it may get fatal error messages from the script.",false,
       "Variables That Change Behavior");
 
+  cm->DefineProperty
+    ("CMAKE_SUBLIMECLANG_DISABLED", cmProperty::VARIABLE,
+     "Used by the Sublime Text 2 generator to disable SublimeClang in "
+     "generated project files.",
+     "For very large projects SublimeClang might run slowly. Set this variable"
+     " to TRUE to instruct the Sublime Text 2 generator to disable "
+     " SublimeClang in the generated project files.", false,
+     "Variables That Change Behavior");
+
   // Variables defined by CMake that describe the system
 
   cm->DefineProperty
