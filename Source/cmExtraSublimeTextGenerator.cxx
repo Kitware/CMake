@@ -23,12 +23,6 @@
 
 #include <cmsys/SystemTools.hxx>
 
-#if defined(_WIN32)
-#  define PATH_SEP "\\"
-#else
-#  define PATH_SEP "/"
-#endif
-
 /*
 Sublime Text 2 Generator
 Author: Morné Chamberlain
@@ -110,36 +104,19 @@ void cmExtraSublimeTextGenerator
     return;
     }
 
-  // Collect all files, this includes source files and list files
-  std::vector<std::string> allFiles;
-  GetFileList(lgs, allFiles);
-  // A set of folders to include in the project
-  std::set<std::string> folderIncludePatternsSet;
-  std::stringstream fileIncludePatternsStream;
-  GetFileStringAndFolderSet(lgs, mf, allFiles, fileIncludePatternsStream,
-                            folderIncludePatternsSet);
-  // Write the folder entries to the project file
-  const std::string &homeRelative = cmSystemTools::RelativePath(
+  const std::string &sourceRootRelativeToOutput = cmSystemTools::RelativePath(
                      lgs[0]->GetMakefile()->GetHomeOutputDirectory(),
                      lgs[0]->GetMakefile()->GetHomeDirectory());
+  const std::string &outputRelativeToSourceRoot = cmSystemTools::RelativePath(
+                     lgs[0]->GetMakefile()->GetHomeDirectory(),
+                     lgs[0]->GetMakefile()->GetHomeOutputDirectory());
+  // Write the folder entries to the project file
   fout << "{\n";
   fout << "\t\"folders\":\n\t[\n\t";
-  fout << "\t{\n\t\t\t\"path\": \"" << homeRelative << "\",\n";
-  fout << "\t\t\t\"folder_include_patterns\": [";
-  std::set<std::string>::const_iterator folderIter =
-          folderIncludePatternsSet.begin();
-  while (folderIter != folderIncludePatternsSet.end())
-    {
-    fout << "\"" << *folderIter << "\"";
-    folderIter++;
-    if (folderIter != folderIncludePatternsSet.end())
-      {
-        fout << ", ";
-      }
-    }
-  fout << "],\n";
-  fout << "\t\t\t\"file_include_patterns\": [" <<
-          fileIncludePatternsStream.str() << "]\n";
+  fout << "\t{\n\t\t\t\"path\": \"" << sourceRootRelativeToOutput << "\",\n";
+  fout << "\t\t\t\"folder_exclude_patterns\": [\"" <<
+          outputRelativeToSourceRoot << "\"],\n";
+  fout << "\t\t\t\"file_exclude_patterns\": []\n";
   fout << "\t\t},\n\t";
   // In order for SublimeClang's path resolution to work, the directory that
   // contains the sublime-project file must be included here. We just ensure
@@ -203,113 +180,6 @@ void cmExtraSublimeTextGenerator
 
   // End of file
   fout << "}";
-}
-
-void cmExtraSublimeTextGenerator
-  ::GetFileList(const std::vector<cmLocalGenerator*>& lgs,
-                std::vector<std::string>& allFiles)
-{
-  for (std::vector<cmLocalGenerator *>::const_iterator
-       it = lgs.begin();
-       it != lgs.end();
-       ++it)
-    {
-    cmMakefile* makefile=(*it)->GetMakefile();
-    // Add list files
-    const std::vector<std::string> & listFiles =
-                                            makefile->GetListFiles();
-    allFiles.insert(allFiles.end(), listFiles.begin(), listFiles.end());
-    // Add source files
-    cmTargets& targets=makefile->GetTargets();
-    for (cmTargets::iterator ti = targets.begin();
-         ti != targets.end(); ti++)
-      {
-      switch(ti->second.GetType())
-        {
-        case cmTarget::EXECUTABLE:
-        case cmTarget::STATIC_LIBRARY:
-        case cmTarget::SHARED_LIBRARY:
-        case cmTarget::MODULE_LIBRARY:
-        case cmTarget::OBJECT_LIBRARY:
-        case cmTarget::UTILITY: // can have sources since 2.6.3
-          {
-          const std::vector<cmSourceFile*>&sources=ti->second.GetSourceFiles();
-          for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
-               si!=sources.end(); si++)
-            {
-            // don't add source files which have the GENERATED property set:
-            if ((*si)->GetPropertyAsBool("GENERATED"))
-              {
-              continue;
-              }
-              allFiles.push_back((*si)->GetFullPath());
-            }
-          }
-        default:  // intended fallthrough
-           break;
-        }
-      }
-    }
-}
-
-void cmExtraSublimeTextGenerator::
-  GetFileStringAndFolderSet(const std::vector<cmLocalGenerator*>& lgs,
-                            const cmMakefile* mf,
-                            const std::vector<std::string>& allFiles,
-                            std::stringstream& fileIncludePatternsStream,
-                            std::set<std::string>& folderIncludePatternsSet)
-{
-  const char* cmakeRoot = mf->GetDefinition("CMAKE_ROOT");
-  for (std::vector<std::string>::const_iterator jt = allFiles.begin();
-       jt != allFiles.end();
-       ++jt)
-    {
-    // don't put cmake's own files into the project (#12110):
-    if (jt->find(cmakeRoot) == 0)
-      {
-      continue;
-      }
-
-    const std::string &relative = cmSystemTools::RelativePath(
-                       lgs[0]->GetMakefile()->GetHomeDirectory(),
-                       jt->c_str());
-    // Split filename from path
-    std::string fileName = cmSystemTools::GetFilenameName(relative);
-    std::string path = "";
-    if (fileName.length() < relative.length())
-      {
-      path = relative.substr(0, relative.length() - fileName.length() - 1);
-      }
-
-    // We don't want paths with CMakeFiles in them
-    if (relative.find("CMakeFiles") == std::string::npos)
-      {
-      if (fileIncludePatternsStream.tellp() > 0)
-        {
-          fileIncludePatternsStream << ", ";
-        }
-      fileIncludePatternsStream << "\"" << relative << "\"";
-      if ((!path.empty()) && (folderIncludePatternsSet.find(path) ==
-                              folderIncludePatternsSet.end()))
-        {
-        folderIncludePatternsSet.insert(path);
-        std::string::size_type splitIndex = path.rfind(PATH_SEP);
-        std::string splitPath = path;
-        while (splitIndex != std::string::npos)
-          {
-          splitPath = splitPath.substr(0, splitIndex);
-          if ((splitPath.empty()) ||
-                  (folderIncludePatternsSet.insert(splitPath).second == false))
-            {
-            // If the path is already in the set then all of its
-            // parents are as well
-            break;
-            }
-          splitIndex = splitPath.rfind(PATH_SEP);
-          }
-        }
-      }
-    }
 }
 
 void cmExtraSublimeTextGenerator::
