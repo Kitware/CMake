@@ -431,6 +431,9 @@ void cmGlobalVisualStudio7Generator
   this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
+  // Write out global sections
+  this->WriteSLNGlobalSections(fout, root);
+
   // Write the footer for the SLN file
   this->WriteSLNFooter(fout);
 }
@@ -624,14 +627,73 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
 
 
 
+void cmGlobalVisualStudio7Generator
+::WriteSLNGlobalSections(std::ostream& fout,
+                         cmLocalGenerator* root)
+{
+  bool extensibilityGlobalsOverridden = false;
+  bool extensibilityAddInsOverridden = false;
+  const cmPropertyMap& props = root->GetMakefile()->GetProperties();
+  for(cmPropertyMap::const_iterator itProp = props.begin();
+      itProp != props.end(); ++itProp)
+    {
+    if(itProp->first.find("VS_GLOBAL_SECTION_") == 0)
+      {
+      std::string sectionType;
+      std::string name = itProp->first.substr(18);
+      if(name.find("PRE_") == 0)
+        {
+        name = name.substr(4);
+        sectionType = "preSolution";
+        }
+      else if(name.find("POST_") == 0)
+        {
+        name = name.substr(5);
+        sectionType = "postSolution";
+        }
+      else
+        continue;
+      if(!name.empty())
+        {
+        if(name == "ExtensibilityGlobals" && sectionType == "postSolution")
+          extensibilityGlobalsOverridden = true;
+        else if(name == "ExtensibilityAddIns" && sectionType == "postSolution")
+          extensibilityAddInsOverridden = true;
+        fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
+        std::vector<std::string> keyValuePairs;
+        cmSystemTools::ExpandListArgument(itProp->second.GetValue(),
+                                          keyValuePairs);
+        for(std::vector<std::string>::const_iterator itPair =
+            keyValuePairs.begin(); itPair != keyValuePairs.end(); ++itPair)
+          {
+          const std::string::size_type posEqual = itPair->find('=');
+          if(posEqual != std::string::npos)
+            {
+            const std::string key =
+              cmSystemTools::TrimWhitespace(itPair->substr(0, posEqual));
+            const std::string value =
+              cmSystemTools::TrimWhitespace(itPair->substr(posEqual + 1));
+            fout << "\t\t" << key << " = " << value << "\n";
+            }
+          }
+        fout << "\tEndGlobalSection\n";
+        }
+      }
+    }
+  if(!extensibilityGlobalsOverridden)
+    fout << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
+         << "\tEndGlobalSection\n";
+  if(!extensibilityAddInsOverridden)
+    fout << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
+         << "\tEndGlobalSection\n";
+}
+
+
+
 // Standard end of dsw file
 void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
 {
-  fout << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
-       << "\tEndGlobalSection\n"
-       << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
-       << "\tEndGlobalSection\n"
-       << "EndGlobal\n";
+  fout << "EndGlobal\n";
 }
 
 

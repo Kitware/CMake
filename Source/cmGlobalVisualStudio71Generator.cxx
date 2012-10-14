@@ -128,6 +128,9 @@ void cmGlobalVisualStudio71Generator
     fout << "\tEndGlobalSection\n";
     }
 
+  // Write out global sections
+  this->WriteSLNGlobalSections(fout, root);
+
   // Write the footer for the SLN file
   this->WriteSLNFooter(fout);
 }
@@ -291,17 +294,6 @@ void cmGlobalVisualStudio71Generator
            << (platformMapping ? platformMapping : "Win32") << std::endl;
       }
     }
-}
-
-//----------------------------------------------------------------------------
-// Standard end of dsw file
-void cmGlobalVisualStudio71Generator::WriteSLNFooter(std::ostream& fout)
-{
-  fout << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
-       << "\tEndGlobalSection\n"
-       << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
-       << "\tEndGlobalSection\n"
-       << "EndGlobal\n";
 }
 
 //----------------------------------------------------------------------------
