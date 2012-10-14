@@ -45,21 +45,6 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
-  /** Populates allFiles with the full paths to all of the source files
-   *  from the local generators in lgs.
-   */
-  void GetFileList(const std::vector<cmLocalGenerator*>& lgs,
-                   std::vector<std::string>& allFiles);
-  /** Sends comma seperated source files paths to fileIncludePatternsStream
-   *  and builds a set of all directories and subdirectories containing
-   *  source files.
-   */
-  void GetFileStringAndFolderSet(const std::vector<cmLocalGenerator*>& lgs,
-                                 const cmMakefile* mf,
-                                 const std::vector<std::string>& allFiles,
-                                 std::stringstream& fileIncludePatternsStream,
-                                 std::set<std::string>&
-                                   folderIncludePatternsSet);
   /** Appends all targets as build systems to the project file and get all
    * include directories and compiler definitions used.
    */
