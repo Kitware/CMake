@@ -351,17 +351,16 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
         }
     }
 
-  // Write out the build_system data for this target
-  std::string makefileName = makefile->GetHomeOutputDirectory();
   // Ninja uses ninja.build files (look for a way to get the output file name
-  // from cmMakefile)
+  // from cmMakefile or something)
+  std::string makefileName;
   if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
     {
-      makefileName += "/build.ninja";
+      makefileName = "build.ninja";
     }
     else
     {
-      makefileName += "/Makefile";
+      makefileName = "Makefile";
     }
   if (!firstTarget)
     {
