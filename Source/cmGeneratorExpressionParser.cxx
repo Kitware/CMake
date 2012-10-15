@@ -192,6 +192,10 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
           {
           extendText(result, *commaIt);
           }
+        else
+          {
+          break;
+          }
         }
       }
     return;
