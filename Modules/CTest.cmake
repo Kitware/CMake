@@ -73,6 +73,8 @@ function(GET_VS_VERSION_STRING generator var)
   set(${var} ${ver_string} PARENT_SCOPE)
 endfunction()
 
+include(CTestUseLaunchers)
+
 if(BUILD_TESTING)
   # Setup some auxilary macros
   macro(SET_IF_NOT_SET var val)
@@ -241,18 +243,6 @@ if(BUILD_TESTING)
   set(DEFAULT_CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
   if(DEFAULT_CTEST_CONFIGURATION_TYPE STREQUAL "")
     set(DEFAULT_CTEST_CONFIGURATION_TYPE "Release")
-  endif()
-
-  if(NOT "${CMAKE_GENERATOR}" MATCHES "Make")
-    set(CTEST_USE_LAUNCHERS 0)
-  endif()
-  if(CTEST_USE_LAUNCHERS)
-    set(CTEST_LAUNCH_COMPILE "\"${CMAKE_CTEST_COMMAND}\" --launch --target-name <TARGET_NAME> --build-dir <CMAKE_CURRENT_BINARY_DIR> --output <OBJECT> --source <SOURCE> --language <LANGUAGE> --")
-    set(CTEST_LAUNCH_LINK    "\"${CMAKE_CTEST_COMMAND}\" --launch --target-name <TARGET_NAME> --build-dir <CMAKE_CURRENT_BINARY_DIR> --output <TARGET> --target-type <TARGET_TYPE> --language <LANGUAGE> --")
-    set(CTEST_LAUNCH_CUSTOM  "\"${CMAKE_CTEST_COMMAND}\" --launch --target-name <TARGET_NAME> --build-dir <CMAKE_CURRENT_BINARY_DIR> --output <OUTPUT> --")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CTEST_LAUNCH_COMPILE}")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CTEST_LAUNCH_LINK}")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_CUSTOM "${CTEST_LAUNCH_CUSTOM}")
   endif()
 
   mark_as_advanced(
