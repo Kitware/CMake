@@ -129,3 +129,45 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
     delete *it;
     }
 }
+
+std::string cmGeneratorExpression::Preprocess(const std::string &input,
+                                              GenerateContext context)
+{
+  std::string result;
+  std::string::size_type pos = 0;
+  std::string::size_type lastPos = pos;
+  while((pos = input.find("$<", lastPos)) != input.npos)
+    {
+    result += input.substr(lastPos, pos - lastPos);
+    pos += 2;
+    int nestingLevel = 1;
+    const char *c = input.c_str() + pos;
+    const char * const cStart = c;
+    for ( ; *c; ++c)
+      {
+      if(c[0] == '$' && c[1] == '<')
+        {
+        ++nestingLevel;
+        ++c;
+        continue;
+        }
+      if(c[0] == '>')
+        {
+        --nestingLevel;
+        if (nestingLevel == 0)
+          {
+          break;
+          }
+        }
+      }
+    const std::string::size_type traversed = (c - cStart) + 1;
+    if (!*c)
+      {
+      result += "$<" + input.substr(pos, traversed);
+      }
+    pos += traversed;
+    lastPos = pos;
+    }
+  result += input.substr(lastPos);
+  return result;
+}

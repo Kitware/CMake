@@ -48,6 +48,13 @@ public:
   const cmCompiledGeneratorExpression& Parse(std::string const& input);
   const cmCompiledGeneratorExpression& Parse(const char* input);
 
+  enum GenerateContext {
+    StripAllGeneratorExpressions
+  };
+
+  static std::string Preprocess(const std::string &input,
+                                GenerateContext context);
+
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);
