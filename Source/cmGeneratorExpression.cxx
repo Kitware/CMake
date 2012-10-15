@@ -13,6 +13,7 @@
 
 #include "cmMakefile.h"
 #include "cmTarget.h"
+#include "assert.h"
 
 #include <cmsys/String.h>
 
@@ -131,8 +132,14 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 }
 
 std::string cmGeneratorExpression::Preprocess(const std::string &input,
-                                              GenerateContext context)
+                                              PreprocessContext context)
 {
+  if (context != StripAllGeneratorExpressions)
+  {
+    assert(!"cmGeneratorExpression::Preprocess called with invalid args");
+    return std::string();
+  }
+
   std::string result;
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
