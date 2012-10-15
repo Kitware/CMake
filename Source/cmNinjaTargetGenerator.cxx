@@ -152,8 +152,10 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   // Add include directory flags.
   {
   std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes, this->GeneratorTarget,
-                                              language.c_str());
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  this->LocalGenerator->GetIncludeDirectories(includes,
+                                              this->GeneratorTarget,
+                                              language.c_str(), config);
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
     language == "RC" ? true : false); // full include paths for RC

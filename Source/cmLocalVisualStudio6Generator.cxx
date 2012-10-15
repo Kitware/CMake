@@ -853,7 +853,8 @@ inline std::string removeQuotes(const std::string& s)
 
 
 std::string
-cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target)
+cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target,
+                                                       const char *config)
 {
   std::string includeOptions;
 
@@ -868,7 +869,7 @@ cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target)
   for(int j=0; j < 2; ++j)
     {
     std::vector<std::string> includes;
-    this->GetIncludeDirectories(includes, gt);
+    this->GetIncludeDirectories(includes, gt, "C", config);
 
     std::vector<std::string>::iterator i;
     for(i = includes.begin(); i != includes.end(); ++i)
@@ -1147,7 +1148,15 @@ void cmLocalVisualStudio6Generator
 #endif
 
   // Get include options for this target.
-  std::string includeOptions = this->GetTargetIncludeOptions(target);
+  std::string includeOptionsDebug = this->GetTargetIncludeOptions(target,
+                                                                  "DEBUG");
+  std::string includeOptionsRelease = this->GetTargetIncludeOptions(target,
+                                                                  "RELEASE");
+  std::string includeOptionsRelWithDebInfo = this->GetTargetIncludeOptions(
+                                                            target,
+                                                            "RELWITHDEBINFO");
+  std::string includeOptionsMinSizeRel = this->GetTargetIncludeOptions(target,
+                                                                "MINSIZEREL");
 
   // Get extra linker options for this target type.
   std::string extraLinkOptions;
@@ -1560,8 +1569,15 @@ void cmLocalVisualStudio6Generator
     cmSystemTools::ReplaceString(line, "CM_MULTILINE_OPTIONS_RELWITHDEBINFO",
                                  optionsRelWithDebInfo.c_str());
 
-    cmSystemTools::ReplaceString(line, "BUILD_INCLUDES",
-                                 includeOptions.c_str());
+    cmSystemTools::ReplaceString(line, "BUILD_INCLUDES_DEBUG",
+                                 includeOptionsDebug.c_str());
+    cmSystemTools::ReplaceString(line, "BUILD_INCLUDES_RELEASE",
+                                 includeOptionsRelease.c_str());
+    cmSystemTools::ReplaceString(line, "BUILD_INCLUDES_MINSIZEREL",
+                                 includeOptionsMinSizeRel.c_str());
+    cmSystemTools::ReplaceString(line, "BUILD_INCLUDES_RELWITHDEBINFO",
+                                 includeOptionsRelWithDebInfo.c_str());
+
     cmSystemTools::ReplaceString(line, "TARGET_VERSION_FLAG",
                                  targetVersionFlag.c_str());
     cmSystemTools::ReplaceString(line, "TARGET_IMPLIB_FLAG_DEBUG",

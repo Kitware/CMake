@@ -72,7 +72,7 @@ public:
   const char* GetCreateRuleVariable();
 
   /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories();
+  std::vector<std::string> GetIncludeDirectories(const char *config);
 
   std::string GetCompileDefinitions(const char *config = 0);
 

@@ -90,7 +90,7 @@ private:
                           std::string& options);
   void OutputObjects(cmTarget& target, const char* tool,
                      std::string& options);
-  std::string GetTargetIncludeOptions(cmTarget &target);
+  std::string GetTargetIncludeOptions(cmTarget &target, const char *config);
   std::vector<std::string> Configurations;
 
   std::string GetConfigName(std::string const& configuration) const;

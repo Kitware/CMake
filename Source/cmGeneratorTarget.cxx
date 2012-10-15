@@ -287,7 +287,8 @@ const char* cmGeneratorTarget::GetCreateRuleVariable()
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
+std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
+                                                          const char *config)
 {
   std::vector<std::string> includes;
   const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
@@ -296,7 +297,6 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories()
     return includes;
     }
 
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   cmListFileBacktrace lfbt;
   cmGeneratorExpression ge(lfbt);
 

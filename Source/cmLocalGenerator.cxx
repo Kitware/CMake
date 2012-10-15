@@ -1324,7 +1324,8 @@ std::string cmLocalGenerator::GetIncludeFlags(
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
-                                             const char* lang)
+                                             const char* lang,
+                                             const char *config)
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1417,7 +1418,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Get the target-specific include directories.
   std::vector<std::string> includes;
 
-  includes = target->GetIncludeDirectories();
+  includes = target->GetIncludeDirectories(config);
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.
