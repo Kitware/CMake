@@ -111,6 +111,7 @@ find_path(PostgreSQL_TYPE_INCLUDE_DIR
    # Look in other places.
    ${PostgreSQL_ROOT_DIRECTORIES}
   PATH_SUFFIXES
+    postgresql
     pgsql/server
     postgresql/server
     include/server
