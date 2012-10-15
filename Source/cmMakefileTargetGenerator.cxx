@@ -1057,8 +1057,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   *this->InfoFileStream
     << "SET(CMAKE_C_TARGET_INCLUDE_PATH\n";
   std::vector<std::string> includes;
+
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget);
+                                              this->GeneratorTarget,
+                                              "C", config);
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
@@ -1543,8 +1546,11 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
   emitted.insert("/System/Library/Frameworks");
 #endif
   std::vector<std::string> includes;
+
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget);
+                                              this->GeneratorTarget,
+                                              "C", config);
   std::vector<std::string>::iterator i;
   // check all include directories for frameworks as this
   // will already have added a -F for the framework
@@ -1849,8 +1855,10 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
 
   std::vector<std::string> includes;
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget, lang);
+                                              this->GeneratorTarget,
+                                              lang, config);
 
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, lang, useResponseFile);
@@ -1953,8 +1961,10 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
      this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG"))
     {
     std::vector<std::string> includes;
+    const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     this->LocalGenerator->GetIncludeDirectories(includes,
-                                                this->GeneratorTarget);
+                                                this->GeneratorTarget,
+                                                "C", config);
     for(std::vector<std::string>::const_iterator idi = includes.begin();
         idi != includes.end(); ++idi)
       {
