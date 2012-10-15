@@ -62,15 +62,14 @@ add_custom_target(check ALL
     -Dtest_incomplete_11=$<something,,
     -Dtest_incomplete_12=$<,,
     -Dtest_incomplete_13=$<some$<1:special>thing
-    -Dtest_incomplete_14=$<<something
+    -Dtest_incomplete_14=$<$<ANGLE-R>
     -Dtest_incomplete_15=$<some$<thing
-    -Dtest_incomplete_16=$<<some$<thing
+    -Dtest_incomplete_16=$<BOOL:something
     -Dtest_incomplete_17=$<1:some$thing>
     -Dtest_incomplete_18=$<1:some,thing
     -Dtest_incomplete_19=$<1:some,thing$<ANGLE-R>
     -Dtest_incomplete_20=$<CONFIGURATION$<ANGLE-R>
     -Dtest_incomplete_21=$<BOOL:something$<ANGLE-R>
-    -Dtest_incomplete_22=$<BOOL:something
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done"
   VERBATIM
