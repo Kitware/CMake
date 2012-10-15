@@ -890,7 +890,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
          l != targets.end(); ++l)
       {
       std::vector<std::string> includeDirs;
-      (*it)->GetIncludeDirectories(includeDirs, l->second);
+      const char *config = mf->GetDefinition("CMAKE_BUILD_TYPE");
+      (*it)->GetIncludeDirectories(includeDirs, l->second, "C", config);
       this->AppendIncludeDirectories(fout, includeDirs, emmited);
       }
     }
