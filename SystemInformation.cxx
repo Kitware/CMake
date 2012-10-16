@@ -9,7 +9,9 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifdef _WIN32
+
+#if defined(_WIN32)
+# define NOMINMAX // use our min,max
 # if !defined(_WIN32_WINNT) && !(defined(_MSC_VER) && _MSC_VER < 1300)
 #  define _WIN32_WINNT 0x0501
 # endif
@@ -54,6 +56,7 @@
 
 #if defined(_WIN32)
 # include <windows.h>
+# include <errno.h>
 # if defined(KWSYS_SYS_HAS_PSAPI)
 #  include <psapi.h>
 # endif
@@ -64,6 +67,7 @@ typedef int siginfo_t;
 # include <sys/types.h>
 # include <sys/time.h>
 # include <sys/utsname.h> // int uname(struct utsname *buf);
+# include <sys/resource.h> // getrlimit
 # include <unistd.h>
 # include <signal.h>
 # include <fcntl.h>
@@ -71,15 +75,15 @@ typedef int siginfo_t;
 #endif
 
 #ifdef __APPLE__
-#include <sys/sysctl.h>
-#include <mach/vm_statistics.h>
-#include <mach/host_info.h>
-#include <mach/mach.h>
-#include <mach/mach_types.h>
-#include <fenv.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
+# include <sys/sysctl.h>
+# include <mach/vm_statistics.h>
+# include <mach/host_info.h>
+# include <mach/mach.h>
+# include <mach/mach_types.h>
+# include <fenv.h>
+# include <sys/socket.h>
+# include <netdb.h>
+# include <netinet/in.h>
 # if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050
 #  include <execinfo.h>
 #  define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
@@ -95,6 +99,13 @@ typedef int siginfo_t;
 #  include <execinfo.h>
 #  define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
 # endif
+# if defined(KWSYS_CXX_HAS_RLIMIT64)
+typedef struct rlimit64 ResourceLimitType;
+#  define GetResourceLimit getrlimit64
+# else
+typedef struct rlimit ResourceLimitType;
+#  define GetResourceLimit getrlimit
+# endif
 #elif defined( __hpux )
 # include <sys/param.h>
 # include <sys/pstat.h>
@@ -105,7 +116,7 @@ typedef int siginfo_t;
 #endif
 
 #ifdef __HAIKU__
-#include <OS.h>
+# include <OS.h>
 #endif
 
 #include <memory.h>
@@ -114,8 +125,38 @@ typedef int siginfo_t;
 #include <string.h>
 #include <ctype.h> // int isdigit(int c);
 
+#if defined(KWSYS_USE_LONG_LONG)
+# if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
+#  define iostreamLongLong(x) (x)
+# else
+#  define iostreamLongLong(x) ((long)x)
+# endif
+#elif defined(KWSYS_USE___INT64)
+# if defined(KWSYS_IOS_HAS_OSTREAM___INT64)
+#  define iostreamLongLong(x) (x)
+# else
+#  define iostreamLongLong(x) ((long)x)
+# endif
+#else
+# error "No Long Long"
+#endif
+
+#if defined(KWSYS_CXX_HAS_ATOLL)
+# define atoLongLong atoll
+#else
+# if defined(KWSYS_CXX_HAS__ATOI64)
+#  define atoLongLong _atoi64
+# elif defined(KWSYS_CXX_HAS_ATOL)
+#  define atoLongLong atol
+# else
+#  define atoLongLong atoi
+# endif
+#endif
+
 namespace KWSYS_NAMESPACE
 {
+template<typename T>
+T min(T a, T b){ return a<b ? a : b; }
 
 extern "C" { typedef void (*SigAction)(int,siginfo_t*,void*); }
 
@@ -168,8 +209,14 @@ public:
   LongLong GetProcessId();
 
   // Retrieve memory information in kib
-  LongLong GetMemoryTotal();
-  LongLong GetMemoryUsed();
+  LongLong GetHostMemoryTotal();
+  LongLong GetHostMemoryAvailable(const char *envVarName);
+  LongLong GetHostMemoryUsed();
+
+  LongLong GetProcMemoryAvailable(
+        const char *hostLimitEnvVarName,
+        const char *procLimitEnvVarName);
+  LongLong GetProcMemoryUsed();
 
   // enable/disable stack trace signal handler.
   static
@@ -448,11 +495,7 @@ const char * SystemInformation::GetHostname()
 kwsys_stl::string SystemInformation::GetFullyQualifiedDomainName()
 {
   kwsys_stl::string fqdn;
-  int ierr=this->Implementation->GetFullyQualifiedDomainName(fqdn);
-  if (ierr)
-    {
-    fqdn="localhost";
-    }
+  this->Implementation->GetFullyQualifiedDomainName(fqdn);
   return fqdn;
 }
 
@@ -552,27 +595,54 @@ size_t SystemInformation::GetAvailablePhysicalMemory()
   return this->Implementation->GetAvailablePhysicalMemory();
 }
 
-kwsys_stl::string SystemInformation::GetMemoryDescription()
+kwsys_stl::string SystemInformation::GetMemoryDescription(
+      const char *hostLimitEnvVarName,
+      const char *procLimitEnvVarName)
 {
   kwsys_stl::ostringstream oss;
   oss
-    << this->GetTotalPhysicalMemory()
-    << " MB physical "
-    << this->GetTotalVirtualMemory()
-    << " MB virtual";
-
+    << "Host Total: "
+    << iostreamLongLong(this->GetHostMemoryTotal())
+    << " KiB, Host Available: "
+    << iostreamLongLong(this->GetHostMemoryAvailable(hostLimitEnvVarName))
+    << " KiB, Process Available: "
+    << iostreamLongLong(
+         this->GetProcMemoryAvailable(hostLimitEnvVarName,procLimitEnvVarName))
+    << " KiB";
   return oss.str();
 }
 
-// Get total system RAM in units of KiB.
-SystemInformation::LongLong SystemInformation::GetMemoryTotal()
+// host memory info in units of KiB.
+SystemInformation::LongLong SystemInformation::GetHostMemoryTotal()
 {
-  return this->Implementation->GetMemoryTotal();
+  return this->Implementation->GetHostMemoryTotal();
 }
 
-SystemInformation::LongLong SystemInformation::GetMemoryUsed()
+SystemInformation::LongLong
+SystemInformation::GetHostMemoryAvailable(const char *hostLimitEnvVarName)
 {
-  return this->Implementation->GetMemoryUsed();
+  return this->Implementation->GetHostMemoryAvailable(hostLimitEnvVarName);
+}
+
+SystemInformation::LongLong SystemInformation::GetHostMemoryUsed()
+{
+  return this->Implementation->GetHostMemoryUsed();
+}
+
+// process memory info in units of KiB.
+SystemInformation::LongLong
+SystemInformation::GetProcMemoryAvailable(
+        const char *hostLimitEnvVarName,
+        const char *procLimitEnvVarName)
+{
+  return this->Implementation->GetProcMemoryAvailable(
+          hostLimitEnvVarName,
+          procLimitEnvVarName);
+}
+
+SystemInformation::LongLong SystemInformation::GetProcMemoryUsed()
+{
+  return this->Implementation->GetProcMemoryUsed();
 }
 
 SystemInformation::LongLong SystemInformation::GetProcessId()
@@ -671,33 +741,55 @@ void SystemInformation::RunMemoryCheck()
 // initial APIC ID for the processor this code is running on.
 // Default value = 0xff if HT is not supported
 
-
-//*****************************************************************************
+// Hide implementation details in an anonymous namespace.
+namespace {
+// *****************************************************************************
+#if defined(__linux) || defined(__APPLE__)
 int LoadLines(
-      const char *fileName,
+      FILE *file,
       kwsys_stl::vector<kwsys_stl::string> &lines)
 {
   // Load each line in the given file into a the vector.
   int nRead=0;
   const int bufSize=1024;
   char buf[bufSize]={'\0'};
-  kwsys_stl::ifstream file(fileName);
-  if (!file.is_open())
+  while (!feof(file) && !ferror(file))
+    {
+    errno=0;
+    if (fgets(buf,bufSize,file) == 0)
+      {
+      if (ferror(file) && (errno==EINTR))
+        {
+        clearerr(file);
+        }
+      continue;
+      }
+    lines.push_back(buf);
+    ++nRead;
+    }
+  if (ferror(file))
     {
     return 0;
     }
-  while(file.good())
-    {
-    file.getline(buf,bufSize);
-    if (file.gcount()>1)
-      {
-      lines.push_back(buf);
-      ++nRead;
-      }
-    }
-  file.close();
   return nRead;
 }
+
+# if defined(__linux)
+// *****************************************************************************
+int LoadLines(
+      const char *fileName,
+      kwsys_stl::vector<kwsys_stl::string> &lines)
+{
+  FILE *file=fopen(fileName,"r");
+  if (file==0)
+    {
+    return 0;
+    }
+  int nRead=LoadLines(file,lines);
+  fclose(file);
+  return nRead;
+}
+# endif
 
 // ****************************************************************************
 template<typename T>
@@ -708,16 +800,43 @@ int NameValue(
   size_t nLines=lines.size();
   for (size_t i=0; i<nLines; ++i)
     {
-    kwsys_stl::string tok;
-    kwsys_stl::istringstream is(lines[i]);
-    is >> tok;
-    if (tok==name)
+    size_t at=lines[i].find(name);
+    if (at==kwsys_stl::string::npos)
       {
-      is >> value;
-      return 0;
+      continue;
       }
+    kwsys_stl::istringstream is(lines[i].substr(at+name.size()));
+    is >> value;
+    return 0;
     }
   return -1;
+}
+#endif
+
+#if defined(__linux)
+// ****************************************************************************
+template<typename T>
+int GetFieldsFromFile(
+      const char *fileName,
+      const char **fieldNames,
+      T *values)
+{
+  kwsys_stl::vector<kwsys_stl::string> fields;
+  if (!LoadLines(fileName,fields))
+    {
+    return -1;
+    }
+  int i=0;
+  while (fieldNames[i]!=NULL)
+    {
+    int ierr=NameValue(fields,fieldNames[i],values[i]);
+    if (ierr)
+      {
+      return -(i+2);
+      }
+    i+=1;
+    }
+  return 0;
 }
 
 // ****************************************************************************
@@ -727,202 +846,244 @@ int GetFieldFromFile(
       const char *fieldName,
       T &value)
 {
-  kwsys_stl::vector<kwsys_stl::string> fields;
-  if (!LoadLines(fileName,fields))
+  const char *fieldNames[2]={fieldName,NULL};
+  T values[1]={T(0)};
+  int ierr=GetFieldsFromFile(fileName,fieldNames,values);
+  if (ierr)
+    {
+    return ierr;
+    }
+  value=values[0];
+  return 0;
+}
+#endif
+
+// ****************************************************************************
+#if defined(__APPLE__)
+template<typename T>
+int GetFieldsFromCommand(
+      const char *command,
+      const char **fieldNames,
+      T *values)
+{
+  FILE *file=popen(command,"r");
+  if (file==0)
     {
     return -1;
     }
-  int ierr=NameValue(fields,fieldName,value);
-  if (ierr)
+  kwsys_stl::vector<kwsys_stl::string> fields;
+  int nl=LoadLines(file,fields);
+  pclose(file);
+  if (nl==0)
     {
-    return -2;
+    return -1;
+    }
+  int i=0;
+  while (fieldNames[i]!=NULL)
+    {
+    int ierr=NameValue(fields,fieldNames[i],values[i]);
+    if (ierr)
+      {
+      return -(i+2);
+      }
+    i+=1;
     }
   return 0;
 }
+#endif
 
-//*****************************************************************************
+// ****************************************************************************
+#if !defined(_WIN32) && !defined(__MINGW32__) && !defined(__CYGWIN__)
 void StacktraceSignalHandler(
       int sigNo,
       siginfo_t *sigInfo,
       void * /*sigContext*/)
 {
 #if defined(__linux) || defined(__APPLE__)
-  kwsys_ios::cerr << "[" << getpid() << "] ";
-
+  kwsys_ios::ostringstream oss;
+  oss
+     << "=========================================================" << kwsys_ios::endl
+     << "Process id " << getpid() << " ";
   switch (sigNo)
     {
     case SIGFPE:
-      kwsys_ios::cerr << "Caught SIGFPE ";
+      oss << "Caught SIGFPE ";
       switch (sigInfo->si_code)
         {
 # if defined(FPE_INTDIV)
         case FPE_INTDIV:
-          kwsys_ios::cerr << "integer division by zero";
+          oss << "integer division by zero";
           break;
 # endif
 
 # if defined(FPE_INTOVF)
         case FPE_INTOVF:
-          kwsys_ios::cerr << "integer overflow";
+          oss << "integer overflow";
           break;
 # endif
 
         case FPE_FLTDIV:
-          kwsys_ios::cerr << "floating point divide by zero";
+          oss << "floating point divide by zero";
           break;
 
         case FPE_FLTOVF:
-          kwsys_ios::cerr << "floating point overflow";
+          oss << "floating point overflow";
           break;
 
         case FPE_FLTUND:
-          kwsys_ios::cerr << "floating point underflow";
+          oss << "floating point underflow";
           break;
 
         case FPE_FLTRES:
-          kwsys_ios::cerr << "floating point inexact result";
+          oss << "floating point inexact result";
           break;
 
         case FPE_FLTINV:
-          kwsys_ios::cerr << "floating point invalid operation";
+          oss << "floating point invalid operation";
           break;
 
 #if defined(FPE_FLTSUB)
         case FPE_FLTSUB:
-          kwsys_ios::cerr << "floating point subscript out of range";
+          oss << "floating point subscript out of range";
           break;
 #endif
 
         default:
-          kwsys_ios::cerr << "code " << sigInfo->si_code;
+          oss << "code " << sigInfo->si_code;
           break;
         }
       break;
 
     case SIGSEGV:
-      kwsys_ios::cerr << "Caught SIGSEGV ";
+      oss << "Caught SIGSEGV ";
       switch (sigInfo->si_code)
         {
         case SEGV_MAPERR:
-          kwsys_ios::cerr << "address not mapped to object";
+          oss << "address not mapped to object";
           break;
 
         case SEGV_ACCERR:
-          kwsys_ios::cerr << "invalid permission for mapped object";
+          oss << "invalid permission for mapped object";
           break;
 
         default:
-          kwsys_ios::cerr << "code " << sigInfo->si_code;
+          oss << "code " << sigInfo->si_code;
           break;
         }
       break;
 
     case SIGINT:
-      kwsys_ios::cerr << "Caught SIGTERM";
+      oss << "Caught SIGTERM";
       break;
 
     case SIGTERM:
-      kwsys_ios::cerr << "Caught SIGTERM";
+      oss << "Caught SIGTERM";
       break;
 
     case SIGBUS:
-      kwsys_ios::cerr << "Caught SIGBUS type ";
+      oss << "Caught SIGBUS type ";
       switch (sigInfo->si_code)
         {
         case BUS_ADRALN:
-          kwsys_ios::cerr << "invalid address alignment";
+          oss << "invalid address alignment";
           break;
 
 # if defined(BUS_ADRERR)
         case BUS_ADRERR:
-          kwsys_ios::cerr << "non-exestent physical address";
+          oss << "non-exestent physical address";
           break;
 # endif
 
 # if defined(BUS_OBJERR)
         case BUS_OBJERR:
-          kwsys_ios::cerr << "object specific hardware error";
+          oss << "object specific hardware error";
           break;
 # endif
 
         default:
-          kwsys_ios::cerr << "code " << sigInfo->si_code;
+          oss << "code " << sigInfo->si_code;
           break;
         }
       break;
 
     case SIGILL:
-      kwsys_ios::cerr << "Caught SIGILL ";
+      oss << "Caught SIGILL ";
       switch (sigInfo->si_code)
         {
         case ILL_ILLOPC:
-          kwsys_ios::cerr << "illegal opcode";
+          oss << "illegal opcode";
           break;
 
 # if defined(ILL_ILLOPN)
         case ILL_ILLOPN:
-          kwsys_ios::cerr << "illegal operand";
+          oss << "illegal operand";
           break;
 # endif
 
 # if defined(ILL_ILLADR)
         case ILL_ILLADR:
-          kwsys_ios::cerr << "illegal addressing mode.";
+          oss << "illegal addressing mode.";
           break;
 # endif
 
         case ILL_ILLTRP:
-          kwsys_ios::cerr << "illegal trap";
+          oss << "illegal trap";
 
         case ILL_PRVOPC:
-          kwsys_ios::cerr << "privileged opcode";
+          oss << "privileged opcode";
           break;
 
 # if defined(ILL_PRVREG)
         case ILL_PRVREG:
-          kwsys_ios::cerr << "privileged register";
+          oss << "privileged register";
           break;
 # endif
 
 # if defined(ILL_COPROC)
         case ILL_COPROC:
-          kwsys_ios::cerr << "co-processor error";
+          oss << "co-processor error";
           break;
 # endif
 
 # if defined(ILL_BADSTK)
         case ILL_BADSTK:
-          kwsys_ios::cerr << "internal stack error";
+          oss << "internal stack error";
           break;
 # endif
 
         default:
-          kwsys_ios::cerr << "code " << sigInfo->si_code;
+          oss << "code " << sigInfo->si_code;
           break;
         }
       break;
 
     default:
-      kwsys_ios::cerr << "Caught " << sigNo << " code " << sigInfo->si_code;
+      oss << "Caught " << sigNo << " code " << sigInfo->si_code;
       break;
     }
-  kwsys_ios::cerr << kwsys_ios::endl;
-
+  oss << kwsys_ios::endl;
 #if defined(KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE)
-  kwsys_ios::cerr << "Stack:" << kwsys_ios::endl;
-  void *stack[128];
-  int n=backtrace(stack,128);
-  backtrace_symbols_fd(stack,n,2);
+  oss << "Program Stack:" << kwsys_ios::endl;
+  void *stackSymbols[128];
+  int n=backtrace(stackSymbols,128);
+  char **stackText=backtrace_symbols(stackSymbols,n);
+  for (int i=0; i<n; ++i)
+    {
+    oss << "  " << stackText[i] << kwsys_ios::endl;
+    }
 #endif
-
+  oss
+     << "=========================================================" << kwsys_ios::endl;
+  kwsys_ios::cerr << oss.str() << kwsys_ios::endl;
   abort();
-
 #else
   // avoid warning C4100
   (void)sigNo;
   (void)sigInfo;
 #endif
 }
+#endif
+} // anonymous namespace
 
 SystemInformationImplementation::SystemInformationImplementation()
 {
@@ -1047,6 +1208,29 @@ const char * SystemInformationImplementation::GetOSName()
 /** Get the hostname */
 const char* SystemInformationImplementation::GetHostname()
 {
+  if (this->Hostname.empty())
+    {
+    this->Hostname="localhost";
+#if defined(_WIN32)
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    char name[255];
+    wVersionRequested = MAKEWORD(2,0);
+    if ( WSAStartup( wVersionRequested, &wsaData ) == 0 )
+      {
+      gethostname(name,sizeof(name));
+      WSACleanup( );
+      }
+    this->Hostname = name;
+#else
+    struct utsname unameInfo;
+    int errorFlag = uname(&unameInfo);
+    if(errorFlag == 0)
+      {
+      this->Hostname = unameInfo.nodename;
+      }
+#endif
+    }
   return this->Hostname.c_str();
 }
 
@@ -1092,7 +1276,12 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
   // we want the fully qualified domain name. Because there are
   // any number of interfaces on this system we look for the
   // first of these that contains the name returned by gethostname
-  // and is longer. failing that we return gethostname.
+  // and is longer. failing that we return gethostname and indicate
+  // with a failure code. Return of a failure code is not necessarilly
+  // an indication of an error. for instance gethostname may return
+  // the fully qualified domain name, or there may not be one if the
+  // system lives on a private network such as in the case of a cluster
+  // node.
 
   int ierr=0;
   char base[NI_MAXHOST];
@@ -1132,8 +1321,8 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
             NI_NAMEREQD);
       if (ierr)
         {
-        // don't report the error now since we may succeed on another
-        // interface. If all attempts fail then retrun an error code.
+        // don't report the failure now since we may succeed on another
+        // interface. If all attempts fail then return the failure code.
         ierr=-3;
         continue;
         }
@@ -1153,6 +1342,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
   return ierr;
 #else
   /* TODO: Implement on more platforms.  */
+  fqdn=this->GetHostname();
   return -1;
 #endif
 }
@@ -2905,7 +3095,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
 Get total system RAM in units of KiB.
 */
 SystemInformation::LongLong
-SystemInformationImplementation::GetMemoryTotal()
+SystemInformationImplementation::GetHostMemoryTotal()
 {
 #if defined(_WIN32)
 # if defined(_MSC_VER) && _MSC_VER < 1300
@@ -2920,7 +3110,7 @@ SystemInformationImplementation::GetMemoryTotal()
   return statex.ullTotalPhys/1024;
 # endif
 #elif defined(__linux)
-  LongLong memTotal=0;
+  SystemInformation::LongLong memTotal=0;
   int ierr=GetFieldFromFile("/proc/meminfo","MemTotal:",memTotal);
   if (ierr)
     {
@@ -2942,15 +3132,156 @@ SystemInformationImplementation::GetMemoryTotal()
 }
 
 /**
+Get total system RAM in units of KiB. This may differ from the
+host total if a host-wide resource limit is applied.
+*/
+SystemInformation::LongLong
+SystemInformationImplementation::GetHostMemoryAvailable(const char *hostLimitEnvVarName)
+{
+  SystemInformation::LongLong memTotal=this->GetHostMemoryTotal();
+
+  // the following mechanism is provided for systems that
+  // apply resource limits across groups of processes.
+  // this is of use on certain SMP systems (eg. SGI UV)
+  // where the host has a large amount of ram but a given user's
+  // access to it is severly restricted. The system will
+  // apply a limit across a set of processes. Units are in KiB.
+  if (hostLimitEnvVarName)
+    {
+    const char *hostLimitEnvVarValue=getenv(hostLimitEnvVarName);
+    if (hostLimitEnvVarValue)
+      {
+      SystemInformation::LongLong hostLimit=atoLongLong(hostLimitEnvVarValue);
+      if (hostLimit>0)
+        {
+        memTotal=min(hostLimit,memTotal);
+        }
+      }
+    }
+
+  return memTotal;
+}
+
+/**
+Get total system RAM in units of KiB. This may differ from the
+host total if a per-process resource limit is applied.
+*/
+SystemInformation::LongLong
+SystemInformationImplementation::GetProcMemoryAvailable(
+        const char *hostLimitEnvVarName,
+        const char *procLimitEnvVarName)
+{
+  SystemInformation::LongLong memAvail
+    = this->GetHostMemoryAvailable(hostLimitEnvVarName);
+
+  // the following mechanism is provide for systems where rlimits
+  // are not employed. Units are in KiB.
+  if (procLimitEnvVarName)
+    {
+    const char *procLimitEnvVarValue=getenv(procLimitEnvVarName);
+    if (procLimitEnvVarValue)
+      {
+      SystemInformation::LongLong procLimit=atoLongLong(procLimitEnvVarValue);
+      if (procLimit>0)
+        {
+        memAvail=min(procLimit,memAvail);
+        }
+      }
+    }
+
+#if defined(__linux)
+  int ierr;
+  ResourceLimitType rlim;
+  ierr=GetResourceLimit(RLIMIT_DATA,&rlim);
+  if ((ierr==0) && (rlim.rlim_cur != RLIM_INFINITY))
+    {
+    memAvail=min((SystemInformation::LongLong)rlim.rlim_cur/1024,memAvail);
+    }
+
+  ierr=GetResourceLimit(RLIMIT_AS,&rlim);
+  if ((ierr==0) && (rlim.rlim_cur != RLIM_INFINITY))
+    {
+    memAvail=min((SystemInformation::LongLong)rlim.rlim_cur/1024,memAvail);
+    }
+#elif defined(__APPLE__)
+  struct rlimit rlim;
+  int ierr;
+  ierr=getrlimit(RLIMIT_DATA,&rlim);
+  if ((ierr==0) && (rlim.rlim_cur != RLIM_INFINITY))
+    {
+    memAvail=min((SystemInformation::LongLong)rlim.rlim_cur/1024,memAvail);
+    }
+
+  ierr=getrlimit(RLIMIT_RSS,&rlim);
+  if ((ierr==0) && (rlim.rlim_cur != RLIM_INFINITY))
+    {
+    memAvail=min((SystemInformation::LongLong)rlim.rlim_cur/1024,memAvail);
+    }
+#endif
+
+  return memAvail;
+}
+
+/**
+Get RAM used by all processes in the host, in units of KiB.
+*/
+SystemInformation::LongLong
+SystemInformationImplementation::GetHostMemoryUsed()
+{
+#if defined(_WIN32)
+# if defined(_MSC_VER) && _MSC_VER < 1300
+  MEMORYSTATUS stat;
+  stat.dwLength = sizeof(stat);
+  GlobalMemoryStatus(&stat);
+  return (stat.dwTotalPhys - stat.dwAvailPhys)/1024;
+# else
+  MEMORYSTATUSEX statex;
+  statex.dwLength=sizeof(statex);
+  GlobalMemoryStatusEx(&statex);
+  return (statex.ullTotalPhys - statex.ullAvailPhys)/1024;
+# endif
+#elif defined(__linux)
+  const char *names[3]={"MemTotal:","MemFree:",NULL};
+  SystemInformation::LongLong values[2]={SystemInformation::LongLong(0)};
+  int ierr=GetFieldsFromFile("/proc/meminfo",names,values);
+  if (ierr)
+    {
+    return ierr;
+    }
+  SystemInformation::LongLong &memTotal=values[0];
+  SystemInformation::LongLong &memFree=values[1];
+  return memTotal - memFree;
+#elif defined(__APPLE__)
+  SystemInformation::LongLong psz=getpagesize();
+  if (psz<1)
+    {
+    return -1;
+    }
+  const char *names[4]={"Pages active:","Pages inactive:","Pages wired down:",NULL};
+  SystemInformation::LongLong values[3]={SystemInformation::LongLong(0)};
+  int ierr=GetFieldsFromCommand("vm_stat", names, values);
+  if (ierr)
+    {
+    return -1;
+    }
+  SystemInformation::LongLong &vmActive=values[0];
+  SystemInformation::LongLong &vmInactive=values[1];
+  SystemInformation::LongLong &vmWired=values[2];
+  return ((vmActive+vmInactive+vmWired)*psz)/1024;
+#else
+  return 0;
+#endif
+}
+
+/**
 Get system RAM used by the process associated with the given
 process id in units of KiB.
 */
 SystemInformation::LongLong
-SystemInformationImplementation::GetMemoryUsed()
+SystemInformationImplementation::GetProcMemoryUsed()
 {
 #if defined(_WIN32) && defined(KWSYS_SYS_HAS_PSAPI)
   long pid=GetCurrentProcessId();
-
   HANDLE hProc;
   hProc=OpenProcess(
       PROCESS_QUERY_INFORMATION|PROCESS_VM_READ,
@@ -2960,7 +3291,6 @@ SystemInformationImplementation::GetMemoryUsed()
     {
     return -1;
     }
-
   PROCESS_MEMORY_COUNTERS pmc;
   int ok=GetProcessMemoryInfo(hProc,&pmc,sizeof(pmc));
   CloseHandle(hProc);
@@ -2970,7 +3300,7 @@ SystemInformationImplementation::GetMemoryUsed()
     }
   return pmc.WorkingSetSize/1024;
 #elif defined(__linux)
-  LongLong memUsed=0;
+  SystemInformation::LongLong memUsed=0;
   int ierr=GetFieldFromFile("/proc/self/status","VmRSS:",memUsed);
   if (ierr)
     {
@@ -2978,23 +3308,34 @@ SystemInformationImplementation::GetMemoryUsed()
     }
   return memUsed;
 #elif defined(__APPLE__)
+  SystemInformation::LongLong memUsed=0;
   pid_t pid=getpid();
   kwsys_stl::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
-  FILE *f=popen(oss.str().c_str(),"r");
-  if (f==0)
+  FILE *file=popen(oss.str().c_str(),"r");
+  if (file==0)
     {
     return -1;
     }
   oss.str("");
-  char buf[256]={'\0'};
-  while (fgets(buf, 256, f) != 0)
+  while (!feof(file) && !ferror(file))
     {
-    oss << buf;
+    char buf[256]={'\0'};
+    errno=0;
+    size_t nRead=fread(buf,1,256,file);
+    if (ferror(file) && (errno==EINTR))
+      {
+      clearerr(file);
+      }
+    if (nRead) oss << buf;
     }
-  pclose(f);
+  int ierr=ferror(file);
+  pclose(file);
+  if (ierr)
+    {
+    return -2;
+    }
   kwsys_stl::istringstream iss(oss.str());
-  LongLong memUsed=0;
   iss >> memUsed;
   return memUsed;
 #else
@@ -3603,6 +3944,7 @@ bool SystemInformationImplementation::ParseSysCtl()
   if ( host_statistics(mach_host_self(), HOST_VM_INFO,
                        (host_info_t) &vmstat, &count) == KERN_SUCCESS )
     {
+    len = sizeof(value);
     err = sysctlbyname("hw.pagesize", &value, &len, NULL, 0);
     int64_t available_memory = vmstat.free_count * value;
     this->AvailablePhysicalMemory = static_cast< size_t >( available_memory / 1048576 );
@@ -3613,7 +3955,7 @@ bool SystemInformationImplementation::ParseSysCtl()
   int mib[2] = { CTL_VM, VM_SWAPUSAGE };
   size_t miblen = sizeof(mib) / sizeof(mib[0]);
   struct xsw_usage swap;
-  len = sizeof(struct xsw_usage);
+  len = sizeof(swap);
   err = sysctl(mib, miblen, &swap, &len, NULL, 0);
   if (err == 0)
     {
@@ -3628,6 +3970,7 @@ bool SystemInformationImplementation::ParseSysCtl()
 // CPU Info
   len = sizeof(this->NumberOfPhysicalCPU);
   sysctlbyname("hw.physicalcpu", &this->NumberOfPhysicalCPU, &len, NULL, 0);
+  len = sizeof(this->NumberOfLogicalCPU);
   sysctlbyname("hw.logicalcpu", &this->NumberOfLogicalCPU, &len, NULL, 0);
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical =
     this->LogicalCPUPerPhysicalCPU();
@@ -3653,8 +3996,9 @@ bool SystemInformationImplementation::ParseSysCtl()
     if (machineBuf.find_first_of("Power") != kwsys_stl::string::npos)
       {
       this->ChipID.Vendor = "IBM";
-      len = 4;
+      len = sizeof(this->ChipID.Family);
       err = sysctlbyname("hw.cputype", &this->ChipID.Family, &len, NULL, 0);
+      len = sizeof(this->ChipID.Model);
       err = sysctlbyname("hw.cpusubtype", &this->ChipID.Model, &len, NULL, 0);
       this->FindManufacturer();
       }
@@ -3679,8 +4023,8 @@ bool SystemInformationImplementation::ParseSysCtl()
     }
 
   // brand string
-  ::memset(retBuf, 0, 128);
-  len = 128;
+  ::memset(retBuf, 0, sizeof(retBuf));
+  len = sizeof(retBuf);
   err = sysctlbyname("machdep.cpu.brand_string", retBuf, &len, NULL, 0);
   if (!err)
     {
@@ -3692,6 +4036,7 @@ bool SystemInformationImplementation::ParseSysCtl()
   len = sizeof(value);
   err = sysctlbyname("hw.l1icachesize", &value, &len, NULL, 0);
   this->Features.L1CacheSize = static_cast< int >( value );
+  len = sizeof(value);
   err = sysctlbyname("hw.l2cachesize", &value, &len, NULL, 0);
   this->Features.L2CacheSize = static_cast< int >( value );
 
