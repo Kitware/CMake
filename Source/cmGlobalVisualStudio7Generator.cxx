@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "windows.h" // this must be first to define GetCurrentDirectory
-#include <assert.h>
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmLocalVisualStudio7Generator.h"
@@ -244,23 +243,20 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
       {
-      std::set<std::string> allConfigurations(this->Configurations.begin(),
-                                              this->Configurations.end());
       this->WriteProjectConfigurations(
         fout, target->GetName(),
-        allConfigurations, target->GetProperty("VS_PLATFORM_MAPPING"));
+        true, target->GetProperty("VS_PLATFORM_MAPPING"));
       }
     else
       {
-      const std::set<std::string>& configsPartOfDefaultBuild =
-        this->IsPartOfDefaultBuild(root->GetMakefile()->GetProjectName(),
-                                   target);
+      bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
+        root->GetMakefile()->GetProjectName(), target);
       const char *vcprojName =
         target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName)
         {
         this->WriteProjectConfigurations(fout, vcprojName,
-                                         configsPartOfDefaultBuild);
+                                         partOfDefaultBuild);
         }
       }
     }
@@ -581,10 +577,9 @@ cmGlobalVisualStudio7Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
-::WriteProjectConfigurations(
-  std::ostream& fout, const char* name,
-  const std::set<std::string>& configsPartOfDefaultBuild,
-  const char* platformMapping)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             bool partOfDefaultBuild,
+                             const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -593,9 +588,7 @@ void cmGlobalVisualStudio7Generator
     fout << "\t\t{" << guid << "}." << *i
          << ".ActiveCfg = " << *i << "|"
          << (platformMapping ? platformMapping : "Win32") << "\n";
-    std::set<std::string>::const_iterator
-      ci = configsPartOfDefaultBuild.find(*i);
-    if(!(ci == configsPartOfDefaultBuild.end()))
+    if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i
            << ".Build.0 = " << *i << "|"
@@ -768,34 +761,26 @@ cmGlobalVisualStudio7Generator
     }
 }
 
-std::set<std::string>
-cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
-                                                     cmTarget* target)
+bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
+                                                          cmTarget* target)
 {
-  std::set<std::string> activeConfigs;
+  if(target->GetPropertyAsBool("EXCLUDE_FROM_DEFAULT_BUILD"))
+    {
+    return false;
+    }
   // if it is a utilitiy target then only make it part of the
   // default build if another target depends on it
   int type = target->GetType();
   if (type == cmTarget::GLOBAL_TARGET)
     {
-    return activeConfigs;
+    return false;
     }
-  if(type == cmTarget::UTILITY && !this->IsDependedOn(project, target))
+  if(type == cmTarget::UTILITY)
     {
-    return activeConfigs;
+    return this->IsDependedOn(project, target);
     }
-  // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
-    {
-    const char* propertyValue =
-      target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i->c_str());
-    if(cmSystemTools::IsOff(propertyValue))
-      {
-      activeConfigs.insert(*i);
-      }
-    }
-  return activeConfigs;
+  // default is to be part of the build
+  return true;
 }
 
 //----------------------------------------------------------------------------

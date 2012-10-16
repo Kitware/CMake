@@ -61,10 +61,10 @@ protected:
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout,
                            const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name,
-    const std::set<std::string>& configsPartOfDefaultBuild,
-    const char* platformMapping = NULL);
+  virtual void WriteProjectConfigurations(std::ostream& fout,
+                                          const char* name,
+                                          bool partOfDefaultBuild,
+                                          const char* platformMapping = NULL);
   virtual void WriteExternalProject(std::ostream& fout,
                                     const char* name,
                                     const char* path,
