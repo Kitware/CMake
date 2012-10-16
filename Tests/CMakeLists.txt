@@ -1409,23 +1409,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSMidl)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
-
-    if(NOT MSVC60)
-      configure_file("${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild/ResultTest.cmake.in"
-                     "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild/ResultTest.cmake" @ONLY)
-      foreach(config ${CMAKE_CONFIGURATION_TYPES})
-        add_test(VSExcludeFromDefaultBuild-${config} ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild"
-          "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
-          --build-config ${config}
-          --build-two-config
-          --build-generator ${CMAKE_TEST_GENERATOR}
-          --build-project VSExcludeFromDefaultBuild
-          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-          --test-command ${CMAKE_COMMAND} -P "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild/ResultTest.cmake" ${config})
-      endforeach()
-    endif()
   endif()
 
   if (APPLE)

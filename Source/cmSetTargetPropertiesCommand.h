@@ -156,9 +156,7 @@ public:
         "\n"
         "The EXCLUDE_FROM_DEFAULT_BUILD property is used by the visual "
         "studio generators.  If it is set to 1 the target will not be "
-        "part of the default build when you select \"Build Solution\". "
-        "This can also be set on a per-configuration basis using "
-        "EXCLUDE_FROM_DEFAULT_BUILD_<CONFIG>."
+        "part of the default build when you select \"Build Solution\"."
         ;
     }
 

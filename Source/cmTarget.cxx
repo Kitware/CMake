@@ -266,21 +266,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "bundle.");
 
   cm->DefineProperty
-    ("EXCLUDE_FROM_DEFAULT_BUILD", cmProperty::TARGET,
-     "Exclude target from \"Build Solution\".",
-     "This property is only used by Visual Studio generators 7 and above. "
-     "When set to TRUE, the target will not be built when you press "
-     "\"Build Solution\".");
-
-  cm->DefineProperty
-    ("EXCLUDE_FROM_DEFAULT_BUILD_<CONFIG>", cmProperty::TARGET,
-     "Per-configuration version of target exclusion from \"Build Solution\". ",
-     "This is the configuration-specific version of "
-     "EXCLUDE_FROM_DEFAULT_BUILD. If the generic EXCLUDE_FROM_DEFAULT_BUILD "
-     "is also set on a target, EXCLUDE_FROM_DEFAULT_BUILD_<CONFIG> takes "
-     "precedence in configurations for which it has a value.");
-
-  cm->DefineProperty
     ("FRAMEWORK", cmProperty::TARGET,
      "This target is a framework on the Mac.",
      "If a shared library target has this property set to true it will "
