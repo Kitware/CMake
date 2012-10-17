@@ -25,6 +25,7 @@
 #include "cmComputeTargetDepends.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
+#include "cmGeneratorExpression.h"
 
 #include <cmsys/Directory.hxx>
 
@@ -1152,13 +1153,13 @@ void cmGlobalGenerator::CheckLocalGenerators()
     {
     manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
     this->LocalGenerators[i]->ConfigureFinalPass();
-    cmGeneratorTargetsType targets =
-      this->LocalGenerators[i]->GetMakefile()->GetGeneratorTargets();
-    for (cmGeneratorTargetsType::iterator l = targets.begin();
+    cmTargets &targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for (cmTargets::iterator l = targets.begin();
          l != targets.end(); l++)
       {
       const cmTarget::LinkLibraryVectorType& libs =
-        l->second->Target->GetOriginalLinkLibraries();
+        l->second.GetOriginalLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();
           lib != libs.end(); ++lib)
         {
@@ -1174,14 +1175,23 @@ void cmGlobalGenerator::CheckLocalGenerators()
             }
           std::string text = notFoundMap[varName];
           text += "\n    linked by target \"";
-          text += l->second->GetName();
+          text += l->second.GetName();
           text += "\" in directory ";
           text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
           notFoundMap[varName] = text;
           }
         }
       std::vector<std::string> incs;
-      this->LocalGenerators[i]->GetIncludeDirectories(incs, l->second);
+      const char *incDirProp = l->second.GetProperty("INCLUDE_DIRECTORIES");
+      if (!incDirProp)
+        {
+        continue;
+        }
+
+      std::string incDirs = cmGeneratorExpression::Preprocess(incDirProp,
+                        cmGeneratorExpression::StripAllGeneratorExpressions);
+
+      cmSystemTools::ExpandListArgument(incDirs.c_str(), incs);
 
       for( std::vector<std::string>::const_iterator incDir = incs.begin();
             incDir != incs.end(); ++incDir)

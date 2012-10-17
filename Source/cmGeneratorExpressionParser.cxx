@@ -14,6 +14,8 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 
+#include "assert.h"
+
 //----------------------------------------------------------------------------
 cmGeneratorExpressionParser::cmGeneratorExpressionParser(
                       const std::vector<cmGeneratorExpressionToken> &tokens)
@@ -75,6 +77,7 @@ static void extendResult(std::vector<cmGeneratorExpressionEvaluator*> &result,
 void cmGeneratorExpressionParser::ParseGeneratorExpression(
                         std::vector<cmGeneratorExpressionEvaluator*> &result)
 {
+  assert(this->it != this->Tokens.end());
   unsigned int nestedLevel = this->NestingLevel;
   ++this->NestingLevel;
 
@@ -96,12 +99,14 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     // ERROR
     }
 
-  if (this->it->TokenType == cmGeneratorExpressionToken::EndExpression)
+  if (this->it != this->Tokens.end() &&
+      this->it->TokenType == cmGeneratorExpressionToken::EndExpression)
     {
     GeneratorExpressionContent *content = new GeneratorExpressionContent(
                 startToken->Content, this->it->Content
                                     - startToken->Content
                                     + this->it->Length);
+    assert(this->it != this->Tokens.end());
     ++this->it;
     --this->NestingLevel;
     content->SetIdentifier(identifier);
@@ -113,39 +118,58 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
   std::vector<std::vector<cmGeneratorExpressionToken>::const_iterator>
                                                             commaTokens;
   std::vector<cmGeneratorExpressionToken>::const_iterator colonToken;
-  if (this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
+  if (this->it != this->Tokens.end() &&
+      this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
     {
     colonToken = this->it;
     parameters.resize(parameters.size() + 1);
+    assert(this->it != this->Tokens.end());
     ++this->it;
-    while (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
+
+    while (this->it != this->Tokens.end() &&
+           this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
       {
       commaTokens.push_back(this->it);
       parameters.resize(parameters.size() + 1);
+      assert(this->it != this->Tokens.end());
       ++this->it;
       }
-    while(this->it->TokenType != cmGeneratorExpressionToken::EndExpression)
+    while (this->it != this->Tokens.end() &&
+           this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
+      {
+      extendText(*(parameters.end() - 1), this->it);
+      assert(this->it != this->Tokens.end());
+      ++this->it;
+      }
+    while (this->it != this->Tokens.end() &&
+           this->it->TokenType != cmGeneratorExpressionToken::EndExpression)
       {
       this->ParseContent(*(parameters.end() - 1));
-      while (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
-        {
-        commaTokens.push_back(this->it);
-        parameters.resize(parameters.size() + 1);
-        ++this->it;
-        }
-      if (this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
-        {
-        extendText(*(parameters.end() - 1), this->it);
-        ++this->it;
-        }
       if (this->it == this->Tokens.end())
         {
         break;
         }
+      while (this->it != this->Tokens.end() &&
+             this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
+        {
+        commaTokens.push_back(this->it);
+        parameters.resize(parameters.size() + 1);
+        assert(this->it != this->Tokens.end());
+        ++this->it;
+        }
+      while (this->it != this->Tokens.end() &&
+             this->it->TokenType == cmGeneratorExpressionToken::ColonSeparator)
+        {
+        extendText(*(parameters.end() - 1), this->it);
+        assert(this->it != this->Tokens.end());
+        ++this->it;
+        }
       }
-      if(this->it->TokenType == cmGeneratorExpressionToken::EndExpression)
+      if(this->it != this->Tokens.end()
+          && this->it->TokenType == cmGeneratorExpressionToken::EndExpression)
         {
         --this->NestingLevel;
+        assert(this->it != this->Tokens.end());
         ++this->it;
         }
     }
@@ -168,12 +192,17 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
                                                          parameters.end();
       std::vector<TokenVector::const_iterator>::const_iterator commaIt =
                                                          commaTokens.begin();
+      assert(parameters.size() > commaTokens.size());
       for ( ; pit != pend; ++pit, ++commaIt)
         {
         extendResult(result, *pit);
         if (commaIt != commaTokens.end())
           {
           extendText(result, *commaIt);
+          }
+        else
+          {
+          break;
           }
         }
       }
@@ -194,6 +223,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
 void cmGeneratorExpressionParser::ParseContent(
                         std::vector<cmGeneratorExpressionEvaluator*> &result)
 {
+  assert(this->it != this->Tokens.end());
   switch(this->it->TokenType)
     {
     case cmGeneratorExpressionToken::Text:
@@ -210,6 +240,7 @@ void cmGeneratorExpressionParser::ParseContent(
           TextContent *textContent =
                               static_cast<TextContent*>(*(result.end() - 1));
           textContent->Extend(this->it->Length);
+          assert(this->it != this->Tokens.end());
           ++this->it;
           return;
           }
@@ -217,10 +248,12 @@ void cmGeneratorExpressionParser::ParseContent(
       cmGeneratorExpressionEvaluator* n = new TextContent(this->it->Content,
                                                           this->it->Length);
       result.push_back(n);
+      assert(this->it != this->Tokens.end());
       ++this->it;
       return ;
     }
     case cmGeneratorExpressionToken::BeginExpression:
+      assert(this->it != this->Tokens.end());
       ++this->it;
       this->ParseGeneratorExpression(result);
       return;
@@ -233,10 +266,11 @@ void cmGeneratorExpressionParser::ParseContent(
         }
       else
         {
-        // TODO: Unreachable. Assert?
+          assert(!"Got unexpected syntax token.");
         }
+      assert(this->it != this->Tokens.end());
       ++this->it;
       return;
     }
-  // Unreachable. Assert?
+    assert(!"Unhandled token in generator expression.");
 }

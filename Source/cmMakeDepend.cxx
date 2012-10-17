@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmMakeDepend.h"
 #include "cmSystemTools.h"
+#include "cmGeneratorExpression.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -58,12 +59,22 @@ void cmMakeDepend::SetMakefile(cmMakefile* makefile)
   // Now extract any include paths from the targets
   std::set<std::string> uniqueIncludes;
   std::vector<std::string> orderedAndUniqueIncludes;
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
-  for (cmGeneratorTargetsType::iterator l = targets.begin();
+  cmTargets &targets = this->Makefile->GetTargets();
+  for (cmTargets::iterator l = targets.begin();
        l != targets.end(); ++l)
     {
-    const std::vector<std::string>& includes =
-      l->second->GetIncludeDirectories();
+    const char *incDirProp = l->second.GetProperty("INCLUDE_DIRECTORIES");
+    if (!incDirProp)
+      {
+      continue;
+      }
+
+    std::string incDirs = cmGeneratorExpression::Preprocess(incDirProp,
+                      cmGeneratorExpression::StripAllGeneratorExpressions);
+
+    std::vector<std::string> includes;
+    cmSystemTools::ExpandListArgument(incDirs.c_str(), includes);
+
     for(std::vector<std::string>::const_iterator j = includes.begin();
         j != includes.end(); ++j)
       {
