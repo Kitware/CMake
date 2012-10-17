@@ -31,13 +31,23 @@ void cmCPackDocumentVariables::DefineVariables(cmake* cm)
          "Each CPack generator as a built-in default value for this"
          " variable. E.g. Archive generators (ZIP, TGZ, ...) includes"
          " the top level whereas RPM or DEB don't. The user may override"
-         " the default value byt setting this variable.\n"
+         " the default value by setting this variable.\n"
          "There is a similar variable "
-         "CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY"
+         "CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY "
          "which may be used to override the behavior for the component"
-         "packaging case which may have different default value for"
-         "historical (now backward compatibility) reason.", false,
+         " packaging case which may have different default value for"
+         " historical (now backward compatibility) reason.", false,
          "Variables common to all CPack generators");
+
+  cm->DefineProperty
+          ("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY", cmProperty::VARIABLE,
+            "Boolean toggle to include/exclude top level directory "
+             "(component case).",
+            "Similar usage as CPACK_INCLUDE_TOPLEVEL_DIRECTORY"
+            " but for the component case. "
+            "See CPACK_INCLUDE_TOPLEVEL_DIRECTORY documentation for"
+            " the detail.", false,
+            "Variables common to all CPack generators");
 
   cm->DefineProperty
           ("CPACK_SET_DESTDIR", cmProperty::VARIABLE,

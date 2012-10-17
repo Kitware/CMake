@@ -855,7 +855,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 
         // If CPack was asked to warn on ABSOLUTE INSTALL DESTINATION
         // then forward request to cmake_install.cmake script
-        if (this->GetOption("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION"))
+        if (this->IsOn("CPACK_WARN_ON_ABSOLUTE_INSTALL_DESTINATION"))
           {
             mf->AddDefinition("CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION",
                               "1");
@@ -865,7 +865,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         // then ask cmake_install.cmake script to error out
         // as soon as it occurs (before installing file)
         if (!SupportsAbsoluteDestination() ||
-            this->GetOption("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION"))
+            this->IsOn("CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION"))
           {
             mf->AddDefinition("CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION",
                               "1");
@@ -905,7 +905,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             localFileName =
                 cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
             localFileName =
-                localFileName.substr(localFileName.find('/')+1,
+                localFileName.substr(localFileName.find_first_not_of('/'),
                                      std::string::npos);
             Components[installComponent].Files.push_back(localFileName);
             cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
