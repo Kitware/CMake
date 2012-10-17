@@ -38,6 +38,7 @@ cmExtraEclipseCDT4Generator
   this->SupportedGlobalGenerators.push_back("Unix Makefiles");
 
   this->SupportsVirtualFolders = true;
+  this->GenerateLinkedResources = true;
 }
 
 //----------------------------------------------------------------------------
@@ -82,6 +83,9 @@ void cmExtraEclipseCDT4Generator::Generate()
   // TODO: Decide if these are local or member variables
   this->HomeDirectory       = mf->GetHomeDirectory();
   this->HomeOutputDirectory = mf->GetHomeOutputDirectory();
+
+  this->GenerateLinkedResources = mf->IsOn(
+                                    "CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES");
 
   this->IsOutOfSourceBuild = (this->HomeDirectory!=this->HomeOutputDirectory);
 
@@ -501,6 +505,10 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
           linkName2 += ti->first;
           this->AppendLinkedResource(fout, linkName2, "virtual:/virtual",
                                      VirtualFolder);
+          if (!this->GenerateLinkedResources)
+            {
+            break; // skip generating the linked resources to the source files
+            }
           std::vector<cmSourceGroup> sourceGroups=makefile->GetSourceGroups();
           // get the files from the source lists then add them to the groups
           cmTarget* tgt = const_cast<cmTarget*>(&ti->second);
@@ -555,6 +563,11 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
 void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
                        cmGeneratedFileStream& fout, const std::string& baseDir)
 {
+  if (!this->GenerateLinkedResources)
+    {
+    return;
+    }
+
   // for each sub project create a linked resource to the source dir
   // - only if it is an out-of-source build
   this->AppendLinkedResource(fout, "[Subprojects]",
