@@ -905,7 +905,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             localFileName =
                 cmSystemTools::RelativePath(InstallPrefix, fit->c_str());
             localFileName =
-                localFileName.substr(localFileName.find('/')+1,
+                localFileName.substr(localFileName.find_first_not_of('/'),
                                      std::string::npos);
             Components[installComponent].Files.push_back(localFileName);
             cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file <"
