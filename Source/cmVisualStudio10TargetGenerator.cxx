@@ -1586,12 +1586,13 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
-  std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget);
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
+    std::vector<std::string> includes;
+    this->LocalGenerator->GetIncludeDirectories(includes,
+                                                this->GeneratorTarget,
+                                                "C", i->c_str());
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>
