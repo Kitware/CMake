@@ -170,7 +170,8 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
       ++fileIt)
     {
     cmSourceFile* sf = *fileIt;
-    std::string absFile = sf->GetFullPath();
+    std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                    sf->GetFullPath().c_str());
     bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
     bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
 
