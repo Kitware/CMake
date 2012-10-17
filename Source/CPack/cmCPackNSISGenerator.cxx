@@ -356,18 +356,30 @@ int cmCPackNSISGenerator::InitializeInternal()
     << std::endl);
   std::vector<std::string> path;
   std::string nsisPath;
-  bool gotRegValue = true;
+  bool gotRegValue = false;
 
 #ifdef _WIN32
-  if ( !cmsys::SystemTools::ReadRegistryValue(
+  if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS\\Unicode", nsisPath,
+      cmsys::SystemTools::KeyWOW64_32) )
+    {
+    gotRegValue = true;
+    }
+  if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS\\Unicode", nsisPath) )
+    {
+    gotRegValue = true;
+    }
+  if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
       "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath,
       cmsys::SystemTools::KeyWOW64_32) )
     {
-    if ( !cmsys::SystemTools::ReadRegistryValue(
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
-      {
-      gotRegValue = false;
-      }
+    gotRegValue = true;
+    }
+  if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
+    {
+    gotRegValue = true;
     }
 
   if (gotRegValue)
