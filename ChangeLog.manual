@@ -1,3 +1,69 @@
+Changes in CMake 2.8.10-rc2 (since 2.8.10-rc1)
+----------------------------------------------
+Alex Neundorf (2):
+      Document CMAKE_FIND_PACKAGE_NAME
+      Automoc: fix #13572: issue with symbolic links
+
+Brad King (4):
+      cmCTestSVN: Fix compilation with Sun CC 5.1
+      if: Document that plain 'NOTFOUND' is a false constant
+      string: Clarify regex documentation of '-' behavior
+      FortranCInterface: Pass all flags to VERIFY project (#13579)
+
+David Cole (1):
+      NSIS: Fix incorrect uninstall registry key name (#13578)
+
+Eric NOULARD (3):
+      CPACK_XX_ON_ABSOLUTE_INSTALL_DESTINATION is now properly checked for ON/OFF
+      Document CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY and fix some typo.
+      Make CPACK_SET_DESTDIR work with archive generator + component-based packaging
+
+Jean-Christophe Fillion-Robin (1):
+      CTest: Ensure CTEST_USE_LAUNCHERS behaves nicely in Superbuild setup
+
+Pere Nubiola i Radigales (1):
+      Find PostgreSQL headers on Debian
+
+Peter Kümmel (4):
+      Ninja: also set OBJECT_DIR when compiling
+      Ninja: don't pollute current dir when using gui (#13495)
+      Ninja: implicit dependency for custom command files
+      Fix regression: write compile definitions if any
+
+Philip Lowman (4):
+      FindGTK2: Rollback lib64 changes which broke header file finding
+      FindGTK2: #12049 fix detection of header files on multiarch systems
+      FindGTK2: #12596 Missing paths for FindGTK2 on NetBSD
+      FindGTK2: Update local changelog
+
+Rolf Eike Beer (6):
+      CTest: fix usage of memory checker with spaces in path
+      CTest: fix pre and post test commands with spaces
+      CTest: add tests that simulate memcheck runs
+      CTest: improve memory checker type detection
+      CTest: add a test for CTEST_CUSTOM_MEMCHECK_IGNORE
+      CTest: add a check with a quoted memory checker
+
+Stephen Kelly (18):
+      GenEx: It is not an error to specify an empty parameter
+      GenEx: Return after error reported.
+      GenEx: Report actual target name not found, not "0" each time.
+      GenEx: Parse comma after colon tokens specially
+      GenEx: Validate target and property names.
+      GenEx: Ensure that the empty CONFIGURATION can be used conditionally.
+      GenEx: Add test for $<BOOL:> with empty parameter.
+      GenEx: Add tests for "0" and "1" expressions with literal commas.
+      GenEx: Don't use std::vector::at(int).
+      Attempt to fix the compile of cmake on Sun CC.
+      GenEx: Parse colon after arguments separator colon specially.
+      GenEx: Test the use of generator expressions to generate lists.
+      GenEx: Fix termination bugs in generator expression parser.
+      GenEx: Break if there are no more commas in the container
+      GenEx: Add some more asserts to verify code-sanity.
+      GenEx: Replace some failing tests with Borland and NMake makefiles.
+      GenEx: Fix reporting about not-found include directories and libraries.
+      Fix config-specific INCLUDE_DIRECTORIES in multi-config generators
+
 Changes in CMake 2.8.10-rc1 (since 2.8.9)
 -----------------------------------------
 Scripted Changes (3):
