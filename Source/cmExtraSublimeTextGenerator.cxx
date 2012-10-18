@@ -117,8 +117,13 @@ void cmExtraSublimeTextGenerator
         cmSystemTools::RelativePath(lgs[0]->GetMakefile()->GetHomeDirectory(),
                                     lgs[0]->GetMakefile()->
                                       GetHomeOutputDirectory());
-      fout << ",\n\t\t\t\"folder_exclude_patterns\": [\"" <<
-              outputRelativeToSourceRoot << "\"]";
+      if ((!outputRelativeToSourceRoot.empty()) &&
+        ((outputRelativeToSourceRoot.length() < 3) ||
+          (outputRelativeToSourceRoot.substr(0, 3) != "../")))
+        {
+        fout << ",\n\t\t\t\"folder_exclude_patterns\": [\"" <<
+                outputRelativeToSourceRoot << "\"]";
+        }
     }
   else
     {
@@ -303,7 +308,32 @@ void cmExtraSublimeTextGenerator::
     }
 }
 
-// Generate the build_system entry for one target
+void cmExtraSublimeTextGenerator::
+  ExtractDefines(const char* value, bool check,
+                 std::set<std::string> &defines)
+{
+  std::vector<std::string> defs;
+  cmSystemTools::ExpandListArgument(value, defs);
+  for(std::vector<std::string>::const_iterator di = defs.begin();
+      di != defs.end(); ++di)
+    {
+    cmXMLSafe safedef(di->c_str());
+    if (check)
+      {
+        std::string safedefString = safedef.str();
+        if ((safedefString.length() >= 2) &&
+          (safedefString.substr(0, 2) == "-D"))
+          {
+          defines.insert(safedefString.substr(2));
+          }
+      }
+    else
+      {
+      defines.insert(safedef.str());
+      }
+    }
+}
+
 void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               const char* targetName,
                                               cmTarget* target,
@@ -321,20 +351,13 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
       cmGeneratorTarget *gtgt = this->GlobalGenerator
                                     ->GetGeneratorTarget(target);
       std::string cdefs = gtgt->GetCompileDefinitions();
-
-      if(!cdefs.empty())
-        {
-        // Expand the list.
-        std::vector<std::string> defs;
-        cmSystemTools::ExpandListArgument(cdefs.c_str(), defs);
-        for(std::vector<std::string>::const_iterator di = defs.begin();
-            di != defs.end(); ++di)
-          {
-          cmXMLSafe safedef(di->c_str());
-          defines.insert(safedef.str());
-          }
-        }
-
+      ExtractDefines(cdefs.c_str(), false, defines);
+      // Get compiler definitions from CMAKE_CXX_FLAGS and CMAKE_C_FLAGS as
+      // well, in case the user set those flags directly
+      std::string cflags = makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
+      ExtractDefines(cflags.c_str(), true, defines);
+      cflags = makefile->GetSafeDefinition("CMAKE_C_FLAGS");
+      ExtractDefines(cflags.c_str(), true, defines);
       // the include directories for this target
       std::vector<std::string> includes;
       target->GetMakefile()->GetLocalGenerator()->

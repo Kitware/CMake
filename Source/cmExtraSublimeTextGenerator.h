@@ -31,7 +31,7 @@ public:
   virtual const char* GetName() const
                         { return cmExtraSublimeTextGenerator::GetActualName();}
   static const char* GetActualName()
-                        { return "SublimeText2";}
+                        { return "Sublime Text 2";}
   static cmExternalMakefileProjectGenerator* New()
                                     { return new cmExtraSublimeTextGenerator; }
   /** Get the documentation entry for this generator.  */
@@ -69,7 +69,9 @@ private:
                     const char* compiler,
                     std::set<std::string>& includeDirs,
                     std::set<std::string>& defines, bool firstTarget);
-
+  /** Extracts -D compile flags from a variable */
+  void ExtractDefines(const char* value, bool check,
+                      std::set<std::string> &defines);
 };
 
 #endif
