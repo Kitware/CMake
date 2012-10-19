@@ -519,7 +519,10 @@ public:
    * Get the list of targets, const version
    */
   const cmTargets &GetTargets() const { return this->Targets; }
-  const std::vector<cmTarget*> &GetOwnedImportedTargets() const { return this->ImportedTargetsOwned; }
+  const std::vector<cmTarget*> &GetOwnedImportedTargets() const
+    {
+      return this->ImportedTargetsOwned;
+    }
 
   const cmGeneratorTargetsType &GetGeneratorTargets() const
     {
