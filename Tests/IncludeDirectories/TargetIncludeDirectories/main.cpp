@@ -9,6 +9,7 @@
 #include "ting.h"
 #include "arguments.h"
 #include "list.h"
+#include "target.h"
 
 int main(int, char**)
 {
