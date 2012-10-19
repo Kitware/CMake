@@ -277,8 +277,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "$<TARGET_PROPERTY:...> expression requires one or two parameters");
       return std::string();
       }
-    cmsys::RegularExpression nameValidator;
-    nameValidator.compile("^[A-Za-z0-9_.-]+$");
+    cmsys::RegularExpression targetNameValidator;
+    targetNameValidator.compile("^[A-Za-z0-9_.-:]+$");
+    cmsys::RegularExpression propertyNameValidator;
+    propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
     cmGeneratorTarget* target = context->Target;
     std::string propertyName = *parameters.begin();
@@ -301,9 +303,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
       std::string targetName = parameters.front();
       propertyName = parameters[1];
-      if (!nameValidator.find(targetName.c_str()))
+      if (!targetNameValidator.find(targetName.c_str()))
         {
-        if (!nameValidator.find(propertyName.c_str()))
+        if (!propertyNameValidator.find(propertyName.c_str()))
           {
           ::reportError(context, content->GetOriginalExpression(),
                         "Target name and property name not supported.");
@@ -335,7 +337,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
       }
 
-    if (!nameValidator.find(propertyName.c_str()))
+    if (!propertyNameValidator.find(propertyName.c_str()))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "Property name not supported.");
@@ -480,7 +482,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     std::string name = *parameters.begin();
 
     cmsys::RegularExpression targetValidator;
-    targetValidator.compile("^[A-Za-z0-9_.-]+$");
+    targetValidator.compile("^[A-Za-z0-9_.-:]+$");
     if (!targetValidator.find(name.c_str()))
       {
       ::reportError(context, content->GetOriginalExpression(),
