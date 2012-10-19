@@ -745,6 +745,10 @@ void cmLocalGenerator
   for(cmGeneratorTargetsType::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
+    if (l->first->IsImported())
+      {
+      continue;
+      }
     cmGeneratorTarget& target = *l->second;
     switch(target.GetType())
       {
