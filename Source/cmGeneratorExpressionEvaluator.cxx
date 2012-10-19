@@ -278,7 +278,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
       }
     cmsys::RegularExpression targetNameValidator;
-    targetNameValidator.compile("^[:A-Za-z0-9_.-]+$");
+    // The ':' is supported to allow use with IMPORTED targets. At least
+    // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
+    targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
     cmsys::RegularExpression propertyNameValidator;
     propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
@@ -482,7 +484,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     std::string name = *parameters.begin();
 
     cmsys::RegularExpression targetValidator;
-    targetValidator.compile("^[A-Za-z0-9_.-:]+$");
+    // The ':' is supported to allow use with IMPORTED targets.
+    targetValidator.compile("^[A-Za-z0-9_.:-]+$");
     if (!targetValidator.find(name.c_str()))
       {
       ::reportError(context, content->GetOriginalExpression(),
