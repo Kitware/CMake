@@ -621,7 +621,12 @@ void cmTarget::DefineProperties(cmake *cm)
      "target location.  "
      "In CMake 2.8.4 and above add_custom_command recognizes generator "
      "expressions to refer to target locations anywhere in the command.  "
-     "Therefore this property is not needed for creating custom commands."
+     "Therefore this property is not needed for creating custom commands.  \n"
+     "Note that for non-imported targets, the reported value of the LOCATION "
+     "property may be incorrect, as the final location depends on the "
+     "LINKER_LANGUAGE of the target.  The LINKER_LANGUAGE property is "
+     "usually computed, but can be explicitly set where needed if the "
+     "LOCATION value is otherwise incorrect."
      CM_LOCATION_UNDEFINED_BEHAVIOR("reading this property"));
 
   cm->DefineProperty
