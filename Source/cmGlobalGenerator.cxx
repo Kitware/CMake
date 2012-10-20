@@ -1110,12 +1110,12 @@ void cmGlobalGenerator::CreateGeneratorTargets()
       }
 
     for(std::vector<cmTarget*>::const_iterator
-          i = mf->GetOwnedImportedTargets().begin();
-        i != mf->GetOwnedImportedTargets().end(); ++i)
+          j = mf->GetOwnedImportedTargets().begin();
+        j != mf->GetOwnedImportedTargets().end(); ++i)
       {
-      cmGeneratorTarget* gt = new cmGeneratorTarget(*i);
-      this->GeneratorTargets[*i] = gt;
-      generatorTargets[*i] = gt;
+      cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
+      this->GeneratorTargets[*j] = gt;
+      generatorTargets[*j] = gt;
       }
 
     mf->SetGeneratorTargets(generatorTargets);
