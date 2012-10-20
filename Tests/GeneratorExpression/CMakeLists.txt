@@ -14,6 +14,9 @@ add_custom_target(check ALL
     -Dtest_and_1=$<AND:1>
     -Dtest_and_1_0=$<AND:1,0>
     -Dtest_and_1_1=$<AND:1,1>
+    # Ordinarily, the 'invalidcontent' would cause an error, but
+    # the '0' makes the AND abort early.
+    -Dtest_and_0_invalidcontent=$<AND:0,invalidcontent>
     -Dtest_config_0=$<CONFIG:$<CONFIGURATION>x>
     -Dtest_config_1=$<CONFIG:$<CONFIGURATION>>
     -Dtest_not_0=$<NOT:0>
@@ -24,6 +27,7 @@ add_custom_target(check ALL
     -Dtest_or_1=$<OR:1>
     -Dtest_or_1_0=$<OR:1,0>
     -Dtest_or_1_1=$<OR:1,1>
+    -Dtest_or_1_invalidcontent=$<OR:1,invalidcontent>
     -Dtest_bool_notfound=$<BOOL:NOTFOUND>
     -Dtest_bool_foo_notfound=$<BOOL:Foo-NOTFOUND>
     -Dtest_bool_true=$<BOOL:True>
