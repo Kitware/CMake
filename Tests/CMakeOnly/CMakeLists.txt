@@ -27,6 +27,8 @@ endif()
 
 add_CMakeOnly_test(AllFindModules)
 
+add_CMakeOnly_test(SelectLibraryConfigurations)
+
 add_CMakeOnly_test(TargetScope)
 
 add_CMakeOnly_test(find_library)
