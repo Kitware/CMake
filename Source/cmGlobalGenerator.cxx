@@ -1111,7 +1111,7 @@ void cmGlobalGenerator::CreateGeneratorTargets()
 
     for(std::vector<cmTarget*>::const_iterator
           j = mf->GetOwnedImportedTargets().begin();
-        j != mf->GetOwnedImportedTargets().end(); ++i)
+        j != mf->GetOwnedImportedTargets().end(); ++j)
       {
       cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
       this->GeneratorTargets[*j] = gt;
