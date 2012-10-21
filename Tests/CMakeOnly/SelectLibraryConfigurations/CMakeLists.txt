@@ -37,6 +37,10 @@ check_slc(OPTONLY "opt")
 set(DBGONLY_LIBRARY_RELEASE "dbg")
 check_slc(DBGONLY "dbg")
 
+set(SAME_LIBRARY_RELEASE "same")
+set(SAME_LIBRARY_DEBUG "same")
+check_slc(SAME "same")
+
 set(OPTONLYLIST_LIBRARY_RELEASE "opt1;opt2")
 check_slc(OPTONLYLIST "opt1;opt2")
 
