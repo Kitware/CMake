@@ -414,6 +414,8 @@ private:
   void CheckRuleHashes(std::string const& pfile, std::string const& home);
   void WriteRuleHashes(std::string const& pfile);
 
+  virtual void ForceLinkerLanguages() {}
+
   void WriteSummary();
   void WriteSummary(cmTarget* target);
   void FinalizeTargetCompileInfo();
