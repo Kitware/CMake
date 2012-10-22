@@ -1126,6 +1126,7 @@ void cmGlobalGenerator::Generate()
 
   // Create per-target generator information.
   this->CreateGeneratorTargets();
+  this->ForceLinkerLanguages();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
