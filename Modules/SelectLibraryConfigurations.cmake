@@ -48,6 +48,15 @@ macro( select_library_configurations basename )
     # if only the debug version was found, set the release value to be the
     # debug value.
     _set_library_name( ${basename} DEBUG RELEASE )
+
+    # Set a default case, which will come into effect if
+    # -no build type is set and the generator only supports one build type
+    #  at a time (i.e. CMAKE_CONFIGURATION_TYPES is false)
+    # -${basename}_LIBRARY_DEBUG and ${basename}_LIBRARY_RELEASE are the same
+    # -${basename}_LIBRARY_DEBUG and ${basename}_LIBRARY_RELEASE are both empty
+    set( ${basename}_LIBRARY ${${basename}_LIBRARY_RELEASE} )
+    set( ${basename}_LIBRARIES ${${basename}_LIBRARY_RELEASE} )
+
     if( ${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE AND
            NOT ${basename}_LIBRARY_DEBUG STREQUAL ${basename}_LIBRARY_RELEASE )
         # if the generator supports configuration types or CMAKE_BUILD_TYPE
@@ -61,11 +70,6 @@ macro( select_library_configurations basename )
                 list( APPEND ${basename}_LIBRARY debug "${_libname}" )
             endforeach()
             set( ${basename}_LIBRARIES "${${basename}_LIBRARY}" )
-        else()
-            # If there are no configuration types or build type, just use
-            # the release version
-            set( ${basename}_LIBRARY ${${basename}_LIBRARY_RELEASE} )
-            set( ${basename}_LIBRARIES ${${basename}_LIBRARY_RELEASE} )
         endif()
     endif()
 
