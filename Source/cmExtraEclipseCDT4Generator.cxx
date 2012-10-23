@@ -579,7 +579,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
                                  this->GetEclipsePath(linkSourceDirectory),
                                  LinkToFolder
                                 );
-      this->SrcLinkedResources.push_back(it->first);
+      // Don't add it to the srcLinkedResources, because listing multiple
+      // directories confuses the Eclipse indexer (#13596).
       }
     }
 }
@@ -730,15 +731,16 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 /* I don't know what the pathentry kind="src" are good for, e.g. autocompletion
  * works also without them. Done wrong, the indexer complains, see #12417
  * and #12213.
+ * According to #13596, this entry at least limits the directories the
+ * indexer is searching for files. So now the "src" entry contains only
+ * the linked resource to CMAKE_SOURCE_DIR.
  * The CDT documentation is very terse on that:
  * "CDT_SOURCE: Entry kind constant describing a path entry identifying a
  * folder containing source code to be compiled."
  * Also on the cdt-dev list didn't bring any information:
  * http://web.archiveorange.com/archive/v/B4NlJDNIpYoOS1SbxFNy
- * So I'm disabling them for now, hoping that somebody will report if something
- * is not workging anymore.
  * Alex */
-#ifdef DO_CREATE_SRC_PATH_ENTRIES
+
   for (std::vector<std::string>::const_iterator
        it = this->SrcLinkedResources.begin();
        it != this->SrcLinkedResources.end();
@@ -755,7 +757,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       excludeFromOut += this->EscapeForXML(*it) + "/|";
       }
     }
-#endif
+
   excludeFromOut += "**/CMakeFiles/";
   fout << "<pathentry excluding=\"" << excludeFromOut
        << "\" kind=\"out\" path=\"\"/>\n";
