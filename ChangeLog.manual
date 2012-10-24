@@ -1,3 +1,19 @@
+Changes in CMake 2.8.10-rc3 (since 2.8.10-rc2)
+----------------------------------------------
+Rolf Eike Beer (2):
+      SelectLibraryConfigurations: add testcase
+      SelectLibraryConfigurations: fix for release and debug libs being the same
+
+Stephen Kelly (5):
+      BasicConfigVersion: Make docs refer to the macro, not the module name
+      Document LOCATION undefined behavior with use of LINKER_LANGUAGE.
+      GenEx: Add an accessor for imported targets in a makefile.
+      GenEx: Create cmGeneratorTargets for imported targets.
+      GexEx: Validate Target names and property names differently.
+
+Thomas Arcila (1):
+      SelectLibraryConfigurations: Fix foreach(x IN LISTS ...) syntax
+
 Changes in CMake 2.8.10-rc2 (since 2.8.10-rc1)
 ----------------------------------------------
 Alex Neundorf (2):
