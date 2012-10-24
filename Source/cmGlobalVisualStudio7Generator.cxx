@@ -268,6 +268,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets)
 {
+  VisualStudioFolders.clear();
+
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
