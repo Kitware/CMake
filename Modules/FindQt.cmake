@@ -56,6 +56,10 @@ if(GLOB_TEMP_VAR)
 endif()
 set(GLOB_TEMP_VAR)
 
+if (Qt_FIND_VERSION)
+  set(DESIRED_QT_VERSION "${Qt_FIND_VERSION}")
+endif ()
+
 # now find qmake
 find_program(QT_QMAKE_EXECUTABLE_FINDQT NAMES qmake PATHS "${QT_SEARCH_PATH}/bin" "$ENV{QTDIR}/bin")
 if(QT_QMAKE_EXECUTABLE_FINDQT)
@@ -113,15 +117,15 @@ if(QT3_QGLOBAL_H_FILE)
   set(QT3_INSTALLED TRUE)
 endif()
 
-if(QT3_INSTALLED AND QT4_INSTALLED )
+if(QT3_INSTALLED AND QT4_INSTALLED AND NOT DESIRED_QT_VERSION)
   # force user to pick if we have both
   set(DESIRED_QT_VERSION 0 CACHE STRING "Pick a version of Qt to use: 3 or 4")
 else()
   # if only one found then pick that one
-  if(QT3_INSTALLED)
+  if(QT3_INSTALLED AND NOT DESIRED_QT_VERSION EQUAL 4)
     set(DESIRED_QT_VERSION 3 CACHE STRING "Pick a version of Qt to use: 3 or 4")
   endif()
-  if(QT4_INSTALLED)
+  if(QT4_INSTALLED AND NOT DESIRED_QT_VERSION EQUAL 3)
     set(DESIRED_QT_VERSION 4 CACHE STRING "Pick a version of Qt to use: 3 or 4")
   endif()
 endif()
