@@ -175,7 +175,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
       }
     else if ( key == ctrl('d') ||key == KEY_DC )
       {
-      if ( form->curcol > 0 )
+      if ( form->curcol >= 0 )
         {
         form_driver(form, REQ_DEL_CHAR);
         }
