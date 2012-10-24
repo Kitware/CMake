@@ -31,7 +31,7 @@
 #  License text for the above reference.)
 
 # look for signs of qt3 installations
-file(GLOB GLOB_TEMP_VAR /usr/lib/qt-3*/bin/qmake)
+file(GLOB GLOB_TEMP_VAR /usr/lib*/qt-3*/bin/qmake /usr/lib*/qt3*/bin/qmake)
 if(GLOB_TEMP_VAR)
   set(QT3_INSTALLED TRUE)
 endif()
