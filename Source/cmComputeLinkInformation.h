@@ -82,6 +82,7 @@ private:
   // Configuration information.
   const char* Config;
   const char* LinkLanguage;
+  bool LinkDependsNoShared;
 
   // Modes for dealing with dependent shared libraries.
   enum SharedDepMode
