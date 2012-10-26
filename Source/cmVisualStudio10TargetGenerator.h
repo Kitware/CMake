@@ -68,6 +68,8 @@ private:
                       std::vector<std::string> const & includes);
   void WriteRCOptions(std::string const& config,
                       std::vector<std::string> const & includes);
+  bool ComputeLinkOptions();
+  bool ComputeLinkOptions(std::string const& config);
   void WriteLinkOptions(std::string const& config);
   void WriteMidlOptions(std::string const& config,
                         std::vector<std::string> const & includes);
@@ -95,6 +97,7 @@ private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef std::map<cmStdString, Options*> OptionsMap;
   OptionsMap ClOptions;
+  OptionsMap LinkOptions;
   std::string PathToVcxproj;
   cmTarget* Target;
   cmGeneratorTarget* GeneratorTarget;
