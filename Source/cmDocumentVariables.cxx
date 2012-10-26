@@ -1222,6 +1222,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_LINK_DEPENDS_NO_SHARED", cmProperty::VARIABLE,
+     "Whether to skip link dependencies on shared library files.",
+     "This variable initializes the LINK_DEPENDS_NO_SHARED "
+     "property on targets when they are created.  "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_AUTOMOC", cmProperty::VARIABLE,
      "Whether to handle moc automatically for Qt targets.",
      "This variable is used to initialize the "
