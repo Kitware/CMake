@@ -1106,6 +1106,23 @@ OutputLinkIncremental(std::string const& configName)
   *this->BuildFileStream << (manifest?manifest:"true")
                          << "</GenerateManifest>\n";
   linkOptions.RemoveFlag("GenerateManifest");
+
+  // Some link options belong here.  Use them now and remove them so that
+  // WriteLinkOptions does not use them.
+  const char* flags[] = {
+    "LinkDelaySign",
+    "LinkKeyFile",
+    0};
+  for(const char** f = flags; *f; ++f)
+    {
+    const char* flag = *f;
+    if(const char* value = linkOptions.GetFlag(flag))
+      {
+      this->WritePlatformConfigTag(flag, configName.c_str(), 3);
+      *this->BuildFileStream << value << "</" << flag << ">\n";
+      linkOptions.RemoveFlag(flag);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
