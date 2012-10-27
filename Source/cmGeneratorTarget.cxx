@@ -308,7 +308,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
                                     .Evaluate(this->Makefile,
                                               config,
                                               false,
-                                              this,
+                                              this->Target,
                                               &dagChecker),
                                     includes);
 
@@ -356,6 +356,6 @@ std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
   return ge.Parse(prop).Evaluate(this->Makefile,
                                  config,
                                  false,
-                                 this,
+                                 this->Target,
                                  &dagChecker);
 }

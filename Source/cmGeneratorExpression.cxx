@@ -68,7 +68,7 @@ cmGeneratorExpression::~cmGeneratorExpression()
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const char* config, bool quiet,
-  cmGeneratorTarget *target,
+  cmTarget *target,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   if (!this->NeedsParsing)
