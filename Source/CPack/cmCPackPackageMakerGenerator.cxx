@@ -182,11 +182,12 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     if (!cmsys::SystemTools::MakeDirectory(packageFileDir.c_str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Problem creating component PostFlight Packages directory: "
+                   "Problem creating component PostFlight Packages directory: "
                     << packageFileDir.c_str() << std::endl);
       return 0;
       }
-    std::string packageFile = packageFileDir + this->GetPackageName(PostFlightComponent);
+    std::string packageFile = packageFileDir +
+      this->GetPackageName(PostFlightComponent);
     if (!this->GenerateComponentPackage(packageFile.c_str(),
                                         packageDir.c_str(),
                                         PostFlightComponent))
@@ -824,8 +825,8 @@ WriteDistributionFile(const char* metapackageFile)
     }
   if(!this->PostFlightComponent.Name.empty())
     {
-      choiceOut << "<line choice=\"" << PostFlightComponent.Name << "Choice\"></line>"
-                << std::endl;
+      choiceOut << "<line choice=\"" << PostFlightComponent.Name
+                << "Choice\"></line>" << std::endl;
     }
   choiceOut << "</choices-outline>" << std::endl;
 
