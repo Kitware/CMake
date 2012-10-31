@@ -56,6 +56,7 @@ add_RunCMake_test(include)
 add_RunCMake_test(include_directories)
 add_RunCMake_test(list)
 add_RunCMake_test(load_command)
+add_RunCMake_test(PolicyCMP0019)
 
 if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
