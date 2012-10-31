@@ -442,7 +442,22 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
           line.replace(pos, 1, "\\\"");
           pos = line.find('\"', pos+2);
         }
-        osf << "        \"" << line << "\\n\"\n";
+        // break up long lines to avoid Rez errors
+        std::vector<std::string> lines;
+        const size_t max_line_length = 512;
+        for(size_t i=0; i<line.size(); i+= max_line_length)
+          {
+          int line_length = max_line_length;
+          if(i+max_line_length > line.size())
+            line_length = line.size()-i;
+          lines.push_back(line.substr(i, line_length));
+          }
+
+        for(size_t i=0; i<lines.size(); i++)
+          {
+          osf << "        \"" << lines[i] << "\"\n";
+          }
+        osf << "        \"\\n\"\n";
       }
       osf << "};\n";
       osf << "\n";
