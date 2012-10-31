@@ -15,6 +15,8 @@ cmFindBase::cmFindBase()
 {
   this->AlreadyInCache = false;
   this->AlreadyInCacheWithoutMetaInfo = false;
+  this->NamesPerDir = false;
+  this->NamesPerDirAllowed = false;
 }
 
 //----------------------------------------------------------------------------
@@ -212,6 +214,19 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       doing = DoingPathSuffixes;
       compatibility = false;
       newStyle = true;
+      }
+    else if (args[j] == "NAMES_PER_DIR")
+      {
+      doing = DoingNone;
+      if(this->NamesPerDirAllowed)
+        {
+        this->NamesPerDir = true;
+        }
+      else
+        {
+        this->SetError("does not support NAMES_PER_DIR");
+        return false;
+        }
       }
     else if (args[j] == "NO_SYSTEM_PATH")
       {
