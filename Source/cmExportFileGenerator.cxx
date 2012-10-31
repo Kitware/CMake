@@ -125,6 +125,50 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties)
+{
+  const char *input = target->GetProperty(propName);
+  if (input)
+    {
+    if (!*input)
+      {
+      // Set to empty
+      properties[propName] = "";
+      return;
+      }
+    std::string prepro = cmGeneratorExpression::Preprocess(input,
+                                                    preprocessRule,
+                                                    this->Namespace.c_str());
+    if (!prepro.empty())
+      {
+      properties[propName] = prepro;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
+                                        std::ostream& os,
+                                        const ImportPropertyMap &properties)
+{
+  if (!properties.empty())
+    {
+    std::string targetName = this->Namespace;
+    targetName += target->GetName();
+    os << "SET_TARGET_PROPERTIES(" << targetName << " PROPERTIES\n";
+    for(ImportPropertyMap::const_iterator pi = properties.begin();
+        pi != properties.end(); ++pi)
+      {
+      os << "  " << pi->first << " \"" << pi->second << "\"\n";
+      }
+    os << ")\n\n";
+    }
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator
 ::SetImportDetailProperties(const char* config, std::string const& suffix,
@@ -167,9 +211,13 @@ cmExportFileGenerator
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
                                 iface->Languages, properties, missingTargets);
-    this->SetImportLinkProperty(suffix, target,
+
+    if(target->GetPolicyStatusCMP0019() != cmPolicies::NEW)
+      {
+      this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties, missingTargets);
+      }
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties, missingTargets);
