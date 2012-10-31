@@ -21,6 +21,7 @@
 #include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
@@ -127,6 +128,7 @@ cmTarget::cmTarget()
   this->PolicyStatusCMP0003 = cmPolicies::WARN;
   this->PolicyStatusCMP0004 = cmPolicies::WARN;
   this->PolicyStatusCMP0008 = cmPolicies::WARN;
+  this->PolicyStatusCMP0019 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -1409,6 +1411,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0004);
   this->PolicyStatusCMP0008 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0008);
+  this->PolicyStatusCMP0019 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0019);
 }
 
 //----------------------------------------------------------------------------
@@ -4238,6 +4242,28 @@ cmTarget::GetImportInfo(const char* config)
   return &i->second;
 }
 
+
+bool handleCMP0019(const std::vector<std::string> &newLinkLibraries,
+  const std::vector<std::string> &oldLinkLibraries)
+{
+  if (newLinkLibraries.size() != oldLinkLibraries.size())
+    {
+    return false;
+    }
+  for(std::vector<std::string>::const_iterator
+      oll = oldLinkLibraries.begin(), nll = newLinkLibraries.begin();
+      oll != oldLinkLibraries.end() && nll != newLinkLibraries.end();
+      ++oll, ++nll)
+    {
+    if (*oll != *nll)
+      {
+      return false;
+      }
+    }
+  return true;
+}
+
+
 //----------------------------------------------------------------------------
 void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                  ImportInfo& info)
@@ -4441,20 +4467,78 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the link interface.
   {
+  std::vector<std::string> newInterfaceLibs;
+  const char* newStyleLibsProp = this->GetProperty("INTERFACE_LINK_LIBRARIES");
+  if(newStyleLibsProp)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        "INTERFACE_LINK_LIBRARIES", 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(newStyleLibsProp)
+                                        .Evaluate(this->Makefile,
+                                                  desired_config.c_str(),
+                                                  false,
+                                                  this,
+                                                  &dagChecker),
+                                      newInterfaceLibs);
+    }
+
   std::string linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-  linkProp += suffix;
-  if(const char* config_libs = this->GetProperty(linkProp.c_str()))
+  std::vector<std::string> oldInterfaceLibs;
+  const char *oldProp = this->GetProperty((linkProp + suffix).c_str());
+  if(oldProp)
     {
-    cmSystemTools::ExpandListArgument(config_libs,
-                                      info.LinkInterface.Libraries);
+    linkProp += suffix;
+    cmSystemTools::ExpandListArgument(oldProp,
+                                      oldInterfaceLibs);
     }
-  else if(const char* libs =
-          this->GetProperty("IMPORTED_LINK_INTERFACE_LIBRARIES"))
+  else
     {
-    cmSystemTools::ExpandListArgument(libs,
-                                      info.LinkInterface.Libraries);
+    oldProp = this->GetProperty("IMPORTED_LINK_INTERFACE_LIBRARIES");
+    if(oldProp)
+      {
+      cmSystemTools::ExpandListArgument(oldProp,
+                                        oldInterfaceLibs);
+      }
     }
+
+  std::vector<std::string> usedLinkLibraries;
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0019))
+    {
+    case cmPolicies::WARN:
+      {
+      if (newStyleLibsProp && oldProp
+          && !handleCMP0019(newInterfaceLibs, oldInterfaceLibs))
+        {
+        cmOStringStream e;
+        e << "The " << linkProp << " and "
+             "LINK_INTERFACE_LIBRARIES are not the same for target \""
+          << this->GetName() << "\". NEW content is \""
+          << (newStyleLibsProp ? newStyleLibsProp : "(unset)") << "\"\n"
+          "OLD content is \""
+          << (oldProp ? oldProp : "(unset)") << "\"\n"
+          << this->Makefile->GetPolicies()->GetPolicyWarning(
+                                                    cmPolicies::CMP0019);
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+        }
+        // fall through to OLD behaviour
+      }
+      case cmPolicies::OLD:
+        usedLinkLibraries = oldInterfaceLibs;
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+      default:
+        usedLinkLibraries = newInterfaceLibs;
+    }
+  info.LinkInterface.Libraries.insert(info.LinkInterface.Libraries.end(),
+                      usedLinkLibraries.begin(), usedLinkLibraries.end());
   }
+
 
   // Get the link dependencies.
   {
@@ -4562,20 +4646,81 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
 
   // An explicit list of interface libraries may be set for shared
   // libraries and executables that export symbols.
-  const char* explicitLibraries = 0;
+  bool explicitLibraries = false;
+  std::vector<std::string> usedLinkLibraries;
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->IsExecutableWithExports())
     {
+    const char *newLibrariesProp =
+                                 this->GetProperty("INTERFACE_LINK_LIBRARIES");
+
+    std::vector<std::string> newInterfaceLibs;
+    std::vector<std::string> oldInterfaceLibs;
+
+    if(newLibrariesProp)
+      {
+      cmListFileBacktrace lfbt;
+      cmGeneratorExpression ge(lfbt);
+
+      cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                          this->GetName(),
+                                          "INTERFACE_LINK_LIBRARIES", 0, 0);
+
+      cmSystemTools::ExpandListArgument(ge.Parse(newLibrariesProp).Evaluate(
+                                      this->Makefile,
+                                      config,
+                                      false,
+                                      this,
+                                      &dagChecker), newInterfaceLibs);
+      }
     // Lookup the per-configuration property.
     std::string propName = "LINK_INTERFACE_LIBRARIES";
     propName += suffix;
-    explicitLibraries = this->GetProperty(propName.c_str());
+    const char *oldLibrariesProp = this->GetProperty(propName.c_str());
 
     // If not set, try the generic property.
-    if(!explicitLibraries)
+    if(!oldLibrariesProp)
       {
-      explicitLibraries = this->GetProperty("LINK_INTERFACE_LIBRARIES");
+      oldLibrariesProp = this->GetProperty("LINK_INTERFACE_LIBRARIES");
       }
+    if(oldLibrariesProp)
+      {
+      cmSystemTools::ExpandListArgument(oldLibrariesProp, oldInterfaceLibs);
+      }
+
+    {
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0019))
+      {
+      case cmPolicies::WARN:
+        {
+        if (newLibrariesProp && oldLibrariesProp
+            && !handleCMP0019(newInterfaceLibs, oldInterfaceLibs))
+          {
+          cmOStringStream e;
+          e << "The INTERFACE_LINK_LIBRARIES and LINK_INTERFACE_LIBRARIES are "
+               "not the same for target \"" << this->GetName() << "\".\n"
+               "NEW content is \""
+            << (newLibrariesProp ? newLibrariesProp : "(unset)") << "\"\n"
+               "OLD content is \""
+            << (oldLibrariesProp ? oldLibrariesProp : "(unset)") << "\"\n"
+            << this->Makefile->GetPolicies()->GetPolicyWarning(
+                                                      cmPolicies::CMP0019);
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          }
+          // fall through to OLD behaviour
+        }
+        case cmPolicies::OLD:
+          explicitLibraries = oldLibrariesProp ? true : false;
+          usedLinkLibraries = oldInterfaceLibs;
+          break;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+        default:
+          usedLinkLibraries = newInterfaceLibs;
+          explicitLibraries = newLibrariesProp ? true : false;
+      }
+    }
     }
 
   // There is no implicit link interface for executables or modules
@@ -4592,7 +4737,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    cmSystemTools::ExpandListArgument(explicitLibraries, iface.Libraries);
+    iface.Libraries.insert(iface.Libraries.end(),
+                          usedLinkLibraries.begin(), usedLinkLibraries.end());
 
     if(this->GetType() == cmTarget::SHARED_LIBRARY)
       {

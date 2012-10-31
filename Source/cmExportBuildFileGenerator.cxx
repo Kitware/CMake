@@ -12,6 +12,7 @@
 #include "cmExportBuildFileGenerator.h"
 
 #include "cmExportCommand.h"
+#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
@@ -27,10 +28,35 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         tei = this->Exports->begin();
       tei != this->Exports->end(); ++tei)
     {
+    if ((*tei)->GetPolicyStatusCMP0019() == cmPolicies::NEW)
+      {
+      os << "IF(NOT POLICY CMP0019)\n"
+        << "   MESSAGE(FATAL_ERROR \"CMake >= 2.8.11 required to use "
+           "IMPORTED targets containing generator expressions\")\n"
+        << "ENDIF(NOT POLICY CMP0019)\n";
+      break;
+      }
+    }
+
+  for(std::vector<cmTarget*>::const_iterator
+        tei = this->Exports->begin();
+      tei != this->Exports->end(); ++tei)
+    {
     cmTarget* te = *tei;
     if(this->ExportedTargets.insert(te).second)
       {
       this->GenerateImportTargetCode(os, te);
+
+      if ((*tei)->GetPolicyStatusCMP0019() == cmPolicies::NEW)
+        {
+        ImportPropertyMap properties;
+
+        this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES", te,
+                                        cmGeneratorExpression::BuildInterface,
+                                        properties);
+
+        this->GenerateInterfaceProperties(te, os, properties);
+        }
       }
     else
       {
