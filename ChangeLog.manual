@@ -1,3 +1,447 @@
+Changes in CMake 2.8.10 (since 2.8.10-rc3)
+----------------------------------------------
+None
+
+Changes in CMake 2.8.10-rc3 (since 2.8.10-rc2)
+----------------------------------------------
+Rolf Eike Beer (2):
+      SelectLibraryConfigurations: add testcase
+      SelectLibraryConfigurations: fix for release and debug libs being the same
+
+Stephen Kelly (5):
+      BasicConfigVersion: Make docs refer to the macro, not the module name
+      Document LOCATION undefined behavior with use of LINKER_LANGUAGE.
+      GenEx: Add an accessor for imported targets in a makefile.
+      GenEx: Create cmGeneratorTargets for imported targets.
+      GexEx: Validate Target names and property names differently.
+
+Thomas Arcila (1):
+      SelectLibraryConfigurations: Fix foreach(x IN LISTS ...) syntax
+
+Changes in CMake 2.8.10-rc2 (since 2.8.10-rc1)
+----------------------------------------------
+Alex Neundorf (2):
+      Document CMAKE_FIND_PACKAGE_NAME
+      Automoc: fix #13572: issue with symbolic links
+
+Brad King (4):
+      cmCTestSVN: Fix compilation with Sun CC 5.1
+      if: Document that plain 'NOTFOUND' is a false constant
+      string: Clarify regex documentation of '-' behavior
+      FortranCInterface: Pass all flags to VERIFY project (#13579)
+
+David Cole (1):
+      NSIS: Fix incorrect uninstall registry key name (#13578)
+
+Eric NOULARD (3):
+      CPACK_XX_ON_ABSOLUTE_INSTALL_DESTINATION is now properly checked for ON/OFF
+      Document CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY and fix some typo.
+      Make CPACK_SET_DESTDIR work with archive generator + component-based packaging
+
+Jean-Christophe Fillion-Robin (1):
+      CTest: Ensure CTEST_USE_LAUNCHERS behaves nicely in Superbuild setup
+
+Pere Nubiola i Radigales (1):
+      Find PostgreSQL headers on Debian
+
+Peter Kümmel (4):
+      Ninja: also set OBJECT_DIR when compiling
+      Ninja: don't pollute current dir when using gui (#13495)
+      Ninja: implicit dependency for custom command files
+      Fix regression: write compile definitions if any
+
+Philip Lowman (4):
+      FindGTK2: Rollback lib64 changes which broke header file finding
+      FindGTK2: #12049 fix detection of header files on multiarch systems
+      FindGTK2: #12596 Missing paths for FindGTK2 on NetBSD
+      FindGTK2: Update local changelog
+
+Rolf Eike Beer (6):
+      CTest: fix usage of memory checker with spaces in path
+      CTest: fix pre and post test commands with spaces
+      CTest: add tests that simulate memcheck runs
+      CTest: improve memory checker type detection
+      CTest: add a test for CTEST_CUSTOM_MEMCHECK_IGNORE
+      CTest: add a check with a quoted memory checker
+
+Stephen Kelly (18):
+      GenEx: It is not an error to specify an empty parameter
+      GenEx: Return after error reported.
+      GenEx: Report actual target name not found, not "0" each time.
+      GenEx: Parse comma after colon tokens specially
+      GenEx: Validate target and property names.
+      GenEx: Ensure that the empty CONFIGURATION can be used conditionally.
+      GenEx: Add test for $<BOOL:> with empty parameter.
+      GenEx: Add tests for "0" and "1" expressions with literal commas.
+      GenEx: Don't use std::vector::at(int).
+      Attempt to fix the compile of cmake on Sun CC.
+      GenEx: Parse colon after arguments separator colon specially.
+      GenEx: Test the use of generator expressions to generate lists.
+      GenEx: Fix termination bugs in generator expression parser.
+      GenEx: Break if there are no more commas in the container
+      GenEx: Add some more asserts to verify code-sanity.
+      GenEx: Replace some failing tests with Borland and NMake makefiles.
+      GenEx: Fix reporting about not-found include directories and libraries.
+      Fix config-specific INCLUDE_DIRECTORIES in multi-config generators
+
+Changes in CMake 2.8.10-rc1 (since 2.8.9)
+-----------------------------------------
+Scripted Changes (3):
+      Remove trailing whitespace from most CMake and C/C++ code
+      Convert CMake-language commands to lower case
+      Remove CMake-language block-end command arguments
+
+Alex Neundorf (27):
+      Eclipse: add support for the 4.2 Juno release (#13367)
+      Eclipse: improve (fix ?) version detection on OSX
+      Eclipse: fix #13358: don't create bad linked resources
+      Eclipse: fix #13358: don't create bad linked resources
+      remove non-working KDE4 test
+      Eclipse on OSX: fix handling of framework include dirs (#13464)
+      Eclipse on OSX: improve handling of framework include dirs (#13367)
+      -fix line length
+      fix #13474: also rescan dependencies if the depender does not exist
+      -fix line length
+      -fix Java dependency scanning, broken in previous commit
+      error out if CTEST_USE_LAUNCHERS is TRUE but RULE_LAUNCH_* are not set
+      fix #13494: rerun automoc also if include dirs or moc options change
+      CMakeDetermineFortranCompiler: add support for cross-compiling (#13379)
+      Automoc: fix #13493, use target properties for include dirs
+      Automoc: do not use DEFINITIONS, but only COMPILE_DEFINITIONS
+      Automoc: also the makefile-COMPILE_DEFINITIONS
+      cmGlobalGenerator.h: some minor coding style fixes
+      Modules/readme.txt: fix typo
+      find_package: add support for a <package>_NOT_FOUND_MESSAGE variable
+      exports: store pointers to all installations of each export set
+      exports: accept a missing target if it is exported exactly once
+      exports: first try at error handling if a target is missing
+      exports: fix build with MSVC6
+      exports: move the handling of missing targets into subclasses
+      exports: define a CMAKE_FIND_PACKAGE_NAME var set by find_package()
+      exports: add a test for exporting dependent targets
+
+Andreas Mohr (1):
+      FindCURL: Find older MSVC prebuilts
+
+Andy Piper (1):
+      Do not include directories which are part of the package install prefix.
+
+Benjamin Eikel (21):
+      Initial version of find module
+      FindSDL: Add version support for FindSDL_net
+      FindSDL: Version support for FindSDL_image
+      FindSDL: Use prefix SDL_NET, because it matches the file name.
+      FindSDL: Use SDL_IMAGE prefix for varibales
+      FindSDL: Add "cmake_minimum_required" to "try_compile" project
+      FindSDL: Format the documentation
+      FindSDL: Version support for FindSDL_sound
+      FindSDL: Use same capitalization for FPHSA as file name
+      FindSDL: Pass SDL_SOUND_LIBRARY to FIND_PACKAGE_HANDLE_STANDARD_ARGS
+      FindSDL: Use SDL_MIXER prefix for variables
+      FindSDL: Add version support for FindSDL_mixer
+      FindSDL: Update documentation
+      FindSDL: Use SDL_TTF prefix for variables
+      FindSDL: Add version support for FindSDL_ttf
+      FindSDL: Update documentation
+      FindSDL: Format documentation
+      FindSDL: Add version support
+      FindSDL: Add my copyright tag to all FindSDL_* modules
+      FindSDL: Remove from find_... calls PATHS that are set by default
+      FindSDL: Stay compatible with old input variables
+
+Bill Hoffman (8):
+      Use OUTPUT_NORMAL instead of OUTPUT_MERGE for cmake -E chdir.
+      curl: Use find_package(OpenSSL)
+      curl: Make OpenSSL DLLs available to CMake on Windows
+      file(DOWNLOAD): Generalize EXPECTED_MD5 to EXPECTED_HASH
+      file(DOWNLOAD): Add options for SSL
+      Utilities/Release: Enable CMAKE_USE_OPENSSL in nightly binaries
+      Add SSL_VERIFYPEER and CAINFO file options to ExternalProject_Add.
+      Revert "Ninja: don't expand any rsp files"
+
+Brad King (83):
+      find_library: Add test covering lib->lib64 cases
+      find_library: Refactor lib->lib64 conversion
+      find_library: Simplify lib->lib<arch> expansion
+      find_library: Fix mixed lib->lib64 (non-)conversion cases (#13419)
+      CMakeDetermine(C|CXX)Compiler: Consider Clang compilers
+      Factor common code out of CMakeDetermine(ASM|C|CXX|Fortran)Compiler
+      Prefer generic system compilers by default for C, C++, and Fortran
+      Xcode: Fix object library references in multi-project trees (#13452)
+      Xcode: Run xcode-select to find Xcode version file (#13463)
+      Watcom: Simplify compiler version detection (#11866)
+      Remove trailing TAB from NSIS.template.in
+      Fix WarnUnusedUnusedViaUnset test pass/fail regex
+      CMakeVersion.bash: Update sed expression for lower-case 'set'
+      GetPrerequisites: Mark file_cmd as advanced cache entry
+      Add boolean generator expressions
+      Add $<CONFIG:...> boolean query generator expression
+      Recognize Clang ASM support (#13473)
+      Xcode: Set ASM source language in project file (#13472)
+      Tests/Assembler: Do not use assembler in universal binaries
+      Add FindHg module to find Mercurial
+      ExternalProject: Add Mercurial (hg) repository support
+      Qt4Macros: Fix recently broken resource file parsing
+      Tests/ObjectLibrary: Do not enable CXX in subdirectories
+      VS11: Rename 'Immersive' to 'WindowsAppContainer' (#12930)
+      VS: Disable precompiled headers unless enabled by project (#12930)
+      VS11: Generate flag tables from MSBuild V110 tool files
+      Detect Compaq compiler version with its id
+      Detect PathScale compiler version with its id
+      Detect TI compiler version with its id
+      Detect Comeau compiler version with its id
+      Detect SDCC compiler version with its id
+      Detect Cray compiler version with its id
+      Detect Analog VisualDSP++ compiler version with its id
+      Re-order C/C++/Fortran compiler determination logic
+      CMakeDetermineCompilerId: Prepare to detect IDE compiler id
+      Xcode: Detect the compiler id and tool location
+      VS10: Define CMAKE_VS_PLATFORM_TOOLSET variable
+      VS: Detect the compiler id and tool location
+      Cleanly enable a language in multiple subdirectories
+      Test variables CMAKE_(C|CXX|Fortran)_COMPILER(|_ID|_VERSION)
+      Document CMAKE_<LANG>_COMPILER_(ID|VERSION) values
+      Make platform information files specific to the CMake version
+      Move CMAKE_<LANG>_COMPILER_WORKS to compiler information files
+      Store ABI detection results in compiler information files
+      VS: Remove support for "free" version 2003 tools
+      VS: Simplify MSVC version reporting
+      Modernize MSVC compiler information files
+      VS: Fix MSVC_IDE definition recently broken by refactoring
+      add_library: Document POSITION_INDEPENDENT_CODE default (#13479)
+      magrathea: Tell cmELF about DT_RUNPATH (#13497)
+      Utilities/Release: Link AIX binary with large maxdata
+      Utilities/xml: Add .gitattributes to disable whitespace checks
+      Utilities/xml: Add docbook-4.5 DTD (#13508)
+      docbook: Fix formatter naming convention to avoid shadow
+      docbook: Fix Sun CC warning on ptr_fun(isalnum)
+      curl: Honor OPENSSL_NO_SSL2
+      if: Compare up to 8 components in VERSION tests
+      ExternalProject: Generalize URL_MD5 option to URL_HASH
+      Rename SSL terminology to TLS
+      file(DOWNLOAD): Make TLS options behave as documented
+      OS X: Add platform-specific Clang compiler info files (#13536)
+      VS11: Detect VS 2012 Express for default generator (#13348)
+      VS11: Add VS 2012 Express support (#13348)
+      file(DOWNLOAD): Add HTTP User-Agent string
+      ExternalProject: Add DOWNLOAD_NAME option
+      file(DOWNLOAD): Change EXPECTED_HASH to take ALGO=value
+      VS8: Remove '.NET' from generator description (#10158)
+      Clang: Split Compiler/Clang* modules out from GNU (#13550)
+      Clang: All versions know about -fPIE (#13550)
+      Xcode: Remove unused code reading CMAKE_OSX_SYSROOT_DEFAULT
+      OS X: Always generate -isysroot if any SDK is in use
+      OS X: Improve default CMAKE_OSX_SYSROOT selection
+      bootstrap: Suppress CMAKE_OSX_SYSROOT if CFLAGS have -isysroot
+      Tests/Assembler: Use CMAKE_OSX_SYSROOT to generate .s file
+      OS X: Allow CMAKE_OSX_SYSROOT to be a logical SDK name
+      OS X: Simplify selection of CMAKE_OSX_ARCHITECTURES
+      OS X: If CMAKE_OSX_SYSROOT is already set do not compute default
+      OS X: Further improve default CMAKE_OSX_SYSROOT selection
+      OS X: Teach deployment target sanity check about SDK names
+      OS X: Ignore MACOSX_DEPLOYMENT_TARGET during Xcode compiler id
+      Verify that PDB_(NAME|OUTPUT_DIRECTORY) are honored in test
+      Document that PDB_(NAME|OUTPUT_DIRECTORY) are ignored for VS 6
+      Run PDBDirectoryAndName test on MSVC and Intel
+
+Clinton Stimpson (8):
+      fphsa: clarify message about minimum required version found.
+      DeployQt4:  Include DESTDIR for some cpack generators.
+      Add -DNDEBUG to RelWithDebInfo flags where where Release flags had it.
+      Fix regex for qt minor version.
+      FindQt4: Give precedence to QTDIR environment variable, if set.
+      FindQt4: Give precedence to QTDIR environment variable, if set.
+      Fix errors detecting Qt4 on Windows 8.
+      cmake-gui: Fix error status when interrupted.
+
+Daniel Pfeifer (8):
+      Simplify CMake.HTML documentation test command line
+      docbook: Remove table of contents
+      docbook: Factor out code to write valid DocBook IDs
+      docbook: Fix the DocBook section output
+      docbook: Cleanup formatter and generated DocBook
+      docbook: Add support for <abstract> at section level 1
+      docbook: Add CMake.DocBook test to validate xml (#13508)
+      docbook: Remove redundant docs that cause invalid DocBook
+
+David Cole (9):
+      Begin post-2.8.9 development
+      Release: Temporarily exclude ExternalProject test on cygwin
+      Add ability to run as a ctest -S script also
+      CMake: Clarify the documentation for if(f1 IS_NEWER_THAN f2)
+      Convert the CPACK_CYGWIN_PATCH_NUMBER variable to a cache variable
+      InstallRequiredSystemLibraries: Use correct file names (#13315)
+      ProcessorCount: Mark find_program vars as advanced (#13236)
+      FindQt4: Avoid "finding" non-existent library in a .framework
+      FindMPI: Set correct variables for calls to FPHSA
+
+Eric NOULARD (2):
+      Enhance DESTDIR documentation. Fixes #0012374.
+      Handles %attr(nnn,-,-) /path/to/file in CPACK_RPM_USER_FILELIST properly.
+
+James Bigler (3):
+      Replace -g3 with -g for CUDA 4.1 and 4.2 in addition to CUDA < 3.0.
+      Added CUDA_SOURCE_PROPERTY_FORMAT. Allows setting per file format (OBJ or PTX)
+      FindCUDA: Added CUDA_HOST_COMPILER variable.
+
+Marcin Wojdyr (1):
+      Remove CMake multiline block-end command arguments
+
+Nils Gladitz (1):
+      ctest_update: Tell svn not to prompt interactively (#13024)
+
+Patrick Gansterer (4):
+      VS: Cleanup AddPlatformDefinitions() of Visual Studio generators
+      Add additional architectures to CMakePlatformId.h.in
+      Add WindowsCE platform information files
+      VS: Remove duplicated implementations of CreateLocalGenerator()
+
+Peter Kuemmel (1):
+      Ninja: don't expand any rsp files
+
+Peter Kümmel (15):
+      Ninja: cmcldeps needs a compiler
+      Ninja: don't crash on returned 0 pointer
+      Ninja: prepare msvc pdb cleanup
+      Ninja:split out setting of msvc TARGET_PDB
+      Ninja: remove GetTargetPDB because it is used only once
+      Ninja: also detect /showInclude prefix for icl
+      Find mingw's windres also when Unix Makefiles are used
+      Ninja: don't suppress warning about compiler options
+      Ninja: suppress cmcldeps only for source file signature try_compiles
+      Ninja: filter target specific compile flags with language specific regex
+      Ninja: OBJECT_DEPENDS should set an implicit dependency
+      Ninja: don't confuse ninja's rsp files with nmake's
+      Ninja: move -LIBPATH behind -link option
+      Ninja: move <OBJECTS> in front of the first linker option
+      Ninja: add option to enforce usage of response files
+
+Philip Lowman (3):
+      FindOpenSceneGraph: CMake variable OSG_DIR influences detection now too
+      FindGTK2: Add GTK2_CAIROMMCONFIG_INCLUDE_DIR for cairommconfig.h
+      CMakeDetermineVSServicePack: Visual Studio 2012 added
+
+Rolf Eike Beer (25):
+      remove lib64 Unix paths if the respective lib path is also given
+      FindOpenSSL: find cross-compiled OpenSSL from MinGW (#13431)
+      FindOpenSSL: use SelectLibraryConfigurations
+      FindOpenSSL: let CMake handle environment variable HINTS
+      FindOpenSSL: cleanup path hints
+      FindOpenSSL: remove leftover comment
+      SelectLibraryConfiguration: generate correct output when input vars are lists
+      Fix typo direcotry -> directory (and similar) [#13444]
+      FindSelfPackers: fix typo (#13456)
+      CheckTypeSize: show in documentation how to get struct member size (#10579)
+      CheckTypeSize: add a test for size of struct members
+      FindX11: remove duplicates from X11 include path list (#13316)
+      FindX11: avoid calling list(REMOVE_DUPLICATES) on an empty list
+      list command: error on too many arguments
+      CMake.List test: explicitely test with lists containing only an empty string
+      use the find_* functions ENV parameter
+      use PATH_SUFFIXES to simplify find_* calls
+      do not escape spaces in regular expressions
+      read less from version headers into variables
+      FindFLEX: fix version extraction on Apple
+      FindGettext: remove code duplicating FPHSA checks
+      include FPHSA from current directory in all modules
+      FindOpenSceneGraph: simplify by using more features of FPHSA
+      FindSDL: add SDLMAIN_LIBRARY only once (#13262)
+      add documentation for all MSVCxxx version variables (#12567)
+
+Sergei Nikulov (1):
+      fix for discovering ft2build.h using FREETYPE_DIR environment var (#13502)
+
+Stephen Kelly (60):
+      Add new qt4_use_modules function.
+      Add missing whitespace to docs.
+      Fix some typos in the docs.
+      Remove incorrect doc string for link type enum
+      Remove duplicate 'of' from docs.
+      Fix unfortunate documentation error for PIC feature.
+      Don't duplicate -D defines sent to the compiler.
+      Fix CompileDefinitions test on Visual Studio.
+      Fix the test setting COMPILE_DEFINITIONS target property
+      Rename files from main.cpp to more meaningful names.
+      Fix casing of 'Qt' in docs, comments and user-visible strings.
+      Read entire Qt4 qrc file when parsing for depends info.
+      Add a return-after-error if an old Qt is found.
+      Use CMake platform variables instead of Qt ones.
+      Move variable setting down to where it relates to.
+      Remove an if which is always true.
+      Use add_subdirectory instead of the obsolete subdirs.
+      Replace two include_directories with a setting.
+      Compile with both Qt4 and Qt5.
+      Build with Qt5 if it is found.
+      cmGeneratorExpression: Re-write for multi-stage evaluation
+      cmGeneratorExpression: Port users to two-stage processing
+      Fix the regular expression validator for target names.
+      Handle colons as a special case in the generator expression parser.
+      Enable deprecated API when using Qt 5.
+      Add more forwarding API to cmGeneratorTarget.
+      Store cmGeneratorTargets with the makefile.
+      Move GenerateTargetManifest to cmGeneratorTarget.
+      Move GetLinkInformation to cmGeneratorTarget
+      Make cmLocalGenerator::AddArchitectureFlags take a cmGeneratorTarget.
+      Move GetCreateRuleVariable to cmGeneratorTarget.
+      Port cmLocalGenerator::GetTargetFlags to cmGeneratorTarget.
+      Move GetIncludeDirectories to cmGeneratorTarget.
+      Append the COMPILE_DEFINITIONS from the Makefile to all targets.
+      Add a wrapper for accessing config-specific compile-definitions.
+      Add convenience for getting a cmGeneratorTarget to use.
+      Fix compiler warning with initialization order.
+      Revert "Move GenerateTargetManifest to cmGeneratorTarget."
+      Use the cmGeneratorTarget for the include directories API.
+      Fix indentation in the code blocks generator.
+      Port remaining code to GetCompileDefinitions().
+      Add include guard for cmGeneratorExpression.
+      Don't prepend a path before generator expressions in include_directories.
+      Convert paths in INCLUDE_DIRECTORIES property to Unix slashes.
+      Add an AppendDefines std::string overload.
+      Return a std::string from GetCompileDefinitions.
+      Refactor GetCompileDefinitions a bit.
+      Extend the generator expression language with more logic.
+      Add a generator expression for target properties.
+      Add API to check that dependent target properties form a DAG.
+      Add a self-reference check for target properties.
+      Early return if there is no target.
+      Process generator expressions in the INCLUDE_DIRECTORIES property.
+      Process generator expressions in the COMPILE_DEFINITIONS target property.
+      Fix the layout of the generator expression documentation.
+      Fix punctuation in some variables documentation.
+      Document that generator expressions can be used in target properties.
+      Remove unused parameter marker and the unused parameter.
+      Fix minor typos.
+      Remove period at the end of the check message.
+
+Tom Schutter (2):
+      cmake-mode.el: Use more readable regex and case-fold-search
+      cmake-mode.el: add local keybindings
+
+Xavier Besseron (7):
+      cmCTestSVN: Add the new SVNInfo structure
+      cmCTestSVN: Extend Revision struct with SVN repo information
+      cmCTestSVN: Add the Repositories list and the RootInfo pointer
+      cmCTestSVN: Create the SVNInfo for the root repository
+      cmCTestSVN: Use the SVNInfo structure
+      cmCTestSVN: Add a LoadExternal() function and an ExternalParser class
+      cmCTestSVN: Load and process information from externals
+
+Yuchen Deng (1):
+      Add PDB_OUTPUT_DIRECTORY and PDB_NAME target properties (#10830)
+
+Yury G. Kudryashov (7):
+      exports: Move cmTargetExport to a dedicated header file
+      exports: Remove cmTargetExport constructor
+      exports: Rename cmGlobalGenerator::AddTargetToExport{s,}
+      exports: Create class cmExportSet
+      exports: Add cmExportSetMap class
+      exports: Hold an ExportSet pointer in cm*Export*Generator
+      exports: cmGlobalGenerator::ExportSets destructor will clear it
+
+Zack Galbreath (2):
+      Clean up documentation formatting so that it is rendered properly in HTML.
+      cmparseMSBuildXML: Include DisplayName in the output
+
 Changes in CMake 2.8.9 (since 2.8.9-rc3)
 ----------------------------------------
 None
