@@ -2732,6 +2732,7 @@ static void kwsysProcessesSignalHandler(int signum
     kwsysProcess* cp = kwsysProcesses.Processes[i];
     kwsysProcess_ssize_t status=
       read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
+    (void)status;
     status=write(cp->SignalPipe, &buf, 1);
     (void)status;
     }

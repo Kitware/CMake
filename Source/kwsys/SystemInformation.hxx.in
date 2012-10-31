@@ -24,7 +24,6 @@
 namespace @KWSYS_NAMESPACE@
 {
 
-
 // forward declare the implementation class
 class SystemInformationImplementation;
 
@@ -96,15 +95,44 @@ public:
   size_t GetTotalPhysicalMemory();
   size_t GetAvailablePhysicalMemory();
 
-  // returns an informative general description if the ram
-  // on this system
-  kwsys_stl::string GetMemoryDescription();
+  // returns an informative general description if the installed and
+  // available ram on this system. See the  GetHostMmeoryTotal, and
+  // Get{Host,Proc}MemoryAvailable methods for more information.
+  kwsys_stl::string GetMemoryDescription(
+        const char *hostLimitEnvVarName=NULL,
+        const char *procLimitEnvVarName=NULL);
 
-  // Retrieve physical memory information in kib
-  LongLong GetMemoryTotal();
-  LongLong GetMemoryUsed();
+  // Retrieve amount of physical memory installed on the system in KiB
+  // units.
+  LongLong GetHostMemoryTotal();
 
-  // enable/disable stack trace signal handler.
+  // Get total system RAM in units of KiB available colectivley to all
+  // processes in a process group. An example of a process group
+  // are the processes comprising an mpi program which is running in
+  // parallel. The amount of memory reported may differ from the host
+  // total if a host wide resource limit is applied. Such reource limits
+  // are reported to us via an applicaiton specified environment variable.
+  LongLong GetHostMemoryAvailable(const char *hostLimitEnvVarName=NULL);
+
+  // Get total system RAM in units of KiB available to this process.
+  // This may differ from the host available if a per-process resource
+  // limit is applied. per-process memory limits are applied on unix
+  // system via rlimit api. Resource limits that are not imposed via
+  // rlimit api may be reported to us via an application specified
+  // environment variable.
+  LongLong GetProcMemoryAvailable(
+        const char *hostLimitEnvVarName=NULL,
+        const char *procLimitEnvVarName=NULL);
+
+  // Get the system RAM used by all processes on the host, in units of KiB.
+  LongLong GetHostMemoryUsed();
+
+  // Get system RAM used by this process id in units of KiB.
+  LongLong GetProcMemoryUsed();
+
+  // enable/disable stack trace signal handler. In order to
+  // produce an informative stack trace the application should
+  // be dynamically linked and compiled with debug symbols.
   static
   void SetStackTraceOnError(int enable);
 
@@ -113,6 +141,7 @@ public:
   void RunOSCheck();
   void RunMemoryCheck();
 };
+
 } // namespace @KWSYS_NAMESPACE@
 
 /* Undefine temporary macros.  */
