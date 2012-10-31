@@ -232,7 +232,14 @@ bool cmTargetLinkLibrariesCommand
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
     }
-
+  if(this->CurrentProcessingState != ProcessingLinkLibraries &&
+     !this->Target->GetProperty("INTERFACE_LINK_LIBRARIES"))
+    {
+    if (this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+      {
+      this->Target->SetProperty("INTERFACE_LINK_LIBRARIES", "");
+      }
+    }
   return true;
 }
 
@@ -250,6 +257,25 @@ cmTargetLinkLibrariesCommand
 }
 
 //----------------------------------------------------------------------------
+static std::string generatorIface(const std::string &value,
+                                  cmTarget::LinkLibraryType llt)
+{
+  if (llt == cmTarget::DEBUG)
+    {
+    return "$<$<CONFIG_DEBUG>:"
+                     + value
+                     + ">";
+    }
+  else if (llt == cmTarget::OPTIMIZED)
+    {
+    return "$<$<NOT:$<CONFIG_DEBUG>>:"
+                     + value
+                     + ">";
+    }
+  return value;
+}
+
+//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
@@ -264,6 +290,12 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       // Not LINK_INTERFACE_LIBRARIES or LINK_PUBLIC, do not add to interface.
       return;
       }
+    }
+
+  if (this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+                                 generatorIface(lib, llt).c_str());
     }
 
   // Get the list of configurations considered to be DEBUG.
