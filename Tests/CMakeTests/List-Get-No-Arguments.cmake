@@ -1,1 +1,0 @@
-list(GET mylist)
