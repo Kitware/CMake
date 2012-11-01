@@ -4707,14 +4707,20 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       {
       continue;
       }
-
-    if(li->second == cmTarget::GENERAL || li->second == linkType)
-      {
-      // The entry is meant for this configuration.
       impl.Libraries.push_back(item);
-      }
-    else
+    }
+
+  LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
+      li != oldllibs.end(); ++li)
+    {
+    if(li->second != cmTarget::GENERAL && li->second != linkType)
       {
+      std::string item = this->CheckCMP0004(li->first);
+      if(item == this->GetName() || item.empty())
+        {
+        continue;
+        }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(item);
       }
