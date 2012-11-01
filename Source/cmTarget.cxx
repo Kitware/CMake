@@ -2110,23 +2110,27 @@ bool cmTarget::NameResolvesToFramework(const std::string& libname)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType)
+void cmTarget::GetFrameworks(const char *config,
+                             std::vector<std::string> &frameworks)
 {
-  if(this->NameResolvesToFramework(libname.c_str()))
+  std::vector<std::string> llibs;
+  this->GetDirectLinkLibraries(config, llibs);
+  for(std::vector<std::string>::const_iterator li = llibs.begin();
+      li != llibs.end(); ++li)
     {
-    std::string frameworkDir = libname;
-    frameworkDir += "/../";
-    frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
-    std::vector<std::string>::iterator i =
-      std::find(this->Frameworks.begin(),
-                this->Frameworks.end(), frameworkDir);
-    if(i == this->Frameworks.end())
+    if(this->NameResolvesToFramework(li->c_str()))
       {
-      this->Frameworks.push_back(frameworkDir);
+      std::string frameworkDir = *li + "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      std::vector<std::string>::iterator i =
+        std::find(frameworks.begin(),
+                  frameworks.end(), frameworkDir);
+      if(i == frameworks.end())
+        {
+        frameworks.push_back(frameworkDir);
+        }
       }
-    return true;
     }
-  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -2194,7 +2198,6 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     return;
     }
 
-  this->AddFramework(pplib, llt);
   cmTarget::LibraryID tmp;
   tmp.first = pplib;
   tmp.second = llt;
