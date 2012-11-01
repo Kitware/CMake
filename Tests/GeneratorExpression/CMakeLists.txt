@@ -16,6 +16,10 @@ add_custom_target(check ALL
     -Dtest_and_1_1=$<AND:1,1>
     -Dtest_config_0=$<CONFIG:$<CONFIGURATION>x>
     -Dtest_config_1=$<CONFIG:$<CONFIGURATION>>
+    -Dtest_config_debug=$<CONFIG:Debug>$<CONFIG:DEBUG>$<CONFIG:DeBuG>
+    -Dtest_config_release=$<CONFIG:Release>$<CONFIG:RELEASE>$<CONFIG:ReLeAsE>
+    -Dtest_config_relwithdebinfo=$<CONFIG:RelWithDebInfo>$<CONFIG:RELWITHDEBINFO>$<CONFIG:relwithdebinfo>
+    -Dtest_config_minsizerel=$<CONFIG:MinSizeRel>$<CONFIG:MINSIZEREL>$<CONFIG:minsizerel>
     -Dtest_not_0=$<NOT:0>
     -Dtest_not_1=$<NOT:1>
     -Dtest_or_0=$<OR:0>
