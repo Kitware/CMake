@@ -1,3 +1,5 @@
+include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
+
 macro(TEST command expected)
   if("x${result}" STREQUAL "x${expected}")
     #message("TEST \"${command}\" success: \"${result}\" expected: \"${expected}\"")
@@ -101,25 +103,34 @@ TEST("SORT empty result" "")
 set(No-Arguments-RESULT 1)
 set(No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-No-Arguments.cmake:1 \\(list\\):.*list must be called with at least two arguments.*")
 
-foreach(cmd Append Reverse Remove_Duplicates Sort) # these currently trigger top-level condition
+# these trigger top-level condition
+foreach(cmd IN ITEMS Append Find Get Insert Length Reverse Remove_At Remove_Duplicates Remove_Item Sort)
   set(${cmd}-No-Arguments-RESULT 1)
-  set(${cmd}-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-${cmd}-No-Arguments.cmake:1 \\(list\\):.*list must be called with at least two arguments.*")
+  set(${cmd}-No-Arguments-STDERR ".*CMake Error at List-${cmd}-No-Arguments.cmake:1 \\(list\\):.*list must be called with at least two arguments.*")
+  string(TOUPPER ${cmd} cmd_upper)
+  set(_test_file_name "${CMAKE_CURRENT_BINARY_DIR}/List-${cmd}-No-Arguments.cmake")
+  file(WRITE "${_test_file_name}" "list(${cmd_upper})\n")
+  check_cmake_test_single(List "${cmd}-No-Arguments" "${_test_file_name}")
+endforeach()
+
+set(Get-List-Only-STDERR "at least three")
+set(Find-List-Only-STDERR "three")
+set(Insert-List-Only-STDERR "at least three")
+set(Length-List-Only-STDERR "two")
+set(Remove_At-List-Only-STDERR "at least two")
+set(Remove_Item-List-Only-STDERR "two or more")
+
+foreach(cmd IN ITEMS Find Get Insert Length Remove_At Remove_Item)
+  string(TOUPPER ${cmd} cmd_upper)
+  set(${cmd}-List-Only-RESULT 1)
+  set(${cmd}-List-Only-STDERR ".*CMake Error at List-${cmd}-List-Only.cmake:1 \\(list\\):.*list sub-command ${cmd_upper} requires ${${cmd}-List-Only-STDERR} arguments.*")
+  set(_test_file_name "${CMAKE_CURRENT_BINARY_DIR}/List-${cmd}-List-Only.cmake")
+  file(WRITE "${_test_file_name}" "list(${cmd_upper} mylist)\n")
+  check_cmake_test_single(List "${cmd}-List-Only" "${_test_file_name}")
 endforeach()
 
 set(Length-Too-Many-Arguments-RESULT 1)
 set(Length-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Length-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command LENGTH requires two arguments.*")
-
-set(Get-No-Arguments-RESULT 1)
-set(Get-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Get-No-Arguments.cmake:1 \\(list\\):.*list sub-command GET requires at least three arguments.*")
-
-set(Find-No-Arguments-RESULT 1)
-set(Find-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Find-No-Arguments.cmake:1 \\(list\\):.*list sub-command FIND requires three arguments.*")
-
-set(Insert-No-Arguments-RESULT 1)
-set(Insert-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Insert-No-Arguments.cmake:1 \\(list\\):.*list sub-command INSERT requires at least three arguments.*")
-
-set(Remove_Item-No-Arguments-RESULT 1)
-set(Remove_Item-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Remove_Item-No-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_ITEM requires two or more arguments.*")
 
 set(Reverse-Too-Many-Arguments-RESULT 1)
 set(Reverse-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Reverse-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command REVERSE only takes one argument.*")
@@ -129,9 +140,6 @@ set(Remove_Duplicates-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURREN
 
 set(Sort-Too-Many-Arguments-RESULT 1)
 set(Sort-Too-Many-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Sort-Too-Many-Arguments.cmake:1 \\(list\\):.*list sub-command SORT only takes one argument.*")
-
-set(Remove_At-No-Arguments-RESULT 1)
-set(Remove_At-No-Arguments-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Remove_At-No-Arguments.cmake:1 \\(list\\):.*list sub-command REMOVE_AT requires at least two arguments.*")
 
 set(Invalid-Subcommand-RESULT 1)
 set(Invalid-Subcommand-STDERR ".*CMake Error at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Invalid-Subcommand.cmake:1 \\(list\\):.*list does not recognize sub-command NO_SUCH_SUBCOMMAND.*")
@@ -150,22 +158,12 @@ endforeach()
 set(Get-CMP0007-Warn-RESULT 0)
 set(Get-CMP0007-Warn-STDERR ".*CMake Warning \\(dev\\) at (@CMAKE_CURRENT_SOURCE_DIR@/)?List-Get-CMP0007-Warn.cmake:3 \\(list\\):.*Policy CMP0007 is not set:.*")
 
-include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(List
   No-Arguments
   Length-Too-Many-Arguments
-  Get-No-Arguments
-  Append-No-Arguments
-  Find-No-Arguments
-  Insert-No-Arguments
-  Remove_Item-No-Arguments
-  Reverse-No-Arguments
   Reverse-Too-Many-Arguments
-  Remove_Duplicates-No-Arguments
   Remove_Duplicates-Too-Many-Arguments
-  Sort-No-Arguments
   Sort-Too-Many-Arguments
-  Remove_At-No-Arguments
   Invalid-Subcommand
   Get-Invalid-Index
   Insert-Invalid-Index
