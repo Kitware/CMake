@@ -82,7 +82,6 @@ typedef int siginfo_t;
 # include <mach/mach_types.h>
 # include <fenv.h>
 # include <sys/socket.h>
-# include <netdb.h>
 # include <netinet/in.h>
 # if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050
 #  include <execinfo.h>
@@ -93,7 +92,6 @@ typedef int siginfo_t;
 #ifdef __linux
 # include <fenv.h>
 # include <sys/socket.h>
-# include <netdb.h>
 # include <netinet/in.h>
 # if defined(__GNUG__)
 #  include <execinfo.h>
@@ -113,6 +111,9 @@ typedef struct rlimit ResourceLimitType;
 
 #if defined(KWSYS_SYS_HAS_IFADDRS_H)
 # include <ifaddrs.h>
+#endif
+#if defined(KWSYS_SYS_HAS_NETDB_H)
+# include <netdb.h>
 #endif
 
 #ifdef __HAIKU__
@@ -453,7 +454,7 @@ bool SystemInformation::DoesCPUSupportFeature(long int i)
 
 kwsys_stl::string SystemInformation::GetCPUDescription()
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << this->GetNumberOfPhysicalCPU()
     << " core ";
@@ -543,7 +544,7 @@ int SystemInformation::GetOSIsApple()
 
 kwsys_stl::string SystemInformation::GetOSDescription()
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << this->GetOSName()
     << " "
@@ -599,7 +600,7 @@ kwsys_stl::string SystemInformation::GetMemoryDescription(
       const char *hostLimitEnvVarName,
       const char *procLimitEnvVarName)
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << "Host Total: "
     << iostreamLongLong(this->GetHostMemoryTotal())
@@ -805,7 +806,7 @@ int NameValue(
       {
       continue;
       }
-    kwsys_stl::istringstream is(lines[i].substr(at+name.size()));
+    kwsys_ios::istringstream is(lines[i].substr(at+name.size()));
     is >> value;
     return 0;
     }
@@ -1271,7 +1272,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
   WSACleanup();
   return 0;
 
-#elif defined(KWSYS_SYS_HAS_IFADDRS_H)
+#elif defined(KWSYS_SYS_HAS_IFADDRS_H) && defined(KWSYS_SYS_HAS_NETDB_H)
   // gethostname typical returns an alias for loopback interface
   // we want the fully qualified domain name. Because there are
   // any number of interfaces on this system we look for the
@@ -3310,7 +3311,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
 #elif defined(__APPLE__)
   SystemInformation::LongLong memUsed=0;
   pid_t pid=getpid();
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE *file=popen(oss.str().c_str(),"r");
   if (file==0)
@@ -3335,7 +3336,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
     {
     return -2;
     }
-  kwsys_stl::istringstream iss(oss.str());
+  kwsys_ios::istringstream iss(oss.str());
   iss >> memUsed;
   return memUsed;
 #else
@@ -4670,7 +4671,7 @@ int SystemInformationImplementation::CallSwVers(
       kwsys_stl::string &ver)
 {
 #ifdef __APPLE__
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss << "sw_vers " << arg;
   FILE *f=popen(oss.str().c_str(),"r");
   if (f==0)
@@ -4684,7 +4685,7 @@ int SystemInformationImplementation::CallSwVers(
     oss << buf;
     }
   pclose(f);
-  kwsys_stl::istringstream iss(oss.str());
+  kwsys_ios::istringstream iss(oss.str());
   iss >> ver;
 #else
   // avoid C4100
