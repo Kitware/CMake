@@ -79,7 +79,8 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
   // Tell CPackDeb.cmake the path where the component is.
   std::string component_path = "/";
   component_path += packageName;
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH", component_path.c_str());
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
+                  component_path.c_str());
   if (!this->ReadListFile("CPackDeb.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -205,7 +206,8 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   // Tell CPackDeb.cmake the path where the component is.
   std::string component_path = "/";
   component_path += compInstDirName;
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH", component_path.c_str());
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
+                  component_path.c_str());
   if (!this->ReadListFile("CPackDeb.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
