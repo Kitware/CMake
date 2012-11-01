@@ -82,7 +82,6 @@ typedef int siginfo_t;
 # include <mach/mach_types.h>
 # include <fenv.h>
 # include <sys/socket.h>
-# include <netdb.h>
 # include <netinet/in.h>
 # if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050
 #  include <execinfo.h>
@@ -93,7 +92,6 @@ typedef int siginfo_t;
 #ifdef __linux
 # include <fenv.h>
 # include <sys/socket.h>
-# include <netdb.h>
 # include <netinet/in.h>
 # if defined(__GNUG__)
 #  include <execinfo.h>
@@ -113,6 +111,9 @@ typedef struct rlimit ResourceLimitType;
 
 #if defined(KWSYS_SYS_HAS_IFADDRS_H)
 # include <ifaddrs.h>
+#endif
+#if defined(KWSYS_SYS_HAS_NETDB_H)
+# include <netdb.h>
 #endif
 
 #ifdef __HAIKU__
@@ -1271,7 +1272,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
   WSACleanup();
   return 0;
 
-#elif defined(KWSYS_SYS_HAS_IFADDRS_H)
+#elif defined(KWSYS_SYS_HAS_IFADDRS_H) && defined(KWSYS_SYS_HAS_NETDB_H)
   // gethostname typical returns an alias for loopback interface
   // we want the fully qualified domain name. Because there are
   // any number of interfaces on this system we look for the
