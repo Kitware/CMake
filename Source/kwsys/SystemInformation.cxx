@@ -97,7 +97,9 @@ typedef int siginfo_t;
 # include <netinet/in.h>
 # if defined(__GNUG__)
 #  include <execinfo.h>
-#  define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
+#  if !(defined(__LSB_VERSION__) && __LSB_VERSION__ < 41)
+#   define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
+#  endif
 # endif
 # if defined(KWSYS_CXX_HAS_RLIMIT64)
 typedef struct rlimit64 ResourceLimitType;
