@@ -453,7 +453,7 @@ bool SystemInformation::DoesCPUSupportFeature(long int i)
 
 kwsys_stl::string SystemInformation::GetCPUDescription()
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << this->GetNumberOfPhysicalCPU()
     << " core ";
@@ -543,7 +543,7 @@ int SystemInformation::GetOSIsApple()
 
 kwsys_stl::string SystemInformation::GetOSDescription()
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << this->GetOSName()
     << " "
@@ -599,7 +599,7 @@ kwsys_stl::string SystemInformation::GetMemoryDescription(
       const char *hostLimitEnvVarName,
       const char *procLimitEnvVarName)
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << "Host Total: "
     << iostreamLongLong(this->GetHostMemoryTotal())
@@ -805,7 +805,7 @@ int NameValue(
       {
       continue;
       }
-    kwsys_stl::istringstream is(lines[i].substr(at+name.size()));
+    kwsys_ios::istringstream is(lines[i].substr(at+name.size()));
     is >> value;
     return 0;
     }
@@ -3310,7 +3310,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
 #elif defined(__APPLE__)
   SystemInformation::LongLong memUsed=0;
   pid_t pid=getpid();
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE *file=popen(oss.str().c_str(),"r");
   if (file==0)
@@ -3335,7 +3335,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
     {
     return -2;
     }
-  kwsys_stl::istringstream iss(oss.str());
+  kwsys_ios::istringstream iss(oss.str());
   iss >> memUsed;
   return memUsed;
 #else
@@ -4670,7 +4670,7 @@ int SystemInformationImplementation::CallSwVers(
       kwsys_stl::string &ver)
 {
 #ifdef __APPLE__
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss << "sw_vers " << arg;
   FILE *f=popen(oss.str().c_str(),"r");
   if (f==0)
@@ -4684,7 +4684,7 @@ int SystemInformationImplementation::CallSwVers(
     oss << buf;
     }
   pclose(f);
-  kwsys_stl::istringstream iss(oss.str());
+  kwsys_ios::istringstream iss(oss.str());
   iss >> ver;
 #else
   // avoid C4100
