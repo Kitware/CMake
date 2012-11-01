@@ -41,7 +41,7 @@ endif()
 
 # This should be specified from the command line.
 if(NOT TEST_GIT_TAG)
-  message(FATAL_ERROR "TEST_GIT_TAG must be specified.")
+  set(TEST_GIT_TAG origin/master)
 endif()
 
 if(do_git_tests)
