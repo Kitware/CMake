@@ -74,6 +74,14 @@ typedef int siginfo_t;
 # include <errno.h> // extern int errno;
 #endif
 
+#ifdef __FreeBSD__
+# include <sys/sysctl.h>
+# include <fenv.h>
+# include <sys/socket.h>
+# include <netdb.h>
+# include <netinet/in.h>
+#endif
+
 #ifdef __APPLE__
 # include <sys/sysctl.h>
 # include <mach/vm_statistics.h>
