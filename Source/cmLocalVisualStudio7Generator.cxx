@@ -78,6 +78,10 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
+    if(l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     const char* path = l->second.GetProperty("EXTERNAL_MSPROJECT");
     if(path)
       {
@@ -181,6 +185,10 @@ void cmLocalVisualStudio7Generator::WriteProjectFiles()
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
+    if(l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
     // so don't build a projectfile for it
     if(!l->second.GetProperty("EXTERNAL_MSPROJECT"))
@@ -1258,6 +1266,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
+    case cmTarget::INTERFACE_LIBRARY:
       break;
     }
 }
@@ -1288,7 +1297,8 @@ cmLocalVisualStudio7GeneratorInternals
                                     cmLocalGenerator::UNCHANGED);
       fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
       }
-    else
+    else if (!l->Target
+        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
       {
       fout << l->Value << " ";
       }
