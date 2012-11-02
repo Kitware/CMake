@@ -1463,6 +1463,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
+           (tgt->GetType() == cmTarget::INTERFACE_LIBRARY) ||
            tgt->IsExecutableWithExports()))
         {
         cmOStringStream e;
@@ -1990,6 +1991,7 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
     {
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
+    case cmTarget::INTERFACE_LIBRARY:
       return;
     default:;
     }
@@ -2017,7 +2019,8 @@ cmTarget* cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
   if (    (type != cmTarget::STATIC_LIBRARY)
        && (type != cmTarget::SHARED_LIBRARY)
        && (type != cmTarget::MODULE_LIBRARY)
-       && (type != cmTarget::OBJECT_LIBRARY))
+       && (type != cmTarget::OBJECT_LIBRARY)
+       && (type != cmTarget::INTERFACE_LIBRARY))
     {
     this->IssueMessage(cmake::INTERNAL_ERROR,
                        "cmMakefile::AddLibrary given invalid target type.");

@@ -392,6 +392,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
+    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     cmMakefile* mf = target->GetMakefile();
     const char *vcprojName =
       target->GetProperty("GENERATOR_FILE_NAME");
