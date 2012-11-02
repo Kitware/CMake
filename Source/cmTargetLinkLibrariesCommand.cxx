@@ -322,6 +322,15 @@ bool
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
+  if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+      && this->CurrentProcessingState != ProcessingKeywordLinkInterface)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "INTERFACE library can only be used with the INTERFACE keyword of "
+      "target_link_libraries");
+    return false;
+    }
+
   cmTarget::TLLSignature sig =
         (this->CurrentProcessingState == ProcessingPlainPrivateInterface
       || this->CurrentProcessingState == ProcessingPlainPublicInterface
@@ -403,6 +412,11 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
 
   if (policy22Status != cmPolicies::OLD
       && policy22Status != cmPolicies::WARN)
+    {
+    return true;
+    }
+
+  if (this->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
     return true;
     }

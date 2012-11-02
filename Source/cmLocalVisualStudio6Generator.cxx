@@ -1839,7 +1839,8 @@ void cmLocalVisualStudio6Generator
       options +=
         this->ConvertToOptionallyRelativeOutputPath(l->Value.c_str());
       }
-    else
+    else if (!l->Target
+        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
       {
       options += l->Value;
       }

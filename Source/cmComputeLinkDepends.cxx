@@ -355,8 +355,15 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     if(cmTarget::LinkInterface const* iface =
        entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
       {
+      const bool isIface =
+                      entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
+
+      if (isIface)
+        {
+        return;
+        }
 
       // Handle dependent shared libraries.
       this->FollowSharedDeps(depender_index, iface);

@@ -90,6 +90,11 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     case cmTarget::STATIC_LIBRARY: type = cmInstallType_STATIC_LIBRARY; break;
     case cmTarget::SHARED_LIBRARY: type = cmInstallType_SHARED_LIBRARY; break;
     case cmTarget::MODULE_LIBRARY: type = cmInstallType_MODULE_LIBRARY; break;
+    case cmTarget::INTERFACE_LIBRARY:
+      // Not reachable. We never create a cmInstallTargetGenerator for
+      // an INTERFACE_LIBRARY.
+      assert(!"INTERFACE_LIBRARY targets have no installable outputs.");
+      break;
     case cmTarget::OBJECT_LIBRARY:
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:

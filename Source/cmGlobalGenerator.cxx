@@ -2555,6 +2555,10 @@ void cmGlobalGenerator::WriteSummary()
   for(std::map<cmStdString,cmTarget *>::const_iterator ti =
         this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
+    if ((ti->second)->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     this->WriteSummary(ti->second);
     fout << ti->second->GetSupportDirectory() << "\n";
     }
