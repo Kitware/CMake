@@ -151,6 +151,16 @@ public:
       "properties of <target>, that is, it may not be used as the operand of "
       "set_property, set_target_properties, target_link_libraries etc.  An "
       "ALIAS target may not be installed of exported."
+      "\n"
+      "The signature\n"
+      "  add_library(<name> INTERFACE)\n"
+      "creates an interface target. An interface target does not directly "
+      "create build output, though it may have properties set on it and it "
+      "may be installed, exported and imported.  Typically the INTERFACE_* "
+      "properties are populated on the interface target using the "
+      "set_property(), target_link_libraries(), target_include_directories() "
+      "and target_compile_defintions() commands, and then it is used as an "
+      "argument to target_link_libraries() like any other target."
       ;
     }
 

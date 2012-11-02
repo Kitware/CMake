@@ -1258,6 +1258,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
+    case cmTarget::INTERFACE_LIBRARY:
       break;
     }
 }
@@ -1288,7 +1289,8 @@ cmLocalVisualStudio7GeneratorInternals
                                     cmLocalGenerator::UNCHANGED);
       fout << lg->ConvertToXMLOutputPath(rel.c_str()) << " ";
       }
-    else
+    else if (!l->Target
+        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
       {
       fout << l->Value << " ";
       }
