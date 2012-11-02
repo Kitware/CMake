@@ -127,6 +127,11 @@ if(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
+    set(LIB_EAY_LIBRARY_DEBUG "${LIB_EAY_DEBUG}")
+    set(LIB_EAY_LIBRARY_RELEASE "${LIB_EAY_RELEASE}")
+    set(SSL_EAY_LIBRARY_DEBUG "${SSL_EAY_DEBUG}")
+    set(SSL_EAY_LIBRARY_RELEASE "${SSL_EAY_RELEASE}")
+
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     select_library_configurations(LIB_EAY)
     select_library_configurations(SSL_EAY)
