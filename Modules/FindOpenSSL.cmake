@@ -84,9 +84,10 @@ if(WIN32 AND NOT CYGWIN)
     # We are using the libraries located in the VC subdir instead of the parent directory eventhough :
     # libeay32MD.lib is identical to ../libeay32.lib, and
     # ssleay32MD.lib is identical to ../ssleay32.lib
-    find_library(LIB_EAY_DEBUG
+    find_library(LIB_EAY_LIBRARY_DEBUG
       NAMES
         libeay32MDd
+        libeay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -94,7 +95,7 @@ if(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    find_library(LIB_EAY_RELEASE
+    find_library(LIB_EAY_LIBRARY_RELEASE
       NAMES
         libeay32MD
         libeay32
@@ -105,9 +106,10 @@ if(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    find_library(SSL_EAY_DEBUG
+    find_library(SSL_EAY_LIBRARY_DEBUG
       NAMES
         ssleay32MDd
+        ssleay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -115,7 +117,7 @@ if(WIN32 AND NOT CYGWIN)
         "lib/VC"
     )
 
-    find_library(SSL_EAY_RELEASE
+    find_library(SSL_EAY_LIBRARY_RELEASE
       NAMES
         ssleay32MD
         ssleay32
