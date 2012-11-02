@@ -72,6 +72,7 @@ public:
   enum TargetType { EXECUTABLE, STATIC_LIBRARY,
                     SHARED_LIBRARY, MODULE_LIBRARY,
                     OBJECT_LIBRARY, UTILITY, GLOBAL_TARGET,
+                    INTERFACE_LIBRARY,
                     UNKNOWN_LIBRARY};
   static const char* GetTargetTypeName(TargetType targetType);
   enum CustomCommandType { PRE_BUILD, PRE_LINK, POST_BUILD };

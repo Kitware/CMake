@@ -877,7 +877,12 @@ cmGlobalNinjaGenerator
     cmTargetDependSet const& targetDeps =
       this->GetTargetDirectDepends(*target);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
-         i != targetDeps.end(); ++i) {
+         i != targetDeps.end(); ++i)
+      {
+      if ((*i)->GetType() == cmTarget::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
       this->AppendTargetOutputs(*i, outputs);
     }
   }
