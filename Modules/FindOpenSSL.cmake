@@ -87,6 +87,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY_DEBUG
       NAMES
         libeay32MDd
+        libeay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
@@ -108,6 +109,7 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY_DEBUG
       NAMES
         ssleay32MDd
+        ssleay32d
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         "lib"
