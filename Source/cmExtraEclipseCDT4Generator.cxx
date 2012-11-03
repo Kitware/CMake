@@ -581,7 +581,6 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
                                 );
       // Don't add it to the srcLinkedResources, because listing multiple
       // directories confuses the Eclipse indexer (#13596).
-      //this->SrcLinkedResources.push_back(it->first);
       }
     }
 }
