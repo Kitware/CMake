@@ -34,7 +34,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(FindTCL)
+include(${CMAKE_CURRENT_LIST_DIR}/FindTCL.cmake)
 
 get_filename_component(TCL_TCLSH_PATH "${TCL_TCLSH}" PATH)
 get_filename_component(TCL_TCLSH_PATH_PARENT "${TCL_TCLSH_PATH}" PATH)

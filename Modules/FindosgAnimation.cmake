@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgAnimation/Animation>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGANIMATION osgAnimation/Animation)
 OSG_FIND_LIBRARY(OSGANIMATION osgAnimation)
 

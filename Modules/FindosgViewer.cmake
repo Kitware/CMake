@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgViewer/Viewer>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGVIEWER osgViewer/Viewer)
 OSG_FIND_LIBRARY(OSGVIEWER osgViewer)
 
