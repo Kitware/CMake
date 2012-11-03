@@ -22,7 +22,7 @@ macro(TEST_BIG_ENDIAN VARIABLE)
     message(STATUS "Check if the system is big endian")
     message(STATUS "Searching 16 bit integer")
 
-    include(CheckTypeSize)
+    include(${CMAKE_CURRENT_LIST_DIR}/CheckTypeSize.cmake)
 
     CHECK_TYPE_SIZE("unsigned short" CMAKE_SIZEOF_UNSIGNED_SHORT)
     if(CMAKE_SIZEOF_UNSIGNED_SHORT EQUAL 2)

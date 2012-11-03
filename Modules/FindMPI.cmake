@@ -78,7 +78,7 @@
 
 # include this to handle the QUIETLY and REQUIRED arguments
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-include(GetPrerequisites)
+include(${CMAKE_CURRENT_LIST_DIR}/GetPrerequisites.cmake)
 
 #
 # This part detects MPI compilers, attempting to wade through the mess of compiler names in

@@ -38,7 +38,7 @@
 #  License text for the above reference.)
 
 # find the perl executable
-include(FindPerl)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPerl.cmake)
 
 if (PERL_EXECUTABLE)
   ### PERL_PREFIX

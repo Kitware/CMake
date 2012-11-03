@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgDB/DatabasePager>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGDB osgDB/DatabasePager)
 OSG_FIND_LIBRARY(OSGDB osgDB)
 
