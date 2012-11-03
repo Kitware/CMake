@@ -72,7 +72,7 @@
 #  Output variables of the form OPENSCENEGRAPH_FOO
 #
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 
 set(_osg_modules_to_process)
 foreach(_osg_component ${OpenSceneGraph_FIND_COMPONENTS})

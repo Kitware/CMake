@@ -40,8 +40,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(CheckFunctionExists)
-include(CheckFortranFunctionExists)
+include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 
 set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
