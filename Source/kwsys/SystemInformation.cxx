@@ -103,6 +103,9 @@ typedef int siginfo_t;
 # include <sys/socket.h>
 # include <netdb.h>
 # include <netinet/in.h>
+# if defined(__LSB_VERSION__) /* LSB has no getifaddrs */
+#  undef KWSYS_SYS_HAS_IFADDRS_H
+# endif
 # if defined(__GNUG__)
 #  include <execinfo.h>
 #  if !(defined(__LSB_VERSION__) && __LSB_VERSION__ < 41)
