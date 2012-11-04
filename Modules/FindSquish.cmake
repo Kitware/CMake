@@ -1,6 +1,6 @@
 #
 # ---- Find Squish
-# This module can be used to find Squish (currently support is aimed at version 3).
+# This module can be used to find Squish. Currently Squish version 3 is supported.
 #
 # ---- Variables and Macros
 #  SQUISH_FOUND                    If false, don't try to use Squish
@@ -17,15 +17,19 @@
 #  SQUISH_SERVER_EXECUTABLE_FOUND  Was the server executable found?
 #  SQUISH_CLIENT_EXECUTABLE_FOUND  Was the client executable found?
 #
-# macro SQUISH_ADD_TEST(testName applicationUnderTest testSuite testCase)
+# macro SQUISH_V3_ADD_TEST(testName applicationUnderTest testCase envVars testWrapper)
+#   Use this macro to add a test using Squish 3.x.
 #
 # ---- Typical Use
 #  enable_testing()
 #  find_package(Squish)
 #  if (SQUISH_FOUND)
-#    SQUISH_ADD_TEST(myTestName myApplication testSuiteName testCaseName)
+#    SQUISH_ADD_TEST(myTestName myApplication testCase envVars testWrapper)
 #  endif ()
 #
+# macro SQUISH_ADD_TEST(testName applicationUnderTest testCase envVars testWrapper)
+#   This is deprecated. Use SQUISH_V3_ADD_TEST() if you are using Squish 3.x instead.
+
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.
@@ -124,7 +128,8 @@ find_package_handle_standard_args(Squish  REQUIRED_VARS  SQUISH_INSTALL_DIR SQUI
                                           VERSION_VAR  SQUISH_VERSION )
 
 
-macro(SQUISH_ADD_TEST testName testAUT testCase envVars testWraper)
+
+macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
   add_test(${testName}
     ${CMAKE_COMMAND} -V -VV
     "-Dsquish_aut:STRING=${testAUT}"
@@ -141,3 +146,8 @@ macro(SQUISH_ADD_TEST testName testAUT testCase envVars testWraper)
     )
 endmacro()
 
+
+macro(SQUISH_ADD_TEST)
+  message(STATUS "Using squish_add_test() is deprecated, use squish_v3_add_test() instead.")
+  squish_v3_add_test(${ARGV})
+endmacro()
