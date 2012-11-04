@@ -70,8 +70,9 @@ endmacro()
 # If any of these modules reported that it was found a version number should have been
 # reported.
 
-foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG HSPELL
-        JASPER LIBLZMA LIBXML2 LIBXSLT PERL PKG_CONFIG PostgreSQL TIFF ZLIB)
+foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG
+        HSPELL ICOTOOL JASPER LIBLZMA LIBXML2 LIBXSLT PERL PKG_CONFIG
+        PostgreSQL TIFF ZLIB)
     check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach()
 

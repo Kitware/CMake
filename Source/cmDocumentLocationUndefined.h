@@ -16,8 +16,8 @@
   "\n" \
   "Do not set properties that affect the location of a target after " \
   action ".  These include properties whose names match " \
-  "\"(RUNTIME|LIBRARY|ARCHIVE)_OUTPUT_(NAME|DIRECTORY)(_<CONFIG>)?\" " \
-  "or \"(IMPLIB_)?(PREFIX|SUFFIX)\".  " \
+  "\"(RUNTIME|LIBRARY|ARCHIVE)_OUTPUT_(NAME|DIRECTORY)(_<CONFIG>)?\", " \
+  "\"(IMPLIB_)?(PREFIX|SUFFIX)\", or \"LINKER_LANGUAGE\".  " \
   "Failure to follow this rule is not diagnosed and leaves the location " \
   "of the target undefined."
 

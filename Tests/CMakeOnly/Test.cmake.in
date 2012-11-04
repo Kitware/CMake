@@ -1,4 +1,8 @@
-set(source_dir "@CMAKE_CURRENT_SOURCE_DIR@/${TEST}")
+if (NOT TEST_SOURCE)
+  set(TEST_SOURCE "${TEST}")
+endif ()
+
+set(source_dir "@CMAKE_CURRENT_SOURCE_DIR@/${TEST_SOURCE}")
 set(binary_dir "@CMAKE_CURRENT_BINARY_DIR@/${TEST}-build")
 file(REMOVE_RECURSE "${binary_dir}")
 file(MAKE_DIRECTORY "${binary_dir}")

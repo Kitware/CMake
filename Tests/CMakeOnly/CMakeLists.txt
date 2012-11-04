@@ -27,6 +27,8 @@ endif()
 
 add_CMakeOnly_test(AllFindModules)
 
+add_CMakeOnly_test(SelectLibraryConfigurations)
+
 add_CMakeOnly_test(TargetScope)
 
 add_CMakeOnly_test(find_library)
@@ -36,3 +38,21 @@ add_test(CMakeOnly.ProjectInclude ${CMAKE_CMAKE_COMMAND}
   -DCMAKE_ARGS=-DCMAKE_PROJECT_ProjectInclude_INCLUDE=${CMAKE_CURRENT_SOURCE_DIR}/ProjectInclude/include.cmake
   -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
   )
+
+include(${CMAKE_SOURCE_DIR}/Modules/CMakeParseArguments.cmake)
+
+function(add_major_test module)
+  cmake_parse_arguments(MAJOR_TEST "NOLANG" "VERSION_VAR" "VERSIONS" ${ARGN})
+  foreach (_version IN LISTS MAJOR_TEST_VERSIONS)
+    add_test(CMakeOnly.MajorVersionSelection-${module}_${_version}
+      ${CMAKE_CMAKE_COMMAND}
+        -DTEST=MajorVersionSelection-${module}_${_version}
+        -DTEST_SOURCE=MajorVersionSelection
+        "-DCMAKE_ARGS=-DMAJOR_TEST_MODULE=${module};-DMAJOR_TEST_VERSION=${_version};-DMAJOR_TEST_NO_LANGUAGES=${MAJOR_TEST_NOLANG};-DMAJOR_TEST_VERSION_VAR=${MAJOR_TEST_VERSION_VAR}"
+        -P ${CMAKE_CURRENT_BINARY_DIR}/Test.cmake
+      )
+  endforeach ()
+endfunction()
+
+add_major_test(PythonLibs VERSIONS 2 3 VERSION_VAR PYTHONLIBS_VERSION_STRING)
+add_major_test(PythonInterp NOLANG VERSIONS 2 3 VERSION_VAR PYTHON_VERSION_STRING)

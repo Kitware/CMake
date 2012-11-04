@@ -177,3 +177,14 @@ void cmIDEOptions::RemoveFlag(const char* flag)
 {
   this->FlagMap.erase(flag);
 }
+
+//----------------------------------------------------------------------------
+const char* cmIDEOptions::GetFlag(const char* flag)
+{
+  std::map<cmStdString, cmStdString>::iterator i = this->FlagMap.find(flag);
+  if(i != this->FlagMap.end())
+    {
+    return i->second.c_str();
+    }
+  return 0;
+}

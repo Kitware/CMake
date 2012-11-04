@@ -414,6 +414,10 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 #elif defined(__SYSC_ZARCH__)
 # define @KWIML@_ABI_ENDIAN_ID @KWIML@_ABI_ENDIAN_ID_BIG
 
+/* VAX */
+#elif defined(__vax__)
+# define @KWIML@_ABI_ENDIAN_ID @KWIML@_ABI_ENDIAN_ID_BIG
+
 /* Unknown CPU */
 #elif !defined(@KWIML@_ABI_NO_ERROR_ENDIAN)
 # error "Byte order of target CPU unknown."
