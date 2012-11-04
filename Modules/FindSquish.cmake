@@ -4,6 +4,10 @@
 #
 # ---- Variables and Macros
 #  SQUISH_FOUND                    If false, don't try to use Squish
+#  SQUISH_VERSION                  The full version of Squish found
+#  SQUISH_VERSION_MAJOR            The major version of Squish found
+#  SQUISH_VERSION_MINOR            The minor version of Squish found
+#  SQUISH_VERSION_PATCH            The patch version of Squish found
 #
 #  SQUISH_INSTALL_DIR              The Squish installation directory (containing bin, lib, etc)
 #  SQUISH_SERVER_EXECUTABLE        The squishserver executable
@@ -86,9 +90,24 @@ else()
   set(SQUISH_INSTALL_DIR_FOUND 0)
 endif()
 
+
+set(SQUISH_VERSION)
+set(SQUISH_VERSION_MAJOR )
+set(SQUISH_VERSION_MINOR )
+set(SQUISH_VERSION_PATCH )
+
 # record if executables are set
 if(SQUISH_CLIENT_EXECUTABLE)
   set(SQUISH_CLIENT_EXECUTABLE_FOUND 1)
+  execute_process(COMMAND "${SQUISH_CLIENT_EXECUTABLE}" --version
+                  OUTPUT_VARIABLE _squishVersionOutput
+                  ERROR_QUIET )
+  if("${_squishVersionOutput}" MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+).*$")
+    set(SQUISH_VERSION_MAJOR "${CMAKE_MATCH_1}")
+    set(SQUISH_VERSION_MINOR "${CMAKE_MATCH_2}")
+    set(SQUISH_VERSION_PATCH "${CMAKE_MATCH_3}")
+    set(SQUISH_VERSION "${SQUISH_VERSION_MAJOR}.${SQUISH_VERSION_MINOR}.${SQUISH_VERSION_PATCH}" )
+  endif()
 else()
   set(SQUISH_CLIENT_EXECUTABLE_FOUND 0)
 endif()
