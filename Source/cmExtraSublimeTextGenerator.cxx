@@ -182,8 +182,9 @@ void cmExtraSublimeTextGenerator
     // It appears that a relative path to the sublime-project file doesn't
     // always work. So we use ${folder:${project_path:<project_filename>}}
     // that SublimeClang will expand to the correct path
-    fout << "\t\"-I${folder:${project_path:" << mf->GetProjectName() <<
-            ".sublime-project}}/" << relative << "\"";
+    // fout << "\t\"-I${folder:${project_path:" << mf->GetProjectName() <<
+    //         ".sublime-project}}/" << relative << "\"";
+    fout << "\t\"-I" << includeDir << "\"";
     stringSetIter++;
     if ((stringSetIter != includeDirs.end()) || (!defines.empty()))
       {
@@ -309,27 +310,28 @@ void cmExtraSublimeTextGenerator::
 }
 
 void cmExtraSublimeTextGenerator::
-  ExtractDefines(const char* value, bool check,
-                 std::set<std::string> &defines)
+  ExtractFlags(const char* value, const std::string& flag,
+               std::set<std::string> &defines)
 {
+  std::string::size_type flagLength = flag.length();
   std::vector<std::string> defs;
   cmSystemTools::ExpandListArgument(value, defs);
   for(std::vector<std::string>::const_iterator di = defs.begin();
       di != defs.end(); ++di)
     {
     cmXMLSafe safedef(di->c_str());
-    if (check)
+    std::string safedefString = safedef.str();
+    if ((flagLength == 0) || ((safedefString.length() >= flagLength) &&
+      (safedefString.substr(0, flagLength) == flag)))
       {
-        std::string safedefString = safedef.str();
-        if ((safedefString.length() >= 2) &&
-          (safedefString.substr(0, 2) == "-D"))
+        if (flagLength > 0)
           {
-          defines.insert(safedefString.substr(2));
+          defines.insert(safedefString.substr(flagLength));
           }
-      }
-    else
-      {
-      defines.insert(safedef.str());
+        else
+          {
+          defines.insert(safedefString);
+          }
       }
     }
 }
@@ -351,13 +353,15 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
       cmGeneratorTarget *gtgt = this->GlobalGenerator
                                     ->GetGeneratorTarget(target);
       std::string cdefs = gtgt->GetCompileDefinitions();
-      ExtractDefines(cdefs.c_str(), false, defines);
+      ExtractFlags(cdefs.c_str(), "", defines);
       // Get compiler definitions from CMAKE_CXX_FLAGS and CMAKE_C_FLAGS as
       // well, in case the user set those flags directly
       std::string cflags = makefile->GetSafeDefinition("CMAKE_CXX_FLAGS");
-      ExtractDefines(cflags.c_str(), true, defines);
+      ExtractFlags(cflags.c_str(), "-D", defines);
+      ExtractFlags(cflags.c_str(), "-I", includeDirs);
       cflags = makefile->GetSafeDefinition("CMAKE_C_FLAGS");
-      ExtractDefines(cflags.c_str(), true, defines);
+      ExtractFlags(cflags.c_str(), "-D", defines);
+      ExtractFlags(cflags.c_str(), "-D", includeDirs);
       // the include directories for this target
       std::vector<std::string> includes;
       target->GetMakefile()->GetLocalGenerator()->
