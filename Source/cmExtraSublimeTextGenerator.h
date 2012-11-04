@@ -69,9 +69,12 @@ private:
                     const char* compiler,
                     std::set<std::string>& includeDirs,
                     std::set<std::string>& defines, bool firstTarget);
-  /** Extracts -D compile flags from a variable */
-  void ExtractDefines(const char* value, bool check,
-                      std::set<std::string> &defines);
+  /**
+   * Extracts compile flags from a variable.
+   * flag would typically be "-D" or "-I"
+   */
+  void ExtractFlags(const char* value, const std::string& flag,
+                    std::set<std::string> &defines);
 };
 
 #endif
