@@ -128,6 +128,7 @@ find_package_handle_standard_args(Squish  REQUIRED_VARS  SQUISH_INSTALL_DIR SQUI
                                           VERSION_VAR  SQUISH_VERSION )
 
 
+set(_SQUISH_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
   add_test(${testName}
@@ -139,7 +140,7 @@ macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
     "-Dsquish_test_case:STRING=${testCase}"
     "-Dsquish_env_vars:STRING=${envVars}"
     "-Dsquish_wrapper:STRING=${testWraper}"
-    -P "${CMAKE_ROOT}/Modules/SquishTestScript.cmake"
+    -P "${_SQUISH_MODULE_DIR}/SquishTestScript.cmake"
     )
   set_tests_properties(${testName}
     PROPERTIES FAIL_REGULAR_EXPRESSION "FAILED;ERROR;FATAL"
