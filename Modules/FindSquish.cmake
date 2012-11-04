@@ -119,12 +119,10 @@ else()
 endif()
 
 # record if Squish was found
-set(SQUISH_FOUND 1)
-foreach(var SQUISH_INSTALL_DIR_FOUND SQUISH_CLIENT_EXECUTABLE_FOUND SQUISH_SERVER_EXECUTABLE_FOUND)
-  if(NOT ${var})
-    set(SQUISH_FOUND 0)
-  endif()
-endforeach()
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Squish  REQUIRED_VARS  SQUISH_INSTALL_DIR SQUISH_CLIENT_EXECUTABLE SQUISH_SERVER_EXECUTABLE
+                                          VERSION_VAR  SQUISH_VERSION )
+
 
 macro(SQUISH_ADD_TEST testName testAUT testCase envVars testWraper)
   add_test(${testName}
