@@ -1,6 +1,6 @@
 #
 # ---- Find Squish
-# This module can be used to find Squish. Currently Squish version 3 is supported.
+# This module can be used to find Squish. Currently Squish versions 3 and 4 are supported.
 #
 # ---- Variables and Macros
 #  SQUISH_FOUND                    If false, don't try to use Squish
@@ -17,14 +17,43 @@
 #  SQUISH_SERVER_EXECUTABLE_FOUND  Was the server executable found?
 #  SQUISH_CLIENT_EXECUTABLE_FOUND  Was the client executable found?
 #
-# macro SQUISH_V3_ADD_TEST(testName applicationUnderTest testCase envVars testWrapper)
+# It provides the function squish_v4_add_test() for adding a squish test to cmake using Squish 4.x:
+#
+#   squish_v4_add_test(cmakeTestName AUT targetName SUITE suiteName TEST squishTestName
+#                   [SETTINGSGROUP group] [PRE_COMMAND command] [POST_COMMAND command] )
+#
+# The arguments have the following meaning:
+#   cmakeTestName: this will be used as the first argument for add_test()
+#   AUT targetName: the name of the cmake target which will be used as AUT, i.e. the
+#                   executable which will be tested.
+#   SUITE suiteName: this is either the full path to the squish suite, or just the
+#                    last directory of the suite, i.e. the suite name. In this case
+#                    the CMakeLists.txt which calls squish_add_test() must be located
+#                    in the parent directory of the suite directory.
+#   TEST squishTestName: the name of the squish test, i.e. the name of the subdirectory
+#                        of the test inside the suite directory.
+#   SETTINGSGROUP group: if specified, the given settings group will be used for executing the test.
+#                        If not specified, the groupname will be "CTest_<username>"
+#   PRE_COMMAND command:  if specified, the given command will be executed before starting the squish test.
+#   POST_COMMAND command: same as PRE_COMMAND, but after the squish test has been executed.
+#
+# ---- Typical Use
+#   enable_testing()
+#   find_package(Squish 4.0)
+#   if (SQUISH_FOUND)
+#      squish_v4_add_test(myTestName AUT myApp SUITE ${CMAKE_SOURCE_DIR}/tests/mySuite TEST someSquishTest SETTINGSGROUP myGroup )
+#   endif ()
+#
+#
+# For users of Squish version 3.x the macro squish_v3_add_test() is provided:
+#   squish_v3_add_test(testName applicationUnderTest testCase envVars testWrapper)
 #   Use this macro to add a test using Squish 3.x.
 #
 # ---- Typical Use
 #  enable_testing()
 #  find_package(Squish)
 #  if (SQUISH_FOUND)
-#    SQUISH_ADD_TEST(myTestName myApplication testCase envVars testWrapper)
+#    squish_v3_add_test(myTestName myApplication testCase envVars testWrapper)
 #  endif ()
 #
 # macro SQUISH_ADD_TEST(testName applicationUnderTest testCase envVars testWrapper)
@@ -33,6 +62,7 @@
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.
+# Copyright 2012 Alexander Neundorf
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -43,6 +73,9 @@
 #=============================================================================
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
+
+
+include(CMakeParseArguments)
 
 set(SQUISH_INSTALL_DIR_STRING "Directory containing the bin, doc, and lib directories for Squish; this should be the root of the installation directory.")
 set(SQUISH_SERVER_EXECUTABLE_STRING "The squishserver executable program.")
@@ -131,8 +164,13 @@ find_package_handle_standard_args(Squish  REQUIRED_VARS  SQUISH_INSTALL_DIR SQUI
 set(_SQUISH_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
+  if("${SQUISH_VERSION_MAJOR}" STREQUAL "4")
+    message(STATUS "Using squish_v3_add_test(), but SQUISH_VERSION_MAJOR is ${SQUISH_VERSION_MAJOR}.\nThis may not work.")
+  endif()
+
   add_test(${testName}
     ${CMAKE_COMMAND} -V -VV
+    "-Dsquish_version:STRING=3"
     "-Dsquish_aut:STRING=${testAUT}"
     "-Dsquish_server_executable:STRING=${SQUISH_SERVER_EXECUTABLE}"
     "-Dsquish_client_executable:STRING=${SQUISH_CLIENT_EXECUTABLE}"
@@ -140,6 +178,7 @@ macro(SQUISH_V3_ADD_TEST testName testAUT testCase envVars testWraper)
     "-Dsquish_test_case:STRING=${testCase}"
     "-Dsquish_env_vars:STRING=${envVars}"
     "-Dsquish_wrapper:STRING=${testWraper}"
+    "-Dsquish_module_dir:STRING=${_SQUISH_MODULE_DIR}"
     -P "${_SQUISH_MODULE_DIR}/SquishTestScript.cmake"
     )
   set_tests_properties(${testName}
@@ -152,3 +191,71 @@ macro(SQUISH_ADD_TEST)
   message(STATUS "Using squish_add_test() is deprecated, use squish_v3_add_test() instead.")
   squish_v3_add_test(${ARGV})
 endmacro()
+
+
+function(SQUISH_V4_ADD_TEST testName)
+
+  if(NOT "${SQUISH_VERSION_MAJOR}" STREQUAL "4")
+    message(STATUS "Using squish_v4_add_test(), but SQUISH_VERSION_MAJOR is ${SQUISH_VERSION_MAJOR}.\nThis may not work.")
+  endif()
+
+  set(oneValueArgs AUT SUITE TEST SETTINGSGROUP PRE_COMMAND POST_COMMAND)
+
+  cmake_parse_arguments(_SQUISH "" "${oneValueArgs}" "" ${ARGN} )
+
+  if(_SQUISH_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "Unknown keywords given to SQUISH_ADD_TEST(): \"${_SQUISH_UNPARSED_ARGUMENTS}\"")
+  endif()
+
+  if(NOT _SQUISH_AUT)
+    message(FATAL_ERROR "Required argument AUT not given for SQUISH_ADD_TEST()")
+  endif()
+
+  if(NOT _SQUISH_SUITE)
+    message(FATAL_ERROR "Required argument SUITE not given for SQUISH_ADD_TEST()")
+  endif()
+
+  if(NOT _SQUISH_TEST)
+    message(FATAL_ERROR "Required argument TEST not given for SQUISH_ADD_TEST()")
+  endif()
+
+  get_target_property(testAUTLocation ${_SQUISH_AUT} LOCATION)
+  get_filename_component(testAUTDir ${testAUTLocation} PATH)
+  get_target_property(testAUTName ${_SQUISH_AUT} OUTPUT_NAME)
+
+  get_filename_component(absTestSuite "${_SQUISH_SUITE}" ABSOLUTE)
+  if(NOT EXISTS "${absTestSuite}")
+    message(FATAL_ERROR "Could not find squish test suite ${_SQUISH_SUITE} (checked ${absTestSuite})")
+  endif()
+
+  set(absTestCase "${absTestSuite}/${_SQUISH_TEST}")
+  if(NOT EXISTS "${absTestCase}")
+    message(FATAL_ERROR "Could not find squish testcase ${_SQUISH_TEST} (checked ${absTestCase})")
+  endif()
+
+  if(NOT _SQUISH_SETTINGSGROUP)
+    set(_SQUISH_SETTINGSGROUP "CTest_$ENV{LOGNAME}")
+  endif()
+
+  add_test(${testName}
+    ${CMAKE_COMMAND} -V -VV
+    "-Dsquish_version:STRING=4"
+    "-Dsquish_aut:STRING=${testAUTName}"
+    "-Dsquish_aut_dir:STRING=${testAUTDir}"
+    "-Dsquish_server_executable:STRING=${SQUISH_SERVER_EXECUTABLE}"
+    "-Dsquish_client_executable:STRING=${SQUISH_CLIENT_EXECUTABLE}"
+    "-Dsquish_libqtdir:STRING=${QT_LIBRARY_DIR}"
+    "-Dsquish_test_suite:STRING=${absTestSuite}"
+    "-Dsquish_test_case:STRING=${_SQUISH_TEST}"
+    "-Dsquish_env_vars:STRING=${envVars}"
+    "-Dsquish_wrapper:STRING=${testWraper}"
+    "-Dsquish_module_dir:STRING=${_SQUISH_MODULE_DIR}"
+    "-Dsquish_settingsgroup:STRING=${_SQUISH_SETTINGSGROUP}"
+    "-Dsquish_pre_command:STRING=${_SQUISH_PRE_COMMAND}"
+    "-Dsquish_post_command:STRING=${_SQUISH_POST_COMMAND}"
+    -P "${_SQUISH_MODULE_DIR}/SquishTestScript.cmake"
+    )
+  set_tests_properties(${testName}
+    PROPERTIES FAIL_REGULAR_EXPRESSION "FAIL;FAILED;ERROR;FATAL"
+    )
+endfunction()
