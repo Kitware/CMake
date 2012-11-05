@@ -487,6 +487,13 @@ public:
   std::vector<std::string> GetIncludeDirectories(const char *config);
   void InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
                      bool before = false);
+
+  void GetLinkDependentTargetsForProperty(const std::string &p,
+                                       std::set<std::string> &targets);
+  bool IsNullImpliedByLinkLibraries(const std::string &p);
+
+  void AddLinkDependentTargetsForProperties(
+          const std::map<cmStdString, cmStdString> &map);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -596,6 +603,9 @@ private:
   bool DLLPlatform;
   bool IsApple;
   bool IsImportedTarget;
+  mutable std::map<cmStdString, std::set<std::string> >
+                                                      LinkDependentProperties;
+  mutable std::set<std::string> LinkImplicitNullProperties;
 
   // Cache target output paths for each configuration.
   struct OutputInfo;

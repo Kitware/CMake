@@ -380,6 +380,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       }
 
+    if (target == context->HeadTarget)
+      {
+      // Keep track of the properties seen while processing.
+      // The evaluation of the LINK_LIBRARIES generator expressions
+      // will check this to ensure that properties form a DAG.
+      context->SeenTargetProperties.insert(propertyName);
+      }
+
     if (propertyName.empty())
       {
       reportError(context, content->GetOriginalExpression(),

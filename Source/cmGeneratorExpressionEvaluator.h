@@ -24,6 +24,7 @@ struct cmGeneratorExpressionContext
 {
   cmListFileBacktrace Backtrace;
   std::set<cmTarget*> Targets;
+  std::set<cmStdString> SeenTargetProperties;
   cmMakefile *Makefile;
   const char *Config;
   cmTarget *HeadTarget; // The target whose property is being evaluated.

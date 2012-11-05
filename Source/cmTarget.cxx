@@ -2164,16 +2164,19 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
     {
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
 
     cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                         this->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
-    cmSystemTools::ExpandListArgument(ge.Parse(prop)->Evaluate(this->Makefile,
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
                                         config,
                                         false,
                                         head,
                                         &dagChecker),
                                       libs);
+
+    this->AddLinkDependentTargetsForProperties(cge->GetSeenTargetProperties());
     }
 }
 
@@ -4373,6 +4376,43 @@ const char* cmTarget::GetExportMacro()
   else
     {
     return 0;
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetLinkDependentTargetsForProperty(const std::string &p,
+                                          std::set<std::string> &targets)
+{
+  const std::map<cmStdString, std::set<std::string> >::const_iterator findIt
+                                  = this->LinkDependentProperties.find(p);
+  if (findIt != this->LinkDependentProperties.end())
+    {
+    targets = findIt->second;
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p)
+{
+  return this->LinkImplicitNullProperties.find(p)
+      != this->LinkImplicitNullProperties.end();
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::AddLinkDependentTargetsForProperties(
+                              const std::map<cmStdString, cmStdString> &map)
+{
+  for (std::map<cmStdString, cmStdString>::const_iterator it = map.begin();
+       it != map.end(); ++it)
+    {
+    std::vector<std::string> targets;
+    cmSystemTools::ExpandListArgument(it->second.c_str(), targets);
+    this->LinkDependentProperties[it->first].insert(targets.begin(),
+                                                    targets.end());
+    if (!this->GetProperty(it->first.c_str()))
+      {
+      this->LinkImplicitNullProperties.insert(it->first);
+      }
     }
 }
 
