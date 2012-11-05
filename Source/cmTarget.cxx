@@ -121,10 +121,13 @@ public:
   SourceEntriesType SourceEntries;
 
   struct IncludeDirectoriesEntry {
-    IncludeDirectoriesEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge)
-      : ge(cge)
+    IncludeDirectoriesEntry(
+                          cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
+                          bool tllEntry = false)
+      : ge(cge), ImpliedByTargetLinkLibraries(tllEntry)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
+    const bool ImpliedByTargetLinkLibraries;
   };
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
   std::string IncludeDirectoriesString;
@@ -2536,6 +2539,50 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::AppendTLLIncludeDirectories(const std::string &includes)
+{
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+  this->Internal->IncludeDirectoriesEntries.push_back(
+          new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(includes),
+                                                         true)
+                                                     );
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::PrependTLLIncludeDirectories(const std::string &includes)
+{
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+  this->Internal->IncludeDirectoriesEntries.insert(
+      this->Internal->IncludeDirectoriesEntries.begin(),
+      new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(includes),
+                                                    true)
+                                                  );
+}
+
+// A Borland machine on the dashboard has a faulty std::remove.
+template <typename ForwardIterator, typename T>
+ForwardIterator cmStdRemove(ForwardIterator first,
+                            ForwardIterator last,
+                            const T& value)
+{
+#if defined(__BORLANDC__) || (defined(__GNUC__) && __GNUC__ < 3)
+  ForwardIterator result = first;
+  for ( ; first != last; ++first)
+    {
+    if (!(*first == value))
+      {
+      *result++ = *first;
+      }
+    }
+  return result;
+#else
+  return std::remove<ForwardIterator, T>(first, last, value);
+#endif
+}
+
+//----------------------------------------------------------------------------
 std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 {
   std::set<std::string> fromTll;
@@ -2568,8 +2615,44 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
         cmSystemTools::ConvertToUnixSlashes(inc);
         }
 
+      if (!(*it)->ImpliedByTargetLinkLibraries)
+        {
+        if (fromTll.find(*li) != fromTll.end())
+          {
+          switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0020))
+            {
+            case cmPolicies::WARN:
+              {
+              cmOStringStream e;
+              e << "The include directory " << *li << " was specified "
+                  "implicitly by an earlier call to target_link_libraries. "
+                  "Preserving the order of includes as if the earlier use of "
+                  "target_link_libraries had not added it."
+                << this->Makefile->GetPolicies()->GetPolicyWarning(
+                                                          cmPolicies::CMP0020);
+              this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+              }
+              // Fall through to OLD behavior
+            case cmPolicies::OLD:
+              includes.erase(cmStdRemove(includes.begin(),
+                                         includes.end(), *li),
+                             includes.end());
+              fromTll.erase(*li);
+              includes.push_back(*li);
+              break;
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::NEW:
+              break;
+            }
+          }
+        }
       if(uniqueIncludes.insert(inc).second)
         {
+        if ((*it)->ImpliedByTargetLinkLibraries)
+          {
+          fromTll.insert(*li);
+          }
         includes.push_back(*li);
         }
       }
