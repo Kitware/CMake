@@ -74,3 +74,27 @@ add_executable(targetB targetB.cpp)
 target_link_libraries(targetB depD depE)
 
 # cmake_policy(POP)
+
+
+macro(create_header _name)
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_name}")
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_name}/${_name}.h" "//${_name}.h\n")
+endmacro()
+
+create_header(foo)
+create_header(bar)
+
+add_library(depF SHARED depF.cpp)
+generate_export_header(depF)
+set_property(TARGET depF PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES
+    ${CMAKE_CURRENT_BINARY_DIR}/foo
+    ${CMAKE_CURRENT_BINARY_DIR}/bar
+)
+set_property(TARGET depF PROPERTY
+  INTERFACE_COMPILE_DEFINITIONS
+    TEST_DEF
+)
+
+add_library(targetC targetC.cpp)
+target_link_libraries(targetC depF)

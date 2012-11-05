@@ -1665,8 +1665,14 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    prop = t.GetProperties().GetOrCreateProperty("INCLUDE_DIRECTORIES");
-    AddStringToProperty(prop, "INCLUDE_DIRECTORIES", inc, before);
+    if (before)
+      {
+      t.PrependTLLIncludeDirectories(inc);
+      }
+    else
+      {
+      t.AppendTLLIncludeDirectories(inc);
+      }
     }
 }
 
