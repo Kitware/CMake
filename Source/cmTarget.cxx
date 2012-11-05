@@ -2601,7 +2601,10 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config)
     OutputInfo info;
     this->ComputeOutputDir(config, false, info.OutDir);
     this->ComputeOutputDir(config, true, info.ImpDir);
-    this->ComputePDBOutputDir(config, info.PdbDir);
+    if(!this->ComputePDBOutputDir(config, info.PdbDir))
+      {
+      info.PdbDir = info.OutDir;
+      }
     OutputInfoMapType::value_type entry(config_upper, info);
     i = this->Internal->OutputInfoMap.insert(entry).first;
     }
@@ -3957,7 +3960,7 @@ bool cmTarget::ComputeOutputDir(const char* config,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputePDBOutputDir(const char* config, std::string& out)
+bool cmTarget::ComputePDBOutputDir(const char* config, std::string& out)
 {
   // Look for a target property defining the target output directory
   // based on the target type.
@@ -3997,8 +4000,7 @@ void cmTarget::ComputePDBOutputDir(const char* config, std::string& out)
     }
   if(out.empty())
     {
-    // Default to the current output directory.
-    out = ".";
+    return false;
     }
 
   // Convert the output path to a full path in case it is
@@ -4013,6 +4015,7 @@ void cmTarget::ComputePDBOutputDir(const char* config, std::string& out)
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", config, "", out);
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
