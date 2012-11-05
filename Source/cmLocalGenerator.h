@@ -142,7 +142,7 @@ public:
   void AddLanguageFlags(std::string& flags, const char* lang,
                         const char* config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
-                       std::string const& lang);
+                       std::string const& lang, const char *config);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
   ///! Append flags to a string.

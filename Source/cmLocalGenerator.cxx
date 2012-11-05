@@ -1984,7 +1984,8 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
-                                       std::string const& lang)
+                                       std::string const& lang,
+                                       const char *config)
 {
   int targetType = target->GetType();
 
@@ -1997,8 +1998,18 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
     }
   else
     {
-    // Add position independendent flags, if needed.
-    if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE"))
+    if (target->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+      if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE"))
+        {
+        this->AddPositionIndependentFlags(flags, lang, targetType);
+        }
+      return;
+    }
+
+    if (target->GetLinkInterfaceDependentBoolProperty(
+                                                "POSITION_INDEPENDENT_CODE",
+                                                config))
       {
       this->AddPositionIndependentFlags(flags, lang, targetType);
       }
