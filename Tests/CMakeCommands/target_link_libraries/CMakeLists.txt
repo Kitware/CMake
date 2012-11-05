@@ -62,10 +62,6 @@ assert_property(targetA LINK_INTERFACE_LIBRARIES "")
 
 add_subdirectory(subdir)
 target_link_libraries(targetA subdirlib)
-set_property(TARGET targetA APPEND PROPERTY
-  INCLUDE_DIRECTORIES
-    $<TARGET_PROPERTY:subdirlib,INTERFACE_INCLUDE_DIRECTORIES>
-)
 
 target_link_libraries(targetA depB depC)
 
@@ -87,3 +83,24 @@ set_property(TARGET depD APPEND PROPERTY
 
 add_executable(targetB targetB.cpp)
 target_link_libraries(targetB depD)
+
+macro(create_header _name)
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_name}")
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_name}/${_name}.h" "//${_name}.h\n")
+endmacro()
+
+create_header(foo)
+create_header(bar)
+
+add_library(depG SHARED depG.cpp)
+generate_export_header(depG)
+target_include_directories(depG INTERFACE
+    "${CMAKE_CURRENT_BINARY_DIR}/foo"
+    "${CMAKE_CURRENT_BINARY_DIR}/bar"
+)
+target_compile_definitions(depG INTERFACE
+    TEST_DEF
+)
+
+add_executable(targetC targetC.cpp)
+target_link_libraries(targetC depG)

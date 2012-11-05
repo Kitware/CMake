@@ -514,6 +514,9 @@ public:
 
   const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
                                                       const char *config);
+
+  std::string GetDebugGeneratorExpressions(const std::string &value,
+                                  cmTarget::LinkLibraryType llt);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -658,9 +661,6 @@ private:
   void MaybeInvalidatePropertyCache(const char* prop);
 
   void ProcessSourceExpression(std::string const& expr);
-
-  std::string GetDebugGeneratorExpressions(const std::string &value,
-                                  cmTarget::LinkLibraryType llt);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.
