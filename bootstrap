@@ -357,7 +357,7 @@ Directory and file names:
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  echo "CMake ${cmake_version}, Copyright 2000-2011 Kitware, Inc."
+  echo "CMake ${cmake_version}, Copyright 2000-2012 Kitware, Inc."
 }
 
 # Display CMake bootstrap error, display the log file and exit
