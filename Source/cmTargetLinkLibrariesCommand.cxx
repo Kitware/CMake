@@ -273,10 +273,52 @@ static std::string generatorIface(const std::string &value,
 }
 
 //----------------------------------------------------------------------------
+static std::string compileProperty(const std::string &lib,
+                                   const std::string &property,
+                                   cmTarget::LinkLibraryType llt)
+{
+  return generatorIface(std::string("$<$<TARGET_DEFINED:" + lib + ">"
+                          ":$<TARGET_PROPERTY:")
+                          + lib
+                          + ",INTERFACE_" + property + ">>", llt);
+}
+
+//----------------------------------------------------------------------------
+static bool isGeneratorExpression(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
+
+//----------------------------------------------------------------------------
+static bool isList(const char *lib)
+{
+  std::vector<std::string> result;
+  cmSystemTools::ExpandListArgument(lib, result);
+  return result.size() > 1;
+}
+
+//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
+  cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
+  const bool isNonImportedTarget = tgt && !tgt->IsImported();
+  const bool isGenex = isGeneratorExpression(lib);
+  const std::string nsLib =
+                            std::string(isNonImportedTarget && !isList(lib)
+                                        ? "$<EXPORT_NAMESPACE>" : "") + lib;
+  if (tgt || isGenex)
+    {
+    this->Target->AppendTLLIncludeDirectories(compileProperty(nsLib,
+                                      "INCLUDE_DIRECTORIES", llt));
+    this->Target->AppendProperty("COMPILE_DEFINITIONS",
+                      compileProperty(nsLib,
+                                      "COMPILE_DEFINITIONS", llt).c_str());
+    }
+
   // Handle normal case first.
   if(this->CurrentProcessingState != ProcessingLinkInterface)
     {
@@ -290,7 +332,13 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     }
 
   this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                               generatorIface(lib, llt).c_str());
+                               generatorIface(nsLib, llt).c_str());
+  this->Target->AppendProperty("INTERFACE_COMPILE_DEFINITIONS",
+                               compileProperty(nsLib,
+                                      "COMPILE_DEFINITIONS", llt).c_str());
+  this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                               compileProperty(nsLib,
+                                      "INCLUDE_DIRECTORIES", llt).c_str());
 
   // Get the list of configurations considered to be DEBUG.
   std::vector<std::string> const& debugConfigs =

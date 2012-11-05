@@ -511,6 +511,23 @@ cmPolicies::cmPolicies()
     "the value of the (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? target "
     "property",
     2,8,11,0, cmPolicies::WARN);
+
+    this->DefinePolicy(
+    CMP0020, "CMP0020",
+    "Use INCLUDE_DIRECTORIES order implied by target_link_libraries.",
+    "CMake 2.8.11 introduced a feature where using target_link_libraries "
+    "can read the INTERFACE_INCLUDE_DIRECTORIES property of a target and "
+    "use the value as include directories when compiling.  Because the "
+    "target_link_libraries call might occur before the include_directories "
+    "call, this could change the order of includes in the compile step."
+    "\n"
+    "The OLD behavior for this policy is to let the include_directories call "
+    "determine the order of includes."
+    "\n"
+    "The NEW behavior for this policy is to use the order of includes "
+    "determined by the order of all calls to target_link_libraries and "
+    "include_directories",
+    2,8,11,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
