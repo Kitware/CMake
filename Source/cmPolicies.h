@@ -69,6 +69,7 @@ public:
     /// POSITION_INDEPENDENT_CODE property and *_COMPILE_OPTIONS_PI{E,C}
     /// instead.
     CMP0019, ///< Use new-style INTERFACE_LINK_LIBRARIES
+    CMP0020, ///< Use INCLUDE_DIRECTORIES order from target_link_libraries
 
     /** \brief Always the last entry.
      *

@@ -478,6 +478,9 @@ public:
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const char* config = 0);
 
+  void AppendTLLIncludeDirectories(const std::string &includes);
+  void PrependTLLIncludeDirectories(const std::string &includes);
+
   std::vector<std::string> GetIncludeDirectories(const char *config);
 
 private:
