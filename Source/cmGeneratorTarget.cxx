@@ -14,13 +14,10 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
-#include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
-
-#include <assert.h>
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
@@ -30,15 +27,6 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
   this->ClassifySources();
   this->LookupObjectLibraries();
-}
-
-cmGeneratorTarget::~cmGeneratorTarget()
-{
-  for(std::map<cmStdString, cmComputeLinkInformation*>::iterator i
-                  = LinkInformation.begin(); i != LinkInformation.end(); ++i)
-    {
-    delete i->second;
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -218,32 +206,6 @@ void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs)
       objs.push_back(obj);
       }
     }
-}
-
-//----------------------------------------------------------------------------
-cmComputeLinkInformation*
-cmGeneratorTarget::GetLinkInformation(const char* config)
-{
-  // Lookup any existing information for this configuration.
-  std::map<cmStdString, cmComputeLinkInformation*>::iterator
-    i = this->LinkInformation.find(config?config:"");
-  if(i == this->LinkInformation.end())
-    {
-    // Compute information for this configuration.
-    cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this->Target, config);
-    if(!info || !info->Compute())
-      {
-      delete info;
-      info = 0;
-      }
-
-    // Store the information for this configuration.
-    std::map<cmStdString, cmComputeLinkInformation*>::value_type
-      entry(config?config:"", info);
-    i = this->LinkInformation.insert(entry).first;
-    }
-  return i->second;
 }
 
 //----------------------------------------------------------------------------

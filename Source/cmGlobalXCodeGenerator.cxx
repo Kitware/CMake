@@ -2649,8 +2649,7 @@ void cmGlobalXCodeGenerator
       }
 
     // Compute the link library and directory information.
-    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(cmtarget);
-    cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = cmtarget->GetLinkInformation(configName);
     if(!pcli)
       {
       continue;
