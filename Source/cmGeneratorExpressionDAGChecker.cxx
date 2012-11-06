@@ -57,7 +57,7 @@ void cmGeneratorExpressionDAGChecker::reportError(
     e << "Error evaluating generator expression:\n"
       << "  " << expr << "\n"
       << "Self reference on target \""
-      << context->Target->GetName() << "\".\n";
+      << context->HeadTarget->GetName() << "\".\n";
     context->Makefile->GetCMakeInstance()
       ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(),
                       parent->Backtrace);

@@ -26,7 +26,9 @@ struct cmGeneratorExpressionContext
   std::set<cmTarget*> Targets;
   cmMakefile *Makefile;
   const char *Config;
-  cmTarget *Target;
+  cmTarget *HeadTarget; // The target whose property is being evaluated.
+  cmTarget *CurrentTarget; // The dependent of HeadTarget which appears
+                           // directly or indirectly in the property.
   bool Quiet;
   bool HadError;
 };
