@@ -16,6 +16,8 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"
 
+#include <cmsys/String.h>
+
 //----------------------------------------------------------------------------
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x510
 static
@@ -253,7 +255,8 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
       }
 
-    return *parameters.begin() == context->Config ? "1" : "0";
+    return cmsysString_strcasecmp(parameters.begin()->c_str(),
+                                  context->Config) == 0 ? "1" : "0";
   }
 } configurationTestNode;
 
