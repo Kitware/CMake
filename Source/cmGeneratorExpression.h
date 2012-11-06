@@ -71,8 +71,13 @@ class cmCompiledGeneratorExpression
 public:
   const char* Evaluate(cmMakefile* mf, const char* config,
                        bool quiet = false,
-                       cmTarget *target = 0,
+                       cmTarget *headTarget = 0,
+                       cmTarget *currentTarget = 0,
                        cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
+  const char* Evaluate(cmMakefile* mf, const char* config,
+                       bool quiet,
+                       cmTarget *headTarget,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const

@@ -297,7 +297,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmsys::RegularExpression propertyNameValidator;
     propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
-    cmTarget* target = context->Target;
+    cmTarget* target = context->HeadTarget;
     std::string propertyName = *parameters.begin();
     if (parameters.size() == 2)
       {
