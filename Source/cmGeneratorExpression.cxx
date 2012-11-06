@@ -53,7 +53,22 @@ cmGeneratorExpression::~cmGeneratorExpression()
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const char* config, bool quiet,
-  cmTarget *target,
+  cmTarget *headTarget,
+  cmGeneratorExpressionDAGChecker *dagChecker) const
+{
+  return this->Evaluate(mf,
+                        config,
+                        quiet,
+                        headTarget,
+                        headTarget,
+                        dagChecker);
+}
+
+//----------------------------------------------------------------------------
+const char *cmCompiledGeneratorExpression::Evaluate(
+  cmMakefile* mf, const char* config, bool quiet,
+  cmTarget *headTarget,
+  cmTarget *currentTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   if (!this->NeedsParsing)
@@ -73,7 +88,8 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.Config = config;
   context.Quiet = quiet;
   context.HadError = false;
-  context.Target = target;
+  context.HeadTarget = headTarget;
+  context.CurrentTarget = currentTarget ? currentTarget : headTarget;
   context.Backtrace = this->Backtrace;
 
   for ( ; it != end; ++it)
