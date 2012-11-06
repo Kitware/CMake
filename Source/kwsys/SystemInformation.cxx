@@ -74,6 +74,18 @@ typedef int siginfo_t;
 # include <errno.h> // extern int errno;
 #endif
 
+#ifdef __FreeBSD__
+# include <sys/sysctl.h>
+# include <fenv.h>
+# include <sys/socket.h>
+# include <netdb.h>
+# include <netinet/in.h>
+# if defined(KWSYS_SYS_HAS_IFADDRS_H)
+#  include <ifaddrs.h>
+#  define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
+# endif
+#endif
+
 #ifdef __APPLE__
 # include <sys/sysctl.h>
 # include <mach/vm_statistics.h>
@@ -84,6 +96,10 @@ typedef int siginfo_t;
 # include <sys/socket.h>
 # include <netdb.h>
 # include <netinet/in.h>
+# if defined(KWSYS_SYS_HAS_IFADDRS_H)
+#  include <ifaddrs.h>
+#  define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
+# endif
 # if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050
 #  include <execinfo.h>
 #  define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
@@ -95,9 +111,17 @@ typedef int siginfo_t;
 # include <sys/socket.h>
 # include <netdb.h>
 # include <netinet/in.h>
+# if defined(KWSYS_SYS_HAS_IFADDRS_H)
+#  include <ifaddrs.h>
+#  if !defined(__LSB_VERSION__) /* LSB has no getifaddrs */
+#   define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
+#  endif
+# endif
 # if defined(__GNUG__)
 #  include <execinfo.h>
-#  define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
+#  if !(defined(__LSB_VERSION__) && __LSB_VERSION__ < 41)
+#   define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
+#  endif
 # endif
 # if defined(KWSYS_CXX_HAS_RLIMIT64)
 typedef struct rlimit64 ResourceLimitType;
@@ -109,10 +133,6 @@ typedef struct rlimit ResourceLimitType;
 #elif defined( __hpux )
 # include <sys/param.h>
 # include <sys/pstat.h>
-#endif
-
-#if defined(KWSYS_SYS_HAS_IFADDRS_H)
-# include <ifaddrs.h>
 #endif
 
 #ifdef __HAIKU__
@@ -453,7 +473,7 @@ bool SystemInformation::DoesCPUSupportFeature(long int i)
 
 kwsys_stl::string SystemInformation::GetCPUDescription()
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << this->GetNumberOfPhysicalCPU()
     << " core ";
@@ -543,7 +563,7 @@ int SystemInformation::GetOSIsApple()
 
 kwsys_stl::string SystemInformation::GetOSDescription()
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << this->GetOSName()
     << " "
@@ -599,7 +619,7 @@ kwsys_stl::string SystemInformation::GetMemoryDescription(
       const char *hostLimitEnvVarName,
       const char *procLimitEnvVarName)
 {
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss
     << "Host Total: "
     << iostreamLongLong(this->GetHostMemoryTotal())
@@ -805,7 +825,7 @@ int NameValue(
       {
       continue;
       }
-    kwsys_stl::istringstream is(lines[i].substr(at+name.size()));
+    kwsys_ios::istringstream is(lines[i].substr(at+name.size()));
     is >> value;
     return 0;
     }
@@ -1271,7 +1291,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
   WSACleanup();
   return 0;
 
-#elif defined(KWSYS_SYS_HAS_IFADDRS_H)
+#elif defined(KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN)
   // gethostname typical returns an alias for loopback interface
   // we want the fully qualified domain name. Because there are
   // any number of interfaces on this system we look for the
@@ -3310,7 +3330,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
 #elif defined(__APPLE__)
   SystemInformation::LongLong memUsed=0;
   pid_t pid=getpid();
-  kwsys_stl::ostringstream oss;
+  kwsys_ios::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE *file=popen(oss.str().c_str(),"r");
   if (file==0)
@@ -3335,7 +3355,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
     {
     return -2;
     }
-  kwsys_stl::istringstream iss(oss.str());
+  kwsys_ios::istringstream iss(oss.str());
   iss >> memUsed;
   return memUsed;
 #else
@@ -4670,22 +4690,12 @@ int SystemInformationImplementation::CallSwVers(
       kwsys_stl::string &ver)
 {
 #ifdef __APPLE__
-  kwsys_stl::ostringstream oss;
-  oss << "sw_vers " << arg;
-  FILE *f=popen(oss.str().c_str(),"r");
-  if (f==0)
-    {
-    return -1;
-    }
-  oss.str("");
-  char buf[256]={'\0'};
-  while (fgets(buf, 256, f) != 0)
-    {
-    oss << buf;
-    }
-  pclose(f);
-  kwsys_stl::istringstream iss(oss.str());
-  iss >> ver;
+  kwsys_stl::vector<const char*> args;
+  args.push_back("sw_vers");
+  args.push_back(arg);
+  args.push_back(0);
+  ver = this->RunProcess(args);
+  this->TrimNewline(ver);
 #else
   // avoid C4100
   (void)arg;
