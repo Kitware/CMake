@@ -585,6 +585,20 @@ option(CMAKE_STRICT
   "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
 mark_as_advanced(CMAKE_STRICT)
 
+if(NOT CMake_VERSION_IS_RELEASE)
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
+      NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts -Wall -W")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -ansi -Wcast-align -Wchar-subscripts -Wall -W -Wshadow")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith -Wformat-security")
+    if (NOT APPLE)
+      set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings -Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
+      set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -Wl,--no-undefined ${CMAKE_MODULE_LINKER_FLAGS}")
+    endif()
+  endif()
+endif()
 
 # build the remaining subdirectories
 add_subdirectory(Source)
