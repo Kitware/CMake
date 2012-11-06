@@ -74,14 +74,6 @@ typedef int siginfo_t;
 # include <errno.h> // extern int errno;
 #endif
 
-#ifdef __FreeBSD__
-# include <sys/sysctl.h>
-# include <fenv.h>
-# include <sys/socket.h>
-# include <netdb.h>
-# include <netinet/in.h>
-#endif
-
 #ifdef __APPLE__
 # include <sys/sysctl.h>
 # include <mach/vm_statistics.h>
@@ -103,14 +95,9 @@ typedef int siginfo_t;
 # include <sys/socket.h>
 # include <netdb.h>
 # include <netinet/in.h>
-# if defined(__LSB_VERSION__) /* LSB has no getifaddrs */
-#  undef KWSYS_SYS_HAS_IFADDRS_H
-# endif
 # if defined(__GNUG__)
 #  include <execinfo.h>
-#  if !(defined(__LSB_VERSION__) && __LSB_VERSION__ < 41)
-#   define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
-#  endif
+#  define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
 # endif
 # if defined(KWSYS_CXX_HAS_RLIMIT64)
 typedef struct rlimit64 ResourceLimitType;
@@ -466,7 +453,7 @@ bool SystemInformation::DoesCPUSupportFeature(long int i)
 
 kwsys_stl::string SystemInformation::GetCPUDescription()
 {
-  kwsys_ios::ostringstream oss;
+  kwsys_stl::ostringstream oss;
   oss
     << this->GetNumberOfPhysicalCPU()
     << " core ";
@@ -556,7 +543,7 @@ int SystemInformation::GetOSIsApple()
 
 kwsys_stl::string SystemInformation::GetOSDescription()
 {
-  kwsys_ios::ostringstream oss;
+  kwsys_stl::ostringstream oss;
   oss
     << this->GetOSName()
     << " "
@@ -612,7 +599,7 @@ kwsys_stl::string SystemInformation::GetMemoryDescription(
       const char *hostLimitEnvVarName,
       const char *procLimitEnvVarName)
 {
-  kwsys_ios::ostringstream oss;
+  kwsys_stl::ostringstream oss;
   oss
     << "Host Total: "
     << iostreamLongLong(this->GetHostMemoryTotal())
@@ -818,7 +805,7 @@ int NameValue(
       {
       continue;
       }
-    kwsys_ios::istringstream is(lines[i].substr(at+name.size()));
+    kwsys_stl::istringstream is(lines[i].substr(at+name.size()));
     is >> value;
     return 0;
     }
@@ -3323,7 +3310,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
 #elif defined(__APPLE__)
   SystemInformation::LongLong memUsed=0;
   pid_t pid=getpid();
-  kwsys_ios::ostringstream oss;
+  kwsys_stl::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE *file=popen(oss.str().c_str(),"r");
   if (file==0)
@@ -3348,7 +3335,7 @@ SystemInformationImplementation::GetProcMemoryUsed()
     {
     return -2;
     }
-  kwsys_ios::istringstream iss(oss.str());
+  kwsys_stl::istringstream iss(oss.str());
   iss >> memUsed;
   return memUsed;
 #else
@@ -4683,7 +4670,7 @@ int SystemInformationImplementation::CallSwVers(
       kwsys_stl::string &ver)
 {
 #ifdef __APPLE__
-  kwsys_ios::ostringstream oss;
+  kwsys_stl::ostringstream oss;
   oss << "sw_vers " << arg;
   FILE *f=popen(oss.str().c_str(),"r");
   if (f==0)
@@ -4697,7 +4684,7 @@ int SystemInformationImplementation::CallSwVers(
     oss << buf;
     }
   pclose(f);
-  kwsys_ios::istringstream iss(oss.str());
+  kwsys_stl::istringstream iss(oss.str());
   iss >> ver;
 #else
   // avoid C4100
