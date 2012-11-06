@@ -32,7 +32,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(CMakeFindFrameworks)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 

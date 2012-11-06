@@ -80,7 +80,7 @@
 # The functions defined in this file depend on the fixup_bundle function
 # (and others) found in BundleUtilities.cmake
 
-include(BundleUtilities)
+include("${CMAKE_CURRENT_LIST_DIR}/BundleUtilities.cmake")
 set(DeployQt4_cmake_dir "${CMAKE_CURRENT_LIST_DIR}")
 set(DeployQt4_apple_plugins_dir "PlugIns")
 

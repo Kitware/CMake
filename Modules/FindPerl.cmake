@@ -18,7 +18,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(FindCygwin)
+include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
 
 set(PERL_POSSIBLE_BIN_PATHS
   ${CYGWIN_INSTALL_PATH}/bin

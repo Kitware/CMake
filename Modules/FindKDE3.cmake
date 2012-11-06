@@ -245,7 +245,7 @@ endif()
 
 
 # KDE3Macros.cmake contains all the KDE specific macros
-include(KDE3Macros)
+include(${CMAKE_CURRENT_LIST_DIR}/KDE3Macros.cmake)
 
 
 macro (KDE3_PRINT_RESULTS)

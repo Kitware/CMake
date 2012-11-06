@@ -44,9 +44,9 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(CMakeFindFrameworks)
-include(FindTclsh)
-include(FindWish)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindTclsh.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindWish.cmake)
 
 if(TCLSH_VERSION_STRING)
   set(TCL_TCLSH_VERSION "${TCLSH_VERSION_STRING}")

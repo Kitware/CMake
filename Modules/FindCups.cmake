@@ -28,7 +28,7 @@ find_path(CUPS_INCLUDE_DIR cups/cups.h )
 find_library(CUPS_LIBRARIES NAMES cups )
 
 if (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES AND CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
-    include(CheckLibraryExists)
+    include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
 
     # ippDeleteAttribute is new in cups-1.1.19 (and used by kdeprint)
     CHECK_LIBRARY_EXISTS(cups ippDeleteAttribute "" CUPS_HAS_IPP_DELETE_ATTRIBUTE)
