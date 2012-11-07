@@ -224,6 +224,10 @@ cmLoadedCommand::~cmLoadedCommand()
 bool cmLoadCommandCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
+  this->Makefile->IssueMessage(
+    cmake::AUTHOR_WARNING,
+    "The \"load_command\" command will be removed in CMake 3.0.  "
+    "See command documentation for details.");
   if(args.size() < 1 )
     {
     return true;
