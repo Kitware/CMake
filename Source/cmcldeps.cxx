@@ -237,11 +237,13 @@ int main() {
 
   // needed to suppress filename output of msvc tools
   std::string srcfilename;
+  {
   std::string::size_type pos = srcfile.rfind("\\");
   if (pos == std::string::npos) {
     srcfilename = srcfile;
   } else {
     srcfilename = srcfile.substr(pos + 1);
+  }
   }
 
   std::string nol = " /nologo ";
@@ -266,9 +268,11 @@ int main() {
 
     // call cl in object dir so the .i is generated there
     std::string objdir;
+    {
     std::string::size_type pos = objfile.rfind("\\");
     if (pos != std::string::npos) {
       objdir = objfile.substr(0, pos);
+    }
     }
 
     // extract dependencies with cl.exe

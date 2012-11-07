@@ -326,18 +326,18 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         {
         cmSystemTools::ReplaceString(source, "$(IntDir)/", "");
 #if defined(_WIN32) || defined(__CYGWIN__)
-        std::ofstream fout(source.c_str(),
+        std::ofstream sourceFout(source.c_str(),
                            std::ios::binary | std::ios::out
                            | std::ios::trunc);
 #else
-        std::ofstream fout(source.c_str(),
+        std::ofstream sourceFout(source.c_str(),
                            std::ios::out | std::ios::trunc);
 #endif
-        if(fout)
+        if(sourceFout)
           {
-          fout.write("# generated from CMake",22);
-          fout.flush();
-          fout.close();
+          sourceFout.write("# generated from CMake",22);
+          sourceFout.flush();
+          sourceFout.close();
           }
         }
       }
