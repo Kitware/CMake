@@ -92,6 +92,8 @@ public:
       "ARGV holds the list of all arguments given to the function and ARGN "
       "holds the list of arguments past the last expected argument."
       "\n"
+      "A function opens a new scope: see set(var PARENT_SCOPE) for details."
+      "\n"
       "See the cmake_policy() command documentation for the behavior of "
       "policies inside functions."
       ;
