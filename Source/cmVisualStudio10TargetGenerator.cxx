@@ -404,6 +404,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       case cmTarget::UTILITY:
         configType += "Utility";
         break;
+      case cmTarget::GLOBAL_TARGET:
+      case cmTarget::UNKNOWN_TARGET:
+        break;
       }
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
@@ -907,7 +910,6 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   cmSourceFile* source)
 {
   cmSourceFile& sf = *source;
-  cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
   std::string objectName;
   if(this->GeneratorTarget->ExplicitObjectName.find(&sf)

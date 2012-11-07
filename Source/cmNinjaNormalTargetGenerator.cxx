@@ -564,6 +564,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
     commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))-linkRuleLength-1000;
 #else
+    (void)linkRuleLength;
     commandLineLengthLimit = -1;
 #endif
   }

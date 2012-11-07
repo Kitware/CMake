@@ -204,7 +204,6 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
   // overwritten by the CreateVCProjBuildRule.
   // (this could be avoided with per-target source files)
   const char* no_main_dependency = 0;
-  const char* no_working_directory = 0;
   if(cmSourceFile* file =
      mf->AddCustomCommandToOutput(
        stamps, listFiles,

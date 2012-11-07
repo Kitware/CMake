@@ -84,7 +84,6 @@ cmLocalVisualStudioGenerator
                   const char* newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();
-  const cmCustomCommandLines& commandLines = cc.GetCommandLines();
   const char* workingDirectory = cc.GetWorkingDirectory();
   cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
   RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;

@@ -75,7 +75,6 @@ void cmGlobalVisualStudioGenerator::Generate()
 #endif
 
       // Now make all targets depend on the ALL_BUILD target
-      cmTargets targets;
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
           i != gen.end(); ++i)
         {

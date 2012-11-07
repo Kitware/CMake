@@ -200,7 +200,6 @@ void cmGlobalVisualStudio6Generator
       tt != orderedProjectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
-    cmMakefile* mf = target->GetMakefile();
     // Write the project into the DSW file
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
