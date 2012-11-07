@@ -710,6 +710,8 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 
   switch(b)
     {
+    case WIN32_EXECUTABLE:
+      break;
     case STATIC_LIBRARY:
       this->DSPHeaderTemplate = root;
       this->DSPHeaderTemplate += "/staticLibHeader.dsptemplate";
