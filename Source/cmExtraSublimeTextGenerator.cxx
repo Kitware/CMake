@@ -361,7 +361,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(cmGeneratedFileStream& fout,
       ExtractFlags(cflags.c_str(), "-I", includeDirs);
       cflags = makefile->GetSafeDefinition("CMAKE_C_FLAGS");
       ExtractFlags(cflags.c_str(), "-D", defines);
-      ExtractFlags(cflags.c_str(), "-D", includeDirs);
+      ExtractFlags(cflags.c_str(), "-I", includeDirs);
       // the include directories for this target
       std::vector<std::string> includes;
       target->GetMakefile()->GetLocalGenerator()->
