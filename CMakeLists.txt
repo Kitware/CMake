@@ -596,9 +596,7 @@ if(NOT CMake_VERSION_IS_RELEASE)
                        -Wshadow -Wpointer-arith -Wformat-security
     )
 
-    message("WTFFFFFFFFFF")
     foreach(FLAG_LANG  C CXX)
-      message("rrrrr ${FLAG_LANG}")
       foreach(FLAG ${${FLAG_LANG}_FLAGS_LIST})
         if(NOT " ${CMAKE_${FLAG_LANG}_FLAGS} " MATCHES " ${FLAG} ")
           set(CMAKE_${FLAG_LANG}_FLAGS "${CMAKE_${FLAG_LANG}_FLAGS} ${FLAG}")
