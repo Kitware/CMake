@@ -1003,6 +1003,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
   switch(target.GetType())
     {
+    case cmTarget::UNKNOWN_LIBRARY:
+      break;
     case cmTarget::OBJECT_LIBRARY:
       {
       std::string libpath = this->GetTargetDirectory(target);

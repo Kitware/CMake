@@ -404,6 +404,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       case cmTarget::UTILITY:
         configType += "Utility";
         break;
+      case cmTarget::GLOBAL_TARGET:
+      case cmTarget::UNKNOWN_TARGET:
+        break;
       }
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
