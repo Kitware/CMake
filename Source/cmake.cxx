@@ -2365,7 +2365,7 @@ int cmake::ActualConfigure()
   // EXECUTABLE_OUTPUT_PATH.  They are now documented as old-style and
   // should no longer be used.  Therefore we present them only if the
   // project requires compatibility with CMake 2.4.  We detect this
-  // here by looking for the old CMAKE_BACKWARDS_COMPATABILITY
+  // here by looking for the old CMAKE_BACKWARDS_COMPATIBILITY
   // variable created when CMP0001 is not set to NEW.
   if(this->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
@@ -4117,7 +4117,7 @@ int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
   return -1;
 }
 
-// For visual studio 2005 and newer manifest files need to be embeded into
+// For visual studio 2005 and newer manifest files need to be embedded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
 int cmake::VisualStudioLink(std::vector<std::string>& args, int type)

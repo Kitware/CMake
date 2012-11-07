@@ -70,7 +70,7 @@ target_compile_definitions(CompatibleInterface
 
 # The COMPATIBLE_INTERFACE_* properties are only read from dependencies
 # in the interface. Populating it on the CompatibleInterface target does
-# not have any affect on the interpretation of the INTERFACE variants
+# not have any effect on the interpretation of the INTERFACE variants
 # in dependencies.
 set_property(TARGET iface1 PROPERTY
   INTERFACE_NON_RELEVANT_PROP ON

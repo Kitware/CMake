@@ -101,7 +101,7 @@ static void Free_Enum_Type(void * argp)
 |                                       const unsigned char * buf,
 |                                       bool  ccase )
 |   
-|   Description   :  Check wether or not the text in 'buf' matches the
+|   Description   :  Check whether or not the text in 'buf' matches the
 |                    text in 's', at least partial.
 |
 |   Return Values :  NOMATCH   - buffer doesn't match

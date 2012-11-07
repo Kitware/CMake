@@ -115,7 +115,7 @@
 #        You should have a look on the AUTOMOC property for targets to achieve the same results.
 #
 #  macro QT4_ADD_DBUS_INTERFACE(outfiles interface basename)
-#        Create a the interface header and implementation files with the
+#        Create the interface header and implementation files with the
 #        given basename from the given interface xml file and add it to
 #        the list of sources.
 #
@@ -171,7 +171,7 @@
 #        in:  ts_files
 #        generates commands to create .qm from .ts - files. The generated
 #        filenames can be found in qm_files. The ts_files
-#        must exists and are not updated in any way.
+#        must exist and are not updated in any way.
 #
 # function QT4_USE_MODULES( target [link_type] modules...)
 #        Make <target> use the <modules> from Qt. Using a Qt module means
@@ -495,7 +495,7 @@ macro (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
     set(QT_INCLUDES "${QT_${basename}_INCLUDE_DIR}" ${QT_INCLUDES})
   endif ()
 
-  # Make variables changeble to the advanced user
+  # Make variables changeable to the advanced user
   mark_as_advanced(QT_${basename}_LIBRARY QT_${basename}_LIBRARY_RELEASE QT_${basename}_LIBRARY_DEBUG QT_${basename}_INCLUDE_DIR)
 endmacro ()
 
@@ -771,7 +771,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     endif()
   endif ()
 
-  # Make variables changeble to the advanced user
+  # Make variables changeable to the advanced user
   mark_as_advanced( QT_LIBRARY_DIR QT_DOC_DIR QT_MKSPECS_DIR
                     QT_PLUGINS_DIR QT_TRANSLATIONS_DIR)
 

@@ -321,7 +321,7 @@ if(WIN32_STYLE_FIND)
       rpcrt4
       wsock32
       )
-    ## HACK: feed in to optimized / debug libaries if both were FOUND.
+    ## HACK: feed in to optimized / debug libraries if both were FOUND.
     set(WXWINDOWS_STATIC_DEBUG_LIBS ${WXWINDOWS_STATIC_DEBUG_LIBS}
       wxbase26d
       wxbase26d_net
@@ -354,7 +354,7 @@ if(WIN32_STYLE_FIND)
   ##
 
   ## if there is at least one shared lib available
-  ## let user choose wether to use shared or static wxwindows libs
+  ## let user choose whether to use shared or static wxwindows libs
   if(WXWINDOWS_SHARED_LIBRARY OR WXWINDOWS_SHARED_DEBUG_LIBRARY)
     ## default value OFF because wxWindows MSVS default build is static
     option(WXWINDOWS_USE_SHARED_LIBS
@@ -606,7 +606,7 @@ else()
       ../wx/bin
       ../../wx/bin )
 
-    # check wether wx-config was found:
+    # check whether wx-config was found:
     if(CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE)
 
       # use shared/static wx lib?

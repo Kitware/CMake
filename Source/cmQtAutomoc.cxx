@@ -696,7 +696,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   std::string ownMocHeaderFile;
 
   std::string::size_type matchOffset = 0;
-  // first a simply string check for "moc" is *much* faster than the regexp,
+  // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   if ((strstr(contentsString.c_str(), "moc") != NULL)
@@ -870,7 +870,7 @@ void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
   bool dotMocIncluded = false;
 
   std::string::size_type matchOffset = 0;
-  // first a simply string check for "moc" is *much* faster than the regexp,
+  // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   if ((strstr(contentsString.c_str(), "moc") != NULL)

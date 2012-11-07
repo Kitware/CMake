@@ -22,7 +22,7 @@ set(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 set(CMAKE_LINK_LIBRARY_FLAG "")
 set(MSVC 1)
 
-# hack: if a new cmake (which uses CMAKE__LINKER) runs on an old build tree
+# hack: if a new cmake (which uses CMAKE_LINKER) runs on an old build tree
 # (where link was hardcoded) and where CMAKE_LINKER isn't in the cache
 # and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
 # hardcode CMAKE_LINKER here to link, so it behaves as it did before, Alex
