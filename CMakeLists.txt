@@ -588,15 +588,26 @@ mark_as_advanced(CMAKE_STRICT)
 if(NOT CMake_VERSION_IS_RELEASE)
   if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
       NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts -Wall -W")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-common")
+    set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
+                     -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
+                     -Wmissing-format-attribute -fno-common
+    )
+    set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
+                       -Wshadow -Wpointer-arith -Wformat-security
+    )
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W -Wshadow")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpointer-arith -Wformat-security")
-    if (NOT APPLE)
-      set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--fatal-warnings -Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
-      set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--fatal-warnings -Wl,--no-undefined ${CMAKE_MODULE_LINKER_FLAGS}")
-    endif()
+    message("WTFFFFFFFFFF")
+    foreach(FLAG_LANG  C CXX)
+      message("rrrrr ${FLAG_LANG}")
+      foreach(FLAG ${${FLAG_LANG}_FLAGS_LIST})
+        if(NOT " ${CMAKE_${FLAG_LANG}_FLAGS} " MATCHES " ${FLAG} ")
+          set(CMAKE_${FLAG_LANG}_FLAGS "${CMAKE_${FLAG_LANG}_FLAGS} ${FLAG}")
+        endif()
+      endforeach()
+    endforeach()
+
+    unset(C_FLAGS_LIST)
+    unset(CXX_FLAGS_LIST)
   endif()
 endif()
 
