@@ -1665,7 +1665,7 @@ kwsys_stl::string SystemTools::EscapeChars(
   kwsys_stl::string n;
   if (str)
     {
-    if (!chars_to_escape | !*chars_to_escape)
+    if (!chars_to_escape || !*chars_to_escape)
       {
       n.append(str);
       }
