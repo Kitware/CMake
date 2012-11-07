@@ -31,14 +31,14 @@ int main (int argc, char *argv[])
   int cc;
   for ( cc = 2; cc < argc; cc ++ )
     {
-    std::string arg = argv[cc];
-    if ( (arg.find_first_of(" ") != arg.npos) &&
-         (arg.find_first_of("\"") == arg.npos) )
+    std::string nextArg = argv[cc];
+    if ( (nextArg.find_first_of(" ") != nextArg.npos) &&
+         (nextArg.find_first_of("\"") == nextArg.npos) )
       {
-      arg = "\"" + arg + "\"";
+      nextArg = "\"" + nextArg + "\"";
       }
     command += " ";
-    command += arg;
+    command += nextArg;
     }
 
   return cmWin32ProcessExecution::Windows9xHack(command.c_str());
