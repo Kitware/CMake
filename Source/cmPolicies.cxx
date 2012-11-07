@@ -457,7 +457,7 @@ cmPolicies::cmPolicies()
     "This makes sure that the modules belonging to "
     "CMake always get those files included which they expect, and against "
     "which they were developed and tested.  "
-    "In call other cases, the files found in "
+    "In all other cases, the files found in "
     "CMAKE_MODULE_PATH still take precedence over the ones in "
     "the CMake module directory.  "
     "The OLD behaviour is to always prefer files from CMAKE_MODULE_PATH over "

@@ -76,7 +76,7 @@ public:
         "will be C-style escaped.  "
         "The file will be configured with the current values of CMake "
         "variables. If @ONLY is specified, only variables "
-        "of the form @VAR@ will be replaces and ${VAR} will be ignored.  "
+        "of the form @VAR@ will be replaced and ${VAR} will be ignored.  "
         "This is useful for configuring scripts that use ${VAR}. "
         "Any occurrences of #cmakedefine VAR will be replaced with "
         "either #define VAR or /* #undef VAR */ depending on "
