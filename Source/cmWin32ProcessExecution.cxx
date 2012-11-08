@@ -271,13 +271,6 @@ bool cmWin32ProcessExecution::Wait(int timeout)
   return this->PrivateClose(timeout);
 }
 
-/*
- * Internal dictionary mapping popen* file pointers to process handles,
- * for use when retrieving the process exit code.  See _PyPclose() below
- * for more information on this dictionary's use.
- */
-static void *_PyPopenProcs = NULL;
-
 static BOOL RealPopenCreateProcess(const char *cmdstring,
                                    const char *path,
                                    const char *szConsoleSpawn,
@@ -679,18 +672,6 @@ bool cmWin32ProcessExecution::PrivateOpen(const char *cmdstring,
       }
     }
 
-  /*
-   * Insert the files we've created into the process dictionary
-   * all referencing the list with the process handle and the
-   * initial number of files (see description below in _PyPclose).
-   * Since if _PyPclose later tried to wait on a process when all
-   * handles weren't closed, it could create a deadlock with the
-   * child, we spend some energy here to try to ensure that we
-   * either insert all file handles into the dictionary or none
-   * at all.  It's a little clumsy with the various popen modes
-   * and variable number of files involved.
-   */
-
   /* Child is launched. Close the parents copy of those pipe
    * handles that only the child should have open.  You need to
    * make sure that no handles to the write end of the output pipe
@@ -760,43 +741,6 @@ cmWin32ProcessExecution::~cmWin32ProcessExecution()
 {
   this->CloseHandles();
 }
-
-/*
- * Wrapper for fclose() to use for popen* files, so we can retrieve the
- * exit code for the child process and return as a result of the close.
- *
- * This function uses the _PyPopenProcs dictionary in order to map the
- * input file pointer to information about the process that was
- * originally created by the popen* call that created the file pointer.
- * The dictionary uses the file pointer as a key (with one entry
- * inserted for each file returned by the original popen* call) and a
- * single list object as the value for all files from a single call.
- * The list object contains the Win32 process handle at [0], and a file
- * count at [1], which is initialized to the total number of file
- * handles using that list.
- *
- * This function closes whichever handle it is passed, and decrements
- * the file count in the dictionary for the process handle pointed to
- * by this file.  On the last close (when the file count reaches zero),
- * this function will wait for the child process and then return its
- * exit code as the result of the close() operation.  This permits the
- * files to be closed in any order - it is always the close() of the
- * final handle that will return the exit code.
- */
-
- /* RED_FLAG 31-Aug-2000 Tim
-  * This is always called (today!) between a pair of
-  * Py_BEGIN_ALLOW_THREADS/ Py_END_ALLOW_THREADS
-  * macros.  So the thread running this has no valid thread state, as
-  * far as Python is concerned.  However, this calls some Python API
-  * functions that cannot be called safely without a valid thread
-  * state, in particular PyDict_GetItem.
-  * As a temporary hack (although it may last for years ...), we
-  * *rely* on not having a valid thread state in this function, in
-  * order to create our own "from scratch".
-  * This will deadlock if _PyPclose is ever called by a thread
-  * holding the global lock.
-  */
 
 bool cmWin32ProcessExecution::PrivateClose(int /* timeout */)
 {
