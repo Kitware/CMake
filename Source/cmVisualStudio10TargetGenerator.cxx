@@ -428,8 +428,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     mfcLine += useOfMfcValue + "</UseOfMfc>\n";
     this->WriteString(mfcLine.c_str(), 2);
 
-    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
-       this->ClOptions[*i]->UsingUnicode() ||
+    if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
+       this->ClOptions[*i]->UsingUnicode()) ||
        this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
       this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
