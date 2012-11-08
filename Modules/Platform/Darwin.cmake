@@ -263,6 +263,23 @@ set(CMAKE_SYSTEM_FRAMEWORK_PATH
   /Network/Library/Frameworks
   /System/Library/Frameworks)
 
+# Warn about known system mis-configuration case.
+if(CMAKE_OSX_SYSROOT)
+  get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
+  if(NOT _IN_TC AND
+     NOT IS_SYMLINK "${CMAKE_OSX_SYSROOT}/Library/Frameworks"
+     AND IS_SYMLINK "${CMAKE_OSX_SYSROOT}/Library/Frameworks/Frameworks")
+    message(WARNING "The SDK Library/Frameworks path\n"
+      " ${CMAKE_OSX_SYSROOT}/Library/Frameworks\n"
+      "is not set up correctly on this system.  "
+      "This is known to occur when installing Xcode 3.2.6:\n"
+      " http://bugs.python.org/issue14018\n"
+      "The problem may cause build errors that report missing system frameworks.  "
+      "Fix your SDK symlinks to resolve this issue and avoid this warning."
+      )
+  endif()
+endif()
+
 # default to searching for application bundles first
 if(NOT DEFINED CMAKE_FIND_APPBUNDLE)
   set(CMAKE_FIND_APPBUNDLE FIRST)
