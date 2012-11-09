@@ -91,4 +91,4 @@ if(do_git_tests)
   check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
   # This is a remote symbolic ref, so it will always trigger a 'git fetch'
   check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
-endif(GIT_EXECUTABLE)
+endif()
