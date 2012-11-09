@@ -61,7 +61,25 @@ was expected."
 endmacro()
 
 find_package(Git)
+set(do_git_tests 0)
 if(GIT_EXECUTABLE)
+  set(do_git_tests 1)
+
+  execute_process(
+    COMMAND "${GIT_EXECUTABLE}" --version
+    OUTPUT_VARIABLE ov
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  string(REGEX REPLACE "^git version (.+)$" "\\1" git_version "${ov}")
+  message(STATUS "git_version='${git_version}'")
+
+  if(git_version VERSION_LESS 1.6.5)
+    message(STATUS "No ExternalProject git tests with git client less than version 1.6.5")
+    set(do_git_tests 0)
+  endif()
+endif()
+
+if(do_git_tests)
   check_a_tag(origin/master 5842b503ba4113976d9bb28d57b5aee1ad2736b7 1)
   check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1)
   # With the Git UPDATE_COMMAND performance patch, this will not required a
