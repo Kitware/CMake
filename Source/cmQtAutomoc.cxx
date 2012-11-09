@@ -209,6 +209,22 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     _moc_incs += *incDirIt;
     }
 
+  // Some projects (kdelibs, phonon) query the compiler for its default
+  // include search dirs, and add those to
+  // CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES.
+  // These may include e.g./usr/lib/qt/include . This is typically also part
+  // of ${QT_INCLUDES}. If this directory is then contained in the implicit
+  // include dirs, it is removed from the include dirs returned from the
+  // target above. So we have to add them additionally, so moc can find them.
+  // See #13646 and #13667.
+  const char* implicitIncludeDirs = makefile->GetSafeDefinition(
+                                     "CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES");
+  if (implicitIncludeDirs && *implicitIncludeDirs)
+    {
+    _moc_incs += sep;
+    _moc_incs += implicitIncludeDirs;
+    }
+
   const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
   std::string _moc_compile_defs = (tmp!=0 ? tmp : "");
   tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
