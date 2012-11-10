@@ -208,7 +208,7 @@ int cmCPackGenerator::InstallProject()
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "Problem creating temporary directory: "
-                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL}")
+                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL)")
                   << std::endl);
     return 0;
     }
