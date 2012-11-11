@@ -14,11 +14,13 @@
 #define cmExtraSublimeTextGenerator_h
 
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmSourceFile.h"
 
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
 class cmGeneratedFileStream;
+class cmGeneratorTarget;
 
 /** \class cmExtraSublimeTextGenerator
  * \brief Write Sublime Text 2 project files for Makefile based projects
@@ -26,6 +28,7 @@ class cmGeneratedFileStream;
 class cmExtraSublimeTextGenerator : public cmExternalMakefileProjectGenerator
 {
 public:
+  typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
   virtual const char* GetName() const
@@ -45,14 +48,15 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
+  void WriteSublimeClangOptionsFile(const MapSourceFileFlags& sourceFileFlags,
+                                    const std::string& filename);
   /** Appends all targets as build systems to the project file and get all
    * include directories and compiler definitions used.
    */
   void AppendAllTargets(const std::vector<cmLocalGenerator*>& lgs,
                         const cmMakefile* mf,
                         cmGeneratedFileStream& fout,
-                        std::set<std::string>& includeDirs,
-                        std::set<std::string>& defines);
+                        MapSourceFileFlags& sourceFileFlags);
   /** Returns the build command that needs to be executed to build the
    *  specified target.
    */
@@ -63,18 +67,24 @@ private:
    */
   void AppendTarget(cmGeneratedFileStream& fout,
                     const char* targetName,
+                    cmLocalGenerator* lg,
                     cmTarget* target,
                     const char* make,
                     const cmMakefile* makefile,
                     const char* compiler,
-                    std::set<std::string>& includeDirs,
-                    std::set<std::string>& defines, bool firstTarget);
+                    MapSourceFileFlags& sourceFileFlags, bool firstTarget);
   /**
-   * Extracts compile flags from a variable.
-   * flag would typically be "-D" or "-I"
+   * Compute the flags for compilation of object files for a given @a language.
+   * @note Generally it is the value of the variable whose name is computed
+   *       by LanguageFlagsVarName().
    */
-  void ExtractFlags(const char* value, const std::string& flag,
-                    std::set<std::string> &defines);
+  std::string ComputeFlagsForObject(cmSourceFile *source,
+                                    cmLocalGenerator* lg,
+                                    cmTarget *target,
+                                    cmGeneratorTarget* gtgt);
+
+  std::string ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg,
+                             cmTarget *target, cmGeneratorTarget* gtgt);
 };
 
 #endif
