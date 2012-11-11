@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgManipulator/TrackballDragger>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGMANIPULATOR osgManipulator/TrackballDragger)
 OSG_FIND_LIBRARY(OSGMANIPULATOR osgManipulator)
 

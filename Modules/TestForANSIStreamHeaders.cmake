@@ -16,7 +16,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(CheckIncludeFileCXX)
+include(${CMAKE_CURRENT_LIST_DIR}/CheckIncludeFileCXX.cmake)
 
 if(NOT CMAKE_NO_ANSI_STREAM_HEADERS)
   CHECK_INCLUDE_FILE_CXX(iostream CMAKE_ANSI_STREAM_HEADERS)

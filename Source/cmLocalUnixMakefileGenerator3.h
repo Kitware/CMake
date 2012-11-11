@@ -209,7 +209,8 @@ public:
 
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.
-  struct ImplicitDependFileMap: public std::map<cmStdString, cmStdString> {};
+  struct ImplicitDependFileMap:
+    public std::map<cmStdString, cmDepends::DependencyVector> {};
   struct ImplicitDependLanguageMap:
     public std::map<cmStdString, ImplicitDependFileMap> {};
   struct ImplicitDependTargetMap:
