@@ -221,7 +221,7 @@ function(SQUISH_V4_ADD_TEST testName)
 
   get_target_property(testAUTLocation ${_SQUISH_AUT} LOCATION)
   get_filename_component(testAUTDir ${testAUTLocation} PATH)
-  get_target_property(testAUTName ${_SQUISH_AUT} OUTPUT_NAME)
+  get_filename_component(testAUTName ${testAUTLocation} NAME)
 
   get_filename_component(absTestSuite "${_SQUISH_SUITE}" ABSOLUTE)
   if(NOT EXISTS "${absTestSuite}")
