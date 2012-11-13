@@ -97,7 +97,6 @@ int cmCPackGenerator::PrepareNames()
     }
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
-  this->GetOption("CPACK_PACKAGE_FILE_NAME");
   const char* pfname = this->GetOption("CPACK_PACKAGE_FILE_NAME");
   if(!pfname)
     {
