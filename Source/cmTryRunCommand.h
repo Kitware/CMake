@@ -81,7 +81,7 @@ public:
       "the executable, but it will not try to run the executable. Instead it "
       "will create cache variables which must be filled by the user or by "
       "presetting them in some CMake script file to the values the "
-      "executable would have produced if it would have been run on its actual "
+      "executable would have produced if it had been run on its actual "
       "target platform. These variables are RUN_RESULT_VAR (explanation see "
       "above) and if RUN_OUTPUT_VARIABLE (or OUTPUT_VARIABLE) was used, an "
       "additional cache variable "
