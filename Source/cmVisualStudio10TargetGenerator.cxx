@@ -404,6 +404,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       case cmTarget::UTILITY:
         configType += "Utility";
         break;
+      case cmTarget::GLOBAL_TARGET:
+      case cmTarget::UNKNOWN_LIBRARY:
+        break;
       }
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
@@ -425,8 +428,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     mfcLine += useOfMfcValue + "</UseOfMfc>\n";
     this->WriteString(mfcLine.c_str(), 2);
 
-    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
-       this->ClOptions[*i]->UsingUnicode() ||
+    if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
+       this->ClOptions[*i]->UsingUnicode()) ||
        this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
       {
       this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
@@ -907,7 +910,6 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   cmSourceFile* source)
 {
   cmSourceFile& sf = *source;
-  cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
 
   std::string objectName;
   if(this->GeneratorTarget->ExplicitObjectName.find(&sf)
