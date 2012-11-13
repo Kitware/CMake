@@ -277,6 +277,10 @@ cmComputeLinkInformation
   this->UseImportLibrary =
     this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")?true:false;
 
+  // Check whether we should skip dependencies on shared library files.
+  this->LinkDependsNoShared =
+    this->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
+
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from
   // the program that will load it.
@@ -650,7 +654,11 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
 
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib, true);
-      this->Depends.push_back(lib);
+      if(!this->LinkDependsNoShared ||
+         tgt->GetType() != cmTarget::SHARED_LIBRARY)
+        {
+        this->Depends.push_back(lib);
+        }
 
       this->AddTargetItem(lib, tgt);
       this->AddLibraryRuntimeInfo(lib, tgt);
