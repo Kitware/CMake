@@ -1447,6 +1447,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       # The test (and tested property) works with .sln files, so it's skipped when:
       # * Using VS6, which doesn't use .sln files
       # * cmake --build is set up to use MSBuild, since the MSBuild invocation does not use the .sln file
+      set(_last_test "")
       foreach(config ${CMAKE_CONFIGURATION_TYPES})
         add_test(NAME VSExcludeFromDefaultBuild-${config} COMMAND ${CMAKE_CTEST_COMMAND}
           --build-and-test
@@ -1462,7 +1463,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
              -D "allConfigs=${CMAKE_CONFIGURATION_TYPES}"
              -D "dir=${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
              -P "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild/ResultTest.cmake")
+        if(_last_test)
+          set_property(TEST VSExcludeFromDefaultBuild-${config} PROPERTY DEPENDS ${_last_test})
+        endif()
+        set(_last_test "VSExcludeFromDefaultBuild-${config}")
       endforeach()
+      unset(_last_test)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild")
     endif()
   endif()
 
