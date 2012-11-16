@@ -109,6 +109,8 @@ protected:
     std::ostream& fout, const char* name,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const char* platformMapping = NULL);
+  virtual void WriteSLNGlobalSections(std::ostream& fout,
+                                      cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget* target);
