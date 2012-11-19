@@ -14,10 +14,12 @@
 #define cmGeneratorExpression_h
 
 #include "cmStandardIncludes.h"
+#include "cmListFileCache.h"
 
 #include <stack>
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/auto_ptr.hxx>
 
 class cmTarget;
 class cmMakefile;
@@ -44,8 +46,9 @@ public:
   cmGeneratorExpression(cmListFileBacktrace const& backtrace);
   ~cmGeneratorExpression();
 
-  const cmCompiledGeneratorExpression& Parse(std::string const& input);
-  const cmCompiledGeneratorExpression& Parse(const char* input);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(
+                                                std::string const& input);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(const char* input);
 
   enum PreprocessContext {
     StripAllGeneratorExpressions,
@@ -62,7 +65,6 @@ private:
   void operator=(const cmGeneratorExpression &);
 
   cmListFileBacktrace const& Backtrace;
-  cmCompiledGeneratorExpression *CompiledExpression;
 };
 
 class cmCompiledGeneratorExpression
@@ -79,20 +81,24 @@ public:
 
   ~cmCompiledGeneratorExpression();
 
+  std::string GetInput() const
+  {
+    return this->Input;
+  }
+
 private:
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
-              const std::vector<cmGeneratorExpressionEvaluator*> &evaluators,
-              const char *input, bool needsParsing);
+              const char *input);
 
   friend class cmGeneratorExpression;
 
   cmCompiledGeneratorExpression(const cmCompiledGeneratorExpression &);
   void operator=(const cmCompiledGeneratorExpression &);
 
-  cmListFileBacktrace const& Backtrace;
-  const std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
-  const char* const Input;
-  const bool NeedsParsing;
+  cmListFileBacktrace Backtrace;
+  std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
+  const std::string Input;
+  bool NeedsParsing;
 
   mutable std::set<cmTarget*> Targets;
   mutable std::string Output;

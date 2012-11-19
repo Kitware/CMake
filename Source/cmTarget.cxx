@@ -1732,9 +1732,10 @@ cmTargetTraceDependencies
     for(cmCustomCommandLine::const_iterator cli = cit->begin();
         cli != cit->end(); ++cli)
       {
-      const cmCompiledGeneratorExpression &cge = ge.Parse(*cli);
-      cge.Evaluate(this->Makefile, 0, true);
-      std::set<cmTarget*> geTargets = cge.GetTargets();
+      const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
+                                                              = ge.Parse(*cli);
+      cge->Evaluate(this->Makefile, 0, true);
+      std::set<cmTarget*> geTargets = cge->GetTargets();
       for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
           it != geTargets.end(); ++it)
         {
@@ -4478,7 +4479,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                         this->GetName(),
                                         "INTERFACE_LINK_LIBRARIES", 0, 0);
     cmSystemTools::ExpandListArgument(ge.Parse(newStyleLibsProp)
-                                        .Evaluate(this->Makefile,
+                                       ->Evaluate(this->Makefile,
                                                   desired_config.c_str(),
                                                   false,
                                                   this,
@@ -4666,7 +4667,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
                                           this->GetName(),
                                           "INTERFACE_LINK_LIBRARIES", 0, 0);
 
-      cmSystemTools::ExpandListArgument(ge.Parse(newLibrariesProp).Evaluate(
+      cmSystemTools::ExpandListArgument(ge.Parse(newLibrariesProp)->Evaluate(
                                       this->Makefile,
                                       config,
                                       false,
