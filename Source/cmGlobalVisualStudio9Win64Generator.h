@@ -38,11 +38,5 @@ public:
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
-
-  /**
-   * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.
-   */
-  virtual void AddPlatformDefinitions(cmMakefile *);
 };
 #endif

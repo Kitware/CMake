@@ -17,6 +17,7 @@
 cmGlobalVisualStudio11Win64Generator::cmGlobalVisualStudio11Win64Generator()
 {
   this->ArchitectureId = "x64";
+  this->AdditionalPlatformDefinition = "CMAKE_FORCE_WIN64";
 }
 
 //----------------------------------------------------------------------------
@@ -26,12 +27,4 @@ void cmGlobalVisualStudio11Win64Generator
   entry.Name = cmGlobalVisualStudio11Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 11 Win64 project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio11Win64Generator
-::AddPlatformDefinitions(cmMakefile* mf)
-{
-  this->cmGlobalVisualStudio11Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
 }

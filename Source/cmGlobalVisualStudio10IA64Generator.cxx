@@ -17,6 +17,7 @@
 cmGlobalVisualStudio10IA64Generator::cmGlobalVisualStudio10IA64Generator()
 {
   this->ArchitectureId = "x64";
+  this->AdditionalPlatformDefinition = "CMAKE_FORCE_IA64";
 }
 
 //----------------------------------------------------------------------------
@@ -26,14 +27,6 @@ void cmGlobalVisualStudio10IA64Generator
   entry.Name = cmGlobalVisualStudio10IA64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 10 Itanium project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10IA64Generator
-::AddPlatformDefinitions(cmMakefile* mf)
-{
-  this->cmGlobalVisualStudio10Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
 }
 
 //----------------------------------------------------------------------------

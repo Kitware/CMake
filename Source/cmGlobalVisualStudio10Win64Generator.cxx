@@ -17,6 +17,7 @@
 cmGlobalVisualStudio10Win64Generator::cmGlobalVisualStudio10Win64Generator()
 {
   this->ArchitectureId = "x64";
+  this->AdditionalPlatformDefinition = "CMAKE_FORCE_WIN64";
 }
 
 //----------------------------------------------------------------------------
@@ -26,14 +27,6 @@ void cmGlobalVisualStudio10Win64Generator
   entry.Name = cmGlobalVisualStudio10Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 10 Win64 project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Win64Generator
-::AddPlatformDefinitions(cmMakefile* mf)
-{
-  this->cmGlobalVisualStudio10Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
 }
 
 //----------------------------------------------------------------------------
