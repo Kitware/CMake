@@ -24,18 +24,9 @@ class cmGlobalVisualStudio9Generator :
   public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio9Generator();
-  static cmGlobalGeneratorFactory* NewFactory() {
-    return new cmGlobalGeneratorSimpleFactory
-      <cmGlobalVisualStudio9Generator>(); }
-
-  ///! Get the name for the generator.
-  virtual const char* GetName() const {
-    return cmGlobalVisualStudio9Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 9 2008";}
-
-  /** Get the documentation entry for this generator.  */
-  static void GetDocumentation(cmDocumentationEntry& entry);
+  cmGlobalVisualStudio9Generator(const char* name,
+    const char* architectureId, const char* additionalPlatformDefinition);
+  static cmGlobalGeneratorFactory* NewFactory();
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -62,5 +53,7 @@ public:
   virtual std::string GetUserMacrosRegKeyBase();
 protected:
   virtual const char* GetIDEVersion() { return "9.0"; }
+private:
+  class Factory;
 };
 #endif
