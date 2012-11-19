@@ -116,7 +116,7 @@ public:
 class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator() const;
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const;
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
     cmGlobalXCodeGenerator().GetDocumentation(entry); }
@@ -152,8 +152,10 @@ cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
-::CreateGlobalGenerator() const
+::CreateGlobalGenerator(const char* name) const
 {
+  if (strcmp(name, GetActualName()))
+    return 0;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;
   std::string versionFile;
