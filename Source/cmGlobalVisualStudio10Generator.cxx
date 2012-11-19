@@ -16,29 +16,29 @@
 #include "cmSourceFile.h"
 #include "cmake.h"
 
-static const char vs10Win32generaorName[] = "Visual Studio 10";
-static const char vs10Win64generaorName[] = "Visual Studio 10 Win64";
-static const char vs10IA64generaorName[] = "Visual Studio 10 IA64";
+static const char vs10Win32generatorName[] = "Visual Studio 10";
+static const char vs10Win64generatorName[] = "Visual Studio 10 Win64";
+static const char vs10IA64generatorName[] = "Visual Studio 10 IA64";
 
 class cmGlobalVisualStudio10Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs10Win32generaorName))
+    if(!strcmp(name, vs10Win32generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        vs10Win32generaorName, NULL, NULL);
+        vs10Win32generatorName, NULL, NULL);
       }
-    if(!strcmp(name, vs10Win64generaorName))
+    if(!strcmp(name, vs10Win64generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        vs10Win64generaorName, "x64", "CMAKE_FORCE_WIN64");
+        vs10Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(!strcmp(name, vs10IA64generaorName))
+    if(!strcmp(name, vs10IA64generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        vs10IA64generaorName, "Itanium", "CMAKE_FORCE_IA64");
+        vs10IA64generatorName, "Itanium", "CMAKE_FORCE_IA64");
       }
     return 0;
   }
@@ -54,9 +54,9 @@ public:
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs10Win32generaorName);
-    names.push_back(vs10Win64generaorName);
-    names.push_back(vs10IA64generaorName); }
+    names.push_back(vs10Win32generatorName);
+    names.push_back(vs10Win64generatorName);
+    names.push_back(vs10IA64generatorName); }
 };
 
 //----------------------------------------------------------------------------
