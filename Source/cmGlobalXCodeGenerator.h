@@ -15,6 +15,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmXCodeObject.h"
 #include "cmCustomCommand.h"
+class cmGlobalGeneratorFactory;
 class cmTarget;
 class cmSourceFile;
 class cmSourceGroup;
@@ -29,7 +30,7 @@ class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
   cmGlobalXCodeGenerator(std::string const& version);
-  static cmGlobalGenerator* New();
+  static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
@@ -186,6 +187,7 @@ private:
                           const char* varNameSuffix,
                           const char* default_flags);
 
+  class Factory;
   class BuildObjectListOrString;
   friend class BuildObjectListOrString;
 

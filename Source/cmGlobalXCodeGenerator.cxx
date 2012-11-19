@@ -20,6 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGeneratorFactory.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -112,6 +113,15 @@ public:
     }
 };
 
+class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
+{
+public:
+  virtual cmGlobalGenerator* CreateGlobalGenerator() const;
+
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
+    cmGlobalXCodeGenerator().GetDocumentation(entry); }
+};
+
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
 {
@@ -132,7 +142,14 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
 }
 
 //----------------------------------------------------------------------------
-cmGlobalGenerator* cmGlobalXCodeGenerator::New()
+cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFacotry()
+{
+  return new Factory;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
+::CreateGlobalGenerator() const
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;

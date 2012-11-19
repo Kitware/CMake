@@ -23,7 +23,9 @@ class cmGlobalWatcomWMakeGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalWatcomWMakeGenerator();
-  static cmGlobalGenerator* New() { return new cmGlobalWatcomWMakeGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalWatcomWMakeGenerator>(); }
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalWatcomWMakeGenerator::GetActualName();}

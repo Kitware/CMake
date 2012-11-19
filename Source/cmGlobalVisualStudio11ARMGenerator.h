@@ -19,8 +19,9 @@ class cmGlobalVisualStudio11ARMGenerator :
 {
 public:
   cmGlobalVisualStudio11ARMGenerator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio11ARMGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio11ARMGenerator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
