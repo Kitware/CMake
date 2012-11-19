@@ -478,6 +478,8 @@ public:
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const char* config = 0);
 
+  std::vector<std::string> GetIncludeDirectories(const char *config);
+
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
