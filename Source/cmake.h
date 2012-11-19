@@ -17,6 +17,7 @@
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
 
+class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmCacheManager;
@@ -396,12 +397,9 @@ protected:
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
   typedef std::map<cmStdString,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
-
-  typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
-  typedef std::map<cmStdString,
-                   CreateGeneratorFunctionType> RegisteredGeneratorsMap;
+  typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
   RegisteredCommandsMap Commands;
-  RegisteredGeneratorsMap Generators;
+  RegisteredGeneratorsVector Generators;
   RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();
   void AddDefaultGenerators();

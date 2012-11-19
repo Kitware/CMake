@@ -23,8 +23,9 @@ class cmGlobalMSYSMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalMSYSMakefileGenerator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalMSYSMakefileGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalMSYSMakefileGenerator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {

@@ -23,8 +23,9 @@ class cmGlobalMinGWMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalMinGWMakefileGenerator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalMinGWMakefileGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalMinGWMakefileGenerator>(); }
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalMinGWMakefileGenerator::GetActualName();}

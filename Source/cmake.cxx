@@ -222,6 +222,11 @@ cmake::~cmake()
     {
     delete (*j).second;
     }
+  for(RegisteredGeneratorsVector::iterator j = this->Generators.begin();
+      j != this->Generators.end(); ++j)
+    {
+    delete *j;
+    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
 #endif
@@ -1869,10 +1874,10 @@ void cmake::AddDefaultExtraGenerators()
 //----------------------------------------------------------------------------
 void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 {
-  for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
+  for(RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
       i != this->Generators.end(); ++i)
     {
-    names.push_back(i->first);
+    (*i)->GetGenerators(names);
     }
   for(RegisteredExtraGeneratorsMap::const_iterator
       i = this->ExtraGenerators.begin();
@@ -1884,29 +1889,36 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
 {
-  cmGlobalGenerator* generator = 0;
   cmExternalMakefileProjectGenerator* extraGenerator = 0;
-  RegisteredGeneratorsMap::const_iterator genIt = this->Generators.find(name);
-  if(genIt == this->Generators.end())
+  RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
+                                            this->ExtraGenerators.find(name);
+  if (extraGenIt != this->ExtraGenerators.end())
     {
-    RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
-                                              this->ExtraGenerators.find(name);
-    if (extraGenIt == this->ExtraGenerators.end())
-      {
-      return 0;
-      }
     extraGenerator = (extraGenIt->second)();
-    genIt=this->Generators.find(extraGenerator->GetGlobalGeneratorName(name));
-    if(genIt == this->Generators.end())
-      {
-      delete extraGenerator;
-      return 0;
-      }
-  }
+    name = extraGenerator->GetGlobalGeneratorName(name);
+    }
 
-  generator = (genIt->second)();
-  generator->SetCMakeInstance(this);
-  generator->SetExternalMakefileProjectGenerator(extraGenerator);
+  cmGlobalGenerator* generator = 0;
+  for (RegisteredGeneratorsVector::const_iterator i =
+    this->Generators.begin(); i != this->Generators.end(); ++i)
+    {
+    generator = (*i)->CreateGlobalGenerator(name);
+    if (generator)
+      {
+      break;
+      }
+    }
+
+  if (generator)
+    {
+    generator->SetCMakeInstance(this);
+    generator->SetExternalMakefileProjectGenerator(extraGenerator);
+    }
+  else
+    {
+    delete extraGenerator;
+    }
+
   return generator;
 }
 
@@ -2570,55 +2582,55 @@ void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # if !defined(CMAKE_BOOT_MINGW)
-  this->Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
-    &cmGlobalVisualStudio6Generator::New;
-  this->Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
-    &cmGlobalVisualStudio7Generator::New;
-  this->Generators[cmGlobalVisualStudio10Generator::GetActualName()] =
-    &cmGlobalVisualStudio10Generator::New;
-  this->Generators[cmGlobalVisualStudio10IA64Generator::GetActualName()] =
-    &cmGlobalVisualStudio10IA64Generator::New;
-  this->Generators[cmGlobalVisualStudio10Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio10Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio11Generator::GetActualName()] =
-    &cmGlobalVisualStudio11Generator::New;
-  this->Generators[cmGlobalVisualStudio11Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio11Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio11ARMGenerator::GetActualName()] =
-    &cmGlobalVisualStudio11ARMGenerator::New;
-  this->Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
-    &cmGlobalVisualStudio71Generator::New;
-  this->Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
-    &cmGlobalVisualStudio8Generator::New;
-  this->Generators[cmGlobalVisualStudio9Generator::GetActualName()] =
-    &cmGlobalVisualStudio9Generator::New;
-  this->Generators[cmGlobalVisualStudio9IA64Generator::GetActualName()] =
-    &cmGlobalVisualStudio9IA64Generator::New;
-  this->Generators[cmGlobalVisualStudio9Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio9Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio8Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio8Win64Generator::New;
-  this->Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
-    &cmGlobalBorlandMakefileGenerator::New;
-  this->Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
-    &cmGlobalNMakeMakefileGenerator::New;
-  this->Generators[cmGlobalJOMMakefileGenerator::GetActualName()] =
-    &cmGlobalJOMMakefileGenerator::New;
-  this->Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
-    &cmGlobalWatcomWMakeGenerator::New;
+  this->Generators.push_back(
+    cmGlobalVisualStudio6Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio7Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio10Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio10IA64Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio10Win64Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio11Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio11Win64Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio11ARMGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio71Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio8Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio9Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio9IA64Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio9Win64Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio8Win64Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalBorlandMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalNMakeMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalJOMMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalWatcomWMakeGenerator::NewFactory());
 # endif
-  this->Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
-    &cmGlobalMSYSMakefileGenerator::New;
-  this->Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =
-    &cmGlobalMinGWMakefileGenerator::New;
+  this->Generators.push_back(
+    cmGlobalMSYSMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif
-  this->Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
-    &cmGlobalUnixMakefileGenerator3::New;
-  this->Generators[cmGlobalNinjaGenerator::GetActualName()] =
-    &cmGlobalNinjaGenerator::New;
+  this->Generators.push_back(
+    cmGlobalUnixMakefileGenerator3::NewFactory());
+  this->Generators.push_back(
+    cmGlobalNinjaGenerator::NewFactory());
 #ifdef CMAKE_USE_XCODE
-  this->Generators[cmGlobalXCodeGenerator::GetActualName()] =
-    &cmGlobalXCodeGenerator::New;
+  this->Generators.push_back(
+    cmGlobalXCodeGenerator::NewFactory());
 #endif
 }
 
@@ -2712,17 +2724,15 @@ void cmake::GetPropertiesDocumentation(std::map<std::string,
 
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
 {
-  for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
-      i != this->Generators.end(); ++i)
+  for(RegisteredGeneratorsVector::const_iterator i =
+      this->Generators.begin(); i != this->Generators.end(); ++i)
     {
     cmDocumentationEntry e;
-    cmGlobalGenerator* generator = (i->second)();
-    generator->GetDocumentation(e);
-    delete generator;
+    (*i)->GetDocumentation(e);
     v.push_back(e);
     }
-  for(RegisteredExtraGeneratorsMap::const_iterator
-      i = this->ExtraGenerators.begin(); i != this->ExtraGenerators.end(); ++i)
+  for(RegisteredExtraGeneratorsMap::const_iterator i =
+      this->ExtraGenerators.begin(); i != this->ExtraGenerators.end(); ++i)
     {
     cmDocumentationEntry e;
     cmExternalMakefileProjectGenerator* generator = (i->second)();

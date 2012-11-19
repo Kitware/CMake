@@ -25,8 +25,9 @@ class cmGlobalVisualStudio9Generator :
 {
 public:
   cmGlobalVisualStudio9Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio9Generator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio9Generator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {

@@ -25,8 +25,9 @@ class cmGlobalVisualStudio10Generator :
 {
 public:
   cmGlobalVisualStudio10Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio10Generator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio10Generator>(); }
 
   virtual std::string
   GenerateBuildCommand(const char* makeProgram,

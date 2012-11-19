@@ -23,8 +23,9 @@ class cmGlobalBorlandMakefileGenerator : public cmGlobalNMakeMakefileGenerator
 {
 public:
   cmGlobalBorlandMakefileGenerator();
-  static cmGlobalGenerator* New()
-    { return new cmGlobalBorlandMakefileGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalBorlandMakefileGenerator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
