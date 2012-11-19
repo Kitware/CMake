@@ -37,7 +37,6 @@
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				SubSystem="1"
-				TargetMachine="@id_machine_7@"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
