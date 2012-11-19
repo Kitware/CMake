@@ -817,6 +817,7 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.clear();
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
+  this->ImportedTargets.clear();
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
