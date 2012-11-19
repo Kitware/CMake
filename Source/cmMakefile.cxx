@@ -1485,9 +1485,12 @@ void cmMakefile::InitializeFromParent()
   // Initialize definitions with the closure of the parent scope.
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
-  // copy include paths
-  this->SetProperty("INCLUDE_DIRECTORIES",
-                    parent->GetProperty("INCLUDE_DIRECTORIES"));
+  const std::vector<IncludeDirectoriesEntry> parentIncludes =
+                                        parent->GetIncludeDirectoriesEntries();
+  this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
+                                       parentIncludes.begin(),
+                                       parentIncludes.end());
+
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
   // define flags
@@ -1613,41 +1616,6 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
 }
 
 //----------------------------------------------------------------------------
-void AddStringToProperty(cmProperty *prop, const char* name, const char* s,
-                         bool before)
-{
-  if (!prop)
-    {
-    return;
-    }
-
-  // Don't worry about duplicates at this point. We eliminate them when
-  // we convert the property to a vector in GetIncludeDirectories.
-
-  if (before)
-    {
-    const char *val = prop->GetValue();
-    cmOStringStream oss;
-
-    if(val && *val)
-      {
-      oss << s << ";" << val;
-      }
-    else
-      {
-      oss << s;
-      }
-
-    std::string newVal = oss.str();
-    prop->Set(name, newVal.c_str());
-    }
-  else
-    {
-    prop->Append(name, s);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
   if (!inc)
@@ -1655,18 +1623,21 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
     return;
     }
 
-  // Directory property:
-  cmProperty *prop =
-    this->GetProperties().GetOrCreateProperty("INCLUDE_DIRECTORIES");
-  AddStringToProperty(prop, "INCLUDE_DIRECTORIES", inc, before);
+  std::vector<IncludeDirectoriesEntry>::iterator position =
+                               before ? this->IncludeDirectoriesEntries.begin()
+                                      : this->IncludeDirectoriesEntries.end();
+
+  cmListFileBacktrace lfbt;
+  this->GetBacktrace(lfbt);
+  IncludeDirectoriesEntry entry(inc, lfbt);
+  this->IncludeDirectoriesEntries.insert(position, entry);
 
   // Property on each target:
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    prop = t.GetProperties().GetOrCreateProperty("INCLUDE_DIRECTORIES");
-    AddStringToProperty(prop, "INCLUDE_DIRECTORIES", inc, before);
+    t.InsertInclude(entry, before);
     }
 }
 
@@ -3451,6 +3422,15 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
+  if (propname == "INCLUDE_DIRECTORIES")
+    {
+    this->IncludeDirectoriesEntries.clear();
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->IncludeDirectoriesEntries.push_back(
+                                        IncludeDirectoriesEntry(value, lfbt));
+    return;
+    }
 
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
@@ -3482,6 +3462,14 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
   // handle special props
   std::string propname = prop;
 
+  if (propname == "INCLUDE_DIRECTORIES")
+    {
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->IncludeDirectoriesEntries.push_back(
+                                        IncludeDirectoriesEntry(value, lfbt));
+    return;
+    }
   if ( propname == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
@@ -3591,6 +3579,20 @@ const char *cmMakefile::GetProperty(const char* prop,
       str << it->c_str();
       }
     output = str.str();
+    return output.c_str();
+    }
+  else if (!strcmp("INCLUDE_DIRECTORIES",prop))
+    {
+    std::string sep;
+    for (std::vector<IncludeDirectoriesEntry>::const_iterator
+        it = this->IncludeDirectoriesEntries.begin(),
+        end = this->IncludeDirectoriesEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
+      sep = ";";
+      }
     return output.c_str();
     }
 
