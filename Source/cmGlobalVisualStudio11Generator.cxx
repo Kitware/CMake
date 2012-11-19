@@ -13,29 +13,29 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 
-static const char vs11Win32generaorName[] = "Visual Studio 11";
-static const char vs11Win64generaorName[] = "Visual Studio 11 Win64";
-static const char vs11ARMgeneraorName[] = "Visual Studio 11 ARM";
+static const char vs11Win32generatorName[] = "Visual Studio 11";
+static const char vs11Win64generatorName[] = "Visual Studio 11 Win64";
+static const char vs11ARMgeneratorName[] = "Visual Studio 11 ARM";
 
 class cmGlobalVisualStudio11Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs11Win32generaorName))
+    if(!strcmp(name, vs11Win32generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win32generaorName, NULL, NULL);
+        vs11Win32generatorName, NULL, NULL);
       }
-    if(!strcmp(name, vs11Win64generaorName))
+    if(!strcmp(name, vs11Win64generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win64generaorName, "x64", "CMAKE_FORCE_WIN64");
+        vs11Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(!strcmp(name, vs11ARMgeneraorName))
+    if(!strcmp(name, vs11ARMgeneratorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11ARMgeneraorName, "ARM", NULL);
+        vs11ARMgeneratorName, "ARM", NULL);
       }
     return 0;
   }
@@ -51,9 +51,9 @@ public:
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs11Win32generaorName);
-    names.push_back(vs11Win64generaorName);
-    names.push_back(vs11ARMgeneraorName); }
+    names.push_back(vs11Win32generatorName);
+    names.push_back(vs11Win64generatorName);
+    names.push_back(vs11ARMgeneratorName); }
 };
 
 //----------------------------------------------------------------------------
