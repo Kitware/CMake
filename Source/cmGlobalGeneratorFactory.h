@@ -26,6 +26,8 @@ struct cmDocumentationEntry;
 class cmGlobalGeneratorFactory
 {
 public:
+  virtual ~cmGlobalGeneratorFactory() {}
+
   /** Create a GlobalGenerator */
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* n) const = 0;
 
