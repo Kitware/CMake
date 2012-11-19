@@ -1877,7 +1877,7 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
   for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
       i != this->Generators.end(); ++i)
     {
-    names.push_back(i->first);
+    i->second->GetGenerators(names);
     }
   for(RegisteredExtraGeneratorsMap::const_iterator
       i = this->ExtraGenerators.begin();
