@@ -1889,29 +1889,32 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
 {
-  cmGlobalGenerator* generator = 0;
   cmExternalMakefileProjectGenerator* extraGenerator = 0;
-  RegisteredGeneratorsMap::const_iterator genIt = this->Generators.find(name);
-  if(genIt == this->Generators.end())
+  RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
+                                            this->ExtraGenerators.find(name);
+  if (extraGenIt != this->ExtraGenerators.end())
     {
-    RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
-                                              this->ExtraGenerators.find(name);
-    if (extraGenIt == this->ExtraGenerators.end())
-      {
-      return 0;
-      }
     extraGenerator = (extraGenIt->second)();
-    genIt=this->Generators.find(extraGenerator->GetGlobalGeneratorName(name));
-    if(genIt == this->Generators.end())
-      {
-      delete extraGenerator;
-      return 0;
-      }
-  }
+    name = extraGenerator->GetGlobalGeneratorName(name);
+    }
 
-  generator = genIt->second->CreateGlobalGenerator();
-  generator->SetCMakeInstance(this);
-  generator->SetExternalMakefileProjectGenerator(extraGenerator);
+  cmGlobalGenerator* generator = 0;
+  RegisteredGeneratorsMap::const_iterator genIt = this->Generators.find(name);
+  if(genIt != this->Generators.end())
+    {
+    generator = genIt->second->CreateGlobalGenerator();
+    }
+
+  if (generator)
+    {
+    generator->SetCMakeInstance(this);
+    generator->SetExternalMakefileProjectGenerator(extraGenerator);
+    }
+  else
+    {
+    delete extraGenerator;
+    }
+
   return generator;
 }
 
