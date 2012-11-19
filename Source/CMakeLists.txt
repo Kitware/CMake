@@ -201,6 +201,7 @@ set(SRCS
   cmGeneratorTarget.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
+  cmGlobalGeneratorFactory.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmGraphAdjacencyList.h

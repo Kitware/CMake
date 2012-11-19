@@ -23,8 +23,9 @@ class cmGlobalJOMMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalJOMMakefileGenerator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalJOMMakefileGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalJOMMakefileGenerator>(); }
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalJOMMakefileGenerator::GetActualName();}

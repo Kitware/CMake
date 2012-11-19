@@ -222,6 +222,11 @@ cmake::~cmake()
     {
     delete (*j).second;
     }
+  for(RegisteredGeneratorsMap::iterator j = this->Generators.begin();
+      j != this->Generators.end(); ++j)
+    {
+    delete (*j).second;
+    }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
 #endif
@@ -1904,7 +1909,7 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
       }
   }
 
-  generator = (genIt->second)();
+  generator = genIt->second->CreateGlobalGenerator();
   generator->SetCMakeInstance(this);
   generator->SetExternalMakefileProjectGenerator(extraGenerator);
   return generator;
@@ -2571,54 +2576,54 @@ void cmake::AddDefaultGenerators()
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # if !defined(CMAKE_BOOT_MINGW)
   this->Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
-    &cmGlobalVisualStudio6Generator::New;
+    cmGlobalVisualStudio6Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
-    &cmGlobalVisualStudio7Generator::New;
+    cmGlobalVisualStudio7Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio10Generator::GetActualName()] =
-    &cmGlobalVisualStudio10Generator::New;
+    cmGlobalVisualStudio10Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio10IA64Generator::GetActualName()] =
-    &cmGlobalVisualStudio10IA64Generator::New;
+    cmGlobalVisualStudio10IA64Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio10Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio10Win64Generator::New;
+    cmGlobalVisualStudio10Win64Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio11Generator::GetActualName()] =
-    &cmGlobalVisualStudio11Generator::New;
+    cmGlobalVisualStudio11Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio11Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio11Win64Generator::New;
+    cmGlobalVisualStudio11Win64Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio11ARMGenerator::GetActualName()] =
-    &cmGlobalVisualStudio11ARMGenerator::New;
+    cmGlobalVisualStudio11ARMGenerator::NewFactory();
   this->Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
-    &cmGlobalVisualStudio71Generator::New;
+    cmGlobalVisualStudio71Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
-    &cmGlobalVisualStudio8Generator::New;
+    cmGlobalVisualStudio8Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio9Generator::GetActualName()] =
-    &cmGlobalVisualStudio9Generator::New;
+    cmGlobalVisualStudio9Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio9IA64Generator::GetActualName()] =
-    &cmGlobalVisualStudio9IA64Generator::New;
+    cmGlobalVisualStudio9IA64Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio9Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio9Win64Generator::New;
+    cmGlobalVisualStudio9Win64Generator::NewFactory();
   this->Generators[cmGlobalVisualStudio8Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio8Win64Generator::New;
+    cmGlobalVisualStudio8Win64Generator::NewFactory();
   this->Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
-    &cmGlobalBorlandMakefileGenerator::New;
+    cmGlobalBorlandMakefileGenerator::NewFactory();
   this->Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
-    &cmGlobalNMakeMakefileGenerator::New;
+    cmGlobalNMakeMakefileGenerator::NewFactory();
   this->Generators[cmGlobalJOMMakefileGenerator::GetActualName()] =
-    &cmGlobalJOMMakefileGenerator::New;
+    cmGlobalJOMMakefileGenerator::NewFactory();
   this->Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
-    &cmGlobalWatcomWMakeGenerator::New;
+    cmGlobalWatcomWMakeGenerator::NewFactory();
 # endif
   this->Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
-    &cmGlobalMSYSMakefileGenerator::New;
+    cmGlobalMSYSMakefileGenerator::NewFactory();
   this->Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =
-    &cmGlobalMinGWMakefileGenerator::New;
+    cmGlobalMinGWMakefileGenerator::NewFactory();
 #endif
   this->Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
-    &cmGlobalUnixMakefileGenerator3::New;
+    cmGlobalUnixMakefileGenerator3::NewFactory();
   this->Generators[cmGlobalNinjaGenerator::GetActualName()] =
-    &cmGlobalNinjaGenerator::New;
+    cmGlobalNinjaGenerator::NewFactory();
 #ifdef CMAKE_USE_XCODE
   this->Generators[cmGlobalXCodeGenerator::GetActualName()] =
-    &cmGlobalXCodeGenerator::New;
+    cmGlobalXCodeGenerator::NewFactory();
 #endif
 }
 
@@ -2716,9 +2721,7 @@ void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
       i != this->Generators.end(); ++i)
     {
     cmDocumentationEntry e;
-    cmGlobalGenerator* generator = (i->second)();
-    generator->GetDocumentation(e);
-    delete generator;
+    i->second->GetDocumentation(e);
     v.push_back(e);
     }
   for(RegisteredExtraGeneratorsMap::const_iterator

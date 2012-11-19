@@ -25,8 +25,9 @@ class cmGlobalVisualStudio9IA64Generator :
 {
 public:
   cmGlobalVisualStudio9IA64Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio9IA64Generator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio9IA64Generator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
