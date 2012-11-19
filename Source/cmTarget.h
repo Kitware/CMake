@@ -15,6 +15,7 @@
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
+#include "cmMakefileIncludeDirectoriesEntry.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -470,6 +471,9 @@ public:
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const char* config = 0);
 
+  std::vector<std::string> GetIncludeDirectories(const char *config);
+  void InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
+                     bool before = false);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
