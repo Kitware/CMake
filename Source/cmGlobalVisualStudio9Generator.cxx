@@ -15,29 +15,29 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-static const char vs9Win32generaorName[] = "Visual Studio 9 2008";
-static const char vs9Win64generaorName[] = "Visual Studio 8 2005 Win64";
-static const char vs9IA64generaorName[] = "Visual Studio 9 2008 IA64";
+static const char vs9Win32generatorName[] = "Visual Studio 9 2008";
+static const char vs9Win64generatorName[] = "Visual Studio 8 2005 Win64";
+static const char vs9IA64generatorName[] = "Visual Studio 9 2008 IA64";
 
 class cmGlobalVisualStudio9Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs9Win32generaorName))
+    if(!strcmp(name, vs9Win32generatorName))
       {
       return new cmGlobalVisualStudio9Generator(
-        vs9Win32generaorName, NULL, NULL);
+        vs9Win32generatorName, NULL, NULL);
       }
-    if(!strcmp(name, vs9Win64generaorName))
+    if(!strcmp(name, vs9Win64generatorName))
       {
       return new cmGlobalVisualStudio9Generator(
-        vs9Win64generaorName, "x64", "CMAKE_FORCE_WIN64");
+        vs9Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(!strcmp(name, vs9IA64generaorName))
+    if(!strcmp(name, vs9IA64generatorName))
       {
       return new cmGlobalVisualStudio9Generator(
-        vs9IA64generaorName, "Itanium", "CMAKE_FORCE_IA64");
+        vs9IA64generatorName, "Itanium", "CMAKE_FORCE_IA64");
       }
     return 0;
   }
@@ -53,9 +53,9 @@ public:
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs9Win32generaorName);
-    names.push_back(vs9Win64generaorName);
-    names.push_back(vs9IA64generaorName); }
+    names.push_back(vs9Win32generatorName);
+    names.push_back(vs9Win64generatorName);
+    names.push_back(vs9IA64generatorName); }
 };
 
 //----------------------------------------------------------------------------

@@ -16,23 +16,23 @@
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 
-static const char vs8Win32generaorName[] = "Visual Studio 8 2005";
-static const char vs8Win64generaorName[] = "Visual Studio 8 2005 Win64";
+static const char vs8Win32generatorName[] = "Visual Studio 8 2005";
+static const char vs8Win64generatorName[] = "Visual Studio 8 2005 Win64";
 
 class cmGlobalVisualStudio8Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs8Win32generaorName))
+    if(!strcmp(name, vs8Win32generatorName))
       {
       return new cmGlobalVisualStudio8Generator(
-        vs8Win32generaorName, NULL, NULL);
+        vs8Win32generatorName, NULL, NULL);
       }
-    if(!strcmp(name, vs8Win64generaorName))
+    if(!strcmp(name, vs8Win64generatorName))
       {
       return new cmGlobalVisualStudio8Generator(
-        vs8Win64generaorName, "x64", "CMAKE_FORCE_WIN64");
+        vs8Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
     return 0;
   }
@@ -48,8 +48,8 @@ public:
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs8Win32generaorName);
-    names.push_back(vs8Win64generaorName); }
+    names.push_back(vs8Win32generatorName);
+    names.push_back(vs8Win64generatorName); }
 };
 
 //----------------------------------------------------------------------------
