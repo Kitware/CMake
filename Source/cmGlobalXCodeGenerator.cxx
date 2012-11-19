@@ -145,7 +145,7 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
 }
 
 //----------------------------------------------------------------------------
-cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFacotry()
+cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 {
   return new Factory;
 }
