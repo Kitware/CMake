@@ -16,11 +16,64 @@
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 
+static const char vs8Win32generaorName[] = "Visual Studio 8 2005";
+static const char vs8Win64generaorName[] = "Visual Studio 8 2005 Win64";
+
+class cmGlobalVisualStudio8Generator::Factory
+  : public cmGlobalGeneratorFactory
+{
+public:
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
+    if(!strcmp(name, vs8Win32generaorName))
+      {
+      return new cmGlobalVisualStudio8Generator(
+        vs8Win32generaorName, NULL, NULL);
+      }
+    if(!strcmp(name, vs8Win64generaorName))
+      {
+      return new cmGlobalVisualStudio8Generator(
+        vs8Win64generaorName, "x64", "CMAKE_FORCE_WIN64");
+      }
+    return 0;
+  }
+
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
+    entry.Name = "Visual Studio 8 2005";
+    entry.Brief = "Generates Visual Studio 8 2005 project files.";
+    entry.Full =
+      "It is possible to append a space followed by the platform name "
+      "to create project files for a specific target platform. E.g. "
+      "\"Visual Studio 8 2005 Win64\" will create project files for "
+      "the x64 processor.";
+  }
+
+  virtual void GetGenerators(std::vector<std::string>& names) const {
+    names.push_back(vs8Win32generaorName);
+    names.push_back(vs8Win64generaorName); }
+};
+
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
+cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
+{
+  return new Factory;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
+  const char* name, const char* architectureId,
+  const char* additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
+  this->Name = name;
+  if (architectureId)
+    {
+    this->ArchitectureId = architectureId;
+    }
+  if (additionalPlatformDefinition)
+    {
+    this->AdditionalPlatformDefinition = additionalPlatformDefinition;
+    }
 }
 
 //----------------------------------------------------------------------------

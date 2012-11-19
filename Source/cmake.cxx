@@ -63,15 +63,8 @@
 #    include "cmGlobalVisualStudio71Generator.h"
 #    include "cmGlobalVisualStudio8Generator.h"
 #    include "cmGlobalVisualStudio9Generator.h"
-#    include "cmGlobalVisualStudio9IA64Generator.h"
-#    include "cmGlobalVisualStudio9Win64Generator.h"
 #    include "cmGlobalVisualStudio10Generator.h"
-#    include "cmGlobalVisualStudio10IA64Generator.h"
-#    include "cmGlobalVisualStudio10Win64Generator.h"
 #    include "cmGlobalVisualStudio11Generator.h"
-#    include "cmGlobalVisualStudio11Win64Generator.h"
-#    include "cmGlobalVisualStudio11ARMGenerator.h"
-#    include "cmGlobalVisualStudio8Win64Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
@@ -2589,27 +2582,13 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(
     cmGlobalVisualStudio10Generator::NewFactory());
   this->Generators.push_back(
-    cmGlobalVisualStudio10IA64Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio10Win64Generator::NewFactory());
-  this->Generators.push_back(
     cmGlobalVisualStudio11Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio11Win64Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio11ARMGenerator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio71Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio8Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio9Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio9IA64Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio9Win64Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio8Win64Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(
