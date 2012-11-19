@@ -289,6 +289,22 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 
+static const struct TargetDefinedNode : public cmGeneratorExpressionNode
+{
+  TargetDefinedNode() {}
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return context->Makefile->FindTargetToUse(parameters.front().c_str())
+      ? "1" : "0";
+  }
+} targetDefinedNode;
+
 //----------------------------------------------------------------------------
 static const char* targetPropertyTransitiveWhitelist[] = {
     "INTERFACE_INCLUDE_DIRECTORIES"
@@ -702,6 +718,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &buildInterfaceNode;
   else if (identifier == "INSTALL_INTERFACE")
     return &installInterfaceNode;
+  else if (identifier == "TARGET_DEFINED")
+    return &targetDefinedNode;
   return 0;
 
 }
