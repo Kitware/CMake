@@ -16,8 +16,61 @@
 #include "cmSourceFile.h"
 #include "cmake.h"
 
+static const char vs10Win32generaorName[] = "Visual Studio 10";
+static const char vs10Win64generaorName[] = "Visual Studio 10 Win64";
+static const char vs10IA64generaorName[] = "Visual Studio 10 IA64";
 
-cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator()
+class cmGlobalVisualStudio10Generator::Factory
+  : public cmGlobalGeneratorFactory
+{
+public:
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
+    if(!strcmp(name, vs10Win32generaorName))
+      {
+      return new cmGlobalVisualStudio10Generator(
+        vs10Win32generaorName, NULL, NULL);
+      }
+    if(!strcmp(name, vs10Win64generaorName))
+      {
+      return new cmGlobalVisualStudio10Generator(
+        vs10Win64generaorName, "x64", "CMAKE_FORCE_WIN64");
+      }
+    if(!strcmp(name, vs10IA64generaorName))
+      {
+      return new cmGlobalVisualStudio10Generator(
+        vs10IA64generaorName, "Itanium", "CMAKE_FORCE_IA64");
+      }
+    return 0;
+  }
+
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
+    entry.Name = "Visual Studio 10";
+    entry.Brief = "Generates Visual Studio 10 project files.";
+    entry.Full =
+      "It is possible to append a space followed by the platform name "
+      "to create project files for a specific target platform. E.g. "
+      "\"Visual Studio 10 Win64\" will create project files for "
+      "the x64 processor; \"Visual Studio 10 IA64\" for Itanium.";
+  }
+
+  virtual void GetGenerators(std::vector<std::string>& names) const {
+    names.push_back(vs10Win32generaorName);
+    names.push_back(vs10Win64generaorName);
+    names.push_back(vs10IA64generaorName); }
+};
+
+//----------------------------------------------------------------------------
+cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
+{
+  return new Factory;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
+  const char* name, const char* architectureId,
+  const char* additionalPlatformDefinition)
+  : cmGlobalVisualStudio8Generator(name, architectureId,
+                                   additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
   std::string vc10Express;
@@ -88,18 +141,17 @@ void cmGlobalVisualStudio10Generator::Generate()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator
-::GetDocumentation(cmDocumentationEntry& entry)
-{
-  entry.Name = cmGlobalVisualStudio10Generator::GetActualName();
-  entry.Brief = "Generates Visual Studio 10 project files.";
-  entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
+  if(!strcmp(this->ArchitectureId, "Itanium") ||
+     !strcmp(this->ArchitectureId, "x64"))
+    {
+    if(this->IsExpressEdition() && !this->Find64BitTools(mf))
+      {
+      return;
+      }
+    }
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }
 

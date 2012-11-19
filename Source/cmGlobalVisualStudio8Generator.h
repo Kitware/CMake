@@ -23,17 +23,14 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  cmGlobalVisualStudio8Generator();
-  static cmGlobalGeneratorFactory* NewFactory() {
-    return new cmGlobalGeneratorSimpleFactory
-      <cmGlobalVisualStudio8Generator>(); }
+  cmGlobalVisualStudio8Generator(const char* name,
+    const char* architectureId, const char* additionalPlatformDefinition);
+  static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
-    return cmGlobalVisualStudio8Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 8 2005";}
+  virtual const char* GetName() const {return this->Name;}
 
-  virtual const char* GetPlatformName() const {return "Win32";}
+  const char* GetPlatformName() const;
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -82,5 +79,10 @@ protected:
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
                                    const char* path, cmTarget &t);
+
+  const char* Name;
+
+private:
+  class Factory;
 };
 #endif
