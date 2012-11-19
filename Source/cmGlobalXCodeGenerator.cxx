@@ -120,6 +120,9 @@ public:
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
     cmGlobalXCodeGenerator().GetDocumentation(entry); }
+
+  virtual void GetGenerators(std::vector<std::string>& names) const {
+    names.push_back(cmGlobalXCodeGenerator::GetActualName()); }
 };
 
 //----------------------------------------------------------------------------
