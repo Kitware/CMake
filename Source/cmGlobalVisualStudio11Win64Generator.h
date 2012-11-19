@@ -31,8 +31,6 @@ public:
   virtual const char* GetPlatformName() const {return "x64";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
+  static void GetDocumentation(cmDocumentationEntry& entry);
 };
 #endif

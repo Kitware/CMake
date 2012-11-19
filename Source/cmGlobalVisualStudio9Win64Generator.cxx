@@ -17,21 +17,14 @@
 cmGlobalVisualStudio9Win64Generator::cmGlobalVisualStudio9Win64Generator()
 {
   this->ArchitectureId = "x64";
+  this->AdditionalPlatformDefinition = "CMAKE_FORCE_WIN64";
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Win64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio9Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 9 2008 Win64 project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio9Win64Generator
-::AddPlatformDefinitions(cmMakefile* mf)
-{
-  cmGlobalVisualStudio9Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
 }

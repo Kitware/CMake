@@ -397,9 +397,9 @@ cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget* target)
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio6Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio6Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 6 project files.";
   entry.Full = "";
 }

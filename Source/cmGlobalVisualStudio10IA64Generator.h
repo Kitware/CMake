@@ -31,9 +31,7 @@ public:
   virtual const char* GetPlatformName() const {return "Itanium";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);

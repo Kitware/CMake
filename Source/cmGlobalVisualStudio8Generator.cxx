@@ -45,9 +45,9 @@ void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio8Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 8 2005 project files.";
   entry.Full = "";
 }

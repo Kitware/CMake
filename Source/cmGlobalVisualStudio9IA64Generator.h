@@ -37,12 +37,6 @@ public:
   virtual const char* GetPlatformName() const {return "Itanium";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-
-  /**
-   * Try to determine system infomation such as shared library
-   * extension, pthreads, byte order etc.
-   */
-  virtual void AddPlatformDefinitions(cmMakefile *);
+  static void GetDocumentation(cmDocumentationEntry& entry);
 };
 #endif

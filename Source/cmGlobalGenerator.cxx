@@ -1556,14 +1556,6 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     }
 }
 
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "";
-  entry.Full = "";
-}
-
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmLocalGenerator* gen)
 {

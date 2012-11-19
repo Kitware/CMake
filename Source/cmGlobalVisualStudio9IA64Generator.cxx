@@ -17,21 +17,14 @@
 cmGlobalVisualStudio9IA64Generator::cmGlobalVisualStudio9IA64Generator()
 {
   this->ArchitectureId = "Itanium";
+  this->AdditionalPlatformDefinition = "CMAKE_FORCE_IA64";
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9IA64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio9IA64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 9 2008 Itanium project files.";
   entry.Full = "";
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio9IA64Generator
-::AddPlatformDefinitions(cmMakefile* mf)
-{
-  cmGlobalVisualStudio9Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
 }
