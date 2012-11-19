@@ -24,6 +24,16 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
 }
 
 //----------------------------------------------------------------------------
+const char* cmGlobalVisualStudio8Generator::GetPlatformName() const
+{
+  if (!strcmp(this->ArchitectureId, "X86"))
+    {
+    return "Win32";
+    }
+  return this->ArchitectureId;
+}
+
+//----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {

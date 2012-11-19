@@ -34,8 +34,6 @@ public:
     return cmGlobalVisualStudio9IA64Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 9 2008 IA64";}
 
-  virtual const char* GetPlatformName() const {return "Itanium";}
-
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 };

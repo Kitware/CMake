@@ -28,8 +28,6 @@ public:
     return cmGlobalVisualStudio11ARMGenerator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 11 ARM";}
 
-  virtual const char* GetPlatformName() const {return "ARM";}
-
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 };

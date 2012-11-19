@@ -33,7 +33,7 @@ public:
     return cmGlobalVisualStudio8Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 8 2005";}
 
-  virtual const char* GetPlatformName() const {return "Win32";}
+  const char* GetPlatformName() const;
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
