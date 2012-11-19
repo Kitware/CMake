@@ -397,10 +397,9 @@ protected:
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
   typedef std::map<cmStdString,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
-  typedef std::map<cmStdString,
-                   cmGlobalGeneratorFactory*> RegisteredGeneratorsMap;
+  typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
   RegisteredCommandsMap Commands;
-  RegisteredGeneratorsMap Generators;
+  RegisteredGeneratorsVector Generators;
   RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();
   void AddDefaultGenerators();
