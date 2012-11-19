@@ -16,7 +16,7 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio10IA64Generator::cmGlobalVisualStudio10IA64Generator()
 {
-  this->ArchitectureId = "x64";
+  this->ArchitectureId = "Itanium";
   this->AdditionalPlatformDefinition = "CMAKE_FORCE_IA64";
 }
 
