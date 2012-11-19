@@ -42,9 +42,9 @@ cmLocalGenerator *cmGlobalVisualStudio9Generator::CreateLocalGenerator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio9Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 9 2008 project files.";
   entry.Full = "";
 }

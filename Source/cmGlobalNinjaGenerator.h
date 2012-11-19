@@ -178,7 +178,7 @@ public:
   static const char* GetActualName() { return "Ninja"; }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   /// Overloaded methods. @see cmGlobalGenerator::Generate()
   virtual void Generate();

@@ -119,7 +119,7 @@ public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const;
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    cmGlobalXCodeGenerator().GetDocumentation(entry); }
+    cmGlobalXCodeGenerator::GetDocumentation(entry); }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
     names.push_back(cmGlobalXCodeGenerator::GetActualName()); }
@@ -3496,9 +3496,8 @@ const char* cmGlobalXCodeGenerator::GetCMakeCFGIntDir() const
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
-  const
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalXCodeGenerator::GetActualName();
   entry.Brief = "Generate Xcode project files.";
   entry.Full = "";
 }

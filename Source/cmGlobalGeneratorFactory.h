@@ -49,7 +49,7 @@ public:
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    T().GetDocumentation(entry); }
+    T::GetDocumentation(entry); }
 
   /** Get the names of the current registered generators */
   virtual void GetGenerators(std::vector<std::string>& names) const {

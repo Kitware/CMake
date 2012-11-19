@@ -21,9 +21,9 @@ cmGlobalVisualStudio11ARMGenerator::cmGlobalVisualStudio11ARMGenerator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio11ARMGenerator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio11ARMGenerator::GetActualName();
   entry.Brief = "Generates Visual Studio 11 ARM project files.";
   entry.Full = "";
 }

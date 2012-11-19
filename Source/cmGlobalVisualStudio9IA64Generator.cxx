@@ -21,9 +21,9 @@ cmGlobalVisualStudio9IA64Generator::cmGlobalVisualStudio9IA64Generator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9IA64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio9IA64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 9 2008 Itanium project files.";
   entry.Full = "";
 }

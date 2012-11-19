@@ -21,9 +21,9 @@ cmGlobalVisualStudio11Win64Generator::cmGlobalVisualStudio11Win64Generator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio11Win64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio11Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 11 Win64 project files.";
   entry.Full = "";
 }

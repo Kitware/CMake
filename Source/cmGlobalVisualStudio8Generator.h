@@ -36,7 +36,7 @@ public:
   virtual const char* GetPlatformName() const {return "Win32";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();

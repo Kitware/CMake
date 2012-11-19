@@ -21,9 +21,9 @@ cmGlobalVisualStudio9Win64Generator::cmGlobalVisualStudio9Win64Generator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio9Win64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio9Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 9 2008 Win64 project files.";
   entry.Full = "";
 }

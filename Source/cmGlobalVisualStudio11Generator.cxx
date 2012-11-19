@@ -43,9 +43,9 @@ cmLocalGenerator *cmGlobalVisualStudio11Generator::CreateLocalGenerator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio11Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio11Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 11 project files.";
   entry.Full = "";
 }

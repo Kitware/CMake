@@ -35,7 +35,7 @@ public:
   static const char* GetActualName() {return "Visual Studio 9 2008";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();

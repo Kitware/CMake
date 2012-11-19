@@ -24,9 +24,9 @@ cmGlobalVisualStudio8Win64Generator::cmGlobalVisualStudio8Win64Generator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Win64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio8Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 8 2005 Win64 project files.";
   entry.Full = "";
 }

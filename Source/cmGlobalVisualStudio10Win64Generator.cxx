@@ -21,9 +21,9 @@ cmGlobalVisualStudio10Win64Generator::cmGlobalVisualStudio10Win64Generator()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Win64Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio10Win64Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 10 Win64 project files.";
   entry.Full = "";
 }

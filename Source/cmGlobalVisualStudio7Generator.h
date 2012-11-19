@@ -40,7 +40,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   /**
    * Try to determine system infomation such as shared library

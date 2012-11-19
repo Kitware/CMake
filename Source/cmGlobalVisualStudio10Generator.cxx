@@ -88,9 +88,9 @@ void cmGlobalVisualStudio10Generator::Generate()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio10Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 10 project files.";
   entry.Full = "";
 }

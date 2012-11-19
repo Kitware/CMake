@@ -33,7 +33,7 @@ public:
   virtual void WriteSLNHeader(std::ostream& fout);
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
