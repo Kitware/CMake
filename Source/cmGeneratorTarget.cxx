@@ -267,7 +267,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
                                               "INCLUDE_DIRECTORIES", 0, 0);
 
   cmSystemTools::ExpandListArgument(ge.Parse(prop)
-                                    .Evaluate(this->Makefile,
+                                    ->Evaluate(this->Makefile,
                                               config,
                                               false,
                                               this->Target,
@@ -315,7 +315,7 @@ std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
   cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                              this->GetName(),
                                              defPropName, 0, 0);
-  return ge.Parse(prop).Evaluate(this->Makefile,
+  return ge.Parse(prop)->Evaluate(this->Makefile,
                                  config,
                                  false,
                                  this->Target,
