@@ -28,16 +28,3 @@ void cmGlobalVisualStudio10IA64Generator
   entry.Brief = "Generates Visual Studio 10 Itanium project files.";
   entry.Full = "";
 }
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10IA64Generator
-::EnableLanguage(std::vector<std::string> const& languages,
-                 cmMakefile* mf, bool optional)
-{
-  if(this->IsExpressEdition() && !this->Find64BitTools(mf))
-    {
-    return;
-    }
-  this->cmGlobalVisualStudio10Generator
-    ::EnableLanguage(languages, mf, optional);
-}
