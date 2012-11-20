@@ -492,6 +492,7 @@ static const char* targetPolicyWhitelist[] = {
     "CMP0003"
   , "CMP0004"
   , "CMP0008"
+  , "CMP0020"
 };
 
 cmPolicies::PolicyStatus statusForTarget(cmTarget *tgt, const char *policy)
@@ -505,6 +506,7 @@ cmPolicies::PolicyStatus statusForTarget(cmTarget *tgt, const char *policy)
   RETURN_POLICY(CMP0003)
   RETURN_POLICY(CMP0004)
   RETURN_POLICY(CMP0008)
+  RETURN_POLICY(CMP0020)
 
 #undef RETURN_POLICY
 
@@ -523,6 +525,7 @@ cmPolicies::PolicyID policyForString(const char *policy_id)
   RETURN_POLICY_ID(CMP0003)
   RETURN_POLICY_ID(CMP0004)
   RETURN_POLICY_ID(CMP0008)
+  RETURN_POLICY_ID(CMP0020)
 
 #undef RETURN_POLICY_ID
 
@@ -575,8 +578,8 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
       }
     reportError(context, content->GetOriginalExpression(),
       "$<TARGET_POLICY:prop> may only be used with a limited number of "
-      "policies.  Currently it may be used with policies CMP0003, CMP0004 "
-      "and CMP0008."
+      "policies.  Currently it may be used with policies CMP0003, CMP0004, "
+      "CMP0008 and CMP0020."
       );
     return std::string();
   }
