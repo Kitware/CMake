@@ -87,6 +87,7 @@ protected:
                                    const char* path, cmTarget &t);
 
   std::string Name;
+  std::string PlatformName;
   std::string WindowsCEVersion;
 
 private:
