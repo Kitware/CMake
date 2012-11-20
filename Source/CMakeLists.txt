@@ -353,6 +353,8 @@ if (WIN32)
       cmLocalVisualStudio7Generator.h
       cmLocalVisualStudioGenerator.cxx
       cmLocalVisualStudioGenerator.h
+      cmVisualStudioWCEPlatformParser.h
+      cmVisualStudioWCEPlatformParser.cxx
       cmWin32ProcessExecution.cxx
       cmWin32ProcessExecution.h
       )
