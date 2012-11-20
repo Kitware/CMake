@@ -101,7 +101,7 @@ protected:
   std::string GetUtilityDepend(cmTarget* target);
   typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
-  const char* ArchitectureId;
+  std::string ArchitectureId;
   const char* AdditionalPlatformDefinition;
 
 private:
