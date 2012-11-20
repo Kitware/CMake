@@ -65,6 +65,9 @@ public:
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
 
+  /** Get the top-level registry key for the given VS version.  */
+  static std::string GetRegistryBase(const char* version);
+
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return true; }

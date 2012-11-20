@@ -33,9 +33,16 @@ cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 {
+  return cmGlobalVisualStudioGenerator::GetRegistryBase(
+    this->GetIDEVersion());
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
+  const char* version)
+{
   std::string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
-  key += this->GetIDEVersion();
-  return key;
+  return key + version;
 }
 
 //----------------------------------------------------------------------------
