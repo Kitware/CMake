@@ -13,6 +13,7 @@
 #define cmGlobalVisualStudio7Generator_h
 
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
 
 class cmTarget;
 struct cmIDEFlagTable;
@@ -26,8 +27,9 @@ class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
   cmGlobalVisualStudio7Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio7Generator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio7Generator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
@@ -38,7 +40,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   /**
    * Try to determine system infomation such as shared library

@@ -809,9 +809,9 @@ std::vector<std::string> *cmGlobalVisualStudio7Generator::GetConfigurations()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio7Generator::GetActualName();
   entry.Brief = "Generates Visual Studio .NET 2002 project files.";
   entry.Full = "";
 }

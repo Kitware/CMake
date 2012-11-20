@@ -201,6 +201,7 @@ set(SRCS
   cmGeneratorTarget.h
   cmGlobalGenerator.cxx
   cmGlobalGenerator.h
+  cmGlobalGeneratorFactory.h
   cmGlobalUnixMakefileGenerator3.cxx
   cmGlobalUnixMakefileGenerator3.h
   cmGraphAdjacencyList.h
@@ -330,12 +331,6 @@ if (WIN32)
       cmGlobalVisualStudio8Generator.h
       cmGlobalVisualStudio9Generator.cxx
       cmGlobalVisualStudio9Generator.h
-      cmGlobalVisualStudio8Win64Generator.cxx
-      cmGlobalVisualStudio8Win64Generator.h
-      cmGlobalVisualStudio9Win64Generator.cxx
-      cmGlobalVisualStudio9Win64Generator.h
-      cmGlobalVisualStudio9IA64Generator.cxx
-      cmGlobalVisualStudio9IA64Generator.h
       cmVisualStudioGeneratorOptions.h
       cmVisualStudioGeneratorOptions.cxx
       cmVisualStudio10TargetGenerator.h
@@ -344,16 +339,8 @@ if (WIN32)
       cmLocalVisualStudio10Generator.h
       cmGlobalVisualStudio10Generator.h
       cmGlobalVisualStudio10Generator.cxx
-      cmGlobalVisualStudio10Win64Generator.h
-      cmGlobalVisualStudio10Win64Generator.cxx
-      cmGlobalVisualStudio10IA64Generator.h
-      cmGlobalVisualStudio10IA64Generator.cxx
       cmGlobalVisualStudio11Generator.h
       cmGlobalVisualStudio11Generator.cxx
-      cmGlobalVisualStudio11Win64Generator.h
-      cmGlobalVisualStudio11Win64Generator.cxx
-      cmGlobalVisualStudio11ARMGenerator.h
-      cmGlobalVisualStudio11ARMGenerator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

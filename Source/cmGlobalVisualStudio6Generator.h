@@ -13,6 +13,7 @@
 #define cmGlobalVisualStudio6Generator_h
 
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmGlobalGeneratorFactory.h"
 
 class cmTarget;
 
@@ -25,8 +26,9 @@ class cmGlobalVisualStudio6Generator : public cmGlobalVisualStudioGenerator
 {
 public:
   cmGlobalVisualStudio6Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio6Generator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio6Generator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
@@ -34,7 +36,7 @@ public:
   static const char* GetActualName() {return "Visual Studio 6";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
