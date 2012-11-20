@@ -58,6 +58,7 @@ public:
 
     cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
       name, parser.GetArchitectureFamily(), NULL);
+    ret->PlatformName = p;
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -114,6 +115,10 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
 //----------------------------------------------------------------------------
 const char* cmGlobalVisualStudio8Generator::GetPlatformName() const
 {
+  if (!this->PlatformName.empty())
+    {
+    return this->PlatformName.c_str();
+    }
   if (this->ArchitectureId == "X86")
     {
     return "Win32";
