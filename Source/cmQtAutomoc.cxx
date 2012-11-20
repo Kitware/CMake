@@ -85,6 +85,18 @@ static std::string extractSubDir(const std::string& absPath,
 }
 
 
+static void copyTargetProperty(cmTarget* destinationTarget,
+                               cmTarget* sourceTarget,
+                               const char* propertyName)
+{
+  const char* propertyValue = sourceTarget->GetProperty(propertyName);
+  if (propertyValue)
+    {
+    destinationTarget->SetProperty(propertyName, propertyValue);
+    }
+}
+
+
 cmQtAutomoc::cmQtAutomoc()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,ColorOutput(true)
@@ -152,9 +164,13 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   std::string automocComment = "Automoc for target ";
   automocComment += targetName;
 
-  makefile->AddUtilityCommand(automocTargetName.c_str(), true,
+  cmTarget* automocTarget = makefile->AddUtilityCommand(
+                              automocTargetName.c_str(), true,
                               workingDirectory.c_str(), depends,
                               commandLines, false, automocComment.c_str());
+  // inherit FOLDER property from target (#13688)
+  copyTargetProperty(automocTarget, target, "FOLDER");
+
   target->AddUtility(automocTargetName.c_str());
 
   // configure a file to get all information to automoc at buildtime:
