@@ -114,6 +114,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   std::vector<std::string> missingTargets;
 
   bool require2_8_12 = false;
+  bool require2_8_13 = false;
   // Create all the imported targets.
   for(std::vector<cmTargetExport*>::const_iterator
         tei = allTargets.begin();
@@ -153,6 +154,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         require2_8_12 = true;
         }
       }
+    if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      require2_8_13 = true;
+      }
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
     this->PopulateCompatibleInterfaceProperties(te, properties);
@@ -160,7 +165,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateInterfaceProperties(te, os, properties);
     }
 
-  if (require2_8_12)
+  if (require2_8_13)
+    {
+    this->GenerateRequiredCMakeVersion(os, "2.8.12.20131007");
+    }
+  else if (require2_8_12)
     {
     this->GenerateRequiredCMakeVersion(os, "2.8.12");
     }
@@ -286,6 +295,14 @@ cmExportInstallFileGenerator
     cmTargetExport const* te = *tei;
     ImportPropertyMap properties;
     std::set<std::string> importedLocations;
+    if (!properties.empty()
+        && te->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      this->GenerateImportPropertyCode(os, config, te->Target, properties);
+      this->GenerateImportedFileChecksCode(os, te->Target, properties,
+                                           importedLocations);
+      continue;
+      }
     this->SetImportLocationProperty(config, suffix, te->ArchiveGenerator,
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->LibraryGenerator,

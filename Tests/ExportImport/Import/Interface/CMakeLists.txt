@@ -2,6 +2,9 @@
 # Import targets from the exported build tree.
 include(${Import_BINARY_DIR}/../Export/ExportInterfaceBuildTree.cmake)
 
+# Import targets from the exported install tree.
+include(${CMAKE_INSTALL_PREFIX}/lib/exp/expInterface.cmake)
+
 add_library(define_iface INTERFACE)
 set_property(TARGET define_iface PROPERTY
   INTERFACE_COMPILE_DEFINITIONS DEFINE_IFACE_DEFINE)
@@ -40,3 +43,13 @@ macro(do_try_compile prefix)
 endmacro()
 
 do_try_compile(bld_)
+
+add_executable(headeronlytest_exp headeronlytest.cpp)
+target_link_libraries(headeronlytest_exp exp_headeronly)
+
+set_property(TARGET exp_sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
+
+add_executable(interfacetest_exp interfacetest.cpp)
+target_link_libraries(interfacetest_exp exp_sharediface)
+
+do_try_compile(exp_)
