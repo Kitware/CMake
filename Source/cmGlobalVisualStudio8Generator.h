@@ -28,7 +28,7 @@ public:
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {return this->Name;}
+  virtual const char* GetName() const {return this->Name.c_str();}
 
   const char* GetPlatformName() const;
 
@@ -82,7 +82,7 @@ protected:
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
                                    const char* path, cmTarget &t);
 
-  const char* Name;
+  std::string Name;
 
 private:
   class Factory;
