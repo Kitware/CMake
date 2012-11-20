@@ -47,6 +47,11 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         }
       return false;
       }
+    if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      // 2.8.13
+      this->GenerateRequiredCMakeVersion(os, "2.8.11.20130815");
+      }
     }
 
   this->GenerateExpectedTargetsCode(os, expectedTargets);
@@ -118,16 +123,22 @@ cmExportBuildFileGenerator
     // Collect import properties for this target.
     cmTarget* target = *tei;
     ImportPropertyMap properties;
-    this->SetImportLocationProperty(config, suffix, target, properties);
+
+    if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+      {
+      this->SetImportLocationProperty(config, suffix, target, properties);
+      }
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      this->SetImportDetailProperties(config, suffix,
-                                      target, properties, missingTargets);
-      this->SetImportLinkInterface(config, suffix,
-                                   cmGeneratorExpression::BuildInterface,
-                                   target, properties, missingTargets);
-
+      if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+        {
+        this->SetImportDetailProperties(config, suffix,
+                                        target, properties, missingTargets);
+        this->SetImportLinkInterface(config, suffix,
+                                    cmGeneratorExpression::BuildInterface,
+                                    target, properties, missingTargets);
+        }
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff

@@ -6164,7 +6164,8 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   const char* loc = 0;
   const char* imp = 0;
   std::string suffix;
-  if (!this->GetMappedConfig(desired_config, &loc, &imp, suffix))
+  if (this->GetType() != INTERFACE_LIBRARY &&
+      !this->GetMappedConfig(desired_config, &loc, &imp, suffix))
     {
     return;
     }

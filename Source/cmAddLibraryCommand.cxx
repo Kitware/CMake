@@ -220,6 +220,16 @@ bool cmAddLibraryCommand
         );
       return true;
       }
+    if(type == cmTarget::INTERFACE_LIBRARY)
+      {
+      if (!cmGeneratorExpression::IsValidTargetName(libName))
+        {
+        cmOStringStream e;
+        e << "Invalid name for IMPORTED INTERFACE library target: " << libName;
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
 
     // Make sure the target does not already exist.
     if(this->Makefile->FindTargetToUse(libName.c_str()))
