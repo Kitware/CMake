@@ -27,3 +27,23 @@ export(TARGETS sharediface sharedlib headeronly
   NAMESPACE bld_
   FILE ../ExportInterfaceBuildTree.cmake
 )
+
+install(TARGETS headeronly sharediface sharedlib
+  EXPORT expInterface
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib NAMELINK_SKIP
+  ARCHIVE DESTINATION lib
+  FRAMEWORK DESTINATION Frameworks
+  BUNDLE DESTINATION Applications
+)
+install(FILES
+  headeronly/headeronly.h
+  DESTINATION include/headeronly
+)
+install(FILES
+  sharedlib/sharedlib.h
+  "${CMAKE_CURRENT_BINARY_DIR}/sharedlib_export.h"
+  DESTINATION include/sharedlib
+)
+
+install(EXPORT expInterface NAMESPACE exp_ DESTINATION lib/exp)

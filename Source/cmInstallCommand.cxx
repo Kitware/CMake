@@ -379,7 +379,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
          target->GetType() != cmTarget::STATIC_LIBRARY &&
          target->GetType() != cmTarget::SHARED_LIBRARY &&
          target->GetType() != cmTarget::MODULE_LIBRARY &&
-         target->GetType() != cmTarget::OBJECT_LIBRARY)
+         target->GetType() != cmTarget::OBJECT_LIBRARY &&
+         target->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         cmOStringStream e;
         e << "TARGETS given target \"" << (*targetIt)
@@ -625,6 +626,11 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
                                                       archiveArgs, true, true);
           }
         }
+        break;
+      case cmTarget::INTERFACE_LIBRARY:
+          // Nothing to do. An INTERFACE_LIBRARY can be installed, but the
+          // only effect of that is to make it exportable. It installs no
+          // other files itself.
         break;
       default:
         // This should never happen due to the above type check.
