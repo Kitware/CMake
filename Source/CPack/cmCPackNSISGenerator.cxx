@@ -33,8 +33,9 @@
 #endif
 
 //----------------------------------------------------------------------
-cmCPackNSISGenerator::cmCPackNSISGenerator()
+cmCPackNSISGenerator::cmCPackNSISGenerator(bool nsis64)
 {
+  Nsis64 = nsis64;
 }
 
 //----------------------------------------------------------------------
@@ -359,6 +360,21 @@ int cmCPackNSISGenerator::InitializeInternal()
   bool gotRegValue = false;
 
 #ifdef _WIN32
+  if (Nsis64)
+    {
+    if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS\\Unicode", nsisPath,
+      cmsys::SystemTools::KeyWOW64_64) )
+      {
+      gotRegValue = true;
+      }
+    if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath,
+      cmsys::SystemTools::KeyWOW64_64) )
+      {
+      gotRegValue = true;
+      }
+    }
   if ( !gotRegValue && cmsys::SystemTools::ReadRegistryValue(
       "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS\\Unicode", nsisPath,
       cmsys::SystemTools::KeyWOW64_32) )

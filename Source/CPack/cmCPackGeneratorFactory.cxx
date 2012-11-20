@@ -61,6 +61,8 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     {
     this->RegisterGenerator("NSIS", "Null Soft Installer",
       cmCPackNSISGenerator::CreateGenerator);
+    this->RegisterGenerator("NSIS64", "Null Soft Installer (64-bit)",
+      cmCPackNSISGenerator::CreateGenerator64);
     }
 #ifdef __CYGWIN__
   if (cmCPackCygwinBinaryGenerator::CanGenerate())
