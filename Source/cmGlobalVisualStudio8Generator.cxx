@@ -99,6 +99,13 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  cmGlobalVisualStudio71Generator::AddPlatformDefinitions(mf);
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
+}
+
+//----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
