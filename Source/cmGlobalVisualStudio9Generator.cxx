@@ -63,6 +63,7 @@ public:
 
     cmGlobalVisualStudio9Generator* ret = new cmGlobalVisualStudio9Generator(
       name, parser.GetArchitectureFamily(), NULL);
+    ret->PlatformName = p;
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
