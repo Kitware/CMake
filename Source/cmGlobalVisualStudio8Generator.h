@@ -64,6 +64,10 @@ public:
       LinkLibraryDependencies and link to .sln dependencies. */
   virtual bool NeedLinkLibraryDependencies(cmTarget& target);
 
+  /** Return true if building for Windows CE */
+  virtual bool TargetsWindowsCE() const {
+    return !this->WindowsCEVersion.empty(); }
+
 protected:
   virtual const char* GetIDEVersion() { return "8.0"; }
 
@@ -83,8 +87,10 @@ protected:
                                    const char* path, cmTarget &t);
 
   std::string Name;
+  std::string WindowsCEVersion;
 
 private:
   class Factory;
+  friend class Factory;
 };
 #endif
