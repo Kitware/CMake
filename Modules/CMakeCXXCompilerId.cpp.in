@@ -210,3 +210,7 @@ int main(int argc, char* argv[])
   (void)argv;
   return require;
 }
+
+#ifdef ADD_MAINCRTSTARTUP
+extern "C" void mainCRTStartup() {}
+#endif
