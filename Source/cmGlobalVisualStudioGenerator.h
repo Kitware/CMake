@@ -72,6 +72,9 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return true; }
 
+  /** Return true if building for Windows CE */
+  virtual bool TargetsWindowsCE() const { return false; }
+
   class TargetSet: public std::set<cmTarget*> {};
   struct TargetCompare
   {

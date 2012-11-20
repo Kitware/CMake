@@ -229,6 +229,9 @@ void cmLocalVisualStudio7Generator
   this->FortranProject =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
     ->TargetIsFortranOnly(target);
+  this->WindowsCEProject =
+    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
+    ->TargetsWindowsCE();
 
   // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
   VSVersion realVersion = this->Version;
@@ -1173,6 +1176,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     cmComputeLinkInformation& cli = *pcli;
     const char* linkLanguage = cli.GetLinkLanguage();
 
+    bool isWin32Executable = target.GetPropertyAsBool("WIN32_EXECUTABLE");
+
     // Compute the variable name to lookup standard libraries for this
     // language.
     std::string standardLibsVar = "CMAKE_";
@@ -1220,15 +1225,24 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
-    if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
+    if ( this->WindowsCEProject )
+      {
+      fout << "\t\t\t\tSubSystem=\"9\"\n"
+           << "\t\t\t\tEntryPointSymbol=\""
+           << (isWin32Executable ? "WinMainCRTStartup" : "mainACRTStartup")
+           << "\"\n";
+      }
+    else if ( this->FortranProject )
       {
       fout << "\t\t\t\tSubSystem=\""
-           << (this->FortranProject? "subSystemWindows" : "2") << "\"\n";
+           << (isWin32Executable ? "subSystemWindows" : "subSystemConsole")
+           << "\"\n";
       }
     else
       {
       fout << "\t\t\t\tSubSystem=\""
-           << (this->FortranProject? "subSystemConsole" : "1") << "\"\n";
+           << (isWin32Executable ? "2" : "1")
+           << "\"\n";
       }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;
