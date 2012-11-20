@@ -15,8 +15,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
 
-#include <memory>
-
 
 
 static const char* getShapeForTarget(const cmTarget* target)
@@ -67,7 +65,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   cmake cm;
   cmGlobalGenerator ggi;
   ggi.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator());
   cmMakefile *mf = lg->GetMakefile();
 
   const char* inFileName = settingsFileName;

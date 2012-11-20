@@ -32,7 +32,6 @@
 
 #include <cmsys/auto_ptr.hxx>
 
-#include <memory> // auto_ptr
 #include <queue>
 
 //----------------------------------------------------------------------------

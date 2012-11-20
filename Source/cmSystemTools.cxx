@@ -52,7 +52,6 @@
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#  include <memory> // auto_ptr
 #  include <fcntl.h>
 #  include "cmCryptoHash.h"
 #endif

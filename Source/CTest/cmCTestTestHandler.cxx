@@ -32,7 +32,6 @@
 #include <math.h>
 #include <float.h>
 
-#include <memory> // auto_ptr
 #include <set>
 
 //----------------------------------------------------------------------
@@ -1547,7 +1546,7 @@ void cmCTestTestHandler::GetListOfTests()
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   cmMakefile *mf = lg->GetMakefile();
   mf->AddDefinition("CTEST_CONFIGURATION_TYPE",
     this->CTest->GetConfigType().c_str());
