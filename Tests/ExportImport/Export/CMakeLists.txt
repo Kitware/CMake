@@ -426,3 +426,5 @@ export(TARGETS testExe2 testLib4 testLib5 testLib6 testExe3 testExe2lib
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )
+
+add_subdirectory(Interface)

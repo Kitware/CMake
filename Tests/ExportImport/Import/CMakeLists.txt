@@ -19,3 +19,6 @@ add_executable(imp_testTransExe1b imp_testTransExe1.c)
 target_link_libraries(imp_testTransExe1b imp_lib1b)
 
 add_subdirectory(try_compile)
+
+# Test package INTERFACE controls
+add_subdirectory(Interface)
