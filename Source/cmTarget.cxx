@@ -4708,7 +4708,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       {
       continue;
       }
-    if(li->second != cmTarget::GENERAL && li->second != linkType)
+    if(li->second == cmTarget::GENERAL || li->second == linkType)
       {
       // The entry is meant for this configuration.
       impl.Libraries.push_back(item);
