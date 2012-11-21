@@ -1875,6 +1875,14 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
   // modify the name so stripping down to just the file name should
   // produce the target name in this case.
   std::string name = cmSystemTools::GetFilenameName(inName);
+
+  // If the input name is the empty string, there is no real
+  // dependency. Short-circuit the other checks:
+  if(name == "")
+    {
+    return false;
+    }
+
   if(cmSystemTools::GetFilenameLastExtension(name) == ".exe")
     {
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);
