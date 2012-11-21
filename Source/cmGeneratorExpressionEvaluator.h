@@ -18,7 +18,6 @@
 #include "cmListFileCache.h"
 
 class cmTarget;
-class cmGeneratorTarget;
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionContext
@@ -27,7 +26,7 @@ struct cmGeneratorExpressionContext
   std::set<cmTarget*> Targets;
   cmMakefile *Makefile;
   const char *Config;
-  cmGeneratorTarget *Target;
+  cmTarget *Target;
   bool Quiet;
   bool HadError;
 };

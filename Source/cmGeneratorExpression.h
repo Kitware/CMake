@@ -20,7 +20,6 @@
 #include <cmsys/RegularExpression.hxx>
 
 class cmTarget;
-class cmGeneratorTarget;
 class cmMakefile;
 class cmListFileBacktrace;
 
@@ -68,7 +67,7 @@ class cmCompiledGeneratorExpression
 public:
   const char* Evaluate(cmMakefile* mf, const char* config,
                        bool quiet = false,
-                       cmGeneratorTarget *target = 0,
+                       cmTarget *target = 0,
                        cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
 
   /** Get set of targets found during evaluations.  */
