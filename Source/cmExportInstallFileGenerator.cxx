@@ -19,6 +19,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
+#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
@@ -39,6 +40,20 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 //----------------------------------------------------------------------------
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
+  for(std::vector<cmTargetExport*>::const_iterator
+        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
+      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
+    {
+    if ((*tei)->Target->GetPolicyStatusCMP0019() == cmPolicies::NEW)
+      {
+      os << "IF(NOT POLICY CMP0019)\n"
+        << "   MESSAGE(FATAL_ERROR \"CMake >= 2.8.11 required to use "
+           "IMPORTED targets containing generator expressions\")\n"
+        << "ENDIF(NOT POLICY CMP0019)\n";
+      break;
+      }
+    }
+
   // Create all the imported targets.
   for(std::vector<cmTargetExport*>::const_iterator
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
@@ -48,6 +63,18 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     if(this->ExportedTargets.insert(te->Target).second)
       {
       this->GenerateImportTargetCode(os, te->Target);
+
+      if ((*tei)->Target->GetPolicyStatusCMP0019() == cmPolicies::NEW)
+        {
+        ImportPropertyMap properties;
+
+        this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES",
+                                      te->Target,
+                                      cmGeneratorExpression::InstallInterface,
+                                      properties);
+
+        this->GenerateInterfaceProperties(te->Target, os, properties);
+        }
       }
     else
       {

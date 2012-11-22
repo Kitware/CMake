@@ -78,6 +78,9 @@ add_custom_target(check ALL
     -Dtest_incomplete_19=$<1:some,thing$<ANGLE-R>
     -Dtest_incomplete_20=$<CONFIGURATION$<ANGLE-R>
     -Dtest_incomplete_21=$<BOOL:something$<ANGLE-R>
+    -Dtest_build_interface=$<BUILD_INTERFACE:build>
+    -Dtest_install_interface=$<INSTALL_INTERFACE:install>
+    -Dtest_export_namespace=$<EXPORT_NAMESPACE>x
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done"
   VERBATIM
