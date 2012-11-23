@@ -286,6 +286,29 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 //----------------------------------------------------------------------------
+static const struct TargetTestNode : public cmGeneratorExpressionNode
+{
+  TargetTestNode() {}
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return context->Makefile->FindTargetToUse(parameters.front().c_str())
+      ? "1" : "0";
+  }
+} targetTestNode;
+
+//----------------------------------------------------------------------------
+static const char* targetPropertyTransitiveWhitelist[] = {
+    "INTERFACE_INCLUDE_DIRECTORIES"
+  , "INTERFACE_COMPILE_DEFINITIONS"
+};
+
+//----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
   TargetPropertyNode() {}
@@ -387,7 +410,27 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 
     const char *prop = target->GetProperty(propertyName.c_str());
-    return prop ? prop : "";
+    if (!prop)
+      {
+      return std::string();
+      }
+
+    for (size_t i = 0;
+         i < (sizeof(targetPropertyTransitiveWhitelist) /
+              sizeof(*targetPropertyTransitiveWhitelist));
+         ++i)
+      {
+      if (targetPropertyTransitiveWhitelist[i] == propertyName)
+        {
+        cmGeneratorExpression ge(context->Backtrace);
+        return ge.Parse(prop)->Evaluate(context->Makefile,
+                            context->Config,
+                            context->Quiet,
+                            context->Target,
+                            &dagChecker);
+        }
+      }
+    return prop;
   }
 } targetPropertyNode;
 
@@ -622,6 +665,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &installInterfaceNode;
   else if (identifier == "EXPORT_NAMESPACE")
     return &nullNode;
+  else if (identifier == "TARGET_DEFINED")
+    return &targetTestNode;
   return 0;
 
 }

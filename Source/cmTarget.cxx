@@ -119,6 +119,18 @@ public:
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
+
+  struct IncludeDirectoriesEntry {
+    IncludeDirectoriesEntry(
+                          cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
+                          bool tllEntry = false)
+      : ge(cge), ImpliedByTargetLinkLibraries(tllEntry)
+    {}
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
+    const bool ImpliedByTargetLinkLibraries;
+  };
+  std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
+  std::string IncludeDirectoriesString;
 };
 
 //----------------------------------------------------------------------------
@@ -1732,9 +1744,10 @@ cmTargetTraceDependencies
     for(cmCustomCommandLine::const_iterator cli = cit->begin();
         cli != cit->end(); ++cli)
       {
-      const cmCompiledGeneratorExpression &cge = ge.Parse(*cli);
-      cge.Evaluate(this->Makefile, 0, true);
-      std::set<cmTarget*> geTargets = cge.GetTargets();
+      const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
+                                                              = ge.Parse(*cli);
+      cge->Evaluate(this->Makefile, 0, true);
+      std::set<cmTarget*> geTargets = cge->GetTargets();
       for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
           it != geTargets.end(); ++it)
         {
@@ -2477,6 +2490,16 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     return;
     }
 
+  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->IncludeDirectoriesEntries.clear();
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->IncludeDirectoriesEntries.push_back(
+                          new cmTargetInternals::IncludeDirectoriesEntry(cge));
+    return;
+    }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -2489,8 +2512,117 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     {
     return;
     }
+  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->IncludeDirectoriesEntries.push_back(
+              new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
+    return;
+    }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::AppendTLLIncludeDirectories(const std::string &includes)
+{
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+  this->Internal->IncludeDirectoriesEntries.push_back(
+          new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(includes),
+                                                         true)
+                                                     );
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::PrependTLLIncludeDirectories(const std::string &includes)
+{
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+  this->Internal->IncludeDirectoriesEntries.insert(
+      this->Internal->IncludeDirectoriesEntries.begin(),
+      new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(includes),
+                                                    true)
+                                                  );
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
+{
+  std::set<std::string> fromTll;
+  std::vector<std::string> includes;
+  std::set<std::string> uniqueIncludes;
+  cmListFileBacktrace lfbt;
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                              this->GetName(),
+                                              "INCLUDE_DIRECTORIES", 0, 0);
+
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = this->Internal->IncludeDirectoriesEntries.begin(),
+      end = this->Internal->IncludeDirectoriesEntries.end();
+      it != end; ++it)
+    {
+    std::vector<std::string> entryIncludes;
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(this->Makefile,
+                                              config,
+                                              false,
+                                              this,
+                                              &dagChecker),
+                                    entryIncludes);
+    for(std::vector<std::string>::const_iterator
+          li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
+      {
+      std::string inc = *li;
+      if (!cmSystemTools::IsOff(inc.c_str()))
+        {
+        cmSystemTools::ConvertToUnixSlashes(inc);
+        }
+
+      if (!(*it)->ImpliedByTargetLinkLibraries)
+        {
+        if (fromTll.find(*li) != fromTll.end())
+          {
+          switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0020))
+            {
+            case cmPolicies::WARN:
+              {
+              cmOStringStream e;
+              e << "The include directory " << *li << " was specified "
+                  "implicitly by an earlier call to target_link_libraries. "
+                  "Preserving the order of includes as if the earlier use of "
+                  "target_link_libraries had not added it."
+                << this->Makefile->GetPolicies()->GetPolicyWarning(
+                                                          cmPolicies::CMP0020);
+              this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+              }
+              // Fall through to OLD behavior
+            case cmPolicies::OLD:
+              includes.erase(std::remove(includes.begin(),
+                                         includes.end(), *li),
+                             includes.end());
+              fromTll.erase(*li);
+              includes.push_back(*li);
+              break;
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::NEW:
+              break;
+            }
+          }
+        }
+      if(uniqueIncludes.insert(inc).second)
+        {
+        if ((*it)->ImpliedByTargetLinkLibraries)
+          {
+          fromTll.insert(*li);
+          }
+        includes.push_back(*li);
+        }
+      }
+    }
+  return includes;
 }
 
 //----------------------------------------------------------------------------
@@ -2818,6 +2950,23 @@ const char *cmTarget::GetProperty(const char* prop,
           this->SetProperty(prop, this->GetLocation(configName.c_str()));
           }
         }
+      }
+    if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+      {
+      this->Internal->IncludeDirectoriesString = "";
+      std::string sep;
+      typedef cmTargetInternals::IncludeDirectoriesEntry
+                                 IncludeDirectoriesEntry;
+      for (std::vector<IncludeDirectoriesEntry*>::const_iterator
+          it = this->Internal->IncludeDirectoriesEntries.begin(),
+          end = this->Internal->IncludeDirectoriesEntries.end();
+          it != end; ++it)
+        {
+        this->Internal->IncludeDirectoriesString += sep;
+        this->Internal->IncludeDirectoriesString += (*it)->ge->GetInput();
+        sep = ";";
+        }
+      return this->Internal->IncludeDirectoriesString.c_str();
       }
     }
 
@@ -4478,7 +4627,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                         this->GetName(),
                                         "INTERFACE_LINK_LIBRARIES", 0, 0);
     cmSystemTools::ExpandListArgument(ge.Parse(newStyleLibsProp)
-                                        .Evaluate(this->Makefile,
+                                       ->Evaluate(this->Makefile,
                                                   desired_config.c_str(),
                                                   false,
                                                   this,
@@ -4666,7 +4815,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface)
                                           this->GetName(),
                                           "INTERFACE_LINK_LIBRARIES", 0, 0);
 
-      cmSystemTools::ExpandListArgument(ge.Parse(newLibrariesProp).Evaluate(
+      cmSystemTools::ExpandListArgument(ge.Parse(newLibrariesProp)->Evaluate(
                                       this->Makefile,
                                       config,
                                       false,
@@ -5085,6 +5234,13 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = this->Pointer->IncludeDirectoriesEntries.begin(),
+      end = this->Pointer->IncludeDirectoriesEntries.end();
+      it != end; ++it)
+    {
+    delete *it;
+    }
   delete this->Pointer;
 }
 
