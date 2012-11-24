@@ -161,7 +161,11 @@ void cmExtraSublimeTextGenerator
   std::string projectName = mf->GetProjectName();
   std::string sublimeClangOptionsFilename = outputDir+"/";
   sublimeClangOptionsFilename += projectName + ".sublimeclang-options";
-  fout << "\t\"sublimeclang_options_file\": \"" << sublimeClangOptionsFilename
+  std::string sublimeClangOptionsScriptFilename = outputDir + "/"
+    + projectName + "_sublimeclang_options_script.py";
+  fout << "\t\"sublimeclang_options_script\": \"python "
+       << sublimeClangOptionsScriptFilename << " "
+       << sublimeClangOptionsFilename
        << "\"\n\t";
   // End of the settings section
   fout << "}\n";
@@ -171,7 +175,29 @@ void cmExtraSublimeTextGenerator
 
   this->WriteSublimeClangOptionsFile(sourceFileFlags,
     sublimeClangOptionsFilename);
+  this->WriteSublimeClangOptionsScript(sublimeClangOptionsScriptFilename);
 }
+
+void cmExtraSublimeTextGenerator::
+  WriteSublimeClangOptionsScript(const std::string& filename)
+{
+  cmGeneratedFileStream fout(filename.c_str());
+  if(!fout)
+    {
+    return;
+    }
+  fout << "import json\n";
+  fout << "import sys\n\n\n";
+  fout << "if len(sys.argv) < 2:\n";
+  fout << "    sys.exit(1)\n";
+  fout << "data = None\n";
+  fout << "with open(sys.argv[1]) as f:\n";
+  fout << "    data = json.load(f)\n";
+  fout << "if data is not None:\n";
+  fout << "    for arg in data.get(sys.argv[2], []):\n";
+  fout << "        print arg\n";
+}
+
 
 void cmExtraSublimeTextGenerator::
   WriteSublimeClangOptionsFile(const MapSourceFileFlags& sourceFileFlags,
@@ -351,6 +377,7 @@ void cmExtraSublimeTextGenerator::
             this->ComputeDefines(*iter, lg, target, gtgt);
           flags.clear();
           cmsys::RegularExpression flagRegex;
+          // Regular expression to extract compiler flags from a string
           // https://gist.github.com/3944250
           const char* regexString =
             "(^|[ ])-[DIOUWfgs][^= ]+(=\\\"[^\"]+\\\"|=[^\"][^ ]+)?";
