@@ -20,6 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGeneratorFactory.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -112,6 +113,18 @@ public:
     }
 };
 
+class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
+{
+public:
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const;
+
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
+    cmGlobalXCodeGenerator::GetDocumentation(entry); }
+
+  virtual void GetGenerators(std::vector<std::string>& names) const {
+    names.push_back(cmGlobalXCodeGenerator::GetActualName()); }
+};
+
 //----------------------------------------------------------------------------
 cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
 {
@@ -132,8 +145,17 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
 }
 
 //----------------------------------------------------------------------------
-cmGlobalGenerator* cmGlobalXCodeGenerator::New()
+cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 {
+  return new Factory;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
+::CreateGlobalGenerator(const char* name) const
+{
+  if (strcmp(name, GetActualName()))
+    return 0;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;
   std::string versionFile;
@@ -3474,9 +3496,8 @@ const char* cmGlobalXCodeGenerator::GetCMakeCFGIntDir() const
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
-  const
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalXCodeGenerator::GetActualName();
   entry.Brief = "Generate Xcode project files.";
   entry.Full = "";
 }

@@ -983,6 +983,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set_tests_properties(ExternalProject PROPERTIES
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
+  add_test(ExternalProjectUpdateSetup ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate"
+    "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project ExternalProjectUpdateTest
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
+    --force-new-ctest-process
+    --test-command ${CMAKE_CTEST_COMMAND} -V
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
+  set_tests_properties(ExternalProjectUpdateSetup PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+
+  add_test(NAME ExternalProjectUpdate
+    COMMAND ${CMAKE_CMAKE_COMMAND}
+    -DExternalProjectUpdate_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
+    -DExternalProjectUpdate_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate
+    -DCMAKE_TEST_GENERATOR=${CMAKE_TEST_GENERATOR}
+    -DCMAKE_TEST_MAKEPROGRAM=${CMAKE_TEST_MAKEPROGRAM}
+    -DCMAKE_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
+    -P ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate/ExternalProjectUpdateTest.cmake
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
+  set_tests_properties(ExternalProjectUpdate PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT}
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
+    DEPENDS ExternalProjectUpdateSetup )
+
   # do each of the tutorial steps
   foreach(STP RANGE 1 7)
     add_test(TutorialStep${STP} ${CMAKE_CTEST_COMMAND}
@@ -1412,6 +1442,35 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSMidl)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
+
+    if(NOT MSVC60 AND NOT CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+      # The test (and tested property) works with .sln files, so it's skipped when:
+      # * Using VS6, which doesn't use .sln files
+      # * cmake --build is set up to use MSBuild, since the MSBuild invocation does not use the .sln file
+      set(_last_test "")
+      foreach(config ${CMAKE_CONFIGURATION_TYPES})
+        add_test(NAME VSExcludeFromDefaultBuild-${config} COMMAND ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild"
+          "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
+          --build-config ${config}
+          --build-two-config
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-project VSExcludeFromDefaultBuild
+          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+          --test-command ${CMAKE_COMMAND}
+             -D "activeConfig=${config}"
+             -D "allConfigs=${CMAKE_CONFIGURATION_TYPES}"
+             -D "dir=${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
+             -P "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild/ResultTest.cmake")
+        if(_last_test)
+          set_property(TEST VSExcludeFromDefaultBuild-${config} PROPERTY DEPENDS ${_last_test})
+        endif()
+        set(_last_test "VSExcludeFromDefaultBuild-${config}")
+      endforeach()
+      unset(_last_test)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild")
+    endif()
   endif()
 
   if (APPLE)

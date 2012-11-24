@@ -23,19 +23,17 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  cmGlobalVisualStudio8Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio8Generator; }
+  cmGlobalVisualStudio8Generator(const char* name,
+    const char* architectureId, const char* additionalPlatformDefinition);
+  static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
-    return cmGlobalVisualStudio8Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 8 2005";}
+  virtual const char* GetName() const {return this->Name;}
 
-  virtual const char* GetPlatformName() const {return "Win32";}
+  const char* GetPlatformName() const;
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -74,12 +72,17 @@ protected:
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
-  virtual void WriteProjectConfigurations(std::ostream& fout,
-                                          const char* name,
-                                          bool partOfDefaultBuild,
-                                          const char* platformMapping = NULL);
+  virtual void WriteProjectConfigurations(
+    std::ostream& fout, const char* name,
+    const std::set<std::string>& configsPartOfDefaultBuild,
+    const char* platformMapping = NULL);
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
                                    const char* path, cmTarget &t);
+
+  const char* Name;
+
+private:
+  class Factory;
 };
 #endif

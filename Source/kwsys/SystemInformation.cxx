@@ -1323,7 +1323,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
 
   for (ifa=ifas; ifa!=NULL; ifa=ifa->ifa_next)
     {
-    int fam=ifa->ifa_addr->sa_family;
+    int fam = ifa->ifa_addr? ifa->ifa_addr->sa_family : -1;
     if ((fam==AF_INET) || (fam==AF_INET6))
       {
       char host[NI_MAXHOST]={'\0'};

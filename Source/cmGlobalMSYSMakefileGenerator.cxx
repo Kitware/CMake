@@ -106,9 +106,9 @@ cmLocalGenerator *cmGlobalMSYSMakefileGenerator::CreateLocalGenerator()
 
 //----------------------------------------------------------------------------
 void cmGlobalMSYSMakefileGenerator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalMSYSMakefileGenerator::GetActualName();
   entry.Brief = "Generates MSYS makefiles.";
   entry.Full = "The makefiles use /bin/sh as the shell.  "
     "They require msys to be installed on the machine.";

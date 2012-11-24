@@ -99,6 +99,7 @@ protected:
   typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
   const char* ArchitectureId;
+  const char* AdditionalPlatformDefinition;
 
 private:
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;

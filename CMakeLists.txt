@@ -585,6 +585,29 @@ option(CMAKE_STRICT
   "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
 mark_as_advanced(CMAKE_STRICT)
 
+if(NOT CMake_VERSION_IS_RELEASE)
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
+      NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
+    set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
+                     -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
+                     -Wmissing-format-attribute -fno-common
+    )
+    set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
+                       -Wshadow -Wpointer-arith -Wformat-security
+    )
+
+    foreach(FLAG_LANG  C CXX)
+      foreach(FLAG ${${FLAG_LANG}_FLAGS_LIST})
+        if(NOT " ${CMAKE_${FLAG_LANG}_FLAGS} " MATCHES " ${FLAG} ")
+          set(CMAKE_${FLAG_LANG}_FLAGS "${CMAKE_${FLAG_LANG}_FLAGS} ${FLAG}")
+        endif()
+      endforeach()
+    endforeach()
+
+    unset(C_FLAGS_LIST)
+    unset(CXX_FLAGS_LIST)
+  endif()
+endif()
 
 # build the remaining subdirectories
 add_subdirectory(Source)

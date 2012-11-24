@@ -97,7 +97,6 @@ int cmCPackGenerator::PrepareNames()
     }
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
-  this->GetOption("CPACK_PACKAGE_FILE_NAME");
   const char* pfname = this->GetOption("CPACK_PACKAGE_FILE_NAME");
   if(!pfname)
     {
@@ -208,7 +207,7 @@ int cmCPackGenerator::InstallProject()
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "Problem creating temporary directory: "
-                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL}")
+                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL)")
                   << std::endl);
     return 0;
     }

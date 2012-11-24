@@ -402,6 +402,79 @@ endif()
 endfunction()
 
 
+function(_ep_write_gitupdate_script script_filename git_EXECUTABLE git_tag git_repository work_dir)
+  file(WRITE ${script_filename}
+"if(\"${git_tag}\" STREQUAL \"\")
+  message(FATAL_ERROR \"Tag for git checkout should not be empty.\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 HEAD
+  WORKING_DIRECTORY \"${work_dir}\"
+  RESULT_VARIABLE error_code
+  OUTPUT_VARIABLE head_sha
+  )
+if(error_code)
+  message(FATAL_ERROR \"Failed to get the hash for HEAD\")
+endif()
+
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" show-ref ${git_tag}
+  WORKING_DIRECTORY \"${work_dir}\"
+  OUTPUT_VARIABLE show_ref_output
+  )
+# If a remote ref is asked for, which can possibly move around,
+# we must always do a fetch and checkout.
+if(\"\${show_ref_output}\" MATCHES \"remotes\")
+  set(is_remote_ref 1)
+else()
+  set(is_remote_ref 0)
+endif()
+
+# This will fail if the tag does not exist (it probably has not been fetched
+# yet).
+execute_process(
+  COMMAND \"${git_EXECUTABLE}\" rev-list --max-count=1 ${git_tag}
+  WORKING_DIRECTORY \"${work_dir}\"
+  RESULT_VARIABLE error_code
+  OUTPUT_VARIABLE tag_sha
+  )
+
+# Is the hash checkout out that we want?
+if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"))
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" fetch
+    WORKING_DIRECTORY \"${work_dir}\"
+    RESULT_VARIABLE error_code
+    )
+  if(error_code)
+    message(FATAL_ERROR \"Failed to fetch repository '${git_repository}'\")
+  endif()
+
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
+    WORKING_DIRECTORY \"${work_dir}\"
+    RESULT_VARIABLE error_code
+    )
+  if(error_code)
+    message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
+  endif()
+
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" submodule update --recursive
+    WORKING_DIRECTORY \"${work_dir}/${src_name}\"
+    RESULT_VARIABLE error_code
+    )
+  if(error_code)
+    message(FATAL_ERROR \"Failed to update submodules in: '${work_dir}/${src_name}'\")
+  endif()
+endif()
+
+"
+)
+
+endfunction(_ep_write_gitupdate_script)
+
 function(_ep_write_downloadfile_script script_filename remote local timeout hash tls_verify tls_cainfo)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
@@ -1354,7 +1427,7 @@ endfunction()
 
 
 function(_ep_add_update_command name)
-  ExternalProject_Get_Property(${name} source_dir)
+  ExternalProject_Get_Property(${name} source_dir tmp_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
   get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
@@ -1406,15 +1479,15 @@ function(_ep_add_update_command name)
       message(FATAL_ERROR "error: could not find git for fetch of ${name}")
     endif()
     set(work_dir ${source_dir})
-    set(comment "Performing update step (git fetch) for '${name}'")
+    set(comment "Performing update step for '${name}'")
     get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
     if(NOT git_tag)
       set(git_tag "master")
     endif()
-    set(cmd ${GIT_EXECUTABLE} fetch
-      COMMAND ${GIT_EXECUTABLE} checkout ${git_tag}
-      COMMAND ${GIT_EXECUTABLE} submodule update --recursive
+    _ep_write_gitupdate_script(${tmp_dir}/${name}-gitupdate.cmake
+      ${GIT_EXECUTABLE} ${git_tag} ${git_repository} ${work_dir}
       )
+    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitupdate.cmake)
     set(always 1)
   elseif(hg_repository)
     if(NOT HG_EXECUTABLE)

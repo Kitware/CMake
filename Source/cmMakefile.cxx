@@ -3937,6 +3937,46 @@ void cmMakefile::DefineProperties(cmake *cm)
      "See the global property of the same name for details.  "
      "This overrides the global property for a directory.",
      true);
+
+  cm->DefineProperty
+    ("VS_GLOBAL_SECTION_PRE_<section>", cmProperty::DIRECTORY,
+     "Specify a preSolution global section in Visual Studio.",
+     "Setting a property like this generates an entry of the following form "
+     "in the solution file:\n"
+     "  GlobalSection(<section>) = preSolution\n"
+     "    <contents based on property value>\n"
+     "  EndGlobalSection\n"
+     "The property must be set to a semicolon-separated list of key=value "
+     "pairs. Each such pair will be transformed into an entry in the solution "
+     "global section. Whitespace around key and value is ignored. List "
+     "elements which do not contain an equal sign are skipped."
+     "\n"
+     "This property only works for Visual Studio 7 and above; it is ignored "
+     "on other generators. The property only applies when set on a directory "
+     "whose CMakeLists.txt conatins a project() command.");
+  cm->DefineProperty
+    ("VS_GLOBAL_SECTION_POST_<section>", cmProperty::DIRECTORY,
+     "Specify a postSolution global section in Visual Studio.",
+     "Setting a property like this generates an entry of the following form "
+     "in the solution file:\n"
+     "  GlobalSection(<section>) = postSolution\n"
+     "    <contents based on property value>\n"
+     "  EndGlobalSection\n"
+     "The property must be set to a semicolon-separated list of key=value "
+     "pairs. Each such pair will be transformed into an entry in the solution "
+     "global section. Whitespace around key and value is ignored. List "
+     "elements which do not contain an equal sign are skipped."
+     "\n"
+     "This property only works for Visual Studio 7 and above; it is ignored "
+     "on other generators. The property only applies when set on a directory "
+     "whose CMakeLists.txt conatins a project() command."
+     "\n"
+     "Note that CMake generates postSolution sections ExtensibilityGlobals "
+     "and ExtensibilityAddIns by default. If you set the corresponding "
+     "property, it will override the default section. For example, setting "
+     "VS_GLOBAL_SECTION_POST_ExtensibilityGlobals will override the default "
+     "contents of the ExtensibilityGlobals section, while keeping "
+     "ExtensibilityAddIns on its default.");
 }
 
 //----------------------------------------------------------------------------

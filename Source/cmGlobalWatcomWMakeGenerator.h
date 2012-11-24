@@ -23,14 +23,16 @@ class cmGlobalWatcomWMakeGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalWatcomWMakeGenerator();
-  static cmGlobalGenerator* New() { return new cmGlobalWatcomWMakeGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalWatcomWMakeGenerator>(); }
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalWatcomWMakeGenerator::GetActualName();}
   static const char* GetActualName() {return "Watcom WMake";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();

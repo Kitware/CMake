@@ -22,6 +22,7 @@
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
   this->ArchitectureId = "X86";
+  this->AdditionalPlatformDefinition = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -75,7 +76,6 @@ void cmGlobalVisualStudioGenerator::Generate()
 #endif
 
       // Now make all targets depend on the ALL_BUILD target
-      cmTargets targets;
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
           i != gen.end(); ++i)
         {
@@ -494,6 +494,11 @@ void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
   mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
   mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
+
+  if(this->AdditionalPlatformDefinition)
+    {
+    mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");
+    }
 }
 
 //----------------------------------------------------------------------------

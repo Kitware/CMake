@@ -828,6 +828,7 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.clear();
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
+  this->ImportedTargets.clear();
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
@@ -1553,14 +1554,6 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     this->ConfiguredFilesPath = gen->CMakeInstance->GetHomeOutputDirectory();
     this->ConfiguredFilesPath += cmake::GetCMakeFilesDirectory();
     }
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "";
-  entry.Full = "";
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
