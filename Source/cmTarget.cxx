@@ -2547,6 +2547,27 @@ void cmTarget::PrependTLLIncludeDirectories(const std::string &includes)
                                                   );
 }
 
+// A Borland machine on the dashboard has a faulty std::remove.
+template <typename ForwardIterator, typename T>
+ForwardIterator cmStdRemove(ForwardIterator first,
+                            ForwardIterator last,
+                            const T& value)
+{
+#ifdef __BORLANDC__
+  ForwardIterator result = first;
+  for ( ; first != last; ++first)
+    {
+    if (!(*first == value))
+      {
+      *result++ = *first;
+      }
+    }
+  return result;
+#else
+  return std::remove<ForwardIterator, T>(first, last, value);
+#endif
+}
+
 //----------------------------------------------------------------------------
 std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 {
@@ -2599,7 +2620,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
               }
               // Fall through to OLD behavior
             case cmPolicies::OLD:
-              includes.erase(std::remove(includes.begin(),
+              includes.erase(cmStdRemove(includes.begin(),
                                          includes.end(), *li),
                              includes.end());
               fromTll.erase(*li);
