@@ -2110,23 +2110,69 @@ bool cmTarget::NameResolvesToFramework(const std::string& libname)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::AddFramework(const std::string& libname, LinkLibraryType)
+void cmTarget::GetFrameworks(const char *config,
+                             std::vector<std::string> &frameworks)
 {
-  if(this->NameResolvesToFramework(libname.c_str()))
+  std::vector<std::string> llibs;
+  this->GetDirectLinkLibraries(config, llibs);
+  for(std::vector<std::string>::const_iterator li = llibs.begin();
+      li != llibs.end(); ++li)
     {
-    std::string frameworkDir = libname;
-    frameworkDir += "/../";
-    frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
-    std::vector<std::string>::iterator i =
-      std::find(this->Frameworks.begin(),
-                this->Frameworks.end(), frameworkDir);
-    if(i == this->Frameworks.end())
+    if(this->NameResolvesToFramework(li->c_str()))
       {
-      this->Frameworks.push_back(frameworkDir);
+      std::string frameworkDir = *li + "/../";
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      std::vector<std::string>::iterator i =
+        std::find(frameworks.begin(),
+                  frameworks.end(), frameworkDir);
+      if(i == frameworks.end())
+        {
+        frameworks.push_back(frameworkDir);
+        }
       }
-    return true;
     }
-  return false;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetDirectLinkLibraries(const char *config,
+                            std::vector<std::string> &libs) const
+{
+  const char *prop = const_cast<cmTarget*>(this)
+                                  ->GetProperty("LINK_LIBRARIES");
+  if (prop)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        "LINK_LIBRARIES", 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(prop)->Evaluate(this->Makefile,
+                                        config,
+                                        false,
+                                        const_cast<cmTarget*>(this),
+                                        &dagChecker),
+                                      libs);
+    }
+}
+
+//----------------------------------------------------------------------------
+static std::string generatorIface(const std::string &value,
+                                  cmTarget::LinkLibraryType llt)
+{
+  if (llt == cmTarget::DEBUG)
+    {
+    return "$<$<CONFIG:Debug>:"
+                     + value
+                     + ">";
+    }
+  else if (llt == cmTarget::OPTIMIZED)
+    {
+    return "$<$<NOT:$<CONFIG:Debug>>:"
+                     + value
+                     + ">";
+    }
+  return value;
 }
 
 //----------------------------------------------------------------------------
@@ -2139,9 +2185,21 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     {
     return;
     }
-  this->AddFramework(lib, llt);
+
+  this->AppendProperty("LINK_LIBRARIES",
+                       generatorIface(lib, llt).c_str());
+
+  std::string pplib = cmGeneratorExpression::Preprocess(
+                        lib,
+                        cmGeneratorExpression::StripAllGeneratorExpressions);
+
+  if (pplib.empty())
+    {
+    return;
+    }
+
   cmTarget::LibraryID tmp;
-  tmp.first = lib;
+  tmp.first = pplib;
   tmp.second = llt;
   this->LinkLibraries.push_back( tmp );
   this->OriginalLinkLibraries.push_back(tmp);
@@ -2178,7 +2236,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
         break;
       }
     dependencies += ";";
-    dependencies += lib;
+    dependencies += pplib;
     dependencies += ";";
     mf.AddCacheDefinition( targetEntry.c_str(), dependencies.c_str(),
                            "Dependencies for the target",
@@ -5014,21 +5072,19 @@ void cmTarget::ComputeLinkImplementation(const char* config,
   cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
 
   // Collect libraries directly linked in this configuration.
-  LinkLibraryVectorType const& llibs = this->GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
+  std::vector<std::string> llibs;
+  this->GetDirectLinkLibraries(config, llibs);
+  for(std::vector<std::string>::const_iterator li = llibs.begin();
       li != llibs.end(); ++li)
     {
     // Skip entries that resolve to the target itself or are empty.
-    std::string item = this->CheckCMP0004(li->first);
+    std::string item = this->CheckCMP0004(*li);
     if(item == this->GetName() || item.empty())
       {
       continue;
       }
-    if(li->second == cmTarget::GENERAL || li->second == linkType)
-      {
-      // The entry is meant for this configuration.
-      impl.Libraries.push_back(item);
-      }
+    // The entry is meant for this configuration.
+    impl.Libraries.push_back(item);
     }
 
   LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
