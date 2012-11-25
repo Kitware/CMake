@@ -1147,6 +1147,17 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_BUILD_INTERFACE_INCLUDES", cmProperty::VARIABLE,
+     "Automatically add the current source- and build directories "
+     "to the INTERFACE_INCLUDE_DIRECTORIES.",
+     "If this variable is enabled, CMake automatically adds for each "
+     "target ${CMAKE_CURRENT_SOURCE_DIR} and ${CMAKE_CURRENT_BINARY_DIR} "
+     "to the INTERFACE_INCLUDE_DIRECTORIES."
+     "By default CMAKE_BUILD_INTERFACE_INCLUDES is OFF.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_INSTALL_RPATH", cmProperty::VARIABLE,
      "The rpath to use for installed targets.",
      "A semicolon-separated list specifying the rpath "
