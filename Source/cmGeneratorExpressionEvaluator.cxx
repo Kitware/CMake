@@ -731,7 +731,8 @@ std::string GeneratorExpressionContent::Evaluate(
     else
       {
       std::vector<std::string> parameters;
-      this->EvaluateParameters(node, identifier, context, dagChecker, parameters);
+      this->EvaluateParameters(node, identifier, context, dagChecker,
+                               parameters);
       }
     return std::string();
     }
