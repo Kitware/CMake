@@ -88,7 +88,15 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
   while(this->it->TokenType != cmGeneratorExpressionToken::EndExpression
       && this->it->TokenType != cmGeneratorExpressionToken::ColonSeparator)
     {
-    this->ParseContent(identifier);
+    if (this->it->TokenType == cmGeneratorExpressionToken::CommaSeparator)
+      {
+      extendText(identifier, this->it);
+      ++this->it;
+      }
+    else
+      {
+      this->ParseContent(identifier);
+      }
     if (this->it == this->Tokens.end())
       {
       break;
