@@ -32,6 +32,7 @@ struct cmGeneratorExpressionContext
 };
 
 struct cmGeneratorExpressionDAGChecker;
+struct cmGeneratorExpressionNode;
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionEvaluator
@@ -115,6 +116,13 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
   std::string GetOriginalExpression() const;
 
   ~GeneratorExpressionContent();
+
+private:
+  std::string EvaluateParameters(const cmGeneratorExpressionNode *node,
+                                 const std::string &identifier,
+                                 cmGeneratorExpressionContext *context,
+                                 cmGeneratorExpressionDAGChecker *dagChecker,
+                                 std::vector<std::string> &parameters) const;
 
 private:
   std::vector<cmGeneratorExpressionEvaluator*> IdentifierChildren;
