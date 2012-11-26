@@ -66,6 +66,8 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 
   virtual bool GeneratesContent() const { return false; }
 
+  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
@@ -642,6 +644,19 @@ std::string GeneratorExpressionContent::Evaluate(
 
   if (!node->GeneratesContent())
     {
+    if (node->AcceptsSingleArbitraryContentParameter())
+      {
+      if (this->ParamChildren.empty())
+        {
+        reportError(context, this->GetOriginalExpression(),
+                  "$<" + identifier + "> expression requires a parameter.");
+        }
+      }
+    else
+      {
+      std::vector<std::string> parameters;
+      this->EvaluateParameters(node, identifier, context, dagChecker, parameters);
+      }
     return std::string();
     }
 
