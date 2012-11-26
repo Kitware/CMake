@@ -1932,6 +1932,7 @@ bool extract_tar(const char* outFileName, bool verbose,
       {
       cmSystemTools::Error("Problem with archive_read_next_header(): ",
                            archive_error_string(a));
+      break;
       }
     if (verbose && extract)
       {
@@ -1954,6 +1955,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         cmSystemTools::Error(
           "Problem with archive_write_disk_set_options(): ",
           archive_error_string(ext));
+        break;
         }
 
       r = archive_write_header(ext, entry);
@@ -1963,6 +1965,7 @@ bool extract_tar(const char* outFileName, bool verbose,
                              archive_error_string(ext));
         cmSystemTools::Error("Current file:",
                              archive_entry_pathname(entry));
+        break;
         }
       else
         {
@@ -1972,6 +1975,7 @@ bool extract_tar(const char* outFileName, bool verbose,
           {
           cmSystemTools::Error("Problem with archive_write_finish_entry(): ",
                                archive_error_string(ext));
+          break;
           }
         }
       }
@@ -1982,8 +1986,7 @@ bool extract_tar(const char* outFileName, bool verbose,
     }
   archive_read_close(a);
   archive_read_finish(a);
-  return true;
-
+  return r == ARCHIVE_EOF || r == ARCHIVE_OK;
 }
 }
 #endif
