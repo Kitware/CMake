@@ -1,3 +1,17 @@
+Changes in CMake 2.8.10.2 (since 2.8.10.1)
+----------------------------------------------
+Alex Neundorf (1):
+      Automoc: fix regression #13667, broken build in phonon
+
+Brad King (1):
+      Initialize IMPORTED GLOBAL targets on reconfigure (#13702)
+
+David Cole (1):
+      CMake: Fix infinite loop untarring corrupt tar file
+
+Rolf Eike Beer (1):
+      FindGettext: fix overwriting result with empty variable (#13691)
+
 Changes in CMake 2.8.10.1 (since 2.8.10)
 ----------------------------------------------
 Brad King (5):
