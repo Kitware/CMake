@@ -2611,7 +2611,7 @@ ForwardIterator cmStdRemove(ForwardIterator first,
                             ForwardIterator last,
                             const T& value)
 {
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || (defined(__GNUC__) && __GNUC__ < 3)
   ForwardIterator result = first;
   for ( ; first != last; ++first)
     {
