@@ -677,6 +677,23 @@ std::string GeneratorExpressionContent::Evaluate(
     }
 
   std::vector<std::string> parameters;
+  this->EvaluateParameters(node, identifier, context, dagChecker, parameters);
+  if (context->HadError)
+    {
+    return std::string();
+    }
+
+  return node->Evaluate(parameters, context, this, dagChecker);
+}
+
+//----------------------------------------------------------------------------
+std::string GeneratorExpressionContent::EvaluateParameters(
+                                const cmGeneratorExpressionNode *node,
+                                const std::string &identifier,
+                                cmGeneratorExpressionContext *context,
+                                cmGeneratorExpressionDAGChecker *dagChecker,
+                                std::vector<std::string> &parameters) const
+{
   {
   std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
                                         pit = this->ParamChildren.begin();
@@ -732,10 +749,8 @@ std::string GeneratorExpressionContent::Evaluate(
     {
     reportError(context, this->GetOriginalExpression(), "$<" + identifier
                       + "> expression requires at least one parameter.");
-    return std::string();
     }
-
-  return node->Evaluate(parameters, context, this, dagChecker);
+  return std::string();
 }
 
 //----------------------------------------------------------------------------
