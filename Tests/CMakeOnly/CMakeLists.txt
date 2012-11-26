@@ -32,6 +32,7 @@ add_CMakeOnly_test(SelectLibraryConfigurations)
 add_CMakeOnly_test(TargetScope)
 
 add_CMakeOnly_test(find_library)
+add_CMakeOnly_test(find_path)
 
 add_test(CMakeOnly.ProjectInclude ${CMAKE_CMAKE_COMMAND}
   -DTEST=ProjectInclude
