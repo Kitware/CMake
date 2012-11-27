@@ -360,13 +360,13 @@ void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
       {
       dir += "/";
       }
-    if(subdir == "lib")
+    if(subdir == "include" || subdir == "lib")
       {
       const char* arch =
         this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
       if(arch && *arch)
         {
-        this->AddPathInternal(dir+"lib/"+arch, pathType);
+        this->AddPathInternal(dir+subdir+"/"+arch, pathType);
         }
       }
     std::string add = dir + subdir;
