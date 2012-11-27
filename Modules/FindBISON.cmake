@@ -47,7 +47,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_program(BISON_EXECUTABLE bison DOC "path to the bison executable")
+find_program(BISON_EXECUTABLE NAMES bison win_bison DOC "path to the bison executable")
 mark_as_advanced(BISON_EXECUTABLE)
 
 if(BISON_EXECUTABLE)
