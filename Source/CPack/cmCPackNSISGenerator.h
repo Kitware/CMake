@@ -27,10 +27,13 @@ class cmCPackNSISGenerator : public cmCPackGenerator
 public:
   cmCPackTypeMacro(cmCPackNSISGenerator, cmCPackGenerator);
 
+  static cmCPackGenerator* CreateGenerator64()
+    { return new cmCPackNSISGenerator(true); }
+
   /**
    * Construct generator
    */
-  cmCPackNSISGenerator();
+  cmCPackNSISGenerator(bool nsis64 = false);
   virtual ~cmCPackNSISGenerator();
 
 protected:
@@ -77,6 +80,8 @@ protected:
   /// Translations any newlines found in the string into \\r\\n, so that the
   /// resulting string can be used within NSIS.
   static std::string TranslateNewlines(std::string str);
+
+  bool Nsis64;
 };
 
 #endif
