@@ -73,24 +73,24 @@ void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
 
   if(strcmp(name, "Macro") == 0)
     {
-    std::string name;
-    std::string value;
+    std::string macroName;
+    std::string macroValue;
 
     for(const char** attr = attributes; *attr; attr += 2)
       {
       if(strcmp(attr[0], "Name") == 0)
         {
-        name = attr[1];
+        macroName = attr[1];
         }
       else if(strcmp(attr[0], "Value") == 0)
         {
-        value = attr[1];
+        macroValue = attr[1];
         }
       }
 
-    if(!name.empty())
+    if(!macroName.empty())
       {
-      this->Macros[name] = value;
+      this->Macros[macroName] = macroValue;
       }
     }
 }
