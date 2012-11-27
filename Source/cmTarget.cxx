@@ -2483,6 +2483,20 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
+void deleteAndClear(
+      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
+{
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = entries.begin(),
+      end = entries.end();
+      it != end; ++it)
+    {
+      delete *it;
+    }
+  entries.clear();
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const char* prop, const char* value)
 {
   if (!prop)
@@ -2494,7 +2508,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     {
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
-    this->Internal->IncludeDirectoriesEntries.clear();
+    deleteAndClear(this->Internal->IncludeDirectoriesEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->IncludeDirectoriesEntries.push_back(
                           new cmTargetInternals::IncludeDirectoriesEntry(cge));
@@ -5255,13 +5269,7 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
-  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
-      it = this->Pointer->IncludeDirectoriesEntries.begin(),
-      end = this->Pointer->IncludeDirectoriesEntries.end();
-      it != end; ++it)
-    {
-    delete *it;
-    }
+  deleteAndClear(this->Pointer->IncludeDirectoriesEntries);
   delete this->Pointer;
 }
 
