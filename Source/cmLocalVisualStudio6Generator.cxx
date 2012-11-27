@@ -1785,10 +1785,8 @@ void cmLocalVisualStudio6Generator
                      const std::string extraOptions,
                      std::string& options)
 {
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   // Compute the link information for this configuration.
-  cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
   if(!pcli)
     {
     return;

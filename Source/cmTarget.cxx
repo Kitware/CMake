@@ -15,6 +15,7 @@
 #include "cmSourceFile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmComputeLinkInformation.h"
 #include "cmDocumentCompileDefinitions.h"
 #include "cmDocumentGeneratorExpressions.h"
 #include "cmDocumentLocationUndefined.h"
@@ -4707,14 +4708,24 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       {
       continue;
       }
-
     if(li->second == cmTarget::GENERAL || li->second == linkType)
       {
       // The entry is meant for this configuration.
       impl.Libraries.push_back(item);
       }
-    else
+    }
+
+  LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
+  for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
+      li != oldllibs.end(); ++li)
+    {
+    if(li->second != cmTarget::GENERAL && li->second != linkType)
       {
+      std::string item = this->CheckCMP0004(li->first);
+      if(item == this->GetName() || item.empty())
+        {
+        continue;
+        }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(item);
       }
@@ -4804,6 +4815,32 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
+cmComputeLinkInformation*
+cmTarget::GetLinkInformation(const char* config)
+{
+  // Lookup any existing information for this configuration.
+  std::map<cmStdString, cmComputeLinkInformation*>::iterator
+    i = this->LinkInformation.find(config?config:"");
+  if(i == this->LinkInformation.end())
+    {
+    // Compute information for this configuration.
+    cmComputeLinkInformation* info =
+      new cmComputeLinkInformation(this, config);
+    if(!info || !info->Compute())
+      {
+      delete info;
+      info = 0;
+      }
+
+    // Store the information for this configuration.
+    std::map<cmStdString, cmComputeLinkInformation*>::value_type
+      entry(config?config:"", info);
+    i = this->LinkInformation.insert(entry).first;
+    }
+  return i->second;
+}
+
+//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkDirectory(const char* config)
 {
   std::string fpath;
@@ -4858,6 +4895,29 @@ std::string cmTarget::GetMacContentDirectory(const char* config,
   fpath += "/";
   fpath = this->BuildMacContentDirectory(fpath, config, includeMacOS);
   return fpath;
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInformationMap
+::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()
+{
+  // Ideally cmTarget instances should never be copied.  However until
+  // we can make a sweep to remove that, this copy constructor avoids
+  // allowing the resources (LinkInformation) from getting copied.  In
+  // the worst case this will lead to extra cmComputeLinkInformation
+  // instances.  We also enforce in debug mode that the map be emptied
+  // when copied.
+  static_cast<void>(r);
+  assert(r.empty());
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
+{
+  for(derived::iterator i = this->begin(); i != this->end(); ++i)
+    {
+    delete i->second;
+    }
 }
 
 //----------------------------------------------------------------------------

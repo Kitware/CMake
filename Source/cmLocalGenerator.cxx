@@ -1671,7 +1671,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 {
   cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
+  cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
   if(!pcli)
     {
     return;
