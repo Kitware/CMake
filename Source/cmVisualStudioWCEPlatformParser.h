@@ -48,8 +48,8 @@ private:
   std::map<std::string, std::string> Macros;
   std::vector<std::string> AvailablePlatforms;
 
-  bool FoundRequiredName;
   const char* RequiredName;
+  bool FoundRequiredName;
 };
 
 #endif
