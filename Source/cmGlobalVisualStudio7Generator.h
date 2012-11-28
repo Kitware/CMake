@@ -108,7 +108,7 @@ protected:
   virtual void WriteProjectDepends(std::ostream& fout,
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name,
+    std::ostream& fout, const char* name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const char* platformMapping = NULL);
   virtual void WriteSLNGlobalSections(std::ostream& fout,

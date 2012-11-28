@@ -122,6 +122,7 @@ private:
   cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   bool FortranProject;
+  bool WindowsCEProject;
   std::string PlatformName; // Win32 or x64
   cmLocalVisualStudio7GeneratorInternals* Internal;
 };

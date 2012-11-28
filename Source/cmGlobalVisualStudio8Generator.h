@@ -28,7 +28,7 @@ public:
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {return this->Name;}
+  virtual const char* GetName() const {return this->Name.c_str();}
 
   const char* GetPlatformName() const;
 
@@ -37,6 +37,8 @@ public:
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
+
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   /**
    * Override Configure and Generate to add the build-system check
@@ -62,6 +64,10 @@ public:
       LinkLibraryDependencies and link to .sln dependencies. */
   virtual bool NeedLinkLibraryDependencies(cmTarget& target);
 
+  /** Return true if building for Windows CE */
+  virtual bool TargetsWindowsCE() const {
+    return !this->WindowsCEVersion.empty(); }
+
 protected:
   virtual const char* GetIDEVersion() { return "8.0"; }
 
@@ -73,16 +79,19 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name,
+    std::ostream& fout, const char* name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const char* platformMapping = NULL);
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
                                    const char* path, cmTarget &t);
 
-  const char* Name;
+  std::string Name;
+  std::string PlatformName;
+  std::string WindowsCEVersion;
 
 private:
   class Factory;
+  friend class Factory;
 };
 #endif

@@ -13,37 +13,63 @@
 #include "cmGlobalVisualStudio9Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmVisualStudioWCEPlatformParser.h"
 #include "cmake.h"
 
-static const char vs9Win32generatorName[] = "Visual Studio 9 2008";
-static const char vs9Win64generatorName[] = "Visual Studio 8 2005 Win64";
-static const char vs9IA64generatorName[] = "Visual Studio 9 2008 IA64";
+static const char vs9generatorName[] = "Visual Studio 9 2008";
 
 class cmGlobalVisualStudio9Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs9Win32generatorName))
+    if(strstr(name, vs9generatorName) != name)
+      {
+      return 0;
+      }
+
+    const char* p = name + sizeof(vs9generatorName) - 1;
+    if(p[0] == '\0')
       {
       return new cmGlobalVisualStudio9Generator(
-        vs9Win32generatorName, NULL, NULL);
+        name, NULL, NULL);
       }
-    if(!strcmp(name, vs9Win64generatorName))
+
+    if(p[0] != ' ')
+      {
+      return 0;
+      }
+
+    ++p;
+
+    if(!strcmp(p, "IA64"))
       {
       return new cmGlobalVisualStudio9Generator(
-        vs9Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
+        name, "Itanium", "CMAKE_FORCE_IA64");
       }
-    if(!strcmp(name, vs9IA64generatorName))
+
+    if(!strcmp(p, "Win64"))
       {
       return new cmGlobalVisualStudio9Generator(
-        vs9IA64generatorName, "Itanium", "CMAKE_FORCE_IA64");
+        name, "x64", "CMAKE_FORCE_WIN64");
       }
-    return 0;
+
+    cmVisualStudioWCEPlatformParser parser(p);
+    parser.ParseVersion("9.0");
+    if (!parser.Found())
+      {
+      return 0;
+      }
+
+    cmGlobalVisualStudio9Generator* ret = new cmGlobalVisualStudio9Generator(
+      name, parser.GetArchitectureFamily(), NULL);
+    ret->PlatformName = p;
+    ret->WindowsCEVersion = parser.GetOSVersion();
+    return ret;
   }
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    entry.Name = "Visual Studio 9 2008";
+    entry.Name = vs9generatorName;
     entry.Brief = "Generates Visual Studio 9 2008 project files.";
     entry.Full =
       "It is possible to append a space followed by the platform name "
@@ -53,9 +79,19 @@ public:
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs9Win32generatorName);
-    names.push_back(vs9Win64generatorName);
-    names.push_back(vs9IA64generatorName); }
+    names.push_back(vs9generatorName);
+    names.push_back(vs9generatorName + std::string(" Win64"));
+    names.push_back(vs9generatorName + std::string(" IA64"));
+    cmVisualStudioWCEPlatformParser parser;
+    parser.ParseVersion("9.0");
+    const std::vector<std::string>& availablePlatforms =
+      parser.GetAvailablePlatforms();
+    for(std::vector<std::string>::const_iterator i =
+        availablePlatforms.begin(); i != availablePlatforms.end(); ++i)
+      {
+      names.push_back("Visual Studio 9 2008 " + *i);
+      }
+  }
 };
 
 //----------------------------------------------------------------------------
