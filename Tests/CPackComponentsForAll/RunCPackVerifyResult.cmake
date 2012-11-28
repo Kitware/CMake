@@ -9,11 +9,10 @@ endif()
 if(NOT CPackGen)
   message(FATAL_ERROR "CPackGen not set")
 endif()
-get_filename_component(CPACK_LOCATION ${CMAKE_COMMAND} PATH)
-set(CPackCommand "${CPACK_LOCATION}/cpack")
-message("cpack = ${CPackCommand}")
-if(NOT CPackCommand)
-  message(FATAL_ERROR "CPackCommand not set")
+
+message("CMAKE_CPACK_COMMAND = ${CMAKE_CPACK_COMMAND}")
+if(NOT CMAKE_CPACK_COMMAND)
+  message(FATAL_ERROR "CMAKE_CPACK_COMMAND not set")
 endif()
 
 if(NOT CPackComponentWay)
@@ -92,7 +91,7 @@ endif()
 
 message("config_args = ${config_args}")
 message("config_verbose = ${config_verbose}")
-execute_process(COMMAND ${CPackCommand} ${config_verbose} -G ${CPackGen} ${config_args}
+execute_process(COMMAND ${CMAKE_CPACK_COMMAND} ${config_verbose} -G ${CPackGen} ${config_args}
     RESULT_VARIABLE CPack_result
     OUTPUT_VARIABLE CPack_output
     ERROR_VARIABLE CPack_error
