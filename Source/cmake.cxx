@@ -82,6 +82,7 @@
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)
 #include "cmCallVisualStudioMacro.h"
+#include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
 #if !defined(CMAKE_BOOT_MINGW)
@@ -1143,6 +1144,10 @@ void CMakeCommandUsage(const char* program)
     << "Available on Windows only:\n"
     << "  comspec                   - on windows 9x use this for RunCommand\n"
     << "  delete_regv key           - delete registry value\n"
+    << "  env_vs8_wince sdkname     - displays a batch file which sets the "
+       "environment for the provided Windows CE SDK installed in VS2005\n"
+    << "  env_vs9_wince sdkname     - displays a batch file which sets the "
+       "environment for the provided Windows CE SDK installed in VS2008\n"
     << "  write_regv key value      - write registry value\n"
 #else
     << "Available on UNIX only:\n"
@@ -1807,6 +1812,14 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         command += " " + args[cc];
         }
       return cmWin32ProcessExecution::Windows9xHack(command.c_str());
+      }
+    else if (args[1] == "env_vs8_wince" && args.size() == 3)
+      {
+      return cmake::WindowsCEEnvironment("8.0", args[2]);
+      }
+    else if (args[1] == "env_vs9_wince" && args.size() == 3)
+      {
+      return cmake::WindowsCEEnvironment("9.0", args[2]);
       }
 #endif
     }
@@ -3999,6 +4012,27 @@ static bool cmakeCheckStampList(const char* stampList)
       }
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
+{
+#if defined(CMAKE_HAVE_VS_GENERATORS)
+  cmVisualStudioWCEPlatformParser parser(name.c_str());
+  parser.ParseVersion(version);
+  if (parser.Found())
+    {
+    std::cout << "@echo off" << std::endl;
+    std::cout << "echo Environment Selection: " << name << std::endl;
+    std::cout << "set PATH=" << parser.GetPathDirectories() << std::endl;
+    std::cout << "set INCLUDE=" << parser.GetIncludeDirectories() <<std::endl;
+    std::cout << "set LIB=" << parser.GetLibraryDirectories() <<std::endl;
+    return 0;
+    }
+#endif
+
+  std::cerr << "Could not find " << name;
+  return -1;
 }
 
 // For visual studio 2005 and newer manifest files need to be embeded into
