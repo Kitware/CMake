@@ -15,18 +15,23 @@
 
 int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
 {
-  std::string vskey = cmGlobalVisualStudioGenerator::GetRegistryBase(version);
-  vskey += "\\Setup\\VS;ProductDir";
+  const std::string registryBase =
+    cmGlobalVisualStudioGenerator::GetRegistryBase(version);
+  const std::string vckey = registryBase + "\\Setup\\VC;ProductDir";
+  const std::string vskey = registryBase + "\\Setup\\VS;ProductDir";
 
-  std::string vsInstallPath;
-  if(!cmSystemTools::ReadRegistryValue(vskey.c_str(), vsInstallPath))
+  if(!cmSystemTools::ReadRegistryValue(vckey.c_str(), this->VcInstallDir) ||
+     !cmSystemTools::ReadRegistryValue(vskey.c_str(), this->VsInstallDir))
     {
     return 0;
     }
-  cmSystemTools::ConvertToUnixSlashes(vsInstallPath);
+  cmSystemTools::ConvertToUnixSlashes(this->VcInstallDir);
+  cmSystemTools::ConvertToUnixSlashes(this->VsInstallDir);
+  this->VcInstallDir.append("/");
+  this->VsInstallDir.append("/");
 
   const std::string configFilename =
-    vsInstallPath + "/VC/vcpackages/WCE.VCPlatform.config";
+    this->VcInstallDir + "vcpackages/WCE.VCPlatform.config";
 
   return this->ParseFile(configFilename.c_str());
 }
@@ -93,6 +98,24 @@ void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
       this->Macros[macroName] = macroValue;
       }
     }
+  else if(strcmp(name, "Directories") == 0)
+    {
+    for(const char** attr = attributes; *attr; attr += 2)
+      {
+      if(strcmp(attr[0], "Include") == 0)
+        {
+        this->Include = attr[1];
+        }
+      else if(strcmp(attr[0], "Library") == 0)
+        {
+        this->Library = attr[1];
+        }
+      else if(strcmp(attr[0], "Path") == 0)
+        {
+        this->Path = attr[1];
+        }
+      }
+    }
 }
 
 void cmVisualStudioWCEPlatformParser::EndElement(const char* name)
@@ -136,4 +159,17 @@ void cmVisualStudioWCEPlatformParser::CharacterDataHandler(const char* data,
                                                            int length)
 {
   this->CharacterData.append(data, length);
+}
+
+std::string cmVisualStudioWCEPlatformParser::FixPaths(
+    const std::string& paths) const
+{
+  std::string ret = paths;
+  cmSystemTools::ReplaceString(ret, "$(PATH)", "%PATH%");
+  cmSystemTools::ReplaceString(ret, "$(VCInstallDir)", VcInstallDir.c_str());
+  cmSystemTools::ReplaceString(ret, "$(VSInstallDir)", VsInstallDir.c_str());
+  cmSystemTools::ReplaceString(ret, "\\", "/");
+  cmSystemTools::ReplaceString(ret, "//", "/");
+  cmSystemTools::ReplaceString(ret, "/", "\\");
+  return ret;
 }
