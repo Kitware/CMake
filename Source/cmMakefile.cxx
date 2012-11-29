@@ -2128,6 +2128,13 @@ void cmMakefile::AddExtraDirectory(const char* dir)
   this->AuxSourceDirectories.push_back(dir);
 }
 
+//----------------------------------------------------------------------------
+static bool containsVariable(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("${");
+  return (openpos != std::string::npos)
+      && (lib.find("}", openpos) != std::string::npos);
+}
 
 // expand CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
 // include and library directories.
@@ -2142,8 +2149,11 @@ void cmMakefile::ExpandVariables()
   if (includeDirs)
     {
     std::string dirs = includeDirs;
-    this->ExpandVariablesInString(dirs, true, true);
-    this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+    if (containsVariable(dirs))
+      {
+      this->ExpandVariablesInString(dirs, true, true);
+      this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+      }
     }
 
   // Also for each target's INCLUDE_DIRECTORIES property:
@@ -2155,8 +2165,17 @@ void cmMakefile::ExpandVariables()
     if (includeDirs)
       {
       std::string dirs = includeDirs;
-      this->ExpandVariablesInString(dirs, true, true);
-      t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+      if (containsVariable(dirs))
+        {
+        // Performance suffers severely when ExpandVariablesInString
+        // is called on strings which contain generator expressions,
+        // presumably because they contain '$' characters.
+        // This expansion is only for compatibility, probably with ancient
+        // cmake versions. Usually the variables are already expanded
+        // so this branch will not be entered.
+        this->ExpandVariablesInString(dirs, true, true);
+        t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
+        }
       }
     }
 
