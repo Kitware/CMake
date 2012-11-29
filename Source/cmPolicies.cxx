@@ -494,22 +494,26 @@ cmPolicies::cmPolicies()
 
     this->DefinePolicy(
     CMP0019, "CMP0019",
-    "Use INTERFACE_LINK_LIBRARIES instead of LINK_INTERFACE_LIBRARIES.",
-    "CMake 2.8.10 used the (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? "
-    "properties to determine the link interface.  CMake 2.8.11 and higher "
+    "Use INTERFACE_LINK_LIBRARIES instead of "
+    "LINK_INTERFACE_LIBRARIES_<CONFIG>.",
+    "CMake 2.8.10 used properties matching "
+    "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? "
+    "to determine the link interface.  CMake 2.8.11 and higher "
     "prefer instead to use the INTERFACE_LINK_LIBRARIES target property to "
-    "determine the link interface, while ignoring "
+    "determine the link interface, while ignoring properties matching"
     "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? completely. The new "
     "INTERFACE_LINK_LIBRARIES target property can use generator expressions "
     "to specify config-specific link libraries."
     "\n"
     "The OLD behavior for this policy is to ignore the "
     "INTERFACE_LINK_LIBRARIES property for all targets and use the "
-    "value of (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? instead."
+    "value of the appropriate property matching "
+    "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? instead."
     "\n"
     "The NEW behavior for this policy is to ignore "
-    "the value of the (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? target "
-    "property",
+    "the value of the property matching "
+    "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? and use "
+    "INTERFACE_LINK_LIBRARIES instead.",
     2,8,11,0, cmPolicies::WARN);
 }
 
