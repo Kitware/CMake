@@ -2619,14 +2619,32 @@ void cmTarget::PrependTLLIncludeDirectories(const std::string &includes)
                                                   );
 }
 
+#if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
+// The Sun Machine on the dashboard has an un diagnosed error with parsing
+// this template: http://open.cdash.org/viewBuildError.php?buildid=2689581
+// In the absense of an ability to find out what the problem is, just
+// write the specialized expansion of the template instead. If cmStdRemove
+// is ever to move to a generic location, that problem would have to be
+// fixed.
+std::vector<std::string>::iterator cmStdRemove(
+                                  std::vector<std::string>::iterator first,
+                                  std::vector<std::string>::iterator last,
+                            const std::string& value)
+#else
 // A Borland machine on the dashboard has a faulty std::remove.
 template <typename ForwardIterator, typename T>
 ForwardIterator cmStdRemove(ForwardIterator first,
                             ForwardIterator last,
                             const T& value)
+#endif
 {
-#if defined(__BORLANDC__) || (defined(__GNUC__) && __GNUC__ < 3)
+#if defined(__BORLANDC__) || (defined(__GNUC__) && __GNUC__ < 3) \
+                          || (defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510)
+#  if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
+  std::vector<std::string>::iterator result = first;
+#  else
   ForwardIterator result = first;
+#  endif
   for ( ; first != last; ++first)
     {
     if (!(*first == value))
