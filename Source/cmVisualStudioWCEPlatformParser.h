@@ -31,6 +31,12 @@ public:
   bool Found() const {return this->FoundRequiredName;}
   const char* GetArchitectureFamily() const;
   std::string GetOSVersion() const;
+  std::string GetIncludeDirectories() const {
+    return this->FixPaths(this->Include); }
+  std::string GetLibraryDirectories() const {
+    return this->FixPaths(this->Library); }
+  std::string GetPathDirectories() const {
+    return this->FixPaths(this->Path); }
   const std::vector<std::string>& GetAvailablePlatforms() const {
     return this->AvailablePlatforms; }
 
@@ -40,8 +46,13 @@ protected:
   void CharacterDataHandler(const char* data, int length);
 
 private:
+  std::string FixPaths(const std::string& paths) const;
+
   std::string CharacterData;
 
+  std::string Include;
+  std::string Library;
+  std::string Path;
   std::string PlatformName;
   std::string OSMajorVersion;
   std::string OSMinorVersion;
@@ -50,6 +61,8 @@ private:
 
   const char* RequiredName;
   bool FoundRequiredName;
+  std::string VcInstallDir;
+  std::string VsInstallDir;
 };
 
 #endif
