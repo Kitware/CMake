@@ -211,13 +211,9 @@ cmExportFileGenerator
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
                                 iface->Languages, properties, missingTargets);
-
-    if(target->GetPolicyStatusCMP0019() != cmPolicies::NEW)
-      {
-      this->SetImportLinkProperty(suffix, target,
+    this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties, missingTargets);
-      }
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties, missingTargets);

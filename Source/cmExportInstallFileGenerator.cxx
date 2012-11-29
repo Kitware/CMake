@@ -40,20 +40,6 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 //----------------------------------------------------------------------------
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  for(std::vector<cmTargetExport*>::const_iterator
-        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
-      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
-    {
-    if ((*tei)->Target->GetPolicyStatusCMP0019() == cmPolicies::NEW)
-      {
-      os << "IF(NOT POLICY CMP0019)\n"
-        << "   MESSAGE(FATAL_ERROR \"CMake >= 2.8.11 required to use "
-           "IMPORTED targets containing generator expressions\")\n"
-        << "ENDIF(NOT POLICY CMP0019)\n";
-      break;
-      }
-    }
-
   // Create all the imported targets.
   for(std::vector<cmTargetExport*>::const_iterator
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
@@ -64,25 +50,25 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       {
       this->GenerateImportTargetCode(os, te->Target);
 
+      ImportPropertyMap properties;
+
       if ((*tei)->Target->GetPolicyStatusCMP0019() == cmPolicies::NEW)
         {
-        ImportPropertyMap properties;
-
-        this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                      te->Target,
-                                      cmGeneratorExpression::InstallInterface,
-                                      properties);
-        this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
-                                      te->Target,
-                                      cmGeneratorExpression::InstallInterface,
-                                      properties);
         this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES",
                                       te->Target,
                                       cmGeneratorExpression::InstallInterface,
                                       properties);
-
-        this->GenerateInterfaceProperties(te->Target, os, properties);
         }
+      this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                                    te->Target,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties);
+      this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
+                                    te->Target,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties);
+
+      this->GenerateInterfaceProperties(te->Target, os, properties);
       }
     else
       {
