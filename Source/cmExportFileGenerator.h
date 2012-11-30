@@ -13,7 +13,6 @@
 #define cmExportFileGenerator_h
 
 #include "cmCommand.h"
-#include "cmGeneratorExpression.h"
 
 /** \class cmExportFileGenerator
  * \brief Generate a file exporting targets from a build or install tree.
@@ -92,12 +91,6 @@ protected:
                                    cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee) = 0;
-  void PopulateInterfaceProperty(const char *,
-                                 cmTarget *target,
-                                 cmGeneratorExpression::PreprocessContext,
-                                 ImportPropertyMap &properties);
-  void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
-                                   const ImportPropertyMap &properties);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;

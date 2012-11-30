@@ -491,43 +491,6 @@ cmPolicies::cmPolicies()
     "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS whether it is modified or not and "
     "honor the POSITION_INDEPENDENT_CODE target property.",
     2,8,9,0, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0019, "CMP0019",
-    "Use INTERFACE_LINK_LIBRARIES instead of LINK_INTERFACE_LIBRARIES.",
-    "CMake 2.8.10 used the (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? "
-    "properties to determine the link interface.  CMake 2.8.11 and higher "
-    "prefer instead to use the INTERFACE_LINK_LIBRARIES target property to "
-    "determine the link interface, while ignoring "
-    "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? completely. The new "
-    "INTERFACE_LINK_LIBRARIES target property can use generator expressions "
-    "to specify config-specific link libraries."
-    "\n"
-    "The OLD behavior for this policy is to ignore the "
-    "INTERFACE_LINK_LIBRARIES property for all targets and use the "
-    "value of (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? instead."
-    "\n"
-    "The NEW behavior for this policy is to ignore "
-    "the value of the (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? target "
-    "property",
-    2,8,11,0, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0020, "CMP0020",
-    "Use INCLUDE_DIRECTORIES order implied by target_link_libraries.",
-    "CMake 2.8.11 introduced a feature where using target_link_libraries "
-    "can read the INTERFACE_INCLUDE_DIRECTORIES property of a target and "
-    "use the value as include directories when compiling.  Because the "
-    "target_link_libraries call might occur before the include_directories "
-    "call, this could change the order of includes in the compile step."
-    "\n"
-    "The OLD behavior for this policy is to let the include_directories call "
-    "determine the order of includes."
-    "\n"
-    "The NEW behavior for this policy is to use the order of includes "
-    "determined by the order of all calls to target_link_libraries and "
-    "include_directories",
-    2,8,11,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

@@ -1565,8 +1565,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
     }
 
   std::string flags;
-  std::vector<std::string> frameworks;
-  this->Target->GetFrameworks(config, frameworks);
+  std::vector<std::string>& frameworks = this->Target->GetFrameworks();
   for(i = frameworks.begin();
       i != frameworks.end(); ++i)
     {
