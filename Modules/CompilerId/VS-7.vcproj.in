@@ -36,7 +36,7 @@
 				Name="VCLinkerTool"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
-				SubSystem="1"
+				SubSystem="@id_subsystem@"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
