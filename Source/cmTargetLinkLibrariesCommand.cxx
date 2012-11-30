@@ -235,7 +235,10 @@ bool cmTargetLinkLibrariesCommand
   if(this->CurrentProcessingState != ProcessingLinkLibraries &&
      !this->Target->GetProperty("INTERFACE_LINK_LIBRARIES"))
     {
-    this->Target->SetProperty("INTERFACE_LINK_LIBRARIES", "");
+    if (this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+      {
+      this->Target->SetProperty("INTERFACE_LINK_LIBRARIES", "");
+      }
     }
   return true;
 }
@@ -289,8 +292,11 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       }
     }
 
-  this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                               generatorIface(lib, llt).c_str());
+  if (this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    {
+    this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+                                 generatorIface(lib, llt).c_str());
+    }
 
   // Get the list of configurations considered to be DEBUG.
   std::vector<std::string> const& debugConfigs =
