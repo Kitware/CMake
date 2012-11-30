@@ -114,7 +114,8 @@ public:
     {return this->PostBuildCommands;}
 
   ///! Return the list of frameworks being linked to this target
-  std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
+  void GetFrameworks(const char *config,
+                     std::vector<std::string> &frameworks);
 
   /**
    * Get the list of the source files used by this target
@@ -172,6 +173,8 @@ public:
   return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
+  void GetDirectLinkLibraries(const char *config,
+                              std::vector<std::string> &) const;
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config);
@@ -183,7 +186,6 @@ public:
 
   // Check to see if a library is a framework and treat it different on Mac
   bool NameResolvesToFramework(const std::string& libname);
-  bool AddFramework(const std::string& lib, LinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
                       LinkLibraryType llt);
@@ -578,7 +580,6 @@ private:
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
-  std::vector<std::string> Frameworks;
   std::vector<std::string> LinkDirectories;
   std::set<cmStdString> LinkDirectoriesEmmitted;
   bool HaveInstallRule;

@@ -37,11 +37,11 @@ target_link_libraries(depB LINK_PRIVATE depA)
 add_library(depC SHARED depC.cpp)
 generate_export_header(depC)
 
-target_link_libraries(depC LINK_PUBLIC depA)
+target_link_libraries(depC LINK_PUBLIC $<1:depA>)
 
 assert_property(depA LINK_INTERFACE_LIBRARIES "")
 assert_property(depB LINK_INTERFACE_LIBRARIES "")
-assert_property(depC LINK_INTERFACE_LIBRARIES "depA")
+assert_property(depC LINK_INTERFACE_LIBRARIES "$<1:depA>")
 
 add_executable(targetA targetA.cpp)
 
