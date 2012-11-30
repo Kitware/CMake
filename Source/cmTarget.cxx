@@ -1376,7 +1376,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
-  this->SetPropertyDefault("INTERFACE_LINK_LIBRARIES", 0);
+  if (this->GetType() != STATIC_LIBRARY)
+    {
+    this->SetPropertyDefault("INTERFACE_LINK_LIBRARIES", 0);
+    }
   this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
   this->SetPropertyDefault("MACOSX_BUNDLE", 0);
 
