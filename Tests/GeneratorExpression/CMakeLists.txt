@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.8)
 project(GeneratorExpression NONE)
 
-add_custom_target(check-part1 ALL
+add_custom_target(check ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_0=$<0:nothing>
     -Dtest_0_with_comma=$<0:-Wl,--no-undefined>
@@ -57,13 +57,6 @@ add_custom_target(check-part1 ALL
     -Dtest_colons_3=$<1:Qt5::Core>
     -Dtest_colons_4=$<1:C:\\CMake>
     -Dtest_colons_5=$<1:C:/CMake>
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part1.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 2)"
-  VERBATIM
-  )
-
-add_custom_target(check-part2 ALL
-  COMMAND ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
     -Dtest_incomplete_2=$<something
     -Dtest_incomplete_3=$<something:
@@ -85,10 +78,7 @@ add_custom_target(check-part2 ALL
     -Dtest_incomplete_19=$<1:some,thing$<ANGLE-R>
     -Dtest_incomplete_20=$<CONFIGURATION$<ANGLE-R>
     -Dtest_incomplete_21=$<BOOL:something$<ANGLE-R>
-    -Dtest_build_interface=$<BUILD_INTERFACE:build>
-    -Dtest_install_interface=$<INSTALL_INTERFACE:install>
-    -Dtest_export_namespace=$<EXPORT_NAMESPACE>x
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
+  COMMAND ${CMAKE_COMMAND} -E echo "check done"
   VERBATIM
   )

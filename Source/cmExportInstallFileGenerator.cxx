@@ -19,7 +19,6 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
-#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
@@ -49,26 +48,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     if(this->ExportedTargets.insert(te->Target).second)
       {
       this->GenerateImportTargetCode(os, te->Target);
-
-      ImportPropertyMap properties;
-
-      if ((*tei)->Target->GetPolicyStatusCMP0019() == cmPolicies::NEW)
-        {
-        this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES",
-                                      te->Target,
-                                      cmGeneratorExpression::InstallInterface,
-                                      properties);
-        }
-      this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                    te->Target,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties);
-      this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
-                                    te->Target,
-                                    cmGeneratorExpression::InstallInterface,
-                                    properties);
-
-      this->GenerateInterfaceProperties(te->Target, os, properties);
       }
     else
       {
