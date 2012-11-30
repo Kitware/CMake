@@ -287,6 +287,37 @@ void cmExportFileGenerator::GenerateImportVersionCode(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateExpectedTargetsCode(std::ostream& os,
+                                            const std::string &expectedTargets)
+{
+  os << "SET(_targetsDefined)\n"
+        "SET(_targetsNotDefined)\n"
+        "SET(_expectedTargets)\n"
+        "FOREACH(_expectedTarget " << expectedTargets << ")\n"
+        "  LIST(APPEND _expectedTargets ${_expectedTarget})\n"
+        "  IF(NOT TARGET ${_expectedTarget})\n"
+        "    LIST(APPEND _targetsNotDefined ${_expectedTarget})\n"
+        "  ENDIF(NOT TARGET ${_expectedTarget})\n"
+        "  IF(TARGET ${_expectedTarget})\n"
+        "    LIST(APPEND _targetsDefined ${_expectedTarget})\n"
+        "  ENDIF(TARGET ${_expectedTarget})\n"
+        "ENDFOREACH(_expectedTarget)\n"
+        "IF(\"${_targetsDefined}\" STREQUAL \"${_expectedTargets}\")\n"
+        "  SET(CMAKE_IMPORT_FILE_VERSION)\n"
+        "  CMAKE_POLICY(POP)\n"
+        "  RETURN()\n"
+        "ENDIF(\"${_targetsDefined}\" STREQUAL \"${_expectedTargets}\")\n"
+        "IF(NOT \"${_targetsDefined}\" STREQUAL \"\")\n"
+        "  MESSAGE(FATAL_ERROR \"Some (but not all) targets in this export "
+        "set were already defined.\\nTargets Defined: ${_targetsDefined}\\n"
+        "Targets not yet defined: ${_targetsNotDefined}\\n\")\n"
+        "ENDIF(NOT \"${_targetsDefined}\" STREQUAL \"\")\n"
+        "UNSET(_targetsDefined)\n"
+        "UNSET(_targetsNotDefined)\n"
+        "UNSET(_expectedTargets)\n"
+        "\n\n";
+}
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator
 ::GenerateImportTargetCode(std::ostream& os, cmTarget* target)
