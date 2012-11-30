@@ -23,6 +23,20 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
+  {
+  std::string expectedTargets;
+  std::string sep;
+  for(std::vector<cmTarget*>::const_iterator
+        tei = this->Exports->begin();
+      tei != this->Exports->end(); ++tei)
+    {
+    expectedTargets += sep + this->Namespace + (*tei)->GetName();
+    sep = " ";
+    }
+
+  this->GenerateExpectedTargetsCode(os, expectedTargets);
+  }
+
   // Create all the imported targets.
   for(std::vector<cmTarget*>::const_iterator
         tei = this->Exports->begin();
