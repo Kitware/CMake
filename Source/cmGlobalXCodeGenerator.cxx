@@ -1997,8 +1997,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       dirs.Add(incpath.c_str());
       }
     }
-  std::vector<std::string> frameworks;
-  target.GetFrameworks(configName, frameworks);
+  std::vector<std::string>& frameworks = target.GetFrameworks();
   if(frameworks.size())
     {
     for(std::vector<std::string>::iterator fmIt = frameworks.begin();

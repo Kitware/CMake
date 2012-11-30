@@ -252,7 +252,45 @@ const char* cmGeneratorTarget::GetCreateRuleVariable()
 std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
                                                           const char *config)
 {
-  return this->Target->GetIncludeDirectories(config);
+  std::vector<std::string> includes;
+  const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
+  if(!prop)
+    {
+    return includes;
+    }
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                              this->GetName(),
+                                              "INCLUDE_DIRECTORIES", 0, 0);
+
+  cmSystemTools::ExpandListArgument(ge.Parse(prop)
+                                    .Evaluate(this->Makefile,
+                                              config,
+                                              false,
+                                              this->Target,
+                                              &dagChecker),
+                                    includes);
+
+  std::set<std::string> uniqueIncludes;
+  std::vector<std::string> orderedAndUniqueIncludes;
+  for(std::vector<std::string>::const_iterator
+      li = includes.begin(); li != includes.end(); ++li)
+    {
+    std::string inc = *li;
+    if (!cmSystemTools::IsOff(inc.c_str()))
+      {
+      cmSystemTools::ConvertToUnixSlashes(inc);
+      }
+    if(uniqueIncludes.insert(inc).second)
+      {
+      orderedAndUniqueIncludes.push_back(inc);
+      }
+    }
+
+  return orderedAndUniqueIncludes;
 }
 
 //----------------------------------------------------------------------------
@@ -277,7 +315,7 @@ std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
   cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                              this->GetName(),
                                              defPropName, 0, 0);
-  return ge.Parse(prop)->Evaluate(this->Makefile,
+  return ge.Parse(prop).Evaluate(this->Makefile,
                                  config,
                                  false,
                                  this->Target,

@@ -96,31 +96,6 @@ static const struct OneNode : public cmGeneratorExpressionNode
 } oneNode;
 
 //----------------------------------------------------------------------------
-static const struct OneNode buildInterfaceNode;
-
-//----------------------------------------------------------------------------
-static const struct ZeroNode installInterfaceNode;
-
-//----------------------------------------------------------------------------
-static const struct NullNode : public cmGeneratorExpressionNode
-{
-  NullNode() {}
-
-  virtual bool GeneratesContent() const { return false; }
-
-  std::string Evaluate(const std::vector<std::string> &,
-                       cmGeneratorExpressionContext *,
-                       const GeneratorExpressionContent *,
-                       cmGeneratorExpressionDAGChecker *) const
-  {
-    return std::string();
-  }
-
-  virtual int NumExpectedParameters() const { return 0; }
-
-} nullNode;
-
-//----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
@@ -288,29 +263,6 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 //----------------------------------------------------------------------------
-static const struct TargetTestNode : public cmGeneratorExpressionNode
-{
-  TargetTestNode() {}
-
-  virtual int NumExpectedParameters() const { return 1; }
-
-  std::string Evaluate(const std::vector<std::string> &parameters,
-                       cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *,
-                       cmGeneratorExpressionDAGChecker *) const
-  {
-    return context->Makefile->FindTargetToUse(parameters.front().c_str())
-      ? "1" : "0";
-  }
-} targetTestNode;
-
-//----------------------------------------------------------------------------
-static const char* targetPropertyTransitiveWhitelist[] = {
-    "INTERFACE_INCLUDE_DIRECTORIES"
-  , "INTERFACE_COMPILE_DEFINITIONS"
-};
-
-//----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
   TargetPropertyNode() {}
@@ -412,27 +364,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 
     const char *prop = target->GetProperty(propertyName.c_str());
-    if (!prop)
-      {
-      return std::string();
-      }
-
-    for (size_t i = 0;
-         i < (sizeof(targetPropertyTransitiveWhitelist) /
-              sizeof(*targetPropertyTransitiveWhitelist));
-         ++i)
-      {
-      if (targetPropertyTransitiveWhitelist[i] == propertyName)
-        {
-        cmGeneratorExpression ge(context->Backtrace);
-        return ge.Parse(prop)->Evaluate(context->Makefile,
-                            context->Config,
-                            context->Quiet,
-                            context->Target,
-                            &dagChecker);
-        }
-      }
-    return prop;
+    return prop ? prop : "";
   }
 } targetPropertyNode;
 
@@ -661,14 +593,6 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &commaNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
-  else if (identifier == "BUILD_INTERFACE")
-    return &buildInterfaceNode;
-  else if (identifier == "INSTALL_INTERFACE")
-    return &installInterfaceNode;
-  else if (identifier == "EXPORT_NAMESPACE")
-    return &nullNode;
-  else if (identifier == "TARGET_DEFINED")
-    return &targetTestNode;
   return 0;
 
 }

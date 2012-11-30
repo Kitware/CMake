@@ -200,44 +200,20 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // Get the depender.
   cmTarget* depender = this->Targets[depender_index];
 
-  // Loop over all targets linked directly in all configs.
-  // We need to make targets depend on the union of all config-specific
-  // dependencies in all targets, because the generated build-systems can't
-  // deal with config-specific dependencies.
+  // Loop over all targets linked directly.
   {
-  std::vector<std::string> configs;
-  depender->GetMakefile()->GetConfigurations(configs);
+  cmTarget::LinkLibraryVectorType const& tlibs =
+    depender->GetOriginalLinkLibraries();
   std::set<cmStdString> emitted;
-  {
-  std::vector<std::string> tlibs;
-  depender->GetDirectLinkLibraries(0, tlibs);
   // A target should not depend on itself.
   emitted.insert(depender->GetName());
-  for(std::vector<std::string>::const_iterator lib = tlibs.begin();
+  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
     // Don't emit the same library twice for this target.
-    if(emitted.insert(*lib).second)
+    if(emitted.insert(lib->first).second)
       {
-      this->AddTargetDepend(depender_index, lib->c_str(), true);
-      }
-    }
-  }
-  for (std::vector<std::string>::const_iterator it = configs.begin();
-    it != configs.end(); ++it)
-    {
-    std::vector<std::string> tlibs;
-    depender->GetDirectLinkLibraries(it->c_str(), tlibs);
-    // A target should not depend on itself.
-    emitted.insert(depender->GetName());
-    for(std::vector<std::string>::const_iterator lib = tlibs.begin();
-        lib != tlibs.end(); ++lib)
-      {
-      // Don't emit the same library twice for this target.
-      if(emitted.insert(*lib).second)
-        {
-        this->AddTargetDepend(depender_index, lib->c_str(), true);
-        }
+      this->AddTargetDepend(depender_index, lib->first.c_str(), true);
       }
     }
   }

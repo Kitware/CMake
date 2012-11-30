@@ -1397,14 +1397,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      false,
      "Variables that Control the Build");
   cm->DefineProperty
-    ("CMAKE_INTERFACE_LINK_LIBRARIES", cmProperty::VARIABLE,
-     "Default value for INTERFACE_LINK_LIBRARIES of targets.",
-     "This variable is used to initialize the "
-     "INTERFACE_LINK_LIBRARIES property on all the targets. "
-     "See that target property for additional information.",
-     false,
-     "Variables that Control the Build");
-  cm->DefineProperty
     ("CMAKE_WIN32_EXECUTABLE", cmProperty::VARIABLE,
      "Default value for WIN32_EXECUTABLE of targets.",
      "This variable is used to initialize the "

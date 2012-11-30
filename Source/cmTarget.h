@@ -99,10 +99,6 @@ public:
   cmPolicies::PolicyStatus GetPolicyStatusCMP0008() const
     { return this->PolicyStatusCMP0008; }
 
-  /** Get the status of policy CMP0019 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0019() const
-    { return this->PolicyStatusCMP0019; }
-
   /**
    * Get the list of the custom commands for this target
    */
@@ -114,8 +110,7 @@ public:
     {return this->PostBuildCommands;}
 
   ///! Return the list of frameworks being linked to this target
-  void GetFrameworks(const char *config,
-                     std::vector<std::string> &frameworks);
+  std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
 
   /**
    * Get the list of the source files used by this target
@@ -173,8 +168,6 @@ public:
   return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
-  void GetDirectLinkLibraries(const char *config,
-                              std::vector<std::string> &) const;
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config);
@@ -186,6 +179,7 @@ public:
 
   // Check to see if a library is a framework and treat it different on Mac
   bool NameResolvesToFramework(const std::string& libname);
+  bool AddFramework(const std::string& lib, LinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
                       LinkLibraryType llt);
@@ -480,11 +474,6 @@ public:
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const char* config = 0);
 
-  void AppendTLLIncludeDirectories(const std::string &includes);
-  void PrependTLLIncludeDirectories(const std::string &includes);
-
-  std::vector<std::string> GetIncludeDirectories(const char *config);
-
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -580,6 +569,7 @@ private:
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
+  std::vector<std::string> Frameworks;
   std::vector<std::string> LinkDirectories;
   std::set<cmStdString> LinkDirectoriesEmmitted;
   bool HaveInstallRule;
@@ -628,7 +618,6 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0003;
   cmPolicies::PolicyStatus PolicyStatusCMP0004;
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
-  cmPolicies::PolicyStatus PolicyStatusCMP0019;
 
   // Internal representation details.
   friend class cmTargetInternals;
