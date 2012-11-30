@@ -37,9 +37,12 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
       if ((*tei)->GetPolicyStatusCMP0019() == cmPolicies::NEW)
         {
-        this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES", te,
+        if ((*tei)->GetType() != cmTarget::STATIC_LIBRARY)
+          {
+          this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES", te,
                                         cmGeneratorExpression::BuildInterface,
                                         properties);
+          }
         }
 
       this->GenerateInterfaceProperties(te, os, properties);
