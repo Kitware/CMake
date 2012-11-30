@@ -12,4 +12,4 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/qrc_my.cxx
 add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/my.qrc
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/my.qrc)
 
-add_library(qrc SHARED ${CMAKE_BINARY_DIR}/qrc_my.cxx)
+add_library(qrc STATIC ${CMAKE_BINARY_DIR}/qrc_my.cxx)
