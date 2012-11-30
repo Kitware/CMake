@@ -4029,6 +4029,8 @@ int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
     std::cout << "set LIB=" << parser.GetLibraryDirectories() <<std::endl;
     return 0;
     }
+#else
+  (void)version;
 #endif
 
   std::cerr << "Could not find " << name;
