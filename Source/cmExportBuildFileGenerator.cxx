@@ -12,7 +12,6 @@
 #include "cmExportBuildFileGenerator.h"
 
 #include "cmExportCommand.h"
-#include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
@@ -32,17 +31,6 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     if(this->ExportedTargets.insert(te).second)
       {
       this->GenerateImportTargetCode(os, te);
-
-      ImportPropertyMap properties;
-
-      if ((*tei)->GetPolicyStatusCMP0019() == cmPolicies::NEW)
-        {
-        this->PopulateInterfaceProperty("INTERFACE_LINK_LIBRARIES", te,
-                                        cmGeneratorExpression::BuildInterface,
-                                        properties);
-        }
-
-      this->GenerateInterfaceProperties(te, os, properties);
       }
     else
       {

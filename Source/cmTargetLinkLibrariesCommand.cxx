@@ -232,11 +232,7 @@ bool cmTargetLinkLibrariesCommand
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
     }
-  if(this->CurrentProcessingState != ProcessingLinkLibraries &&
-     !this->Target->GetProperty("INTERFACE_LINK_LIBRARIES"))
-    {
-    this->Target->SetProperty("INTERFACE_LINK_LIBRARIES", "");
-    }
+
   return true;
 }
 
@@ -251,25 +247,6 @@ cmTargetLinkLibrariesCommand
     << this->LinkLibraryTypeNames[right] << "\" instead of a library name.  "
     << "The first specifier will be ignored.";
   this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-}
-
-//----------------------------------------------------------------------------
-static std::string generatorIface(const std::string &value,
-                                  cmTarget::LinkLibraryType llt)
-{
-  if (llt == cmTarget::DEBUG)
-    {
-    return "$<$<CONFIG:Debug>:"
-                     + value
-                     + ">";
-    }
-  else if (llt == cmTarget::OPTIMIZED)
-    {
-    return "$<$<NOT:$<CONFIG:Debug>>:"
-                     + value
-                     + ">";
-    }
-  return value;
 }
 
 //----------------------------------------------------------------------------
@@ -288,9 +265,6 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       return;
       }
     }
-
-  this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                               generatorIface(lib, llt).c_str());
 
   // Get the list of configurations considered to be DEBUG.
   std::vector<std::string> const& debugConfigs =
