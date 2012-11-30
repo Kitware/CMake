@@ -24,7 +24,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="@id_definitions@"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -37,6 +36,7 @@
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				SubSystem="@id_subsystem@"
+				EntryPointSymbol="@id_entrypoint@"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"

@@ -228,7 +228,3 @@ int main(int argc, char* argv[])
   return require;
 }
 #endif
-
-#ifdef ADD_MAINCRTSTARTUP
-void mainCRTStartup() {}
-#endif

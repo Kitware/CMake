@@ -141,7 +141,7 @@ Id flags: ${testflags}
       set(id_toolset "")
     endif()
     if(CMAKE_VS_WINCE_VERSION)
-      set(id_definitions "ADD_MAINCRTSTARTUP")
+      set(id_entrypoint "mainACRTStartup")
       set(id_subsystem 9)
     else()
       set(id_subsystem 1)
