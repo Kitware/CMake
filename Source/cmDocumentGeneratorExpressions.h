@@ -19,6 +19,8 @@
   "  $<0:...>                  = empty string (ignores \"...\")\n"      \
   "  $<1:...>                  = content of \"...\"\n"                  \
   "  $<CONFIG:cfg>             = '1' if config is \"cfg\", else '0'\n"  \
+  "  $<CONFIG_DEBUG>           = '1' if the current config is a debug " \
+  "config (see global property DEBUG_CONFIGURATIONS), else '0'\n"       \
   "  $<CONFIGURATION>          = configuration name\n"                  \
   "  $<BOOL:...>               = '1' if the '...' is true, else '0'\n"  \
   "  $<STREQUAL:a,b>           = '1' if a is STREQUAL b, else '0'\n"    \
