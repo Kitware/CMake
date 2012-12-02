@@ -2538,6 +2538,29 @@ void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
 }
 
 //----------------------------------------------------------------------------
+static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
+                                                  cmMakefile* context)
+{
+  // Look for link-type keywords in the value.
+  static cmsys::RegularExpression
+    keys("(^|;)(debug|optimized|general)(;|$)");
+  if(!keys.find(value))
+    {
+    return;
+    }
+
+  // Report an error.
+  cmOStringStream e;
+
+  e << "Property INTERFACE_LINK_LIBRARIES may not contain link-type "
+    "keyword \"" << keys.match(2) << "\".  The INTERFACE_LINK_LIBRARIES "
+    "property may contain configuration-sensitive generator-expressions "
+    "which may be used to specify per-configuration rules.";
+
+  context->IssueMessage(cmake::FATAL_ERROR, e.str());
+}
+
+//----------------------------------------------------------------------------
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
   const char* prop, const char* value, cmMakefile* context, bool imported
   )
@@ -2596,6 +2619,13 @@ void cmTarget::CheckProperty(const char* prop, cmMakefile* context)
     if(const char* value = this->GetProperty(prop))
       {
       cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
+      }
+    }
+  if(strncmp(prop, "INTERFACE_LINK_LIBRARIES", 24) == 0)
+    {
+    if(const char* value = this->GetProperty(prop))
+      {
+      cmTargetCheckINTERFACE_LINK_LIBRARIES(value, context);
       }
     }
 }

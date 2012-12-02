@@ -288,6 +288,38 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 //----------------------------------------------------------------------------
+static const struct DebugTestNode : public cmGeneratorExpressionNode
+{
+  DebugTestNode() {}
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    if (!context->Config)
+      {
+      return "0";
+      }
+
+    std::vector<std::string> const& debugConfigs =
+                    context->Makefile->GetCMakeInstance()->GetDebugConfigs();
+    std::string configUpper = cmSystemTools::UpperCase(context->Config);
+    for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
+        i != debugConfigs.end(); ++i)
+      {
+      if(*i == configUpper)
+        {
+        return "1";
+        }
+      }
+    return "0";
+  }
+} debugTestNode;
+
+//----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
   TargetPropertyNode() {}
@@ -590,6 +622,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &configurationNode;
   else if (identifier == "CONFIG")
     return &configurationTestNode;
+  else if (identifier == "CONFIG_DEBUG")
+    return &debugTestNode;
   else if (identifier == "TARGET_FILE")
     return &targetFileNode;
   else if (identifier == "TARGET_LINKER_FILE")

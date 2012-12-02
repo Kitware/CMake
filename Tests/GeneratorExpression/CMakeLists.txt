@@ -23,6 +23,7 @@ add_custom_target(check-part1 ALL
     -Dtest_config_release=$<CONFIG:Release>$<CONFIG:RELEASE>$<CONFIG:ReLeAsE>
     -Dtest_config_relwithdebinfo=$<CONFIG:RelWithDebInfo>$<CONFIG:RELWITHDEBINFO>$<CONFIG:relwithdebinfo>
     -Dtest_config_minsizerel=$<CONFIG:MinSizeRel>$<CONFIG:MINSIZEREL>$<CONFIG:minsizerel>
+    -Dtest_config_is_debug=$<CONFIG:Debug>$<CONFIG_DEBUG>
     -Dtest_not_0=$<NOT:0>
     -Dtest_not_1=$<NOT:1>
     -Dtest_or_0=$<OR:0>

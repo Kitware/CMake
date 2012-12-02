@@ -262,13 +262,13 @@ static std::string generatorIface(const std::string &value,
 {
   if (llt == cmTarget::DEBUG)
     {
-    return "$<$<CONFIG:Debug>:"
+    return "$<$<CONFIG_DEBUG>:"
                      + value
                      + ">";
     }
   else if (llt == cmTarget::OPTIMIZED)
     {
-    return "$<$<NOT:$<CONFIG:Debug>>:"
+    return "$<$<NOT:$<CONFIG_DEBUG>>:"
                      + value
                      + ">";
     }
