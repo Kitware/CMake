@@ -516,7 +516,7 @@ cmPolicies::cmPolicies()
     "LINK_INTERFACE_LIBRARIES(_<CONFIG>) properties to determine the "
     "link interface.  "
     "Targets named after LINK_PUBLIC in target_link_libraries will "
-    "populate the old properties and not the new.  "
+    "populate the old properties and the new.  "
     "The export() and install(EXPORT) commands will generate only the "
     "IMPORTED_LINK_INTERFACE_LIBRARIES(_<CONFIG>) properties on a "
     "target to be imported into other projects, and not "
