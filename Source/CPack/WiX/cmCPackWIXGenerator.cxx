@@ -539,8 +539,8 @@ std::string cmCPackWIXGenerator::GenerateGUID()
   UUID guid;
   UuidCreate(&guid);
 
-  RPC_CSTR tmp = 0;
-  UuidToStringA(&guid, &tmp);
+  unsigned char *tmp = 0;
+  UuidToString(&guid, &tmp);
 
   std::string result(reinterpret_cast<char*>(tmp));
   RpcStringFree(&tmp);
