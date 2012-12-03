@@ -120,6 +120,11 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   /usr/lib/jvm/default-java/jre/lib/{libarch}
   /usr/lib/jvm/default-java/jre/lib
   /usr/lib/jvm/default-java/lib
+  # OpenBSD specific paths for default JVM
+  /usr/local/jdk-1.7.0/jre/lib/{libarch}
+  /usr/local/jre-1.7.0/lib/{libarch}
+  /usr/local/jdk-1.6.0/jre/lib/{libarch}
+  /usr/local/jre-1.6.0/lib/{libarch}
   )
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
@@ -153,6 +158,9 @@ set(JAVA_AWT_INCLUDE_DIRECTORIES
   /opt/sun-jdk-1.5.0.04/include
   # Debian specific path for default JVM
   /usr/lib/jvm/default-java/include
+  # OpenBSD specific path for default JVM
+  /usr/local/jdk-1.7.0/include
+  /usr/local/jdk-1.6.0/include
   )
 
 foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
@@ -227,6 +235,7 @@ find_path(JAVA_INCLUDE_PATH2 jni_md.h
   ${JAVA_INCLUDE_PATH}/win32
   ${JAVA_INCLUDE_PATH}/linux
   ${JAVA_INCLUDE_PATH}/freebsd
+  ${JAVA_INCLUDE_PATH}/openbsd
   ${JAVA_INCLUDE_PATH}/solaris
   ${JAVA_INCLUDE_PATH}/hp-ux
   ${JAVA_INCLUDE_PATH}/alpha
