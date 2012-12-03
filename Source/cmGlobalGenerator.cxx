@@ -2047,7 +2047,7 @@ bool cmGlobalGenerator::UseFolderProperty()
     }
 
   // By default, this feature is OFF, since it is not supported in the
-  // Visual Studio Express editions:
+  // Visual Studio Express editions until VS11:
   //
   return false;
 }
