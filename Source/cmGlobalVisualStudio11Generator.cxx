@@ -93,3 +93,12 @@ cmLocalGenerator *cmGlobalVisualStudio11Generator::CreateLocalGenerator()
   lg->SetGlobalGenerator(this);
   return lg;
 }
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio11Generator::UseFolderProperty()
+{
+  // Intentionally skip over the parent class implementation and call the
+  // grand-parent class's implementation. Folders are not supported by the
+  // Express editions in VS10 and earlier, but they are in VS11 Express.
+  return cmGlobalVisualStudio8Generator::UseFolderProperty();
+}
