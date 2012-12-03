@@ -115,7 +115,7 @@ std::string cmWIXSourceWriter::WindowsCodepageToUtf8(const std::string& value)
     }
 
   int characterCount = MultiByteToWideChar(
-    CP_ACP, 0, value.c_str(), value.size(), 0, 0);
+    CP_ACP, 0, value.c_str(), static_cast<int>(value.size()), 0, 0);
 
   if(characterCount == 0)
     {
@@ -125,10 +125,11 @@ std::string cmWIXSourceWriter::WindowsCodepageToUtf8(const std::string& value)
   std::vector<wchar_t> utf16(characterCount);
 
   MultiByteToWideChar(
-    CP_ACP, 0, value.c_str(), value.size(), &utf16[0], utf16.size());
+    CP_ACP, 0, value.c_str(), static_cast<int>(value.size()),
+    &utf16[0], static_cast<int>(utf16.size()));
 
-  int utf8ByteCount =
-    WideCharToMultiByte(CP_UTF8, 0, &utf16[0], utf16.size(), 0, 0, 0, 0);
+  int utf8ByteCount = WideCharToMultiByte(
+    CP_UTF8, 0, &utf16[0], static_cast<int>(utf16.size()), 0, 0, 0, 0);
 
   if(utf8ByteCount == 0)
     {
@@ -137,8 +138,8 @@ std::string cmWIXSourceWriter::WindowsCodepageToUtf8(const std::string& value)
 
   std::vector<char> utf8(utf8ByteCount);
 
-  WideCharToMultiByte(CP_UTF8, 0, &utf16[0], utf16.size(),
-    &utf8[0], utf8.size(), 0, 0);
+  WideCharToMultiByte(CP_UTF8, 0, &utf16[0], static_cast<int>(utf16.size()),
+    &utf8[0], static_cast<int>(utf8.size()), 0, 0);
 
   return std::string(&utf8[0], utf8.size());
 }
