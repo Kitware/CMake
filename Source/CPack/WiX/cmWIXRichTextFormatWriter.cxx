@@ -37,7 +37,7 @@ void cmWIXRichTextFormatWriter::AddText(const std::string& text)
 {
   typedef unsigned char rtf_byte_t;
 
-  for(std::size_t i = 0; i < text.size(); ++i)
+  for(size_t i = 0; i < text.size(); ++i)
     {
     rtf_byte_t c = rtf_byte_t(text[i]);
 
