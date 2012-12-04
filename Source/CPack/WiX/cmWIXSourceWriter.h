@@ -51,17 +51,17 @@ private:
 
   void WriteXMLDeclaration();
 
-  void Indent(std::size_t count);
+  void Indent(size_t count);
 
   static std::string EscapeAttributeValue(const std::string& value);
 
-  std::ofstream file;
+  cmCPackLog* Logger;
 
-  std::vector<std::string> elements;
+  std::ofstream file;
 
   State state;
 
-  cmCPackLog* Logger;
+  std::vector<std::string> elements;
 };
 
 #endif

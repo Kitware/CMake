@@ -150,9 +150,9 @@ void cmWIXSourceWriter::WriteXMLDeclaration()
   file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
 }
 
-void cmWIXSourceWriter::Indent(std::size_t count)
+void cmWIXSourceWriter::Indent(size_t count)
 {
-  for(std::size_t i = 0; i < count; ++i)
+  for(size_t i = 0; i < count; ++i)
     {
     file << "    ";
     }
@@ -165,7 +165,7 @@ std::string cmWIXSourceWriter::EscapeAttributeValue(
   result.reserve(value.size());
 
   char c = 0;
-  for(std::size_t i = 0 ; i < value.size(); ++i)
+  for(size_t i = 0 ; i < value.size(); ++i)
     {
     c = value[i];
     switch(c)

@@ -185,7 +185,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     }
 
   std::stringstream objectFiles;
-  for(std::size_t i = 0; i < wixSources.size(); ++i)
+  for(size_t i = 0; i < wixSources.size(); ++i)
     {
     const std::string& sourceFilename = wixSources[i];
 
@@ -290,7 +290,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     install_root.pop_back();
     }
 
-  for(std::size_t i = 1; i < install_root.size(); ++i)
+  for(size_t i = 1; i < install_root.size(); ++i)
     {
     directoryDefinitions.BeginElement("Directory");
 
@@ -300,16 +300,16 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
       }
     else
       {
-      std::stringstream tmp;
-      tmp << "INSTALL_PREFIX_" << i;
-      directoryDefinitions.AddAttribute("Id", tmp.str());
+      std::stringstream ss;
+      ss << "INSTALL_PREFIX_" << i;
+      directoryDefinitions.AddAttribute("Id", ss.str());
       }
 
     directoryDefinitions.AddAttribute("Name", install_root[i]);
   }
 
-  std::size_t directoryCounter = 0;
-  std::size_t fileCounter = 0;
+  size_t directoryCounter = 0;
+  size_t fileCounter = 0;
 
   std::string fileDefinitionsFilename =
     cpackTopLevel + "/files.wxs";
@@ -345,7 +345,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   featureDefinitions.EndElement();
   fileDefinitions.EndElement();
 
-  for(std::size_t i = 1; i < install_root.size(); ++i)
+  for(size_t i = 1; i < install_root.size(); ++i)
     {
     directoryDefinitions.EndElement();
     }
@@ -431,13 +431,13 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmWIXSourceWriter& directoryDefinitions,
   cmWIXSourceWriter& fileDefinitions,
   cmWIXSourceWriter& featureDefinitions,
-  std::size_t& directoryCounter,
-  std::size_t& fileCounter)
+  size_t& directoryCounter,
+  size_t& fileCounter)
 {
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
 
-  for(std::size_t i = 0; i < dir.GetNumberOfFiles(); ++i)
+  for(size_t i = 0; i < dir.GetNumberOfFiles(); ++i)
     {
     std::string fileName = dir.GetFile(static_cast<unsigned long>(i));
 
