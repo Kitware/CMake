@@ -21,61 +21,67 @@ std::string cmTimestamp::CurrentTime(
   const std::string& formatString, bool utcFlag)
 {
   time_t currentTimeT = time(0);
-  if(currentTimeT == time_t(-1)) return std::string();
+  if(currentTimeT == time_t(-1))
+    {
+    return std::string();
+    }
 
   return CreateTimestampFromTimeT(currentTimeT, formatString, utcFlag);
 }
 
+//----------------------------------------------------------------------------
 std::string cmTimestamp::FileModificationTime(const char* path,
   const std::string& formatString, bool utcFlag)
 {
 #ifdef _WIN32
-  struct _stat info;
-  std::memset(&info, 0, sizeof(info));
-
-  if(_stat(path, &info) != 0)
-    return std::string();
-
-  time_t currentTimeT = info.st_mtime;
+  #define STAT _stat
 #else
-  struct stat info;
-  std::memset(&info, 0, sizeof(info));
-
-  if(stat(path, &info) != 0)
-    return std::string();
-
-  time_t currentTimeT = info.st_mtime;
+  #define STAT stat
 #endif
 
-  return CreateTimestampFromTimeT(currentTimeT, formatString, utcFlag);
+  struct STAT info;
+  std::memset(&info, 0, sizeof(info));
+
+  if(STAT(path, &info) != 0)
+    {
+    return std::string();
+    }
+
+  return CreateTimestampFromTimeT(info.st_mtime, formatString, utcFlag);
 }
 
+//----------------------------------------------------------------------------
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
     std::string formatString, bool utcFlag)
 {
   if(formatString.empty())
     {
     formatString = "%Y-%m-%dT%H:%M:%S";
-    if(utcFlag) formatString += "Z";
+    if(utcFlag)
+      {
+      formatString += "Z";
+      }
     }
 
   struct tm timeStruct;
   std::memset(&timeStruct, 0, sizeof(timeStruct));
 
+  struct tm* ptr = (struct tm*) 0;
   if(utcFlag)
     {
-  tm* ptr = gmtime(&timeT);
-  if(ptr == 0) return std::string();
-
-    timeStruct = *ptr;
+    ptr = gmtime(&timeT);
     }
   else
     {
-  struct tm* ptr = localtime(&timeT);
-  if(ptr == 0) return std::string();
-
-    timeStruct = *ptr;
+    ptr = localtime(&timeT);
     }
+
+  if(ptr == 0)
+    {
+    return std::string();
+    }
+
+  timeStruct = *ptr;
 
   std::string result;
   for(std::string::size_type i = 0; i < formatString.size(); ++i)
