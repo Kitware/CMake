@@ -63,6 +63,8 @@ protected:
   void GenerateMissingTargetsCheckCode(std::ostream& os,
                                const std::vector<std::string>& missingTargets);
 
+  void GenerateExpectedTargetsCode(std::ostream& os,
+                                          const std::string &expectedTargets);
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
