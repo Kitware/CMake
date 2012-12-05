@@ -3552,6 +3552,13 @@ void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
                                                   chained);
 }
 
+bool cmake::GetIsPropertyDefined(const char *name,
+                                 cmProperty::ScopeType scope)
+{
+  this->PropertyDefinitions[scope].find(name) !=
+                                      this->PropertyDefinitions[scope].end();
+}
+
 cmPropertyDefinition *cmake
 ::GetPropertyDefinition(const char *name,
                         cmProperty::ScopeType scope)
