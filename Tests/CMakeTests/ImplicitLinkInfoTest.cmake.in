@@ -120,6 +120,7 @@ Framework search paths:
 	/System/Library/Frameworks/")
 set(mac_i686_gcc_Wlv_libs "")
 set(mac_i686_gcc_Wlv_dirs "/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_i686_gcc_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
 list(APPEND platforms mac_i686_gcc_Wlv)
 
 # gcc -arch i686 dummy.c -v
@@ -146,6 +147,7 @@ Framework search paths:
 	/System/Library/Frameworks/")
 set(mac_i686_g++_Wlv_libs "stdc++")
 set(mac_i686_g++_Wlv_dirs "/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_i686_g++_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
 list(APPEND platforms mac_i686_g++_Wlv)
 
 # g++ -arch i686 dummy.cxx -v
@@ -169,6 +171,7 @@ Framework search paths:
 	/System/Library/Frameworks/")
 set(mac_i686_gfortran_Wlv_libs "gfortranbegin;gfortran")
 set(mac_i686_gfortran_Wlv_dirs "/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1;/usr/local/lib;/usr/lib")
+set(mac_i686_gfortran_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
 list(APPEND platforms mac_i686_gfortran_Wlv)
 
 # gfortran dummy.f -v
@@ -195,6 +198,7 @@ Framework search paths:
 	/System/Library/Frameworks/")
 set(mac_ppc_gcc_Wlv_libs "")
 set(mac_ppc_gcc_Wlv_dirs "/usr/lib/powerpc-apple-darwin10/4.2.1;/usr/lib/gcc/powerpc-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_ppc_gcc_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
 list(APPEND platforms mac_ppc_gcc_Wlv)
 
 # gcc -arch ppc dummy.c -v
@@ -221,6 +225,7 @@ Framework search paths:
 	/System/Library/Frameworks/")
 set(mac_ppc_g++_Wlv_libs "stdc++")
 set(mac_ppc_g++_Wlv_dirs "/usr/lib/powerpc-apple-darwin10/4.2.1;/usr/lib/gcc/powerpc-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_ppc_g++_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
 list(APPEND platforms mac_ppc_g++_Wlv)
 
 # g++ -arch ppc dummy.cxx -v
@@ -499,10 +504,10 @@ list(APPEND platforms msys_g77)
 # Test parsing for all above examples.
 
 foreach(p IN LISTS platforms)
-  cmake_parse_implicit_link_info("${${p}_text}" libs dirs log "${${p}_obj_regex}")
+  cmake_parse_implicit_link_info("${${p}_text}" libs dirs fwks log "${${p}_obj_regex}")
 
-  foreach(v libs dirs)
-    if(NOT "${${v}}" STREQUAL "${${p}_${v}}")
+  foreach(v libs dirs fwks)
+    if(DEFINED "${p}_${v}" AND NOT "${${v}}" STREQUAL "${${p}_${v}}")
       message(FATAL_ERROR
         "cmake_parse_implicit_link_info failed\n"
         "Expected '${p}' implicit ${v}\n"
