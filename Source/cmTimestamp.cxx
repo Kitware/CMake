@@ -33,16 +33,10 @@ std::string cmTimestamp::CurrentTime(
 std::string cmTimestamp::FileModificationTime(const char* path,
   const std::string& formatString, bool utcFlag)
 {
-#ifdef _WIN32
-  #define STAT _stat
-#else
-  #define STAT stat
-#endif
-
-  struct STAT info;
+  struct stat info;
   std::memset(&info, 0, sizeof(info));
 
-  if(STAT(path, &info) != 0)
+  if(stat(path, &info) != 0)
     {
     return std::string();
     }
