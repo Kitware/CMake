@@ -892,6 +892,19 @@ void cmTarget::DefineProperties(cmake *cm)
      "requirement for their INTERFACE_POSITION_INDEPENDENT_CODE property.");
 
   cm->DefineProperty
+    ("COMPATIBLE_INTERFACE_BOOL", cmProperty::TARGET,
+     "Properties which must be compatible with their link interface",
+     "The COMPATIBLE_INTERFACE_BOOL property may contain a list of properties"
+     "for this target which must be consistent when evaluated as a boolean "
+     "in the INTERFACE of all linked dependencies.  For example, if a "
+     "property \"FOO\" appears in the list, then the \"INTERFACE_FOO\" "
+     "property content in all dependencies must be consistent with each "
+     "other, and with the \"FOO\" property in this target.  "
+     "Consistency in this sense has the meaning that if the property is set,"
+     "then it must have the same boolean value as all others, and if the "
+     "property is not set, then it is ignored.");
+
+  cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
@@ -5299,6 +5312,58 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                          const char* config)
+{
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  std::set<cmStdString> emitted;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    const char *prop = li->Target->GetProperty("COMPATIBLE_INTERFACE_BOOL");
+    if (!prop)
+      {
+      continue;
+      }
+
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop, props);
+
+    for(std::vector<std::string>::iterator pi = props.begin();
+        pi != props.end(); ++pi)
+      {
+      if (this->Makefile->GetCMakeInstance()
+                        ->GetIsPropertyDefined(pi->c_str(),
+                                                cmProperty::TARGET))
+        {
+        cmOStringStream e;
+        e << "Target \"" << li->Target->GetName() << "\" has property \""
+          << *pi << "\" listed in its COMPATIBLE_INTERFACE_BOOL property.  "
+            "This is not allowed.  Only user-defined properties may appear "
+            "listed in the COMPATIBLE_INTERFACE_BOOL property.";
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        return;
+        }
+      if(emitted.insert(*pi).second)
+        {
+        this->GetLinkInterfaceDependentBoolProperty(*pi, config);
+        if (cmSystemTools::GetErrorOccuredFlag())
+          {
+          return;
+          }
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 cmComputeLinkInformation*
 cmTarget::GetLinkInformation(const char* config, cmTarget *head)
 {
@@ -5317,6 +5382,11 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       {
       delete info;
       info = 0;
+      }
+
+    if (info)
+      {
+      this->CheckPropertyCompatibility(info, config);
       }
 
     // Store the information for this configuration.
