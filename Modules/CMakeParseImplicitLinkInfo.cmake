@@ -36,6 +36,16 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
     set(cmd)
     if("${line}" MATCHES "${linker_regex}" AND
         NOT "${line}" MATCHES "${linker_exclude_regex}")
+      if(XCODE)
+        # Xcode unconditionally adds a path under the project build tree and
+        # on older versions it is not reported with proper quotes.  Remove it.
+        string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" _dir_regex "${CMAKE_BINARY_DIR}")
+        string(REGEX REPLACE " -[FL]${_dir_regex}/([^ ]| [^-])+( |$)" " " xline "${line}")
+        if(NOT "x${xline}" STREQUAL "x${line}")
+          set(log "${log}  reduced line: [${line}]\n            to: [${xline}]\n")
+          set(line "${xline}")
+        endif()
+      endif()
       if(UNIX)
         separate_arguments(args UNIX_COMMAND "${line}")
       else()
@@ -97,6 +107,13 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
     endif()
   endforeach()
 
+  # Look for library search paths reported by linker.
+  if("${output_lines}" MATCHES ";Library search paths:((;\t[^;]+)+)")
+    string(REPLACE ";\t" ";" implicit_dirs_match "${CMAKE_MATCH_1}")
+    set(log "${log}  Library search paths: [${implicit_dirs_match}]\n")
+    list(APPEND implicit_dirs_tmp ${implicit_dirs_match})
+  endif()
+
   # Cleanup list of libraries and flags.
   # We remove items that are not language-specific.
   set(implicit_libs "")
@@ -108,12 +125,18 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
     endif()
   endforeach()
 
-  # Cleanup list of directories.
+  # Cleanup list of library directories.
   set(implicit_dirs "")
   foreach(d IN LISTS implicit_dirs_tmp)
     get_filename_component(dir "${d}" ABSOLUTE)
-    list(APPEND implicit_dirs "${dir}")
-    set(log "${log}  collapse dir [${d}] ==> [${dir}]\n")
+    string(FIND "${dir}" "${CMAKE_FILES_DIRECTORY}/" pos)
+    if(NOT pos LESS 0)
+      set(msg ", skipping non-system directory")
+    else()
+      set(msg "")
+      list(APPEND implicit_dirs "${dir}")
+    endif()
+    set(log "${log}  collapse library dir [${d}] ==> [${dir}]${msg}\n")
   endforeach()
   list(REMOVE_DUPLICATES implicit_dirs)
 

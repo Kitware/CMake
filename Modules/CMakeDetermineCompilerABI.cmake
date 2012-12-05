@@ -72,18 +72,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       # Parse implicit linker information for this language, if available.
       set(implicit_dirs "")
       set(implicit_libs "")
-      set(MULTI_ARCH FALSE)
-      if(DEFINED CMAKE_OSX_ARCHITECTURES)
-        if( "${CMAKE_OSX_ARCHITECTURES}" MATCHES ";" )
-          set(MULTI_ARCH TRUE)
-        endif()
-      endif()
-      if(CMAKE_${lang}_VERBOSE_FLAG
-          # Implicit link information cannot be used explicitly for
-          # multiple OS X architectures, so we skip it.
-          AND NOT MULTI_ARCH
-          # Skip this with Xcode for now.
-          AND NOT "${CMAKE_GENERATOR}" MATCHES Xcode)
+      if(CMAKE_${lang}_VERBOSE_FLAG)
         CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs log
           "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}")
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -110,6 +99,14 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
         set(_desc "Determine Intel Fortran Compiler Implicit Link Path -- done")
         message(STATUS "${_desc}")
+      endif()
+
+      # Implicit link libraries cannot be used explicitly for multiple
+      # OS X architectures, so we skip it.
+      if(DEFINED CMAKE_OSX_ARCHITECTURES)
+        if("${CMAKE_OSX_ARCHITECTURES}" MATCHES ";")
+          set(implicit_libs "")
+        endif()
       endif()
 
       set(CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES "${implicit_libs}" PARENT_SCOPE)
