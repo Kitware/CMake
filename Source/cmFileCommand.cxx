@@ -3263,7 +3263,7 @@ bool cmFileCommand::HandleTimestampCommand(
     return false;
     }
 
-  int argsIndex = 1;
+  unsigned int argsIndex = 1;
 
   const std::string& filename = args[argsIndex++];
 
