@@ -51,3 +51,27 @@ if("${CPACK_GENERATOR}" STREQUAL "PackageMaker")
     set(CPACK_PACKAGE_DEFAULT_LOCATION "/usr")
   endif()
 endif()
+
+if("${CPACK_GENERATOR}" STREQUAL "WIX")
+  # Reset CPACK_PACKAGE_VERSION to deal with WiX restriction.
+  # But the file names still use the full CMake_VERSION value:
+  set(CPACK_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME}-@CMake_VERSION@-${CPACK_SYSTEM_NAME}")
+  set(CPACK_SOURCE_PACKAGE_FILE_NAME
+    "${CPACK_PACKAGE_NAME}-@CMake_VERSION@-Source")
+
+  if(NOT CPACK_WIX_SIZEOF_VOID_P)
+    set(CPACK_WIX_SIZEOF_VOID_P "@CMAKE_SIZEOF_VOID_P@")
+  endif()
+
+  set(CPACK_PACKAGE_VERSION
+    "@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@.@CMake_VERSION_PATCH@")
+  # WIX installers require at most a 4 component version number, where
+  # each component is an integer between 0 and 65534 inclusive
+  set(tweak "@CMake_VERSION_TWEAK@")
+  if(tweak MATCHES "^[0-9]+$")
+    if(tweak GREATER 0 AND tweak LESS 65535)
+      set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${tweak}")
+    endif()
+  endif()
+endif()

@@ -499,6 +499,14 @@ if(UNIX)
     )
 endif()
 
+if(WIN32)
+  set(CPACK_SRCS ${CPACK_SRCS}
+    CPack/WiX/cmCPackWIXGenerator.cxx
+    CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmWIXRichTextFormatWriter.cxx
+  )
+endif()
+
 if(APPLE)
   set(CPACK_SRCS ${CPACK_SRCS}
     CPack/cmCPackBundleGenerator.cxx
