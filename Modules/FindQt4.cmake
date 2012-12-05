@@ -65,6 +65,10 @@
 #       is much more flexible, but requires that FindQt4.cmake is executed before
 #       such an exported dependency file is processed.
 #
+#  QT_INCLUDE_DIRS_NO_SYSTEM
+#        If this variable is set to TRUE, the Qt include directories
+#        in the QT_USE_FILE will NOT have the SYSTEM keyword set.
+#
 # There are also some files that need processing by some Qt tools such as moc
 # and uic.  Listed below are macros that may be used to process those files.
 #
