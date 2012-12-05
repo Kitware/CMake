@@ -15,6 +15,8 @@
 
 static const char vs11Win32generatorName[] = "Visual Studio 11";
 static const char vs11Win64generatorName[] = "Visual Studio 11 Win64";
+static const char vs11WinXP32generatorName[] = "Visual Studio 11 (WinXP)";
+static const char vs11WinXP64generatorName[] = "Visual Studio 11 Win64 (WinXP)";
 static const char vs11ARMgeneratorName[] = "Visual Studio 11 ARM";
 
 class cmGlobalVisualStudio11Generator::Factory
@@ -25,17 +27,27 @@ public:
     if(!strcmp(name, vs11Win32generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win32generatorName, NULL, NULL);
+        vs11Win32generatorName, NULL, NULL, "v110");
       }
     if(!strcmp(name, vs11Win64generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
+        vs11Win64generatorName, "x64", "CMAKE_FORCE_WIN64", "v110");
+      }
+    if(!strcmp(name, vs11WinXP32generatorName))
+      {
+      return new cmGlobalVisualStudio11Generator(
+        vs11Win32generatorName, NULL, NULL, "v110_xp");
+      }
+    if(!strcmp(name, vs11WinXP64generatorName))
+      {
+      return new cmGlobalVisualStudio11Generator(
+        vs11Win64generatorName, "x64", "CMAKE_FORCE_WIN64", "v110_xp");
       }
     if(!strcmp(name, vs11ARMgeneratorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11ARMgeneratorName, "ARM", NULL);
+        vs11ARMgeneratorName, "ARM", NULL, "v110");
       }
     return 0;
   }
@@ -53,6 +65,8 @@ public:
   virtual void GetGenerators(std::vector<std::string>& names) const {
     names.push_back(vs11Win32generatorName);
     names.push_back(vs11Win64generatorName);
+    names.push_back(vs11WinXP32generatorName);
+    names.push_back(vs11WinXP64generatorName);
     names.push_back(vs11ARMgeneratorName); }
 };
 
@@ -65,7 +79,7 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
   const char* name, const char* architectureId,
-  const char* additionalPlatformDefinition)
+  const char* additionalPlatformDefinition, const char* toolset)
   : cmGlobalVisualStudio10Generator(name, architectureId,
                                    additionalPlatformDefinition)
 {
@@ -74,7 +88,7 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\11.0\\Setup\\VC;"
     "ProductDir", vc11Express, cmSystemTools::KeyWOW64_32);
-  this->PlatformToolset = "v110";
+  this->PlatformToolset = toolset;
 }
 
 //----------------------------------------------------------------------------
