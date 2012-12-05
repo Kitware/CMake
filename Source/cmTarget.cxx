@@ -5299,6 +5299,58 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                          const char* config)
+{
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  std::set<cmStdString> emitted;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    const char *prop = li->Target->GetProperty("COMPATIBLE_INTERFACE_BOOL");
+    if (!prop)
+      {
+      continue;
+      }
+
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop, props);
+
+    for(std::vector<std::string>::iterator pi = props.begin();
+        pi != props.end(); ++pi)
+      {
+      if (this->Makefile->GetCMakeInstance()
+                        ->GetIsPropertyDefined(pi->c_str(),
+                                                cmProperty::TARGET))
+        {
+        cmOStringStream e;
+        e << "Target \"" << li->Target->GetName() << "\" has property \""
+          << *pi << "\" listed in its COMPATIBLE_INTERFACE_BOOL property.  "
+            "This is not allowed.  Only user-defined properties may appear "
+            "listed in the COMPATIBLE_INTERFACE_BOOL property.";
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        return;
+        }
+      if(emitted.insert(*pi).second)
+        {
+        this->GetLinkInterfaceDependentBoolProperty(*pi, config);
+        if (cmSystemTools::GetErrorOccuredFlag())
+          {
+          return;
+          }
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 cmComputeLinkInformation*
 cmTarget::GetLinkInformation(const char* config, cmTarget *head)
 {
@@ -5317,6 +5369,11 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       {
       delete info;
       info = 0;
+      }
+
+    if (info)
+      {
+      this->CheckPropertyCompatibility(info, config);
       }
 
     // Store the information for this configuration.
