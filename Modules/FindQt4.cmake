@@ -982,13 +982,13 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endif()
 
   find_program(QT_MOC_EXECUTABLE
-    NAMES moc-qt4 moc
+    NAMES moc-qt4 moc moc4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
   find_program(QT_UIC_EXECUTABLE
-    NAMES uic-qt4 uic
+    NAMES uic-qt4 uic uic4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
@@ -1018,13 +1018,13 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     )
 
   find_program(QT_LUPDATE_EXECUTABLE
-    NAMES lupdate-qt4 lupdate
+    NAMES lupdate-qt4 lupdate lupdate4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
   find_program(QT_LRELEASE_EXECUTABLE
-    NAMES lrelease-qt4 lrelease
+    NAMES lrelease-qt4 lrelease lrelease4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
@@ -1036,13 +1036,13 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     )
 
   find_program(QT_DESIGNER_EXECUTABLE
-    NAMES designer-qt4 designer
+    NAMES designer-qt4 designer designer4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
   find_program(QT_LINGUIST_EXECUTABLE
-    NAMES linguist-qt4 linguist
+    NAMES linguist-qt4 linguist linguist4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
