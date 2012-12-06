@@ -168,6 +168,9 @@ public:
   return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
+  void GetDirectLinkLibraries(const char *config,
+                              std::vector<std::string> &,
+                              cmTarget *head);
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config);
@@ -621,6 +624,9 @@ private:
   void MaybeInvalidatePropertyCache(const char* prop);
 
   void ProcessSourceExpression(std::string const& expr);
+
+  std::string GetDebugGeneratorExpressions(const std::string &value,
+                                  cmTarget::LinkLibraryType llt);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

@@ -515,6 +515,22 @@ void cmTarget::DefineProperties(cmake *cm)
      "undefined behavior.");
 
   cm->DefineProperty
+    ("LINK_LIBRARIES", cmProperty::TARGET,
+     "List of direct link dependencies.",
+     "This property specifies the list of libraries or targets which will be "
+     "used for linking. "
+     "In addition to accepting values from the target_link_libraries "
+     "command, values may be set directly on any target using the "
+     "set_property command. "
+     "\n"
+     "The target property values are used by the generators to set "
+     "the link libraries for the compiler.  "
+     "See also the target_link_libraries command.\n"
+     "Contents of LINK_LIBRARIES may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+
+  cm->DefineProperty
     ("INCLUDE_DIRECTORIES", cmProperty::TARGET,
      "List of preprocessor include file search directories.",
      "This property specifies the list of directories given "
@@ -2135,6 +2151,66 @@ bool cmTarget::NameResolvesToFramework(const std::string& libname)
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::GetDirectLinkLibraries(const char *config,
+                            std::vector<std::string> &libs, cmTarget *head)
+{
+  const char *prop = this->GetProperty("LINK_LIBRARIES");
+  if (prop)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        "LINK_LIBRARIES", 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(prop)->Evaluate(this->Makefile,
+                                        config,
+                                        false,
+                                        head,
+                                        &dagChecker),
+                                      libs);
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
+                                  cmTarget::LinkLibraryType llt)
+{
+  if (llt == GENERAL)
+    {
+    return value;
+    }
+
+  // Get the list of configurations considered to be DEBUG.
+  std::vector<std::string> const& debugConfigs =
+                      this->Makefile->GetCMakeInstance()->GetDebugConfigs();
+
+  std::string configString = "$<CONFIG:" + debugConfigs[0] + ">";
+
+  if (debugConfigs.size() > 1)
+    {
+    for(std::vector<std::string>::const_iterator
+          li = debugConfigs.begin() + 1; li != debugConfigs.end(); ++li)
+      {
+      configString += ",$<CONFIG:" + *li + ">";
+      }
+    configString = "$<OR:" + configString + ">";
+    }
+
+  if (llt == OPTIMIZED)
+    {
+    configString = "$<NOT:" + configString + ">";
+    }
+  return "$<" + configString + ":" + value + ">";
+}
+
+//----------------------------------------------------------------------------
+static std::string targetNameGenex(const char *lib)
+{
+  return std::string("$<TARGET_NAME:") + lib + ">";
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib,
                               LinkLibraryType llt)
@@ -2144,6 +2220,18 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     {
     return;
     }
+
+  {
+  cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
+  const bool isNonImportedTarget = tgt && !tgt->IsImported();
+
+  std::string libName = isNonImportedTarget ? targetNameGenex(lib)
+                                          : std::string(lib);
+  this->AppendProperty("LINK_LIBRARIES",
+                       this->GetDebugGeneratorExpressions(libName,
+                                                          llt).c_str());
+  }
+
   cmTarget::LibraryID tmp;
   tmp.first = lib;
   tmp.second = llt;
@@ -4883,26 +4971,23 @@ void cmTarget::ComputeLinkImplementation(const char* config,
                                          LinkImplementation& impl,
                                          cmTarget *head)
 {
-  (void)head;
   // Compute which library configuration to link.
   cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
 
   // Collect libraries directly linked in this configuration.
-  LinkLibraryVectorType const& llibs = this->GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = llibs.begin();
+  std::vector<std::string> llibs;
+  this->GetDirectLinkLibraries(config, llibs, head);
+  for(std::vector<std::string>::const_iterator li = llibs.begin();
       li != llibs.end(); ++li)
     {
     // Skip entries that resolve to the target itself or are empty.
-    std::string item = this->CheckCMP0004(li->first);
+    std::string item = this->CheckCMP0004(*li);
     if(item == this->GetName() || item.empty())
       {
       continue;
       }
-    if(li->second == cmTarget::GENERAL || li->second == linkType)
-      {
-      // The entry is meant for this configuration.
-      impl.Libraries.push_back(item);
-      }
+    // The entry is meant for this configuration.
+    impl.Libraries.push_back(item);
     }
 
   LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
