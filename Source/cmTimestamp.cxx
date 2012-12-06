@@ -34,7 +34,7 @@ std::string cmTimestamp::FileModificationTime(const char* path,
   const std::string& formatString, bool utcFlag)
 {
   struct stat info;
-  std::memset(&info, 0, sizeof(info));
+  memset(&info, 0, sizeof(info));
 
   if(stat(path, &info) != 0)
     {
@@ -58,7 +58,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
     }
 
   struct tm timeStruct;
-  std::memset(&timeStruct, 0, sizeof(timeStruct));
+  memset(&timeStruct, 0, sizeof(timeStruct));
 
   struct tm* ptr = (struct tm*) 0;
   if(utcFlag)
@@ -82,7 +82,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
     {
     char c1 = formatString[i];
     char c2 = (i+1 < formatString.size()) ?
-      formatString[i+1] : 0;
+      formatString[i+1] : static_cast<char>(0);
 
     if(c1 == '%' && c2 != 0)
       {
