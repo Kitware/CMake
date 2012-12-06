@@ -96,31 +96,6 @@ static const struct OneNode : public cmGeneratorExpressionNode
 } oneNode;
 
 //----------------------------------------------------------------------------
-static const struct OneNode buildInterfaceNode;
-
-//----------------------------------------------------------------------------
-static const struct ZeroNode installInterfaceNode;
-
-//----------------------------------------------------------------------------
-static const struct NullNode : public cmGeneratorExpressionNode
-{
-  NullNode() {}
-
-  virtual bool GeneratesContent() const { return false; }
-
-  std::string Evaluate(const std::vector<std::string> &,
-                       cmGeneratorExpressionContext *,
-                       const GeneratorExpressionContent *,
-                       cmGeneratorExpressionDAGChecker *) const
-  {
-    return std::string();
-  }
-
-  virtual int NumExpectedParameters() const { return 0; }
-
-} nullNode;
-
-//----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
@@ -286,38 +261,6 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                                   context->Config) == 0 ? "1" : "0";
   }
 } configurationTestNode;
-
-//----------------------------------------------------------------------------
-static const struct DebugTestNode : public cmGeneratorExpressionNode
-{
-  DebugTestNode() {}
-
-  virtual int NumExpectedParameters() const { return 0; }
-
-  std::string Evaluate(const std::vector<std::string> &,
-                       cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *,
-                       cmGeneratorExpressionDAGChecker *) const
-  {
-    if (!context->Config)
-      {
-      return "0";
-      }
-
-    std::vector<std::string> const& debugConfigs =
-                    context->Makefile->GetCMakeInstance()->GetDebugConfigs();
-    std::string configUpper = cmSystemTools::UpperCase(context->Config);
-    for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
-        i != debugConfigs.end(); ++i)
-      {
-      if(*i == configUpper)
-        {
-        return "1";
-        }
-      }
-    return "0";
-  }
-} debugTestNode;
 
 //----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
@@ -622,8 +565,6 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &configurationNode;
   else if (identifier == "CONFIG")
     return &configurationTestNode;
-  else if (identifier == "CONFIG_DEBUG")
-    return &debugTestNode;
   else if (identifier == "TARGET_FILE")
     return &targetFileNode;
   else if (identifier == "TARGET_LINKER_FILE")
@@ -652,12 +593,6 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &commaNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
-  else if (identifier == "BUILD_INTERFACE")
-    return &buildInterfaceNode;
-  else if (identifier == "INSTALL_INTERFACE")
-    return &installInterfaceNode;
-  else if (identifier == "EXPORT_NAMESPACE")
-    return &nullNode;
   return 0;
 
 }
