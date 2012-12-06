@@ -693,7 +693,7 @@ public:
   /**
    * Expand variables in the makefiles ivars such as link directories etc
    */
-  void ExpandVariables();
+  void ExpandVariablesCMP0019();
 
   /**
    * Replace variables and #cmakedefine lines in the given string.
