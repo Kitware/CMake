@@ -538,6 +538,23 @@ cmPolicies::cmPolicies()
     "that in effect when the target is created by an add_library or "
     "add_executable command.",
     2,8,11,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0021, "CMP0021",
+    "Do not re-expand variables in include and link information.",
+    "CMake 2.8.10 and lower re-evaluated values given to the "
+    "include_directories, link_directories, and link_libraries "
+    "commands to expand any leftover variable references at the "
+    "end of the configuration step.  "
+    "This was for strict compatibility with VERY early CMake versions "
+    "because all variable references are now normally evaluated during "
+    "CMake language processing.  "
+    "CMake 2.8.11 and higher prefer to skip the extra evaluation."
+    "\n"
+    "The OLD behavior for this policy is to re-evaluate the values "
+    "for strict compatibility.  "
+    "The NEW behavior for this policy is to leave the values untouched.",
+    2,8,11,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

@@ -69,6 +69,8 @@ public:
     /// POSITION_INDEPENDENT_CODE property and *_COMPILE_OPTIONS_PI{E,C}
     /// instead.
     CMP0019, ///< Use new-style INTERFACE_LINK_LIBRARIES
+    CMP0020, ///< Reserved.
+    CMP0021, ///< No variable re-expansion in include and link info
 
     /** \brief Always the last entry.
      *
