@@ -19,8 +19,6 @@
   "  $<0:...>                  = empty string (ignores \"...\")\n"      \
   "  $<1:...>                  = content of \"...\"\n"                  \
   "  $<CONFIG:cfg>             = '1' if config is \"cfg\", else '0'\n"  \
-  "  $<CONFIG_DEBUG>           = '1' if the current config is a debug " \
-  "config (see global property DEBUG_CONFIGURATIONS), else '0'\n"       \
   "  $<CONFIGURATION>          = configuration name\n"                  \
   "  $<BOOL:...>               = '1' if the '...' is true, else '0'\n"  \
   "  $<STREQUAL:a,b>           = '1' if a is STREQUAL b, else '0'\n"    \
@@ -28,15 +26,6 @@
   "strings which contain a '>' for example.\n"                          \
   "  $<COMMA>                  = A literal ','. Used to compare "       \
   "strings which contain a ',' for example.\n"                          \
-  "  $<INSTALL_INTERFACE:...>  = content of \"...\" when the property " \
-  "is exported using install(EXPORT), and empty otherwise.\n"           \
-  "  $<BUILD_INTERFACE:...>    = content of \"...\" when the property " \
-  "is exported using export(), or when the target is used by another "  \
-  "target in the same buildsystem. Expands to the empty string "        \
-  "otherwise.\n"                                                        \
-  "  $<EXPORT_NAMESPACE>       = The namespace used in an invokation "  \
-  "of export() or install(EXPORT). Expands to empty in other "          \
-  "contexts.\n"                                                         \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \

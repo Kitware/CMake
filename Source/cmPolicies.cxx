@@ -491,53 +491,6 @@ cmPolicies::cmPolicies()
     "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS whether it is modified or not and "
     "honor the POSITION_INDEPENDENT_CODE target property.",
     2,8,9,0, cmPolicies::WARN);
-
-    this->DefinePolicy(
-    CMP0019, "CMP0019",
-    "Use INTERFACE_LINK_LIBRARIES instead of LINK_INTERFACE_LIBRARIES.",
-    "A CMake shared library target (or an executable with the "
-    "ENABLE_EXPORTS property) may be given a \"link interface\" "
-    "determining the libraries that must be linked by its dependents.  "
-    "CMake 2.8.10 and lower used the LINK_INTERFACE_LIBRARIES and "
-    "LINK_INTERFACE_LIBRARIES_<CONFIG> target properties "
-    "to determine the link interface.  "
-    "CMake 2.8.11 and higher prefer the single "
-    "INTERFACE_LINK_LIBRARIES target property "
-    "to determine the link interface.  "
-    "The new property supports generator expressions "
-    "to specify configuration-specific link libraries."
-    "\n"
-    "This policy is not considered when loading IMPORTED targets.  "
-    "However, it does affect how the export() and install(EXPORT) "
-    "commands generate imported targets for use in dependent projects.  "
-    "\n"
-    "The OLD behavior for this policy is to ignore the new "
-    "INTERFACE_LINK_LIBRARIES property and use the old "
-    "LINK_INTERFACE_LIBRARIES(_<CONFIG>) properties to determine the "
-    "link interface.  "
-    "Targets named after LINK_PUBLIC in target_link_libraries will "
-    "populate the old properties and the new.  "
-    "The export() and install(EXPORT) commands will generate only the "
-    "IMPORTED_LINK_INTERFACE_LIBRARIES(_<CONFIG>) properties on a "
-    "target to be imported into other projects, and not "
-    "INTERFACE_LINK_LIBRARIES.  "
-    "\n"
-    "The NEW behavior for this policy is to ignore the old "
-    "LINK_INTERFACE_LIBRARIES(_<CONFIG>) properties and use the new "
-    "INTERFACE_LINK_LIBRARIES property to determine the link interface.  "
-    "Targets named after LINK_PUBLIC in target_link_libraries will "
-    "populate the new property and not the old.  "
-    "The export() and install(EXPORT) commands will generate the new "
-    "INTERFACE_LINK_LIBRARIES property on a target to be imported "
-    "into other projects.  "
-    "They will generate IMPORTED_LINK_INTERFACE_LIBRARIES(_<CONFIG>) "
-    "properties only if LINK_INTERFACE_LIBRARIES(_<CONFIG>) have been "
-    "set explicitly on the target to be exported."
-    "\n"
-    "The setting for this policy used to determine the link interface is "
-    "that in effect when the target is created by an add_library or "
-    "add_executable command.",
-    2,8,11,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

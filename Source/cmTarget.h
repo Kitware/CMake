@@ -99,10 +99,6 @@ public:
   cmPolicies::PolicyStatus GetPolicyStatusCMP0008() const
     { return this->PolicyStatusCMP0008; }
 
-  /** Get the status of policy CMP0019 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0019() const
-    { return this->PolicyStatusCMP0019; }
-
   /**
    * Get the list of the custom commands for this target
    */
@@ -622,7 +618,6 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0003;
   cmPolicies::PolicyStatus PolicyStatusCMP0004;
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
-  cmPolicies::PolicyStatus PolicyStatusCMP0019;
 
   // Internal representation details.
   friend class cmTargetInternals;

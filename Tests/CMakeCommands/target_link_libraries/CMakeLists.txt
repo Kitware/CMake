@@ -56,21 +56,3 @@ assert_property(targetA LINK_INTERFACE_LIBRARIES "")
 target_link_libraries(targetA depB depC)
 
 assert_property(targetA LINK_INTERFACE_LIBRARIES "")
-
-# cmake_policy(PUSH)
-
-cmake_policy(SET CMP0019 NEW)
-
-add_library(depD SHARED depD.cpp)
-generate_export_header(depD)
-set_property(TARGET depD APPEND PROPERTY INTERFACE_LINK_LIBRARIES $<1:depA>)
-
-add_library(depE SHARED depE.cpp)
-generate_export_header(depE)
-target_link_libraries(depE LINK_PRIVATE depB)
-target_link_libraries(depE LINK_INTERFACE_LIBRARIES $<1:depB>)
-
-add_executable(targetB targetB.cpp)
-target_link_libraries(targetB depD depE)
-
-# cmake_policy(POP)

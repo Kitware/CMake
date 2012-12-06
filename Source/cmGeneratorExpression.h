@@ -48,14 +48,11 @@ public:
   const cmCompiledGeneratorExpression& Parse(const char* input);
 
   enum PreprocessContext {
-    StripAllGeneratorExpressions,
-    BuildInterface,
-    InstallInterface
+    StripAllGeneratorExpressions
   };
 
   static std::string Preprocess(const std::string &input,
-                                PreprocessContext context,
-                                const char *ns = 0);
+                                PreprocessContext context);
 
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
