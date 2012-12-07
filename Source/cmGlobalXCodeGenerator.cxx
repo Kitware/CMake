@@ -1971,48 +1971,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     }
 
   BuildObjectListOrString dirs(this, this->XcodeVersion >= 30);
-  BuildObjectListOrString fdirs(this, this->XcodeVersion >= 30);
   std::vector<std::string> includes;
   this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt,
                                                      "C", configName);
-  std::set<cmStdString> emitted;
-  emitted.insert("/System/Library/Frameworks");
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
     {
-    if(this->NameResolvesToFramework(i->c_str()))
-      {
-      std::string frameworkDir = *i;
-      frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
-      if(emitted.insert(frameworkDir).second)
-        {
-        fdirs.Add(this->XCodeEscapePath(frameworkDir.c_str()).c_str());
-        }
-      }
-    else
-      {
-      std::string incpath =
-        this->XCodeEscapePath(i->c_str());
-      dirs.Add(incpath.c_str());
-      }
-    }
-  std::vector<std::string>& frameworks = target.GetFrameworks();
-  if(frameworks.size())
-    {
-    for(std::vector<std::string>::iterator fmIt = frameworks.begin();
-        fmIt != frameworks.end(); ++fmIt)
-      {
-      if(emitted.insert(*fmIt).second)
-        {
-        fdirs.Add(this->XCodeEscapePath(fmIt->c_str()).c_str());
-        }
-      }
-    }
-  if(!fdirs.IsEmpty())
-    {
-    buildSettings->AddAttribute("FRAMEWORK_SEARCH_PATHS",
-                                fdirs.CreateList());
+    std::string incpath =
+      this->XCodeEscapePath(i->c_str());
+    dirs.Add(incpath.c_str());
     }
   if(!dirs.IsEmpty())
     {
