@@ -1,6 +1,6 @@
 CMake Warning \(dev\) in CMakeLists.txt:
-  Policy CMP0021 is not set: Do not re-expand variables in include and link
-  information.  Run "cmake --help-policy CMP0021" for policy details.  Use
+  Policy CMP0019 is not set: Do not re-expand variables in include and link
+  information.  Run "cmake --help-policy CMP0019" for policy details.  Use
   the cmake_policy command to set the policy and suppress this warning.
 
   The following variable evaluations were encountered:

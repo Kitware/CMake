@@ -493,7 +493,7 @@ cmPolicies::cmPolicies()
     2,8,9,0, cmPolicies::WARN);
 
   this->DefinePolicy(
-    CMP0021, "CMP0021",
+    CMP0019, "CMP0019",
     "Do not re-expand variables in include and link information.",
     "CMake 2.8.10 and lower re-evaluated values given to the "
     "include_directories, link_directories, and link_libraries "

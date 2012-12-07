@@ -814,7 +814,7 @@ bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
 void cmMakefile::FinalPass()
 {
   // do all the variable expansions here
-  this->ExpandVariablesCMP0021();
+  this->ExpandVariablesCMP0019();
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
@@ -2122,15 +2122,15 @@ void cmMakefile::AddExtraDirectory(const char* dir)
   this->AuxSourceDirectories.push_back(dir);
 }
 
-static bool mightExpandVariablesCMP0021(const char* s)
+static bool mightExpandVariablesCMP0019(const char* s)
 {
   return s && *s && strstr(s,"${") && strchr(s,'}');
 }
 
-void cmMakefile::ExpandVariablesCMP0021()
+void cmMakefile::ExpandVariablesCMP0019()
 {
   // Drop this ancient compatibility behavior with a policy.
-  cmPolicies::PolicyStatus pol = this->GetPolicyStatus(cmPolicies::CMP0021);
+  cmPolicies::PolicyStatus pol = this->GetPolicyStatus(cmPolicies::CMP0019);
   if(pol != cmPolicies::OLD && pol != cmPolicies::WARN)
     {
     return;
@@ -2138,7 +2138,7 @@ void cmMakefile::ExpandVariablesCMP0021()
   cmOStringStream w;
 
   const char *includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if(mightExpandVariablesCMP0021(includeDirs))
+  if(mightExpandVariablesCMP0019(includeDirs))
     {
     std::string dirs = includeDirs;
     this->ExpandVariablesInString(dirs, true, true);
@@ -2158,7 +2158,7 @@ void cmMakefile::ExpandVariablesCMP0021()
     {
     cmTarget &t = l->second;
     includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
-    if(mightExpandVariablesCMP0021(includeDirs))
+    if(mightExpandVariablesCMP0019(includeDirs))
       {
       std::string dirs = includeDirs;
       this->ExpandVariablesInString(dirs, true, true);
@@ -2176,7 +2176,7 @@ void cmMakefile::ExpandVariablesCMP0021()
   for(std::vector<std::string>::iterator d = this->LinkDirectories.begin();
       d != this->LinkDirectories.end(); ++d)
     {
-    if(mightExpandVariablesCMP0021(d->c_str()))
+    if(mightExpandVariablesCMP0019(d->c_str()))
       {
       std::string orig = *d;
       this->ExpandVariablesInString(*d, true, true);
@@ -2193,7 +2193,7 @@ void cmMakefile::ExpandVariablesCMP0021()
         this->LinkLibraries.begin();
       l != this->LinkLibraries.end(); ++l)
     {
-    if(mightExpandVariablesCMP0021(l->first.c_str()))
+    if(mightExpandVariablesCMP0019(l->first.c_str()))
       {
       std::string orig = l->first;
       this->ExpandVariablesInString(l->first, true, true);
@@ -2210,7 +2210,7 @@ void cmMakefile::ExpandVariablesCMP0021()
   if(!w.str().empty())
     {
     cmOStringStream m;
-    m << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0021)
+    m << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0019)
       << "\n"
       << "The following variable evaluations were encountered:\n"
       << w.str();
