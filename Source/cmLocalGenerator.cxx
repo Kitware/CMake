@@ -1329,7 +1329,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const char* lang,
-                                             const char *config)
+                                             const char *config,
+                                             bool stripImplicitInclDirs
+                                            )
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1404,18 +1406,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
     }
 
-  // Load implicit include directories for this language.
-  std::string impDirVar = "CMAKE_";
-  impDirVar += lang;
-  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
-  if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
+  if (stripImplicitInclDirs)
     {
-    std::vector<std::string> impDirVec;
-    cmSystemTools::ExpandListArgument(value, impDirVec);
-    for(std::vector<std::string>::const_iterator i = impDirVec.begin();
-        i != impDirVec.end(); ++i)
+    // Load implicit include directories for this language.
+    std::string impDirVar = "CMAKE_";
+    impDirVar += lang;
+    impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
+    if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
       {
-      emitted.insert(*i);
+      std::vector<std::string> impDirVec;
+      cmSystemTools::ExpandListArgument(value, impDirVec);
+      for(std::vector<std::string>::const_iterator i = impDirVec.begin();
+          i != impDirVec.end(); ++i)
+        {
+        emitted.insert(*i);
+        }
       }
     }
 
