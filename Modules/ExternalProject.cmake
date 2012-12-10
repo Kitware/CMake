@@ -1586,15 +1586,16 @@ function(_ep_add_configure_command name)
 
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
     if(cmake_generator)
-      list(APPEND cmd "-G${cmake_generator}" "${source_dir}")
+      list(APPEND cmd "-G${cmake_generator}")
     else()
       if(CMAKE_EXTRA_GENERATOR)
-        list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}"
-          "${source_dir}")
+        list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}")
       else()
-        list(APPEND cmd "-G${CMAKE_GENERATOR}" "${source_dir}")
+        list(APPEND cmd "-G${CMAKE_GENERATOR}")
       endif()
     endif()
+
+    list(APPEND cmd "${source_dir}")
   endif()
 
   # If anything about the configure command changes, (command itself, cmake
