@@ -38,6 +38,7 @@
 #    [CONFIGURE_COMMAND cmd...]  # Build tree configuration command
 #    [CMAKE_COMMAND /.../cmake]  # Specify alternative cmake executable
 #    [CMAKE_GENERATOR gen]       # Specify generator for native build
+#    [CMAKE_GENERATOR_TOOLSET t] # Generator-specific toolset name
 #    [CMAKE_ARGS args...]        # Arguments to CMake command line
 #    [CMAKE_CACHE_ARGS args...]  # Initial cache arguments, of the form -Dvar:string=on
 #   #--Build step-----------------
@@ -1585,13 +1586,23 @@ function(_ep_add_configure_command name)
     endif()
 
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
+    get_target_property(cmake_generator_toolset ${name} _EP_CMAKE_GENERATOR_TOOLSET)
     if(cmake_generator)
       list(APPEND cmd "-G${cmake_generator}")
+      if(cmake_generator_toolset)
+        list(APPEND cmd "-T${cmake_generator_toolset}")
+      endif()
     else()
       if(CMAKE_EXTRA_GENERATOR)
         list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}")
       else()
         list(APPEND cmd "-G${CMAKE_GENERATOR}")
+      endif()
+      if(cmake_generator_toolset)
+        message(FATAL_ERROR "Option CMAKE_GENERATOR_TOOLSET not allowed without CMAKE_GENERATOR.")
+      endif()
+      if(CMAKE_GENERATOR_TOOLSET)
+        list(APPEND cmd "-T${CMAKE_GENERATOR_TOOLSET}")
       endif()
     endif()
 
