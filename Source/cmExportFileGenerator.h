@@ -94,6 +94,10 @@ protected:
                                    cmTarget* depender,
                                    cmTarget* dependee) = 0;
 
+  void ResolveTargetsInGeneratorExpressions(std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets);
+
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
 
