@@ -26,6 +26,10 @@
   "strings which contain a '>' for example.\n"                          \
   "  $<COMMA>                  = A literal ','. Used to compare "       \
   "strings which contain a ',' for example.\n"                          \
+  "  $<TARGET_NAME:...>        = Marks ... as being the name of a "     \
+  "target.  This is required if exporting targets to multiple "         \
+  "dependent export sets.  The '...' must be a literal name of a "      \
+  "target- it may not contain generator expressions.\n"                 \
   "  $<INSTALL_INTERFACE:...>  = content of \"...\" when the property " \
   "is exported using install(EXPORT), and empty otherwise.\n"           \
   "  $<BUILD_INTERFACE:...>    = content of \"...\" when the property " \
