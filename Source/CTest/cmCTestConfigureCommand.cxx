@@ -144,6 +144,15 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += cmakeGeneratorName;
       cmakeConfigureCommand += "\"";
 
+      const char* cmakeGeneratorToolset =
+        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
+      if(cmakeGeneratorToolset && *cmakeGeneratorToolset)
+        {
+        cmakeConfigureCommand += " \"-T";
+        cmakeConfigureCommand += cmakeGeneratorToolset;
+        cmakeConfigureCommand += "\"";
+        }
+
       cmakeConfigureCommand += " \"";
       cmakeConfigureCommand += source_dir;
       cmakeConfigureCommand += "\"";
