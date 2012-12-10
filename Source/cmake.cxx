@@ -659,6 +659,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
                     bool directoriesSetBefore)
 {
   bool directoriesSet = directoriesSetBefore;
+  bool haveToolset = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -786,6 +787,27 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       std::cout << "Also check system files when warning about unused and " <<
                    "uninitialized variables.\n";
       this->SetCheckSystemVars(true);
+      }
+    else if(arg.find("-T",0) == 0)
+      {
+      std::string value = arg.substr(2);
+      if(value.size() == 0)
+        {
+        ++i;
+        if(i >= args.size())
+          {
+          cmSystemTools::Error("No toolset specified for -T");
+          return;
+          }
+        value = args[i];
+        }
+      if(haveToolset)
+        {
+        cmSystemTools::Error("Multiple -T options not allowed");
+        return;
+        }
+      this->GeneratorToolset = value;
+      haveToolset = true;
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -2280,6 +2302,39 @@ int cmake::ActualConfigure()
                                 this->GlobalGenerator->GetExtraGeneratorName(),
                                 "Name of external makefile project generator.",
                                 cmCacheManager::INTERNAL);
+    }
+
+  if(const char* tsName =
+     this->CacheManager->GetCacheValue("CMAKE_GENERATOR_TOOLSET"))
+    {
+    if(this->GeneratorToolset.empty())
+      {
+      this->GeneratorToolset = tsName;
+      }
+    else if(this->GeneratorToolset != tsName)
+      {
+      std::string message = "Error: generator toolset: ";
+      message += this->GeneratorToolset;
+      message += "\nDoes not match the toolset used previously: ";
+      message += tsName;
+      message +=
+        "\nEither remove the CMakeCache.txt file or choose a different"
+        " binary directory.";
+      cmSystemTools::Error(message.c_str());
+      return -2;
+      }
+    }
+  else
+    {
+    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
+                                      this->GeneratorToolset.c_str(),
+                                      "Name of generator toolset.",
+                                      cmCacheManager::INTERNAL);
+    }
+  if(!this->GeneratorToolset.empty() &&
+     !this->GlobalGenerator->SetGeneratorToolset(this->GeneratorToolset))
+    {
+    return -2;
     }
 
   // reset any system configuration information, except for when we are

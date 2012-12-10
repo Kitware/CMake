@@ -49,6 +49,10 @@ public:
   ///! Get the name for this generator
   virtual const char *GetName() const { return "Generic"; };
 
+  /** Set the generator-specific toolset name.  Returns true if toolset
+      is supported and false otherwise.  */
+  virtual bool SetGeneratorToolset(std::string const& ts);
+
   /**
    * Create LocalGenerators and process the CMakeLists files. This does not
    * actually produce any makefiles, DSPs, etc.
