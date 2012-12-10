@@ -125,6 +125,65 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                      const char *outputName,
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets)
+{
+  const char *input = target->GetProperty(propName);
+  if (input)
+    {
+    if (!*input)
+      {
+      // Set to empty
+      properties[outputName] = "";
+      return;
+      }
+
+    std::string prepro = cmGeneratorExpression::Preprocess(input,
+                                                           preprocessRule);
+    if (!prepro.empty())
+      {
+      this->ResolveTargetsInGeneratorExpressions(prepro, target,
+                                                 missingTargets);
+      properties[outputName] = prepro;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets)
+{
+  this->PopulateInterfaceProperty(propName, propName, target, preprocessRule,
+                            properties, missingTargets);
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
+                                        std::ostream& os,
+                                        const ImportPropertyMap &properties)
+{
+  if (!properties.empty())
+    {
+    std::string targetName = this->Namespace;
+    targetName += target->GetName();
+    os << "SET_TARGET_PROPERTIES(" << targetName << " PROPERTIES\n";
+    for(ImportPropertyMap::const_iterator pi = properties.begin();
+        pi != properties.end(); ++pi)
+      {
+      os << "  " << pi->first << " \"" << pi->second << "\"\n";
+      }
+    os << ")\n\n";
+    }
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
                                     std::string &input,
