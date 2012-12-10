@@ -47,6 +47,8 @@ struct cmGeneratorExpressionNode
 
   virtual bool GeneratesContent() const { return true; }
 
+  virtual bool RequiresLiteralInput() const { return false; }
+
   virtual bool AcceptsSingleArbitraryContentParameter() const
     { return false; }
 
@@ -692,12 +694,27 @@ std::string GeneratorExpressionContent::Evaluate(
                                                                 = pit->end();
       for ( ; it != end; ++it)
         {
+        if (node->RequiresLiteralInput())
+          {
+          if ((*it)->GetType() != cmGeneratorExpressionEvaluator::Text)
+            {
+            reportError(context, this->GetOriginalExpression(),
+                  "$<" + identifier + "> expression requires literal input.");
+            return std::string();
+            }
+          }
         result += (*it)->Evaluate(context, dagChecker);
         if (context->HadError)
           {
           return std::string();
           }
         }
+      }
+    if (node->RequiresLiteralInput())
+      {
+      std::vector<std::string> parameters;
+      parameters.push_back(result);
+      return node->Evaluate(parameters, context, this, dagChecker);
       }
     return result;
     }
