@@ -28,6 +28,8 @@ public:
     const char* architectureId, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
+  virtual bool SetGeneratorToolset(std::string const& ts);
+
   virtual std::string
   GenerateBuildCommand(const char* makeProgram,
                        const char *projectName,
