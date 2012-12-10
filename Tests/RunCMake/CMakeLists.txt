@@ -47,6 +47,7 @@ endmacro()
 
 add_RunCMake_test(CMP0019)
 add_RunCMake_test(GeneratorExpression)
+add_RunCMake_test(GeneratorToolset)
 add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
