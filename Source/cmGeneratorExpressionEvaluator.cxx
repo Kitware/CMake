@@ -377,6 +377,28 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 } targetPropertyNode;
 
 //----------------------------------------------------------------------------
+static const struct TargetNameNode : public cmGeneratorExpressionNode
+{
+  TargetNameNode() {}
+
+  virtual bool GeneratesContent() const { return true; }
+
+  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+  virtual bool RequiresLiteralInput() const { return true; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return parameters.front();
+  }
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+} targetNameNode;
+
+//----------------------------------------------------------------------------
 template<bool linker, bool soname>
 struct TargetFilesystemArtifactResultCreator
 {
@@ -601,6 +623,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &commaNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
+  else if (identifier == "TARGET_NAME")
+    return &targetNameNode;
   else if (identifier == "BUILD_INTERFACE")
     return &buildInterfaceNode;
   else if (identifier == "INSTALL_INTERFACE")
