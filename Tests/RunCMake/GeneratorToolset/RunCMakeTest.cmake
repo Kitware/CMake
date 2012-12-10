@@ -2,9 +2,15 @@ include(RunCMake)
 
 run_cmake(NoToolset)
 
-set(RunCMake_TEST_OPTIONS -T "Bad Toolset")
-run_cmake(BadToolset)
-unset(RunCMake_TEST_OPTIONS)
+if("${RunCMake_GENERATOR}" MATCHES "Visual Studio 1[01]")
+  set(RunCMake_TEST_OPTIONS -T "Test Toolset")
+  run_cmake(TestToolset)
+  unset(RunCMake_TEST_OPTIONS)
+else()
+  set(RunCMake_TEST_OPTIONS -T "Bad Toolset")
+  run_cmake(BadToolset)
+  unset(RunCMake_TEST_OPTIONS)
+endif()
 
 set(RunCMake_TEST_OPTIONS -T "Toolset 1" "-TToolset 2")
 run_cmake(TwoToolsets)

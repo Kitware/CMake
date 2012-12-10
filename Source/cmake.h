@@ -540,6 +540,8 @@ private:
   {"-T <toolset-name>", "Specify toolset name if supported by generator.", \
    "Some CMake generators support a toolset name to be given to the " \
    "native build system to choose a compiler.  " \
+   "This is supported only on specific generators:\n" \
+   "  Visual Studio >= 10\n" \
    "See native build system documentation for allowed toolset names."}, \
   {"-Wno-dev", "Suppress developer warnings.",\
    "Suppress warnings that are meant for the author"\
