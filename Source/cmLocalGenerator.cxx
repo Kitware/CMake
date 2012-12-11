@@ -1708,7 +1708,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
       fdi != fwDirs.end(); ++fdi)
     {
-    frameworkPath = " -F";
+    frameworkPath += "-F";
     frameworkPath += this->Convert(fdi->c_str(), NONE, SHELL, false);
     frameworkPath += " ";
     }
