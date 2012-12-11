@@ -212,36 +212,11 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     }
 
 
-  const char* qtIncDir = 0;
-  const char* qtCoreIncDir = 0;
-
-  // check whether ${QT_INCLUDE_DIR} is part of the implicit include dirs,
-  // see http://public.kitware.com/Bug/view.php?id=13667
-  bool qtIncludeDirMayHaveBeenRemoved = false;
-  if (makefile->IsSet("QT_INCLUDE_DIR"))
-    {
-    qtIncDir = makefile->GetDefinition("QT_INCLUDE_DIR");
-    std::string s =
-         makefile->GetSafeDefinition("CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES");
-    std::vector<std::string> implIncDirs;
-    cmSystemTools::ExpandListArgument(s, implIncDirs);
-    if (std::find(implIncDirs.begin(), implIncDirs.end(),std::string(qtIncDir))
-                                                          != implIncDirs.end())
-      {
-      qtIncludeDirMayHaveBeenRemoved = true;
-      if (makefile->IsSet("QT_QTCORE_INCLUDE_DIR"))
-        {
-        qtCoreIncDir = makefile->GetDefinition("QT_QTCORE_INCLUDE_DIR");
-        }
-      }
-    }
-
-  bool haveQtCoreIncDir = false;
-  bool haveQtIncDir = false;
-
   std::vector<std::string> includeDirs;
   cmGeneratorTarget gtgt(target);
-  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX");
+  // Get the include dirs for this target, without stripping the implicit
+  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
+  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", 0, false);
   std::string _moc_incs = "";
   const char* sep = "";
   for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
@@ -251,37 +226,6 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     _moc_incs += sep;
     sep = ";";
     _moc_incs += *incDirIt;
-
-    if (qtIncludeDirMayHaveBeenRemoved && qtCoreIncDir && qtIncDir) // #13667
-      {
-      if (*incDirIt == qtIncDir)
-        {
-        haveQtIncDir = true;
-        qtIncludeDirMayHaveBeenRemoved = false; // it's here, i.e. not removed
-        }
-      if (*incDirIt == qtCoreIncDir)
-        {
-        haveQtCoreIncDir = true;
-        }
-      }
-    }
-
-  // Some projects (kdelibs, phonon) query the compiler for its default
-  // include search dirs, and add those to
-  // CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES.
-  // These may include e.g./usr/lib/qt/include . This is typically also part
-  // of ${QT_INCLUDES}. If this directory is then contained in the implicit
-  // include dirs, it is removed from the include dirs returned from the
-  // target above. So we add ${QT_INCLUDE_DIR} manually for moc if we detected
-  // that ${QT_QTCORE_INCLUDE_DIR} is among the include dirs (there shouldn't
-  // be a way to use Qt4 without using ${QT_QTCORE_INCLUDE_DIR} I think.
-  // See #13646 and #13667.
-  if (qtIncludeDirMayHaveBeenRemoved && qtCoreIncDir && qtIncDir
-      && (haveQtCoreIncDir == true) && (haveQtIncDir == false))
-    {
-    _moc_incs += sep;
-    sep = ";";
-    _moc_incs += qtIncDir;
     }
 
   const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
