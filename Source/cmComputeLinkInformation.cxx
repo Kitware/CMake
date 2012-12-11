@@ -1376,10 +1376,31 @@ void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::ComputeFrameworkInfo()
 {
-  // Avoid adding system framework paths.  See "man ld" on OS X.
-  this->FrameworkPathsEmmitted.insert("/Library/Frameworks");
-  this->FrameworkPathsEmmitted.insert("/Network/Library/Frameworks");
-  this->FrameworkPathsEmmitted.insert("/System/Library/Frameworks");
+  // Avoid adding implicit framework paths.
+  std::vector<std::string> implicitDirVec;
+
+  // Get platform-wide implicit directories.
+  if(const char* implicitLinks = this->Makefile->GetDefinition
+     ("CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES"))
+    {
+    cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
+    }
+
+  // Get language-specific implicit directories.
+  std::string implicitDirVar = "CMAKE_";
+  implicitDirVar += this->LinkLanguage;
+  implicitDirVar += "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES";
+  if(const char* implicitDirs =
+     this->Makefile->GetDefinition(implicitDirVar.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(implicitDirs, implicitDirVec);
+    }
+
+  for(std::vector<std::string>::const_iterator i = implicitDirVec.begin();
+      i != implicitDirVec.end(); ++i)
+    {
+    this->FrameworkPathsEmmitted.insert(*i);
+    }
 
   // Regular expression to extract a framework path and name.
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");

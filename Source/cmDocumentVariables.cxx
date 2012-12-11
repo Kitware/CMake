@@ -1633,6 +1633,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
+    ("CMAKE_<LANG>_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES", cmProperty::VARIABLE,
+     "Implicit linker framework search path detected for language <LANG>.",
+     "These paths are implicit linker framework search directories for "
+     "the compiler's language.  "
+     "CMake automatically detects these directories for each language and "
+     "reports the results in this variable.", false,
+     "Variables for Languages");
+
+  cm->DefineProperty
     ("CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES", cmProperty::VARIABLE,
      "Implicit link libraries and flags detected for language <LANG>.",
      "Compilers typically pass language runtime library names and "

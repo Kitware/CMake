@@ -256,6 +256,24 @@ set(CMAKE_CXX_CREATE_MACOSX_FRAMEWORK
 if(NOT DEFINED CMAKE_FIND_FRAMEWORK)
   set(CMAKE_FIND_FRAMEWORK FIRST)
 endif()
+
+# Older OS X linkers do not report their framework search path
+# with -v but "man ld" documents the following locations.
+set(CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+  ${_CMAKE_OSX_SYSROOT_PATH}/Library/Frameworks
+  ${_CMAKE_OSX_SYSROOT_PATH}/System/Library/Frameworks
+  )
+if(_CMAKE_OSX_SYSROOT_PATH)
+  # Treat some paths as implicit so we do not override the SDK versions.
+  list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+    /System/Library/Frameworks)
+endif()
+if("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
+  # Older OS X tools had more implicit paths.
+  list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+    ${_CMAKE_OSX_SYSROOT_PATH}/Network/Library/Frameworks)
+endif()
+
 # set up the default search directories for frameworks
 set(CMAKE_SYSTEM_FRAMEWORK_PATH
   ~/Library/Frameworks
