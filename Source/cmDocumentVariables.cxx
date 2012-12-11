@@ -1621,12 +1621,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "These paths are implicit linker search directories for the compiler's "
      "language.  "
      "CMake automatically detects these directories for each language and "
-     "reports the results in this variable.  The content of the environment "
-     "variable LIBRARY_PATH during the initial CMake run influences the "
-     "contents of the CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES variable.  When "
-     "linking with the full path against a library located in one of these "
-     "directories, only the short form of the link line, e.g. -lFoo, will be "
-     "used instead of the full path.", false,
+     "reports the results in this variable."
+     "\n"
+     "When a library in one of these directories is given by full path to "
+     "target_link_libraries() CMake will generate the -l<name> form on "
+     "link lines to ensure the linker searches its implicit directories "
+     "for the library.  "
+     "Note that some toolchains read implicit directories from an "
+     "environment variable such as LIBRARY_PATH so keep its value "
+     "consistent when operating in a given build tree.",false,
      "Variables for Languages");
 
   cm->DefineProperty
