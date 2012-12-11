@@ -19,6 +19,8 @@
 #include <ctype.h>
 #include <time.h>
 
+#include <cmTimestamp.h>
+
 //----------------------------------------------------------------------------
 bool cmStringCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -86,6 +88,10 @@ bool cmStringCommand
   else if(subCommand == "FIND")
     {
     return this->HandleFindCommand(args);
+    }
+  else if(subCommand == "TIMESTAMP")
+    {
+    return this->HandleTimestampCommand(args);
     }
 
   std::string e = "does not recognize sub-command "+subCommand;
@@ -877,5 +883,53 @@ bool cmStringCommand
   result.push_back(0);
 
   this->Makefile->AddDefinition(variableName.c_str(), &*result.begin());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand
+::HandleTimestampCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command TIMESTAMP requires at least one argument.");
+    return false;
+    }
+  else if(args.size() > 4)
+    {
+    this->SetError("sub-command TIMESTAMP takes at most three arguments.");
+    return false;
+    }
+
+  unsigned int argsIndex = 1;
+
+  const std::string &outputVariable = args[argsIndex++];
+
+  std::string formatString;
+  if(args.size() > argsIndex && args[argsIndex] != "UTC")
+    {
+    formatString = args[argsIndex++];
+    }
+
+  bool utcFlag = false;
+  if(args.size() > argsIndex)
+    {
+    if(args[argsIndex] == "UTC")
+      {
+      utcFlag = true;
+      }
+    else
+      {
+      std::string e = " TIMESTAMP sub-command does not recognize option " +
+          args[argsIndex] + ".";
+      this->SetError(e.c_str());
+      return false;
+      }
+    }
+
+  cmTimestamp timestamp;
+  std::string result = timestamp.CurrentTime(formatString, utcFlag);
+  this->Makefile->AddDefinition(outputVariable.c_str(), result.c_str());
+
   return true;
 }

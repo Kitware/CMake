@@ -17,6 +17,8 @@
 #include "cmFileTimeComparison.h"
 #include "cmCryptoHash.h"
 
+#include "cmTimestamp.h"
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_curl.h"
 #endif
@@ -160,6 +162,10 @@ bool cmFileCommand
   else if ( subCommand == "TO_NATIVE_PATH" )
     {
     return this->HandleCMakePathCommand(args, true);
+    }
+  else if ( subCommand == "TIMESTAMP" )
+    {
+    return this->HandleTimestampCommand(args);
     }
 
   std::string e = "does not recognize sub-command "+subCommand;
@@ -3240,4 +3246,55 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   this->SetError("UPLOAD not supported by bootstrap cmake.");
   return false;
 #endif
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleTimestampCommand(
+  std::vector<std::string> const& args)
+{
+  if(args.size() < 3)
+    {
+    this->SetError("sub-command TIMESTAMP requires at least two arguments.");
+    return false;
+    }
+  else if(args.size() > 5)
+    {
+    this->SetError("sub-command TIMESTAMP takes at most four arguments.");
+    return false;
+    }
+
+  unsigned int argsIndex = 1;
+
+  const std::string& filename = args[argsIndex++];
+
+  const std::string& outputVariable = args[argsIndex++];
+
+  std::string formatString;
+  if(args.size() > argsIndex && args[argsIndex] != "UTC")
+    {
+    formatString = args[argsIndex++];
+    }
+
+  bool utcFlag = false;
+  if(args.size() > argsIndex)
+    {
+    if(args[argsIndex] == "UTC")
+      {
+      utcFlag = true;
+      }
+    else
+      {
+      std::string e = " TIMESTAMP sub-command does not recognize option " +
+          args[argsIndex] + ".";
+      this->SetError(e.c_str());
+      return false;
+      }
+    }
+
+  cmTimestamp timestamp;
+  std::string result = timestamp.FileModificationTime(
+    filename.c_str(), formatString, utcFlag);
+  this->Makefile->AddDefinition(outputVariable.c_str(), result.c_str());
+
+  return true;
 }
