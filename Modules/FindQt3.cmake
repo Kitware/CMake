@@ -64,6 +64,7 @@ find_path(QT_INCLUDE_DIR qt.h
   /usr/share/qt3/include
   C:/Progra~1/qt/include
   /usr/include/qt3
+  /usr/local/include/X11/qt3
   )
 
 # if qglobal.h is not in the qt_include_dir then set
@@ -146,7 +147,7 @@ find_library(QT_QASSISTANTCLIENT_LIBRARY
 
 # Qt 3 should prefer QTDIR over the PATH
 find_program(QT_MOC_EXECUTABLE
-  NAMES moc-qt3 moc
+  NAMES moc-qt3 moc moc3 moc3-mt
   HINTS
     ENV QTDIR
   PATHS
@@ -154,6 +155,7 @@ find_program(QT_MOC_EXECUTABLE
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.2.0;InstallDir]/include/Qt"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\3.1.0;InstallDir]/include/Qt"
   ${GLOB_PATHS_BIN}
+    /usr/local/lib/qt3
     /usr/local/qt
     /usr/lib/qt
     /usr/lib/qt3
@@ -170,7 +172,7 @@ endif()
 
 # Qt 3 should prefer QTDIR over the PATH
 find_program(QT_UIC_EXECUTABLE
-  NAMES uic-qt3 uic
+  NAMES uic-qt3 uic uic3 uic3-mt
   HINTS
     ENV QTDIR
   PATHS
