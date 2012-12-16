@@ -20,7 +20,7 @@ class cmGeneratedFileStream;
 class cmGlobalVisualStudio10Generator;
 class cmSourceFile;
 class cmCustomCommand;
-class cmLocalVisualStudio7Generator;
+class cmLocalVisualStudio10Generator;
 class cmComputeLinkInformation;
 class cmVisualStudioGeneratorOptions;
 #include "cmSourceGroup.h"
@@ -107,7 +107,7 @@ private:
   std::string Name;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
-  cmLocalVisualStudio7Generator* LocalGenerator;
+  cmLocalVisualStudio10Generator* LocalGenerator;
   std::set<cmSourceFile*> SourcesVisited;
 
   typedef std::map<cmStdString, ToolSources> ToolSourceMap;

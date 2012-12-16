@@ -18,7 +18,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmVisualStudioGeneratorOptions.h"
-#include "cmLocalVisualStudio7Generator.h"
+#include "cmLocalVisualStudio10Generator.h"
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
@@ -93,8 +93,8 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GeneratorTarget = gg->GetGeneratorTarget(target);
   this->Makefile = target->GetMakefile();
   this->LocalGenerator =
-    (cmLocalVisualStudio7Generator*)
-    this->Makefile->GetLocalGenerator();
+    static_cast<cmLocalVisualStudio10Generator*>(
+    this->Makefile->GetLocalGenerator());
   this->Name = this->Target->GetName();
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
@@ -443,7 +443,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       {
       this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
       }
-    if(const char* toolset = gg->GetPlatformToolset())
+    if(const char* toolset = this->LocalGenerator->GetPlatformToolset())
       {
       std::string pts = "<PlatformToolset>";
       pts += toolset;

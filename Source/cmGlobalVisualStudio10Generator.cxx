@@ -83,7 +83,8 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
 void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);
-  if(!this->PlatformToolset.empty())
+  if(!this->PlatformToolset.empty() &&
+     mf->GetDefinition("CMAKE_VS_PLATFORM_TOOLSET") == 0)
     {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET",
                       this->PlatformToolset.c_str());
