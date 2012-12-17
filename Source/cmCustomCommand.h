@@ -32,6 +32,7 @@ public:
   cmCustomCommand(cmMakefile* mf,
                   const std::vector<std::string>& outputs,
                   const std::vector<std::string>& depends,
+                  const std::map<std::string,std::string>& envVariables,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
                   const char* workingDirectory);
@@ -77,6 +78,12 @@ public:
   void AppendImplicitDepends(ImplicitDependsList const&);
   ImplicitDependsList const& GetImplicitDepends() const;
 
+  /** Environment Variables */
+  typedef std::map<std::string,std::string> EnvVariablesMap;
+  void SetEnvVariables(EnvVariablesMap const&);
+  void AppendEnvVariables(EnvVariablesMap const&);
+  EnvVariablesMap const& GetEnvVariables() const;
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
@@ -88,6 +95,7 @@ private:
   bool EscapeOldStyle;
   cmListFileBacktrace* Backtrace;
   ImplicitDependsList ImplicitDepends;
+  EnvVariablesMap EnvVariables;
 };
 
 #endif

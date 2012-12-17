@@ -31,7 +31,8 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   WorkingDirectory(r.WorkingDirectory),
   EscapeAllowMakeVars(r.EscapeAllowMakeVars),
   EscapeOldStyle(r.EscapeOldStyle),
-  Backtrace(new cmListFileBacktrace(*r.Backtrace))
+  Backtrace(new cmListFileBacktrace(*r.Backtrace)),
+  EnvVariables(r.EnvVariables)
 {
 }
 
@@ -39,6 +40,7 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
 cmCustomCommand::cmCustomCommand(cmMakefile* mf,
                                  const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& depends,
+                                 const std::map<std::string,std::string>& envVariables,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
                                  const char* workingDirectory):
@@ -50,7 +52,8 @@ cmCustomCommand::cmCustomCommand(cmMakefile* mf,
   WorkingDirectory(workingDirectory?workingDirectory:""),
   EscapeAllowMakeVars(false),
   EscapeOldStyle(true),
-  Backtrace(new cmListFileBacktrace)
+  Backtrace(new cmListFileBacktrace),
+  EnvVariables(envVariables)
 {
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;
@@ -169,4 +172,23 @@ void cmCustomCommand::AppendImplicitDepends(ImplicitDependsList const& l)
 {
   this->ImplicitDepends.insert(this->ImplicitDepends.end(),
                                l.begin(), l.end());
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::SetEnvVariables(EnvVariablesMap const& m)
+{
+  this->EnvVariables = m;
+}
+
+//----------------------------------------------------------------------------
+void cmCustomCommand::AppendEnvVariables(EnvVariablesMap const& m)
+{
+  this->EnvVariables.insert(m.begin(), m.end());
+}
+
+//----------------------------------------------------------------------------
+cmCustomCommand::EnvVariablesMap const&
+cmCustomCommand::GetEnvVariables() const
+{
+  return this->EnvVariables;
 }

@@ -1023,6 +1023,25 @@ cmLocalUnixMakefileGenerator3
 
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
+
+  // Build the export line
+  const cmCustomCommand::EnvVariablesMap &env_variables = cc.GetEnvVariables();
+  cmCustomCommand::EnvVariablesMap::const_iterator env_var_it;
+  std::string env_variable_command = "";
+
+  if(env_variables.size() > 0) {
+    // Initialize env command (cross-platform capability built into CMake)
+    env_variable_command = "$(CMAKE_COMMAND) -E env ";
+
+    // Add the environment variables
+    for(env_var_it=env_variables.begin();
+        env_var_it != env_variables.end();
+        ++env_var_it) 
+    {
+      env_variable_command += (env_var_it->first)+"="+(env_var_it->second)+" ";
+    }
+  }
+
   for(unsigned int c = 0; c < ccg.GetNumberOfCommands(); ++c)
     {
     // Build the command line in a single string.
@@ -1105,6 +1124,10 @@ cmLocalUnixMakefileGenerator3
           cmd = "echo >nul && " + cmd;
           }
         }
+
+      // Add the environment variable string to the command
+      cmd = env_variable_command + cmd;
+
       commands1.push_back(cmd);
       }
     }

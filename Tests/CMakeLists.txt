@@ -588,6 +588,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory")
 
+  add_test(CustomCommandEnvVariables  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/CustomCommandEnvVariables"
+    "${CMake_BINARY_DIR}/Tests/CustomCommandEnvVariables"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project TestEnvVariables
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandEnvVariables")
+
    #add_test(SimpleExclude ${CMAKE_CTEST_COMMAND}
    #  --build-and-test
    #  "${CMake_SOURCE_DIR}/Tests/SimpleExclude"

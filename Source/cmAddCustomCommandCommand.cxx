@@ -33,6 +33,7 @@ bool cmAddCustomCommandCommand
   std::string comment_buffer;
   const char* comment = 0;
   std::vector<std::string> depends, outputs, output;
+  std::map<std::string,std::string> envVariables;
   bool verbatim = false;
   bool append = false;
   std::string implicit_depends_lang;
@@ -58,6 +59,7 @@ bool cmAddCustomCommandCommand
     doing_outputs,
     doing_comment,
     doing_working_directory,
+    doing_env_variables,
     doing_nothing
   };
 
@@ -137,6 +139,10 @@ bool cmAddCustomCommandCommand
     else if (copy == "COMMENT")
       {
       doing = doing_comment;
+      }
+    else if (copy == "ENVIRONMENT")
+      {
+      doing = doing_env_variables;
       }
     else
       {
@@ -228,6 +234,17 @@ bool cmAddCustomCommandCommand
            comment_buffer = copy;
            comment = comment_buffer.c_str();
            break;
+         case doing_env_variables:
+           {
+             // Split the env variable
+             size_t assignment_index = copy.find_first_of("=");
+      
+             // Add the env variable
+             envVariables.insert(std::pair<std::string,std::string>(
+                   copy.substr(0,assignment_index),
+                   copy.substr(assignment_index+1,copy.length())));
+           }
+           break;
          default:
            this->SetError("Wrong syntax. Unknown type of argument.");
            return false;
@@ -306,6 +323,7 @@ bool cmAddCustomCommandCommand
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
     this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
+                                             envVariables,
                                              commandLines, cctype,
                                              comment, working.c_str(),
                                              escapeOldStyle);
@@ -315,6 +333,7 @@ bool cmAddCustomCommandCommand
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(output, depends,
                                              main_dependency.c_str(),
+                                             envVariables,
                                              commandLines, comment,
                                              working.c_str(), false,
                                              escapeOldStyle);
@@ -346,8 +365,8 @@ bool cmAddCustomCommandCommand
     {
     // Use the old-style mode for backward compatibility.
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
-                                             source.c_str(), commandLines,
-                                             comment);
+                                             source.c_str(), envVariables,
+                                             commandLines, comment);
     }
 
   return true;

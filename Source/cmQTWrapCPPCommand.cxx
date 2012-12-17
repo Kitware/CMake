@@ -99,9 +99,11 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
 
       const char* no_main_dependency = 0;
       const char* no_working_dir = 0;
+      std::map<std::string,std::string> no_env_variables;
       this->Makefile->AddCustomCommandToOutput(newName.c_str(),
                                                depends,
                                                no_main_dependency,
+                                               no_env_variables,
                                                commandLines,
                                                "Qt Wrapped File",
                                                no_working_dir);
