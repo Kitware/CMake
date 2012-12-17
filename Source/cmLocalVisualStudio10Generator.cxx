@@ -117,6 +117,17 @@ void cmLocalVisualStudio10Generator
                   cmCacheManager::INTERNAL);
 }
 
+const char* cmLocalVisualStudio10Generator::GetPlatformToolset() const
+{
+  if(const char* toolset =
+     this->Makefile->GetDefinition("CMAKE_VS_PLATFORM_TOOLSET"))
+    {
+    return toolset;
+    }
+  return static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator)
+         ->GetPlatformToolset();
+}
+
 //----------------------------------------------------------------------------
 const char* cmLocalVisualStudio10Generator::ReportErrorLabel() const
 {

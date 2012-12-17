@@ -37,6 +37,9 @@ public:
   virtual void ReadAndStoreExternalGUID(const char* name,
                                         const char* path);
 
+  /** The toolset name for the target platform.  */
+  const char* GetPlatformToolset() const;
+
 protected:
   virtual const char* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return true; }
