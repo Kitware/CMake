@@ -2485,6 +2485,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
     {
     cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
     deleteAndClear(this->Internal->IncludeDirectoriesEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
@@ -2507,6 +2508,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
     {
     cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
     this->Internal->IncludeDirectoriesEntries.push_back(
               new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
@@ -2541,6 +2543,20 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                               this->GetName(),
                                               "INCLUDE_DIRECTORIES", 0, 0);
 
+
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugIncludes = std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 "INCLUDE_DIRECTORIES")
+                        != debugProperties.end();
+
   for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
       it = this->Internal->IncludeDirectoriesEntries.begin(),
       end = this->Internal->IncludeDirectoriesEntries.end();
@@ -2553,6 +2569,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                               this,
                                               &dagChecker),
                                     entryIncludes);
+    std::string usedIncludes;
     for(std::vector<std::string>::const_iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
       {
@@ -2565,7 +2582,17 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
       if(uniqueIncludes.insert(inc).second)
         {
         includes.push_back(*li);
+        if (debugIncludes)
+          {
+          usedIncludes += " * " + *li + "\n";
+          }
         }
+      }
+    if (!usedIncludes.empty())
+      {
+      this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG,
+                            "Used includes:\n" + usedIncludes,
+                            (*it)->ge->GetBacktrace());
       }
     }
   return includes;
