@@ -896,6 +896,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       " script, it may get fatal error messages from the script.",false,
       "Variables That Change Behavior");
 
+  cm->DefineProperty
+    ("CMAKE_DEBUG_TARGET_PROPERTIES", cmProperty::VARIABLE,
+     "Enables tracing output for target properties.",
+     "This variable can be populated with a list of properties to generate "
+     "debug output for when evaluating target properties.  Currently it can "
+     "only be used when evaluating the INCLUDE_DIRECTORIES target property.  "
+     "In that case, it outputs a backtrace for each include directory in "
+     "the build.  Default is unset.",false,"Variables That Change Behavior");
+
   // Variables defined by CMake that describe the system
 
   cm->DefineProperty

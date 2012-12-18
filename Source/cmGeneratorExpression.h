@@ -83,6 +83,11 @@ public:
     return this->Input;
   }
 
+  cmListFileBacktrace GetBacktrace() const
+  {
+    return this->Backtrace;
+  }
+
 private:
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
               const char *input);
