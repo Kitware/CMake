@@ -320,10 +320,13 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
   // overwritten by the CreateVCProjBuildRule.
   // (this could be avoided with per-target source files)
   const char* no_main_dependency = 0;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   if(cmSourceFile* file =
      mf->AddCustomCommandToOutput(
        stamps, listFiles,
-       no_main_dependency, commandLines, "Checking Build System",
+       no_main_dependency,
+       no_env_variables,
+       commandLines, "Checking Build System",
        no_working_directory, true))
     {
     tgt->AddSourceFile(file);

@@ -141,6 +141,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       cmCustomCommandLines force_commands;
       force_commands.push_back(force_command);
       const char* no_main_dependency = 0;
+      cmCustomCommand::EnvVariablesMap no_env_variables;
       std::string force = this->Makefile->GetStartOutputDirectory();
       force += cmake::GetCMakeFilesDirectory();
       force += "/";
@@ -148,6 +149,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force += "_force";
       this->Makefile->AddCustomCommandToOutput(force.c_str(), no_depends,
                                                no_main_dependency,
+                                               no_env_variables,
                                                force_commands, " ", 0, true);
       if(cmSourceFile* file =
          this->Makefile->GetSourceFileWithOutput(force.c_str()))
@@ -311,11 +313,13 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   const char* no_working_directory = 0;
   std::string fullpathStampName = this->Convert(stampName.c_str(), FULL,
                                             UNCHANGED);
   this->Makefile->AddCustomCommandToOutput(fullpathStampName.c_str(),
                                            listFiles, makefileIn.c_str(),
+                                           no_env_variables,
                                            commandLines, comment.c_str(),
                                            no_working_directory, true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))

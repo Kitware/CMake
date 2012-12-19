@@ -56,9 +56,10 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
   command.push_back(impDir);
   std::vector<std::string> no_output;
   std::vector<std::string> no_depends;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   cmCustomCommandLines commands;
   commands.push_back(command);
-  pcc.reset(new cmCustomCommand(0, no_output, no_depends, commands, 0, 0));
+  pcc.reset(new cmCustomCommand(0, no_output, no_depends, no_env_variables, commands, 0, 0));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;
@@ -76,6 +77,16 @@ const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
   return this->ReportErrorLabel();
 }
 
+std::string cmLocalVisualStudioGenerator::EscapeForBatch(const char* s)
+{
+  std::string ret(s);
+  // '^' is the DOS batch escape operator.
+  cmSystemTools::ReplaceString(ret, "&", "^&");
+  cmSystemTools::ReplaceString(ret, "<", "^<");
+  cmSystemTools::ReplaceString(ret, ">", "^>");
+  return ret;
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudioGenerator
@@ -85,6 +96,9 @@ cmLocalVisualStudioGenerator
 {
   bool useLocal = this->CustomCommandUseLocal();
   const char* workingDirectory = cc.GetWorkingDirectory();
+  const cmCustomCommand::EnvVariablesMap &env_variables = cc.GetEnvVariables();
+  std::string env_variables_scriptlet;
+
   cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
   RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
 
@@ -113,6 +127,29 @@ cmLocalVisualStudioGenerator
     newline = newline_text;
     script += "setlocal";
     }
+
+  // I'd think environment variables should be placed
+  // *after* the setlocal above, right?
+  if(!env_variables.empty()) {
+    typedef cmCustomCommand::EnvVariablesMap::const_iterator env_iter_type;
+    env_iter_type env_var_it_end(env_variables.end());
+    for(env_iter_type env_var_it(env_variables.begin());
+        env_var_it != env_var_it_end;
+        ++env_var_it)
+    {
+      env_variables_scriptlet += newline;
+      newline = newline_text;
+      env_variables_scriptlet += "set ";
+      // For variable values, we need to escape chars such as '&'.
+      // EscapeForShell() didn't seem to do the right thing for this purpose,
+      // thus I added a new helper.
+      // Possibly further quoting/escaping missing here...
+      env_variables_scriptlet += env_var_it->first;
+      env_variables_scriptlet += "=";
+      env_variables_scriptlet += EscapeForBatch(env_var_it->second.c_str());
+    }
+  }
+  script += env_variables_scriptlet;
 
   if(workingDirectory)
     {

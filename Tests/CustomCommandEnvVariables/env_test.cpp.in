@@ -1,0 +1,58 @@
+
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
+int main(int argc, char** argv, char** envp)
+{
+  char** env;
+
+  const char env_var_prefix[] = "@ENV_TEST_ENV_VAR_PREFIX_template@";
+  const char f_result[] = "@ENV_TEST_F_RESULT_template@";
+
+  // Write out the analysis result
+  std::ofstream result_file;
+
+  result_file.open(f_result, std::ios_base::out | std::ios_base::trunc);
+  if (result_file.fail())
+    return -1;
+
+  bool found_some = false;
+
+  //std::cout << "prefix " << env_var_prefix << std::endl;
+
+  for(env = envp; *env != 0; env++) {
+    const char* thisEnv = *env;
+
+    //std::cout << "thisEnv " << thisEnv << std::endl;
+
+    // Check if a matching environment variable got set
+    if(0 == strncmp(thisEnv, env_var_prefix, sizeof(env_var_prefix)-1)) {
+      // Since there ultimately will be a file compare of our content with
+      // expected content,
+      // and expected content is provided by a CMake list variable,
+      // append a CMake list ';' separator for each entry here, too,
+      // to achieve identical content.
+      if(found_some) // existing elements?
+        result_file << ';';
+
+      result_file << thisEnv;
+      found_some = true;
+    }
+  }
+
+  result_file.close();
+
+  if(found_some)
+  {
+    // Success!
+    std::cout<<"CMake custom command found some environment variables!"<<std::endl;
+    return 0;
+  }
+  else
+  {
+    // Not success!
+    std::cerr<<"CMake custom command could not find any environment variable!"<<std::endl;
+    return -1;
+  }
+}
