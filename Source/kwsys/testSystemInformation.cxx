@@ -66,6 +66,7 @@ int testSystemInformation(int, char*[])
   printMethod(info, GetFamilyID);
   printMethod(info, GetModelID);
   printMethod(info, GetExtendedProcessorName);
+  printMethod(info, GetSteppingCode);
   printMethod(info, GetProcessorSerialNumber);
   printMethod2(info, GetProcessorCacheSize, "KB");
   printMethod(info, GetLogicalProcessorsPerPhysical);
