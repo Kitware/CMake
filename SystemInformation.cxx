@@ -307,7 +307,7 @@ public:
   enum Manufacturer
     {
     AMD, Intel, NSC, UMC, Cyrix, NexGen, IDT, Rise, Transmeta, Sun, IBM,
-    Motorola, UnknownManufacturer
+    Motorola, HP, UnknownManufacturer
     };
 
 protected:
@@ -346,7 +346,7 @@ protected:
   static void Delay (unsigned int);
   static void DelayOverhead (unsigned int);
 
-  void FindManufacturer();
+  void FindManufacturer(const kwsys_stl::string &family = "");
 
   // For Mac
   bool ParseSysCtl();
@@ -1144,6 +1144,7 @@ void SystemInformationImplementation::RunCPUCheck()
     {
     // Retrieve the CPU details.
     RetrieveCPUIdentity();
+    this->FindManufacturer();
     RetrieveCPUFeatures();
     }
 
@@ -1415,6 +1416,8 @@ const char * SystemInformationImplementation::GetVendorID()
       return "IBM";
     case Motorola:
       return "Motorola";
+    case HP:
+      return "Hewlett-Packard";
     default:
       return "Unknown Manufacturer";
     }
@@ -1670,7 +1673,7 @@ bool SystemInformationImplementation::RetrieveCPUFeatures()
 #endif
       ; <<CPUID>>
       ; eax = 1 --> eax: CPU ID - bits 31..16 - unused, bits 15..12 - type, bits 11..8 - family, bits 7..4 - model, bits 3..0 - mask revision
-      ;        ebx: 31..24 - default APIC ID, 23..16 - logical processsor ID, 15..8 - CFLUSH chunk size , 7..0 - brand ID
+      ;        ebx: 31..24 - default APIC ID, 23..16 - logical processor ID, 15..8 - CFLUSH chunk size , 7..0 - brand ID
       ;        edx: CPU feature flags
       mov eax,1
       CPUID_INSTRUCTION
@@ -1755,7 +1758,7 @@ bool SystemInformationImplementation::RetrieveCPUFeatures()
 
 
 /** Find the manufacturer given the vendor id */
-void SystemInformationImplementation::FindManufacturer()
+void SystemInformationImplementation::FindManufacturer(const kwsys_stl::string& family)
 {
   if (this->ChipID.Vendor == "GenuineIntel")       this->ChipManufacturer = Intel;        // Intel Corp.
   else if (this->ChipID.Vendor == "UMC UMC UMC ")  this->ChipManufacturer = UMC;          // United Microelectronics Corp.
@@ -1771,6 +1774,7 @@ void SystemInformationImplementation::FindManufacturer()
   else if (this->ChipID.Vendor == "Sun")           this->ChipManufacturer = Sun;          // Sun Microelectronics
   else if (this->ChipID.Vendor == "IBM")           this->ChipManufacturer = IBM;          // IBM Microelectronics
   else if (this->ChipID.Vendor == "Motorola")      this->ChipManufacturer = Motorola;          // Motorola Microelectronics
+  else if (family.substr(0, 7) == "PA-RISC")       this->ChipManufacturer = HP;           // Hewlett-Packard
   else                                             this->ChipManufacturer = UnknownManufacturer;  // Unknown manufacturer
 }
 
@@ -1809,7 +1813,7 @@ bool SystemInformationImplementation::RetrieveCPUIdentity()
 
       ; <<CPUID>>
       ; eax = 1 --> eax: CPU ID - bits 31..16 - unused, bits 15..12 - type, bits 11..8 - family, bits 7..4 - model, bits 3..0 - mask revision
-      ;        ebx: 31..24 - default APIC ID, 23..16 - logical processsor ID, 15..8 - CFLUSH chunk size , 7..0 - brand ID
+      ;        ebx: 31..24 - default APIC ID, 23..16 - logical processor ID, 15..8 - CFLUSH chunk size , 7..0 - brand ID
       ;        edx: CPU feature flags
       mov eax,1
       CPUID_INSTRUCTION
@@ -1835,8 +1839,6 @@ bool SystemInformationImplementation::RetrieveCPUIdentity()
   memcpy (&(vbuf[8]), &(localCPUVendor[2]), sizeof (int));
   vbuf[12] = '\0';
   this->ChipID.Vendor = vbuf;
-
-  this->FindManufacturer();
 
   // Retrieve the family of CPU present.
   this->ChipID.ExtendedFamily =    ((localCPUSignature & 0x0FF00000) >> 20);  // Bits 27..20 Used
@@ -2436,7 +2438,7 @@ bool SystemInformationImplementation::RetrieveExtendedCPUFeatures()
 #endif
       ; <<CPUID>>
       ; eax = 0x80000001 --> eax: CPU ID - bits 31..16 - unused, bits 15..12 - type, bits 11..8 - family, bits 7..4 - model, bits 3..0 - mask revision
-      ;             ebx: 31..24 - default APIC ID, 23..16 - logical processsor ID, 15..8 - CFLUSH chunk size , 7..0 - brand ID
+      ;             ebx: 31..24 - default APIC ID, 23..16 - logical processor ID, 15..8 - CFLUSH chunk size , 7..0 - brand ID
       ;             edx: CPU feature flags
       mov eax,0x80000001
       CPUID_INSTRUCTION
@@ -3002,6 +3004,16 @@ kwsys_stl::string SystemInformationImplementation::ExtractValueFromCpuInfoFile(k
     size_t pos2 = buffer.find("\n",pos);
     if(pos!=buffer.npos && pos2!=buffer.npos)
       {
+      // It may happen that the beginning matches, but this is still not the requested key.
+      // An example is looking for "cpu" when "cpu family" comes first. So we check that
+      // we have only spaces from here to pos, otherwise we search again.
+      for(size_t i=this->CurrentPositionInFile+strlen(word); i < pos; ++i)
+        {
+        if(buffer[i] != ' ' && buffer[i] != '\t')
+          {
+          return this->ExtractValueFromCpuInfoFile(buffer, word, pos2);
+          }
+        }
       return buffer.substr(pos+2,pos2-pos-2);
       }
     }
@@ -3073,7 +3085,7 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
     this->NumberOfLogicalCPU = atoi(cpucount.c_str());
 #endif
   // gotta have one, and if this is 0 then we get a / by 0n
-  // beter to have a bad answer than a crash
+  // better to have a bad answer than a crash
   if(this->NumberOfPhysicalCPU <= 0)
     {
     this->NumberOfPhysicalCPU = 1;
@@ -3082,32 +3094,83 @@ int SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical=
       this->NumberOfLogicalCPU/this->NumberOfPhysicalCPU;
 
-  // CPU speed (checking only the first proc
+  // CPU speed (checking only the first processor)
   kwsys_stl::string CPUSpeed = this->ExtractValueFromCpuInfoFile(buffer,"cpu MHz");
   this->CPUSpeedInMHz = static_cast<float>(atof(CPUSpeed.c_str()));
 
   // Chip family
-  this->ChipID.Family = atoi(this->ExtractValueFromCpuInfoFile(buffer,"cpu family").c_str());
+  kwsys_stl::string familyStr =
+    this->ExtractValueFromCpuInfoFile(buffer,"cpu family");
+  if(familyStr.empty())
+    {
+    familyStr = this->ExtractValueFromCpuInfoFile(buffer,"CPU architecture");
+    }
+  this->ChipID.Family = atoi(familyStr.c_str());
 
   // Chip Vendor
   this->ChipID.Vendor = this->ExtractValueFromCpuInfoFile(buffer,"vendor_id");
-  this->FindManufacturer();
+  this->FindManufacturer(familyStr);
+
+  // second try for setting family
+  if (this->ChipID.Family == 0 && this->ChipManufacturer == HP)
+    {
+    if (familyStr == "PA-RISC 1.1a")
+      this->ChipID.Family = 0x11a;
+    else if (familyStr == "PA-RISC 2.0")
+      this->ChipID.Family = 0x200;
+    // If you really get CMake to work on a machine not belonging to
+    // any of those families I owe you a dinner if you get it to
+    // contribute nightly builds regularly.
+    }
 
   // Chip Model
   this->ChipID.Model = atoi(this->ExtractValueFromCpuInfoFile(buffer,"model").c_str());
-  this->RetrieveClassicalCPUIdentity();
+  if(!this->RetrieveClassicalCPUIdentity())
+    {
+    // Some platforms (e.g. PA-RISC) tell us their CPU name here.
+    // Note: x86 does not.
+    kwsys_stl::string cpuname = this->ExtractValueFromCpuInfoFile(buffer,"cpu");
+    if(!cpuname.empty())
+      {
+      this->ChipID.ProcessorName = cpuname;
+      }
+    }
+
+  // Chip revision
+  kwsys_stl::string cpurev = this->ExtractValueFromCpuInfoFile(buffer,"stepping");
+  if(cpurev.empty())
+    {
+    cpurev = this->ExtractValueFromCpuInfoFile(buffer,"CPU revision");
+    }
+  this->ChipID.Revision = atoi(cpurev.c_str());
 
   // Chip Model Name
   this->ChipID.ModelName = this->ExtractValueFromCpuInfoFile(buffer,"model name").c_str();
 
   // L1 Cache size
-  kwsys_stl::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,"cache size");
-  pos = cacheSize.find(" KB");
-  if(pos!=cacheSize.npos)
+  // Different architectures may show different names for the caches.
+  // Sum up everything we find.
+  kwsys_stl::vector<const char*> cachename;
+  cachename.clear();
+
+  cachename.push_back("cache size"); // e.g. x86
+  cachename.push_back("I-cache"); // e.g. PA-RISC
+  cachename.push_back("D-cache"); // e.g. PA-RISC
+
+  this->Features.L1CacheSize = 0;
+  for (size_t index = 0; index < cachename.size(); index ++)
     {
-    cacheSize = cacheSize.substr(0,pos);
+    kwsys_stl::string cacheSize = this->ExtractValueFromCpuInfoFile(buffer,cachename[index]);
+    if (!cacheSize.empty())
+      {
+      pos = cacheSize.find(" KB");
+      if(pos!=cacheSize.npos)
+        {
+        cacheSize = cacheSize.substr(0,pos);
+        }
+      this->Features.L1CacheSize += atoi(cacheSize.c_str());
+      }
     }
-  this->Features.L1CacheSize = atoi(cacheSize.c_str());
   return 1;
 }
 
