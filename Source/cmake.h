@@ -542,6 +542,7 @@ private:
    "native build system to choose a compiler.  " \
    "This is supported only on specific generators:\n" \
    "  Visual Studio >= 10\n" \
+   "  Xcode >= 3.0\n" \
    "See native build system documentation for allowed toolset names."}, \
   {"-Wno-dev", "Suppress developer warnings.",\
    "Suppress warnings that are meant for the author"\

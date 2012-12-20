@@ -83,6 +83,7 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig();
 
+  virtual bool SetGeneratorToolset(std::string const& ts);
 private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
@@ -236,6 +237,7 @@ private:
   std::map<cmStdString, cmXCodeObject* > TargetGroup;
   std::map<cmStdString, cmXCodeObject* > FileRefs;
   std::vector<std::string> Architectures;
+  std::string PlatformToolset;
 };
 
 #endif

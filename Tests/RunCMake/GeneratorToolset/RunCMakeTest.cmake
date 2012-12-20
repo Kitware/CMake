@@ -2,7 +2,7 @@ include(RunCMake)
 
 run_cmake(NoToolset)
 
-if("${RunCMake_GENERATOR}" MATCHES "Visual Studio 1[01]")
+if("${RunCMake_GENERATOR}" MATCHES "Visual Studio 1[01]|Xcode" AND NOT XCODE_BELOW_3)
   set(RunCMake_TEST_OPTIONS -T "Test Toolset")
   run_cmake(TestToolset)
   unset(RunCMake_TEST_OPTIONS)
