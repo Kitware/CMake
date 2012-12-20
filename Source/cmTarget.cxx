@@ -21,6 +21,7 @@
 #include "cmDocumentLocationUndefined.h"
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorExpressionDAGChecker.h"
 #include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>
@@ -118,6 +119,14 @@ public:
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
+
+  struct IncludeDirectoriesEntry {
+    IncludeDirectoriesEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge)
+      : ge(cge)
+    {}
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
+  };
+  std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
 };
 
 //----------------------------------------------------------------------------
@@ -1392,8 +1401,14 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Initialize the INCLUDE_DIRECTORIES property based on the current value
   // of the same directory property:
-  this->SetProperty("INCLUDE_DIRECTORIES",
-                    this->Makefile->GetProperty("INCLUDE_DIRECTORIES"));
+  const std::vector<cmMakefileIncludeDirectoriesEntry> parentIncludes =
+                              this->Makefile->GetIncludeDirectoriesEntries();
+
+  for (std::vector<cmMakefileIncludeDirectoriesEntry>::const_iterator it
+              = parentIncludes.begin(); it != parentIncludes.end(); ++it)
+    {
+    this->InsertInclude(*it);
+    }
 
   if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
       || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
@@ -1728,9 +1743,10 @@ cmTargetTraceDependencies
     for(cmCustomCommandLine::const_iterator cli = cit->begin();
         cli != cit->end(); ++cli)
       {
-      const cmCompiledGeneratorExpression &cge = ge.Parse(*cli);
-      cge.Evaluate(this->Makefile, 0, true);
-      std::set<cmTarget*> geTargets = cge.GetTargets();
+      const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
+                                                              = ge.Parse(*cli);
+      cge->Evaluate(this->Makefile, 0, true);
+      std::set<cmTarget*> geTargets = cge->GetTargets();
       for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
           it != geTargets.end(); ++it)
         {
@@ -2445,6 +2461,20 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
+void deleteAndClear(
+      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
+{
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = entries.begin(),
+      end = entries.end();
+      it != end; ++it)
+    {
+      delete *it;
+    }
+  entries.clear();
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const char* prop, const char* value)
 {
   if (!prop)
@@ -2452,6 +2482,17 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     return;
     }
 
+  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    deleteAndClear(this->Internal->IncludeDirectoriesEntries);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->IncludeDirectoriesEntries.push_back(
+                          new cmTargetInternals::IncludeDirectoriesEntry(cge));
+    return;
+    }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -2464,8 +2505,98 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     {
     return;
     }
+  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->IncludeDirectoriesEntries.push_back(
+              new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
+    return;
+    }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
+                     bool before)
+{
+  cmGeneratorExpression ge(entry.Backtrace);
+
+  std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::iterator position
+                = before ? this->Internal->IncludeDirectoriesEntries.begin()
+                         : this->Internal->IncludeDirectoriesEntries.end();
+
+  this->Internal->IncludeDirectoriesEntries.insert(position,
+      new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(entry.Value)));
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
+{
+  std::set<std::string> fromTll;
+  std::vector<std::string> includes;
+  std::set<std::string> uniqueIncludes;
+  cmListFileBacktrace lfbt;
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                              this->GetName(),
+                                              "INCLUDE_DIRECTORIES", 0, 0);
+
+
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugIncludes = std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 "INCLUDE_DIRECTORIES")
+                        != debugProperties.end();
+
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = this->Internal->IncludeDirectoriesEntries.begin(),
+      end = this->Internal->IncludeDirectoriesEntries.end();
+      it != end; ++it)
+    {
+    std::vector<std::string> entryIncludes;
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(this->Makefile,
+                                              config,
+                                              false,
+                                              this,
+                                              &dagChecker),
+                                    entryIncludes);
+    std::string usedIncludes;
+    for(std::vector<std::string>::const_iterator
+          li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
+      {
+      std::string inc = *li;
+      if (!cmSystemTools::IsOff(inc.c_str()))
+        {
+        cmSystemTools::ConvertToUnixSlashes(inc);
+        }
+
+      if(uniqueIncludes.insert(inc).second)
+        {
+        includes.push_back(*li);
+        if (debugIncludes)
+          {
+          usedIncludes += " * " + *li + "\n";
+          }
+        }
+      }
+    if (!usedIncludes.empty())
+      {
+      this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG,
+                            "Used includes:\n" + usedIncludes,
+                            (*it)->ge->GetBacktrace());
+      }
+    }
+  return includes;
 }
 
 //----------------------------------------------------------------------------
@@ -2794,6 +2925,24 @@ const char *cmTarget::GetProperty(const char* prop,
           }
         }
       }
+    }
+  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+    {
+    static std::string output;
+    output = "";
+    std::string sep;
+    typedef cmTargetInternals::IncludeDirectoriesEntry
+                                IncludeDirectoriesEntry;
+    for (std::vector<IncludeDirectoriesEntry*>::const_iterator
+        it = this->Internal->IncludeDirectoriesEntries.begin(),
+        end = this->Internal->IncludeDirectoriesEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += (*it)->ge->GetInput();
+      sep = ";";
+      }
+    return output.c_str();
     }
 
   if (strcmp(prop,"IMPORTED") == 0)
@@ -4918,6 +5067,7 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
+  deleteAndClear(this->Pointer->IncludeDirectoriesEntries);
   delete this->Pointer;
 }
 
