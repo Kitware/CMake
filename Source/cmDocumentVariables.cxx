@@ -303,6 +303,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      ,false,
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_XCODE_PLATFORM_TOOLSET", cmProperty::VARIABLE,
+     "Xcode compiler selection.",
+     "Xcode supports selection of a compiler from one of the installed "
+     "toolsets.  "
+     "CMake provides the name of the chosen toolset in this variable, "
+     "if any is explicitly selected (e.g. via the cmake -T option)."
+     ,false,
+     "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_MINOR_VERSION", cmProperty::VARIABLE,
      "The Minor version of cmake (i.e. the 4 in X.4.X).",
      "This specifies the minor version of the CMake"

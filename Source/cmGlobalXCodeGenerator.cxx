@@ -201,6 +201,20 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts)
+{
+  if(this->XcodeVersion >= 30)
+    {
+    this->PlatformToolset = ts;
+    return true;
+    }
+  else
+    {
+    return cmGlobalGenerator::SetGeneratorToolset(ts);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
                                             lang,
                                             cmMakefile * mf, bool optional)
@@ -226,6 +240,11 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
   mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
+  if(!this->PlatformToolset.empty())
+    {
+    mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET",
+                      this->PlatformToolset.c_str());
+    }
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
     const char* osxArch =
       mf->GetDefinition("CMAKE_OSX_ARCHITECTURES");
@@ -3162,6 +3181,11 @@ void cmGlobalXCodeGenerator
     {
     buildSettings->AddAttribute("MACOSX_DEPLOYMENT_TARGET",
                                 this->CreateString(deploymentTarget));
+    }
+  if(!this->PlatformToolset.empty())
+    {
+    buildSettings->AddAttribute("GCC_VERSION",
+      this->CreateString(this->PlatformToolset.c_str()));
     }
 
   // Put this last so it can override existing settings
