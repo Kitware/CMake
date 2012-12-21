@@ -205,7 +205,8 @@ if(TEST_MODULE_DEPENDS)
                          -DCMAKE_Fortran_FLAGS_MINSIZEREL:STRING=${CMAKE_Fortran_FLAGS_MINSIZEREL}
                          -DCMAKE_Fortran_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_Fortran_FLAGS_RELWITHDEBINFO}
                          ${External_BUILD_TYPE}
-         )
+    VERBATIM
+    )
   add_custom_target(ExternalTarget ALL DEPENDS ${testf_BINARY_DIR}/ExternalProject)
 
   # Test module output directory if available.
