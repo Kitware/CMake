@@ -25,12 +25,18 @@ struct cmGeneratorExpressionDAGChecker
                                   const GeneratorExpressionContent *content,
                                   cmGeneratorExpressionDAGChecker *parent);
 
-  bool check() const;
+  enum Result {
+    DAG,
+    SELF_REFERENCE,
+    CYCLIC_REFERENCE
+  };
+
+  Result check() const;
 
   void reportError(cmGeneratorExpressionContext *context,
                    const std::string &expr);
 private:
-  bool isDAG() const;
+  Result checkGraph() const;
 
 private:
   const cmGeneratorExpressionDAGChecker * const Parent;
@@ -38,7 +44,7 @@ private:
   const std::string Property;
   const GeneratorExpressionContent * const Content;
   const cmListFileBacktrace Backtrace;
-  bool IsDAG;
+  Result CheckResult;
 };
 
 #endif
