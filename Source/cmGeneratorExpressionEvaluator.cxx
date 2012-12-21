@@ -381,10 +381,16 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                content,
                                                dagCheckerParent);
 
-    if (!dagChecker.check())
+    switch (dagChecker.check())
       {
+    case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.reportError(context, content->GetOriginalExpression());
       return std::string();
+    case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+      // No error. We just skip cyclic references.
+      return std::string();
+    case cmGeneratorExpressionDAGChecker::DAG:
+      break;
       }
 
     const char *prop = target->GetProperty(propertyName.c_str());
