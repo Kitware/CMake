@@ -98,6 +98,14 @@
 #elif defined(__SYSC_ZARCH__)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
 
+/* Aarch64 */
+#elif defined(__aarch64__)
+# if !defined(__AARCH64EB__)
+#  define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_LITTLE
+# else
+#  define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
+# endif
+
 /* Unknown CPU */
 #else
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID 0
