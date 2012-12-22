@@ -953,7 +953,7 @@ int cmake::AddCMakePaths()
   cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
-#if __APPLE__
+#ifdef __APPLE__
   // on the apple this might be the gui bundle
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
