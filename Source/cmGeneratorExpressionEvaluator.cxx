@@ -553,13 +553,13 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
 {
   if (identifier == "0")
     return &zeroNode;
-  if (identifier == "1")
+  else if (identifier == "1")
     return &oneNode;
-  if (identifier == "AND")
+  else if (identifier == "AND")
     return &andNode;
-  if (identifier == "OR")
+  else if (identifier == "OR")
     return &orNode;
-  if (identifier == "NOT")
+  else if (identifier == "NOT")
     return &notNode;
   else if (identifier == "CONFIGURATION")
     return &configurationNode;
