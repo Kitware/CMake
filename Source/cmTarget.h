@@ -404,6 +404,11 @@ public:
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 
+  bool GetMappedConfig(std::string const& desired_config,
+                       const char** loc,
+                       const char** imp,
+                       std::string& suffix);
+
   // Define the properties
   static void DefineProperties(cmake *cm);
 

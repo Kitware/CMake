@@ -265,8 +265,24 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
       }
 
-    return cmsysString_strcasecmp(parameters.begin()->c_str(),
-                                  context->Config) == 0 ? "1" : "0";
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(),
+                                  context->Config) == 0)
+      {
+      return "1";
+      }
+
+    if (context->CurrentTarget
+        && context->CurrentTarget->IsImported())
+      {
+      const char* loc = 0;
+      const char* imp = 0;
+      std::string suffix;
+      return context->CurrentTarget->GetMappedConfig(context->Config,
+                                                  &loc,
+                                                  &imp,
+                                                  suffix) ? "1" : "0";
+      }
+    return "0";
   }
 } configurationTestNode;
 
