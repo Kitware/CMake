@@ -247,7 +247,8 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
   if(cmTarget::LinkInterface const* iface =
                                 dependee->GetLinkInterface(config))
     {
-    for(std::vector<std::string>::const_iterator lib = iface->Libraries.begin();
+    for(std::vector<std::string>::const_iterator
+        lib = iface->Libraries.begin();
         lib != iface->Libraries.end(); ++lib)
       {
       // Don't emit the same library twice for this target.
