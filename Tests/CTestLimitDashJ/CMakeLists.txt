@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(LimitDashJ NONE)
+project(CTestLimitDashJ NONE)
 
 # This file demonstrates http://public.kitware.com/Bug/view.php?id=12904
 # when configured with CMake 2.8.10.2 and earlier, and when running
