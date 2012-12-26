@@ -2535,7 +2535,6 @@ void cmTarget::InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
 //----------------------------------------------------------------------------
 std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 {
-  std::set<std::string> fromTll;
   std::vector<std::string> includes;
   std::set<std::string> uniqueIncludes;
   cmListFileBacktrace lfbt;
