@@ -430,6 +430,8 @@ public:
       If no macro should be defined null is returned.  */
   const char* GetExportMacro();
 
+  std::string GetCompileDefinitions(const char *config = 0);
+
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
   // when source file properties are changed and we do not have enough
