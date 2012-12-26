@@ -48,7 +48,11 @@ private:
                        bool linking);
   void AddTargetDepend(int depender_index, cmTarget* dependee, bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
-
+  void AddInterfaceDepends(int depender_index, const char* dependee_name,
+                           bool linking, std::set<cmStdString> &emitted);
+  void AddInterfaceDepends(int depender_index, cmTarget* dependee,
+                           const char *config,
+                           std::set<cmStdString> &emitted);
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;
   bool NoCycles;
