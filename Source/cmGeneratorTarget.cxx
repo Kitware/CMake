@@ -254,32 +254,3 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
 {
   return this->Target->GetIncludeDirectories(config);
 }
-
-//----------------------------------------------------------------------------
-std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
-{
-  std::string defPropName = "COMPILE_DEFINITIONS";
-  if (config)
-    {
-    defPropName += "_" + cmSystemTools::UpperCase(config);
-    }
-
-  const char *prop = this->Target->GetProperty(defPropName.c_str());
-
-  if (!prop)
-    {
-    return "";
-    }
-
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
-
-  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                             this->GetName(),
-                                             defPropName, 0, 0);
-  return ge.Parse(prop)->Evaluate(this->Makefile,
-                                 config,
-                                 false,
-                                 this->Target,
-                                 &dagChecker);
-}
