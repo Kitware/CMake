@@ -39,6 +39,7 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 //----------------------------------------------------------------------------
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
+  std::vector<cmTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
@@ -48,20 +49,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     {
     expectedTargets += sep + this->Namespace + (*tei)->Target->GetName();
     sep = " ";
-    }
-
-  this->GenerateExpectedTargetsCode(os, expectedTargets);
-  }
-
-  // Create all the imported targets.
-  for(std::vector<cmTargetExport*>::const_iterator
-        tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
-      tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
-    {
     cmTargetExport const* te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
       {
-      this->GenerateImportTargetCode(os, te->Target);
+      allTargets.push_back(te->Target);
       }
     else
       {
@@ -73,6 +64,18 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       cmSystemTools::Error(e.str().c_str());
       return false;
       }
+    }
+
+  this->GenerateExpectedTargetsCode(os, expectedTargets);
+  }
+
+  // Create all the imported targets.
+  for(std::vector<cmTarget*>::const_iterator
+        tei = allTargets.begin();
+      tei != allTargets.end(); ++tei)
+    {
+    cmTarget* te = *tei;
+    this->GenerateImportTargetCode(os, te);
     }
 
   // Now load per-configuration properties for them.
