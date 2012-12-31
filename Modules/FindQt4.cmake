@@ -942,12 +942,27 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ############################################
 
 
+  macro(_qt4_add_target_depends _QT_MODULE)
+    if (TARGET Qt4::${_QT_MODULE})
+      foreach(_DEPEND ${ARGN})
+        if (NOT TARGET Qt4::Qt${_DEPEND})
+          message(FATAL_ERROR "_qt4_add_target_depends invoked with invalid arguments")
+        endif()
+        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+          IMPORTED_LINK_INTERFACE_LIBRARIES
+          "Qt4::Qt${_DEPEND}"
+        )
+      endforeach()
+    endif()
+  endmacro()
+
   # Set QT_xyz_LIBRARY variable and add
   # library include path to QT_INCLUDES
   _QT4_ADJUST_LIB_VARS(QtCore)
 
   foreach(QT_MODULE ${QT_MODULES})
     _QT4_ADJUST_LIB_VARS(${QT_MODULE})
+    _qt4_add_target_depends(${QT_MODULE} Core)
   endforeach()
 
   _QT4_ADJUST_LIB_VARS(QtAssistant)
@@ -962,6 +977,19 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     _QT4_ADJUST_LIB_VARS(QAxContainer)
   endif()
 
+  # Only public dependencies are listed here.
+  # Eg, QtDBus links to QtXml, but users of QtDBus do not need to
+  # link to QtXml because QtDBus only uses it internally, not in public
+  # headers.
+  # Everything depends on QtCore, but that is covered above already
+  _qt4_add_target_depends(Qt3Support Sql Gui Network)
+  _qt4_add_target_depends(QtDeclarative Script Gui)
+  _qt4_add_target_depends(QtDesigner Gui)
+  _qt4_add_target_depends(QtHelp Gui)
+  _qt4_add_target_depends(QtMultimedia Gui)
+  _qt4_add_target_depends(QtOpenGL Gui)
+  _qt4_add_target_depends(QtSvg Gui)
+  _qt4_add_target_depends(QtWebKit Gui Network)
 
   #######################################
   #
