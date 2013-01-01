@@ -1930,6 +1930,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
 
   ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
+  ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
