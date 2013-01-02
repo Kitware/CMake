@@ -942,19 +942,28 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ############################################
 
 
-  macro(_qt4_add_target_depends _QT_MODULE)
+  macro(_qt4_add_target_depends_internal _QT_MODULE _PROPERTY)
     if (TARGET Qt4::${_QT_MODULE})
       foreach(_DEPEND ${ARGN})
         if (NOT TARGET Qt4::Qt${_DEPEND})
           message(FATAL_ERROR "_qt4_add_target_depends invoked with invalid arguments")
         endif()
         set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
-          IMPORTED_LINK_INTERFACE_LIBRARIES
+          ${_PROPERTY}
           "Qt4::Qt${_DEPEND}"
         )
       endforeach()
     endif()
   endmacro()
+
+  macro(_qt4_add_target_depends _QT_MODULE)
+    _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_INTERFACE_LIBRARIES ${ARGN})
+  endmacro()
+
+  macro(_qt4_add_target_private_depends _QT_MODULE)
+    _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_DEPENDENT_LIBRARIES ${ARGN})
+  endmacro()
+
 
   # Set QT_xyz_LIBRARY variable and add
   # library include path to QT_INCLUDES
@@ -990,6 +999,24 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   _qt4_add_target_depends(QtOpenGL Gui)
   _qt4_add_target_depends(QtSvg Gui)
   _qt4_add_target_depends(QtWebKit Gui Network)
+
+  _qt4_add_target_private_depends(Qt3Support Xml)
+  _qt4_add_target_private_depends(QtSvg Xml)
+  _qt4_add_target_private_depends(QtDBus Xml)
+  _qt4_add_target_private_depends(QtUiTools Xml Gui)
+  _qt4_add_target_private_depends(QtHelp Sql Xml Network)
+  _qt4_add_target_private_depends(QtXmlPatterns Network)
+  _qt4_add_target_private_depends(QtScriptTools Gui)
+  _qt4_add_target_private_depends(QtWebKit XmlPatterns)
+  _qt4_add_target_private_depends(QtDeclarative XmlPatterns Svg Sql Gui)
+  _qt4_add_target_private_depends(QtMultimedia Gui)
+  _qt4_add_target_private_depends(QtOpenGL Gui)
+  _qt4_add_target_private_depends(QAxServer Gui)
+  _qt4_add_target_private_depends(QAxContainer Gui)
+  _qt4_add_target_private_depends(phonon Gui)
+  if(QT_QTDBUS_FOUND)
+    _qt4_add_target_private_depends(phonon DBus)
+  endif()
 
   #######################################
   #
