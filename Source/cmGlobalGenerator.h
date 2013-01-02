@@ -20,9 +20,11 @@
 #include "cmSystemTools.h" // for cmSystemTools::OutputOption
 #include "cmExportSetMap.h" // For cmExportSetMap
 #include "cmGeneratorTarget.h"
+#include "cmGeneratorExpression.h"
 
 class cmake;
 class cmGeneratorTarget;
+class cmGeneratorExpressionEvaluationFile;
 class cmMakefile;
 class cmLocalGenerator;
 class cmExternalMakefileProjectGenerator;
@@ -278,6 +280,14 @@ public:
 
   static std::string EscapeJSON(const std::string& s);
 
+  void AddEvaluationFile(const std::string &inputFile,
+                  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputName,
+                  cmMakefile *makefile,
+                  cmsys::auto_ptr<cmCompiledGeneratorExpression> condition,
+                  bool inputIsContent);
+
+  void ProcessEvaluationFiles();
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
@@ -337,6 +347,7 @@ protected:
   // All targets in the entire project.
   std::map<cmStdString,cmTarget *> TotalTargets;
   std::map<cmStdString,cmTarget *> ImportedTargets;
+  std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   virtual const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();
