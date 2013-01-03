@@ -1,17 +1,16 @@
 
 #include <QApplication>
+#include <QWidget>
 
-#include <QDeclarativeView>
-
-#include <QUrl>
+#include <QString>
 
 int main(int argc, char **argv)
 {
   QApplication app(argc, argv);
 
-  QDeclarativeView v;
-  v.setSource(QUrl("http://www.example.com"));
-  v.show();
+  QWidget w;
+  w.setWindowTitle(QString::fromLatin1("SomeTitle"));
+  w.show();
 
   return 0;
 }
