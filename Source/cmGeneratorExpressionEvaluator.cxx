@@ -18,6 +18,8 @@
 
 #include <cmsys/String.h>
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x510
 static
@@ -291,6 +293,17 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     cmTarget* target = context->Target;
     std::string propertyName = *parameters.begin();
+
+    if (!target && parameters.size() == 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:prop> may only be used with targets.  It may not "
+          "be used with add_custom_command.  Specify the target to read a "
+          "property from using the $<TARGET_PROPERTY:tgt,prop> signature "
+          "instead.");
+      return std::string();
+      }
+
     if (parameters.size() == 2)
       {
       if (parameters.begin()->empty() && parameters[1].empty())
@@ -350,6 +363,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                     "Property name not supported.");
       return std::string();
       }
+
+    assert(target);
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
                                                target->GetName(),
