@@ -45,3 +45,10 @@ set_property(TARGET TargetIncludeDirectories
   APPEND PROPERTY INCLUDE_DIRECTORIES
   "$<TARGET_PROPERTY:somelib::withcolons,INTERFACE_INCLUDE_DIRECTORIES>"
 )
+
+add_custom_target(test_custom_target
+        "some_bogus_custom_tool"
+        $<TARGET_PROPERTY:TargetIncludeDirectories,INCLUDE_DIRECTORIES>
+        $<TARGET_PROPERTY:TargetIncludeDirectories,COMPILE_DEFINITIONS>
+        WORKING_DIRECTORY
+        "${CMAKE_CURRENT_SOURCE_DIR}")
