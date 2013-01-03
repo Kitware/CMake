@@ -7,5 +7,5 @@ int DepB::foo()
 {
   DepA a;
 
-  return 0;
+  return a.foo();
 }
