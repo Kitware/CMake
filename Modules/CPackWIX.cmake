@@ -49,6 +49,32 @@
 # by the WiX Generator in case CPACK_RESOURCE_FILE_LICENSE
 # is in an unsupported format or the .txt -> .rtf
 # conversion does not work as expected.
+#
+##end
+#
+##variable
+# CPACK_WIX_PRODUCT_ICON - The Icon shown next to the program name in Add/Remove programs.
+#
+# If set, this icon is used in place of the default icon.
+#
+##end
+#
+##variable
+# CPACK_WIX_UI_BANNER - The bitmap will appear at the top of all installer pages other than the welcome and completion dialogs.
+#
+# If set, this image will replace the default banner image.
+#
+# This image must be 493 by 58 pixels.
+#
+##end
+#
+##variable
+# CPACK_WIX_UI_DIALOG - Background bitmap used on the welcome and completion dialogs.
+#
+# If this variable is set, the installer will replace the default dialog image.
+#
+# This image must be 493 by 312 pixels.
+#
 ##end
 
 #=============================================================================
