@@ -1959,6 +1959,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
 
+  add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
+    --output-on-failure -C "\${CTestTest_CONFIG}")
+
   add_test(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
   set_tests_properties(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")
   set_tests_properties(CTestTestPrintLabels PROPERTIES PASS_REGULAR_EXPRESSION
