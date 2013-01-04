@@ -102,9 +102,16 @@ protected:
   void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
                                    const ImportPropertyMap &properties);
 
+
+  enum FreeTargetsReplace {
+    ReplaceFreeTargets,
+    NoReplaceFreeTargets
+  };
+
   void ResolveTargetsInGeneratorExpressions(std::string &input,
-                                    cmTarget* target,
-                                    std::vector<std::string> &missingTargets);
+                          cmTarget* target,
+                          std::vector<std::string> &missingTargets,
+                          FreeTargetsReplace replace = NoReplaceFreeTargets);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
@@ -132,6 +139,9 @@ private:
   bool AddTargetNamespace(std::string &input, cmTarget* target,
                           std::vector<std::string> &missingTargets);
 
+  void ResolveTargetsInGeneratorExpression(std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets);
 };
 
 #endif
