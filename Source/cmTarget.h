@@ -258,7 +258,9 @@ public:
     // Needed only for OLD behavior of CMP0003.
     std::vector<std::string> WrongConfigLibraries;
 
-    LinkInterface(): Multiplicity(0) {}
+    bool ImplementationIsInterface;
+
+    LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
   };
 
   /** Get the link interface for the given configuration.  Returns 0

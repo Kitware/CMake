@@ -77,3 +77,13 @@ assert_property(targetA LINK_INTERFACE_LIBRARIES "")
 add_library(depIfaceOnly SHARED EXCLUDE_FROM_ALL depIfaceOnly.cpp)
 generate_export_header(depIfaceOnly)
 set_property(TARGET depB APPEND PROPERTY LINK_INTERFACE_LIBRARIES depIfaceOnly)
+
+add_library(depD SHARED depD.cpp)
+generate_export_header(depD)
+set_property(TARGET depD APPEND PROPERTY
+  LINK_INTERFACE_LIBRARIES
+    $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:depA>
+)
+
+add_executable(targetB targetB.cpp)
+target_link_libraries(targetB depD)

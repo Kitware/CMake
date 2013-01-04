@@ -4714,16 +4714,30 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   {
   std::string linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
   linkProp += suffix;
-  if(const char* config_libs = this->GetProperty(linkProp.c_str()))
+
+  const char *propertyLibs = this->GetProperty(linkProp.c_str());
+
+  if(!propertyLibs)
     {
-    cmSystemTools::ExpandListArgument(config_libs,
-                                      info.LinkInterface.Libraries);
+    linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
+    propertyLibs = this->GetProperty(linkProp.c_str());
     }
-  else if(const char* libs =
-          this->GetProperty("IMPORTED_LINK_INTERFACE_LIBRARIES"))
+  if(propertyLibs)
     {
-    cmSystemTools::ExpandListArgument(libs,
-                                      info.LinkInterface.Libraries);
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        linkProp, 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(propertyLibs)
+                                       ->Evaluate(this->Makefile,
+                                                  desired_config.c_str(),
+                                                  false,
+                                                  headTarget,
+                                                  this,
+                                                  &dagChecker),
+                                    info.LinkInterface.Libraries);
     }
   }
 
@@ -4837,18 +4851,20 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
   // An explicit list of interface libraries may be set for shared
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
+  std::string linkIfaceProp;
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->IsExecutableWithExports())
     {
     // Lookup the per-configuration property.
-    std::string propName = "LINK_INTERFACE_LIBRARIES";
-    propName += suffix;
-    explicitLibraries = this->GetProperty(propName.c_str());
+    linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
+    linkIfaceProp += suffix;
+    explicitLibraries = this->GetProperty(linkIfaceProp.c_str());
 
     // If not set, try the generic property.
     if(!explicitLibraries)
       {
-      explicitLibraries = this->GetProperty("LINK_INTERFACE_LIBRARIES");
+      linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
+      explicitLibraries = this->GetProperty(linkIfaceProp.c_str());
       }
     }
 
@@ -4866,7 +4882,16 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    cmSystemTools::ExpandListArgument(explicitLibraries, iface.Libraries);
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt, this->GetName(),
+                                               linkIfaceProp, 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(explicitLibraries)->Evaluate(
+                                        this->Makefile,
+                                        config,
+                                        false,
+                                        headTarget,
+                                        this, &dagChecker), iface.Libraries);
 
     if(this->GetType() == cmTarget::SHARED_LIBRARY)
       {
@@ -4909,6 +4934,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     // The link implementation is the default link interface.
     LinkImplementation const* impl = this->GetLinkImplementation(config,
                                                               headTarget);
+    iface.ImplementationIsInterface = true;
     iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     if(this->GetType() == cmTarget::STATIC_LIBRARY)
