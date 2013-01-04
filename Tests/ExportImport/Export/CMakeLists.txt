@@ -158,6 +158,36 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<INSTALL_INTERFACE:InstallOnly_DEFINE>
 )
 
+include(GenerateExportHeader)
+
+add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
+generate_export_header(testSharedLibRequired)
+set_property(TARGET testSharedLibRequired APPEND PROPERTY
+  INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
+)
+set_property(TARGET testSharedLibRequired APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
+                                "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
+set_property(TARGET testSharedLibDepends APPEND PROPERTY
+  INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
+)
+generate_export_header(testSharedLibDepends)
+
+set_property(TARGET testSharedLibDepends APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:testSharedLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
+)
+set_property(TARGET testSharedLibDepends APPEND PROPERTY
+  LINK_INTERFACE_LIBRARIES
+    $<1:$<TARGET_NAME:testSharedLibRequired>>
+)
+
+# LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
+target_link_libraries(testSharedLibDepends LINK_PRIVATE testSharedLibRequired)
+
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
                 testLibIncludeRequired2
@@ -165,10 +195,11 @@ install(TARGETS testLibRequired
                 testLibIncludeRequired4
                 testLibIncludeRequired5
                 testLibIncludeRequired6
+                testSharedLibRequired
         EXPORT RequiredExp DESTINATION lib )
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredConfig.cmake DESTINATION lib/cmake/testLibRequired)
 
-install(TARGETS testLibDepends EXPORT DependsExp DESTINATION lib )
+install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
 install(EXPORT DependsExp FILE testLibDependsConfig.cmake DESTINATION lib/cmake/testLibDepends)
 
 

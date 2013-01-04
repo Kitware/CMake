@@ -359,9 +359,47 @@ cmExportFileGenerator
     {
     return;
     }
-  this->SetImportLinkProperty(suffix, target,
-                              "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                              iface->Libraries, properties, missingTargets);
+
+  if (iface->ImplementationIsInterface)
+    {
+    this->SetImportLinkProperty(suffix, target,
+                                "IMPORTED_LINK_INTERFACE_LIBRARIES",
+                                iface->Libraries, properties, missingTargets);
+    return;
+    }
+
+  const char *propContent;
+
+  if (const char *prop_suffixed = target->GetProperty(
+                    ("LINK_INTERFACE_LIBRARIES" + suffix).c_str()))
+    {
+    propContent = prop_suffixed;
+    }
+  else if (const char *prop = target->GetProperty(
+                    "LINK_INTERFACE_LIBRARIES"))
+    {
+    propContent = prop;
+    }
+  else
+    {
+    return;
+    }
+
+  if (!*propContent)
+    {
+    properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = "";
+    return;
+    }
+
+  std::string prepro = cmGeneratorExpression::Preprocess(propContent,
+                                                         preprocessRule);
+  if (!prepro.empty())
+    {
+    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+                                               missingTargets,
+                                               ReplaceFreeTargets);
+    properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = prepro;
+    }
 }
 
 //----------------------------------------------------------------------------
