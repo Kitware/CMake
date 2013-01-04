@@ -244,8 +244,9 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                                  const char *config,
                                                std::set<cmStdString> &emitted)
 {
+  cmTarget* depender = this->Targets[depender_index];
   if(cmTarget::LinkInterface const* iface =
-                                dependee->GetLinkInterface(config))
+                                dependee->GetLinkInterface(config, depender))
     {
     for(std::vector<std::string>::const_iterator
         lib = iface->Libraries.begin();
