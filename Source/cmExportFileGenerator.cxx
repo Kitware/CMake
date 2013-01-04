@@ -219,8 +219,53 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
 }
 
 //----------------------------------------------------------------------------
+static bool isGeneratorExpression(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
+                                    std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets,
+                                    FreeTargetsReplace replace)
+{
+  if (replace == NoReplaceFreeTargets)
+    {
+    this->ResolveTargetsInGeneratorExpression(input, target, missingTargets);
+    return;
+    }
+  std::vector<std::string> parts;
+  cmGeneratorExpression::Split(input, parts);
+
+  std::string sep;
+  input = "";
+  for(std::vector<std::string>::iterator li = parts.begin();
+      li != parts.end(); ++li)
+    {
+    if (!isGeneratorExpression(input))
+      {
+      this->AddTargetNamespace(*li, target, missingTargets);
+      }
+    else
+      {
+      this->ResolveTargetsInGeneratorExpression(
+                                    *li,
+                                    target,
+                                    missingTargets);
+      }
+    input += sep + *li;
+    sep = ";";
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
                                     std::string &input,
                                     cmTarget* target,
                                     std::vector<std::string> &missingTargets)
