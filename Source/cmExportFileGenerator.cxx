@@ -347,6 +347,26 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
+::SetImportLinkInterface(const char* config, std::string const& suffix,
+                    cmGeneratorExpression::PreprocessContext preprocessRule,
+                    cmTarget* target, ImportPropertyMap& properties,
+                    std::vector<std::string>& missingTargets)
+{
+  // Add the transitive link dependencies for this configuration.
+  cmTarget::LinkInterface const* iface = target->GetLinkInterface(config,
+                                                                  target);
+  if (!iface)
+    {
+    return;
+    }
+  this->SetImportLinkProperty(suffix, target,
+                              "IMPORTED_LINK_INTERFACE_LIBRARIES",
+                              iface->Libraries, properties, missingTargets);
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator
 ::SetImportDetailProperties(const char* config, std::string const& suffix,
                             cmTarget* target, ImportPropertyMap& properties,
                             std::vector<std::string>& missingTargets
@@ -388,9 +408,7 @@ cmExportFileGenerator
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
                                 iface->Languages, properties, missingTargets);
-    this->SetImportLinkProperty(suffix, target,
-                                "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                                iface->Libraries, properties, missingTargets);
+
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties, missingTargets);

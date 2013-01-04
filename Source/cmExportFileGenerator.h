@@ -102,6 +102,10 @@ protected:
   void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
                                    const ImportPropertyMap &properties);
 
+  void SetImportLinkInterface(const char* config, std::string const& suffix,
+                    cmGeneratorExpression::PreprocessContext preprocessRule,
+                    cmTarget* target, ImportPropertyMap& properties,
+                    std::vector<std::string>& missingTargets);
 
   enum FreeTargetsReplace {
     ReplaceFreeTargets,
