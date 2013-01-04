@@ -720,6 +720,28 @@ void cmTarget::DefineProperties(cmake *cm)
      "for the named configuration.");
 
   cm->DefineProperty
+    ("INTERFACE_INCLUDE_DIRECTORIES", cmProperty::TARGET,
+     "List of public include directories for a library.",
+     "Targets may populate this property to publish the include directories "
+     "required to compile against the headers for the target.  Consuming "
+     "targets can add entries to their own INCLUDE_DIRECTORIES property such "
+     "as $<TARGET_PROPERTY:foo,INTERFACE_INCLUDE_DIRECTORIES> to use the "
+     "include directories specified in the interface of 'foo'."
+     "\n"
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+
+  cm->DefineProperty
+    ("INTERFACE_COMPILE_DEFINITIONS", cmProperty::TARGET,
+     "List of public compile definitions for a library.",
+     "Targets may populate this property to publish the compile definitions "
+     "required to compile against the headers for the target.  Consuming "
+     "targets can add entries to their own COMPILE_DEFINITIONS property such "
+     "as $<TARGET_PROPERTY:foo,INTERFACE_COMPILE_DEFINITIONS> to use the "
+     "compile definitions specified in the interface of 'foo'."
+     "\n"
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+
+  cm->DefineProperty
     ("LINK_INTERFACE_MULTIPLICITY", cmProperty::TARGET,
      "Repetition count for STATIC libraries with cyclic dependencies.",
      "When linking to a STATIC library target with cyclic dependencies the "
@@ -4365,6 +4387,128 @@ cmTarget::GetImportInfo(const char* config)
   return &i->second;
 }
 
+bool cmTarget::GetMappedConfig(std::string const& desired_config,
+                               const char** loc,
+                               const char** imp,
+                               std::string& suffix)
+{
+  // Track the configuration-specific property suffix.
+  suffix = "_";
+  suffix += desired_config;
+
+  std::vector<std::string> mappedConfigs;
+  {
+  std::string mapProp = "MAP_IMPORTED_CONFIG_";
+  mapProp += desired_config;
+  if(const char* mapValue = this->GetProperty(mapProp.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(mapValue, mappedConfigs);
+    }
+  }
+
+  // If we needed to find one of the mapped configurations but did not
+  // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
+  // library or an executable with exports.
+  bool allowImp = this->HasImportLibrary();
+
+  // If a mapping was found, check its configurations.
+  for(std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
+      !*loc && !*imp && mci != mappedConfigs.end(); ++mci)
+    {
+    // Look for this configuration.
+    std::string mcUpper = cmSystemTools::UpperCase(mci->c_str());
+    std::string locProp = "IMPORTED_LOCATION_";
+    locProp += mcUpper;
+    *loc = this->GetProperty(locProp.c_str());
+    if(allowImp)
+      {
+      std::string impProp = "IMPORTED_IMPLIB_";
+      impProp += mcUpper;
+      *imp = this->GetProperty(impProp.c_str());
+      }
+
+    // If it was found, use it for all properties below.
+    if(*loc || *imp)
+      {
+      suffix = "_";
+      suffix += mcUpper;
+      }
+    }
+
+  // If we needed to find one of the mapped configurations but did not
+  // then the target is not found.  The project does not want any
+  // other configuration.
+  if(!mappedConfigs.empty() && !*loc && !*imp)
+    {
+    return false;
+    }
+
+  // If we have not yet found it then there are no mapped
+  // configurations.  Look for an exact-match.
+  if(!*loc && !*imp)
+    {
+    std::string locProp = "IMPORTED_LOCATION";
+    locProp += suffix;
+    *loc = this->GetProperty(locProp.c_str());
+    if(allowImp)
+      {
+      std::string impProp = "IMPORTED_IMPLIB";
+      impProp += suffix;
+      *imp = this->GetProperty(impProp.c_str());
+      }
+    }
+
+  // If we have not yet found it then there are no mapped
+  // configurations and no exact match.
+  if(!*loc && !*imp)
+    {
+    // The suffix computed above is not useful.
+    suffix = "";
+
+    // Look for a configuration-less location.  This may be set by
+    // manually-written code.
+    *loc = this->GetProperty("IMPORTED_LOCATION");
+    if(allowImp)
+      {
+      *imp = this->GetProperty("IMPORTED_IMPLIB");
+      }
+    }
+
+  // If we have not yet found it then the project is willing to try
+  // any available configuration.
+  if(!*loc && !*imp)
+    {
+    std::vector<std::string> availableConfigs;
+    if(const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS"))
+      {
+      cmSystemTools::ExpandListArgument(iconfigs, availableConfigs);
+      }
+    for(std::vector<std::string>::const_iterator
+          aci = availableConfigs.begin();
+        !*loc && !*imp && aci != availableConfigs.end(); ++aci)
+      {
+      suffix = "_";
+      suffix += cmSystemTools::UpperCase(*aci);
+      std::string locProp = "IMPORTED_LOCATION";
+      locProp += suffix;
+      *loc = this->GetProperty(locProp.c_str());
+      if(allowImp)
+        {
+        std::string impProp = "IMPORTED_IMPLIB";
+        impProp += suffix;
+        *imp = this->GetProperty(impProp.c_str());
+        }
+      }
+    }
+  // If we have not yet found it then the target is not available.
+  if(!*loc && !*imp)
+    {
+    return false;
+    }
+
+  return true;
+}
+
 //----------------------------------------------------------------------------
 void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                  ImportInfo& info)
@@ -4376,120 +4520,10 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   // Initialize members.
   info.NoSOName = false;
 
-  // Track the configuration-specific property suffix.
-  std::string suffix = "_";
-  suffix += desired_config;
-
-  // On a DLL platform there may be only IMPORTED_IMPLIB for a shared
-  // library or an executable with exports.
-  bool allowImp = this->HasImportLibrary();
-
-  // Look for a mapping from the current project's configuration to
-  // the imported project's configuration.
-  std::vector<std::string> mappedConfigs;
-  {
-  std::string mapProp = "MAP_IMPORTED_CONFIG_";
-  mapProp += desired_config;
-  if(const char* mapValue = this->GetProperty(mapProp.c_str()))
-    {
-    cmSystemTools::ExpandListArgument(mapValue, mappedConfigs);
-    }
-  }
-
-  // If a mapping was found, check its configurations.
   const char* loc = 0;
   const char* imp = 0;
-  for(std::vector<std::string>::const_iterator mci = mappedConfigs.begin();
-      !loc && !imp && mci != mappedConfigs.end(); ++mci)
-    {
-    // Look for this configuration.
-    std::string mcUpper = cmSystemTools::UpperCase(mci->c_str());
-    std::string locProp = "IMPORTED_LOCATION_";
-    locProp += mcUpper;
-    loc = this->GetProperty(locProp.c_str());
-    if(allowImp)
-      {
-      std::string impProp = "IMPORTED_IMPLIB_";
-      impProp += mcUpper;
-      imp = this->GetProperty(impProp.c_str());
-      }
-
-    // If it was found, use it for all properties below.
-    if(loc || imp)
-      {
-      suffix = "_";
-      suffix += mcUpper;
-      }
-    }
-
-  // If we needed to find one of the mapped configurations but did not
-  // then the target is not found.  The project does not want any
-  // other configuration.
-  if(!mappedConfigs.empty() && !loc && !imp)
-    {
-    return;
-    }
-
-  // If we have not yet found it then there are no mapped
-  // configurations.  Look for an exact-match.
-  if(!loc && !imp)
-    {
-    std::string locProp = "IMPORTED_LOCATION";
-    locProp += suffix;
-    loc = this->GetProperty(locProp.c_str());
-    if(allowImp)
-      {
-      std::string impProp = "IMPORTED_IMPLIB";
-      impProp += suffix;
-      imp = this->GetProperty(impProp.c_str());
-      }
-    }
-
-  // If we have not yet found it then there are no mapped
-  // configurations and no exact match.
-  if(!loc && !imp)
-    {
-    // The suffix computed above is not useful.
-    suffix = "";
-
-    // Look for a configuration-less location.  This may be set by
-    // manually-written code.
-    loc = this->GetProperty("IMPORTED_LOCATION");
-    if(allowImp)
-      {
-      imp = this->GetProperty("IMPORTED_IMPLIB");
-      }
-    }
-
-  // If we have not yet found it then the project is willing to try
-  // any available configuration.
-  if(!loc && !imp)
-    {
-    std::vector<std::string> availableConfigs;
-    if(const char* iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS"))
-      {
-      cmSystemTools::ExpandListArgument(iconfigs, availableConfigs);
-      }
-    for(std::vector<std::string>::const_iterator
-          aci = availableConfigs.begin();
-        !loc && !imp && aci != availableConfigs.end(); ++aci)
-      {
-      suffix = "_";
-      suffix += cmSystemTools::UpperCase(*aci);
-      std::string locProp = "IMPORTED_LOCATION";
-      locProp += suffix;
-      loc = this->GetProperty(locProp.c_str());
-      if(allowImp)
-        {
-        std::string impProp = "IMPORTED_IMPLIB";
-        impProp += suffix;
-        imp = this->GetProperty(impProp.c_str());
-        }
-      }
-    }
-
-  // If we have not yet found it then the target is not available.
-  if(!loc && !imp)
+  std::string suffix;
+  if (!this->GetMappedConfig(desired_config, &loc, &imp, suffix))
     {
     return;
     }

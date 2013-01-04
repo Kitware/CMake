@@ -22,6 +22,7 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
+  std::vector<cmTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
@@ -31,20 +32,10 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     {
     expectedTargets += sep + this->Namespace + (*tei)->GetName();
     sep = " ";
-    }
-
-  this->GenerateExpectedTargetsCode(os, expectedTargets);
-  }
-
-  // Create all the imported targets.
-  for(std::vector<cmTarget*>::const_iterator
-        tei = this->Exports->begin();
-      tei != this->Exports->end(); ++tei)
-    {
     cmTarget* te = *tei;
     if(this->ExportedTargets.insert(te).second)
       {
-      this->GenerateImportTargetCode(os, te);
+      allTargets.push_back(te);
       }
     else
       {
@@ -57,6 +48,33 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       return false;
       }
     }
+
+  this->GenerateExpectedTargetsCode(os, expectedTargets);
+  }
+
+  std::vector<std::string> missingTargets;
+
+  // Create all the imported targets.
+  for(std::vector<cmTarget*>::const_iterator
+        tei = allTargets.begin();
+      tei != allTargets.end(); ++tei)
+    {
+    cmTarget* te = *tei;
+    this->GenerateImportTargetCode(os, te);
+
+    ImportPropertyMap properties;
+
+    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+
+    this->GenerateInterfaceProperties(te, os, properties);
+    }
+
+  this->GenerateMissingTargetsCheckCode(os, missingTargets);
 
   // Generate import file content for each configuration.
   for(std::vector<std::string>::const_iterator
