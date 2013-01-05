@@ -251,9 +251,9 @@ std::string cmGeneratorExpression::Preprocess(const std::string &input,
     return stripAllGeneratorExpressions(input);
     }
   else if (context == BuildInterface || context == InstallInterface)
-  {
+    {
     return stripExportInterface(input, context);
-  }
+    }
 
   assert(!"cmGeneratorExpression::Preprocess called with invalid args");
   return std::string();
