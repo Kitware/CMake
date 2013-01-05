@@ -143,11 +143,11 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
       }
 
     std::string prepro = cmGeneratorExpression::Preprocess(input,
-                                                              preprocessRule);
+                                                           preprocessRule);
     if (!prepro.empty())
       {
       this->ResolveTargetsInGeneratorExpressions(prepro, target,
-                                                missingTargets);
+                                                 missingTargets);
       properties[outputName] = prepro;
       }
     }
