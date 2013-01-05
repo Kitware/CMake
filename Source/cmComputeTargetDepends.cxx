@@ -200,22 +200,48 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // Get the depender.
   cmTarget* depender = this->Targets[depender_index];
 
-  // Loop over all targets linked directly.
+  // Loop over all targets linked directly in all configs.
+  // We need to make targets depend on the union of all config-specific
+  // dependencies in all targets, because the generated build-systems can't
+  // deal with config-specific dependencies.
   {
-  cmTarget::LinkLibraryVectorType const& tlibs =
-    depender->GetOriginalLinkLibraries();
   std::set<cmStdString> emitted;
+  {
+  std::vector<std::string> tlibs;
+  depender->GetDirectLinkLibraries(0, tlibs, depender);
   // A target should not depend on itself.
   emitted.insert(depender->GetName());
-  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
+  for(std::vector<std::string>::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
     // Don't emit the same library twice for this target.
-    if(emitted.insert(lib->first).second)
+    if(emitted.insert(*lib).second)
       {
-      this->AddTargetDepend(depender_index, lib->first.c_str(), true);
-      this->AddInterfaceDepends(depender_index, lib->first.c_str(),
+      this->AddTargetDepend(depender_index, lib->c_str(), true);
+      this->AddInterfaceDepends(depender_index, lib->c_str(),
                                 true, emitted);
+      }
+    }
+  }
+  std::vector<std::string> configs;
+  depender->GetMakefile()->GetConfigurations(configs);
+  for (std::vector<std::string>::const_iterator it = configs.begin();
+    it != configs.end(); ++it)
+    {
+    std::vector<std::string> tlibs;
+    depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
+    // A target should not depend on itself.
+    emitted.insert(depender->GetName());
+    for(std::vector<std::string>::const_iterator lib = tlibs.begin();
+        lib != tlibs.end(); ++lib)
+      {
+      // Don't emit the same library twice for this target.
+      if(emitted.insert(*lib).second)
+        {
+        this->AddTargetDepend(depender_index, lib->c_str(), true);
+        this->AddInterfaceDepends(depender_index, lib->c_str(),
+                                  true, emitted);
+        }
       }
     }
   }
@@ -244,8 +270,9 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                                  const char *config,
                                                std::set<cmStdString> &emitted)
 {
+  cmTarget* depender = this->Targets[depender_index];
   if(cmTarget::LinkInterface const* iface =
-                                dependee->GetLinkInterface(config))
+                                dependee->GetLinkInterface(config, depender))
     {
     for(std::vector<std::string>::const_iterator
         lib = iface->Libraries.begin();

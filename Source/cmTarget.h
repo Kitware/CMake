@@ -25,11 +25,13 @@ class cmSourceFile;
 class cmGlobalGenerator;
 class cmComputeLinkInformation;
 class cmListFileBacktrace;
+class cmTarget;
 
 struct cmTargetLinkInformationMap:
-  public std::map<cmStdString, cmComputeLinkInformation*>
+  public std::map<std::pair<cmTarget*, cmStdString>, cmComputeLinkInformation*>
 {
-  typedef std::map<cmStdString, cmComputeLinkInformation*> derived;
+  typedef std::map<std::pair<cmTarget*, cmStdString>,
+                   cmComputeLinkInformation*> derived;
   cmTargetLinkInformationMap() {}
   cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
   ~cmTargetLinkInformationMap();
@@ -166,6 +168,9 @@ public:
   return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
+  void GetDirectLinkLibraries(const char *config,
+                              std::vector<std::string> &,
+                              cmTarget *head);
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config);
@@ -258,7 +263,8 @@ public:
 
   /** Get the link interface for the given configuration.  Returns 0
       if the target cannot be linked.  */
-  LinkInterface const* GetLinkInterface(const char* config);
+  LinkInterface const* GetLinkInterface(const char* config,
+                                        cmTarget *headTarget);
 
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
@@ -274,7 +280,8 @@ public:
     // Needed only for OLD behavior of CMP0003.
     std::vector<std::string> WrongConfigLibraries;
   };
-  LinkImplementation const* GetLinkImplementation(const char* config);
+  LinkImplementation const* GetLinkImplementation(const char* config,
+                                                  cmTarget *head);
 
   /** Link information from the transitive closure of the link
       implementation and the interfaces of its dependencies.  */
@@ -286,7 +293,7 @@ public:
     // Languages whose runtime libraries must be linked.
     std::vector<std::string> Languages;
   };
-  LinkClosure const* GetLinkClosure(const char* config);
+  LinkClosure const* GetLinkClosure(const char* config, cmTarget *head);
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
@@ -331,7 +338,7 @@ public:
   bool FindSourceFiles();
 
   ///! Return the preferred linker language for this target
-  const char* GetLinkerLanguage(const char* config = 0);
+  const char* GetLinkerLanguage(const char* config = 0, cmTarget *head = 0);
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
@@ -399,7 +406,8 @@ public:
   std::string GetInstallNameDirForInstallTree(const char* config,
                                               bool for_xcode = false);
 
-  cmComputeLinkInformation* GetLinkInformation(const char* config);
+  cmComputeLinkInformation* GetLinkInformation(const char* config,
+                                               cmTarget *head = 0);
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
@@ -597,22 +605,28 @@ private:
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;
-  ImportInfo const* GetImportInfo(const char* config);
-  void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
+  ImportInfo const* GetImportInfo(const char* config,
+                                        cmTarget *workingTarget);
+  void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
+                                        cmTarget *head);
 
   cmTargetLinkInformationMap LinkInformation;
 
-  bool ComputeLinkInterface(const char* config, LinkInterface& iface);
+  bool ComputeLinkInterface(const char* config, LinkInterface& iface,
+                                        cmTarget *head);
 
   void ComputeLinkImplementation(const char* config,
-                                 LinkImplementation& impl);
-  void ComputeLinkClosure(const char* config, LinkClosure& lc);
+                                 LinkImplementation& impl, cmTarget *head);
+  void ComputeLinkClosure(const char* config, LinkClosure& lc, cmTarget *head);
 
   void ClearLinkMaps();
 
   void MaybeInvalidatePropertyCache(const char* prop);
 
   void ProcessSourceExpression(std::string const& expr);
+
+  std::string GetDebugGeneratorExpressions(const std::string &value,
+                                  cmTarget::LinkLibraryType llt);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.

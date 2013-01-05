@@ -239,10 +239,12 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget* target, const char* config)
+::cmComputeLinkInformation(cmTarget* target, const char* config,
+                           cmTarget *headTarget)
 {
   // Store context information.
   this->Target = target;
+  this->HeadTarget = headTarget;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
@@ -265,7 +267,7 @@ cmComputeLinkInformation
   this->OrderDependentRPath = 0;
 
   // Get the language used for linking this target.
-  this->LinkLanguage = this->Target->GetLinkerLanguage(config);
+  this->LinkLanguage = this->Target->GetLinkerLanguage(config, headTarget);
   if(!this->LinkLanguage)
     {
     // The Compute method will do nothing, so skip the rest of the
@@ -503,7 +505,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config);
+  cmComputeLinkDepends cld(this->Target, this->Config, this->HeadTarget);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -569,7 +571,8 @@ bool cmComputeLinkInformation::Compute()
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
-  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config);
+  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config,
+                                                          this->HeadTarget);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
