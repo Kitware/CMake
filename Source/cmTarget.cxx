@@ -100,23 +100,23 @@ public:
     OptionalLinkInterface(): Exists(false) {}
     bool Exists;
   };
-  typedef std::map<std::pair<cmTarget*, cmStdString>, OptionalLinkInterface>
+  typedef std::map<std::pair<cmTarget*, std::string>, OptionalLinkInterface>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
 
   typedef std::map<cmStdString, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
 
-  typedef std::map<std::pair<cmTarget*, cmStdString>, cmTarget::ImportInfo>
+  typedef std::map<std::pair<cmTarget*, std::string>, cmTarget::ImportInfo>
                                                             ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
   // Cache link implementation computation from each configuration.
-  typedef std::map<std::pair<cmTarget*, cmStdString>,
+  typedef std::map<std::pair<cmTarget*, std::string>,
                    cmTarget::LinkImplementation> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
-  typedef std::map<std::pair<cmTarget*, cmStdString>, cmTarget::LinkClosure>
+  typedef std::map<std::pair<cmTarget*, std::string>, cmTarget::LinkClosure>
                                                           LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
 
@@ -3165,7 +3165,7 @@ const char* cmTarget::GetLinkerLanguage(const char* config, cmTarget *head)
 cmTarget::LinkClosure const* cmTarget::GetLinkClosure(const char* config,
                                                       cmTarget *head)
 {
-  std::pair<cmTarget*, cmStdString> key =
+  std::pair<cmTarget*, std::string> key =
         std::make_pair(head, cmSystemTools::UpperCase(config ? config : ""));
   cmTargetInternals::LinkClosureMapType::iterator
     i = this->Internal->LinkClosureMap.find(key);
@@ -4467,7 +4467,7 @@ cmTarget::GetImportInfo(const char* config, cmTarget *headTarget)
     {
     config_upper = "NOCONFIG";
     }
-  std::pair<cmTarget*, cmStdString> key = std::make_pair(headTarget,
+  std::pair<cmTarget*, std::string> key = std::make_pair(headTarget,
                                                          config_upper);
   typedef cmTargetInternals::ImportInfoMapType ImportInfoMapType;
 
@@ -4798,7 +4798,7 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config,
     }
 
   // Lookup any existing link interface for this configuration.
-  std::pair<cmTarget*, cmStdString> key = std::make_pair(head,
+  std::pair<cmTarget*, std::string> key = std::make_pair(head,
                                 cmSystemTools::UpperCase(config? config : ""));
 
   cmTargetInternals::LinkInterfaceMapType::iterator
@@ -4947,7 +4947,7 @@ cmTarget::GetLinkImplementation(const char* config, cmTarget *head)
     }
 
   // Lookup any existing link implementation for this configuration.
-  std::pair<cmTarget*, cmStdString> key = std::make_pair(head,
+  std::pair<cmTarget*, std::string> key = std::make_pair(head,
                                 cmSystemTools::UpperCase(config? config : ""));
 
   cmTargetInternals::LinkImplMapType::iterator
@@ -5095,9 +5095,9 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
 {
   cmTarget *headTarget = head ? head : this;
   // Lookup any existing information for this configuration.
-  std::pair<cmTarget*, cmStdString> key = std::make_pair(headTarget,
-                                                         config?config:"");
-  std::map<std::pair<cmTarget*, cmStdString>,
+  std::pair<cmTarget*, std::string> key = std::make_pair(headTarget,
+                                  cmSystemTools::UpperCase(config?config:""));
+  std::map<std::pair<cmTarget*, std::string>,
            cmComputeLinkInformation*>::iterator
     i = this->LinkInformation.find(key);
   if(i == this->LinkInformation.end())
@@ -5112,7 +5112,7 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       }
 
     // Store the information for this configuration.
-    std::map<std::pair<cmTarget*, cmStdString>,
+    std::map<std::pair<cmTarget*, std::string>,
              cmComputeLinkInformation*>::value_type
       entry(key, info);
     i = this->LinkInformation.insert(entry).first;
