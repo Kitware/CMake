@@ -4500,22 +4500,49 @@ void cmTarget::AddLinkDependentTargetsForProperties(
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
-                                                     const char *config)
+template<typename PropertyType>
+PropertyType getTypedProperty(cmTarget *tgt, const char *prop,
+                              PropertyType * = 0);
+
+//----------------------------------------------------------------------------
+template<>
+bool getTypedProperty<bool>(cmTarget *tgt, const char *prop, bool *)
 {
-  bool propContent = this->GetPropertyAsBool(p.c_str());
-  const bool explicitlySet = this->GetProperties()
+  return tgt->GetPropertyAsBool(prop);
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+bool consistentProperty(PropertyType lhs, PropertyType rhs);
+
+//----------------------------------------------------------------------------
+template<>
+bool consistentProperty(bool lhs, bool rhs)
+{
+  return lhs == rhs;
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
+                                          const std::string &p,
+                                          const char *config,
+                                          const char *defaultValue,
+                                          PropertyType * = 0)
+{
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p.c_str());
+  const bool explicitlySet = tgt->GetProperties()
                                   .find(p.c_str())
-                                  != this->GetProperties().end();
+                                  != tgt->GetProperties().end();
   std::set<std::string> dependentTargets;
-  this->GetLinkDependentTargetsForProperty(p,
+  tgt->GetLinkDependentTargetsForProperty(p,
                                           dependentTargets);
   const bool impliedByUse =
-          this->IsNullImpliedByLinkLibraries(p);
+          tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
-  cmComputeLinkInformation *info = this->GetLinkInformation(config);
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
   bool propInitialized = explicitlySet;
 
@@ -4537,17 +4564,18 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
     const bool ifaceIsSet = li->Target->GetProperties()
                             .find("INTERFACE_" + p)
                             != li->Target->GetProperties().end();
-    const bool ifacePropContent = li->Target->GetPropertyAsBool(
+    PropertyType ifacePropContent =
+                    getTypedProperty<PropertyType>(li->Target,
                               ("INTERFACE_" + p).c_str());
     if (explicitlySet)
       {
       if (ifaceIsSet)
         {
-        if (propContent != ifacePropContent)
+        if (!consistentProperty(propContent, ifacePropContent))
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
-            << this->GetName() << "\" does\nnot match the "
+            << tgt->GetName() << "\" does\nnot match the "
             "INTERFACE_" << p << " property requirement\nof "
             "dependency \"" << li->Target->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
@@ -4569,13 +4597,13 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
       {
       if (ifaceIsSet)
         {
-        if (propContent != ifacePropContent)
+        if (!consistentProperty(propContent, ifacePropContent))
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
-            << this->GetName() << "\" is\nimplied to be FALSE because it "
-            "was used to determine the link libraries\nalready. The "
-            "INTERFACE_" << p << " property on\ndependency \""
+            << tgt->GetName() << "\" is\nimplied to be " << defaultValue
+            << " because it was used to determine the link libraries\n"
+               "already. The INTERFACE_" << p << " property on\ndependency \""
             << li->Target->GetName() << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
           break;
@@ -4598,13 +4626,13 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
         {
         if (propInitialized)
           {
-          if (propContent != ifacePropContent)
+          if (!consistentProperty(propContent, ifacePropContent))
             {
             cmOStringStream e;
             e << "The INTERFACE_" << p << " property of \""
               << li->Target->GetName() << "\" does\nnot agree with the value "
                 "of " << p << " already determined\nfor \""
-              << this->GetName() << "\".\n";
+              << tgt->GetName() << "\".\n";
             cmSystemTools::Error(e.str().c_str());
             break;
             }
@@ -4628,6 +4656,13 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
       }
     }
   return propContent;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                                     const char *config)
+{
+  return checkInterfacePropertyCompatibility<bool>(this, p, config, "FALSE");
 }
 
 //----------------------------------------------------------------------------
@@ -5417,6 +5452,63 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
   return lib;
 }
 
+template<typename PropertyType>
+PropertyType getLinkInterfaceDependentProperty(cmTarget *tgt,
+                                               const std::string prop,
+                                               const char *config,
+                                               PropertyType * = 0);
+
+template<>
+bool getLinkInterfaceDependentProperty(cmTarget *tgt,
+                                         const std::string prop,
+                                         const char *config, bool *)
+{
+  return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
+                              const char *propName,
+                              std::set<cmStdString> &emitted,
+                              const char *config,
+                              PropertyType * = 0)
+{
+  const char *prop = dependee->GetProperty(propName);
+  if (!prop)
+    {
+    return;
+    }
+
+  std::vector<std::string> props;
+  cmSystemTools::ExpandListArgument(prop, props);
+
+  for(std::vector<std::string>::iterator pi = props.begin();
+      pi != props.end(); ++pi)
+    {
+    if (depender->GetMakefile()->GetCMakeInstance()
+                      ->GetIsPropertyDefined(pi->c_str(),
+                                              cmProperty::TARGET))
+      {
+      cmOStringStream e;
+      e << "Target \"" << dependee->GetName() << "\" has property \""
+        << *pi << "\" listed in its " << propName << " property.  "
+          "This is not allowed.  Only user-defined properties may appear "
+          "listed in the " << propName << " property.";
+      depender->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    if(emitted.insert(*pi).second)
+      {
+      getLinkInterfaceDependentProperty<PropertyType>(depender, *pi, config);
+      if (cmSystemTools::GetErrorOccuredFlag())
+        {
+        return;
+        }
+      }
+    }
+}
+
 //----------------------------------------------------------------------------
 void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                           const char* config)
@@ -5433,38 +5525,13 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       {
       continue;
       }
-    const char *prop = li->Target->GetProperty("COMPATIBLE_INTERFACE_BOOL");
-    if (!prop)
-      {
-      continue;
-      }
 
-    std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(prop, props);
-
-    for(std::vector<std::string>::iterator pi = props.begin();
-        pi != props.end(); ++pi)
+    checkPropertyConsistency<bool>(this, li->Target,
+                                   "COMPATIBLE_INTERFACE_BOOL",
+                                   emitted, config);
+    if (cmSystemTools::GetErrorOccuredFlag())
       {
-      if (this->Makefile->GetCMakeInstance()
-                        ->GetIsPropertyDefined(pi->c_str(),
-                                                cmProperty::TARGET))
-        {
-        cmOStringStream e;
-        e << "Target \"" << li->Target->GetName() << "\" has property \""
-          << *pi << "\" listed in its COMPATIBLE_INTERFACE_BOOL property.  "
-            "This is not allowed.  Only user-defined properties may appear "
-            "listed in the COMPATIBLE_INTERFACE_BOOL property.";
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-        return;
-        }
-      if(emitted.insert(*pi).second)
-        {
-        this->GetLinkInterfaceDependentBoolProperty(*pi, config);
-        if (cmSystemTools::GetErrorOccuredFlag())
-          {
-          return;
-          }
-        }
+      return;
       }
     }
 }
