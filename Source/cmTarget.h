@@ -494,6 +494,9 @@ public:
 
   void AddLinkDependentTargetsForProperties(
           const std::map<cmStdString, cmStdString> &map);
+
+  bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                             const char *config);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.

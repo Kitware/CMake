@@ -4417,6 +4417,134 @@ void cmTarget::AddLinkDependentTargetsForProperties(
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                                     const char *config)
+{
+  bool propContent = this->GetPropertyAsBool(p.c_str());
+  const bool explicitlySet = this->GetProperties()
+                                  .find(p.c_str())
+                                  != this->GetProperties().end();
+  std::set<std::string> dependentTargets;
+  this->GetLinkDependentTargetsForProperty(p,
+                                          dependentTargets);
+  const bool impliedByUse =
+          this->IsNullImpliedByLinkLibraries(p);
+  assert((impliedByUse ^ explicitlySet)
+      || (!impliedByUse && !explicitlySet));
+
+  cmComputeLinkInformation *info = this->GetLinkInformation(config);
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+  bool propInitialized = explicitlySet;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    // An error should be reported if one dependency
+    // has INTERFACE_POSITION_INDEPENDENT_CODE ON and the other
+    // has INTERFACE_POSITION_INDEPENDENT_CODE OFF, or if the
+    // target itself has a POSITION_INDEPENDENT_CODE which disagrees
+    // with a dependency.
+
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    const bool ifaceIsSet = li->Target->GetProperties()
+                            .find("INTERFACE_" + p)
+                            != li->Target->GetProperties().end();
+    const bool ifacePropContent = li->Target->GetPropertyAsBool(
+                              ("INTERFACE_" + p).c_str());
+    if (explicitlySet)
+      {
+      if (ifaceIsSet)
+        {
+        if (propContent != ifacePropContent)
+          {
+          cmOStringStream e;
+          e << "Property " << p << " on target \""
+            << this->GetName() << "\" does\nnot match the "
+            "INTERFACE_" << p << " property requirement\nof "
+            "dependency \"" << li->Target->GetName() << "\".\n";
+          cmSystemTools::Error(e.str().c_str());
+          }
+        else
+          {
+          // Agree
+          continue;
+          }
+        }
+      else
+        {
+        // Explicitly set on target and not set in iface. Can't disagree.
+        continue;
+        }
+      }
+    else if (impliedByUse)
+      {
+      if (ifaceIsSet)
+        {
+        if (propContent != ifacePropContent)
+          {
+          cmOStringStream e;
+          e << "Property " << p << " on target \""
+            << this->GetName() << "\" is\nimplied to be FALSE because it "
+            "was used to determine the link libraries\nalready. The "
+            "INTERFACE_" << p << " property on\ndependency \""
+            << li->Target->GetName() << "\" is in conflict.\n";
+          cmSystemTools::Error(e.str().c_str());
+          }
+        else
+          {
+          // Agree
+          continue;
+          }
+        }
+      else
+        {
+        // Implicitly set on target and not set in iface. Can't disagree.
+        continue;
+        }
+      }
+    else
+      {
+      if (ifaceIsSet)
+        {
+        if (propInitialized)
+          {
+          if (propContent != ifacePropContent)
+            {
+            cmOStringStream e;
+            e << "The INTERFACE_" << p << " property of \""
+              << li->Target->GetName() << "\" does\nnot agree with the value "
+                "of " << p << " already determined\nfor \""
+              << this->GetName() << "\".\n";
+            cmSystemTools::Error(e.str().c_str());
+            }
+          else
+            {
+            // Agree.
+            continue;
+            }
+          }
+        else
+          {
+          propContent = ifacePropContent;
+          propInitialized = true;
+          }
+        }
+      else
+        {
+        // Not set. Nothing to agree on.
+        continue;
+        }
+      }
+    }
+  return propContent;
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 {
   for(std::vector<cmSourceFile*>::const_iterator
