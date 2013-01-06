@@ -908,6 +908,17 @@ void cmTarget::DefineProperties(cmake *cm)
      "property is not set, then it is ignored.");
 
   cm->DefineProperty
+    ("COMPATIBLE_INTERFACE_STRING", cmProperty::TARGET,
+     "Properties which must be string-compatible with their link interface",
+     "The COMPATIBLE_INTERFACE_STRING property may contain a list of "
+     "properties for this target which must be the same when evaluated as "
+     "a string in the INTERFACE of all linked dependencies.  For example, "
+     "if a property \"FOO\" appears in the list, then the \"INTERFACE_FOO\" "
+     "property content in all dependencies must be equal with each "
+     "other, and with the \"FOO\" property in this target.  If the "
+     "property is not set, then it is ignored.");
+
+  cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
@@ -4512,6 +4523,14 @@ bool getTypedProperty<bool>(cmTarget *tgt, const char *prop, bool *)
 }
 
 //----------------------------------------------------------------------------
+template<>
+const char *getTypedProperty<const char *>(cmTarget *tgt, const char *prop,
+                                          const char **)
+{
+  return tgt->GetProperty(prop);
+}
+
+//----------------------------------------------------------------------------
 template<typename PropertyType>
 bool consistentProperty(PropertyType lhs, PropertyType rhs);
 
@@ -4520,6 +4539,17 @@ template<>
 bool consistentProperty(bool lhs, bool rhs)
 {
   return lhs == rhs;
+}
+
+//----------------------------------------------------------------------------
+template<>
+bool consistentProperty(const char *lhs, const char *rhs)
+{
+  if (!lhs && !rhs)
+    return true;
+  if (!lhs || !rhs)
+    return false;
+  return strcmp(lhs, rhs) == 0;
 }
 
 //----------------------------------------------------------------------------
@@ -4668,6 +4698,17 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
+const char * cmTarget::GetLinkInterfaceDependentStringProperty(
+                                                      const std::string &p,
+                                                      const char *config)
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty", 0);
+}
+
+//----------------------------------------------------------------------------
 bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
                              const char *interfaceProperty,
                              const char *config)
@@ -4711,6 +4752,14 @@ bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                            const char *config)
 {
   return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
+                                    const char *config)
+{
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_STRING",
                                  config);
 }
 
@@ -5468,6 +5517,15 @@ bool getLinkInterfaceDependentProperty(cmTarget *tgt,
   return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
 }
 
+template<>
+const char * getLinkInterfaceDependentProperty(cmTarget *tgt,
+                                                 const std::string prop,
+                                                 const char *config,
+                                                 const char **)
+{
+  return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+}
+
 //----------------------------------------------------------------------------
 template<typename PropertyType>
 void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
@@ -5532,6 +5590,13 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
     checkPropertyConsistency<bool>(this, li->Target,
                                    "COMPATIBLE_INTERFACE_BOOL",
                                    emitted, config, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_STRING",
+                                           emitted, config, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;

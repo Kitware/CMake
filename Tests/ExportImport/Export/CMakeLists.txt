@@ -181,7 +181,14 @@ set_property(TARGET testSharedLibRequired
   PROPERTY
     INTERFACE_CUSTOM_PROP ON
 )
-
+set_property(TARGET testSharedLibRequired
+  APPEND PROPERTY
+    COMPATIBLE_INTERFACE_STRING CUSTOM_STRING
+)
+set_property(TARGET testSharedLibRequired
+  PROPERTY
+    INTERFACE_CUSTOM_STRING testcontent
+)
 
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY

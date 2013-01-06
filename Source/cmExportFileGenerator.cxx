@@ -217,6 +217,9 @@ void getCompatibleInterfaceProperties(cmTarget *target,
     getPropertyContents(li->Target,
                         "COMPATIBLE_INTERFACE_BOOL",
                         ifaceProperties);
+    getPropertyContents(li->Target,
+                        "COMPATIBLE_INTERFACE_STRING",
+                        ifaceProperties);
     }
 }
 
@@ -227,10 +230,13 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
 {
   this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_BOOL",
                                 target, properties);
+  this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_STRING",
+                                target, properties);
 
   std::set<std::string> ifaceProperties;
 
   getPropertyContents(target, "COMPATIBLE_INTERFACE_BOOL", ifaceProperties);
+  getPropertyContents(target, "COMPATIBLE_INTERFACE_STRING", ifaceProperties);
 
   getCompatibleInterfaceProperties(target, ifaceProperties, 0);
 
