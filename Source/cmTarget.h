@@ -28,9 +28,9 @@ class cmListFileBacktrace;
 class cmTarget;
 
 struct cmTargetLinkInformationMap:
-  public std::map<std::pair<cmTarget*, cmStdString>, cmComputeLinkInformation*>
+  public std::map<std::pair<cmTarget*, std::string>, cmComputeLinkInformation*>
 {
-  typedef std::map<std::pair<cmTarget*, cmStdString>,
+  typedef std::map<std::pair<cmTarget*, std::string>,
                    cmComputeLinkInformation*> derived;
   cmTargetLinkInformationMap() {}
   cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
