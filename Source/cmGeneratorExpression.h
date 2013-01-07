@@ -51,7 +51,9 @@ public:
   cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(const char* input);
 
   enum PreprocessContext {
-    StripAllGeneratorExpressions
+    StripAllGeneratorExpressions,
+    BuildInterface,
+    InstallInterface
   };
 
   static std::string Preprocess(const std::string &input,
@@ -69,8 +71,13 @@ class cmCompiledGeneratorExpression
 public:
   const char* Evaluate(cmMakefile* mf, const char* config,
                        bool quiet = false,
-                       cmTarget *target = 0,
+                       cmTarget *headTarget = 0,
+                       cmTarget *currentTarget = 0,
                        cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
+  const char* Evaluate(cmMakefile* mf, const char* config,
+                       bool quiet,
+                       cmTarget *headTarget,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const
