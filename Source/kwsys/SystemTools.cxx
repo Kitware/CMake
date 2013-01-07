@@ -630,6 +630,7 @@ bool SystemTools::MakeDirectory(const char* path)
     Mkdir(topdir.c_str());
     pos++;
     }
+  topdir = dir;
   if(Mkdir(topdir.c_str()) != 0)
     {
     // There is a bug in the Borland Run time library which makes MKDIR
