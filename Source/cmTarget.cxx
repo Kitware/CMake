@@ -72,6 +72,11 @@ struct cmTarget::ImportInfo
   cmTarget::LinkInterface LinkInterface;
 };
 
+struct TargetConfigPair : public std::pair<cmTarget*, std::string> {
+  TargetConfigPair(cmTarget* tgt, const std::string &config)
+    : std::pair<cmTarget*, std::string>(tgt, config) {}
+};
+
 //----------------------------------------------------------------------------
 class cmTargetInternals
 {
@@ -100,23 +105,23 @@ public:
     OptionalLinkInterface(): Exists(false) {}
     bool Exists;
   };
-  typedef std::map<std::pair<cmTarget*, std::string>, OptionalLinkInterface>
+  typedef std::map<TargetConfigPair, OptionalLinkInterface>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
 
   typedef std::map<cmStdString, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
 
-  typedef std::map<std::pair<cmTarget*, std::string>, cmTarget::ImportInfo>
+  typedef std::map<TargetConfigPair, cmTarget::ImportInfo>
                                                             ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
   // Cache link implementation computation from each configuration.
-  typedef std::map<std::pair<cmTarget*, std::string>,
+  typedef std::map<TargetConfigPair,
                    cmTarget::LinkImplementation> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
-  typedef std::map<std::pair<cmTarget*, std::string>, cmTarget::LinkClosure>
+  typedef std::map<TargetConfigPair, cmTarget::LinkClosure>
                                                           LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
 
@@ -3165,8 +3170,7 @@ const char* cmTarget::GetLinkerLanguage(const char* config, cmTarget *head)
 cmTarget::LinkClosure const* cmTarget::GetLinkClosure(const char* config,
                                                       cmTarget *head)
 {
-  std::pair<cmTarget*, std::string> key =
-        std::make_pair(head, cmSystemTools::UpperCase(config ? config : ""));
+  TargetConfigPair key(head, cmSystemTools::UpperCase(config ? config : ""));
   cmTargetInternals::LinkClosureMapType::iterator
     i = this->Internal->LinkClosureMap.find(key);
   if(i == this->Internal->LinkClosureMap.end())
@@ -4467,8 +4471,7 @@ cmTarget::GetImportInfo(const char* config, cmTarget *headTarget)
     {
     config_upper = "NOCONFIG";
     }
-  std::pair<cmTarget*, std::string> key = std::make_pair(headTarget,
-                                                         config_upper);
+  TargetConfigPair key(headTarget, config_upper);
   typedef cmTargetInternals::ImportInfoMapType ImportInfoMapType;
 
   ImportInfoMapType::const_iterator i =
@@ -4798,8 +4801,7 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config,
     }
 
   // Lookup any existing link interface for this configuration.
-  std::pair<cmTarget*, std::string> key = std::make_pair(head,
-                                cmSystemTools::UpperCase(config? config : ""));
+  TargetConfigPair key(head, cmSystemTools::UpperCase(config? config : ""));
 
   cmTargetInternals::LinkInterfaceMapType::iterator
     i = this->Internal->LinkInterfaceMap.find(key);
@@ -4947,8 +4949,7 @@ cmTarget::GetLinkImplementation(const char* config, cmTarget *head)
     }
 
   // Lookup any existing link implementation for this configuration.
-  std::pair<cmTarget*, std::string> key = std::make_pair(head,
-                                cmSystemTools::UpperCase(config? config : ""));
+  TargetConfigPair key(head, cmSystemTools::UpperCase(config? config : ""));
 
   cmTargetInternals::LinkImplMapType::iterator
     i = this->Internal->LinkImplMap.find(key);
@@ -5095,10 +5096,9 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
 {
   cmTarget *headTarget = head ? head : this;
   // Lookup any existing information for this configuration.
-  std::pair<cmTarget*, std::string> key = std::make_pair(headTarget,
+  TargetConfigPair key(headTarget,
                                   cmSystemTools::UpperCase(config?config:""));
-  std::map<std::pair<cmTarget*, std::string>,
-           cmComputeLinkInformation*>::iterator
+  cmTargetLinkInformationMap::iterator
     i = this->LinkInformation.find(key);
   if(i == this->LinkInformation.end())
     {
@@ -5112,9 +5112,7 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       }
 
     // Store the information for this configuration.
-    std::map<std::pair<cmTarget*, std::string>,
-             cmComputeLinkInformation*>::value_type
-      entry(key, info);
+    cmTargetLinkInformationMap::value_type entry(key, info);
     i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
