@@ -26,12 +26,9 @@
 /* Whether ostream supports long long.  */
 #define @KWSYS_NAMESPACE@_IOS_HAS_OSTREAM_LONG_LONG @KWSYS_IOS_HAS_OSTREAM_LONG_LONG@
 
-/* Size of type long long and 0 if not available.  */
-#define @KWSYS_NAMESPACE@_IOS_SIZEOF_LONG_LONG @KWSYS_SIZEOF_LONG_LONG@
-
 /* Determine whether we need to define the streaming operators for
    long long or __int64.  */
-#if @KWSYS_NAMESPACE@_IOS_SIZEOF_LONG_LONG
+#if @KWSYS_USE_LONG_LONG@
 # if !@KWSYS_NAMESPACE@_IOS_HAS_ISTREAM_LONG_LONG || \
      !@KWSYS_NAMESPACE@_IOS_HAS_OSTREAM_LONG_LONG
 # define @KWSYS_NAMESPACE@_IOS_NEED_OPERATORS_LL 1
@@ -136,7 +133,6 @@ operator<<(kwsys_ios::ostream& os, @KWSYS_NAMESPACE@::IOStreamULL value)
 /* If building a C++ file in kwsys itself, give the source file
    access to the macros without a configured namespace.  */
 #if defined(KWSYS_NAMESPACE)
-# define KWSYS_IOS_SIZEOF_LONG_LONG      @KWSYS_NAMESPACE@_IOS_SIZEOF_LONG_LONG
 # define KWSYS_IOS_HAS_ISTREAM_LONG_LONG @KWSYS_NAMESPACE@_IOS_HAS_ISTREAM_LONG_LONG
 # define KWSYS_IOS_HAS_OSTREAM_LONG_LONG @KWSYS_NAMESPACE@_IOS_HAS_OSTREAM_LONG_LONG
 # define KWSYS_IOS_NEED_OPERATORS_LL     @KWSYS_NAMESPACE@_IOS_NEED_OPERATORS_LL
