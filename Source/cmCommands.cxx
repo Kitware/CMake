@@ -28,6 +28,7 @@
 #include "cmRemoveDefinitionsCommand.cxx"
 #include "cmSourceGroupCommand.cxx"
 #include "cmSubdirDependsCommand.cxx"
+#include "cmTargetCompileDefinitionsCommand.cxx"
 #include "cmTargetIncludeDirectoriesCommand.cxx"
 #include "cmTargetPropCommandBase.cxx"
 #include "cmUseMangledMesaCommand.cxx"
@@ -69,6 +70,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmSourceGroupCommand);
   commands.push_back(new cmSubdirDependsCommand);
   commands.push_back(new cmTargetIncludeDirectoriesCommand);
+  commands.push_back(new cmTargetCompileDefinitionsCommand);
   commands.push_back(new cmUseMangledMesaCommand);
   commands.push_back(new cmUtilitySourceCommand);
   commands.push_back(new cmVariableRequiresCommand);
