@@ -157,7 +157,7 @@ public:
 #include <os/storage/Path.h>
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
+#if defined(__BEOS__) && !defined(__ZETA__)
 #include <be/kernel/OS.h>
 #include <be/storage/Path.h>
 
@@ -630,6 +630,7 @@ bool SystemTools::MakeDirectory(const char* path)
     Mkdir(topdir.c_str());
     pos++;
     }
+  topdir = dir;
   if(Mkdir(topdir.c_str()) != 0)
     {
     // There is a bug in the Borland Run time library which makes MKDIR
