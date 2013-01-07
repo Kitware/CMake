@@ -3,6 +3,8 @@
 #include "depC.h"
 #include "depIfaceOnly.h"
 
+#include "subdirlib.h"
+
 int main(int argc, char **argv)
 {
   DepA a;
@@ -11,5 +13,7 @@ int main(int argc, char **argv)
 
   DepIfaceOnly iface_only;
 
-  return a.foo() + b.foo() + c.foo() + iface_only.foo();
+  SubDirLibObject sd;
+
+  return a.foo() + b.foo() + c.foo() + iface_only.foo() + sd.foo();
 }

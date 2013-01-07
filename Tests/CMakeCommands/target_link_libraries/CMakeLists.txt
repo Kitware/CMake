@@ -60,6 +60,13 @@ set_target_properties(targetA PROPERTIES LINK_INTERFACE_LIBRARIES "")
 
 assert_property(targetA LINK_INTERFACE_LIBRARIES "")
 
+add_subdirectory(subdir)
+target_link_libraries(targetA subdirlib)
+set_property(TARGET targetA APPEND PROPERTY
+  INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:subdirlib,INTERFACE_INCLUDE_DIRECTORIES>
+)
+
 target_link_libraries(targetA depB depC)
 
 assert_property(targetA LINK_INTERFACE_LIBRARIES "")
