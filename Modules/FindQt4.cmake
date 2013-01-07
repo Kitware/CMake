@@ -538,6 +538,11 @@ endif ()
 
 if (QT_QMAKE_EXECUTABLE AND QTVERSION)
 
+  # set version variables
+  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
+
   # ask qmake for the mkspecs directory
   # we do this first because QT_LIBINFIX might be set
   if (NOT QT_MKSPECS_DIR  OR  QT_QMAKE_CHANGED)
@@ -1173,11 +1178,6 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ######################################
 
   include("${_qt4_current_dir}/Qt4Macros.cmake")
-
-  # set version variables
-  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
 
 endif()
 
