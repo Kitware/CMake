@@ -989,6 +989,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
   endif()
+  if(QT4_WORKS AND QT_QTGUI_FOUND)
+    add_test(Qt4Targets ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Qt4Targets"
+      "${CMake_BINARY_DIR}/Tests/Qt4Targets"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project Qt4Targets
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Targets"
+      --force-new-ctest-process
+      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+      --test-command ${CMAKE_CTEST_COMMAND} -V
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Targets")
+  endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
     --build-and-test
