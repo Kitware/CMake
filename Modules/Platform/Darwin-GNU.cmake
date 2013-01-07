@@ -19,6 +19,7 @@ endif()
 set(__DARWIN_COMPILER_GNU 1)
 
 macro(__darwin_compiler_gnu lang)
+  set(CMAKE_${lang}_VERBOSE_FLAG "-v -Wl,-v") # also tell linker to print verbose output
   # GNU does not have -shared on OS X
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "-bundle -Wl,-headerpad_max_install_names")
