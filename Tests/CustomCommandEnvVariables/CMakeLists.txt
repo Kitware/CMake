@@ -4,7 +4,7 @@ project(TestEnvVariables)
 # We need the environment variable names to have a common prefix,
 # to enable env_test.cpp.in to successfully identify the variable target set.
 
-set(vp "ENVTESTCMAKE") # common variable prefix
+set(vp "ENV_TEST_CMAKE_") # common variable prefix
 
 set(f_expected "${TestEnvVariables_BINARY_DIR}/env_result_expected.txt")
 set(f_result "env_result.txt")
@@ -31,7 +31,8 @@ add_executable(env_test "${env_test_production}")
 # in the actual destination environment (i.e., shell)
 # would work in the first place.
 
-set(env_var_list "")
+set(env_var_arg_list "")
+set(env_var_res_list "")
 
 # BUG NOTE: SORT will jumble *any* semicolon-containing payload string (element)# within the list. CMake bug! (now filed as #13806).
 # The explanation at
@@ -46,36 +47,48 @@ set(env_var_list "")
 # and cause some nice PITA for CMake scrambling to fix this test case result ;)
 set(CMAKE_SEMICOLON_NONBUGGY FALSE)
 
-list(APPEND env_var_list "${vp}TESTING=True")
-list(APPEND env_var_list "${vp}ANOTHER_VAR=1")
-list(APPEND env_var_list "${vp}BS_TEST='MY\\TEST'")
+macro(add_test_env ENV_NAME ENV_ARG_VAL )
+  if(${ARGC} EQUAL 3)
+    set(ENV_RES_VAL ${ARGV2})
+  else()
+    set(ENV_RES_VAL ${ENV_ARG_VAL})
+  endif()
+  list(APPEND env_var_arg_list "${vp}${ENV_NAME}=${ENV_ARG_VAL}")
+  list(APPEND env_var_res_list "${vp}${ENV_NAME}=${ENV_RES_VAL}")
+endmacro()
+
+add_test_env("TESTING" "True")
+add_test_env("ANOTHER_VAR" "1")
+add_test_env("DQUOTE_TEST" "MYTEST")
+add_test_env("SPACE_TEST" "MY TEST")
+add_test_env("BS_TEST" "MY\\\\TEST")
 
 # Verify escape handling of the well-known set
 # of the five predefined XML entities:
 # '"' (&quot;) / '\'' (&apos;) / '<' (&lt;) / '>' (&gt;) / '&' (&amp;)
-list(APPEND env_var_list "${vp}XML_ENTITY_RAW_QUOT='XML\"ENTITY'")
-list(APPEND env_var_list "${vp}XML_ENTITY_RAW_APOS='XML\\'ENTITY'")
-list(APPEND env_var_list "${vp}XML_ENTITY_RAW_LT='XML<ENTITY'")
-list(APPEND env_var_list "${vp}XML_ENTITY_RAW_GT='XML>ENTITY'")
-list(APPEND env_var_list "${vp}XML_ENTITY_RAW_AMP='XML&ENTITY'")
+add_test_env("XML_ENTITY_RAW_QUOT" "XML\\\\\"ENTITY")
+add_test_env("XML_ENTITY_RAW_APOS" "XML'ENTITY")
+add_test_env("XML_ENTITY_RAW_LT" "XML<ENTITY")
+add_test_env("XML_ENTITY_RAW_GT" "XML>ENTITY")
+add_test_env("XML_ENTITY_RAW_AMP" "XML&ENTITY")
 
 if(CMAKE_SEMICOLON_NONBUGGY)
-  list(APPEND env_var_list "${vp}XML_ENTITY_ESC_QUOT='XML&quot\;ENTITY'")
-  list(APPEND env_var_list "${vp}XML_ENTITY_ESC_APOS='XML&apos\;ENTITY'")
-  list(APPEND env_var_list "${vp}XML_ENTITY_ESC_LT='XML&lt\;ENTITY'")
-  list(APPEND env_var_list "${vp}XML_ENTITY_ESC_GT='XML&gt\;ENTITY'")
-  list(APPEND env_var_list "${vp}XML_ENTITY_ESC_AMP='XML&amp\;ENTITY'")
+  add_test_env("XML_ENTITY_ESC_QUOT" "XML&quot\;ENTITY")
+  add_test_env("XML_ENTITY_ESC_APOS" "XML&apos\;ENTITY")
+  add_test_env("XML_ENTITY_ESC_LT" "XML&lt\;ENTITY")
+  add_test_env("XML_ENTITY_ESC_GT" "XML&gt\;ENTITY")
+  add_test_env("XML_ENTITY_ESC_AMP" "XML&amp\;ENTITY")
 endif(CMAKE_SEMICOLON_NONBUGGY)
 
 # These two additionally need a local BS-escape for CMake:
-list(APPEND env_var_list "${vp}CHAR_LF='CHAR\\nLF'")
-list(APPEND env_var_list "${vp}CHAR_CR='CHAR\\rCR'")
+add_test_env("CHAR_LF" "CHAR\\\\nLF")
+add_test_env("CHAR_CR" "CHAR\\\\rCR")
 
 if(CMAKE_SEMICOLON_NONBUGGY)
-  list(APPEND env_var_list "${vp}CHAR_SEMICOLON='CHAR\;SEMICOLON'")
+  add_test_env("CHAR_SEMICOLON" "\"CHAR\;SEMICOLON\"")
 
-  list(APPEND env_var_list "${vp}VS_HEX_LF='VS&#x0A\;HEX'")
-  list(APPEND env_var_list "${vp}VS_HEX_CR='VS&#x0D\;HEX'")
+  add_test_env("VS_HEX_LF" "\"VS&#x0A\;HEX\"")
+  add_test_env("VS_HEX_CR" "\"VS&#x0D\;HEX\"")
 endif(CMAKE_SEMICOLON_NONBUGGY)
 
 # We need to SORT the list, since at least in some environments (Windows)
@@ -85,23 +98,22 @@ endif(CMAKE_SEMICOLON_NONBUGGY)
 # - in such case we'll have to rework the implementation to fully handle it.
 # We decide to not do REMOVE_DUPLICATES - if this breaks, then it's
 # "programmer error".
-list(SORT env_var_list)
+list(SORT env_var_res_list)
 
 # Debugging helper (quite important, to verify escape handling on CMake side)
 #message(FATAL_ERROR "env_var_list now: ${env_var_list}")
-
 
 # We'll intentionally skip messing with any (platform-specific) newlines
 # in file content, at both CMake side and .cpp side.
 # Thus we'll simply write out the CMake list flat,
 # and make sure to provide list separators (';') on .cpp side.
-file(WRITE "${f_expected}" "${env_var_list}")
+file(WRITE "${f_expected}" "${env_var_res_list}")
 
 add_custom_command(
   OUTPUT ${f_result}
   DEPENDS env_test
-  COMMAND "${TestEnvVariables_BINARY_DIR}/${CMAKE_CFG_INTDIR}/env_test" arg1 arg2
-  ENVIRONMENT ${env_var_list}
+  COMMAND "${TestEnvVariables_BINARY_DIR}/${CMAKE_CFG_INTDIR}/env_test" "arg1" "arg2"
+  ENVIRONMENT ${env_var_arg_list}
   COMMENT "custom command to test setting environment variables"
   VERBATIM
 )

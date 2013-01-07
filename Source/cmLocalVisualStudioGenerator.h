@@ -64,9 +64,6 @@ protected:
   virtual const char* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return false; }
 
-  static std::string EscapeForBatch(const char* s);
-
-
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
   MaybeCreateImplibDir(cmTarget& target, const char* config, bool isFortran);
