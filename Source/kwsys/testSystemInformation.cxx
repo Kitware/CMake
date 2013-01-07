@@ -47,6 +47,8 @@
 
 int testSystemInformation(int, char*[])
 {
+  kwsys_ios::cout << "CTEST_FULL_OUTPUT\n"; // avoid truncation
+
   kwsys::SystemInformation info;
   info.RunCPUCheck();
   info.RunOSCheck();
@@ -86,6 +88,13 @@ int testSystemInformation(int, char*[])
   printMethod3(info, GetHostMemoryUsed(), "KiB");
   printMethod3(info, GetProcMemoryUsed(), "KiB");
 
+  for (int i = 0; i <= 31; i++)
+    {
+    if (info.DoesCPUSupportFeature(1 << i))
+      {
+      kwsys_ios::cout << "CPU feature " << i << "\n";
+      }
+    }
   //int GetProcessorCacheXSize(long int);
 //  bool DoesCPUSupportFeature(long int);
   return 0;
