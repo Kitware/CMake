@@ -29,6 +29,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(depA SHARED depA.cpp)
 generate_export_header(depA)
 
+add_library(importedlib UNKNOWN IMPORTED)
+target_link_libraries(importedlib LINK_INTERFACE_LIBRARIES depA)
+
 add_library(depB SHARED depB.cpp)
 generate_export_header(depB)
 
