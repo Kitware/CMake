@@ -270,7 +270,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
       }
     const std::string targetName = input.substr(nameStartPos,
                                                 endPos - nameStartPos);
-    if(targetName.find("$<", lastPos) != input.npos)
+    if(targetName.find("$<") != input.npos)
       {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "literal.";
