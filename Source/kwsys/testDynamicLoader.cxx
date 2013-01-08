@@ -15,7 +15,7 @@
 #include KWSYS_HEADER(ios/iostream)
 #include KWSYS_HEADER(stl/string)
 
-#if defined(__BEOS__) && !defined(__HAIKU__)
+#if defined(__BEOS__)
 #include <be/kernel/OS.h>  /* disable_debugger() API. */
 #endif
 
