@@ -34,6 +34,13 @@ generate_export_header(depB)
 
 target_link_libraries(depB LINK_PRIVATE depA)
 
+add_library(libgenex SHARED libgenex.cpp)
+generate_export_header(libgenex)
+
+set_property(TARGET depB APPEND PROPERTY
+  LINK_LIBRARIES $<1:libgenex>
+)
+
 add_library(depC SHARED depC.cpp)
 generate_export_header(depC)
 
