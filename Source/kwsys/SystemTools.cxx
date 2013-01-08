@@ -157,7 +157,7 @@ public:
 #include <os/storage/Path.h>
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
+#if defined(__BEOS__) && !defined(__ZETA__)
 #include <be/kernel/OS.h>
 #include <be/storage/Path.h>
 
@@ -622,11 +622,7 @@ bool SystemTools::MakeDirectory(const char* path)
     }
   SystemTools::ConvertToUnixSlashes(dir);
 
-  kwsys_stl::string::size_type pos = dir.find(':');
-  if(pos == kwsys_stl::string::npos)
-    {
-    pos = 0;
-    }
+  kwsys_stl::string::size_type pos = 0;
   kwsys_stl::string topdir;
   while((pos = dir.find('/', pos)) != kwsys_stl::string::npos)
     {
@@ -634,14 +630,7 @@ bool SystemTools::MakeDirectory(const char* path)
     Mkdir(topdir.c_str());
     pos++;
     }
-  if(dir[dir.size()-1] == '/')
-    {
-    topdir = dir.substr(0, dir.size());
-    }
-  else
-    {
-    topdir = dir;
-    }
+  topdir = dir;
   if(Mkdir(topdir.c_str()) != 0)
     {
     // There is a bug in the Borland Run time library which makes MKDIR
@@ -4054,7 +4043,7 @@ kwsys_stl::string SystemTools::GetCurrentDateTime(const char* format)
   return kwsys_stl::string(buf);
 }
 
-kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
+kwsys_stl::string SystemTools::MakeCidentifier(const char* s)
 {
   kwsys_stl::string str(s);
   if (str.find_first_of("0123456789") == 0)
