@@ -184,6 +184,41 @@ void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
 }
 
 //----------------------------------------------------------------------------
+bool
+cmExportFileGenerator::AddTargetNamespace(std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets)
+{
+  cmMakefile *mf = target->GetMakefile();
+
+  cmTarget *tgt = mf->FindTargetToUse(input.c_str());
+  if (!tgt)
+    {
+    return false;
+    }
+
+  if(tgt->IsImported())
+    {
+    return true;
+    }
+  if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
+    {
+    input = this->Namespace + input;
+    }
+  else
+    {
+    std::string namespacedTarget;
+    this->HandleMissingTarget(namespacedTarget, missingTargets,
+                              mf, target, tgt);
+    if (!namespacedTarget.empty())
+      {
+      input = namespacedTarget;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
                                     std::string &input,
@@ -212,45 +247,17 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
       continue;
       }
 
-    const std::string targetName = input.substr(nameStartPos,
+    std::string targetName = input.substr(nameStartPos,
                                                 commaPos - nameStartPos);
 
-    pos = nameStartPos; // We're not going to replace the entire expression,
-                        // but only the target parameter.
-    if (cmTarget *tgt = mf->FindTargetToUse(targetName.c_str()))
-      {
-      if(tgt->IsImported())
-        {
-        pos += targetName.size();
-        }
-      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
-        {
-        input.replace(pos, targetName.size(),
-                      this->Namespace + targetName);
-        pos += this->Namespace.size() + targetName.size();
-        }
-      else
-        {
-        std::string namespacedTarget;
-        this->HandleMissingTarget(namespacedTarget, missingTargets,
-                                  mf, target, tgt);
-        if (!namespacedTarget.empty())
-          {
-          input.replace(pos, targetName.size(), namespacedTarget);
-          pos += namespacedTarget.size();
-          }
-        }
-      }
-    else
+    if (!this->AddTargetNamespace(targetName, target, missingTargets))
       {
       errorString = "$<TARGET_PROPERTY:" + targetName + ",prop> requires "
                     "its first parameter to be a reachable target.";
-      }
-    lastPos = pos;
-    if (!errorString.empty())
-      {
       break;
       }
+    input.replace(nameStartPos, commaPos - nameStartPos, targetName);
+    lastPos = pos + targetName.size();
     }
   if (!errorString.empty())
     {
@@ -267,51 +274,24 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
     if (endPos == input.npos)
       {
       errorString = "$<TARGET_NAME:...> expression incomplete";
+      break;
       }
-    const std::string targetName = input.substr(nameStartPos,
+    std::string targetName = input.substr(nameStartPos,
                                                 endPos - nameStartPos);
     if(targetName.find("$<") != input.npos)
       {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "literal.";
+      break;
       }
-    if (cmTarget *tgt = mf->FindTargetToUse(targetName.c_str()))
-      {
-      if(tgt->IsImported())
-        {
-        input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
-                      targetName);
-        pos += sizeof("$<TARGET_NAME:") + targetName.size();
-        }
-      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
-        {
-        input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
-                      this->Namespace + targetName);
-        pos += sizeof("$<TARGET_NAME:") + targetName.size();
-        }
-      else
-        {
-        std::string namespacedTarget;
-        this->HandleMissingTarget(namespacedTarget, missingTargets,
-                                  mf, target, tgt);
-        if (!namespacedTarget.empty())
-          {
-          input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
-                        namespacedTarget);
-          pos += sizeof("$<TARGET_NAME:") + targetName.size();
-          }
-        }
-      }
-    else
+    if (!this->AddTargetNamespace(targetName, target, missingTargets))
       {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "reachable target.";
-      }
-    lastPos = pos;
-    if (!errorString.empty())
-      {
       break;
       }
+    input.replace(pos, endPos - pos + 1, targetName);
+    lastPos = endPos;
     }
   if (!errorString.empty())
     {
@@ -397,9 +377,6 @@ cmExportFileGenerator
     return;
     }
 
-  // Get the makefile in which to lookup target information.
-  cmMakefile* mf = target->GetMakefile();
-
   // Construct the property value.
   std::string link_libs;
   const char* sep = "";
@@ -410,33 +387,9 @@ cmExportFileGenerator
     link_libs += sep;
     sep = ";";
 
-    // Append this entry.
-    if(cmTarget* tgt = mf->FindTargetToUse(li->c_str()))
-      {
-      // This is a target.
-      if(tgt->IsImported())
-        {
-        // The target is imported (and therefore is not in the
-        // export).  Append the raw name.
-        link_libs += *li;
-        }
-      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
-        {
-        // The target is in the export.  Append it with the export
-        // namespace.
-        link_libs += this->Namespace;
-        link_libs += *li;
-        }
-      else
-        {
-        this->HandleMissingTarget(link_libs, missingTargets, mf, target, tgt);
-        }
-      }
-    else
-      {
-      // Append the raw name.
-      link_libs += *li;
-      }
+    std::string temp = *li;
+    this->AddTargetNamespace(temp, target, missingTargets);
+    link_libs += temp;
     }
 
   // Store the property.

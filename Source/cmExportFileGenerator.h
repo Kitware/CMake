@@ -128,6 +128,10 @@ private:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
+
+  bool AddTargetNamespace(std::string &input, cmTarget* target,
+                          std::vector<std::string> &missingTargets);
+
 };
 
 #endif
