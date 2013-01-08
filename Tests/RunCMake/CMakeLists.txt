@@ -50,6 +50,7 @@ add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
+add_RunCMake_test(PositionIndependentCode)
 
 add_RunCMake_test(build_command)
 add_RunCMake_test(find_package)

@@ -268,7 +268,8 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
       this->AddFortranFlags(flags);
       }
 
-    this->LocalGenerator->AddCMP0018Flags(flags, this->Target, lang);
+    this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
+                                          lang, this->ConfigName);
 
     // Add include directory flags.
     this->AddIncludeFlags(flags, lang);
