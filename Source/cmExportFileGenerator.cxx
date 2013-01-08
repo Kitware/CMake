@@ -184,8 +184,88 @@ void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
 }
 
 //----------------------------------------------------------------------------
+bool
+cmExportFileGenerator::AddTargetNamespace(std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets)
+{
+  cmMakefile *mf = target->GetMakefile();
+
+  cmTarget *tgt = mf->FindTargetToUse(input.c_str());
+  if (!tgt)
+    {
+    return false;
+    }
+
+  if(tgt->IsImported())
+    {
+    return true;
+    }
+  if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
+    {
+    input = this->Namespace + input;
+    }
+  else
+    {
+    std::string namespacedTarget;
+    this->HandleMissingTarget(namespacedTarget, missingTargets,
+                              mf, target, tgt);
+    if (!namespacedTarget.empty())
+      {
+      input = namespacedTarget;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+static bool isGeneratorExpression(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
+                                    std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets,
+                                    FreeTargetsReplace replace)
+{
+  if (replace == NoReplaceFreeTargets)
+    {
+    this->ResolveTargetsInGeneratorExpression(input, target, missingTargets);
+    return;
+    }
+  std::vector<std::string> parts;
+  cmGeneratorExpression::Split(input, parts);
+
+  std::string sep;
+  input = "";
+  for(std::vector<std::string>::iterator li = parts.begin();
+      li != parts.end(); ++li)
+    {
+    if (!isGeneratorExpression(input))
+      {
+      this->AddTargetNamespace(*li, target, missingTargets);
+      }
+    else
+      {
+      this->ResolveTargetsInGeneratorExpression(
+                                    *li,
+                                    target,
+                                    missingTargets);
+      }
+    input += sep + *li;
+    sep = ";";
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
                                     std::string &input,
                                     cmTarget* target,
                                     std::vector<std::string> &missingTargets)
@@ -212,45 +292,17 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
       continue;
       }
 
-    const std::string targetName = input.substr(nameStartPos,
+    std::string targetName = input.substr(nameStartPos,
                                                 commaPos - nameStartPos);
 
-    pos = nameStartPos; // We're not going to replace the entire expression,
-                        // but only the target parameter.
-    if (cmTarget *tgt = mf->FindTargetToUse(targetName.c_str()))
-      {
-      if(tgt->IsImported())
-        {
-        pos += targetName.size();
-        }
-      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
-        {
-        input.replace(pos, targetName.size(),
-                      this->Namespace + targetName);
-        pos += this->Namespace.size() + targetName.size();
-        }
-      else
-        {
-        std::string namespacedTarget;
-        this->HandleMissingTarget(namespacedTarget, missingTargets,
-                                  mf, target, tgt);
-        if (!namespacedTarget.empty())
-          {
-          input.replace(pos, targetName.size(), namespacedTarget);
-          pos += namespacedTarget.size();
-          }
-        }
-      }
-    else
+    if (!this->AddTargetNamespace(targetName, target, missingTargets))
       {
       errorString = "$<TARGET_PROPERTY:" + targetName + ",prop> requires "
                     "its first parameter to be a reachable target.";
-      }
-    lastPos = pos;
-    if (!errorString.empty())
-      {
       break;
       }
+    input.replace(nameStartPos, commaPos - nameStartPos, targetName);
+    lastPos = pos + targetName.size();
     }
   if (!errorString.empty())
     {
@@ -267,55 +319,86 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
     if (endPos == input.npos)
       {
       errorString = "$<TARGET_NAME:...> expression incomplete";
+      break;
       }
-    const std::string targetName = input.substr(nameStartPos,
+    std::string targetName = input.substr(nameStartPos,
                                                 endPos - nameStartPos);
-    if(targetName.find("$<", lastPos) != input.npos)
+    if(targetName.find("$<") != input.npos)
       {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "literal.";
+      break;
       }
-    if (cmTarget *tgt = mf->FindTargetToUse(targetName.c_str()))
-      {
-      if(tgt->IsImported())
-        {
-        input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
-                      targetName);
-        pos += sizeof("$<TARGET_NAME:") + targetName.size();
-        }
-      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
-        {
-        input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
-                      this->Namespace + targetName);
-        pos += sizeof("$<TARGET_NAME:") + targetName.size();
-        }
-      else
-        {
-        std::string namespacedTarget;
-        this->HandleMissingTarget(namespacedTarget, missingTargets,
-                                  mf, target, tgt);
-        if (!namespacedTarget.empty())
-          {
-          input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
-                        namespacedTarget);
-          pos += sizeof("$<TARGET_NAME:") + targetName.size();
-          }
-        }
-      }
-    else
+    if (!this->AddTargetNamespace(targetName, target, missingTargets))
       {
       errorString = "$<TARGET_NAME:...> requires its parameter to be a "
                     "reachable target.";
-      }
-    lastPos = pos;
-    if (!errorString.empty())
-      {
       break;
       }
+    input.replace(pos, endPos - pos + 1, targetName);
+    lastPos = endPos;
     }
   if (!errorString.empty())
     {
     mf->IssueMessage(cmake::FATAL_ERROR, errorString);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator
+::SetImportLinkInterface(const char* config, std::string const& suffix,
+                    cmGeneratorExpression::PreprocessContext preprocessRule,
+                    cmTarget* target, ImportPropertyMap& properties,
+                    std::vector<std::string>& missingTargets)
+{
+  // Add the transitive link dependencies for this configuration.
+  cmTarget::LinkInterface const* iface = target->GetLinkInterface(config,
+                                                                  target);
+  if (!iface)
+    {
+    return;
+    }
+
+  if (iface->ImplementationIsInterface)
+    {
+    this->SetImportLinkProperty(suffix, target,
+                                "IMPORTED_LINK_INTERFACE_LIBRARIES",
+                                iface->Libraries, properties, missingTargets);
+    return;
+    }
+
+  const char *propContent;
+
+  if (const char *prop_suffixed = target->GetProperty(
+                    ("LINK_INTERFACE_LIBRARIES" + suffix).c_str()))
+    {
+    propContent = prop_suffixed;
+    }
+  else if (const char *prop = target->GetProperty(
+                    "LINK_INTERFACE_LIBRARIES"))
+    {
+    propContent = prop;
+    }
+  else
+    {
+    return;
+    }
+
+  if (!*propContent)
+    {
+    properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = "";
+    return;
+    }
+
+  std::string prepro = cmGeneratorExpression::Preprocess(propContent,
+                                                         preprocessRule);
+  if (!prepro.empty())
+    {
+    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+                                               missingTargets,
+                                               ReplaceFreeTargets);
+    properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = prepro;
     }
 }
 
@@ -363,9 +446,7 @@ cmExportFileGenerator
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
                                 iface->Languages, properties, missingTargets);
-    this->SetImportLinkProperty(suffix, target,
-                                "IMPORTED_LINK_INTERFACE_LIBRARIES",
-                                iface->Libraries, properties, missingTargets);
+
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
                                 iface->SharedDeps, properties, missingTargets);
@@ -397,9 +478,6 @@ cmExportFileGenerator
     return;
     }
 
-  // Get the makefile in which to lookup target information.
-  cmMakefile* mf = target->GetMakefile();
-
   // Construct the property value.
   std::string link_libs;
   const char* sep = "";
@@ -410,33 +488,9 @@ cmExportFileGenerator
     link_libs += sep;
     sep = ";";
 
-    // Append this entry.
-    if(cmTarget* tgt = mf->FindTargetToUse(li->c_str()))
-      {
-      // This is a target.
-      if(tgt->IsImported())
-        {
-        // The target is imported (and therefore is not in the
-        // export).  Append the raw name.
-        link_libs += *li;
-        }
-      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
-        {
-        // The target is in the export.  Append it with the export
-        // namespace.
-        link_libs += this->Namespace;
-        link_libs += *li;
-        }
-      else
-        {
-        this->HandleMissingTarget(link_libs, missingTargets, mf, target, tgt);
-        }
-      }
-    else
-      {
-      // Append the raw name.
-      link_libs += *li;
-      }
+    std::string temp = *li;
+    this->AddTargetNamespace(temp, target, missingTargets);
+    link_libs += temp;
     }
 
   // Store the property.

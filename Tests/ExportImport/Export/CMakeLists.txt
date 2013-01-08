@@ -149,6 +149,7 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired4,INTERFACE_INCLUDE_DIRECTORIES>>
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired5,INTERFACE_INCLUDE_DIRECTORIES>>
     $<INSTALL_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired6,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<TARGET_PROPERTY:testLibLibraryRequired,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
 set_property(TARGET testLibRequired APPEND PROPERTY
@@ -158,6 +159,22 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<INSTALL_INTERFACE:InstallOnly_DEFINE>
 )
 
+include(GenerateExportHeader)
+add_library(testLibLibraryRequired SHARED testLibLibraryRequired.cpp)
+generate_export_header(testLibLibraryRequired)
+set_property(TARGET testLibLibraryRequired APPEND PROPERTY
+  INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
+)
+set_property(TARGET testLibLibraryRequired APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
+                                "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+set_property(TARGET testLibRequired APPEND PROPERTY
+  LINK_INTERFACE_LIBRARIES
+    $<1:testLibLibraryRequired>
+)
+
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
                 testLibIncludeRequired2
@@ -165,6 +182,7 @@ install(TARGETS testLibRequired
                 testLibIncludeRequired4
                 testLibIncludeRequired5
                 testLibIncludeRequired6
+                testLibLibraryRequired
         EXPORT RequiredExp DESTINATION lib )
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredConfig.cmake DESTINATION lib/cmake/testLibRequired)
 
