@@ -4,7 +4,7 @@
 
 #include "subdirlib_export.h"
 
-struct SubDirLibObject
+struct SUBDIRLIB_EXPORT SubDirLibObject
 {
   int foo() const;
 };
