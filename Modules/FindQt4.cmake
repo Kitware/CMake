@@ -420,7 +420,7 @@ macro (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
       endif ()
       set_property(TARGET Qt4::${_camelCaseBasename} PROPERTY
         INTERFACE_INCLUDE_DIRECTORIES
-          "${QT_HEADERS_DIR}/${_camelCaseBasename}"
+          "${QT_${basename}_INCLUDE_DIR}"
       )
       string(REGEX REPLACE "^QT" "" _stemname ${basename})
       set_property(TARGET Qt4::${_camelCaseBasename} PROPERTY
