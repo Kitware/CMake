@@ -207,11 +207,6 @@ typedef struct rlimit ResourceLimitType;
 #if USE_CPUID
 
 #define CPUID_AWARE_COMPILER
-#ifdef CPUID_AWARE_COMPILER
-#define CPUID_INSTRUCTION    cpuid
-#else
-#define CPUID_INSTRUCTION    _asm _emit 0x0f _asm _emit 0xa2
-#endif
 
 /**
  * call CPUID instruction
@@ -239,7 +234,12 @@ static bool call_cpuid(int select, int result[4])
 #endif
       ; <<CPUID>>
       mov eax, select
-      CPUID_INSTRUCTION
+#ifdef CPUID_AWARE_COMPILER
+      cpuid
+#else
+      _asm _emit 0x0f
+      _asm _emit 0xa2
+#endif
       mov tmp[0 * TYPE int], eax
       mov tmp[1 * TYPE int], ebx
       mov tmp[2 * TYPE int], ecx
@@ -436,6 +436,9 @@ protected:
   kwsys_stl::string ExtractValueFromCpuInfoFile(kwsys_stl::string buffer,
                                           const char* word, size_t init=0);
 
+  bool QueryLinuxMemory();
+  bool QueryCygwinMemory();
+
   static void Delay (unsigned int);
   static void DelayOverhead (unsigned int);
 
@@ -465,12 +468,19 @@ protected:
   bool QueryBSDProcessor();
 
   //For HP-UX
+  bool QueryHPUXMemory();
   bool QueryHPUXProcessor();
+
+  //For Microsoft Windows
+  bool QueryWindowsMemory();
+
+  //For AIX
+  bool QueryAIXMemory();
 
   bool QueryProcessor();
 
   // Evaluate the memory information.
-  int QueryMemory();
+  bool QueryMemory();
   size_t TotalVirtualMemory;
   size_t AvailableVirtualMemory;
   size_t TotalPhysicalMemory;
@@ -1306,6 +1316,16 @@ void SystemInformationImplementation::RunMemoryCheck()
   this->QueryQNXMemory();
 #elif defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
   this->QueryBSDMemory();
+#elif defined(__CYGWIN__)
+  this->QueryCygwinMemory();
+#elif defined(_WIN32)
+  this->QueryWindowsMemory();
+#elif defined(__hpux)
+  this->QueryHPUXMemory();
+#elif defined(__linux)
+  this->QueryLinuxMemory();
+#elif defined(_AIX)
+  this->QueryAIXMemory();
 #else
   this->QueryMemory();
 #endif
@@ -3342,25 +3362,9 @@ void SystemInformationImplementation::SetStackTraceOnError(int enable)
 #endif
 }
 
-/** Query for the memory status */
-int SystemInformationImplementation::QueryMemory()
+bool SystemInformationImplementation::QueryWindowsMemory()
 {
-  this->TotalVirtualMemory = 0;
-  this->TotalPhysicalMemory = 0;
-  this->AvailableVirtualMemory = 0;
-  this->AvailablePhysicalMemory = 0;
-#ifdef __CYGWIN__
-  // _SC_PAGE_SIZE does return the mmap() granularity on Cygwin,
-  // see http://cygwin.com/ml/cygwin/2006-06/msg00350.html
-  // Therefore just use 4096 as the page size of Windows.
-  long m = sysconf(_SC_PHYS_PAGES);
-  if (m < 0)
-    {
-    return false;
-    }
-  this->TotalPhysicalMemory = m >> 8;
-  return 1;
-#elif defined(_WIN32)
+#if defined(_WIN32)
 # if defined(_MSC_VER) && _MSC_VER < 1300
   MEMORYSTATUS ms;
   unsigned long tv, tp, av, ap;
@@ -3385,8 +3389,15 @@ int SystemInformationImplementation::QueryMemory()
   this->TotalPhysicalMemory = tp>>10>>10;
   this->AvailableVirtualMemory = av>>10>>10;
   this->AvailablePhysicalMemory = ap>>10>>10;
-  return 1;
-#elif defined(__linux)
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool SystemInformationImplementation::QueryLinuxMemory()
+{
+#if defined(__linux)
   unsigned long tv=0;
   unsigned long tp=0;
   unsigned long av=0;
@@ -3403,7 +3414,7 @@ int SystemInformationImplementation::QueryMemory()
   if( errorFlag!=0 )
     {
     kwsys_ios::cout << "Problem calling uname(): " << strerror(errno) << kwsys_ios::endl;
-    return 0;
+    return false;
     }
 
   if( unameInfo.release!=0 && strlen(unameInfo.release)>=3 )
@@ -3427,7 +3438,7 @@ int SystemInformationImplementation::QueryMemory()
   if ( !fd )
     {
     kwsys_ios::cout << "Problem opening /proc/meminfo" << kwsys_ios::endl;
-    return 0;
+    return false;
     }
 
   if( linuxMajor>=3 || ( (linuxMajor>=2) && (linuxMinor>=6) ) )
@@ -3466,7 +3477,7 @@ int SystemInformationImplementation::QueryMemory()
       {
       kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
       fclose(fd);
-      return 0;
+      return false;
       }
     }
   else
@@ -3498,49 +3509,55 @@ int SystemInformationImplementation::QueryMemory()
       {
       kwsys_ios::cout << "Problem parsing /proc/meminfo" << kwsys_ios::endl;
       fclose(fd);
-      return 0;
+      return false;
       }
     }
   fclose( fd );
-  return 1;
-#elif defined(__hpux)
-  unsigned long tv=0;
-  unsigned long tp=0;
-  unsigned long av=0;
-  unsigned long ap=0;
-  struct pst_static pst;
-  struct pst_dynamic pdy;
 
-  unsigned long ps = 0;
-  if (pstat_getstatic(&pst, sizeof(pst), (size_t) 1, 0) != -1)
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool SystemInformationImplementation::QueryCygwinMemory()
+{
+#ifdef __CYGWIN__
+  // _SC_PAGE_SIZE does return the mmap() granularity on Cygwin,
+  // see http://cygwin.com/ml/cygwin/2006-06/msg00350.html
+  // Therefore just use 4096 as the page size of Windows.
+  long m = sysconf(_SC_PHYS_PAGES);
+  if (m < 0)
     {
-    ps = pst.page_size;
-    tp =  pst.physical_memory *ps;
-    tv = (pst.physical_memory + pst.pst_maxmem) * ps;
-    if (pstat_getdynamic(&pdy, sizeof(pdy), (size_t) 1, 0) != -1)
-      {
-      ap = tp - pdy.psd_rm * ps;
-      av = tv - pdy.psd_vm;
-      this->TotalVirtualMemory = tv>>10>>10;
-      this->TotalPhysicalMemory = tp>>10>>10;
-      this->AvailableVirtualMemory = av>>10>>10;
-      this->AvailablePhysicalMemory = ap>>10>>10;
-      return 1;
-      }
+    return false;
     }
-  return 0;
-#elif defined(_AIX)
+  this->TotalPhysicalMemory = m >> 8;
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool SystemInformationImplementation::QueryAIXMemory()
+{
+#if defined(_AIX)
   long c = sysconf(_SC_AIX_REALMEM);
   if (c <= 0)
-  {
-    return 0;
-  }
+    {
+    return false;
+    }
 
   this->TotalPhysicalMemory = c / 1024;
 
-  return 1;
+  return true;
 #else
+  return false;
+#endif
+}
 
+/** Query for the memory status */
+bool SystemInformationImplementation::QueryMemory()
+{
 #if defined(_SC_PHYS_PAGES) && defined(_SC_PAGESIZE)
   // Assume the mmap() granularity as returned by _SC_PAGESIZE is also
   // the system page size. The only known system where this isn't true
@@ -3550,7 +3567,7 @@ int SystemInformationImplementation::QueryMemory()
 
   if (p < 0 || m < 0)
     {
-    return 0;
+    return false;
     }
 
   // assume pagesize is a power of 2 and smaller 1 MiB
@@ -3563,17 +3580,16 @@ int SystemInformationImplementation::QueryMemory()
   p = sysconf(_SC_AVPHYS_PAGES);
   if (p < 0)
     {
-    return 0;
+    return false;
     }
 
   this->AvailablePhysicalMemory = p;
   this->AvailablePhysicalMemory /= pagediv;
 #endif
 
-  return 1;
-#endif
-
-  return 0;
+  return true;
+#else
+  return false;
 #endif
 }
 
@@ -4408,6 +4424,42 @@ bool SystemInformationImplementation::QueryBSDProcessor()
   this->CPUSpeedInMHz = (float) k;
 #endif
 
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool SystemInformationImplementation::QueryHPUXMemory()
+{
+#if defined(__hpux)
+  unsigned long tv=0;
+  unsigned long tp=0;
+  unsigned long av=0;
+  unsigned long ap=0;
+  struct pst_static pst;
+  struct pst_dynamic pdy;
+
+  unsigned long ps = 0;
+  if (pstat_getstatic(&pst, sizeof(pst), (size_t) 1, 0) == -1)
+    {
+    return false;
+    }
+
+  ps = pst.page_size;
+  tp =  pst.physical_memory *ps;
+  tv = (pst.physical_memory + pst.pst_maxmem) * ps;
+  if (pstat_getdynamic(&pdy, sizeof(pdy), (size_t) 1, 0) == -1)
+    {
+    return false;
+    }
+
+  ap = tp - pdy.psd_rm * ps;
+  av = tv - pdy.psd_vm;
+  this->TotalVirtualMemory = tv>>10>>10;
+  this->TotalPhysicalMemory = tp>>10>>10;
+  this->AvailableVirtualMemory = av>>10>>10;
+  this->AvailablePhysicalMemory = ap>>10>>10;
   return true;
 #else
   return false;
