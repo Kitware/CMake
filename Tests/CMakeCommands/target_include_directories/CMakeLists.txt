@@ -24,16 +24,16 @@ add_executable(target_include_directories
   "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
 )
 target_include_directories(target_include_directories
-  PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/privateinclude/"
-  PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/publicinclude/"
-  INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/interfaceinclude/"
+  PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/privateinclude"
+  PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/publicinclude"
+  INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/interfaceinclude"
 )
 
 target_include_directories(target_include_directories
-  PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/poison/"
+  PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/poison"
 )
 target_include_directories(target_include_directories
-  BEFORE PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/cure/"
+  BEFORE PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/cure"
 )
 
 add_library(importedlib UNKNOWN IMPORTED)
