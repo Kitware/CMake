@@ -157,8 +157,8 @@ endif()
 # Test that dependent imported targets have usable
 # INTERFACE_COMPILE_DEFINITIONS and INTERFACE_INCLUDE_DIRECTORIES
 
-add_library(deps_iface deps_iface.cpp)
-target_link_libraries(deps_iface testLibsDepends)
+add_executable(deps_iface deps_iface.c)
+target_link_libraries(deps_iface testLibDepends)
 set_property(TARGET deps_iface APPEND PROPERTY
   COMPILE_DEFINITIONS
     $<TARGET_PROPERTY:testLibDepends,INTERFACE_COMPILE_DEFINITIONS>

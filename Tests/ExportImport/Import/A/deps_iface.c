@@ -20,7 +20,7 @@
 extern int testLibDepends(void);
 
 
-int main(int,char **)
+int main()
 {
   TestLibLibraryRequired ifaceDep;
 
