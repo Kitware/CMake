@@ -247,7 +247,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   for(std::vector<std::string>::iterator li = parts.begin();
       li != parts.end(); ++li)
     {
-    if (!isGeneratorExpression(input))
+    if (!isGeneratorExpression(*li))
       {
       this->AddTargetNamespace(*li, target, missingTargets);
       }
