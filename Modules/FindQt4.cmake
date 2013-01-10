@@ -418,6 +418,15 @@ macro (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
           set_property(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
         endif()
       endif ()
+      set_property(TARGET Qt4::${_camelCaseBasename} PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES
+          "${QT_${basename}_INCLUDE_DIR}"
+      )
+      string(REGEX REPLACE "^QT" "" _stemname ${basename})
+      set_property(TARGET Qt4::${_camelCaseBasename} PROPERTY
+        INTERFACE_COMPILE_DEFINITIONS
+          "QT_${_stemname}_LIB"
+      )
     endif()
 
     # If QT_USE_IMPORTED_TARGETS is enabled, the QT_QTFOO_LIBRARY variables are set to point at these
@@ -957,6 +966,14 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
           ${_PROPERTY}
           "Qt4::Qt${_DEPEND}"
         )
+        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+          INTERFACE_INCLUDE_DIRECTORIES
+            "$<TARGET_PROPERTY:Qt4::Qt${_DEPEND},INTERFACE_INCLUDE_DIRECTORIES>"
+        )
+        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+          INTERFACE_COMPILE_DEFINITIONS
+            "$<TARGET_PROPERTY:Qt4::Qt${_DEPEND},INTERFACE_COMPILE_DEFINITIONS>"
+        )
       endforeach()
     endif()
   endmacro()
@@ -973,6 +990,11 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # Set QT_xyz_LIBRARY variable and add
   # library include path to QT_INCLUDES
   _QT4_ADJUST_LIB_VARS(QtCore)
+  set_property(TARGET Qt4::QtCore APPEND PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES
+      "${QT_MKSPECS_DIR}/default"
+      ${QT_INCLUDE_DIR}
+  )
 
   foreach(QT_MODULE ${QT_MODULES})
     _QT4_ADJUST_LIB_VARS(${QT_MODULE})
@@ -997,6 +1019,10 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # headers.
   # Everything depends on QtCore, but that is covered above already
   _qt4_add_target_depends(Qt3Support Sql Gui Network)
+  if (TARGET Qt4::Qt3Support)
+    # An additional define is required for QT3_SUPPORT
+    set_property(TARGET Qt4::Qt3Support APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS QT3_SUPPORT)
+  endif()
   _qt4_add_target_depends(QtDeclarative Script Gui)
   _qt4_add_target_depends(QtDesigner Gui)
   _qt4_add_target_depends(QtHelp Gui)
