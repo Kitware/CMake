@@ -185,6 +185,9 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
     $<1:$<TARGET_NAME:testSharedLibRequired>>
 )
 
+# LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
+target_link_libraries(testSharedLibDepends LINK_PRIVATE testSharedLibRequired)
+
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
                 testLibIncludeRequired2
