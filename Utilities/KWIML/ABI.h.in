@@ -253,7 +253,9 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 #  else
 #   define @KWIML@_ABI_SIZEOF_LONG_LONG 0
 #  endif
-# elif defined(__hpux) && !defined(__GNUC__) /* Old HP: no __HP_cc/__HP_aCC above */
+# elif defined(__GNUC__) /* GNU */
+#  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
+# elif defined(__hpux) /* Old HP: no __HP_cc/__HP_aCC/__GNUC__ above */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # endif
 #endif
