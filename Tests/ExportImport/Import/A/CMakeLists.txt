@@ -167,3 +167,14 @@ set_property(TARGET deps_iface APPEND PROPERTY
   INCLUDE_DIRECTORIES
     $<TARGET_PROPERTY:testLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
 )
+
+add_executable(deps_shared_iface deps_shared_iface.cpp)
+target_link_libraries(deps_shared_iface testSharedLibDepends)
+set_property(TARGET deps_shared_iface APPEND PROPERTY
+  COMPILE_DEFINITIONS
+    $<TARGET_PROPERTY:testSharedLibDepends,INTERFACE_COMPILE_DEFINITIONS>
+)
+set_property(TARGET deps_shared_iface APPEND PROPERTY
+  INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:testSharedLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
+)
