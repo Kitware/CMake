@@ -40,25 +40,39 @@ else ()
     set(GLUT_cocoa_LIBRARY "-framework Cocoa" CACHE STRING "Cocoa framework for OSX")
   else ()
 
+    if (BEOS)
+
+      set(_GLUT_INC_DIR /boot/develop/headers/os/opengl)
+      set(_GLUT_glut_LIB_DIR /boot/develop/lib/x86)
+
+    else()
+
+      find_library( GLUT_Xi_LIBRARY Xi
+        /usr/openwin/lib
+        )
+
+      find_library( GLUT_Xmu_LIBRARY Xmu
+        /usr/openwin/lib
+        )
+
+    endif ()
+
     find_path( GLUT_INCLUDE_DIR GL/glut.h
       /usr/include/GL
       /usr/openwin/share/include
       /usr/openwin/include
       /opt/graphics/OpenGL/include
       /opt/graphics/OpenGL/contrib/libglut
+      ${_GLUT_INC_DIR}
       )
 
     find_library( GLUT_glut_LIBRARY glut
       /usr/openwin/lib
+      ${_GLUT_glut_LIB_DIR}
       )
 
-    find_library( GLUT_Xi_LIBRARY Xi
-      /usr/openwin/lib
-      )
-
-    find_library( GLUT_Xmu_LIBRARY Xmu
-      /usr/openwin/lib
-      )
+    unset(_GLUT_INC_DIR)
+    unset(_GLUT_glut_LIB_DIR)
 
   endif ()
 
