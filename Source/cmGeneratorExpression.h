@@ -83,6 +83,9 @@ public:
   std::set<cmTarget*> const& GetTargets() const
     { return this->Targets; }
 
+  std::map<cmStdString, cmStdString> const& GetSeenTargetProperties() const
+    { return this->SeenTargetProperties; }
+
   ~cmCompiledGeneratorExpression();
 
   std::string GetInput() const
@@ -110,6 +113,7 @@ private:
   bool NeedsParsing;
 
   mutable std::set<cmTarget*> Targets;
+  mutable std::map<cmStdString, cmStdString> SeenTargetProperties;
   mutable std::string Output;
 };
 

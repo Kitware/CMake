@@ -1639,14 +1639,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     if(strcmp(lang, "CXX") == 0)
       {
       this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
-      this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target, "C");
+      this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
+                                                   "C", configName);
       }
 
     // Add language-specific flags.
     this->CurrentLocalGenerator->AddLanguageFlags(flags, lang, configName);
 
     // Add shared-library flags if needed.
-    this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target, lang);
+    this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target,
+                                                 lang, configName);
     }
   else if(binary)
   {

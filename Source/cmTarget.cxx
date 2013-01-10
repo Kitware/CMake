@@ -878,6 +878,20 @@ void cmTarget::DefineProperties(cmake *cm)
      "created.");
 
   cm->DefineProperty
+    ("INTERFACE_POSITION_INDEPENDENT_CODE", cmProperty::TARGET,
+     "Whether consumers need to create a position-independent target",
+     "The INTERFACE_POSITION_INDEPENDENT_CODE property informs consumers of "
+     "this target whether they must set their POSITION_INDEPENDENT_CODE "
+     "property to ON.  If this property is set to ON, then the "
+     "POSITION_INDEPENDENT_CODE property on all consumers will be set to "
+     "ON.  Similarly, if this property is set to OFF, then the "
+     "POSITION_INDEPENDENT_CODE property on all consumers will be set to "
+     "OFF.  If this property is undefined, then consumers will determine "
+     "their POSITION_INDEPENDENT_CODE property by other means.  Consumers "
+     "must ensure that the targets that they link to have a consistent "
+     "requirement for their INTERFACE_POSITION_INDEPENDENT_CODE property.");
+
+  cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
@@ -2164,16 +2178,19 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
     {
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
 
     cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                         this->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
-    cmSystemTools::ExpandListArgument(ge.Parse(prop)->Evaluate(this->Makefile,
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
                                         config,
                                         false,
                                         head,
                                         &dagChecker),
                                       libs);
+
+    this->AddLinkDependentTargetsForProperties(cge->GetSeenTargetProperties());
     }
 }
 
@@ -4374,6 +4391,171 @@ const char* cmTarget::GetExportMacro()
     {
     return 0;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetLinkDependentTargetsForProperty(const std::string &p,
+                                          std::set<std::string> &targets)
+{
+  const std::map<cmStdString, std::set<std::string> >::const_iterator findIt
+                                  = this->LinkDependentProperties.find(p);
+  if (findIt != this->LinkDependentProperties.end())
+    {
+    targets = findIt->second;
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p)
+{
+  return this->LinkImplicitNullProperties.find(p)
+      != this->LinkImplicitNullProperties.end();
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::AddLinkDependentTargetsForProperties(
+                              const std::map<cmStdString, cmStdString> &map)
+{
+  for (std::map<cmStdString, cmStdString>::const_iterator it = map.begin();
+       it != map.end(); ++it)
+    {
+    std::vector<std::string> targets;
+    cmSystemTools::ExpandListArgument(it->second.c_str(), targets);
+    this->LinkDependentProperties[it->first].insert(targets.begin(),
+                                                    targets.end());
+    if (!this->GetProperty(it->first.c_str()))
+      {
+      this->LinkImplicitNullProperties.insert(it->first);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                                     const char *config)
+{
+  bool propContent = this->GetPropertyAsBool(p.c_str());
+  const bool explicitlySet = this->GetProperties()
+                                  .find(p.c_str())
+                                  != this->GetProperties().end();
+  std::set<std::string> dependentTargets;
+  this->GetLinkDependentTargetsForProperty(p,
+                                          dependentTargets);
+  const bool impliedByUse =
+          this->IsNullImpliedByLinkLibraries(p);
+  assert((impliedByUse ^ explicitlySet)
+      || (!impliedByUse && !explicitlySet));
+
+  cmComputeLinkInformation *info = this->GetLinkInformation(config);
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+  bool propInitialized = explicitlySet;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    // An error should be reported if one dependency
+    // has INTERFACE_POSITION_INDEPENDENT_CODE ON and the other
+    // has INTERFACE_POSITION_INDEPENDENT_CODE OFF, or if the
+    // target itself has a POSITION_INDEPENDENT_CODE which disagrees
+    // with a dependency.
+
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    const bool ifaceIsSet = li->Target->GetProperties()
+                            .find("INTERFACE_" + p)
+                            != li->Target->GetProperties().end();
+    const bool ifacePropContent = li->Target->GetPropertyAsBool(
+                              ("INTERFACE_" + p).c_str());
+    if (explicitlySet)
+      {
+      if (ifaceIsSet)
+        {
+        if (propContent != ifacePropContent)
+          {
+          cmOStringStream e;
+          e << "Property " << p << " on target \""
+            << this->GetName() << "\" does\nnot match the "
+            "INTERFACE_" << p << " property requirement\nof "
+            "dependency \"" << li->Target->GetName() << "\".\n";
+          cmSystemTools::Error(e.str().c_str());
+          }
+        else
+          {
+          // Agree
+          continue;
+          }
+        }
+      else
+        {
+        // Explicitly set on target and not set in iface. Can't disagree.
+        continue;
+        }
+      }
+    else if (impliedByUse)
+      {
+      if (ifaceIsSet)
+        {
+        if (propContent != ifacePropContent)
+          {
+          cmOStringStream e;
+          e << "Property " << p << " on target \""
+            << this->GetName() << "\" is\nimplied to be FALSE because it "
+            "was used to determine the link libraries\nalready. The "
+            "INTERFACE_" << p << " property on\ndependency \""
+            << li->Target->GetName() << "\" is in conflict.\n";
+          cmSystemTools::Error(e.str().c_str());
+          }
+        else
+          {
+          // Agree
+          continue;
+          }
+        }
+      else
+        {
+        // Implicitly set on target and not set in iface. Can't disagree.
+        continue;
+        }
+      }
+    else
+      {
+      if (ifaceIsSet)
+        {
+        if (propInitialized)
+          {
+          if (propContent != ifacePropContent)
+            {
+            cmOStringStream e;
+            e << "The INTERFACE_" << p << " property of \""
+              << li->Target->GetName() << "\" does\nnot agree with the value "
+                "of " << p << " already determined\nfor \""
+              << this->GetName() << "\".\n";
+            cmSystemTools::Error(e.str().c_str());
+            }
+          else
+            {
+            // Agree.
+            continue;
+            }
+          }
+        else
+          {
+          propContent = ifacePropContent;
+          propInitialized = true;
+          }
+        }
+      else
+        {
+        // Not set. Nothing to agree on.
+        continue;
+        }
+      }
+    }
+  return propContent;
 }
 
 //----------------------------------------------------------------------------
