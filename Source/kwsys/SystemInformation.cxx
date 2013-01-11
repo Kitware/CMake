@@ -91,6 +91,10 @@ typedef int siginfo_t;
 # include <sys/sysctl.h>
 #endif
 
+#if defined(KWSYS_SYS_HAS_MACHINE_CPU_H)
+# include <machine/cpu.h>
+#endif
+
 #if defined(__DragonFly__)
 # include <sys/sysctl.h>
 #endif
@@ -3026,7 +3030,7 @@ bool SystemInformationImplementation::QueryProcessor()
     return false;
     }
 
-  this->NumberOfPhysicalCPU = c;
+  this->NumberOfPhysicalCPU = static_cast<unsigned int>(c);
   this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
 
   return true;
@@ -4000,6 +4004,81 @@ bool SystemInformationImplementation::ParseSysCtl()
     len = sizeof(value);
     err = sysctlbyname("machdep.cpu.model", &value, &len, NULL, 0);
     this->ChipID.Model = static_cast< int >( value );
+
+    // Chip Stepping
+    len = sizeof(value);
+    value = 0;
+    err = sysctlbyname("machdep.cpu.stepping", &value, &len, NULL, 0);
+    if (!err)
+      {
+      this->ChipID.Revision = static_cast< int >( value );
+      }
+
+    // feature string
+    char *buf = 0;
+    size_t allocSize = 128;
+
+    err = 0;
+    len = 0;
+
+    // sysctlbyname() will return with err==0 && len==0 if the buffer is too small
+    while (err == 0 && len == 0)
+      {
+      delete[] buf;
+      allocSize *= 2;
+      buf = new char[allocSize];
+      if (!buf)
+        {
+        break;
+        }
+      buf[0] = ' ';
+      len = allocSize - 2; // keep space for leading and trailing space
+      err = sysctlbyname("machdep.cpu.features", buf + 1, &len, NULL, 0);
+      }
+    if (!err && buf && len)
+      {
+      // now we can match every flags as space + flag + space
+      buf[len + 1] = ' ';
+      kwsys_stl::string cpuflags(buf, len + 2);
+
+      if ((cpuflags.find(" FPU ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasFPU = true;
+        }
+      if ((cpuflags.find(" TSC ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasTSC = true;
+        }
+      if ((cpuflags.find(" MMX ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasMMX = true;
+        }
+      if ((cpuflags.find(" SSE ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasSSE = true;
+        }
+      if ((cpuflags.find(" SSE2 ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasSSE2 = true;
+        }
+      if ((cpuflags.find(" APIC ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasAPIC = true;
+        }
+      if ((cpuflags.find(" CMOV ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasCMOV = true;
+        }
+      if ((cpuflags.find(" MTRR ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasMTRR = true;
+        }
+      if ((cpuflags.find(" ACPI ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasACPI = true;
+        }
+      }
+    delete[] buf;
     }
 
   // brand string
@@ -4059,13 +4138,12 @@ kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<
   char* data = NULL;
   int length;
   double timeout = 255;
+  int pipe; // pipe id as returned by kwsysProcess_WaitForData()
 
-  while(kwsysProcess_WaitForData(gp,&data,&length,&timeout)) // wait for 1s
+  while( ( pipe = kwsysProcess_WaitForData(gp,&data,&length,&timeout),
+           (pipe == kwsysProcess_Pipe_STDOUT || pipe == kwsysProcess_Pipe_STDERR) ) ) // wait for 1s
     {
-    for(int i=0;i<length;i++)
-      {
-      buffer += data[i];
-      }
+      buffer.append(data, length);
     }
   kwsysProcess_WaitForExit(gp, 0);
 
@@ -4422,6 +4500,45 @@ bool SystemInformationImplementation::QueryBSDProcessor()
     }
 
   this->CPUSpeedInMHz = (float) k;
+#endif
+
+#if defined(CPU_SSE)
+  ctrl[0] = CTL_MACHDEP;
+  ctrl[1] = CPU_SSE;
+
+  if (sysctl(ctrl, 2, &k, &sz, NULL, 0) != 0)
+    {
+    return false;
+    }
+
+  this->Features.HasSSE = (k > 0);
+#endif
+
+#if defined(CPU_SSE2)
+  ctrl[0] = CTL_MACHDEP;
+  ctrl[1] = CPU_SSE2;
+
+  if (sysctl(ctrl, 2, &k, &sz, NULL, 0) != 0)
+    {
+    return false;
+    }
+
+  this->Features.HasSSE2 = (k > 0);
+#endif
+
+#if defined(CPU_CPUVENDOR)
+  ctrl[0] = CTL_MACHDEP;
+  ctrl[1] = CPU_CPUVENDOR;
+  char vbuf[25];
+  ::memset(vbuf, 0, sizeof(vbuf));
+  sz = sizeof(vbuf) - 1;
+  if (sysctl(ctrl, 2, vbuf, &sz, NULL, 0) != 0)
+    {
+    return false;
+    }
+
+  this->ChipID.Vendor = vbuf;
+  this->FindManufacturer();
 #endif
 
   return true;
