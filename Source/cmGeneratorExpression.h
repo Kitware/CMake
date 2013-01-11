@@ -59,6 +59,9 @@ public:
   static std::string Preprocess(const std::string &input,
                                 PreprocessContext context);
 
+  static void Split(const std::string &input,
+                    std::vector<std::string> &output);
+
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);

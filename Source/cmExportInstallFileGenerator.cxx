@@ -229,6 +229,10 @@ cmExportInstallFileGenerator
       this->SetImportDetailProperties(config, suffix,
                                       te->Target, properties, missingTargets);
 
+      this->SetImportLinkInterface(config, suffix,
+                                   cmGeneratorExpression::InstallInterface,
+                                   te->Target, properties, missingTargets);
+
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
       // is done.  Then this can be a propagated include directory.

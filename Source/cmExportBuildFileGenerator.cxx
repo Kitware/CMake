@@ -107,6 +107,10 @@ cmExportBuildFileGenerator
       std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
                                       target, properties, missingTargets);
+      this->SetImportLinkInterface(config, suffix,
+                                   cmGeneratorExpression::BuildInterface,
+                                   target, properties, missingTargets);
+
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
