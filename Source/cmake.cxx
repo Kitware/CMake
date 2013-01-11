@@ -3299,6 +3299,12 @@ int cmake::ExecuteLinkScript(std::vector<std::string>& args)
   int result = 0;
   while(result == 0 && cmSystemTools::GetLineFromStream(fin, command))
     {
+    // Skip empty command lines.
+    if(command.find_first_not_of(" \t") == command.npos)
+      {
+      continue;
+      }
+
     // Setup this command line.
     const char* cmd[2] = {command.c_str(), 0};
     cmsysProcess_SetCommand(cp, cmd);
