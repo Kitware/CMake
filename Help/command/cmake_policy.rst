@@ -76,3 +76,9 @@ use the pre-record policies when they are invoked.  If the function or
 macro implementation sets policies, the changes automatically
 propagate up through callers until they reach the closest nested
 policy stack entry.
+
+::
+
+  cmake_policy(GET_WARNING CMP<NNNN> <variable>)
+
+Populate <variable> with the policy warning message for the given policy.
