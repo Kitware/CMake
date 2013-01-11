@@ -250,6 +250,7 @@ endif()
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
   testExe2libImp testLib3Imp testLib3ImpDep
+  testSharedLibRequired testSharedLibDepends
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
