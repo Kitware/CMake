@@ -3561,7 +3561,7 @@ void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
 bool cmake::GetIsPropertyDefined(const char *name,
                                  cmProperty::ScopeType scope)
 {
-  this->PropertyDefinitions[scope].find(name) !=
+  return this->PropertyDefinitions[scope].find(name) !=
                                       this->PropertyDefinitions[scope].end();
 }
 
