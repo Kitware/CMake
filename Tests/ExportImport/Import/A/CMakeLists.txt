@@ -159,22 +159,19 @@ endif()
 
 add_executable(deps_iface deps_iface.c)
 target_link_libraries(deps_iface testLibDepends)
-set_property(TARGET deps_iface APPEND PROPERTY
-  COMPILE_DEFINITIONS
-    $<TARGET_PROPERTY:testLibDepends,INTERFACE_COMPILE_DEFINITIONS>
-)
-set_property(TARGET deps_iface APPEND PROPERTY
-  INCLUDE_DIRECTORIES
-    $<TARGET_PROPERTY:testLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
-)
+target_include_directories(deps_iface PRIVATE testLibDepends)
+target_compile_definitions(deps_iface PRIVATE testLibDepends)
 
 add_executable(deps_shared_iface deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface testSharedLibDepends)
-set_property(TARGET deps_shared_iface APPEND PROPERTY
-  COMPILE_DEFINITIONS
-    $<TARGET_PROPERTY:testSharedLibDepends,INTERFACE_COMPILE_DEFINITIONS>
-)
-set_property(TARGET deps_shared_iface APPEND PROPERTY
-  INCLUDE_DIRECTORIES
-    $<TARGET_PROPERTY:testSharedLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
-)
+target_include_directories(deps_shared_iface PRIVATE testSharedLibDepends)
+target_compile_definitions(deps_shared_iface PRIVATE testSharedLibDepends)
+
+#-----------------------------------------------------------------------------
+# Test that targets imported from the build tree have their dependencies
+# evaluated correctly. The above already tests the same for the install tree.
+
+add_executable(deps_shared_iface2 deps_shared_iface.cpp)
+target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends)
+target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends)
+target_compile_definitions(deps_shared_iface2 PRIVATE bld_testSharedLibDepends)
