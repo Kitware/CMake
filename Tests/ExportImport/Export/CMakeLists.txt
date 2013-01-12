@@ -186,7 +186,7 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
 )
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   LINK_INTERFACE_LIBRARIES
-    $<1:$<TARGET_NAME:testSharedLibRequired>>
+    $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>
 )
 
 # LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
