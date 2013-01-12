@@ -162,6 +162,10 @@ include(GenerateExportHeader)
 
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
 generate_export_header(testSharedLibRequired)
+set_property(TARGET testSharedLibRequired
+  PROPERTY
+    INTERFACE_POSITION_INDEPENDENT_CODE ON
+)
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
 )
