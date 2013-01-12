@@ -72,6 +72,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
+                                  te, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
     }
