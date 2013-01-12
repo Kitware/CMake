@@ -167,6 +167,24 @@ target_link_libraries(deps_shared_iface testSharedLibDepends)
 target_include_directories(deps_shared_iface PRIVATE testSharedLibDepends)
 target_compile_definitions(deps_shared_iface PRIVATE testSharedLibDepends)
 
+if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-fPIE run_pic_test)
+else()
+  if (CMAKE_CXX_COMPILER_ID MATCHES "PGI"
+      OR CMAKE_CXX_COMPILER_ID MATCHES "PathScale"
+      OR CMAKE_SYSTEM_NAME MATCHES "IRIX64"
+      OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    set(run_pic_test 0)
+  else()
+    set(run_pic_test 1)
+  endif()
+endif()
+
+if (run_pic_test)
+  target_compile_definitions(deps_shared_iface PRIVATE CHECK_PIC_WORKS)
+endif()
+
 #-----------------------------------------------------------------------------
 # Test that targets imported from the build tree have their dependencies
 # evaluated correctly. The above already tests the same for the install tree.

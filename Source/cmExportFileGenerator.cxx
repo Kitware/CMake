@@ -127,6 +127,18 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                                              cmTarget *target,
+                                              ImportPropertyMap &properties)
+{
+  const char *input = target->GetProperty(propName);
+  if (input)
+    {
+    properties[propName] = input;
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
                       const char *outputName,
                       cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
