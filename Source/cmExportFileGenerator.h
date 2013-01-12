@@ -99,6 +99,8 @@ protected:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
+  void PopulateInterfaceProperty(const char *propName, cmTarget *target,
+                                 ImportPropertyMap &properties);
   void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
                                    const ImportPropertyMap &properties);
 

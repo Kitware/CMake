@@ -162,6 +162,10 @@ include(GenerateExportHeader)
 
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
 generate_export_header(testSharedLibRequired)
+set_property(TARGET testSharedLibRequired
+  PROPERTY
+    INTERFACE_POSITION_INDEPENDENT_CODE ON
+)
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
 )
@@ -182,7 +186,7 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
 )
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   LINK_INTERFACE_LIBRARIES
-    $<1:$<TARGET_NAME:testSharedLibRequired>>
+    $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>
 )
 
 # LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
@@ -247,9 +251,11 @@ if(WIN32)
   install(TARGETS testLib5 RUNTIME DESTINATION bin)
 endif()
 
+add_subdirectory(sublib) # For CMAKE_BUILD_INTERFACE_INCLUDES test.
+
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
-  testExe2libImp testLib3Imp testLib3ImpDep
+  testExe2libImp testLib3Imp testLib3ImpDep subdirlib
   testSharedLibRequired testSharedLibDepends
   NAMESPACE bld_
   FILE ExportBuildTree.cmake

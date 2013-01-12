@@ -62,6 +62,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     cmTarget* te = *tei;
     this->GenerateImportTargetCode(os, te);
 
+    te->AppendBuildInterfaceIncludes();
+
     ImportPropertyMap properties;
 
     this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
@@ -70,6 +72,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
+                                  te, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
     }
