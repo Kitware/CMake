@@ -172,6 +172,8 @@ target_compile_definitions(deps_shared_iface PRIVATE testSharedLibDepends)
 # evaluated correctly. The above already tests the same for the install tree.
 
 add_executable(deps_shared_iface2 deps_shared_iface.cpp)
-target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends)
-target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends)
-target_compile_definitions(deps_shared_iface2 PRIVATE bld_testSharedLibDepends)
+target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
+target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends bld_subdirlib)
+target_compile_definitions(deps_shared_iface2
+  PRIVATE bld_testSharedLibDepends TEST_SUBDIR_LIB
+)

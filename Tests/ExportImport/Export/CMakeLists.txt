@@ -247,9 +247,11 @@ if(WIN32)
   install(TARGETS testLib5 RUNTIME DESTINATION bin)
 endif()
 
+add_subdirectory(sublib) # For CMAKE_BUILD_INTERFACE_INCLUDES test.
+
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
-  testExe2libImp testLib3Imp testLib3ImpDep
+  testExe2libImp testLib3Imp testLib3ImpDep subdirlib
   testSharedLibRequired testSharedLibDepends
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
