@@ -941,19 +941,7 @@ void cmGlobalGenerator::Generate()
 
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
-      if (mf->IsOn("CMAKE_BUILD_INTERFACE_INCLUDES"))
-        {
-        const char *binDir = mf->GetStartOutputDirectory();
-        const char *srcDir = mf->GetStartDirectory();
-        const std::string dirs = std::string(binDir ? binDir : "")
-                                + std::string(binDir ? ";" : "")
-                                + std::string(srcDir ? srcDir : "");
-        if (!dirs.empty())
-          {
-          tit->second.AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
-          }
-        }
+        tit->second.AppendBuildInterfaceIncludes();
       }
     }
 

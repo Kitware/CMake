@@ -490,6 +490,8 @@ public:
   void InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
                      bool before = false);
 
+  void AppendBuildInterfaceIncludes();
+
   void GetLinkDependentTargetsForProperty(const std::string &p,
                                        std::set<std::string> &targets);
   bool IsNullImpliedByLinkLibraries(const std::string &p);
@@ -611,6 +613,7 @@ private:
   mutable std::map<cmStdString, std::set<std::string> >
                                                       LinkDependentProperties;
   mutable std::set<std::string> LinkImplicitNullProperties;
+  bool BuildInterfaceIncludesAppended;
 
   // Cache target output paths for each configuration.
   struct OutputInfo;
