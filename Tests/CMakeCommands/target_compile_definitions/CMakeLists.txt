@@ -23,4 +23,6 @@ add_executable(consumer
 
 target_compile_definitions(consumer
   PRIVATE target_compile_definitions importedlib
+  $<$<TARGET_DEFINED:notdefined>:SHOULD_NOT_BE_DEFINED>
+  $<$<TARGET_DEFINED:importedlib>:SHOULD_BE_DEFINED>
 )
