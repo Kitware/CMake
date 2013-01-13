@@ -104,6 +104,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
      << "ENDFOREACH(f)\n"
      << "\n";
 
+  this->GenerateImportedFileCheckLoop(os);
+
   // Generate an import file for each configuration.
   bool result = true;
   for(std::vector<std::string>::const_iterator
@@ -248,8 +250,6 @@ cmExportInstallFileGenerator
                                            importedLocations);
       }
     }
-
-  this->GenerateImportedFileCheckLoop(os);
 
   // Cleanup the import prefix variable.
   if(!this->ImportPrefix.empty())
