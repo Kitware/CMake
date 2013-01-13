@@ -95,7 +95,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateInterfaceProperties(te, os, properties);
     }
 
-  this->GenerateMissingTargetsCheckCode(os, missingTargets);
 
   // Now load per-configuration properties for them.
   os << "# Load information for each installed configuration.\n"
@@ -107,23 +106,29 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
      << "ENDFOREACH(f)\n"
      << "\n";
 
+  this->GenerateImportedFileCheckLoop(os);
+
   // Generate an import file for each configuration.
   bool result = true;
   for(std::vector<std::string>::const_iterator
         ci = this->Configurations.begin();
       ci != this->Configurations.end(); ++ci)
     {
-    if(!this->GenerateImportFileConfig(ci->c_str()))
+    if(!this->GenerateImportFileConfig(ci->c_str(), missingTargets))
       {
       result = false;
       }
     }
+
+  this->GenerateMissingTargetsCheckCode(os, missingTargets);
+
   return result;
 }
 
 //----------------------------------------------------------------------------
 bool
-cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config)
+cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
+                                    std::vector<std::string> &missingTargets)
 {
   // Skip configurations not enabled for this export.
   if(!this->IEGen->InstallsForConfig(config))
@@ -163,7 +168,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config)
   this->GenerateImportHeaderCode(os, config);
 
   // Generate the per-config target information.
-  this->GenerateImportConfig(os, config);
+  this->GenerateImportConfig(os, config, missingTargets);
 
   // End with the import file footer.
   this->GenerateImportFooterCode(os);
@@ -178,7 +183,8 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config)
 void
 cmExportInstallFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
-                              const char* config, std::string const& suffix)
+                              const char* config, std::string const& suffix,
+                              std::vector<std::string> &missingTargets)
 {
   // Add code to compute the installation prefix relative to the
   // import file location.
@@ -227,7 +233,6 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
                                       te->Target, properties, missingTargets);
 
@@ -242,14 +247,11 @@ cmExportInstallFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, te->Target, properties);
       this->GenerateImportedFileChecksCode(os, te->Target, properties,
                                            importedLocations);
       }
     }
-
-  this->GenerateImportedFileCheckLoop(os);
 
   // Cleanup the import prefix variable.
   if(!this->ImportPrefix.empty())

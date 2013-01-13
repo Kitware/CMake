@@ -78,15 +78,15 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateInterfaceProperties(te, os, properties);
     }
 
-  this->GenerateMissingTargetsCheckCode(os, missingTargets);
-
   // Generate import file content for each configuration.
   for(std::vector<std::string>::const_iterator
         ci = this->Configurations.begin();
       ci != this->Configurations.end(); ++ci)
     {
-    this->GenerateImportConfig(os, ci->c_str());
+    this->GenerateImportConfig(os, ci->c_str(), missingTargets);
     }
+
+  this->GenerateMissingTargetsCheckCode(os, missingTargets);
 
   return true;
 }
@@ -95,7 +95,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 void
 cmExportBuildFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
-                              const char* config, std::string const& suffix)
+                              const char* config, std::string const& suffix,
+                            std::vector<std::string> &missingTargets)
 {
   for(std::vector<cmTarget*>::const_iterator
         tei = this->Exports->begin();
@@ -108,7 +109,6 @@ cmExportBuildFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
                                       target, properties, missingTargets);
       this->SetImportLinkInterface(config, suffix,
@@ -123,7 +123,6 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, target, properties);
       }
     }
