@@ -665,6 +665,10 @@ cmExportFileGenerator
 void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
                                 const std::vector<std::string>& missingTargets)
 {
+  if (missingTargets.empty())
+    {
+    return;
+    }
   os << "# Make sure the targets which have been exported in some other \n"
         "# export set exist.\n";
   for(unsigned int i=0; i<missingTargets.size(); ++i)
