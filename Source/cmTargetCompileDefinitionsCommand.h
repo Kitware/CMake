@@ -69,6 +69,9 @@ public:
       "INTERFACE_COMPILE_DEFINITIONS from.  "
       "Repeated calls for the same <target> append items in the order called."
       "\n"
+      "Arguments to target_compile_definitions may use \"generator "
+      "expressions\" with the syntax \"$<...>\".  "
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
       ;
     }
 
