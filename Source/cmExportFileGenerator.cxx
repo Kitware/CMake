@@ -671,19 +671,23 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
     }
   os << "# Make sure the targets which have been exported in some other \n"
         "# export set exist.\n";
+  std::set<std::string> emitted;
   for(unsigned int i=0; i<missingTargets.size(); ++i)
     {
-    os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
-       << "  IF(CMAKE_FIND_PACKAGE_NAME)\n"
-       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
-       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
-       << "\"Required imported target \\\"" << missingTargets[i]
-       << "\\\" not found ! \")\n"
-       << "  ELSE()\n"
-       << "    MESSAGE(FATAL_ERROR \"Required imported target \\\""
-       << missingTargets[i] << "\\\" not found ! \")\n"
-       << "  ENDIF()\n"
-       << "ENDIF()\n";
+    if (emitted.insert(missingTargets[i]).second)
+      {
+      os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
+        << "  IF(CMAKE_FIND_PACKAGE_NAME)\n"
+        << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
+        << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
+        << "\"Required imported target \\\"" << missingTargets[i]
+        << "\\\" not found ! \")\n"
+        << "  ELSE()\n"
+        << "    MESSAGE(FATAL_ERROR \"Required imported target \\\""
+        << missingTargets[i] << "\\\" not found ! \")\n"
+        << "  ENDIF()\n"
+        << "ENDIF()\n";
+      }
     }
   os << "\n";
 }
