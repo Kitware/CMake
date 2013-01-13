@@ -73,6 +73,9 @@ public:
       "directories must be absolute paths, not relative paths.  "
       "Repeated calls for the same <target> append items in the order called."
       "\n"
+      "Arguments to target_include_directories may use \"generator "
+      "expressions\" with the syntax \"$<...>\".  "
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
       ;
     }
 
