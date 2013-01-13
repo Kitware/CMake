@@ -107,7 +107,8 @@ bool cmExportFileGenerator::GenerateImportFile()
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
-                                                 const char* config)
+                                    const char* config,
+                                    std::vector<std::string> &missingTargets)
 {
   // Construct the property configuration suffix.
   std::string suffix = "_";
@@ -121,7 +122,7 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
     }
 
   // Generate the per-config target information.
-  this->GenerateImportTargetsConfig(os, config, suffix);
+  this->GenerateImportTargetsConfig(os, config, suffix, missingTargets);
 }
 
 //----------------------------------------------------------------------------
