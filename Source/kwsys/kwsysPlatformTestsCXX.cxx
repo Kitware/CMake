@@ -580,3 +580,30 @@ int main()
     }
 }
 #endif
+
+#ifdef TEST_KWSYS_CXX_HAS_BORLAND_ASM
+int main()
+{
+  int a = 1;
+  __asm {
+    xor EBX, EBX;
+    mov a, EBX;
+  }
+
+  return a;
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_BORLAND_ASM_CPUID
+int main()
+{
+  int a = 0;
+  __asm {
+    xor EAX, EAX;
+    cpuid;
+    mov a, EAX;
+  }
+
+  return a;
+}
+#endif

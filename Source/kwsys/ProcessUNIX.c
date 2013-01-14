@@ -418,9 +418,10 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
        parse it.  */
     newCommands[cp->NumberOfCommands] =
       kwsysSystem_Parse_CommandForUnix(*command, 0);
-    if(!newCommands[cp->NumberOfCommands])
+    if(!newCommands[cp->NumberOfCommands] ||
+       !newCommands[cp->NumberOfCommands][0])
       {
-      /* Out of memory.  */
+      /* Out of memory or no command parsed.  */
       free(newCommands);
       return 0;
       }
