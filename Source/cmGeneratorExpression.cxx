@@ -171,7 +171,7 @@ static std::string stripEmptyListElements(const std::string &input)
     result += *c;
     }
 
-  if (*(result.end() - 1) == ';')
+  if (!result.empty() && *(result.end() - 1) == ';')
     {
     result.resize(result.size() - 1);
     }
