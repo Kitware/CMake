@@ -626,6 +626,8 @@ private:
                                         cmTarget *head);
 
   cmTargetLinkInformationMap LinkInformation;
+  void CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                  const char* config);
 
   bool ComputeLinkInterface(const char* config, LinkInterface& iface,
                                         cmTarget *head);
