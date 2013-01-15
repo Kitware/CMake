@@ -148,6 +148,38 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 }
 
 //----------------------------------------------------------------------------
+static std::string stripEmptyListElements(const std::string &input)
+{
+  std::string result;
+
+  const char *c = input.c_str();
+  bool skipSemiColons = true;
+  for ( ; *c; ++c)
+    {
+    if(c[0] == ';')
+      {
+      if(skipSemiColons)
+        {
+        continue;
+        }
+      skipSemiColons = true;
+      }
+    else
+      {
+      skipSemiColons = false;
+      }
+    result += *c;
+    }
+
+  if (!result.empty() && *(result.end() - 1) == ';')
+    {
+    result.resize(result.size() - 1);
+    }
+
+  return result;
+}
+
+//----------------------------------------------------------------------------
 static std::string stripAllGeneratorExpressions(const std::string &input)
 {
   std::string result;
@@ -186,7 +218,7 @@ static std::string stripAllGeneratorExpressions(const std::string &input)
     lastPos = pos;
     }
   result += input.substr(lastPos);
-  return result;
+  return stripEmptyListElements(result);
 }
 
 //----------------------------------------------------------------------------
@@ -247,7 +279,7 @@ static std::string stripExportInterface(const std::string &input,
     }
   result += input.substr(lastPos);
 
-  return result;
+  return stripEmptyListElements(result);
 }
 
 //----------------------------------------------------------------------------

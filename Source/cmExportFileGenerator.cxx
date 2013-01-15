@@ -107,7 +107,8 @@ bool cmExportFileGenerator::GenerateImportFile()
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
-                                                 const char* config)
+                                    const char* config,
+                                    std::vector<std::string> &missingTargets)
 {
   // Construct the property configuration suffix.
   std::string suffix = "_";
@@ -121,7 +122,19 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
     }
 
   // Generate the per-config target information.
-  this->GenerateImportTargetsConfig(os, config, suffix);
+  this->GenerateImportTargetsConfig(os, config, suffix, missingTargets);
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                                              cmTarget *target,
+                                              ImportPropertyMap &properties)
+{
+  const char *input = target->GetProperty(propName);
+  if (input)
+    {
+    properties[propName] = input;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -665,21 +678,29 @@ cmExportFileGenerator
 void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
                                 const std::vector<std::string>& missingTargets)
 {
+  if (missingTargets.empty())
+    {
+    return;
+    }
   os << "# Make sure the targets which have been exported in some other \n"
         "# export set exist.\n";
+  std::set<std::string> emitted;
   for(unsigned int i=0; i<missingTargets.size(); ++i)
     {
-    os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
-       << "  IF(CMAKE_FIND_PACKAGE_NAME)\n"
-       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
-       << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
-       << "\"Required imported target \\\"" << missingTargets[i]
-       << "\\\" not found ! \")\n"
-       << "  ELSE()\n"
-       << "    MESSAGE(FATAL_ERROR \"Required imported target \\\""
-       << missingTargets[i] << "\\\" not found ! \")\n"
-       << "  ENDIF()\n"
-       << "ENDIF()\n";
+    if (emitted.insert(missingTargets[i]).second)
+      {
+      os << "IF(NOT TARGET \"" << missingTargets[i] << "\" )\n"
+        << "  IF(CMAKE_FIND_PACKAGE_NAME)\n"
+        << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
+        << "    SET( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
+        << "\"Required imported target \\\"" << missingTargets[i]
+        << "\\\" not found ! \")\n"
+        << "  ELSE()\n"
+        << "    MESSAGE(FATAL_ERROR \"Required imported target \\\""
+        << missingTargets[i] << "\\\" not found ! \")\n"
+        << "  ENDIF()\n"
+        << "ENDIF()\n";
+      }
     }
   os << "\n";
 }

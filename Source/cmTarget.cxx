@@ -150,6 +150,7 @@ cmTarget::cmTarget()
   this->DLLPlatform = false;
   this->IsApple = false;
   this->IsImportedTarget = false;
+  this->BuildInterfaceIncludesAppended = false;
 }
 
 //----------------------------------------------------------------------------
@@ -2678,6 +2679,30 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::AppendBuildInterfaceIncludes()
+{
+  if (this->BuildInterfaceIncludesAppended)
+    {
+    return;
+    }
+  this->BuildInterfaceIncludesAppended = true;
+
+  if (this->Makefile->IsOn("CMAKE_BUILD_INTERFACE_INCLUDES"))
+    {
+    const char *binDir = this->Makefile->GetStartOutputDirectory();
+    const char *srcDir = this->Makefile->GetStartDirectory();
+    const std::string dirs = std::string(binDir ? binDir : "")
+                            + std::string(binDir ? ";" : "")
+                            + std::string(srcDir ? srcDir : "");
+    if (!dirs.empty())
+      {
+      this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                            ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
