@@ -91,6 +91,10 @@ typedef int siginfo_t;
 # include <sys/sysctl.h>
 #endif
 
+#if defined(KWSYS_SYS_HAS_MACHINE_CPU_H)
+# include <machine/cpu.h>
+#endif
+
 #if defined(__DragonFly__)
 # include <sys/sysctl.h>
 #endif
@@ -198,7 +202,7 @@ typedef struct rlimit ResourceLimitType;
 #define USE_CPUID_INTRINSICS 0
 #endif
 
-#if USE_ASM_INSTRUCTIONS || USE_CPUID_INTRINSICS
+#if USE_ASM_INSTRUCTIONS || USE_CPUID_INTRINSICS || defined(KWSYS_CXX_HAS_BORLAND_ASM_CPUID)
 # define USE_CPUID 1
 #else
 # define USE_CPUID 0
@@ -220,6 +224,7 @@ static bool call_cpuid(int select, int result[4])
   return true;
 #else
   int tmp[4];
+#if defined(_MSC_VER)
   // Use SEH to determine CPUID presence
   __try {
     _asm {
@@ -258,7 +263,24 @@ static bool call_cpuid(int select, int result[4])
     return false;
     }
 
-  memcpy(result, tmp, sizeof(tmp));
+    memcpy(result, tmp, sizeof(tmp));
+#elif defined(KWSYS_CXX_HAS_BORLAND_ASM_CPUID)
+  unsigned int a, b, c, d;
+  __asm {
+    mov EAX, select;
+    cpuid
+    mov a, EAX;
+    mov b, EBX;
+    mov c, ECX;
+    mov d, EDX;
+  }
+
+  result[0] = a;
+  result[1] = b;
+  result[2] = c;
+  result[3] = d;
+#endif
+
   // The cpuid instruction succeeded.
   return true;
 #endif
@@ -428,7 +450,7 @@ protected:
   int CPUCount();
   unsigned char LogicalCPUPerPhysicalCPU();
   unsigned char GetAPICId();
-  unsigned int IsHyperThreadingSupported();
+  bool IsHyperThreadingSupported();
   static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int);
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
@@ -452,7 +474,8 @@ protected:
   kwsys_stl::string SysCtlBuffer;
 
   // For Solaris
-  bool QuerySolarisInfo();
+  bool QuerySolarisMemory();
+  bool QuerySolarisProcessor();
   kwsys_stl::string ParseValueFromKStat(const char* arguments);
   kwsys_stl::string RunProcess(kwsys_stl::vector<const char*> args);
 
@@ -477,9 +500,11 @@ protected:
   //For AIX
   bool QueryAIXMemory();
 
+  bool QueryProcessorBySysconf();
   bool QueryProcessor();
 
   // Evaluate the memory information.
+  bool QueryMemoryBySysconf();
   bool QueryMemory();
   size_t TotalVirtualMemory;
   size_t AvailableVirtualMemory;
@@ -1283,7 +1308,7 @@ void SystemInformationImplementation::RunCPUCheck()
 #elif defined(__APPLE__)
   this->ParseSysCtl();
 #elif defined (__SVR4) && defined (__sun)
-  this->QuerySolarisInfo();
+  this->QuerySolarisProcessor();
 #elif defined(__HAIKU__)
   this->QueryHaikuInfo();
 #elif defined(__QNX__)
@@ -1309,7 +1334,7 @@ void SystemInformationImplementation::RunMemoryCheck()
 #if defined(__APPLE__)
   this->ParseSysCtl();
 #elif defined (__SVR4) && defined (__sun)
-  this->QuerySolarisInfo();
+  this->QuerySolarisMemory();
 #elif defined(__HAIKU__)
   this->QueryHaikuInfo();
 #elif defined(__QNX__)
@@ -3012,7 +3037,7 @@ bool SystemInformationImplementation::RetreiveInformationFromCpuInfoFile()
   return true;
 }
 
-bool SystemInformationImplementation::QueryProcessor()
+bool SystemInformationImplementation::QueryProcessorBySysconf()
 {
 #if defined(_SC_NPROC_ONLN) && !defined(_SC_NPROCESSORS_ONLN)
 // IRIX names this slightly different
@@ -3026,13 +3051,18 @@ bool SystemInformationImplementation::QueryProcessor()
     return false;
     }
 
-  this->NumberOfPhysicalCPU = c;
+  this->NumberOfPhysicalCPU = static_cast<unsigned int>(c);
   this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
 
   return true;
 #else
   return false;
 #endif
+}
+
+bool SystemInformationImplementation::QueryProcessor()
+{
+  return this->QueryProcessorBySysconf();
 }
 
 /**
@@ -3555,8 +3585,7 @@ bool SystemInformationImplementation::QueryAIXMemory()
 #endif
 }
 
-/** Query for the memory status */
-bool SystemInformationImplementation::QueryMemory()
+bool SystemInformationImplementation::QueryMemoryBySysconf()
 {
 #if defined(_SC_PHYS_PAGES) && defined(_SC_PAGESIZE)
   // Assume the mmap() granularity as returned by _SC_PAGESIZE is also
@@ -3591,6 +3620,12 @@ bool SystemInformationImplementation::QueryMemory()
 #else
   return false;
 #endif
+}
+
+/** Query for the memory status */
+bool SystemInformationImplementation::QueryMemory()
+{
+  return this->QueryMemoryBySysconf();
 }
 
 /** */
@@ -3725,8 +3760,13 @@ unsigned char SystemInformationImplementation::LogicalCPUPerPhysicalCPU(void)
 
 
 /** Works only for windows */
-unsigned int SystemInformationImplementation::IsHyperThreadingSupported()
+bool SystemInformationImplementation::IsHyperThreadingSupported()
 {
+  if (this->Features.ExtendedFeatures.SupportsHyperthreading)
+    {
+    return true;
+    }
+
 #if USE_CPUID
   int Regs[4] = { 0, 0, 0, 0 },
              VendorId[4] = { 0, 0, 0, 0 };
@@ -3744,13 +3784,15 @@ unsigned int SystemInformationImplementation::IsHyperThreadingSupported()
 
   if (((Regs[0] & FAMILY_ID) == PENTIUM4_ID) || (Regs[0] & EXT_FAMILY_ID))
     {
-    if (VendorId[1] == 'uneG')
+    if (VendorId[1] == 0x756e6547) // 'uneG'
       {
-      if (VendorId[3] == 'Ieni')
+      if (VendorId[3] == 0x49656e69) // 'Ieni'
         {
-        if (VendorId[2] == 'letn')
+        if (VendorId[2] == 0x6c65746e) // 'letn'
           {
-          return(Regs[3] & HT_BIT);    // Genuine Intel with hyper-Threading technology
+          // Genuine Intel with hyper-Threading technology
+          this->Features.ExtendedFeatures.SupportsHyperthreading = ((Regs[3] & HT_BIT) != 0);
+          return this->Features.ExtendedFeatures.SupportsHyperthreading;
           }
         }
       }
@@ -4000,6 +4042,81 @@ bool SystemInformationImplementation::ParseSysCtl()
     len = sizeof(value);
     err = sysctlbyname("machdep.cpu.model", &value, &len, NULL, 0);
     this->ChipID.Model = static_cast< int >( value );
+
+    // Chip Stepping
+    len = sizeof(value);
+    value = 0;
+    err = sysctlbyname("machdep.cpu.stepping", &value, &len, NULL, 0);
+    if (!err)
+      {
+      this->ChipID.Revision = static_cast< int >( value );
+      }
+
+    // feature string
+    char *buf = 0;
+    size_t allocSize = 128;
+
+    err = 0;
+    len = 0;
+
+    // sysctlbyname() will return with err==0 && len==0 if the buffer is too small
+    while (err == 0 && len == 0)
+      {
+      delete[] buf;
+      allocSize *= 2;
+      buf = new char[allocSize];
+      if (!buf)
+        {
+        break;
+        }
+      buf[0] = ' ';
+      len = allocSize - 2; // keep space for leading and trailing space
+      err = sysctlbyname("machdep.cpu.features", buf + 1, &len, NULL, 0);
+      }
+    if (!err && buf && len)
+      {
+      // now we can match every flags as space + flag + space
+      buf[len + 1] = ' ';
+      kwsys_stl::string cpuflags(buf, len + 2);
+
+      if ((cpuflags.find(" FPU ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasFPU = true;
+        }
+      if ((cpuflags.find(" TSC ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasTSC = true;
+        }
+      if ((cpuflags.find(" MMX ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasMMX = true;
+        }
+      if ((cpuflags.find(" SSE ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasSSE = true;
+        }
+      if ((cpuflags.find(" SSE2 ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasSSE2 = true;
+        }
+      if ((cpuflags.find(" APIC ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasAPIC = true;
+        }
+      if ((cpuflags.find(" CMOV ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasCMOV = true;
+        }
+      if ((cpuflags.find(" MTRR ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasMTRR = true;
+        }
+      if ((cpuflags.find(" ACPI ")!=kwsys_stl::string::npos))
+        {
+        this->Features.HasACPI = true;
+        }
+      }
+    delete[] buf;
     }
 
   // brand string
@@ -4059,13 +4176,12 @@ kwsys_stl::string SystemInformationImplementation::RunProcess(kwsys_stl::vector<
   char* data = NULL;
   int length;
   double timeout = 255;
+  int pipe; // pipe id as returned by kwsysProcess_WaitForData()
 
-  while(kwsysProcess_WaitForData(gp,&data,&length,&timeout)) // wait for 1s
+  while( ( pipe = kwsysProcess_WaitForData(gp,&data,&length,&timeout),
+           (pipe == kwsysProcess_Pipe_STDOUT || pipe == kwsysProcess_Pipe_STDERR) ) ) // wait for 1s
     {
-    for(int i=0;i<length;i++)
-      {
-      buffer += data[i];
-      }
+      buffer.append(data, length);
     }
   kwsysProcess_WaitForExit(gp, 0);
 
@@ -4173,16 +4289,40 @@ kwsys_stl::string SystemInformationImplementation::ParseValueFromKStat(const cha
   return value;
 }
 
-
 /** Querying for system information from Solaris */
-bool SystemInformationImplementation::QuerySolarisInfo()
+bool SystemInformationImplementation::QuerySolarisMemory()
 {
-  // Parse values
-  this->NumberOfPhysicalCPU = static_cast<unsigned int>(
-    atoi(this->ParseValueFromKStat("-n syste_misc -s ncpus").c_str()));
-  this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
-  this->Features.ExtendedFeatures.LogicalProcessorsPerPhysical = 1;
+#if defined (__SVR4) && defined (__sun)
+  // Solaris allows querying this value by sysconf, but if this is
+  // a 32 bit process on a 64 bit host the returned memory will be
+  // limited to 4GiB. So if this is a 32 bit process or if the sysconf
+  // method fails use the kstat interface.
+#if SIZEOF_VOID_P == 8
+  if (this->QueryMemoryBySysconf())
+    {
+    return true;
+    }
+#endif
 
+  char* tail;
+  unsigned long totalMemory =
+       strtoul(this->ParseValueFromKStat("-s physmem").c_str(),&tail,0);
+  this->TotalPhysicalMemory = totalMemory/128;
+
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool SystemInformationImplementation::QuerySolarisProcessor()
+{
+  if (!this->QueryProcessorBySysconf())
+    {
+    return false;
+    }
+
+  // Parse values
   this->CPUSpeedInMHz = static_cast<float>(atoi(this->ParseValueFromKStat("-s clock_MHz").c_str()));
 
   // Chip family
@@ -4198,20 +4338,6 @@ bool SystemInformationImplementation::QuerySolarisInfo()
     this->ChipID.Vendor = "Sun";
     this->FindManufacturer();
     }
-
-  // Cache size
-  this->Features.L1CacheSize = 0;
-  this->Features.L2CacheSize = 0;
-
-  char* tail;
-  unsigned long totalMemory =
-       strtoul(this->ParseValueFromKStat("-s physmem").c_str(),&tail,0);
-  this->TotalPhysicalMemory = totalMemory/128;
-
-  // Undefined values (for now at least)
-  this->TotalVirtualMemory = 0;
-  this->AvailablePhysicalMemory = 0;
-  this->AvailableVirtualMemory = 0;
 
   return true;
 }
@@ -4422,6 +4548,45 @@ bool SystemInformationImplementation::QueryBSDProcessor()
     }
 
   this->CPUSpeedInMHz = (float) k;
+#endif
+
+#if defined(CPU_SSE)
+  ctrl[0] = CTL_MACHDEP;
+  ctrl[1] = CPU_SSE;
+
+  if (sysctl(ctrl, 2, &k, &sz, NULL, 0) != 0)
+    {
+    return false;
+    }
+
+  this->Features.HasSSE = (k > 0);
+#endif
+
+#if defined(CPU_SSE2)
+  ctrl[0] = CTL_MACHDEP;
+  ctrl[1] = CPU_SSE2;
+
+  if (sysctl(ctrl, 2, &k, &sz, NULL, 0) != 0)
+    {
+    return false;
+    }
+
+  this->Features.HasSSE2 = (k > 0);
+#endif
+
+#if defined(CPU_CPUVENDOR)
+  ctrl[0] = CTL_MACHDEP;
+  ctrl[1] = CPU_CPUVENDOR;
+  char vbuf[25];
+  ::memset(vbuf, 0, sizeof(vbuf));
+  sz = sizeof(vbuf) - 1;
+  if (sysctl(ctrl, 2, vbuf, &sz, NULL, 0) != 0)
+    {
+    return false;
+    }
+
+  this->ChipID.Vendor = vbuf;
+  this->FindManufacturer();
 #endif
 
   return true;
