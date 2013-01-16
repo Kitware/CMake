@@ -50,7 +50,8 @@ if(NOT DEFINED can_build_tutorial_step5)
   endif()
 endif()
 
-add_custom_target(NonExternalProjectTarget)
+add_custom_target(NonExternalProjectTarget
+  COMMAND ${CMAKE_COMMAND} -E echo NonExternalProjectTarget)
 
 # Empty projects that test all the known ExternalProject_Add argument key words:
 #
