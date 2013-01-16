@@ -33,7 +33,12 @@ target_include_directories(target_include_directories
   PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/poison"
 )
 target_include_directories(target_include_directories
-  BEFORE PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/cure"
+  BEFORE PUBLIC "$<$<TARGET_DEFINED:target_include_directories>:${CMAKE_CURRENT_BINARY_DIR}/cure>"
+)
+
+# Has no effect because the target is not defined:
+target_include_directories(target_include_directories
+  BEFORE PUBLIC "$<$<TARGET_DEFINED:notdefined>:${CMAKE_CURRENT_BINARY_DIR}/poison>"
 )
 
 add_library(importedlib UNKNOWN IMPORTED)
