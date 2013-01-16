@@ -5422,14 +5422,14 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       info = 0;
       }
 
+    // Store the information for this configuration.
+    cmTargetLinkInformationMap::value_type entry(key, info);
+    i = this->LinkInformation.insert(entry).first;
+
     if (info)
       {
       this->CheckPropertyCompatibility(info, config);
       }
-
-    // Store the information for this configuration.
-    cmTargetLinkInformationMap::value_type entry(key, info);
-    i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
 }
