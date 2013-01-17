@@ -145,6 +145,7 @@ cmTarget::cmTarget()
   this->PolicyStatusCMP0003 = cmPolicies::WARN;
   this->PolicyStatusCMP0004 = cmPolicies::WARN;
   this->PolicyStatusCMP0008 = cmPolicies::WARN;
+  this->PolicyStatusCMP0020 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -1499,6 +1500,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0004);
   this->PolicyStatusCMP0008 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0008);
+  this->PolicyStatusCMP0020 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0020);
 }
 
 //----------------------------------------------------------------------------
@@ -5422,14 +5425,14 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       info = 0;
       }
 
+    // Store the information for this configuration.
+    cmTargetLinkInformationMap::value_type entry(key, info);
+    i = this->LinkInformation.insert(entry).first;
+
     if (info)
       {
       this->CheckPropertyCompatibility(info, config);
       }
-
-    // Store the information for this configuration.
-    cmTargetLinkInformationMap::value_type entry(key, info);
-    i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
 }

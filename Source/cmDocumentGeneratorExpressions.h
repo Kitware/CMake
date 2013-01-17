@@ -50,6 +50,10 @@
   "  $<TARGET_PROPERTY:tgt,prop>   = The value of the property prop\n"  \
   "on the target tgt. Note that tgt is not added as a dependency of\n"  \
   "the target this expression is evaluated on.\n"                       \
+  "  $<TARGET_POLICY:pol>          = '1' if the policy was NEW when "   \
+  "the 'head' target was created, else '0'.  If the policy was not "    \
+  "set, the warning message for the policy will be emitted.  This "     \
+  "generator expression only works for a subset of policies.\n"         \
   "Boolean expressions:\n"                                              \
   "  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'\n"    \
   "  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'\n"    \
