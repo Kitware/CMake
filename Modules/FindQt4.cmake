@@ -1062,7 +1062,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     _qt4_add_target_private_depends(phonon DBus)
   endif()
 
-  if (NOT QT4_NO_LINK_QTMAIN)
+  if (WIN32 AND NOT QT4_NO_LINK_QTMAIN)
     set(_isExe $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
     set(_isWin32 $<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>)
     set(_isNotExcluded $<NOT:$<BOOL:$<TARGET_PROPERTY:QT4_NO_LINK_QTMAIN>>>)
