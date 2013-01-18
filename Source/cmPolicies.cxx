@@ -511,7 +511,7 @@ cmPolicies::cmPolicies()
 
   this->DefinePolicy(
     CMP0020, "CMP0020",
-    "Automatically link Qt executables to qtmain target.",
+    "Automatically link Qt executables to qtmain target on Windows.",
     "CMake 2.8.10 and lower required users of Qt to always specify a link "
     "dependency to the qtmain.lib static library manually on Windows.  CMake "
     "2.8.11 gained the ability to evaluate generator expressions while "
