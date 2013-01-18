@@ -4533,6 +4533,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
             "INTERFACE_" << p << " property requirement\nof "
             "dependency \"" << li->Target->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4559,6 +4560,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
             "INTERFACE_" << p << " property on\ndependency \""
             << li->Target->GetName() << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4586,6 +4588,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
                 "of " << p << " already determined\nfor \""
               << this->GetName() << "\".\n";
             cmSystemTools::Error(e.str().c_str());
+            break;
             }
           else
             {
