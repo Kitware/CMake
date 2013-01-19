@@ -53,6 +53,7 @@ add_RunCMake_test(ObjectLibrary)
 if(NOT WIN32)
   add_RunCMake_test(PositionIndependentCode)
 endif()
+add_RunCMake_test(CompatibleInterface)
 
 add_RunCMake_test(build_command)
 add_RunCMake_test(find_package)

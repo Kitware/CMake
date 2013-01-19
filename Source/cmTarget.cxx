@@ -4536,6 +4536,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
             "INTERFACE_" << p << " property requirement\nof "
             "dependency \"" << li->Target->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4562,6 +4563,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
             "INTERFACE_" << p << " property on\ndependency \""
             << li->Target->GetName() << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4589,6 +4591,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
                 "of " << p << " already determined\nfor \""
               << this->GetName() << "\".\n";
             cmSystemTools::Error(e.str().c_str());
+            break;
             }
           else
             {
@@ -5401,6 +5404,105 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
           }
         }
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+void setImplicitProperty(cmTarget *depender, cmTarget *dependee,
+                         const char *propName,
+                         std::set<cmStdString> &emitted,
+                         const char *config)
+{
+  const char *prop = dependee->GetProperty(propName);
+  if (!prop)
+    {
+    return;
+    }
+
+  std::vector<std::string> props;
+  cmSystemTools::ExpandListArgument(prop, props);
+
+  for(std::vector<std::string>::iterator pi = props.begin();
+      pi != props.end(); ++pi)
+    {
+    if(emitted.insert(*pi).second)
+      {
+      if (depender->GetProperty(pi->c_str()))
+        {
+        continue;
+        }
+      bool result = depender->GetLinkInterfaceDependentBoolProperty(
+                                                                  pi->c_str(),
+                                                                  config);
+
+      if (cmSystemTools::GetErrorOccuredFlag())
+        {
+        return;
+        }
+      depender->SetProperty(pi->c_str(), result ? "ON" : "OFF");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::SpecifyImplicitProperties(const char *config)
+{
+  cmComputeLinkInformation* info = this->GetLinkInformation(config);
+
+  if (!info)
+    {
+    return;
+    }
+
+  {
+  if (!this->GetProperty("POSITION_INDEPENDENT_CODE"))
+    {
+    bool pic_result
+              = this->GetLinkInterfaceDependentBoolProperty(
+                                                  "POSITION_INDEPENDENT_CODE",
+                                                  config);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    this->SetProperty("POSITION_INDEPENDENT_CODE", pic_result ? "ON" : "OFF");
+    }
+  }
+
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  std::set<cmStdString> emitted;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    setImplicitProperty(this, li->Target,
+                              "COMPATIBLE_INTERFACE_BOOL", emitted, config);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::SpecifyImplicitProperties()
+{
+  this->SpecifyImplicitProperties(0);
+
+  std::vector<std::string> configNames;
+  this->Makefile->GetConfigurations(configNames);
+
+  for (std::vector<std::string>::const_iterator ci = configNames.begin();
+    ci != configNames.end(); ++ci)
+    {
+    this->SpecifyImplicitProperties(ci->c_str());
     }
 }
 
