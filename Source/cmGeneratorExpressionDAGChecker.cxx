@@ -106,3 +106,16 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
     }
   return DAG;
 }
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
+{
+  const cmGeneratorExpressionDAGChecker *top = this;
+  const cmGeneratorExpressionDAGChecker *parent = this->Parent;
+  while (parent)
+    {
+    parent = parent->Parent;
+    top = parent;
+    }
+  return top->Property == "LINK_LIBRARIES";
+}

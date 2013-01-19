@@ -4613,6 +4613,53 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
+bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
+                             const char *interfaceProperty,
+                             const char *config)
+{
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    const char *prop = li->Target->GetProperty(interfaceProperty);
+    if (!prop)
+      {
+      return false;
+      }
+
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop, props);
+
+    for(std::vector<std::string>::iterator pi = props.begin();
+        pi != props.end(); ++pi)
+      {
+      if (*pi == p)
+        {
+        return true;
+        }
+      }
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                           const char *config)
+{
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 {
   for(std::vector<cmSourceFile*>::const_iterator
