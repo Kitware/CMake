@@ -1097,8 +1097,6 @@ void cmGlobalGenerator::CreateGeneratorTargets()
       {
       cmTarget* t = &ti->second;
 
-      t->SpecifyImplicitProperties();
-
       {
       t->AppendProperty("COMPILE_DEFINITIONS", noconfig_compile_definitions);
       for(std::vector<std::string>::const_iterator ci = configs.begin();

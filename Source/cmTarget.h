@@ -495,7 +495,8 @@ public:
   void GetLinkDependentTargetsForProperty(const std::string &p,
                                        std::set<std::string> &targets);
   bool IsNullImpliedByLinkLibraries(const std::string &p);
-  void SpecifyImplicitProperties();
+  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                            const char *config);
 
   void AddLinkDependentTargetsForProperties(
           const std::map<cmStdString, cmStdString> &map);
@@ -648,8 +649,6 @@ private:
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt);
-
-  void SpecifyImplicitProperties(const char *config);
 
   // The cmMakefile instance that owns this target.  This should
   // always be set.
