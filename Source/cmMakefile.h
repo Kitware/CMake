@@ -870,6 +870,9 @@ public:
     return this->IncludeDirectoriesEntries;
   }
 
+  bool IsGeneratingBuildSystem(){ return this->GeneratingBuildSystem; }
+  void SetGeneratingBuildSystem(){ this->GeneratingBuildSystem = true; }
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -1019,6 +1022,9 @@ private:
 
   // Enforce rules about CMakeLists.txt files.
   void EnforceDirectoryLevelRules();
+
+  bool GeneratingBuildSystem;
+
 };
 
 //----------------------------------------------------------------------------
