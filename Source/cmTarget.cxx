@@ -151,6 +151,7 @@ cmTarget::cmTarget()
   this->IsApple = false;
   this->IsImportedTarget = false;
   this->BuildInterfaceIncludesAppended = false;
+  this->DebugIncludesDone = false;
 }
 
 //----------------------------------------------------------------------------
@@ -2739,10 +2740,16 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
     cmSystemTools::ExpandListArgument(debugProp, debugProperties);
     }
 
-  bool debugIncludes = std::find(debugProperties.begin(),
+  bool debugIncludes = !this->DebugIncludesDone
+                    && std::find(debugProperties.begin(),
                                  debugProperties.end(),
                                  "INCLUDE_DIRECTORIES")
                         != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->DebugIncludesDone = true;
+    }
 
   for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
       it = this->Internal->IncludeDirectoriesEntries.begin(),
