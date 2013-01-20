@@ -54,7 +54,7 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
-      "  target_include_directories(<target> [BEFORE] "
+      "  target_include_directories(<target> [SYSTEM] [BEFORE] "
       "<INTERFACE|PUBLIC|PRIVATE> [items1...]\n"
       "    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])\n"
       "Specify include directories or targets to use when compiling a given "
@@ -87,7 +87,11 @@ private:
 
   virtual void HandleDirectContent(cmTarget *tgt,
                                    const std::vector<std::string> &content,
-                                   bool prepend);
+                                   bool prepend, bool system);
+  virtual void HandleInterfaceContent(cmTarget *tgt,
+                                   const std::vector<std::string> &content,
+                                   bool prepend, bool system);
+
   virtual std::string Join(const std::vector<std::string> &content);
 };
 

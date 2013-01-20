@@ -25,7 +25,8 @@ public:
 
   enum ArgumentFlags {
     NO_FLAGS = 0,
-    PROCESS_BEFORE = 1
+    PROCESS_BEFORE = 1,
+    PROCESS_SYSTEM = 2
   };
 
   bool HandleArguments(std::vector<std::string> const& args,
@@ -38,21 +39,22 @@ protected:
 
   virtual void HandleInterfaceContent(cmTarget *tgt,
                                    const std::vector<std::string> &content,
-                                   bool prepend);
+                                   bool prepend, bool system);
 private:
   virtual void HandleImportedTarget(const std::string &tgt) = 0;
   virtual void HandleMissingTarget(const std::string &name) = 0;
 
   virtual void HandleDirectContent(cmTarget *tgt,
                                    const std::vector<std::string> &content,
-                                   bool prepend) = 0;
+                                   bool prepend, bool system) = 0;
+
   virtual std::string Join(const std::vector<std::string> &content) = 0;
 
   bool ProcessContentArgs(std::vector<std::string> const& args,
-                          unsigned int &argIndex, bool prepend);
+                          unsigned int &argIndex, bool prepend, bool system);
   void PopulateTargetProperies(const std::string &scope,
                                const std::vector<std::string> &content,
-                               bool prepend);
+                               bool prepend, bool system);
 };
 
 #endif
