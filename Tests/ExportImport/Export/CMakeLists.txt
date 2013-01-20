@@ -173,6 +173,15 @@ set_property(TARGET testSharedLibRequired APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
                                 "${CMAKE_CURRENT_SOURCE_DIR}"
 )
+set_property(TARGET testSharedLibRequired
+  APPEND PROPERTY
+    COMPATIBLE_INTERFACE_BOOL CUSTOM_PROP
+)
+set_property(TARGET testSharedLibRequired
+  PROPERTY
+    INTERFACE_CUSTOM_PROP ON
+)
+
 
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
