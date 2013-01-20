@@ -162,6 +162,19 @@ target_link_libraries(deps_iface testLibDepends)
 target_include_directories(deps_iface PRIVATE testLibDepends)
 target_compile_definitions(deps_iface PRIVATE testLibDepends)
 
+target_link_libraries(testSharedLibDepends
+  LINK_INTERFACE_LIBRARIES
+    testSharedLibImportDepend
+)
+target_include_directories(testSharedLibDepends
+  INTERFACE
+    testSharedLibImportDepend
+)
+target_compile_definitions(testSharedLibDepends
+  INTERFACE
+    testSharedLibImportDepend
+)
+
 add_executable(deps_shared_iface deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface testSharedLibDepends)
 target_include_directories(deps_shared_iface PRIVATE testSharedLibDepends)
@@ -181,6 +194,9 @@ else()
   endif()
 endif()
 
+# LinkDependent libraries are populated on export. Why? Should they be?
+# Does that depend on the non-genex content of LINK_INTERFACE_LIBRARIES?
+
 if (run_pic_test)
   target_compile_definitions(deps_shared_iface PRIVATE CHECK_PIC_WORKS)
 endif()
@@ -189,6 +205,18 @@ endif()
 # Test that targets imported from the build tree have their dependencies
 # evaluated correctly. The above already tests the same for the install tree.
 
+target_link_libraries(bld_testSharedLibDepends
+  LINK_INTERFACE_LIBRARIES
+    bld_testSharedLibImportDepend
+)
+target_include_directories(bld_testSharedLibDepends
+  INTERFACE
+  bld_testSharedLibImportDepend
+)
+target_compile_definitions(bld_testSharedLibDepends
+  INTERFACE
+  bld_testSharedLibImportDepend
+)
 add_executable(deps_shared_iface2 deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
 target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends bld_subdirlib)

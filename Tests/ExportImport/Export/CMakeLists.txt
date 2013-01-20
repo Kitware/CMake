@@ -180,6 +180,12 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
 )
 generate_export_header(testSharedLibDepends)
 
+add_library(testSharedLibImportDepend SHARED testSharedLibImportDepend.cpp)
+set_property(TARGET testSharedLibImportDepend APPEND PROPERTY
+  INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
+)
+generate_export_header(testSharedLibImportDepend)
+
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES
     $<TARGET_PROPERTY:testSharedLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
@@ -203,7 +209,7 @@ install(TARGETS testLibRequired
         EXPORT RequiredExp DESTINATION lib )
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredConfig.cmake DESTINATION lib/cmake/testLibRequired)
 
-install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
+install(TARGETS testLibDepends testSharedLibDepends testSharedLibImportDepend EXPORT DependsExp DESTINATION lib )
 install(EXPORT DependsExp FILE testLibDependsConfig.cmake DESTINATION lib/cmake/testLibDepends)
 
 
@@ -256,7 +262,7 @@ add_subdirectory(sublib) # For CMAKE_BUILD_INTERFACE_INCLUDES test.
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
   testExe2libImp testLib3Imp testLib3ImpDep subdirlib
-  testSharedLibRequired testSharedLibDepends
+  testSharedLibRequired testSharedLibDepends testSharedLibImportDepend
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
