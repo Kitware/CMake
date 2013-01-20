@@ -84,7 +84,8 @@ public:
 
 protected:
   // used internally
-  void AddDirectory(const char *arg, bool before, bool system);
+  void GetIncludes(const std::string &arg, std::vector<std::string> &incs);
+  void NormalizeInclude(std::string &inc);
 };
 
 

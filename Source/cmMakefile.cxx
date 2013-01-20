@@ -1616,20 +1616,31 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
+void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
+                                       bool before)
 {
-  if (!inc)
+  if (incs.empty())
     {
     return;
     }
 
+  std::string incString;
+  std::string sep;
+
+  for(std::vector<std::string>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    incString += sep + *li;
+    sep = ";";
+    }
+
   std::vector<IncludeDirectoriesEntry>::iterator position =
-                               before ? this->IncludeDirectoriesEntries.begin()
-                                      : this->IncludeDirectoriesEntries.end();
+                              before ? this->IncludeDirectoriesEntries.begin()
+                                    : this->IncludeDirectoriesEntries.end();
 
   cmListFileBacktrace lfbt;
   this->GetBacktrace(lfbt);
-  IncludeDirectoriesEntry entry(inc, lfbt);
+  IncludeDirectoriesEntry entry(incString, lfbt);
   this->IncludeDirectoriesEntries.insert(position, entry);
 
   // Property on each target:
@@ -1642,9 +1653,10 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddSystemIncludeDirectory(const char* dir)
+void
+cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
 {
-  this->SystemIncludeDirectories.insert(dir);
+  this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 }
 
 //----------------------------------------------------------------------------
