@@ -99,6 +99,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
+  this->GeneratingBuildSystem = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
