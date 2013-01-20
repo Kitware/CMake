@@ -287,7 +287,8 @@ public:
   /**
    * Add an include directory to the build.
    */
-  void AddIncludeDirectory(const char*, bool before = false);
+  void AddIncludeDirectories(const std::vector<std::string> &incs,
+                             bool before = false);
 
   /**
    * Add a variable definition to the build. This variable
@@ -545,7 +546,7 @@ public:
   /**
    * Mark include directories as system directories.
    */
-  void AddSystemIncludeDirectory(const char* dir);
+  void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
   bool IsSystemIncludeDirectory(const char* dir);
 
   /** Expand out any arguements in the vector that have ; separated
