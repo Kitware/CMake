@@ -2,13 +2,6 @@ CMake Warning at DebugIncludes.cmake:8 \(include_directories\):
   Used includes:
 
    \* .*/Tests/RunCMake/include_directories/one
-
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
-+
-CMake Warning at DebugIncludes.cmake:8 \(include_directories\):
-  Used includes:
-
    \* .*/Tests/RunCMake/include_directories/two
 
 Call Stack \(most recent call first\):
