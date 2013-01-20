@@ -285,6 +285,15 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     this->Makefile->GetCMakeInstance()->GetDebugConfigs();
   std::string prop;
 
+  std::string prefix;
+  std::string suffix;
+
+  if (this->Target->IsImported())
+    {
+    prefix = "IMPORTED_";
+    suffix = "_NOCONFIG";
+    }
+
   // Include this library in the link interface for the target.
   if(llt == cmTarget::DEBUG || llt == cmTarget::GENERAL)
     {
@@ -292,7 +301,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
         i != debugConfigs.end(); ++i)
       {
-      prop = "LINK_INTERFACE_LIBRARIES_";
+      prop = prefix + "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
       this->Target->AppendProperty(prop.c_str(), lib);
       }
@@ -300,14 +309,14 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
   if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
     {
     // Put in the non-DEBUG configuration interfaces.
-    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+    this->Target->AppendProperty((prefix + "LINK_INTERFACE_LIBRARIES" + suffix).c_str(), lib);
 
     // Make sure the DEBUG configuration interfaces exist so that the
     // general one will not be used as a fall-back.
     for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
         i != debugConfigs.end(); ++i)
       {
-      prop = "LINK_INTERFACE_LIBRARIES_";
+      prop = prefix + "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
       if(!this->Target->GetProperty(prop.c_str()))
         {
