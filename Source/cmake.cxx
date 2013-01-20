@@ -4394,6 +4394,10 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     isError = true;
     msg << "CMake Internal Error (please report a bug)";
     }
+  else if(t == cmake::LOG)
+    {
+    msg << "CMake Debug Log";
+    }
   else
     {
     msg << "CMake Warning";
