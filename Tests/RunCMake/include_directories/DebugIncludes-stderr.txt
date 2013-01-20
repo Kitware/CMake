@@ -1,4 +1,4 @@
-CMake Warning at DebugIncludes.cmake:8 \(include_directories\):
+CMake Debug Log at DebugIncludes.cmake:8 \(include_directories\):
   Used includes for target lll:
 
    \* .*/Tests/RunCMake/include_directories/one
@@ -7,7 +7,7 @@ CMake Warning at DebugIncludes.cmake:8 \(include_directories\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Warning at DebugIncludes.cmake:13 \(set_property\):
+CMake Debug Log at DebugIncludes.cmake:13 \(set_property\):
   Used includes for target lll:
 
    \* .*/Tests/RunCMake/include_directories/three
@@ -15,7 +15,7 @@ CMake Warning at DebugIncludes.cmake:13 \(set_property\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Warning at DebugIncludes.cmake:18 \(include_directories\):
+CMake Debug Log at DebugIncludes.cmake:18 \(include_directories\):
   Used includes for target lll:
 
    \* .*/Tests/RunCMake/include_directories/four
@@ -23,7 +23,7 @@ CMake Warning at DebugIncludes.cmake:18 \(include_directories\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Warning at DebugIncludes.cmake:25 \(set_property\):
+CMake Debug Log at DebugIncludes.cmake:25 \(set_property\):
   Used includes for target lll:
 
    \* .*/Tests/RunCMake/include_directories/five
