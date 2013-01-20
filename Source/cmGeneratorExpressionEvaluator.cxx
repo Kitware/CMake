@@ -442,6 +442,27 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     const char *prop = target->GetProperty(propertyName.c_str());
     if (!prop)
       {
+      if (target->IsImported())
+        {
+        return std::string();
+        }
+      if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
+        {
+        return std::string();
+        }
+      if (propertyName == "POSITION_INDEPENDENT_CODE")
+        {
+        return target->GetLinkInterfaceDependentBoolProperty(
+                    "POSITION_INDEPENDENT_CODE", context->Config) ? "1" : "0";
+        }
+      if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
+                                                       context->Config))
+        {
+        return target->GetLinkInterfaceDependentBoolProperty(
+                                                propertyName,
+                                                context->Config) ? "1" : "0";
+        }
+
       return std::string();
       }
 
