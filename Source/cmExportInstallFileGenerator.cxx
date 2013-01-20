@@ -57,7 +57,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     else
       {
       cmOStringStream e;
-      e << "INSTALL(EXPORT \""
+      e << "install(EXPORT \""
         << this->IEGen->GetExportSet()->GetName()
         << "\" ...) " << "includes target \"" << te->Target->GetName()
         << "\" more than once in the export set.";
@@ -99,12 +99,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Now load per-configuration properties for them.
   os << "# Load information for each installed configuration.\n"
-     << "GET_FILENAME_COMPONENT(_DIR \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n"
-     << "FILE(GLOB CONFIG_FILES \"${_DIR}/"
+     << "get_filename_component(_DIR \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n"
+     << "file(GLOB CONFIG_FILES \"${_DIR}/"
      << this->GetConfigImportFileGlob() << "\")\n"
-     << "FOREACH(f ${CONFIG_FILES})\n"
-     << "  INCLUDE(${f})\n"
-     << "ENDFOREACH(f)\n"
+     << "foreach(f ${CONFIG_FILES})\n"
+     << "  include(${f})\n"
+     << "endforeach()\n"
      << "\n";
 
   this->GenerateImportedFileCheckLoop(os);
@@ -194,12 +194,12 @@ cmExportInstallFileGenerator
     {
     std::string dest = installDest;
     os << "# Compute the installation prefix relative to this file.\n"
-       << "GET_FILENAME_COMPONENT(_IMPORT_PREFIX "
+       << "get_filename_component(_IMPORT_PREFIX "
        << "\"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
     while(!dest.empty())
       {
       os <<
-        "GET_FILENAME_COMPONENT(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
+        "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
       dest = cmSystemTools::GetFilenamePath(dest);
       }
     os << "\n";
@@ -258,7 +258,7 @@ cmExportInstallFileGenerator
   if(!this->ImportPrefix.empty())
     {
     os << "# Cleanup temporary variables.\n"
-       << "SET(_IMPORT_PREFIX)\n"
+       << "set(_IMPORT_PREFIX)\n"
        << "\n";
     }
 }
@@ -428,7 +428,7 @@ cmExportInstallFileGenerator
 {
   const char* installDest = this->IEGen->GetDestination();
   cmOStringStream e;
-  e << "INSTALL(EXPORT \""
+  e << "install(EXPORT \""
     << this->IEGen->GetExportSet()->GetName()
     << "\") given absolute "
     << "DESTINATION \"" << installDest << "\" but the export "
@@ -446,7 +446,7 @@ cmExportInstallFileGenerator
                              int occurrences)
 {
   cmOStringStream e;
-  e << "INSTALL(EXPORT \""
+  e << "install(EXPORT \""
     << this->IEGen->GetExportSet()->GetName()
     << "\" ...) "
     << "includes target \"" << depender->GetName()
