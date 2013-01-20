@@ -1520,6 +1520,13 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkClosureMap.clear();
+  for (cmTargetLinkInformationMap::const_iterator it
+      = this->LinkInformation.begin();
+      it != this->LinkInformation.end(); ++it)
+    {
+    delete it->second;
+    }
+  this->LinkInformation.clear();
 }
 
 //----------------------------------------------------------------------------
