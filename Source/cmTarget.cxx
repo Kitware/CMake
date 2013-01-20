@@ -4643,7 +4643,7 @@ bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
     const char *prop = li->Target->GetProperty(interfaceProperty);
     if (!prop)
       {
-      return false;
+      continue;
       }
 
     std::vector<std::string> props;
