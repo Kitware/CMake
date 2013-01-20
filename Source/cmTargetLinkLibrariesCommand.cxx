@@ -309,7 +309,8 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
   if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
     {
     // Put in the non-DEBUG configuration interfaces.
-    this->Target->AppendProperty((prefix + "LINK_INTERFACE_LIBRARIES" + suffix).c_str(), lib);
+    this->Target->AppendProperty(
+                (prefix + "LINK_INTERFACE_LIBRARIES" + suffix).c_str(), lib);
 
     // Make sure the DEBUG configuration interfaces exist so that the
     // general one will not be used as a fall-back.
