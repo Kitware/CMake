@@ -2785,8 +2785,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
     if (!usedIncludes.empty())
       {
       this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG,
-                            "Used includes:\n" + usedIncludes,
-                            (*it)->ge->GetBacktrace());
+                            "Used includes for target " + this->Name + ":\n"
+                            + usedIncludes, (*it)->ge->GetBacktrace());
       }
     }
   return includes;
