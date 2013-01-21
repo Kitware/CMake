@@ -71,7 +71,11 @@ bool cmIncludeDirectoryCommand
       }
     if (system)
       {
-      systemIncludes.insert(includes.begin(), includes.end());
+      for (std::vector<std::string>::const_iterator li = includes.begin();
+        li != includes.end(); ++li)
+        {
+        systemIncludes.insert(*li);
+        }
       }
     }
   std::reverse(beforeIncludes.begin(), beforeIncludes.end());
