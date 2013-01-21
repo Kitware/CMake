@@ -80,9 +80,9 @@ bool cmTargetPropCommandBase
     return false;
     }
 
-  if(this->Target->IsImported() && scope != "INTERFACE")
+  if(this->Target->IsImported())
     {
-    this->HandleImportedTargetInvalidScope(args[0], scope);
+    this->HandleImportedTarget(args[0]);
     return false;
     }
 

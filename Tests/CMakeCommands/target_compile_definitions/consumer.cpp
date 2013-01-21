@@ -11,10 +11,6 @@
 #error Expected MY_INTERFACE_DEFINE
 #endif
 
-#ifndef MY_IMPORTEDINTERFACE_DEFINE
-#error Expected MY_IMPORTEDINTERFACE_DEFINE
-#endif
-
 #ifdef SHOULD_NOT_BE_DEFINED
 #error Unexpected SHOULD_NOT_BE_DEFINED
 #endif
