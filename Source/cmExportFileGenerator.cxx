@@ -190,7 +190,11 @@ void getPropertyContents(cmTarget *tgt, const char *prop,
     }
   std::vector<std::string> content;
   cmSystemTools::ExpandListArgument(p, content);
-  ifaceProperties.insert(content.begin(), content.end());
+  for (std::vector<std::string>::const_iterator ci = content.begin();
+    ci != content.end(); ++ci)
+    {
+    ifaceProperties.insert(*ci);
+    }
 }
 
 //----------------------------------------------------------------------------
