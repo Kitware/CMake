@@ -505,7 +505,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   //   }
 
   // Add shared-library flags if needed.
-  lg->AddCMP0018Flags(flags, target, language);
+  lg->AddCMP0018Flags(flags, target, language, config);
 
   // Add include directory flags.
   {
