@@ -65,6 +65,12 @@
 #       is much more flexible, but requires that FindQt4.cmake is executed before
 #       such an exported dependency file is processed.
 #
+#       Note that if using IMPORTED targets, the qtmain.lib static library is
+#       automatically linked on Windows. To disable that globally, set the
+#       QT4_NO_LINK_QTMAIN variable before finding Qt4. To disable that for a
+#       particular executable, set the QT4_NO_LINK_QTMAIN target property to
+#       True on the executable.
+#
 #  QT_INCLUDE_DIRS_NO_SYSTEM
 #        If this variable is set to TRUE, the Qt include directories
 #        in the QT_USE_FILE will NOT have the SYSTEM keyword set.
@@ -1009,7 +1015,14 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # platform dependent libraries
   if(Q_WS_WIN)
     _QT4_ADJUST_LIB_VARS(qtmain)
+
     _QT4_ADJUST_LIB_VARS(QAxServer)
+    set_property(TARGET Qt4::QAxServer PROPERTY
+      INTERFACE_QT4_NO_LINK_QTMAIN ON
+    )
+    set_property(TARGET Qt4::QAxServer APPEND PROPERTY
+      COMPATIBLE_INTERFACE_BOOL QT4_NO_LINK_QTMAIN)
+
     _QT4_ADJUST_LIB_VARS(QAxContainer)
   endif()
 
@@ -1047,6 +1060,21 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   _qt4_add_target_private_depends(phonon Gui)
   if(QT_QTDBUS_FOUND)
     _qt4_add_target_private_depends(phonon DBus)
+  endif()
+
+  if (WIN32 AND NOT QT4_NO_LINK_QTMAIN)
+    set(_isExe $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
+    set(_isWin32 $<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>)
+    set(_isNotExcluded $<NOT:$<BOOL:$<TARGET_PROPERTY:QT4_NO_LINK_QTMAIN>>>)
+    set(_isPolicyNEW $<TARGET_POLICY:CMP0020>)
+    set_property(TARGET Qt4::QtCore APPEND PROPERTY
+      IMPORTED_LINK_INTERFACE_LIBRARIES
+        $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt4::qtmain>
+    )
+    unset(_isExe)
+    unset(_isWin32)
+    unset(_isNotExcluded)
+    unset(_isPolicyNEW)
   endif()
 
   #######################################

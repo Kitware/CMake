@@ -60,6 +60,7 @@ add_RunCMake_test(find_package)
 add_RunCMake_test(include)
 add_RunCMake_test(include_directories)
 add_RunCMake_test(list)
+add_RunCMake_test(CMP0004)
 
 if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
