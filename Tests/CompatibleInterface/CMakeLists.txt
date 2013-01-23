@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(CompatibleInterface)
 
+include(GenerateExportHeader)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 add_library(iface1 empty.cpp)
 set_property(TARGET iface1 APPEND PROPERTY
   COMPATIBLE_INTERFACE_BOOL
@@ -28,7 +31,9 @@ target_compile_definitions(CompatibleInterface
     $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP3>>:BOOL_PROP3>
 )
 
-add_library(iface2 SHARED empty.cpp)
+
+add_library(iface2 SHARED iface2.cpp)
+generate_export_header(iface2)
 
 # For the LINK_LIBRARIES and related properties, we should not evaluate
 # properties defined only in the interface - they should be implicitly zero
