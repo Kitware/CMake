@@ -616,6 +616,7 @@ private:
   bool DLLPlatform;
   bool IsApple;
   bool IsImportedTarget;
+  bool DebugIncludesDone;
   mutable std::map<cmStdString, std::set<std::string> >
                                                       LinkDependentProperties;
   mutable std::set<std::string> LinkImplicitNullProperties;
