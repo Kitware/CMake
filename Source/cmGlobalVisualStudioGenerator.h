@@ -65,9 +65,15 @@ public:
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
 
+  /** Get the top-level registry key for the given VS version.  */
+  static std::string GetRegistryBase(const char* version);
+
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return true; }
+
+  /** Return true if building for Windows CE */
+  virtual bool TargetsWindowsCE() const { return false; }
 
   class TargetSet: public std::set<cmTarget*> {};
   struct TargetCompare
@@ -98,7 +104,7 @@ protected:
   std::string GetUtilityDepend(cmTarget* target);
   typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
-  const char* ArchitectureId;
+  std::string ArchitectureId;
   const char* AdditionalPlatformDefinition;
 
 private:

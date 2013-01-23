@@ -33,6 +33,7 @@ public:
   virtual std::string GetUserMacrosDirectory() { return ""; }
 protected:
   virtual const char* GetIDEVersion() { return "11.0"; }
+  bool UseFolderProperty();
 private:
   class Factory;
 };

@@ -1,0 +1,42 @@
+CMake Warning at DebugIncludes.cmake:8 \(include_directories\):
+  Used includes:
+
+   \* .*/Tests/RunCMake/include_directories/one
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Warning at DebugIncludes.cmake:8 \(include_directories\):
+  Used includes:
+
+   \* .*/Tests/RunCMake/include_directories/two
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Warning at DebugIncludes.cmake:13 \(set_property\):
+  Used includes:
+
+   \* .*/Tests/RunCMake/include_directories/three
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Warning at DebugIncludes.cmake:18 \(include_directories\):
+  Used includes:
+
+   \* .*/Tests/RunCMake/include_directories/four
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
++
+CMake Warning at DebugIncludes.cmake:25 \(set_property\):
+  Used includes:
+
+   \* .*/Tests/RunCMake/include_directories/five
+   \* .*/Tests/RunCMake/include_directories/six
+
+Call Stack \(most recent call first\):
+  DebugIncludes.cmake:35 \(some_macro\)
+  DebugIncludes.cmake:38 \(some_function\)
+  CMakeLists.txt:3 \(include\)

@@ -102,11 +102,53 @@ list(APPEND platforms linux64_test1)
 #-----------------------------------------------------------------------------
 # Mac
 
+# gcc -arch i686 dummy.c -v -Wl,-v
+set(mac_i686_gcc_Wlv_text " /usr/libexec/gcc/i686-apple-darwin10/4.2.1/collect2 -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/tmp//ccnhXAGL.o -lSystem -lgcc -lSystem
+collect2 version 4.2.1 (Apple Inc. build 5646) (i686 Darwin)
+/usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/tmp//ccSiuUhD.o -v -lSystem -lgcc -lSystem
+@(#)PROGRAM:ld  PROJECT:ld64-95.2.12
+Library search paths:
+	/usr/lib/i686-apple-darwin10/4.2.1
+	/usr/lib/gcc/i686-apple-darwin10/4.2.1
+	/usr/lib/gcc/i686-apple-darwin10/4.2.1
+	/usr/lib/i686-apple-darwin10/4.2.1
+	/usr/lib
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/")
+set(mac_i686_gcc_Wlv_libs "")
+set(mac_i686_gcc_Wlv_dirs "/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_i686_gcc_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
+list(APPEND platforms mac_i686_gcc_Wlv)
+
 # gcc -arch i686 dummy.c -v
 set(mac_i686_gcc_text " /usr/libexec/gcc/i686-apple-darwin10/4.2.1/collect2 -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/tmp//ccnhXAGL.o -lSystem -lgcc -lSystem")
 set(mac_i686_gcc_libs "")
 set(mac_i686_gcc_dirs "/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib")
 list(APPEND platforms mac_i686_gcc)
+
+# g++ -arch i686 dummy.cxx -v -Wl,-v
+set(mac_i686_g++_Wlv_text " /usr/libexec/gcc/i686-apple-darwin10/4.2.1/collect2 -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/tmp//ccEXXICh.o -lstdc++ -lSystem -lgcc -lSystem
+collect2 version 4.2.1 (Apple Inc. build 5646) (i686 Darwin)
+/usr/libexec/gcc/i686-apple-darwin10/4.2.1/ld -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/tmp//ccWrBoVl.o -v -lstdc++ -lSystem -lgcc -lSystem
+@(#)PROGRAM:ld  PROJECT:ld64-95.2.12
+Library search paths:
+	/usr/lib/i686-apple-darwin10/4.2.1
+	/usr/lib/gcc/i686-apple-darwin10/4.2.1
+	/usr/lib/gcc/i686-apple-darwin10/4.2.1
+	/usr/lib/i686-apple-darwin10/4.2.1
+	/usr/lib
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/")
+set(mac_i686_g++_Wlv_libs "stdc++")
+set(mac_i686_g++_Wlv_dirs "/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_i686_g++_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
+list(APPEND platforms mac_i686_g++_Wlv)
 
 # g++ -arch i686 dummy.cxx -v
 set(mac_i686_g++_text " /usr/libexec/gcc/i686-apple-darwin10/4.2.1/collect2 -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.6.o -L/usr/lib/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../../i686-apple-darwin10/4.2.1 -L/usr/lib/gcc/i686-apple-darwin10/4.2.1/../../.. /var/tmp//ccEXXICh.o -lstdc++ -lSystem -lgcc -lSystem")
@@ -114,17 +156,77 @@ set(mac_i686_g++_libs "stdc++")
 set(mac_i686_g++_dirs "/usr/lib/i686-apple-darwin10/4.2.1;/usr/lib/gcc/i686-apple-darwin10/4.2.1;/usr/lib")
 list(APPEND platforms mac_i686_g++)
 
+# gfortran dummy.f -v -Wl,-v
+set(mac_i686_gfortran_Wlv_text " /usr/local/libexec/gcc/i386-apple-darwin9.7.0/4.4.1/collect2 -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1 -L/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1/../../.. /var/tmp//cc9zXNax.o -v -lgfortranbegin -lgfortran -lgcc_s.10.5 -lgcc -lSystem
+collect2 version 4.4.1 20090623 (prerelease) (i686 Darwin)
+/usr/bin/ld -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1 -L/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1/../../.. /var/tmp//cc9zXNax.o -v -lgfortranbegin -lgfortran -lgcc_s.10.5 -lgcc -lSystem
+@(#)PROGRAM:ld  PROJECT:ld64-95.2.12
+Library search paths:
+	/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1
+	/usr/local/lib
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/")
+set(mac_i686_gfortran_Wlv_libs "gfortranbegin;gfortran")
+set(mac_i686_gfortran_Wlv_dirs "/usr/local/lib/gcc/i386-apple-darwin9.7.0/4.4.1;/usr/local/lib;/usr/lib")
+set(mac_i686_gfortran_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
+list(APPEND platforms mac_i686_gfortran_Wlv)
+
 # gfortran dummy.f -v
 set(mac_i686_gfortran_text " /usr/libexec/gcc/i386-apple-darwin9.7.0/4.4.1/collect2 -dynamic -arch i386 -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/gcc/i386-apple-darwin9.7.0/4.4.1 -L/usr/lib/gcc -L/usr/lib/gcc/i386-apple-darwin9.7.0/4.4.1/../../.. /var/tmp//ccgqbX5P.o -lgfortranbegin -lgfortran -lgcc_s.10.5 -lgcc -lSystem")
 set(mac_i686_gfortran_libs "gfortranbegin;gfortran")
 set(mac_i686_gfortran_dirs "/usr/lib/gcc/i386-apple-darwin9.7.0/4.4.1;/usr/lib/gcc;/usr/lib")
 list(APPEND platforms mac_i686_gfortran)
 
+# gcc -arch ppc dummy.c -v -Wl,-v
+set(mac_ppc_gcc_Wlv_text " /usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/collect2 -dynamic -arch ppc -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../../powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../.. /var/tmp//cclziQY4.o -v -lgcc -lSystemStubs -lSystem
+collect2 version 4.2.1 (Apple Inc. build 5646) (Darwin/PowerPC)
+/usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/ld -dynamic -arch ppc -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../../powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../.. /var/tmp//cclziQY4.o -v -lgcc -lSystemStubs -lSystem
+@(#)PROGRAM:ld  PROJECT:ld64-95.2.12
+Library search paths:
+	/usr/lib/powerpc-apple-darwin10/4.2.1
+	/usr/lib/gcc/powerpc-apple-darwin10/4.2.1
+	/usr/lib/gcc/powerpc-apple-darwin10/4.2.1
+	/usr/lib/powerpc-apple-darwin10/4.2.1
+	/usr/lib
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/")
+set(mac_ppc_gcc_Wlv_libs "")
+set(mac_ppc_gcc_Wlv_dirs "/usr/lib/powerpc-apple-darwin10/4.2.1;/usr/lib/gcc/powerpc-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_ppc_gcc_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
+list(APPEND platforms mac_ppc_gcc_Wlv)
+
 # gcc -arch ppc dummy.c -v
 set(mac_ppc_gcc_text " /usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/collect2 -dynamic -arch ppc -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../../powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../.. /var/tmp//ccdcolsP.o -lgcc -lSystemStubs -lSystem")
 set(mac_ppc_gcc_libs "")
 set(mac_ppc_gcc_dirs "/usr/lib/powerpc-apple-darwin10/4.2.1;/usr/lib/gcc/powerpc-apple-darwin10/4.2.1;/usr/lib")
 list(APPEND platforms mac_ppc_gcc)
+
+# g++ -arch ppc dummy.cxx -v -Wl,-v
+set(mac_ppc_g++_Wlv_text " /usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/collect2 -dynamic -arch ppc -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../../powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../.. /var/tmp//ccaFTkwq.o -v -lstdc++ -lgcc -lSystemStubs -lSystem
+collect2 version 4.2.1 (Apple Inc. build 5646) (Darwin/PowerPC)
+/usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/ld -dynamic -arch ppc -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../../powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../.. /var/tmp//ccaFTkwq.o -v -lstdc++ -lgcc -lSystemStubs -lSystem
+@(#)PROGRAM:ld  PROJECT:ld64-95.2.12
+Library search paths:
+	/usr/lib/powerpc-apple-darwin10/4.2.1
+	/usr/lib/gcc/powerpc-apple-darwin10/4.2.1
+	/usr/lib/gcc/powerpc-apple-darwin10/4.2.1
+	/usr/lib/powerpc-apple-darwin10/4.2.1
+	/usr/lib
+	/usr/lib
+	/usr/local/lib
+Framework search paths:
+	/Library/Frameworks/
+	/System/Library/Frameworks/")
+set(mac_ppc_g++_Wlv_libs "stdc++")
+set(mac_ppc_g++_Wlv_dirs "/usr/lib/powerpc-apple-darwin10/4.2.1;/usr/lib/gcc/powerpc-apple-darwin10/4.2.1;/usr/lib;/usr/local/lib")
+set(mac_ppc_g++_Wlv_fwks "/Library/Frameworks;/System/Library/Frameworks")
+list(APPEND platforms mac_ppc_g++_Wlv)
 
 # g++ -arch ppc dummy.cxx -v
 set(mac_ppc_g++_text " /usr/libexec/gcc/powerpc-apple-darwin10/4.2.1/collect2 -dynamic -arch ppc -macosx_version_min 10.6.0 -weak_reference_mismatches non-weak -o a.out -lcrt1.10.5.o -L/usr/lib/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../../powerpc-apple-darwin10/4.2.1 -L/usr/lib/gcc/powerpc-apple-darwin10/4.2.1/../../.. /var/tmp//ccbjB6Lj.o -lstdc++ -lgcc -lSystemStubs -lSystem")
@@ -402,10 +504,10 @@ list(APPEND platforms msys_g77)
 # Test parsing for all above examples.
 
 foreach(p IN LISTS platforms)
-  cmake_parse_implicit_link_info("${${p}_text}" libs dirs log "${${p}_obj_regex}")
+  cmake_parse_implicit_link_info("${${p}_text}" libs dirs fwks log "${${p}_obj_regex}")
 
-  foreach(v libs dirs)
-    if(NOT "${${v}}" STREQUAL "${${p}_${v}}")
+  foreach(v libs dirs fwks)
+    if(DEFINED "${p}_${v}" AND NOT "${${v}}" STREQUAL "${${p}_${v}}")
       message(FATAL_ERROR
         "cmake_parse_implicit_link_info failed\n"
         "Expected '${p}' implicit ${v}\n"

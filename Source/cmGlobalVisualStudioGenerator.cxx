@@ -33,9 +33,16 @@ cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 {
+  return cmGlobalVisualStudioGenerator::GetRegistryBase(
+    this->GetIDEVersion());
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
+  const char* version)
+{
   std::string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
-  key += this->GetIDEVersion();
-  return key;
+  return key + version;
 }
 
 //----------------------------------------------------------------------------
@@ -492,8 +499,8 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId.c_str());
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId.c_str());
 
   if(this->AdditionalPlatformDefinition)
     {

@@ -445,6 +445,8 @@ protected:
                               std::string const& link);
   static int ExecuteEchoColor(std::vector<std::string>& args);
   static int ExecuteLinkScript(std::vector<std::string>& args);
+  static int WindowsCEEnvironment(const char* version,
+                                  const std::string& name);
   static int VisualStudioLink(std::vector<std::string>& args, int type);
   static int VisualStudioLinkIncremental(std::vector<std::string>& args,
                                          int type,

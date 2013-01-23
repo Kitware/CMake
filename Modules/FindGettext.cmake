@@ -209,5 +209,3 @@ function(GETTEXT_PROCESS_PO_FILES _lang)
    add_dependencies(pofiles ${uniqueTargetName})
 
 endfunction()
-
-set(GETTEXT_FOUND ${Gettext_FOUND})

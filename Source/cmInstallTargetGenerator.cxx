@@ -16,7 +16,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
-#include "cmGeneratorTarget.h"
 
 #include <assert.h>
 
@@ -27,8 +26,7 @@ cmInstallTargetGenerator
                            std::vector<std::string> const& configurations,
                            const char* component, bool optional):
   cmInstallGenerator(dest, configurations, component), Target(&t),
-  ImportLibrary(implib), FilePermissions(file_permissions),
-  Optional(optional), GeneratorTarget(0)
+  ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
@@ -486,17 +484,6 @@ void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
   this->AddStripRule(os, indent, file);
 }
 
-void cmInstallTargetGenerator::CreateGeneratorTarget()
-{
-  if (!this->GeneratorTarget)
-    {
-    this->GeneratorTarget = this->Target->GetMakefile()
-                                        ->GetLocalGenerator()
-                                        ->GetGlobalGenerator()
-                                        ->GetGeneratorTarget(this->Target);
-    }
-}
-
 //----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
@@ -520,13 +507,10 @@ cmInstallTargetGenerator
     return;
     }
 
-  this->CreateGeneratorTarget();
-
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
   std::map<cmStdString, cmStdString> install_name_remap;
-  if(cmComputeLinkInformation* cli =
-                            this->GeneratorTarget->GetLinkInformation(config))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
     std::set<cmTarget*> const& sharedLibs = cli->GetSharedLibrariesLinked();
     for(std::set<cmTarget*>::const_iterator j = sharedLibs.begin();
@@ -624,12 +608,9 @@ cmInstallTargetGenerator
     return;
     }
 
-  this->CreateGeneratorTarget();
-
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-                            this->GeneratorTarget->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;
@@ -658,12 +639,9 @@ cmInstallTargetGenerator
     return;
     }
 
-  this->CreateGeneratorTarget();
-
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-                            this->GeneratorTarget->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;

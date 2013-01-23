@@ -938,6 +938,23 @@ void cmGlobalGenerator::Generate()
       (*targets)[tit->first] = tit->second;
       (*targets)[tit->first].SetMakefile(mf);
       }
+
+    for ( tit = targets->begin(); tit != targets->end(); ++ tit )
+      {
+      if (mf->IsOn("CMAKE_BUILD_INTERFACE_INCLUDES"))
+        {
+        const char *binDir = mf->GetStartOutputDirectory();
+        const char *srcDir = mf->GetStartDirectory();
+        const std::string dirs = std::string(binDir ? binDir : "")
+                                + std::string(binDir ? ";" : "")
+                                + std::string(srcDir ? srcDir : "");
+        if (!dirs.empty())
+          {
+          tit->second.AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                                ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
+          }
+        }
+      }
     }
 
   // Add generator specific helper commands
@@ -2047,7 +2064,7 @@ bool cmGlobalGenerator::UseFolderProperty()
     }
 
   // By default, this feature is OFF, since it is not supported in the
-  // Visual Studio Express editions:
+  // Visual Studio Express editions until VS11:
   //
   return false;
 }

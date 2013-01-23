@@ -19,8 +19,6 @@
 #include "cmTarget.h"
 #include "cmake.h"
 
-#include <memory> // auto_ptr
-
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmTarget* target):

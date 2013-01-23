@@ -247,7 +247,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       std::set<std::string> allConfigurations(this->Configurations.begin(),
                                               this->Configurations.end());
       this->WriteProjectConfigurations(
-        fout, target->GetName(),
+        fout, target->GetName(), target->GetType(),
         allConfigurations, target->GetProperty("VS_PLATFORM_MAPPING"));
       }
     else
@@ -259,7 +259,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName)
         {
-        this->WriteProjectConfigurations(fout, vcprojName,
+        this->WriteProjectConfigurations(fout, vcprojName, target->GetType(),
                                          configsPartOfDefaultBuild);
         }
       }
@@ -587,7 +587,7 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name,
+  std::ostream& fout, const char* name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {

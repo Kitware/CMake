@@ -144,8 +144,7 @@ void cmGlobalVisualStudio10Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
-  if(!strcmp(this->ArchitectureId, "Itanium") ||
-     !strcmp(this->ArchitectureId, "x64"))
+  if(this->ArchitectureId == "Itanium" || this->ArchitectureId == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
       {

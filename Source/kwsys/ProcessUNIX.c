@@ -63,10 +63,6 @@ do.
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
 
-#ifdef __HAIKU__
-#undef __BEOS__
-#endif
-
 #if defined(__VMS)
 # define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
 #else

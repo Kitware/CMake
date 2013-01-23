@@ -277,7 +277,7 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name,
+  std::ostream& fout, const char* name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {

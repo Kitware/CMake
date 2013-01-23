@@ -157,7 +157,7 @@ public:
 #include <os/storage/Path.h>
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
+#if defined(__BEOS__) && !defined(__ZETA__)
 #include <be/kernel/OS.h>
 #include <be/storage/Path.h>
 
@@ -622,11 +622,7 @@ bool SystemTools::MakeDirectory(const char* path)
     }
   SystemTools::ConvertToUnixSlashes(dir);
 
-  kwsys_stl::string::size_type pos = dir.find(':');
-  if(pos == kwsys_stl::string::npos)
-    {
-    pos = 0;
-    }
+  kwsys_stl::string::size_type pos = 0;
   kwsys_stl::string topdir;
   while((pos = dir.find('/', pos)) != kwsys_stl::string::npos)
     {
@@ -634,14 +630,7 @@ bool SystemTools::MakeDirectory(const char* path)
     Mkdir(topdir.c_str());
     pos++;
     }
-  if(dir[dir.size()-1] == '/')
-    {
-    topdir = dir.substr(0, dir.size());
-    }
-  else
-    {
-    topdir = dir;
-    }
+  topdir = dir;
   if(Mkdir(topdir.c_str()) != 0)
     {
     // There is a bug in the Borland Run time library which makes MKDIR
@@ -2754,9 +2743,15 @@ kwsys_stl::string SystemTools::GetRealPath(const char* path)
 
 bool SystemTools::FileIsDirectory(const char* name)
 {
+  size_t length = strlen(name);
+  if (length == 0)
+    {
+    return false;
+    }
+
   // Remove any trailing slash from the name.
   char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
-  size_t last = strlen(name)-1;
+  size_t last = length-1;
   if(last > 0 && (name[last] == '/' || name[last] == '\\')
     && strcmp(name, "/") !=0)
     {
@@ -4048,7 +4043,7 @@ kwsys_stl::string SystemTools::GetCurrentDateTime(const char* format)
   return kwsys_stl::string(buf);
 }
 
-kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
+kwsys_stl::string SystemTools::MakeCidentifier(const char* s)
 {
   kwsys_stl::string str(s);
   if (str.find_first_of("0123456789") == 0)

@@ -573,6 +573,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommand")
 
+  ADD_TEST_MACRO(EmptyDepends ${CMAKE_CTEST_COMMAND})
+
   add_test(CustomCommandWorkingDirectory  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/CustomCommandWorkingDirectory"
@@ -695,6 +697,29 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
 
+  # On Windows run the CPackWiXGenerator test
+  # if the WiX Toolset seems to be available
+  if(WIN32)
+    file(TO_CMAKE_PATH "$ENV{WIX}" WIX_ROOT)
+
+    find_program(WIX_LIGHT_EXECUTABLE light
+      PATHS "${WIX_ROOT}/bin"
+      DOC "WiX Toolset light.exe location")
+
+    if(WIX_LIGHT_EXECUTABLE)
+      add_test(CPackWiXGenerator ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator"
+        "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project CPackWiXGenerator
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --test-command ${CMAKE_CMAKE_COMMAND}
+          "-DCPackWiXGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+          -P "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator/RunCPackVerifyResult.cmake")
+    endif()
+  endif()
+
   if(CTEST_RUN_CPackComponents)
     set(CPackComponents_EXTRA_OPTIONS)
     if(APPLE)
@@ -742,7 +767,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
     set(CPackComponentsForAll_EXTRA_OPTIONS)
-    set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
     # set up list of CPack generators
     list(APPEND GENLST "ZIP")
     if(APPLE)
@@ -782,7 +806,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
              --graphviz=CPackComponentsForAll.dot
           --test-command ${CMAKE_CMAKE_COMMAND}
             "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
-            "${CPackRun_CPackCommand}"
             "${CPackRun_CPackGen}"
             "${CPackRun_CPackComponentWay}"
             -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
@@ -817,7 +840,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command
       ${CMAKE_CMAKE_COMMAND}
         -D dir=${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators
-        -D cpack=${CMAKE_CPACK_COMMAND}
         -P ${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators/RunCPack.cmake
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators")
@@ -966,6 +988,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command ${CMAKE_CTEST_COMMAND} -V
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
+  endif()
+  if(QT4_WORKS AND QT_QTGUI_FOUND)
+    add_test(Qt4Targets ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Qt4Targets"
+      "${CMake_BINARY_DIR}/Tests/Qt4Targets"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project Qt4Targets
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Targets"
+      --force-new-ctest-process
+      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+      --test-command ${CMAKE_CTEST_COMMAND} -V
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Targets")
   endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
@@ -1893,6 +1930,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
 
   ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
+  ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
+  ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
@@ -1936,6 +1975,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
+
+  add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
+    --output-on-failure -C "\${CTestTest_CONFIG}")
 
   add_test(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
   set_tests_properties(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")

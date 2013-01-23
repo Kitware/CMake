@@ -116,7 +116,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_MD5 1)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
-  SET(KWSYS_USE_Registry 1)
   SET(KWSYS_USE_System 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
@@ -597,6 +596,13 @@ IF(KWSYS_USE_SystemInformation)
       ENDIF()
     ENDIF()
   ENDIF()
+  IF(CMAKE_SYSTEM MATCHES "HP-UX")
+    CHECK_INCLUDE_FILES("sys/mpctl.h" KWSYS_SYS_HAS_MPCTL_H)
+    IF(KWSYS_SYS_HAS_MPCTL_H)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_SYS_HAS_MPCTL_H=1)
+    ENDIF()
+  ENDIF()
   IF(KWSYS_LFS_AVAILABLE AND NOT KWSYS_LFS_DISABLE)
     SET(KWSYS_PLATFORM_CXX_TEST_DEFINES -DKWSYS_HAS_LFS=1)
   ENDIF()
@@ -762,7 +768,7 @@ SET(KWSYS_HXX_FILES Configure String
 # Add selected C++ classes.
 SET(cppclasses
   Directory DynamicLoader Glob RegularExpression SystemTools
-  CommandLineArguments Registry IOStream SystemInformation
+  CommandLineArguments IOStream SystemInformation
   )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
@@ -800,12 +806,8 @@ SET(KWSYS_CXX_SRCS)
 # Add the proper sources for this platform's Process implementation.
 IF(KWSYS_USE_Process)
   IF(NOT UNIX)
-    # Use the Windows implementation.  We need the encoded forwarding executable.
-    SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessWin32.c
-      ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
-    SET_SOURCE_FILES_PROPERTIES(
-      ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-      PROPERTIES GENERATED 1)
+    # Use the Windows implementation.
+    SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessWin32.c)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
@@ -938,43 +940,6 @@ IF(KWSYS_USE_String)
 ENDIF(KWSYS_USE_String)
 
 #-----------------------------------------------------------------------------
-# Process execution on windows needs to build a forwarding executable
-# that works around a Win9x bug.  We encode the executable into a C
-# file and build it into the library.  Win9x platforms reproduce the
-# executable into a temporary directory when it is needed.
-IF(KWSYS_USE_Process)
-  IF(NOT UNIX)
-    # Build the forwarding executable itself and a program that will
-    # encode it into a C file.
-    ADD_EXECUTABLE(${KWSYS_NAMESPACE}ProcessFwd9x ProcessFwd9x.c)
-    ADD_EXECUTABLE(${KWSYS_NAMESPACE}EncodeExecutable EncodeExecutable.c)
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}ProcessFwd9x PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}EncodeExecutable PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}ProcessFwd9x PROPERTY LABELS ${KWSYS_LABELS_EXE})
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}EncodeExecutable PROPERTY LABELS ${KWSYS_LABELS_EXE})
-
-    SET(CFG_INTDIR "/${CMAKE_CFG_INTDIR}")
-    IF(CMAKE_BUILD_TOOL MATCHES "make")
-      SET(CFG_INTDIR "")
-    ENDIF(CMAKE_BUILD_TOOL MATCHES "make")
-
-    # Take advantage of a better custom command syntax if possible.
-    SET(CMD ${CMAKE_CURRENT_BINARY_DIR}${CFG_INTDIR}/${KWSYS_NAMESPACE}EncodeExecutable.exe)
-    SET(FWD ${CMAKE_CURRENT_BINARY_DIR}${CFG_INTDIR}/${KWSYS_NAMESPACE}ProcessFwd9x.exe)
-    ADD_CUSTOM_COMMAND(
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-      COMMAND ${CMD}
-      ARGS ${FWD} ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-           ${KWSYS_NAMESPACE} ProcessFwd9x
-      DEPENDS ${CMD} ${FWD})
-
-    # Make sure build occurs in proper order.
-    ADD_DEPENDENCIES(${KWSYS_NAMESPACE} ${KWSYS_NAMESPACE}ProcessFwd9x
-                     ${KWSYS_NAMESPACE}EncodeExecutable)
-  ENDIF(NOT UNIX)
-ENDIF(KWSYS_USE_Process)
-
-#-----------------------------------------------------------------------------
 # Setup testing if not being built as part of another project.
 IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   IF(BUILD_TESTING)
@@ -1012,7 +977,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         )
     ENDIF(NOT WATCOM)
     SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-      testRegistry
       testIOS
       testSystemTools
       testCommandLineArguments
@@ -1116,8 +1080,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       # We expect test to fail
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES WILL_FAIL ON)
       GET_TEST_PROPERTY(kwsys.testFail WILL_FAIL wfv)
-      SET_TESTS_PROPERTIES(kwsys.testRegistry PROPERTIES FAIL_REGULAR_EXPRESSION "ERROR_NOT_VALGRIND;FAIL;Test failed")
-      SET_TESTS_PROPERTIES(kwsys.testRegistry PROPERTIES PASS_REGULAR_EXPRESSION "Test passed")
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES MEASUREMENT "Some Key=Some Value")
       MESSAGE(STATUS "GET_TEST_PROPERTY returned: ${wfv}")
     ENDIF()

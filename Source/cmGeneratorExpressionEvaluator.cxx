@@ -18,6 +18,8 @@
 
 #include <cmsys/String.h>
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x510
 static
@@ -47,6 +49,8 @@ struct cmGeneratorExpressionNode
 
   virtual bool GeneratesContent() const { return true; }
 
+  virtual bool RequiresLiteralInput() const { return false; }
+
   virtual bool AcceptsSingleArbitraryContentParameter() const
     { return false; }
 
@@ -65,6 +69,8 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
   ZeroNode() {}
 
   virtual bool GeneratesContent() const { return false; }
+
+  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
 
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
@@ -92,6 +98,12 @@ static const struct OneNode : public cmGeneratorExpressionNode
     return std::string();
   }
 } oneNode;
+
+//----------------------------------------------------------------------------
+static const struct OneNode buildInterfaceNode;
+
+//----------------------------------------------------------------------------
+static const struct ZeroNode installInterfaceNode;
 
 //----------------------------------------------------------------------------
 #define BOOLEAN_OP_NODE(OPNAME, OP, SUCCESS_VALUE, FAILURE_VALUE) \
@@ -255,10 +267,33 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
       }
 
-    return cmsysString_strcasecmp(parameters.begin()->c_str(),
-                                  context->Config) == 0 ? "1" : "0";
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(),
+                                  context->Config) == 0)
+      {
+      return "1";
+      }
+
+    if (context->CurrentTarget
+        && context->CurrentTarget->IsImported())
+      {
+      const char* loc = 0;
+      const char* imp = 0;
+      std::string suffix;
+      return context->CurrentTarget->GetMappedConfig(context->Config,
+                                                  &loc,
+                                                  &imp,
+                                                  suffix) ? "1" : "0";
+      }
+    return "0";
   }
 } configurationTestNode;
+
+
+//----------------------------------------------------------------------------
+static const char* targetPropertyTransitiveWhitelist[] = {
+    "INTERFACE_INCLUDE_DIRECTORIES"
+  , "INTERFACE_COMPILE_DEFINITIONS"
+};
 
 //----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
@@ -287,8 +322,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmsys::RegularExpression propertyNameValidator;
     propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
-    cmGeneratorTarget* target = context->Target;
+    cmTarget* target = context->HeadTarget;
     std::string propertyName = *parameters.begin();
+
+    if (!target && parameters.size() == 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_PROPERTY:prop> may only be used with targets.  It may not "
+          "be used with add_custom_command.  Specify the target to read a "
+          "property from using the $<TARGET_PROPERTY:tgt,prop> signature "
+          "instead.");
+      return std::string();
+      }
+
     if (parameters.size() == 2)
       {
       if (parameters.begin()->empty() && parameters[1].empty())
@@ -320,7 +366,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                       "Target name not supported.");
         return std::string();
         }
-      target = context->Makefile->FindGeneratorTargetToUse(
+      target = context->Makefile->FindTargetToUse(
                                                 targetName.c_str());
 
       if (!target)
@@ -332,6 +378,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
         }
+      }
+
+    if (target == context->HeadTarget)
+      {
+      // Keep track of the properties seen while processing.
+      // The evaluation of the LINK_LIBRARIES generator expressions
+      // will check this to ensure that properties form a DAG.
+      context->SeenTargetProperties.insert(propertyName);
       }
 
     if (propertyName.empty())
@@ -349,22 +403,73 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
       }
 
+    assert(target);
+
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
                                                target->GetName(),
                                                propertyName,
                                                content,
                                                dagCheckerParent);
 
-    if (!dagChecker.check())
+    switch (dagChecker.check())
       {
+    case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.reportError(context, content->GetOriginalExpression());
       return std::string();
+    case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+      // No error. We just skip cyclic references.
+      return std::string();
+    case cmGeneratorExpressionDAGChecker::DAG:
+      break;
       }
 
     const char *prop = target->GetProperty(propertyName.c_str());
-    return prop ? prop : "";
+    if (!prop)
+      {
+      return std::string();
+      }
+
+    for (size_t i = 0;
+         i < (sizeof(targetPropertyTransitiveWhitelist) /
+              sizeof(*targetPropertyTransitiveWhitelist));
+         ++i)
+      {
+      if (targetPropertyTransitiveWhitelist[i] == propertyName)
+        {
+        cmGeneratorExpression ge(context->Backtrace);
+        return ge.Parse(prop)->Evaluate(context->Makefile,
+                            context->Config,
+                            context->Quiet,
+                            context->HeadTarget,
+                            target,
+                            &dagChecker);
+        }
+      }
+    return prop;
   }
 } targetPropertyNode;
+
+//----------------------------------------------------------------------------
+static const struct TargetNameNode : public cmGeneratorExpressionNode
+{
+  TargetNameNode() {}
+
+  virtual bool GeneratesContent() const { return true; }
+
+  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+  virtual bool RequiresLiteralInput() const { return true; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return parameters.front();
+  }
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+} targetNameNode;
 
 //----------------------------------------------------------------------------
 template<bool linker, bool soname>
@@ -551,13 +656,13 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
 {
   if (identifier == "0")
     return &zeroNode;
-  if (identifier == "1")
+  else if (identifier == "1")
     return &oneNode;
-  if (identifier == "AND")
+  else if (identifier == "AND")
     return &andNode;
-  if (identifier == "OR")
+  else if (identifier == "OR")
     return &orNode;
-  if (identifier == "NOT")
+  else if (identifier == "NOT")
     return &notNode;
   else if (identifier == "CONFIGURATION")
     return &configurationNode;
@@ -591,6 +696,12 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &commaNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
+  else if (identifier == "TARGET_NAME")
+    return &targetNameNode;
+  else if (identifier == "BUILD_INTERFACE")
+    return &buildInterfaceNode;
+  else if (identifier == "INSTALL_INTERFACE")
+    return &installInterfaceNode;
   return 0;
 
 }
@@ -642,6 +753,20 @@ std::string GeneratorExpressionContent::Evaluate(
 
   if (!node->GeneratesContent())
     {
+    if (node->AcceptsSingleArbitraryContentParameter())
+      {
+      if (this->ParamChildren.empty())
+        {
+        reportError(context, this->GetOriginalExpression(),
+                  "$<" + identifier + "> expression requires a parameter.");
+        }
+      }
+    else
+      {
+      std::vector<std::string> parameters;
+      this->EvaluateParameters(node, identifier, context, dagChecker,
+                               parameters);
+      }
     return std::string();
     }
 
@@ -666,6 +791,15 @@ std::string GeneratorExpressionContent::Evaluate(
                                                                 = pit->end();
       for ( ; it != end; ++it)
         {
+        if (node->RequiresLiteralInput())
+          {
+          if ((*it)->GetType() != cmGeneratorExpressionEvaluator::Text)
+            {
+            reportError(context, this->GetOriginalExpression(),
+                  "$<" + identifier + "> expression requires literal input.");
+            return std::string();
+            }
+          }
         result += (*it)->Evaluate(context, dagChecker);
         if (context->HadError)
           {
@@ -673,10 +807,33 @@ std::string GeneratorExpressionContent::Evaluate(
           }
         }
       }
+    if (node->RequiresLiteralInput())
+      {
+      std::vector<std::string> parameters;
+      parameters.push_back(result);
+      return node->Evaluate(parameters, context, this, dagChecker);
+      }
     return result;
     }
 
   std::vector<std::string> parameters;
+  this->EvaluateParameters(node, identifier, context, dagChecker, parameters);
+  if (context->HadError)
+    {
+    return std::string();
+    }
+
+  return node->Evaluate(parameters, context, this, dagChecker);
+}
+
+//----------------------------------------------------------------------------
+std::string GeneratorExpressionContent::EvaluateParameters(
+                                const cmGeneratorExpressionNode *node,
+                                const std::string &identifier,
+                                cmGeneratorExpressionContext *context,
+                                cmGeneratorExpressionDAGChecker *dagChecker,
+                                std::vector<std::string> &parameters) const
+{
   {
   std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
                                         pit = this->ParamChildren.begin();
@@ -732,10 +889,8 @@ std::string GeneratorExpressionContent::Evaluate(
     {
     reportError(context, this->GetOriginalExpression(), "$<" + identifier
                       + "> expression requires at least one parameter.");
-    return std::string();
     }
-
-  return node->Evaluate(parameters, context, this, dagChecker);
+  return std::string();
 }
 
 //----------------------------------------------------------------------------

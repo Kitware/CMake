@@ -82,6 +82,7 @@
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)
 #include "cmCallVisualStudioMacro.h"
+#include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
 #if !defined(CMAKE_BOOT_MINGW)
@@ -110,8 +111,6 @@
 #endif
 
 #include <sys/stat.h> // struct stat
-
-#include <memory> // auto_ptr
 
 static bool cmakeCheckStampFile(const char* stampName);
 static bool cmakeCheckStampList(const char* stampName);
@@ -520,7 +519,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // read in the list file to fill the cache
   if(path)
     {
-    std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+    cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
     lg->GetMakefile()->SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartOutputDirectory
@@ -559,7 +558,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   this->SetGlobalGenerator(gg);
 
   // read in the list file to fill the cache
-  std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   mf->SetHomeOutputDirectory
     (cmSystemTools::GetCurrentWorkingDirectory().c_str());
@@ -955,7 +954,7 @@ int cmake::AddCMakePaths()
   cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
-#if __APPLE__
+#ifdef __APPLE__
   // on the apple this might be the gui bundle
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
@@ -1146,6 +1145,10 @@ void CMakeCommandUsage(const char* program)
     << "Available on Windows only:\n"
     << "  comspec                   - on windows 9x use this for RunCommand\n"
     << "  delete_regv key           - delete registry value\n"
+    << "  env_vs8_wince sdkname     - displays a batch file which sets the "
+       "environment for the provided Windows CE SDK installed in VS2005\n"
+    << "  env_vs9_wince sdkname     - displays a batch file which sets the "
+       "environment for the provided Windows CE SDK installed in VS2008\n"
     << "  write_regv key value      - write registry value\n"
 #else
     << "Available on UNIX only:\n"
@@ -1655,7 +1658,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen.c_str()))
         {
         cm.SetGlobalGenerator(ggd);
-        std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+        cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
         lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
         lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
@@ -1810,6 +1813,14 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         command += " " + args[cc];
         }
       return cmWin32ProcessExecution::Windows9xHack(command.c_str());
+      }
+    else if (args[1] == "env_vs8_wince" && args.size() == 3)
+      {
+      return cmake::WindowsCEEnvironment("8.0", args[2]);
+      }
+    else if (args[1] == "env_vs9_wince" && args.size() == 3)
+      {
+      return cmake::WindowsCEEnvironment("9.0", args[2]);
       }
 #endif
     }
@@ -2797,7 +2808,7 @@ int cmake::CheckBuildSystem()
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   if(!mf->ReadListFile(0, this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
@@ -2823,11 +2834,11 @@ int cmake::CheckBuildSystem()
       }
 
     // Create the generator and use it to clear the dependencies.
-    std::auto_ptr<cmGlobalGenerator>
+    cmsys::auto_ptr<cmGlobalGenerator>
       ggd(this->CreateGlobalGenerator(genName));
     if(ggd.get())
       {
-      std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+      cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
       lgd->ClearDependencies(mf, verbose);
       }
     }
@@ -3070,7 +3081,7 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 void cmake::GenerateGraphViz(const char* fileName) const
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  std::auto_ptr<cmGraphVizWriter> gvWriter(
+  cmsys::auto_ptr<cmGraphVizWriter> gvWriter(
        new cmGraphVizWriter(this->GetGlobalGenerator()->GetLocalGenerators()));
 
   std::string settingsFile = this->GetHomeOutputDirectory();
@@ -4006,6 +4017,29 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
+//----------------------------------------------------------------------------
+int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
+{
+#if defined(CMAKE_HAVE_VS_GENERATORS)
+  cmVisualStudioWCEPlatformParser parser(name.c_str());
+  parser.ParseVersion(version);
+  if (parser.Found())
+    {
+    std::cout << "@echo off" << std::endl;
+    std::cout << "echo Environment Selection: " << name << std::endl;
+    std::cout << "set PATH=" << parser.GetPathDirectories() << std::endl;
+    std::cout << "set INCLUDE=" << parser.GetIncludeDirectories() <<std::endl;
+    std::cout << "set LIB=" << parser.GetLibraryDirectories() <<std::endl;
+    return 0;
+    }
+#else
+  (void)version;
+#endif
+
+  std::cerr << "Could not find " << name;
+  return -1;
+}
+
 // For visual studio 2005 and newer manifest files need to be embeded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
@@ -4469,7 +4503,7 @@ int cmake::Build(const std::string& dir,
     std::cerr << "Error: could find generator in Cache\n";
     return 1;
     }
-  std::auto_ptr<cmGlobalGenerator> gen(
+  cmsys::auto_ptr<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(it.GetValue()));
   std::string output;
   std::string projName;

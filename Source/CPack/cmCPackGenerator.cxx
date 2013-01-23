@@ -23,7 +23,6 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
-#include <memory> // auto_ptr
 #include <algorithm>
 
 #if defined(__HAIKU__)
@@ -696,7 +695,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
         cmGlobalGenerator gg;
         gg.SetCMakeInstance(&cm);
-        std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+        cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
         cmMakefile *mf = lg->GetMakefile();
         std::string realInstallDirectory = tempInstallDirectory;
         if ( !installSubDirectory.empty() && installSubDirectory != "/" )

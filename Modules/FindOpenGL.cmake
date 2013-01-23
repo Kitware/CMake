@@ -58,14 +58,22 @@ else ()
     find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
 
   else()
-    # Handle HP-UX cases where we only want to find OpenGL in either hpux64
-    # or hpux32 depending on if we're doing a 64 bit build.
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-      set(HPUX_IA_OPENGL_LIB_PATH /opt/graphics/OpenGL/lib/hpux32/)
-    else()
-      set(HPUX_IA_OPENGL_LIB_PATH
-        /opt/graphics/OpenGL/lib/hpux64/
-        /opt/graphics/OpenGL/lib/pa20_64)
+    if (CMAKE_SYSTEM_NAME MATCHES "HP-UX")
+      # Handle HP-UX cases where we only want to find OpenGL in either hpux64
+      # or hpux32 depending on if we're doing a 64 bit build.
+      if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set(_OPENGL_LIB_PATH
+          /opt/graphics/OpenGL/lib/hpux32/)
+      else()
+        set(_OPENGL_LIB_PATH
+          /opt/graphics/OpenGL/lib/hpux64/
+          /opt/graphics/OpenGL/lib/pa20_64)
+      endif()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL Haiku)
+      set(_OPENGL_LIB_PATH
+        /boot/develop/lib/x86)
+      set(_OPENGL_INCLUDE_PATH
+        /boot/develop/headers/os/opengl)
     endif()
 
     # The first line below is to make sure that the proper headers
@@ -80,6 +88,7 @@ else ()
       /usr/share/doc/NVIDIA_GLX-1.0/include
       /usr/openwin/share/include
       /opt/graphics/OpenGL/include /usr/X11R6/include
+      ${_OPENGL_INCLUDE_PATH}
     )
 
     find_path(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
@@ -93,8 +102,11 @@ else ()
       PATHS /opt/graphics/OpenGL/lib
             /usr/openwin/lib
             /usr/shlib /usr/X11R6/lib
-            ${HPUX_IA_OPENGL_LIB_PATH}
+            ${_OPENGL_LIB_PATH}
     )
+
+    unset(_OPENGL_INCLUDE_PATH)
+    unset(_OPENGL_LIB_PATH)
 
     # On Unix OpenGL most certainly always requires X11.
     # Feel free to tighten up these conditions if you don't

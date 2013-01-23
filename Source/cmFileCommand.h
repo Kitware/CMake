@@ -87,6 +87,7 @@ public:
       "       [TLS_VERIFY on|off] [TLS_CAINFO file])\n"
       "  file(UPLOAD filename url [INACTIVITY_TIMEOUT timeout]\n"
       "       [TIMEOUT timeout] [STATUS status] [LOG log] [SHOW_PROGRESS])\n"
+      "  file(TIMESTAMP filename variable [<format string>] [UTC])\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exist. (If the file is a build input, use "
@@ -200,6 +201,12 @@ public:
       "If SHOW_PROGRESS is specified, progress information will be printed "
       "as status messages until the operation is complete."
       "\n"
+      "TIMESTAMP will write a string representation of "
+      "the modification time of filename to variable.\n"
+      "Should the command be unable to obtain a timestamp "
+      "variable will be set to the empty string \"\".\n"
+      "See documentation of the string TIMESTAMP sub-command for more details."
+      "\n"
       "The file() command also provides COPY and INSTALL signatures:\n"
       "  file(<COPY|INSTALL> files... DESTINATION <dir>\n"
       "       [FILE_PERMISSIONS permissions...]\n"
@@ -260,6 +267,8 @@ protected:
   bool HandleInstallCommand(std::vector<std::string> const& args);
   bool HandleDownloadCommand(std::vector<std::string> const& args);
   bool HandleUploadCommand(std::vector<std::string> const& args);
+
+  bool HandleTimestampCommand(std::vector<std::string> const& args);
 };
 
 

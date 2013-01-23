@@ -439,6 +439,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                             this->GetGeneratorTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
+  vars["LINK_FLAGS"] = cmGlobalNinjaGenerator
+                        ::EncodeLiteral(vars["LINK_FLAGS"]);
+
   vars["LINK_PATH"] = frameworkPath + linkPath;
 
   // Compute architecture specific link flags.  Yes, these go into a different

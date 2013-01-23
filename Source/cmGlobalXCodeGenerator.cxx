@@ -1206,7 +1206,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
 
   // If the language is compiled as a source trust Xcode to link with it.
   cmTarget::LinkImplementation const* impl =
-    cmtarget.GetLinkImplementation("NOCONFIG");
+    cmtarget.GetLinkImplementation("NOCONFIG", &cmtarget);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
     {
@@ -1639,14 +1639,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     if(strcmp(lang, "CXX") == 0)
       {
       this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
-      this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target, "C");
+      this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
+                                                   "C", configName);
       }
 
     // Add language-specific flags.
     this->CurrentLocalGenerator->AddLanguageFlags(flags, lang, configName);
 
     // Add shared-library flags if needed.
-    this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target, lang);
+    this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target,
+                                                 lang, configName);
     }
   else if(binary)
   {
@@ -1997,15 +1999,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       dirs.Add(incpath.c_str());
       }
     }
-  std::vector<std::string>& frameworks = target.GetFrameworks();
-  if(frameworks.size())
+  if(target.GetType() != cmTarget::OBJECT_LIBRARY &&
+     target.GetType() != cmTarget::STATIC_LIBRARY)
     {
-    for(std::vector<std::string>::iterator fmIt = frameworks.begin();
-        fmIt != frameworks.end(); ++fmIt)
+    // Add framework search paths needed for linking.
+    if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
       {
-      if(emitted.insert(*fmIt).second)
+      std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
+      for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+          fdi != fwDirs.end(); ++fdi)
         {
-        fdirs.Add(this->XCodeEscapePath(fmIt->c_str()).c_str());
+        if(emitted.insert(*fdi).second)
+          {
+          fdirs.Add(this->XCodeEscapePath(fdi->c_str()).c_str());
+          }
         }
       }
     }
@@ -2649,8 +2656,7 @@ void cmGlobalXCodeGenerator
       }
 
     // Compute the link library and directory information.
-    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(cmtarget);
-    cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = cmtarget->GetLinkInformation(configName);
     if(!pcli)
       {
       continue;
@@ -2690,25 +2696,6 @@ void cmGlobalXCodeGenerator
       }
     this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
                                       linkDirs.c_str(), configName);
-    }
-
-    // add the framework search paths
-    {
-    const char* sep = "";
-    std::string fdirs;
-    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
-    for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
-        fdi != fwDirs.end(); ++fdi)
-      {
-      fdirs += sep;
-      sep = " ";
-      fdirs += this->XCodeEscapePath(fdi->c_str());
-      }
-    if(!fdirs.empty())
-      {
-      this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
-                                        fdirs.c_str(), configName);
-      }
     }
 
     // now add the link libraries

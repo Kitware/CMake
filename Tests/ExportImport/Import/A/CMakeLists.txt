@@ -152,3 +152,18 @@ check_function_exists(testLib1 HAVE_TESTLIB1_FUNCTION)
 if (NOT HAVE_TESTLIB1_FUNCTION)
   message(SEND_ERROR "Using imported target testLib2 in check_function_exists() failed !")
 endif()
+
+#-----------------------------------------------------------------------------
+# Test that dependent imported targets have usable
+# INTERFACE_COMPILE_DEFINITIONS and INTERFACE_INCLUDE_DIRECTORIES
+
+add_library(deps_iface deps_iface.cpp)
+target_link_libraries(deps_iface testLibsDepends)
+set_property(TARGET deps_iface APPEND PROPERTY
+  COMPILE_DEFINITIONS
+    $<TARGET_PROPERTY:testLibDepends,INTERFACE_COMPILE_DEFINITIONS>
+)
+set_property(TARGET deps_iface APPEND PROPERTY
+  INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:testLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
+)

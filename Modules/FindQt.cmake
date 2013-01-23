@@ -43,6 +43,12 @@ if(GLOB_TEMP_VAR)
 endif()
 set(GLOB_TEMP_VAR)
 
+file(GLOB GLOB_TEMP_VAR /usr/local/lib/qt3/bin/qmake)
+if(GLOB_TEMP_VAR)
+  set(QT3_INSTALLED TRUE)
+endif()
+set(GLOB_TEMP_VAR)
+
 # look for qt4 installations
 file(GLOB GLOB_TEMP_VAR /usr/local/qt-x11-commercial-4*/bin/qmake)
 if(GLOB_TEMP_VAR)
@@ -51,6 +57,12 @@ endif()
 set(GLOB_TEMP_VAR)
 
 file(GLOB GLOB_TEMP_VAR /usr/local/Trolltech/Qt-4*/bin/qmake)
+if(GLOB_TEMP_VAR)
+  set(QT4_INSTALLED TRUE)
+endif()
+set(GLOB_TEMP_VAR)
+
+file(GLOB GLOB_TEMP_VAR /usr/local/lib/qt4/bin/qmake)
 if(GLOB_TEMP_VAR)
   set(QT4_INSTALLED TRUE)
 endif()
@@ -91,6 +103,7 @@ find_file( QT4_QGLOBAL_H_FILE qglobal.h
   /usr/lib/qt/include/Qt
   /usr/include/Qt
   /usr/share/qt4/include/Qt
+  /usr/local/include/X11/qt4/Qt
   C:/Progra~1/qt/include/Qt )
 
 if(QT4_QGLOBAL_H_FILE)
@@ -110,6 +123,7 @@ find_file( QT3_QGLOBAL_H_FILE qglobal.h
   /usr/lib/qt/include
   /usr/include
   /usr/share/qt3/include
+  /usr/local/include/X11/qt3
   C:/Progra~1/qt/include
   /usr/include/qt3 )
 

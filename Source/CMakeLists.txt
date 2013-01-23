@@ -355,6 +355,8 @@ if (WIN32)
       cmLocalVisualStudio7Generator.h
       cmLocalVisualStudioGenerator.cxx
       cmLocalVisualStudioGenerator.h
+      cmVisualStudioWCEPlatformParser.h
+      cmVisualStudioWCEPlatformParser.cxx
       cmWin32ProcessExecution.cxx
       cmWin32ProcessExecution.h
       )
@@ -497,6 +499,14 @@ if(UNIX)
     CPack/cmCPackDebGenerator.cxx
     CPack/cmCPackRPMGenerator.cxx
     )
+endif()
+
+if(WIN32)
+  set(CPACK_SRCS ${CPACK_SRCS}
+    CPack/WiX/cmCPackWIXGenerator.cxx
+    CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmWIXRichTextFormatWriter.cxx
+  )
 endif()
 
 if(APPLE)

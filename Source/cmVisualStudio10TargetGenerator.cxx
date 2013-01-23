@@ -572,6 +572,12 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
       sep = ";";
       }
     (*this->BuildFileStream ) << "</Outputs>\n";
+    if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
+      {
+      // VS >= 11 let us turn off linking of custom command outputs.
+      this->WritePlatformConfigTag("LinkObjects", i->c_str(), 3);
+      (*this->BuildFileStream ) << "false</LinkObjects>\n";
+      }
     }
   this->WriteString("</CustomBuild>\n", 2);
 }
@@ -879,14 +885,23 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       }
     }
 
-  for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ExternalObjects.begin();
-      si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+  if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
+    {
+    // For VS >= 11 we use LinkObjects to avoid linking custom command
+    // outputs.  Use Object for all external objects, generated or not.
+    this->WriteSources("Object", this->GeneratorTarget->ExternalObjects);
+    }
+  else
     {
     // If an object file is generated in this target, then vs10 will use
     // it in the build, and we have to list it as None instead of Object.
-    std::vector<cmSourceFile*> const* d = this->Target->GetSourceDepends(*si);
-    this->WriteSource((d && !d->empty())? "None":"Object", *si);
+    for(std::vector<cmSourceFile*>::const_iterator
+          si = this->GeneratorTarget->ExternalObjects.begin();
+        si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+      {
+      std::vector<cmSourceFile*> const* d=this->Target->GetSourceDepends(*si);
+      this->WriteSource((d && !d->empty())? "None":"Object", *si);
+      }
     }
 
   this->WriteSources("None", this->GeneratorTarget->ExtraSources);
@@ -1430,7 +1445,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   // Replace spaces in libs with ;
   cmSystemTools::ReplaceString(libs, " ", ";");
   cmComputeLinkInformation* pcli =
-    this->GeneratorTarget->GetLinkInformation(config.c_str());
+    this->Target->GetLinkInformation(config.c_str());
   if(!pcli)
     {
     cmSystemTools::Error

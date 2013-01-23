@@ -13,6 +13,7 @@
 #define cmExportFileGenerator_h
 
 #include "cmCommand.h"
+#include "cmGeneratorExpression.h"
 
 /** \class cmExportFileGenerator
  * \brief Generate a file exporting targets from a build or install tree.
@@ -63,6 +64,8 @@ protected:
   void GenerateMissingTargetsCheckCode(std::ostream& os,
                                const std::vector<std::string>& missingTargets);
 
+  void GenerateExpectedTargetsCode(std::ostream& os,
+                                          const std::string &expectedTargets);
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
@@ -91,6 +94,17 @@ protected:
                                    cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee) = 0;
+  void PopulateInterfaceProperty(const char *,
+                                 cmTarget *target,
+                                 cmGeneratorExpression::PreprocessContext,
+                                 ImportPropertyMap &properties,
+                                 std::vector<std::string> &missingTargets);
+  void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
+                                   const ImportPropertyMap &properties);
+
+  void ResolveTargetsInGeneratorExpressions(std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
@@ -107,6 +121,13 @@ protected:
 
   // The set of targets included in the export.
   std::set<cmTarget*> ExportedTargets;
+
+private:
+  void PopulateInterfaceProperty(const char *, const char *,
+                                 cmTarget *target,
+                                 cmGeneratorExpression::PreprocessContext,
+                                 ImportPropertyMap &properties,
+                                 std::vector<std::string> &missingTargets);
 };
 
 #endif

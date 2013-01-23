@@ -55,5 +55,6 @@ protected:
   virtual const char* GetIDEVersion() { return "9.0"; }
 private:
   class Factory;
+  friend class Factory;
 };
 #endif

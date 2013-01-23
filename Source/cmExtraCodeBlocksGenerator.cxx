@@ -811,6 +811,11 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
+  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+    {
+    command += " -v ";
+    command += target;
+    }
   else
     {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);

@@ -125,6 +125,201 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                      const char *outputName,
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets)
+{
+  const char *input = target->GetProperty(propName);
+  if (input)
+    {
+    if (!*input)
+      {
+      // Set to empty
+      properties[outputName] = "";
+      return;
+      }
+
+    std::string prepro = cmGeneratorExpression::Preprocess(input,
+                                                           preprocessRule);
+    if (!prepro.empty())
+      {
+      this->ResolveTargetsInGeneratorExpressions(prepro, target,
+                                                 missingTargets);
+      properties[outputName] = prepro;
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets)
+{
+  this->PopulateInterfaceProperty(propName, propName, target, preprocessRule,
+                            properties, missingTargets);
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
+                                        std::ostream& os,
+                                        const ImportPropertyMap &properties)
+{
+  if (!properties.empty())
+    {
+    std::string targetName = this->Namespace;
+    targetName += target->GetName();
+    os << "SET_TARGET_PROPERTIES(" << targetName << " PROPERTIES\n";
+    for(ImportPropertyMap::const_iterator pi = properties.begin();
+        pi != properties.end(); ++pi)
+      {
+      os << "  " << pi->first << " \"" << pi->second << "\"\n";
+      }
+    os << ")\n\n";
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
+                                    std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets)
+{
+  std::string::size_type pos = 0;
+  std::string::size_type lastPos = pos;
+
+  cmMakefile *mf = target->GetMakefile();
+  std::string errorString;
+
+  while((pos = input.find("$<TARGET_PROPERTY:", lastPos)) != input.npos)
+    {
+    std::string::size_type nameStartPos = pos +
+                                            sizeof("$<TARGET_PROPERTY:") - 1;
+    std::string::size_type closePos = input.find(">", nameStartPos);
+    std::string::size_type commaPos = input.find(",", nameStartPos);
+    std::string::size_type nextOpenPos = input.find("$<", nameStartPos);
+    if (commaPos == input.npos // Implied 'this' target
+        || closePos == input.npos // Imcomplete expression.
+        || closePos < commaPos // Implied 'this' target
+        || nextOpenPos < commaPos) // Non-literal
+      {
+      lastPos = nameStartPos;
+      continue;
+      }
+
+    const std::string targetName = input.substr(nameStartPos,
+                                                commaPos - nameStartPos);
+
+    pos = nameStartPos; // We're not going to replace the entire expression,
+                        // but only the target parameter.
+    if (cmTarget *tgt = mf->FindTargetToUse(targetName.c_str()))
+      {
+      if(tgt->IsImported())
+        {
+        pos += targetName.size();
+        }
+      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
+        {
+        input.replace(pos, targetName.size(),
+                      this->Namespace + targetName);
+        pos += this->Namespace.size() + targetName.size();
+        }
+      else
+        {
+        std::string namespacedTarget;
+        this->HandleMissingTarget(namespacedTarget, missingTargets,
+                                  mf, target, tgt);
+        if (!namespacedTarget.empty())
+          {
+          input.replace(pos, targetName.size(), namespacedTarget);
+          pos += namespacedTarget.size();
+          }
+        }
+      }
+    else
+      {
+      errorString = "$<TARGET_PROPERTY:" + targetName + ",prop> requires "
+                    "its first parameter to be a reachable target.";
+      }
+    lastPos = pos;
+    if (!errorString.empty())
+      {
+      break;
+      }
+    }
+  if (!errorString.empty())
+    {
+    mf->IssueMessage(cmake::FATAL_ERROR, errorString);
+    return;
+    }
+
+  pos = 0;
+  lastPos = pos;
+  while((pos = input.find("$<TARGET_NAME:", lastPos)) != input.npos)
+    {
+    std::string::size_type nameStartPos = pos + sizeof("$<TARGET_NAME:") - 1;
+    std::string::size_type endPos = input.find(">", nameStartPos);
+    if (endPos == input.npos)
+      {
+      errorString = "$<TARGET_NAME:...> expression incomplete";
+      }
+    const std::string targetName = input.substr(nameStartPos,
+                                                endPos - nameStartPos);
+    if(targetName.find("$<", lastPos) != input.npos)
+      {
+      errorString = "$<TARGET_NAME:...> requires its parameter to be a "
+                    "literal.";
+      }
+    if (cmTarget *tgt = mf->FindTargetToUse(targetName.c_str()))
+      {
+      if(tgt->IsImported())
+        {
+        input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
+                      targetName);
+        pos += sizeof("$<TARGET_NAME:") + targetName.size();
+        }
+      else if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
+        {
+        input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
+                      this->Namespace + targetName);
+        pos += sizeof("$<TARGET_NAME:") + targetName.size();
+        }
+      else
+        {
+        std::string namespacedTarget;
+        this->HandleMissingTarget(namespacedTarget, missingTargets,
+                                  mf, target, tgt);
+        if (!namespacedTarget.empty())
+          {
+          input.replace(pos, sizeof("$<TARGET_NAME:") + targetName.size(),
+                        namespacedTarget);
+          pos += sizeof("$<TARGET_NAME:") + targetName.size();
+          }
+        }
+      }
+    else
+      {
+      errorString = "$<TARGET_NAME:...> requires its parameter to be a "
+                    "reachable target.";
+      }
+    lastPos = pos;
+    if (!errorString.empty())
+      {
+      break;
+      }
+    }
+  if (!errorString.empty())
+    {
+    mf->IssueMessage(cmake::FATAL_ERROR, errorString);
+    }
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportFileGenerator
 ::SetImportDetailProperties(const char* config, std::string const& suffix,
@@ -162,7 +357,8 @@ cmExportFileGenerator
     }
 
   // Add the transitive link dependencies for this configuration.
-  if(cmTarget::LinkInterface const* iface = target->GetLinkInterface(config))
+  if(cmTarget::LinkInterface const* iface = target->GetLinkInterface(config,
+                                                                     target))
     {
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
@@ -286,6 +482,37 @@ void cmExportFileGenerator::GenerateImportVersionCode(std::ostream& os)
      << "\n";
 }
 
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::GenerateExpectedTargetsCode(std::ostream& os,
+                                            const std::string &expectedTargets)
+{
+  os << "SET(_targetsDefined)\n"
+        "SET(_targetsNotDefined)\n"
+        "SET(_expectedTargets)\n"
+        "FOREACH(_expectedTarget " << expectedTargets << ")\n"
+        "  LIST(APPEND _expectedTargets ${_expectedTarget})\n"
+        "  IF(NOT TARGET ${_expectedTarget})\n"
+        "    LIST(APPEND _targetsNotDefined ${_expectedTarget})\n"
+        "  ENDIF(NOT TARGET ${_expectedTarget})\n"
+        "  IF(TARGET ${_expectedTarget})\n"
+        "    LIST(APPEND _targetsDefined ${_expectedTarget})\n"
+        "  ENDIF(TARGET ${_expectedTarget})\n"
+        "ENDFOREACH(_expectedTarget)\n"
+        "IF(\"${_targetsDefined}\" STREQUAL \"${_expectedTargets}\")\n"
+        "  SET(CMAKE_IMPORT_FILE_VERSION)\n"
+        "  CMAKE_POLICY(POP)\n"
+        "  RETURN()\n"
+        "ENDIF(\"${_targetsDefined}\" STREQUAL \"${_expectedTargets}\")\n"
+        "IF(NOT \"${_targetsDefined}\" STREQUAL \"\")\n"
+        "  MESSAGE(FATAL_ERROR \"Some (but not all) targets in this export "
+        "set were already defined.\\nTargets Defined: ${_targetsDefined}\\n"
+        "Targets not yet defined: ${_targetsNotDefined}\\n\")\n"
+        "ENDIF(NOT \"${_targetsDefined}\" STREQUAL \"\")\n"
+        "UNSET(_targetsDefined)\n"
+        "UNSET(_targetsNotDefined)\n"
+        "UNSET(_expectedTargets)\n"
+        "\n\n";
+}
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator

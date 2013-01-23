@@ -814,7 +814,7 @@ bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
 void cmMakefile::FinalPass()
 {
   // do all the variable expansions here
-  this->ExpandVariables();
+  this->ExpandVariablesCMP0019();
 
   // give all the commands a chance to do something
   // after the file has been parsed before generation
@@ -1485,9 +1485,12 @@ void cmMakefile::InitializeFromParent()
   // Initialize definitions with the closure of the parent scope.
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
-  // copy include paths
-  this->SetProperty("INCLUDE_DIRECTORIES",
-                    parent->GetProperty("INCLUDE_DIRECTORIES"));
+  const std::vector<IncludeDirectoriesEntry> parentIncludes =
+                                        parent->GetIncludeDirectoriesEntries();
+  this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
+                                       parentIncludes.begin(),
+                                       parentIncludes.end());
+
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
   // define flags
@@ -1613,41 +1616,6 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
 }
 
 //----------------------------------------------------------------------------
-void AddStringToProperty(cmProperty *prop, const char* name, const char* s,
-                         bool before)
-{
-  if (!prop)
-    {
-    return;
-    }
-
-  // Don't worry about duplicates at this point. We eliminate them when
-  // we convert the property to a vector in GetIncludeDirectories.
-
-  if (before)
-    {
-    const char *val = prop->GetValue();
-    cmOStringStream oss;
-
-    if(val && *val)
-      {
-      oss << s << ";" << val;
-      }
-    else
-      {
-      oss << s;
-      }
-
-    std::string newVal = oss.str();
-    prop->Set(name, newVal.c_str());
-    }
-  else
-    {
-    prop->Append(name, s);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 {
   if (!inc)
@@ -1655,18 +1623,21 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
     return;
     }
 
-  // Directory property:
-  cmProperty *prop =
-    this->GetProperties().GetOrCreateProperty("INCLUDE_DIRECTORIES");
-  AddStringToProperty(prop, "INCLUDE_DIRECTORIES", inc, before);
+  std::vector<IncludeDirectoriesEntry>::iterator position =
+                               before ? this->IncludeDirectoriesEntries.begin()
+                                      : this->IncludeDirectoriesEntries.end();
+
+  cmListFileBacktrace lfbt;
+  this->GetBacktrace(lfbt);
+  IncludeDirectoriesEntry entry(inc, lfbt);
+  this->IncludeDirectoriesEntries.insert(position, entry);
 
   // Property on each target:
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
-    prop = t.GetProperties().GetOrCreateProperty("INCLUDE_DIRECTORIES");
-    AddStringToProperty(prop, "INCLUDE_DIRECTORIES", inc, before);
+    t.InsertInclude(entry, before);
     }
 }
 
@@ -2122,21 +2093,33 @@ void cmMakefile::AddExtraDirectory(const char* dir)
   this->AuxSourceDirectories.push_back(dir);
 }
 
-
-// expand CMAKE_BINARY_DIR and CMAKE_SOURCE_DIR in the
-// include and library directories.
-
-void cmMakefile::ExpandVariables()
+static bool mightExpandVariablesCMP0019(const char* s)
 {
-  // Now expand variables in the include and link strings
+  return s && *s && strstr(s,"${") && strchr(s,'}');
+}
 
-  // May not be necessary anymore... But may need a policy for strict
-  // backwards compatibility
+void cmMakefile::ExpandVariablesCMP0019()
+{
+  // Drop this ancient compatibility behavior with a policy.
+  cmPolicies::PolicyStatus pol = this->GetPolicyStatus(cmPolicies::CMP0019);
+  if(pol != cmPolicies::OLD && pol != cmPolicies::WARN)
+    {
+    return;
+    }
+  cmOStringStream w;
+
   const char *includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if (includeDirs)
+  if(mightExpandVariablesCMP0019(includeDirs))
     {
     std::string dirs = includeDirs;
     this->ExpandVariablesInString(dirs, true, true);
+    if(pol == cmPolicies::WARN && dirs != includeDirs)
+      {
+      w << "Evaluated directory INCLUDE_DIRECTORIES\n"
+        << "  " << includeDirs << "\n"
+        << "as\n"
+        << "  " << dirs << "\n";
+      }
     this->SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
     }
 
@@ -2146,10 +2129,17 @@ void cmMakefile::ExpandVariables()
     {
     cmTarget &t = l->second;
     includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
-    if (includeDirs)
+    if(mightExpandVariablesCMP0019(includeDirs))
       {
       std::string dirs = includeDirs;
       this->ExpandVariablesInString(dirs, true, true);
+      if(pol == cmPolicies::WARN && dirs != includeDirs)
+        {
+        w << "Evaluated target " << t.GetName() << " INCLUDE_DIRECTORIES\n"
+          << "  " << includeDirs << "\n"
+          << "as\n"
+          << "  " << dirs << "\n";
+        }
       t.SetProperty("INCLUDE_DIRECTORIES", dirs.c_str());
       }
     }
@@ -2157,13 +2147,45 @@ void cmMakefile::ExpandVariables()
   for(std::vector<std::string>::iterator d = this->LinkDirectories.begin();
       d != this->LinkDirectories.end(); ++d)
     {
-    this->ExpandVariablesInString(*d, true, true);
+    if(mightExpandVariablesCMP0019(d->c_str()))
+      {
+      std::string orig = *d;
+      this->ExpandVariablesInString(*d, true, true);
+      if(pol == cmPolicies::WARN && *d != orig)
+        {
+        w << "Evaluated link directory\n"
+          << "  " << orig << "\n"
+          << "as\n"
+          << "  " << *d << "\n";
+        }
+      }
     }
   for(cmTarget::LinkLibraryVectorType::iterator l =
         this->LinkLibraries.begin();
       l != this->LinkLibraries.end(); ++l)
     {
-    this->ExpandVariablesInString(l->first, true, true);
+    if(mightExpandVariablesCMP0019(l->first.c_str()))
+      {
+      std::string orig = l->first;
+      this->ExpandVariablesInString(l->first, true, true);
+      if(pol == cmPolicies::WARN && l->first != orig)
+        {
+        w << "Evaluated link library\n"
+          << "  " << orig << "\n"
+          << "as\n"
+          << "  " << l->first << "\n";
+        }
+      }
+    }
+
+  if(!w.str().empty())
+    {
+    cmOStringStream m;
+    m << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0019)
+      << "\n"
+      << "The following variable evaluations were encountered:\n"
+      << w.str();
+    this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
     }
 }
 
@@ -3400,6 +3422,15 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
+  if (propname == "INCLUDE_DIRECTORIES")
+    {
+    this->IncludeDirectoriesEntries.clear();
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->IncludeDirectoriesEntries.push_back(
+                                        IncludeDirectoriesEntry(value, lfbt));
+    return;
+    }
 
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
@@ -3431,6 +3462,14 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
   // handle special props
   std::string propname = prop;
 
+  if (propname == "INCLUDE_DIRECTORIES")
+    {
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->IncludeDirectoriesEntries.push_back(
+                                        IncludeDirectoriesEntry(value, lfbt));
+    return;
+    }
   if ( propname == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
@@ -3540,6 +3579,20 @@ const char *cmMakefile::GetProperty(const char* prop,
       str << it->c_str();
       }
     output = str.str();
+    return output.c_str();
+    }
+  else if (!strcmp("INCLUDE_DIRECTORIES",prop))
+    {
+    std::string sep;
+    for (std::vector<IncludeDirectoriesEntry>::const_iterator
+        it = this->IncludeDirectoriesEntries.begin(),
+        end = this->IncludeDirectoriesEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
+      sep = ";";
+      }
     return output.c_str();
     }
 
