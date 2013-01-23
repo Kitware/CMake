@@ -114,8 +114,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
   const cmGeneratorExpressionDAGChecker *parent = this->Parent;
   while (parent)
     {
-    parent = parent->Parent;
     top = parent;
+    parent = parent->Parent;
     }
 
   const char *prop = top->Property.c_str();
