@@ -22,13 +22,11 @@ bool cmTargetIncludeDirectoriesCommand
 
 //----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
-::HandleImportedTargetInvalidScope(const std::string &tgt,
-                                   const std::string &scope)
+::HandleImportedTarget(const std::string &tgt)
 {
   cmOStringStream e;
-  e << "Cannot specify " << scope << " include directories for imported "
-       "target \"" << tgt << "\".  Include directories can only be "
-       "specified for an imported target in the INTERFACE mode.";
+  e << "Cannot specify include directories for imported target \""
+    << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 

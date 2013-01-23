@@ -11,9 +11,6 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/publicinclude/publicinclude.h" "#define 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/interfaceinclude")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/interfaceinclude/interfaceinclude.h" "#define INTERFACEINCLUDE_DEFINE\n")
 
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/importedinterfaceinclude")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/importedinterfaceinclude/importedinterfaceinclude.h" "#define IMPORTEDINTERFACEINCLUDE_DEFINE\n")
-
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/poison")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/poison/common.h" "#error Should not be included\n")
 
@@ -41,15 +38,10 @@ target_include_directories(target_include_directories
   BEFORE PUBLIC "$<$<TARGET_DEFINED:notdefined>:${CMAKE_CURRENT_BINARY_DIR}/poison>"
 )
 
-add_library(importedlib UNKNOWN IMPORTED)
-target_include_directories(importedlib
-  INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/importedinterfaceinclude"
-)
-
 add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
 
 target_include_directories(consumer
-  PRIVATE target_include_directories importedlib
+  PRIVATE target_include_directories
 )
