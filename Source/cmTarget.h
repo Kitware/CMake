@@ -495,6 +495,8 @@ public:
   void GetLinkDependentTargetsForProperty(const std::string &p,
                                        std::set<std::string> &targets);
   bool IsNullImpliedByLinkLibraries(const std::string &p);
+  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                            const char *config);
 
   void AddLinkDependentTargetsForProperties(
           const std::map<cmStdString, cmStdString> &map);

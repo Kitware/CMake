@@ -165,7 +165,12 @@ target_compile_definitions(deps_iface PRIVATE testLibDepends)
 add_executable(deps_shared_iface deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface testSharedLibDepends)
 target_include_directories(deps_shared_iface PRIVATE testSharedLibDepends)
-target_compile_definitions(deps_shared_iface PRIVATE testSharedLibDepends)
+target_compile_definitions(deps_shared_iface
+  PRIVATE
+    testSharedLibDepends
+    $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>
+    $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
+)
 
 if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   include(CheckCXXCompilerFlag)
@@ -194,4 +199,6 @@ target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
 target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends bld_subdirlib)
 target_compile_definitions(deps_shared_iface2
   PRIVATE bld_testSharedLibDepends TEST_SUBDIR_LIB
+  $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>
+  $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
 )

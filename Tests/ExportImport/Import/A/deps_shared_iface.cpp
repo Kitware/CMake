@@ -8,6 +8,14 @@
 #endif
 #endif
 
+#ifndef PIC_PROPERTY_IS_ON
+#error Expected PIC_PROPERTY_IS_ON
+#endif
+
+#ifndef CUSTOM_PROPERTY_IS_ON
+#error Expected CUSTOM_PROPERTY_IS_ON
+#endif
+
 #ifdef TEST_SUBDIR_LIB
 #include "subdir.h"
 #endif

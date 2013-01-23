@@ -1520,6 +1520,13 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkClosureMap.clear();
+  for (cmTargetLinkInformationMap::const_iterator it
+      = this->LinkInformation.begin();
+      it != this->LinkInformation.end(); ++it)
+    {
+    delete it->second;
+    }
+  this->LinkInformation.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -4533,6 +4540,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
             "INTERFACE_" << p << " property requirement\nof "
             "dependency \"" << li->Target->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4559,6 +4567,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
             "INTERFACE_" << p << " property on\ndependency \""
             << li->Target->GetName() << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4586,6 +4595,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
                 "of " << p << " already determined\nfor \""
               << this->GetName() << "\".\n";
             cmSystemTools::Error(e.str().c_str());
+            break;
             }
           else
             {
@@ -4607,6 +4617,53 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
       }
     }
   return propContent;
+}
+
+//----------------------------------------------------------------------------
+bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
+                             const char *interfaceProperty,
+                             const char *config)
+{
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    const char *prop = li->Target->GetProperty(interfaceProperty);
+    if (!prop)
+      {
+      continue;
+      }
+
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop, props);
+
+    for(std::vector<std::string>::iterator pi = props.begin();
+        pi != props.end(); ++pi)
+      {
+      if (*pi == p)
+        {
+        return true;
+        }
+      }
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                           const char *config)
+{
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
+                                 config);
 }
 
 //----------------------------------------------------------------------------
@@ -5422,14 +5479,14 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
       info = 0;
       }
 
+    // Store the information for this configuration.
+    cmTargetLinkInformationMap::value_type entry(key, info);
+    i = this->LinkInformation.insert(entry).first;
+
     if (info)
       {
       this->CheckPropertyCompatibility(info, config);
       }
-
-    // Store the information for this configuration.
-    cmTargetLinkInformationMap::value_type entry(key, info);
-    i = this->LinkInformation.insert(entry).first;
     }
   return i->second;
 }

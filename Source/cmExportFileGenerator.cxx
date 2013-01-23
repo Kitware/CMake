@@ -21,6 +21,7 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmVersion.h"
+#include "cmComputeLinkInformation.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -175,6 +176,79 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 {
   this->PopulateInterfaceProperty(propName, propName, target, preprocessRule,
                             properties, missingTargets);
+}
+
+
+//----------------------------------------------------------------------------
+void getPropertyContents(cmTarget *tgt, const char *prop,
+         std::set<std::string> &ifaceProperties)
+{
+  const char *p = tgt->GetProperty(prop);
+  if (!p)
+    {
+    return;
+    }
+  std::vector<std::string> content;
+  cmSystemTools::ExpandListArgument(p, content);
+  for (std::vector<std::string>::const_iterator ci = content.begin();
+    ci != content.end(); ++ci)
+    {
+    ifaceProperties.insert(*ci);
+    }
+}
+
+//----------------------------------------------------------------------------
+void getCompatibleInterfaceProperties(cmTarget *target,
+                                      std::set<std::string> &ifaceProperties,
+                                      const char *config)
+{
+  cmComputeLinkInformation *info = target->GetLinkInformation(config);
+
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    getPropertyContents(li->Target,
+                        "COMPATIBLE_INTERFACE_BOOL",
+                        ifaceProperties);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
+                                cmTarget *target,
+                                ImportPropertyMap &properties)
+{
+  this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_BOOL",
+                                target, properties);
+
+  std::set<std::string> ifaceProperties;
+
+  getPropertyContents(target, "COMPATIBLE_INTERFACE_BOOL", ifaceProperties);
+
+  getCompatibleInterfaceProperties(target, ifaceProperties, 0);
+
+  std::vector<std::string> configNames;
+  target->GetMakefile()->GetConfigurations(configNames);
+
+  for (std::vector<std::string>::const_iterator ci = configNames.begin();
+    ci != configNames.end(); ++ci)
+    {
+    getCompatibleInterfaceProperties(target, ifaceProperties, ci->c_str());
+    }
+
+  for (std::set<std::string>::const_iterator it = ifaceProperties.begin();
+    it != ifaceProperties.end(); ++it)
+    {
+    this->PopulateInterfaceProperty(("INTERFACE_" + *it).c_str(),
+                                    target, properties);
+    }
 }
 
 //----------------------------------------------------------------------------
