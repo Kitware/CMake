@@ -2260,7 +2260,7 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName)
     {
     return true;
     }
-  // If we are doing an in-source build, than the test will always fail
+  // If we are doing an in-source build, then the test will always fail
   if ( cmSystemTools::SameFile(this->GetHomeDirectory(),
                                this->GetHomeOutputDirectory()) )
     {
@@ -2271,8 +2271,8 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName)
     return true;
     }
 
-  // Check if this is subdirectory of the source tree but not a
-  // subdirectory of a build tree
+  // Check if this is a subdirectory of the source tree but not a
+  // subdirectory of the build tree
   if ( cmSystemTools::IsSubDirectory(fileName,
       this->GetHomeDirectory()) &&
     !cmSystemTools::IsSubDirectory(fileName,
