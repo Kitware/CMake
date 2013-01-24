@@ -304,6 +304,13 @@ function(_ExternalData_arg target arg options var_file)
   list(GET options 0 data)
   list(REMOVE_AT options 0)
 
+  # Reject trailing slashes.
+  if("x${data}" MATCHES "[/\\]$")
+    message(FATAL_ERROR "Data file reference in argument\n"
+      "  ${arg}\n"
+      "may not end in a slash!")
+  endif()
+
   # Convert to full path.
   if(IS_ABSOLUTE "${data}")
     set(absdata "${data}")
@@ -376,7 +383,7 @@ function(_ExternalData_arg target arg options var_file)
       "  ${arg}\n"
       "corresponds to source tree path\n"
       "  ${reldata}\n"
-      "that does not exist (with or without an extension)!")
+      "that does not exist as a file (with or without an extension)!")
   endif()
 
   if(external)
@@ -470,7 +477,7 @@ function(_ExternalData_arg_find_files pattern regex)
   foreach(entry IN LISTS globbed)
     string(REGEX REPLACE "^(${regex})(\\.md5|)$" "\\1;\\2" tuple "${entry}")
     list(LENGTH tuple len)
-    if("${len}" EQUAL 2)
+    if("${len}" EQUAL 2 AND NOT IS_DIRECTORY "${top_src}/${entry}")
       list(GET tuple 0 relname)
       list(GET tuple 1 alg)
       set(name "${top_src}/${relname}")
