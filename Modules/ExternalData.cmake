@@ -49,6 +49,11 @@
 #    %(algo)     <ext>     Description
 #    -------     -----     -----------
 #    MD5         .md5      Message-Digest Algorithm 5, RFC 1321
+#    SHA1        .sha1     US Secure Hash Algorithm 1, RFC 3174
+#    SHA224      .sha224   US Secure Hash Algorithms, RFC 4634
+#    SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
+#    SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
+#    SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
 # Note that the hashes are used only for unique data identification and
 # download verification.  This is not security software.
 #
@@ -261,8 +266,8 @@ endfunction()
 #-----------------------------------------------------------------------------
 # Private helper interface
 
-set(_ExternalData_REGEX_ALGO "MD5")
-set(_ExternalData_REGEX_EXT "md5")
+set(_ExternalData_REGEX_ALGO "MD5|SHA1|SHA224|SHA256|SHA384|SHA512")
+set(_ExternalData_REGEX_EXT "md5|sha1|sha224|sha256|sha384|sha512")
 set(_ExternalData_SELF "${CMAKE_CURRENT_LIST_FILE}")
 get_filename_component(_ExternalData_SELF_DIR "${_ExternalData_SELF}" PATH)
 

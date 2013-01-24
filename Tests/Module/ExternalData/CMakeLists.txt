@@ -22,6 +22,7 @@ ExternalData_Add_Test(Data1
     -D SeriesBn=DATA{SeriesBn_1.dat,:}
     -D SeriesCn=DATA{SeriesCn.1.dat,:}
     -D SeriesDn=DATA{SeriesDn-1.dat,:}
+    -D SeriesMixed=DATA{SeriesMixed.1.dat,:}
     -D Paired=DATA{PairedA.dat,PairedB.dat}
     -D Meta=DATA{MetaTop.dat,REGEX:Meta[ABC].dat}
     -D Directory=DATA{Directory/,A.dat,REGEX:[BC].dat}
