@@ -315,7 +315,6 @@ function(_ExternalData_arg target arg options var_file)
   if(IS_ABSOLUTE "${data}")
     set(absdata "${data}")
   else()
-    # TODO: If ${data} does not start in "./" or "../" then use search path?
     get_filename_component(absdata "${CMAKE_CURRENT_SOURCE_DIR}/${data}" ABSOLUTE)
   endif()
 
@@ -465,7 +464,7 @@ macro(_ExternalData_arg_series)
   list(GET tuple 2 ext)
 
   # Glob files that might match the series.
-  # Then match match base, number, and extension.
+  # Then match base, number, and extension.
   _ExternalData_exact_regex(series_base "${relbase}")
   _ExternalData_exact_regex(series_ext "${ext}")
   _ExternalData_arg_find_files("${relbase}*${ext}"
