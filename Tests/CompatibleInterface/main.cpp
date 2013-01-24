@@ -11,7 +11,10 @@
 #error Expected BOOL_PROP3
 #endif
 
+#include "iface2.h"
+
 int main(int argc, char **argv)
 {
-  return 0;
+  Iface2 if2;
+  return if2.foo();
 }
