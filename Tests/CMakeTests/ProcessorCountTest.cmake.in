@@ -9,14 +9,14 @@ message("### 3. ProcessorCount(...) function call is emitting output that it sho
 message("processor_count='${processor_count}'")
 
 execute_process(
-  COMMAND "@CMAKE_BINARY_DIR@/Source/kwsys/$ENV{CMAKE_CONFIG_TYPE}/cmsysTestsCxx"
+  COMMAND "${KWSYS_TEST_EXE}"
   testSystemInformation
   OUTPUT_VARIABLE tsi_out
   ERROR_VARIABLE tsi_err
   RESULT_VARIABLE tsi_res
 )
 if (tsi_res)
-  message(SEND_ERROR "executing \"@CMAKE_BINARY_DIR@/Source/kwsys/$ENV{CMAKE_CONFIG_TYPE}/cmsysTestsCxx\" failed")
+  message("executing \"${KWSYS_TEST_EXE}\" failed")
   message(FATAL_ERROR "output: ${tsi_res}")
 endif ()
 
