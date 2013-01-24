@@ -14,21 +14,34 @@ set_property(TARGET iface1 APPEND PROPERTY
     BOOL_PROP3
     BOOL_PROP4
 )
+set_property(TARGET iface1 APPEND PROPERTY
+  COMPATIBLE_INTERFACE_STRING
+    STRING_PROP1
+    STRING_PROP2
+    STRING_PROP3
+)
 
 set_property(TARGET iface1 PROPERTY INTERFACE_BOOL_PROP1 ON)
 set_property(TARGET iface1 PROPERTY INTERFACE_BOOL_PROP2 ON)
+set_property(TARGET iface1 PROPERTY INTERFACE_STRING_PROP1 prop1)
+set_property(TARGET iface1 PROPERTY INTERFACE_STRING_PROP2 prop2)
 
 add_executable(CompatibleInterface main.cpp)
 target_link_libraries(CompatibleInterface iface1)
 
 set_property(TARGET CompatibleInterface PROPERTY BOOL_PROP2 ON)
 set_property(TARGET CompatibleInterface PROPERTY BOOL_PROP3 ON)
+set_property(TARGET CompatibleInterface PROPERTY STRING_PROP2 prop2)
+set_property(TARGET CompatibleInterface PROPERTY STRING_PROP3 prop3)
 
 target_compile_definitions(CompatibleInterface
   PRIVATE
     $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP1>>:BOOL_PROP1>
     $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP2>>:BOOL_PROP2>
     $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP3>>:BOOL_PROP3>
+    $<$<STREQUAL:$<TARGET_PROPERTY:STRING_PROP1>,prop1>:STRING_PROP1>
+    $<$<STREQUAL:$<TARGET_PROPERTY:STRING_PROP2>,prop2>:STRING_PROP2>
+    $<$<STREQUAL:$<TARGET_PROPERTY:STRING_PROP3>,prop3>:STRING_PROP3>
 )
 
 
