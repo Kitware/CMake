@@ -9,6 +9,8 @@
 # configure_file() command when creating the <Name>Config.cmake or <Name>-config.cmake
 # file for installing a project or library. It helps making the resulting package
 # relocatable by avoiding hardcoded paths in the installed Config.cmake file.
+# <Name>Config.cmake files installed under UNIX into /lib(64) or /usr/lib(64) are
+# considered system packages and are not relocatable.
 #
 # In a FooConfig.cmake file there may be code like this to make the
 # install destinations know to the using project:
