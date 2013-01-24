@@ -119,8 +119,7 @@
 # Variables ExternalData_TIMEOUT_INACTIVITY and ExternalData_TIMEOUT_ABSOLUTE
 # set the download inactivity and absolute timeouts, in seconds.  The defaults
 # are 60 seconds and 300 seconds, respectively.  Set either timeout to 0
-# seconds to disable enforcement.  The inactivity timeout is enforced only
-# with CMake >= 2.8.5.
+# seconds to disable enforcement.
 
 #=============================================================================
 # Copyright 2010-2013 Kitware, Inc.
@@ -263,13 +262,7 @@ function(_ExternalData_compute_hash var_hash algo file)
 endfunction()
 
 function(_ExternalData_random var)
-  if(NOT ${CMAKE_VERSION} VERSION_LESS 2.8.5)
-    string(RANDOM LENGTH 6 random)
-  elseif(EXISTS /dev/urandom)
-    file(READ /dev/urandom random LIMIT 4 HEX)
-  else()
-    message(FATAL_ERROR "CMake >= 2.8.5 required in this environment")
-  endif()
+  string(RANDOM LENGTH 6 random)
   set("${var}" "${random}" PARENT_SCOPE)
 endfunction()
 
@@ -550,14 +543,10 @@ function(_ExternalData_download_file url file err_var msg_var)
   set(retry 3)
   while(retry)
     math(EXPR retry "${retry} - 1")
-    if("${CMAKE_VERSION}" VERSION_GREATER 2.8.4.20110602)
-      if(ExternalData_TIMEOUT_INACTIVITY)
-        set(inactivity_timeout INACTIVITY_TIMEOUT ${ExternalData_TIMEOUT_INACTIVITY})
-      elseif(NOT "${ExternalData_TIMEOUT_INACTIVITY}" EQUAL 0)
-        set(inactivity_timeout INACTIVITY_TIMEOUT 60)
-      else()
-        set(inactivity_timeout "")
-      endif()
+    if(ExternalData_TIMEOUT_INACTIVITY)
+      set(inactivity_timeout INACTIVITY_TIMEOUT ${ExternalData_TIMEOUT_INACTIVITY})
+    elseif(NOT "${ExternalData_TIMEOUT_INACTIVITY}" EQUAL 0)
+      set(inactivity_timeout INACTIVITY_TIMEOUT 60)
     else()
       set(inactivity_timeout "")
     endif()
