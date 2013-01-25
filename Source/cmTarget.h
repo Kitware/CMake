@@ -501,12 +501,17 @@ public:
   bool IsNullImpliedByLinkLibraries(const std::string &p);
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                             const char *config);
+  bool IsLinkInterfaceDependentStringProperty(const std::string &p,
+                                              const char *config);
 
   void AddLinkDependentTargetsForProperties(
           const std::map<cmStdString, cmStdString> &map);
 
   bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
                                              const char *config);
+
+  const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
+                                                      const char *config);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
