@@ -66,18 +66,26 @@
 # the source tree contains a content link such as "MyInput.png.md5" then the
 # "MyData" target creates a real "MyInput.png" in the build tree.
 #
-# The DATA{} syntax can automatically recognize and fetch a file series.  If
-# the source tree contains a group of files or content links named like a
-# series then a DATA{} reference to one member adds rules to fetch all of
-# them.  Although all members of a series are fetched, only the file
-# originally named by the DATA{} argument is substituted for it.  Two
-# variables configure recognition of a series from DATA{<name>}.  First,
-# ExternalData_SERIES_PARSE is a regex of the form "^(...)(...)(...)$" to
-# parse <prefix>, <number>, and <suffix> parts from <name>.  Second,
-# ExternalData_SERIES_MATCH is a regex matching the <number> part of series
-# members named <prefix><number><suffix>.  Note that the <suffix> of a series
-# does not include a hash-algorithm extension.  Both series configuration
-# variables have default values that work well for common cases.
+# The DATA{} syntax can be told to fetch a file series using the form
+# "DATA{<name>,:}", where the ":" is literal.  If the source tree contains a
+# group of files or content links named like a series then a reference to one
+# member adds rules to fetch all of them.  Although all members of a series
+# are fetched, only the file originally named by the DATA{} argument is
+# substituted for it.  The default configuration recognizes file series names
+# ending with "#.ext", "_#.ext", ".#.ext", or "-#.ext" where "#" is a sequence
+# of decimal digits and ".ext" is any single extension.  Configure it with a
+# regex that parses <number> and <suffix> parts from the end of <name>:
+#  ExternalData_SERIES_PARSE = regex of the form (<number>)(<suffix>)$
+# For more complicated cases set:
+#  ExternalData_SERIES_PARSE = regex with at least two () groups
+#  ExternalData_SERIES_PARSE_PREFIX = <prefix> regex group number, if any
+#  ExternalData_SERIES_PARSE_NUMBER = <number> regex group number
+#  ExternalData_SERIES_PARSE_SUFFIX = <suffix> regex group number
+# Configure series number matching with a regex that matches the
+# <number> part of series members named <prefix><number><suffix>:
+#  ExternalData_SERIES_MATCH = regex matching <number> in all series members
+# Note that the <suffix> of a series does not include a hash-algorithm
+# extension.
 #
 # The DATA{} syntax can alternatively match files associated with the named
 # file and contained in the same directory.  Associated files may be specified
@@ -349,6 +357,7 @@ function(_ExternalData_arg target arg options var_file)
   set(have_original 0)
 
   # Process options.
+  set(series_option "")
   set(associated_files "")
   set(associated_regex "")
   foreach(opt ${options})
@@ -356,6 +365,9 @@ function(_ExternalData_arg target arg options var_file)
       # Regular expression to match associated files.
       string(REGEX REPLACE "^REGEX:" "" regex "${opt}")
       list(APPEND associated_regex "${regex}")
+    elseif("x${opt}" MATCHES "^x:$")
+      # Activate series matching.
+      set(series_option "${opt}")
     elseif("x${opt}" MATCHES "^[^][:/*?]+$")
       # Specific associated file.
       list(APPEND associated_files "${opt}")
@@ -365,16 +377,19 @@ function(_ExternalData_arg target arg options var_file)
     endif()
   endforeach()
 
-  if(associated_files OR associated_regex)
-    # Load the named data file and listed/matching associated files.
-    _ExternalData_arg_single()
-    _ExternalData_arg_associated()
-  elseif("${reldata}" MATCHES "(^|/)[^/.]+$")
-    # Files with no extension cannot be a series.
-    _ExternalData_arg_single()
-  else()
-    # Match a whole file series by default.
+  if(series_option)
+    if(associated_files OR associated_regex)
+      message(FATAL_ERROR "Series option \"${series_option}\" not allowed with associated files.")
+    endif()
+    # Load a whole file series.
     _ExternalData_arg_series()
+  else()
+    # Load the named data file.
+    _ExternalData_arg_single()
+    if(associated_files OR associated_regex)
+      # Load listed/matching associated files.
+      _ExternalData_arg_associated()
+    endif()
   endif()
 
   if(NOT have_original)
@@ -430,27 +445,40 @@ endmacro()
 
 macro(_ExternalData_arg_series)
   # Configure series parsing and matching.
+  set(series_parse_prefix "")
+  set(series_parse_number "\\1")
+  set(series_parse_suffix "\\2")
   if(ExternalData_SERIES_PARSE)
-    if(NOT "${ExternalData_SERIES_PARSE}" MATCHES
-        "^\\^\\([^()]*\\)\\([^()]*\\)\\([^()]*\\)\\$$")
+    if(ExternalData_SERIES_PARSE_NUMBER AND ExternalData_SERIES_PARSE_SUFFIX)
+      if(ExternalData_SERIES_PARSE_PREFIX)
+        set(series_parse_prefix "\\${ExternalData_SERIES_PARSE_PREFIX}")
+      endif()
+      set(series_parse_number "\\${ExternalData_SERIES_PARSE_NUMBER}")
+      set(series_parse_suffix "\\${ExternalData_SERIES_PARSE_SUFFIX}")
+    elseif(NOT "x${ExternalData_SERIES_PARSE}" MATCHES "^x\\([^()]*\\)\\([^()]*\\)\\$$")
       message(FATAL_ERROR
         "ExternalData_SERIES_PARSE is set to\n"
         "  ${ExternalData_SERIES_PARSE}\n"
         "which is not of the form\n"
-        "  ^(...)(...)(...)$\n")
+        "  (<number>)(<suffix>)$\n"
+        "Fix the regular expression or set variables\n"
+        "  ExternalData_SERIES_PARSE_PREFIX = <prefix> regex group number, if any\n"
+        "  ExternalData_SERIES_PARSE_NUMBER = <number> regex group number\n"
+        "  ExternalData_SERIES_PARSE_SUFFIX = <suffix> regex group number\n"
+        )
     endif()
     set(series_parse "${ExternalData_SERIES_PARSE}")
   else()
-    set(series_parse "^(.*)()(\\.[^./]*)$")
+    set(series_parse "([0-9]*)(\\.[^./]*)$")
   endif()
   if(ExternalData_SERIES_MATCH)
     set(series_match "${ExternalData_SERIES_MATCH}")
   else()
-    set(series_match "[_.]?[0-9]*")
+    set(series_match "[_.-]?[0-9]*")
   endif()
 
   # Parse the base, number, and extension components of the series.
-  string(REGEX REPLACE "${series_parse}" "\\1;\\2;\\3" tuple "${reldata}")
+  string(REGEX REPLACE "${series_parse}" "${series_parse_prefix};${series_parse_number};${series_parse_suffix}" tuple "${reldata}")
   list(LENGTH tuple len)
   if(NOT "${len}" EQUAL 3)
     message(FATAL_ERROR "Data file referenced by argument\n"
