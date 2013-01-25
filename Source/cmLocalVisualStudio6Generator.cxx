@@ -1703,19 +1703,19 @@ void cmLocalVisualStudio6Generator
 
     this->AppendDefines(
       definesSet,
-      gt->GetCompileDefinitions());
+      target.GetCompileDefinitions());
     this->AppendDefines(
       debugDefinesSet,
-      gt->GetCompileDefinitions("DEBUG"));
+      target.GetCompileDefinitions("DEBUG"));
     this->AppendDefines(
       releaseDefinesSet,
-      gt->GetCompileDefinitions("RELEASE"));
+      target.GetCompileDefinitions("RELEASE"));
     this->AppendDefines(
       minsizeDefinesSet,
-      gt->GetCompileDefinitions("MINSIZEREL"));
+      target.GetCompileDefinitions("MINSIZEREL"));
     this->AppendDefines(
       debugrelDefinesSet,
-      gt->GetCompileDefinitions("RELWITHDEBINFO"));
+      target.GetCompileDefinitions("RELWITHDEBINFO"));
 
     std::string defines = " ";
     std::string debugDefines = " ";
