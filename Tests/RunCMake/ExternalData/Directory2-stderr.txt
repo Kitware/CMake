@@ -1,0 +1,10 @@
+CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+  Data file reference in argument
+
+    DATA{Directory2/}
+
+  may not end in a slash!
+Call Stack \(most recent call first\):
+  .*
+  Directory2.cmake:3 \(ExternalData_Add_Test\)
+  CMakeLists.txt:3 \(include\)
