@@ -149,7 +149,8 @@ public:
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
-                              const char* lang, bool forResponseFile = false);
+                              const char* lang, bool forResponseFile = false,
+                              const char *config = 0);
 
   /**
    * Encode a list of preprocessor definitions for the compiler
