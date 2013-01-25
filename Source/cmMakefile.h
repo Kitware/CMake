@@ -547,7 +547,7 @@ public:
    * Mark include directories as system directories.
    */
   void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
-  bool IsSystemIncludeDirectory(const char* dir);
+  bool IsSystemIncludeDirectory(const char* dir, const char *config);
 
   /** Expand out any arguements in the vector that have ; separated
    *  strings into multiple arguements.  A new vector is created

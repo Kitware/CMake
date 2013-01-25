@@ -23,6 +23,7 @@
 #include "cmListFileCache.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmGeneratorExpression.h"
 #include "cmTest.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
@@ -1665,10 +1666,24 @@ cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::IsSystemIncludeDirectory(const char* dir)
+bool cmMakefile::IsSystemIncludeDirectory(const char* dir, const char *config)
 {
-  return (this->SystemIncludeDirectories.find(dir) !=
-          this->SystemIncludeDirectories.end());
+  for (std::set<cmStdString>::const_iterator
+      it = this->SystemIncludeDirectories.begin();
+      it != this->SystemIncludeDirectories.end(); ++it)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    std::vector<std::string> incs;
+    cmSystemTools::ExpandListArgument(ge.Parse(*it)
+                                       ->Evaluate(this, config, false), incs);
+    if (std::find(incs.begin(), incs.end(), dir) != incs.end())
+      {
+      return true;
+      }
+    }
+  return false;
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
