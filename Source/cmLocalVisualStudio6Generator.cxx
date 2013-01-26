@@ -1697,10 +1697,6 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-
-    cmGeneratorTarget* gt =
-      this->GlobalGenerator->GetGeneratorTarget(&target);
-
     this->AppendDefines(
       definesSet,
       target.GetCompileDefinitions());
