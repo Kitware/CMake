@@ -367,7 +367,6 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
   std::string::size_type lastPos = pos;
 
   cmMakefile *mf = target->GetMakefile();
-  std::string errorString;
 
   while((pos = input.find("$<TARGET_PROPERTY:", lastPos)) != input.npos)
     {
@@ -388,21 +387,14 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     std::string targetName = input.substr(nameStartPos,
                                                 commaPos - nameStartPos);
 
-    if (!this->AddTargetNamespace(targetName, target, missingTargets))
+    if (this->AddTargetNamespace(targetName, target, missingTargets))
       {
-      errorString = "$<TARGET_PROPERTY:" + targetName + ",prop> requires "
-                    "its first parameter to be a reachable target.";
-      break;
+      input.replace(nameStartPos, commaPos - nameStartPos, targetName);
       }
-    input.replace(nameStartPos, commaPos - nameStartPos, targetName);
     lastPos = pos + targetName.size();
     }
-  if (!errorString.empty())
-    {
-    mf->IssueMessage(cmake::FATAL_ERROR, errorString);
-    return;
-    }
 
+  std::string errorString;
   pos = 0;
   lastPos = pos;
   while((pos = input.find("$<TARGET_NAME:", lastPos)) != input.npos)
