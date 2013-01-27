@@ -155,6 +155,21 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
+void
+cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string &input)
+{
+  std::string::size_type pos = 0;
+  std::string::size_type lastPos = pos;
+
+  while((pos = input.find("$<INSTALL_PREFIX>", lastPos)) != input.npos)
+    {
+    std::string::size_type endPos = pos + sizeof("$<INSTALL_PREFIX>") - 1;
+    input.replace(pos, endPos - pos, "${_IMPORT_PREFIX}");
+    lastPos = endPos;
+    }
+}
+
+//----------------------------------------------------------------------------
 bool
 cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
                                     std::vector<std::string> &missingTargets)

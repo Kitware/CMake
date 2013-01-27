@@ -55,6 +55,8 @@
   "the 'head' target was created, else '0'.  If the policy was not "    \
   "set, the warning message for the policy will be emitted.  This "     \
   "generator expression only works for a subset of policies.\n"         \
+  "  $<INSTALL_PREFIX>         = Content of the install prefix when "   \
+  "the target is exported via INSTALL(EXPORT) and empty otherwise.\n"   \
   "Boolean expressions:\n"                                              \
   "  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'\n"    \
   "  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'\n"    \
