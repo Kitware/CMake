@@ -168,6 +168,8 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<$<TARGET_DEFINED:not_a_target>:$<TARGET_PROPERTY:not_a_target,INTERFACE_INCLUDE_DIRECTORIES>>
 )
 
+target_compile_definitions(testLibRequired PUBLIC testSharedLibRequired)
+
 set_property(TARGET testLibRequired APPEND PROPERTY
   INTERFACE_COMPILE_DEFINITIONS
     testLibRequired_IFACE_DEFINE
@@ -206,6 +208,7 @@ set_property(TARGET testSharedLibRequired
   PROPERTY
     INTERFACE_CUSTOM_STRING testcontent
 )
+target_compile_definitions(testSharedLibRequired INTERFACE SOME_NON_TARGET_DEFINE)
 
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY

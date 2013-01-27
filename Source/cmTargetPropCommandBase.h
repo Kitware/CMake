@@ -35,10 +35,10 @@ private:
   virtual void HandleImportedTarget(const std::string &tgt) = 0;
   virtual void HandleMissingTarget(const std::string &name) = 0;
 
-  virtual bool HandleNonTargetArg(std::string &content,
-                          const std::string &sep,
-                          const std::string &entry,
-                          const std::string &tgt) = 0;
+  virtual void HandleMaybeTargetArg(std::string &content,
+                                    const std::string &sep,
+                                    const std::string &entry,
+                                    const std::string &fragment);
 
   virtual void HandleDirectContent(cmTarget *tgt,
                                    const std::string &content,
