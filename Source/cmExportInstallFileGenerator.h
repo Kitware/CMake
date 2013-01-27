@@ -64,6 +64,8 @@ protected:
                                    cmTarget* depender,
                                    cmTarget* dependee);
 
+  virtual void ReplaceInstallPrefix(std::string &input);
+
   void ComplainAboutMissingTarget(cmTarget* depender,
                                   cmTarget* dependee,
                                   int occurrences);

@@ -113,9 +113,16 @@ macro(add_include_lib _libName)
   add_library(${_libName} "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c")
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_libName}")
   set_property(TARGET ${_libName} APPEND PROPERTY
-      INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/${_libName}")
+      INTERFACE_INCLUDE_DIRECTORIES
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${_libName}>"
+        "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/${_libName}>"
+      )
   if (NOT "${ARGV1}" STREQUAL "NO_HEADER")
       file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h" "// no content\n")
+      install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h"
+          DESTINATION include/${_libName}
+      )
   endif()
 endmacro()
 
@@ -129,6 +136,10 @@ add_include_lib(testLibIncludeRequired3 NO_HEADER)
 # but we are testing that the INSTALL_INTERFACE causes it not to be used
 # at build time.
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired3/testLibIncludeRequired4.h" "#error Should not be included\n")
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired3/testLibIncludeRequired4.h"
+    DESTINATION include/testLibIncludeRequired3
+)
 add_include_lib(testLibIncludeRequired4)
 add_include_lib(testLibIncludeRequired5 NO_HEADER)
 # Generate testLibIncludeRequired6 in the testLibIncludeRequired5 directory
@@ -139,6 +150,10 @@ add_include_lib(testLibIncludeRequired5 NO_HEADER)
 # the Import side of this unit test, the '6' include from the '5' directory
 # will not be used because it is in the BUILD_INTERFACE only.
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired5/testLibIncludeRequired6.h" "#error Should not be included\n")
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired5/testLibIncludeRequired6.h"
+    DESTINATION include/testLibIncludeRequired5
+)
 add_include_lib(testLibIncludeRequired6)
 
 set_property(TARGET testLibRequired APPEND PROPERTY

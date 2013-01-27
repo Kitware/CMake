@@ -152,6 +152,8 @@ private:
   void ResolveTargetsInGeneratorExpression(std::string &input,
                                     cmTarget* target,
                                     std::vector<std::string> &missingTargets);
+
+  virtual void ReplaceInstallPrefix(std::string &input);
 };
 
 #endif

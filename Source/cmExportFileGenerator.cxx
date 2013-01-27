@@ -423,10 +423,20 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     input.replace(pos, endPos - pos + 1, targetName);
     lastPos = endPos;
     }
+
+  this->ReplaceInstallPrefix(input);
+
   if (!errorString.empty())
     {
     mf->IssueMessage(cmake::FATAL_ERROR, errorString);
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportFileGenerator::ReplaceInstallPrefix(std::string &)
+{
+  // Do nothing
 }
 
 //----------------------------------------------------------------------------
