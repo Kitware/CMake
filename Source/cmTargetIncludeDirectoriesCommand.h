@@ -85,8 +85,10 @@ private:
   virtual void HandleImportedTarget(const std::string &tgt);
   virtual void HandleMissingTarget(const std::string &name);
 
-  virtual void HandleDirectContent(cmTarget *tgt, const std::string &content,
+  virtual void HandleDirectContent(cmTarget *tgt,
+                                   const std::vector<std::string> &content,
                                    bool prepend);
+  virtual std::string Join(const std::vector<std::string> &content);
 };
 
 #endif

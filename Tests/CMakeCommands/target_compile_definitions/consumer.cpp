@@ -19,4 +19,8 @@
 #error Expected SHOULD_BE_DEFINED
 #endif
 
+#ifndef DASH_D_DEFINE
+#error Expected DASH_D_DEFINE
+#endif
+
 int main() { return 0; }
