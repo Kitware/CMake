@@ -31,6 +31,9 @@ public:
   bool HandleArguments(std::vector<std::string> const& args,
                            const char *prop, ArgumentFlags flags = NO_FLAGS);
 
+protected:
+  std::string Property;
+
 private:
   virtual void HandleImportedTarget(const std::string &tgt) = 0;
   virtual void HandleMissingTarget(const std::string &name) = 0;
@@ -51,7 +54,6 @@ private:
 
 private:
   cmTarget *Target;
-  std::string Property;
 };
 
 #endif
