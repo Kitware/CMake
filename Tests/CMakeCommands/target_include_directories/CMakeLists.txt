@@ -43,5 +43,5 @@ add_executable(consumer
 )
 
 target_include_directories(consumer
-  PRIVATE target_include_directories
+  PRIVATE $<TARGET_PROPERTY:target_include_directories,INTERFACE_INCLUDE_DIRECTORIES>
 )

@@ -41,26 +41,6 @@ void cmTargetIncludeDirectoriesCommand
 }
 
 //----------------------------------------------------------------------------
-bool cmTargetIncludeDirectoriesCommand
-::HandleNonTargetArg(std::string &content,
-                   const std::string &sep,
-                   const std::string &entry,
-                   const std::string &tgt)
-{
-  if (!cmSystemTools::FileIsFullPath(entry.c_str()))
-    {
-    cmOStringStream e;
-    e << "Cannot specify relative include directory \"" << entry << "\" for "
-         "target \"" << tgt << "\". Only absolute paths are permitted";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-    }
-
-  content += sep + entry;
-  return true;
-}
-
-//----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::string &content,
                       bool prepend)
