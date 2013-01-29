@@ -47,7 +47,8 @@ private:
   bool ProcessContentArgs(std::vector<std::string> const& args,
                           unsigned int &argIndex, bool prepend);
   void PopulateTargetProperies(const std::string &scope,
-                               const std::vector<std::string> &content, bool prepend);
+                               const std::vector<std::string> &content,
+                               bool prepend);
 };
 
 #endif
