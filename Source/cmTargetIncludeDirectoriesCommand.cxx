@@ -41,12 +41,44 @@ void cmTargetIncludeDirectoriesCommand
 }
 
 //----------------------------------------------------------------------------
+static bool isGeneratorExpression(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
+
+//----------------------------------------------------------------------------
+std::string cmTargetIncludeDirectoriesCommand
+::Join(const std::vector<std::string> &content)
+{
+  std::string dirs;
+  std::string sep;
+  std::string prefix = this->Makefile->GetStartDirectory() + std::string("/");
+  for(std::vector<std::string>::const_iterator it = content.begin();
+    it != content.end(); ++it)
+    {
+    if (cmSystemTools::FileIsFullPath(it->c_str())
+        || isGeneratorExpression(*it))
+      {
+      dirs += sep + *it;
+      }
+    else
+      {
+      dirs += sep + prefix + *it;
+      }
+    sep = ";";
+    }
+  return dirs;
+}
+
+//----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
-::HandleDirectContent(cmTarget *tgt, const std::string &content,
+::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                       bool prepend)
 {
   cmListFileBacktrace lfbt;
   this->Makefile->GetBacktrace(lfbt);
-  cmMakefileIncludeDirectoriesEntry entry(content, lfbt);
+  cmMakefileIncludeDirectoriesEntry entry(this->Join(content), lfbt);
   tgt->InsertInclude(entry, prepend);
 }

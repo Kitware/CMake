@@ -37,9 +37,32 @@ void cmTargetCompileDefinitionsCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
+//----------------------------------------------------------------------------
+std::string cmTargetCompileDefinitionsCommand
+::Join(const std::vector<std::string> &content)
+{
+  std::string defs;
+  std::string sep;
+  for(std::vector<std::string>::const_iterator it = content.begin();
+    it != content.end(); ++it)
+    {
+    if (strncmp(it->c_str(), "-D", 2) == 0)
+      {
+      defs += sep + it->substr(2);
+      }
+    else
+      {
+      defs += sep + *it;
+      }
+    sep = ";";
+    }
+  return defs;
+}
+
+//----------------------------------------------------------------------------
 void cmTargetCompileDefinitionsCommand
-::HandleDirectContent(cmTarget *tgt, const std::string &content,
+::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                                    bool)
 {
-  tgt->AppendProperty("COMPILE_DEFINITIONS", content.c_str());
+  tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str());
 }

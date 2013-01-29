@@ -20,4 +20,5 @@ target_compile_definitions(consumer
   PRIVATE $<TARGET_PROPERTY:target_compile_definitions,INTERFACE_COMPILE_DEFINITIONS>
   $<$<TARGET_DEFINED:notdefined>:SHOULD_NOT_BE_DEFINED>
   $<$<TARGET_DEFINED:target_compile_definitions>:SHOULD_BE_DEFINED>
+  -DDASH_D_DEFINE
 )

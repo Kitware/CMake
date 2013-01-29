@@ -44,4 +44,5 @@ add_executable(consumer
 
 target_include_directories(consumer
   PRIVATE $<TARGET_PROPERTY:target_include_directories,INTERFACE_INCLUDE_DIRECTORIES>
+  relative_dir
 )
