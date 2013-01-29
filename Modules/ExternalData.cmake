@@ -97,6 +97,14 @@
 # will pass MyInput.mha and MyFrames00.png on the command line but ensure
 # that the associated files are present next to them.
 #
+# The DATA{} syntax may reference a directory using a trailing slash and a
+# list of associated files.  The form DATA{<name>/,<opt1>,<opt2>,...} adds
+# rules to fetch any files in the directory that match one of the associated
+# file options.  For example, the argument DATA{MyDataDir/,REGEX:.*} will pass
+# the full path to a MyDataDir directory on the command line and ensure that
+# the directory contains files corresponding to every file or content link in
+# the MyDataDir source directory.
+#
 # The variable ExternalData_LINK_CONTENT may be set to the name of a supported
 # hash algorithm to enable automatic conversion of real data files referenced
 # by the DATA{} syntax into content links.  For each such <file> a content
@@ -312,11 +320,11 @@ function(_ExternalData_arg target arg options var_file)
   list(GET options 0 data)
   list(REMOVE_AT options 0)
 
-  # Reject trailing slashes.
-  if("x${data}" MATCHES "[/\\]$")
-    message(FATAL_ERROR "Data file reference in argument\n"
-      "  ${arg}\n"
-      "may not end in a slash!")
+  # Interpret trailing slashes as directories.
+  set(data_is_directory 0)
+  if("x${data}" MATCHES "^x(.*)([/\\])$")
+    set(data_is_directory 1)
+    set(data "${CMAKE_MATCH_1}")
   endif()
 
   # Convert to full path.
@@ -338,6 +346,13 @@ function(_ExternalData_arg target arg options var_file)
       "does not lie under the top-level source directory\n"
       "  ${top_src}\n")
   endif()
+  if(data_is_directory AND NOT IS_DIRECTORY "${top_src}/${reldata}")
+    message(FATAL_ERROR "Data directory referenced by argument\n"
+      "  ${arg}\n"
+      "corresponds to source tree path\n"
+      "  ${reldata}\n"
+      "that does not exist as a directory!")
+  endif()
   if(NOT ExternalData_BINARY_ROOT)
     set(ExternalData_BINARY_ROOT "${CMAKE_BINARY_DIR}")
   endif()
@@ -354,7 +369,7 @@ function(_ExternalData_arg target arg options var_file)
 
   set(external "") # Entries external to the source tree.
   set(internal "") # Entries internal to the source tree.
-  set(have_original 0)
+  set(have_original ${data_is_directory})
 
   # Process options.
   set(series_option "")
@@ -378,11 +393,23 @@ function(_ExternalData_arg target arg options var_file)
   endforeach()
 
   if(series_option)
+    if(data_is_directory)
+      message(FATAL_ERROR "Series option \"${series_option}\" not allowed with directories.")
+    endif()
     if(associated_files OR associated_regex)
       message(FATAL_ERROR "Series option \"${series_option}\" not allowed with associated files.")
     endif()
     # Load a whole file series.
     _ExternalData_arg_series()
+  elseif(data_is_directory)
+    if(associated_files OR associated_regex)
+      # Load listed/matching associated files in the directory.
+      _ExternalData_arg_associated()
+    else()
+      message(FATAL_ERROR "Data directory referenced by argument\n"
+        "  ${arg}\n"
+        "must list associated files.")
+    endif()
   else()
     # Load the named data file.
     _ExternalData_arg_single()
@@ -415,7 +442,11 @@ endfunction()
 
 macro(_ExternalData_arg_associated)
   # Associated files lie in the same directory.
-  get_filename_component(reldir "${reldata}" PATH)
+  if(data_is_directory)
+    set(reldir "${reldata}")
+  else()
+    get_filename_component(reldir "${reldata}" PATH)
+  endif()
   if(reldir)
     set(reldir "${reldir}/")
   endif()
