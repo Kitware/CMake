@@ -108,49 +108,23 @@ bool cmTargetPropCommandBase
       this->PopulateTargetProperies(scope, content, prepend);
       return true;
       }
-    if(isGeneratorExpression(args[i]))
+    if (this->Makefile->FindTargetToUse(args[i].c_str()))
+      {
+      content += sep + "$<TARGET_PROPERTY:" + args[i]
+                      + ",INTERFACE_" + this->Property + ">";
+      }
+    else if(isGeneratorExpression(args[i]))
       {
       content += sep + args[i];
       }
-    else
+    else if (!this->HandleNonTargetArg(content, sep, args[i], args[0]))
       {
-      cmsys::RegularExpression targetNameValidator;
-      targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
-      if (!targetNameValidator.find(args[i].c_str()))
-        {
-        content += sep + args[i];
-        }
-      else
-        {
-        const std::string fragment = "$<TARGET_PROPERTY:" + args[i]
-                                   + ",INTERFACE_" + this->Property + ">";
-        if (this->Makefile->FindTargetToUse(args[i].c_str()))
-          {
-          content += sep + fragment;
-          }
-        else
-          {
-          this->HandleMaybeTargetArg(content, sep, args[i], fragment);
-          }
-        }
+      return false;
       }
     sep = ";";
     }
   this->PopulateTargetProperies(scope, content, prepend);
   return true;
-}
-
-//----------------------------------------------------------------------------
-void cmTargetPropCommandBase
-::HandleMaybeTargetArg(std::string &content,
-                       const std::string &sep,
-                       const std::string &entry,
-                       const std::string &fragment)
-{
-  content += sep + "$<$<TARGET_DEFINED:"
-                  + entry + ">:" + fragment + ">";
-  content += ";$<$<NOT:$<TARGET_DEFINED:"
-                  + entry + ">>:" + entry + ">";
 }
 
 //----------------------------------------------------------------------------

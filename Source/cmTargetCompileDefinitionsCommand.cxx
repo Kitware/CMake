@@ -37,6 +37,16 @@ void cmTargetCompileDefinitionsCommand
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
+bool cmTargetCompileDefinitionsCommand
+::HandleNonTargetArg(std::string &content,
+                   const std::string &sep,
+                   const std::string &entry,
+                   const std::string &)
+{
+  content += sep + entry;
+  return true;
+}
+
 void cmTargetCompileDefinitionsCommand
 ::HandleDirectContent(cmTarget *tgt, const std::string &content,
                                    bool)
