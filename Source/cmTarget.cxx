@@ -2815,6 +2815,35 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 }
 
 //----------------------------------------------------------------------------
+std::string cmTarget::GetCompileDefinitions(const char *config)
+{
+  std::string defPropName = "COMPILE_DEFINITIONS";
+  if (config)
+    {
+    defPropName += "_" + cmSystemTools::UpperCase(config);
+    }
+
+  const char *prop = this->GetProperty(defPropName.c_str());
+
+  if (!prop)
+    {
+    return "";
+    }
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                             this->GetName(),
+                                             defPropName, 0, 0);
+  return ge.Parse(prop)->Evaluate(this->Makefile,
+                                 config,
+                                 false,
+                                 this,
+                                 &dagChecker);
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
 {
   // Wipe out maps caching information affected by this property.
