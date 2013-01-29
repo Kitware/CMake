@@ -615,6 +615,24 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 } targetPolicyNode;
 
 //----------------------------------------------------------------------------
+static const struct InstallPrefixNode : public cmGeneratorExpressionNode
+{
+  InstallPrefixNode() {}
+
+  virtual bool GeneratesContent() const { return false; }
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return std::string();
+  }
+
+} installPrefixNode;
+
+//----------------------------------------------------------------------------
 template<bool linker, bool soname>
 struct TargetFilesystemArtifactResultCreator
 {
@@ -849,6 +867,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &installInterfaceNode;
   else if (identifier == "TARGET_DEFINED")
     return &targetDefinedNode;
+  else if (identifier == "INSTALL_PREFIX")
+    return &installPrefixNode;
   return 0;
 
 }

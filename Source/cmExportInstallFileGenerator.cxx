@@ -69,6 +69,27 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   this->GenerateExpectedTargetsCode(os, expectedTargets);
   }
 
+  // Add code to compute the installation prefix relative to the
+  // import file location.
+  const char* installDest = this->IEGen->GetDestination();
+  if(!cmSystemTools::FileIsFullPath(installDest))
+    {
+    std::string dest = installDest;
+    os << "# Compute the installation prefix relative to this file.\n"
+       << "get_filename_component(_IMPORT_PREFIX "
+       << "\"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
+    while(!dest.empty())
+      {
+      os <<
+        "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
+      dest = cmSystemTools::GetFilenamePath(dest);
+      }
+    os << "\n";
+
+    // Import location properties may reference this variable.
+    this->ImportPrefix = "${_IMPORT_PREFIX}/";
+    }
+
   std::vector<std::string> missingTargets;
 
   // Create all the imported targets.
@@ -107,6 +128,13 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
      << "endforeach()\n"
      << "\n";
 
+  // Cleanup the import prefix variable.
+  if(!this->ImportPrefix.empty())
+    {
+    os << "# Cleanup temporary variables.\n"
+       << "set(_IMPORT_PREFIX)\n"
+       << "\n";
+    }
   this->GenerateImportedFileCheckLoop(os);
 
   // Generate an import file for each configuration.
@@ -124,6 +152,21 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   this->GenerateMissingTargetsCheckCode(os, missingTargets);
 
   return result;
+}
+
+//----------------------------------------------------------------------------
+void
+cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string &input)
+{
+  std::string::size_type pos = 0;
+  std::string::size_type lastPos = pos;
+
+  while((pos = input.find("$<INSTALL_PREFIX>", lastPos)) != input.npos)
+    {
+    std::string::size_type endPos = pos + sizeof("$<INSTALL_PREFIX>") - 1;
+    input.replace(pos, endPos - pos, "${_IMPORT_PREFIX}");
+    lastPos = endPos;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -187,27 +230,6 @@ cmExportInstallFileGenerator
                               const char* config, std::string const& suffix,
                               std::vector<std::string> &missingTargets)
 {
-  // Add code to compute the installation prefix relative to the
-  // import file location.
-  const char* installDest = this->IEGen->GetDestination();
-  if(!cmSystemTools::FileIsFullPath(installDest))
-    {
-    std::string dest = installDest;
-    os << "# Compute the installation prefix relative to this file.\n"
-       << "get_filename_component(_IMPORT_PREFIX "
-       << "\"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
-    while(!dest.empty())
-      {
-      os <<
-        "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
-      dest = cmSystemTools::GetFilenamePath(dest);
-      }
-    os << "\n";
-
-    // Import location properties may reference this variable.
-    this->ImportPrefix = "${_IMPORT_PREFIX}/";
-    }
-
   // Add each target in the set to the export.
   for(std::vector<cmTargetExport*>::const_iterator
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
@@ -252,14 +274,6 @@ cmExportInstallFileGenerator
       this->GenerateImportedFileChecksCode(os, te->Target, properties,
                                            importedLocations);
       }
-    }
-
-  // Cleanup the import prefix variable.
-  if(!this->ImportPrefix.empty())
-    {
-    os << "# Cleanup temporary variables.\n"
-       << "set(_IMPORT_PREFIX)\n"
-       << "\n";
     }
 }
 
