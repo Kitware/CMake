@@ -1,5 +1,5 @@
 set(ExternalData_SERIES_PARSE "([0-9]+)(_\\.my\\.dat)$")
-set(ExternalData_SERIES_MATCH "[0-9]+")
+set(ExternalData_SERIES_MATCH "([0-9]+)")
 ExternalData_Add_Test(Data2
   NAME Data2Check
   COMMAND ${CMAKE_COMMAND}
