@@ -5,8 +5,8 @@ include(${Import_BINARY_DIR}/../Export/ExportBuildTree.cmake)
 include(${CMAKE_INSTALL_PREFIX}/lib/exp/exp.cmake)
 
 # Import two exports, where the Depends one depends on an exported target from the Required one:
-include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibRequired/testLibRequiredConfig.cmake)
-include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibDepends/testLibDependsConfig.cmake)
+include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibRequired/testLibRequiredTargets.cmake)
+include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibDepends/testLibDependsTargets.cmake)
 
 # Try referencing an executable imported from the install tree.
 add_custom_command(
