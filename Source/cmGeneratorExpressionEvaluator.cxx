@@ -621,14 +621,17 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 {
   InstallPrefixNode() {}
 
-  virtual bool GeneratesContent() const { return false; }
+  virtual bool GeneratesContent() const { return true; }
   virtual int NumExpectedParameters() const { return 0; }
 
   std::string Evaluate(const std::vector<std::string> &,
-                       cmGeneratorExpressionContext *,
-                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *) const
   {
+    reportError(context, content->GetOriginalExpression(),
+                "INSTALL_PREFIX is a marker for install(EXPORT) only.  It "
+                "should never be evaluated.");
     return std::string();
   }
 
