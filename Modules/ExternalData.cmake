@@ -334,8 +334,9 @@ function(_ExternalData_arg target arg options var_file)
   if(IS_ABSOLUTE "${data}")
     set(absdata "${data}")
   else()
-    get_filename_component(absdata "${CMAKE_CURRENT_SOURCE_DIR}/${data}" ABSOLUTE)
+    set(absdata "${CMAKE_CURRENT_SOURCE_DIR}/${data}")
   endif()
+  get_filename_component(absdata "${absdata}" ABSOLUTE)
 
   # Convert to relative path under the source tree.
   if(NOT ExternalData_SOURCE_ROOT)
