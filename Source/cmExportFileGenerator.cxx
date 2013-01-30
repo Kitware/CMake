@@ -391,7 +391,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
       {
       input.replace(nameStartPos, commaPos - nameStartPos, targetName);
       }
-    lastPos = pos + targetName.size();
+    lastPos = nameStartPos + targetName.size() + 1;
     }
 
   std::string errorString;
