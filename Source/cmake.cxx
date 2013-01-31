@@ -953,7 +953,7 @@ int cmake::AddCMakePaths()
   cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
-#if __APPLE__
+#ifdef __APPLE__
   // on the apple this might be the gui bundle
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
@@ -3299,6 +3299,12 @@ int cmake::ExecuteLinkScript(std::vector<std::string>& args)
   int result = 0;
   while(result == 0 && cmSystemTools::GetLineFromStream(fin, command))
     {
+    // Skip empty command lines.
+    if(command.find_first_not_of(" \t") == command.npos)
+      {
+      continue;
+      }
+
     // Setup this command line.
     const char* cmd[2] = {command.c_str(), 0};
     cmsysProcess_SetCommand(cp, cmd);
@@ -3550,6 +3556,13 @@ void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
                                                   FullDescription,
                                                   docSection,
                                                   chained);
+}
+
+bool cmake::GetIsPropertyDefined(const char *name,
+                                 cmProperty::ScopeType scope)
+{
+  return this->PropertyDefinitions[scope].find(name) !=
+                                      this->PropertyDefinitions[scope].end();
 }
 
 cmPropertyDefinition *cmake

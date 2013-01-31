@@ -3,9 +3,13 @@
 
 #include "depA.h"
 
+#include "libgenex.h"
+
 int DepB::foo()
 {
   DepA a;
 
-  return 0;
+  LibGenex lg;
+
+  return a.foo() + lg.foo();
 }

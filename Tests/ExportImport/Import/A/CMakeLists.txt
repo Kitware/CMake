@@ -152,3 +152,46 @@ check_function_exists(testLib1 HAVE_TESTLIB1_FUNCTION)
 if (NOT HAVE_TESTLIB1_FUNCTION)
   message(SEND_ERROR "Using imported target testLib2 in check_function_exists() failed !")
 endif()
+
+#-----------------------------------------------------------------------------
+# Test that dependent imported targets have usable
+# INTERFACE_COMPILE_DEFINITIONS and INTERFACE_INCLUDE_DIRECTORIES
+
+add_executable(deps_iface deps_iface.c)
+target_link_libraries(deps_iface testLibDepends)
+target_include_directories(deps_iface PRIVATE testLibDepends)
+target_compile_definitions(deps_iface PRIVATE testLibDepends)
+
+add_executable(deps_shared_iface deps_shared_iface.cpp)
+target_link_libraries(deps_shared_iface testSharedLibDepends)
+target_include_directories(deps_shared_iface PRIVATE testSharedLibDepends)
+target_compile_definitions(deps_shared_iface PRIVATE testSharedLibDepends)
+
+if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-fPIE run_pic_test)
+else()
+  if (CMAKE_CXX_COMPILER_ID MATCHES "PGI"
+      OR CMAKE_CXX_COMPILER_ID MATCHES "PathScale"
+      OR CMAKE_SYSTEM_NAME MATCHES "IRIX64"
+      OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    set(run_pic_test 0)
+  else()
+    set(run_pic_test 1)
+  endif()
+endif()
+
+if (run_pic_test)
+  target_compile_definitions(deps_shared_iface PRIVATE CHECK_PIC_WORKS)
+endif()
+
+#-----------------------------------------------------------------------------
+# Test that targets imported from the build tree have their dependencies
+# evaluated correctly. The above already tests the same for the install tree.
+
+add_executable(deps_shared_iface2 deps_shared_iface.cpp)
+target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
+target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends bld_subdirlib)
+target_compile_definitions(deps_shared_iface2
+  PRIVATE bld_testSharedLibDepends TEST_SUBDIR_LIB
+)

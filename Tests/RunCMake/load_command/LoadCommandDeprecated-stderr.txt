@@ -1,6 +1,0 @@
-CMake Warning \(dev\) at LoadCommandDeprecated.cmake:1 \(load_command\):
-  The "load_command" command will be removed in CMake 3.0.  See command
-  documentation for details.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.

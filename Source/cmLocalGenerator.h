@@ -142,7 +142,7 @@ public:
   void AddLanguageFlags(std::string& flags, const char* lang,
                         const char* config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
-                       std::string const& lang);
+                       std::string const& lang, const char *config);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
   ///! Append flags to a string.
@@ -212,7 +212,8 @@ public:
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget* target,
-                             const char* lang = "C", const char *config = 0);
+                             const char* lang = "C", const char *config = 0,
+                             bool stripImplicitInclDirs = true);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);

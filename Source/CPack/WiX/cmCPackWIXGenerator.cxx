@@ -221,6 +221,9 @@ bool cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   CopyDefinition(includeFile, "CPACK_PACKAGE_NAME");
   CopyDefinition(includeFile, "CPACK_PACKAGE_VERSION");
   CopyDefinition(includeFile, "CPACK_WIX_LICENSE_RTF");
+  CopyDefinition(includeFile, "CPACK_WIX_PRODUCT_ICON");
+  CopyDefinition(includeFile, "CPACK_WIX_UI_BANNER");
+  CopyDefinition(includeFile, "CPACK_WIX_UI_DIALOG");
 
   return true;
 }

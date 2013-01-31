@@ -147,7 +147,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
 
   // Add shared-library flags if needed.
   this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
-                                        language.c_str());
+                                        language.c_str(),
+                                        this->GetConfigName());
 
   // Add include directory flags.
   {

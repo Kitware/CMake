@@ -234,8 +234,6 @@ macro (CMAKE_BUILD_UTILITIES)
   set(kwsys_folder "Utilities/KWSys")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE} "${kwsys_folder}")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}_c "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}EncodeExecutable "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}ProcessFwd9x "${kwsys_folder}")
   if(BUILD_TESTING)
     CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestDynload "${kwsys_folder}")
     CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestProcess "${kwsys_folder}")
@@ -590,10 +588,10 @@ if(NOT CMake_VERSION_IS_RELEASE)
       NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
     set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
                      -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
-                     -Wmissing-format-attribute -fno-common
+                     -Wmissing-format-attribute -fno-common -Wundef
     )
     set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
-                       -Wshadow -Wpointer-arith -Wformat-security
+                       -Wshadow -Wpointer-arith -Wformat-security -Wundef
     )
 
     foreach(FLAG_LANG  C CXX)

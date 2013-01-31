@@ -22,6 +22,7 @@
 #include "cmNewLineStyle.h"
 #include "cmGeneratorTarget.h"
 #include "cmake.h"
+#include "cmMakefileIncludeDirectoriesEntry.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -693,7 +694,7 @@ public:
   /**
    * Expand variables in the makefiles ivars such as link directories etc
    */
-  void ExpandVariables();
+  void ExpandVariablesCMP0019();
 
   /**
    * Replace variables and #cmakedefine lines in the given string.
@@ -861,6 +862,13 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
+  typedef cmMakefileIncludeDirectoriesEntry IncludeDirectoriesEntry;
+
+  std::vector<IncludeDirectoriesEntry> GetIncludeDirectoriesEntries() const
+  {
+    return this->IncludeDirectoriesEntries;
+  }
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -908,6 +916,8 @@ protected:
   std::vector<std::string> SourceFileExtensions;
   std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
+
+  std::vector<IncludeDirectoriesEntry> IncludeDirectoriesEntries;
 
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);

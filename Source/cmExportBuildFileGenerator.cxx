@@ -22,6 +22,7 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
+  std::vector<cmTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
@@ -31,20 +32,10 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     {
     expectedTargets += sep + this->Namespace + (*tei)->GetName();
     sep = " ";
-    }
-
-  this->GenerateExpectedTargetsCode(os, expectedTargets);
-  }
-
-  // Create all the imported targets.
-  for(std::vector<cmTarget*>::const_iterator
-        tei = this->Exports->begin();
-      tei != this->Exports->end(); ++tei)
-    {
     cmTarget* te = *tei;
     if(this->ExportedTargets.insert(te).second)
       {
-      this->GenerateImportTargetCode(os, te);
+      allTargets.push_back(te);
       }
     else
       {
@@ -58,13 +49,44 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       }
     }
 
+  this->GenerateExpectedTargetsCode(os, expectedTargets);
+  }
+
+  std::vector<std::string> missingTargets;
+
+  // Create all the imported targets.
+  for(std::vector<cmTarget*>::const_iterator
+        tei = allTargets.begin();
+      tei != allTargets.end(); ++tei)
+    {
+    cmTarget* te = *tei;
+    this->GenerateImportTargetCode(os, te);
+
+    te->AppendBuildInterfaceIncludes();
+
+    ImportPropertyMap properties;
+
+    this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
+                                  te, properties);
+
+    this->GenerateInterfaceProperties(te, os, properties);
+    }
+
   // Generate import file content for each configuration.
   for(std::vector<std::string>::const_iterator
         ci = this->Configurations.begin();
       ci != this->Configurations.end(); ++ci)
     {
-    this->GenerateImportConfig(os, ci->c_str());
+    this->GenerateImportConfig(os, ci->c_str(), missingTargets);
     }
+
+  this->GenerateMissingTargetsCheckCode(os, missingTargets);
 
   return true;
 }
@@ -73,7 +95,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 void
 cmExportBuildFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
-                              const char* config, std::string const& suffix)
+                              const char* config, std::string const& suffix,
+                            std::vector<std::string> &missingTargets)
 {
   for(std::vector<cmTarget*>::const_iterator
         tei = this->Exports->begin();
@@ -86,9 +109,12 @@ cmExportBuildFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      std::vector<std::string> missingTargets;
       this->SetImportDetailProperties(config, suffix,
                                       target, properties, missingTargets);
+      this->SetImportLinkInterface(config, suffix,
+                                   cmGeneratorExpression::BuildInterface,
+                                   target, properties, missingTargets);
+
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -97,7 +123,6 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateMissingTargetsCheckCode(os, missingTargets);
       this->GenerateImportPropertyCode(os, config, target, properties);
       }
     }

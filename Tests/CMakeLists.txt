@@ -989,6 +989,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
   endif()
+  if(QT4_WORKS AND QT_QTGUI_FOUND)
+    add_test(Qt4Targets ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/Qt4Targets"
+      "${CMake_BINARY_DIR}/Tests/Qt4Targets"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project Qt4Targets
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Targets"
+      --force-new-ctest-process
+      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+      --test-command ${CMAKE_CTEST_COMMAND} -V
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Targets")
+  endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -1915,6 +1930,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
 
   ADD_TEST_MACRO(CMakeCommands.target_link_libraries target_link_libraries)
+  ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
+  ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
@@ -1958,6 +1975,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
+
+  add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
+    --output-on-failure -C "\${CTestTest_CONFIG}")
 
   add_test(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
   set_tests_properties(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")

@@ -491,6 +491,23 @@ cmPolicies::cmPolicies()
     "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS whether it is modified or not and "
     "honor the POSITION_INDEPENDENT_CODE target property.",
     2,8,9,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0019, "CMP0019",
+    "Do not re-expand variables in include and link information.",
+    "CMake 2.8.10 and lower re-evaluated values given to the "
+    "include_directories, link_directories, and link_libraries "
+    "commands to expand any leftover variable references at the "
+    "end of the configuration step.  "
+    "This was for strict compatibility with VERY early CMake versions "
+    "because all variable references are now normally evaluated during "
+    "CMake language processing.  "
+    "CMake 2.8.11 and higher prefer to skip the extra evaluation."
+    "\n"
+    "The OLD behavior for this policy is to re-evaluate the values "
+    "for strict compatibility.  "
+    "The NEW behavior for this policy is to leave the values untouched.",
+    2,8,11,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

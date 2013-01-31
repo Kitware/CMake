@@ -200,20 +200,48 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // Get the depender.
   cmTarget* depender = this->Targets[depender_index];
 
-  // Loop over all targets linked directly.
+  // Loop over all targets linked directly in all configs.
+  // We need to make targets depend on the union of all config-specific
+  // dependencies in all targets, because the generated build-systems can't
+  // deal with config-specific dependencies.
   {
-  cmTarget::LinkLibraryVectorType const& tlibs =
-    depender->GetOriginalLinkLibraries();
   std::set<cmStdString> emitted;
+  {
+  std::vector<std::string> tlibs;
+  depender->GetDirectLinkLibraries(0, tlibs, depender);
   // A target should not depend on itself.
   emitted.insert(depender->GetName());
-  for(cmTarget::LinkLibraryVectorType::const_iterator lib = tlibs.begin();
+  for(std::vector<std::string>::const_iterator lib = tlibs.begin();
       lib != tlibs.end(); ++lib)
     {
     // Don't emit the same library twice for this target.
-    if(emitted.insert(lib->first).second)
+    if(emitted.insert(*lib).second)
       {
-      this->AddTargetDepend(depender_index, lib->first.c_str(), true);
+      this->AddTargetDepend(depender_index, lib->c_str(), true);
+      this->AddInterfaceDepends(depender_index, lib->c_str(),
+                                true, emitted);
+      }
+    }
+  }
+  std::vector<std::string> configs;
+  depender->GetMakefile()->GetConfigurations(configs);
+  for (std::vector<std::string>::const_iterator it = configs.begin();
+    it != configs.end(); ++it)
+    {
+    std::vector<std::string> tlibs;
+    depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
+    // A target should not depend on itself.
+    emitted.insert(depender->GetName());
+    for(std::vector<std::string>::const_iterator lib = tlibs.begin();
+        lib != tlibs.end(); ++lib)
+      {
+      // Don't emit the same library twice for this target.
+      if(emitted.insert(*lib).second)
+        {
+        this->AddTargetDepend(depender_index, lib->c_str(), true);
+        this->AddInterfaceDepends(depender_index, lib->c_str(),
+                                  true, emitted);
+        }
       }
     }
   }
@@ -234,6 +262,64 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       }
     }
   }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
+                                                 cmTarget* dependee,
+                                                 const char *config,
+                                               std::set<cmStdString> &emitted)
+{
+  cmTarget* depender = this->Targets[depender_index];
+  if(cmTarget::LinkInterface const* iface =
+                                dependee->GetLinkInterface(config, depender))
+    {
+    for(std::vector<std::string>::const_iterator
+        lib = iface->Libraries.begin();
+        lib != iface->Libraries.end(); ++lib)
+      {
+      // Don't emit the same library twice for this target.
+      if(emitted.insert(*lib).second)
+        {
+        this->AddTargetDepend(depender_index, lib->c_str(), true);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
+                                             const char* dependee_name,
+                                             bool linking,
+                                             std::set<cmStdString> &emitted)
+{
+  cmTarget* depender = this->Targets[depender_index];
+  cmTarget* dependee =
+    depender->GetMakefile()->FindTargetToUse(dependee_name);
+  // Skip targets that will not really be linked.  This is probably a
+  // name conflict between an external library and an executable
+  // within the project.
+  if(linking && dependee &&
+     dependee->GetType() == cmTarget::EXECUTABLE &&
+     !dependee->IsExecutableWithExports())
+    {
+    dependee = 0;
+    }
+
+  if(dependee)
+    {
+    this->AddInterfaceDepends(depender_index, dependee, 0, emitted);
+    std::vector<std::string> configs;
+    depender->GetMakefile()->GetConfigurations(configs);
+    for (std::vector<std::string>::const_iterator it = configs.begin();
+      it != configs.end(); ++it)
+      {
+      // A target should not depend on itself.
+      emitted.insert(depender->GetName());
+      this->AddInterfaceDepends(depender_index, dependee,
+                                it->c_str(), emitted);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
