@@ -79,7 +79,7 @@ public:
       ;
     }
 
-  cmTypeMacro(cmTargetIncludeDirectoriesCommand, cmCommand);
+  cmTypeMacro(cmTargetIncludeDirectoriesCommand, cmTargetPropCommandBase);
 
 private:
   virtual void HandleImportedTarget(const std::string &tgt);
