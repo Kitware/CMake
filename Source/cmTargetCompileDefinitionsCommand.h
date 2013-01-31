@@ -75,7 +75,7 @@ public:
       ;
     }
 
-  cmTypeMacro(cmTargetCompileDefinitionsCommand, cmCommand);
+  cmTypeMacro(cmTargetCompileDefinitionsCommand, cmTargetPropCommandBase);
 
 private:
   virtual void HandleImportedTarget(const std::string &tgt);
