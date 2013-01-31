@@ -399,7 +399,7 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
   if ( last_slash > 0 )
     {
     //kwsys_ios::cout << "I can skip: " << fexpr.substr(0, last_slash)
-    //<< kwsys_ios::endl;
+    // << kwsys_ios::endl;
     skip = last_slash;
     }
   if ( skip == 0 )

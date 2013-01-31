@@ -35,7 +35,7 @@
 // left on disk.
 #include <testSystemTools.h>
 
-kwsys_stl::string GetLibName(const char* lname)
+static kwsys_stl::string GetLibName(const char* lname)
 {
   // Construct proper name of lib
   kwsys_stl::string slname;
