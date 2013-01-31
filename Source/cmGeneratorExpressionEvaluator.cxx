@@ -465,9 +465,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       if (target->IsLinkInterfaceDependentStringProperty(propertyName,
                                                          context->Config))
         {
-        return target->GetLinkInterfaceDependentStringProperty(
+        const char *propContent =
+                              target->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
                                                 context->Config);
+        return propContent ? propContent : "";
         }
 
       return std::string();
@@ -619,18 +621,104 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 {
   InstallPrefixNode() {}
 
-  virtual bool GeneratesContent() const { return false; }
+  virtual bool GeneratesContent() const { return true; }
   virtual int NumExpectedParameters() const { return 0; }
 
   std::string Evaluate(const std::vector<std::string> &,
-                       cmGeneratorExpressionContext *,
-                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *) const
   {
+    reportError(context, content->GetOriginalExpression(),
+                "INSTALL_PREFIX is a marker for install(EXPORT) only.  It "
+                "should never be evaluated.");
     return std::string();
   }
 
 } installPrefixNode;
+
+//----------------------------------------------------------------------------
+static const struct LinkedNode : public cmGeneratorExpressionNode
+{
+  LinkedNode() {}
+
+  virtual bool GeneratesContent() const { return true; }
+  virtual int NumExpectedParameters() const { return 1; }
+  virtual bool RequiresLiteralInput() const { return true; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (dagChecker->EvaluatingIncludeDirectories())
+      {
+      return this->GetInterfaceProperty(parameters.front(),
+                                        "INCLUDE_DIRECTORIES",
+                                        context, content, dagChecker);
+      }
+    if (dagChecker->EvaluatingCompileDefinitions())
+      {
+      return this->GetInterfaceProperty(parameters.front(),
+                                        "COMPILE_DEFINITIONS",
+                                        context, content, dagChecker);
+      }
+
+    reportError(context, content->GetOriginalExpression(),
+                "$<LINKED:...> may only be used in INCLUDE_DIRECTORIES and "
+                "COMPILE_DEFINITIONS properties.");
+
+    return std::string();
+  }
+
+private:
+  std::string GetInterfaceProperty(const std::string &item,
+                      const std::string &prop,
+                      cmGeneratorExpressionContext *context,
+                      const GeneratorExpressionContent *content,
+                      cmGeneratorExpressionDAGChecker *dagCheckerParent) const
+  {
+    cmTarget *target = context->CurrentTarget
+                              ->GetMakefile()->FindTargetToUse(item.c_str());
+    if (!target)
+      {
+      return std::string();
+      }
+    std::string propertyName = "INTERFACE_" + prop;
+    const char *propContent = target->GetProperty(propertyName.c_str());
+    if (!propContent)
+      {
+      return std::string();
+      }
+
+    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
+                                               target->GetName(),
+                                               propertyName,
+                                               content,
+                                               dagCheckerParent);
+
+    switch (dagChecker.check())
+      {
+    case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
+      dagChecker.reportError(context, content->GetOriginalExpression());
+      return std::string();
+    case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
+      // No error. We just skip cyclic references.
+      return std::string();
+    case cmGeneratorExpressionDAGChecker::DAG:
+      break;
+      }
+
+    cmGeneratorExpression ge(context->Backtrace);
+    return ge.Parse(propContent)->Evaluate(context->Makefile,
+                        context->Config,
+                        context->Quiet,
+                        context->HeadTarget,
+                        target,
+                        &dagChecker);
+  }
+
+} linkedNode;
 
 //----------------------------------------------------------------------------
 template<bool linker, bool soname>
@@ -869,6 +957,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetDefinedNode;
   else if (identifier == "INSTALL_PREFIX")
     return &installPrefixNode;
+  else if (identifier == "LINKED")
+    return &linkedNode;
   return 0;
 
 }

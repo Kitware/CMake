@@ -90,23 +90,7 @@ set_property(TARGET testLibCycleA PROPERTY LINK_INTERFACE_MULTIPLICITY 3)
 # Test exporting dependent libraries into different exports
 add_library(testLibRequired testLibRequired.c)
 add_library(testLibDepends testLibDepends.c)
-set_property(TARGET testLibDepends APPEND PROPERTY
-  INCLUDE_DIRECTORIES
-    $<TARGET_PROPERTY:testLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
-)
-set_property(TARGET testLibDepends APPEND PROPERTY
-  COMPILE_DEFINITIONS
-    $<TARGET_PROPERTY:testLibRequired,INTERFACE_COMPILE_DEFINITIONS>
-)
-set_property(TARGET testLibDepends APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES
-    $<TARGET_PROPERTY:testLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
-)
-set_property(TARGET testLibDepends APPEND PROPERTY
-  INTERFACE_COMPILE_DEFINITIONS
-    $<TARGET_PROPERTY:testLibRequired,INTERFACE_COMPILE_DEFINITIONS>
-)
-target_link_libraries(testLibDepends testLibRequired)
+target_link_libraries(testLibDepends LINK_PUBLIC testLibRequired)
 
 macro(add_include_lib _libName)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "// no content\n")
@@ -234,11 +218,30 @@ install(TARGETS testLibRequired
                 testLibIncludeRequired6
                 testSharedLibRequired
         EXPORT RequiredExp DESTINATION lib )
-install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredConfig.cmake DESTINATION lib/cmake/testLibRequired)
+install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredTargets.cmake DESTINATION lib/cmake/testLibRequired)
 
 install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
-install(EXPORT DependsExp FILE testLibDependsConfig.cmake DESTINATION lib/cmake/testLibDepends)
+install(EXPORT DependsExp FILE testLibDependsTargets.cmake DESTINATION lib/cmake/testLibDepends)
 
+file(WRITE
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibRequiredConfig.cmake"
+  "
+if(\${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION VERSION_LESS 2.3 AND NOT \${CMAKE_FIND_PACKAGE_NAME}_INTERFACES)
+  set(\${CMAKE_FIND_PACKAGE_NAME}_NO_INTERFACES 1)
+endif()
+include(\"\${CMAKE_CURRENT_LIST_DIR}/testLibRequiredTargets.cmake\")
+set(\${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS \"${CMAKE_CURRENT_BINARY_DIR}\" \"${CMAKE_CURRENT_SOURCE_DIR}\" )
+"
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file( testLibRequiredConfigVersion.cmake VERSION 2.5 COMPATIBILITY AnyNewerVersion)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibRequiredConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibRequiredConfigVersion.cmake"
+  DESTINATION lib/cmake/testLibRequired
+)
 
 # Install and export from install tree.
 install(

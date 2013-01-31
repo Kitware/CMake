@@ -125,3 +125,19 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
        || strncmp(prop, "LINK_INTERFACE_LIBRARIES_", 26) == 0
        || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 35) == 0);
 }
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories()
+{
+  const char *prop = this->Property.c_str();
+  return (strcmp(prop, "INCLUDE_DIRECTORIES") == 0
+       || strcmp(prop, "INTERFACE_INCLUDE_DIRECTORIES") == 0 );
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions()
+{
+  const char *prop = this->Property.c_str();
+  return (strcmp(prop, "COMPILE_DEFINITIONS") == 0
+       || strcmp(prop, "INTERFACE_COMPILE_DEFINITIONS") == 0 );
+}

@@ -5,8 +5,8 @@ include(${Import_BINARY_DIR}/../Export/ExportBuildTree.cmake)
 include(${CMAKE_INSTALL_PREFIX}/lib/exp/exp.cmake)
 
 # Import two exports, where the Depends one depends on an exported target from the Required one:
-include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibRequired/testLibRequiredConfig.cmake)
-include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibDepends/testLibDependsConfig.cmake)
+include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibRequired/testLibRequiredTargets.cmake)
+include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibDepends/testLibDependsTargets.cmake)
 
 # Try referencing an executable imported from the install tree.
 add_custom_command(
@@ -159,18 +159,11 @@ endif()
 
 add_executable(deps_iface deps_iface.c)
 target_link_libraries(deps_iface testLibDepends)
-target_include_directories(deps_iface PRIVATE $<TARGET_PROPERTY:testLibDepends,INTERFACE_INCLUDE_DIRECTORIES>)
-target_compile_definitions(deps_iface PRIVATE $<TARGET_PROPERTY:testLibDepends,INTERFACE_COMPILE_DEFINITIONS>)
 
 add_executable(deps_shared_iface deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface testSharedLibDepends)
-target_include_directories(deps_shared_iface
-  PRIVATE
-    $<TARGET_PROPERTY:testSharedLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
-)
 target_compile_definitions(deps_shared_iface
   PRIVATE
-    $<TARGET_PROPERTY:testSharedLibDepends,INTERFACE_COMPILE_DEFINITIONS>
     $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>
     $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
     $<$<STREQUAL:$<TARGET_PROPERTY:CUSTOM_STRING>,testcontent>:CUSTOM_STRING_IS_MATCH>
@@ -200,13 +193,8 @@ endif()
 
 add_executable(deps_shared_iface2 deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
-target_include_directories(deps_shared_iface2
-  PRIVATE
-    $<TARGET_PROPERTY:bld_testSharedLibDepends,INTERFACE_INCLUDE_DIRECTORIES>
-    $<TARGET_PROPERTY:bld_subdirlib,INTERFACE_INCLUDE_DIRECTORIES>
-)
 target_compile_definitions(deps_shared_iface2
-  PRIVATE $<TARGET_PROPERTY:bld_testSharedLibDepends,INTERFACE_COMPILE_DEFINITIONS> TEST_SUBDIR_LIB
+  PRIVATE TEST_SUBDIR_LIB
   $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>
   $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
   $<$<STREQUAL:$<TARGET_PROPERTY:CUSTOM_STRING>,testcontent>:CUSTOM_STRING_IS_MATCH>

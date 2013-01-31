@@ -1,0 +1,7 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<LINKED:something>
+
+  \$<LINKED:...> may only be used in INCLUDE_DIRECTORIES and
+  COMPILE_DEFINITIONS properties.$
