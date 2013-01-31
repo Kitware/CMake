@@ -465,9 +465,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       if (target->IsLinkInterfaceDependentStringProperty(propertyName,
                                                          context->Config))
         {
-        return target->GetLinkInterfaceDependentStringProperty(
+        const char *propContent =
+                              target->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
                                                 context->Config);
+        return propContent ? propContent : "";
         }
 
       return std::string();
