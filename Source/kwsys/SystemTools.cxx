@@ -3037,7 +3037,7 @@ void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
   path.erase(path.end()-1, path.end());
 }
 
-void
+static void
 SystemToolsAppendComponents(
   kwsys_stl::vector<kwsys_stl::string>& out_components,
   kwsys_stl::vector<kwsys_stl::string>::const_iterator first,
@@ -4704,7 +4704,7 @@ bool SystemTools::ParseURL( const kwsys_stl::string& URL,
 // ----------------------------------------------------------------------
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.
-unsigned int SystemToolsManagerCount;
+static unsigned int SystemToolsManagerCount;
 SystemToolsTranslationMap *SystemTools::TranslationMap;
 SystemToolsTranslationMap *SystemTools::LongPathMap;
 #ifdef __CYGWIN__
