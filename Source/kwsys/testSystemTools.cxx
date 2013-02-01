@@ -32,7 +32,7 @@
 #include <string.h> /* strcmp */
 
 //----------------------------------------------------------------------------
-const char* toUnixPaths[][2] =
+static const char* toUnixPaths[][2] =
 {
     { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
     { "/usr/lo cal/bin/pa sswd", "/usr/lo cal/bin/pa sswd" },
@@ -52,8 +52,8 @@ const char* toUnixPaths[][2] =
     {0, 0}
 };
 
-bool CheckConvertToUnixSlashes(kwsys_stl::string input,
-                               kwsys_stl::string output)
+static bool CheckConvertToUnixSlashes(kwsys_stl::string input,
+                                      kwsys_stl::string output)
 {
   kwsys_stl::string result = input;
   kwsys::SystemTools::ConvertToUnixSlashes(result);
@@ -69,17 +69,17 @@ bool CheckConvertToUnixSlashes(kwsys_stl::string input,
 }
 
 //----------------------------------------------------------------------------
-const char* checkEscapeChars[][4] =
+static const char* checkEscapeChars[][4] =
 {
   { "1 foo 2 bar 2", "12", "\\", "\\1 foo \\2 bar \\2"},
   { " {} ", "{}", "#", " #{#} "},
   {0, 0, 0, 0}
 };
 
-bool CheckEscapeChars(kwsys_stl::string input,
-                      const char *chars_to_escape,
-                      char escape_char,
-                      kwsys_stl::string output)
+static bool CheckEscapeChars(kwsys_stl::string input,
+                             const char *chars_to_escape,
+                             char escape_char,
+                             kwsys_stl::string output)
 {
   kwsys_stl::string result = kwsys::SystemTools::EscapeChars(
     input.c_str(), chars_to_escape, escape_char);
@@ -95,7 +95,7 @@ bool CheckEscapeChars(kwsys_stl::string input,
 }
 
 //----------------------------------------------------------------------------
-bool CheckFileOperations()
+static bool CheckFileOperations()
 {
   bool res = true;
 
@@ -129,7 +129,7 @@ bool CheckFileOperations()
 }
 
 //----------------------------------------------------------------------------
-bool CheckStringOperations()
+static bool CheckStringOperations()
 {
   bool res = true;
 
@@ -329,7 +329,7 @@ bool CheckStringOperations()
 
 //----------------------------------------------------------------------------
 
-bool CheckPutEnv(const char* env, const char* name, const char* value)
+static bool CheckPutEnv(const char* env, const char* name, const char* value)
 {
   if(!kwsys::SystemTools::PutEnv(env))
     {
@@ -348,7 +348,7 @@ bool CheckPutEnv(const char* env, const char* name, const char* value)
   return true;
 }
 
-bool CheckUnPutEnv(const char* env, const char* name)
+static bool CheckUnPutEnv(const char* env, const char* name)
 {
   if(!kwsys::SystemTools::UnPutEnv(env))
     {
@@ -365,7 +365,7 @@ bool CheckUnPutEnv(const char* env, const char* name)
   return true;
 }
 
-bool CheckEnvironmentOperations()
+static bool CheckEnvironmentOperations()
 {
   bool res = true;
   res &= CheckPutEnv("A=B", "A", "B");
