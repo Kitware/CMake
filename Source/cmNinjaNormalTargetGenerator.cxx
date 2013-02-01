@@ -190,7 +190,7 @@ cmNinjaNormalTargetGenerator
         linkOptionVar += cmTarget::GetTargetTypeName(targetType);
         const std::string linkOption =
                 GetMakefile()->GetSafeDefinition(linkOptionVar.c_str());
-        rspcontent = "$in " + linkOption + " $LINK_PATH $LINK_LIBRARIES";
+        rspcontent = "$in_newline " + linkOption + " $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
     }
