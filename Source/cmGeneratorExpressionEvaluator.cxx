@@ -435,6 +435,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
       return std::string();
+    case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+      // No error. We're not going to find anything new here.
+      return std::string();
     case cmGeneratorExpressionDAGChecker::DAG:
       break;
       }
@@ -704,6 +707,9 @@ private:
       return std::string();
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
+      return std::string();
+    case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
+      // No error. We're not going to find anything new here.
       return std::string();
     case cmGeneratorExpressionDAGChecker::DAG:
       break;
