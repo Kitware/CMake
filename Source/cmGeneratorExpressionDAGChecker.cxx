@@ -38,17 +38,17 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
-    if (it != top->Seen.end()
-        && it->second.find(property) != it->second.end())
+    if (it != top->Seen.end())
       {
-      this->CheckResult = ALREADY_SEEN;
-      return;
+      const std::set<cmStdString> &propSet = it->second;
+      if (propSet.find(property) != propSet.end())
+        {
+        this->CheckResult = ALREADY_SEEN;
+        return;
+        }
       }
-    else
-      {
-      const_cast<cmGeneratorExpressionDAGChecker *>(top)
-                                              ->Seen[target].insert(property);
-      }
+    const_cast<cmGeneratorExpressionDAGChecker *>(top)
+                                            ->Seen[target].insert(property);
     }
 }
 
