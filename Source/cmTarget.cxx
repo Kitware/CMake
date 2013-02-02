@@ -2797,10 +2797,10 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 
       if(uniqueIncludes.insert(inc).second)
         {
-        includes.push_back(*li);
+        includes.push_back(inc);
         if (debugIncludes)
           {
-          usedIncludes += " * " + *li + "\n";
+          usedIncludes += " * " + inc + "\n";
           }
         }
       }
