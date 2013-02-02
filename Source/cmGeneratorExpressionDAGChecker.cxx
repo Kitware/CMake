@@ -44,11 +44,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
       this->CheckResult = ALREADY_SEEN;
       return;
       }
-    else
-      {
-      const_cast<cmGeneratorExpressionDAGChecker *>(top)
-                                              ->Seen[target].insert(property);
-      }
+    const_cast<cmGeneratorExpressionDAGChecker *>(top)
+                                            ->Seen[target].insert(property);
     }
 }
 
