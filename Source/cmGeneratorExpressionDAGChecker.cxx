@@ -41,7 +41,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     if (it != top->Seen.end())
       {
       const std::set<cmStdString> &propSet = it->second;
-      if (propSet.find(property) != propSet.end())
+      const std::set<cmStdString>::const_iterator i = propSet.find(property);
+      if (i != propSet.end())
         {
         this->CheckResult = ALREADY_SEEN;
         return;
