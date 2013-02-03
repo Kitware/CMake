@@ -134,6 +134,7 @@ public:
       : ge(cge)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
+    std::vector<std::string> CachedIncludes;
   };
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
 };
@@ -2778,13 +2779,20 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
       end = this->Internal->IncludeDirectoriesEntries.end();
       it != end; ++it)
     {
-    std::vector<std::string> entryIncludes;
-    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(this->Makefile,
-                                              config,
-                                              false,
-                                              this,
-                                              &dagChecker),
-                                    entryIncludes);
+    std::vector<std::string> entryIncludes = (*it)->CachedIncludes;
+    if(entryIncludes.empty())
+      {
+      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(this->Makefile,
+                                                config,
+                                                false,
+                                                this,
+                                                &dagChecker),
+                                      entryIncludes);
+      if (!(*it)->ge->GetHadContextSensitiveCondition())
+        {
+        (*it)->CachedIncludes = entryIncludes;
+        }
+      }
     std::string usedIncludes;
     for(std::vector<std::string>::const_iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)

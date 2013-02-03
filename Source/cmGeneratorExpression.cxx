@@ -88,6 +88,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.Config = config;
   context.Quiet = quiet;
   context.HadError = false;
+  context.HadContextSensitiveCondition = false;
   context.HeadTarget = headTarget;
   context.CurrentTarget = currentTarget ? currentTarget : headTarget;
   context.Backtrace = this->Backtrace;
@@ -108,6 +109,10 @@ const char *cmCompiledGeneratorExpression::Evaluate(
       this->Output = "";
       break;
       }
+    }
+  if (!context.HadError)
+    {
+    this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
     }
 
   this->Targets = context.Targets;
