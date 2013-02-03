@@ -238,6 +238,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
+    context->HadContextSensitiveCondition = true;
     return context->Config ? context->Config : "";
   }
 } configurationNode;
@@ -262,6 +263,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
                   "Expression syntax not recognized.");
       return std::string();
       }
+    context->HadContextSensitiveCondition = true;
     if (!context->Config)
       {
       return parameters.front().empty() ? "1" : "0";
@@ -455,12 +457,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       if (propertyName == "POSITION_INDEPENDENT_CODE")
         {
+        context->HadContextSensitiveCondition = true;
         return target->GetLinkInterfaceDependentBoolProperty(
                     "POSITION_INDEPENDENT_CODE", context->Config) ? "1" : "0";
         }
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config))
         {
+        context->HadContextSensitiveCondition = true;
         return target->GetLinkInterfaceDependentBoolProperty(
                                                 propertyName,
                                                 context->Config) ? "1" : "0";
@@ -468,6 +472,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       if (target->IsLinkInterfaceDependentStringProperty(propertyName,
                                                          context->Config))
         {
+        context->HadContextSensitiveCondition = true;
         const char *propContent =
                               target->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
@@ -486,12 +491,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       if (targetPropertyTransitiveWhitelist[i] == propertyName)
         {
         cmGeneratorExpression ge(context->Backtrace);
-        return ge.Parse(prop)->Evaluate(context->Makefile,
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+        std::string result = cge->Evaluate(context->Makefile,
                             context->Config,
                             context->Quiet,
                             context->HeadTarget,
                             target,
                             &dagChecker);
+
+        if (cge->GetHadContextSensitiveCondition())
+          {
+          context->HadContextSensitiveCondition = true;
+          }
+        return result;
         }
       }
     return prop;
@@ -585,6 +597,9 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
           "be used with add_custom_command.");
       return std::string();
       }
+
+    context->HadContextSensitiveCondition = true;
+
     for (size_t i = 0;
          i < (sizeof(targetPolicyWhitelist) /
               sizeof(*targetPolicyWhitelist));
@@ -716,12 +731,18 @@ private:
       }
 
     cmGeneratorExpression ge(context->Backtrace);
-    return ge.Parse(propContent)->Evaluate(context->Makefile,
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(propContent);
+    std::string result = cge->Evaluate(context->Makefile,
                         context->Config,
                         context->Quiet,
                         context->HeadTarget,
                         target,
                         &dagChecker);
+    if (cge->GetHadContextSensitiveCondition())
+      {
+      context->HadContextSensitiveCondition = true;
+      }
+    return result;
   }
 
 } linkedNode;
