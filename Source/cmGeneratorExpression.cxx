@@ -123,7 +123,8 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
               cmListFileBacktrace const& backtrace,
               const char *input)
-  : Backtrace(backtrace), Input(input ? input : "")
+  : Backtrace(backtrace), Input(input ? input : ""),
+    HadContextSensitiveCondition(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens =

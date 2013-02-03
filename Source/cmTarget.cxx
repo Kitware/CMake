@@ -2779,8 +2779,15 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
       end = this->Internal->IncludeDirectoriesEntries.end();
       it != end; ++it)
     {
+
+    bool testIsOff = true;
+    bool cacheIncludes = false;
     std::vector<std::string> entryIncludes = (*it)->CachedIncludes;
-    if(entryIncludes.empty())
+    if(!entryIncludes.empty())
+      {
+      testIsOff = false;
+      }
+    else
       {
       cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(this->Makefile,
                                                 config,
@@ -2790,18 +2797,18 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                       entryIncludes);
       if (!(*it)->ge->GetHadContextSensitiveCondition())
         {
-        (*it)->CachedIncludes = entryIncludes;
+        cacheIncludes = true;
         }
       }
     std::string usedIncludes;
-    for(std::vector<std::string>::const_iterator
+    for(std::vector<std::string>::iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
       {
-      std::string inc = *li;
-      if (!cmSystemTools::IsOff(inc.c_str()))
+      if (testIsOff && !cmSystemTools::IsOff(li->c_str()))
         {
-        cmSystemTools::ConvertToUnixSlashes(inc);
+        cmSystemTools::ConvertToUnixSlashes(*li);
         }
+      std::string inc = *li;
 
       if(uniqueIncludes.insert(inc).second)
         {
@@ -2811,6 +2818,10 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
           usedIncludes += " * " + inc + "\n";
           }
         }
+      }
+    if (cacheIncludes)
+      {
+      (*it)->CachedIncludes = entryIncludes;
       }
     if (!usedIncludes.empty())
       {
