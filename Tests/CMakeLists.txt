@@ -319,6 +319,7 @@ if(BUILD_TESTING)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-project ExternalDataTest
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
     --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
     )
