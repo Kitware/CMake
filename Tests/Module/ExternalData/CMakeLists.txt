@@ -4,8 +4,12 @@ project(ExternalDataTest NONE)
 include(CTest)
 
 include(ExternalData)
+
+if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" MATCHES "^/")
+  set(slash /)
+endif()
 set(ExternalData_URL_TEMPLATES
-  "file:///${CMAKE_CURRENT_SOURCE_DIR}/%(algo)/%(hash)"
+  "file://${slash}${CMAKE_CURRENT_SOURCE_DIR}/%(algo)/%(hash)"
   )
 set(ExternalData_BINARY_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ExternalData")
 file(REMOVE_RECURSE ${ExternalData_BINARY_ROOT}) # clean test
