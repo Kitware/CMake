@@ -191,7 +191,7 @@ function(ExternalData_add_target target)
                                  -DExternalData_ACTION=local
                                  -DExternalData_CONFIG=${config}
                                  -P ${_ExternalData_SELF}
-        DEPENDS "${name}"
+        MAIN_DEPENDENCY "${name}"
         )
       list(APPEND files "${file}")
     endif()
@@ -222,7 +222,7 @@ function(ExternalData_add_target target)
                                  -DExternalData_CONFIG=${config}
                                  -P ${_ExternalData_SELF}
         # Update whenever the object hash changes.
-        DEPENDS "${name}${ext}"
+        MAIN_DEPENDENCY "${name}${ext}"
         )
       list(APPEND files "${file}${stamp}")
     endif()
