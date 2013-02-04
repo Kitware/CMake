@@ -1190,6 +1190,11 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
   int tries = 5;
   while(!MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) && --tries)
     {
+    // Try again only if failure was due to access permissions.
+    if(GetLastError() != ERROR_ACCESS_DENIED)
+      {
+      return false;
+      }
     DWORD attrs = GetFileAttributes(newname);
     if((attrs != INVALID_FILE_ATTRIBUTES) &&
        (attrs & FILE_ATTRIBUTE_READONLY))
