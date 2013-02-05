@@ -100,6 +100,10 @@ public:
   {
     return this->Backtrace;
   }
+  bool GetHadContextSensitiveCondition() const
+  {
+    return this->HadContextSensitiveCondition;
+  }
 
 private:
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
@@ -118,6 +122,7 @@ private:
   mutable std::set<cmTarget*> Targets;
   mutable std::map<cmStdString, cmStdString> SeenTargetProperties;
   mutable std::string Output;
+  mutable bool HadContextSensitiveCondition;
 };
 
 #endif

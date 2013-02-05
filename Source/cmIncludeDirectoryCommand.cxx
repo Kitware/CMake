@@ -36,6 +36,10 @@ bool cmIncludeDirectoryCommand
     ++i;
     }
 
+  std::vector<std::string> beforeIncludes;
+  std::vector<std::string> afterIncludes;
+  std::set<cmStdString> systemIncludes;
+
   for(; i != args.end(); ++i)
     {
     if(*i == "SYSTEM")
@@ -49,9 +53,37 @@ bool cmIncludeDirectoryCommand
       return false;
       }
 
-    this->AddDirectory(i->c_str(),before,system);
+    std::vector<std::string> includes;
 
+    GetIncludes(*i, includes);
+
+    if (before)
+      {
+      beforeIncludes.insert(beforeIncludes.end(),
+                            includes.begin(),
+                            includes.end());
+      }
+    else
+      {
+      afterIncludes.insert(afterIncludes.end(),
+                           includes.begin(),
+                           includes.end());
+      }
+    if (system)
+      {
+      for (std::vector<std::string>::const_iterator li = includes.begin();
+        li != includes.end(); ++li)
+        {
+        systemIncludes.insert(*li);
+        }
+      }
     }
+  std::reverse(beforeIncludes.begin(), beforeIncludes.end());
+
+  this->Makefile->AddIncludeDirectories(afterIncludes);
+  this->Makefile->AddIncludeDirectories(beforeIncludes, before);
+  this->Makefile->AddSystemIncludeDirectories(systemIncludes);
+
   return true;
 }
 
@@ -72,57 +104,49 @@ static bool StartsWithGeneratorExpression(const std::string &input)
 // output from a program and passing it into a command the cleanup doesn't
 // always happen
 //
-void cmIncludeDirectoryCommand::AddDirectory(const char *i,
-                                             bool before,
-                                             bool system)
+void cmIncludeDirectoryCommand::GetIncludes(const std::string &arg,
+                                            std::vector<std::string> &incs)
 {
   // break apart any line feed arguments
-  std::string ret = i;
   std::string::size_type pos = 0;
-  if((pos = ret.find('\n', pos)) != std::string::npos)
+  std::string::size_type lastPos = 0;
+  while((pos = arg.find('\n', lastPos)) != std::string::npos)
     {
     if (pos)
       {
-      this->AddDirectory(ret.substr(0,pos).c_str(), before, system);
+      std::string inc = arg.substr(lastPos,pos);
+      NormalizeInclude(inc);
+      incs.push_back(inc);
       }
-    if (ret.size()-pos-1)
-      {
-      this->AddDirectory(ret.substr(pos+1,ret.size()-pos-1).c_str(),
-                         before, system);
-      }
-    return;
+    lastPos = pos + 1;
+    }
+  std::string inc = arg.substr(lastPos);
+  NormalizeInclude(inc);
+  incs.push_back(inc);
+}
+
+void cmIncludeDirectoryCommand::NormalizeInclude(std::string &inc)
+{
+  std::string::size_type b = inc.find_first_not_of(" \r");
+  std::string::size_type e = inc.find_last_not_of(" \r");
+  if ((b!=inc.npos) && (e!=inc.npos))
+    {
+    inc.assign(inc, b, 1+e-b);   // copy the remaining substring
     }
 
-  // remove any leading or trailing spaces and \r
-  std::string::size_type b = ret.find_first_not_of(" \r");
-  std::string::size_type e = ret.find_last_not_of(" \r");
-  if ((b!=ret.npos) && (e!=ret.npos))
+  if (!cmSystemTools::IsOff(inc.c_str()))
     {
-    ret.assign(ret, b, 1+e-b);   // copy the remaining substring
-    }
-  else
-    {
-    return;         // if we get here, we had only whitespace in the string
-    }
+    cmSystemTools::ConvertToUnixSlashes(inc);
 
-  if (!cmSystemTools::IsOff(ret.c_str()))
-    {
-    cmSystemTools::ConvertToUnixSlashes(ret);
-    if(!cmSystemTools::FileIsFullPath(ret.c_str()))
+    if(!cmSystemTools::FileIsFullPath(inc.c_str()))
       {
-      if(!StartsWithGeneratorExpression(ret))
+      if(!StartsWithGeneratorExpression(inc))
         {
         std::string tmp = this->Makefile->GetStartDirectory();
         tmp += "/";
-        tmp += ret;
-        ret = tmp;
+        tmp += inc;
+        inc = tmp;
         }
       }
     }
-  this->Makefile->AddIncludeDirectory(ret.c_str(), before);
-  if(system)
-    {
-    this->Makefile->AddSystemIncludeDirectory(ret.c_str());
-    }
 }
-

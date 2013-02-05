@@ -50,6 +50,8 @@ if(NOT DEFINED can_build_tutorial_step5)
   endif()
 endif()
 
+add_custom_target(NonExternalProjectTarget
+  COMMAND ${CMAKE_COMMAND} -E echo NonExternalProjectTarget)
 
 # Empty projects that test all the known ExternalProject_Add argument key words:
 #
@@ -94,7 +96,7 @@ ExternalProject_Add(${proj}
   CVS_REPOSITORY ""
   CVS_MODULE ""
   CVS_TAG ""
-  DEPENDS "MinimalNoOpProject"
+  DEPENDS "MinimalNoOpProject" NonExternalProjectTarget
   DOWNLOAD_COMMAND ""
   INSTALL_COMMAND ""
   PATCH_COMMAND ""

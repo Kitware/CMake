@@ -102,6 +102,10 @@ public:
   cmPolicies::PolicyStatus GetPolicyStatusCMP0008() const
     { return this->PolicyStatusCMP0008; }
 
+  /** Get the status of policy CMP0020 when the target was created.  */
+  cmPolicies::PolicyStatus GetPolicyStatusCMP0020() const
+    { return this->PolicyStatusCMP0020; }
+
   /**
    * Get the list of the custom commands for this target
    */
@@ -426,6 +430,8 @@ public:
       If no macro should be defined null is returned.  */
   const char* GetExportMacro();
 
+  std::string GetCompileDefinitions(const char *config = 0);
+
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
   // when source file properties are changed and we do not have enough
@@ -495,12 +501,22 @@ public:
   void GetLinkDependentTargetsForProperty(const std::string &p,
                                        std::set<std::string> &targets);
   bool IsNullImpliedByLinkLibraries(const std::string &p);
+  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                            const char *config);
+  bool IsLinkInterfaceDependentStringProperty(const std::string &p,
+                                              const char *config);
 
   void AddLinkDependentTargetsForProperties(
           const std::map<cmStdString, cmStdString> &map);
 
   bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
                                              const char *config);
+
+  const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
+                                                      const char *config);
+
+  std::string GetDebugGeneratorExpressions(const std::string &value,
+                                  cmTarget::LinkLibraryType llt);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -610,6 +626,7 @@ private:
   bool DLLPlatform;
   bool IsApple;
   bool IsImportedTarget;
+  bool DebugIncludesDone;
   mutable std::map<cmStdString, std::set<std::string> >
                                                       LinkDependentProperties;
   mutable std::set<std::string> LinkImplicitNullProperties;
@@ -645,9 +662,6 @@ private:
 
   void ProcessSourceExpression(std::string const& expr);
 
-  std::string GetDebugGeneratorExpressions(const std::string &value,
-                                  cmTarget::LinkLibraryType llt);
-
   // The cmMakefile instance that owns this target.  This should
   // always be set.
   cmMakefile* Makefile;
@@ -656,6 +670,7 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0003;
   cmPolicies::PolicyStatus PolicyStatusCMP0004;
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
+  cmPolicies::PolicyStatus PolicyStatusCMP0020;
 
   // Internal representation details.
   friend class cmTargetInternals;

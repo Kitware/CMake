@@ -22,13 +22,11 @@ bool cmTargetIncludeDirectoriesCommand
 
 //----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
-::HandleImportedTargetInvalidScope(const std::string &tgt,
-                                   const std::string &scope)
+::HandleImportedTarget(const std::string &tgt)
 {
   cmOStringStream e;
-  e << "Cannot specify " << scope << " include directories for imported "
-       "target \"" << tgt << "\".  Include directories can only be "
-       "specified for an imported target in the INTERFACE mode.";
+  e << "Cannot specify include directories for imported target \""
+    << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 
@@ -43,32 +41,44 @@ void cmTargetIncludeDirectoriesCommand
 }
 
 //----------------------------------------------------------------------------
-bool cmTargetIncludeDirectoriesCommand
-::HandleNonTargetArg(std::string &content,
-                   const std::string &sep,
-                   const std::string &entry,
-                   const std::string &tgt)
+static bool isGeneratorExpression(const std::string &lib)
 {
-  if (!cmSystemTools::FileIsFullPath(entry.c_str()))
-    {
-    cmOStringStream e;
-    e << "Cannot specify relative include directory \"" << entry << "\" for "
-         "target \"" << tgt << "\". Only absolute paths are permitted";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-    }
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
 
-  content += sep + entry;
-  return true;
+//----------------------------------------------------------------------------
+std::string cmTargetIncludeDirectoriesCommand
+::Join(const std::vector<std::string> &content)
+{
+  std::string dirs;
+  std::string sep;
+  std::string prefix = this->Makefile->GetStartDirectory() + std::string("/");
+  for(std::vector<std::string>::const_iterator it = content.begin();
+    it != content.end(); ++it)
+    {
+    if (cmSystemTools::FileIsFullPath(it->c_str())
+        || isGeneratorExpression(*it))
+      {
+      dirs += sep + *it;
+      }
+    else
+      {
+      dirs += sep + prefix + *it;
+      }
+    sep = ";";
+    }
+  return dirs;
 }
 
 //----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
-::HandleDirectContent(cmTarget *tgt, const std::string &content,
+::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                       bool prepend)
 {
   cmListFileBacktrace lfbt;
   this->Makefile->GetBacktrace(lfbt);
-  cmMakefileIncludeDirectoriesEntry entry(content, lfbt);
+  cmMakefileIncludeDirectoriesEntry entry(this->Join(content), lfbt);
   tgt->InsertInclude(entry, prepend);
 }

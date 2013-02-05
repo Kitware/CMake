@@ -5,8 +5,8 @@ include(${Import_BINARY_DIR}/../Export/ExportBuildTree.cmake)
 include(${CMAKE_INSTALL_PREFIX}/lib/exp/exp.cmake)
 
 # Import two exports, where the Depends one depends on an exported target from the Required one:
-include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibRequired/testLibRequiredConfig.cmake)
-include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibDepends/testLibDependsConfig.cmake)
+include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibRequired/testLibRequiredTargets.cmake)
+include(${CMAKE_INSTALL_PREFIX}/lib/cmake/testLibDepends/testLibDependsTargets.cmake)
 
 # Try referencing an executable imported from the install tree.
 add_custom_command(
@@ -159,13 +159,15 @@ endif()
 
 add_executable(deps_iface deps_iface.c)
 target_link_libraries(deps_iface testLibDepends)
-target_include_directories(deps_iface PRIVATE testLibDepends)
-target_compile_definitions(deps_iface PRIVATE testLibDepends)
 
 add_executable(deps_shared_iface deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface testSharedLibDepends)
-target_include_directories(deps_shared_iface PRIVATE testSharedLibDepends)
-target_compile_definitions(deps_shared_iface PRIVATE testSharedLibDepends)
+target_compile_definitions(deps_shared_iface
+  PRIVATE
+    $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>
+    $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
+    $<$<STREQUAL:$<TARGET_PROPERTY:CUSTOM_STRING>,testcontent>:CUSTOM_STRING_IS_MATCH>
+)
 
 if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   include(CheckCXXCompilerFlag)
@@ -191,7 +193,9 @@ endif()
 
 add_executable(deps_shared_iface2 deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
-target_include_directories(deps_shared_iface2 PRIVATE bld_testSharedLibDepends bld_subdirlib)
 target_compile_definitions(deps_shared_iface2
-  PRIVATE bld_testSharedLibDepends TEST_SUBDIR_LIB
+  PRIVATE TEST_SUBDIR_LIB
+  $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>
+  $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
+  $<$<STREQUAL:$<TARGET_PROPERTY:CUSTOM_STRING>,testcontent>:CUSTOM_STRING_IS_MATCH>
 )

@@ -59,8 +59,9 @@ public:
     return
       "  include_directories([AFTER|BEFORE] [SYSTEM] dir1 dir2 ...)\n"
       "Add the given directories to those the compiler uses to search "
-      "for include files. "
-      "These directories are added to the directory property "
+      "for include files.  Relative paths are interpreted as relative to "
+      "the current source directory. \n"
+      "The include directories are added to the directory property "
       "INCLUDE_DIRECTORIES for the current CMakeLists file. "
       "They are also added to the target property INCLUDE_DIRECTORIES "
       "for each target in the current CMakeLists file. "
@@ -84,7 +85,8 @@ public:
 
 protected:
   // used internally
-  void AddDirectory(const char *arg, bool before, bool system);
+  void GetIncludes(const std::string &arg, std::vector<std::string> &incs);
+  void NormalizeInclude(std::string &inc);
 };
 
 

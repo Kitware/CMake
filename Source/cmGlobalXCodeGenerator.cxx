@@ -1700,11 +1700,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs, exportMacro);
     }
   cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
-  this->AppendDefines(ppDefs, gtgt->GetCompileDefinitions().c_str());
+  this->AppendDefines(ppDefs, target.GetCompileDefinitions().c_str());
   if(configName)
     {
     this->AppendDefines(ppDefs,
-                        gtgt->GetCompileDefinitions(configName).c_str());
+                        target.GetCompileDefinitions(configName).c_str());
     }
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
