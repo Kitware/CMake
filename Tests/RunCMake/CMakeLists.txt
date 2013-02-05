@@ -42,9 +42,14 @@ macro(add_RunCMake_test test)
     -DRunCMake_GENERATOR_TOOLSET=${CMAKE_TEST_GENERATOR_TOOLSET}
     -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
     -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${test}
+    ${${test}_ARGS}
     -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
     )
 endmacro()
+
+if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 3)
+  set(GeneratorToolset_ARGS -DXCODE_BELOW_3=1)
+endif()
 
 add_RunCMake_test(CMP0019)
 add_RunCMake_test(ExternalData)
