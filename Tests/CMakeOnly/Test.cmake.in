@@ -9,6 +9,7 @@ file(MAKE_DIRECTORY "${binary_dir}")
 execute_process(
   COMMAND  ${CMAKE_COMMAND} ${CMAKE_ARGS}
   "${source_dir}" -G "@CMAKE_TEST_GENERATOR@"
+  -T "@CMAKE_TEST_GENERATOR_TOOLSET@"
   WORKING_DIRECTORY "${binary_dir}"
   RESULT_VARIABLE result
   )

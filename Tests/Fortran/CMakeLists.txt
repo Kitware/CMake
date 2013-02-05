@@ -197,6 +197,7 @@ if(TEST_MODULE_DEPENDS)
          --build-two-config
          --build-project ExtFort
          --build-generator ${CMAKE_GENERATOR}
+         --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
          --build-makeprogram ${CMAKE_MAKE_PROGRAM}
          --build-options -DCMAKE_Fortran_COMPILER:STRING=${CMAKE_Fortran_COMPILER}
                          -DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}
