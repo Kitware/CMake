@@ -325,6 +325,9 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
       if(!cmSystemTools::FileExists(source.c_str()))
         {
         cmSystemTools::ReplaceString(source, "$(IntDir)/", "");
+        // Make sure the path exists for the file
+        std::string path = cmSystemTools::GetFilenamePath(source);
+        cmSystemTools::MakeDirectory(path.c_str());
 #if defined(_WIN32) || defined(__CYGWIN__)
         std::ofstream sourceFout(source.c_str(),
                            std::ios::binary | std::ios::out
@@ -1697,25 +1700,21 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-
-    cmGeneratorTarget* gt =
-      this->GlobalGenerator->GetGeneratorTarget(&target);
-
     this->AppendDefines(
       definesSet,
-      gt->GetCompileDefinitions());
+      target.GetCompileDefinitions());
     this->AppendDefines(
       debugDefinesSet,
-      gt->GetCompileDefinitions("DEBUG"));
+      target.GetCompileDefinitions("DEBUG"));
     this->AppendDefines(
       releaseDefinesSet,
-      gt->GetCompileDefinitions("RELEASE"));
+      target.GetCompileDefinitions("RELEASE"));
     this->AppendDefines(
       minsizeDefinesSet,
-      gt->GetCompileDefinitions("MINSIZEREL"));
+      target.GetCompileDefinitions("MINSIZEREL"));
     this->AppendDefines(
       debugrelDefinesSet,
-      gt->GetCompileDefinitions("RELWITHDEBINFO"));
+      target.GetCompileDefinitions("RELWITHDEBINFO"));
 
     std::string defines = " ";
     std::string debugDefines = " ";

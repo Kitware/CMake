@@ -2466,7 +2466,9 @@ bool SystemInformationImplementation::RetrieveCPUPowerManagement()
 #endif
 }
 
-void SystemInformationStripLeadingSpace(kwsys_stl::string& str)
+#if USE_CPUID
+// Used only in USE_CPUID implementation below.
+static void SystemInformationStripLeadingSpace(kwsys_stl::string& str)
 {
   // Because some manufacturers have leading white space - we have to post-process the name.
   kwsys_stl::string::size_type pos = str.find_first_not_of(" ");
@@ -2475,6 +2477,7 @@ void SystemInformationStripLeadingSpace(kwsys_stl::string& str)
     str = str.substr(pos);
     }
 }
+#endif
 
 /** */
 bool SystemInformationImplementation::RetrieveExtendedCPUIdentity()

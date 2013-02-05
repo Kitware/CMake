@@ -9,6 +9,8 @@
 # configure_file() command when creating the <Name>Config.cmake or <Name>-config.cmake
 # file for installing a project or library. It helps making the resulting package
 # relocatable by avoiding hardcoded paths in the installed Config.cmake file.
+# <Name>Config.cmake files installed under UNIX into /lib(64) or /usr/lib(64) are
+# considered system packages and are not relocatable.
 #
 # In a FooConfig.cmake file there may be code like this to make the
 # install destinations know to the using project:
@@ -173,17 +175,33 @@ function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
   else()
     set(absInstallDir "${CMAKE_INSTALL_PREFIX}/${CCF_INSTALL_DESTINATION}")
   endif()
+
+  # with the /usr-move, /lib(64) is a symlink to /usr/lib on Fedora, ArchLinux, Mageira and others.
+  # If we are installed to such a location, force using absolute paths.
+  set(forceAbsolutePaths FALSE)
+  if("${absInstallDir}" MATCHES "^(/usr)?/lib(64)?/.+")
+    set(forceAbsolutePaths TRUE)
+  endif()
+
   file(RELATIVE_PATH PACKAGE_RELATIVE_PATH "${absInstallDir}" "${CMAKE_INSTALL_PREFIX}" )
 
   foreach(var ${CCF_PATH_VARS})
     if(NOT DEFINED ${var})
       message(FATAL_ERROR "Variable ${var} does not exist")
     else()
-      if(IS_ABSOLUTE "${${var}}")
-        string(REPLACE "${CMAKE_INSTALL_PREFIX}" "\${PACKAGE_PREFIX_DIR}"
-                        PACKAGE_${var} "${${var}}")
+      if(forceAbsolutePaths)
+        if(IS_ABSOLUTE "${${var}}")
+          set(PACKAGE_${var} "${${var}}")
+        else()
+          set(PACKAGE_${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+        endif()
       else()
-        set(PACKAGE_${var} "\${PACKAGE_PREFIX_DIR}/${${var}}")
+        if(IS_ABSOLUTE "${${var}}")
+          string(REPLACE "${CMAKE_INSTALL_PREFIX}" "\${PACKAGE_PREFIX_DIR}"
+                          PACKAGE_${var} "${${var}}")
+        else()
+          set(PACKAGE_${var} "\${PACKAGE_PREFIX_DIR}/${${var}}")
+        endif()
       endif()
     endif()
   endforeach()

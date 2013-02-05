@@ -31,28 +31,25 @@ public:
   bool HandleArguments(std::vector<std::string> const& args,
                            const char *prop, ArgumentFlags flags = NO_FLAGS);
 
+  cmTypeMacro(cmTargetPropCommandBase, cmCommand);
+protected:
+  std::string Property;
+  cmTarget *Target;
+
 private:
-  virtual void HandleImportedTargetInvalidScope(const std::string &tgt,
-                                   const std::string &scope) = 0;
+  virtual void HandleImportedTarget(const std::string &tgt) = 0;
   virtual void HandleMissingTarget(const std::string &name) = 0;
 
-  virtual bool HandleNonTargetArg(std::string &content,
-                          const std::string &sep,
-                          const std::string &entry,
-                          const std::string &tgt) = 0;
-
   virtual void HandleDirectContent(cmTarget *tgt,
-                                   const std::string &content,
+                                   const std::vector<std::string> &content,
                                    bool prepend) = 0;
+  virtual std::string Join(const std::vector<std::string> &content) = 0;
 
   bool ProcessContentArgs(std::vector<std::string> const& args,
                           unsigned int &argIndex, bool prepend);
   void PopulateTargetProperies(const std::string &scope,
-                               const std::string &content, bool prepend);
-
-private:
-  cmTarget *Target;
-  std::string Property;
+                               const std::vector<std::string> &content,
+                               bool prepend);
 };
 
 #endif

@@ -1,0 +1,5 @@
+CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+  ExternalData_URL_TEMPLATES is not set!
+Call Stack \(most recent call first\):
+  NoURLTemplates.cmake:2 \(ExternalData_Add_Target\)
+  CMakeLists.txt:3 \(include\)

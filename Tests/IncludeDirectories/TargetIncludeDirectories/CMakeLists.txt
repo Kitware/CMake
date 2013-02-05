@@ -82,3 +82,44 @@ add_custom_target(test_custom_target
         $<TARGET_PROPERTY:TargetIncludeDirectories,COMPILE_DEFINITIONS>
         WORKING_DIRECTORY
         "${CMAKE_CURRENT_SOURCE_DIR}")
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bad")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/bad/common.h" "#error Should not be included\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/good")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/good/common.h" "#include \"othergood.h\"\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/othergood")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/othergood/othergood.h" "// No error\n")
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libothergood.cpp" "// No content \n")
+add_library(libothergood "${CMAKE_CURRENT_BINARY_DIR}/libothergood.cpp")
+set_property(TARGET libothergood APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/othergood"
+)
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libgood.cpp" "// No content \n")
+add_library(libgood "${CMAKE_CURRENT_BINARY_DIR}/libgood.cpp")
+set_property(TARGET libgood APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES
+    "${CMAKE_CURRENT_BINARY_DIR}/good;$<TARGET_PROPERTY:libothergood,INTERFACE_INCLUDE_DIRECTORIES>"
+)
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libbad.cpp" "// No content \n")
+add_library(libbad "${CMAKE_CURRENT_BINARY_DIR}/libbad.cpp")
+set_property(TARGET libbad APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/bad"
+)
+
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lib5.cpp" "#include \"common.h\"\n")
+add_library(lib5 "${CMAKE_CURRENT_BINARY_DIR}/lib5.cpp")
+
+# Assuming the link order must be:
+target_link_libraries(lib5 libbad libgood)
+
+# Oops!.
+# As include directory order and link order are the same when using target_link_libraries, we have to
+# get the libgood includes in before the libbad includes.
+# We do that with this command:
+target_include_directories(lib5
+  BEFORE PRIVATE $<LINKED:libgood>
+)

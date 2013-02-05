@@ -47,9 +47,24 @@
   "  $<TARGET_LINKER_FILE_DIR:tgt>/$<TARGET_LINKER_FILE_NAME:tgt>\n"    \
   "  $<TARGET_SONAME_FILE_DIR:tgt>/$<TARGET_SONAME_FILE_NAME:tgt>\n"    \
   "\n"                                                                  \
-  "  $<TARGET_PROPERTY:tgt,prop>   = The value of the property prop\n"  \
-  "on the target tgt. Note that tgt is not added as a dependency of\n"  \
-  "the target this expression is evaluated on.\n"                       \
+  "  $<TARGET_PROPERTY:tgt,prop>   = The value of the property prop "   \
+  "on the target tgt.\n"                                                \
+  "Note that tgt is not added as a dependency of the target this "      \
+  "expression is evaluated on.\n"                                       \
+  "  $<LINKED:item>            = An empty string if item is not a "     \
+  "target.  If item is a target then the "                              \
+  "INTERFACE_INCLUDE_DIRECTORIES or INTERFACE_COMPILE_DEFINITIONS "     \
+  "content is read from the target.  "                                  \
+  "This generator expression can only be used in evaluation of the "    \
+  "INCLUDE_DIRECTORIES or COMPILE_DEFINITIONS property.  Note that "    \
+  "this expression is for internal use and may be changed or removed "  \
+  "in the future.\n"                                                    \
+  "  $<TARGET_POLICY:pol>          = '1' if the policy was NEW when "   \
+  "the 'head' target was created, else '0'.  If the policy was not "    \
+  "set, the warning message for the policy will be emitted.  This "     \
+  "generator expression only works for a subset of policies.\n"         \
+  "  $<INSTALL_PREFIX>         = Content of the install prefix when "   \
+  "the target is exported via INSTALL(EXPORT) and empty otherwise.\n"   \
   "Boolean expressions:\n"                                              \
   "  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'\n"    \
   "  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'\n"    \
@@ -60,7 +75,7 @@
 #define CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS                       \
   CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS \
   "Expressions with an implicit 'this' target:\n"                       \
-  "  $<TARGET_PROPERTY:prop>   = The value of the property prop on\n"   \
+  "  $<TARGET_PROPERTY:prop>   = The value of the property prop on "    \
   "the target on which the generator expression is evaluated.\n"        \
   ""
 

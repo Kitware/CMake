@@ -32,6 +32,7 @@ struct cmGeneratorExpressionContext
                            // directly or indirectly in the property.
   bool Quiet;
   bool HadError;
+  bool HadContextSensitiveCondition;
 };
 
 struct cmGeneratorExpressionDAGChecker;

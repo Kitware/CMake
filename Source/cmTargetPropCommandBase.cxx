@@ -80,17 +80,16 @@ bool cmTargetPropCommandBase
     return false;
     }
 
-  if(this->Target->IsImported() && scope != "INTERFACE")
+  if(this->Target->IsImported())
     {
-    this->HandleImportedTargetInvalidScope(args[0], scope);
+    this->HandleImportedTarget(args[0]);
     return false;
     }
 
   ++argIndex;
 
-  std::string content;
+  std::vector<std::string> content;
 
-  std::string sep;
   for(unsigned int i=argIndex; i < args.size(); ++i, ++argIndex)
     {
     if(args[i] == "PUBLIC"
@@ -100,16 +99,7 @@ bool cmTargetPropCommandBase
       this->PopulateTargetProperies(scope, content, prepend);
       return true;
       }
-    if (this->Makefile->FindTargetToUse(args[i].c_str()))
-      {
-      content += sep + "$<TARGET_PROPERTY:" + args[i]
-                      + ",INTERFACE_" + this->Property + ">";
-      }
-    else if (!this->HandleNonTargetArg(content, sep, args[i], args[0]))
-      {
-      return false;
-      }
-    sep = ";";
+    content.push_back(args[i]);
     }
   this->PopulateTargetProperies(scope, content, prepend);
   return true;
@@ -118,7 +108,8 @@ bool cmTargetPropCommandBase
 //----------------------------------------------------------------------------
 void cmTargetPropCommandBase
 ::PopulateTargetProperies(const std::string &scope,
-                          const std::string &content, bool prepend)
+                          const std::vector<std::string> &content,
+                          bool prepend)
 {
   if (scope == "PRIVATE" || scope == "PUBLIC")
     {
@@ -130,7 +121,7 @@ void cmTargetPropCommandBase
       {
       const std::string propName = std::string("INTERFACE_") + this->Property;
       const char *propValue = this->Target->GetProperty(propName.c_str());
-      const std::string totalContent = content + (propValue
+      const std::string totalContent = this->Join(content) + (propValue
                                                 ? std::string(";") + propValue
                                                 : std::string());
       this->Target->SetProperty(propName.c_str(), totalContent.c_str());
@@ -138,7 +129,7 @@ void cmTargetPropCommandBase
     else
       {
       this->Target->AppendProperty(("INTERFACE_" + this->Property).c_str(),
-                            content.c_str());
+                                   this->Join(content).c_str());
       }
     }
 }

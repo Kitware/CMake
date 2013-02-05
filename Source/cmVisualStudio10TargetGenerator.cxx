@@ -1221,8 +1221,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   clOptions.AddDefines(
-                     this->GeneratorTarget->GetCompileDefinitions().c_str());
-  clOptions.AddDefines(this->GeneratorTarget->GetCompileDefinitions(
+                     this->Target->GetCompileDefinitions().c_str());
+  clOptions.AddDefines(this->Target->GetCompileDefinitions(
                                                 configName.c_str()).c_str());
   clOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
