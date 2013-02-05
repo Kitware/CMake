@@ -1,0 +1,14 @@
+CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+  Data file referenced by argument
+
+    DATA{MissingData.txt}
+
+  corresponds to source tree path
+
+    MissingData.txt
+
+  that does not exist as a file \(with or without an extension\)!
+Call Stack \(most recent call first\):
+  .*
+  MissingData.cmake:2 \(ExternalData_Add_Test\)
+  CMakeLists.txt:3 \(include\)

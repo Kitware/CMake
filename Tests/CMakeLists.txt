@@ -312,6 +312,19 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
 
+  add_test(Module.ExternalData ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/Module/ExternalData"
+    "${CMake_BINARY_DIR}/Tests/Module/ExternalData"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project ExternalDataTest
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-noclean
+    --force-new-ctest-process
+    --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Module/ExternalData")
+
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
 
   if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
