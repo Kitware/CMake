@@ -34,7 +34,9 @@ function(run_cmake test)
   endif()
   execute_process(
     COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
-              -G "${RunCMake_GENERATOR}" -DRunCMake_TEST=${test}
+              -G "${RunCMake_GENERATOR}"
+              -T "${RunCMake_GENERATOR_TOOLSET}"
+              -DRunCMake_TEST=${test}
               ${RunCMake_TEST_OPTIONS}
     WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
     OUTPUT_VARIABLE actual_stdout

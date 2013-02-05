@@ -18,13 +18,21 @@ set(LIB2_BINARY_DIR ${VSExternalInclude_BINARY_DIR}/Lib2)
 make_directory("${LIB2_BINARY_DIR}")
 
 # generate lib1
-exec_program("${CMAKE_COMMAND}" "${LIB1_BINARY_DIR}"  ARGS -G\"${CMAKE_GENERATOR}\"
-  \"${VSExternalInclude_SOURCE_DIR}/Lib1\" OUTPUT_VARIABLE OUT)
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -T "${CMAKE_GENERATOR_TOOLSET}" "${VSExternalInclude_SOURCE_DIR}/Lib1"
+  WORKING_DIRECTORY ${LIB1_BINARY_DIR}
+  OUTPUT_VARIABLE OUT
+  ERROR_VARIABLE OUT
+  )
 message("CMAKE Ran with the following output:\n\"${OUT}\"")
 
 # generate lib2
-exec_program("${CMAKE_COMMAND}" "${LIB2_BINARY_DIR}"  ARGS -G\"${CMAKE_GENERATOR}\"
-  \"${VSExternalInclude_SOURCE_DIR}/Lib2\" OUTPUT_VARIABLE OUT)
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -T "${CMAKE_GENERATOR_TOOLSET}" "${VSExternalInclude_SOURCE_DIR}/Lib2"
+  WORKING_DIRECTORY ${LIB2_BINARY_DIR}
+  OUTPUT_VARIABLE OUT
+  ERROR_VARIABLE OUT
+  )
 message("CMAKE Ran with the following output:\n\"${OUT}\"")
 
 
@@ -46,7 +54,7 @@ add_dependencies(VSExternalInclude lib2)
 # and the sln file can no longer be the only source
 # of that depend.  So, for VS 10 make the executable
 # depend on lib1 and lib2
-if(MSVC10 OR MSVC11)
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[01]")
   add_dependencies(VSExternalInclude lib1)
 endif()
 

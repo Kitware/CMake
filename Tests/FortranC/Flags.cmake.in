@@ -15,6 +15,7 @@ set(COMMAND)
 execute_process(
   WORKING_DIRECTORY "${bld}"
   COMMAND ${CMAKE_COMMAND} "${src}" -G "@CMAKE_TEST_GENERATOR@"
+                           -T "@CMAKE_TEST_GENERATOR_TOOLSET@"
                            "-DFortranC_TEST_FLAGS=1"
                            "-DCMAKE_C_COMPILER=${bld}/cc.sh"
                            "-DCMAKE_C_FLAGS:STRING=@CMAKE_C_FLAGS@"

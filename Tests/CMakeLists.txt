@@ -54,6 +54,11 @@ if(BUILD_TESTING)
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     )
+  if(CMAKE_TEST_GENERATOR_TOOLSET)
+    list(APPEND build_generator_args
+      --build-generator-toolset ${CMAKE_TEST_GENERATOR_TOOLSET}
+      )
+  endif()
 
   add_subdirectory(CMakeLib)
   add_subdirectory(CMakeOnly)
@@ -388,6 +393,7 @@ if(BUILD_TESTING)
          "${CMake_BINARY_DIR}/Tests/Simple_EclipseGenerator"
          --build-two-config
          --build-generator "Eclipse CDT4 - Unix Makefiles"
+         --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --test-command Simple)
@@ -402,6 +408,7 @@ if(BUILD_TESTING)
          "${CMake_BINARY_DIR}/Tests/Simple_CodeBlocksGenerator"
          --build-two-config
          --build-generator "CodeBlocks - Unix Makefiles"
+         --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --test-command Simple)
@@ -415,6 +422,7 @@ if(BUILD_TESTING)
          "${CMake_BINARY_DIR}/Tests/Simple_KDevelop3Generator"
          --build-two-config
          --build-generator "KDevelop3 - Unix Makefiles"
+         --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --test-command Simple)
@@ -1024,6 +1032,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -DExternalProjectUpdate_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
     -DExternalProjectUpdate_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate
     -DCMAKE_TEST_GENERATOR=${CMAKE_TEST_GENERATOR}
+    -DCMAKE_TEST_GENERATOR_TOOLSET=${CMAKE_TEST_GENERATOR_TOOLSET}
     -DCMAKE_TEST_MAKEPROGRAM=${CMAKE_TEST_MAKEPROGRAM}
     -DCMAKE_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
     -P ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate/ExternalProjectUpdateTest.cmake
