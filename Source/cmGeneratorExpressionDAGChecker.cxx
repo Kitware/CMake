@@ -24,7 +24,33 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   : Parent(parent), Target(target), Property(property),
     Content(content), Backtrace(backtrace)
 {
+  const cmGeneratorExpressionDAGChecker *top = this;
+  const cmGeneratorExpressionDAGChecker *p = this->Parent;
+  while (p)
+    {
+    top = p;
+    p = p->Parent;
+    }
   this->CheckResult = this->checkGraph();
+
+  if (CheckResult == DAG && (top->Property == "INCLUDE_DIRECTORIES"
+      || top->Property == "COMPILE_DEFINITIONS") )
+    {
+    std::map<cmStdString, std::set<cmStdString> >::const_iterator it
+                                                    = top->Seen.find(target);
+    if (it != top->Seen.end())
+      {
+      const std::set<cmStdString> &propSet = it->second;
+      const std::set<cmStdString>::const_iterator i = propSet.find(property);
+      if (i != propSet.end())
+        {
+        this->CheckResult = ALREADY_SEEN;
+        return;
+        }
+      }
+    const_cast<cmGeneratorExpressionDAGChecker *>(top)
+                                            ->Seen[target].insert(property);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -124,4 +150,20 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
        || strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
        || strncmp(prop, "LINK_INTERFACE_LIBRARIES_", 26) == 0
        || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 35) == 0);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories()
+{
+  const char *prop = this->Property.c_str();
+  return (strcmp(prop, "INCLUDE_DIRECTORIES") == 0
+       || strcmp(prop, "INTERFACE_INCLUDE_DIRECTORIES") == 0 );
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions()
+{
+  const char *prop = this->Property.c_str();
+  return (strcmp(prop, "COMPILE_DEFINITIONS") == 0
+       || strcmp(prop, "INTERFACE_COMPILE_DEFINITIONS") == 0 );
 }

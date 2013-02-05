@@ -89,7 +89,6 @@ add_custom_target(check-part2 ALL
     -Dtest_install_interface=$<INSTALL_INTERFACE:install>
     -Dtest_target_name_1=$<TARGET_NAME:tgt,ok>
     -Dtest_target_name_2=$<TARGET_NAME:tgt:ok>
-    -Dtest_install_prefix=$<INSTALL_PREFIX>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
   VERBATIM

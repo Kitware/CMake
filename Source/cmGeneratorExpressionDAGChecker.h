@@ -28,7 +28,8 @@ struct cmGeneratorExpressionDAGChecker
   enum Result {
     DAG,
     SELF_REFERENCE,
-    CYCLIC_REFERENCE
+    CYCLIC_REFERENCE,
+    ALREADY_SEEN
   };
 
   Result check() const;
@@ -37,6 +38,8 @@ struct cmGeneratorExpressionDAGChecker
                    const std::string &expr);
 
   bool EvaluatingLinkLibraries();
+  bool EvaluatingIncludeDirectories();
+  bool EvaluatingCompileDefinitions();
 
 private:
   Result checkGraph() const;
@@ -45,6 +48,7 @@ private:
   const cmGeneratorExpressionDAGChecker * const Parent;
   const std::string Target;
   const std::string Property;
+  std::map<cmStdString, std::set<cmStdString> > Seen;
   const GeneratorExpressionContent * const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;

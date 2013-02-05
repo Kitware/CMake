@@ -48,10 +48,22 @@ target_compile_definitions(CompatibleInterface
 add_library(iface2 SHARED iface2.cpp)
 generate_export_header(iface2)
 
+set_property(TARGET iface2 APPEND PROPERTY
+  COMPATIBLE_INTERFACE_STRING
+    Iface2_PROP
+)
+
 # For the LINK_LIBRARIES and related properties, we should not evaluate
 # properties defined only in the interface - they should be implicitly zero
 set_property(TARGET iface2
   APPEND PROPERTY
     LINK_INTERFACE_LIBRARIES $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP4>>:nonexistant>
 )
-target_link_libraries(CompatibleInterface iface2)
+target_link_libraries(CompatibleInterface iface2
+      $<$<BOOL:$<TARGET_PROPERTY:Iface2_PROP>>:nonexistant>
+)
+# Test that this does not segfault:
+target_compile_definitions(CompatibleInterface
+  PRIVATE
+    $<$<BOOL:$<TARGET_PROPERTY:Iface2_PROP>>:SOME_DEFINE>
+)

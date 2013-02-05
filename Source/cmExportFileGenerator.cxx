@@ -25,6 +25,8 @@
 
 #include <cmsys/auto_ptr.hxx>
 
+#include "assert.h"
+
 //----------------------------------------------------------------------------
 cmExportFileGenerator::cmExportFileGenerator()
 {
@@ -160,7 +162,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
                                                            preprocessRule);
     if (!prepro.empty())
       {
-      this->ResolveTargetsInGeneratorExpressions(prepro, target,
+      this->ResolveTargetsInGeneratorExpressions(prepro, target, propName,
                                                  missingTargets);
       properties[outputName] = prepro;
       }
@@ -264,15 +266,16 @@ void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
 {
   if (!properties.empty())
     {
+    os << "if(NOT ${CMAKE_FIND_PACKAGE_NAME}_NO_INTERFACES)\n";
     std::string targetName = this->Namespace;
     targetName += target->GetName();
-    os << "set_target_properties(" << targetName << " PROPERTIES\n";
+    os << "  set_target_properties(" << targetName << " PROPERTIES\n";
     for(ImportPropertyMap::const_iterator pi = properties.begin();
         pi != properties.end(); ++pi)
       {
-      os << "  " << pi->first << " \"" << pi->second << "\"\n";
+      os << "    " << pi->first << " \"" << pi->second << "\"\n";
       }
-    os << ")\n\n";
+    os << "  )\nendif()\n\n";
     }
 }
 
@@ -323,13 +326,14 @@ static bool isGeneratorExpression(const std::string &lib)
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
                                     std::string &input,
-                                    cmTarget* target,
+                                    cmTarget* target, const char *propName,
                                     std::vector<std::string> &missingTargets,
                                     FreeTargetsReplace replace)
 {
   if (replace == NoReplaceFreeTargets)
     {
-    this->ResolveTargetsInGeneratorExpression(input, target, missingTargets);
+    this->ResolveTargetsInGeneratorExpression(input, target, propName,
+                                              missingTargets);
     return;
     }
   std::vector<std::string> parts;
@@ -348,7 +352,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
       {
       this->ResolveTargetsInGeneratorExpression(
                                     *li,
-                                    target,
+                                    target, propName,
                                     missingTargets);
       }
     input += sep + *li;
@@ -360,7 +364,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
                                     std::string &input,
-                                    cmTarget* target,
+                                    cmTarget* target, const char *propName,
                                     std::vector<std::string> &missingTargets)
 {
   std::string::size_type pos = 0;
@@ -391,10 +395,61 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
       {
       input.replace(nameStartPos, commaPos - nameStartPos, targetName);
       }
-    lastPos = pos + targetName.size();
+    lastPos = nameStartPos + targetName.size() + 1;
     }
 
   std::string errorString;
+  pos = 0;
+  lastPos = pos;
+  while((pos = input.find("$<LINKED:", lastPos)) != input.npos)
+    {
+    std::string::size_type nameStartPos = pos + sizeof("$<LINKED:") - 1;
+    std::string::size_type endPos = input.find(">", nameStartPos);
+    if (endPos == input.npos)
+      {
+      errorString = "$<LINKED:...> expression incomplete";
+      break;
+      }
+    std::string targetName = input.substr(nameStartPos,
+                                                endPos - nameStartPos);
+    if(targetName.find("$<") != input.npos)
+      {
+      errorString = "$<LINKED:...> requires its parameter to be a "
+                    "literal.";
+      break;
+      }
+    if (this->AddTargetNamespace(targetName, target, missingTargets))
+      {
+      assert(propName); // The link libraries strings will
+                        // never contain $<LINKED>
+      std::string replacement = "$<TARGET_PROPERTY:"
+                              + targetName + "," + propName;
+      input.replace(pos, endPos - pos, replacement);
+      lastPos = pos + replacement.size() + 1;
+      }
+    else
+      {
+      if (pos != 0)
+        {
+        if (input[pos - 1] == ';')
+          {
+          --pos;
+          }
+        }
+      else if (input[endPos + 1] == ';')
+        {
+        ++endPos;
+        }
+      input.replace(pos, endPos - pos + 1, "");
+      lastPos = pos;
+      }
+    }
+  if (!errorString.empty())
+    {
+    mf->IssueMessage(cmake::FATAL_ERROR, errorString);
+    return;
+    }
+
   pos = 0;
   lastPos = pos;
   while((pos = input.find("$<TARGET_NAME:", lastPos)) != input.npos)
@@ -490,7 +545,7 @@ cmExportFileGenerator
                                                          preprocessRule);
   if (!prepro.empty())
     {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+    this->ResolveTargetsInGeneratorExpressions(prepro, target, 0,
                                                missingTargets,
                                                ReplaceFreeTargets);
     properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = prepro;

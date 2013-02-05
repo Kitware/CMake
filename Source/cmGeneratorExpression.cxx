@@ -88,6 +88,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.Config = config;
   context.Quiet = quiet;
   context.HadError = false;
+  context.HadContextSensitiveCondition = false;
   context.HeadTarget = headTarget;
   context.CurrentTarget = currentTarget ? currentTarget : headTarget;
   context.Backtrace = this->Backtrace;
@@ -109,6 +110,10 @@ const char *cmCompiledGeneratorExpression::Evaluate(
       break;
       }
     }
+  if (!context.HadError)
+    {
+    this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
+    }
 
   this->Targets = context.Targets;
   // TODO: Return a std::string from here instead?
@@ -118,7 +123,8 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
               cmListFileBacktrace const& backtrace,
               const char *input)
-  : Backtrace(backtrace), Input(input ? input : "")
+  : Backtrace(backtrace), Input(input ? input : ""),
+    HadContextSensitiveCondition(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens =

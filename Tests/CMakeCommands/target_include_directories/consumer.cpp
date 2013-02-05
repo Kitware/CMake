@@ -3,6 +3,7 @@
 #include "publicinclude.h"
 #include "interfaceinclude.h"
 #include "relative_dir.h"
+#include "linkedinclude.h"
 
 #ifdef PRIVATEINCLUDE_DEFINE
 #error Unexpected PRIVATEINCLUDE_DEFINE
@@ -22,6 +23,10 @@
 
 #ifndef RELATIVE_DIR_DEFINE
 #error Expected RELATIVE_DIR_DEFINE
+#endif
+
+#ifndef LINKEDINCLUDE_DEFINE
+#error Expected LINKEDINCLUDE_DEFINE
 #endif
 
 int main() { return 0; }
