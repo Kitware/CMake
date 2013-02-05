@@ -31,6 +31,7 @@ public:
   bool HandleArguments(std::vector<std::string> const& args,
                            const char *prop, ArgumentFlags flags = NO_FLAGS);
 
+  cmTypeMacro(cmTargetPropCommandBase, cmCommand);
 protected:
   std::string Property;
   cmTarget *Target;
