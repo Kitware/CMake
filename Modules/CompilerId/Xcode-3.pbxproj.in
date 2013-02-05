@@ -83,6 +83,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				SYMROOT = .;
+				@id_toolset@
 			};
 			name = Debug;
 		};

@@ -79,6 +79,17 @@ cmGlobalGenerator::~cmGlobalGenerator()
   this->ClearGeneratorTargets();
 }
 
+bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
+{
+  cmOStringStream e;
+  e << this->GetName() <<
+    " generator does not support toolset specification, but "
+    "toolset \"" << ts << "\" was specified.";
+  this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                    cmListFileBacktrace());
+  return false;
+}
+
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
                                                 cmMakefile *mf,
                                                 bool optional)

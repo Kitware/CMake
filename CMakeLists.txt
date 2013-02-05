@@ -122,9 +122,11 @@ macro(CMAKE_SETUP_TESTING)
       "Generator used when running tests")
     if(NOT CMAKE_TEST_GENERATOR)
       set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
+      set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
       set(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
     else()
       set(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
+      set(CMAKE_TEST_GENERATOR_TOOLSET "")
     endif()
 
     # Are we testing with the MSVC compiler?

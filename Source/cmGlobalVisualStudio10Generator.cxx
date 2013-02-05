@@ -80,6 +80,14 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
 }
 
 //----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts)
+{
+  this->PlatformToolset = ts;
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);

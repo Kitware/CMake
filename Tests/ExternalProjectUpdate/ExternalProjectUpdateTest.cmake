@@ -12,7 +12,7 @@ macro(check_a_tag desired_tag resulting_sha fetch_expected)
 
   # Configure
   execute_process(COMMAND ${CMAKE_COMMAND}
-    -G ${CMAKE_TEST_GENERATOR}
+    -G ${CMAKE_TEST_GENERATOR} -T "${CMAKE_TEST_GENERATOR_TOOLSET}"
     -DTEST_GIT_TAG:STRING=${desired_tag}
     ${ExternalProjectUpdate_SOURCE_DIR}
     WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}
