@@ -67,3 +67,18 @@ target_compile_definitions(CompatibleInterface
   PRIVATE
     $<$<BOOL:$<TARGET_PROPERTY:Iface2_PROP>>:SOME_DEFINE>
 )
+
+# The COMPATIBLE_INTERFACE_* properties are only read from dependencies
+# in the interface. Populating it on the CompatibleInterface target does
+# not have any affect on the interpretation of the INTERFACE variants
+# in dependencies.
+set_property(TARGET iface1 PROPERTY
+  INTERFACE_NON_RELEVANT_PROP ON
+)
+set_property(TARGET iface2 PROPERTY
+  INTERFACE_NON_RELEVANT_PROP ON
+)
+set_property(TARGET CompatibleInterface APPEND PROPERTY
+  COMPATIBLE_INTERFACE_BOOL
+    NON_RELEVANT_PROP
+)
