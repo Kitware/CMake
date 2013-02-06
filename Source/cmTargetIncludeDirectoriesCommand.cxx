@@ -41,14 +41,6 @@ void cmTargetIncludeDirectoriesCommand
 }
 
 //----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 std::string cmTargetIncludeDirectoriesCommand
 ::Join(const std::vector<std::string> &content)
 {
@@ -59,7 +51,7 @@ std::string cmTargetIncludeDirectoriesCommand
     it != content.end(); ++it)
     {
     if (cmSystemTools::FileIsFullPath(it->c_str())
-        || isGeneratorExpression(*it))
+        || cmGeneratorExpression::Find(*it) != -1)
       {
       dirs += sep + *it;
       }

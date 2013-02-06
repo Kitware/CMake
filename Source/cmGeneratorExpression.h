@@ -62,6 +62,8 @@ public:
   static void Split(const std::string &input,
                     std::vector<std::string> &output);
 
+  static std::string::size_type Find(const std::string &input);
+
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);
