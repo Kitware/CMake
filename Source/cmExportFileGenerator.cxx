@@ -315,14 +315,6 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
 }
 
 //----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
                                     std::string &input,
@@ -344,7 +336,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
   for(std::vector<std::string>::iterator li = parts.begin();
       li != parts.end(); ++li)
     {
-    if (!isGeneratorExpression(*li))
+    if (cmGeneratorExpression::Find(*li) == std::string::npos)
       {
       this->AddTargetNamespace(*li, target, missingTargets);
       }

@@ -365,3 +365,16 @@ std::string cmGeneratorExpression::Preprocess(const std::string &input,
   assert(!"cmGeneratorExpression::Preprocess called with invalid args");
   return std::string();
 }
+
+//----------------------------------------------------------------------------
+std::string::size_type cmGeneratorExpression::Find(const std::string &input)
+{
+  const std::string::size_type openpos = input.find("$<");
+  if (openpos != std::string::npos
+        && input.find(">", openpos) != std::string::npos)
+      {
+      return openpos;
+      }
+    }
+  return std::string::npos;
+}
