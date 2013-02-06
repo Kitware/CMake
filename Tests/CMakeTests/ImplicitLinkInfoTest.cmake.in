@@ -99,6 +99,12 @@ set(linux64_test1_libs "${linux64_gcc_libs}")
 set(linux64_test1_dirs "${linux64_gcc_dirs}")
 list(APPEND platforms linux64_test1)
 
+# sunCC dummy.cxx -v # extra slashes
+set(linux64_test2_text "/usr/bin/ld --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /opt/sun/sunstudio12/prod/lib/amd64//crti.o /opt/sun/sunstudio12/prod/lib/amd64/crt1x.o /opt/sun/sunstudio12/prod/lib/amd64/values-xa.o dummy.o -Y \"/opt/sun/sunstudio12/prod/lib//amd64:/lib64:/usr//lib64\" -Qy -lc /opt/sun/sunstudio12/prod/lib/amd64//libc_supp.a /opt/sun/sunstudio12/prod/lib/amd64/crtn.o")
+set(linux64_test2_libs "c;/opt/sun/sunstudio12/prod/lib/amd64/libc_supp.a")
+set(linux64_test2_dirs "/opt/sun/sunstudio12/prod/lib/amd64;/lib64;/usr/lib64")
+list(APPEND platforms linux64_test2)
+
 #-----------------------------------------------------------------------------
 # Mac
 
