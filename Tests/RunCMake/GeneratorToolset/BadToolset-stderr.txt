@@ -1,7 +1,7 @@
 CMake Error:
   Generator
 
-    [A-Za-z0-9 -]+
+    .*
 
   does not support toolset specification, but toolset
 
