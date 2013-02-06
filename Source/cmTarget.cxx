@@ -2270,14 +2270,6 @@ static std::string targetNameGenex(const char *lib)
 }
 
 //----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib,
                               LinkLibraryType llt)
@@ -2300,7 +2292,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                                                           llt).c_str());
   }
 
-  if (isGeneratorExpression(lib))
+  if (cmGeneratorExpression::Find(lib) != std::string::npos)
     {
     return;
     }
