@@ -48,9 +48,7 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
-  void WriteSublimeClangOptionsScript(const std::string& filename);
-  void WriteSublimeClangOptionsFile(const MapSourceFileFlags& sourceFileFlags,
-                                    const std::string& filename);
+
   /** Appends all targets as build systems to the project file and get all
    * include directories and compiler definitions used.
    */
