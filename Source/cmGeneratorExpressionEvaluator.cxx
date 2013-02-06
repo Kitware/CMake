@@ -333,10 +333,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "$<TARGET_PROPERTY:...> expression requires one or two parameters");
       return std::string();
       }
-    cmsys::RegularExpression targetNameValidator;
-    // The ':' is supported to allow use with IMPORTED targets. At least
-    // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
-    targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
     cmsys::RegularExpression propertyNameValidator;
     propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
@@ -372,7 +368,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
       std::string targetName = parameters.front();
       propertyName = parameters[1];
-      if (!targetNameValidator.find(targetName.c_str()))
+      if (!cmGeneratorExpression::IsValidTargetName(targetName))
         {
         if (!propertyNameValidator.find(propertyName.c_str()))
           {
@@ -867,10 +863,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     // Lookup the referenced target.
     std::string name = *parameters.begin();
 
-    cmsys::RegularExpression targetValidator;
-    // The ':' is supported to allow use with IMPORTED targets.
-    targetValidator.compile("^[A-Za-z0-9_.:-]+$");
-    if (!targetValidator.find(name.c_str()))
+    if (!cmGeneratorExpression::IsValidTargetName(name))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "Expression syntax not recognized.");
