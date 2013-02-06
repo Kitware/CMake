@@ -906,7 +906,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "consistent with each other, and with the \"FOO\" property in the "
      "dependee.  Consistency in this sense has the meaning that if the "
      "property is set, then it must have the same boolean value as all "
-     "others, and if the property is not set, then it is ignored.");
+     "others, and if the property is not set, then it is ignored.  Note that "
+     "for each dependee, the set of properties from this property must not "
+     "intersect with the set of properties from the "
+     "COMPATIBLE_INTERFACE_STRING property.");
 
   cm->DefineProperty
     ("COMPATIBLE_INTERFACE_STRING", cmProperty::TARGET,
@@ -917,7 +920,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "if a property \"FOO\" appears in the list, then for each dependee, the "
      "\"INTERFACE_FOO\" property content in all of its dependencies must be "
      "equal with each other, and with the \"FOO\" property in the dependee.  "
-     "If the property is not set, then it is ignored.");
+     "If the property is not set, then it is ignored.  Note that for each "
+     "dependee, the set of properties from this property must not intersect "
+     "with the set of properties from the COMPATIBLE_INTERFACE_BOOL "
+     "property.");
 
   cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
@@ -5616,7 +5622,8 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 {
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
 
-  std::set<cmStdString> emitted;
+  std::set<cmStdString> emittedBools;
+  std::set<cmStdString> emittedStrings;
 
   for(cmComputeLinkInformation::ItemVector::const_iterator li =
       deps.begin();
@@ -5629,17 +5636,34 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 
     checkPropertyConsistency<bool>(this, li->Target,
                                    "COMPATIBLE_INTERFACE_BOOL",
-                                   emitted, config, 0);
+                                   emittedBools, config, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;
       }
     checkPropertyConsistency<const char *>(this, li->Target,
                                            "COMPATIBLE_INTERFACE_STRING",
-                                           emitted, config, 0);
+                                           emittedStrings, config, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;
+      }
+    }
+
+  for(std::set<cmStdString>::const_iterator li = emittedBools.begin();
+      li != emittedBools.end(); ++li)
+    {
+    const std::set<cmStdString>::const_iterator si = emittedStrings.find(*li);
+    if (si != emittedStrings.end())
+      {
+      cmOStringStream e;
+      e << "Property \"" << *li << "\" appears in both the "
+      "COMPATIBLE_INTERFACE_BOOL and the COMPATIBLE_INTERFACE_STRING "
+      "property in the dependencies of target \"" << this->GetName() <<
+      "\".  This is not allowed. A property may only require compatibility "
+      "in a boolean interpretation or a string interpretation, but not both.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      break;
       }
     }
 }
