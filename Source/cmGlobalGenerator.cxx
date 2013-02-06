@@ -82,9 +82,12 @@ cmGlobalGenerator::~cmGlobalGenerator()
 bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
 {
   cmOStringStream e;
-  e << this->GetName() <<
-    " generator does not support toolset specification, but "
-    "toolset \"" << ts << "\" was specified.";
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "does not support toolset specification, but toolset\n"
+    "  " << ts << "\n"
+    "was specified.";
   this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                     cmListFileBacktrace());
   return false;
