@@ -281,9 +281,8 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
 {
   const bool isGenex = isGeneratorExpression(lib);
 
-  cmsys::RegularExpression targetNameValidator;
-  targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
-  const bool potentialTargetName = targetNameValidator.find(lib);
+  const bool potentialTargetName
+                              = cmGeneratorExpression::IsValidTargetName(lib);
 
   if (potentialTargetName || isGenex)
     {

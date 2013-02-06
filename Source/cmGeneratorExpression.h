@@ -64,6 +64,8 @@ public:
 
   static std::string::size_type Find(const std::string &input);
 
+  static bool IsValidTargetName(const std::string &input);
+
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);
