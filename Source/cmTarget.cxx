@@ -900,24 +900,24 @@ void cmTarget::DefineProperties(cmake *cm)
      "Properties which must be compatible with their link interface",
      "The COMPATIBLE_INTERFACE_BOOL property may contain a list of properties"
      "for this target which must be consistent when evaluated as a boolean "
-     "in the INTERFACE of all linked dependencies.  For example, if a "
-     "property \"FOO\" appears in the list, then the \"INTERFACE_FOO\" "
-     "property content in all dependencies must be consistent with each "
-     "other, and with the \"FOO\" property in this target.  "
-     "Consistency in this sense has the meaning that if the property is set,"
-     "then it must have the same boolean value as all others, and if the "
-     "property is not set, then it is ignored.");
+     "in the INTERFACE of all linked dependees.  For example, if a "
+     "property \"FOO\" appears in the list, then for each dependee, the "
+     "\"INTERFACE_FOO\" property content in all of its dependencies must be "
+     "consistent with each other, and with the \"FOO\" property in the "
+     "dependee.  Consistency in this sense has the meaning that if the "
+     "property is set, then it must have the same boolean value as all "
+     "others, and if the property is not set, then it is ignored.");
 
   cm->DefineProperty
     ("COMPATIBLE_INTERFACE_STRING", cmProperty::TARGET,
      "Properties which must be string-compatible with their link interface",
      "The COMPATIBLE_INTERFACE_STRING property may contain a list of "
      "properties for this target which must be the same when evaluated as "
-     "a string in the INTERFACE of all linked dependencies.  For example, "
-     "if a property \"FOO\" appears in the list, then the \"INTERFACE_FOO\" "
-     "property content in all dependencies must be equal with each "
-     "other, and with the \"FOO\" property in this target.  If the "
-     "property is not set, then it is ignored.");
+     "a string in the INTERFACE of all linked dependees.  For example, "
+     "if a property \"FOO\" appears in the list, then for each dependee, the "
+     "\"INTERFACE_FOO\" property content in all of its dependencies must be "
+     "equal with each other, and with the \"FOO\" property in the dependee.  "
+     "If the property is not set, then it is ignored.");
 
   cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
