@@ -371,10 +371,20 @@ std::string::size_type cmGeneratorExpression::Find(const std::string &input)
 {
   const std::string::size_type openpos = input.find("$<");
   if (openpos != std::string::npos
-        && input.find(">", openpos) != std::string::npos)
-      {
-      return openpos;
-      }
+      && input.find(">", openpos) != std::string::npos)
+    {
+    return openpos;
     }
   return std::string::npos;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
+{
+  cmsys::RegularExpression targetNameValidator;
+  // The ':' is supported to allow use with IMPORTED targets. At least
+  // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
+  targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
+
+  return targetNameValidator.find(input.c_str());
 }
