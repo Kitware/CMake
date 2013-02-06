@@ -904,14 +904,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "only be used when evaluating the INCLUDE_DIRECTORIES target property.  "
      "In that case, it outputs a backtrace for each include directory in "
      "the build.  Default is unset.",false,"Variables That Change Behavior");
-  cm->DefineProperty
-    ("CMAKE_SUBLIMECLANG_DISABLED", cmProperty::VARIABLE,
-     "Used by the Sublime Text 2 generator to disable SublimeClang in "
-     "generated project files.",
-     "For very large projects SublimeClang might run slowly. Set this variable"
-     " to TRUE to instruct the Sublime Text 2 generator to disable "
-     " SublimeClang in the generated project files.", false,
-     "Variables That Change Behavior");
 
   // Variables defined by CMake that describe the system
 

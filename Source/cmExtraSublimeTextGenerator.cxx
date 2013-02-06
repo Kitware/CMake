@@ -87,8 +87,8 @@ void cmExtraSublimeTextGenerator::CreateProjectFile(
   std::string outputDir=mf->GetStartOutputDirectory();
   std::string projectName=mf->GetProjectName();
 
-  std::string filename=outputDir+"/";
-  filename+=projectName+".sublime-project";
+  const std::string filename =
+                     outputDir + "/" + projectName + ".sublime-project";
 
   this->CreateNewProjectFile(lgs, filename);
 }
@@ -140,106 +140,12 @@ void cmExtraSublimeTextGenerator
   // wide
   MapSourceFileFlags sourceFileFlags;
   AppendAllTargets(lgs, mf, fout, sourceFileFlags);
+
   // End of build_systems
   fout << "\n\t]";
-
-  // Write the settings section with sublimeclang options
-  fout << ",\n\t\"settings\":\n\t{\n\t";
-  // Check if the CMAKE_SUBLIMECLANG_DISABLED flag has been set. If it has
-  // disable sublimeclang for this project.
-  const char* sublimeclangDisabledValue =
-    mf->GetSafeDefinition("CMAKE_SUBLIMECLANG_DISABLED");
-  bool sublimeclangEnabled = cmSystemTools::IsOff(sublimeclangDisabledValue);
-  // Per project sublimeclang settings override default and user settings,
-  // so we only write the sublimeclang_enabled setting to the project file
-  // if it is set to be disabled.
-  if (!sublimeclangEnabled)
-    {
-      fout << "\t\"sublimeclang_enabled\": false,\n\t";
-    }
-  std::string outputDir = mf->GetStartOutputDirectory();
-  std::string projectName = mf->GetProjectName();
-  std::string sublimeClangOptionsFilename = outputDir+"/";
-  sublimeClangOptionsFilename += projectName + ".sublimeclang-options";
-  std::string sublimeClangOptionsScriptFilename = outputDir + "/"
-    + projectName + "_sublimeclang_options_script.py";
-  fout << "\t\"sublimeclang_options_script\": \"python "
-       << sublimeClangOptionsScriptFilename << " "
-       << sublimeClangOptionsFilename
-       << "\"\n\t";
-  // End of the settings section
-  fout << "}\n";
-
-  // End of file
-  fout << "}";
-
-  this->WriteSublimeClangOptionsFile(sourceFileFlags,
-    sublimeClangOptionsFilename);
-  this->WriteSublimeClangOptionsScript(sublimeClangOptionsScriptFilename);
+  fout << "\n\t}";
 }
 
-void cmExtraSublimeTextGenerator::
-  WriteSublimeClangOptionsScript(const std::string& filename)
-{
-  cmGeneratedFileStream fout(filename.c_str());
-  if(!fout)
-    {
-    return;
-    }
-  fout << "import json\n";
-  fout << "import sys\n\n\n";
-  fout << "if len(sys.argv) < 2:\n";
-  fout << "    sys.exit(1)\n";
-  fout << "data = None\n";
-  fout << "with open(sys.argv[1]) as f:\n";
-  fout << "    data = json.load(f)\n";
-  fout << "if data is not None:\n";
-  fout << "    for arg in data.get(sys.argv[2], []):\n";
-  fout << "        print arg\n";
-}
-
-
-void cmExtraSublimeTextGenerator::
-  WriteSublimeClangOptionsFile(const MapSourceFileFlags& sourceFileFlags,
-                               const std::string& filename)
-{
-  cmGeneratedFileStream fout(filename.c_str());
-  if(!fout)
-    {
-    return;
-    }
-  fout << "{\n";
-  MapSourceFileFlags::const_iterator sourceFileFlagsEnd =
-    sourceFileFlags.end();
-  int totalFiles = sourceFileFlags.size();
-  int fileIndex = 0;
-  for (MapSourceFileFlags::const_iterator iter = sourceFileFlags.begin();
-    iter != sourceFileFlagsEnd; ++iter)
-    {
-    const std::string& sourceFilePath = iter->first;
-    const std::vector<std::string>& flags = iter->second;
-    fout << "\t\"" << sourceFilePath << "\":\n\t[\n\t";
-    std::vector<std::string>::const_iterator flagsEnd = flags.end();
-    for (std::vector<std::string>::const_iterator flagsIter = flags.begin();
-      flagsIter != flagsEnd; ++flagsIter)
-      {
-      fout << "\t\"" << *flagsIter << "\"";
-      if (flagsIter + 1 != flagsEnd)
-        {
-        fout << ",";
-        }
-      fout << "\n\t";
-      }
-      fout << "]";
-      if (fileIndex < totalFiles - 1)
-        {
-        fout << ",";
-        }
-      fout << "\n";
-      fileIndex++;
-    }
-  fout << "}\n";
-}
 
 void cmExtraSublimeTextGenerator::
   AppendAllTargets(const std::vector<cmLocalGenerator*>& lgs,
