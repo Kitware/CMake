@@ -2715,6 +2715,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 void cmTarget::AppendBuildInterfaceIncludes()
 {
   if(this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::STATIC_LIBRARY &&
      this->GetType() != cmTarget::MODULE_LIBRARY &&
      !this->IsExecutableWithExports())
     {
