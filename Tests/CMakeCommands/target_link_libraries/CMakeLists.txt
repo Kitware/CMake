@@ -103,4 +103,7 @@ target_compile_definitions(depG INTERFACE
 )
 
 add_executable(targetC targetC.cpp)
-target_link_libraries(targetC depG)
+# Creates a generator expression for include directories like
+#  $<$<TARGET_DEFINED:$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:depG>>:\
+#    $<TARGET_PROPERTY:$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:depG>,INTERFACE_INCLUDE_DIRECTORIES>>
+target_link_libraries(targetC $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:depG>)
