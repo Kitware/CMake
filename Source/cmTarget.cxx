@@ -2766,6 +2766,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                               this->GetName(),
                                               "INCLUDE_DIRECTORIES", 0, 0);
 
+  this->AppendBuildInterfaceIncludes();
 
   std::vector<std::string> debugProperties;
   const char *debugProp =

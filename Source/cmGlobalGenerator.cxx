@@ -938,11 +938,6 @@ void cmGlobalGenerator::Generate()
       (*targets)[tit->first] = tit->second;
       (*targets)[tit->first].SetMakefile(mf);
       }
-
-    for ( tit = targets->begin(); tit != targets->end(); ++ tit )
-      {
-        tit->second.AppendBuildInterfaceIncludes();
-      }
     }
 
   // Add generator specific helper commands
