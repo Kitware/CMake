@@ -2809,7 +2809,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                                 this,
                                                 &dagChecker),
                                       entryIncludes);
-      if (!(*it)->ge->GetHadContextSensitiveCondition())
+      if (this->Makefile->IsGeneratingBuildSystem()
+          && !(*it)->ge->GetHadContextSensitiveCondition())
         {
         cacheIncludes = true;
         }
