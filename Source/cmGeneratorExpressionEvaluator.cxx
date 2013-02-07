@@ -398,7 +398,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       // Keep track of the properties seen while processing.
       // The evaluation of the LINK_LIBRARIES generator expressions
-      // will check this to ensure that properties form a DAG.
+      // will check this to ensure that properties have one consistent
+      // value for all evaluations.
       context->SeenTargetProperties.insert(propertyName);
       }
 

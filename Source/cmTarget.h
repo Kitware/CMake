@@ -498,16 +498,11 @@ public:
 
   void AppendBuildInterfaceIncludes();
 
-  void GetLinkDependentTargetsForProperty(const std::string &p,
-                                       std::set<std::string> &targets);
   bool IsNullImpliedByLinkLibraries(const std::string &p);
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                             const char *config);
   bool IsLinkInterfaceDependentStringProperty(const std::string &p,
                                               const char *config);
-
-  void AddLinkDependentTargetsForProperties(
-          const std::map<cmStdString, cmStdString> &map);
 
   bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
                                              const char *config);
@@ -627,8 +622,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool DebugIncludesDone;
-  mutable std::map<cmStdString, std::set<std::string> >
-                                                      LinkDependentProperties;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
