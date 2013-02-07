@@ -267,19 +267,11 @@ static std::string compileProperty(cmTarget *tgt, const std::string &lib,
 }
 
 //----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
-  const bool isGenex = isGeneratorExpression(lib);
+  const bool isGenex = cmGeneratorExpression::Find(lib) != std::string::npos;
 
   const bool potentialTargetName
                               = cmGeneratorExpression::IsValidTargetName(lib);
