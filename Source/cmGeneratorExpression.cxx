@@ -95,14 +95,13 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
   for ( ; it != end; ++it)
     {
-    const std::string result = (*it)->Evaluate(&context, dagChecker);
-    this->Output += result;
+    this->Output += (*it)->Evaluate(&context, dagChecker);
 
     for(std::set<cmStdString>::const_iterator
           p = context.SeenTargetProperties.begin();
           p != context.SeenTargetProperties.end(); ++p)
       {
-      this->SeenTargetProperties[*p] += result + ";";
+      this->SeenTargetProperties.insert(*p);
       }
     if (context.HadError)
       {
