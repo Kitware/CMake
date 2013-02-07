@@ -434,8 +434,17 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       // No error. We just skip cyclic references.
       return std::string();
     case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-      // No error. We're not going to find anything new here.
-      return std::string();
+      for (size_t i = 0;
+          i < (sizeof(targetPropertyTransitiveWhitelist) /
+                sizeof(*targetPropertyTransitiveWhitelist));
+          ++i)
+        {
+        if (targetPropertyTransitiveWhitelist[i] == propertyName)
+          {
+          // No error. We're not going to find anything new here.
+          return std::string();
+          }
+        }
     case cmGeneratorExpressionDAGChecker::DAG:
       break;
       }
