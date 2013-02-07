@@ -2233,7 +2233,15 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
                                         &dagChecker),
                                       libs);
 
-    this->AddLinkDependentTargetsForProperties(cge->GetSeenTargetProperties());
+    std::set<cmStdString> seenProps = cge->GetSeenTargetProperties();
+    for (std::set<cmStdString>::const_iterator it = seenProps.begin();
+        it != seenProps.end(); ++it)
+      {
+      if (!this->GetProperty(it->c_str()))
+        {
+        this->LinkImplicitNullProperties.insert(*it);
+        }
+      }
     }
 }
 
@@ -4520,40 +4528,10 @@ const char* cmTarget::GetExportMacro()
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetLinkDependentTargetsForProperty(const std::string &p,
-                                          std::set<std::string> &targets)
-{
-  const std::map<cmStdString, std::set<std::string> >::const_iterator findIt
-                                  = this->LinkDependentProperties.find(p);
-  if (findIt != this->LinkDependentProperties.end())
-    {
-    targets = findIt->second;
-    }
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p)
 {
   return this->LinkImplicitNullProperties.find(p)
       != this->LinkImplicitNullProperties.end();
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::AddLinkDependentTargetsForProperties(
-                              const std::map<cmStdString, cmStdString> &map)
-{
-  for (std::map<cmStdString, cmStdString>::const_iterator it = map.begin();
-       it != map.end(); ++it)
-    {
-    std::vector<std::string> targets;
-    cmSystemTools::ExpandListArgument(it->second.c_str(), targets);
-    this->LinkDependentProperties[it->first].insert(targets.begin(),
-                                                    targets.end());
-    if (!this->GetProperty(it->first.c_str()))
-      {
-      this->LinkImplicitNullProperties.insert(it->first);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -4611,9 +4589,6 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
   const bool explicitlySet = tgt->GetProperties()
                                   .find(p.c_str())
                                   != tgt->GetProperties().end();
-  std::set<std::string> dependentTargets;
-  tgt->GetLinkDependentTargetsForProperty(p,
-                                          dependentTargets);
   const bool impliedByUse =
           tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
