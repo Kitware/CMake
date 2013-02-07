@@ -460,12 +460,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         return std::string();
         }
-      if (propertyName == "POSITION_INDEPENDENT_CODE")
-        {
-        context->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(
-                    "POSITION_INDEPENDENT_CODE", context->Config) ? "1" : "0";
-        }
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config))
         {

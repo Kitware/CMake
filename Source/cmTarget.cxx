@@ -4797,7 +4797,8 @@ bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                            const char *config)
 {
-  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
+  return (p == "POSITION_INDEPENDENT_CODE") ||
+    isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
                                  config);
 }
 
