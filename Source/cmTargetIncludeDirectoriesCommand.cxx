@@ -51,7 +51,7 @@ std::string cmTargetIncludeDirectoriesCommand
     it != content.end(); ++it)
     {
     if (cmSystemTools::FileIsFullPath(it->c_str())
-        || cmGeneratorExpression::Find(*it) != -1)
+        || cmGeneratorExpression::Find(*it) != std::string::npos)
       {
       dirs += sep + *it;
       }
