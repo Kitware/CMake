@@ -115,13 +115,13 @@ void cmIncludeDirectoryCommand::GetIncludes(const std::string &arg,
     if (pos)
       {
       std::string inc = arg.substr(lastPos,pos);
-      NormalizeInclude(inc);
+      this->NormalizeInclude(inc);
       incs.push_back(inc);
       }
     lastPos = pos + 1;
     }
   std::string inc = arg.substr(lastPos);
-  NormalizeInclude(inc);
+  this->NormalizeInclude(inc);
   incs.push_back(inc);
 }
 

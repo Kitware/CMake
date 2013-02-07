@@ -23,13 +23,21 @@ CMake Debug Log at DebugIncludes.cmake:18 \(include_directories\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Debug Log at DebugIncludes.cmake:25 \(set_property\):
+CMake Debug Log at DebugIncludes.cmake:26 \(target_link_libraries\):
   Used includes for target lll:
 
    \* .*/Tests/RunCMake/include_directories/five
-   \* .*/Tests/RunCMake/include_directories/six
 
 Call Stack \(most recent call first\):
-  DebugIncludes.cmake:35 \(some_macro\)
-  DebugIncludes.cmake:38 \(some_function\)
+  CMakeLists.txt:3 \(include\)
++
+CMake Debug Log at DebugIncludes.cmake:29 \(set_property\):
+  Used includes for target lll:
+
+   \* .*/Tests/RunCMake/include_directories/six
+   \* .*/Tests/RunCMake/include_directories/seven
+
+Call Stack \(most recent call first\):
+  DebugIncludes.cmake:40 \(some_macro\)
+  DebugIncludes.cmake:43 \(some_function\)
   CMakeLists.txt:3 \(include\)
