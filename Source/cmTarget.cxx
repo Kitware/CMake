@@ -2714,6 +2714,12 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 //----------------------------------------------------------------------------
 void cmTarget::AppendBuildInterfaceIncludes()
 {
+  if(this->GetType() != cmTarget::SHARED_LIBRARY &&
+     this->GetType() != cmTarget::MODULE_LIBRARY &&
+     !this->IsExecutableWithExports())
+    {
+    return;
+    }
   if (this->BuildInterfaceIncludesAppended)
     {
     return;
@@ -2760,6 +2766,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                               this->GetName(),
                                               "INCLUDE_DIRECTORIES", 0, 0);
 
+  this->AppendBuildInterfaceIncludes();
 
   std::vector<std::string> debugProperties;
   const char *debugProp =
