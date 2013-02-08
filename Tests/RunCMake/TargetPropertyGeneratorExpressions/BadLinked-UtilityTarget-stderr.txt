@@ -1,0 +1,8 @@
+CMake Error at BadLinked-UtilityTarget.cmake:7 \(set_property\):
+  Error evaluating generator expression:
+
+    \$<LINKED:check>
+
+  Target "check" is not an executable or library.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:8 \(include\)
