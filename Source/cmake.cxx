@@ -2084,7 +2084,7 @@ struct SaveCacheEntry
 int cmake::HandleDeleteCacheVariables(const char* var)
 {
   std::vector<std::string> argsSplit;
-  cmSystemTools::ExpandListArgument(std::string(var), argsSplit);
+  cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
   this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if(this->GetIsInTryCompile())
