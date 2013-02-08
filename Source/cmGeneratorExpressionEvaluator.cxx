@@ -702,6 +702,14 @@ private:
       {
       return std::string();
       }
+    if(target->GetType() >= cmTarget::UTILITY &&
+      target->GetType() != cmTarget::UNKNOWN_LIBRARY)
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                  "Target \"" + item
+                  + "\" is not an executable or library.");
+      return std::string();
+      }
     std::string propertyName = "INTERFACE_" + prop;
     const char *propContent = target->GetProperty(propertyName.c_str());
     if (!propContent)
