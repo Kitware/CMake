@@ -273,14 +273,13 @@ int main (int argc, char *argv[])
     return cmCTestLaunch::Main(argc, argv);
     }
 
-  int nocwd = 0;
   cmCTest inst;
 
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
     cmCTestLog(&inst, ERROR_MESSAGE,
       "Current working directory cannot be established." << std::endl);
-    nocwd = 1;
+    return 1;
     }
 
   // If there is a testing input file, check for documentation options
@@ -298,7 +297,7 @@ int main (int argc, char *argv[])
       }
     cmDocumentation doc;
     doc.addCTestStandardDocSections();
-    if(doc.CheckOptions(argc, argv) || nocwd)
+    if(doc.CheckOptions(argc, argv))
       {
       // Construct and print requested documentation.
       std::vector<cmDocumentationEntry> commands;
