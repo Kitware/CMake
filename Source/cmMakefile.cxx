@@ -2990,6 +2990,7 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
   cm.SetStartDirectory(srcdir);
   cm.SetStartOutputDirectory(bindir);
   cm.SetCMakeCommand(cmakeCommand.c_str());
+  cm.SetGeneratorToolset(this->GetCMakeInstance()->GetGeneratorToolset());
   cm.LoadCache();
   if(!gg->IsMultiConfig())
     {

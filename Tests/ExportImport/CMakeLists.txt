@@ -41,9 +41,11 @@ add_custom_command(
     --build-project Export
     --build-target install
     --build-generator ${CMAKE_GENERATOR}
+    --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
     --build-makeprogram ${CMAKE_MAKE_PROGRAM}
     --build-options -C${ExportImport_BINARY_DIR}/InitialCache.cmake
-    )
+  VERBATIM
+  )
 add_custom_target(ExportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ExportProject)
 add_dependencies(ExportTarget CleanupTarget)
 set_property(
@@ -61,9 +63,11 @@ add_custom_command(
    --build-noclean
    --build-project Import
    --build-generator ${CMAKE_GENERATOR}
+   --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
    --build-makeprogram ${CMAKE_MAKE_PROGRAM}
    --build-options -C${ExportImport_BINARY_DIR}/InitialCache.cmake
-   )
+  VERBATIM
+  )
 add_custom_target(ImportTarget ALL DEPENDS ${ExportImport_BINARY_DIR}/ImportProject)
 add_dependencies(ImportTarget ExportTarget)
 set_property(

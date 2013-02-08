@@ -67,6 +67,12 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     generator += this->BuildGenerator;
     args.push_back(generator);
     }
+  if(this->BuildGeneratorToolset.size())
+    {
+    std::string toolset = "-T";
+    toolset += this->BuildGeneratorToolset;
+    args.push_back(toolset);
+    }
 
   const char* config = 0;
   if ( this->CTest->GetConfigType().size() > 0 )
@@ -229,10 +235,14 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   // should we cmake?
   cmake cm;
   cm.SetProgressCallback(CMakeProgressCallback, &cmakeOutString);
-  cm.SetGlobalGenerator(cm.CreateGlobalGenerator(
-      this->BuildGenerator.c_str()));
 
-  if(!this->BuildNoCMake)
+  if(this->BuildNoCMake)
+    {
+    cm.SetGlobalGenerator(cm.CreateGlobalGenerator(
+                            this->BuildGenerator.c_str()));
+    cm.SetGeneratorToolset(this->BuildGeneratorToolset);
+    }
+  else
     {
     // do the cmake step, no timeout here since it is not a sub process
     if (this->RunCMake(outstring,out,cmakeOutString,cwd,&cm))
@@ -466,10 +476,16 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     idx++;
     this->Timeout = atof(allArgs[idx].c_str());
     }
-  if(currentArg.find("--build-generator",0) == 0 && idx < allArgs.size() - 1)
+  if(currentArg == "--build-generator" && idx < allArgs.size() - 1)
     {
     idx++;
     this->BuildGenerator = allArgs[idx];
+    }
+  if(currentArg == "--build-generator-toolset" &&
+     idx < allArgs.size() - 1)
+    {
+    idx++;
+    this->BuildGeneratorToolset = allArgs[idx];
     }
   if(currentArg.find("--build-project",0) == 0 && idx < allArgs.size() - 1)
     {

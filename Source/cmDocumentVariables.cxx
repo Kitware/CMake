@@ -255,6 +255,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "CMAKE_EXTRA_GENERATOR (e.g. \"Eclipse CDT4\").",false,
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_GENERATOR_TOOLSET", cmProperty::VARIABLE,
+     "Native build system toolset name specified by user.",
+     "Some CMake generators support a toolset name to be given to the "
+     "native build system to choose a compiler.  "
+     "If the user specifies a toolset name (e.g. via the cmake -T option) "
+     "the value will be available in this variable.",false,
+     "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_HOME_DIRECTORY", cmProperty::VARIABLE,
      "Path to top of source tree.",
      "This is the path to the top level of the source tree.",false,
@@ -292,6 +300,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "CMake may specify a toolset explicitly, such as \"v110\" for "
      "VS 11 or \"Windows7.1SDK\" for 64-bit support in VS 10 Express.  "
      "CMake provides the name of the chosen toolset in this variable."
+     ,false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_XCODE_PLATFORM_TOOLSET", cmProperty::VARIABLE,
+     "Xcode compiler selection.",
+     "Xcode supports selection of a compiler from one of the installed "
+     "toolsets.  "
+     "CMake provides the name of the chosen toolset in this variable, "
+     "if any is explicitly selected (e.g. via the cmake -T option)."
      ,false,
      "Variables that Provide Information");
   cm->DefineProperty

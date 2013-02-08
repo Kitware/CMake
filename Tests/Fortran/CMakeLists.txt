@@ -197,6 +197,7 @@ if(TEST_MODULE_DEPENDS)
          --build-two-config
          --build-project ExtFort
          --build-generator ${CMAKE_GENERATOR}
+         --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
          --build-makeprogram ${CMAKE_MAKE_PROGRAM}
          --build-options -DCMAKE_Fortran_COMPILER:STRING=${CMAKE_Fortran_COMPILER}
                          -DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}
@@ -205,7 +206,8 @@ if(TEST_MODULE_DEPENDS)
                          -DCMAKE_Fortran_FLAGS_MINSIZEREL:STRING=${CMAKE_Fortran_FLAGS_MINSIZEREL}
                          -DCMAKE_Fortran_FLAGS_RELWITHDEBINFO:STRING=${CMAKE_Fortran_FLAGS_RELWITHDEBINFO}
                          ${External_BUILD_TYPE}
-         )
+    VERBATIM
+    )
   add_custom_target(ExternalTarget ALL DEPENDS ${testf_BINARY_DIR}/ExternalProject)
 
   # Test module output directory if available.
