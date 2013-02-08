@@ -4781,6 +4781,10 @@ bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                            const char *config)
 {
+  if (this->TargetTypeValue == OBJECT_LIBRARY)
+    {
+    return false;
+    }
   return (p == "POSITION_INDEPENDENT_CODE") ||
     isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
                                  config);
@@ -4790,6 +4794,10 @@ bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
                                     const char *config)
 {
+  if (this->TargetTypeValue == OBJECT_LIBRARY)
+    {
+    return false;
+    }
   return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_STRING",
                                  config);
 }

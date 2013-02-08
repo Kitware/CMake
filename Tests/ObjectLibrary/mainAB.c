@@ -1,8 +1,6 @@
-#if defined(_WIN32) && defined(SHARED_B)
-# define IMPORT_B __declspec(dllimport)
-#else
-# define IMPORT_B
-#endif
+
+#include "b.h"
+
 extern IMPORT_B int b1(void);
 extern IMPORT_B int b2(void);
 #ifndef NO_A
