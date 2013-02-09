@@ -183,9 +183,9 @@ struct xar_file {
 	time_t			 mtime;
 	time_t			 atime;
 	struct archive_string	 uname;
-	uid_t			 uid;
+	int64_t			 uid;
 	struct archive_string	 gname;
-	gid_t			 gid;
+	int64_t			 gid;
 	mode_t			 mode;
 	dev_t			 dev;
 	dev_t			 devmajor;
@@ -467,6 +467,7 @@ archive_read_support_format_xar(struct archive *_a)
 	    xar_read_header,
 	    xar_read_data,
 	    xar_read_data_skip,
+	    NULL,
 	    xar_cleanup);
 	if (r != ARCHIVE_OK)
 		free(xar);
@@ -602,7 +603,8 @@ read_toc(struct archive_read *a)
 		r = move_reading_point(a, xar->toc_chksum_offset);
 		if (r != ARCHIVE_OK)
 			return (r);
-		b = __archive_read_ahead(a, xar->toc_chksum_size, &bytes);
+		b = __archive_read_ahead(a,
+			(size_t)xar->toc_chksum_size, &bytes);
 		if (bytes < 0)
 			return ((int)bytes);
 		if ((uint64_t)bytes < xar->toc_chksum_size) {
@@ -611,7 +613,8 @@ read_toc(struct archive_read *a)
 			    "Truncated archive file");
 			return (ARCHIVE_FATAL);
 		}
-		r = checksum_final(a, b, xar->toc_chksum_size, NULL, 0);
+		r = checksum_final(a, b,
+			(size_t)xar->toc_chksum_size, NULL, 0);
 		__archive_read_consume(a, xar->toc_chksum_size);
 		xar->offset += xar->toc_chksum_size;
 		if (r != ARCHIVE_OK)
@@ -2065,7 +2068,7 @@ xml_start(struct archive_read *a, const char *name, struct xmlattr_list *list)
 					xar->file->hdnext = xar->hdlink_orgs;
 					xar->hdlink_orgs = xar->file;
 				} else {
-					xar->file->link = atol10(attr->value,
+					xar->file->link = (unsigned)atol10(attr->value,
 					    strlen(attr->value));
 					if (xar->file->link > 0)
 						if (add_link(a, xar, xar->file) != ARCHIVE_OK) {
@@ -2624,6 +2627,7 @@ strappend_base64(struct xar *xar,
 	const unsigned char *b;
 	size_t len;
 
+	(void)xar; /* UNUSED */
 	len = 0;
 	out = buff;
 	b = (const unsigned char *)s;
@@ -2760,7 +2764,7 @@ xml_data(void *userData, const char *s, int len)
 		xar->file->has |= HAS_MODE;
 		xar->file->mode =
 		    (xar->file->mode & AE_IFMT) |
-		    (atol8(s, len) & ~AE_IFMT);
+		    ((mode_t)(atol8(s, len)) & ~AE_IFMT);
 		break;
 	case FILE_GROUP:
 		xar->file->has |= HAS_GID;
@@ -3075,12 +3079,15 @@ xml2_xmlattr_setup(struct archive_read *a,
 		attr->name = strdup(
 		    (const char *)xmlTextReaderConstLocalName(reader));
 		if (attr->name == NULL) {
+			free(attr);
 			archive_set_error(&a->archive, ENOMEM, "Out of memory");
 			return (ARCHIVE_FATAL);
 		}
 		attr->value = strdup(
 		    (const char *)xmlTextReaderConstValue(reader));
 		if (attr->value == NULL) {
+			free(attr->name);
+			free(attr);
 			archive_set_error(&a->archive, ENOMEM, "Out of memory");
 			return (ARCHIVE_FATAL);
 		}

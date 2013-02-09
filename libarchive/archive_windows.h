@@ -49,6 +49,9 @@
 #define	LIBARCHIVE_ARCHIVE_WINDOWS_H_INCLUDED
 
 /* Start of configuration for native Win32  */
+#ifndef MINGW_HAS_SECURE_API
+#define MINGW_HAS_SECURE_API 1
+#endif
 
 #include <errno.h>
 #define	set_errno(val)	((errno)=val)
@@ -71,10 +74,6 @@
 #include <windows.h>
 //#define	EFTYPE 7
 
-#if defined(_MSC_VER)
-/* TODO: Fix the code, don't suppress the warnings. */
-#pragma warning(disable:4244)   /* 'conversion' conversion from 'type1' to 'type2', possible loss of data */
-#endif
 #if defined(__BORLANDC__)
 #pragma warn -8068	/* Constant out of range in comparison. */
 #pragma warn -8072	/* Suspicious pointer arithmetic. */
@@ -94,13 +93,27 @@
 #ifndef fileno
 #define	fileno		_fileno
 #endif
+#ifdef fstat
+#undef fstat
+#endif
 #define	fstat		__la_fstat
+#if !defined(__BORLANDC__)
+#ifdef lseek
+#undef lseek
+#endif
 #define	lseek		_lseeki64
+#else
+#define	lseek		__la_lseek
+#define __LA_LSEEK_NEEDED
+#endif
 #define	lstat		__la_stat
 #define	open		__la_open
 #define	read		__la_read
 #if !defined(__BORLANDC__)
 #define setmode		_setmode
+#endif
+#ifdef stat
+#undef stat
 #endif
 #define	stat(path,stref)		__la_stat(path,stref)
 #if !defined(__BORLANDC__)
@@ -245,10 +258,13 @@
 /* Replacement POSIX function */
 extern int	 __la_fstat(int fd, struct stat *st);
 extern int	 __la_lstat(const char *path, struct stat *st);
+#if defined(__LA_LSEEK_NEEDED)
+extern __int64	 __la_lseek(int fd, __int64 offset, int whence);
+#endif
 extern int	 __la_open(const char *path, int flags, ...);
 extern ssize_t	 __la_read(int fd, void *buf, size_t nbytes);
 extern int	 __la_stat(const char *path, struct stat *st);
-extern pid_t	 __la_waitpid(pid_t wpid, int *status, int option);
+extern pid_t	 __la_waitpid(HANDLE child, int *status, int option);
 extern ssize_t	 __la_write(int fd, const void *buf, size_t nbytes);
 
 #define _stat64i32(path, st)	__la_stat(path, st)
@@ -261,6 +277,30 @@ extern wchar_t *__la_win_permissive_name(const char *name);
 extern wchar_t *__la_win_permissive_name_w(const wchar_t *wname);
 extern void __la_dosmaperr(unsigned long e);
 #define la_dosmaperr(e) __la_dosmaperr(e)
+extern struct archive_entry *__la_win_entry_in_posix_pathseparator(
+    struct archive_entry *);
 
+#if defined(HAVE_WCRTOMB) && defined(__BORLANDC__)
+typedef int mbstate_t;
+size_t wcrtomb(char *, wchar_t, mbstate_t *);
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1300
+WINBASEAPI BOOL WINAPI GetVolumePathNameW(
+       LPCWSTR lpszFileName,
+       LPWSTR lpszVolumePathName,
+       DWORD cchBufferLength
+       );
+# if _WIN32_WINNT < 0x0500 /* windows.h not providing 0x500 API */
+typedef struct _FILE_ALLOCATED_RANGE_BUFFER {
+       LARGE_INTEGER FileOffset;
+       LARGE_INTEGER Length;
+} FILE_ALLOCATED_RANGE_BUFFER, *PFILE_ALLOCATED_RANGE_BUFFER;
+#  define FSCTL_SET_SPARSE \
+     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 49, METHOD_BUFFERED, FILE_WRITE_DATA)
+#  define FSCTL_QUERY_ALLOCATED_RANGES \
+     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 51,  METHOD_NEITHER, FILE_READ_DATA)
+# endif
+#endif
 
 #endif /* LIBARCHIVE_ARCHIVE_WINDOWS_H_INCLUDED */
