@@ -392,6 +392,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
         }
+        context->AllTargets.insert(target);
       }
 
     if (target == context->HeadTarget)
@@ -852,7 +853,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                   "Target \"" + name + "\" is not an executable or library.");
       return std::string();
       }
-    context->Targets.insert(target);
+    context->DependTargets.insert(target);
+    context->AllTargets.insert(target);
 
     std::string result =
                 TargetFilesystemArtifactResultCreator<linker, soname>::Create(
