@@ -15,10 +15,7 @@
 #include "cmExportFileGenerator.h"
 
 class cmInstallExportGenerator;
-class cmInstallFilesGenerator;
 class cmInstallTargetGenerator;
-class cmTargetExport;
-class cmExportSet;
 
 /** \class cmExportInstallFileGenerator
  * \brief Generate a file exporting targets from an install tree.
