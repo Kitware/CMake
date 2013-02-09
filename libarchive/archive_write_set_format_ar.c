@@ -165,7 +165,7 @@ archive_write_ar_header(struct archive_write *a, struct archive_entry *entry)
 	 * Reject files with empty name.
 	 */
 	pathname = archive_entry_pathname(entry);
-	if (*pathname == '\0') {
+	if (pathname == NULL || *pathname == '\0') {
 		archive_set_error(&a->archive, EINVAL,
 		    "Invalid filename");
 		return (ARCHIVE_WARN);
@@ -366,7 +366,7 @@ archive_write_ar_data(struct archive_write *a, const void *buff, size_t s)
 
 	ar = (struct ar_w *)a->format_data;
 	if (s > ar->entry_bytes_remaining)
-		s = ar->entry_bytes_remaining;
+		s = (size_t)ar->entry_bytes_remaining;
 
 	if (ar->is_strtab > 0) {
 		if (ar->has_strtab > 0) {

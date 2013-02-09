@@ -48,6 +48,7 @@
 
 #include "archive_platform.h"
 #include "archive_private.h"
+#include "archive_entry.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stddef.h>
@@ -63,6 +64,23 @@
 #include <share.h>
 
 #define EPOC_TIME ARCHIVE_LITERAL_ULL(116444736000000000)
+
+#if defined(__LA_LSEEK_NEEDED)
+static BOOL SetFilePointerEx_perso(HANDLE hFile,
+				   LARGE_INTEGER liDistanceToMove,
+				   PLARGE_INTEGER lpNewFilePointer,
+				   DWORD dwMoveMethod)
+{
+	LARGE_INTEGER li;
+	li.QuadPart = liDistanceToMove.QuadPart;
+	li.LowPart = SetFilePointer(
+		hFile, li.LowPart, &li.HighPart, dwMoveMethod);
+	if(lpNewFilePointer) {
+		lpNewFilePointer->QuadPart = li.QuadPart;
+	}
+	return li.LowPart != -1 || GetLastError() == NO_ERROR;
+}
+#endif
 
 struct ustat {
 	int64_t		st_atime;
@@ -92,7 +110,7 @@ getino(struct ustat *ub)
 	ULARGE_INTEGER ino64;
 	ino64.QuadPart = ub->st_ino;
 	/* I don't know this hashing is correct way */
-	return (ino64.LowPart ^ (ino64.LowPart >> INOSIZE));
+	return ((ino_t)(ino64.LowPart ^ (ino64.LowPart >> INOSIZE)));
 }
 
 /*
@@ -136,7 +154,7 @@ __la_win_permissive_name_w(const wchar_t *wname)
 	if (l == 0)
 		return (NULL);
 	/* NOTE: GetFullPathNameW has a bug that if the length of the file
-	 * name is just one that return imcomplete buffer size. Thus, we 
+	 * name is just 1 then it returns incomplete buffer size. Thus, we
 	 * have to add three to the size to allocate a sufficient buffer
 	 * size for the full-pathname of the file name. */
 	l += 3;
@@ -233,6 +251,40 @@ la_CreateFile(const char *path, DWORD dwDesiredAccess, DWORD dwShareMode,
 	free(wpath);
 	return (handle);
 }
+
+#if defined(__LA_LSEEK_NEEDED)
+__int64
+__la_lseek(int fd, __int64 offset, int whence)
+{
+	LARGE_INTEGER distance;
+	LARGE_INTEGER newpointer;
+	HANDLE handle;
+
+	if (fd < 0) {
+		errno = EBADF;
+		return (-1);
+	}
+	handle = (HANDLE)_get_osfhandle(fd);
+	if (GetFileType(handle) != FILE_TYPE_DISK) {
+		errno = EBADF;
+		return (-1);
+	}
+	distance.QuadPart = offset;
+	if (!SetFilePointerEx_perso(handle, distance, &newpointer, whence)) {
+		DWORD lasterr;
+
+		lasterr = GetLastError();
+		if (lasterr == ERROR_BROKEN_PIPE)
+			return (0);
+		if (lasterr == ERROR_ACCESS_DENIED)
+			errno = EBADF;
+		else
+			la_dosmaperr(lasterr);
+		return (-1);
+	}
+	return (newpointer.QuadPart);
+}
+#endif
 
 /* This can exceed MAX_PATH limitation. */
 int
@@ -373,7 +425,7 @@ __la_read(int fd, void *buf, size_t nbytes)
 
 /* Convert Windows FILETIME to UTC */
 __inline static void
-fileTimeToUTC(const FILETIME *filetime, time_t *time, long *ns)
+fileTimeToUTC(const FILETIME *filetime, time_t *t, long *ns)
 {
 	ULARGE_INTEGER utc;
 
@@ -381,10 +433,10 @@ fileTimeToUTC(const FILETIME *filetime, time_t *time, long *ns)
 	utc.LowPart  = filetime->dwLowDateTime;
 	if (utc.QuadPart >= EPOC_TIME) {
 		utc.QuadPart -= EPOC_TIME;
-		*time = (time_t)(utc.QuadPart / 10000000);	/* milli seconds base */
+		*t = (time_t)(utc.QuadPart / 10000000);	/* milli seconds base */
 		*ns = (long)(utc.QuadPart % 10000000) * 100;/* nano seconds base */
 	} else {
-		*time = 0;
+		*t = 0;
 		*ns = 0;
 	}
 }
@@ -407,7 +459,7 @@ __hstat(HANDLE handle, struct ustat *st)
 	ULARGE_INTEGER ino64;
 	DWORD ftype;
 	mode_t mode;
-	time_t time;
+	time_t t;
 	long ns;
 
 	switch (ftype = GetFileType(handle)) {
@@ -464,14 +516,14 @@ __hstat(HANDLE handle, struct ustat *st)
 		mode |= S_IFREG;
 	st->st_mode = mode;
 	
-	fileTimeToUTC(&info.ftLastAccessTime, &time, &ns);
-	st->st_atime = time; 
+	fileTimeToUTC(&info.ftLastAccessTime, &t, &ns);
+	st->st_atime = t; 
 	st->st_atime_nsec = ns;
-	fileTimeToUTC(&info.ftLastWriteTime, &time, &ns);
-	st->st_mtime = time;
+	fileTimeToUTC(&info.ftLastWriteTime, &t, &ns);
+	st->st_mtime = t;
 	st->st_mtime_nsec = ns;
-	fileTimeToUTC(&info.ftCreationTime, &time, &ns);
-	st->st_ctime = time;
+	fileTimeToUTC(&info.ftCreationTime, &t, &ns);
+	st->st_ctime = t;
 	st->st_ctime_nsec = ns;
 	st->st_size = 
 	    ((int64_t)(info.nFileSizeHigh) * ((int64_t)MAXDWORD + 1))
@@ -507,7 +559,7 @@ copy_stat(struct stat *st, struct ustat *us)
 	st->st_ino = getino(us);
 	st->st_mode = us->st_mode;
 	st->st_nlink = us->st_nlink;
-	st->st_size = us->st_size;
+	st->st_size = (off_t)us->st_size;
 	st->st_uid = us->st_uid;
 	st->st_dev = us->st_dev;
 	st->st_rdev = us->st_rdev;
@@ -581,35 +633,22 @@ __la_stat(const char *path, struct stat *st)
  * This waitpid is limited implementation.
  */
 pid_t
-__la_waitpid(pid_t wpid, int *status, int option)
+__la_waitpid(HANDLE child, int *status, int option)
 {
-	HANDLE child;
-	DWORD cs, ret;
+	DWORD cs;
 
 	(void)option;/* UNUSED */
-	*status = 0;
-	child = OpenProcess(PROCESS_QUERY_INFORMATION | SYNCHRONIZE, FALSE, wpid);
-	if (child == NULL) {
-		la_dosmaperr(GetLastError());
-		return (-1);
-	}
-	ret = WaitForSingleObject(child, INFINITE);
-	if (ret == WAIT_FAILED) {
-		CloseHandle(child);
-		la_dosmaperr(GetLastError());
-		return (-1);
-	}
-	if (GetExitCodeProcess(child, &cs) == 0) {
-		CloseHandle(child);
-		la_dosmaperr(GetLastError());
-		return (-1);
-	}
-	if (cs == STILL_ACTIVE)
-		*status = 0x100;
-	else
-		*status = (int)(cs & 0xff);
-	CloseHandle(child);
-	return (wpid);
+	do {
+		if (GetExitCodeProcess(child, &cs) == 0) {
+			CloseHandle(child);
+			la_dosmaperr(GetLastError());
+			*status = 0;
+			return (-1);
+		}
+	} while (cs == STILL_ACTIVE);
+
+	*status = (int)(cs & 0xff);
+	return (0);
 }
 
 ssize_t
@@ -638,6 +677,113 @@ __la_write(int fd, const void *buf, size_t nbytes)
 	}
 	return (bytes_written);
 }
+
+/*
+ * Replace the Windows path separator '\' with '/'.
+ */
+static int
+replace_pathseparator(struct archive_wstring *ws, const wchar_t *wp)
+{
+	wchar_t *w;
+	size_t path_length;
+
+	if (wp == NULL)
+		return(0);
+	if (wcschr(wp, L'\\') == NULL)
+		return(0);
+	path_length = wcslen(wp);
+	if (archive_wstring_ensure(ws, path_length) == NULL)
+		return(-1);
+	archive_wstrncpy(ws, wp, path_length);
+	for (w = ws->s; *w; w++) {
+		if (*w == L'\\')
+			*w = L'/';
+	}
+	return(1);
+}
+
+static int
+fix_pathseparator(struct archive_entry *entry)
+{
+	struct archive_wstring ws;
+	const wchar_t *wp;
+	int ret = ARCHIVE_OK;
+
+	archive_string_init(&ws);
+	wp = archive_entry_pathname_w(entry);
+	switch (replace_pathseparator(&ws, wp)) {
+	case 0: /* Not replaced. */
+		break;
+	case 1: /* Replaced. */
+		archive_entry_copy_pathname_w(entry, ws.s);
+		break;
+	default:
+		ret = ARCHIVE_FAILED;
+	}
+	wp = archive_entry_hardlink_w(entry);
+	switch (replace_pathseparator(&ws, wp)) {
+	case 0: /* Not replaced. */
+		break;
+	case 1: /* Replaced. */
+		archive_entry_copy_hardlink_w(entry, ws.s);
+		break;
+	default:
+		ret = ARCHIVE_FAILED;
+	}
+	wp = archive_entry_symlink_w(entry);
+	switch (replace_pathseparator(&ws, wp)) {
+	case 0: /* Not replaced. */
+		break;
+	case 1: /* Replaced. */
+		archive_entry_copy_symlink_w(entry, ws.s);
+		break;
+	default:
+		ret = ARCHIVE_FAILED;
+	}
+	archive_wstring_free(&ws);
+	return(ret);
+}
+
+struct archive_entry *
+__la_win_entry_in_posix_pathseparator(struct archive_entry *entry)
+{
+	struct archive_entry *entry_main;
+	const wchar_t *wp;
+	int has_backslash = 0;
+	int ret;
+
+	wp = archive_entry_pathname_w(entry);
+	if (wp != NULL && wcschr(wp, L'\\') != NULL)
+		has_backslash = 1;
+	if (!has_backslash) {
+		wp = archive_entry_hardlink_w(entry);
+		if (wp != NULL && wcschr(wp, L'\\') != NULL)
+			has_backslash = 1;
+	}
+	if (!has_backslash) {
+		wp = archive_entry_symlink_w(entry);
+		if (wp != NULL && wcschr(wp, L'\\') != NULL)
+			has_backslash = 1;
+	}
+	/*
+	 * If there is no backslach chars, return the original.
+	 */
+	if (!has_backslash)
+		return (entry);
+
+	/* Copy entry so we can modify it as needed. */
+	entry_main = archive_entry_clone(entry);
+	if (entry_main == NULL)
+		return (NULL);
+	/* Replace the Windows path-separator '\' with '/'. */
+	ret = fix_pathseparator(entry_main);
+	if (ret < ARCHIVE_WARN) {
+		archive_entry_free(entry_main);
+		return (NULL);
+	}
+	return (entry_main);
+}
+
 
 /*
  * The following function was modified from PostgreSQL sources and is
@@ -745,7 +891,7 @@ __la_dosmaperr(unsigned long e)
 		return;
 	}
 
-	for (i = 0; i < sizeof(doserrors); i++)
+	for (i = 0; i < (int)sizeof(doserrors); i++)
 	{
 		if (doserrors[i].winerr == e)
 		{
