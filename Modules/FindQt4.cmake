@@ -985,11 +985,19 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endmacro()
 
   macro(_qt4_add_target_depends _QT_MODULE)
-    _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_INTERFACE_LIBRARIES ${ARGN})
+    get_target_property(_configs Qt4::${_QT_MODULE} IMPORTED_CONFIGURATIONS)
+    foreach(_config ${_configs})
+      _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_INTERFACE_LIBRARIES_${_config} ${ARGN})
+    endforeach()
+    set(_configs)
   endmacro()
 
   macro(_qt4_add_target_private_depends _QT_MODULE)
-    _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_DEPENDENT_LIBRARIES ${ARGN})
+    get_target_property(_configs ${_QT_MODULE} IMPORTED_CONFIGURATIONS)
+    foreach(_config ${_configs})
+      _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_DEPENDENT_LIBRARIES_${_config} ${ARGN})
+    endforeach()
+    set(_configs)
   endmacro()
 
 
@@ -1067,10 +1075,14 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     set(_isWin32 $<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>)
     set(_isNotExcluded $<NOT:$<BOOL:$<TARGET_PROPERTY:QT4_NO_LINK_QTMAIN>>>)
     set(_isPolicyNEW $<TARGET_POLICY:CMP0020>)
-    set_property(TARGET Qt4::QtCore APPEND PROPERTY
-      IMPORTED_LINK_INTERFACE_LIBRARIES
-        $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt4::qtmain>
-    )
+    get_target_property(_configs Qt4::QtCore IMPORTED_CONFIGURATIONS)
+    foreach(_config ${_configs})
+      set_property(TARGET Qt4::QtCore APPEND PROPERTY
+        IMPORTED_LINK_INTERFACE_LIBRARIES_${_config}
+          $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt4::qtmain>
+      )
+    endforeach()
+    unset(_configs)
     unset(_isExe)
     unset(_isWin32)
     unset(_isNotExcluded)
