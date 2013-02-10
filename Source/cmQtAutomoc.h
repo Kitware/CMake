@@ -37,7 +37,7 @@ private:
 
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
-  bool RunAutomoc();
+  bool RunAutomoc(cmMakefile* makefile);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
   void ParseCppFile(const std::string& absFilename,
