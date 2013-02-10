@@ -44,14 +44,14 @@ static bool containsQ_OBJECT(const std::string& text)
 static std::string findMatchingHeader(const std::string& absPath,
                                       const std::string& mocSubDir,
                                       const std::string& basename,
-                                const std::list<std::string>& headerExtensions)
+                              const std::vector<std::string>& headerExtensions)
 {
   std::string header;
-  for(std::list<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
-    std::string sourceFilePath = absPath + basename + (*ext);
+    std::string sourceFilePath = absPath + basename + "." + (*ext);
     if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
       {
       header = sourceFilePath;
@@ -59,7 +59,7 @@ static std::string findMatchingHeader(const std::string& absPath,
       }
     if (!mocSubDir.empty())
       {
-      sourceFilePath = mocSubDir + basename + (*ext);
+      sourceFilePath = mocSubDir + basename + "." + (*ext);
       if (cmsys::SystemTools::FileExists(sourceFilePath.c_str()))
         {
         header = sourceFilePath;
@@ -296,7 +296,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory)
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    success = this->RunAutomoc();
+    success = this->RunAutomoc(makefile);
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
@@ -504,7 +504,7 @@ void cmQtAutomoc::Init()
 }
 
 
-bool cmQtAutomoc::RunAutomoc()
+bool cmQtAutomoc::RunAutomoc(cmMakefile* makefile)
 {
   if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
     || (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr))
@@ -528,22 +528,8 @@ bool cmQtAutomoc::RunAutomoc()
   std::vector<std::string> sourceFiles;
   cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
 
-  std::list<std::string> headerExtensions;
-  headerExtensions.push_back(".h");
-  headerExtensions.push_back(".hpp");
-  headerExtensions.push_back(".hxx");
-#if defined(_WIN32)
-  // not case sensitive, don't add ".H"
-#elif defined(__APPLE__)
-  // detect case-sensitive filesystem
-  long caseSensitive = pathconf(this->Srcdir.c_str(), _PC_CASE_SENSITIVE);
-  if (caseSensitive == 1)
-  {
-    headerExtensions.push_back(".H");
-  }
-#else
-  headerExtensions.push_back(".H");
-#endif
+  const std::vector<std::string>& headerExtensions =
+                                               makefile->GetHeaderExtensions();
 
   for (std::vector<std::string>::const_iterator it = sourceFiles.begin();
        it != sourceFiles.end();
@@ -643,7 +629,7 @@ bool cmQtAutomoc::RunAutomoc()
 
 
 void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
-                              const std::list<std::string>& headerExtensions,
+                              const std::vector<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs)
 {
   cmsys::RegularExpression mocIncludeRegExp(
@@ -821,7 +807,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
 
 
 void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
-                              const std::list<std::string>& headerExtensions,
+                              const std::vector<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs)
 {
   cmsys::RegularExpression mocIncludeRegExp(
@@ -932,8 +918,8 @@ void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
 
 
 void cmQtAutomoc::SearchHeadersForCppFile(const std::string& absFilename,
-                                const std::list<std::string>& headerExtensions,
-                                std::set<std::string>& absHeaders)
+                              const std::vector<std::string>& headerExtensions,
+                              std::set<std::string>& absHeaders)
 {
   // search for header files and private header files we may need to moc:
   const std::string basename =
@@ -941,22 +927,22 @@ void cmQtAutomoc::SearchHeadersForCppFile(const std::string& absFilename,
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
 
-  for(std::list<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
-    const std::string headerName = absPath + basename + (*ext);
+    const std::string headerName = absPath + basename + "." + (*ext);
     if (cmsys::SystemTools::FileExists(headerName.c_str()))
       {
       absHeaders.insert(headerName);
       break;
       }
     }
-  for(std::list<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
-    const std::string privateHeaderName = absPath+basename+"_p"+(*ext);
+    const std::string privateHeaderName = absPath+basename+"_p."+(*ext);
     if (cmsys::SystemTools::FileExists(privateHeaderName.c_str()))
       {
       absHeaders.insert(privateHeaderName);
@@ -1077,7 +1063,8 @@ bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
 }
 
 
-std::string cmQtAutomoc::Join(const std::list<std::string>& lst,char separator)
+std::string cmQtAutomoc::Join(const std::vector<std::string>& lst,
+                              char separator)
 {
     if (lst.empty())
       {
@@ -1085,11 +1072,11 @@ std::string cmQtAutomoc::Join(const std::list<std::string>& lst,char separator)
       }
 
     std::string result;
-    for (std::list<std::string>::const_iterator it = lst.begin();
+    for (std::vector<std::string>::const_iterator it = lst.begin();
          it != lst.end();
          ++it)
       {
-      result += (*it) + separator;
+      result += "." + (*it) + separator;
       }
     result.erase(result.end() - 1);
     return result;
