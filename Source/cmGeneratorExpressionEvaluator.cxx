@@ -333,10 +333,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "$<TARGET_PROPERTY:...> expression requires one or two parameters");
       return std::string();
       }
-    cmsys::RegularExpression targetNameValidator;
-    // The ':' is supported to allow use with IMPORTED targets. At least
-    // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
-    targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
     cmsys::RegularExpression propertyNameValidator;
     propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
@@ -372,7 +368,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
       std::string targetName = parameters.front();
       propertyName = parameters[1];
-      if (!targetNameValidator.find(targetName.c_str()))
+      if (!cmGeneratorExpression::IsValidTargetName(targetName))
         {
         if (!propertyNameValidator.find(propertyName.c_str()))
           {
@@ -402,7 +398,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       // Keep track of the properties seen while processing.
       // The evaluation of the LINK_LIBRARIES generator expressions
-      // will check this to ensure that properties form a DAG.
+      // will check this to ensure that properties have one consistent
+      // value for all evaluations.
       context->SeenTargetProperties.insert(propertyName);
       }
 
@@ -438,8 +435,17 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       // No error. We just skip cyclic references.
       return std::string();
     case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-      // No error. We're not going to find anything new here.
-      return std::string();
+      for (size_t i = 0;
+          i < (sizeof(targetPropertyTransitiveWhitelist) /
+                sizeof(*targetPropertyTransitiveWhitelist));
+          ++i)
+        {
+        if (targetPropertyTransitiveWhitelist[i] == propertyName)
+          {
+          // No error. We're not going to find anything new here.
+          return std::string();
+          }
+        }
     case cmGeneratorExpressionDAGChecker::DAG:
       break;
       }
@@ -454,12 +460,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
         {
         return std::string();
-        }
-      if (propertyName == "POSITION_INDEPENDENT_CODE")
-        {
-        context->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(
-                    "POSITION_INDEPENDENT_CODE", context->Config) ? "1" : "0";
         }
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config))
@@ -702,6 +702,14 @@ private:
       {
       return std::string();
       }
+    if(target->GetType() >= cmTarget::UTILITY &&
+      target->GetType() != cmTarget::UNKNOWN_LIBRARY)
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                  "Target \"" + item
+                  + "\" is not an executable or library.");
+      return std::string();
+      }
     std::string propertyName = "INTERFACE_" + prop;
     const char *propContent = target->GetProperty(propertyName.c_str());
     if (!propContent)
@@ -867,10 +875,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     // Lookup the referenced target.
     std::string name = *parameters.begin();
 
-    cmsys::RegularExpression targetValidator;
-    // The ':' is supported to allow use with IMPORTED targets.
-    targetValidator.compile("^[A-Za-z0-9_.:-]+$");
-    if (!targetValidator.find(name.c_str()))
+    if (!cmGeneratorExpression::IsValidTargetName(name))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "Expression syntax not recognized.");

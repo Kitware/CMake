@@ -38,6 +38,15 @@ bool cmTargetPropCommandBase
     this->HandleMissingTarget(args[0]);
     return false;
     }
+  if ((this->Target->GetType() != cmTarget::SHARED_LIBRARY)
+    && (this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+    && (this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
+    && (this->Target->GetType() != cmTarget::MODULE_LIBRARY)
+    && (this->Target->GetType() != cmTarget::EXECUTABLE))
+    {
+    this->SetError("called with non-compilable target type");
+    return false;
+    }
 
   unsigned int argIndex = 1;
 

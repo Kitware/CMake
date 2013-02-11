@@ -48,6 +48,7 @@
 #include "abc.h"
 #include "xyz.h"
 #include "yaf.h"
+#include "libC.h"
 
 int main(int argv, char **args)
 {
@@ -77,6 +78,9 @@ int main(int argv, char **args)
 
   Yaf yaf;
   yaf.doYaf();
+
+  LibC lc;
+  lc.foo();
 
   return app.exec();
 }

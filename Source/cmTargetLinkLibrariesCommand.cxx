@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmTargetLinkLibrariesCommand.h"
 
+#include "cmGeneratorExpression.h"
+
 const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[3] =
 {
   "general",
@@ -265,23 +267,14 @@ static std::string compileProperty(cmTarget *tgt, const std::string &lib,
 }
 
 //----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
-  const bool isGenex = isGeneratorExpression(lib);
+  const bool isGenex = cmGeneratorExpression::Find(lib) != std::string::npos;
 
-  cmsys::RegularExpression targetNameValidator;
-  targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
-  const bool potentialTargetName = targetNameValidator.find(lib);
+  const bool potentialTargetName
+                              = cmGeneratorExpression::IsValidTargetName(lib);
 
   if (potentialTargetName || isGenex)
     {

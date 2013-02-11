@@ -23,4 +23,18 @@ add_executable(foo main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
 
 set_target_properties(foo codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 
-target_link_libraries(foo codeeditorLib ${QT_LIBRARIES} )
+include(GenerateExportHeader)
+# The order is relevant here. B depends on A, and B headers depend on A
+# headers both subdirectories use CMAKE_BUILD_INTERFACE_INCLUDES and we
+# test that CMAKE_AUTOMOC successfully reads the include directories
+# for the build interface from those targets. There has previously been
+# a bug where caching of the include directories happened before
+# extracting the includes to pass to moc.
+add_subdirectory(Bdir)
+add_subdirectory(Adir)
+add_library(libC SHARED libC.cpp)
+set_target_properties(libC PROPERTIES AUTOMOC TRUE)
+generate_export_header(libC)
+target_link_libraries(libC LINK_PUBLIC libB)
+
+target_link_libraries(foo codeeditorLib ${QT_LIBRARIES} libC)

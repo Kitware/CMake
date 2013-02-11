@@ -1212,7 +1212,8 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::GetIncludeFlags(
                                      const std::vector<std::string> &includes,
-                                     const char* lang, bool forResponseFile)
+                                     const char* lang, bool forResponseFile,
+                                     const char *config)
 {
   if(!lang)
     {
@@ -1285,7 +1286,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     if(!flagUsed || repeatFlag)
       {
       if(sysIncludeFlag &&
-         this->Makefile->IsSystemIncludeDirectory(i->c_str()))
+         this->Makefile->IsSystemIncludeDirectory(i->c_str(), config))
         {
         includeFlags << sysIncludeFlag;
         }

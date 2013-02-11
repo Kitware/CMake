@@ -26,6 +26,9 @@ endif()
 
 # Test static library without its own sources.
 add_library(ABstatic STATIC ${dummy} $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:B>)
+target_include_directories(ABstatic PUBLIC $<TARGET_PROPERTY:B,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_definitions(ABstatic PUBLIC $<TARGET_PROPERTY:B,INTERFACE_COMPILE_DEFINITIONS>)
+
 add_executable(UseABstatic mainAB.c)
 target_link_libraries(UseABstatic ABstatic)
 
@@ -41,12 +44,17 @@ endif()
 
 # Test shared library without its own sources.
 add_library(ABshared SHARED ${dummy} ${ABshared_SRCS})
+target_include_directories(ABshared PUBLIC $<TARGET_PROPERTY:B,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_definitions(ABshared PUBLIC $<TARGET_PROPERTY:B,INTERFACE_COMPILE_DEFINITIONS>)
+
 add_executable(UseABshared mainAB.c)
 set_property(TARGET UseABshared PROPERTY COMPILE_DEFINITIONS SHARED_B ${NO_A})
 target_link_libraries(UseABshared ABshared)
 
 # Test executable without its own sources.
 add_library(ABmain OBJECT mainAB.c)
+target_include_directories(ABmain PUBLIC $<TARGET_PROPERTY:B,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_definitions(ABmain PUBLIC $<TARGET_PROPERTY:B,INTERFACE_COMPILE_DEFINITIONS>)
 add_executable(UseABinternal ${dummy}
   $<TARGET_OBJECTS:ABmain> $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:B>
   )
