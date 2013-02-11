@@ -37,6 +37,7 @@
   "target in the same buildsystem. Expands to the empty string "        \
   "otherwise.\n"                                                        \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
+  "  $<TARGET_DEFINED:tgt>     = '1' if tgt is a target, else '0'\n"    \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \
   "where \"tgt\" is the name of a target.  "                            \
@@ -46,9 +47,14 @@
   "  $<TARGET_LINKER_FILE_DIR:tgt>/$<TARGET_LINKER_FILE_NAME:tgt>\n"    \
   "  $<TARGET_SONAME_FILE_DIR:tgt>/$<TARGET_SONAME_FILE_NAME:tgt>\n"    \
   "\n"                                                                  \
-  "  $<TARGET_PROPERTY:tgt,prop>   = The value of the property prop\n"  \
-  "on the target tgt. Note that tgt is not added as a dependency of\n"  \
-  "the target this expression is evaluated on.\n"                       \
+  "  $<TARGET_PROPERTY:tgt,prop>   = The value of the property prop "   \
+  "on the target tgt.\n"                                                \
+  "Note that tgt is not added as a dependency of the target this "      \
+  "expression is evaluated on.\n"                                       \
+  "  $<TARGET_POLICY:pol>          = '1' if the policy was NEW when "   \
+  "the 'head' target was created, else '0'.  If the policy was not "    \
+  "set, the warning message for the policy will be emitted.  This "     \
+  "generator expression only works for a subset of policies.\n"         \
   "Boolean expressions:\n"                                              \
   "  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'\n"    \
   "  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'\n"    \
@@ -59,7 +65,7 @@
 #define CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS                       \
   CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS \
   "Expressions with an implicit 'this' target:\n"                       \
-  "  $<TARGET_PROPERTY:prop>   = The value of the property prop on\n"   \
+  "  $<TARGET_PROPERTY:prop>   = The value of the property prop on "    \
   "the target on which the generator expression is evaluated.\n"        \
   ""
 

@@ -13,6 +13,7 @@
 #define cmTargetLinkLibrariesCommand_h
 
 #include "cmCommand.h"
+#include "cmDocumentGeneratorExpressions.h"
 
 /** \class cmTargetLinkLibrariesCommand
  * \brief Specify a list of libraries to link into executables.
@@ -92,7 +93,9 @@ public:
       "linked to this target will appear on the link line for the other "
       "target too.  "
       "See the LINK_INTERFACE_LIBRARIES target property to override the "
-      "set of transitive link dependencies for a target."
+      "set of transitive link dependencies for a target.  "
+      "Calls to other signatures of this command may set the property "
+      "making any libraries linked exclusively by this signature private."
       "\n"
       "  target_link_libraries(<target> LINK_INTERFACE_LIBRARIES\n"
       "                        [[debug|optimized|general] <lib>] ...)\n"
@@ -141,6 +144,12 @@ public:
       "However, if two archives are really so interdependent they should "
       "probably be combined into a single archive."
       ")"
+      "\n"
+      "Arguments to target_link_libraries may use \"generator expressions\" "
+      "with the syntax \"$<...>\".  Note however, that generator expressions "
+      "will not be used in OLD handling of CMP0003 or CMP0004."
+      "\n"
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
       ;
     }
 

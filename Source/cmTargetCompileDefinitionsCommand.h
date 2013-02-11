@@ -59,7 +59,7 @@ public:
       "Specify compile definitions or targets to use when compiling a given "
       "target.  "
       "The named <target> must have been created by a command such as "
-      "add_executable or add_library.  "
+      "add_executable or add_library and must not be an IMPORTED target.  "
       "The INTERFACE, PUBLIC and PRIVATE keywords are required to specify "
       "the scope of the following arguments.  PRIVATE and PUBLIC items will "
       "populate the COMPILE_DEFINITIONS property of <target>.  PUBLIC and "
@@ -69,14 +69,16 @@ public:
       "INTERFACE_COMPILE_DEFINITIONS from.  "
       "Repeated calls for the same <target> append items in the order called."
       "\n"
+      "Arguments to target_compile_definitions may use \"generator "
+      "expressions\" with the syntax \"$<...>\".  "
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
       ;
     }
 
   cmTypeMacro(cmTargetCompileDefinitionsCommand, cmCommand);
 
 private:
-  virtual void HandleImportedTargetInvalidScope(const std::string &scope,
-                                   const std::string &tgt);
+  virtual void HandleImportedTarget(const std::string &tgt);
   virtual void HandleMissingTarget(const std::string &name);
 
   virtual bool HandleNonTargetArg(std::string &content,

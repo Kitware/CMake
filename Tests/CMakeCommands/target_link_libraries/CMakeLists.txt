@@ -29,9 +29,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_library(depA SHARED depA.cpp)
 generate_export_header(depA)
 
-add_library(importedlib UNKNOWN IMPORTED)
-target_link_libraries(importedlib LINK_INTERFACE_LIBRARIES depA)
-
 add_library(depB SHARED depB.cpp)
 generate_export_header(depB)
 
@@ -80,3 +77,13 @@ assert_property(targetA LINK_INTERFACE_LIBRARIES "")
 add_library(depIfaceOnly SHARED EXCLUDE_FROM_ALL depIfaceOnly.cpp)
 generate_export_header(depIfaceOnly)
 set_property(TARGET depB APPEND PROPERTY LINK_INTERFACE_LIBRARIES depIfaceOnly)
+
+add_library(depD SHARED depD.cpp)
+generate_export_header(depD)
+set_property(TARGET depD APPEND PROPERTY
+  LINK_INTERFACE_LIBRARIES
+    $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:depA>
+)
+
+add_executable(targetB targetB.cpp)
+target_link_libraries(targetB depD)

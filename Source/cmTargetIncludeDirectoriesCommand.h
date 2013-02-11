@@ -60,7 +60,7 @@ public:
       "Specify include directories or targets to use when compiling a given "
       "target.  "
       "The named <target> must have been created by a command such as "
-      "add_executable or add_library.\n"
+      "add_executable or add_library and must not be an IMPORTED target.\n"
       "If BEFORE is specified, the content will be prepended to the property "
       "instead of being appended.\n"
       "The INTERFACE, PUBLIC and PRIVATE keywords are required to specify "
@@ -73,14 +73,16 @@ public:
       "directories must be absolute paths, not relative paths.  "
       "Repeated calls for the same <target> append items in the order called."
       "\n"
+      "Arguments to target_include_directories may use \"generator "
+      "expressions\" with the syntax \"$<...>\".  "
+      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
       ;
     }
 
   cmTypeMacro(cmTargetIncludeDirectoriesCommand, cmCommand);
 
 private:
-  virtual void HandleImportedTargetInvalidScope(const std::string &tgt,
-                                   const std::string &scope);
+  virtual void HandleImportedTarget(const std::string &tgt);
   virtual void HandleMissingTarget(const std::string &name);
 
   virtual bool HandleNonTargetArg(std::string &content,

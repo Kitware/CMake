@@ -148,6 +148,38 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 }
 
 //----------------------------------------------------------------------------
+static std::string stripEmptyListElements(const std::string &input)
+{
+  std::string result;
+
+  const char *c = input.c_str();
+  bool skipSemiColons = true;
+  for ( ; *c; ++c)
+    {
+    if(c[0] == ';')
+      {
+      if(skipSemiColons)
+        {
+        continue;
+        }
+      skipSemiColons = true;
+      }
+    else
+      {
+      skipSemiColons = false;
+      }
+    result += *c;
+    }
+
+  if (!result.empty() && *(result.end() - 1) == ';')
+    {
+    result.resize(result.size() - 1);
+    }
+
+  return result;
+}
+
+//----------------------------------------------------------------------------
 static std::string stripAllGeneratorExpressions(const std::string &input)
 {
   std::string result;
@@ -186,7 +218,7 @@ static std::string stripAllGeneratorExpressions(const std::string &input)
     lastPos = pos;
     }
   result += input.substr(lastPos);
-  return result;
+  return stripEmptyListElements(result);
 }
 
 //----------------------------------------------------------------------------
@@ -247,7 +279,68 @@ static std::string stripExportInterface(const std::string &input,
     }
   result += input.substr(lastPos);
 
-  return result;
+  return stripEmptyListElements(result);
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorExpression::Split(const std::string &input,
+                                  std::vector<std::string> &output)
+{
+  std::string::size_type pos = 0;
+  std::string::size_type lastPos = pos;
+  while((pos = input.find("$<", lastPos)) != input.npos)
+    {
+    std::string part = input.substr(lastPos, pos - lastPos);
+    std::string preGenex;
+    if (!part.empty())
+      {
+      std::string::size_type startPos = input.rfind(";", pos);
+      if (startPos != pos - 1 && startPos >= lastPos)
+        {
+        part = input.substr(lastPos, startPos - lastPos);
+        preGenex = input.substr(startPos + 1, pos - startPos - 1);
+        }
+      cmSystemTools::ExpandListArgument(part.c_str(), output);
+      }
+    pos += 2;
+    int nestingLevel = 1;
+    const char *c = input.c_str() + pos;
+    const char * const cStart = c;
+    for ( ; *c; ++c)
+      {
+      if(c[0] == '$' && c[1] == '<')
+        {
+        ++nestingLevel;
+        ++c;
+        continue;
+        }
+      if(c[0] == '>')
+        {
+        --nestingLevel;
+        if (nestingLevel == 0)
+          {
+          break;
+          }
+        }
+      }
+    for ( ; *c; ++c)
+      {
+      // Capture the part after the genex and before the next ';'
+      if(c[0] == ';')
+        {
+        --c;
+        break;
+        }
+      }
+    const std::string::size_type traversed = (c - cStart) + 1;
+    output.push_back(preGenex + "$<" + input.substr(pos, traversed));
+    pos += traversed;
+    lastPos = pos;
+    }
+  if (lastPos < input.size())
+    {
+    cmSystemTools::ExpandListArgument(input.substr(lastPos), output);
+    }
 }
 
 //----------------------------------------------------------------------------

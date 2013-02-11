@@ -69,6 +69,7 @@ public:
     /// POSITION_INDEPENDENT_CODE property and *_COMPILE_OPTIONS_PI{E,C}
     /// instead.
     CMP0019, ///< No variable re-expansion in include and link info
+    CMP0020, ///< Automatically link Qt executables to qtmain target
 
     /** \brief Always the last entry.
      *

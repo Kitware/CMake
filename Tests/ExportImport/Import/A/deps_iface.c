@@ -18,7 +18,7 @@
 extern int testLibDepends(void);
 
 
-int main(int,char **)
+int main()
 {
   return testLibDepends();
 }

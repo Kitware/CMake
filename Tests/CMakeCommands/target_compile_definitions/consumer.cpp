@@ -11,8 +11,12 @@
 #error Expected MY_INTERFACE_DEFINE
 #endif
 
-#ifndef MY_IMPORTEDINTERFACE_DEFINE
-#error Expected MY_IMPORTEDINTERFACE_DEFINE
+#ifdef SHOULD_NOT_BE_DEFINED
+#error Unexpected SHOULD_NOT_BE_DEFINED
+#endif
+
+#ifndef SHOULD_BE_DEFINED
+#error Expected SHOULD_BE_DEFINED
 #endif
 
 int main() { return 0; }

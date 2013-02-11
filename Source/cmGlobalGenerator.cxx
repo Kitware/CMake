@@ -941,19 +941,7 @@ void cmGlobalGenerator::Generate()
 
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
-      if (mf->IsOn("CMAKE_BUILD_INTERFACE_INCLUDES"))
-        {
-        const char *binDir = mf->GetStartOutputDirectory();
-        const char *srcDir = mf->GetStartDirectory();
-        const std::string dirs = std::string(binDir ? binDir : "")
-                                + std::string(binDir ? ";" : "")
-                                + std::string(srcDir ? srcDir : "");
-        if (!dirs.empty())
-          {
-          tit->second.AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
-          }
-        }
+        tit->second.AppendBuildInterfaceIncludes();
       }
     }
 
@@ -992,6 +980,7 @@ void cmGlobalGenerator::Generate()
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
+    this->LocalGenerators[i]->GetMakefile()->SetGeneratingBuildSystem();
     this->SetCurrentLocalGenerator(this->LocalGenerators[i]);
     this->LocalGenerators[i]->Generate();
     this->LocalGenerators[i]->GenerateInstallRules();
@@ -1075,7 +1064,8 @@ void cmGlobalGenerator::CreateAutomocTargets()
       if(target.GetType() == cmTarget::EXECUTABLE ||
          target.GetType() == cmTarget::STATIC_LIBRARY ||
          target.GetType() == cmTarget::SHARED_LIBRARY ||
-         target.GetType() == cmTarget::MODULE_LIBRARY)
+         target.GetType() == cmTarget::MODULE_LIBRARY ||
+         target.GetType() == cmTarget::OBJECT_LIBRARY)
         {
         if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
           {

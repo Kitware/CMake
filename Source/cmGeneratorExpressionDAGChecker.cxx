@@ -106,3 +106,22 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
     }
   return DAG;
 }
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
+{
+  const cmGeneratorExpressionDAGChecker *top = this;
+  const cmGeneratorExpressionDAGChecker *parent = this->Parent;
+  while (parent)
+    {
+    top = parent;
+    parent = parent->Parent;
+    }
+
+  const char *prop = top->Property.c_str();
+  return (strcmp(prop, "LINK_LIBRARIES") == 0
+       || strcmp(prop, "LINK_INTERFACE_LIBRARIES") == 0
+       || strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
+       || strncmp(prop, "LINK_INTERFACE_LIBRARIES_", 26) == 0
+       || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 35) == 0);
+}

@@ -99,6 +99,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->AddDefaultDefinitions();
   this->Initialize();
   this->PreOrder = false;
+  this->GeneratingBuildSystem = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -1616,20 +1617,31 @@ void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
+void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
+                                       bool before)
 {
-  if (!inc)
+  if (incs.empty())
     {
     return;
     }
 
+  std::string incString;
+  std::string sep;
+
+  for(std::vector<std::string>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    incString += sep + *li;
+    sep = ";";
+    }
+
   std::vector<IncludeDirectoriesEntry>::iterator position =
-                               before ? this->IncludeDirectoriesEntries.begin()
-                                      : this->IncludeDirectoriesEntries.end();
+                              before ? this->IncludeDirectoriesEntries.begin()
+                                    : this->IncludeDirectoriesEntries.end();
 
   cmListFileBacktrace lfbt;
   this->GetBacktrace(lfbt);
-  IncludeDirectoriesEntry entry(inc, lfbt);
+  IncludeDirectoriesEntry entry(incString, lfbt);
   this->IncludeDirectoriesEntries.insert(position, entry);
 
   // Property on each target:
@@ -1642,9 +1654,14 @@ void cmMakefile::AddIncludeDirectory(const char* inc, bool before)
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddSystemIncludeDirectory(const char* dir)
+void
+cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
 {
-  this->SystemIncludeDirectories.insert(dir);
+  for(std::set<cmStdString>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    this->SystemIncludeDirectories.insert(*li);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2243,7 +2260,7 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName)
     {
     return true;
     }
-  // If we are doing an in-source build, than the test will always fail
+  // If we are doing an in-source build, then the test will always fail
   if ( cmSystemTools::SameFile(this->GetHomeDirectory(),
                                this->GetHomeOutputDirectory()) )
     {
@@ -2254,8 +2271,8 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName)
     return true;
     }
 
-  // Check if this is subdirectory of the source tree but not a
-  // subdirectory of a build tree
+  // Check if this is a subdirectory of the source tree but not a
+  // subdirectory of the build tree
   if ( cmSystemTools::IsSubDirectory(fileName,
       this->GetHomeDirectory()) &&
     !cmSystemTools::IsSubDirectory(fileName,

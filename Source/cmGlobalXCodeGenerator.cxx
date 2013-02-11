@@ -1367,16 +1367,18 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
 }
 
 //----------------------------------------------------------------------------
-// This function removes each occurence of the flag and returns the last one
+// This function removes each occurrence of the flag and returns the last one
 // (i.e., the dominant flag in GCC)
 std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
                                                 std::string& flags)
 {
   std::string retFlag;
-  std::string::size_type pos = flags.rfind(flag);
+  std::string::size_type lastOccurancePos = flags.rfind(flag);
   bool saved = false;
-  while(pos != flags.npos)
+  while(lastOccurancePos != flags.npos)
     {
+    //increment pos, we use lastOccurancePos to reduce search space on next inc
+    std::string::size_type pos = lastOccurancePos;
     if(pos == 0 || flags[pos-1]==' ')
       {
       while(pos < flags.size() && flags[pos] != ' ')
@@ -1388,9 +1390,12 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
         flags[pos] = ' ';
         pos++;
         }
-      }
       saved = true;
-      pos = flags.rfind(flag);
+      }
+    //decrement lastOccurancePos while making sure we don't loop around
+    //and become a very large positive number since size_type is unsigned
+    lastOccurancePos = lastOccurancePos == 0 ? 0 : lastOccurancePos-1;
+    lastOccurancePos = flags.rfind(flag,lastOccurancePos);
     }
   return retFlag;
 }
@@ -1676,11 +1681,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs, exportMacro);
     }
   cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
-  this->AppendDefines(ppDefs, gtgt->GetCompileDefinitions().c_str());
+  this->AppendDefines(ppDefs, target.GetCompileDefinitions().c_str());
   if(configName)
     {
     this->AppendDefines(ppDefs,
-                        gtgt->GetCompileDefinitions(configName).c_str());
+                        target.GetCompileDefinitions(configName).c_str());
     }
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());

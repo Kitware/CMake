@@ -289,6 +289,22 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 
+static const struct TargetDefinedNode : public cmGeneratorExpressionNode
+{
+  TargetDefinedNode() {}
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return context->Makefile->FindTargetToUse(parameters.front().c_str())
+      ? "1" : "0";
+  }
+} targetDefinedNode;
+
 //----------------------------------------------------------------------------
 static const char* targetPropertyTransitiveWhitelist[] = {
     "INTERFACE_INCLUDE_DIRECTORIES"
@@ -426,6 +442,34 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     const char *prop = target->GetProperty(propertyName.c_str());
     if (!prop)
       {
+      if (target->IsImported())
+        {
+        return std::string();
+        }
+      if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
+        {
+        return std::string();
+        }
+      if (propertyName == "POSITION_INDEPENDENT_CODE")
+        {
+        return target->GetLinkInterfaceDependentBoolProperty(
+                    "POSITION_INDEPENDENT_CODE", context->Config) ? "1" : "0";
+        }
+      if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
+                                                       context->Config))
+        {
+        return target->GetLinkInterfaceDependentBoolProperty(
+                                                propertyName,
+                                                context->Config) ? "1" : "0";
+        }
+      if (target->IsLinkInterfaceDependentStringProperty(propertyName,
+                                                         context->Config))
+        {
+        return target->GetLinkInterfaceDependentStringProperty(
+                                                propertyName,
+                                                context->Config);
+        }
+
       return std::string();
       }
 
@@ -470,6 +514,105 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
   virtual int NumExpectedParameters() const { return 1; }
 
 } targetNameNode;
+
+//----------------------------------------------------------------------------
+static const char* targetPolicyWhitelist[] = {
+    "CMP0003"
+  , "CMP0004"
+  , "CMP0008"
+  , "CMP0020"
+};
+
+cmPolicies::PolicyStatus statusForTarget(cmTarget *tgt, const char *policy)
+{
+#define RETURN_POLICY(POLICY) \
+  if (strcmp(policy, #POLICY) == 0) \
+  { \
+    return tgt->GetPolicyStatus ## POLICY (); \
+  } \
+
+  RETURN_POLICY(CMP0003)
+  RETURN_POLICY(CMP0004)
+  RETURN_POLICY(CMP0008)
+  RETURN_POLICY(CMP0020)
+
+#undef RETURN_POLICY
+
+  assert("!Unreachable code. Not a valid policy");
+  return cmPolicies::WARN;
+}
+
+cmPolicies::PolicyID policyForString(const char *policy_id)
+{
+#define RETURN_POLICY_ID(POLICY_ID) \
+  if (strcmp(policy_id, #POLICY_ID) == 0) \
+  { \
+    return cmPolicies:: POLICY_ID; \
+  } \
+
+  RETURN_POLICY_ID(CMP0003)
+  RETURN_POLICY_ID(CMP0004)
+  RETURN_POLICY_ID(CMP0008)
+  RETURN_POLICY_ID(CMP0020)
+
+#undef RETURN_POLICY_ID
+
+  assert("!Unreachable code. Not a valid policy");
+  return cmPolicies::CMP0002;
+}
+
+//----------------------------------------------------------------------------
+static const struct TargetPolicyNode : public cmGeneratorExpressionNode
+{
+  TargetPolicyNode() {}
+
+  virtual int NumExpectedParameters() const { return 1; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context ,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<TARGET_POLICY:prop> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      return std::string();
+      }
+    for (size_t i = 0;
+         i < (sizeof(targetPolicyWhitelist) /
+              sizeof(*targetPolicyWhitelist));
+         ++i)
+      {
+      const char *policy = targetPolicyWhitelist[i];
+      if (parameters.front() == policy)
+        {
+        cmMakefile *mf = context->HeadTarget->GetMakefile();
+        switch(statusForTarget(context->HeadTarget, policy))
+          {
+          case cmPolicies::WARN:
+            mf->IssueMessage(cmake::AUTHOR_WARNING,
+                             mf->GetPolicies()->
+                             GetPolicyWarning(policyForString(policy)));
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::OLD:
+            return "0";
+          case cmPolicies::NEW:
+            return "1";
+          }
+        }
+      }
+    reportError(context, content->GetOriginalExpression(),
+      "$<TARGET_POLICY:prop> may only be used with a limited number of "
+      "policies.  Currently it may be used with policies CMP0003, CMP0004, "
+      "CMP0008 and CMP0020."
+      );
+    return std::string();
+  }
+
+} targetPolicyNode;
 
 //----------------------------------------------------------------------------
 template<bool linker, bool soname>
@@ -698,10 +841,14 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetPropertyNode;
   else if (identifier == "TARGET_NAME")
     return &targetNameNode;
+  else if (identifier == "TARGET_POLICY")
+    return &targetPolicyNode;
   else if (identifier == "BUILD_INTERFACE")
     return &buildInterfaceNode;
   else if (identifier == "INSTALL_INTERFACE")
     return &installInterfaceNode;
+  else if (identifier == "TARGET_DEFINED")
+    return &targetDefinedNode;
   return 0;
 
 }

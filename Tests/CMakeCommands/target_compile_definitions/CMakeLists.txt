@@ -12,15 +12,12 @@ target_compile_definitions(target_compile_definitions
   INTERFACE MY_INTERFACE_DEFINE
 )
 
-add_library(importedlib UNKNOWN IMPORTED)
-target_compile_definitions(importedlib
-  INTERFACE MY_IMPORTEDINTERFACE_DEFINE
-)
-
 add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
 
 target_compile_definitions(consumer
   PRIVATE target_compile_definitions importedlib
+  $<$<TARGET_DEFINED:notdefined>:SHOULD_NOT_BE_DEFINED>
+  $<$<TARGET_DEFINED:target_compile_definitions>:SHOULD_BE_DEFINED>
 )

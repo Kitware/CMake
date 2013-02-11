@@ -621,7 +621,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                   ->GetGeneratorTarget(target);
 
     // the compilerdefines for this target
-    std::string cdefs = gtgt->GetCompileDefinitions();
+    std::string cdefs = target->GetCompileDefinitions();
 
     if(!cdefs.empty())
       {

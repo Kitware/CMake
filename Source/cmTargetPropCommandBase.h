@@ -14,6 +14,7 @@
 #define cmTargetPropCommandBase_h
 
 #include "cmCommand.h"
+#include "cmDocumentGeneratorExpressions.h"
 
 class cmTarget;
 
@@ -31,8 +32,7 @@ public:
                            const char *prop, ArgumentFlags flags = NO_FLAGS);
 
 private:
-  virtual void HandleImportedTargetInvalidScope(const std::string &tgt,
-                                   const std::string &scope) = 0;
+  virtual void HandleImportedTarget(const std::string &tgt) = 0;
   virtual void HandleMissingTarget(const std::string &name) = 0;
 
   virtual bool HandleNonTargetArg(std::string &content,

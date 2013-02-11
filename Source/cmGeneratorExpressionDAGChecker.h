@@ -35,6 +35,9 @@ struct cmGeneratorExpressionDAGChecker
 
   void reportError(cmGeneratorExpressionContext *context,
                    const std::string &expr);
+
+  bool EvaluatingLinkLibraries();
+
 private:
   Result checkGraph() const;
 

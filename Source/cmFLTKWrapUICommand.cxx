@@ -37,9 +37,13 @@ bool cmFLTKWrapUICommand
   // get the list of GUI files from which .cxx and .h will be generated
   std::string outputDirectory = this->Makefile->GetCurrentOutputDirectory();
 
+  {
   // Some of the generated files are *.h so the directory "GUI"
   // where they are created have to be added to the include path
-  this->Makefile->AddIncludeDirectory( outputDirectory.c_str() );
+  std::vector<std::string> outputDirectories;
+  outputDirectories.push_back(outputDirectory);
+  this->Makefile->AddIncludeDirectories( outputDirectories );
+  }
 
   for(std::vector<std::string>::iterator i = (newArgs.begin() + 1);
       i != newArgs.end(); i++)

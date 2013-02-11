@@ -145,11 +145,14 @@ cmTarget::cmTarget()
   this->PolicyStatusCMP0003 = cmPolicies::WARN;
   this->PolicyStatusCMP0004 = cmPolicies::WARN;
   this->PolicyStatusCMP0008 = cmPolicies::WARN;
+  this->PolicyStatusCMP0020 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsApple = false;
   this->IsImportedTarget = false;
+  this->BuildInterfaceIncludesAppended = false;
+  this->DebugIncludesDone = false;
 }
 
 //----------------------------------------------------------------------------
@@ -892,6 +895,30 @@ void cmTarget::DefineProperties(cmake *cm)
      "requirement for their INTERFACE_POSITION_INDEPENDENT_CODE property.");
 
   cm->DefineProperty
+    ("COMPATIBLE_INTERFACE_BOOL", cmProperty::TARGET,
+     "Properties which must be compatible with their link interface",
+     "The COMPATIBLE_INTERFACE_BOOL property may contain a list of properties"
+     "for this target which must be consistent when evaluated as a boolean "
+     "in the INTERFACE of all linked dependencies.  For example, if a "
+     "property \"FOO\" appears in the list, then the \"INTERFACE_FOO\" "
+     "property content in all dependencies must be consistent with each "
+     "other, and with the \"FOO\" property in this target.  "
+     "Consistency in this sense has the meaning that if the property is set,"
+     "then it must have the same boolean value as all others, and if the "
+     "property is not set, then it is ignored.");
+
+  cm->DefineProperty
+    ("COMPATIBLE_INTERFACE_STRING", cmProperty::TARGET,
+     "Properties which must be string-compatible with their link interface",
+     "The COMPATIBLE_INTERFACE_STRING property may contain a list of "
+     "properties for this target which must be the same when evaluated as "
+     "a string in the INTERFACE of all linked dependencies.  For example, "
+     "if a property \"FOO\" appears in the list, then the \"INTERFACE_FOO\" "
+     "property content in all dependencies must be equal with each "
+     "other, and with the \"FOO\" property in this target.  If the "
+     "property is not set, then it is ignored.");
+
+  cm->DefineProperty
     ("POST_INSTALL_SCRIPT", cmProperty::TARGET,
      "Deprecated install support.",
      "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
@@ -1485,6 +1512,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0004);
   this->PolicyStatusCMP0008 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0008);
+  this->PolicyStatusCMP0020 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0020);
 }
 
 //----------------------------------------------------------------------------
@@ -1506,6 +1535,13 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkClosureMap.clear();
+  for (cmTargetLinkInformationMap::const_iterator it
+      = this->LinkInformation.begin();
+      it != this->LinkInformation.end(); ++it)
+    {
+    delete it->second;
+    }
+  this->LinkInformation.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -2233,6 +2269,14 @@ static std::string targetNameGenex(const char *lib)
 }
 
 //----------------------------------------------------------------------------
+static bool isGeneratorExpression(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib,
                               LinkLibraryType llt)
@@ -2247,12 +2291,18 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
   const bool isNonImportedTarget = tgt && !tgt->IsImported();
 
-  std::string libName = isNonImportedTarget ? targetNameGenex(lib)
-                                          : std::string(lib);
+  const std::string libName = (isNonImportedTarget && llt != GENERAL)
+                                                        ? targetNameGenex(lib)
+                                                        : std::string(lib);
   this->AppendProperty("LINK_LIBRARIES",
                        this->GetDebugGeneratorExpressions(libName,
                                                           llt).c_str());
   }
+
+  if (isGeneratorExpression(lib))
+    {
+    return;
+    }
 
   cmTarget::LibraryID tmp;
   tmp.first = lib;
@@ -2655,6 +2705,30 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::AppendBuildInterfaceIncludes()
+{
+  if (this->BuildInterfaceIncludesAppended)
+    {
+    return;
+    }
+  this->BuildInterfaceIncludesAppended = true;
+
+  if (this->Makefile->IsOn("CMAKE_BUILD_INTERFACE_INCLUDES"))
+    {
+    const char *binDir = this->Makefile->GetStartOutputDirectory();
+    const char *srcDir = this->Makefile->GetStartDirectory();
+    const std::string dirs = std::string(binDir ? binDir : "")
+                            + std::string(binDir ? ";" : "")
+                            + std::string(srcDir ? srcDir : "");
+    if (!dirs.empty())
+      {
+      this->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
+                            ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
                      bool before)
 {
@@ -2688,10 +2762,16 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
     cmSystemTools::ExpandListArgument(debugProp, debugProperties);
     }
 
-  bool debugIncludes = std::find(debugProperties.begin(),
+  bool debugIncludes = !this->DebugIncludesDone
+                    && std::find(debugProperties.begin(),
                                  debugProperties.end(),
                                  "INCLUDE_DIRECTORIES")
                         != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->DebugIncludesDone = true;
+    }
 
   for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
       it = this->Internal->IncludeDirectoriesEntries.begin(),
@@ -2727,11 +2807,40 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
     if (!usedIncludes.empty())
       {
       this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG,
-                            "Used includes:\n" + usedIncludes,
-                            (*it)->ge->GetBacktrace());
+                            "Used includes for target " + this->Name + ":\n"
+                            + usedIncludes, (*it)->ge->GetBacktrace());
       }
     }
   return includes;
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetCompileDefinitions(const char *config)
+{
+  std::string defPropName = "COMPILE_DEFINITIONS";
+  if (config)
+    {
+    defPropName += "_" + cmSystemTools::UpperCase(config);
+    }
+
+  const char *prop = this->GetProperty(defPropName.c_str());
+
+  if (!prop)
+    {
+    return "";
+    }
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                             this->GetName(),
+                                             defPropName, 0, 0);
+  return ge.Parse(prop)->Evaluate(this->Makefile,
+                                 config,
+                                 false,
+                                 this,
+                                 &dagChecker);
 }
 
 //----------------------------------------------------------------------------
@@ -4431,22 +4540,69 @@ void cmTarget::AddLinkDependentTargetsForProperties(
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
-                                                     const char *config)
+template<typename PropertyType>
+PropertyType getTypedProperty(cmTarget *tgt, const char *prop,
+                              PropertyType *);
+
+//----------------------------------------------------------------------------
+template<>
+bool getTypedProperty<bool>(cmTarget *tgt, const char *prop, bool *)
 {
-  bool propContent = this->GetPropertyAsBool(p.c_str());
-  const bool explicitlySet = this->GetProperties()
+  return tgt->GetPropertyAsBool(prop);
+}
+
+//----------------------------------------------------------------------------
+template<>
+const char *getTypedProperty<const char *>(cmTarget *tgt, const char *prop,
+                                          const char **)
+{
+  return tgt->GetProperty(prop);
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+bool consistentProperty(PropertyType lhs, PropertyType rhs);
+
+//----------------------------------------------------------------------------
+template<>
+bool consistentProperty(bool lhs, bool rhs)
+{
+  return lhs == rhs;
+}
+
+//----------------------------------------------------------------------------
+template<>
+bool consistentProperty(const char *lhs, const char *rhs)
+{
+  if (!lhs && !rhs)
+    return true;
+  if (!lhs || !rhs)
+    return false;
+  return strcmp(lhs, rhs) == 0;
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
+                                          const std::string &p,
+                                          const char *config,
+                                          const char *defaultValue,
+                                          PropertyType *)
+{
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p.c_str(),
+                                                            0);
+  const bool explicitlySet = tgt->GetProperties()
                                   .find(p.c_str())
-                                  != this->GetProperties().end();
+                                  != tgt->GetProperties().end();
   std::set<std::string> dependentTargets;
-  this->GetLinkDependentTargetsForProperty(p,
+  tgt->GetLinkDependentTargetsForProperty(p,
                                           dependentTargets);
   const bool impliedByUse =
-          this->IsNullImpliedByLinkLibraries(p);
+          tgt->IsNullImpliedByLinkLibraries(p);
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
-  cmComputeLinkInformation *info = this->GetLinkInformation(config);
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
   bool propInitialized = explicitlySet;
 
@@ -4468,20 +4624,22 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
     const bool ifaceIsSet = li->Target->GetProperties()
                             .find("INTERFACE_" + p)
                             != li->Target->GetProperties().end();
-    const bool ifacePropContent = li->Target->GetPropertyAsBool(
-                              ("INTERFACE_" + p).c_str());
+    PropertyType ifacePropContent =
+                    getTypedProperty<PropertyType>(li->Target,
+                              ("INTERFACE_" + p).c_str(), 0);
     if (explicitlySet)
       {
       if (ifaceIsSet)
         {
-        if (propContent != ifacePropContent)
+        if (!consistentProperty(propContent, ifacePropContent))
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
-            << this->GetName() << "\" does\nnot match the "
+            << tgt->GetName() << "\" does\nnot match the "
             "INTERFACE_" << p << " property requirement\nof "
             "dependency \"" << li->Target->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4499,15 +4657,16 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
       {
       if (ifaceIsSet)
         {
-        if (propContent != ifacePropContent)
+        if (!consistentProperty(propContent, ifacePropContent))
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
-            << this->GetName() << "\" is\nimplied to be FALSE because it "
-            "was used to determine the link libraries\nalready. The "
-            "INTERFACE_" << p << " property on\ndependency \""
+            << tgt->GetName() << "\" is\nimplied to be " << defaultValue
+            << " because it was used to determine the link libraries\n"
+               "already. The INTERFACE_" << p << " property on\ndependency \""
             << li->Target->GetName() << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
+          break;
           }
         else
           {
@@ -4527,14 +4686,15 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
         {
         if (propInitialized)
           {
-          if (propContent != ifacePropContent)
+          if (!consistentProperty(propContent, ifacePropContent))
             {
             cmOStringStream e;
             e << "The INTERFACE_" << p << " property of \""
               << li->Target->GetName() << "\" does\nnot agree with the value "
                 "of " << p << " already determined\nfor \""
-              << this->GetName() << "\".\n";
+              << tgt->GetName() << "\".\n";
             cmSystemTools::Error(e.str().c_str());
+            break;
             }
           else
             {
@@ -4556,6 +4716,80 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
       }
     }
   return propContent;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                                     const char *config)
+{
+  return checkInterfacePropertyCompatibility<bool>(this, p, config, "FALSE",
+                                                   0);
+}
+
+//----------------------------------------------------------------------------
+const char * cmTarget::GetLinkInterfaceDependentStringProperty(
+                                                      const std::string &p,
+                                                      const char *config)
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty", 0);
+}
+
+//----------------------------------------------------------------------------
+bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
+                             const char *interfaceProperty,
+                             const char *config)
+{
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    const char *prop = li->Target->GetProperty(interfaceProperty);
+    if (!prop)
+      {
+      continue;
+      }
+
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop, props);
+
+    for(std::vector<std::string>::iterator pi = props.begin();
+        pi != props.end(); ++pi)
+      {
+      if (*pi == p)
+        {
+        return true;
+        }
+      }
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                           const char *config)
+{
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
+                                    const char *config)
+{
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_STRING",
+                                 config);
 }
 
 //----------------------------------------------------------------------------
@@ -4896,16 +5130,30 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   {
   std::string linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
   linkProp += suffix;
-  if(const char* config_libs = this->GetProperty(linkProp.c_str()))
+
+  const char *propertyLibs = this->GetProperty(linkProp.c_str());
+
+  if(!propertyLibs)
     {
-    cmSystemTools::ExpandListArgument(config_libs,
-                                      info.LinkInterface.Libraries);
+    linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
+    propertyLibs = this->GetProperty(linkProp.c_str());
     }
-  else if(const char* libs =
-          this->GetProperty("IMPORTED_LINK_INTERFACE_LIBRARIES"))
+  if(propertyLibs)
     {
-    cmSystemTools::ExpandListArgument(libs,
-                                      info.LinkInterface.Libraries);
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        linkProp, 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(propertyLibs)
+                                       ->Evaluate(this->Makefile,
+                                                  desired_config.c_str(),
+                                                  false,
+                                                  headTarget,
+                                                  this,
+                                                  &dagChecker),
+                                    info.LinkInterface.Libraries);
     }
   }
 
@@ -5019,18 +5267,20 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
   // An explicit list of interface libraries may be set for shared
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
+  std::string linkIfaceProp;
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->IsExecutableWithExports())
     {
     // Lookup the per-configuration property.
-    std::string propName = "LINK_INTERFACE_LIBRARIES";
-    propName += suffix;
-    explicitLibraries = this->GetProperty(propName.c_str());
+    linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
+    linkIfaceProp += suffix;
+    explicitLibraries = this->GetProperty(linkIfaceProp.c_str());
 
     // If not set, try the generic property.
     if(!explicitLibraries)
       {
-      explicitLibraries = this->GetProperty("LINK_INTERFACE_LIBRARIES");
+      linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
+      explicitLibraries = this->GetProperty(linkIfaceProp.c_str());
       }
     }
 
@@ -5048,7 +5298,16 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    cmSystemTools::ExpandListArgument(explicitLibraries, iface.Libraries);
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt, this->GetName(),
+                                               linkIfaceProp, 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(explicitLibraries)->Evaluate(
+                                        this->Makefile,
+                                        config,
+                                        false,
+                                        headTarget,
+                                        this, &dagChecker), iface.Libraries);
 
     if(this->GetType() == cmTarget::SHARED_LIBRARY)
       {
@@ -5091,6 +5350,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     // The link implementation is the default link interface.
     LinkImplementation const* impl = this->GetLinkImplementation(config,
                                                               headTarget);
+    iface.ImplementationIsInterface = true;
     iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     if(this->GetType() == cmTarget::STATIC_LIBRARY)
@@ -5272,6 +5532,107 @@ std::string cmTarget::CheckCMP0004(std::string const& item)
   return lib;
 }
 
+template<typename PropertyType>
+PropertyType getLinkInterfaceDependentProperty(cmTarget *tgt,
+                                               const std::string prop,
+                                               const char *config,
+                                               PropertyType *);
+
+template<>
+bool getLinkInterfaceDependentProperty(cmTarget *tgt,
+                                         const std::string prop,
+                                         const char *config, bool *)
+{
+  return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
+}
+
+template<>
+const char * getLinkInterfaceDependentProperty(cmTarget *tgt,
+                                                 const std::string prop,
+                                                 const char *config,
+                                                 const char **)
+{
+  return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
+                              const char *propName,
+                              std::set<cmStdString> &emitted,
+                              const char *config,
+                              PropertyType *)
+{
+  const char *prop = dependee->GetProperty(propName);
+  if (!prop)
+    {
+    return;
+    }
+
+  std::vector<std::string> props;
+  cmSystemTools::ExpandListArgument(prop, props);
+
+  for(std::vector<std::string>::iterator pi = props.begin();
+      pi != props.end(); ++pi)
+    {
+    if (depender->GetMakefile()->GetCMakeInstance()
+                      ->GetIsPropertyDefined(pi->c_str(),
+                                              cmProperty::TARGET))
+      {
+      cmOStringStream e;
+      e << "Target \"" << dependee->GetName() << "\" has property \""
+        << *pi << "\" listed in its " << propName << " property.  "
+          "This is not allowed.  Only user-defined properties may appear "
+          "listed in the " << propName << " property.";
+      depender->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    if(emitted.insert(*pi).second)
+      {
+      getLinkInterfaceDependentProperty<PropertyType>(depender, *pi, config,
+                                                      0);
+      if (cmSystemTools::GetErrorOccuredFlag())
+        {
+        return;
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                          const char* config)
+{
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  std::set<cmStdString> emitted;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    checkPropertyConsistency<bool>(this, li->Target,
+                                   "COMPATIBLE_INTERFACE_BOOL",
+                                   emitted, config, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_STRING",
+                                           emitted, config, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    }
+}
+
 //----------------------------------------------------------------------------
 cmComputeLinkInformation*
 cmTarget::GetLinkInformation(const char* config, cmTarget *head)
@@ -5296,6 +5657,11 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
     // Store the information for this configuration.
     cmTargetLinkInformationMap::value_type entry(key, info);
     i = this->LinkInformation.insert(entry).first;
+
+    if (info)
+      {
+      this->CheckPropertyCompatibility(info, config);
+      }
     }
   return i->second;
 }

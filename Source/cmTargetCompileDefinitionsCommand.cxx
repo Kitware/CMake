@@ -20,13 +20,11 @@ bool cmTargetCompileDefinitionsCommand
 }
 
 void cmTargetCompileDefinitionsCommand
-::HandleImportedTargetInvalidScope(const std::string &scope,
-                                   const std::string &tgt)
+::HandleImportedTarget(const std::string &tgt)
 {
   cmOStringStream e;
-  e << "Cannot specify " << scope << " compile definitions for imported "
-       "target \"" << tgt << "\".  Compile definitions can only be "
-       "specified for an imported target in the INTERFACE mode.";
+  e << "Cannot specify compile definitions for imported target \""
+    << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
 

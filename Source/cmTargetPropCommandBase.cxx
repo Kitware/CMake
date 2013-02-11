@@ -66,6 +66,14 @@ bool cmTargetPropCommandBase
 }
 
 //----------------------------------------------------------------------------
+static bool isGeneratorExpression(const std::string &lib)
+{
+  const std::string::size_type openpos = lib.find("$<");
+  return (openpos != std::string::npos)
+      && (lib.find(">", openpos) != std::string::npos);
+}
+
+//----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
 ::ProcessContentArgs(std::vector<std::string> const& args,
                      unsigned int &argIndex, bool prepend)
@@ -80,9 +88,9 @@ bool cmTargetPropCommandBase
     return false;
     }
 
-  if(this->Target->IsImported() && scope != "INTERFACE")
+  if(this->Target->IsImported())
     {
-    this->HandleImportedTargetInvalidScope(args[0], scope);
+    this->HandleImportedTarget(args[0]);
     return false;
     }
 
@@ -104,6 +112,10 @@ bool cmTargetPropCommandBase
       {
       content += sep + "$<TARGET_PROPERTY:" + args[i]
                       + ",INTERFACE_" + this->Property + ">";
+      }
+    else if(isGeneratorExpression(args[i]))
+      {
+      content += sep + args[i];
       }
     else if (!this->HandleNonTargetArg(content, sep, args[i], args[0]))
       {

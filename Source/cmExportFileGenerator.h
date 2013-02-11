@@ -47,7 +47,8 @@ protected:
 
   // Generate per-configuration target information to the given output
   // stream.
-  void GenerateImportConfig(std::ostream& os, const char* config);
+  void GenerateImportConfig(std::ostream& os, const char* config,
+                            std::vector<std::string> &missingTargets);
 
   // Methods to implement export file code generation.
   void GenerateImportHeaderCode(std::ostream& os, const char* config = 0);
@@ -85,7 +86,8 @@ protected:
   /** Each subclass knows where the target files are located.  */
   virtual void GenerateImportTargetsConfig(std::ostream& os,
                                            const char* config,
-                                           std::string const& suffix) = 0;
+                                           std::string const& suffix,
+                            std::vector<std::string> &missingTargets) = 0;
 
   /** Each subclass knows how to deal with a target that is  missing from an
    *  export set.  */
@@ -99,12 +101,27 @@ protected:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
+  void PopulateInterfaceProperty(const char *propName, cmTarget *target,
+                                 ImportPropertyMap &properties);
+  void PopulateCompatibleInterfaceProperties(cmTarget *target,
+                                 ImportPropertyMap &properties);
   void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
                                    const ImportPropertyMap &properties);
 
+  void SetImportLinkInterface(const char* config, std::string const& suffix,
+                    cmGeneratorExpression::PreprocessContext preprocessRule,
+                    cmTarget* target, ImportPropertyMap& properties,
+                    std::vector<std::string>& missingTargets);
+
+  enum FreeTargetsReplace {
+    ReplaceFreeTargets,
+    NoReplaceFreeTargets
+  };
+
   void ResolveTargetsInGeneratorExpressions(std::string &input,
-                                    cmTarget* target,
-                                    std::vector<std::string> &missingTargets);
+                          cmTarget* target,
+                          std::vector<std::string> &missingTargets,
+                          FreeTargetsReplace replace = NoReplaceFreeTargets);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
@@ -128,6 +145,13 @@ private:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
+
+  bool AddTargetNamespace(std::string &input, cmTarget* target,
+                          std::vector<std::string> &missingTargets);
+
+  void ResolveTargetsInGeneratorExpression(std::string &input,
+                                    cmTarget* target,
+                                    std::vector<std::string> &missingTargets);
 };
 
 #endif
