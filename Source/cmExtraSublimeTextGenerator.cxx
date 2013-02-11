@@ -11,14 +11,16 @@
   See the License for more information.
 ============================================================================*/
 #include "cmExtraSublimeTextGenerator.h"
+#include "cmake.h"
+#include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmLocalGenerator.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
-#include "cmake.h"
 #include "cmSourceFile.h"
-#include "cmGeneratedFileStream.h"
-#include "cmTarget.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmXMLSafe.h"
 
 #include <cmsys/SystemTools.hxx>
@@ -253,10 +255,11 @@ void cmExtraSublimeTextGenerator::
                cmTarget* target,
                const char* make,
                const cmMakefile* makefile,
-               const char* compiler,
+               const char*, //compiler
                MapSourceFileFlags& sourceFileFlags,
                bool firstTarget)
 {
+
   if (target != 0)
     {
       cmGeneratorTarget *gtgt = this->GlobalGenerator
@@ -426,7 +429,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   lg->AppendFlags(flags, makefile->GetDefineFlags());
 
   // Add target-specific flags.
-  if(gtgt->GetProperty("COMPILE_FLAGS"))
+  if(target->GetProperty("COMPILE_FLAGS"))
     {
     std::string langIncludeExpr = "CMAKE_";
     langIncludeExpr += language;
@@ -437,7 +440,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
       cmsys::RegularExpression r(regex);
       std::vector<std::string> args;
       cmSystemTools::
-        ParseWindowsCommandLine(gtgt->GetProperty("COMPILE_FLAGS"), args);
+        ParseWindowsCommandLine(target->GetProperty("COMPILE_FLAGS"), args);
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
         {
@@ -449,12 +452,12 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
       }
     else
       {
-      lg->AppendFlags(flags, gtgt->GetProperty("COMPILE_FLAGS"));
+      lg->AppendFlags(flags, target->GetProperty("COMPILE_FLAGS"));
       }
     }
 
   // Add source file specific flags.
-  lg->AppendFlags(flags, source->GetProperty("COMPILE_FLAGS"));
+  lg->AppendFlags(flags, target->GetProperty("COMPILE_FLAGS"));
 
   // TODO: Handle Apple frameworks.
 
@@ -466,7 +469,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
 std::string
 cmExtraSublimeTextGenerator::
 ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
-               cmGeneratorTarget* gtgt)
+               cmGeneratorTarget*)
 
 {
   std::set<std::string> defines;
@@ -485,12 +488,12 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
     }
 
   // Add preprocessor definitions for this target and configuration.
-  lg->AppendDefines(defines, gtgt->GetCompileDefinitions());
+  lg->AppendDefines(defines, target->GetCompileDefinitions());
   lg->AppendDefines(defines, source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(config);
-  lg->AppendDefines(defines, gtgt->GetCompileDefinitions(config));
+  lg->AppendDefines(defines, target->GetCompileDefinitions(config));
   lg->AppendDefines(defines, source->GetProperty(defPropName.c_str()));
   }
 
