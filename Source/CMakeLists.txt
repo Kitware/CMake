@@ -184,6 +184,8 @@ set(SRCS
   cmExtraCodeBlocksGenerator.h
   cmExtraEclipseCDT4Generator.cxx
   cmExtraEclipseCDT4Generator.h
+  cmExtraSublimeTextGenerator.cxx
+  cmExtraSublimeTextGenerator.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
