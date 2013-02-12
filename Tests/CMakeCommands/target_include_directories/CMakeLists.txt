@@ -52,6 +52,6 @@ set_property(TARGET linked PROPERTY
 target_include_directories(consumer
   PRIVATE
     $<TARGET_PROPERTY:target_include_directories,INTERFACE_INCLUDE_DIRECTORIES>
-    $<LINKED:linked>
+    $<TARGET_PROPERTY:linked,INTERFACE_INCLUDE_DIRECTORIES>
   relative_dir
 )
