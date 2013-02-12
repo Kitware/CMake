@@ -1496,10 +1496,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   // Initialize the INCLUDE_DIRECTORIES property based on the current value
   // of the same directory property:
-  const std::vector<cmMakefileIncludeDirectoriesEntry> parentIncludes =
+  const std::vector<cmValueWithOrigin> parentIncludes =
                               this->Makefile->GetIncludeDirectoriesEntries();
 
-  for (std::vector<cmMakefileIncludeDirectoriesEntry>::const_iterator it
+  for (std::vector<cmValueWithOrigin>::const_iterator it
               = parentIncludes.begin(); it != parentIncludes.end(); ++it)
     {
     this->InsertInclude(*it);
@@ -2743,7 +2743,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
+void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
                      bool before)
 {
   cmGeneratorExpression ge(entry.Backtrace);

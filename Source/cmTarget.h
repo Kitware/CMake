@@ -15,7 +15,7 @@
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
-#include "cmMakefileIncludeDirectoriesEntry.h"
+#include "cmListFileCache.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -493,7 +493,7 @@ public:
   std::string GetFrameworkDirectory(const char* config = 0);
 
   std::vector<std::string> GetIncludeDirectories(const char *config);
-  void InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
+  void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
 
   void AppendBuildInterfaceIncludes();

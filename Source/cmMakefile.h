@@ -22,7 +22,6 @@
 #include "cmNewLineStyle.h"
 #include "cmGeneratorTarget.h"
 #include "cmake.h"
-#include "cmMakefileIncludeDirectoriesEntry.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -863,9 +862,7 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
-  typedef cmMakefileIncludeDirectoriesEntry IncludeDirectoriesEntry;
-
-  std::vector<IncludeDirectoriesEntry> GetIncludeDirectoriesEntries() const
+  std::vector<cmValueWithOrigin> GetIncludeDirectoriesEntries() const
   {
     return this->IncludeDirectoriesEntries;
   }
@@ -921,7 +918,7 @@ protected:
   std::vector<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
-  std::vector<IncludeDirectoriesEntry> IncludeDirectoriesEntries;
+  std::vector<cmValueWithOrigin> IncludeDirectoriesEntries;
 
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);
