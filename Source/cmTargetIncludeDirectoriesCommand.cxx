@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmTargetIncludeDirectoriesCommand.h"
 
-#include "cmMakefileIncludeDirectoriesEntry.h"
-
 //----------------------------------------------------------------------------
 bool cmTargetIncludeDirectoriesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -71,6 +69,6 @@ void cmTargetIncludeDirectoriesCommand
 {
   cmListFileBacktrace lfbt;
   this->Makefile->GetBacktrace(lfbt);
-  cmMakefileIncludeDirectoriesEntry entry(this->Join(content), lfbt);
+  cmValueWithOrigin entry(this->Join(content), lfbt);
   tgt->InsertInclude(entry, prepend);
 }

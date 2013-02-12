@@ -17,9 +17,6 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/poison/common.h" "#error Should not be i
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cure")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cure/common.h" "#define CURE_DEFINE\n")
 
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/linkedinclude")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/linkedinclude/linkedinclude.h" "#define LINKEDINCLUDE_DEFINE\n")
-
 add_executable(target_include_directories
   "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
 )
@@ -45,13 +42,8 @@ add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
 
-add_library(linked UNKNOWN IMPORTED)
-set_property(TARGET linked PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/linkedinclude")
-
 target_include_directories(consumer
   PRIVATE
     $<TARGET_PROPERTY:target_include_directories,INTERFACE_INCLUDE_DIRECTORIES>
-    $<LINKED:linked>
   relative_dir
 )
