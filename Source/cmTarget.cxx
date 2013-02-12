@@ -137,6 +137,7 @@ public:
     std::vector<std::string> CachedIncludes;
   };
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
+  std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
 };
 
 //----------------------------------------------------------------------------
@@ -2743,6 +2744,12 @@ void cmTarget::AppendBuildInterfaceIncludes()
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::AppendTllInclude(const cmValueWithOrigin &entry)
+{
+  this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
                      bool before)
 {
@@ -2754,6 +2761,73 @@ void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
 
   this->Internal->IncludeDirectoriesEntries.insert(position,
       new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(entry.Value)));
+}
+
+//----------------------------------------------------------------------------
+static void processIncludeDirectories(cmTarget *tgt,
+      const std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries,
+      std::vector<std::string> &includes,
+      std::set<std::string> &uniqueIncludes,
+      cmGeneratorExpressionDAGChecker *dagChecker,
+      const char *config, bool debugIncludes)
+{
+  cmMakefile *mf = tgt->GetMakefile();
+
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = entries.begin(), end = entries.end(); it != end; ++it)
+    {
+    bool testIsOff = true;
+    bool cacheIncludes = false;
+    std::vector<std::string> entryIncludes = (*it)->CachedIncludes;
+    if(!entryIncludes.empty())
+      {
+      testIsOff = false;
+      }
+    else
+      {
+      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+                                                config,
+                                                false,
+                                                tgt,
+                                                dagChecker),
+                                      entryIncludes);
+      if (mf->IsGeneratingBuildSystem()
+          && !(*it)->ge->GetHadContextSensitiveCondition())
+        {
+        cacheIncludes = true;
+        }
+      }
+    std::string usedIncludes;
+    for(std::vector<std::string>::iterator
+          li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
+      {
+      if (testIsOff && !cmSystemTools::IsOff(li->c_str()))
+        {
+        cmSystemTools::ConvertToUnixSlashes(*li);
+        }
+      std::string inc = *li;
+
+      if(uniqueIncludes.insert(inc).second)
+        {
+        includes.push_back(inc);
+        if (debugIncludes)
+          {
+          usedIncludes += " * " + inc + "\n";
+          }
+        }
+      }
+    if (cacheIncludes)
+      {
+      (*it)->CachedIncludes = entryIncludes;
+      }
+    if (!usedIncludes.empty())
+      {
+      mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
+                            std::string("Used includes for target ")
+                            + tgt->GetName() + ":\n"
+                            + usedIncludes, (*it)->ge->GetBacktrace());
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2788,63 +2862,48 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
     this->DebugIncludesDone = true;
     }
 
-  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
-      it = this->Internal->IncludeDirectoriesEntries.begin(),
-      end = this->Internal->IncludeDirectoriesEntries.end();
+  processIncludeDirectories(this,
+                            this->Internal->IncludeDirectoriesEntries,
+                            includes,
+                            uniqueIncludes,
+                            &dagChecker,
+                            config,
+                            debugIncludes);
+
+  std::vector<cmTargetInternals::IncludeDirectoriesEntry*>
+                                      linkInterfaceIncludeDirectoriesEntries;
+
+  for (std::vector<cmValueWithOrigin>::const_iterator
+      it = this->Internal->LinkInterfaceIncludeDirectoriesEntries.begin(),
+      end = this->Internal->LinkInterfaceIncludeDirectoriesEntries.end();
       it != end; ++it)
     {
-
-    bool testIsOff = true;
-    bool cacheIncludes = false;
-    std::vector<std::string> entryIncludes = (*it)->CachedIncludes;
-    if(!entryIncludes.empty())
+    {
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(it->Value);
+    std::string result = cge->Evaluate(this->Makefile, config,
+                                       false, this, 0, 0);
+    if (!this->Makefile->FindTargetToUse(result.c_str()))
       {
-      testIsOff = false;
-      }
-    else
-      {
-      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(this->Makefile,
-                                                config,
-                                                false,
-                                                this,
-                                                &dagChecker),
-                                      entryIncludes);
-      if (this->Makefile->IsGeneratingBuildSystem()
-          && !(*it)->ge->GetHadContextSensitiveCondition())
-        {
-        cacheIncludes = true;
-        }
-      }
-    std::string usedIncludes;
-    for(std::vector<std::string>::iterator
-          li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
-      {
-      if (testIsOff && !cmSystemTools::IsOff(li->c_str()))
-        {
-        cmSystemTools::ConvertToUnixSlashes(*li);
-        }
-      std::string inc = *li;
-
-      if(uniqueIncludes.insert(inc).second)
-        {
-        includes.push_back(inc);
-        if (debugIncludes)
-          {
-          usedIncludes += " * " + inc + "\n";
-          }
-        }
-      }
-    if (cacheIncludes)
-      {
-      (*it)->CachedIncludes = entryIncludes;
-      }
-    if (!usedIncludes.empty())
-      {
-      this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG,
-                            "Used includes for target " + this->Name + ":\n"
-                            + usedIncludes, (*it)->ge->GetBacktrace());
+      continue;
       }
     }
+    cmGeneratorExpression ge(it->Backtrace);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
+        "$<TARGET_PROPERTY:" + it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
+
+    linkInterfaceIncludeDirectoriesEntries.push_back(
+                        new cmTargetInternals::IncludeDirectoriesEntry(cge));
+    }
+
+  processIncludeDirectories(this,
+                            linkInterfaceIncludeDirectoriesEntries,
+                            includes,
+                            uniqueIncludes,
+                            &dagChecker,
+                            config,
+                            debugIncludes);
+
   return includes;
 }
 
@@ -2858,23 +2917,57 @@ std::string cmTarget::GetCompileDefinitions(const char *config)
     }
 
   const char *prop = this->GetProperty(defPropName.c_str());
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                            this->GetName(),
+                                            defPropName, 0, 0);
 
-  if (!prop)
+  std::string result;
+  if (prop)
     {
-    return "";
+    cmGeneratorExpression ge(lfbt);
+
+    result = ge.Parse(prop)->Evaluate(this->Makefile,
+                                  config,
+                                  false,
+                                  this,
+                                  &dagChecker);
     }
 
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
+  std::vector<std::string> libs;
+  this->GetDirectLinkLibraries(config, libs, this);
 
-  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                             this->GetName(),
-                                             defPropName, 0, 0);
-  return ge.Parse(prop)->Evaluate(this->Makefile,
-                                 config,
-                                 false,
-                                 this,
-                                 &dagChecker);
+  if (libs.empty())
+    {
+    return result;
+    }
+
+  std::string sep;
+  std::string depString;
+  for (std::vector<std::string>::const_iterator it = libs.begin();
+      it != libs.end(); ++it)
+    {
+    if (this->Makefile->FindTargetToUse(it->c_str()))
+      {
+      depString += sep + "$<TARGET_PROPERTY:"
+                + *it + ",INTERFACE_COMPILE_DEFINITIONS>";
+      sep = ";";
+      }
+    }
+
+  cmGeneratorExpression ge2(lfbt);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge2 = ge2.Parse(depString);
+  std::string depResult = cge2->Evaluate(this->Makefile,
+                      config,
+                      false,
+                      this,
+                      &dagChecker);
+  if (!depResult.empty())
+    {
+    result += (result.empty() ? "" : ";") + depResult;
+    }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------
