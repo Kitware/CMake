@@ -451,15 +451,68 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 
     const char *prop = target->GetProperty(propertyName.c_str());
+
+    std::string linkedTargetsContent;
+
+    if (dagCheckerParent)
+      {
+      if (dagCheckerParent->EvaluatingLinkLibraries())
+        {
+        if(!prop)
+          {
+          return std::string();
+          }
+        }
+      else
+        {
+        assert(dagCheckerParent->EvaluatingIncludeDirectories()
+            || dagCheckerParent->EvaluatingCompileDefinitions());
+
+        if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
+            || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
+          {
+          const cmTarget::LinkInterface *iface = target->GetLinkInterface(
+                                                        context->Config,
+                                                        context->HeadTarget);
+          if(iface)
+            {
+            cmGeneratorExpression ge(context->Backtrace);
+
+            std::string sep;
+            std::string depString;
+            for (std::vector<std::string>::const_iterator
+                it = iface->Libraries.begin();
+                it != iface->Libraries.end(); ++it)
+              {
+              if (context->Makefile->FindTargetToUse(it->c_str()))
+                {
+                depString +=
+                  sep + "$<TARGET_PROPERTY:" + *it + "," + propertyName + ">";
+                sep = ";";
+                }
+              }
+            cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                          ge.Parse(depString);
+            linkedTargetsContent = cge->Evaluate(context->Makefile,
+                                context->Config,
+                                context->Quiet,
+                                context->HeadTarget,
+                                target,
+                                &dagChecker);
+            if (cge->GetHadContextSensitiveCondition())
+              {
+              context->HadContextSensitiveCondition = true;
+              }
+            }
+          }
+        }
+      }
+
     if (!prop)
       {
       if (target->IsImported())
         {
-        return std::string();
-        }
-      if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
-        {
-        return std::string();
+        return linkedTargetsContent;
         }
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config))
@@ -480,7 +533,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return propContent ? propContent : "";
         }
 
-      return std::string();
+      return linkedTargetsContent;
       }
 
     for (size_t i = 0;
@@ -502,6 +555,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         if (cge->GetHadContextSensitiveCondition())
           {
           context->HadContextSensitiveCondition = true;
+          }
+        if (!linkedTargetsContent.empty())
+          {
+          result += (result.empty() ? "" : ";") + linkedTargetsContent;
           }
         return result;
         }
