@@ -495,6 +495,7 @@ public:
   std::vector<std::string> GetIncludeDirectories(const char *config);
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
+  void AppendTllInclude(const cmValueWithOrigin &entry);
 
   void AppendBuildInterfaceIncludes();
 
