@@ -252,42 +252,10 @@ cmTargetLinkLibrariesCommand
 }
 
 //----------------------------------------------------------------------------
-static std::string compileProperty(cmTarget *tgt, const std::string &lib,
-                                   bool isGenex,
-                                   const std::string &property,
-                                   cmTarget::LinkLibraryType llt)
-{
-  std::string value = !isGenex ? "$<LINKED:" + lib + ">"
-                               : "$<$<TARGET_DEFINED:" + lib + ">:" +
-                                   "$<TARGET_PROPERTY:" + lib +
-                                   ",INTERFACE_" + property + ">"
-                                 ">";
-
-  return tgt->GetDebugGeneratorExpressions(value, llt);
-}
-
-//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
-  const bool isGenex = cmGeneratorExpression::Find(lib) != std::string::npos;
-
-  const bool potentialTargetName
-                              = cmGeneratorExpression::IsValidTargetName(lib);
-
-  if (potentialTargetName || isGenex)
-    {
-    this->Target->AppendProperty("INCLUDE_DIRECTORIES",
-                                 compileProperty(this->Target, lib,
-                                                 isGenex,
-                                      "INCLUDE_DIRECTORIES", llt).c_str());
-    this->Target->AppendProperty("COMPILE_DEFINITIONS",
-                                 compileProperty(this->Target, lib,
-                                                 isGenex,
-                                      "COMPILE_DEFINITIONS", llt).c_str());
-    }
-
   // Handle normal case first.
   if(this->CurrentProcessingState != ProcessingLinkInterface)
     {
@@ -306,18 +274,6 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       // Not LINK_INTERFACE_LIBRARIES or LINK_PUBLIC, do not add to interface.
       return;
       }
-    }
-
-  if (potentialTargetName || isGenex)
-    {
-    this->Target->AppendProperty("INTERFACE_COMPILE_DEFINITIONS",
-                                compileProperty(this->Target, lib,
-                                                isGenex,
-                                        "COMPILE_DEFINITIONS", llt).c_str());
-    this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                compileProperty(this->Target, lib,
-                                                isGenex,
-                                        "INCLUDE_DIRECTORIES", llt).c_str());
     }
 
   // Get the list of configurations considered to be DEBUG.
