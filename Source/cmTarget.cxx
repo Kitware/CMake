@@ -2881,7 +2881,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
     {
     cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(it->Value);
-    std::string result = cge->Evaluate(this->Makefile, config, false, this, 0, 0);
+    std::string result = cge->Evaluate(this->Makefile, config,
+                                       false, this, 0, 0);
     if (!this->Makefile->FindTargetToUse(result.c_str()))
       {
       continue;
@@ -2892,7 +2893,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
         "$<TARGET_PROPERTY:" + it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
 
     linkInterfaceIncludeDirectoriesEntries.push_back(
-                          new cmTargetInternals::IncludeDirectoriesEntry(cge));
+                        new cmTargetInternals::IncludeDirectoriesEntry(cge));
     }
 
   processIncludeDirectories(this,
@@ -2948,7 +2949,8 @@ std::string cmTarget::GetCompileDefinitions(const char *config)
     {
     if (this->Makefile->FindTargetToUse(it->c_str()))
       {
-      depString += sep + "$<TARGET_PROPERTY:" + *it + ",INTERFACE_COMPILE_DEFINITIONS>";
+      depString += sep + "$<TARGET_PROPERTY:"
+                + *it + ",INTERFACE_COMPILE_DEFINITIONS>";
       sep = ";";
       }
     }
