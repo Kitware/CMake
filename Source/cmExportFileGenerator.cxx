@@ -264,16 +264,15 @@ void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
 {
   if (!properties.empty())
     {
-    os << "if(NOT ${CMAKE_FIND_PACKAGE_NAME}_NO_INTERFACES)\n";
     std::string targetName = this->Namespace;
     targetName += target->GetName();
-    os << "  set_target_properties(" << targetName << " PROPERTIES\n";
+    os << "set_target_properties(" << targetName << " PROPERTIES\n";
     for(ImportPropertyMap::const_iterator pi = properties.begin();
         pi != properties.end(); ++pi)
       {
-      os << "    " << pi->first << " \"" << pi->second << "\"\n";
+      os << "  " << pi->first << " \"" << pi->second << "\"\n";
       }
-    os << "  )\nendif()\n\n";
+    os << ")\n\n";
     }
 }
 
