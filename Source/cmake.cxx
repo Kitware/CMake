@@ -4033,17 +4033,10 @@ static bool cmakeCheckStampFile(const char* stampName)
     }
 
   // The build system is up to date.  The stamp file has been removed
-  // by the VS IDE due to a "rebuild" request.  Restore it atomically.
-  cmOStringStream stampTempStr;
-  stampTempStr << stampName << ".tmp" << cmSystemTools::RandomSeed();
-  const char* stampTemp = stampTempStr.str().c_str();
-  {
-  // TODO: Teach cmGeneratedFileStream to use a random temp file (with
-  // multiple tries in unlikely case of conflict) and use that here.
-  std::ofstream stamp(stampTemp);
+  // by the VS IDE due to a "rebuild" request.  Just restore it.
+  std::ofstream stamp(stampName);
   stamp << "# CMake generation timestamp file this directory.\n";
-  }
-  if(cmSystemTools::RenameFile(stampTemp, stampName))
+  if(stamp)
     {
     // Notify the user why CMake is not re-running.  It is safe to
     // just print to stdout here because this code is only reachable
@@ -4054,7 +4047,6 @@ static bool cmakeCheckStampFile(const char* stampName)
     }
   else
     {
-    cmSystemTools::RemoveFile(stampTemp);
     cmSystemTools::Error("Cannot restore timestamp ", stampName);
     return false;
     }
