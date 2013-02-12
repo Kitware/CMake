@@ -25,8 +25,6 @@
 
 #include <cmsys/auto_ptr.hxx>
 
-#include "assert.h"
-
 //----------------------------------------------------------------------------
 cmExportFileGenerator::cmExportFileGenerator()
 {
@@ -162,7 +160,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
                                                            preprocessRule);
     if (!prepro.empty())
       {
-      this->ResolveTargetsInGeneratorExpressions(prepro, target, propName,
+      this->ResolveTargetsInGeneratorExpressions(prepro, target,
                                                  missingTargets);
       properties[outputName] = prepro;
       }
@@ -318,14 +316,13 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
                                     std::string &input,
-                                    cmTarget* target, const char *propName,
+                                    cmTarget* target,
                                     std::vector<std::string> &missingTargets,
                                     FreeTargetsReplace replace)
 {
   if (replace == NoReplaceFreeTargets)
     {
-    this->ResolveTargetsInGeneratorExpression(input, target, propName,
-                                              missingTargets);
+    this->ResolveTargetsInGeneratorExpression(input, target, missingTargets);
     return;
     }
   std::vector<std::string> parts;
@@ -344,7 +341,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
       {
       this->ResolveTargetsInGeneratorExpression(
                                     *li,
-                                    target, propName,
+                                    target,
                                     missingTargets);
       }
     input += sep + *li;
@@ -356,7 +353,7 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
 void
 cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
                                     std::string &input,
-                                    cmTarget* target, const char *propName,
+                                    cmTarget* target,
                                     std::vector<std::string> &missingTargets)
 {
   std::string::size_type pos = 0;
@@ -391,57 +388,6 @@ cmExportFileGenerator::ResolveTargetsInGeneratorExpression(
     }
 
   std::string errorString;
-  pos = 0;
-  lastPos = pos;
-  while((pos = input.find("$<LINKED:", lastPos)) != input.npos)
-    {
-    std::string::size_type nameStartPos = pos + sizeof("$<LINKED:") - 1;
-    std::string::size_type endPos = input.find(">", nameStartPos);
-    if (endPos == input.npos)
-      {
-      errorString = "$<LINKED:...> expression incomplete";
-      break;
-      }
-    std::string targetName = input.substr(nameStartPos,
-                                                endPos - nameStartPos);
-    if(targetName.find("$<") != input.npos)
-      {
-      errorString = "$<LINKED:...> requires its parameter to be a "
-                    "literal.";
-      break;
-      }
-    if (this->AddTargetNamespace(targetName, target, missingTargets))
-      {
-      assert(propName); // The link libraries strings will
-                        // never contain $<LINKED>
-      std::string replacement = "$<TARGET_PROPERTY:"
-                              + targetName + "," + propName;
-      input.replace(pos, endPos - pos, replacement);
-      lastPos = pos + replacement.size() + 1;
-      }
-    else
-      {
-      if (pos != 0)
-        {
-        if (input[pos - 1] == ';')
-          {
-          --pos;
-          }
-        }
-      else if (input[endPos + 1] == ';')
-        {
-        ++endPos;
-        }
-      input.replace(pos, endPos - pos + 1, "");
-      lastPos = pos;
-      }
-    }
-  if (!errorString.empty())
-    {
-    mf->IssueMessage(cmake::FATAL_ERROR, errorString);
-    return;
-    }
-
   pos = 0;
   lastPos = pos;
   while((pos = input.find("$<TARGET_NAME:", lastPos)) != input.npos)
@@ -537,7 +483,7 @@ cmExportFileGenerator
                                                          preprocessRule);
   if (!prepro.empty())
     {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target, 0,
+    this->ResolveTargetsInGeneratorExpressions(prepro, target,
                                                missingTargets,
                                                ReplaceFreeTargets);
     properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = prepro;
