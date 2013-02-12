@@ -16,15 +16,9 @@ add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
 
-add_library(linked UNKNOWN IMPORTED)
-set_property(TARGET linked PROPERTY
-  INTERFACE_COMPILE_DEFINITIONS "MY_LINKED_DEFINE")
-
-
 target_compile_definitions(consumer
   PRIVATE $<TARGET_PROPERTY:target_compile_definitions,INTERFACE_COMPILE_DEFINITIONS>
   $<$<TARGET_DEFINED:notdefined>:SHOULD_NOT_BE_DEFINED>
   $<$<TARGET_DEFINED:target_compile_definitions>:SHOULD_BE_DEFINED>
-  $<TARGET_PROPERTY:linked,INTERFACE_COMPILE_DEFINITIONS>
   -DDASH_D_DEFINE
 )
