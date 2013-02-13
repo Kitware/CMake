@@ -1134,6 +1134,17 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
+    if(this->WindowsCEProject)
+      {
+      if(this->GetVersion() < VS9)
+        {
+        fout << "\t\t\t\tSubSystem=\"9\"\n";
+        }
+      else
+        {
+        fout << "\t\t\t\tSubSystem=\"8\"\n";
+        }
+      }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;
     stackVar += "_STACK_SIZE";
@@ -1223,8 +1234,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     if ( this->WindowsCEProject )
       {
-      fout << "\t\t\t\tSubSystem=\"9\"\n"
-           << "\t\t\t\tEntryPointSymbol=\""
+      if(this->GetVersion() < VS9)
+        {
+        fout << "\t\t\t\tSubSystem=\"9\"\n";
+        }
+      else
+        {
+        fout << "\t\t\t\tSubSystem=\"8\"\n";
+        }
+      fout << "\t\t\t\tEntryPointSymbol=\""
            << (isWin32Executable ? "WinMainCRTStartup" : "mainACRTStartup")
            << "\"\n";
       }
