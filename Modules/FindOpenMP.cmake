@@ -1,7 +1,9 @@
 # - Finds OpenMP support
 # This module can be used to detect OpenMP support in a compiler.
 # If the compiler supports OpenMP, the flags required to compile with
-# openmp support are set.
+# OpenMP support are returned in variables for the different languages.
+# The variables may be empty if the compiler does not need a special
+# flag to support OpenMP.
 #
 # The following variables are set:
 #   OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
