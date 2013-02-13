@@ -458,8 +458,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     const char *prop = target->GetProperty(propertyName.c_str());
 
-    std::string linkedTargetsContent;
-
     if (dagCheckerParent)
       {
       if (dagCheckerParent->EvaluatingLinkLibraries())
@@ -473,43 +471,45 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         assert(dagCheckerParent->EvaluatingIncludeDirectories()
             || dagCheckerParent->EvaluatingCompileDefinitions());
+        }
+      }
 
-        if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
-            || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
+    std::string linkedTargetsContent;
+
+    if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
+        || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
+      {
+      const cmTarget::LinkInterface *iface = target->GetLinkInterface(
+                                                    context->Config,
+                                                    context->HeadTarget);
+      if(iface)
+        {
+        cmGeneratorExpression ge(context->Backtrace);
+
+        std::string sep;
+        std::string depString;
+        for (std::vector<std::string>::const_iterator
+            it = iface->Libraries.begin();
+            it != iface->Libraries.end(); ++it)
           {
-          const cmTarget::LinkInterface *iface = target->GetLinkInterface(
-                                                        context->Config,
-                                                        context->HeadTarget);
-          if(iface)
+          if (context->Makefile->FindTargetToUse(it->c_str()))
             {
-            cmGeneratorExpression ge(context->Backtrace);
-
-            std::string sep;
-            std::string depString;
-            for (std::vector<std::string>::const_iterator
-                it = iface->Libraries.begin();
-                it != iface->Libraries.end(); ++it)
-              {
-              if (context->Makefile->FindTargetToUse(it->c_str()))
-                {
-                depString +=
-                  sep + "$<TARGET_PROPERTY:" + *it + "," + propertyName + ">";
-                sep = ";";
-                }
-              }
-            cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                          ge.Parse(depString);
-            linkedTargetsContent = cge->Evaluate(context->Makefile,
-                                context->Config,
-                                context->Quiet,
-                                context->HeadTarget,
-                                target,
-                                &dagChecker);
-            if (cge->GetHadContextSensitiveCondition())
-              {
-              context->HadContextSensitiveCondition = true;
-              }
+            depString +=
+              sep + "$<TARGET_PROPERTY:" + *it + "," + propertyName + ">";
+            sep = ";";
             }
+          }
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                      ge.Parse(depString);
+        linkedTargetsContent = cge->Evaluate(context->Makefile,
+                            context->Config,
+                            context->Quiet,
+                            context->HeadTarget,
+                            target,
+                            &dagChecker);
+        if (cge->GetHadContextSensitiveCondition())
+          {
+          context->HadContextSensitiveCondition = true;
           }
         }
       }
