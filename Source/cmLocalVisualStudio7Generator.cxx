@@ -1134,6 +1134,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
+    if(this->WindowsCEProject)
+      {
+      fout << "\t\t\t\tSubSystem=\"9\"\n";
+      }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;
     stackVar += "_STACK_SIZE";
