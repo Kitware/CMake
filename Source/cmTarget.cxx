@@ -2904,6 +2904,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                             config,
                             debugIncludes);
 
+  deleteAndClear(linkInterfaceIncludeDirectoriesEntries);
+
   return includes;
 }
 
