@@ -1832,6 +1832,28 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       }
     }
 
+  // Add runtime paths required by the languages to always be
+  // present.  This is done even when skipping rpath support.
+  {
+  cmTarget::LinkClosure const* lc =
+    this->Target->GetLinkClosure(this->Config);
+  for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
+      li != lc->Languages.end(); ++li)
+    {
+    std::string useVar = "CMAKE_" + *li +
+      "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH";
+    if(this->Makefile->IsOn(useVar.c_str()))
+      {
+      std::string dirVar = "CMAKE_" + *li +
+        "_IMPLICIT_LINK_DIRECTORIES";
+      if(const char* dirs = this->Makefile->GetDefinition(dirVar.c_str()))
+        {
+        cmCLI_ExpandListUnique(dirs, runtimeDirs, emitted);
+        }
+      }
+    }
+  }
+
   // Add runtime paths required by the platform to always be
   // present.  This is done even when skipping rpath support.
   cmCLI_ExpandListUnique(this->RuntimeAlways.c_str(), runtimeDirs, emitted);
