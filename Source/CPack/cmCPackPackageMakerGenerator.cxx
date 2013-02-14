@@ -106,55 +106,100 @@ int cmCPackPackageMakerGenerator::PackageFiles()
     resDir += "/en.lproj";
     }
 
-
-  // Create directory structure
-  std::string preflightDirName = resDir + "/PreFlight";
-  std::string postflightDirName = resDir + "/PostFlight";
   const char* preflight = this->GetOption("CPACK_PREFLIGHT_SCRIPT");
   const char* postflight = this->GetOption("CPACK_POSTFLIGHT_SCRIPT");
   const char* postupgrade = this->GetOption("CPACK_POSTUPGRADE_SCRIPT");
-  // if preflight or postflight scripts not there create directories
-  // of the same name, I think this makes it work
-  if(!preflight)
+
+  if(this->Components.empty())
     {
-    if ( !cmsys::SystemTools::MakeDirectory(preflightDirName.c_str()))
+    // Create directory structure
+    std::string preflightDirName = resDir + "/PreFlight";
+    std::string postflightDirName = resDir + "/PostFlight";
+    // if preflight or postflight scripts not there create directories
+    // of the same name, I think this makes it work
+    if(!preflight)
       {
-      cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Problem creating installer directory: "
-                    << preflightDirName.c_str() << std::endl);
-      return 0;
+      if ( !cmsys::SystemTools::MakeDirectory(preflightDirName.c_str()))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Problem creating installer directory: "
+                      << preflightDirName.c_str() << std::endl);
+        return 0;
+        }
+      }
+    if(!postflight)
+      {
+      if ( !cmsys::SystemTools::MakeDirectory(postflightDirName.c_str()))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+                      "Problem creating installer directory: "
+                      << postflightDirName.c_str() << std::endl);
+        return 0;
+        }
+      }
+    // if preflight, postflight, or postupgrade are set
+    // then copy them into the resource directory and make
+    // them executable
+    if(preflight)
+      {
+      this->CopyInstallScript(resDir.c_str(),
+                              preflight,
+                              "preflight");
+      }
+    if(postflight)
+      {
+      this->CopyInstallScript(resDir.c_str(),
+                              postflight,
+                              "postflight");
+      }
+    if(postupgrade)
+      {
+      this->CopyInstallScript(resDir.c_str(),
+                              postupgrade,
+                              "postupgrade");
       }
     }
-  if(!postflight)
+  else if(postflight)
     {
-    if ( !cmsys::SystemTools::MakeDirectory(postflightDirName.c_str()))
+    // create a postflight component to house the script
+    this->PostFlightComponent.Name = "PostFlight";
+    this->PostFlightComponent.DisplayName = "PostFlight";
+    this->PostFlightComponent.Description = "PostFlight";
+    this->PostFlightComponent.IsHidden = true;
+
+    // empty directory for pkg contents
+    std::string packageDir = toplevel + "/" + PostFlightComponent.Name;
+    if (!cmsys::SystemTools::MakeDirectory(packageDir.c_str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-                    "Problem creating installer directory: "
-                    << postflightDirName.c_str() << std::endl);
+                    "Problem creating component packages directory: "
+                    << packageDir.c_str() << std::endl);
       return 0;
       }
-    }
-  // if preflight, postflight, or postupgrade are set
-  // then copy them into the resource directory and make
-  // them executable
-  if(preflight)
-    {
-    this->CopyInstallScript(resDir.c_str(),
-                            preflight,
-                            "preflight");
-    }
-  if(postflight)
-    {
-    this->CopyInstallScript(resDir.c_str(),
+
+    // create package
+    std::string packageFileDir = packageDirFileName + "/Contents/Packages/";
+    if (!cmsys::SystemTools::MakeDirectory(packageFileDir.c_str()))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                   "Problem creating component PostFlight Packages directory: "
+                    << packageFileDir.c_str() << std::endl);
+      return 0;
+      }
+    std::string packageFile = packageFileDir +
+      this->GetPackageName(PostFlightComponent);
+    if (!this->GenerateComponentPackage(packageFile.c_str(),
+                                        packageDir.c_str(),
+                                        PostFlightComponent))
+      {
+      return 0;
+      }
+
+    // copy postflight script into resource directory of .pkg
+    std::string resourceDir = packageFile + "/Contents/Resources";
+    this->CopyInstallScript(resourceDir.c_str(),
                             postflight,
                             "postflight");
-    }
-  if(postupgrade)
-    {
-    this->CopyInstallScript(resDir.c_str(),
-                            postupgrade,
-                            "postupgrade");
     }
 
   if (!this->Components.empty())
@@ -778,6 +823,11 @@ WriteDistributionFile(const char* metapackageFile)
                 << std::endl;
       }
     }
+  if(!this->PostFlightComponent.Name.empty())
+    {
+      choiceOut << "<line choice=\"" << PostFlightComponent.Name
+                << "Choice\"></line>" << std::endl;
+    }
   choiceOut << "</choices-outline>" << std::endl;
 
   // Create the actual choices
@@ -792,6 +842,12 @@ WriteDistributionFile(const char* metapackageFile)
     {
     CreateChoice(compIt->second, choiceOut);
     }
+
+  if(!this->PostFlightComponent.Name.empty())
+    {
+    CreateChoice(PostFlightComponent, choiceOut);
+    }
+
   this->SetOption("CPACK_PACKAGEMAKER_CHOICES", choiceOut.str().c_str());
 
   // Create the distribution.dist file in the metapackage to turn it

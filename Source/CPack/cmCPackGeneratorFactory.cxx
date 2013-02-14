@@ -19,6 +19,7 @@
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
+
 #ifdef __APPLE__
 #  include "cmCPackDragNDropGenerator.h"
 #  include "cmCPackBundleGenerator.h"
@@ -37,6 +38,9 @@
 #  include "cmCPackRPMGenerator.h"
 #endif
 
+#ifdef _WIN32
+#  include "WiX/cmCPackWIXGenerator.h"
+#endif
 
 #include "cmCPackLog.h"
 
@@ -61,6 +65,8 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     {
     this->RegisterGenerator("NSIS", "Null Soft Installer",
       cmCPackNSISGenerator::CreateGenerator);
+    this->RegisterGenerator("NSIS64", "Null Soft Installer (64-bit)",
+      cmCPackNSISGenerator::CreateGenerator64);
     }
 #ifdef __CYGWIN__
   if (cmCPackCygwinBinaryGenerator::CanGenerate())
@@ -80,6 +86,13 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     this->RegisterGenerator("ZIP", "ZIP file format",
       cmCPackZIPGenerator::CreateGenerator);
     }
+#ifdef _WIN32
+  if (cmCPackWIXGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("WIX", "MSI file format via WiX tools",
+      cmCPackWIXGenerator::CreateGenerator);
+    }
+#endif
   if (cmCPackTarBZip2Generator::CanGenerate())
     {
     this->RegisterGenerator("TBZ2", "Tar BZip2 compression",

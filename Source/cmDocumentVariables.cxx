@@ -896,6 +896,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       " script, it may get fatal error messages from the script.",false,
       "Variables That Change Behavior");
 
+  cm->DefineProperty
+    ("CMAKE_DEBUG_TARGET_PROPERTIES", cmProperty::VARIABLE,
+     "Enables tracing output for target properties.",
+     "This variable can be populated with a list of properties to generate "
+     "debug output for when evaluating target properties.  Currently it can "
+     "only be used when evaluating the INCLUDE_DIRECTORIES target property.  "
+     "In that case, it outputs a backtrace for each include directory in "
+     "the build.  Default is unset.",false,"Variables That Change Behavior");
+
   // Variables defined by CMake that describe the system
 
   cm->DefineProperty
@@ -1217,6 +1226,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Where to put all the MS debug symbol files.",
      "This variable is used to initialize the "
      "PDB_OUTPUT_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_LINK_DEPENDS_NO_SHARED", cmProperty::VARIABLE,
+     "Whether to skip link dependencies on shared library files.",
+     "This variable initializes the LINK_DEPENDS_NO_SHARED "
+     "property on targets when they are created.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1612,7 +1630,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "These paths are implicit linker search directories for the compiler's "
      "language.  "
      "CMake automatically detects these directories for each language and "
-     "reports the results in this variable.", false,
+     "reports the results in this variable."
+     "\n"
+     "When a library in one of these directories is given by full path to "
+     "target_link_libraries() CMake will generate the -l<name> form on "
+     "link lines to ensure the linker searches its implicit directories "
+     "for the library.  "
+     "Note that some toolchains read implicit directories from an "
+     "environment variable such as LIBRARY_PATH so keep its value "
+     "consistent when operating in a given build tree.",false,
      "Variables for Languages");
 
   cm->DefineProperty

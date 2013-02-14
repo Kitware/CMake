@@ -49,9 +49,6 @@ public:
   ///! Get the name for this generator
   virtual const char *GetName() const { return "Generic"; };
 
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
-
   /**
    * Create LocalGenerators and process the CMakeLists files. This does not
    * actually produce any makefiles, DSPs, etc.

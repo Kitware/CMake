@@ -90,9 +90,82 @@ set_property(TARGET testLibCycleA PROPERTY LINK_INTERFACE_MULTIPLICITY 3)
 # Test exporting dependent libraries into different exports
 add_library(testLibRequired testLibRequired.c)
 add_library(testLibDepends testLibDepends.c)
+set_property(TARGET testLibDepends APPEND PROPERTY
+  INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:testLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
+)
+set_property(TARGET testLibDepends APPEND PROPERTY
+  COMPILE_DEFINITIONS
+    $<TARGET_PROPERTY:testLibRequired,INTERFACE_COMPILE_DEFINITIONS>
+)
+set_property(TARGET testLibDepends APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:testLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
+)
+set_property(TARGET testLibDepends APPEND PROPERTY
+  INTERFACE_COMPILE_DEFINITIONS
+    $<TARGET_PROPERTY:testLibRequired,INTERFACE_COMPILE_DEFINITIONS>
+)
 target_link_libraries(testLibDepends testLibRequired)
 
-install(TARGETS testLibRequired EXPORT RequiredExp DESTINATION lib )
+macro(add_include_lib _libName)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c" "// no content\n")
+  add_library(${_libName} "${CMAKE_CURRENT_BINARY_DIR}/${_libName}.c")
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${_libName}")
+  set_property(TARGET ${_libName} APPEND PROPERTY
+      INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/${_libName}")
+  if (NOT "${ARGV1}" STREQUAL "NO_HEADER")
+      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h" "// no content\n")
+  endif()
+endmacro()
+
+add_include_lib(testLibIncludeRequired1)
+add_include_lib(testLibIncludeRequired2)
+add_include_lib(testLibIncludeRequired3 NO_HEADER)
+# Generate testLibIncludeRequired4 in the testLibIncludeRequired3 directory
+# with an error. If the includes from testLibIncludeRequired3 appear first,
+# the error will be hit.
+# Below, the '3' library appears before the '4' library
+# but we are testing that the INSTALL_INTERFACE causes it not to be used
+# at build time.
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired3/testLibIncludeRequired4.h" "#error Should not be included\n")
+add_include_lib(testLibIncludeRequired4)
+add_include_lib(testLibIncludeRequired5 NO_HEADER)
+# Generate testLibIncludeRequired6 in the testLibIncludeRequired5 directory
+# with an error. If the includes from testLibIncludeRequired5 appear first,
+# the error will be hit.
+# Below, the '5' library appears before the '6' library
+# but we are testing that when the installed IMPORTED target is used, from
+# the Import side of this unit test, the '6' include from the '5' directory
+# will not be used because it is in the BUILD_INTERFACE only.
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired5/testLibIncludeRequired6.h" "#error Should not be included\n")
+add_include_lib(testLibIncludeRequired6)
+
+set_property(TARGET testLibRequired APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES
+    $<TARGET_PROPERTY:testLibIncludeRequired1,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:$<1:$<TARGET_NAME:testLibIncludeRequired2>>,INTERFACE_INCLUDE_DIRECTORIES>
+    $<INSTALL_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired3,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired4,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired5,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<INSTALL_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired6,INTERFACE_INCLUDE_DIRECTORIES>>
+)
+
+set_property(TARGET testLibRequired APPEND PROPERTY
+  INTERFACE_COMPILE_DEFINITIONS
+    testLibRequired_IFACE_DEFINE
+    $<BUILD_INTERFACE:BuildOnly_DEFINE>
+    $<INSTALL_INTERFACE:InstallOnly_DEFINE>
+)
+
+install(TARGETS testLibRequired
+                testLibIncludeRequired1
+                testLibIncludeRequired2
+                testLibIncludeRequired3
+                testLibIncludeRequired4
+                testLibIncludeRequired5
+                testLibIncludeRequired6
+        EXPORT RequiredExp DESTINATION lib )
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredConfig.cmake DESTINATION lib/cmake/testLibRequired)
 
 install(TARGETS testLibDepends EXPORT DependsExp DESTINATION lib )

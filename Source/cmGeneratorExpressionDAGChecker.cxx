@@ -24,13 +24,14 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   : Parent(parent), Target(target), Property(property),
     Content(content), Backtrace(backtrace)
 {
-  this->IsDAG = this->isDAG();
+  this->CheckResult = this->checkGraph();
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::check() const
+cmGeneratorExpressionDAGChecker::Result
+cmGeneratorExpressionDAGChecker::check() const
 {
-  return this->IsDAG;
+  return this->CheckResult;
 }
 
 //----------------------------------------------------------------------------
@@ -38,7 +39,7 @@ void cmGeneratorExpressionDAGChecker::reportError(
                   cmGeneratorExpressionContext *context,
                   const std::string &expr)
 {
-  if (this->IsDAG)
+  if (this->CheckResult == DAG)
     {
     return;
     }
@@ -57,7 +58,7 @@ void cmGeneratorExpressionDAGChecker::reportError(
     e << "Error evaluating generator expression:\n"
       << "  " << expr << "\n"
       << "Self reference on target \""
-      << context->Target->GetName() << "\".\n";
+      << context->HeadTarget->GetName() << "\".\n";
     context->Makefile->GetCMakeInstance()
       ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(),
                       parent->Backtrace);
@@ -91,16 +92,17 @@ void cmGeneratorExpressionDAGChecker::reportError(
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::isDAG() const
+cmGeneratorExpressionDAGChecker::Result
+cmGeneratorExpressionDAGChecker::checkGraph() const
 {
   const cmGeneratorExpressionDAGChecker *parent = this->Parent;
   while (parent)
     {
     if (this->Target == parent->Target && this->Property == parent->Property)
       {
-      return false;
+      return parent->Parent ? CYCLIC_REFERENCE : SELF_REFERENCE;
       }
     parent = parent->Parent;
     }
-  return true;
+  return DAG;
 }

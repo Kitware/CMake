@@ -103,7 +103,7 @@ else ()
 
     if (OPENGL_gl_LIBRARY)
       if(NOT X11_FOUND)
-        include(FindX11)
+        include(${CMAKE_CURRENT_LIST_DIR}/FindX11.cmake)
       endif()
       if (X11_FOUND)
         if (NOT APPLE)

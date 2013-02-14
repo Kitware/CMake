@@ -439,6 +439,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                             this->GetGeneratorTarget());
 
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
+  vars["LINK_FLAGS"] = cmGlobalNinjaGenerator
+                        ::EncodeLiteral(vars["LINK_FLAGS"]);
+
   vars["LINK_PATH"] = frameworkPath + linkPath;
 
   // Compute architecture specific link flags.  Yes, these go into a different
@@ -564,6 +567,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
     commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))-linkRuleLength-1000;
 #else
+    (void)linkRuleLength;
     commandLineLengthLimit = -1;
 #endif
   }

@@ -63,7 +63,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_program(FLEX_EXECUTABLE flex DOC "path to the flex executable")
+find_program(FLEX_EXECUTABLE NAMES flex win_flex DOC "path to the flex executable")
 mark_as_advanced(FLEX_EXECUTABLE)
 
 find_library(FL_LIBRARY NAMES fl
@@ -93,10 +93,12 @@ if(FLEX_EXECUTABLE)
   else()
     # older versions of flex printed "/full/path/to/executable version X.Y"
     # newer versions use "basename(executable) X.Y"
-    get_filename_component(FLEX_EXE_NAME "${FLEX_EXECUTABLE}" NAME)
-    string(REGEX REPLACE "^.*${FLEX_EXE_NAME}\"? (version )?([0-9]+[^ ]*)( .*)?$" "\\2"
+    get_filename_component(FLEX_EXE_NAME_WE "${FLEX_EXECUTABLE}" NAME_WE)
+    get_filename_component(FLEX_EXE_EXT "${FLEX_EXECUTABLE}" EXT)
+    string(REGEX REPLACE "^.*${FLEX_EXE_NAME_WE}(${FLEX_EXE_EXT})?\"? (version )?([0-9]+[^ ]*)( .*)?$" "\\3"
       FLEX_VERSION "${FLEX_version_output}")
-    unset(FLEX_EXE_NAME)
+    unset(FLEX_EXE_EXT)
+    unset(FLEX_EXE_NAME_WE)
   endif()
 
   #============================================================

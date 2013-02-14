@@ -384,6 +384,7 @@ public:
 
   //! Get the version of dart server
   int GetDartVersion() { return this->DartVersion; }
+  int GetDropSiteCDash() { return this->DropSiteCDash; }
 
   //! Add file to be submitted
   void AddSubmitFile(Part part, const char* name);
@@ -561,6 +562,7 @@ private:
   bool Quiet;
 
   int  DartVersion;
+  bool DropSiteCDash;
 
   std::vector<cmStdString> InitialCommandLineArguments;
 

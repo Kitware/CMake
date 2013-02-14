@@ -43,7 +43,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgPresentation/SlideEventHandler>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGPRESENTATION osgPresentation/SlideEventHandler)
 OSG_FIND_LIBRARY(OSGPRESENTATION osgPresentation)
 

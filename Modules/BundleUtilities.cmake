@@ -369,7 +369,7 @@ function(set_bundle_key_values keys_var context item exepath dirs copyflag)
       # For frameworks, construct the name under the embedded path from the
       # opening "${item_name}.framework/" to the closing "/${item_name}":
       #
-      string(REGEX REPLACE "^.*(${item_name}.framework/.*/${item_name}).*$" "${default_embedded_path}/\\1" embedded_item "${item}")
+      string(REGEX REPLACE "^.*(${item_name}.framework/.*/?${item_name}).*$" "${default_embedded_path}/\\1" embedded_item "${item}")
     else()
       # For other items, just use the same name as the original, but in the
       # embedded path:

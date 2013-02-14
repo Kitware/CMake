@@ -573,6 +573,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommand")
 
+  ADD_TEST_MACRO(EmptyDepends ${CMAKE_CTEST_COMMAND})
+
   add_test(CustomCommandWorkingDirectory  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/CustomCommandWorkingDirectory"
@@ -695,6 +697,29 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
 
+  # On Windows run the CPackWiXGenerator test
+  # if the WiX Toolset seems to be available
+  if(WIN32)
+    file(TO_CMAKE_PATH "$ENV{WIX}" WIX_ROOT)
+
+    find_program(WIX_LIGHT_EXECUTABLE light
+      PATHS "${WIX_ROOT}/bin"
+      DOC "WiX Toolset light.exe location")
+
+    if(WIX_LIGHT_EXECUTABLE)
+      add_test(CPackWiXGenerator ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator"
+        "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-project CPackWiXGenerator
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --test-command ${CMAKE_CMAKE_COMMAND}
+          "-DCPackWiXGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+          -P "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator/RunCPackVerifyResult.cmake")
+    endif()
+  endif()
+
   if(CTEST_RUN_CPackComponents)
     set(CPackComponents_EXTRA_OPTIONS)
     if(APPLE)
@@ -742,7 +767,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
     set(CPackComponentsForAll_EXTRA_OPTIONS)
-    set(CPackRun_CPackCommand "-DCPackCommand=${CMAKE_CPACK_COMMAND}")
     # set up list of CPack generators
     list(APPEND GENLST "ZIP")
     if(APPLE)
@@ -782,7 +806,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
              --graphviz=CPackComponentsForAll.dot
           --test-command ${CMAKE_CMAKE_COMMAND}
             "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
-            "${CPackRun_CPackCommand}"
             "${CPackRun_CPackGen}"
             "${CPackRun_CPackComponentWay}"
             -P "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll/RunCPackVerifyResult.cmake")
@@ -817,7 +840,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command
       ${CMAKE_CMAKE_COMMAND}
         -D dir=${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators
-        -D cpack=${CMAKE_CPACK_COMMAND}
         -P ${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators/RunCPack.cmake
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators")
@@ -982,6 +1004,36 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
   set_tests_properties(ExternalProject PROPERTIES
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+
+  add_test(ExternalProjectUpdateSetup ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate"
+    "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project ExternalProjectUpdateTest
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
+    --force-new-ctest-process
+    --test-command ${CMAKE_CTEST_COMMAND} -V
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
+  set_tests_properties(ExternalProjectUpdateSetup PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+
+  add_test(NAME ExternalProjectUpdate
+    COMMAND ${CMAKE_CMAKE_COMMAND}
+    -DExternalProjectUpdate_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
+    -DExternalProjectUpdate_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate
+    -DCMAKE_TEST_GENERATOR=${CMAKE_TEST_GENERATOR}
+    -DCMAKE_TEST_MAKEPROGRAM=${CMAKE_TEST_MAKEPROGRAM}
+    -DCMAKE_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
+    -P ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate/ExternalProjectUpdateTest.cmake
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
+  set_tests_properties(ExternalProjectUpdate PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT}
+    WORKING_DIRECTORY ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
+    DEPENDS ExternalProjectUpdateSetup )
 
   # do each of the tutorial steps
   foreach(STP RANGE 1 7)
@@ -1412,6 +1464,35 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --test-command VSMidl)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
+
+    if(NOT MSVC60 AND NOT CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+      # The test (and tested property) works with .sln files, so it's skipped when:
+      # * Using VS6, which doesn't use .sln files
+      # * cmake --build is set up to use MSBuild, since the MSBuild invocation does not use the .sln file
+      set(_last_test "")
+      foreach(config ${CMAKE_CONFIGURATION_TYPES})
+        add_test(NAME VSExcludeFromDefaultBuild-${config} COMMAND ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild"
+          "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
+          --build-config ${config}
+          --build-two-config
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-project VSExcludeFromDefaultBuild
+          --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+          --test-command ${CMAKE_COMMAND}
+             -D "activeConfig=${config}"
+             -D "allConfigs=${CMAKE_CONFIGURATION_TYPES}"
+             -D "dir=${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
+             -P "${CMake_SOURCE_DIR}/Tests/VSExcludeFromDefaultBuild/ResultTest.cmake")
+        if(_last_test)
+          set_property(TEST VSExcludeFromDefaultBuild-${config} PROPERTY DEPENDS ${_last_test})
+        endif()
+        set(_last_test "VSExcludeFromDefaultBuild-${config}")
+      endforeach()
+      unset(_last_test)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild")
+    endif()
   endif()
 
   if (APPLE)
@@ -1877,6 +1958,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -S "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
+
+  add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
+    --output-on-failure -C "\${CTestTest_CONFIG}")
 
   add_test(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
   set_tests_properties(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")

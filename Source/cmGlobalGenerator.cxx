@@ -1556,14 +1556,6 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     }
 }
 
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "";
-  entry.Full = "";
-}
-
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmLocalGenerator* gen)
 {
@@ -2055,7 +2047,7 @@ bool cmGlobalGenerator::UseFolderProperty()
     }
 
   // By default, this feature is OFF, since it is not supported in the
-  // Visual Studio Express editions:
+  // Visual Studio Express editions until VS11:
   //
   return false;
 }

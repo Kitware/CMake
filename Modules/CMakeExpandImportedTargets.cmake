@@ -30,7 +30,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(CMakeParseArguments)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
 function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
 

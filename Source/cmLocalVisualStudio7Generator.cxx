@@ -229,6 +229,9 @@ void cmLocalVisualStudio7Generator
   this->FortranProject =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
     ->TargetIsFortranOnly(target);
+  this->WindowsCEProject =
+    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
+    ->TargetsWindowsCE();
 
   // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
   VSVersion realVersion = this->Version;
@@ -914,12 +917,12 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       // for FAT32 file systems, which can cause an empty manifest
       // to be embedded into the resulting executable.  See CMake
       // bug #2617.
-      const char* tool  = "VCManifestTool";
+      const char* manifestTool  = "VCManifestTool";
       if(this->FortranProject)
         {
-        tool = "VFManifestTool";
+        manifestTool = "VFManifestTool";
         }
-      fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << tool << "\"\n"
+      fout << "\t\t\t<Tool\n\t\t\t\tName=\"" << manifestTool << "\"\n"
            << "\t\t\t\tUseFAT32Workaround=\"true\"\n"
            << "\t\t\t/>\n";
       }
@@ -1003,6 +1006,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
   switch(target.GetType())
     {
+    case cmTarget::UNKNOWN_LIBRARY:
+      break;
     case cmTarget::OBJECT_LIBRARY:
       {
       std::string libpath = this->GetTargetDirectory(target);
@@ -1074,9 +1079,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                            targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmGeneratorTarget* gt =
-      this->GlobalGenerator->GetGeneratorTarget(&target);
-    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
     if(!pcli)
       {
       return;
@@ -1161,15 +1164,15 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
                               targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmGeneratorTarget* gt =
-      this->GlobalGenerator->GetGeneratorTarget(&target);
-    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
     if(!pcli)
       {
       return;
       }
     cmComputeLinkInformation& cli = *pcli;
     const char* linkLanguage = cli.GetLinkLanguage();
+
+    bool isWin32Executable = target.GetPropertyAsBool("WIN32_EXECUTABLE");
 
     // Compute the variable name to lookup standard libraries for this
     // language.
@@ -1218,15 +1221,24 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
-    if ( target.GetPropertyAsBool("WIN32_EXECUTABLE") )
+    if ( this->WindowsCEProject )
+      {
+      fout << "\t\t\t\tSubSystem=\"9\"\n"
+           << "\t\t\t\tEntryPointSymbol=\""
+           << (isWin32Executable ? "WinMainCRTStartup" : "mainACRTStartup")
+           << "\"\n";
+      }
+    else if ( this->FortranProject )
       {
       fout << "\t\t\t\tSubSystem=\""
-           << (this->FortranProject? "subSystemWindows" : "2") << "\"\n";
+           << (isWin32Executable ? "subSystemWindows" : "subSystemConsole")
+           << "\"\n";
       }
     else
       {
       fout << "\t\t\t\tSubSystem=\""
-           << (this->FortranProject? "subSystemConsole" : "1") << "\"\n";
+           << (isWin32Executable ? "2" : "1")
+           << "\"\n";
       }
     std::string stackVar = "CMAKE_";
     stackVar += linkLanguage;

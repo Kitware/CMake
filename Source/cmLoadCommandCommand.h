@@ -47,7 +47,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() const
     {
-    return "Load a command into a running CMake.";
+    return "Deprecated.  Use macro() or function() instead.";
     }
 
   /**
@@ -56,6 +56,13 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
+      "This command will be removed in CMake 3.0.  "
+      "It works only when the target architecture matches the "
+      "running CMake binary.  "
+      "Use macro() or function() to add commands.  "
+      "Use execute_process() to run advanced computations "
+      "in external processes."
+      "\n"
       "  load_command(COMMAND_NAME <loc1> [loc2 ...])\n"
       "The given locations are searched for a library whose name is "
       "cmCOMMAND_NAME.  If found, it is loaded as a module and the command "
@@ -65,6 +72,12 @@ public:
       "  CMAKE_LOADED_COMMAND_<COMMAND_NAME>\n"
       "will be set to the full path of the module that was loaded.  "
       "Otherwise the variable will not be set.";
+    }
+
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged() const
+    {
+    return true;
     }
 
   cmTypeMacro(cmLoadCommandCommand, cmCommand);

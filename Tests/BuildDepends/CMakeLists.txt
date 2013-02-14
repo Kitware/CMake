@@ -60,6 +60,12 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
   "static const char* zot_macro_tgt = \"zot_macro_tgt\";\n")
 
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_lib.h
+  "#define link_depends_no_shared_lib_value 1\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_exe.h
+  "#define link_depends_no_shared_exe_value 0\n")
+set(link_depends_no_shared_check_txt ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_check.txt)
+
 help_xcode_depends()
 
 message("Building project first time")
@@ -125,6 +131,19 @@ else()
   message(SEND_ERROR "Project did not initially build properly: ${out}")
 endif()
 
+if(EXISTS "${link_depends_no_shared_check_txt}")
+  file(STRINGS "${link_depends_no_shared_check_txt}" link_depends_no_shared_check LIMIT_COUNT 1)
+  if("${link_depends_no_shared_check}" STREQUAL "1")
+    message(STATUS "link_depends_no_shared_exe is newer than link_depends_no_shared_lib as expected.")
+  else()
+    message(SEND_ERROR "Project did not initially build properly: "
+      "link_depends_no_shared_exe is older than link_depends_no_shared_lib.")
+  endif()
+else()
+  message(SEND_ERROR "Project did not initially build properly: "
+    "Targets link_depends_no_shared_lib and link_depends_no_shared_exe not both built.")
+endif()
+
 message("Waiting 3 seconds...")
 # any additional argument will cause ${bar} to wait forever
 execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
@@ -140,6 +159,9 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
   "static const char* zot_macro_dir = \"zot_macro_dir changed\";\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_tgt.hxx
   "static const char* zot_macro_tgt = \"zot_macro_tgt changed\";\n")
+
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_lib.h
+  "#define link_depends_no_shared_lib_value 0\n")
 
 if(TEST_LINK_DEPENDS)
   file(WRITE ${TEST_LINK_DEPENDS} "2")
@@ -218,4 +240,16 @@ is not newer than dependency
   ${TEST_LINK_DEPENDS}
 ")
   endif()
+endif()
+
+if(EXISTS "${link_depends_no_shared_check_txt}")
+  file(STRINGS "${link_depends_no_shared_check_txt}" link_depends_no_shared_check LIMIT_COUNT 1)
+  if("${link_depends_no_shared_check}" STREQUAL "0")
+    message(STATUS "link_depends_no_shared_exe is older than link_depends_no_shared_lib as expected.")
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: link_depends_no_shared_exe is newer than link_depends_no_shared_lib.")
+  endif()
+else()
+  message(SEND_ERROR "Project did not rebuild properly.  "
+    "Targets link_depends_no_shared_lib and link_depends_no_shared_exe not both built.")
 endif()

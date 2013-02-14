@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.8)
 project(GeneratorExpression NONE)
 
-add_custom_target(check ALL
+add_custom_target(check-part1 ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_0=$<0:nothing>
     -Dtest_0_with_comma=$<0:-Wl,--no-undefined>
@@ -14,6 +14,9 @@ add_custom_target(check ALL
     -Dtest_and_1=$<AND:1>
     -Dtest_and_1_0=$<AND:1,0>
     -Dtest_and_1_1=$<AND:1,1>
+    # Ordinarily, the 'invalidcontent' would cause an error, but
+    # the '0' makes the AND abort early.
+    -Dtest_and_0_invalidcontent=$<AND:0,invalidcontent>
     -Dtest_config_0=$<CONFIG:$<CONFIGURATION>x>
     -Dtest_config_1=$<CONFIG:$<CONFIGURATION>>
     -Dtest_config_debug=$<CONFIG:Debug>$<CONFIG:DEBUG>$<CONFIG:DeBuG>
@@ -28,6 +31,7 @@ add_custom_target(check ALL
     -Dtest_or_1=$<OR:1>
     -Dtest_or_1_0=$<OR:1,0>
     -Dtest_or_1_1=$<OR:1,1>
+    -Dtest_or_1_invalidcontent=$<OR:1,invalidcontent>
     -Dtest_bool_notfound=$<BOOL:NOTFOUND>
     -Dtest_bool_foo_notfound=$<BOOL:Foo-NOTFOUND>
     -Dtest_bool_true=$<BOOL:True>
@@ -53,6 +57,13 @@ add_custom_target(check ALL
     -Dtest_colons_3=$<1:Qt5::Core>
     -Dtest_colons_4=$<1:C:\\CMake>
     -Dtest_colons_5=$<1:C:/CMake>
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part1.cmake
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 2)"
+  VERBATIM
+  )
+
+add_custom_target(check-part2 ALL
+  COMMAND ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
     -Dtest_incomplete_2=$<something
     -Dtest_incomplete_3=$<something:
@@ -74,7 +85,11 @@ add_custom_target(check ALL
     -Dtest_incomplete_19=$<1:some,thing$<ANGLE-R>
     -Dtest_incomplete_20=$<CONFIGURATION$<ANGLE-R>
     -Dtest_incomplete_21=$<BOOL:something$<ANGLE-R>
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done"
+    -Dtest_build_interface=$<BUILD_INTERFACE:build>
+    -Dtest_install_interface=$<INSTALL_INTERFACE:install>
+    -Dtest_target_name_1=$<TARGET_NAME:tgt,ok>
+    -Dtest_target_name_2=$<TARGET_NAME:tgt:ok>
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
   VERBATIM
   )

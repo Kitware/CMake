@@ -26,7 +26,7 @@
 #  HAVE_ISYSTEM      - true required to replace -I by -isystem on g++
 #
 # For convenience include Use_wxWindows.cmake in your project's
-# CMakeLists.txt using include(Use_wxWindows).
+# CMakeLists.txt using include(${CMAKE_CURRENT_LIST_DIR}/Use_wxWindows.cmake).
 #
 # USAGE
 #  set(WXWINDOWS_USE_GL 1)

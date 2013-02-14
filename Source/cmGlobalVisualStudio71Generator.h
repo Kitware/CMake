@@ -24,8 +24,9 @@ class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 {
 public:
   cmGlobalVisualStudio71Generator();
-  static cmGlobalGenerator* New()
-    { return new cmGlobalVisualStudio71Generator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalVisualStudio71Generator>(); }
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
@@ -33,7 +34,7 @@ public:
   static const char* GetActualName() {return "Visual Studio 7 .NET 2003";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -61,16 +62,15 @@ protected:
                             const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectDepends(std::ostream& fout,
                            const char* name, const char* path, cmTarget &t);
-  virtual void WriteProjectConfigurations(std::ostream& fout,
-                                          const char* name,
-                                          bool partOfDefaultBuild,
-                                          const char* platformMapping = NULL);
+  virtual void WriteProjectConfigurations(
+    std::ostream& fout, const char* name, cmTarget::TargetType type,
+    const std::set<std::string>& configsPartOfDefaultBuild,
+    const char* platformMapping = NULL);
   virtual void WriteExternalProject(std::ostream& fout,
                                     const char* name,
                                     const char* path,
                                     const char* typeGuid,
                                     const std::set<cmStdString>& depends);
-  virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
 
   std::string ProjectConfigurationSectionName;

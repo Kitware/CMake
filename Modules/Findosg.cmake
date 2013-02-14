@@ -46,7 +46,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgUtil/SceneView>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSG osg/PositionAttitudeTransform)
 OSG_FIND_LIBRARY(OSG osg)
 

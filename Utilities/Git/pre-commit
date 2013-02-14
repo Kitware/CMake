@@ -47,18 +47,16 @@ if test -z "$HOOKS_ALLOW_KWSYS"; then
 
 '"$(echo "$files" | sed 's/^/  /')"'
 
-cannot be committed through Git.  KWSys is kept in a CVS repository
-shared by several projects.  A robot replays changes committed there
-into the Source/kwsys directory in CMake.  Please send changes to
-this directory separately.  Run
+should not be made directly in CMake.  KWSys is kept in its own Git
+repository and shared by several projects.  Please visit
+
+  http://public.kitware.com/Wiki/KWSys/Git
+
+to contribute changes directly to KWSys.  Run
 
   git reset HEAD -- Source/kwsys
 
-to unstage these changes and then
-
-  git diff -- Source/kwsys > kwsys.patch
-
-to construct the patch.  Alternatively, set environment variable
+to unstage these changes.  Alternatively, set environment variable
 
   HOOKS_ALLOW_KWSYS=1
 

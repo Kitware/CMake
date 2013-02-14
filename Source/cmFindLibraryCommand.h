@@ -70,7 +70,11 @@ protected:
   virtual void GenerateDocumentation();
 private:
   std::string FindNormalLibrary();
+  std::string FindNormalLibraryNamesPerDir();
+  std::string FindNormalLibraryDirsPerName();
   std::string FindFrameworkLibrary();
+  std::string FindFrameworkLibraryNamesPerDir();
+  std::string FindFrameworkLibraryDirsPerName();
 };
 
 

@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgVolume/Volume>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGVOLUME osgVolume/Volume)
 OSG_FIND_LIBRARY(OSGVOLUME osgVolume)
 

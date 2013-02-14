@@ -80,6 +80,8 @@ set(_JAVA_PATHS
   /usr/java/j2sdk1.4.2_09/bin
   /usr/lib/j2sdk1.5-sun/bin
   /opt/sun-jdk-1.5.0.04/bin
+  /usr/local/jdk-1.7.0/bin
+  /usr/local/jdk-1.6.0/bin
   )
 find_program(Java_JAVA_EXECUTABLE
   NAMES java
@@ -107,6 +109,7 @@ if(Java_JAVA_EXECUTABLE)
       # 2. OpenJDK 1.6
       # 3. GCJ 1.5
       # 4. Kaffe 1.4.2
+      # 5. OpenJDK 1.7.x on OpenBSD
       if(var MATCHES "java version \"[0-9]+\\.[0-9]+\\.[0-9_.]+.*\".*")
         # This is most likely Sun / OpenJDK, or maybe GCJ-java compat layer
         string( REGEX REPLACE ".* version \"([0-9]+\\.[0-9]+\\.[0-9_.]+.*)\".*"
@@ -114,6 +117,10 @@ if(Java_JAVA_EXECUTABLE)
       elseif(var MATCHES "java full version \"kaffe-[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
         # Kaffe style
         string( REGEX REPLACE "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+).*"
+                "\\1" Java_VERSION_STRING "${var}" )
+      elseif(var MATCHES "openjdk version \"[0-9]+\\.[0-9]+\\.[0-9_]+\".*")
+        # OpenJDK ver 1.7.x on OpenBSD
+        string( REGEX REPLACE "openjdk version \"([0-9]+\\.[0-9]+\\.[0-9_]+).*"
                 "\\1" Java_VERSION_STRING "${var}" )
       else()
         if(NOT Java_FIND_QUIETLY)

@@ -61,9 +61,9 @@ cmLocalGenerator *cmGlobalJOMMakefileGenerator::CreateLocalGenerator()
 
 //----------------------------------------------------------------------------
 void cmGlobalJOMMakefileGenerator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalJOMMakefileGenerator::GetActualName();
   entry.Brief = "Generates JOM makefiles.";
   entry.Full = "";
 }

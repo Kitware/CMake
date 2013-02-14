@@ -16,3 +16,7 @@ if(NOT CMAKE_PLATFORM_RUNTIME_PATH)
 endif()
 
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_OPENBSD_VERSIONING 1)
+
+# OpenBSD policy requires that shared libraries be installed without
+# executable permission.
+set(CMAKE_INSTALL_SO_NO_EXE 1)

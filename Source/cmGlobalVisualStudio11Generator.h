@@ -20,19 +20,11 @@ class cmGlobalVisualStudio11Generator:
   public cmGlobalVisualStudio10Generator
 {
 public:
-  cmGlobalVisualStudio11Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio11Generator; }
-
-  ///! Get the name for the generator.
-  virtual const char* GetName() const {
-    return cmGlobalVisualStudio11Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 11";}
+  cmGlobalVisualStudio11Generator(const char* name,
+    const char* architectureId, const char* additionalPlatformDefinition);
+  static cmGlobalGeneratorFactory* NewFactory();
 
   virtual void WriteSLNHeader(std::ostream& fout);
-
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -41,5 +33,8 @@ public:
   virtual std::string GetUserMacrosDirectory() { return ""; }
 protected:
   virtual const char* GetIDEVersion() { return "11.0"; }
+  bool UseFolderProperty();
+private:
+  class Factory;
 };
 #endif

@@ -182,10 +182,6 @@ cmSourceGroup *cmSourceGroup::MatchChildrenRegex(const char *name)
   std::vector<cmSourceGroup>::iterator end =
     this->Internal->GroupChildren.end();
 
-  if(this->MatchesRegex(name))
-    {
-    return this;
-    }
   for(;iter!=end; ++iter)
     {
     cmSourceGroup *result = iter->MatchChildrenRegex(name);
@@ -194,6 +190,11 @@ cmSourceGroup *cmSourceGroup::MatchChildrenRegex(const char *name)
       return result;
       }
     }
+  if(this->MatchesRegex(name))
+    {
+    return this;
+    }
+
   return 0;
 }
 

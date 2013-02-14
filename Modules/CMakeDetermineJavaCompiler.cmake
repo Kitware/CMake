@@ -63,6 +63,8 @@ if(NOT CMAKE_Java_COMPILER)
     /usr/java/j2sdk1.4.2_09/bin
     /usr/lib/j2sdk1.5-sun/bin
     /opt/sun-jdk-1.5.0.04/bin
+    /usr/local/jdk-1.7.0/bin
+    /usr/local/jdk-1.6.0/bin
     )
   # if no compiler has been specified yet, then look for one
   if(CMAKE_Java_COMPILER_INIT)

@@ -19,7 +19,7 @@
 message(STATUS
   "WARNING: you are using the obsolete 'GLU' package, please use 'OpenGL' instead")
 
-include(FindOpenGL)
+include(${CMAKE_CURRENT_LIST_DIR}/FindOpenGL.cmake)
 
 if (OPENGL_GLU_FOUND)
   set (GLU_LIBRARY ${OPENGL_LIBRARIES})

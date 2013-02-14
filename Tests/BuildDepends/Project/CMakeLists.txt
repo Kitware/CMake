@@ -64,7 +64,8 @@ if("${CMAKE_GENERATOR}" MATCHES "Make")
   # Test the IMPLICIT_DEPENDS feature.
   set(ZOT_DEPENDS IMPLICIT_DEPENDS CXX ${CMAKE_CURRENT_SOURCE_DIR}/dep.cxx)
   set(ZOT_CUSTOM_DEP
-    IMPLICIT_DEPENDS CXX ${CMAKE_CURRENT_SOURCE_DIR}/dep_custom.cxx)
+    IMPLICIT_DEPENDS CXX ${CMAKE_CURRENT_SOURCE_DIR}/dep_custom.cxx
+                     CXX ${CMAKE_CURRENT_SOURCE_DIR}/dep_custom2.cxx )
 else()
   # No IMPLICIT_DEPENDS...just depend directly.
   set(ZOT_DEPENDS DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/zot.hxx.in)
@@ -107,3 +108,18 @@ if(TEST_LINK_DEPENDS)
   add_executable(linkdep linkdep.cxx)
   set_property(TARGET linkdep PROPERTY LINK_DEPENDS ${TEST_LINK_DEPENDS})
 endif()
+
+add_library(link_depends_no_shared_lib SHARED link_depends_no_shared_lib.c
+  ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_lib.h)
+add_executable(link_depends_no_shared_exe link_depends_no_shared_exe.c
+  ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_exe.h)
+target_link_libraries(link_depends_no_shared_exe link_depends_no_shared_lib)
+set_property(TARGET link_depends_no_shared_exe PROPERTY LINK_DEPENDS_NO_SHARED 1)
+add_custom_target(link_depends_no_shared_check ALL
+  COMMAND ${CMAKE_COMMAND}
+   -Dlib=$<TARGET_FILE:link_depends_no_shared_lib>
+   -Dexe=$<TARGET_FILE:link_depends_no_shared_exe>
+   -Dout=${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_check.txt
+   -P ${CMAKE_CURRENT_SOURCE_DIR}/link_depends_no_shared_check.cmake
+  )
+add_dependencies(link_depends_no_shared_check link_depends_no_shared_exe)

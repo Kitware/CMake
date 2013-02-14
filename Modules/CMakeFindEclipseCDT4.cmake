@@ -77,6 +77,8 @@ endif()
 # This variable is used by the Eclipse generator and appended to the make invocation commands.
 set(CMAKE_ECLIPSE_MAKE_ARGUMENTS "${_CMAKE_ECLIPSE_INITIAL_MAKE_ARGS}" CACHE STRING "Additional command line arguments when Eclipse invokes make. Enter e.g. -j<some_number> to get parallel builds")
 
+set(CMAKE_ECLIPSE_GENERATE_LINKED_RESOURCES TRUE CACHE BOOL "If disabled, CMake will not generate linked resource to the subprojects and to the source files within targets")
+
 # This variable is used by the Eclipse generator in out-of-source builds only.
 set(CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT FALSE CACHE BOOL "If enabled, CMake will generate a source project for Eclipse in CMAKE_SOURCE_DIR")
 mark_as_advanced(CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT)

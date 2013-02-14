@@ -27,7 +27,6 @@
 
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/SystemTools.hxx>
-#include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
@@ -276,7 +275,7 @@ int main (int argc, char *argv[])
   cminst.RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg;
   cmgg.SetCMakeInstance(&cminst);
-  std::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
   cmMakefile* globalMF = cmlg->GetMakefile();
 
   bool cpackConfigFileSpecified = true;

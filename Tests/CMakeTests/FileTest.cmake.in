@@ -12,6 +12,10 @@ set(Copy-NoDest-RESULT 1)
 set(Copy-NoDest-STDERR "given no DESTINATION")
 set(Copy-NoFile-RESULT 1)
 set(Copy-NoFile-STDERR "COPY cannot find.*/does_not_exist\\.txt")
+set(Glob-NoArg-RESULT 1)
+set(Glob-NoArg-STDERR "file must be called with at least two arguments")
+set(Make_Directory-NoArg-RESULT 1)
+set(Make-Directory-NoArg-STDERR "file must be called with at least two arguments")
 set(MD5-NoFile-RESULT 1)
 set(MD5-NoFile-STDERR "file MD5 failed to read file")
 set(MD5-BadArg1-RESULT 1)
@@ -32,6 +36,14 @@ set(SHA384-Works-RESULT 0)
 set(SHA384-Works-STDERR "1de9560b4e030e02051ea408200ffc55d70c97ac64ebf822461a5c786f495c36df43259b14483bc8d364f0106f4971ee")
 set(SHA512-Works-RESULT 0)
 set(SHA512-Works-STDERR "3982a1b4e651768bec70ab1fb97045cb7a659f4ba7203d501c52ab2e803071f9d5fd272022df15f27727fc67f8cd022e710e29010b2a9c0b467c111e2f6abf51")
+set(TIMESTAMP-NoFile-RESULT 0)
+set(TIMESTAMP-NoFile-STDERR "~~")
+set(TIMESTAMP-BadArg1-RESULT 1)
+set(TIMESTAMP-BadArg1-STDERR "file sub-command TIMESTAMP requires at least two arguments")
+set(TIMESTAMP-NotBogus-RESULT 0)
+set(TIMESTAMP-NotBogus-STDERR "all timestamps match")
+set(TIMESTAMP-Works-RESULT 0)
+set(TIMESTAMP-Works-STDERR "~[0-9]*-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-6][0-9]Z~")
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/CheckCMakeTest.cmake")
 check_cmake_test(File
@@ -42,6 +54,8 @@ check_cmake_test(File
   Copy-LateArg
   Copy-NoDest
   Copy-NoFile
+  Glob-NoArg
+  Make_Directory-NoArg
   MD5-NoFile
   MD5-BadArg1
   MD5-BadArg2
@@ -52,7 +66,16 @@ check_cmake_test(File
   SHA256-Works
   SHA384-Works
   SHA512-Works
+  TIMESTAMP-NoFile
+  TIMESTAMP-BadArg1
+  TIMESTAMP-NotBogus
+  TIMESTAMP-Works
   )
+
+file(GLOB hum)
+if (NOT hum STREQUAL "")
+  message(FATAL_ERROR "file(GLOB hum) did not return an empty string.")
+endif()
 
 # Also execute each test listed in FileTestScript.cmake:
 #

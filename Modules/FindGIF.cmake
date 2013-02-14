@@ -58,8 +58,8 @@ set(GIF_LIBRARIES ${GIF_LIBRARY})
 # one.
 # http://giflib.sourcearchive.com/documentation/4.1.4/files.html
 if(GIF_INCLUDE_DIR)
-  include(CMakePushCheckState)
-  include(CheckStructHasMember)
+  include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+  include(${CMAKE_CURRENT_LIST_DIR}/CheckStructHasMember.cmake)
   CMAKE_PUSH_CHECK_STATE()
   set(GIF_VERSION 3)
   set(CMAKE_REQUIRED_INCLUDES "${GIF_INCLUDE_DIR}")

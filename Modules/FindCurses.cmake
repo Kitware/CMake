@@ -56,7 +56,7 @@ endif()
 # prefix as the library was found, if still not found, try curses.h with the
 # default search paths.
 if(CURSES_CURSES_LIBRARY  AND  CURSES_NEED_NCURSES)
-  include(CheckLibraryExists)
+  include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
   CHECK_LIBRARY_EXISTS("${CURSES_CURSES_LIBRARY}"
     wsyncup "" CURSES_CURSES_HAS_WSYNCUP)
 

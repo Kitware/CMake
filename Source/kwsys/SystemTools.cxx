@@ -1665,7 +1665,7 @@ kwsys_stl::string SystemTools::EscapeChars(
   kwsys_stl::string n;
   if (str)
     {
-    if (!chars_to_escape | !*chars_to_escape)
+    if (!chars_to_escape || !*chars_to_escape)
       {
       n.append(str);
       }
@@ -2754,9 +2754,15 @@ kwsys_stl::string SystemTools::GetRealPath(const char* path)
 
 bool SystemTools::FileIsDirectory(const char* name)
 {
+  size_t length = strlen(name);
+  if (length == 0)
+    {
+    return false;
+    }
+
   // Remove any trailing slash from the name.
   char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
-  size_t last = strlen(name)-1;
+  size_t last = length-1;
   if(last > 0 && (name[last] == '/' || name[last] == '\\')
     && strcmp(name, "/") !=0)
     {

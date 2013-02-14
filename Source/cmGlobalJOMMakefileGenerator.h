@@ -23,8 +23,9 @@ class cmGlobalJOMMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
   cmGlobalJOMMakefileGenerator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalJOMMakefileGenerator; }
+  static cmGlobalGeneratorFactory* NewFactory() {
+    return new cmGlobalGeneratorSimpleFactory
+      <cmGlobalJOMMakefileGenerator>(); }
   ///! Get the name for the generator.
   virtual const char* GetName() const {
     return cmGlobalJOMMakefileGenerator::GetActualName();}
@@ -33,7 +34,7 @@ public:
   static const char* GetActualName() {return "NMake Makefiles JOM";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();

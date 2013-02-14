@@ -1097,10 +1097,17 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         }
       else
         {
-        cmCTestLog(this->CTest, ERROR_MESSAGE,
-          "Unknown gcov output line: [" << line->c_str() << "]" << std::endl);
-        cont->Error ++;
-        //abort();
+        // gcov 4.7 can have output lines saying "No executable lines" and
+        // "Removing 'filename.gcov'"... Don't log those as "errors."
+        if(*line != "No executable lines" &&
+           !cmSystemTools::StringStartsWith(line->c_str(), "Removing "))
+          {
+          cmCTestLog(this->CTest, ERROR_MESSAGE,
+            "Unknown gcov output line: [" << line->c_str() << "]"
+            << std::endl);
+          cont->Error ++;
+          //abort();
+          }
         }
 
 

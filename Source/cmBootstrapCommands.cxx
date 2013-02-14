@@ -89,6 +89,7 @@
 #include "cmStringCommand.cxx"
 #include "cmSubdirCommand.cxx"
 #include "cmTargetLinkLibrariesCommand.cxx"
+#include "cmTimestamp.cxx"
 #include "cmTryCompileCommand.cxx"
 #include "cmTryRunCommand.cxx"
 #include "cmUnsetCommand.cxx"

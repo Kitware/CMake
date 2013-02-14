@@ -88,8 +88,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(FindPackageMessage)
-include(CMakeParseArguments)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
 # internal helper macro
 macro(_FPHSA_FAILURE_MESSAGE _msg)
@@ -187,8 +187,8 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   # user knows better what went wrong (#6375)
   set(MISSING_VARS "")
   set(DETAILS "")
-  set(${_NAME_UPPER}_FOUND TRUE)
   # check if all passed variables are valid
+  unset(${_NAME_UPPER}_FOUND)
   foreach(_CURRENT_VAR ${FPHSA_REQUIRED_VARS})
     if(NOT ${_CURRENT_VAR})
       set(${_NAME_UPPER}_FOUND FALSE)
@@ -197,6 +197,9 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       set(DETAILS "${DETAILS}[${${_CURRENT_VAR}}]")
     endif()
   endforeach()
+  if(NOT "${${_NAME_UPPER}_FOUND}" STREQUAL "FALSE")
+    set(${_NAME_UPPER}_FOUND TRUE)
+  endif()
 
   # component handling
   unset(FOUND_COMPONENTS_MSG)

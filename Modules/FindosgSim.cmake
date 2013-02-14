@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgSim/ImpostorSprite>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGSIM osgSim/ImpostorSprite)
 OSG_FIND_LIBRARY(OSGSIM osgSim)
 

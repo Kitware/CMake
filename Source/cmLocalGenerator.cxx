@@ -1329,7 +1329,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const char* lang,
-                                             const char *config)
+                                             const char *config,
+                                             bool stripImplicitInclDirs
+                                            )
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.
@@ -1404,18 +1406,21 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
     }
 
-  // Load implicit include directories for this language.
-  std::string impDirVar = "CMAKE_";
-  impDirVar += lang;
-  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
-  if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
+  if (stripImplicitInclDirs)
     {
-    std::vector<std::string> impDirVec;
-    cmSystemTools::ExpandListArgument(value, impDirVec);
-    for(std::vector<std::string>::const_iterator i = impDirVec.begin();
-        i != impDirVec.end(); ++i)
+    // Load implicit include directories for this language.
+    std::string impDirVar = "CMAKE_";
+    impDirVar += lang;
+    impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
+    if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
       {
-      emitted.insert(*i);
+      std::vector<std::string> impDirVec;
+      cmSystemTools::ExpandListArgument(value, impDirVec);
+      for(std::vector<std::string>::const_iterator i = impDirVec.begin();
+          i != impDirVec.end(); ++i)
+        {
+        emitted.insert(*i);
+        }
       }
     }
 
@@ -1671,7 +1676,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 {
   cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
+  cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
   if(!pcli)
     {
     return;
@@ -1875,6 +1880,14 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
   // modify the name so stripping down to just the file name should
   // produce the target name in this case.
   std::string name = cmSystemTools::GetFilenameName(inName);
+
+  // If the input name is the empty string, there is no real
+  // dependency. Short-circuit the other checks:
+  if(name == "")
+    {
+    return false;
+    }
+
   if(cmSystemTools::GetFilenameLastExtension(name) == ".exe")
     {
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);

@@ -112,7 +112,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   else
     {
     // Use the command name given.
-    exe = ge.Parse(exe.c_str()).Evaluate(mf, config);
+    exe = ge.Parse(exe.c_str())->Evaluate(mf, config);
     cmSystemTools::ConvertToUnixSlashes(exe);
     }
 
@@ -122,7 +122,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   for(std::vector<std::string>::const_iterator ci = command.begin()+1;
       ci != command.end(); ++ci)
     {
-    os << " " << lg->EscapeForCMake(ge.Parse(*ci).Evaluate(mf, config));
+    os << " " << lg->EscapeForCMake(ge.Parse(*ci)->Evaluate(mf, config));
     }
 
   // Finish the test command.

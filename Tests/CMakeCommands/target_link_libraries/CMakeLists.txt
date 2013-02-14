@@ -34,6 +34,13 @@ generate_export_header(depB)
 
 target_link_libraries(depB LINK_PRIVATE depA)
 
+add_library(libgenex SHARED libgenex.cpp)
+generate_export_header(libgenex)
+
+set_property(TARGET depB APPEND PROPERTY
+  LINK_LIBRARIES $<1:libgenex>
+)
+
 add_library(depC SHARED depC.cpp)
 generate_export_header(depC)
 
@@ -56,3 +63,10 @@ assert_property(targetA LINK_INTERFACE_LIBRARIES "")
 target_link_libraries(targetA depB depC)
 
 assert_property(targetA LINK_INTERFACE_LIBRARIES "")
+
+# Exclude depIfaceOnly from ALL so that it will only be built if something
+# depends on it. As it is in the link interface of depB, targetA
+# will depend on it. That dependency is what is being tested here.
+add_library(depIfaceOnly SHARED EXCLUDE_FROM_ALL depIfaceOnly.cpp)
+generate_export_header(depIfaceOnly)
+set_property(TARGET depB APPEND PROPERTY LINK_INTERFACE_LIBRARIES depIfaceOnly)

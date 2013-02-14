@@ -72,9 +72,12 @@ public:
       "CMAKE_INCLUDE_DIRECTORIES_BEFORE to ON. "
       "By using AFTER or BEFORE explicitly, you can select between "
       "appending and prepending, independent of the default. "
+      "\n"
       "If the SYSTEM option is given, the compiler will be told the "
       "directories are meant as system include directories on some "
-      "platforms.";
+      "platforms (signalling this setting might achieve effects such as "
+      "the compiler skipping warnings, or these fixed-install system files "
+      "not being considered in dependency calculations - see compiler docs).";
     }
 
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);

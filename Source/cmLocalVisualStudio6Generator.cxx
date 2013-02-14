@@ -326,18 +326,18 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         {
         cmSystemTools::ReplaceString(source, "$(IntDir)/", "");
 #if defined(_WIN32) || defined(__CYGWIN__)
-        std::ofstream fout(source.c_str(),
+        std::ofstream sourceFout(source.c_str(),
                            std::ios::binary | std::ios::out
                            | std::ios::trunc);
 #else
-        std::ofstream fout(source.c_str(),
+        std::ofstream sourceFout(source.c_str(),
                            std::ios::out | std::ios::trunc);
 #endif
-        if(fout)
+        if(sourceFout)
           {
-          fout.write("# generated from CMake",22);
-          fout.flush();
-          fout.close();
+          sourceFout.write("# generated from CMake",22);
+          sourceFout.flush();
+          sourceFout.close();
           }
         }
       }
@@ -710,6 +710,8 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 
   switch(b)
     {
+    case WIN32_EXECUTABLE:
+      break;
     case STATIC_LIBRARY:
       this->DSPHeaderTemplate = root;
       this->DSPHeaderTemplate += "/staticLibHeader.dsptemplate";
@@ -1783,10 +1785,8 @@ void cmLocalVisualStudio6Generator
                      const std::string extraOptions,
                      std::string& options)
 {
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   // Compute the link information for this configuration.
-  cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
   if(!pcli)
     {
     return;

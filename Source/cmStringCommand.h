@@ -93,6 +93,7 @@ public:
       "  string(RANDOM [LENGTH <length>] [ALPHABET <alphabet>]\n"
       "         [RANDOM_SEED <seed>] <output variable>)\n"
       "  string(FIND <string> <substring> <output variable> [REVERSE])\n"
+      "  string(TIMESTAMP <output variable> [<format string>] [UTC])\n"
       "REGEX MATCH will match the regular expression once and store the "
       "match in the output variable.\n"
       "REGEX MATCHALL will match the regular expression as many times as "
@@ -142,7 +143,33 @@ public:
       "   ()        Saves a matched subexpression, which can be referenced \n"
       "             in the REGEX REPLACE operation. Additionally it is saved\n"
       "             by all regular expression-related commands, including \n"
-      "             e.g. if( MATCHES ), in the variables CMAKE_MATCH_(0..9).";
+      "             e.g. if( MATCHES ), in the variables CMAKE_MATCH_(0..9).\n"
+      "TIMESTAMP will write a string representation of "
+      "the current date and/or time to the output variable.\n"
+      "Should the command be unable to obtain a timestamp "
+      "the output variable will be set to the empty string \"\".\n"
+      "The optional UTC flag requests the current date/time "
+      "representation to be in Coordinated Universal Time (UTC) "
+      "rather than local time.\n"
+      "The optional <format string> may contain the following "
+      "format specifiers: \n"
+      "   %d        The day of the current month (01-31).\n"
+      "   %H        The hour on a 24-hour clock (00-23).\n"
+      "   %I        The hour on a 12-hour clock (01-12).\n"
+      "   %j        The day of the current year (001-366).\n"
+      "   %m        The month of the current year (01-12).\n"
+      "   %M        The minute of the current hour (00-59).\n"
+      "   %S        The second of the current minute.\n"
+      "             60 represents a leap second. (00-60)\n"
+      "   %U        The week number of the current year (00-53).\n"
+      "   %w        The day of the current week. 0 is Sunday. (0-6)\n"
+      "   %y        The last two digits of the current year (00-99)\n"
+      "   %Y        The current year. \n"
+      "Unknown format specifiers will be ignored "
+      "and copied to the output as-is.\n"
+      "If no explicit <format string> is given it will default to:\n"
+      "   %Y-%m-%dT%H:%M:%S    for local time.\n"
+      "   %Y-%m-%dT%H:%M:%SZ   for UTC.";
     }
 
   cmTypeMacro(cmStringCommand, cmCommand);
@@ -165,6 +192,7 @@ protected:
   bool HandleStripCommand(std::vector<std::string> const& args);
   bool HandleRandomCommand(std::vector<std::string> const& args);
   bool HandleFindCommand(std::vector<std::string> const& args);
+  bool HandleTimestampCommand(std::vector<std::string> const& args);
 
   class RegexReplacement
   {

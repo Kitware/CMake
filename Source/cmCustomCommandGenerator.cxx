@@ -47,7 +47,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
     {
     return target->GetLocation(this->Config);
     }
-  return this->GE->Parse(argv0).Evaluate(this->Makefile, this->Config);
+  return this->GE->Parse(argv0)->Evaluate(this->Makefile, this->Config);
 }
 
 //----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ cmCustomCommandGenerator
   cmCustomCommandLine const& commandLine = this->CC.GetCommandLines()[c];
   for(unsigned int j=1;j < commandLine.size(); ++j)
     {
-    std::string arg = this->GE->Parse(commandLine[j]).Evaluate(this->Makefile,
+    std::string arg = this->GE->Parse(commandLine[j])->Evaluate(this->Makefile,
                                                                this->Config);
     cmd += " ";
     if(this->OldStyle)
