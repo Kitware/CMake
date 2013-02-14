@@ -1867,6 +1867,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty(
+    "CMAKE_<LANG>_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH",
+    cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_CREATE_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_<LANG>_FLAGS",
