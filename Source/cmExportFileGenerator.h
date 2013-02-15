@@ -119,7 +119,7 @@ protected:
   };
 
   void ResolveTargetsInGeneratorExpressions(std::string &input,
-                          cmTarget* target, const char *propName,
+                          cmTarget* target,
                           std::vector<std::string> &missingTargets,
                           FreeTargetsReplace replace = NoReplaceFreeTargets);
 
@@ -150,7 +150,7 @@ private:
                           std::vector<std::string> &missingTargets);
 
   void ResolveTargetsInGeneratorExpression(std::string &input,
-                                    cmTarget* target, const char *propName,
+                                    cmTarget* target,
                                     std::vector<std::string> &missingTargets);
 
   virtual void ReplaceInstallPrefix(std::string &input);

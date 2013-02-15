@@ -972,14 +972,6 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
           ${_PROPERTY}
           "Qt4::Qt${_DEPEND}"
         )
-        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
-          INTERFACE_INCLUDE_DIRECTORIES
-            "$<TARGET_PROPERTY:Qt4::Qt${_DEPEND},INTERFACE_INCLUDE_DIRECTORIES>"
-        )
-        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
-          INTERFACE_COMPILE_DEFINITIONS
-            "$<TARGET_PROPERTY:Qt4::Qt${_DEPEND},INTERFACE_COMPILE_DEFINITIONS>"
-        )
       endforeach()
     endif()
   endmacro()

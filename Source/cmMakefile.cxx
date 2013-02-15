@@ -1487,7 +1487,7 @@ void cmMakefile::InitializeFromParent()
   // Initialize definitions with the closure of the parent scope.
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
-  const std::vector<IncludeDirectoriesEntry> parentIncludes =
+  const std::vector<cmValueWithOrigin> parentIncludes =
                                         parent->GetIncludeDirectoriesEntries();
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
                                        parentIncludes.begin(),
@@ -1636,13 +1636,13 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
     sep = ";";
     }
 
-  std::vector<IncludeDirectoriesEntry>::iterator position =
+  std::vector<cmValueWithOrigin>::iterator position =
                               before ? this->IncludeDirectoriesEntries.begin()
                                     : this->IncludeDirectoriesEntries.end();
 
   cmListFileBacktrace lfbt;
   this->GetBacktrace(lfbt);
-  IncludeDirectoriesEntry entry(incString, lfbt);
+  cmValueWithOrigin entry(incString, lfbt);
   this->IncludeDirectoriesEntries.insert(position, entry);
 
   // Property on each target:
@@ -3461,7 +3461,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
-                                        IncludeDirectoriesEntry(value, lfbt));
+                                        cmValueWithOrigin(value, lfbt));
     return;
     }
 
@@ -3500,7 +3500,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
-                                        IncludeDirectoriesEntry(value, lfbt));
+                                        cmValueWithOrigin(value, lfbt));
     return;
     }
   if ( propname == "LINK_DIRECTORIES" )
@@ -3617,7 +3617,7 @@ const char *cmMakefile::GetProperty(const char* prop,
   else if (!strcmp("INCLUDE_DIRECTORIES",prop))
     {
     std::string sep;
-    for (std::vector<IncludeDirectoriesEntry>::const_iterator
+    for (std::vector<cmValueWithOrigin>::const_iterator
         it = this->IncludeDirectoriesEntries.begin(),
         end = this->IncludeDirectoriesEntries.end();
         it != end; ++it)

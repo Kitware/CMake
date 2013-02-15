@@ -22,7 +22,11 @@ include_directories(
 )
 
 add_library(foo "${CMAKE_CURRENT_BINARY_DIR}/DebugIncludes.cpp")
-target_include_directories(foo INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/five")
+target_include_directories(foo
+  INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/seven"
+    "${CMAKE_CURRENT_SOURCE_DIR}/eight"
+)
 target_link_libraries(lll foo)
 
 macro(some_macro)

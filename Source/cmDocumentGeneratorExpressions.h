@@ -51,14 +51,6 @@
   "on the target tgt.\n"                                                \
   "Note that tgt is not added as a dependency of the target this "      \
   "expression is evaluated on.\n"                                       \
-  "  $<LINKED:item>            = An empty string if item is not a "     \
-  "target.  If item is a target then the "                              \
-  "INTERFACE_INCLUDE_DIRECTORIES or INTERFACE_COMPILE_DEFINITIONS "     \
-  "content is read from the target.  "                                  \
-  "This generator expression can only be used in evaluation of the "    \
-  "INCLUDE_DIRECTORIES or COMPILE_DEFINITIONS property.  Note that "    \
-  "this expression is for internal use and may be changed or removed "  \
-  "in the future.\n"                                                    \
   "  $<TARGET_POLICY:pol>          = '1' if the policy was NEW when "   \
   "the 'head' target was created, else '0'.  If the policy was not "    \
   "set, the warning message for the policy will be emitted.  This "     \
