@@ -158,9 +158,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                               this->GeneratorTarget,
                                               language.c_str(), config);
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
-    language == "RC" ? true : false); // full include paths for RC
-                                      // needed by cmcldeps
+    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(), true);
   if(cmGlobalNinjaGenerator::IsMinGW())
     cmSystemTools::ReplaceString(includeFlags, "\\", "/");
 
@@ -279,7 +277,11 @@ std::string
 cmNinjaTargetGenerator
 ::GetSourceFilePath(cmSourceFile* source) const
 {
-  return ConvertToNinjaPath(source->GetFullPath().c_str());
+  std::string result = source->GetFullPath();
+#ifdef _WIN32
+  cmSystemTools::ReplaceString(result, "/", "\\");
+#endif
+  return result;
 }
 
 std::string
