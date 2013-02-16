@@ -2914,7 +2914,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
     {
     std::vector<std::string> folders =
       cmSystemTools::tokenize(sg->GetFullName(), "\\");
-    cmStdString curr_folder = cmtarget.GetName();
+    cmStdString curr_folder = target;
     curr_folder += "/";
     for(std::vector<std::string>::size_type i = 0; i < folders.size();i++)
       {
