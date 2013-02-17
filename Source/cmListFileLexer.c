@@ -378,13 +378,13 @@ struct yy_trans_info
         flex_int32_t yy_verify;
         flex_int32_t yy_nxt;
         };
-static yyconst flex_int16_t yy_accept[44] =
+static yyconst flex_int16_t yy_accept[45] =
     {   0,
         0,    0,    0,    0,   17,    6,   14,    1,    8,    2,
         6,    3,    4,    6,   15,    9,   11,   12,   13,    6,
-        0,    6,    0,    2,    0,    5,    6,    9,    0,   10,
-        0,    7,    0,    0,    0,    7,    0,    7,    0,    0,
-        0,    0,    0
+        0,    6,    0,   14,    2,    0,    5,    6,    9,    0,
+       10,    0,    7,    0,    0,    0,    7,    0,    7,    0,
+        0,    0,    0,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -421,62 +421,64 @@ static yyconst flex_int32_t yy_ec[256] =
 
 static yyconst flex_int32_t yy_meta[13] =
     {   0,
-        1,    1,    2,    1,    3,    1,    1,    1,    4,    4,
-        4,    1
+        1,    2,    3,    2,    4,    1,    1,    1,    5,    5,
+        5,    1
     } ;
 
-static yyconst flex_int16_t yy_base[54] =
+static yyconst flex_int16_t yy_base[56] =
     {   0,
-        0,    0,   10,   20,   36,   32,  102,  102,  102,    0,
-       27,  102,  102,   35,    0,   22,  102,  102,   44,    0,
-       49,   23,    0,    0,   21,    0,    0,   17,   23,  102,
-        0,   61,   19,    0,   17,    0,   15,   13,    0,   11,
-       10,    9,  102,   73,   77,   81,   85,   89,   13,   93,
-       12,   97,   10
+        0,    0,   10,   20,   38,   32,    0,  109,  109,    0,
+       28,  109,  109,   35,    0,   23,  109,  109,   44,    0,
+       49,   26,    0,    0,    0,   22,    0,    0,   18,   24,
+      109,    0,   61,   20,    0,   18,    0,   17,   16,    0,
+       12,   11,   10,  109,   73,   16,   78,   83,   88,   93,
+       12,   98,   11,  103,    9
     } ;
 
-static yyconst flex_int16_t yy_def[54] =
+static yyconst flex_int16_t yy_def[56] =
     {   0,
-       43,    1,   44,   44,   43,   43,   43,   43,   43,   45,
-        6,   43,   43,    6,   46,   47,   43,   43,   47,    6,
-       43,    6,   48,   45,   49,   14,    6,   47,   47,   43,
-       21,   43,   21,   50,   51,   32,   49,   32,   52,   53,
-       51,   53,    0,   43,   43,   43,   43,   43,   43,   43,
-       43,   43,   43
+       44,    1,   45,   45,   44,   44,   46,   44,   44,   47,
+        6,   44,   44,    6,   48,   49,   44,   44,   49,    6,
+       44,    6,   50,   46,   47,   51,   14,    6,   49,   49,
+       44,   21,   44,   21,   52,   53,   33,   51,   33,   54,
+       55,   53,   55,    0,   44,   44,   44,   44,   44,   44,
+       44,   44,   44,   44,   44
     } ;
 
-static yyconst flex_int16_t yy_nxt[115] =
+static yyconst flex_int16_t yy_nxt[122] =
     {   0,
         6,    7,    8,    7,    9,   10,   11,   12,   13,    6,
-       14,   15,   17,   42,   18,   41,   37,   31,   32,   31,
-       35,   19,   17,   36,   18,   32,   40,   28,   29,   36,
-       35,   19,   20,   29,   25,   43,   21,   43,   22,   43,
-       43,   20,   20,   23,   26,   26,   30,   43,   28,   31,
-       31,   43,   43,   32,   43,   33,   43,   43,   31,   31,
-       34,   32,   43,   43,   43,   21,   43,   38,   43,   43,
-       32,   32,   39,   16,   16,   16,   16,   24,   43,   24,
-       24,   27,   43,   27,   27,   28,   43,   43,   28,   20,
-       43,   20,   20,   31,   43,   31,   31,   32,   43,   32,
+       14,   15,   17,   43,   18,   42,   38,   24,   32,   33,
+       32,   19,   17,   36,   18,   37,   33,   41,   29,   30,
+       37,   19,   20,   36,   30,   26,   21,   44,   22,   44,
+       44,   20,   20,   23,   27,   27,   31,   44,   29,   32,
+       32,   44,   44,   33,   44,   34,   44,   44,   32,   32,
+       35,   33,   44,   44,   44,   21,   44,   39,   44,   44,
+       33,   33,   40,   16,   16,   16,   16,   16,   25,   25,
+       44,   25,   25,   28,   28,   44,   28,   28,   29,   29,
+       44,   44,   29,   20,   20,   44,   20,   20,   32,   32,
 
-       32,    5,   43,   43,   43,   43,   43,   43,   43,   43,
-       43,   43,   43,   43
+       44,   32,   32,   33,   33,   44,   33,   33,    5,   44,
+       44,   44,   44,   44,   44,   44,   44,   44,   44,   44,
+       44
     } ;
 
-static yyconst flex_int16_t yy_chk[115] =
+static yyconst flex_int16_t yy_chk[122] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    3,   53,    3,   51,   49,   42,   41,   40,
-       38,    3,    4,   37,    4,   35,   33,   29,   28,   25,
-       22,    4,    6,   16,   11,    5,    6,    0,    6,    0,
+        1,    1,    3,   55,    3,   53,   51,   46,   43,   42,
+       41,    3,    4,   39,    4,   38,   36,   34,   30,   29,
+       26,    4,    6,   22,   16,   11,    6,    5,    6,    0,
         0,    6,    6,    6,   14,   14,   19,    0,   19,   21,
        21,    0,    0,   21,    0,   21,    0,    0,   21,   21,
-       21,   32,    0,    0,    0,   32,    0,   32,    0,    0,
-       32,   32,   32,   44,   44,   44,   44,   45,    0,   45,
-       45,   46,    0,   46,   46,   47,    0,    0,   47,   48,
-        0,   48,   48,   50,    0,   50,   50,   52,    0,   52,
+       21,   33,    0,    0,    0,   33,    0,   33,    0,    0,
+       33,   33,   33,   45,   45,   45,   45,   45,   47,   47,
+        0,   47,   47,   48,   48,    0,   48,   48,   49,   49,
+        0,    0,   49,   50,   50,    0,   50,   50,   52,   52,
 
-       52,   43,   43,   43,   43,   43,   43,   43,   43,   43,
-       43,   43,   43,   43
+        0,   52,   52,   54,   54,    0,   54,   54,   44,   44,
+       44,   44,   44,   44,   44,   44,   44,   44,   44,   44,
+       44
     } ;
 
 /* Table of booleans, true if rule could match eol. */
@@ -561,7 +563,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 /*--------------------------------------------------------------------------*/
 
-#line 567 "cmListFileLexer.c"
+#line 569 "cmListFileLexer.c"
 
 #define INITIAL 0
 #define STRING 1
@@ -793,7 +795,7 @@ YY_DECL
 #line 81 "cmListFileLexer.in.l"
 
 
-#line 801 "cmListFileLexer.c"
+#line 803 "cmListFileLexer.c"
 
         if ( !yyg->yy_init )
                 {
@@ -846,13 +848,13 @@ yy_match:
                         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                                 {
                                 yy_current_state = (int) yy_def[yy_current_state];
-                                if ( yy_current_state >= 44 )
+                                if ( yy_current_state >= 45 )
                                         yy_c = yy_meta[(unsigned int) yy_c];
                                 }
                         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
                         ++yy_cp;
                         }
-                while ( yy_base[yy_current_state] != 102 );
+                while ( yy_base[yy_current_state] != 109 );
 
 yy_find_action:
                 yy_act = yy_accept[yy_current_state];
@@ -1016,12 +1018,14 @@ case 14:
 YY_RULE_SETUP
 #line 171 "cmListFileLexer.in.l"
 {
+  lexer->token.type = cmListFileLexer_Token_Space;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
+  return 1;
 }
-        YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 175 "cmListFileLexer.in.l"
+#line 178 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1029,7 +1033,7 @@ YY_RULE_SETUP
   return 1;
 }
 case YY_STATE_EOF(INITIAL):
-#line 182 "cmListFileLexer.in.l"
+#line 185 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
@@ -1037,10 +1041,10 @@ case YY_STATE_EOF(INITIAL):
 }
 case 16:
 YY_RULE_SETUP
-#line 188 "cmListFileLexer.in.l"
+#line 191 "cmListFileLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1058 "cmListFileLexer.c"
+#line 1063 "cmListFileLexer.c"
 
         case YY_END_OF_BUFFER:
                 {
@@ -1332,7 +1336,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
                 while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                         {
                         yy_current_state = (int) yy_def[yy_current_state];
-                        if ( yy_current_state >= 44 )
+                        if ( yy_current_state >= 45 )
                                 yy_c = yy_meta[(unsigned int) yy_c];
                         }
                 yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1361,11 +1365,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
         while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
                 {
                 yy_current_state = (int) yy_def[yy_current_state];
-                if ( yy_current_state >= 44 )
+                if ( yy_current_state >= 45 )
                         yy_c = yy_meta[(unsigned int) yy_c];
                 }
         yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-        yy_is_jam = (yy_current_state == 43);
+        yy_is_jam = (yy_current_state == 44);
 
         return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2162,7 +2166,7 @@ void cmListFileLexer_yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 188 "cmListFileLexer.in.l"
+#line 191 "cmListFileLexer.in.l"
 
 
 
@@ -2399,6 +2403,7 @@ const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
   switch(type)
     {
     case cmListFileLexer_Token_None: return "nothing";
+    case cmListFileLexer_Token_Space: return "space";
     case cmListFileLexer_Token_Newline: return "newline";
     case cmListFileLexer_Token_Identifier: return "identifier";
     case cmListFileLexer_Token_ParenLeft: return "left paren";
