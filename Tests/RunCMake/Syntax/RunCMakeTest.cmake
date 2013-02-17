@@ -1,5 +1,11 @@
 include(RunCMake)
 
+run_cmake(CommandSpaces)
+run_cmake(CommandTabs)
+run_cmake(CommandNewlines)
+run_cmake(CommandComments)
+run_cmake(CommandError0)
+run_cmake(CommandError1)
 run_cmake(String0)
 run_cmake(String1)
 run_cmake(StringNoSpace)
