@@ -36,6 +36,7 @@ struct cmListFileParser
   const char* FileName;
   cmListFileLexer* Lexer;
   cmListFileFunction Function;
+  enum { SeparationOkay, SeparationWarning } Separation;
 };
 
 //----------------------------------------------------------------------------
@@ -69,7 +70,10 @@ bool cmListFileParser::ParseFile()
   while(cmListFileLexer_Token* token =
         cmListFileLexer_Scan(this->Lexer))
     {
-    if(token->type == cmListFileLexer_Token_Newline)
+    if(token->type == cmListFileLexer_Token_Space)
+      {
+      }
+    else if(token->type == cmListFileLexer_Token_Newline)
       {
       haveNewline = true;
       }
@@ -244,7 +248,9 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 
   // Command name has already been parsed.  Read the left paren.
   cmListFileLexer_Token* token;
-  if(!(token = cmListFileLexer_Scan(this->Lexer)))
+  while((token = cmListFileLexer_Scan(this->Lexer)) &&
+        token->type == cmListFileLexer_Token_Space) {}
+  if(!token)
     {
     cmOStringStream error;
     error << "Error in cmake code at\n" << this->FileName << ":"
@@ -266,14 +272,23 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     }
 
   // Arguments.
-  unsigned long lastLine = cmListFileLexer_GetCurrentLine(this->Lexer);
+  unsigned long lastLine;
   unsigned long parenDepth = 0;
-  while((token = cmListFileLexer_Scan(this->Lexer)))
+  this->Separation = SeparationOkay;
+  while((lastLine = cmListFileLexer_GetCurrentLine(this->Lexer),
+         token = cmListFileLexer_Scan(this->Lexer)))
     {
+    if(token->type == cmListFileLexer_Token_Space ||
+       token->type == cmListFileLexer_Token_Newline)
+      {
+      this->Separation = SeparationOkay;
+      continue;
+      }
     if(token->type == cmListFileLexer_Token_ParenLeft)
       {
       parenDepth++;
       this->AddArgument(token, cmListFileArgument::Unquoted);
+      this->Separation = SeparationOkay;
       }
     else if(token->type == cmListFileLexer_Token_ParenRight)
       {
@@ -282,18 +297,22 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
         return true;
         }
       parenDepth--;
+      this->Separation = SeparationOkay;
       this->AddArgument(token, cmListFileArgument::Unquoted);
+      this->Separation = SeparationWarning;
       }
     else if(token->type == cmListFileLexer_Token_Identifier ||
             token->type == cmListFileLexer_Token_ArgumentUnquoted)
       {
       this->AddArgument(token, cmListFileArgument::Unquoted);
+      this->Separation = SeparationWarning;
       }
     else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
       this->AddArgument(token, cmListFileArgument::Quoted);
+      this->Separation = SeparationWarning;
       }
-    else if(token->type != cmListFileLexer_Token_Newline)
+    else
       {
       // Error.
       cmOStringStream error;
@@ -306,7 +325,6 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       cmSystemTools::Error(error.str().c_str());
       return false;
       }
-    lastLine = cmListFileLexer_GetCurrentLine(this->Lexer);
     }
 
   cmOStringStream error;
@@ -325,6 +343,16 @@ void cmListFileParser::AddArgument(cmListFileLexer_Token* token,
 {
   cmListFileArgument a(token->text, delim, this->FileName, token->line);
   this->Function.Arguments.push_back(a);
+  if(this->Separation == SeparationOkay)
+    {
+    return;
+    }
+  cmOStringStream m;
+  m << "Syntax Warning in cmake code at\n"
+    << "  " << this->FileName << ":" << token->line << ":"
+    << token->column << "\n"
+    << "Argument not separated from preceding token by whitespace.";
+  this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str().c_str());
 }
 
 //----------------------------------------------------------------------------
