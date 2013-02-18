@@ -381,7 +381,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     fprintf(fout, "ADD_EXECUTABLE(%s \"%s\")\n", targetName, source.c_str());
     if (libsToLink.empty())
       {
-      fprintf(fout, "TARGET_LINK_LIBRARIES(%s ${LINK_LIBRARIES})\n",targetName);
+      fprintf(fout,
+              "TARGET_LINK_LIBRARIES(%s ${LINK_LIBRARIES})\n",targetName);
       }
     else
       {
