@@ -66,6 +66,7 @@ public:
 
   static bool IsValidTargetName(const std::string &input);
 
+  static std::string StripEmptyListElements(const std::string &input);
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);

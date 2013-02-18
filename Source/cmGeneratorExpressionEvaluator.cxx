@@ -508,6 +508,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       }
 
+    linkedTargetsContent =
+          cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
+
     if (!prop)
       {
       if (target->IsImported())
