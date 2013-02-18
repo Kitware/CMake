@@ -129,14 +129,16 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         default:
           this->Makefile->IssueMessage(cmake::FATAL_ERROR,
             "Only libraries may be used as try_compile IMPORTED "
-            "LINK_LIBRARIES");
+            "LINK_LIBRARIES.  Got " + std::string(tgt->GetName()) + " of "
+            "type " + tgt->GetTargetTypeName(tgt->GetType()) + ".");
           return -1;
         }
         if (!tgt->IsImported())
           {
           this->Makefile->IssueMessage(cmake::FATAL_ERROR,
             "Only libraries may be used as try_compile IMPORTED "
-            "LINK_LIBRARIES");
+            "LINK_LIBRARIES.  Got " + std::string(tgt->GetName()) + ", which "
+            "is a non-IMPORTED target.");
           return -1;
           }
         targets.push_back(tgt);
