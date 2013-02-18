@@ -33,8 +33,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     }
   this->CheckResult = this->checkGraph();
 
-  if (CheckResult == DAG && (top->Property == "INCLUDE_DIRECTORIES"
-      || top->Property == "COMPILE_DEFINITIONS") )
+  if (CheckResult == DAG && (top->EvaluatingIncludeDirectories()
+      || top->EvaluatingCompileDefinitions()))
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
