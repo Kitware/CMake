@@ -114,7 +114,8 @@ const char *cmCompiledGeneratorExpression::Evaluate(
     this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
     }
 
-  this->Targets = context.Targets;
+  this->DependTargets = context.DependTargets;
+  this->AllTargetsSeen = context.AllTargets;
   // TODO: Return a std::string from here instead?
   return this->Output.c_str();
 }

@@ -88,10 +88,13 @@ public:
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const
-    { return this->Targets; }
+    { return this->DependTargets; }
 
   std::set<cmStdString> const& GetSeenTargetProperties() const
     { return this->SeenTargetProperties; }
+
+  std::set<cmTarget*> const& GetAllTargetsSeen() const
+    { return this->AllTargetsSeen; }
 
   ~cmCompiledGeneratorExpression();
 
@@ -123,7 +126,8 @@ private:
   const std::string Input;
   bool NeedsParsing;
 
-  mutable std::set<cmTarget*> Targets;
+  mutable std::set<cmTarget*> DependTargets;
+  mutable std::set<cmTarget*> AllTargetsSeen;
   mutable std::set<cmStdString> SeenTargetProperties;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
