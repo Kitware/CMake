@@ -65,6 +65,16 @@
 #       is much more flexible, but requires that FindQt4.cmake is executed before
 #       such an exported dependency file is processed.
 #
+#       Note that if using IMPORTED targets, the qtmain.lib static library is
+#       automatically linked on Windows. To disable that globally, set the
+#       QT4_NO_LINK_QTMAIN variable before finding Qt4. To disable that for a
+#       particular executable, set the QT4_NO_LINK_QTMAIN target property to
+#       True on the executable.
+#
+#  QT_INCLUDE_DIRS_NO_SYSTEM
+#        If this variable is set to TRUE, the Qt include directories
+#        in the QT_USE_FILE will NOT have the SYSTEM keyword set.
+#
 # There are also some files that need processing by some Qt tools such as moc
 # and uic.  Listed below are macros that may be used to process those files.
 #
@@ -376,8 +386,8 @@ if(QT_QT_LIBRARY)
 endif()
 
 
-include(CheckCXXSymbolExists)
-include(MacroAddFileDependencies)
+include(${CMAKE_CURRENT_LIST_DIR}/CheckCXXSymbolExists.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/MacroAddFileDependencies.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 set(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
@@ -414,6 +424,15 @@ macro (_QT4_ADJUST_LIB_VARS _camelCaseBasename)
           set_property(TARGET Qt4::${_camelCaseBasename}        PROPERTY IMPORTED_LOCATION_DEBUG "${QT_${basename}_LIBRARY_DEBUG}" )
         endif()
       endif ()
+      set_property(TARGET Qt4::${_camelCaseBasename} PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES
+          "${QT_${basename}_INCLUDE_DIR}"
+      )
+      string(REGEX REPLACE "^QT" "" _stemname ${basename})
+      set_property(TARGET Qt4::${_camelCaseBasename} PROPERTY
+        INTERFACE_COMPILE_DEFINITIONS
+          "QT_${_stemname}_LIB"
+      )
     endif()
 
     # If QT_USE_IMPORTED_TARGETS is enabled, the QT_QTFOO_LIBRARY variables are set to point at these
@@ -533,6 +552,11 @@ if (QT_QMAKE_EXECUTABLE)
 endif ()
 
 if (QT_QMAKE_EXECUTABLE AND QTVERSION)
+
+  # set version variables
+  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
 
   # ask qmake for the mkspecs directory
   # we do this first because QT_LIBINFIX might be set
@@ -938,12 +962,49 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ############################################
 
 
+  macro(_qt4_add_target_depends_internal _QT_MODULE _PROPERTY)
+    if (TARGET Qt4::${_QT_MODULE})
+      foreach(_DEPEND ${ARGN})
+        if (NOT TARGET Qt4::Qt${_DEPEND})
+          message(FATAL_ERROR "_qt4_add_target_depends invoked with invalid arguments")
+        endif()
+        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+          ${_PROPERTY}
+          "Qt4::Qt${_DEPEND}"
+        )
+        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+          INTERFACE_INCLUDE_DIRECTORIES
+            "$<TARGET_PROPERTY:Qt4::Qt${_DEPEND},INTERFACE_INCLUDE_DIRECTORIES>"
+        )
+        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+          INTERFACE_COMPILE_DEFINITIONS
+            "$<TARGET_PROPERTY:Qt4::Qt${_DEPEND},INTERFACE_COMPILE_DEFINITIONS>"
+        )
+      endforeach()
+    endif()
+  endmacro()
+
+  macro(_qt4_add_target_depends _QT_MODULE)
+    _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_INTERFACE_LIBRARIES ${ARGN})
+  endmacro()
+
+  macro(_qt4_add_target_private_depends _QT_MODULE)
+    _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_DEPENDENT_LIBRARIES ${ARGN})
+  endmacro()
+
+
   # Set QT_xyz_LIBRARY variable and add
   # library include path to QT_INCLUDES
   _QT4_ADJUST_LIB_VARS(QtCore)
+  set_property(TARGET Qt4::QtCore APPEND PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES
+      "${QT_MKSPECS_DIR}/default"
+      ${QT_INCLUDE_DIR}
+  )
 
   foreach(QT_MODULE ${QT_MODULES})
     _QT4_ADJUST_LIB_VARS(${QT_MODULE})
+    _qt4_add_target_depends(${QT_MODULE} Core)
   endforeach()
 
   _QT4_ADJUST_LIB_VARS(QtAssistant)
@@ -954,10 +1015,67 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   # platform dependent libraries
   if(Q_WS_WIN)
     _QT4_ADJUST_LIB_VARS(qtmain)
+
     _QT4_ADJUST_LIB_VARS(QAxServer)
+    set_property(TARGET Qt4::QAxServer PROPERTY
+      INTERFACE_QT4_NO_LINK_QTMAIN ON
+    )
+    set_property(TARGET Qt4::QAxServer APPEND PROPERTY
+      COMPATIBLE_INTERFACE_BOOL QT4_NO_LINK_QTMAIN)
+
     _QT4_ADJUST_LIB_VARS(QAxContainer)
   endif()
 
+  # Only public dependencies are listed here.
+  # Eg, QtDBus links to QtXml, but users of QtDBus do not need to
+  # link to QtXml because QtDBus only uses it internally, not in public
+  # headers.
+  # Everything depends on QtCore, but that is covered above already
+  _qt4_add_target_depends(Qt3Support Sql Gui Network)
+  if (TARGET Qt4::Qt3Support)
+    # An additional define is required for QT3_SUPPORT
+    set_property(TARGET Qt4::Qt3Support APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS QT3_SUPPORT)
+  endif()
+  _qt4_add_target_depends(QtDeclarative Script Gui)
+  _qt4_add_target_depends(QtDesigner Gui)
+  _qt4_add_target_depends(QtHelp Gui)
+  _qt4_add_target_depends(QtMultimedia Gui)
+  _qt4_add_target_depends(QtOpenGL Gui)
+  _qt4_add_target_depends(QtSvg Gui)
+  _qt4_add_target_depends(QtWebKit Gui Network)
+
+  _qt4_add_target_private_depends(Qt3Support Xml)
+  _qt4_add_target_private_depends(QtSvg Xml)
+  _qt4_add_target_private_depends(QtDBus Xml)
+  _qt4_add_target_private_depends(QtUiTools Xml Gui)
+  _qt4_add_target_private_depends(QtHelp Sql Xml Network)
+  _qt4_add_target_private_depends(QtXmlPatterns Network)
+  _qt4_add_target_private_depends(QtScriptTools Gui)
+  _qt4_add_target_private_depends(QtWebKit XmlPatterns)
+  _qt4_add_target_private_depends(QtDeclarative XmlPatterns Svg Sql Gui)
+  _qt4_add_target_private_depends(QtMultimedia Gui)
+  _qt4_add_target_private_depends(QtOpenGL Gui)
+  _qt4_add_target_private_depends(QAxServer Gui)
+  _qt4_add_target_private_depends(QAxContainer Gui)
+  _qt4_add_target_private_depends(phonon Gui)
+  if(QT_QTDBUS_FOUND)
+    _qt4_add_target_private_depends(phonon DBus)
+  endif()
+
+  if (WIN32 AND NOT QT4_NO_LINK_QTMAIN)
+    set(_isExe $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
+    set(_isWin32 $<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>)
+    set(_isNotExcluded $<NOT:$<BOOL:$<TARGET_PROPERTY:QT4_NO_LINK_QTMAIN>>>)
+    set(_isPolicyNEW $<TARGET_POLICY:CMP0020>)
+    set_property(TARGET Qt4::QtCore APPEND PROPERTY
+      IMPORTED_LINK_INTERFACE_LIBRARIES
+        $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt4::qtmain>
+    )
+    unset(_isExe)
+    unset(_isWin32)
+    unset(_isNotExcluded)
+    unset(_isPolicyNEW)
+  endif()
 
   #######################################
   #
@@ -982,13 +1100,13 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endif()
 
   find_program(QT_MOC_EXECUTABLE
-    NAMES moc-qt4 moc
+    NAMES moc-qt4 moc moc4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
   find_program(QT_UIC_EXECUTABLE
-    NAMES uic-qt4 uic
+    NAMES uic-qt4 uic uic4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
@@ -1018,13 +1136,13 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     )
 
   find_program(QT_LUPDATE_EXECUTABLE
-    NAMES lupdate-qt4 lupdate
+    NAMES lupdate-qt4 lupdate lupdate4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
   find_program(QT_LRELEASE_EXECUTABLE
-    NAMES lrelease-qt4 lrelease
+    NAMES lrelease-qt4 lrelease lrelease4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
@@ -1036,13 +1154,13 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     )
 
   find_program(QT_DESIGNER_EXECUTABLE
-    NAMES designer-qt4 designer
+    NAMES designer-qt4 designer designer4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
 
   find_program(QT_LINGUIST_EXECUTABLE
-    NAMES linguist-qt4 linguist
+    NAMES linguist-qt4 linguist linguist4
     PATHS ${QT_BINARY_DIR}
     NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
     )
@@ -1169,11 +1287,6 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ######################################
 
   include("${_qt4_current_dir}/Qt4Macros.cmake")
-
-  # set version variables
-  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
-  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
 
 endif()
 

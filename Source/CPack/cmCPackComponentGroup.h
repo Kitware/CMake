@@ -42,7 +42,9 @@ public:
 class cmCPackComponent
 {
 public:
- cmCPackComponent() : Group(0), TotalSize(0) { }
+ cmCPackComponent() : Group(0), IsRequired(true), IsHidden(false),
+                      IsDisabledByDefault(false), IsDownloaded(false),
+                      TotalSize(0) { }
 
   /// The name of the component (used to reference the component).
   std::string Name;

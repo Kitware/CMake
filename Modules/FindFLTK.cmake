@@ -58,7 +58,7 @@ if(WIN32)
 endif()
 
 if(UNIX)
-  include(FindX11)
+  include(${CMAKE_CURRENT_LIST_DIR}/FindX11.cmake)
   find_library(FLTK_MATH_LIBRARY m)
   set( FLTK_PLATFORM_DEPENDENT_LIBS ${X11_LIBRARIES} ${FLTK_MATH_LIBRARY})
 endif()

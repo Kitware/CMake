@@ -15,6 +15,7 @@
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
+#include "cmMakefileIncludeDirectoriesEntry.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -22,7 +23,19 @@ class cmake;
 class cmMakefile;
 class cmSourceFile;
 class cmGlobalGenerator;
+class cmComputeLinkInformation;
 class cmListFileBacktrace;
+class cmTarget;
+
+struct cmTargetLinkInformationMap:
+  public std::map<std::pair<cmTarget*, std::string>, cmComputeLinkInformation*>
+{
+  typedef std::map<std::pair<cmTarget*, std::string>,
+                   cmComputeLinkInformation*> derived;
+  cmTargetLinkInformationMap() {}
+  cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
+  ~cmTargetLinkInformationMap();
+};
 
 class cmTargetInternals;
 class cmTargetInternalPointer
@@ -89,6 +102,10 @@ public:
   cmPolicies::PolicyStatus GetPolicyStatusCMP0008() const
     { return this->PolicyStatusCMP0008; }
 
+  /** Get the status of policy CMP0020 when the target was created.  */
+  cmPolicies::PolicyStatus GetPolicyStatusCMP0020() const
+    { return this->PolicyStatusCMP0020; }
+
   /**
    * Get the list of the custom commands for this target
    */
@@ -98,9 +115,6 @@ public:
     {return this->PreLinkCommands;}
   std::vector<cmCustomCommand> &GetPostBuildCommands()
     {return this->PostBuildCommands;}
-
-  ///! Return the list of frameworks being linked to this target
-  std::vector<std::string> &GetFrameworks() {return this->Frameworks;}
 
   /**
    * Get the list of the source files used by this target
@@ -158,6 +172,9 @@ public:
   return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
+  void GetDirectLinkLibraries(const char *config,
+                              std::vector<std::string> &,
+                              cmTarget *head);
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config);
@@ -169,7 +186,6 @@ public:
 
   // Check to see if a library is a framework and treat it different on Mac
   bool NameResolvesToFramework(const std::string& libname);
-  bool AddFramework(const std::string& lib, LinkLibraryType llt);
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
                       LinkLibraryType llt);
@@ -246,12 +262,15 @@ public:
     // Needed only for OLD behavior of CMP0003.
     std::vector<std::string> WrongConfigLibraries;
 
-    LinkInterface(): Multiplicity(0) {}
+    bool ImplementationIsInterface;
+
+    LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
   };
 
   /** Get the link interface for the given configuration.  Returns 0
       if the target cannot be linked.  */
-  LinkInterface const* GetLinkInterface(const char* config);
+  LinkInterface const* GetLinkInterface(const char* config,
+                                        cmTarget *headTarget);
 
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
@@ -267,7 +286,8 @@ public:
     // Needed only for OLD behavior of CMP0003.
     std::vector<std::string> WrongConfigLibraries;
   };
-  LinkImplementation const* GetLinkImplementation(const char* config);
+  LinkImplementation const* GetLinkImplementation(const char* config,
+                                                  cmTarget *head);
 
   /** Link information from the transitive closure of the link
       implementation and the interfaces of its dependencies.  */
@@ -279,7 +299,7 @@ public:
     // Languages whose runtime libraries must be linked.
     std::vector<std::string> Languages;
   };
-  LinkClosure const* GetLinkClosure(const char* config);
+  LinkClosure const* GetLinkClosure(const char* config, cmTarget *head);
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
@@ -324,7 +344,7 @@ public:
   bool FindSourceFiles();
 
   ///! Return the preferred linker language for this target
-  const char* GetLinkerLanguage(const char* config = 0);
+  const char* GetLinkerLanguage(const char* config = 0, cmTarget *head = 0);
 
   /** Get the full name of the target according to the settings in its
       makefile.  */
@@ -392,8 +412,16 @@ public:
   std::string GetInstallNameDirForInstallTree(const char* config,
                                               bool for_xcode = false);
 
+  cmComputeLinkInformation* GetLinkInformation(const char* config,
+                                               cmTarget *head = 0);
+
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
+
+  bool GetMappedConfig(std::string const& desired_config,
+                       const char** loc,
+                       const char** imp,
+                       std::string& suffix);
 
   // Define the properties
   static void DefineProperties(cmake *cm);
@@ -401,6 +429,8 @@ public:
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro();
+
+  std::string GetCompileDefinitions(const char *config = 0);
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -462,6 +492,31 @@ public:
   /** @return the Mac framework directory without the base. */
   std::string GetFrameworkDirectory(const char* config = 0);
 
+  std::vector<std::string> GetIncludeDirectories(const char *config);
+  void InsertInclude(const cmMakefileIncludeDirectoriesEntry &entry,
+                     bool before = false);
+
+  void AppendBuildInterfaceIncludes();
+
+  void GetLinkDependentTargetsForProperty(const std::string &p,
+                                       std::set<std::string> &targets);
+  bool IsNullImpliedByLinkLibraries(const std::string &p);
+  bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                            const char *config);
+  bool IsLinkInterfaceDependentStringProperty(const std::string &p,
+                                              const char *config);
+
+  void AddLinkDependentTargetsForProperties(
+          const std::map<cmStdString, cmStdString> &map);
+
+  bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                             const char *config);
+
+  const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
+                                                      const char *config);
+
+  std::string GetDebugGeneratorExpressions(const std::string &value,
+                                  cmTarget::LinkLibraryType llt);
 private:
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -557,7 +612,6 @@ private:
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
-  std::vector<std::string> Frameworks;
   std::vector<std::string> LinkDirectories;
   std::set<cmStdString> LinkDirectoriesEmmitted;
   bool HaveInstallRule;
@@ -572,23 +626,35 @@ private:
   bool DLLPlatform;
   bool IsApple;
   bool IsImportedTarget;
+  bool DebugIncludesDone;
+  mutable std::map<cmStdString, std::set<std::string> >
+                                                      LinkDependentProperties;
+  mutable std::set<std::string> LinkImplicitNullProperties;
+  bool BuildInterfaceIncludesAppended;
 
   // Cache target output paths for each configuration.
   struct OutputInfo;
   OutputInfo const* GetOutputInfo(const char* config);
   bool ComputeOutputDir(const char* config, bool implib, std::string& out);
-  void ComputePDBOutputDir(const char* config, std::string& out);
+  bool ComputePDBOutputDir(const char* config, std::string& out);
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;
-  ImportInfo const* GetImportInfo(const char* config);
-  void ComputeImportInfo(std::string const& desired_config, ImportInfo& info);
+  ImportInfo const* GetImportInfo(const char* config,
+                                        cmTarget *workingTarget);
+  void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
+                                        cmTarget *head);
 
-  bool ComputeLinkInterface(const char* config, LinkInterface& iface);
+  cmTargetLinkInformationMap LinkInformation;
+  void CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                  const char* config);
+
+  bool ComputeLinkInterface(const char* config, LinkInterface& iface,
+                                        cmTarget *head);
 
   void ComputeLinkImplementation(const char* config,
-                                 LinkImplementation& impl);
-  void ComputeLinkClosure(const char* config, LinkClosure& lc);
+                                 LinkImplementation& impl, cmTarget *head);
+  void ComputeLinkClosure(const char* config, LinkClosure& lc, cmTarget *head);
 
   void ClearLinkMaps();
 
@@ -604,6 +670,7 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0003;
   cmPolicies::PolicyStatus PolicyStatusCMP0004;
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
+  cmPolicies::PolicyStatus PolicyStatusCMP0020;
 
   // Internal representation details.
   friend class cmTargetInternals;

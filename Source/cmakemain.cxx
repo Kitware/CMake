@@ -344,19 +344,17 @@ int main(int ac, char** av)
 
 int do_cmake(int ac, char** av)
 {
-  int nocwd = 0;
-
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
     std::cerr << "Current working directory cannot be established."
               << std::endl;
-    nocwd = 1;
+    return 1;
     }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
-  if(doc.CheckOptions(ac, av, "-E") || nocwd)
+  if(doc.CheckOptions(ac, av, "-E"))
     {
     // Construct and print requested documentation.
     cmake hcm;
@@ -424,7 +422,7 @@ int do_cmake(int ac, char** av)
     return result;
     }
 #else
-  if ( nocwd || ac == 1 )
+  if ( ac == 1 )
     {
     std::cout <<
       "Bootstrap CMake should not be used outside CMake build process."

@@ -27,7 +27,6 @@
 
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/SystemTools.hxx>
-#include <memory> // auto_ptr
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][3] =
@@ -181,7 +180,6 @@ int main (int argc, char *argv[])
 {
   cmSystemTools::FindExecutableDirectory(argv[0]);
   cmCPackLog log;
-  int nocwd = 0;
 
   log.SetErrorPrefix("CPack Error: ");
   log.SetWarningPrefix("CPack Warning: ");
@@ -194,7 +192,7 @@ int main (int argc, char *argv[])
     {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
       "Current working directory cannot be established." << std::endl);
-    nocwd = 1;
+    return 1;
     }
 
   std::string generator;
@@ -276,7 +274,7 @@ int main (int argc, char *argv[])
   cminst.RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg;
   cmgg.SetCMakeInstance(&cminst);
-  std::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
   cmMakefile* globalMF = cmlg->GetMakefile();
 
   bool cpackConfigFileSpecified = true;
@@ -298,7 +296,7 @@ int main (int argc, char *argv[])
    * should launch cpack using "cpackConfigFile" if it exists
    * in the current directory.
    */
-  if((doc.CheckOptions(argc, argv,"-G") || nocwd) && !(argc==1))
+  if((doc.CheckOptions(argc, argv,"-G")) && !(argc==1))
     {
       help = true;
     }

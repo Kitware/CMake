@@ -62,7 +62,7 @@ set(VTK_DIR_MESSAGE "VTK not found.  Set the VTK_DIR cmake cache entry to the ${
 if(_VTK_40_ALLOW AND VTK_DIR)
   if(EXISTS ${VTK_DIR}/UseVTK.cmake AND NOT EXISTS ${VTK_DIR}/VTKConfig.cmake)
     set(VTK_FOUND 1)
-    include(UseVTKConfig40) # No VTKConfig; load VTK 4.0 settings.
+    include(${CMAKE_CURRENT_LIST_DIR}/UseVTKConfig40.cmake) # No VTKConfig; load VTK 4.0 settings.
   endif()
 endif()
 
@@ -117,7 +117,7 @@ if(_VTK_40_ALLOW AND NOT VTK_DIR)
   if(VTK_DIR)
     if(EXISTS ${VTK_DIR}/UseVTK.cmake AND NOT EXISTS ${VTK_DIR}/VTKConfig.cmake)
       set(VTK_FOUND 1)
-      include(UseVTKConfig40) # No VTKConfig; load VTK 4.0 settings.
+      include(${CMAKE_CURRENT_LIST_DIR}/UseVTKConfig40.cmake) # No VTKConfig; load VTK 4.0 settings.
     else()
       # We found the wrong version.  Pretend we did not find it.
       set(VTK_DIR "VTK_DIR-NOTFOUND" CACHE PATH "The ${VTK_DIR_DESCRIPTION}" FORCE)

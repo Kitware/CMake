@@ -25,6 +25,14 @@
 #  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
 # endif
 
+#elif defined(__PATHCC__)
+# define COMPILER_ID "PathScale"
+# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
+# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
+# if defined(__PATHCC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
+# endif
+
 #elif defined(__clang__)
 # define COMPILER_ID "Clang"
 # define COMPILER_VERSION_MAJOR DEC(__clang_major__)
@@ -98,14 +106,6 @@
 # define COMPILER_VERSION_MINOR DEC(__PGIC_MINOR__)
 # if defined(__PGIC_PATCHLEVEL__)
 #  define COMPILER_VERSION_PATCH DEC(__PGIC_PATCHLEVEL__)
-# endif
-
-#elif defined(__PATHCC__)
-# define COMPILER_ID "PathScale"
-# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
-# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
-# if defined(__PATHCC_PATCHLEVEL__)
-#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
 # endif
 
 #elif defined(_CRAYC)

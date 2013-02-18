@@ -121,7 +121,7 @@ bool cmCTestHandlerCommand
     }
   if ( this->Values[ct_SUBMIT_INDEX] )
     {
-    if ( this->CTest->GetDartVersion() <= 1 )
+    if(!this->CTest->GetDropSiteCDash() && this->CTest->GetDartVersion() <= 1)
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
         "Dart before version 2.0 does not support collecting submissions."

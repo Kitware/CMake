@@ -128,6 +128,9 @@ void cmGlobalVisualStudio71Generator
     fout << "\tEndGlobalSection\n";
     }
 
+  // Write out global sections
+  this->WriteSLNGlobalSections(fout, root);
+
   // Write the footer for the SLN file
   this->WriteSLNFooter(fout);
 }
@@ -273,9 +276,10 @@ void cmGlobalVisualStudio71Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
-::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild,
-                             const char* platformMapping)
+::WriteProjectConfigurations(
+  std::ostream& fout, const char* name, cmTarget::TargetType,
+  const std::set<std::string>& configsPartOfDefaultBuild,
+  const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -284,24 +288,15 @@ void cmGlobalVisualStudio71Generator
     fout << "\t\t{" << guid << "}." << *i
          << ".ActiveCfg = " << *i << "|"
          << (platformMapping ? platformMapping : "Win32") << std::endl;
-    if(partOfDefaultBuild)
+    std::set<std::string>::const_iterator
+      ci = configsPartOfDefaultBuild.find(*i);
+    if(!(ci == configsPartOfDefaultBuild.end()))
       {
       fout << "\t\t{" << guid << "}." << *i
            << ".Build.0 = " << *i << "|"
            << (platformMapping ? platformMapping : "Win32") << std::endl;
       }
     }
-}
-
-//----------------------------------------------------------------------------
-// Standard end of dsw file
-void cmGlobalVisualStudio71Generator::WriteSLNFooter(std::ostream& fout)
-{
-  fout << "\tGlobalSection(ExtensibilityGlobals) = postSolution\n"
-       << "\tEndGlobalSection\n"
-       << "\tGlobalSection(ExtensibilityAddIns) = postSolution\n"
-       << "\tEndGlobalSection\n"
-       << "EndGlobal\n";
 }
 
 //----------------------------------------------------------------------------
@@ -313,9 +308,9 @@ void cmGlobalVisualStudio71Generator::WriteSLNHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio71Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio71Generator::GetActualName();
   entry.Brief = "Generates Visual Studio .NET 2003 project files.";
   entry.Full = "";
 }

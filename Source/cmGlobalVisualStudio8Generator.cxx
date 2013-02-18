@@ -13,14 +13,117 @@
 #include "cmGlobalVisualStudio8Generator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmVisualStudioWCEPlatformParser.h"
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
 
+static const char vs8generatorName[] = "Visual Studio 8 2005";
+
+class cmGlobalVisualStudio8Generator::Factory
+  : public cmGlobalGeneratorFactory
+{
+public:
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
+    if(strstr(name, vs8generatorName) != name)
+      {
+      return 0;
+      }
+
+    const char* p = name + sizeof(vs8generatorName) - 1;
+    if(p[0] == '\0')
+      {
+      return new cmGlobalVisualStudio8Generator(
+        name, NULL, NULL);
+      }
+
+    if(p[0] != ' ')
+      {
+      return 0;
+      }
+
+    ++p;
+
+    if(!strcmp(p, "Win64"))
+      {
+      return new cmGlobalVisualStudio8Generator(
+        name, "x64", "CMAKE_FORCE_WIN64");
+      }
+
+    cmVisualStudioWCEPlatformParser parser(p);
+    parser.ParseVersion("8.0");
+    if (!parser.Found())
+      {
+      return 0;
+      }
+
+    cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
+      name, parser.GetArchitectureFamily(), NULL);
+    ret->PlatformName = p;
+    ret->WindowsCEVersion = parser.GetOSVersion();
+    return ret;
+  }
+
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
+    entry.Name = vs8generatorName;
+    entry.Brief = "Generates Visual Studio 8 2005 project files.";
+    entry.Full =
+      "It is possible to append a space followed by the platform name "
+      "to create project files for a specific target platform. E.g. "
+      "\"Visual Studio 8 2005 Win64\" will create project files for "
+      "the x64 processor.";
+  }
+
+  virtual void GetGenerators(std::vector<std::string>& names) const {
+    names.push_back(vs8generatorName);
+    names.push_back(vs8generatorName + std::string(" Win64"));
+    cmVisualStudioWCEPlatformParser parser;
+    parser.ParseVersion("8.0");
+    const std::vector<std::string>& availablePlatforms =
+      parser.GetAvailablePlatforms();
+    for(std::vector<std::string>::const_iterator i =
+        availablePlatforms.begin(); i != availablePlatforms.end(); ++i)
+      {
+      names.push_back("Visual Studio 8 2005 " + *i);
+      }
+  }
+};
+
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator()
+cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
+{
+  return new Factory;
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
+  const char* name, const char* architectureId,
+  const char* additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
+  this->Name = name;
+  if (architectureId)
+    {
+    this->ArchitectureId = architectureId;
+    }
+  if (additionalPlatformDefinition)
+    {
+    this->AdditionalPlatformDefinition = additionalPlatformDefinition;
+    }
+}
+
+//----------------------------------------------------------------------------
+const char* cmGlobalVisualStudio8Generator::GetPlatformName() const
+{
+  if (!this->PlatformName.empty())
+    {
+    return this->PlatformName.c_str();
+    }
+  if (this->ArchitectureId == "X86")
+    {
+    return "Win32";
+    }
+  return this->ArchitectureId.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -36,6 +139,19 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  cmGlobalVisualStudio71Generator::AddPlatformDefinitions(mf);
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
+
+  if(this->TargetsWindowsCE())
+  {
+    mf->AddDefinition("CMAKE_VS_WINCE_VERSION",
+      this->WindowsCEVersion.c_str());
+  }
+}
+
+//----------------------------------------------------------------------------
 // ouput standard header for dsw file
 void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 {
@@ -45,9 +161,9 @@ void cmGlobalVisualStudio8Generator::WriteSLNHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio8Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 8 2005 project files.";
   entry.Full = "";
 }
@@ -204,7 +320,6 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
   // overwritten by the CreateVCProjBuildRule.
   // (this could be avoided with per-target source files)
   const char* no_main_dependency = 0;
-  const char* no_working_directory = 0;
   if(cmSourceFile* file =
      mf->AddCustomCommandToOutput(
        stamps, listFiles,
@@ -258,9 +373,10 @@ cmGlobalVisualStudio8Generator
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio8Generator
-::WriteProjectConfigurations(std::ostream& fout, const char* name,
-                             bool partOfDefaultBuild,
-                             const char* platformMapping)
+::WriteProjectConfigurations(
+  std::ostream& fout, const char* name, cmTarget::TargetType type,
+  const std::set<std::string>& configsPartOfDefaultBuild,
+  const char* platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -270,10 +386,21 @@ cmGlobalVisualStudio8Generator
          << "|" << this->GetPlatformName() << ".ActiveCfg = " << *i << "|"
          << (platformMapping ? platformMapping : this->GetPlatformName())
          << "\n";
-    if(partOfDefaultBuild)
+      std::set<std::string>::const_iterator
+        ci = configsPartOfDefaultBuild.find(*i);
+      if(!(ci == configsPartOfDefaultBuild.end()))
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Build.0 = " << *i << "|"
+           << (platformMapping ? platformMapping : this->GetPlatformName())
+           << "\n";
+      }
+    bool needsDeploy = (type == cmTarget::EXECUTABLE ||
+                        type == cmTarget::SHARED_LIBRARY);
+    if(this->TargetsWindowsCE() && needsDeploy)
+      {
+      fout << "\t\t{" << guid << "}." << *i
+           << "|" << this->GetPlatformName() << ".Deploy.0 = " << *i << "|"
            << (platformMapping ? platformMapping : this->GetPlatformName())
            << "\n";
       }

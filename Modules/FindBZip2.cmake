@@ -49,7 +49,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   VERSION_VAR BZIP2_VERSION_STRING)
 
 if (BZIP2_FOUND)
-   include(CheckLibraryExists)
+   include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
    CHECK_LIBRARY_EXISTS("${BZIP2_LIBRARIES}" BZ2_bzCompressInit "" BZIP2_NEED_PREFIX)
 endif ()
 

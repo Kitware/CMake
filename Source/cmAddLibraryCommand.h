@@ -134,6 +134,10 @@ public:
       "They may contain custom commands generating such sources, but not "
       "PRE_BUILD, PRE_LINK, or POST_BUILD commands.  "
       "Object libraries cannot be imported, exported, installed, or linked."
+      "  "
+      "Some native build systems may not like targets that have only "
+      "object files, so consider adding at least one real source file "
+      "to any target that references $<TARGET_OBJECTS:objlib>."
       ;
     }
 

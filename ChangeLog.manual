@@ -1,3 +1,37 @@
+Changes in CMake 2.8.10.2 (since 2.8.10.1)
+----------------------------------------------
+Alex Neundorf (1):
+      Automoc: fix regression #13667, broken build in phonon
+
+Brad King (1):
+      Initialize IMPORTED GLOBAL targets on reconfigure (#13702)
+
+David Cole (1):
+      CMake: Fix infinite loop untarring corrupt tar file
+
+Rolf Eike Beer (1):
+      FindGettext: fix overwriting result with empty variable (#13691)
+
+Changes in CMake 2.8.10.1 (since 2.8.10)
+----------------------------------------------
+Brad King (5):
+      Fix default PDB output directory (#13644)
+      Fix PathScale compiler id for Clang-based upstream
+      Update programmatically-reported copyright year (#13638)
+      FindSDL: Restore accidentally dropped search paths (#13651)
+      OS X: Fix default CMAKE_OSX_SYSROOT with deployment target
+
+Rolf Eike Beer (2):
+      FindOpenSSL: fix library selection on Windows (#13645)
+      FindOpenSSL: also find the non-MD debug libraries for MSVC
+
+Stephen Kelly (1):
+      GenEx: Use case insensitive comparison for $<CONFIG:...>
+
+Changes in CMake 2.8.10 (since 2.8.10-rc3)
+----------------------------------------------
+None
+
 Changes in CMake 2.8.10-rc3 (since 2.8.10-rc2)
 ----------------------------------------------
 Rolf Eike Beer (2):

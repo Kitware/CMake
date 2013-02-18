@@ -1,14 +1,10 @@
-if(NOT DEFINED cpack)
-  message(FATAL_ERROR "cpack not defined")
-endif()
-
 if(NOT DEFINED dir)
   message(FATAL_ERROR "dir not defined")
 endif()
 
 # Analyze 'cpack --help' output for list of available generators:
 #
-execute_process(COMMAND ${cpack} --help
+execute_process(COMMAND ${CMAKE_CPACK_COMMAND} --help
   RESULT_VARIABLE result
   OUTPUT_VARIABLE stdout
   ERROR_VARIABLE stderr
@@ -43,7 +39,7 @@ message(STATUS "CPack generators='${generators}'")
 
 foreach(g ${generators})
   message(STATUS "Calling cpack -G ${g}...")
-  execute_process(COMMAND ${cpack} -G ${g}
+  execute_process(COMMAND ${CMAKE_CPACK_COMMAND} -G ${g}
     RESULT_VARIABLE result
     OUTPUT_VARIABLE stdout
     ERROR_VARIABLE stderr

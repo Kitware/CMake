@@ -63,10 +63,6 @@ do.
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
 
-#ifdef __HAIKU__
-#undef __BEOS__
-#endif
-
 #if defined(__VMS)
 # define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
 #else
@@ -106,7 +102,7 @@ static inline void kwsysProcess_usleep(unsigned int msec)
  * pipes' file handles to be non-blocking and just poll them directly
  * without select().
  */
-#if !defined(__BEOS__) && !defined(__VMS)
+#if !defined(__BEOS__) && !defined(__VMS) && !defined(__MINT__)
 # define KWSYSPE_USE_SELECT 1
 #endif
 
@@ -422,9 +418,10 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
        parse it.  */
     newCommands[cp->NumberOfCommands] =
       kwsysSystem_Parse_CommandForUnix(*command, 0);
-    if(!newCommands[cp->NumberOfCommands])
+    if(!newCommands[cp->NumberOfCommands] ||
+       !newCommands[cp->NumberOfCommands][0])
       {
-      /* Out of memory.  */
+      /* Out of memory or no command parsed.  */
       free(newCommands);
       return 0;
       }
@@ -2732,6 +2729,7 @@ static void kwsysProcessesSignalHandler(int signum
     kwsysProcess* cp = kwsysProcesses.Processes[i];
     kwsysProcess_ssize_t status=
       read(cp->PipeReadEnds[KWSYSPE_PIPE_SIGNAL], &buf, 1);
+    (void)status;
     status=write(cp->SignalPipe, &buf, 1);
     (void)status;
     }

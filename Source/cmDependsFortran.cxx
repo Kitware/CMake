@@ -170,44 +170,50 @@ cmDependsFortran::~cmDependsFortran()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
-                                         std::ostream&, std::ostream&)
+bool cmDependsFortran::WriteDependencies(
+    const std::set<std::string>& sources, const std::string& obj,
+    std::ostream&, std::ostream&)
 {
   // Make sure this is a scanning instance.
-  if(!src || src[0] == '\0')
+  if(sources.empty() || sources.begin()->empty())
     {
-    cmSystemTools::Error("Cannot scan dependencies without an source file.");
+    cmSystemTools::Error("Cannot scan dependencies without a source file.");
     return false;
     }
-  if(!obj || obj[0] == '\0')
+  if(obj.empty())
     {
     cmSystemTools::Error("Cannot scan dependencies without an object file.");
     return false;
     }
 
-  // Get the information object for this source.
-  cmDependsFortranSourceInfo& info =
-    this->Internal->CreateObjectInfo(obj, src);
-
-  // Make a copy of the macros defined via ADD_DEFINITIONS
-  std::set<std::string> ppDefines(this->PPDefinitions.begin(),
-                                  this->PPDefinitions.end());
-
-  // Create the parser object. The constructor takes ppMacro and info per
-  // reference, so we may look into the resulting objects later.
-  cmDependsFortranParser parser(this, ppDefines, info);
-
-  // Push on the starting file.
-  cmDependsFortranParser_FilePush(&parser, src);
-
-  // Parse the translation unit.
-  if(cmDependsFortran_yyparse(parser.Scanner) != 0)
+  bool okay = true;
+  for(std::set<std::string>::const_iterator it = sources.begin();
+      it != sources.end(); ++it)
     {
-    // Failed to parse the file.  Report failure to write dependencies.
-    return false;
-    }
+    const std::string& src = *it;
+    // Get the information object for this source.
+    cmDependsFortranSourceInfo& info =
+      this->Internal->CreateObjectInfo(obj.c_str(), src.c_str());
 
-  return true;
+    // Make a copy of the macros defined via ADD_DEFINITIONS
+    std::set<std::string> ppDefines(this->PPDefinitions.begin(),
+                                    this->PPDefinitions.end());
+
+    // Create the parser object. The constructor takes ppMacro and info per
+    // reference, so we may look into the resulting objects later.
+    cmDependsFortranParser parser(this, ppDefines, info);
+
+    // Push on the starting file.
+    cmDependsFortranParser_FilePush(&parser, src.c_str());
+
+    // Parse the translation unit.
+    if(cmDependsFortran_yyparse(parser.Scanner) != 0)
+      {
+      // Failed to parse the file.  Report failure to write dependencies.
+      okay = false;
+      }
+    }
+  return okay;
 }
 
 //----------------------------------------------------------------------------

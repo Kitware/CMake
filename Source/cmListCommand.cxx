@@ -15,13 +15,14 @@
 
 #include <stdlib.h> // required for atoi
 #include <ctype.h>
+#include <assert.h>
 //----------------------------------------------------------------------------
 bool cmListCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
-  if(args.size() < 1)
+  if(args.size() < 2)
     {
-    this->SetError("must be called with at least one argument.");
+    this->SetError("must be called with at least two arguments.");
     return false;
     }
 
@@ -243,11 +244,7 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
 //----------------------------------------------------------------------------
 bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
 {
-  if(args.size() < 2)
-    {
-    this->SetError("sub-command APPEND requires at least one argument.");
-    return false;
-    }
+  assert(args.size() >= 2);
 
   // Skip if nothing to append.
   if(args.size() < 3)
@@ -424,12 +421,8 @@ bool cmListCommand
 bool cmListCommand
 ::HandleReverseCommand(std::vector<std::string> const& args)
 {
-  if(args.size() < 2)
-    {
-    this->SetError("sub-command REVERSE requires a list as an argument.");
-    return false;
-    }
-  else if(args.size() > 2)
+  assert(args.size() >= 2);
+  if(args.size() > 2)
     {
     this->SetError(
       "sub-command REVERSE only takes one argument.");
@@ -463,13 +456,8 @@ bool cmListCommand
 bool cmListCommand
 ::HandleRemoveDuplicatesCommand(std::vector<std::string> const& args)
 {
-  if(args.size() < 2)
-    {
-    this->SetError(
-      "sub-command REMOVE_DUPLICATES requires a list as an argument.");
-    return false;
-    }
-  else if(args.size() > 2)
+  assert(args.size() >= 2);
+  if(args.size() > 2)
     {
     this->SetError(
       "sub-command REMOVE_DUPLICATES only takes one argument.");
@@ -513,12 +501,8 @@ bool cmListCommand
 bool cmListCommand
 ::HandleSortCommand(std::vector<std::string> const& args)
 {
-  if(args.size() < 2)
-    {
-    this->SetError("sub-command SORT requires a list as an argument.");
-    return false;
-    }
-  else if(args.size() > 2)
+  assert(args.size() >= 2);
+  if(args.size() > 2)
     {
     this->SetError(
       "sub-command SORT only takes one argument.");

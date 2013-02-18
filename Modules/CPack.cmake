@@ -438,6 +438,7 @@ if(NOT CPACK_GENERATOR)
     endif()
   else()
     option(CPACK_BINARY_NSIS "Enable to build NSIS packages" ON)
+    option(CPACK_BINARY_WIX  "Enable to build WiX packages" OFF)
     option(CPACK_BINARY_ZIP  "Enable to build ZIP packages" OFF)
   endif()
 
@@ -453,6 +454,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TGZ          TGZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TBZ2         TBZ2)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TZ           TZ)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_WIX          WIX)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_ZIP          ZIP)
 
 endif()
@@ -483,7 +485,7 @@ endif()
 mark_as_advanced(CPACK_BINARY_CYGWIN CPACK_BINARY_PACKAGEMAKER CPACK_BINARY_OSXX11
                  CPACK_BINARY_STGZ   CPACK_BINARY_TGZ          CPACK_BINARY_TBZ2
                  CPACK_BINARY_DEB    CPACK_BINARY_RPM          CPACK_BINARY_TZ
-                 CPACK_BINARY_NSIS CPACK_BINARY_ZIP CPACK_BINARY_BUNDLE
+                 CPACK_BINARY_NSIS CPACK_BINARY_WIX CPACK_BINARY_ZIP CPACK_BINARY_BUNDLE
                  CPACK_SOURCE_CYGWIN CPACK_SOURCE_TBZ2 CPACK_SOURCE_TGZ
                  CPACK_SOURCE_TZ CPACK_SOURCE_ZIP CPACK_BINARY_DRAGNDROP)
 
@@ -521,6 +523,9 @@ cpack_set_if_not_set(CPACK_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
 cpack_set_if_not_set(CPACK_NSIS_INSTALLER_ICON_CODE "")
 cpack_set_if_not_set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
+
+# WiX specific variables
+cpack_set_if_not_set(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 
 if(DEFINED CPACK_COMPONENTS_ALL)
   if(CPACK_MONOLITHIC_INSTALL)

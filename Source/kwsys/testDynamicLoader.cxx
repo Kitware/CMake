@@ -15,7 +15,7 @@
 #include KWSYS_HEADER(ios/iostream)
 #include KWSYS_HEADER(stl/string)
 
-#if defined(__BEOS__) && !defined(__HAIKU__)
+#if defined(__BEOS__)
 #include <be/kernel/OS.h>  /* disable_debugger() API. */
 #endif
 
@@ -35,7 +35,7 @@
 // left on disk.
 #include <testSystemTools.h>
 
-kwsys_stl::string GetLibName(const char* lname)
+static kwsys_stl::string GetLibName(const char* lname)
 {
   // Construct proper name of lib
   kwsys_stl::string slname;

@@ -24,9 +24,11 @@ class cmGlobalVisualStudio10Generator :
   public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio10Generator();
-  static cmGlobalGenerator* New() {
-    return new cmGlobalVisualStudio10Generator; }
+  cmGlobalVisualStudio10Generator(const char* name,
+    const char* architectureId, const char* additionalPlatformDefinition);
+  static cmGlobalGeneratorFactory* NewFactory();
+
+  virtual bool SetGeneratorToolset(std::string const& ts);
 
   virtual std::string
   GenerateBuildCommand(const char* makeProgram,
@@ -34,14 +36,7 @@ public:
                        const char* additionalOptions, const char *targetName,
                        const char* config, bool ignoreErrors, bool);
 
-  ///! Get the name for the generator.
-  virtual const char* GetName() const {
-    return cmGlobalVisualStudio10Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 10";}
   virtual void AddPlatformDefinitions(cmMakefile* mf);
-
-  /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -92,6 +87,7 @@ protected:
   bool UseFolderProperty();
 
 private:
+  class Factory;
   struct LongestSourcePath
   {
     LongestSourcePath(): Length(0), Target(0), SourceFile(0) {}

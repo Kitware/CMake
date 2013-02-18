@@ -122,9 +122,11 @@ macro(CMAKE_SETUP_TESTING)
       "Generator used when running tests")
     if(NOT CMAKE_TEST_GENERATOR)
       set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
+      set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
       set(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
     else()
       set(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
+      set(CMAKE_TEST_GENERATOR_TOOLSET "")
     endif()
 
     # Are we testing with the MSVC compiler?
@@ -234,8 +236,6 @@ macro (CMAKE_BUILD_UTILITIES)
   set(kwsys_folder "Utilities/KWSys")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE} "${kwsys_folder}")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}_c "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}EncodeExecutable "${kwsys_folder}")
-  CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}ProcessFwd9x "${kwsys_folder}")
   if(BUILD_TESTING)
     CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestDynload "${kwsys_folder}")
     CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE}TestProcess "${kwsys_folder}")
@@ -585,6 +585,29 @@ option(CMAKE_STRICT
   "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
 mark_as_advanced(CMAKE_STRICT)
 
+if(NOT CMake_VERSION_IS_RELEASE)
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
+      NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
+    set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
+                     -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
+                     -Wmissing-format-attribute -fno-common -Wundef
+    )
+    set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
+                       -Wshadow -Wpointer-arith -Wformat-security -Wundef
+    )
+
+    foreach(FLAG_LANG  C CXX)
+      foreach(FLAG ${${FLAG_LANG}_FLAGS_LIST})
+        if(NOT " ${CMAKE_${FLAG_LANG}_FLAGS} " MATCHES " ${FLAG} ")
+          set(CMAKE_${FLAG_LANG}_FLAGS "${CMAKE_${FLAG_LANG}_FLAGS} ${FLAG}")
+        endif()
+      endforeach()
+    endforeach()
+
+    unset(C_FLAGS_LIST)
+    unset(CXX_FLAGS_LIST)
+  endif()
+endif()
 
 # build the remaining subdirectories
 add_subdirectory(Source)

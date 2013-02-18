@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgGA/FlightManipulator>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGGA osgGA/FlightManipulator)
 OSG_FIND_LIBRARY(OSGGA osgGA)
 

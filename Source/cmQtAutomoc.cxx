@@ -85,6 +85,18 @@ static std::string extractSubDir(const std::string& absPath,
 }
 
 
+static void copyTargetProperty(cmTarget* destinationTarget,
+                               cmTarget* sourceTarget,
+                               const char* propertyName)
+{
+  const char* propertyValue = sourceTarget->GetProperty(propertyName);
+  if (propertyValue)
+    {
+    destinationTarget->SetProperty(propertyName, propertyValue);
+    }
+}
+
+
 cmQtAutomoc::cmQtAutomoc()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,ColorOutput(true)
@@ -152,9 +164,13 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   std::string automocComment = "Automoc for target ";
   automocComment += targetName;
 
-  makefile->AddUtilityCommand(automocTargetName.c_str(), true,
+  cmTarget* automocTarget = makefile->AddUtilityCommand(
+                              automocTargetName.c_str(), true,
                               workingDirectory.c_str(), depends,
                               commandLines, false, automocComment.c_str());
+  // inherit FOLDER property from target (#13688)
+  copyTargetProperty(automocTarget, target, "FOLDER");
+
   target->AddUtility(automocTargetName.c_str());
 
   // configure a file to get all information to automoc at buildtime:
@@ -195,9 +211,12 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
       }
     }
 
+
   std::vector<std::string> includeDirs;
   cmGeneratorTarget gtgt(target);
-  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX");
+  // Get the include dirs for this target, without stripping the implicit
+  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
+  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", 0, false);
   std::string _moc_incs = "";
   const char* sep = "";
   for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
@@ -210,7 +229,11 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     }
 
   const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
-  std::string _moc_compile_defs = (tmp!=0 ? tmp : "");
+  std::string _moc_compile_defs;
+  if (tmp)
+    {
+    _moc_compile_defs = target->GetCompileDefinitions();
+    }
   tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
   if (tmp)
     {

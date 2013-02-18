@@ -40,9 +40,9 @@ set(_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 get_property(_LANGUAGES_ GLOBAL PROPERTY ENABLED_LANGUAGES)
 if (NOT _LANGUAGES_ MATCHES Fortran)
-include(CheckFunctionExists)
+include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 else ()
-include(CheckFortranFunctionExists)
+include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 endif ()
 
 set(LAPACK_FOUND FALSE)

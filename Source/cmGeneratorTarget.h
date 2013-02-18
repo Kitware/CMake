@@ -14,7 +14,6 @@
 
 #include "cmStandardIncludes.h"
 
-class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmGlobalGenerator;
 class cmLocalGenerator;
@@ -26,7 +25,6 @@ class cmGeneratorTarget
 {
 public:
   cmGeneratorTarget(cmTarget*);
-  ~cmGeneratorTarget();
 
   int GetType() const;
   const char *GetName() const;
@@ -60,10 +58,6 @@ public:
 
   void UseObjectLibraries(std::vector<std::string>& objs);
 
-  std::map<cmStdString, cmComputeLinkInformation*> LinkInformation;
-
-  cmComputeLinkInformation* GetLinkInformation(const char* config);
-
   void GetAppleArchs(const char* config,
                      std::vector<std::string>& archVec);
 
@@ -73,8 +67,6 @@ public:
 
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(const char *config);
-
-  std::string GetCompileDefinitions(const char *config = 0);
 
 private:
   void ClassifySources();

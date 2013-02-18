@@ -147,7 +147,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
 
   // Add shared-library flags if needed.
   this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
-                                        language.c_str());
+                                        language.c_str(),
+                                        this->GetConfigName());
 
   // Add include directory flags.
   {
@@ -227,7 +228,7 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
   // Add preprocessor definitions for this target and configuration.
   this->LocalGenerator->AppendDefines
     (defines,
-     this->GeneratorTarget->GetCompileDefinitions());
+     this->Target->GetCompileDefinitions());
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty("COMPILE_DEFINITIONS"));
@@ -236,7 +237,7 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
   defPropName += cmSystemTools::UpperCase(this->GetConfigName());
   this->LocalGenerator->AppendDefines
     (defines,
-     this->GeneratorTarget->GetCompileDefinitions(this->GetConfigName()));
+     this->Target->GetCompileDefinitions(this->GetConfigName()));
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty(defPropName.c_str()));
@@ -257,7 +258,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
+    this->Target->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 
@@ -423,17 +424,19 @@ cmNinjaTargetGenerator
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
+  if(useClDeps)
+    {
+    std::string cmdPrefix = clDepsBinary + lang + " $in \"$DEP_FILE\" $out " +
+                            clShowPrefix + clBinary;
+    compileCmds.front().insert(0, cmdPrefix);
+    }
+
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i)
     this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
 
-  std::string cmdLine;
-  if(useClDeps)
-    {
-    cmdLine = clDepsBinary + lang + " $in \"$DEP_FILE\" $out " +
-              clShowPrefix + clBinary;
-    }
-  cmdLine += this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+  std::string cmdLine =
+    this->GetLocalGenerator()->BuildCommandLine(compileCmds);
 
 
   // Write the rule for compiling file of the given language.

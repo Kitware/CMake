@@ -15,6 +15,8 @@ cmFindBase::cmFindBase()
 {
   this->AlreadyInCache = false;
   this->AlreadyInCacheWithoutMetaInfo = false;
+  this->NamesPerDir = false;
+  this->NamesPerDirAllowed = false;
 }
 
 //----------------------------------------------------------------------------
@@ -213,6 +215,19 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       compatibility = false;
       newStyle = true;
       }
+    else if (args[j] == "NAMES_PER_DIR")
+      {
+      doing = DoingNone;
+      if(this->NamesPerDirAllowed)
+        {
+        this->NamesPerDir = true;
+        }
+      else
+        {
+        this->SetError("does not support NAMES_PER_DIR");
+        return false;
+        }
+      }
     else if (args[j] == "NO_SYSTEM_PATH")
       {
       doing = DoingNone;
@@ -345,13 +360,13 @@ void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
       {
       dir += "/";
       }
-    if(subdir == "lib")
+    if(subdir == "include" || subdir == "lib")
       {
       const char* arch =
         this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
       if(arch && *arch)
         {
-        this->AddPathInternal(dir+"lib/"+arch, pathType);
+        this->AddPathInternal(dir+subdir+"/"+arch, pathType);
         }
       }
     std::string add = dir + subdir;

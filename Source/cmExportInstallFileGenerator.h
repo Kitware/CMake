@@ -56,12 +56,15 @@ protected:
   virtual bool GenerateMainFile(std::ostream& os);
   virtual void GenerateImportTargetsConfig(std::ostream& os,
                                            const char* config,
-                                           std::string const& suffix);
+                                           std::string const& suffix,
+                            std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
                                    std::vector<std::string>& missingTargets,
                                    cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee);
+
+  virtual void ReplaceInstallPrefix(std::string &input);
 
   void ComplainAboutMissingTarget(cmTarget* depender,
                                   cmTarget* dependee,
@@ -72,7 +75,8 @@ protected:
 
 
   /** Generate a per-configuration file for the targets.  */
-  bool GenerateImportFileConfig(const char* config);
+  bool GenerateImportFileConfig(const char* config,
+                            std::vector<std::string> &missingTargets);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(const char* config,

@@ -28,7 +28,7 @@
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES include/lua51 include/lua5.1 include/lua include
+  PATH_SUFFIXES include/lua51 include/lua5.1 include/lua-5.1 include/lua include
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -54,7 +54,7 @@ find_library(LUA_LIBRARY
 
 if(LUA_LIBRARY)
   # include the math library for Unix
-  if(UNIX AND NOT APPLE)
+  if(UNIX AND NOT APPLE AND NOT BEOS)
     find_library(LUA_MATH_LIBRARY m)
     set( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
   # For Windows and Mac, don't need to explicitly include the math library

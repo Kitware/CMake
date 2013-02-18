@@ -112,6 +112,9 @@ protected:
   // value.
   std::string EscapeForXML(std::string str);
 
+  // The PostFlight component when creating a metapackage
+  cmCPackComponent PostFlightComponent;
+
   double PackageMakerVersion;
   double PackageCompatibilityVersion;
 };

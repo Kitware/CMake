@@ -17,6 +17,7 @@
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
 
+class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmCacheManager;
@@ -186,6 +187,14 @@ class cmake
   ///! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<std::string>& names);
 
+  ///! Set the name of the selected generator-specific toolset.
+  void SetGeneratorToolset(std::string const& ts)
+    { this->GeneratorToolset = ts; }
+
+  ///! Get the name of the selected generator-specific toolset.
+  std::string const& GetGeneratorToolset() const
+    { return this->GeneratorToolset; }
+
   ///! get the cmCachemManager used by this invocation of cmake
   cmCacheManager *GetCacheManager() { return this->CacheManager; }
 
@@ -340,6 +349,8 @@ class cmake
                       bool chain = false,
                       const char *variableGroup = 0);
 
+  bool GetIsPropertyDefined(const char *name, cmProperty::ScopeType scope);
+
   // get property definition
   cmPropertyDefinition *GetPropertyDefinition
   (const char *name, cmProperty::ScopeType scope);
@@ -396,12 +407,9 @@ protected:
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
   typedef std::map<cmStdString,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
-
-  typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
-  typedef std::map<cmStdString,
-                   CreateGeneratorFunctionType> RegisteredGeneratorsMap;
+  typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
   RegisteredCommandsMap Commands;
-  RegisteredGeneratorsMap Generators;
+  RegisteredGeneratorsVector Generators;
   RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();
   void AddDefaultGenerators();
@@ -418,6 +426,7 @@ protected:
   std::string StartOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
+  std::string GeneratorToolset;
 
   ///! read in a cmake list file to initialize the cache
   void ReadListFile(const std::vector<std::string>& args, const char *path);
@@ -447,6 +456,8 @@ protected:
                               std::string const& link);
   static int ExecuteEchoColor(std::vector<std::string>& args);
   static int ExecuteLinkScript(std::vector<std::string>& args);
+  static int WindowsCEEnvironment(const char* version,
+                                  const std::string& name);
   static int VisualStudioLink(std::vector<std::string>& args, int type);
   static int VisualStudioLinkIncremental(std::vector<std::string>& args,
                                          int type,
@@ -526,6 +537,13 @@ private:
    "A makefile generator is responsible for generating a particular build " \
    "system.  Possible generator names are specified in the Generators " \
    "section."},\
+  {"-T <toolset-name>", "Specify toolset name if supported by generator.", \
+   "Some CMake generators support a toolset name to be given to the " \
+   "native build system to choose a compiler.  " \
+   "This is supported only on specific generators:\n" \
+   "  Visual Studio >= 10\n" \
+   "  Xcode >= 3.0\n" \
+   "See native build system documentation for allowed toolset names."}, \
   {"-Wno-dev", "Suppress developer warnings.",\
    "Suppress warnings that are meant for the author"\
    " of the CMakeLists.txt files."},\

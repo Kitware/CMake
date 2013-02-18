@@ -14,13 +14,10 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
-#include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
-
-#include <assert.h>
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
@@ -30,15 +27,6 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
   this->ClassifySources();
   this->LookupObjectLibraries();
-}
-
-cmGeneratorTarget::~cmGeneratorTarget()
-{
-  for(std::map<cmStdString, cmComputeLinkInformation*>::iterator i
-                  = LinkInformation.begin(); i != LinkInformation.end(); ++i)
-    {
-    delete i->second;
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -221,32 +209,6 @@ void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs)
 }
 
 //----------------------------------------------------------------------------
-cmComputeLinkInformation*
-cmGeneratorTarget::GetLinkInformation(const char* config)
-{
-  // Lookup any existing information for this configuration.
-  std::map<cmStdString, cmComputeLinkInformation*>::iterator
-    i = this->LinkInformation.find(config?config:"");
-  if(i == this->LinkInformation.end())
-    {
-    // Compute information for this configuration.
-    cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this->Target, config);
-    if(!info || !info->Compute())
-      {
-      delete info;
-      info = 0;
-      }
-
-    // Store the information for this configuration.
-    std::map<cmStdString, cmComputeLinkInformation*>::value_type
-      entry(config?config:"", info);
-    i = this->LinkInformation.insert(entry).first;
-    }
-  return i->second;
-}
-
-//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetAppleArchs(const char* config,
                              std::vector<std::string>& archVec)
 {
@@ -290,72 +252,5 @@ const char* cmGeneratorTarget::GetCreateRuleVariable()
 std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
                                                           const char *config)
 {
-  std::vector<std::string> includes;
-  const char *prop = this->Target->GetProperty("INCLUDE_DIRECTORIES");
-  if(!prop)
-    {
-    return includes;
-    }
-
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
-
-  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                              this->GetName(),
-                                              "INCLUDE_DIRECTORIES", 0, 0);
-
-  cmSystemTools::ExpandListArgument(ge.Parse(prop)
-                                    .Evaluate(this->Makefile,
-                                              config,
-                                              false,
-                                              this,
-                                              &dagChecker),
-                                    includes);
-
-  std::set<std::string> uniqueIncludes;
-  std::vector<std::string> orderedAndUniqueIncludes;
-  for(std::vector<std::string>::const_iterator
-      li = includes.begin(); li != includes.end(); ++li)
-    {
-    std::string inc = *li;
-    if (!cmSystemTools::IsOff(inc.c_str()))
-      {
-      cmSystemTools::ConvertToUnixSlashes(inc);
-      }
-    if(uniqueIncludes.insert(inc).second)
-      {
-      orderedAndUniqueIncludes.push_back(inc);
-      }
-    }
-
-  return orderedAndUniqueIncludes;
-}
-
-//----------------------------------------------------------------------------
-std::string cmGeneratorTarget::GetCompileDefinitions(const char *config)
-{
-  std::string defPropName = "COMPILE_DEFINITIONS";
-  if (config)
-    {
-    defPropName += "_" + cmSystemTools::UpperCase(config);
-    }
-
-  const char *prop = this->Target->GetProperty(defPropName.c_str());
-
-  if (!prop)
-    {
-    return "";
-    }
-
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
-
-  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                             this->GetName(),
-                                             defPropName, 0, 0);
-  return ge.Parse(prop).Evaluate(this->Makefile,
-                                 config,
-                                 false,
-                                 this,
-                                 &dagChecker);
+  return this->Target->GetIncludeDirectories(config);
 }

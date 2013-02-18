@@ -43,7 +43,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgQt/GraphicsWindowQt>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGQT osgQt/GraphicsWindowQt)
 OSG_FIND_LIBRARY(OSGQT osgQt)
 

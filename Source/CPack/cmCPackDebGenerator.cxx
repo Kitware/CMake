@@ -76,6 +76,11 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
       packageFileName.c_str());
   // Tell CPackDeb.cmake the name of the component GROUP.
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT",packageName.c_str());
+  // Tell CPackDeb.cmake the path where the component is.
+  std::string component_path = "/";
+  component_path += packageName;
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
+                  component_path.c_str());
   if (!this->ReadListFile("CPackDeb.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -198,8 +203,11 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   /* replace the TEMPORARY package file name */
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
       packageFileName.c_str());
-  // Tell CPackDeb.cmake the name of the component GROUP.
-  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT",compInstDirName.c_str());
+  // Tell CPackDeb.cmake the path where the component is.
+  std::string component_path = "/";
+  component_path += compInstDirName;
+  this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH",
+                  component_path.c_str());
   if (!this->ReadListFile("CPackDeb.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

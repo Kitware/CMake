@@ -60,7 +60,7 @@
 
 # This module is maintained by Will Dicharry <wdicharry@stellarscience.com>.
 
-include(SelectLibraryConfigurations)
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 # List of the valid HDF5 components

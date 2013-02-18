@@ -22,6 +22,7 @@
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
   this->ArchitectureId = "X86";
+  this->AdditionalPlatformDefinition = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -32,9 +33,16 @@ cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudioGenerator::GetRegistryBase()
 {
+  return cmGlobalVisualStudioGenerator::GetRegistryBase(
+    this->GetIDEVersion());
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudioGenerator::GetRegistryBase(
+  const char* version)
+{
   std::string key = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
-  key += this->GetIDEVersion();
-  return key;
+  return key + version;
 }
 
 //----------------------------------------------------------------------------
@@ -75,7 +83,6 @@ void cmGlobalVisualStudioGenerator::Generate()
 #endif
 
       // Now make all targets depend on the ALL_BUILD target
-      cmTargets targets;
       for(std::vector<cmLocalGenerator*>::iterator i = gen.begin();
           i != gen.end(); ++i)
         {
@@ -492,8 +499,13 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId);
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId);
+  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId.c_str());
+  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId.c_str());
+
+  if(this->AdditionalPlatformDefinition)
+    {
+    mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");
+    }
 }
 
 //----------------------------------------------------------------------------

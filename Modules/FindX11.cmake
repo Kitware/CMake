@@ -336,8 +336,8 @@ if (UNIX)
   endif ()
 
   if(X11_FOUND)
-    include(CheckFunctionExists)
-    include(CheckLibraryExists)
+    include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
 
     # Translated from an autoconf-generated configure script.
     # See libs.m4 in autoconf's m4 directory.
@@ -417,7 +417,7 @@ if (UNIX)
     # Build the final list of libraries.
     set(X11_LIBRARIES ${X11_X_PRE_LIBS} ${X11_LIBRARIES} ${X11_X_EXTRA_LIBS})
 
-    include(FindPackageMessage)
+    include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
     FIND_PACKAGE_MESSAGE(X11 "Found X11: ${X11_X11_LIB}"
       "[${X11_X11_LIB}][${X11_INCLUDE_DIR}]")
   else ()

@@ -621,7 +621,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                   ->GetGeneratorTarget(target);
 
     // the compilerdefines for this target
-    std::string cdefs = gtgt->GetCompileDefinitions();
+    std::string cdefs = target->GetCompileDefinitions();
 
     if(!cdefs.empty())
       {
@@ -809,6 +809,11 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += makefileName;
     command += "&quot; ";
     command += " VERBOSE=1 ";
+    command += target;
+    }
+  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+    {
+    command += " -v ";
     command += target;
     }
   else

@@ -452,9 +452,9 @@ cmLocalGenerator* cmGlobalNinjaGenerator::CreateLocalGenerator()
 }
 
 void cmGlobalNinjaGenerator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalNinjaGenerator::GetActualName();
   entry.Brief = "Generates build.ninja files (experimental).";
   entry.Full =
     "A build.ninja file is generated into the build tree. Recent "

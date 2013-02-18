@@ -358,6 +358,30 @@ int main()
 }
 #endif
 
+#ifdef TEST_KWSYS_IOS_HAS_ISTREAM___INT64
+int test_istream(kwsys_ios::istream& is, __int64& x)
+{
+  return (is >> x)? 1:0;
+}
+int main()
+{
+  __int64 x = 0;
+  return test_istream(kwsys_ios::cin, x);
+}
+#endif
+
+#ifdef TEST_KWSYS_IOS_HAS_OSTREAM___INT64
+int test_ostream(kwsys_ios::ostream& os, __int64 x)
+{
+  return (os << x)? 1:0;
+}
+int main()
+{
+  __int64 x = 0;
+  return test_ostream(kwsys_ios::cout, x);
+}
+#endif
+
 #ifdef TEST_KWSYS_CHAR_IS_SIGNED
 /* Return 0 for char signed and 1 for char unsigned.  */
 int main()
@@ -425,6 +449,48 @@ int main()
 {
   char* e = environ[0];
   return e? 0:1;
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_RLIMIT64
+# if defined(KWSYS_HAS_LFS)
+#  define _LARGEFILE_SOURCE
+#  define _LARGEFILE64_SOURCE
+#  define _LARGE_FILES
+#  define _FILE_OFFSET_BITS 64
+# endif
+# include <sys/resource.h>
+int main()
+{
+  struct rlimit64 rlim;
+  return getrlimit64(0,&rlim);
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_ATOLL
+#include <stdlib.h>
+int main()
+{
+  const char *str="1024";
+  return static_cast<int>(atoll(str));
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_ATOL
+#include <stdlib.h>
+int main()
+{
+  const char *str="1024";
+  return static_cast<int>(atol(str));
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS__ATOI64
+#include <stdlib.h>
+int main()
+{
+  const char *str="1024";
+  return static_cast<int>(_atoi64(str));
 }
 #endif
 
@@ -512,5 +578,32 @@ int main()
             fname);
     return 1;
     }
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_BORLAND_ASM
+int main()
+{
+  int a = 1;
+  __asm {
+    xor EBX, EBX;
+    mov a, EBX;
+  }
+
+  return a;
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_BORLAND_ASM_CPUID
+int main()
+{
+  int a = 0;
+  __asm {
+    xor EAX, EAX;
+    cpuid;
+    mov a, EAX;
+  }
+
+  return a;
 }
 #endif

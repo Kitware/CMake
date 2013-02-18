@@ -25,20 +25,33 @@ struct cmGeneratorExpressionDAGChecker
                                   const GeneratorExpressionContent *content,
                                   cmGeneratorExpressionDAGChecker *parent);
 
-  bool check() const;
+  enum Result {
+    DAG,
+    SELF_REFERENCE,
+    CYCLIC_REFERENCE,
+    ALREADY_SEEN
+  };
+
+  Result check() const;
 
   void reportError(cmGeneratorExpressionContext *context,
                    const std::string &expr);
+
+  bool EvaluatingLinkLibraries();
+  bool EvaluatingIncludeDirectories();
+  bool EvaluatingCompileDefinitions();
+
 private:
-  bool isDAG() const;
+  Result checkGraph() const;
 
 private:
   const cmGeneratorExpressionDAGChecker * const Parent;
   const std::string Target;
   const std::string Property;
+  std::map<cmStdString, std::set<cmStdString> > Seen;
   const GeneratorExpressionContent * const Content;
   const cmListFileBacktrace Backtrace;
-  bool IsDAG;
+  Result CheckResult;
 };
 
 #endif

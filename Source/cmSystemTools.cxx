@@ -52,7 +52,6 @@
 #endif
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#  include <memory> // auto_ptr
 #  include <fcntl.h>
 #  include "cmCryptoHash.h"
 #endif
@@ -1181,46 +1180,35 @@ bool cmSystemTools::CopyFileIfDifferent(const char* source,
 bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 {
 #ifdef _WIN32
-  /* On Windows the move functions will not replace existing files.
-     Check if the destination exists.  */
-  struct stat newFile;
-  if(stat(newname, &newFile) == 0)
+# ifndef INVALID_FILE_ATTRIBUTES
+#  define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
+# endif
+  /* Windows MoveFileEx may not replace read-only or in-use files.  If it
+     fails then remove the read-only attribute from any existing destination.
+     Try multiple times since we may be racing against another process
+     creating/opening the destination file just before our MoveFileEx.  */
+  int tries = 5;
+  while(!MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) && --tries)
     {
-    /* The destination exists.  We have to replace it carefully.  The
-       MoveFileEx function does what we need but is not available on
-       Win9x.  */
-    OSVERSIONINFO osv;
-    DWORD attrs;
-
-    /* Make sure the destination is not read only.  */
-    attrs = GetFileAttributes(newname);
-    if(attrs & FILE_ATTRIBUTE_READONLY)
+    // Try again only if failure was due to access permissions.
+    if(GetLastError() != ERROR_ACCESS_DENIED)
       {
-      SetFileAttributes(newname, attrs & ~FILE_ATTRIBUTE_READONLY);
+      return false;
       }
-
-    /* Check the windows version number.  */
-    osv.dwOSVersionInfoSize = sizeof(osv);
-    GetVersionEx(&osv);
-    if(osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+    DWORD attrs = GetFileAttributes(newname);
+    if((attrs != INVALID_FILE_ATTRIBUTES) &&
+       (attrs & FILE_ATTRIBUTE_READONLY))
       {
-      /* This is Win9x.  There is no MoveFileEx implementation.  We
-         cannot quite rename the file atomically.  Just delete the
-         destination and then move the file.  */
-      DeleteFile(newname);
-      return MoveFile(oldname, newname) != 0;
+      // Remove the read-only attribute from the destination file.
+      SetFileAttributes(newname, attrs & ~FILE_ATTRIBUTE_READONLY);
       }
     else
       {
-      /* This is not Win9x.  Use the MoveFileEx implementation.  */
-      return MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) != 0;
+      // The file may be temporarily in use so wait a bit.
+      cmSystemTools::Delay(100);
       }
     }
-  else
-    {
-    /* The destination does not exist.  Just move the file.  */
-    return MoveFile(oldname, newname) != 0;
-    }
+  return tries > 0;
 #else
   /* On UNIX we have an OS-provided call to do this atomically.  */
   return rename(oldname, newname) == 0;
@@ -1932,6 +1920,7 @@ bool extract_tar(const char* outFileName, bool verbose,
       {
       cmSystemTools::Error("Problem with archive_read_next_header(): ",
                            archive_error_string(a));
+      break;
       }
     if (verbose && extract)
       {
@@ -1954,6 +1943,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         cmSystemTools::Error(
           "Problem with archive_write_disk_set_options(): ",
           archive_error_string(ext));
+        break;
         }
 
       r = archive_write_header(ext, entry);
@@ -1963,6 +1953,7 @@ bool extract_tar(const char* outFileName, bool verbose,
                              archive_error_string(ext));
         cmSystemTools::Error("Current file:",
                              archive_entry_pathname(entry));
+        break;
         }
       else
         {
@@ -1972,6 +1963,7 @@ bool extract_tar(const char* outFileName, bool verbose,
           {
           cmSystemTools::Error("Problem with archive_write_finish_entry(): ",
                                archive_error_string(ext));
+          break;
           }
         }
       }
@@ -1982,8 +1974,7 @@ bool extract_tar(const char* outFileName, bool verbose,
     }
   archive_read_close(a);
   archive_read_finish(a);
-  return true;
-
+  return r == ARCHIVE_EOF || r == ARCHIVE_OK;
 }
 }
 #endif

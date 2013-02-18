@@ -248,7 +248,12 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::StartNextTests()
 {
-  size_t numToStart = this->ParallelLevel - this->RunningCount;
+  size_t numToStart = 0;
+  if(this->RunningCount < this->ParallelLevel)
+    {
+    numToStart = this->ParallelLevel - this->RunningCount;
+    }
+
   if(numToStart == 0)
     {
     return;

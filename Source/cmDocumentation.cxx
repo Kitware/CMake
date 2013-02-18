@@ -155,7 +155,7 @@ static const char *cmDocumentationStandardSeeAlso[][3] =
 static const char *cmDocumentationCopyright[][3] =
 {
   {0,
-   "Copyright 2000-2009 Kitware, Inc., Insight Software Consortium.  "
+   "Copyright 2000-2012 Kitware, Inc., Insight Software Consortium.  "
    "All rights reserved.", 0},
   {0,
    "Redistribution and use in source and binary forms, with or without "

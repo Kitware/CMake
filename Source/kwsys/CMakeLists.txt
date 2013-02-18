@@ -116,7 +116,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   SET(KWSYS_USE_MD5 1)
   SET(KWSYS_USE_Process 1)
   SET(KWSYS_USE_RegularExpression 1)
-  SET(KWSYS_USE_Registry 1)
   SET(KWSYS_USE_System 1)
   SET(KWSYS_USE_SystemTools 1)
   SET(KWSYS_USE_CommandLineArguments 1)
@@ -509,19 +508,28 @@ ENDIF(KWSYS_USE_FundamentalType)
 
 IF(KWSYS_USE_IOStream)
   # Determine whether iostreams support long long.
+  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
+    -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI}
+    -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD})
   IF(KWSYS_CXX_HAS_LONG_LONG)
-    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES
-      -DKWSYS_IOS_USE_ANSI=${KWSYS_IOS_USE_ANSI}
-      -DKWSYS_IOS_HAVE_STD=${KWSYS_IOS_HAVE_STD})
     KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_ISTREAM_LONG_LONG
       "Checking if istream supports long long" DIRECT)
     KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_OSTREAM_LONG_LONG
       "Checking if ostream supports long long" DIRECT)
-    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
   ELSE()
     SET(KWSYS_IOS_HAS_ISTREAM_LONG_LONG 0)
     SET(KWSYS_IOS_HAS_OSTREAM_LONG_LONG 0)
   ENDIF()
+  IF(KWSYS_CXX_HAS___INT64)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_ISTREAM___INT64
+      "Checking if istream supports __int64" DIRECT)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_IOS_HAS_OSTREAM___INT64
+      "Checking if ostream supports __int64" DIRECT)
+  ELSE()
+    SET(KWSYS_IOS_HAS_ISTREAM___INT64 0)
+    SET(KWSYS_IOS_HAS_OSTREAM___INT64 0)
+  ENDIF()
+  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
 ENDIF(KWSYS_USE_IOStream)
 
 IF(KWSYS_NAMESPACE MATCHES "^kwsys$")
@@ -566,9 +574,106 @@ IF(KWSYS_USE_SystemTools)
 ENDIF()
 
 IF(KWSYS_USE_SystemInformation)
-  SET_PROPERTY(SOURCE SystemInformation.cxx PROPERTY
-    COMPILE_DEFINITIONS KWSYS_USE_LONG_LONG=${KWSYS_USE_LONG_LONG}
-                        KWSYS_USE___INT64=${KWSYS_USE___INT64})
+  SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+    COMPILE_DEFINITIONS SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
+  IF(NOT CYGWIN)
+    INCLUDE(CheckIncludeFiles)
+    CHECK_INCLUDE_FILES("sys/types.h;ifaddrs.h" KWSYS_SYS_HAS_IFADDRS_H)
+    IF(KWSYS_SYS_HAS_IFADDRS_H)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_SYS_HAS_IFADDRS_H=1)
+    ENDIF()
+  ENDIF()
+  IF(WIN32)
+    INCLUDE(CheckSymbolExists)
+    SET(CMAKE_REQUIRED_LIBRARIES Psapi)
+    CHECK_SYMBOL_EXISTS(GetProcessMemoryInfo "windows.h;psapi.h" KWSYS_SYS_HAS_PSAPI)
+    UNSET(CMAKE_REQUIRED_LIBRARIES)
+    IF(KWSYS_SYS_HAS_PSAPI)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_SYS_HAS_PSAPI=1)
+      IF(MSVC70 OR MSVC71)
+        # Suppress LNK4089: all references to 'PSAPI.DLL' discarded by /OPT:REF
+        SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /IGNORE:4089")
+      ENDIF()
+    ENDIF()
+  ENDIF()
+  IF(CMAKE_SYSTEM MATCHES "HP-UX")
+    CHECK_INCLUDE_FILES("sys/mpctl.h" KWSYS_SYS_HAS_MPCTL_H)
+    IF(KWSYS_SYS_HAS_MPCTL_H)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_SYS_HAS_MPCTL_H=1)
+    ENDIF()
+  ENDIF()
+  IF(CMAKE_SYSTEM MATCHES "BSD")
+    CHECK_INCLUDE_FILES("machine/cpu.h" KWSYS_SYS_HAS_MACHINE_CPU_H)
+    IF(KWSYS_SYS_HAS_MACHINE_CPU_H)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_SYS_HAS_MACHINE_CPU_H=1)
+    ENDIF()
+  ENDIF()
+  IF(KWSYS_LFS_AVAILABLE AND NOT KWSYS_LFS_DISABLE)
+    SET(KWSYS_PLATFORM_CXX_TEST_DEFINES -DKWSYS_HAS_LFS=1)
+  ENDIF()
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_RLIMIT64
+    "Checking whether CXX compiler has rlimit64" DIRECT)
+  SET(KWSYS_PLATFORM_CXX_TEST_DEFINES)
+  IF(KWSYS_CXX_HAS_RLIMIT64)
+    SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_CXX_HAS_RLIMIT64=1)
+  ENDIF()
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_ATOL
+    "Checking whether CXX compiler has atol" DIRECT)
+  IF(KWSYS_CXX_HAS_ATOL)
+    SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_CXX_HAS_ATOL=1)
+  ENDIF()
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_ATOLL
+    "Checking whether CXX compiler has atoll" DIRECT)
+  IF(KWSYS_CXX_HAS_ATOLL)
+    SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_CXX_HAS_ATOLL=1)
+  ENDIF()
+  KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS__ATOI64
+    "Checking whether CXX compiler has _atoi64" DIRECT)
+  IF(KWSYS_CXX_HAS__ATOI64)
+    SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_CXX_HAS__ATOI64=1)
+  ENDIF()
+  IF(BORLAND)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_BORLAND_ASM
+      "Checking whether Borland CXX compiler supports assembler instructions" DIRECT)
+    IF(KWSYS_CXX_HAS_BORLAND_ASM)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_CXX_HAS_BORLAND_ASM=1)
+      KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_BORLAND_ASM_CPUID
+        "Checking whether Borland CXX compiler supports CPUID assembler instruction" DIRECT)
+      IF(KWSYS_CXX_HAS_BORLAND_ASM_CPUID)
+        SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+          COMPILE_DEFINITIONS KWSYS_CXX_HAS_BORLAND_ASM_CPUID=1)
+      ENDIF()
+    ENDIF()
+  ENDIF()
+  IF(KWSYS_USE___INT64)
+    SET_PROPERTY(SOURCE SystemInformation.cxx testSystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_USE___INT64=1)
+  ENDIF()
+  IF(KWSYS_USE_LONG_LONG)
+    SET_PROPERTY(SOURCE SystemInformation.cxx testSystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_USE_LONG_LONG=1)
+  ENDIF()
+  IF(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
+    SET_PROPERTY(SOURCE SystemInformation.cxx testSystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1)
+  ENDIF()
+  IF(KWSYS_IOS_HAS_OSTREAM___INT64)
+    SET_PROPERTY(SOURCE SystemInformation.cxx testSystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_IOS_HAS_OSTREAM___INT64=1)
+  ENDIF()
+  IF(KWSYS_BUILD_SHARED)
+    SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+      COMPILE_DEFINITIONS KWSYS_BUILD_SHARED=1)
+  ENDIF()
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -686,7 +791,7 @@ SET(KWSYS_HXX_FILES Configure String
 # Add selected C++ classes.
 SET(cppclasses
   Directory DynamicLoader Glob RegularExpression SystemTools
-  CommandLineArguments Registry IOStream SystemInformation
+  CommandLineArguments IOStream SystemInformation
   )
 FOREACH(cpp ${cppclasses})
   IF(KWSYS_USE_${cpp})
@@ -724,12 +829,8 @@ SET(KWSYS_CXX_SRCS)
 # Add the proper sources for this platform's Process implementation.
 IF(KWSYS_USE_Process)
   IF(NOT UNIX)
-    # Use the Windows implementation.  We need the encoded forwarding executable.
-    SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessWin32.c
-      ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c)
-    SET_SOURCE_FILES_PROPERTIES(
-      ${PROJECT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-      PROPERTIES GENERATED 1)
+    # Use the Windows implementation.
+    SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessWin32.c)
   ELSE(NOT UNIX)
     # Use the UNIX implementation.
     SET(KWSYS_C_SRCS ${KWSYS_C_SRCS} ProcessUNIX.c)
@@ -802,9 +903,12 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
       TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
     ENDIF(UNIX)
   ENDIF(KWSYS_USE_DynamicLoader)
-  
+
   IF(KWSYS_USE_SystemInformation AND WIN32)
     TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ws2_32)
+    IF(KWSYS_SYS_HAS_PSAPI)
+      TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} Psapi)
+    ENDIF()
   ENDIF(KWSYS_USE_SystemInformation AND WIN32)
 
   # Apply user-defined target properties to the library.
@@ -842,48 +946,21 @@ ENDIF(KWSYS_ENABLE_C AND KWSYS_C_SRCS)
 # line to configure the namespace in the C and C++ source files.
 ADD_DEFINITIONS("-DKWSYS_NAMESPACE=${KWSYS_NAMESPACE}")
 
+# Disable deprecation warnings for standard C functions.
+IF(MSVC OR (WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$"))
+  ADD_DEFINITIONS(
+    -D_CRT_NONSTDC_NO_DEPRECATE
+    -D_CRT_SECURE_NO_DEPRECATE
+    -D_CRT_SECURE_NO_WARNINGS
+    -D_SCL_SECURE_NO_DEPRECATE
+    )
+ENDIF()
+
 IF(KWSYS_USE_String)
   # Activate code in "String.c".  See the comment in the source.
   SET_SOURCE_FILES_PROPERTIES(String.c PROPERTIES
     COMPILE_FLAGS "-DKWSYS_STRING_C")
 ENDIF(KWSYS_USE_String)
-
-#-----------------------------------------------------------------------------
-# Process execution on windows needs to build a forwarding executable
-# that works around a Win9x bug.  We encode the executable into a C
-# file and build it into the library.  Win9x platforms reproduce the
-# executable into a temporary directory when it is needed.
-IF(KWSYS_USE_Process)
-  IF(NOT UNIX)
-    # Build the forwarding executable itself and a program that will
-    # encode it into a C file.
-    ADD_EXECUTABLE(${KWSYS_NAMESPACE}ProcessFwd9x ProcessFwd9x.c)
-    ADD_EXECUTABLE(${KWSYS_NAMESPACE}EncodeExecutable EncodeExecutable.c)
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}ProcessFwd9x PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}EncodeExecutable PROPERTY RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}ProcessFwd9x PROPERTY LABELS ${KWSYS_LABELS_EXE})
-    SET_PROPERTY(TARGET ${KWSYS_NAMESPACE}EncodeExecutable PROPERTY LABELS ${KWSYS_LABELS_EXE})
-
-    SET(CFG_INTDIR "/${CMAKE_CFG_INTDIR}")
-    IF(CMAKE_BUILD_TOOL MATCHES "make")
-      SET(CFG_INTDIR "")
-    ENDIF(CMAKE_BUILD_TOOL MATCHES "make")
-
-    # Take advantage of a better custom command syntax if possible.
-    SET(CMD ${CMAKE_CURRENT_BINARY_DIR}${CFG_INTDIR}/${KWSYS_NAMESPACE}EncodeExecutable.exe)
-    SET(FWD ${CMAKE_CURRENT_BINARY_DIR}${CFG_INTDIR}/${KWSYS_NAMESPACE}ProcessFwd9x.exe)
-    ADD_CUSTOM_COMMAND(
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-      COMMAND ${CMD}
-      ARGS ${FWD} ${CMAKE_CURRENT_BINARY_DIR}/${KWSYS_NAMESPACE}ProcessFwd9xEnc.c
-           ${KWSYS_NAMESPACE} ProcessFwd9x
-      DEPENDS ${CMD} ${FWD})
-
-    # Make sure build occurs in proper order.
-    ADD_DEPENDENCIES(${KWSYS_NAMESPACE} ${KWSYS_NAMESPACE}ProcessFwd9x
-                     ${KWSYS_NAMESPACE}EncodeExecutable)
-  ENDIF(NOT UNIX)
-ENDIF(KWSYS_USE_Process)
 
 #-----------------------------------------------------------------------------
 # Setup testing if not being built as part of another project.
@@ -923,7 +1000,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         )
     ENDIF(NOT WATCOM)
     SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-      testRegistry
       testIOS
       testSystemTools
       testCommandLineArguments
@@ -1027,8 +1103,6 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       # We expect test to fail
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES WILL_FAIL ON)
       GET_TEST_PROPERTY(kwsys.testFail WILL_FAIL wfv)
-      SET_TESTS_PROPERTIES(kwsys.testRegistry PROPERTIES FAIL_REGULAR_EXPRESSION "ERROR_NOT_VALGRIND;FAIL;Test failed")
-      SET_TESTS_PROPERTIES(kwsys.testRegistry PROPERTIES PASS_REGULAR_EXPRESSION "Test passed")
       SET_TESTS_PROPERTIES(kwsys.testFail PROPERTIES MEASUREMENT "Some Key=Some Value")
       MESSAGE(STATUS "GET_TEST_PROPERTY returned: ${wfv}")
     ENDIF()

@@ -107,6 +107,7 @@ elseif(NOT "x$ENV{SDKROOT}" STREQUAL "x" AND
   # Use the value of SDKROOT from the environment.
   set(_CMAKE_OSX_SYSROOT_DEFAULT "$ENV{SDKROOT}")
 elseif("${CMAKE_GENERATOR}" MATCHES Xcode
+       OR CMAKE_OSX_DEPLOYMENT_TARGET
        OR CMAKE_OSX_ARCHITECTURES MATCHES "[^;]"
        OR NOT EXISTS "/usr/include/sys/types.h")
   # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
@@ -255,12 +256,47 @@ set(CMAKE_CXX_CREATE_MACOSX_FRAMEWORK
 if(NOT DEFINED CMAKE_FIND_FRAMEWORK)
   set(CMAKE_FIND_FRAMEWORK FIRST)
 endif()
+
+# Older OS X linkers do not report their framework search path
+# with -v but "man ld" documents the following locations.
+set(CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+  ${_CMAKE_OSX_SYSROOT_PATH}/Library/Frameworks
+  ${_CMAKE_OSX_SYSROOT_PATH}/System/Library/Frameworks
+  )
+if(_CMAKE_OSX_SYSROOT_PATH)
+  # Treat some paths as implicit so we do not override the SDK versions.
+  list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+    /System/Library/Frameworks)
+endif()
+if("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
+  # Older OS X tools had more implicit paths.
+  list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+    ${_CMAKE_OSX_SYSROOT_PATH}/Network/Library/Frameworks)
+endif()
+
 # set up the default search directories for frameworks
 set(CMAKE_SYSTEM_FRAMEWORK_PATH
   ~/Library/Frameworks
   /Library/Frameworks
   /Network/Library/Frameworks
   /System/Library/Frameworks)
+
+# Warn about known system mis-configuration case.
+if(CMAKE_OSX_SYSROOT)
+  get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
+  if(NOT _IN_TC AND
+     NOT IS_SYMLINK "${CMAKE_OSX_SYSROOT}/Library/Frameworks"
+     AND IS_SYMLINK "${CMAKE_OSX_SYSROOT}/Library/Frameworks/Frameworks")
+    message(WARNING "The SDK Library/Frameworks path\n"
+      " ${CMAKE_OSX_SYSROOT}/Library/Frameworks\n"
+      "is not set up correctly on this system.  "
+      "This is known to occur when installing Xcode 3.2.6:\n"
+      " http://bugs.python.org/issue14018\n"
+      "The problem may cause build errors that report missing system frameworks.  "
+      "Fix your SDK symlinks to resolve this issue and avoid this warning."
+      )
+  endif()
+endif()
 
 # default to searching for application bundles first
 if(NOT DEFINED CMAKE_FIND_APPBUNDLE)

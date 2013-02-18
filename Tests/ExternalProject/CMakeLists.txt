@@ -50,6 +50,8 @@ if(NOT DEFINED can_build_tutorial_step5)
   endif()
 endif()
 
+add_custom_target(NonExternalProjectTarget
+  COMMAND ${CMAKE_COMMAND} -E echo NonExternalProjectTarget)
 
 # Empty projects that test all the known ExternalProject_Add argument key words:
 #
@@ -94,7 +96,7 @@ ExternalProject_Add(${proj}
   CVS_REPOSITORY ""
   CVS_MODULE ""
   CVS_TAG ""
-  DEPENDS "MinimalNoOpProject"
+  DEPENDS "MinimalNoOpProject" NonExternalProjectTarget
   DOWNLOAD_COMMAND ""
   INSTALL_COMMAND ""
   PATCH_COMMAND ""
@@ -636,6 +638,17 @@ if(do_svn_tests)
 
   add_test(TutorialStep1-SVN-trunk-BuildTreeTest
     "${binary_base}/TutorialStep1-SVN-trunk/Tutorial" 98)
+endif()
+
+if(do_git_tests)
+  add_test(TutorialStep1-GIT-byhash
+    "${binary_base}/TutorialStep1-GIT-byhash/Tutorial" 100)
+
+  add_test(TutorialStep1-GIT-bytag
+    "${binary_base}/TutorialStep1-GIT-bytag/Tutorial" 99)
+
+  add_test(TutorialStep1-GIT-master
+    "${binary_base}/TutorialStep1-GIT-master/Tutorial" 98)
 endif()
 
 

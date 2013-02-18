@@ -29,7 +29,8 @@ class cmOrderDirectories;
 class cmComputeLinkInformation
 {
 public:
-  cmComputeLinkInformation(cmTarget* target, const char* config);
+  cmComputeLinkInformation(cmTarget* target, const char* config,
+                           cmTarget* headTarget);
   ~cmComputeLinkInformation();
   bool Compute();
 
@@ -74,6 +75,7 @@ private:
 
   // Context information.
   cmTarget* Target;
+  cmTarget* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
@@ -82,6 +84,7 @@ private:
   // Configuration information.
   const char* Config;
   const char* LinkLanguage;
+  bool LinkDependsNoShared;
 
   // Modes for dealing with dependent shared libraries.
   enum SharedDepMode

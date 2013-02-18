@@ -50,6 +50,7 @@ bool cmDepends::Write(std::ostream &makeDepends,
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(srcStr, pairs);
 
+  std::map<std::string, std::set<std::string> > dependencies;
   for(std::vector<std::string>::iterator si = pairs.begin();
       si != pairs.end();)
     {
@@ -62,9 +63,14 @@ bool cmDepends::Write(std::ostream &makeDepends,
     obj = this->LocalGenerator->Convert(obj.c_str(),
                                         cmLocalGenerator::HOME_OUTPUT,
                                         cmLocalGenerator::MAKEFILE);
+    dependencies[obj].insert(src);
+    }
+  for(std::map<std::string, std::set<std::string> >::const_iterator
+      it = dependencies.begin(); it != dependencies.end(); ++it)
+    {
 
     // Write the dependencies for this pair.
-    if(!this->WriteDependencies(src.c_str(), obj.c_str(),
+    if(!this->WriteDependencies(it->second, it->first,
                                 makeDepends, internalDepends))
       {
       return false;
@@ -134,8 +140,9 @@ void cmDepends::Clear(const char *file)
 }
 
 //----------------------------------------------------------------------------
-bool cmDepends::WriteDependencies(const char*, const char*,
-                                  std::ostream&, std::ostream&)
+bool cmDepends::WriteDependencies(
+    const std::set<std::string>&, const std::string&,
+    std::ostream&, std::ostream&)
 {
   // This should be implemented by the subclass.
   return false;
@@ -174,8 +181,10 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
       // kdelibs/khtml this reduces the number of calls from 184k down to 92k,
       // or the time for cmake -E cmake_depends from 0.3 s down to 0.21 s.
       dependerExists = cmSystemTools::FileExists(this->Depender);
-      DependencyVector tmp;
-      validDeps[this->Depender] = tmp;
+      // If we erase validDeps[this->Depender] by overwriting it with an empty
+      // vector, we lose dependencies for dependers that have multiple
+      // entries. No need to initialize the entry, std::map will do so on first
+      // access.
       currentDependencies = &validDeps[this->Depender];
       continue;
       }

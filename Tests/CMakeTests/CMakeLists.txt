@@ -4,7 +4,8 @@ set(CMAKE_EXECUTABLE "${CMake_BIN_DIR}/cmake")
 macro(AddCMakeTest TestName PreArgs)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${TestName}Test.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" @ONLY IMMEDIATE)
-  add_test(CMake.${TestName} ${CMAKE_EXECUTABLE} ${PreArgs}
+  add_test(NAME CMake.${TestName}
+    COMMAND ${CMAKE_EXECUTABLE} ${PreArgs}
     -P "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" ${ARGN})
 endmacro()
 
@@ -28,7 +29,7 @@ AddCMakeTest(String "")
 AddCMakeTest(Math "")
 AddCMakeTest(CMakeMinimumRequired "")
 AddCMakeTest(CompilerIdVendor "")
-AddCMakeTest(ProcessorCount "")
+AddCMakeTest(ProcessorCount "-DKWSYS_TEST_EXE=$<TARGET_FILE:cmsysTestsCxx>")
 AddCMakeTest(PushCheckState "")
 AddCMakeTest(While "")
 

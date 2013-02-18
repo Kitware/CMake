@@ -239,10 +239,12 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget* target, const char* config)
+::cmComputeLinkInformation(cmTarget* target, const char* config,
+                           cmTarget *headTarget)
 {
   // Store context information.
   this->Target = target;
+  this->HeadTarget = headTarget;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
@@ -265,7 +267,7 @@ cmComputeLinkInformation
   this->OrderDependentRPath = 0;
 
   // Get the language used for linking this target.
-  this->LinkLanguage = this->Target->GetLinkerLanguage(config);
+  this->LinkLanguage = this->Target->GetLinkerLanguage(config, headTarget);
   if(!this->LinkLanguage)
     {
     // The Compute method will do nothing, so skip the rest of the
@@ -276,6 +278,10 @@ cmComputeLinkInformation
   // Check whether we should use an import library for linking a target.
   this->UseImportLibrary =
     this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX")?true:false;
+
+  // Check whether we should skip dependencies on shared library files.
+  this->LinkDependsNoShared =
+    this->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
 
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from
@@ -499,7 +505,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config);
+  cmComputeLinkDepends cld(this->Target, this->Config, this->HeadTarget);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -565,7 +571,8 @@ bool cmComputeLinkInformation::Compute()
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
-  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config);
+  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config,
+                                                          this->HeadTarget);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
@@ -650,7 +657,11 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
 
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib, true);
-      this->Depends.push_back(lib);
+      if(!this->LinkDependsNoShared ||
+         tgt->GetType() != cmTarget::SHARED_LIBRARY)
+        {
+        this->Depends.push_back(lib);
+        }
 
       this->AddTargetItem(lib, tgt);
       this->AddLibraryRuntimeInfo(lib, tgt);
@@ -1368,10 +1379,31 @@ void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::ComputeFrameworkInfo()
 {
-  // Avoid adding system framework paths.  See "man ld" on OS X.
-  this->FrameworkPathsEmmitted.insert("/Library/Frameworks");
-  this->FrameworkPathsEmmitted.insert("/Network/Library/Frameworks");
-  this->FrameworkPathsEmmitted.insert("/System/Library/Frameworks");
+  // Avoid adding implicit framework paths.
+  std::vector<std::string> implicitDirVec;
+
+  // Get platform-wide implicit directories.
+  if(const char* implicitLinks = this->Makefile->GetDefinition
+     ("CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES"))
+    {
+    cmSystemTools::ExpandListArgument(implicitLinks, implicitDirVec);
+    }
+
+  // Get language-specific implicit directories.
+  std::string implicitDirVar = "CMAKE_";
+  implicitDirVar += this->LinkLanguage;
+  implicitDirVar += "_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES";
+  if(const char* implicitDirs =
+     this->Makefile->GetDefinition(implicitDirVar.c_str()))
+    {
+    cmSystemTools::ExpandListArgument(implicitDirs, implicitDirVec);
+    }
+
+  for(std::vector<std::string>::const_iterator i = implicitDirVec.begin();
+      i != implicitDirVec.end(); ++i)
+    {
+    this->FrameworkPathsEmmitted.insert(*i);
+    }
 
   // Regular expression to extract a framework path and name.
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");

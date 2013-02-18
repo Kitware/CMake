@@ -200,7 +200,6 @@ void cmGlobalVisualStudio6Generator
       tt != orderedProjectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
-    cmMakefile* mf = target->GetMakefile();
     // Write the project into the DSW file
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
@@ -398,9 +397,9 @@ cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget* target)
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio6Generator
-::GetDocumentation(cmDocumentationEntry& entry) const
+::GetDocumentation(cmDocumentationEntry& entry)
 {
-  entry.Name = this->GetName();
+  entry.Name = cmGlobalVisualStudio6Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 6 project files.";
   entry.Full = "";
 }

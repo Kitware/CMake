@@ -255,6 +255,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "CMAKE_EXTRA_GENERATOR (e.g. \"Eclipse CDT4\").",false,
      "Variables that Provide Information");
   cm->DefineProperty
+    ("CMAKE_GENERATOR_TOOLSET", cmProperty::VARIABLE,
+     "Native build system toolset name specified by user.",
+     "Some CMake generators support a toolset name to be given to the "
+     "native build system to choose a compiler.  "
+     "If the user specifies a toolset name (e.g. via the cmake -T option) "
+     "the value will be available in this variable.",false,
+     "Variables that Provide Information");
+  cm->DefineProperty
     ("CMAKE_HOME_DIRECTORY", cmProperty::VARIABLE,
      "Path to top of source tree.",
      "This is the path to the top level of the source tree.",false,
@@ -292,6 +300,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "CMake may specify a toolset explicitly, such as \"v110\" for "
      "VS 11 or \"Windows7.1SDK\" for 64-bit support in VS 10 Express.  "
      "CMake provides the name of the chosen toolset in this variable."
+     ,false,
+     "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_XCODE_PLATFORM_TOOLSET", cmProperty::VARIABLE,
+     "Xcode compiler selection.",
+     "Xcode supports selection of a compiler from one of the installed "
+     "toolsets.  "
+     "CMake provides the name of the chosen toolset in this variable, "
+     "if any is explicitly selected (e.g. via the cmake -T option)."
      ,false,
      "Variables that Provide Information");
   cm->DefineProperty
@@ -896,6 +913,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       " script, it may get fatal error messages from the script.",false,
       "Variables That Change Behavior");
 
+  cm->DefineProperty
+    ("CMAKE_DEBUG_TARGET_PROPERTIES", cmProperty::VARIABLE,
+     "Enables tracing output for target properties.",
+     "This variable can be populated with a list of properties to generate "
+     "debug output for when evaluating target properties.  Currently it can "
+     "only be used when evaluating the INCLUDE_DIRECTORIES target property.  "
+     "In that case, it outputs a backtrace for each include directory in "
+     "the build.  Default is unset.",false,"Variables That Change Behavior");
+
   // Variables defined by CMake that describe the system
 
   cm->DefineProperty
@@ -1138,6 +1164,17 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_BUILD_INTERFACE_INCLUDES", cmProperty::VARIABLE,
+     "Automatically add the current source- and build directories "
+     "to the INTERFACE_INCLUDE_DIRECTORIES.",
+     "If this variable is enabled, CMake automatically adds for each "
+     "target ${CMAKE_CURRENT_SOURCE_DIR} and ${CMAKE_CURRENT_BINARY_DIR} "
+     "to the INTERFACE_INCLUDE_DIRECTORIES."
+     "By default CMAKE_BUILD_INTERFACE_INCLUDES is OFF.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_INSTALL_RPATH", cmProperty::VARIABLE,
      "The rpath to use for installed targets.",
      "A semicolon-separated list specifying the rpath "
@@ -1217,6 +1254,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Where to put all the MS debug symbol files.",
      "This variable is used to initialize the "
      "PDB_OUTPUT_DIRECTORY property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_LINK_DEPENDS_NO_SHARED", cmProperty::VARIABLE,
+     "Whether to skip link dependencies on shared library files.",
+     "This variable initializes the LINK_DEPENDS_NO_SHARED "
+     "property on targets when they are created.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1611,6 +1657,23 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "libraries and default library search paths when they invoke a linker.  "
      "These paths are implicit linker search directories for the compiler's "
      "language.  "
+     "CMake automatically detects these directories for each language and "
+     "reports the results in this variable."
+     "\n"
+     "When a library in one of these directories is given by full path to "
+     "target_link_libraries() CMake will generate the -l<name> form on "
+     "link lines to ensure the linker searches its implicit directories "
+     "for the library.  "
+     "Note that some toolchains read implicit directories from an "
+     "environment variable such as LIBRARY_PATH so keep its value "
+     "consistent when operating in a given build tree.",false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES", cmProperty::VARIABLE,
+     "Implicit linker framework search path detected for language <LANG>.",
+     "These paths are implicit linker framework search directories for "
+     "the compiler's language.  "
      "CMake automatically detects these directories for each language and "
      "reports the results in this variable.", false,
      "Variables for Languages");

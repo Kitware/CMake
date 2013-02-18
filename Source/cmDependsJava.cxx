@@ -25,11 +25,11 @@ cmDependsJava::~cmDependsJava()
 }
 
 //----------------------------------------------------------------------------
-bool cmDependsJava::WriteDependencies(const char *src, const char *,
-  std::ostream&, std::ostream&)
+bool cmDependsJava::WriteDependencies(const std::set<std::string>& sources,
+    const std::string&, std::ostream&, std::ostream&)
 {
   // Make sure this is a scanning instance.
-  if(!src || src[0] == '\0')
+  if(sources.empty() || sources.begin()->empty())
     {
     cmSystemTools::Error("Cannot scan dependencies without an source file.");
     return false;

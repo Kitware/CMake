@@ -42,7 +42,7 @@
 # #include <osg/PositionAttitudeTransform>
 # #include <osgWidget/Widget>
 
-include(Findosg_functions)
+include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGWIDGET osgWidget/Widget)
 OSG_FIND_LIBRARY(OSGWIDGET osgWidget)
 

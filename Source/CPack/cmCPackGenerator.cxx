@@ -23,7 +23,6 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
-#include <memory> // auto_ptr
 #include <algorithm>
 
 #if defined(__HAIKU__)
@@ -97,7 +96,6 @@ int cmCPackGenerator::PrepareNames()
     }
   tempDirectory += this->GetOption("CPACK_GENERATOR");
   std::string topDirectory = tempDirectory;
-  this->GetOption("CPACK_PACKAGE_FILE_NAME");
   const char* pfname = this->GetOption("CPACK_PACKAGE_FILE_NAME");
   if(!pfname)
     {
@@ -208,7 +206,7 @@ int cmCPackGenerator::InstallProject()
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
       "Problem creating temporary directory: "
-                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL}")
+                  << (tempInstallDirectory ? tempInstallDirectory : "(NULL)")
                   << std::endl);
     return 0;
     }
@@ -697,7 +695,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
         cmGlobalGenerator gg;
         gg.SetCMakeInstance(&cm);
-        std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+        cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
         cmMakefile *mf = lg->GetMakefile();
         std::string realInstallDirectory = tempInstallDirectory;
         if ( !installSubDirectory.empty() && installSubDirectory != "/" )

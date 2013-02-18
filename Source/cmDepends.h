@@ -76,8 +76,10 @@ protected:
 
   // Write dependencies for the target file to the given stream.
   // Return true for success and false for failure.
-  virtual bool WriteDependencies(const char *src, const char* obj,
-    std::ostream& makeDepends, std::ostream& internalDepends);
+  virtual bool WriteDependencies(const std::set<std::string>& sources,
+                                 const std::string& obj,
+                                 std::ostream& makeDepends,
+                                 std::ostream& internalDepends);
 
   // Check dependencies for the target file in the given stream.
   // Return false if dependencies must be regenerated and true

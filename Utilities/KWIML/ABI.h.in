@@ -253,7 +253,9 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 #  else
 #   define @KWIML@_ABI_SIZEOF_LONG_LONG 0
 #  endif
-# elif defined(__hpux) && !defined(__GNUC__) /* Old HP: no __HP_cc/__HP_aCC above */
+# elif defined(__GNUC__) /* GNU */
+#  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
+# elif defined(__hpux) /* Old HP: no __HP_cc/__HP_aCC/__GNUC__ above */
 #  define @KWIML@_ABI_SIZEOF_LONG_LONG 8
 # endif
 #endif
@@ -413,6 +415,18 @@ suppression macro @KWIML@_ABI_NO_VERIFY was defined.
 /* z/Architecture */
 #elif defined(__SYSC_ZARCH__)
 # define @KWIML@_ABI_ENDIAN_ID @KWIML@_ABI_ENDIAN_ID_BIG
+
+/* VAX */
+#elif defined(__vax__)
+# define @KWIML@_ABI_ENDIAN_ID @KWIML@_ABI_ENDIAN_ID_BIG
+
+/* Aarch64 */
+#elif defined(__aarch64__)
+# if !defined(__AARCH64EB__)
+#  define @KWIML@_ABI_ENDIAN_ID @KWIML@_ABI_ENDIAN_ID_LITTLE
+# else
+#  define @KWIML@_ABI_ENDIAN_ID @KWIML@_ABI_ENDIAN_ID_BIG
+# endif
 
 /* Unknown CPU */
 #elif !defined(@KWIML@_ABI_NO_ERROR_ENDIAN)

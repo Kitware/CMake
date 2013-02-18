@@ -53,7 +53,7 @@
 #include <cm_zlib.h>
 #include <cmsys/Base64.h>
 
-#if defined(__BEOS__) && !defined(__HAIKU__)
+#if defined(__BEOS__)
 #include <be/kernel/OS.h>   /* disable_debugger() API. */
 #endif
 
@@ -327,6 +327,7 @@ cmCTest::cmCTest()
   this->OutputLogFileLastTag   = -1;
   this->SuppressUpdatingCTestConfiguration = false;
   this->DartVersion            = 1;
+  this->DropSiteCDash          = false;
   this->OutputTestOutputOnTestFailure = false;
   this->ComputedCompressTestOutput = false;
   this->ComputedCompressMemCheckOutput = false;
@@ -653,6 +654,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     = this->GetCTestConfiguration("SourceDirectory").c_str();
   std::string bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
   this->DartVersion = 1;
+  this->DropSiteCDash = false;
   for(Part p = PartStart; p != PartCount; p = Part(p+1))
     {
     this->Parts[p].SubmitFiles.clear();
@@ -719,6 +721,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
       return false;
       }
     }
+  this->DropSiteCDash = mf->IsOn("CTEST_DROP_SITE_CDASH");
 
   if ( !this->Initialize(bld_dir.c_str(), command) )
     {

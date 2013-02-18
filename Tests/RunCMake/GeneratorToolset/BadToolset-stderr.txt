@@ -1,0 +1,10 @@
+CMake Error:
+  Generator
+
+    .*
+
+  does not support toolset specification, but toolset
+
+    Bad Toolset
+
+  was specified.$

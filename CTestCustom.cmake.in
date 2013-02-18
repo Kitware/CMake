@@ -31,6 +31,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "remark: .*LOOP WAS VECTORIZED"
   "warning .980: wrong number of actual arguments to intrinsic function .std::basic_"
   "LINK : warning LNK4089: all references to.*ADVAPI32.dll.*discarded by /OPT:REF"
+  "LINK : warning LNK4089: all references to.*PSAPI.DLL.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*USER32.dll.*discarded by /OPT:REF"
   "Warning: library was too large for page size.*"
   "Warning: public.*_archive_.*in module.*archive_*clashes with prior module.*archive_.*"

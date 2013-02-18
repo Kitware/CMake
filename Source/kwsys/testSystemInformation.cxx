@@ -13,8 +13,6 @@
 #include KWSYS_HEADER(SystemInformation.hxx)
 #include KWSYS_HEADER(ios/iostream)
 
-
-
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
@@ -22,20 +20,45 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
-#define printMethod(inof, m) kwsys_ios::cout << #m << ": " \
+#if defined(KWSYS_USE_LONG_LONG)
+# if defined(KWSYS_IOS_HAS_OSTREAM_LONG_LONG)
+#  define iostreamLongLong(x) (x)
+# else
+#  define iostreamLongLong(x) ((long)x)
+# endif
+#elif defined(KWSYS_USE___INT64)
+# if defined(KWSYS_IOS_HAS_OSTREAM___INT64)
+#  define iostreamLongLong(x) (x)
+# else
+#  define iostreamLongLong(x) ((long)x)
+# endif
+#else
+# error "No Long Long"
+#endif
+
+#define printMethod(info, m) kwsys_ios::cout << #m << ": " \
 << info.m() << "\n"
 
-#define printMethod2(inof, m, unit) kwsys_ios::cout << #m << ": " \
+#define printMethod2(info, m, unit) kwsys_ios::cout << #m << ": " \
 << info.m() << " " << unit << "\n"
+
+#define printMethod3(info, m, unit) kwsys_ios::cout << #m << ": " \
+<< iostreamLongLong(info.m) << " " << unit << "\n"
 
 int testSystemInformation(int, char*[])
 {
+  kwsys_ios::cout << "CTEST_FULL_OUTPUT\n"; // avoid truncation
+
   kwsys::SystemInformation info;
   info.RunCPUCheck();
   info.RunOSCheck();
   info.RunMemoryCheck();
   printMethod(info, GetOSName);
+  printMethod(info, GetOSIsLinux);
+  printMethod(info, GetOSIsApple);
+  printMethod(info, GetOSIsWindows);
   printMethod(info, GetHostname);
+  printMethod(info, GetFullyQualifiedDomainName);
   printMethod(info, GetOSRelease);
   printMethod(info, GetOSVersion);
   printMethod(info, GetOSPlatform);
@@ -45,6 +68,7 @@ int testSystemInformation(int, char*[])
   printMethod(info, GetFamilyID);
   printMethod(info, GetModelID);
   printMethod(info, GetExtendedProcessorName);
+  printMethod(info, GetSteppingCode);
   printMethod(info, GetProcessorSerialNumber);
   printMethod2(info, GetProcessorCacheSize, "KB");
   printMethod(info, GetLogicalProcessorsPerPhysical);
@@ -58,7 +82,19 @@ int testSystemInformation(int, char*[])
   printMethod2(info, GetAvailableVirtualMemory, "MB");
   printMethod2(info, GetTotalPhysicalMemory, "MB");
   printMethod2(info, GetAvailablePhysicalMemory, "MB");
+  printMethod3(info, GetHostMemoryTotal(), "KiB");
+  printMethod3(info, GetHostMemoryAvailable("KWSHL"), "KiB");
+  printMethod3(info, GetProcMemoryAvailable("KWSHL","KWSPL"), "KiB");
+  printMethod3(info, GetHostMemoryUsed(), "KiB");
+  printMethod3(info, GetProcMemoryUsed(), "KiB");
 
+  for (int i = 0; i <= 31; i++)
+    {
+    if (info.DoesCPUSupportFeature(1 << i))
+      {
+      kwsys_ios::cout << "CPU feature " << i << "\n";
+      }
+    }
   //int GetProcessorCacheXSize(long int);
 //  bool DoesCPUSupportFeature(long int);
   return 0;

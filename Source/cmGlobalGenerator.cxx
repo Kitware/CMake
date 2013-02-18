@@ -79,6 +79,20 @@ cmGlobalGenerator::~cmGlobalGenerator()
   this->ClearGeneratorTargets();
 }
 
+bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
+{
+  cmOStringStream e;
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "does not support toolset specification, but toolset\n"
+    "  " << ts << "\n"
+    "was specified.";
+  this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                                    cmListFileBacktrace());
+  return false;
+}
+
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
                                                 cmMakefile *mf,
                                                 bool optional)
@@ -828,6 +842,7 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.clear();
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
+  this->ImportedTargets.clear();
   this->LocalGeneratorToTargetMap.clear();
   this->ProjectMap.clear();
   this->RuleHashes.clear();
@@ -937,6 +952,11 @@ void cmGlobalGenerator::Generate()
       (*targets)[tit->first] = tit->second;
       (*targets)[tit->first].SetMakefile(mf);
       }
+
+    for ( tit = targets->begin(); tit != targets->end(); ++ tit )
+      {
+        tit->second.AppendBuildInterfaceIncludes();
+      }
     }
 
   // Add generator specific helper commands
@@ -974,6 +994,7 @@ void cmGlobalGenerator::Generate()
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
+    this->LocalGenerators[i]->GetMakefile()->SetGeneratingBuildSystem();
     this->SetCurrentLocalGenerator(this->LocalGenerators[i]);
     this->LocalGenerators[i]->Generate();
     this->LocalGenerators[i]->GenerateInstallRules();
@@ -1057,7 +1078,8 @@ void cmGlobalGenerator::CreateAutomocTargets()
       if(target.GetType() == cmTarget::EXECUTABLE ||
          target.GetType() == cmTarget::STATIC_LIBRARY ||
          target.GetType() == cmTarget::SHARED_LIBRARY ||
-         target.GetType() == cmTarget::MODULE_LIBRARY)
+         target.GetType() == cmTarget::MODULE_LIBRARY ||
+         target.GetType() == cmTarget::OBJECT_LIBRARY)
         {
         if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
           {
@@ -1555,14 +1577,6 @@ void cmGlobalGenerator::SetConfiguredFilesPath(cmGlobalGenerator* gen)
     }
 }
 
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::GetDocumentation(cmDocumentationEntry& entry) const
-{
-  entry.Name = this->GetName();
-  entry.Brief = "";
-  entry.Full = "";
-}
-
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmLocalGenerator* gen)
 {
@@ -2054,7 +2068,7 @@ bool cmGlobalGenerator::UseFolderProperty()
     }
 
   // By default, this feature is OFF, since it is not supported in the
-  // Visual Studio Express editions:
+  // Visual Studio Express editions until VS11:
   //
   return false;
 }

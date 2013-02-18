@@ -16,9 +16,10 @@
 # This is used internally by CMake and should not be included by user
 # code.
 
-function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
+function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj_regex)
   set(implicit_libs_tmp "")
   set(implicit_dirs_tmp)
+  set(implicit_fwks_tmp)
   set(log "")
 
   # Parse implicit linker arguments.
@@ -36,6 +37,16 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
     set(cmd)
     if("${line}" MATCHES "${linker_regex}" AND
         NOT "${line}" MATCHES "${linker_exclude_regex}")
+      if(XCODE)
+        # Xcode unconditionally adds a path under the project build tree and
+        # on older versions it is not reported with proper quotes.  Remove it.
+        string(REGEX REPLACE "([][+.*()^])" "\\\\\\1" _dir_regex "${CMAKE_BINARY_DIR}")
+        string(REGEX REPLACE " -[FL]${_dir_regex}/([^ ]| [^-])+( |$)" " " xline "${line}")
+        if(NOT "x${xline}" STREQUAL "x${line}")
+          set(log "${log}  reduced line: [${line}]\n            to: [${xline}]\n")
+          set(line "${xline}")
+        endif()
+      endif()
       if(UNIX)
         separate_arguments(args UNIX_COMMAND "${line}")
       else()
@@ -97,32 +108,62 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var log_var obj_regex)
     endif()
   endforeach()
 
+  # Look for library search paths reported by linker.
+  if("${output_lines}" MATCHES ";Library search paths:((;\t[^;]+)+)")
+    string(REPLACE ";\t" ";" implicit_dirs_match "${CMAKE_MATCH_1}")
+    set(log "${log}  Library search paths: [${implicit_dirs_match}]\n")
+    list(APPEND implicit_dirs_tmp ${implicit_dirs_match})
+  endif()
+  if("${output_lines}" MATCHES ";Framework search paths:((;\t[^;]+)+)")
+    string(REPLACE ";\t" ";" implicit_fwks_match "${CMAKE_MATCH_1}")
+    set(log "${log}  Framework search paths: [${implicit_fwks_match}]\n")
+    list(APPEND implicit_fwks_tmp ${implicit_fwks_match})
+  endif()
+
   # Cleanup list of libraries and flags.
   # We remove items that are not language-specific.
   set(implicit_libs "")
   foreach(lib IN LISTS implicit_libs_tmp)
     if("${lib}" MATCHES "^(crt.*\\.o|gcc.*|System.*)$")
       set(log "${log}  remove lib [${lib}]\n")
+    elseif(IS_ABSOLUTE "${lib}")
+      get_filename_component(abs "${lib}" ABSOLUTE)
+      if(NOT "x${lib}" STREQUAL "x${abs}")
+        set(log "${log}  collapse lib [${lib}] ==> [${abs}]\n")
+      endif()
+      list(APPEND implicit_libs "${abs}")
     else()
       list(APPEND implicit_libs "${lib}")
     endif()
   endforeach()
 
-  # Cleanup list of directories.
-  set(implicit_dirs "")
-  foreach(d IN LISTS implicit_dirs_tmp)
-    get_filename_component(dir "${d}" ABSOLUTE)
-    list(APPEND implicit_dirs "${dir}")
-    set(log "${log}  collapse dir [${d}] ==> [${dir}]\n")
+  # Cleanup list of library and framework directories.
+  set(desc_dirs "library")
+  set(desc_fwks "framework")
+  foreach(t dirs fwks)
+    set(implicit_${t} "")
+    foreach(d IN LISTS implicit_${t}_tmp)
+      get_filename_component(dir "${d}" ABSOLUTE)
+      string(FIND "${dir}" "${CMAKE_FILES_DIRECTORY}/" pos)
+      if(NOT pos LESS 0)
+        set(msg ", skipping non-system directory")
+      else()
+        set(msg "")
+        list(APPEND implicit_${t} "${dir}")
+      endif()
+      set(log "${log}  collapse ${desc_${t}} dir [${d}] ==> [${dir}]${msg}\n")
+    endforeach()
+    list(REMOVE_DUPLICATES implicit_${t})
   endforeach()
-  list(REMOVE_DUPLICATES implicit_dirs)
 
   # Log results.
   set(log "${log}  implicit libs: [${implicit_libs}]\n")
   set(log "${log}  implicit dirs: [${implicit_dirs}]\n")
+  set(log "${log}  implicit fwks: [${implicit_fwks}]\n")
 
   # Return results.
   set(${lib_var} "${implicit_libs}" PARENT_SCOPE)
   set(${dir_var} "${implicit_dirs}" PARENT_SCOPE)
+  set(${fwk_var} "${implicit_fwks}" PARENT_SCOPE)
   set(${log_var} "${log}" PARENT_SCOPE)
 endfunction()

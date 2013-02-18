@@ -172,10 +172,11 @@ satisfy dependencies.
 
 //----------------------------------------------------------------------------
 cmComputeLinkDepends
-::cmComputeLinkDepends(cmTarget* target, const char* config)
+::cmComputeLinkDepends(cmTarget* target, const char* config, cmTarget* head)
 {
   // Store context information.
   this->Target = target;
+  this->HeadTarget = head;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
@@ -352,7 +353,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     {
     // Follow the target dependencies.
     if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config))
+       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
       {
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
@@ -444,7 +445,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   if(entry.Target)
     {
     if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config))
+       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -533,7 +534,7 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 {
   // Add direct link dependencies in this configuration.
   cmTarget::LinkImplementation const* impl =
-    this->Target->GetLinkImplementation(this->Config);
+    this->Target->GetLinkImplementation(this->Config, this->HeadTarget);
   this->AddLinkEntries(-1, impl->Libraries);
   for(std::vector<std::string>::const_iterator
         wi = impl->WrongConfigLibraries.begin();
@@ -944,7 +945,7 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     if(cmTarget* target = this->EntryList[*ni].Target)
       {
       if(cmTarget::LinkInterface const* iface =
-         target->GetLinkInterface(this->Config))
+         target->GetLinkInterface(this->Config, this->HeadTarget))
         {
         if(iface->Multiplicity > count)
           {

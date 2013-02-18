@@ -32,7 +32,7 @@
 # pragma warn -8060 /* possibly incorrect assignment */
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
+#if defined(__BEOS__) && !defined(__ZETA__)
 /* BeOS 5 doesn't have usleep(), but it has snooze(), which is identical. */
 # include <be/kernel/OS.h>
 static inline void testProcess_usleep(unsigned int msec)
@@ -47,7 +47,7 @@ int runChild(const char* cmd[], int state, int exception, int value,
              int share, int output, int delay, double timeout, int poll,
              int repeat, int disown);
 
-int test1(int argc, const char* argv[])
+static int test1(int argc, const char* argv[])
 {
   (void)argc; (void)argv;
   fprintf(stdout, "Output on stdout from test returning 0.\n");
@@ -55,7 +55,7 @@ int test1(int argc, const char* argv[])
   return 0;
 }
 
-int test2(int argc, const char* argv[])
+static int test2(int argc, const char* argv[])
 {
   (void)argc; (void)argv;
   fprintf(stdout, "Output on stdout from test returning 123.\n");
@@ -63,7 +63,7 @@ int test2(int argc, const char* argv[])
   return 123;
 }
 
-int test3(int argc, const char* argv[])
+static int test3(int argc, const char* argv[])
 {
   (void)argc; (void)argv;
   fprintf(stdout, "Output before sleep on stdout from timeout test.\n");
@@ -80,8 +80,16 @@ int test3(int argc, const char* argv[])
   return 0;
 }
 
-int test4(int argc, const char* argv[])
+static int test4(int argc, const char* argv[])
 {
+  /* Prepare a pointer to an invalid address.  Don't use null, because
+  dereferencing null is undefined behaviour and compilers are free to
+  do whatever they want. ex: Clang will warn at compile time, or even
+  optimize away the write. We hope to 'outsmart' them by using
+  'volatile' and a slightly larger address, based on a runtime value. */
+  volatile int* invalidAddress = 0;
+  invalidAddress += argc?1:2;
+
 #if defined(_WIN32)
   /* Avoid error diagnostic popups since we are crashing on purpose.  */
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
@@ -94,17 +102,14 @@ int test4(int argc, const char* argv[])
   fprintf(stderr, "Output before crash on stderr from crash test.\n");  
   fflush(stdout);
   fflush(stderr);
-#if defined(__clang__)
-  *(int*)1 = 0; /* Clang warns about 0-ptr; undefined behavior.  */
-#else
-  *(int*)0 = 0;
-#endif
+  /* Provoke deliberate crash by writing to the invalid address. */
+  *invalidAddress = 0;
   fprintf(stdout, "Output after crash on stdout from crash test.\n");
   fprintf(stderr, "Output after crash on stderr from crash test.\n");
   return 0;
 }
 
-int test5(int argc, const char* argv[])
+static int test5(int argc, const char* argv[])
 {
   int r;
   const char* cmd[4];
@@ -127,7 +132,7 @@ int test5(int argc, const char* argv[])
 }
 
 #define TEST6_SIZE (4096*2)
-void test6(int argc, const char* argv[])
+static void test6(int argc, const char* argv[])
 {
   int i;
   char runaway[TEST6_SIZE+1];
@@ -151,7 +156,7 @@ void test6(int argc, const char* argv[])
    delaying 1/10th of a second should ever have to poll.  */
 #define MINPOLL 5
 #define MAXPOLL 20
-int test7(int argc, const char* argv[])
+static int test7(int argc, const char* argv[])
 {
   (void)argc; (void)argv;
   fprintf(stdout, "Output on stdout before sleep.\n");
@@ -171,7 +176,7 @@ int test7(int argc, const char* argv[])
   return 0;
 }
 
-int test8(int argc, const char* argv[])
+static int test8(int argc, const char* argv[])
 {
   /* Create a disowned grandchild to test handling of processes
      that exit before their children.  */
@@ -195,7 +200,7 @@ int test8(int argc, const char* argv[])
   return r;
 }
 
-int test8_grandchild(int argc, const char* argv[])
+static int test8_grandchild(int argc, const char* argv[])
 {
   (void)argc; (void)argv;
   fprintf(stdout, "Output on stdout from grandchild before sleep.\n");
@@ -216,7 +221,7 @@ int test8_grandchild(int argc, const char* argv[])
   return 0;
 }
 
-int runChild2(kwsysProcess* kp,
+static int runChild2(kwsysProcess* kp,
               const char* cmd[], int state, int exception, int value,
               int share, int output, int delay, double timeout,
               int poll, int disown)
@@ -500,7 +505,7 @@ int main(int argc, const char* argv[])
     fprintf(stderr, "Output on stderr after test %d.\n", n);
     fflush(stdout);
     fflush(stderr);
-#if _WIN32
+#if defined(_WIN32)
     if(argv0) { free(argv0); }
 #endif
     return r;

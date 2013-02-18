@@ -157,7 +157,7 @@ public:
 #include <os/storage/Path.h>
 #endif
 
-#if defined(__BEOS__) && !defined(__ZETA__) && !defined(__HAIKU__)
+#if defined(__BEOS__) && !defined(__ZETA__)
 #include <be/kernel/OS.h>
 #include <be/storage/Path.h>
 
@@ -196,18 +196,16 @@ inline int Rmdir(const char* dir)
 }
 inline const char* Getcwd(char* buf, unsigned int len)
 {
-  const char* ret = _getcwd(buf, len);
-  if(!ret)
+  if(const char* ret = _getcwd(buf, len))
     {
-    fprintf(stderr, "No current working directory.\n");
-    abort();
+    // make sure the drive letter is capital
+    if(strlen(buf) > 1 && buf[1] == ':')
+      {
+      buf[0] = toupper(buf[0]);
+      }
+    return ret;
     }
-  // make sure the drive letter is capital
-  if(strlen(buf) > 1 && buf[1] == ':')
-    {
-    buf[0] = toupper(buf[0]);
-    }
-  return ret;
+  return 0;
 }
 inline int Chdir(const char* dir)
 {
@@ -245,13 +243,7 @@ inline int Rmdir(const char* dir)
 }
 inline const char* Getcwd(char* buf, unsigned int len)
 {
-  const char* ret = getcwd(buf, len);
-  if(!ret)
-    {
-    fprintf(stderr, "No current working directory\n");
-    abort();
-    }
-  return ret;
+  return getcwd(buf, len);
 }
 
 inline int Chdir(const char* dir)
@@ -622,11 +614,7 @@ bool SystemTools::MakeDirectory(const char* path)
     }
   SystemTools::ConvertToUnixSlashes(dir);
 
-  kwsys_stl::string::size_type pos = dir.find(':');
-  if(pos == kwsys_stl::string::npos)
-    {
-    pos = 0;
-    }
+  kwsys_stl::string::size_type pos = 0;
   kwsys_stl::string topdir;
   while((pos = dir.find('/', pos)) != kwsys_stl::string::npos)
     {
@@ -634,14 +622,7 @@ bool SystemTools::MakeDirectory(const char* path)
     Mkdir(topdir.c_str());
     pos++;
     }
-  if(dir[dir.size()-1] == '/')
-    {
-    topdir = dir.substr(0, dir.size());
-    }
-  else
-    {
-    topdir = dir;
-    }
+  topdir = dir;
   if(Mkdir(topdir.c_str()) != 0)
     {
     // There is a bug in the Borland Run time library which makes MKDIR
@@ -1665,7 +1646,7 @@ kwsys_stl::string SystemTools::EscapeChars(
   kwsys_stl::string n;
   if (str)
     {
-    if (!chars_to_escape | !*chars_to_escape)
+    if (!chars_to_escape || !*chars_to_escape)
       {
       n.append(str);
       }
@@ -2754,9 +2735,15 @@ kwsys_stl::string SystemTools::GetRealPath(const char* path)
 
 bool SystemTools::FileIsDirectory(const char* name)
 {
+  size_t length = strlen(name);
+  if (length == 0)
+    {
+    return false;
+    }
+
   // Remove any trailing slash from the name.
   char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
-  size_t last = strlen(name)-1;
+  size_t last = length-1;
   if(last > 0 && (name[last] == '/' || name[last] == '\\')
     && strcmp(name, "/") !=0)
     {
@@ -3042,7 +3029,7 @@ void SystemTools::CheckTranslationPath(kwsys_stl::string & path)
   path.erase(path.end()-1, path.end());
 }
 
-void
+static void
 SystemToolsAppendComponents(
   kwsys_stl::vector<kwsys_stl::string>& out_components,
   kwsys_stl::vector<kwsys_stl::string>::const_iterator first,
@@ -3094,7 +3081,7 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
         }
       else
         {
-        // ??
+        base_components.push_back("");
         }
       }
 
@@ -4048,7 +4035,7 @@ kwsys_stl::string SystemTools::GetCurrentDateTime(const char* format)
   return kwsys_stl::string(buf);
 }
 
-kwsys_stl::string SystemTools::MakeCindentifier(const char* s)
+kwsys_stl::string SystemTools::MakeCidentifier(const char* s)
 {
   kwsys_stl::string str(s);
   if (str.find_first_of("0123456789") == 0)
@@ -4709,7 +4696,7 @@ bool SystemTools::ParseURL( const kwsys_stl::string& URL,
 // ----------------------------------------------------------------------
 // These must NOT be initialized.  Default initialization to zero is
 // necessary.
-unsigned int SystemToolsManagerCount;
+static unsigned int SystemToolsManagerCount;
 SystemToolsTranslationMap *SystemTools::TranslationMap;
 SystemToolsTranslationMap *SystemTools::LongPathMap;
 #ifdef __CYGWIN__

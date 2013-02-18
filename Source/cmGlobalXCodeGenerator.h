@@ -15,6 +15,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmXCodeObject.h"
 #include "cmCustomCommand.h"
+class cmGlobalGeneratorFactory;
 class cmTarget;
 class cmSourceFile;
 class cmSourceGroup;
@@ -29,7 +30,7 @@ class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
   cmGlobalXCodeGenerator(std::string const& version);
-  static cmGlobalGenerator* New();
+  static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {
@@ -37,7 +38,7 @@ public:
   static const char* GetActualName() {return "Xcode";}
 
   /** Get the documentation entry for this generator.  */
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const;
+  static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -82,6 +83,7 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig();
 
+  virtual bool SetGeneratorToolset(std::string const& ts);
 private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
@@ -186,6 +188,7 @@ private:
                           const char* varNameSuffix,
                           const char* default_flags);
 
+  class Factory;
   class BuildObjectListOrString;
   friend class BuildObjectListOrString;
 
@@ -234,6 +237,7 @@ private:
   std::map<cmStdString, cmXCodeObject* > TargetGroup;
   std::map<cmStdString, cmXCodeObject* > FileRefs;
   std::vector<std::string> Architectures;
+  std::string PlatformToolset;
 };
 
 #endif

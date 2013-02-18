@@ -77,6 +77,11 @@ int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
                   packageFileName.c_str());
   // Tell CPackRPM.cmake the name of the component NAME.
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT",packageName.c_str());
+  // Tell CPackRPM.cmake the path where the component is.
+  std::string component_path = "/";
+  component_path += packageName;
+  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
+                  component_path.c_str());
   if (!this->ReadListFile("CPackRPM.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -178,8 +183,11 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne()
   /* replace the TEMPORARY package file name */
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME",
       packageFileName.c_str());
-  // Tell CPackRPM.cmake the name of the component GROUP.
-  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT",compInstDirName.c_str());
+  // Tell CPackRPM.cmake the path where the component is.
+  std::string component_path = "/";
+  component_path += compInstDirName;
+  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH",
+                  component_path.c_str());
   if (!this->ReadListFile("CPackRPM.cmake"))
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

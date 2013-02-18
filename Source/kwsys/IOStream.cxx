@@ -272,6 +272,7 @@ namespace KWSYS_NAMESPACE
 
 // Create one public symbol in this object file to avoid warnings from
 // archivers.
+void IOStreamSymbolToAvoidWarning();
 void IOStreamSymbolToAvoidWarning()
 {
 }

@@ -63,15 +63,8 @@
 #    include "cmGlobalVisualStudio71Generator.h"
 #    include "cmGlobalVisualStudio8Generator.h"
 #    include "cmGlobalVisualStudio9Generator.h"
-#    include "cmGlobalVisualStudio9IA64Generator.h"
-#    include "cmGlobalVisualStudio9Win64Generator.h"
 #    include "cmGlobalVisualStudio10Generator.h"
-#    include "cmGlobalVisualStudio10IA64Generator.h"
-#    include "cmGlobalVisualStudio10Win64Generator.h"
 #    include "cmGlobalVisualStudio11Generator.h"
-#    include "cmGlobalVisualStudio11Win64Generator.h"
-#    include "cmGlobalVisualStudio11ARMGenerator.h"
-#    include "cmGlobalVisualStudio8Win64Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
@@ -89,6 +82,7 @@
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)
 #include "cmCallVisualStudioMacro.h"
+#include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
 #if !defined(CMAKE_BOOT_MINGW)
@@ -116,8 +110,6 @@
 #endif
 
 #include <sys/stat.h> // struct stat
-
-#include <memory> // auto_ptr
 
 static bool cmakeCheckStampFile(const char* stampName);
 static bool cmakeCheckStampList(const char* stampName);
@@ -221,6 +213,11 @@ cmake::~cmake()
       j != this->Commands.end(); ++j)
     {
     delete (*j).second;
+    }
+  for(RegisteredGeneratorsVector::iterator j = this->Generators.begin();
+      j != this->Generators.end(); ++j)
+    {
+    delete *j;
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
@@ -521,7 +518,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // read in the list file to fill the cache
   if(path)
     {
-    std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+    cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
     lg->GetMakefile()->SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory().c_str());
     lg->GetMakefile()->SetStartOutputDirectory
@@ -560,7 +557,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   this->SetGlobalGenerator(gg);
 
   // read in the list file to fill the cache
-  std::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   mf->SetHomeOutputDirectory
     (cmSystemTools::GetCurrentWorkingDirectory().c_str());
@@ -662,6 +659,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
                     bool directoriesSetBefore)
 {
   bool directoriesSet = directoriesSetBefore;
+  bool haveToolset = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -789,6 +787,27 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       std::cout << "Also check system files when warning about unused and " <<
                    "uninitialized variables.\n";
       this->SetCheckSystemVars(true);
+      }
+    else if(arg.find("-T",0) == 0)
+      {
+      std::string value = arg.substr(2);
+      if(value.size() == 0)
+        {
+        ++i;
+        if(i >= args.size())
+          {
+          cmSystemTools::Error("No toolset specified for -T");
+          return;
+          }
+        value = args[i];
+        }
+      if(haveToolset)
+        {
+        cmSystemTools::Error("Multiple -T options not allowed");
+        return;
+        }
+      this->GeneratorToolset = value;
+      haveToolset = true;
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -956,7 +975,7 @@ int cmake::AddCMakePaths()
   cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
   cMakeSelf += "/cmake";
   cMakeSelf += cmSystemTools::GetExecutableExtension();
-#if __APPLE__
+#ifdef __APPLE__
   // on the apple this might be the gui bundle
   if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
     {
@@ -1147,6 +1166,10 @@ void CMakeCommandUsage(const char* program)
     << "Available on Windows only:\n"
     << "  comspec                   - on windows 9x use this for RunCommand\n"
     << "  delete_regv key           - delete registry value\n"
+    << "  env_vs8_wince sdkname     - displays a batch file which sets the "
+       "environment for the provided Windows CE SDK installed in VS2005\n"
+    << "  env_vs9_wince sdkname     - displays a batch file which sets the "
+       "environment for the provided Windows CE SDK installed in VS2008\n"
     << "  write_regv key value      - write registry value\n"
 #else
     << "Available on UNIX only:\n"
@@ -1656,7 +1679,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen.c_str()))
         {
         cm.SetGlobalGenerator(ggd);
-        std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+        cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
         lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
         lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
@@ -1812,6 +1835,14 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       return cmWin32ProcessExecution::Windows9xHack(command.c_str());
       }
+    else if (args[1] == "env_vs8_wince" && args.size() == 3)
+      {
+      return cmake::WindowsCEEnvironment("8.0", args[2]);
+      }
+    else if (args[1] == "env_vs9_wince" && args.size() == 3)
+      {
+      return cmake::WindowsCEEnvironment("9.0", args[2]);
+      }
 #endif
     }
 
@@ -1869,10 +1900,10 @@ void cmake::AddDefaultExtraGenerators()
 //----------------------------------------------------------------------------
 void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 {
-  for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
+  for(RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
       i != this->Generators.end(); ++i)
     {
-    names.push_back(i->first);
+    (*i)->GetGenerators(names);
     }
   for(RegisteredExtraGeneratorsMap::const_iterator
       i = this->ExtraGenerators.begin();
@@ -1884,29 +1915,36 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 
 cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
 {
-  cmGlobalGenerator* generator = 0;
   cmExternalMakefileProjectGenerator* extraGenerator = 0;
-  RegisteredGeneratorsMap::const_iterator genIt = this->Generators.find(name);
-  if(genIt == this->Generators.end())
+  RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
+                                            this->ExtraGenerators.find(name);
+  if (extraGenIt != this->ExtraGenerators.end())
     {
-    RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
-                                              this->ExtraGenerators.find(name);
-    if (extraGenIt == this->ExtraGenerators.end())
-      {
-      return 0;
-      }
     extraGenerator = (extraGenIt->second)();
-    genIt=this->Generators.find(extraGenerator->GetGlobalGeneratorName(name));
-    if(genIt == this->Generators.end())
-      {
-      delete extraGenerator;
-      return 0;
-      }
-  }
+    name = extraGenerator->GetGlobalGeneratorName(name);
+    }
 
-  generator = (genIt->second)();
-  generator->SetCMakeInstance(this);
-  generator->SetExternalMakefileProjectGenerator(extraGenerator);
+  cmGlobalGenerator* generator = 0;
+  for (RegisteredGeneratorsVector::const_iterator i =
+    this->Generators.begin(); i != this->Generators.end(); ++i)
+    {
+    generator = (*i)->CreateGlobalGenerator(name);
+    if (generator)
+      {
+      break;
+      }
+    }
+
+  if (generator)
+    {
+    generator->SetCMakeInstance(this);
+    generator->SetExternalMakefileProjectGenerator(extraGenerator);
+    }
+  else
+    {
+    delete extraGenerator;
+    }
+
   return generator;
 }
 
@@ -2046,7 +2084,7 @@ struct SaveCacheEntry
 int cmake::HandleDeleteCacheVariables(const char* var)
 {
   std::vector<std::string> argsSplit;
-  cmSystemTools::ExpandListArgument(std::string(var), argsSplit);
+  cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
   this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if(this->GetIsInTryCompile())
@@ -2264,6 +2302,39 @@ int cmake::ActualConfigure()
                                 this->GlobalGenerator->GetExtraGeneratorName(),
                                 "Name of external makefile project generator.",
                                 cmCacheManager::INTERNAL);
+    }
+
+  if(const char* tsName =
+     this->CacheManager->GetCacheValue("CMAKE_GENERATOR_TOOLSET"))
+    {
+    if(this->GeneratorToolset.empty())
+      {
+      this->GeneratorToolset = tsName;
+      }
+    else if(this->GeneratorToolset != tsName)
+      {
+      std::string message = "Error: generator toolset: ";
+      message += this->GeneratorToolset;
+      message += "\nDoes not match the toolset used previously: ";
+      message += tsName;
+      message +=
+        "\nEither remove the CMakeCache.txt file or choose a different"
+        " binary directory.";
+      cmSystemTools::Error(message.c_str());
+      return -2;
+      }
+    }
+  else
+    {
+    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_TOOLSET",
+                                      this->GeneratorToolset.c_str(),
+                                      "Name of generator toolset.",
+                                      cmCacheManager::INTERNAL);
+    }
+  if(!this->GeneratorToolset.empty() &&
+     !this->GlobalGenerator->SetGeneratorToolset(this->GeneratorToolset))
+    {
+    return -2;
     }
 
   // reset any system configuration information, except for when we are
@@ -2570,55 +2641,41 @@ void cmake::AddDefaultGenerators()
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # if !defined(CMAKE_BOOT_MINGW)
-  this->Generators[cmGlobalVisualStudio6Generator::GetActualName()] =
-    &cmGlobalVisualStudio6Generator::New;
-  this->Generators[cmGlobalVisualStudio7Generator::GetActualName()] =
-    &cmGlobalVisualStudio7Generator::New;
-  this->Generators[cmGlobalVisualStudio10Generator::GetActualName()] =
-    &cmGlobalVisualStudio10Generator::New;
-  this->Generators[cmGlobalVisualStudio10IA64Generator::GetActualName()] =
-    &cmGlobalVisualStudio10IA64Generator::New;
-  this->Generators[cmGlobalVisualStudio10Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio10Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio11Generator::GetActualName()] =
-    &cmGlobalVisualStudio11Generator::New;
-  this->Generators[cmGlobalVisualStudio11Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio11Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio11ARMGenerator::GetActualName()] =
-    &cmGlobalVisualStudio11ARMGenerator::New;
-  this->Generators[cmGlobalVisualStudio71Generator::GetActualName()] =
-    &cmGlobalVisualStudio71Generator::New;
-  this->Generators[cmGlobalVisualStudio8Generator::GetActualName()] =
-    &cmGlobalVisualStudio8Generator::New;
-  this->Generators[cmGlobalVisualStudio9Generator::GetActualName()] =
-    &cmGlobalVisualStudio9Generator::New;
-  this->Generators[cmGlobalVisualStudio9IA64Generator::GetActualName()] =
-    &cmGlobalVisualStudio9IA64Generator::New;
-  this->Generators[cmGlobalVisualStudio9Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio9Win64Generator::New;
-  this->Generators[cmGlobalVisualStudio8Win64Generator::GetActualName()] =
-    &cmGlobalVisualStudio8Win64Generator::New;
-  this->Generators[cmGlobalBorlandMakefileGenerator::GetActualName()] =
-    &cmGlobalBorlandMakefileGenerator::New;
-  this->Generators[cmGlobalNMakeMakefileGenerator::GetActualName()] =
-    &cmGlobalNMakeMakefileGenerator::New;
-  this->Generators[cmGlobalJOMMakefileGenerator::GetActualName()] =
-    &cmGlobalJOMMakefileGenerator::New;
-  this->Generators[cmGlobalWatcomWMakeGenerator::GetActualName()] =
-    &cmGlobalWatcomWMakeGenerator::New;
+  this->Generators.push_back(
+    cmGlobalVisualStudio6Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio7Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio10Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio11Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio71Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio8Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio9Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalBorlandMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalNMakeMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalJOMMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalWatcomWMakeGenerator::NewFactory());
 # endif
-  this->Generators[cmGlobalMSYSMakefileGenerator::GetActualName()] =
-    &cmGlobalMSYSMakefileGenerator::New;
-  this->Generators[cmGlobalMinGWMakefileGenerator::GetActualName()] =
-    &cmGlobalMinGWMakefileGenerator::New;
+  this->Generators.push_back(
+    cmGlobalMSYSMakefileGenerator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalMinGWMakefileGenerator::NewFactory());
 #endif
-  this->Generators[cmGlobalUnixMakefileGenerator3::GetActualName()] =
-    &cmGlobalUnixMakefileGenerator3::New;
-  this->Generators[cmGlobalNinjaGenerator::GetActualName()] =
-    &cmGlobalNinjaGenerator::New;
+  this->Generators.push_back(
+    cmGlobalUnixMakefileGenerator3::NewFactory());
+  this->Generators.push_back(
+    cmGlobalNinjaGenerator::NewFactory());
 #ifdef CMAKE_USE_XCODE
-  this->Generators[cmGlobalXCodeGenerator::GetActualName()] =
-    &cmGlobalXCodeGenerator::New;
+  this->Generators.push_back(
+    cmGlobalXCodeGenerator::NewFactory());
 #endif
 }
 
@@ -2712,17 +2769,15 @@ void cmake::GetPropertiesDocumentation(std::map<std::string,
 
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
 {
-  for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
-      i != this->Generators.end(); ++i)
+  for(RegisteredGeneratorsVector::const_iterator i =
+      this->Generators.begin(); i != this->Generators.end(); ++i)
     {
     cmDocumentationEntry e;
-    cmGlobalGenerator* generator = (i->second)();
-    generator->GetDocumentation(e);
-    delete generator;
+    (*i)->GetDocumentation(e);
     v.push_back(e);
     }
-  for(RegisteredExtraGeneratorsMap::const_iterator
-      i = this->ExtraGenerators.begin(); i != this->ExtraGenerators.end(); ++i)
+  for(RegisteredExtraGeneratorsMap::const_iterator i =
+      this->ExtraGenerators.begin(); i != this->ExtraGenerators.end(); ++i)
     {
     cmDocumentationEntry e;
     cmExternalMakefileProjectGenerator* generator = (i->second)();
@@ -2805,7 +2860,7 @@ int cmake::CheckBuildSystem()
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  std::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   if(!mf->ReadListFile(0, this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
@@ -2831,11 +2886,11 @@ int cmake::CheckBuildSystem()
       }
 
     // Create the generator and use it to clear the dependencies.
-    std::auto_ptr<cmGlobalGenerator>
+    cmsys::auto_ptr<cmGlobalGenerator>
       ggd(this->CreateGlobalGenerator(genName));
     if(ggd.get())
       {
-      std::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+      cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
       lgd->ClearDependencies(mf, verbose);
       }
     }
@@ -3078,7 +3133,7 @@ void cmake::MarkCliAsUsed(const std::string& variable)
 void cmake::GenerateGraphViz(const char* fileName) const
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  std::auto_ptr<cmGraphVizWriter> gvWriter(
+  cmsys::auto_ptr<cmGraphVizWriter> gvWriter(
        new cmGraphVizWriter(this->GetGlobalGenerator()->GetLocalGenerators()));
 
   std::string settingsFile = this->GetHomeOutputDirectory();
@@ -3299,6 +3354,12 @@ int cmake::ExecuteLinkScript(std::vector<std::string>& args)
   int result = 0;
   while(result == 0 && cmSystemTools::GetLineFromStream(fin, command))
     {
+    // Skip empty command lines.
+    if(command.find_first_not_of(" \t") == command.npos)
+      {
+      continue;
+      }
+
     // Setup this command line.
     const char* cmd[2] = {command.c_str(), 0};
     cmsysProcess_SetCommand(cp, cmd);
@@ -3550,6 +3611,13 @@ void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
                                                   FullDescription,
                                                   docSection,
                                                   chained);
+}
+
+bool cmake::GetIsPropertyDefined(const char *name,
+                                 cmProperty::ScopeType scope)
+{
+  return this->PropertyDefinitions[scope].find(name) !=
+                                      this->PropertyDefinitions[scope].end();
 }
 
 cmPropertyDefinition *cmake
@@ -4014,6 +4082,29 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
+//----------------------------------------------------------------------------
+int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
+{
+#if defined(CMAKE_HAVE_VS_GENERATORS)
+  cmVisualStudioWCEPlatformParser parser(name.c_str());
+  parser.ParseVersion(version);
+  if (parser.Found())
+    {
+    std::cout << "@echo off" << std::endl;
+    std::cout << "echo Environment Selection: " << name << std::endl;
+    std::cout << "set PATH=" << parser.GetPathDirectories() << std::endl;
+    std::cout << "set INCLUDE=" << parser.GetIncludeDirectories() <<std::endl;
+    std::cout << "set LIB=" << parser.GetLibraryDirectories() <<std::endl;
+    return 0;
+    }
+#else
+  (void)version;
+#endif
+
+  std::cerr << "Could not find " << name;
+  return -1;
+}
+
 // For visual studio 2005 and newer manifest files need to be embeded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
@@ -4358,6 +4449,10 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     isError = true;
     msg << "CMake Internal Error (please report a bug)";
     }
+  else if(t == cmake::LOG)
+    {
+    msg << "CMake Debug Log";
+    }
   else
     {
     msg << "CMake Warning";
@@ -4477,7 +4572,7 @@ int cmake::Build(const std::string& dir,
     std::cerr << "Error: could find generator in Cache\n";
     return 1;
     }
-  std::auto_ptr<cmGlobalGenerator> gen(
+  cmsys::auto_ptr<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(it.GetValue()));
   std::string output;
   std::string projName;

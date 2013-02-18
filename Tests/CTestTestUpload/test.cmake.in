@@ -8,6 +8,7 @@ set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-Upload")
 set(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestUpload")
 set(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestUpload")
 set(CTEST_CMAKE_GENERATOR               "@CMAKE_TEST_GENERATOR@")
+set(CTEST_CMAKE_GENERATOR_TOOLSET       "@CMAKE_TEST_GENERATOR_TOOLSET@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
 
 CTEST_START(Experimental)
