@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmTargetLinkLibrariesCommand.h"
 
+#include "cmGeneratorExpression.h"
+
 const char* cmTargetLinkLibrariesCommand::LinkLibraryTypeNames[3] =
 {
   "general",
@@ -250,54 +252,21 @@ cmTargetLinkLibrariesCommand
 }
 
 //----------------------------------------------------------------------------
-static std::string compileProperty(cmTarget *tgt, const std::string &lib,
-                                   bool isGenex,
-                                   const std::string &property,
-                                   cmTarget::LinkLibraryType llt)
-{
-  std::string value = !isGenex ? "$<LINKED:" + lib + ">"
-                               : "$<$<TARGET_DEFINED:" + lib + ">:" +
-                                   "$<TARGET_PROPERTY:" + lib +
-                                   ",INTERFACE_" + property + ">"
-                                 ">";
-
-  return tgt->GetDebugGeneratorExpressions(value, llt);
-}
-
-//----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
-  const bool isGenex = isGeneratorExpression(lib);
-
-  cmsys::RegularExpression targetNameValidator;
-  targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
-  const bool potentialTargetName = targetNameValidator.find(lib);
-
-  if (potentialTargetName || isGenex)
-    {
-    this->Target->AppendProperty("INCLUDE_DIRECTORIES",
-                                 compileProperty(this->Target, lib,
-                                                 isGenex,
-                                      "INCLUDE_DIRECTORIES", llt).c_str());
-    this->Target->AppendProperty("COMPILE_DEFINITIONS",
-                                 compileProperty(this->Target, lib,
-                                                 isGenex,
-                                      "COMPILE_DEFINITIONS", llt).c_str());
-    }
-
   // Handle normal case first.
   if(this->CurrentProcessingState != ProcessingLinkInterface)
     {
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmValueWithOrigin entry(this->Target->GetDebugGeneratorExpressions(lib,
+                                                                       llt),
+                            lfbt);
+    this->Target->AppendTllInclude(entry);
+    }
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
     if (this->CurrentProcessingState != ProcessingPublicInterface)
@@ -305,18 +274,6 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       // Not LINK_INTERFACE_LIBRARIES or LINK_PUBLIC, do not add to interface.
       return;
       }
-    }
-
-  if (potentialTargetName || isGenex)
-    {
-    this->Target->AppendProperty("INTERFACE_COMPILE_DEFINITIONS",
-                                compileProperty(this->Target, lib,
-                                                isGenex,
-                                        "COMPILE_DEFINITIONS", llt).c_str());
-    this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
-                                compileProperty(this->Target, lib,
-                                                isGenex,
-                                        "INCLUDE_DIRECTORIES", llt).c_str());
     }
 
   // Get the list of configurations considered to be DEBUG.

@@ -121,5 +121,5 @@ target_link_libraries(lib5 libbad libgood)
 # get the libgood includes in before the libbad includes.
 # We do that with this command:
 target_include_directories(lib5
-  BEFORE PRIVATE $<LINKED:libgood>
+  BEFORE PRIVATE $<TARGET_PROPERTY:libgood,INTERFACE_INCLUDE_DIRECTORIES>
 )

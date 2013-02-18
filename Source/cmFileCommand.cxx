@@ -2409,7 +2409,8 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
       fileName += "/" + *i;
       }
 
-    if(cmSystemTools::FileIsDirectory(fileName.c_str()) && recurse)
+    if(cmSystemTools::FileIsDirectory(fileName.c_str()) &&
+       !cmSystemTools::FileIsSymlink(fileName.c_str()) && recurse)
       {
       cmSystemTools::RemoveADirectory(fileName.c_str());
       }

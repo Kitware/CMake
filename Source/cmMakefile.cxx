@@ -23,6 +23,7 @@
 #include "cmListFileCache.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmDocumentCompileDefinitions.h"
+#include "cmGeneratorExpression.h"
 #include "cmTest.h"
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #  include "cmVariableWatch.h"
@@ -1486,7 +1487,7 @@ void cmMakefile::InitializeFromParent()
   // Initialize definitions with the closure of the parent scope.
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
-  const std::vector<IncludeDirectoriesEntry> parentIncludes =
+  const std::vector<cmValueWithOrigin> parentIncludes =
                                         parent->GetIncludeDirectoriesEntries();
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
                                        parentIncludes.begin(),
@@ -1635,13 +1636,13 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
     sep = ";";
     }
 
-  std::vector<IncludeDirectoriesEntry>::iterator position =
+  std::vector<cmValueWithOrigin>::iterator position =
                               before ? this->IncludeDirectoriesEntries.begin()
                                     : this->IncludeDirectoriesEntries.end();
 
   cmListFileBacktrace lfbt;
   this->GetBacktrace(lfbt);
-  IncludeDirectoriesEntry entry(incString, lfbt);
+  cmValueWithOrigin entry(incString, lfbt);
   this->IncludeDirectoriesEntries.insert(position, entry);
 
   // Property on each target:
@@ -1665,10 +1666,24 @@ cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::IsSystemIncludeDirectory(const char* dir)
+bool cmMakefile::IsSystemIncludeDirectory(const char* dir, const char *config)
 {
-  return (this->SystemIncludeDirectories.find(dir) !=
-          this->SystemIncludeDirectories.end());
+  for (std::set<cmStdString>::const_iterator
+      it = this->SystemIncludeDirectories.begin();
+      it != this->SystemIncludeDirectories.end(); ++it)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    std::vector<std::string> incs;
+    cmSystemTools::ExpandListArgument(ge.Parse(*it)
+                                       ->Evaluate(this, config, false), incs);
+    if (std::find(incs.begin(), incs.end(), dir) != incs.end())
+      {
+      return true;
+      }
+    }
+  return false;
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
@@ -3446,7 +3461,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
-                                        IncludeDirectoriesEntry(value, lfbt));
+                                        cmValueWithOrigin(value, lfbt));
     return;
     }
 
@@ -3485,7 +3500,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
-                                        IncludeDirectoriesEntry(value, lfbt));
+                                        cmValueWithOrigin(value, lfbt));
     return;
     }
   if ( propname == "LINK_DIRECTORIES" )
@@ -3602,7 +3617,7 @@ const char *cmMakefile::GetProperty(const char* prop,
   else if (!strcmp("INCLUDE_DIRECTORIES",prop))
     {
     std::string sep;
-    for (std::vector<IncludeDirectoriesEntry>::const_iterator
+    for (std::vector<cmValueWithOrigin>::const_iterator
         it = this->IncludeDirectoriesEntries.begin(),
         end = this->IncludeDirectoriesEntries.end();
         it != end; ++it)

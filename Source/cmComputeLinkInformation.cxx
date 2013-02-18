@@ -1784,6 +1784,22 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
 }
 
 //----------------------------------------------------------------------------
+static void cmCLI_ExpandListUnique(const char* str,
+                                   std::vector<std::string>& out,
+                                   std::set<cmStdString>& emitted)
+{
+  std::vector<std::string> tmp;
+  cmSystemTools::ExpandListArgument(str, tmp);
+  for(std::vector<std::string>::iterator i = tmp.begin(); i != tmp.end(); ++i)
+    {
+    if(emitted.insert(*i).second)
+      {
+      out.push_back(*i);
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
                                         bool for_install)
 {
@@ -1808,10 +1824,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
+  std::set<cmStdString> emitted;
   if(use_install_rpath)
     {
     const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");
-    cmSystemTools::ExpandListArgument(install_rpath, runtimeDirs);
+    cmCLI_ExpandListUnique(install_rpath, runtimeDirs, emitted);
     }
   if(use_build_rpath || use_link_rpath)
     {
@@ -1823,7 +1840,10 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       // support or if using the link path as an rpath.
       if(use_build_rpath)
         {
-        runtimeDirs.push_back(*ri);
+        if(emitted.insert(*ri).second)
+          {
+          runtimeDirs.push_back(*ri);
+          }
         }
       else if(use_link_rpath)
         {
@@ -1835,15 +1855,40 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
            !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
            !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
           {
-          runtimeDirs.push_back(*ri);
+          if(emitted.insert(*ri).second)
+            {
+            runtimeDirs.push_back(*ri);
+            }
           }
         }
       }
     }
 
+  // Add runtime paths required by the languages to always be
+  // present.  This is done even when skipping rpath support.
+  {
+  cmTarget::LinkClosure const* lc =
+    this->Target->GetLinkClosure(this->Config, this->HeadTarget);
+  for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
+      li != lc->Languages.end(); ++li)
+    {
+    std::string useVar = "CMAKE_" + *li +
+      "_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH";
+    if(this->Makefile->IsOn(useVar.c_str()))
+      {
+      std::string dirVar = "CMAKE_" + *li +
+        "_IMPLICIT_LINK_DIRECTORIES";
+      if(const char* dirs = this->Makefile->GetDefinition(dirVar.c_str()))
+        {
+        cmCLI_ExpandListUnique(dirs, runtimeDirs, emitted);
+        }
+      }
+    }
+  }
+
   // Add runtime paths required by the platform to always be
   // present.  This is done even when skipping rpath support.
-  cmSystemTools::ExpandListArgument(this->RuntimeAlways.c_str(), runtimeDirs);
+  cmCLI_ExpandListUnique(this->RuntimeAlways.c_str(), runtimeDirs, emitted);
 }
 
 //----------------------------------------------------------------------------

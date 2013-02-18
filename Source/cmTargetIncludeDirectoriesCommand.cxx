@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmTargetIncludeDirectoriesCommand.h"
 
-#include "cmMakefileIncludeDirectoriesEntry.h"
-
 //----------------------------------------------------------------------------
 bool cmTargetIncludeDirectoriesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -41,14 +39,6 @@ void cmTargetIncludeDirectoriesCommand
 }
 
 //----------------------------------------------------------------------------
-static bool isGeneratorExpression(const std::string &lib)
-{
-  const std::string::size_type openpos = lib.find("$<");
-  return (openpos != std::string::npos)
-      && (lib.find(">", openpos) != std::string::npos);
-}
-
-//----------------------------------------------------------------------------
 std::string cmTargetIncludeDirectoriesCommand
 ::Join(const std::vector<std::string> &content)
 {
@@ -59,7 +49,7 @@ std::string cmTargetIncludeDirectoriesCommand
     it != content.end(); ++it)
     {
     if (cmSystemTools::FileIsFullPath(it->c_str())
-        || isGeneratorExpression(*it))
+        || cmGeneratorExpression::Find(*it) != std::string::npos)
       {
       dirs += sep + *it;
       }
@@ -79,6 +69,6 @@ void cmTargetIncludeDirectoriesCommand
 {
   cmListFileBacktrace lfbt;
   this->Makefile->GetBacktrace(lfbt);
-  cmMakefileIncludeDirectoriesEntry entry(this->Join(content), lfbt);
+  cmValueWithOrigin entry(this->Join(content), lfbt);
   tgt->InsertInclude(entry, prepend);
 }

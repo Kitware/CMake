@@ -21,6 +21,14 @@ include_directories(
   "${CMAKE_CURRENT_SOURCE_DIR}/four"
 )
 
+add_library(foo "${CMAKE_CURRENT_BINARY_DIR}/DebugIncludes.cpp")
+target_include_directories(foo
+  INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/seven"
+    "${CMAKE_CURRENT_SOURCE_DIR}/eight"
+)
+target_link_libraries(lll foo)
+
 macro(some_macro)
   set_property(TARGET lll APPEND PROPERTY
       INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/one"
@@ -28,6 +36,7 @@ macro(some_macro)
                           "${CMAKE_CURRENT_SOURCE_DIR}/four"
                           "${CMAKE_CURRENT_SOURCE_DIR}/five"
                           "${CMAKE_CURRENT_SOURCE_DIR}/six"
+                          "${CMAKE_CURRENT_SOURCE_DIR}/seven"
   )
 endmacro()
 

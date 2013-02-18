@@ -95,14 +95,13 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
   for ( ; it != end; ++it)
     {
-    const std::string result = (*it)->Evaluate(&context, dagChecker);
-    this->Output += result;
+    this->Output += (*it)->Evaluate(&context, dagChecker);
 
     for(std::set<cmStdString>::const_iterator
           p = context.SeenTargetProperties.begin();
           p != context.SeenTargetProperties.end(); ++p)
       {
-      this->SeenTargetProperties[*p] += result + ";";
+      this->SeenTargetProperties.insert(*p);
       }
     if (context.HadError)
       {
@@ -364,4 +363,27 @@ std::string cmGeneratorExpression::Preprocess(const std::string &input,
 
   assert(!"cmGeneratorExpression::Preprocess called with invalid args");
   return std::string();
+}
+
+//----------------------------------------------------------------------------
+std::string::size_type cmGeneratorExpression::Find(const std::string &input)
+{
+  const std::string::size_type openpos = input.find("$<");
+  if (openpos != std::string::npos
+      && input.find(">", openpos) != std::string::npos)
+    {
+    return openpos;
+    }
+  return std::string::npos;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
+{
+  cmsys::RegularExpression targetNameValidator;
+  // The ':' is supported to allow use with IMPORTED targets. At least
+  // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
+  targetNameValidator.compile("^[A-Za-z0-9_.:-]+$");
+
+  return targetNameValidator.find(input.c_str());
 }

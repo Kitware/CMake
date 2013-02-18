@@ -76,4 +76,13 @@ struct cmListFile
   std::vector<cmListFileFunction> Functions;
 };
 
+struct cmValueWithOrigin {
+  cmValueWithOrigin(const std::string &value,
+                          const cmListFileBacktrace &bt)
+    : Value(value), Backtrace(bt)
+  {}
+  std::string Value;
+  cmListFileBacktrace Backtrace;
+};
+
 #endif

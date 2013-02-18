@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmTargetCompileDefinitionsCommand.h"
 
-#include "cmMakefileIncludeDirectoriesEntry.h"
-
 bool cmTargetCompileDefinitionsCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {

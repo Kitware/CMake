@@ -62,6 +62,10 @@ public:
   static void Split(const std::string &input,
                     std::vector<std::string> &output);
 
+  static std::string::size_type Find(const std::string &input);
+
+  static bool IsValidTargetName(const std::string &input);
+
 private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);
@@ -86,7 +90,7 @@ public:
   std::set<cmTarget*> const& GetTargets() const
     { return this->Targets; }
 
-  std::map<cmStdString, cmStdString> const& GetSeenTargetProperties() const
+  std::set<cmStdString> const& GetSeenTargetProperties() const
     { return this->SeenTargetProperties; }
 
   ~cmCompiledGeneratorExpression();
@@ -120,7 +124,7 @@ private:
   bool NeedsParsing;
 
   mutable std::set<cmTarget*> Targets;
-  mutable std::map<cmStdString, cmStdString> SeenTargetProperties;
+  mutable std::set<cmStdString> SeenTargetProperties;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
 };

@@ -1167,9 +1167,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_BUILD_INTERFACE_INCLUDES", cmProperty::VARIABLE,
      "Automatically add the current source- and build directories "
      "to the INTERFACE_INCLUDE_DIRECTORIES.",
-     "If this variable is enabled, CMake automatically adds for each "
-     "target ${CMAKE_CURRENT_SOURCE_DIR} and ${CMAKE_CURRENT_BINARY_DIR} "
-     "to the INTERFACE_INCLUDE_DIRECTORIES."
+     "If this variable is enabled, CMake automatically adds for each shared "
+     "library target, static library target, module target and executable "
+     "target, ${CMAKE_CURRENT_SOURCE_DIR} and ${CMAKE_CURRENT_BINARY_DIR} to "
+     "the INTERFACE_INCLUDE_DIRECTORIES."
      "By default CMAKE_BUILD_INTERFACE_INCLUDES is OFF.",
      false,
      "Variables that Control the Build");
@@ -1866,6 +1867,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty(
+    "CMAKE_<LANG>_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH",
+    cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_CREATE_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_SHARED_MODULE_<LANG>_FLAGS",
