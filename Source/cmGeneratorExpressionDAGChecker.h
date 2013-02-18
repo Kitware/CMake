@@ -38,8 +38,8 @@ struct cmGeneratorExpressionDAGChecker
                    const std::string &expr);
 
   bool EvaluatingLinkLibraries();
-  bool EvaluatingIncludeDirectories();
-  bool EvaluatingCompileDefinitions();
+  bool EvaluatingIncludeDirectories() const;
+  bool EvaluatingCompileDefinitions() const;
 
 private:
   Result checkGraph() const;
