@@ -126,7 +126,7 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
     {
     if (this->Target == parent->Target && this->Property == parent->Property)
       {
-      return parent->Parent ? CYCLIC_REFERENCE : SELF_REFERENCE;
+      return (parent == this->Parent) ? SELF_REFERENCE : CYCLIC_REFERENCE;
       }
     parent = parent->Parent;
     }
