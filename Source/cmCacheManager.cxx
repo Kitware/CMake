@@ -584,23 +584,15 @@ bool cmCacheManager::DeleteCache(const char* path)
   cmSystemTools::ConvertToUnixSlashes(cacheFile);
   std::string cmakeFiles = cacheFile;
   cacheFile += "/CMakeCache.txt";
-  cmSystemTools::RemoveFile(cacheFile.c_str());
-  // now remove the files in the CMakeFiles directory
-  // this cleans up language cache files
-  cmsys::Directory dir;
-  cmakeFiles += cmake::GetCMakeFilesDirectory();
-  dir.Load(cmakeFiles.c_str());
-  for (unsigned long fileNum = 0;
-    fileNum <  dir.GetNumberOfFiles();
-    ++fileNum)
+  if(cmSystemTools::FileExists(cacheFile.c_str()))
     {
-    if(!cmSystemTools::
-       FileIsDirectory(dir.GetFile(fileNum)))
+    cmSystemTools::RemoveFile(cacheFile.c_str());
+    // now remove the files in the CMakeFiles directory
+    // this cleans up language cache files
+    cmakeFiles += cmake::GetCMakeFilesDirectory();
+    if(cmSystemTools::FileIsDirectory(cmakeFiles.c_str()))
       {
-      std::string fullPath = cmakeFiles;
-      fullPath += "/";
-      fullPath += dir.GetFile(fileNum);
-      cmSystemTools::RemoveFile(fullPath.c_str());
+      cmSystemTools::RemoveADirectory(cmakeFiles.c_str());
       }
     }
   return true;
