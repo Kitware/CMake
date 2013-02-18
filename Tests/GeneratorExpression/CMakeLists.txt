@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8.8)
-project(GeneratorExpression NONE)
+project(GeneratorExpression CXX)
 
 add_custom_target(check-part1 ALL
   COMMAND ${CMAKE_COMMAND}
@@ -62,6 +62,24 @@ add_custom_target(check-part1 ALL
   VERBATIM
   )
 
+add_library(empty1 empty.cpp)
+target_include_directories(empty1 PUBLIC /empty1/public)
+target_include_directories(empty1 PRIVATE /empty1/private)
+
+add_library(empty2 empty.cpp)
+target_include_directories(empty2 PUBLIC /empty2/public)
+
+add_library(empty3 empty.cpp)
+target_include_directories(empty3 PUBLIC /empty3/public)
+target_include_directories(empty3 PRIVATE /empty3/private)
+
+add_library(empty4 empty.cpp)
+target_include_directories(empty4 PUBLIC /empty4/public)
+
+target_link_libraries(empty1 LINK_PUBLIC empty2)
+target_link_libraries(empty2 LINK_PUBLIC empty3 empty4)
+target_link_libraries(empty3 LINK_PUBLIC empty2 empty4)
+
 add_custom_target(check-part2 ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
@@ -89,6 +107,13 @@ add_custom_target(check-part2 ALL
     -Dtest_install_interface=$<INSTALL_INTERFACE:install>
     -Dtest_target_name_1=$<TARGET_NAME:tgt,ok>
     -Dtest_target_name_2=$<TARGET_NAME:tgt:ok>
+    -Dtest_target_includes1=$<TARGET_PROPERTY:empty1,INTERFACE_INCLUDE_DIRECTORIES>
+    -Dtest_target_includes2=$<TARGET_PROPERTY:empty2,INTERFACE_INCLUDE_DIRECTORIES>
+    -Dtest_target_includes3=$<TARGET_PROPERTY:empty3,INTERFACE_INCLUDE_DIRECTORIES>
+    -Dtest_target_includes4=$<TARGET_PROPERTY:empty1,INCLUDE_DIRECTORIES>
+    -Dtest_target_includes5=$<TARGET_PROPERTY:empty2,INCLUDE_DIRECTORIES>
+    -Dtest_target_includes6=$<TARGET_PROPERTY:empty3,INCLUDE_DIRECTORIES>
+    -Dtest_target_includes7=$<TARGET_PROPERTY:empty1,INTERFACE_INCLUDE_DIRECTORIES>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
   VERBATIM

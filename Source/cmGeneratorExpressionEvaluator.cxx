@@ -430,7 +430,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     switch (dagChecker.check())
       {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      dagChecker.reportError(context, content->GetOriginalExpression());
+      // It would be better to consider it an error for the foo target
+      // to have a INTERFACE_INCLUDE_DIRECTORIES which depends directly on its
+      // own INTERFACE_INCLUDE_DIRECTORIES property, but as the error of a
+      // target having itself in its own LINK_INTERFACE_LIBRARIES is 'allowed'
+      // and tested, and as the interface includes and defines are now based
+      // on the link interface, it breaks the CMakeOnly.LinkInterfaceLoop test.
+//       dagChecker.reportError(context, content->GetOriginalExpression());
       return std::string();
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
@@ -453,8 +459,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     const char *prop = target->GetProperty(propertyName.c_str());
 
-    std::string linkedTargetsContent;
-
     if (dagCheckerParent)
       {
       if (dagCheckerParent->EvaluatingLinkLibraries())
@@ -468,46 +472,51 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         assert(dagCheckerParent->EvaluatingIncludeDirectories()
             || dagCheckerParent->EvaluatingCompileDefinitions());
+        }
+      }
 
-        if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
-            || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
+    std::string linkedTargetsContent;
+
+    if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
+        || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
+      {
+      const cmTarget::LinkInterface *iface = target->GetLinkInterface(
+                                                    context->Config,
+                                                    context->HeadTarget);
+      if(iface)
+        {
+        cmGeneratorExpression ge(context->Backtrace);
+
+        std::string sep;
+        std::string depString;
+        for (std::vector<std::string>::const_iterator
+            it = iface->Libraries.begin();
+            it != iface->Libraries.end(); ++it)
           {
-          const cmTarget::LinkInterface *iface = target->GetLinkInterface(
-                                                        context->Config,
-                                                        context->HeadTarget);
-          if(iface)
+          if (context->Makefile->FindTargetToUse(it->c_str()))
             {
-            cmGeneratorExpression ge(context->Backtrace);
-
-            std::string sep;
-            std::string depString;
-            for (std::vector<std::string>::const_iterator
-                it = iface->Libraries.begin();
-                it != iface->Libraries.end(); ++it)
-              {
-              if (context->Makefile->FindTargetToUse(it->c_str()))
-                {
-                depString +=
-                  sep + "$<TARGET_PROPERTY:" + *it + "," + propertyName + ">";
-                sep = ";";
-                }
-              }
-            cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                          ge.Parse(depString);
-            linkedTargetsContent = cge->Evaluate(context->Makefile,
-                                context->Config,
-                                context->Quiet,
-                                context->HeadTarget,
-                                target,
-                                &dagChecker);
-            if (cge->GetHadContextSensitiveCondition())
-              {
-              context->HadContextSensitiveCondition = true;
-              }
+            depString +=
+              sep + "$<TARGET_PROPERTY:" + *it + "," + propertyName + ">";
+            sep = ";";
             }
+          }
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                      ge.Parse(depString);
+        linkedTargetsContent = cge->Evaluate(context->Makefile,
+                            context->Config,
+                            context->Quiet,
+                            context->HeadTarget,
+                            target,
+                            &dagChecker);
+        if (cge->GetHadContextSensitiveCondition())
+          {
+          context->HadContextSensitiveCondition = true;
           }
         }
       }
+
+    linkedTargetsContent =
+          cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
 
     if (!prop)
       {
