@@ -38,7 +38,6 @@ cmXCodeObject::~cmXCodeObject()
 cmXCodeObject::cmXCodeObject(PBXType ptype, Type type)
 {
   this->Version = 15;
-  this->PBXTargetDependencyValue = 0;
   this->Target = 0;
   this->Object =0;
 
