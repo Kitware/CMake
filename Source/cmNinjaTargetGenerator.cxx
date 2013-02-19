@@ -552,7 +552,7 @@ cmNinjaTargetGenerator
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
     const std::vector<std::string>& ccoutputs = cc->GetOutputs();
     std::transform(ccoutputs.begin(), ccoutputs.end(),
-                   std::back_inserter(implicitDeps), MapToNinjaPath());
+                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
     }
 
   // If the source file is GENERATED and does not have a custom command
