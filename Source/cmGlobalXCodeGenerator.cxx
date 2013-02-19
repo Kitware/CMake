@@ -2517,24 +2517,6 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
 void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
                                              cmXCodeObject* dependTarget)
 {
-  // make sure a target does not depend on itself
-  if(target == dependTarget)
-    {
-    return;
-    }
-  // now avoid circular references if dependTarget already
-  // depends on target then skip it.  Circular references crashes
-  // xcode
-  cmXCodeObject* dependTargetDepends =
-    dependTarget->GetObject("dependencies");
-  if(dependTargetDepends)
-    {
-    if(dependTargetDepends->HasObject(target->GetPBXTargetDependency()))
-      {
-      return;
-      }
-    }
-
   cmXCodeObject* targetdep = dependTarget->GetPBXTargetDependency();
   if(!targetdep)
     {
