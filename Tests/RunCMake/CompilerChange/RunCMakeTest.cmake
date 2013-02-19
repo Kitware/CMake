@@ -13,6 +13,9 @@ if(NOT EXISTS "${CMAKE_C_COMPILER}")
   message(FATAL_ERROR "FindCompiler provided non-existing path \"${CMAKE_C_COMPILER}\"!")
 endif()
 
+# Now that we have the full compiler path, hide CC.
+unset(ENV{CC})
+
 # Wrap around the real compiler so we can change the compiler
 # path without changing the underlying compiler.
 set(ccIn ${RunCMake_SOURCE_DIR}/cc.sh.in)
