@@ -237,8 +237,6 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
         cmCacheManager::STRING);
       }
     }
-  mf->AddDefinition("CMAKE_GENERATOR_CC", "gcc");
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", "g++");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   if(!this->PlatformToolset.empty())
     {

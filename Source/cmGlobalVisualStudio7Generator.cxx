@@ -27,11 +27,8 @@ void cmGlobalVisualStudio7Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
-  mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  mf->AddDefinition("CMAKE_GENERATOR_FC", "ifort");
   this->AddPlatformDefinitions(mf);
 
   // Create list of configurations requested by user's cache, if any.
