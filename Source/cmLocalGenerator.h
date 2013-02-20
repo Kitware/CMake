@@ -49,29 +49,29 @@ public:
   /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */
-  virtual void TraceDependencies();
+  void TraceDependencies();
 
   virtual void AddHelperCommands() {}
 
   /**
    * Perform any final calculations prior to generation
    */
-  virtual void ConfigureFinalPass();
+  void ConfigureFinalPass();
 
   /**
    * Generate the install rules files in this directory.
    */
-  virtual void GenerateInstallRules();
+  void GenerateInstallRules();
 
   /**
    * Generate the test files for tests.
    */
-  virtual void GenerateTestFiles();
+  void GenerateTestFiles();
 
   /**
    * Generate a manifest of target files that will be built.
    */
-  virtual void GenerateTargetManifest();
+  void GenerateTargetManifest();
 
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
