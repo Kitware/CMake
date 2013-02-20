@@ -119,6 +119,22 @@ cmQtAutomoc::cmQtAutomoc()
     }
 }
 
+void cmQtAutomoc::InitializeMocSourceFile(cmTarget* target)
+{
+  std::string automocTargetName = target->GetName();
+  cmMakefile *makefile = target->GetMakefile();
+  automocTargetName += "_automoc";
+  std::string mocCppFile = makefile->GetCurrentOutputDirectory();
+  mocCppFile += "/";
+  mocCppFile += automocTargetName;
+  mocCppFile += ".cpp";
+  cmSourceFile* mocCppSource = makefile->GetOrCreateSource(mocCppFile.c_str(),
+                                                         true);
+  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                           mocCppFile.c_str(), false);
+
+  target->AddSourceFile(mocCppSource);
+}
 
 void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 {
@@ -268,17 +284,6 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   outputFile += "/AutomocInfo.cmake";
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
                           false, true, false);
-
-  std::string mocCppFile =  makefile->GetCurrentOutputDirectory();
-  mocCppFile += "/";
-  mocCppFile += automocTargetName;
-  mocCppFile += ".cpp";
-  cmSourceFile* mocCppSource = makefile->GetOrCreateSource(mocCppFile.c_str(),
-                                                         true);
-  target->AddSourceFile(mocCppSource);
-
-  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                           mocCppFile.c_str(), false);
 }
 
 

@@ -23,6 +23,7 @@ public:
   cmQtAutomoc();
   bool Run(const char* targetDirectory);
 
+  void InitializeMocSourceFile(cmTarget* target);
   void SetupAutomocTarget(cmTarget* target);
 
 private:

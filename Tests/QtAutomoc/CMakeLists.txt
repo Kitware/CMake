@@ -38,3 +38,9 @@ generate_export_header(libC)
 target_link_libraries(libC LINK_PUBLIC libB)
 
 target_link_libraries(foo codeeditorLib ${QT_LIBRARIES} libC)
+
+add_library(empty STATIC empty.cpp)
+set_target_properties(empty PROPERTIES AUTOMOC TRUE)
+target_link_libraries(empty no_link_language)
+add_library(no_link_language STATIC empty.h)
+set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)

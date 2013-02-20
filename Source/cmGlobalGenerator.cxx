@@ -1067,6 +1067,8 @@ bool cmGlobalGenerator::CheckTargets()
 void cmGlobalGenerator::CreateAutomocTargets()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
+  typedef std::vector<std::pair<cmQtAutomoc, cmTarget*> > Automocs;
+  Automocs automocs;
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
@@ -1084,10 +1086,16 @@ void cmGlobalGenerator::CreateAutomocTargets()
         if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
           {
           cmQtAutomoc automoc;
-          automoc.SetupAutomocTarget(&target);
+          automoc.InitializeMocSourceFile(&target);
+          automocs.push_back(std::make_pair(automoc, &target));
           }
         }
       }
+    }
+  for (Automocs::iterator it = automocs.begin(); it != automocs.end();
+       ++it)
+    {
+    it->first.SetupAutomocTarget(it->second);
     }
 #endif
 }
