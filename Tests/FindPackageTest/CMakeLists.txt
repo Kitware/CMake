@@ -43,6 +43,16 @@ if(NOT LOTSOFCOMPONENTS_FOUND)
   message(SEND_ERROR "LotsOfComponents not found !")
 endif()
 
+find_package(SomePackage)
+if(NOT SomePackage_FOUND)
+  message(SEND_ERROR "SomePackage with FOUND_VAR SomePackage_FOUND not found !")
+endif()
+
+find_package(UpperCasePackage)
+if(NOT UPPERCASEPACKAGE_FOUND)
+  message(SEND_ERROR "UpperCasePackage with FOUND_VAR UPPERCASEPACKAGE_FOUND not found !")
+endif()
+
 #-----------------------------------------------------------------------------
 # Test system package registry if possible.
 set(CMakeTestSystemPackage "")
