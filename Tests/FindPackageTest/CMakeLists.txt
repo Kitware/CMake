@@ -43,6 +43,11 @@ if(NOT LOTSOFCOMPONENTS_FOUND)
   message(SEND_ERROR "LotsOfComponents not found !")
 endif()
 
+find_package(SomePackage)
+if(NOT SomePackage_FOUND)
+  message(SEND_ERROR "SomePackage with USE_ORIGINAL_CASE not found !")
+endif()
+
 #-----------------------------------------------------------------------------
 # Test system package registry if possible.
 set(CMakeTestSystemPackage "")

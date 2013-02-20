@@ -2,7 +2,7 @@
 #
 # This function is intended to be used in FindXXX.cmake modules files.
 # It handles the REQUIRED, QUIET and version-related arguments to find_package().
-# It also sets the <UPPERCASED_NAME>_FOUND variable.
+# It also sets the <packagename>_FOUND variable.
 # The package is considered found if all variables <var1>... listed contain
 # valid results, e.g. valid filepaths.
 #
@@ -18,14 +18,20 @@
 # for the failure case. This is not recommended.
 #
 # The second mode is more powerful and also supports version checking:
-#    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [REQUIRED_VARS <var1>...<varN>]
+#    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [USE_ORIGINAL_CASE]
+#                                           [REQUIRED_VARS <var1>...<varN>]
 #                                           [VERSION_VAR   <versionvar>]
 #                                           [HANDLE_COMPONENTS]
 #                                           [CONFIG_MODE]
 #                                           [FAIL_MESSAGE "Custom failure message"] )
 #
-# As above, if <var1> through <varN> are all valid, <UPPERCASED_NAME>_FOUND
-# will be set to TRUE.
+# If USE_ORIGINAL_CASE is used, then the name of the _FOUND-variable will be
+# the name of the package in original casing and _FOUND appended, e.g. SomePackage_FOUND.
+# If USE_ORIGINAL_CASE is not used, the package name will be uppercased, e.g
+# SOMEPACKAGE_FOUND. This was the only behaviour before CMake 2.8.11.
+#
+# As in the simple mode, if <var1> through <varN> are all valid,
+# <packagename_NAME>_FOUND will be set to TRUE.
 # After REQUIRED_VARS the variables which are required for this package are listed.
 # Following VERSION_VAR the name of the variable can be specified which holds
 # the version of the package which has been found. If this is done, this version
@@ -35,7 +41,7 @@
 # which has been actually found, both if the version is ok or not.
 # If the package supports components, use the HANDLE_COMPONENTS option to enable
 # handling them. In this case, find_package_handle_standard_args() will report
-# which components have been found and which are missing, and the <NAME>_FOUND
+# which components have been found and which are missing, and the <packagename>_FOUND
 # variable will be set to FALSE if any of the required components (i.e. not the
 # ones listed after OPTIONAL_COMPONENTS) are missing.
 # Use the option CONFIG_MODE if your FindXXX.cmake module is a wrapper for
@@ -137,7 +143,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
 # new extended or in the "old" mode:
-  set(options CONFIG_MODE HANDLE_COMPONENTS)
+  set(options  CONFIG_MODE  HANDLE_COMPONENTS  USE_ORIGINAL_CASE)
   set(oneValueArgs FAIL_MESSAGE VERSION_VAR)
   set(multiValueArgs REQUIRED_VARS)
   set(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
@@ -183,22 +189,28 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   string(TOUPPER ${_NAME} _NAME_UPPER)
   string(TOLOWER ${_NAME} _NAME_LOWER)
 
+  if(FPHSA_USE_ORIGINAL_CASE)
+    set(_FOUND_VAR ${_NAME}_FOUND)
+  else()
+    set(_FOUND_VAR ${_NAME_UPPER}_FOUND)
+  endif()
+
   # collect all variables which were not found, so they can be printed, so the
   # user knows better what went wrong (#6375)
   set(MISSING_VARS "")
   set(DETAILS "")
   # check if all passed variables are valid
-  unset(${_NAME_UPPER}_FOUND)
+  unset(${_FOUND_VAR})
   foreach(_CURRENT_VAR ${FPHSA_REQUIRED_VARS})
     if(NOT ${_CURRENT_VAR})
-      set(${_NAME_UPPER}_FOUND FALSE)
+      set(${_FOUND_VAR} FALSE)
       set(MISSING_VARS "${MISSING_VARS} ${_CURRENT_VAR}")
     else()
       set(DETAILS "${DETAILS}[${${_CURRENT_VAR}}]")
     endif()
   endforeach()
-  if(NOT "${${_NAME_UPPER}_FOUND}" STREQUAL "FALSE")
-    set(${_NAME_UPPER}_FOUND TRUE)
+  if(NOT "${${_FOUND_VAR}}" STREQUAL "FALSE")
+    set(${_FOUND_VAR} TRUE)
   endif()
 
   # component handling
@@ -222,7 +234,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
         set(MISSING_COMPONENTS_MSG "${MISSING_COMPONENTS_MSG} ${comp}")
 
         if(${_NAME}_FIND_REQUIRED_${comp})
-          set(${_NAME_UPPER}_FOUND FALSE)
+          set(${_FOUND_VAR} FALSE)
           set(MISSING_VARS "${MISSING_VARS} ${comp}")
         endif()
 
@@ -276,12 +288,12 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   if(VERSION_OK)
     set(DETAILS "${DETAILS}[v${VERSION}(${${_NAME}_FIND_VERSION})]")
   else()
-    set(${_NAME_UPPER}_FOUND FALSE)
+    set(${_FOUND_VAR} FALSE)
   endif()
 
 
   # print the result:
-  if (${_NAME_UPPER}_FOUND)
+  if (${_FOUND_VAR})
     FIND_PACKAGE_MESSAGE(${_NAME} "Found ${_NAME}: ${${_FIRST_REQUIRED_VAR}} ${VERSION_MSG} ${COMPONENT_MSG}" "${DETAILS}")
   else ()
 
@@ -297,6 +309,6 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
   endif ()
 
-  set(${_NAME_UPPER}_FOUND ${${_NAME_UPPER}_FOUND} PARENT_SCOPE)
+  set(${_FOUND_VAR} ${${_FOUND_VAR}} PARENT_SCOPE)
 
 endfunction()
