@@ -956,6 +956,15 @@ void cmGlobalXCodeGenerator::SetCurrentLocalGenerator(cmLocalGenerator* gen)
 }
 
 //----------------------------------------------------------------------------
+struct cmSourceFilePathCompare
+{
+  bool operator()(cmSourceFile* l, cmSourceFile* r)
+  {
+    return l->GetFullPath() < r->GetFullPath();
+  }
+};
+
+//----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                            std::vector<cmXCodeObject*>&
@@ -981,7 +990,9 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       }
 
     // organize the sources
-    std::vector<cmSourceFile*> const &classes = cmtarget.GetSourceFiles();
+    std::vector<cmSourceFile*> classes = cmtarget.GetSourceFiles();
+    std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
+
     std::vector<cmXCodeObject*> externalObjFiles;
     std::vector<cmXCodeObject*> headerFiles;
     std::vector<cmXCodeObject*> resourceFiles;
@@ -2914,7 +2925,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
     {
     std::vector<std::string> folders =
       cmSystemTools::tokenize(sg->GetFullName(), "\\");
-    cmStdString curr_folder = cmtarget.GetName();
+    cmStdString curr_folder = target;
     curr_folder += "/";
     for(std::vector<std::string>::size_type i = 0; i < folders.size();i++)
       {
