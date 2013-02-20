@@ -757,29 +757,46 @@ void cmExportFileGenerator::GenerateMissingTargetsCheckCode(std::ostream& os,
 {
   if (missingTargets.empty())
     {
+    os << "# This file does not depend on other imported targets which have\n"
+          "# been exported from the same project but in a separate "
+            "export set.\n\n";
     return;
     }
   os << "# Make sure the targets which have been exported in some other \n"
-        "# export set exist.\n";
+        "# export set exist.\n"
+        "unset(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets)\n"
+        "foreach(_target ";
   std::set<std::string> emitted;
   for(unsigned int i=0; i<missingTargets.size(); ++i)
     {
     if (emitted.insert(missingTargets[i]).second)
       {
-      os << "if(NOT TARGET \"" << missingTargets[i] << "\" )\n"
-        << "  if(CMAKE_FIND_PACKAGE_NAME)\n"
-        << "    set( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
-        << "    set( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
-        << "\"Required imported target \\\"" << missingTargets[i]
-        << "\\\" not found ! \")\n"
-        << "  else()\n"
-        << "    message(FATAL_ERROR \"Required imported target \\\""
-        << missingTargets[i] << "\\\" not found ! \")\n"
-        << "  endif()\n"
-        << "endif()\n";
+      os << "\"" << missingTargets[i] <<  "\" ";
       }
     }
-  os << "\n";
+  os << ")\n"
+        "  if(NOT TARGET \"${_target}\" )\n"
+        "    set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets \""
+        "${${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets} ${_target}\")"
+        "\n"
+        "  endif()\n"
+        "endforeach()\n"
+        "\n"
+        "if(DEFINED ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets)\n"
+        "  if(CMAKE_FIND_PACKAGE_NAME)\n"
+        "    set( ${CMAKE_FIND_PACKAGE_NAME}_FOUND FALSE)\n"
+        "    set( ${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "
+        "\"The following imported targets are "
+        "referenced, but are missing: "
+                 "${${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets}\")\n"
+        "  else()\n"
+        "    message(FATAL_ERROR \"The following imported targets are "
+        "referenced, but are missing: "
+                "${${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets}\")\n"
+        "  endif()\n"
+        "endif()\n"
+        "unset(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE_targets)\n"
+        "\n";
 }
 
 
