@@ -477,8 +477,22 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string linkedTargetsContent;
 
+    std::string interfacePropertyName;
+
     if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
-        || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
+        || propertyName == "INCLUDE_DIRECTORIES")
+      {
+      interfacePropertyName = "INTERFACE_INCLUDE_DIRECTORIES";
+      }
+    else if (propertyName == "INTERFACE_COMPILE_DEFINITIONS"
+        || propertyName == "COMPILE_DEFINITIONS"
+        || strncmp(propertyName.c_str(), "COMPILE_DEFINITIONS_", 20) == 0)
+      {
+      interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
+      }
+
+    if (interfacePropertyName == "INTERFACE_INCLUDE_DIRECTORIES"
+        || interfacePropertyName == "INTERFACE_COMPILE_DEFINITIONS")
       {
       const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                     context->Config,
@@ -496,7 +510,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           if (context->Makefile->FindTargetToUse(it->c_str()))
             {
             depString +=
-              sep + "$<TARGET_PROPERTY:" + *it + "," + propertyName + ">";
+              sep + "$<TARGET_PROPERTY:" + *it + ","
+                                         + interfacePropertyName + ">";
             sep = ";";
             }
           }
@@ -551,7 +566,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
               sizeof(*targetPropertyTransitiveWhitelist));
          ++i)
       {
-      if (targetPropertyTransitiveWhitelist[i] == propertyName)
+      if (targetPropertyTransitiveWhitelist[i] == interfacePropertyName)
         {
         cmGeneratorExpression ge(context->Backtrace);
         cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);

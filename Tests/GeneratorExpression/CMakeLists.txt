@@ -80,6 +80,9 @@ target_link_libraries(empty1 LINK_PUBLIC empty2)
 target_link_libraries(empty2 LINK_PUBLIC empty3 empty4)
 target_link_libraries(empty3 LINK_PUBLIC empty2 empty4)
 
+add_library(empty5 empty.cpp)
+target_include_directories(empty5 PRIVATE /empty5/private)
+
 add_custom_target(check-part2 ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
@@ -114,6 +117,7 @@ add_custom_target(check-part2 ALL
     -Dtest_target_includes5=$<TARGET_PROPERTY:empty2,INCLUDE_DIRECTORIES>
     -Dtest_target_includes6=$<TARGET_PROPERTY:empty3,INCLUDE_DIRECTORIES>
     -Dtest_target_includes7=$<TARGET_PROPERTY:empty1,INTERFACE_INCLUDE_DIRECTORIES>
+    -Dtest_target_includes8=$<TARGET_PROPERTY:empty5,INCLUDE_DIRECTORIES>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
   VERBATIM
