@@ -92,6 +92,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
 
   std::vector<cmTarget*> targets;
   std::string libsToLink = " ";
+  bool useOldLinkLibs = true;
   for (i = 3; i < argv.size(); ++i)
     {
     if (argv[i] == "LINK_LIBRARIES")
@@ -104,6 +105,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         }
       extraArgs++;
       ++i;
+      useOldLinkLibs = false;
       for ( ; i < argv.size() && argv[i] != "CMAKE_FLAGS"
           && argv[i] != "COMPILE_DEFINITIONS" && argv[i] != "OUTPUT_VARIABLE";
           ++i)
@@ -375,7 +377,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
             this->BinaryDirectory.c_str());
     /* Create the actual executable.  */
     fprintf(fout, "ADD_EXECUTABLE(%s \"%s\")\n", targetName, source.c_str());
-    if (libsToLink.empty())
+    if (useOldLinkLibs)
       {
       fprintf(fout,
               "TARGET_LINK_LIBRARIES(%s ${LINK_LIBRARIES})\n",targetName);
