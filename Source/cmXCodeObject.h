@@ -120,14 +120,6 @@ public:
       return 0;
     }
 
-  cmXCodeObject* GetPBXTargetDependency()
-    {
-      return this->PBXTargetDependencyValue;
-    }
-  void SetPBXTargetDependency(cmXCodeObject* d)
-    {
-      this->PBXTargetDependencyValue = d;
-    }
   void CopyAttributes(cmXCodeObject* );
 
   void AddDependLibrary(const char* configName,
@@ -170,7 +162,6 @@ protected:
   cmStdString Comment;
   cmStdString String;
   cmXCodeObject* Object;
-  cmXCodeObject* PBXTargetDependencyValue;
   std::vector<cmXCodeObject*> List;
   std::map<cmStdString, StringVec> DependLibraries;
   std::map<cmStdString, StringVec> DependTargets;

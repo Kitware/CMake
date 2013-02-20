@@ -2526,47 +2526,25 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
 void cmGlobalXCodeGenerator::AddDependTarget(cmXCodeObject* target,
                                              cmXCodeObject* dependTarget)
 {
-  // make sure a target does not depend on itself
-  if(target == dependTarget)
-    {
-    return;
-    }
-  // now avoid circular references if dependTarget already
-  // depends on target then skip it.  Circular references crashes
-  // xcode
-  cmXCodeObject* dependTargetDepends =
-    dependTarget->GetObject("dependencies");
-  if(dependTargetDepends)
-    {
-    if(dependTargetDepends->HasObject(target->GetPBXTargetDependency()))
-      {
-      return;
-      }
-    }
-
-  cmXCodeObject* targetdep = dependTarget->GetPBXTargetDependency();
-  if(!targetdep)
-    {
-    cmXCodeObject* container =
-      this->CreateObject(cmXCodeObject::PBXContainerItemProxy);
-    container->SetComment("PBXContainerItemProxy");
-    container->AddAttribute("containerPortal",
-                            this->CreateObjectReference(this->RootObject));
-    container->AddAttribute("proxyType", this->CreateString("1"));
-    container->AddAttribute("remoteGlobalIDString",
-                            this->CreateObjectReference(dependTarget));
-    container->AddAttribute("remoteInfo",
-                            this->CreateString(
-                              dependTarget->GetTarget()->GetName()));
-    targetdep =
-      this->CreateObject(cmXCodeObject::PBXTargetDependency);
-    targetdep->SetComment("PBXTargetDependency");
-    targetdep->AddAttribute("target",
-                            this->CreateObjectReference(dependTarget));
-    targetdep->AddAttribute("targetProxy",
-                            this->CreateObjectReference(container));
-    dependTarget->SetPBXTargetDependency(targetdep);
-    }
+  // This is called once for every edge in the target dependency graph.
+  cmXCodeObject* container =
+    this->CreateObject(cmXCodeObject::PBXContainerItemProxy);
+  container->SetComment("PBXContainerItemProxy");
+  container->AddAttribute("containerPortal",
+                          this->CreateObjectReference(this->RootObject));
+  container->AddAttribute("proxyType", this->CreateString("1"));
+  container->AddAttribute("remoteGlobalIDString",
+                          this->CreateObjectReference(dependTarget));
+  container->AddAttribute("remoteInfo",
+                          this->CreateString(
+                            dependTarget->GetTarget()->GetName()));
+  cmXCodeObject* targetdep =
+    this->CreateObject(cmXCodeObject::PBXTargetDependency);
+  targetdep->SetComment("PBXTargetDependency");
+  targetdep->AddAttribute("target",
+                          this->CreateObjectReference(dependTarget));
+  targetdep->AddAttribute("targetProxy",
+                          this->CreateObjectReference(container));
 
   cmXCodeObject* depends = target->GetObject("dependencies");
   if(!depends)
