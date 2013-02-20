@@ -41,11 +41,8 @@ void cmGlobalVisualStudio6Generator
                  bool optional)
 {
   cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_GENERATOR_CC", "cl");
-  mf->AddDefinition("CMAKE_GENERATOR_CXX", "cl");
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  mf->AddDefinition("CMAKE_GENERATOR_Fortran", "ifort");
   this->GenerateConfigurations(mf);
   this->cmGlobalGenerator::EnableLanguage(lang, mf, optional);
 }
