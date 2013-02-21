@@ -81,7 +81,7 @@ target_link_libraries(empty2 LINK_PUBLIC empty3 empty4)
 target_link_libraries(empty3 LINK_PUBLIC empty2 empty4)
 
 add_library(empty5 empty.cpp)
-target_include_directories(empty5 PRIVATE /empty5/private)
+target_include_directories(empty5 PRIVATE /empty5/private1 /empty5/private2)
 
 add_custom_target(check-part2 ALL
   COMMAND ${CMAKE_COMMAND}
