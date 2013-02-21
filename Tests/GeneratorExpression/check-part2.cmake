@@ -33,4 +33,4 @@ check(test_target_includes4 "/empty1/public;/empty1/private;/empty2/public;/empt
 check(test_target_includes5 "/empty2/public;/empty3/public;/empty2/public;/empty4/public")
 check(test_target_includes6 "/empty3/public;/empty3/private;/empty2/public;/empty3/public;/empty4/public")
 check(test_target_includes7 "/empty1/public;/empty2/public;/empty3/public;/empty4/public")
-check(test_target_includes8 "/empty5/private")
+check(test_target_includes8 "/empty5/private1;/empty5/private2")
