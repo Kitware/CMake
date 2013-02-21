@@ -18,20 +18,21 @@
 # for the failure case. This is not recommended.
 #
 # The second mode is more powerful and also supports version checking:
-#    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [USE_ORIGINAL_CASE]
+#    FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [FOUND_VAR <resultVar>]
 #                                           [REQUIRED_VARS <var1>...<varN>]
 #                                           [VERSION_VAR   <versionvar>]
 #                                           [HANDLE_COMPONENTS]
 #                                           [CONFIG_MODE]
 #                                           [FAIL_MESSAGE "Custom failure message"] )
 #
-# If USE_ORIGINAL_CASE is used, then the name of the _FOUND-variable will be
-# the name of the package in original casing and _FOUND appended, e.g. SomePackage_FOUND.
-# If USE_ORIGINAL_CASE is not used, the package name will be uppercased, e.g
-# SOMEPACKAGE_FOUND. This was the only behaviour before CMake 2.8.11.
+# In this mode, the name of the result-variable can be set either to either
+# <UPPERCASED_NAME>_FOUND or <OriginalCase_Name>_FOUND using the FOUND_VAR option.
+# Other names for the result-variable are not allowed.
+# So for a Find-module named FindFooBar.cmake, the two possible names are
+# FooBar_FOUND and FOOBAR_FOUND. It is recommended to use the original case version.
 #
 # As in the simple mode, if <var1> through <varN> are all valid,
-# <packagename_NAME>_FOUND will be set to TRUE.
+# <packagename>_FOUND will be set to TRUE.
 # After REQUIRED_VARS the variables which are required for this package are listed.
 # Following VERSION_VAR the name of the variable can be specified which holds
 # the version of the package which has been found. If this is done, this version
@@ -143,8 +144,8 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # set up the arguments for CMAKE_PARSE_ARGUMENTS and check whether we are in
 # new extended or in the "old" mode:
-  set(options  CONFIG_MODE  HANDLE_COMPONENTS  USE_ORIGINAL_CASE)
-  set(oneValueArgs FAIL_MESSAGE VERSION_VAR)
+  set(options  CONFIG_MODE  HANDLE_COMPONENTS)
+  set(oneValueArgs  FAIL_MESSAGE  VERSION_VAR  FOUND_VAR)
   set(multiValueArgs REQUIRED_VARS)
   set(_KEYWORDS_FOR_EXTENDED_MODE  ${options} ${oneValueArgs} ${multiValueArgs} )
   list(FIND _KEYWORDS_FOR_EXTENDED_MODE "${_FIRST_ARG}" INDEX)
@@ -189,8 +190,12 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   string(TOUPPER ${_NAME} _NAME_UPPER)
   string(TOLOWER ${_NAME} _NAME_LOWER)
 
-  if(FPHSA_USE_ORIGINAL_CASE)
-    set(_FOUND_VAR ${_NAME}_FOUND)
+  if(FPHSA_FOUND_VAR)
+    if("${FPHSA_FOUND_VAR}" MATCHES "^${_NAME}_FOUND$"  OR  "${FPHSA_FOUND_VAR}" MATCHES "^${_NAME_UPPER}_FOUND$")
+      set(_FOUND_VAR ${FPHSA_FOUND_VAR})
+    else()
+      message(FATAL_ERROR "The argument for FOUND_VAR is \"${FPHSA_FOUND_VAR}\", but only \"${_NAME}_FOUND\" and \"${_NAME_UPPER}_FOUND\" are valid names.")
+    endif()
   else()
     set(_FOUND_VAR ${_NAME_UPPER}_FOUND)
   endif()

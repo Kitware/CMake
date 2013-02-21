@@ -45,7 +45,12 @@ endif()
 
 find_package(SomePackage)
 if(NOT SomePackage_FOUND)
-  message(SEND_ERROR "SomePackage with USE_ORIGINAL_CASE not found !")
+  message(SEND_ERROR "SomePackage with FOUND_VAR SomePackage_FOUND not found !")
+endif()
+
+find_package(UpperCasePackage)
+if(NOT UPPERCASEPACKAGE_FOUND)
+  message(SEND_ERROR "UpperCasePackage with FOUND_VAR UPPERCASEPACKAGE_FOUND not found !")
 endif()
 
 #-----------------------------------------------------------------------------
