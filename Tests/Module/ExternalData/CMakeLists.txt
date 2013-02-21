@@ -18,6 +18,7 @@ ExternalData_Add_Test(Data1
   NAME Data1Check
   COMMAND ${CMAKE_COMMAND}
     -D Data=DATA{Data.dat}
+    -D "DataSpace=DATA{Data Space.dat}"
     -D SeriesA=DATA{SeriesA.dat,:}
     -D SeriesB=DATA{SeriesB.dat,:}
     -D SeriesC=DATA{SeriesC.dat,:}
