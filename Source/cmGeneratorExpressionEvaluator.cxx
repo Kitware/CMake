@@ -506,6 +506,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             it = iface->Libraries.begin();
             it != iface->Libraries.end(); ++it)
           {
+          if (*it == target->GetName())
+            {
+            // Broken code can have a target in its own link interface.
+            // Don't follow such link interface entries so as not to create a
+            // self-referencing loop.
+            continue;
+            }
           if (context->Makefile->FindTargetToUse(it->c_str()))
             {
             depString +=
