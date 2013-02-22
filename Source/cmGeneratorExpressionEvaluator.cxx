@@ -430,13 +430,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     switch (dagChecker.check())
       {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      // It would be better to consider it an error for the foo target
-      // to have a INTERFACE_INCLUDE_DIRECTORIES which depends directly on its
-      // own INTERFACE_INCLUDE_DIRECTORIES property, but as the error of a
-      // target having itself in its own LINK_INTERFACE_LIBRARIES is 'allowed'
-      // and tested, and as the interface includes and defines are now based
-      // on the link interface, it breaks the CMakeOnly.LinkInterfaceLoop test.
-//       dagChecker.reportError(context, content->GetOriginalExpression());
+      dagChecker.reportError(context, content->GetOriginalExpression());
       return std::string();
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
@@ -507,6 +501,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             it = iface->Libraries.begin();
             it != iface->Libraries.end(); ++it)
           {
+          if (*it == target->GetName())
+            {
+            // Broken code can have a target in its own link interface.
+            // Don't follow such link interface entries so as not to create a
+            // self-referencing loop.
+            continue;
+            }
           if (context->Makefile->FindTargetToUse(it->c_str()))
             {
             depString +=
