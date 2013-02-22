@@ -384,7 +384,8 @@ if(BUILD_TESTING)
   # mainly it tests that cmake doesn't crash when generating these project files.
   if(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
     # check which generators we have
-    exec_program(${CMAKE_CMAKE_COMMAND} ARGS --help OUTPUT_VARIABLE cmakeOutput )
+    execute_process(COMMAND ${CMAKE_CMAKE_COMMAND} --help
+      OUTPUT_VARIABLE cmakeOutput ERROR_VARIABLE cmakeOutput)
     # check for the Eclipse generator
     if ("${cmakeOutput}" MATCHES Eclipse)
       add_test(Simple_EclipseGenerator ${CMAKE_CTEST_COMMAND}
@@ -1239,11 +1240,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endif()
   set(MAKE_IS_GNU )
   if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
-    exec_program(
-      ${CMAKE_TEST_MAKEPROGRAM} ARGS no_such_target --version
-      RETURN_VALUE res OUTPUT_VARIABLE out
-      )
-    if("${res}" EQUAL 0)
+    execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
+      RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
+    if("${res}" STREQUAL "0")
       if("${out}" MATCHES "GNU")
         set(MAKE_IS_GNU 1)
       endif()
