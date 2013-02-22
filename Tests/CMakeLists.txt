@@ -50,6 +50,26 @@ if(BUILD_TESTING)
     set(TEST_CompileCommandOutput 1)
   endif()
 
+  set(MAKE_IS_GNU )
+  if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+    execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
+      RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
+    if("${res}" STREQUAL "0")
+      if("${out}" MATCHES "GNU")
+        set(MAKE_IS_GNU 1)
+      endif()
+    endif()
+  endif()
+
+  # some old versions of make simply cannot handle spaces in paths
+  if (MAKE_IS_GNU OR
+      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+    set(MAKE_SUPPORTS_SPACES 1)
+  else()
+    set(MAKE_SUPPORTS_SPACES 0)
+  endif()
+
   set(build_generator_args
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
@@ -1238,22 +1258,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/kwsys")
   endif()
-  set(MAKE_IS_GNU )
-  if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
-    execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
-      RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
-    if("${res}" STREQUAL "0")
-      if("${out}" MATCHES "GNU")
-        set(MAKE_IS_GNU 1)
-      endif()
-    endif()
-  endif()
 
-  # only add this test on platforms that support it
-  # some old versions of make simply cannot handle spaces in paths
-  if (MAKE_IS_GNU OR
-      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+  if(MAKE_SUPPORTS_SPACES)
     add_test(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -2396,7 +2402,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   if(TEST_CompileCommandOutput)
     set(CompileCommandOutput_EXTRA_OPTIONS
-      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_IS_GNU})
+      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
     ADD_TEST_MACRO(CompileCommandOutput
       "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
   endif()
