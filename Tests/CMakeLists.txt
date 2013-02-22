@@ -167,9 +167,6 @@ if(BUILD_TESTING)
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
   ADD_TEST_MACRO(FindPackageTest FindPackageTest)
-  ADD_TEST_MACRO(FPHSA_InvalidFOUND_VAR FPHSA_InvalidFOUND_VAR)
-  set_tests_properties(FPHSA_InvalidFOUND_VAR PROPERTIES
-                       PASS_REGULAR_EXPRESSION "The argument for FOUND_VAR is .badfoundvar_FOUND., but only")
   ADD_TEST_MACRO(FindModulesExecuteAll FindModulesExecuteAll)
   ADD_TEST_MACRO(StringFileTest StringFileTest)
   ADD_TEST_MACRO(TryCompile TryCompile)
