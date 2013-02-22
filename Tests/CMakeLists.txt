@@ -350,6 +350,7 @@ if(BUILD_TESTING)
     --build-project ExternalDataTest
     --build-noclean
     --force-new-ctest-process
+    --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Module/ExternalData")

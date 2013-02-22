@@ -14,11 +14,15 @@ set(ExternalData_URL_TEMPLATES
 set(ExternalData_BINARY_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ExternalData")
 file(REMOVE_RECURSE ${ExternalData_BINARY_ROOT}) # clean test
 
+if(MAKE_SUPPORTS_SPACES)
+  set(Data1CheckSpaces -D "DataSpace=DATA{Data Space.dat}")
+endif()
+
 ExternalData_Add_Test(Data1
   NAME Data1Check
   COMMAND ${CMAKE_COMMAND}
     -D Data=DATA{Data.dat}
-    -D "DataSpace=DATA{Data Space.dat}"
+    ${Data1CheckSpaces}
     -D SeriesA=DATA{SeriesA.dat,:}
     -D SeriesB=DATA{SeriesB.dat,:}
     -D SeriesC=DATA{SeriesC.dat,:}
