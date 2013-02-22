@@ -471,6 +471,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
             || propertyName == "INTERFACE_COMPILE_DEFINITIONS")
           {
+          if (*it == target->GetName())
+            {
+            // Broken code can have a target in its own link interface.
+            // Don't follow such link interface entries so as not to create a
+            // self-referencing loop.
+            continue;
+            }
           const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                         context->Config,
                                                         context->HeadTarget);
