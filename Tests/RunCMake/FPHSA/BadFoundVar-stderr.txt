@@ -1,4 +1,4 @@
-CMake Error at .*/CMake/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+CMake Error at .*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
   The argument for FOUND_VAR is "badfoundvar_FOUND", but only
   "BadFoundVar_FOUND" and "BADFOUNDVAR_FOUND" are valid names.
 Call Stack \(most recent call first\):
