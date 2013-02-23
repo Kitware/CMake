@@ -92,6 +92,7 @@ public:
     // Others not copied here are result caches.
     this->SourceEntries = r.SourceEntries;
     }
+  ~cmTargetInternals();
   typedef cmTarget::SourceFileFlags SourceFileFlags;
   std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
   bool SourceFileFlagsConstructed;
@@ -146,6 +147,26 @@ public:
   std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
   std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
 };
+
+//----------------------------------------------------------------------------
+void deleteAndClear(
+      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
+{
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = entries.begin(),
+      end = entries.end();
+      it != end; ++it)
+    {
+      delete *it;
+    }
+  entries.clear();
+}
+
+//----------------------------------------------------------------------------
+cmTargetInternals::~cmTargetInternals()
+{
+  deleteAndClear(CachedLinkInterfaceIncludeDirectoriesEntries);
+}
 
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
@@ -2659,20 +2680,6 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
     // cannot depend on itself
     this->DeleteDependency( dep_map, lib, lib);
     }
-}
-
-//----------------------------------------------------------------------------
-void deleteAndClear(
-      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
-{
-  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
-      it = entries.begin(),
-      end = entries.end();
-      it != end; ++it)
-    {
-      delete *it;
-    }
-  entries.clear();
 }
 
 //----------------------------------------------------------------------------
