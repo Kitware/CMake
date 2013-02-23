@@ -139,7 +139,7 @@ public:
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
 
-  std::vector<cmTargetInternals::IncludeDirectoriesEntry*>
+  std::vector<IncludeDirectoriesEntry*>
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
   std::map<std::string, std::string> CachedLinkInterfaceCompileDefinitions;
 
