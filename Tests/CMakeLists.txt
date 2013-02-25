@@ -50,6 +50,26 @@ if(BUILD_TESTING)
     set(TEST_CompileCommandOutput 1)
   endif()
 
+  set(MAKE_IS_GNU )
+  if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+    execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
+      RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
+    if("${res}" STREQUAL "0")
+      if("${out}" MATCHES "GNU")
+        set(MAKE_IS_GNU 1)
+      endif()
+    endif()
+  endif()
+
+  # some old versions of make simply cannot handle spaces in paths
+  if (MAKE_IS_GNU OR
+      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+    set(MAKE_SUPPORTS_SPACES 1)
+  else()
+    set(MAKE_SUPPORTS_SPACES 0)
+  endif()
+
   set(build_generator_args
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
@@ -327,6 +347,7 @@ if(BUILD_TESTING)
     --build-project ExternalDataTest
     --build-noclean
     --force-new-ctest-process
+    --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Module/ExternalData")
@@ -384,7 +405,8 @@ if(BUILD_TESTING)
   # mainly it tests that cmake doesn't crash when generating these project files.
   if(${CMAKE_TEST_GENERATOR} MATCHES "Unix Makefiles"  OR  ${CMAKE_TEST_GENERATOR} MATCHES "KDevelop")
     # check which generators we have
-    exec_program(${CMAKE_CMAKE_COMMAND} ARGS --help OUTPUT_VARIABLE cmakeOutput )
+    execute_process(COMMAND ${CMAKE_CMAKE_COMMAND} --help
+      OUTPUT_VARIABLE cmakeOutput ERROR_VARIABLE cmakeOutput)
     # check for the Eclipse generator
     if ("${cmakeOutput}" MATCHES Eclipse)
       add_test(Simple_EclipseGenerator ${CMAKE_CTEST_COMMAND}
@@ -1237,24 +1259,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/kwsys")
   endif()
-  set(MAKE_IS_GNU )
-  if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
-    exec_program(
-      ${CMAKE_TEST_MAKEPROGRAM} ARGS no_such_target --version
-      RETURN_VALUE res OUTPUT_VARIABLE out
-      )
-    if("${res}" EQUAL 0)
-      if("${out}" MATCHES "GNU")
-        set(MAKE_IS_GNU 1)
-      endif()
-    endif()
-  endif()
 
-  # only add this test on platforms that support it
-  # some old versions of make simply cannot handle spaces in paths
-  if (MAKE_IS_GNU OR
-      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+  if(MAKE_SUPPORTS_SPACES)
     add_test(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -2397,7 +2403,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   if(TEST_CompileCommandOutput)
     set(CompileCommandOutput_EXTRA_OPTIONS
-      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_IS_GNU})
+      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
     ADD_TEST_MACRO(CompileCommandOutput
       "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
   endif()
