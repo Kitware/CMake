@@ -115,11 +115,11 @@ add_library(link_depends_no_shared_lib SHARED link_depends_no_shared_lib.c
 add_executable(link_depends_no_shared_exe_no_relink link_depends_no_shared_exe.c
   ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_exe.h)
 target_link_libraries(link_depends_no_shared_exe_no_relink link_depends_no_shared_lib)
-set_property(TARGET link_depends_no_shared_exe_no_relink PROPERTY LINK_DEPENDS_NO_SHARED 1)
 
 add_executable(link_depends_no_shared_exe_relink link_depends_no_shared_exe.c
   ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_exe.h)
 target_link_libraries(link_depends_no_shared_exe_relink link_depends_no_shared_lib)
+set_property(TARGET link_depends_no_shared_exe_relink PROPERTY LINK_DEPENDS_SHARED_LIBRARIES 1)
 
 add_custom_target(link_depends_no_shared_check ALL
   COMMAND ${CMAKE_COMMAND}
