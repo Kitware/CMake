@@ -176,6 +176,8 @@ set(SRCS
   cmExportFileGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExportTryCompileFileGenerator.h
+  cmExportTryCompileFileGenerator.cxx
   cmExportSet.h
   cmExportSet.cxx
   cmExportSetMap.h

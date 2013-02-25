@@ -679,6 +679,9 @@ cmExportFileGenerator
     case cmTarget::MODULE_LIBRARY:
       os << "add_library(" << targetName << " MODULE IMPORTED)\n";
       break;
+    case cmTarget::UNKNOWN_LIBRARY:
+      os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
+      break;
     default:  // should never happen
       break;
     }

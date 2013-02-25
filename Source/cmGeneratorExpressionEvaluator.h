@@ -23,7 +23,8 @@ class cmTarget;
 struct cmGeneratorExpressionContext
 {
   cmListFileBacktrace Backtrace;
-  std::set<cmTarget*> Targets;
+  std::set<cmTarget*> DependTargets;
+  std::set<cmTarget*> AllTargets;
   std::set<cmStdString> SeenTargetProperties;
   cmMakefile *Makefile;
   const char *Config;
