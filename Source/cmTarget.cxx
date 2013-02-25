@@ -92,6 +92,7 @@ public:
     // Others not copied here are result caches.
     this->SourceEntries = r.SourceEntries;
     }
+  ~cmTargetInternals();
   typedef cmTarget::SourceFileFlags SourceFileFlags;
   std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
   bool SourceFileFlagsConstructed;
@@ -138,7 +139,34 @@ public:
   };
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
+
+  std::vector<IncludeDirectoriesEntry*>
+                                CachedLinkInterfaceIncludeDirectoriesEntries;
+  std::map<std::string, std::string> CachedLinkInterfaceCompileDefinitions;
+
+  std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
+  std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
 };
+
+//----------------------------------------------------------------------------
+void deleteAndClear(
+      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
+{
+  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+      it = entries.begin(),
+      end = entries.end();
+      it != end; ++it)
+    {
+      delete *it;
+    }
+  entries.clear();
+}
+
+//----------------------------------------------------------------------------
+cmTargetInternals::~cmTargetInternals()
+{
+  deleteAndClear(CachedLinkInterfaceIncludeDirectoriesEntries);
+}
 
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
@@ -2655,20 +2683,6 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-void deleteAndClear(
-      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
-{
-  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
-      it = entries.begin(),
-      end = entries.end();
-      it != end; ++it)
-    {
-      delete *it;
-    }
-  entries.clear();
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const char* prop, const char* value)
 {
   if (!prop)
@@ -2870,41 +2884,53 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                             config,
                             debugIncludes);
 
-  std::vector<cmTargetInternals::IncludeDirectoriesEntry*>
-                                      linkInterfaceIncludeDirectoriesEntries;
-
-  for (std::vector<cmValueWithOrigin>::const_iterator
-      it = this->Internal->LinkInterfaceIncludeDirectoriesEntries.begin(),
-      end = this->Internal->LinkInterfaceIncludeDirectoriesEntries.end();
-      it != end; ++it)
+  std::string configString = config ? config : "";
+  if (!this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[configString])
     {
-    {
-    cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(it->Value);
-    std::string result = cge->Evaluate(this->Makefile, config,
-                                       false, this, 0, 0);
-    if (!this->Makefile->FindTargetToUse(result.c_str()))
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->Internal->LinkInterfaceIncludeDirectoriesEntries.begin(),
+        end = this->Internal->LinkInterfaceIncludeDirectoriesEntries.end();
+        it != end; ++it)
       {
-      continue;
+      {
+      cmGeneratorExpression ge(lfbt);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                        ge.Parse(it->Value);
+      std::string result = cge->Evaluate(this->Makefile, config,
+                                        false, this, 0, 0);
+      if (!this->Makefile->FindTargetToUse(result.c_str()))
+        {
+        continue;
+        }
       }
-    }
-    cmGeneratorExpression ge(it->Backtrace);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-        "$<TARGET_PROPERTY:" + it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
+      cmGeneratorExpression ge(it->Backtrace);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
+          "$<TARGET_PROPERTY:" +
+                              it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
 
-    linkInterfaceIncludeDirectoriesEntries.push_back(
+      this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries.push_back(
                         new cmTargetInternals::IncludeDirectoriesEntry(cge));
+      }
     }
 
   processIncludeDirectories(this,
-                            linkInterfaceIncludeDirectoriesEntries,
+              this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries,
                             includes,
                             uniqueIncludes,
                             &dagChecker,
                             config,
                             debugIncludes);
 
-  deleteAndClear(linkInterfaceIncludeDirectoriesEntries);
+  if (!this->Makefile->IsGeneratingBuildSystem())
+    {
+    deleteAndClear(
+              this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries);
+    }
+  else
+    {
+    this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[configString]
+                                                                      = true;
+    }
 
   return includes;
 }
@@ -2957,16 +2983,34 @@ std::string cmTarget::GetCompileDefinitions(const char *config)
       }
     }
 
-  cmGeneratorExpression ge2(lfbt);
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge2 = ge2.Parse(depString);
-  std::string depResult = cge2->Evaluate(this->Makefile,
-                      config,
-                      false,
-                      this,
-                      &dagChecker);
-  if (!depResult.empty())
+  std::string configString = config ? config : "";
+  if (!this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString])
     {
-    result += (result.empty() ? "" : ";") + depResult;
+    cmGeneratorExpression ge2(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge2 =
+                                                        ge2.Parse(depString);
+    this->Internal->CachedLinkInterfaceCompileDefinitions[configString] =
+                                                cge2->Evaluate(this->Makefile,
+                                                               config,
+                                                               false,
+                                                               this,
+                                                               &dagChecker);
+    }
+  if (!this->Internal->CachedLinkInterfaceCompileDefinitions[configString]
+                                                                    .empty())
+    {
+    result += (result.empty() ? "" : ";")
+        + this->Internal->CachedLinkInterfaceCompileDefinitions[configString];
+    }
+
+  if (!this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->Internal->CachedLinkInterfaceCompileDefinitions[configString] = "";
+    }
+  else
+    {
+    this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString]
+                                                                      = true;
     }
 
   return result;
