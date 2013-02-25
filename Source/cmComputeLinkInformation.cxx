@@ -281,7 +281,7 @@ cmComputeLinkInformation
 
   // Check whether we should skip dependencies on shared library files.
   this->LinkDependsNoShared =
-    this->Target->GetPropertyAsBool("LINK_DEPENDS_NO_SHARED");
+    !this->Target->GetPropertyAsBool("LINK_DEPENDS_SHARED_LIBRARIES");
 
   // On platforms without import libraries there may be a special flag
   // to use when creating a plugin (module) that obtains symbols from

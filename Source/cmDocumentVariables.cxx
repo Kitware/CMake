@@ -1260,9 +1260,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
-    ("CMAKE_LINK_DEPENDS_NO_SHARED", cmProperty::VARIABLE,
+    ("CMAKE_LINK_DEPENDS_SHARED_LIBRARIES", cmProperty::VARIABLE,
      "Whether to skip link dependencies on shared library files.",
-     "This variable initializes the LINK_DEPENDS_NO_SHARED "
+     "This variable initializes the LINK_DEPENDS_SHARED_LIBRARIES "
      "property on targets when they are created.  "
      "See that target property for additional information.",
      false,

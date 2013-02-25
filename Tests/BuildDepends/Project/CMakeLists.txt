@@ -111,15 +111,25 @@ endif()
 
 add_library(link_depends_no_shared_lib SHARED link_depends_no_shared_lib.c
   ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_lib.h)
-add_executable(link_depends_no_shared_exe link_depends_no_shared_exe.c
+
+add_executable(link_depends_no_shared_exe_no_relink link_depends_no_shared_exe.c
   ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_exe.h)
-target_link_libraries(link_depends_no_shared_exe link_depends_no_shared_lib)
-set_property(TARGET link_depends_no_shared_exe PROPERTY LINK_DEPENDS_NO_SHARED 1)
+target_link_libraries(link_depends_no_shared_exe_no_relink link_depends_no_shared_lib)
+
+add_executable(link_depends_no_shared_exe_relink link_depends_no_shared_exe.c
+  ${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_exe.h)
+target_link_libraries(link_depends_no_shared_exe_relink link_depends_no_shared_lib)
+set_property(TARGET link_depends_no_shared_exe_relink PROPERTY LINK_DEPENDS_SHARED_LIBRARIES 1)
+
 add_custom_target(link_depends_no_shared_check ALL
   COMMAND ${CMAKE_COMMAND}
    -Dlib=$<TARGET_FILE:link_depends_no_shared_lib>
-   -Dexe=$<TARGET_FILE:link_depends_no_shared_exe>
+   -Dexe_relink=$<TARGET_FILE:link_depends_no_shared_exe_relink>
+   -Dexe_no_relink=$<TARGET_FILE:link_depends_no_shared_exe_no_relink>
    -Dout=${CMAKE_CURRENT_BINARY_DIR}/link_depends_no_shared_check.txt
    -P ${CMAKE_CURRENT_SOURCE_DIR}/link_depends_no_shared_check.cmake
   )
-add_dependencies(link_depends_no_shared_check link_depends_no_shared_exe)
+add_dependencies(link_depends_no_shared_check
+  link_depends_no_shared_exe_no_relink
+  link_depends_no_shared_exe_relink
+)
