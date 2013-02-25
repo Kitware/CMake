@@ -30,12 +30,12 @@ target_include_directories(target_include_directories
   PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/poison"
 )
 target_include_directories(target_include_directories
-  BEFORE PUBLIC "$<$<TARGET_DEFINED:target_include_directories>:${CMAKE_CURRENT_BINARY_DIR}/cure>"
+  BEFORE PUBLIC "$<$<STREQUAL:$<TARGET_PROPERTY:target_include_directories,TYPE>,EXECUTABLE>:${CMAKE_CURRENT_BINARY_DIR}/cure>"
 )
 
-# Has no effect because the target is not defined:
+# Has no effect because the target type is not SHARED_LIBRARY:
 target_include_directories(target_include_directories
-  BEFORE PUBLIC "$<$<TARGET_DEFINED:notdefined>:${CMAKE_CURRENT_BINARY_DIR}/poison>"
+  BEFORE PUBLIC "$<$<STREQUAL:$<TARGET_PROPERTY:target_include_directories,TYPE>,SHARED_LIBRARY>:${CMAKE_CURRENT_BINARY_DIR}/poison>"
 )
 
 add_executable(consumer

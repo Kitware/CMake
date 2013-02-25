@@ -37,7 +37,6 @@
   "target in the same buildsystem. Expands to the empty string "        \
   "otherwise.\n"                                                        \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
-  "  $<TARGET_DEFINED:tgt>     = '1' if tgt is a target, else '0'\n"    \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \
   "where \"tgt\" is the name of a target.  "                            \
