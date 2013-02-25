@@ -47,7 +47,7 @@
 #     ...
 #   };
 #
-# The CMake fragment will generate a file in the ${CMAKE_CURRENT_BUILD_DIR}
+# The CMake fragment will generate a file in the ${CMAKE_CURRENT_BINARY_DIR}
 # called somelib_export.h containing the macros SOMELIB_EXPORT, SOMELIB_NO_EXPORT,
 # SOMELIB_DEPRECATED, SOMELIB_DEPRECATED_EXPORT and SOMELIB_DEPRECATED_NO_EXPORT.
 # The resulting file should be installed with other headers in the library.
