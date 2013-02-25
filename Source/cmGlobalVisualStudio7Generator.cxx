@@ -29,6 +29,7 @@ void cmGlobalVisualStudio7Generator
 {
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
+  mf->AddDefinition("CMAKE_GENERATOR_FC", "ifort");
   this->AddPlatformDefinitions(mf);
 
   // Create list of configurations requested by user's cache, if any.
