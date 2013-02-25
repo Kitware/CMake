@@ -33,8 +33,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     }
   this->CheckResult = this->checkGraph();
 
-  if (CheckResult == DAG && (top->Property == "INCLUDE_DIRECTORIES"
-      || top->Property == "COMPILE_DEFINITIONS") )
+  if (CheckResult == DAG && (top->EvaluatingIncludeDirectories()
+      || top->EvaluatingCompileDefinitions()))
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
@@ -126,7 +126,7 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
     {
     if (this->Target == parent->Target && this->Property == parent->Property)
       {
-      return parent->Parent ? CYCLIC_REFERENCE : SELF_REFERENCE;
+      return (parent == this->Parent) ? SELF_REFERENCE : CYCLIC_REFERENCE;
       }
     parent = parent->Parent;
     }
@@ -153,7 +153,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories()
+bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories() const
 {
   const char *prop = this->Property.c_str();
   return (strcmp(prop, "INCLUDE_DIRECTORIES") == 0
@@ -161,7 +161,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories()
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions()
+bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions() const
 {
   const char *prop = this->Property.c_str();
   return (strcmp(prop, "COMPILE_DEFINITIONS") == 0
