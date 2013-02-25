@@ -307,6 +307,34 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 } configurationTestNode;
 
 
+static const struct JoinNode : public cmGeneratorExpressionNode
+{
+  JoinNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  virtual bool AcceptsArbitraryContentParameter() const { return true; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    std::string result;
+
+    std::vector<std::string> list;
+    cmSystemTools::ExpandListArgument(parameters.front(), list);
+    std::string sep;
+    for(std::vector<std::string>::const_iterator li = list.begin();
+      li != list.end(); ++li)
+      {
+      result += sep + *li;
+      sep = parameters[1];
+      }
+    return result;
+  }
+} joinNode;
+
 //----------------------------------------------------------------------------
 static const char* targetPropertyTransitiveWhitelist[] = {
     "INTERFACE_INCLUDE_DIRECTORIES"
@@ -973,6 +1001,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &installInterfaceNode;
   else if (identifier == "INSTALL_PREFIX")
     return &installPrefixNode;
+  else if (identifier == "JOIN")
+    return &joinNode;
   return 0;
 
 }

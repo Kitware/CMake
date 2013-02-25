@@ -10,6 +10,7 @@
 #include "arguments.h"
 #include "list.h"
 #include "target.h"
+#include "prefix_foo_bar_bat.h"
 
 int main(int, char**)
 {

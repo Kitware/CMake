@@ -13,6 +13,12 @@ set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS
     "$<1:CMAKE_IS_DECLARATIVE>"
     "$<0:GE_NOT_DEFINED>"
     "$<1:ARGUMENT;LIST>"
+    PREFIX_$<JOIN:DEF1;DEF2,;PREFIX_>
+    LETTER_LIST1=\"$<JOIN:A;B;C;D,,>\"
+    LETTER_LIST2=\"$<JOIN:A;B;C;D,,,>\"
+    LETTER_LIST3=\"$<JOIN:A;B;C;D,,->\"
+    LETTER_LIST4=\"$<JOIN:A;B;C;D,-,->\"
+    LETTER_LIST5=\"$<JOIN:A;B;C;D,-,>\"
 )
 
 set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS
