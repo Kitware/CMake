@@ -965,13 +965,17 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   macro(_qt4_add_target_depends_internal _QT_MODULE _PROPERTY)
     if (TARGET Qt4::${_QT_MODULE})
       foreach(_DEPEND ${ARGN})
-        if (NOT TARGET Qt4::Qt${_DEPEND})
-          message(FATAL_ERROR "_qt4_add_target_depends invoked with invalid arguments")
+        set(_VALID_DEPENDS)
+        if (TARGET Qt4::Qt${_DEPEND})
+          list(APPEND _VALID_DEPENDS Qt4::Qt${_DEPEND})
         endif()
-        set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
-          ${_PROPERTY}
-          "Qt4::Qt${_DEPEND}"
-        )
+        if (_VALID_DEPENDS)
+          set_property(TARGET Qt4::${_QT_MODULE} APPEND PROPERTY
+            ${_PROPERTY}
+            "${_VALID_DEPENDS}"
+          )
+        endif()
+        set(_VALID_DEPENDS)
       endforeach()
     endif()
   endmacro()
