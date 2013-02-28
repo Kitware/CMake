@@ -567,6 +567,17 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     message("warning: target '${target}' does not exist...")
   endif()
 
+  set(gp_cmd_paths ${gp_cmd_paths}
+    "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
+    "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
+    "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
+    "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
+    "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
+    "/usr/local/bin"
+    "/usr/bin"
+    )
+
   # <setup-gp_tool-vars>
   #
   # Try to choose the right tool by default. Caller can set gp_tool prior to
@@ -574,12 +585,26 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   if("${gp_tool}" STREQUAL "")
     set(gp_tool "ldd")
+
     if(APPLE)
       set(gp_tool "otool")
     endif()
+
     if(WIN32 AND NOT UNIX) # This is how to check for cygwin, har!
-      set(gp_tool "dumpbin")
+      find_program(gp_dumpbin "dumpbin" PATHS ${gp_cmd_paths})
+      if(gp_dumpbin)
+        set(gp_tool "dumpbin")
+      else() # Try harder. Maybe we're on MinGW
+        set(gp_tool "objdump")
+      endif()
     endif()
+  endif()
+
+  find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
+
+  if(NOT gp_cmd)
+    message(STATUS "warning: could not find '${gp_tool}' - cannot analyze prerequisites...")
+    return()
   endif()
 
   set(gp_tool_known 0)
@@ -612,30 +637,22 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
   endif()
 
+  if("${gp_tool}" STREQUAL "objdump")
+    set(gp_cmd_args "-p")
+    set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
+    set(gp_regex_error "")
+    set(gp_regex_fallback "")
+    set(gp_regex_cmp_count 1)
+    set(gp_tool_known 1)
+  endif()
+
   if(NOT gp_tool_known)
     message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
     message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
-    message(STATUS "Valid gp_tool values are dumpbin, ldd and otool.")
+    message(STATUS "Valid gp_tool values are dumpbin, ldd, objdump and otool.")
     return()
   endif()
 
-  set(gp_cmd_paths ${gp_cmd_paths}
-    "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
-    "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
-    "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
-    "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
-    "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "/usr/local/bin"
-    "/usr/bin"
-    )
-
-  find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
-
-  if(NOT gp_cmd)
-    message(STATUS "warning: could not find '${gp_tool}' - cannot analyze prerequisites...")
-    return()
-  endif()
 
   if("${gp_tool}" STREQUAL "dumpbin")
     # When running dumpbin, it also needs the "Common7/IDE" directory in the
