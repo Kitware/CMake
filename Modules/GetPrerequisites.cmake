@@ -585,11 +585,18 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   if("${gp_tool}" STREQUAL "")
     set(gp_tool "ldd")
+
     if(APPLE)
       set(gp_tool "otool")
     endif()
+
     if(WIN32 AND NOT UNIX) # This is how to check for cygwin, har!
-      set(gp_tool "dumpbin")
+      find_program(gp_dumpbin "dumpbin" PATHS ${gp_cmd_paths})
+      if(gp_dumpbin)
+        set(gp_tool "dumpbin")
+      else() # Try harder. Maybe we're on MinGW
+        set(gp_tool "objdump")
+      endif()
     endif()
   endif()
 
@@ -630,10 +637,19 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
   endif()
 
+  if("${gp_tool}" STREQUAL "objdump")
+    set(gp_cmd_args "-p")
+    set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
+    set(gp_regex_error "")
+    set(gp_regex_fallback "")
+    set(gp_regex_cmp_count 1)
+    set(gp_tool_known 1)
+  endif()
+
   if(NOT gp_tool_known)
     message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
     message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
-    message(STATUS "Valid gp_tool values are dumpbin, ldd and otool.")
+    message(STATUS "Valid gp_tool values are dumpbin, ldd, objdump and otool.")
     return()
   endif()
 
