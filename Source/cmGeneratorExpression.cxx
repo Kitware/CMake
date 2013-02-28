@@ -302,12 +302,20 @@ void cmGeneratorExpression::Split(const std::string &input,
     if (!part.empty())
       {
       std::string::size_type startPos = input.rfind(";", pos);
-      if (startPos != pos - 1 && startPos >= lastPos)
+      if (startPos == std::string::npos)
+        {
+        preGenex = part;
+        part = "";
+        }
+      else if (startPos != pos - 1 && startPos >= lastPos)
         {
         part = input.substr(lastPos, startPos - lastPos);
         preGenex = input.substr(startPos + 1, pos - startPos - 1);
         }
-      cmSystemTools::ExpandListArgument(part.c_str(), output);
+      if(!part.empty())
+        {
+        cmSystemTools::ExpandListArgument(part.c_str(), output);
+        }
       }
     pos += 2;
     int nestingLevel = 1;
