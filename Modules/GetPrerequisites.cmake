@@ -567,6 +567,17 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     message("warning: target '${target}' does not exist...")
   endif()
 
+  set(gp_cmd_paths ${gp_cmd_paths}
+    "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
+    "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
+    "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
+    "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
+    "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
+    "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
+    "/usr/local/bin"
+    "/usr/bin"
+    )
+
   # <setup-gp_tool-vars>
   #
   # Try to choose the right tool by default. Caller can set gp_tool prior to
@@ -580,6 +591,13 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     if(WIN32 AND NOT UNIX) # This is how to check for cygwin, har!
       set(gp_tool "dumpbin")
     endif()
+  endif()
+
+  find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
+
+  if(NOT gp_cmd)
+    message(STATUS "warning: could not find '${gp_tool}' - cannot analyze prerequisites...")
+    return()
   endif()
 
   set(gp_tool_known 0)
@@ -619,23 +637,6 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     return()
   endif()
 
-  set(gp_cmd_paths ${gp_cmd_paths}
-    "C:/Program Files/Microsoft Visual Studio 9.0/VC/bin"
-    "C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/bin"
-    "C:/Program Files/Microsoft Visual Studio 8/VC/BIN"
-    "C:/Program Files (x86)/Microsoft Visual Studio 8/VC/BIN"
-    "C:/Program Files/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "C:/Program Files (x86)/Microsoft Visual Studio .NET 2003/VC7/BIN"
-    "/usr/local/bin"
-    "/usr/bin"
-    )
-
-  find_program(gp_cmd ${gp_tool} PATHS ${gp_cmd_paths})
-
-  if(NOT gp_cmd)
-    message(STATUS "warning: could not find '${gp_tool}' - cannot analyze prerequisites...")
-    return()
-  endif()
 
   if("${gp_tool}" STREQUAL "dumpbin")
     # When running dumpbin, it also needs the "Common7/IDE" directory in the
