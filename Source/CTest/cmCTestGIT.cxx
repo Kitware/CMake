@@ -68,7 +68,7 @@ std::string cmCTestGIT::GetWorkingRevision()
 {
   // Run plumbing "git rev-list" to get work tree revision.
   const char* git = this->CommandLineTool.c_str();
-  const char* git_rev_list[] = {git, "rev-list", "-n", "1", "HEAD", 0};
+  const char* git_rev_list[] = {git, "rev-list", "-n", "1", "HEAD", "--", 0};
   std::string rev;
   OneLineParser out(this, "rl-out> ", rev);
   OutputLogger err(this->Log, "rl-err> ");
@@ -639,7 +639,7 @@ void cmCTestGIT::LoadModifications()
   this->RunChild(git_update_index, &ui_out, &ui_err);
 
   // Use 'git diff-index' to get modified files.
-  const char* git_diff_index[] = {git, "diff-index", "-z", "HEAD", 0};
+  const char* git_diff_index[] = {git, "diff-index", "-z", "HEAD", "--", 0};
   DiffParser out(this, "di-out> ");
   OutputLogger err(this->Log, "di-err> ");
   this->RunChild(git_diff_index, &out, &err);
