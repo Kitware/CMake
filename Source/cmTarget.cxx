@@ -4253,10 +4253,15 @@ void cmTarget::SetPropertyDefault(const char* property,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HaveBuildTreeRPATH()
+bool cmTarget::HaveBuildTreeRPATH(const char *config)
 {
-  return (!this->GetPropertyAsBool("SKIP_BUILD_RPATH") &&
-          !this->LinkLibraries.empty());
+  if (this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
+    {
+    return false;
+    }
+  std::vector<std::string> libs;
+  this->GetDirectLinkLibraries(config, libs, this);
+  return !libs.empty();
 }
 
 //----------------------------------------------------------------------------
@@ -4327,7 +4332,7 @@ bool cmTarget::NeedRelinkBeforeInstall(const char* config)
   // If either a build or install tree rpath is set then the rpath
   // will likely change between the build tree and install tree and
   // this target must be relinked.
-  return this->HaveBuildTreeRPATH() || this->HaveInstallTreeRPATH();
+  return this->HaveBuildTreeRPATH(config) || this->HaveInstallTreeRPATH();
 }
 
 //----------------------------------------------------------------------------

@@ -401,7 +401,7 @@ public:
    */
   bool NeedRelinkBeforeInstall(const char* config);
 
-  bool HaveBuildTreeRPATH();
+  bool HaveBuildTreeRPATH(const char *config);
   bool HaveInstallTreeRPATH();
 
   /** Return true if builtin chrpath will work for this target */
