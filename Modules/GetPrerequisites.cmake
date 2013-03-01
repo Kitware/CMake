@@ -5,6 +5,7 @@
 #
 # It uses various tools to obtain the list of required shared library files:
 #   dumpbin (Windows)
+#   objdump (MinGW on Windows)
 #   ldd (Linux/Unix)
 #   otool (Mac OSX)
 # The following functions are provided by this module:
