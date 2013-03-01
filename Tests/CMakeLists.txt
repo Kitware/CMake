@@ -287,6 +287,7 @@ if(BUILD_TESTING)
 
   # run test for BundleUtilities on supported platforms/compilers
   if(MSVC OR
+     MINGW OR
      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
      CMAKE_SYSTEM_NAME MATCHES "Darwin")
   if(NOT "${CMAKE_TEST_GENERATOR}" STREQUAL "Watcom WMake")
