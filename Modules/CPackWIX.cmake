@@ -76,6 +76,12 @@
 # This image must be 493 by 312 pixels.
 #
 ##end
+#
+##variable
+# CPACK_WIX_PROGRAM_MENU_FOLDER - Start menu folder name for launcher.
+#
+# If this variable is not set, it will be initialized with CPACK_PACKAGE_NAME
+##end
 
 #=============================================================================
 # Copyright 2012 Kitware, Inc.
