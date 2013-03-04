@@ -76,6 +76,8 @@ run_child(WORKING_DIRECTORY ${TOP}/module
 # Import initial content into the repository.
 message("Importing content...")
 create_content(import)
+file(WRITE ${TOP}/import/HEAD "HEAD\n")
+file(WRITE ${TOP}/import/master "master\n")
 
 # Import the content into the repository.
 run_child(WORKING_DIRECTORY ${TOP}/import
@@ -157,19 +159,19 @@ update_content(user-source files_added files_removed dirs_added)
 if(dirs_added)
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
-    COMMAND ${GIT} add ${dirs_added}
+    COMMAND ${GIT} add -- ${dirs_added}
     )
 endif()
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} add ${files_added}
+  COMMAND ${GIT} add -- ${files_added}
   )
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} rm ${files_removed}
+  COMMAND ${GIT} rm -- ${files_removed}
   )
 run_child(WORKING_DIRECTORY ${TOP}/user-source/module
-  COMMAND ${GIT} checkout master
+  COMMAND ${GIT} checkout master --
   )
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
