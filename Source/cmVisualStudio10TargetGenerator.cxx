@@ -1390,7 +1390,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   std::string flags;
   if(stackVal)
     {
-    flags += " ";
+    flags += " /STACK:";
     flags += stackVal;
     }
   std::string linkFlagVarBase = "CMAKE_";
