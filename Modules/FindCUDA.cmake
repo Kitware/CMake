@@ -223,6 +223,8 @@
 #  CUDA_CUBLAS_LIBRARIES -- Device or emulation library for the Cuda BLAS
 #                           implementation (alterative to:
 #                           CUDA_ADD_CUBLAS_TO_TARGET macro).
+#  CUDA_cupti_LIBRARY    -- CUDA Profiling Tools Interface library.
+#                           Only available for CUDA version 4.0+.
 #  CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
 #                           Only available for CUDA version 3.2+.
 #  CUDA_cusparse_LIBRARY -- CUDA Sparse Matrix library.
@@ -451,6 +453,7 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   endif()
   unset(CUDA_VERSION CACHE)
   unset(CUDA_CUDA_LIBRARY CACHE)
+  unset(CUDA_cupti_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
   unset(CUDA_cufft_LIBRARY CACHE)
@@ -551,11 +554,11 @@ mark_as_advanced(CUDA_TOOLKIT_INCLUDE)
 set (CUDA_NVCC_INCLUDE_ARGS_USER "")
 set (CUDA_INCLUDE_DIRS ${CUDA_TOOLKIT_INCLUDE})
 
-macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
+macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # CUDA 3.2+ on Windows moved the library directories, so we need the new
     # and old paths.
-    set(_cuda_64bit_lib_dir "lib/x64" "lib64" )
+    set(_cuda_64bit_lib_dir "${_path_ext}lib/x64" "${_path_ext}lib64" "${_path_ext}libx64" )
   endif()
   # CUDA 3.2+ on Windows moved the library directories, so we need to new
   # (lib/Win32) and the old path (lib).
@@ -564,7 +567,7 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
     PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
     ENV CUDA_PATH
     ENV CUDA_LIB_PATH
-    PATH_SUFFIXES ${_cuda_64bit_lib_dir} "lib/Win32" "lib"
+    PATH_SUFFIXES ${_cuda_64bit_lib_dir} "${_path_ext}lib/Win32" "${_path_ext}lib" "${_path_ext}libWin32"
     DOC ${_doc}
     NO_DEFAULT_PATH
     )
@@ -572,15 +575,31 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   find_library(${_var} NAMES ${_names} DOC ${_doc})
 endmacro()
 
+macro(cuda_find_library_local_first _var _names _doc)
+  cuda_find_library_local_first_with_path_ext( "${_var}" "${_names}" "${_doc}" "" )
+endmacro()
+
+macro(find_library_local_first _var _names _doc )
+  cuda_find_library_local_first( "${_var}" "${_names}" "${_doc}" "" )
+endmacro()
+
+
 # CUDA_LIBRARIES
-find_library_local_first(CUDA_CUDART_LIBRARY cudart "\"cudart\" library")
+cuda_find_library_local_first(CUDA_CUDART_LIBRARY cudart "\"cudart\" library")
 if(CUDA_VERSION VERSION_EQUAL "3.0")
   # The cudartemu library only existed for the 3.0 version of CUDA.
-  find_library_local_first(CUDA_CUDARTEMU_LIBRARY cudartemu "\"cudartemu\" library")
+  cuda_find_library_local_first(CUDA_CUDARTEMU_LIBRARY cudartemu "\"cudartemu\" library")
   mark_as_advanced(
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
+
+# CUPTI library showed up in cuda toolkit 4.0
+if(NOT CUDA_VERSION VERSION_LESS "4.0")
+  cuda_find_library_local_first_with_path_ext(CUDA_cupti_LIBRARY cupti "\"cupti\" library" "extras/CUPTI/")
+  mark_as_advanced(CUDA_cupti_LIBRARY)
+endif()
+
 # If we are using emulation mode and we found the cudartemu library then use
 # that one instead of cudart.
 if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
@@ -603,7 +622,7 @@ endif()
 
 # 1.1 toolkit on linux doesn't appear to have a separate library on
 # some platforms.
-find_library_local_first(CUDA_CUDA_LIBRARY cuda "\"cuda\" library (older versions only).")
+cuda_find_library_local_first(CUDA_CUDA_LIBRARY cuda "\"cuda\" library (older versions only).")
 
 # Add cuda library to the link line only if it is found.
 if (CUDA_CUDA_LIBRARY)
@@ -618,7 +637,7 @@ mark_as_advanced(
 #######################
 # Look for some of the toolkit helper libraries
 macro(FIND_CUDA_HELPER_LIBS _name)
-  find_library_local_first(CUDA_${_name}_LIBRARY ${_name} "\"${_name}\" library")
+  cuda_find_library_local_first(CUDA_${_name}_LIBRARY ${_name} "\"${_name}\" library")
   mark_as_advanced(CUDA_${_name}_LIBRARY)
 endmacro()
 
