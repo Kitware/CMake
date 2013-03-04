@@ -91,6 +91,13 @@
 #     CUDA_ADD_LIBRARY, CUDA_ADD_EXECUTABLE, or CUDA_WRAP_SRCS.  Flags used for
 #     shared library compilation are not affected by this flag.
 #
+#  CUDA_SEPARABLE_COMPILATION (Default OFF)
+#  -- If set this will enable separable compilation for all CUDA runtime object
+#     files.  If used outside of CUDA_ADD_EXECUTABLE and CUDA_ADD_LIBRARY
+#     (e.g. calling CUDA_WRAP_SRCS directly),
+#     CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME and
+#     CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS should be called.
+#
 #  CUDA_VERBOSE_BUILD (Default OFF)
 #  -- Set to ON to see all the commands used when building the CUDA file.  When
 #     using a Makefile generator the value defaults to VERBOSE (run make
@@ -137,10 +144,35 @@
 #  CUDA_COMPILE_PTX( generated_files file0 file1 ... [OPTIONS ...] )
 #  -- Returns a list of PTX files generated from the input source files.
 #
+#  CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME( output_file_var
+#                                                       cuda_target
+#                                                       object_files )
+#  -- Compute the name of the intermediate link file used for separable
+#     compilation.  This file name is typically passed into
+#     CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS.  output_file_var is produced
+#     based on cuda_target the list of objects files that need separable
+#     compilation as specified by object_files.  If the object_files list is
+#     empty, then output_file_var will be empty.  This function is called
+#     automatically for CUDA_ADD_LIBRARY and CUDA_ADD_EXECUTABLE.  Note that
+#     this is a function and not a macro.
+#
 #  CUDA_INCLUDE_DIRECTORIES( path0 path1 ... )
 #  -- Sets the directories that should be passed to nvcc
 #     (e.g. nvcc -Ipath0 -Ipath1 ... ). These paths usually contain other .cu
 #     files.
+#
+#
+#  CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS( output_file_var cuda_target
+#                                           nvcc_flags object_files)
+#
+#  -- Generates the link object required by separable compilation from the given
+#     object files.  This is called automatically for CUDA_ADD_EXECUTABLE and
+#     CUDA_ADD_LIBRARY, but can be called manually when using CUDA_WRAP_SRCS
+#     directly.  When called from CUDA_ADD_LIBRARY or CUDA_ADD_EXECUTABLE the
+#     nvcc_flags passed in are the same as the flags passed in via the OPTIONS
+#     argument.  The only nvcc flag added automatically is the bitness flag as
+#     specified by CUDA_64_BIT_DEVICE_CODE.  Note that this is a function
+#     instead of a macro.
 #
 #  CUDA_WRAP_SRCS ( cuda_target format generated_files file0 file1 ...
 #                   [STATIC | SHARED | MODULE] [OPTIONS ...] )
@@ -405,6 +437,9 @@ endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
 option(CUDA_PROPAGATE_HOST_FLAGS "Propage C/CXX_FLAGS and friends to the host compiler via -Xcompile" ON)
+
+# Enable CUDA_SEPARABLE_COMPILATION
+option(CUDA_SEPARABLE_COMPILATION "Compile CUDA objects with separable compilation enabled.  Requires CUDA 5.0+" OFF)
 
 # Specifies whether the commands used when compiling the .cu file will be printed out.
 option(CUDA_VERBOSE_BUILD "Print out the commands run while compiling the CUDA source file.  With the Makefile generator this defaults to VERBOSE variable specified on the command line, but can be forced on with this option." OFF)
@@ -913,6 +948,11 @@ endfunction()
 
 macro(CUDA_WRAP_SRCS cuda_target format generated_files)
 
+  # If CMake doesn't support separable compilation, complain
+  if(CUDA_SEPARABLE_COMPILATION AND CMAKE_VERSION VERSION_LESS "2.8.10.1")
+    message(SEND_ERROR "CUDA_SEPARABLE_COMPILATION isn't supported for CMake versions less than 2.8.10.1")
+  endif()
+
   # Set up all the command line flags here, so that they can be overridden on a per target basis.
 
   set(nvcc_flags "")
@@ -950,6 +990,8 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   # $(VCInstallDir)/bin.
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
     set(ccbin_flags -D "\"CCBIN:PATH=$(VCInstallDir)bin\"" )
+  else()
+    set(ccbin_flags)
   endif()
 
   # Figure out which configure we will use and pass that in as an argument to
@@ -1117,7 +1159,11 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       else()
         set(generated_file_path "${cuda_compile_output_dir}/${CMAKE_CFG_INTDIR}")
         set(generated_file_basename "${cuda_target}_generated_${basename}${generated_extension}")
-        set(format_flag "-c")
+        if(CUDA_SEPARABLE_COMPILATION)
+          set(format_flag "-dc")
+        else()
+          set(format_flag "-c")
+        endif()
       endif()
 
       # Set all of our file names.  Make sure that whatever filenames that have
@@ -1144,6 +1190,10 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         set(source_file "${file}")
       else()
         set(source_file "${CMAKE_CURRENT_SOURCE_DIR}/${file}")
+      endif()
+
+      if( NOT compile_to_ptx AND CUDA_SEPARABLE_COMPILATION)
+        list(APPEND ${cuda_target}_SEPARABLE_COMPILATION_OBJECTS "${generated_file}")
       endif()
 
       # Bring in the dependencies.  Creates a variable CUDA_NVCC_DEPEND #######
@@ -1244,6 +1294,85 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   set(${generated_files} ${_cuda_wrap_generated_files})
 endmacro()
 
+function(_cuda_get_important_host_flags important_flags flag_string)
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
+    string(REGEX MATCHALL "/M[DT][d]?" flags ${flag_string})
+    list(APPEND ${important_flags} ${flags})
+  else()
+    string(REGEX MATCHALL "-fPIC" flags ${flag_string})
+    list(APPEND ${important_flags} ${flags})
+  endif()
+  set(${important_flags} ${${important_flags}} PARENT_SCOPE)
+endfunction()
+
+###############################################################################
+###############################################################################
+# Separable Compilation Link
+###############################################################################
+###############################################################################
+
+# Compute the filename to be used by CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS
+function(CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME output_file_var cuda_target object_files)
+  if (object_files)
+    set(generated_extension ${CMAKE_${CUDA_C_OR_CXX}_OUTPUT_EXTENSION})
+    set(output_file "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${cuda_target}.dir/${CMAKE_CFG_INTDIR}/${cuda_target}_intermediate_link${generated_extension}")
+  else()
+    set(output_file)
+  endif()
+
+  set(${output_file_var} "${output_file}" PARENT_SCOPE)
+endfunction()
+
+# Setup the build rule for the separable compilation intermediate link file.
+function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options object_files)
+  if (object_files)
+
+    if(NOT EXISTS "${output_file}")
+      # Some generators (e.g. makefiles) can't proceed to the link phase if all
+      # input files aren't available.  This guarantees the file exists, so that
+      # linking can begin.
+      execute_process(COMMAND ${CMAKE_COMMAND} -E touch "${output_file}")
+    endif()
+
+    set_source_files_properties("${output_file}"
+      PROPERTIES
+      EXTERNAL_OBJECT TRUE # This is an object file not to be compiled, but only
+                           # be linked.
+      GENERATED TRUE       # This file is generated during the build
+      )
+
+    # For now we are ignoring all the configuration specific flags.
+    set(nvcc_flags)
+    CUDA_PARSE_NVCC_OPTIONS(nvcc_flags ${options})
+    if(CUDA_64_BIT_DEVICE_CODE)
+      list(APPEND nvcc_flags -m64)
+    else()
+      list(APPEND nvcc_flags -m32)
+    endif()
+    # If -ccbin, --compiler-bindir has been specified, don't do anything.  Otherwise add it here.
+    list( FIND nvcc_flags "-ccbin" ccbin_found0 )
+    list( FIND nvcc_flags "--compiler-bindir" ccbin_found1 )
+    if( ccbin_found0 LESS 0 AND ccbin_found1 LESS 0 )
+      list(APPEND nvcc_flags -ccbin "\"${CUDA_HOST_COMPILER}\"")
+    endif()
+    set(flags)
+    foreach(config ${CUDA_configuration_types})
+      string(TOUPPER ${config} config_upper)
+      set(important_host_flags)
+      _cuda_get_important_host_flags(important_host_flags ${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}})
+      foreach(f ${important_host_flags})
+        list(APPEND flags $<$<CONFIG:${config}>:-Xcompiler> $<$<CONFIG:${config}>:${f}>)
+      endforeach()
+    endforeach()
+    file(RELATIVE_PATH output_file_relative_path "${CMAKE_BINARY_DIR}" "${output_file}")
+    add_custom_command(
+      TARGET ${cuda_target}
+      PRE_LINK
+      COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
+      COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
+      )
+ endif()
+endfunction()
 
 ###############################################################################
 ###############################################################################
@@ -1262,11 +1391,21 @@ macro(CUDA_ADD_LIBRARY cuda_target)
     ${_cmake_options} ${_cuda_shared_flag}
     OPTIONS ${_options} )
 
+  # Compute the file name of the intermedate link file used for separable
+  # compilation.
+  CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME(link_file ${cuda_target} "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
+
   # Add the library.
   add_library(${cuda_target} ${_cmake_options}
     ${_generated_files}
     ${_sources}
+    ${link_file}
     )
+
+  # Add a link phase for the separable compilation if it has been enabled.  If
+  # it has been enabled then the ${cuda_target}_SEPARABLE_COMPILATION_OBJECTS
+  # variable will have been defined.
+  CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS("${link_file}" ${cuda_target} "${_options}" "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
 
   target_link_libraries(${cuda_target}
     ${CUDA_LIBRARIES}
@@ -1296,11 +1435,21 @@ macro(CUDA_ADD_EXECUTABLE cuda_target)
   # Create custom commands and targets for each file.
   CUDA_WRAP_SRCS( ${cuda_target} OBJ _generated_files ${_sources} OPTIONS ${_options} )
 
+  # Compute the file name of the intermedate link file used for separable
+  # compilation.
+  CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME(link_file ${cuda_target} "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
+
   # Add the library.
   add_executable(${cuda_target} ${_cmake_options}
     ${_generated_files}
     ${_sources}
+    ${link_file}
     )
+
+  # Add a link phase for the separable compilation if it has been enabled.  If
+  # it has been enabled then the ${cuda_target}_SEPARABLE_COMPILATION_OBJECTS
+  # variable will have been defined.
+  CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS("${link_file}" ${cuda_target} "${_options}" "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
 
   target_link_libraries(${cuda_target}
     ${CUDA_LIBRARIES}
