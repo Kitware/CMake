@@ -2110,6 +2110,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     debugStr = "NO";
     }
 
+  buildSettings->AddAttribute("COMBINE_HIDPI_IMAGES",
+                              this->CreateString("YES"));
   buildSettings->AddAttribute("GCC_GENERATE_DEBUGGING_SYMBOLS",
                               this->CreateString(debugStr));
   buildSettings->AddAttribute("GCC_OPTIMIZATION_LEVEL",
