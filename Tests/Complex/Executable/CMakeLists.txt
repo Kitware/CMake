@@ -91,7 +91,7 @@ remove_definitions(-DCOMPLEX_DEFINED)
 add_custom_command(TARGET complex PRE_BUILD
                    COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Executable/prebuild.txt")
-add_custom_command(TARGET complex PRE_BUILD
+add_custom_command(TARGET complex PRE_LINK
                    COMMAND ${CREATE_FILE_EXE}
                    ARGS "${Complex_BINARY_DIR}/Executable/prelink.txt")
 add_custom_command(TARGET complex POST_BUILD
