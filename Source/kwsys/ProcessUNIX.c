@@ -47,6 +47,12 @@ do.
 
 */
 
+#if defined(__CYGWIN__)
+/* Increase the file descriptor limit for select before including
+   related system headers. (Default: 64) */
+#define FD_SETSIZE 2048
+#endif
+
 #include <stddef.h>    /* ptrdiff_t */
 #include <stdio.h>     /* snprintf */
 #include <stdlib.h>    /* malloc, free */
