@@ -509,54 +509,71 @@ function(_QT4_QUERY_QMAKE VAR RESULT)
   endif()
 endfunction()
 
-
-set(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
-
-get_filename_component(qt_install_version "[HKEY_CURRENT_USER\\Software\\trolltech\\Versions;DefaultQtVersion]" NAME)
-# check for qmake
-# Debian uses qmake-qt4
-# macports' Qt uses qmake-mac
-find_program(QT_QMAKE_EXECUTABLE NAMES qmake qmake4 qmake-qt4 qmake-mac
-  PATHS
-    ENV QTDIR
-    "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\${qt_install_version};InstallDir]"
-  PATH_SUFFIXES bin
-  DOC "The qmake executable for the Qt installation to use"
-)
-
-# double check that it was a Qt4 qmake, if not, re-find with different names
-if (QT_QMAKE_EXECUTABLE)
-
-  if(QT_QMAKE_EXECUTABLE_LAST)
-    string(COMPARE NOTEQUAL "${QT_QMAKE_EXECUTABLE_LAST}" "${QT_QMAKE_EXECUTABLE}" QT_QMAKE_CHANGED)
-  endif()
-
-  set(QT_QMAKE_EXECUTABLE_LAST "${QT_QMAKE_EXECUTABLE}" CACHE INTERNAL "" FORCE)
-
-  _qt4_query_qmake(QT_VERSION QTVERSION)
-
-  # check for qt3 qmake and then try and find qmake4 or qmake-qt4 in the path
-  if(NOT QTVERSION)
-    set(QT_QMAKE_EXECUTABLE NOTFOUND CACHE FILEPATH "" FORCE)
-    find_program(QT_QMAKE_EXECUTABLE NAMES qmake4 qmake-qt4 PATHS
-      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
-      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
-      $ENV{QTDIR}/bin
-      DOC "The qmake executable for the Qt installation to use"
-      )
-    if(QT_QMAKE_EXECUTABLE)
-      _qt4_query_qmake(QT_VERSION QTVERSION)
-    endif()
-  endif()
-
-endif ()
-
-if (QT_QMAKE_EXECUTABLE AND QTVERSION)
-
-  # set version variables
+function(_QT4_GET_VERSION_COMPONENTS VERSION RESULT_MAJOR RESULT_MINOR RESULT_PATCH)
   string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
   string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
   string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
+
+  set(${RESULT_MAJOR} ${QT_VERSION_MAJOR} PARENT_SCOPE)
+  set(${RESULT_MINOR} ${QT_VERSION_MINOR} PARENT_SCOPE)
+  set(${RESULT_PATCH} ${QT_VERSION_PATCH} PARENT_SCOPE)
+endfunction()
+
+function(_QT4_FIND_QMAKE QMAKE_NAMES QMAKE_RESULT VERSION_RESULT)
+  list(LENGTH QMAKE_NAMES QMAKE_NAMES_LEN)
+  if(${QMAKE_NAMES_LEN} EQUAL 0)
+    return()
+  endif()
+  list(GET QMAKE_NAMES 0 QMAKE_NAME)
+
+  get_filename_component(qt_install_version "[HKEY_CURRENT_USER\\Software\\trolltech\\Versions;DefaultQtVersion]" NAME)
+
+  find_program(QT_QMAKE_EXECUTABLE NAMES ${QMAKE_NAME}
+    PATHS
+      ENV QTDIR
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\${qt_install_version};InstallDir]"
+    PATH_SUFFIXES bin
+    DOC "The qmake executable for the Qt installation to use"
+  )
+
+  set(major 0)
+  if (QT_QMAKE_EXECUTABLE)
+    _qt4_query_qmake(QT_VERSION QTVERSION)
+    _qt4_get_version_components("${QTVERSION}" major minor patch)
+  endif()
+
+  if (NOT QT_QMAKE_EXECUTABLE OR NOT "${major}" EQUAL 4)
+    set(curr_qmake "${QT_QMAKE_EXECUTABLE}")
+    set(curr_qt_version "${QTVERSION}")
+
+    set(QT_QMAKE_EXECUTABLE NOTFOUND CACHE FILEPATH "" FORCE)
+    list(REMOVE_AT QMAKE_NAMES 0)
+    _qt4_find_qmake("${QMAKE_NAMES}" QMAKE QTVERSION)
+
+    _qt4_get_version_components("${QTVERSION}" major minor patch)
+    if (NOT ${major} EQUAL 4)
+      # Restore possibly found qmake and it's version; these are used later
+      # in error message if incorrect version is found
+      set(QT_QMAKE_EXECUTABLE "${curr_qmake}" CACHE FILEPATH "" FORCE)
+      set(QTVERSION "${curr_qt_version}")
+    endif()
+
+  endif()
+
+
+  set(${QMAKE_RESULT} "${QT_QMAKE_QMAKE_EXECUTABLE}" PARENT_SCOPE)
+  set(${VERSION_RESULT} "${QTVERSION}" PARENT_SCOPE)
+endfunction()
+
+
+set(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
+
+set(_QT4_QMAKE_NAMES qmake qmake4 qmake-qt4 qmake-mac)
+_qt4_find_qmake("${_QT4_QMAKE_NAMES}" QT_QMAKE_EXECUTABLE QTVERSION)
+
+if (QT_QMAKE_EXECUTABLE AND QTVERSION)
+
+  _qt4_get_version_components("${QTVERSION}" QT_VERSION_MAJOR QT_VERSION_MINOR QT_VERSION_PATCH)
 
   # ask qmake for the mkspecs directory
   # we do this first because QT_LIBINFIX might be set
@@ -1330,7 +1347,7 @@ else()
 
 endif()
 
-if (QT_VERSION_MAJOR GREATER 4)
+if (NOT QT_VERSION_MAJOR EQUAL 4)
     set(VERSION_MSG "Found unsuitable Qt version \"${QTVERSION}\" from ${QT_QMAKE_EXECUTABLE}")
     set(QT4_FOUND FALSE)
     if(Qt4_FIND_REQUIRED)
