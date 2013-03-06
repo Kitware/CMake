@@ -2898,7 +2898,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                                         ge.Parse(it->Value);
       std::string result = cge->Evaluate(this->Makefile, config,
                                         false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(result.c_str()))
+      if (!cmGeneratorExpression::IsValidTargetName(result.c_str())
+          || !this->Makefile->FindTargetToUse(result.c_str()))
         {
         continue;
         }
@@ -2975,7 +2976,9 @@ std::string cmTarget::GetCompileDefinitions(const char *config)
   for (std::vector<std::string>::const_iterator it = libs.begin();
       it != libs.end(); ++it)
     {
-    if (this->Makefile->FindTargetToUse(it->c_str()))
+    if ((cmGeneratorExpression::IsValidTargetName(it->c_str())
+          || cmGeneratorExpression::Find(it->c_str()) != std::string::npos)
+        && this->Makefile->FindTargetToUse(it->c_str()))
       {
       depString += sep + "$<TARGET_PROPERTY:"
                 + *it + ",INTERFACE_COMPILE_DEFINITIONS>";
