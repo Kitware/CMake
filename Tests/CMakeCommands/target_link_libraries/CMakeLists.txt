@@ -102,11 +102,14 @@ target_compile_definitions(depG INTERFACE
     TEST_DEF
 )
 
-# Linking to a target containing a + should be non-fatal.
-add_library(wrapc++ empty.cpp)
 
 add_executable(targetC targetC.cpp)
-target_link_libraries(targetC wrapc++)
+if(NOT BORLAND)
+  # Linking to a target containing a + should be non-fatal, though it does
+  # not work at all on Borland
+  add_library(wrapc++ empty.cpp)
+  target_link_libraries(targetC wrapc++)
+endif()
 # The TARGET_PROPERTY expression is duplicated below to test that there is no
 # shortcutting of the evaluation by returning an empty string.
 set(_exe_test $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
