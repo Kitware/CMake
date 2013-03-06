@@ -8,7 +8,7 @@
 #error Expected TEST_DEF definition
 #endif
 
-int main(int argc, char **argv)
+int main(int, char **)
 {
   DepG g;
 
