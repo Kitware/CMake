@@ -95,7 +95,7 @@ void cmFindPackageCommand::GenerateDocumentation()
     "Finds and loads settings from an external project.  "
     "<package>_FOUND will be set to indicate whether the package was found.  "
     "When the package is found package-specific information is provided "
-    "through variables and imported targets documented by the package"
+    "through variables and imported targets documented by the package "
     "itself.  "
     "The QUIET option disables messages if the package cannot be found.  "
     "The MODULE option disables the second signature documented below.  "
