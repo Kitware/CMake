@@ -1232,7 +1232,9 @@ void cmTarget::DefineProperties(cmake *cm)
     ("GENERATOR_FILE_NAME", cmProperty::TARGET,
      "Generator's file for this target.",
      "An internal property used by some generators to record the name of "
-     "project or dsp file associated with this target.");
+     "project or dsp file associated with this target. Note that at configure "
+     "time, this property is only set for targets created by "
+     "include_external_msproject().");
 
   cm->DefineProperty
     ("SOURCES", cmProperty::TARGET,
