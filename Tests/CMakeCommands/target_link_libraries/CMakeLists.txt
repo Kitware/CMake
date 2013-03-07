@@ -104,9 +104,9 @@ target_compile_definitions(depG INTERFACE
 
 
 add_executable(targetC targetC.cpp)
-if(NOT BORLAND)
+if(NOT BORLAND AND NOT WATCOM)
   # Linking to a target containing a + should be non-fatal, though it does
-  # not work at all on Borland
+  # not work at all on Borland or watcom
   add_library(wrapc++ empty.cpp)
   target_link_libraries(targetC wrapc++)
 endif()
