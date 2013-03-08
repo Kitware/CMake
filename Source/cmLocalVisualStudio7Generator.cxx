@@ -1621,17 +1621,30 @@ cmLocalVisualStudio7Generator
   return dir_max;
 }
 
-void cmLocalVisualStudio7Generator
+bool cmLocalVisualStudio7Generator
 ::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
              std::ostream &fout, const char *libName,
              std::vector<std::string> *configs)
 {
   const std::vector<const cmSourceFile *> &sourceFiles =
     sg->GetSourceFiles();
-  // If the group is empty, don't write it at all.
-  if(sourceFiles.empty() && sg->GetGroupChildren().empty())
+  std::vector<cmSourceGroup> const& children  = sg->GetGroupChildren();
+
+  // Write the children to temporary output.
+  bool hasChildrenWithSources = false;
+  cmOStringStream tmpOut;
+  for(unsigned int i=0;i<children.size();++i)
     {
-    return;
+    if(this->WriteGroup(&children[i], target, tmpOut, libName, configs))
+      {
+      hasChildrenWithSources = true;
+      }
+    }
+
+  // If the group is empty, don't write it at all.
+  if(sourceFiles.empty() && !hasChildrenWithSources)
+    {
+    return false;
     }
 
   // If the group has a name, write the header.
@@ -1752,11 +1765,10 @@ void cmLocalVisualStudio7Generator
       }
     }
 
-  std::vector<cmSourceGroup> const& children  = sg->GetGroupChildren();
-
-  for(unsigned int i=0;i<children.size();++i)
+  // If the group has children with source files, write the children.
+  if(hasChildrenWithSources)
     {
-    this->WriteGroup(&children[i], target, fout, libName, configs);
+    fout << tmpOut.str();
     }
 
   // If the group has a name, write the footer.
@@ -1764,6 +1776,8 @@ void cmLocalVisualStudio7Generator
     {
     this->WriteVCProjEndGroup(fout);
     }
+
+  return true;
 }
 
 void cmLocalVisualStudio7Generator::
