@@ -74,17 +74,35 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   const char* installDest = this->IEGen->GetDestination();
   if(!cmSystemTools::FileIsFullPath(installDest))
     {
-    std::string dest = installDest;
-    os << "# Compute the installation prefix relative to this file.\n"
-       << "get_filename_component(_IMPORT_PREFIX "
-       << "\"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
-    while(!dest.empty())
+    std::string installPrefix =
+      this->IEGen->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+    std::string absDest = installPrefix + "/" + installDest + "/";
+    if(strncmp(absDest.c_str(), "/lib/", 5) == 0 ||
+       strncmp(absDest.c_str(), "/lib64/", 7) == 0 ||
+       strncmp(absDest.c_str(), "/usr/lib/", 9) == 0 ||
+       strncmp(absDest.c_str(), "/usr/lib64/", 11) == 0)
       {
-      os <<
-        "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
-      dest = cmSystemTools::GetFilenamePath(dest);
+      // Assume this is a build for system package installation rather than a
+      // relocatable distribution.  Use an absolute prefix because some Linux
+      // distros symlink /lib to /usr/lib which confuses the relative path
+      // computation below if we generate for /lib under one prefix and but the
+      // file is loaded from another.
+      os << "set(_IMPORT_PREFIX \"" << installPrefix << "\")\n";
       }
-    os << "\n";
+    else
+      {
+      std::string dest = installDest;
+      os << "# Compute the installation prefix relative to this file.\n"
+         << "get_filename_component(_IMPORT_PREFIX "
+         << "\"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
+      while(!dest.empty())
+        {
+        os <<
+         "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
+        dest = cmSystemTools::GetFilenamePath(dest);
+        }
+      os << "\n";
+      }
 
     // Import location properties may reference this variable.
     this->ImportPrefix = "${_IMPORT_PREFIX}/";
