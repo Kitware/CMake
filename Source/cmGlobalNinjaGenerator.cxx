@@ -495,65 +495,12 @@ void cmGlobalNinjaGenerator
                  cmMakefile *mf,
                  bool optional)
 {
-  std::string path;
-  for(std::vector<std::string>::const_iterator l = languages.begin();
-      l != languages.end(); ++l)
+  if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
     {
-    std::vector<std::string> language;
-    language.push_back(*l);
-
-    if(*l == "NONE")
-      {
-      this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
-      continue;
-      }
-    else if(*l == "Fortran")
-      {
-      std::string message = "The \"";
-      message += this->GetName();
-      message += "\" generator does not support the language \"";
-      message += *l;
-      message += "\" yet.";
-      cmSystemTools::Error(message.c_str());
-      }
-    else if(*l == "RC")
-      {
-      // check if mingw is used
-      if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
-        {
-        UsingMinGW = true;
-        if(!mf->GetDefinition("CMAKE_RC_COMPILER"))
-          {
-          std::string windres = cmSystemTools::FindProgram("windres");
-          if(windres.empty())
-            {
-            std::string compiler_path;
-            std::string::size_type prefix = std::string::npos;
-            if (mf->GetDefinition("CMAKE_C_COMPILER"))
-              {
-              compiler_path = mf->GetDefinition("CMAKE_C_COMPILER");
-              prefix = compiler_path.rfind("gcc");
-              }
-            else if (mf->GetDefinition("CMAKE_CXX_COMPILER"))
-              {
-              compiler_path = mf->GetDefinition("CMAKE_CXX_COMPILER");
-              prefix = compiler_path.rfind("++");
-              prefix--;
-              }
-            if (prefix != std::string::npos)
-              {
-              windres = compiler_path.substr(0, prefix) + "windres";
-              windres = cmSystemTools::FindProgram(windres.c_str());
-              }
-            }
-          if(!windres.empty())
-            mf->AddDefinition("CMAKE_RC_COMPILER", windres.c_str());
-          }
-        }
-      }
-    this->cmGlobalGenerator::EnableLanguage(language, mf, optional);
-    this->ResolveLanguageCompiler(*l, mf, optional);
+    UsingMinGW = true;
+    this->EnableMinGWLanguage(mf);
     }
+  this->cmGlobalGenerator::EnableLanguage(languages, mf, optional);
 }
 
 bool cmGlobalNinjaGenerator::UsingMinGW = false;
