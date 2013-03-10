@@ -17,6 +17,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmVersion.h"
 
+#include <algorithm>
+
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
 const char* cmGlobalNinjaGenerator::INDENT = "  ";
@@ -492,16 +494,20 @@ void cmGlobalNinjaGenerator::Generate()
 // Used in:
 //   Source/cmMakefile.cxx:
 void cmGlobalNinjaGenerator
-::EnableLanguage(std::vector<std::string>const& languages,
-                 cmMakefile *mf,
+::EnableLanguage(std::vector<std::string>const& langs,
+                 cmMakefile* makefile,
                  bool optional)
 {
-  if(mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
+  if (makefile->IsOn("CMAKE_COMPILER_IS_MINGW"))
     {
     UsingMinGW = true;
-    this->EnableMinGWLanguage(mf);
+    this->EnableMinGWLanguage(makefile);
     }
-  this->cmGlobalGenerator::EnableLanguage(languages, mf, optional);
+  if (std::find(langs.begin(), langs.end(), "Fortran") != langs.end())
+    {
+    cmSystemTools::Error("The Ninja generator does not support Fortran yet.");
+    }
+  this->cmGlobalGenerator::EnableLanguage(langs, makefile, optional);
 }
 
 bool cmGlobalNinjaGenerator::UsingMinGW = false;
