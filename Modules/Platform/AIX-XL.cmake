@@ -21,7 +21,7 @@ set(__AIX_COMPILER_XL 1)
 macro(__aix_compiler_xl lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-blibpath:")
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
-  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-G -Wl,-brtl,-bnoipath")  # -shared
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-G -Wl,-bnoipath")  # -shared
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-Wl,-brtl,-bnoipath,-bexpall")  # +s, flag for exe link to use shared lib
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS " ")
   set(CMAKE_SHARED_MODULE_${lang}_FLAGS  " ")
