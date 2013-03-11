@@ -1086,8 +1086,10 @@ void cmGlobalGenerator::CreateAutomocTargets()
         if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
           {
           cmQtAutomoc automoc;
-          automoc.InitializeMocSourceFile(&target);
-          automocs.push_back(std::make_pair(automoc, &target));
+          if(automoc.InitializeMocSourceFile(&target))
+            {
+            automocs.push_back(std::make_pair(automoc, &target));
+            }
           }
         }
       }
