@@ -4699,6 +4699,10 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       || (!impliedByUse && !explicitlySet));
 
   cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+  if(!info)
+    {
+    return propContent;
+    }
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
   bool propInitialized = explicitlySet;
 
