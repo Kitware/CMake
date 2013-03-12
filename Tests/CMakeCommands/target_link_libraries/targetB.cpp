@@ -1,7 +1,7 @@
 
 #include "depD.h"
 
-int main(int argc, char **argv)
+int main(int, char **)
 {
   DepD d;
   DepA a = d.getA();
