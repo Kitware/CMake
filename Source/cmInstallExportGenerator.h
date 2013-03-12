@@ -36,6 +36,8 @@ public:
 
   cmExportSet* GetExportSet() {return this->ExportSet;}
 
+  cmMakefile* GetMakefile() const { return this->Makefile; }
+
   const std::string& GetNamespace() const { return this->Namespace; }
 
 protected:
