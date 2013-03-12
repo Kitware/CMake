@@ -35,6 +35,7 @@ ExternalData_Add_Test(Data1
     -D Paired=DATA{PairedA.dat,PairedB.dat}
     -D Meta=DATA{MetaTop.dat,REGEX:Meta[ABC].dat}
     -D Directory=DATA{Directory/,A.dat,REGEX:[BC].dat}
+    -D "Semicolons=DATA{Data.dat}\\;DATA{Data.dat}"
     -P ${CMAKE_CURRENT_SOURCE_DIR}/Data1Check.cmake
   )
 ExternalData_Add_Target(Data1)
