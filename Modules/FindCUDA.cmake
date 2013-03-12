@@ -605,11 +605,6 @@ endif()
 # some platforms.
 find_library_local_first(CUDA_CUDA_LIBRARY cuda "\"cuda\" library (older versions only).")
 
-# Add cuda library to the link line only if it is found.
-if (CUDA_CUDA_LIBRARY)
-  set(CUDA_LIBRARIES ${CUDA_LIBRARIES} ${CUDA_CUDA_LIBRARY})
-endif()
-
 mark_as_advanced(
   CUDA_CUDA_LIBRARY
   CUDA_CUDART_LIBRARY
