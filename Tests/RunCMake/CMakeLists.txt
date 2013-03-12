@@ -52,6 +52,7 @@ if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 3)
 endif()
 
 add_RunCMake_test(CMP0019)
+add_RunCMake_test(CTest)
 if(UNIX AND "${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles")
   add_RunCMake_test(CompilerChange)
 endif()
