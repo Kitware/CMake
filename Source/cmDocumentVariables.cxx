@@ -1551,7 +1551,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_COMPILER_IS_GNU<LANG>", cmProperty::VARIABLE,
      "True if the compiler is GNU.",
      "If the selected <LANG> compiler is the GNU "
-     "compiler then this is TRUE, if not it is FALSE.",false,
+     "compiler then this is TRUE, if not it is FALSE. "
+     "Unlike the other per-language variables, this uses the GNU syntax for "
+     "identifying languages instead of the CMake syntax. Recognized values of "
+     "the <LANG> suffix are:\n"
+     "  CC = C compiler\n"
+     "  CXX = C++ compiler\n"
+     "  G77 = Fortran compiler",
+     false,
      "Variables for Languages");
 
   cm->DefineProperty
