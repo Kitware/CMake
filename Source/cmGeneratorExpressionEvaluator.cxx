@@ -227,6 +227,22 @@ static const struct CommaNode : public cmGeneratorExpressionNode
 } commaNode;
 
 //----------------------------------------------------------------------------
+static const struct SemicolonNode : public cmGeneratorExpressionNode
+{
+  SemicolonNode() {}
+
+  virtual int NumExpectedParameters() const { return 0; }
+
+  std::string Evaluate(const std::vector<std::string> &,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return ";";
+  }
+} semicolonNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -943,6 +959,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &angle_rNode;
   else if (identifier == "COMMA")
     return &commaNode;
+  else if (identifier == "SEMICOLON")
+    return &semicolonNode;
   else if (identifier == "TARGET_PROPERTY")
     return &targetPropertyNode;
   else if (identifier == "TARGET_NAME")
