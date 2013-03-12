@@ -1,0 +1,6 @@
+CMake Error at .*/Modules/CTest.cmake:[0-9]+ \(build_command\):
+  build_command\(\) requires CMAKE_MAKE_PROGRAM to be defined.  Call project\(\)
+  or enable_language\(\) first.
+Call Stack \(most recent call first\):
+  BeforeProject.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

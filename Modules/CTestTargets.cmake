@@ -16,6 +16,10 @@ if(NOT RUN_FROM_CTEST_OR_DART)
   message(FATAL_ERROR "Do not incldue CTestTargets.cmake directly")
 endif()
 
+if(NOT PROJECT_BINARY_DIR)
+  message(FATAL_ERROR "Do not include(CTest) before calling project().")
+endif()
+
 # make directories in the binary tree
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/Testing/Temporary)
 get_filename_component(CMAKE_HOST_PATH ${CMAKE_COMMAND} PATH)
