@@ -27,6 +27,8 @@ if (Qt5Widgets_FOUND)
   set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
   # Remove this when the minimum version of Qt is 4.6.
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 else()
   set(QT_MIN_VERSION "4.4.0")
   find_package(Qt4 REQUIRED)
