@@ -4753,6 +4753,10 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       || (!impliedByUse && !explicitlySet));
 
   cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+  if(!info)
+    {
+    return propContent;
+    }
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
   bool propInitialized = explicitlySet;
 
@@ -4893,6 +4897,10 @@ bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
                              const char *config)
 {
   cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+  if(!info)
+    {
+    return false;
+    }
 
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
 
