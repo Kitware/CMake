@@ -156,7 +156,8 @@
 #  License text for the above reference.)
 
 function(ExternalData_add_test target)
-  ExternalData_expand_arguments("${target}" testArgs ${ARGN})
+  # Expand all arguments as a single string to preserve escaped semicolons.
+  ExternalData_expand_arguments("${target}" testArgs "${ARGN}")
   add_test(${testArgs})
 endfunction()
 
@@ -234,13 +235,17 @@ endfunction()
 
 function(ExternalData_expand_arguments target outArgsVar)
   # Replace DATA{} references with real arguments.
-  set(data_regex "DATA{([^{}\r\n]*)}")
+  set(data_regex "DATA{([^;{}\r\n]*)}")
   set(other_regex "([^D]|D[^A]|DA[^T]|DAT[^A]|DATA[^{])+|.")
   set(outArgs "")
+  # This list expansion un-escapes semicolons in list element values so we
+  # must re-escape them below anywhere a new list expansion will occur.
   foreach(arg IN LISTS ARGN)
     if("x${arg}" MATCHES "${data_regex}")
+      # Re-escape in-value semicolons before expansion in foreach below.
+      string(REPLACE ";" "\\;" tmp "${arg}")
       # Split argument into DATA{}-pieces and other pieces.
-      string(REGEX MATCHALL "${data_regex}|${other_regex}" pieces "${arg}")
+      string(REGEX MATCHALL "${data_regex}|${other_regex}" pieces "${tmp}")
       # Compose output argument with DATA{}-pieces replaced.
       set(outArg "")
       foreach(piece IN LISTS pieces)
@@ -254,11 +259,13 @@ function(ExternalData_expand_arguments target outArgsVar)
           set(outArg "${outArg}${piece}")
         endif()
       endforeach()
-      list(APPEND outArgs "${outArg}")
     else()
       # No replacements needed in this argument.
-      list(APPEND outArgs "${arg}")
+      set(outArg "${arg}")
     endif()
+    # Re-escape in-value semicolons in resulting list.
+    string(REPLACE ";" "\\;" outArg "${outArg}")
+    list(APPEND outArgs "${outArg}")
   endforeach()
   set("${outArgsVar}" "${outArgs}" PARENT_SCOPE)
 endfunction()
