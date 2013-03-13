@@ -26,6 +26,8 @@
   "strings which contain a '>' for example.\n"                          \
   "  $<COMMA>                  = A literal ','. Used to compare "       \
   "strings which contain a ',' for example.\n"                          \
+  "  $<SEMICOLON>              = A literal ';'. Used to prevent "       \
+  "list expansion on an argument with ';'.\n"                           \
   "  $<TARGET_NAME:...>        = Marks ... as being the name of a "     \
   "target.  This is required if exporting targets to multiple "         \
   "dependent export sets.  The '...' must be a literal name of a "      \

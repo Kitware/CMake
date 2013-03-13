@@ -47,11 +47,13 @@ add_custom_target(check-part1 ALL
     -Dtest_strequal_no_yes=$<STREQUAL:No,Yes>
     -Dtest_strequal_angle_r=$<STREQUAL:$<ANGLE-R>,$<ANGLE-R>>
     -Dtest_strequal_comma=$<STREQUAL:$<COMMA>,$<COMMA>>
+    -Dtest_strequal_semicolon=$<STREQUAL:$<SEMICOLON>,$<SEMICOLON>>
     -Dtest_strequal_angle_r_comma=$<STREQUAL:$<ANGLE-R>,$<COMMA>>
     -Dtest_strequal_both_empty=$<STREQUAL:,>
     -Dtest_strequal_one_empty=$<STREQUAL:something,>
     -Dtest_angle_r=$<ANGLE-R>
     -Dtest_comma=$<COMMA>
+    -Dtest_semicolon=$<SEMICOLON>
     -Dtest_colons_1=$<1::>
     -Dtest_colons_2=$<1:::>
     -Dtest_colons_3=$<1:Qt5::Core>
