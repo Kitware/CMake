@@ -257,6 +257,7 @@ function(add_jar _TARGET_NAME)
     set(_JAVA_CLASS_FILES)
     set(_JAVA_COMPILE_FILES)
     set(_JAVA_DEPENDS)
+    set(_JAVA_COMPILE_DEPENDS)
     set(_JAVA_RESOURCE_FILES)
     foreach(_JAVA_SOURCE_FILE ${_JAVA_SOURCE_FILES})
         get_filename_component(_JAVA_EXT ${_JAVA_SOURCE_FILE} EXT)
@@ -284,7 +285,10 @@ function(add_jar _TARGET_NAME)
                 OR _JAVA_EXT MATCHES ".war"
                 OR _JAVA_EXT MATCHES ".ear"
                 OR _JAVA_EXT MATCHES ".sar")
+            set(CMAKE_JAVA_INCLUDE_PATH_FINAL "${CMAKE_JAVA_INCLUDE_PATH_FINAL}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${_JAVA_SOURCE_FILE}")
             list(APPEND CMAKE_JAVA_INCLUDE_PATH ${_JAVA_SOURCE_FILE})
+            list(APPEND _JAVA_DEPENDS ${_JAVA_SOURCE_FILE})
+            list(APPEND _JAVA_COMPILE_DEPENDS ${_JAVA_SOURCE_FILE})
 
         elseif (_JAVA_EXT STREQUAL "")
             list(APPEND CMAKE_JAVA_INCLUDE_PATH ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}} ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}_CLASSPATH})
@@ -314,7 +318,7 @@ function(add_jar _TARGET_NAME)
                 -d ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 ${_JAVA_COMPILE_FILES}
             COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
-            DEPENDS ${_JAVA_COMPILE_FILES}
+            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_DEPENDS}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Building Java objects for ${_TARGET_NAME}.jar"
         )
