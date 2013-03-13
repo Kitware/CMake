@@ -85,6 +85,7 @@ std::string cmGlobalNinjaGenerator::EncodeLiteral(const std::string &lit)
 {
   std::string result = lit;
   cmSystemTools::ReplaceString(result, "$", "$$");
+  cmSystemTools::ReplaceString(result, "\n", "$\n");
   return result;
 }
 
