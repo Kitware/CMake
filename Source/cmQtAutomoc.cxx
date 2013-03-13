@@ -119,10 +119,21 @@ cmQtAutomoc::cmQtAutomoc()
     }
 }
 
-void cmQtAutomoc::InitializeMocSourceFile(cmTarget* target)
+bool cmQtAutomoc::InitializeMocSourceFile(cmTarget* target)
 {
+  cmMakefile* makefile = target->GetMakefile();
+  // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
+  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
+  if (qtMajorVersion == "")
+    {
+    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
+    }
+  if (qtMajorVersion != "4" && qtMajorVersion != "5")
+    {
+    return false;
+    }
+
   std::string automocTargetName = target->GetName();
-  cmMakefile *makefile = target->GetMakefile();
   automocTargetName += "_automoc";
   std::string mocCppFile = makefile->GetCurrentOutputDirectory();
   mocCppFile += "/";
@@ -134,6 +145,7 @@ void cmQtAutomoc::InitializeMocSourceFile(cmTarget* target)
                            mocCppFile.c_str(), false);
 
   target->AddSourceFile(mocCppSource);
+  return true;
 }
 
 void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
@@ -141,16 +153,6 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   cmMakefile* makefile = target->GetMakefile();
   cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   const char* targetName = target->GetName();
-  // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
-  std::string qtMajorVersion = makefile->GetSafeDefinition("QT_VERSION_MAJOR");
-  if (qtMajorVersion == "")
-    {
-    qtMajorVersion = makefile->GetSafeDefinition("Qt5Core_VERSION_MAJOR");
-    }
-  if (qtMajorVersion != "4" && qtMajorVersion != "5")
-    {
-    return;
-    }
 
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
 

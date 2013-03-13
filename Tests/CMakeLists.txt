@@ -993,6 +993,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
 
+  add_test(QtAutomocNoQt  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/QtAutomocNoQt"
+    "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt"
+    ${build_generator_args}
+    --build-project QtAutomocNoQt
+    --build-options -DCMAKE_BUILD_TYPE=\${CTEST_CONFIGURATION_TYPE}
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
+
   if(QT4_WORKS AND QT_QTGUI_FOUND)
     add_test(QtAutomoc ${CMAKE_CTEST_COMMAND}
       --build-and-test
