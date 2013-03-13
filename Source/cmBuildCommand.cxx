@@ -87,6 +87,14 @@ bool cmBuildCommand
 
   const char* makeprogram
     = this->Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
+  if(!makeprogram)
+    {
+    this->Makefile->IssueMessage(
+      cmake::FATAL_ERROR,
+      "build_command() requires CMAKE_MAKE_PROGRAM to be defined.  "
+      "Call project() or enable_language() first.");
+    return true;
+    }
 
   // If null/empty CONFIGURATION argument, GenerateBuildCommand uses 'Debug'
   // in the currently implemented multi-configuration global generators...
