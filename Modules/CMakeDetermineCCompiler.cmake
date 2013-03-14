@@ -158,6 +158,13 @@ if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
     if ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
     endif ()
+  elseif("${CMAKE_C_COMPILER_ID}" MATCHES "TI")
+    # TI compilers are named e.g. cl6x, cl470 or armcl.exe
+    get_filename_component(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
+    if (COMPILER_BASENAME MATCHES "^(.+)?cl([^.]+)?(\\.exe)?$")
+      set(_CMAKE_TOOLCHAIN_PREFIX "${CMAKE_MATCH_1}")
+      set(_CMAKE_TOOLCHAIN_SUFFIX "${CMAKE_MATCH_2}")
+    endif ()
   endif()
 
 endif ()
