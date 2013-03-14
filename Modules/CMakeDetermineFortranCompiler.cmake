@@ -200,19 +200,21 @@ endif ()
 # NAME_WE cannot be used since then this test will fail for names lile
 # "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
-if (CMAKE_CROSSCOMPILING
-    AND "${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU"
-    AND NOT _CMAKE_TOOLCHAIN_PREFIX)
-  get_filename_component(COMPILER_BASENAME "${CMAKE_Fortran_COMPILER}" NAME)
-  if (COMPILER_BASENAME MATCHES "^(.+-)g?fortran(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
-    set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif ()
+if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
-  # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
-  # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
-  if ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
-    set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
-  endif ()
+  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+    get_filename_component(COMPILER_BASENAME "${CMAKE_Fortran_COMPILER}" NAME)
+    if (COMPILER_BASENAME MATCHES "^(.+-)g?fortran(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
+      set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+    endif ()
+
+    # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
+    # but uses the regular ar, objcopy, etc. (instead of llvm-objcopy etc.)
+    if ("${_CMAKE_TOOLCHAIN_PREFIX}" MATCHES "(.+-)?llvm-$")
+      set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+    endif ()
+  endif()
+
 endif ()
 
 include(CMakeFindBinUtils)
