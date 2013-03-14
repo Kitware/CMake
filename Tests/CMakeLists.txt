@@ -2442,6 +2442,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     set_tests_properties(KWStyle PROPERTIES
       WORKING_DIRECTORY ${CMake_BINARY_DIR}/Utilities/KWStyle)
   endif()
-endif()
 
-subdirs(CMakeTests)
+  add_subdirectory(CMakeTests)
+endif()
