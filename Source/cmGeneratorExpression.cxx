@@ -256,7 +256,7 @@ static std::string stripExportInterface(const std::string &input,
       }
     else
       {
-      pos = std::min(bPos, iPos);
+      pos = (bPos < iPos) ? bPos : iPos;
       }
 
     result += input.substr(lastPos, pos - lastPos);
