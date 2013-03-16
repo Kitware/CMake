@@ -1003,21 +1003,35 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
-  if(QT4_WORKS AND QT_QTGUI_FOUND)
-    add_test(QtAutomoc ${CMAKE_CTEST_COMMAND}
+  find_package(Qt5Widgets QUIET NO_MODULE)
+  if(Qt5Widgets_FOUND)
+    add_test(Qt5Automoc ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
-      "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+      "${CMake_BINARY_DIR}/Tests/Qt5Automoc"
       ${build_generator_args}
       --build-project QtAutomoc
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/QtAutomoc"
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5Automoc"
       --force-new-ctest-process
-      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=5
       --test-command ${CMAKE_CTEST_COMMAND} -V
       )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomoc")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5Automoc")
   endif()
   if(QT4_WORKS AND QT_QTGUI_FOUND)
+    add_test(Qt4Automoc ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/QtAutomoc"
+      "${CMake_BINARY_DIR}/Tests/Qt4Automoc"
+      ${build_generator_args}
+      --build-project QtAutomoc
+      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Automoc"
+      --force-new-ctest-process
+      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=4
+      --test-command ${CMAKE_CTEST_COMMAND} -V
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Automoc")
+
     add_test(Qt4Targets ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Qt4Targets"
