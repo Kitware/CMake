@@ -2,9 +2,28 @@ cmake_minimum_required(VERSION 2.8)
 
 project(QtAutomoc)
 
-find_package(Qt4 REQUIRED)
+if (QT_TEST_VERSION STREQUAL 4)
+  find_package(Qt4 REQUIRED)
 
-include(UseQt4)
+  include(UseQt4)
+
+  set(QT_QTCORE_TARGET Qt4::QtCore)
+else()
+  if (NOT QT_TEST_VERSION STREQUAL 5)
+    message(SEND_ERROR "Invalid Qt version specified.")
+  endif()
+  find_package(Qt5Widgets REQUIRED)
+
+  set(QT_QTCORE_TARGET Qt5::Core)
+
+  include_directories(${Qt5Widgets_INCLUDE_DIRS})
+  set(QT_LIBRARIES Qt5::Widgets)
+
+  if(Qt5_POSITION_INDEPENDENT_CODE)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  endif()
+endif()
+
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
