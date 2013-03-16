@@ -187,7 +187,8 @@
 #
 #  Below is a detailed list of variables that FindQt4.cmake sets.
 #  QT_FOUND         If false, don't try to use Qt.
-#  QT4_FOUND        If false, don't try to use Qt 4.
+#  Qt4_FOUND        If false, don't try to use Qt 4.
+#  QT4_FOUND        If false, don't try to use Qt 4. This variable is for compatibility only.
 #
 #  QT_VERSION_MAJOR The major version of Qt found.
 #  QT_VERSION_MINOR The minor version of Qt found.
@@ -1365,7 +1366,7 @@ if (NOT QT_VERSION_MAJOR EQUAL 4)
       endif()
     endif()
 else()
-  FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt4
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt4 FOUND_VAR Qt4_FOUND
     REQUIRED_VARS ${_QT4_FOUND_REQUIRED_VARS}
     VERSION_VAR QTVERSION
     )
@@ -1380,5 +1381,6 @@ endif()
 set (QT_MOC_EXE ${QT_MOC_EXECUTABLE} )
 set (QT_UIC_EXE ${QT_UIC_EXECUTABLE} )
 set( QT_QT_LIBRARY "")
-set(QT_FOUND ${QT4_FOUND})
+set(QT4_FOUND ${Qt4_FOUND})
+set(QT_FOUND ${Qt4_FOUND})
 
