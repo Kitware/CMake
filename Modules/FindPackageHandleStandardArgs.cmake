@@ -195,7 +195,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   string(TOLOWER ${_NAME} _NAME_LOWER)
 
   if(FPHSA_FOUND_VAR)
-    if("${FPHSA_FOUND_VAR}" MATCHES "^${_NAME}_FOUND$"  OR  "${FPHSA_FOUND_VAR}" MATCHES "^${_NAME_UPPER}_FOUND$")
+    if(FPHSA_FOUND_VAR MATCHES "^${_NAME}_FOUND$"  OR  FPHSA_FOUND_VAR MATCHES "^${_NAME_UPPER}_FOUND$")
       set(_FOUND_VAR ${FPHSA_FOUND_VAR})
     else()
       message(FATAL_ERROR "The argument for FOUND_VAR is \"${FPHSA_FOUND_VAR}\", but only \"${_NAME}_FOUND\" and \"${_NAME_UPPER}_FOUND\" are valid names.")
