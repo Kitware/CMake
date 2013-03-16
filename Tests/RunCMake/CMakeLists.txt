@@ -75,6 +75,12 @@ add_RunCMake_test(include_directories)
 add_RunCMake_test(list)
 add_RunCMake_test(CMP0004)
 
+find_package(Qt4 QUIET)
+find_package(Qt5Core QUIET)
+if (QT4_FOUND AND Qt5Core_FOUND AND Qt5Core_VERSION VERSION_GREATER 5.0.2)
+  add_RunCMake_test(IncompatibleQt)
+endif()
+
 if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
   add_RunCMake_test(SolutionGlobalSections)
