@@ -1499,7 +1499,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "  PathScale = PathScale (pathscale.com)\n"
      "  SDCC = Small Device C Compiler (sdcc.sourceforge.net)\n"
      "  SunPro = Oracle Solaris Studio (oracle.com)\n"
-     "  TI_DSP = Texas Instruments (ti.com)\n"
+     "  TI = Texas Instruments (ti.com)\n"
      "  TinyCC = Tiny C Compiler (tinycc.org)\n"
      "  Watcom = Open Watcom (openwatcom.org)\n"
      "  XL, VisualAge, zOS = IBM XL (ibm.com)\n"
