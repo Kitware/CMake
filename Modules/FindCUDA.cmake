@@ -1341,13 +1341,6 @@ endfunction()
 function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options object_files)
   if (object_files)
 
-    if(NOT EXISTS "${output_file}")
-      # Some generators (e.g. makefiles) can't proceed to the link phase if all
-      # input files aren't available.  This guarantees the file exists, so that
-      # linking can begin.
-      execute_process(COMMAND ${CMAKE_COMMAND} -E touch "${output_file}")
-    endif()
-
     set_source_files_properties("${output_file}"
       PROPERTIES
       EXTERNAL_OBJECT TRUE # This is an object file not to be compiled, but only
@@ -1379,12 +1372,34 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
       endforeach()
     endforeach()
     file(RELATIVE_PATH output_file_relative_path "${CMAKE_BINARY_DIR}" "${output_file}")
-    add_custom_command(
-      TARGET ${cuda_target}
-      PRE_LINK
-      COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
-      COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
-      )
+
+    # Some generators don't handle the multiple levels of custom command
+    # dependencies correctly (obj1 depends on file1, obj2 depends on obj1), so
+    # we work around that issue by compiling the intermediate link object as a
+    # pre-link custom command in that situation.
+    set(do_obj_build_rule TRUE)
+    if (MSVC_VERSION GREATER 1599)
+      # VS 2010 and 2012 have this problem.  If future versions fix this issue,
+      # it should still work, it just won't be as nice as the other method.
+      set(do_obj_build_rule FALSE)
+    endif()
+
+    if (do_obj_build_rule)
+      add_custom_command(
+        OUTPUT ${output_file}
+        DEPENDS ${object_files}
+        COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} -dlink ${object_files} -o ${output_file}
+        ${flags}
+        COMMENT "Building NVCC intermediate link file ${output_file_relative_path}"
+        )
+    else()
+      add_custom_command(
+        TARGET ${cuda_target}
+        PRE_LINK
+        COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
+        COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
+        )
+    endif()
  endif()
 endfunction()
 
