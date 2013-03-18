@@ -1407,20 +1407,22 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
     }
 
-  if (stripImplicitInclDirs)
+  std::vector<std::string> implicitDirs;
+  // Load implicit include directories for this language.
+  std::string impDirVar = "CMAKE_";
+  impDirVar += lang;
+  impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
+  if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
     {
-    // Load implicit include directories for this language.
-    std::string impDirVar = "CMAKE_";
-    impDirVar += lang;
-    impDirVar += "_IMPLICIT_INCLUDE_DIRECTORIES";
-    if(const char* value = this->Makefile->GetDefinition(impDirVar.c_str()))
+    std::vector<std::string> impDirVec;
+    cmSystemTools::ExpandListArgument(value, impDirVec);
+    for(std::vector<std::string>::const_iterator i = impDirVec.begin();
+        i != impDirVec.end(); ++i)
       {
-      std::vector<std::string> impDirVec;
-      cmSystemTools::ExpandListArgument(value, impDirVec);
-      for(std::vector<std::string>::const_iterator i = impDirVec.begin();
-          i != impDirVec.end(); ++i)
+      emitted.insert(*i);
+      if (!stripImplicitInclDirs)
         {
-        emitted.insert(*i);
+        implicitDirs.push_back(*i);
         }
       }
     }
@@ -1459,6 +1461,15 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       i != includes.end(); ++i)
     {
     if(emitted.insert(*i).second)
+      {
+      dirs.push_back(*i);
+      }
+    }
+
+  for(std::vector<std::string>::const_iterator i = implicitDirs.begin();
+      i != implicitDirs.end(); ++i)
+    {
+    if(std::find(includes.begin(), includes.end(), *i) != includes.end())
       {
       dirs.push_back(*i);
       }
