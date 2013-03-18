@@ -491,7 +491,7 @@ QCMakePropertyList QCMakeCacheModel::properties() const
 
       // go to the next in the tree
       while(!idxs.isEmpty() && (
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 3)
+#if QT_VERSION < QT_VERSION_CHECK(5, 1, 0)
         (idxs.last().row()+1) >= rowCount(idxs.last().parent()) ||
 #endif
         !idxs.last().sibling(idxs.last().row()+1, 0).isValid()))
