@@ -193,7 +193,8 @@ void cmTarget::DefineProperties(cmake *cm)
      "Should the target be processed with automoc (for Qt projects).",
      "AUTOMOC is a boolean specifying whether CMake will handle "
      "the Qt moc preprocessor automatically, i.e. without having to use "
-     "the QT4_WRAP_CPP() macro. Currently Qt4 is supported. "
+     "the QT4_WRAP_CPP() or QT5_WRAP_CPP() macro. Currently Qt4 and Qt5 are "
+     "supported.  "
      "When this property is set to TRUE, CMake will scan the source files "
      "at build time and invoke moc accordingly. "
      "If an #include statement like #include \"moc_foo.cpp\" is found, "
