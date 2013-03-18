@@ -686,7 +686,14 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
       find_path(QT_QTCORE_INCLUDE_DIR QtCore
                 HINTS ${qt_headers} ${QT_LIBRARY_DIR}
                 PATH_SUFFIXES QtCore qt4/QtCore
+                NO_DEFAULT_PATH
         )
+      if(NOT QT_QTCORE_INCLUDE_DIR)
+        find_path(QT_QTCORE_INCLUDE_DIR QtCore
+                  HINTS ${qt_headers} ${QT_LIBRARY_DIR}
+                  PATH_SUFFIXES QtCore qt4/QtCore
+          )
+      endif()
 
       # Set QT_HEADERS_DIR based on finding QtCore header
       if(QT_QTCORE_INCLUDE_DIR)
