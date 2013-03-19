@@ -236,9 +236,29 @@ static std::string stripExportInterface(const std::string &input,
 
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
-  while((pos = input.find("$<BUILD_INTERFACE:", lastPos)) != input.npos
-    || (pos = input.find("$<INSTALL_INTERFACE:", lastPos)) != input.npos)
+  while (true)
     {
+    std::string::size_type bPos = input.find("$<BUILD_INTERFACE:", lastPos);
+    std::string::size_type iPos = input.find("$<INSTALL_INTERFACE:", lastPos);
+
+    if (bPos == std::string::npos && iPos == std::string::npos)
+      {
+      break;
+      }
+
+    if (bPos == std::string::npos)
+      {
+      pos = iPos;
+      }
+    else if (iPos == std::string::npos)
+      {
+      pos = bPos;
+      }
+    else
+      {
+      pos = (bPos < iPos) ? bPos : iPos;
+      }
+
     result += input.substr(lastPos, pos - lastPos);
     const bool gotInstallInterface = input[pos + 2] == 'I';
     pos += gotInstallInterface ? sizeof("$<INSTALL_INTERFACE:") - 1

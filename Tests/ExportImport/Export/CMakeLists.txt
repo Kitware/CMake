@@ -148,6 +148,10 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired4,INTERFACE_INCLUDE_DIRECTORIES>>
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired5,INTERFACE_INCLUDE_DIRECTORIES>>
     $<INSTALL_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired6,INTERFACE_INCLUDE_DIRECTORIES>>
+    # The BUILD_INTERFACE entry from above is duplicated below. This is to test that
+    # the INSTALL_INTERFACE entry bound by a BUILD_INTERFACE entry on either side is
+    # preprocessed correctly on install(EXPORT).
+    $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired5,INTERFACE_INCLUDE_DIRECTORIES>>
     # Test that the below is non-fatal
     $<$<STREQUAL:one,two>:$<TARGET_PROPERTY:not_a_target,INTERFACE_INCLUDE_DIRECTORIES>>
 )
