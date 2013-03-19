@@ -46,15 +46,24 @@ set(_RUBY_POSSIBLE_EXECUTABLE_NAMES ruby)
 # if 1.9 is required, don't look for ruby18 and ruby1.8, default to version 1.8
 if(Ruby_FIND_VERSION_MAJOR  AND  Ruby_FIND_VERSION_MINOR)
    set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${RUBY_FIND_VERSION_MINOR}")
+   # we can't construct that if only major version is given
+   set(_RUBY_POSSIBLE_EXECUTABLE_NAMES
+       ruby${Ruby_FIND_VERSION_MAJOR}.${Ruby_FIND_VERSION_MINOR}
+       ruby${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION_MINOR}
+       ${_RUBY_POSSIBLE_EXECUTABLE_NAMES})
 else()
    set(Ruby_FIND_VERSION_SHORT_NODOT "18")
 endif()
 
-set(_RUBY_POSSIBLE_EXECUTABLE_NAMES ${_RUBY_POSSIBLE_EXECUTABLE_NAMES} ruby1.9 ruby19)
+if(NOT Ruby_FIND_VERSION_EXACT)
+  list(APPEND _RUBY_POSSIBLE_EXECUTABLE_NAMES ruby1.9 ruby19)
 
-# if we want a version below 1.9, also look for ruby 1.8
-if("${Ruby_FIND_VERSION_SHORT_NODOT}" VERSION_LESS "19")
-   set(_RUBY_POSSIBLE_EXECUTABLE_NAMES ${_RUBY_POSSIBLE_EXECUTABLE_NAMES} ruby1.8 ruby18)
+  # if we want a version below 1.9, also look for ruby 1.8
+  if("${Ruby_FIND_VERSION_SHORT_NODOT}" VERSION_LESS "19")
+    list(APPEND _RUBY_POSSIBLE_EXECUTABLE_NAMES ruby1.8 ruby18)
+  endif()
+
+  list(REMOVE_DUPLICATES _RUBY_POSSIBLE_EXECUTABLE_NAMES)
 endif()
 
 find_program(RUBY_EXECUTABLE NAMES ${_RUBY_POSSIBLE_EXECUTABLE_NAMES})
