@@ -2745,7 +2745,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
     }
   this->BuildInterfaceIncludesAppended = true;
 
-  if (this->Makefile->IsOn("CMAKE_BUILD_INTERFACE_INCLUDES"))
+  if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE"))
     {
     const char *binDir = this->Makefile->GetStartOutputDirectory();
     const char *srcDir = this->Makefile->GetStartDirectory();

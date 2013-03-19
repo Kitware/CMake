@@ -291,7 +291,7 @@ if(WIN32)
   install(TARGETS testLib5 RUNTIME DESTINATION bin)
 endif()
 
-add_subdirectory(sublib) # For CMAKE_BUILD_INTERFACE_INCLUDES test.
+add_subdirectory(sublib) # For CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE test.
 
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3

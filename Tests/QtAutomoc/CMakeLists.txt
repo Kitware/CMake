@@ -44,7 +44,7 @@ set_target_properties(foo codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 
 include(GenerateExportHeader)
 # The order is relevant here. B depends on A, and B headers depend on A
-# headers both subdirectories use CMAKE_BUILD_INTERFACE_INCLUDES and we
+# headers both subdirectories use CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE and we
 # test that CMAKE_AUTOMOC successfully reads the include directories
 # for the build interface from those targets. There has previously been
 # a bug where caching of the include directories happened before
