@@ -287,11 +287,20 @@ if(error_code)
   message(FATAL_ERROR \"Failed to remove directory: '${source_dir}'\")
 endif()
 
-execute_process(
-  COMMAND \"${git_EXECUTABLE}\" clone \"${git_repository}\" \"${src_name}\"
-  WORKING_DIRECTORY \"${work_dir}\"
-  RESULT_VARIABLE error_code
-  )
+# try the clone 3 times incase there is an odd git clone issue
+set(error_code 1)
+set(number_of_tries 0)
+while(error_code AND number_of_tries LESS 3)
+  execute_process(
+    COMMAND \"${git_EXECUTABLE}\" clone \"${git_repository}\" \"${src_name}\"
+    WORKING_DIRECTORY \"${work_dir}\"
+    RESULT_VARIABLE error_code
+    )
+endwhile()
+if(number_of_tries GREATER 1)
+  message(STATUS \"Had to git clone more than once:
+          \${number_of_tries} times.\")
+endif()
 if(error_code)
   message(FATAL_ERROR \"Failed to clone repository: '${git_repository}'\")
 endif()
