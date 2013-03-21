@@ -260,6 +260,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 std::string cmGlobalXCodeGenerator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName,
+                       const char *projectDir,
                        const char* additionalOptions,
                        const char *targetName,
                        const char* config,
@@ -268,6 +269,7 @@ std::string cmGlobalXCodeGenerator
 {
   // Config is not used yet
   (void) ignoreErrors;
+  (void) projectDir;
 
   // now build the test
   if(makeProgram == 0 || !strlen(makeProgram))

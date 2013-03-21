@@ -1340,11 +1340,13 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 
 std::string cmGlobalGenerator
 ::GenerateBuildCommand(const char* makeProgram, const char *projectName,
-                       const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors, bool)
+                       const char *projectDir, const char* additionalOptions,
+                       const char *targetName, const char* config,
+                       bool ignoreErrors, bool)
 {
-  // Project name and config are not used yet.
+  // Project name & dir and config are not used yet.
   (void)projectName;
+  (void)projectDir;
   (void)config;
 
   std::string makeCommand =
@@ -1411,7 +1413,7 @@ int cmGlobalGenerator::Build(
   if (clean)
     {
     std::string cleanCommand =
-      this->GenerateBuildCommand(makeCommandCSTR, projectName,
+      this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
       0, "clean", config, false, fast);
     if(output)
       {
@@ -1443,7 +1445,7 @@ int cmGlobalGenerator::Build(
 
   // now build
   std::string makeCommand =
-    this->GenerateBuildCommand(makeCommandCSTR, projectName,
+    this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
                                extraOptions, target,
                                config, false, fast);
   if(output)

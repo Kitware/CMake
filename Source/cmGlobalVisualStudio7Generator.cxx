@@ -56,10 +56,12 @@ void cmGlobalVisualStudio7Generator
 
 std::string cmGlobalVisualStudio7Generator
 ::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName,
+                       const char *projectName, const char *projectDir,
                        const char* additionalOptions, const char *targetName,
                        const char* config, bool ignoreErrors, bool)
 {
+  // Visual studio 7 doesn't need project dir
+  (void) projectDir;
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;
 

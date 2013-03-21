@@ -133,7 +133,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string buildCommand
         = this->GlobalGenerator->
         GenerateBuildCommand(cmakeMakeProgram,
-                             cmakeProjectName,
+                             cmakeProjectName, 0,
                              cmakeBuildAdditionalFlags, cmakeBuildTarget,
                              cmakeBuildConfiguration, true, false);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
