@@ -215,7 +215,7 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
 
 std::string cmGlobalVisualStudio10Generator
 ::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName,
+                       const char *projectName, const char *projectDir,
                        const char* additionalOptions, const char *targetName,
                        const char* config, bool ignoreErrors, bool fast)
 {
@@ -230,7 +230,8 @@ std::string cmGlobalVisualStudio10Generator
       lowerCaseCommand.find("VCExpress") != std::string::npos)
     {
     return cmGlobalVisualStudio7Generator::GenerateBuildCommand(makeProgram,
-      projectName, additionalOptions, targetName, config, ignoreErrors, fast);
+      projectName, projectDir, additionalOptions, targetName, config,
+      ignoreErrors, fast);
     }
 
   // Otherwise, assume MSBuild command line, and construct accordingly.
