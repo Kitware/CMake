@@ -280,3 +280,9 @@ endif()
 if(NOT ST_NINE STREQUAL "9")
   message(SEND_ERROR "SUBSTRING does not return the tail when selected with -1")
 endif()
+
+string(MAKE_C_IDENTIFIER "1one-two$" MCI_1)
+
+if(NOT MCI_1 STREQUAL _1one_two_)
+  message(SEND_ERROR "MAKE_C_IDENTIFIER did not create expected result.")
+endif()
