@@ -39,6 +39,7 @@ cmExtraEclipseCDT4Generator
 
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
+  this->SupportsGmakeErrorParser = true;
 }
 
 //----------------------------------------------------------------------------
@@ -76,6 +77,10 @@ void cmExtraEclipseCDT4Generator::Generate()
       if (version < 3006) // 3.6 is Helios
         {
         this->SupportsVirtualFolders = false;
+        }
+      if (version < 3007) // 3.7 is Indigo
+        {
+        this->SupportsGmakeErrorParser = false;
         }
       }
     }
@@ -403,8 +408,17 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     {
     fout << "org.eclipse.cdt.core.ICCErrorParser;";
     }
+
+  if (this->SupportsGmakeErrorParser)
+    {
+    fout << "org.eclipse.cdt.core.GmakeErrorParser;";
+    }
+  else
+    {
+    fout << "org.eclipse.cdt.core.MakeErrorParser;";
+    }
+
   fout <<
-    "org.eclipse.cdt.core.MakeErrorParser;"
     "org.eclipse.cdt.core.GCCErrorParser;"
     "org.eclipse.cdt.core.GASErrorParser;"
     "org.eclipse.cdt.core.GLDErrorParser;"
