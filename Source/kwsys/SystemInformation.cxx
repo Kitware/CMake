@@ -130,7 +130,7 @@ typedef int siginfo_t;
 #   define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 #  endif
 # endif
-# if defined(__GNUG__)
+# if defined(__GNUC__)
 #  include <execinfo.h>
 #  if !(defined(__LSB_VERSION__) && __LSB_VERSION__ < 41)
 #   define KWSYS_SYSTEMINFORMATION_HAVE_BACKTRACE
