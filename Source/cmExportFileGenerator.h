@@ -107,6 +107,11 @@ protected:
                                  ImportPropertyMap &properties);
   void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
                                    const ImportPropertyMap &properties);
+  void PopulateIncludeDirectoriesInterface(
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets);
 
   void SetImportLinkInterface(const char* config, std::string const& suffix,
                     cmGeneratorExpression::PreprocessContext preprocessRule,
