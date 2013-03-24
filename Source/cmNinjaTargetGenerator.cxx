@@ -228,16 +228,13 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
   // Add preprocessor definitions for this target and configuration.
   this->LocalGenerator->AppendDefines
     (defines,
-     this->Target->GetCompileDefinitions());
+     this->Target->GetCompileDefinitions(this->GetConfigName()));
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(this->GetConfigName());
-  this->LocalGenerator->AppendDefines
-    (defines,
-     this->Target->GetCompileDefinitions(this->GetConfigName()));
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty(defPropName.c_str()));

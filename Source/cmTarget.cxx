@@ -2942,29 +2942,33 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 //----------------------------------------------------------------------------
 std::string cmTarget::GetCompileDefinitions(const char *config)
 {
-  std::string defPropName = "COMPILE_DEFINITIONS";
+  const char *configProp = 0;
   if (config)
     {
-    defPropName += "_" + cmSystemTools::UpperCase(config);
+    std::string configPropName;
+    configPropName = "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
+    configProp = this->GetProperty(configPropName.c_str());
     }
 
-  const char *prop = this->GetProperty(defPropName.c_str());
+  const char *noconfigProp = this->GetProperty("COMPILE_DEFINITIONS");
   cmListFileBacktrace lfbt;
   cmGeneratorExpressionDAGChecker dagChecker(lfbt,
                                             this->GetName(),
-                                            defPropName, 0, 0);
+                                            "COMPILE_DEFINITIONS", 0, 0);
 
-  std::string result;
-  if (prop)
+  std::string defsString = (noconfigProp ? noconfigProp : "");
+  if (configProp && noconfigProp)
     {
-    cmGeneratorExpression ge(lfbt);
-
-    result = ge.Parse(prop)->Evaluate(this->Makefile,
-                                  config,
-                                  false,
-                                  this,
-                                  &dagChecker);
+    defsString += ";";
     }
+  defsString += (configProp ? configProp : "");
+
+  cmGeneratorExpression ge(lfbt);
+  std::string result = ge.Parse(defsString.c_str())->Evaluate(this->Makefile,
+                                config,
+                                false,
+                                this,
+                                &dagChecker);
 
   std::vector<std::string> libs;
   this->GetDirectLinkLibraries(config, libs, this);

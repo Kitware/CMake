@@ -1702,7 +1702,7 @@ void cmLocalVisualStudio6Generator
 
     this->AppendDefines(
       definesSet,
-      target.GetCompileDefinitions());
+      target.GetCompileDefinitions(0));
     this->AppendDefines(
       debugDefinesSet,
       target.GetCompileDefinitions("DEBUG"));
