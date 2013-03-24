@@ -174,9 +174,14 @@ set_property(TARGET testSharedLibRequired
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
 )
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/testSharedLibRequired.h"
+  "${CMAKE_CURRENT_BINARY_DIR}/testsharedlibrequired_export.h"
+    DESTINATION include/testSharedLibRequired
+)
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
-                                "${CMAKE_CURRENT_SOURCE_DIR}"
+  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/testSharedLibRequired>"
+                                "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
 )
 set_property(TARGET testSharedLibRequired
   APPEND PROPERTY
@@ -204,6 +209,15 @@ generate_export_header(testSharedLibDepends)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES
     $<TARGET_PROPERTY:testSharedLibRequired,INTERFACE_INCLUDE_DIRECTORIES>
+)
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/testSharedLibDepends.h"
+  "${CMAKE_CURRENT_BINARY_DIR}/testsharedlibdepends_export.h"
+    DESTINATION include/testSharedLibDepends
+)
+set_property(TARGET testSharedLibDepends APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/testSharedLibDepends>"
+                                "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
 )
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   LINK_INTERFACE_LIBRARIES
