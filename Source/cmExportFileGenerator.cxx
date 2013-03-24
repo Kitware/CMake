@@ -24,6 +24,7 @@
 #include "cmComputeLinkInformation.h"
 
 #include <cmsys/auto_ptr.hxx>
+#include <assert.h>
 
 //----------------------------------------------------------------------------
 cmExportFileGenerator::cmExportFileGenerator()
@@ -164,6 +165,115 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
                                                  missingTargets);
       properties[outputName] = prepro;
       }
+    }
+}
+
+//----------------------------------------------------------------------------
+static bool isSubDirectory(const char* a, const char* b)
+{
+  return (cmSystemTools::ComparePath(a, b) ||
+          cmSystemTools::IsSubDirectory(a, b));
+}
+
+//----------------------------------------------------------------------------
+static bool checkInterfaceDirs(const std::string &prepro,
+                      cmTarget *target)
+{
+  const char* installDir = target->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+  const char* topSourceDir = target->GetMakefile()->GetHomeDirectory();
+  const char* topBinaryDir = target->GetMakefile()->GetHomeOutputDirectory();
+
+  std::vector<std::string> parts;
+  cmGeneratorExpression::Split(prepro, parts);
+
+  const bool inSourceBuild = strcmp(topSourceDir, topBinaryDir) == 0;
+
+  for(std::vector<std::string>::iterator li = parts.begin();
+      li != parts.end(); ++li)
+    {
+    if (cmGeneratorExpression::Find(*li) != std::string::npos)
+      {
+      continue;
+      }
+    if (strncmp(li->c_str(), "${_IMPORT_PREFIX}", 17) == 0)
+      {
+      continue;
+      }
+    if (!cmSystemTools::FileIsFullPath(li->c_str()))
+      {
+      cmOStringStream e;
+      e << "Target \"" << target->GetName() << "\" "
+           "INTERFACE_INCLUDE_DIRECTORIES property contains relative path:\n"
+           "  \"" << *li << "\"";
+      target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
+                                          e.str().c_str());
+      return false;
+      }
+    if (isSubDirectory(li->c_str(), installDir))
+      {
+      continue;
+      }
+    if (isSubDirectory(li->c_str(), topBinaryDir))
+      {
+      cmOStringStream e;
+      e << "Target \"" << target->GetName() << "\" "
+           "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
+           "  \"" << *li << "\"\nwhich is prefixed in the build directory.";
+      target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
+                                          e.str().c_str());
+      return false;
+      }
+    if (!inSourceBuild)
+      {
+      if (isSubDirectory(li->c_str(), topSourceDir))
+        {
+        cmOStringStream e;
+        e << "Target \"" << target->GetName() << "\" "
+            "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
+            "  \"" << *li << "\"\nwhich is prefixed in the source directory.";
+        target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
+                                            e.str().c_str());
+        return false;
+        }
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
+                      cmTarget *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets)
+{
+  assert(preprocessRule == cmGeneratorExpression::InstallInterface);
+
+  const char *propName = "INTERFACE_INCLUDE_DIRECTORIES";
+  const char *input = target->GetProperty(propName);
+  if (!input)
+    {
+    return;
+    }
+  if (!*input)
+    {
+    // Set to empty
+    properties[propName] = "";
+    return;
+    }
+
+  std::string prepro = cmGeneratorExpression::Preprocess(input,
+                                                          preprocessRule);
+  if (!prepro.empty())
+    {
+    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+                                                missingTargets);
+
+    if (!checkInterfaceDirs(prepro, target))
+      {
+      return;
+      }
+    properties[propName] = prepro;
     }
 }
 
