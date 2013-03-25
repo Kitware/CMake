@@ -296,6 +296,7 @@ while(error_code AND number_of_tries LESS 3)
     WORKING_DIRECTORY \"${work_dir}\"
     RESULT_VARIABLE error_code
     )
+  math(EXPR number_of_tries \"\${number_of_tries} + 1\")
 endwhile()
 if(number_of_tries GREATER 1)
   message(STATUS \"Had to git clone more than once:
