@@ -1220,8 +1220,6 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   clOptions.AddFlag("PrecompiledHeader", "NotUsing");
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
-  clOptions.AddDefines(
-                     this->Target->GetCompileDefinitions().c_str());
   clOptions.AddDefines(this->Target->GetCompileDefinitions(
                                                 configName.c_str()).c_str());
   clOptions.SetVerboseMakefile(
