@@ -45,6 +45,30 @@ enum {
 // TEST_GENERATOR_EXPRESSIONS
 #endif
 
+#ifndef BUILD_IS_DEBUG
+# error "BUILD_IS_DEBUG not defined!"
+#endif
+#ifndef BUILD_IS_NOT_DEBUG
+# error "BUILD_IS_NOT_DEBUG not defined!"
+#endif
+
+// Check per-config definitions.
+#ifdef TEST_CONFIG_DEBUG
+# if !BUILD_IS_DEBUG
+#  error "BUILD_IS_DEBUG false with TEST_CONFIG_DEBUG!"
+# endif
+# if BUILD_IS_NOT_DEBUG
+#  error "BUILD_IS_NOT_DEBUG true with TEST_CONFIG_DEBUG!"
+# endif
+#else
+# if BUILD_IS_DEBUG
+#  error "BUILD_IS_DEBUG true without TEST_CONFIG_DEBUG!"
+# endif
+# if !BUILD_IS_NOT_DEBUG
+#  error "BUILD_IS_NOT_DEBUG false without TEST_CONFIG_DEBUG!"
+# endif
+#endif
+
 int main(int argc, char **argv)
 {
   return 0;
