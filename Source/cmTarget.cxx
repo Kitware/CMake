@@ -2830,7 +2830,7 @@ static void processIncludeDirectories(cmTarget *tgt,
         {
         cmOStringStream e;
         e << "Imported target \"" << (*it)->TargetName << "\" includes "
-             "non-existent path \"" << *li << "\" in its "
+             "non-existent path\n  \"" << *li << "\"\nin its "
              "INTERFACE_INCLUDE_DIRECTORIES. Possible reasons include:\n"
              "* The path was deleted, renamed, or moved to another "
              "location.\n"
