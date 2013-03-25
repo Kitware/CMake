@@ -131,11 +131,13 @@ public:
   SourceEntriesType SourceEntries;
 
   struct IncludeDirectoriesEntry {
-    IncludeDirectoriesEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge)
-      : ge(cge)
+    IncludeDirectoriesEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
+      const std::string &targetName = std::string())
+      : ge(cge), TargetName(targetName)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
     std::vector<std::string> CachedIncludes;
+    const std::string TargetName;
   };
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
@@ -2818,6 +2820,28 @@ static void processIncludeDirectories(cmTarget *tgt,
     for(std::vector<std::string>::iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
       {
+      cmTarget *dependentTarget =
+                              mf->FindTargetToUse((*it)->TargetName.c_str());
+
+      const bool fromImported = dependentTarget
+                             && dependentTarget->IsImported();
+
+      if (fromImported && !cmSystemTools::FileExists(li->c_str()))
+        {
+        cmOStringStream e;
+        e << "Imported target \"" << (*it)->TargetName << "\" includes "
+             "non-existent path \"" << *li << "\" in its "
+             "INTERFACE_INCLUDE_DIRECTORIES. Possible reasons include:\n"
+             "* The path was deleted, renamed, or moved to another "
+             "location.\n"
+             "* An install or uninstall procedure did not complete "
+             "successfully.\n"
+             "* The installation package was faulty and references files it "
+             "does not provide.\n";
+        tgt->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+        return;
+        }
+
       if (testIsOff && !cmSystemTools::IsOff(li->c_str()))
         {
         cmSystemTools::ConvertToUnixSlashes(*li);
@@ -2913,7 +2937,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                               it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
 
       this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries.push_back(
-                        new cmTargetInternals::IncludeDirectoriesEntry(cge));
+                        new cmTargetInternals::IncludeDirectoriesEntry(cge,
+                                                              it->Value));
       }
     }
 
