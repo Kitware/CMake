@@ -203,8 +203,8 @@ static bool checkInterfaceDirs(const std::string &prepro,
       {
       cmOStringStream e;
       e << "Target \"" << target->GetName() << "\" "
-           "INTERFACE_INCLUDE_DIRECTORIES property contains relative path \""
-        << *li << "\".";
+           "INTERFACE_INCLUDE_DIRECTORIES property contains relative path:\n"
+           "  \"" << *li << "\"";
       target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
                                           e.str().c_str());
       return false;
@@ -217,8 +217,8 @@ static bool checkInterfaceDirs(const std::string &prepro,
       {
       cmOStringStream e;
       e << "Target \"" << target->GetName() << "\" "
-           "INTERFACE_INCLUDE_DIRECTORIES property contains path \""
-        << *li << "\" which is prefixed in the build directory.";
+           "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
+           "  \"" << *li << "\"\nwhich is prefixed in the build directory.";
       target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
                                           e.str().c_str());
       return false;
@@ -229,8 +229,8 @@ static bool checkInterfaceDirs(const std::string &prepro,
         {
         cmOStringStream e;
         e << "Target \"" << target->GetName() << "\" "
-            "INTERFACE_INCLUDE_DIRECTORIES property contains path \""
-          << *li << "\" which is prefixed in the source directory.";
+            "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
+            "  \"" << *li << "\"\nwhich is prefixed in the source directory.";
         target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
                                             e.str().c_str());
         return false;
