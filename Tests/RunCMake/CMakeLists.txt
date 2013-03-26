@@ -77,7 +77,7 @@ add_RunCMake_test(CMP0004)
 
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)
-if (QT4_FOUND AND Qt5Core_FOUND AND Qt5Core_VERSION VERSION_GREATER 5.0.2)
+if (QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)
   add_RunCMake_test(IncompatibleQt)
 endif()
 
