@@ -191,6 +191,7 @@ cmTarget::cmTarget()
   this->PolicyStatusCMP0004 = cmPolicies::WARN;
   this->PolicyStatusCMP0008 = cmPolicies::WARN;
   this->PolicyStatusCMP0020 = cmPolicies::WARN;
+  this->PolicyStatusCMP0021 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -1568,6 +1569,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0008);
   this->PolicyStatusCMP0020 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0020);
+  this->PolicyStatusCMP0021 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0021);
 }
 
 //----------------------------------------------------------------------------
@@ -2876,14 +2879,41 @@ static void processIncludeDirectories(cmTarget *tgt,
 
       if (!cmSystemTools::FileIsFullPath(li->c_str()))
         {
+        cmOStringStream e;
+        bool noMessage = false;
+        cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (!(*it)->TargetName.empty())
           {
-          cmOStringStream e;
           e << "Target \"" << (*it)->TargetName << "\" contains relative "
             "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
             "  \"" << *li << "\" ";
-          tgt->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
-                                           e.str().c_str());
+          }
+        else
+          {
+          switch(tgt->GetPolicyStatusCMP0021())
+            {
+            case cmPolicies::WARN:
+              {
+              cmOStringStream w;
+              e << (mf->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0021)) << "\n";
+              messageType = cmake::AUTHOR_WARNING;
+              }
+              break;
+            case cmPolicies::OLD:
+              noMessage = true;
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::NEW:
+              // Issue the fatal message.
+              break;
+            }
+          e << "Found relative path while evaluating include directories of "
+          "\"" << tgt->GetName() << "\":\n  \"" << *li << "\"\n";
+          }
+        if (!noMessage)
+          {
+          tgt->GetMakefile()->IssueMessage(messageType, e.str().c_str());
           return;
           }
         }
