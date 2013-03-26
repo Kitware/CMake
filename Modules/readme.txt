@@ -7,21 +7,26 @@ We would like all FindXxx.cmake files to produce consistent variable names.
 
 Please use the following consistent variable names for general use.
 
-Xxx_INCLUDE_DIRS        The final set of include directories listed in one variable for use by client code.  This should not be a cache entry.
-Xxx_LIBRARIES           The libraries to link against to use Xxx. These should include full paths.  This should not be a cache entry.
-Xxx_DEFINITIONS         Definitions to use when compiling code that uses Xxx. This really shouldn't include options such as (-DHAS_JPEG)that a client source-code file uses to decide whether to #include <jpeg.h>
+Xxx_INCLUDE_DIRS        The final set of include directories listed in one variable for use by client code.
+                        This should not be a cache entry.
+Xxx_LIBRARIES           The libraries to link against to use Xxx. These should include full paths.
+                        This should not be a cache entry.
+Xxx_DEFINITIONS         Definitions to use when compiling code that uses Xxx. This really shouldn't include options such
+                        as (-DHAS_JPEG)that a client source-code file uses to decide whether to #include <jpeg.h>
 Xxx_EXECUTABLE          Where to find the Xxx tool.
 Xxx_Yyy_EXECUTABLE      Where to find the Yyy tool that comes with Xxx.
-Xxx_LIBRARY_DIRS        Optionally, the final set of library directories listed in one variable for use by client code.  This should not be a cache entry.
+Xxx_LIBRARY_DIRS        Optionally, the final set of library directories listed in one variable for use by client code.
+                        This should not be a cache entry.
 Xxx_ROOT_DIR            Where to find the base directory of Xxx.
 Xxx_VERSION_Yy          Expect Version Yy if true. Make sure at most one of these is ever true.
-Xxx_WRAP_Yy             If False, do not try to use the relevent CMake wrapping command.
+Xxx_WRAP_Yy             If False, do not try to use the relevant CMake wrapping command.
 Xxx_Yy_FOUND            If False, optional Yy part of Xxx sytem is not available.
 Xxx_FOUND               Set to false, or undefined, if we haven't found, or don't want to use Xxx.
 Xxx_NOT_FOUND_MESSAGE   Should be set by config-files in the case that it has set Xxx_FOUND to FALSE.
                         The contained message will be printed by the find_package() command and by
                         find_package_handle_standard_args() to inform the user about the problem.
-Xxx_RUNTIME_LIBRARY_DIRS Optionally, the runtime library search path for use when running an executable linked to shared libraries.
+Xxx_RUNTIME_LIBRARY_DIRS Optionally, the runtime library search path for use when running an executable linked to
+                         shared libraries.
                          The list should be used by user code to create the PATH on windows or LD_LIBRARY_PATH on unix.
                          This should not be a cache entry.
 Xxx_VERSION_STRING      A human-readable string containing the version of the package found, if any.
@@ -29,22 +34,32 @@ Xxx_VERSION_MAJOR       The major version of the package found, if any.
 Xxx_VERSION_MINOR       The minor version of the package found, if any.
 Xxx_VERSION_PATCH       The patch version of the package found, if any.
 
-You do not have to provide all of the above variables. You should provide Xxx_FOUND under most circumstances. If Xxx is a library, then  Xxx_LIBRARIES, should also be defined, and Xxx_INCLUDE_DIRS should usually be defined (I guess libm.a might be an exception)
+You do not have to provide all of the above variables. You should provide Xxx_FOUND under most circumstances.
+If Xxx is a library, then  Xxx_LIBRARIES, should also be defined, and Xxx_INCLUDE_DIRS should usually be
+defined (I guess libm.a might be an exception)
 
-The following names should not usually be used in CMakeLists.txt files, but they may be usefully modified in users' CMake Caches to control stuff.
+The following names should not usually be used in CMakeLists.txt files, but they may be usefully modified in
+users' CMake Caches to control stuff.
 
 Xxx_LIBRARY             Name of Xxx Library. A User may set this and Xxx_INCLUDE_DIR to ignore to force non-use of Xxx.
 Xxx_Yy_LIBRARY          Name of Yy library that is part of the Xxx system. It may or may not be required to use Xxx.
-Xxx_INCLUDE_DIR         Where to find xxx.h, etc.  (Xxx_INCLUDE_PATH was considered bad because a path includes an actual filename.)
+Xxx_INCLUDE_DIR         Where to find xxx.h, etc.  (Xxx_INCLUDE_PATH was considered bad because a path includes an
+                        actual filename.)
 Xxx_Yy_INCLUDE_DIR      Where to find xxx_yy.h, etc.
 
-For tidiness's sake, try to keep as many options as possible out of the cache, leaving at least one option which can be used to disable use of the module, or locate a not-found library (e.g. Xxx_ROOT_DIR). For the same reason, mark most cache options as advanced.
+For tidiness's sake, try to keep as many options as possible out of the cache, leaving at least one option which can be
+used to disable use of the module, or locate a not-found library (e.g. Xxx_ROOT_DIR).
+For the same reason, mark most cache options as advanced.
 
-If you need other commands to do special things then it should still begin with Xxx_. This gives a sort of namespace effect and keeps things tidy for the user. You should put comments describing all the exported settings, plus descriptions of any the users can use to control stuff.
+If you need other commands to do special things then it should still begin with Xxx_. This gives a sort of namespace
+effect and keeps things tidy for the user. You should put comments describing all the exported settings, plus
+descriptions of any the users can use to control stuff.
 
-You really should also provide backwards compatibility any old settings that were actually in use. Make sure you comment them as deprecated, so that no-one starts using them.
+You really should also provide backwards compatibility any old settings that were actually in use.
+Make sure you comment them as deprecated, so that no-one starts using them.
 
-To correctly document a module, create a comment block at the top with # comments.  There are three types of comments that can be in the block:
+To correctly document a module, create a comment block at the top with # comments.
+There are three types of comments that can be in the block:
 
 1. The brief description of the module, this is done by:
 # - a small description
