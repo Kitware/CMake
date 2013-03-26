@@ -621,7 +621,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                   ->GetGeneratorTarget(target);
 
     // the compilerdefines for this target
-    std::string cdefs = target->GetCompileDefinitions();
+    std::string cdefs = target->GetCompileDefinitions(buildType);
 
     if(!cdefs.empty())
       {
@@ -640,10 +640,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     std::set<std::string> uniqIncludeDirs;
 
     std::vector<std::string> includes;
-    const char *config = target->GetMakefile()
-                               ->GetDefinition("CMAKE_BUILD_TYPE");
     target->GetMakefile()->GetLocalGenerator()->
-      GetIncludeDirectories(includes, gtgt, "C", config);
+      GetIncludeDirectories(includes, gtgt, "C", buildType);
     for(std::vector<std::string>::const_iterator dirIt=includes.begin();
         dirIt != includes.end();
         ++dirIt)

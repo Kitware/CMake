@@ -14,3 +14,8 @@ set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS
     "$<0:GE_NOT_DEFINED>"
     "$<1:ARGUMENT;LIST>"
 )
+
+set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS
+  BUILD_IS_DEBUG=$<CONFIG:Debug>
+  BUILD_IS_NOT_DEBUG=$<NOT:$<CONFIG:Debug>>
+  )
