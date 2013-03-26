@@ -81,7 +81,14 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
 void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-  fout << "# Visual Studio 11\n";
+  if (this->ExpressEdition)
+    {
+    fout << "# Visual Studio Express 2012 for Windows Desktop\n";
+    }
+  else
+    {
+    fout << "# Visual Studio 2012\n";
+    }
 }
 
 //----------------------------------------------------------------------------
