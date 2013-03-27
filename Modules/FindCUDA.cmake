@@ -920,7 +920,13 @@ function(CUDA_COMPUTE_BUILD_PATH path build_path)
   if (IS_ABSOLUTE "${bpath}")
     # Absolute paths are generally unnessary, especially if something like
     # file(GLOB_RECURSE) is used to pick up the files.
-    file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+
+    string(FIND "${bpath}" "${CMAKE_CURRENT_BINARY_DIR}" _binary_dir_pos)
+    if (_binary_dir_pos EQUAL 0)
+      file(RELATIVE_PATH bpath "${CMAKE_CURRENT_BINARY_DIR}" "${bpath}")
+    else()
+      file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+    endif()
   endif()
 
   # This recipie is from cmLocalGenerator::CreateSafeUniqueObjectFileName in the
