@@ -2842,6 +2842,20 @@ static void processIncludeDirectories(cmTarget *tgt,
         return;
         }
 
+      if (!cmSystemTools::FileIsFullPath(li->c_str()))
+        {
+        if (!(*it)->TargetName.empty())
+          {
+          cmOStringStream e;
+          e << "Target \"" << (*it)->TargetName << "\" contains relative "
+            "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
+            "  \"" << *li << "\" ";
+          tgt->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
+                                           e.str().c_str());
+          return;
+          }
+        }
+
       if (testIsOff && !cmSystemTools::IsOff(li->c_str()))
         {
         cmSystemTools::ConvertToUnixSlashes(*li);
