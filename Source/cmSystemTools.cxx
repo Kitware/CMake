@@ -203,13 +203,13 @@ std::string cmSystemTools::EscapeQuotes(const char* str)
 std::string cmSystemTools::TrimWhitespace(const std::string& s)
 {
   std::string::const_iterator start = s.begin();
-  while(start != s.end() && *start == ' ')
+  while(start != s.end() && *start <= ' ')
     ++start;
   if (start == s.end())
     return "";
 
   std::string::const_iterator stop = s.end()-1;
-  while(*stop == ' ')
+  while(*stop <= ' ')
     --stop;
   return std::string(start, stop+1);
 }
