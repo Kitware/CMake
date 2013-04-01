@@ -17,6 +17,10 @@
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+# include "cmLocalVisualStudioGenerator.h"
+#endif
+
 #include <cmsys/Terminal.h>
 #include <cmsys/ios/sstream>
 
@@ -182,14 +186,44 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   std::string automocComment = "Automoc for target ";
   automocComment += targetName;
 
-  cmTarget* automocTarget = makefile->AddUtilityCommand(
-                              automocTargetName.c_str(), true,
-                              workingDirectory.c_str(), depends,
-                              commandLines, false, automocComment.c_str());
-  // inherit FOLDER property from target (#13688)
-  copyTargetProperty(automocTarget, target, "FOLDER");
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  bool usePRE_BUILD = false;
+  cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
+  if(strstr(gg->GetName(), "Visual Studio"))
+    {
+    cmLocalVisualStudioGenerator* vslg =
+      static_cast<cmLocalVisualStudioGenerator*>(localGen);
+    // Under VS >= 7 use a PRE_BUILD event instead of a separate target to
+    // reduce the number of targets loaded into the IDE.
+    // This also works around a VS 11 bug that may skip updating the target:
+    //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
+    usePRE_BUILD = vslg->GetVersion() >= cmLocalVisualStudioGenerator::VS7;
+    }
+  if(usePRE_BUILD)
+    {
+    // Add the pre-build command directly to bypass the OBJECT_LIBRARY
+    // rejection in cmMakefile::AddCustomCommandToTarget because we know
+    // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
+    std::vector<std::string> no_output;
+    cmCustomCommand cc(makefile, no_output, depends,
+                       commandLines, automocComment.c_str(),
+                       workingDirectory.c_str());
+    cc.SetEscapeOldStyle(false);
+    cc.SetEscapeAllowMakeVars(true);
+    target->GetPreBuildCommands().push_back(cc);
+    }
+  else
+#endif
+    {
+    cmTarget* automocTarget = makefile->AddUtilityCommand(
+                                automocTargetName.c_str(), true,
+                                workingDirectory.c_str(), depends,
+                                commandLines, false, automocComment.c_str());
+    // inherit FOLDER property from target (#13688)
+    copyTargetProperty(automocTarget, target, "FOLDER");
 
-  target->AddUtility(automocTargetName.c_str());
+    target->AddUtility(automocTargetName.c_str());
+    }
 
   // configure a file to get all information to automoc at buildtime:
   std::string _moc_files;
