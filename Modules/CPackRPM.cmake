@@ -163,6 +163,8 @@
 #     May be set by the user in order to specify a USER binary spec file
 #     to be used by CPackRPM instead of generating the file.
 #     The specified file will be processed by configure_file( @ONLY).
+#     One can provide a component specific file by setting
+#     CPACK_RPM_<componentName>_USER_BINARY_SPECFILE.
 ##end
 ##variable
 #  CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE - Spec file template.
@@ -832,11 +834,18 @@ if(CPACK_RPM_PACKAGE_DEBUG)
    message("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
 endif()
 
-# USER generated spec file handling.
-# We should generate a spec file template:
+#
+# USER generated/provided spec file handling.
+#
+
+# We can have a component specific spec file.
+if(CPACK_RPM_PACKAGE_COMPONENT AND CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE)
+  set(CPACK_RPM_USER_BINARY_SPECFILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE})
+endif()
+
+# We should generate a USER spec file template:
 #  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
 #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
-#
 if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
    file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
       "# -*- rpm-spec -*-
@@ -902,9 +911,9 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-${CPACK_RPM_INSTALL_FILES}
-${CPACK_RPM_ABSOLUTE_INSTALL_FILES}
-${CPACK_RPM_USER_INSTALL_FILES}
+\@CPACK_RPM_INSTALL_FILES\@
+\@CPACK_RPM_ABSOLUTE_INSTALL_FILES\@
+\@CPACK_RPM_USER_INSTALL_FILES\@
 
 %changelog
 \@CPACK_RPM_SPEC_CHANGELOG\@
