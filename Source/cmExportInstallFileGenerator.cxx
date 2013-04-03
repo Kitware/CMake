@@ -76,33 +76,36 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     {
     std::string installPrefix =
       this->IEGen->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-    std::string absDest = installPrefix + "/" + installDest + "/";
-    if(strncmp(absDest.c_str(), "/lib/", 5) == 0 ||
-       strncmp(absDest.c_str(), "/lib64/", 7) == 0 ||
-       strncmp(absDest.c_str(), "/usr/lib/", 9) == 0 ||
-       strncmp(absDest.c_str(), "/usr/lib64/", 11) == 0)
+    std::string absDest = installPrefix + "/" + installDest;
+    std::string absDestS = absDest + "/";
+    os << "# Compute the installation prefix relative to this file.\n"
+       << "get_filename_component(_IMPORT_PREFIX"
+       << " \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
+    if(strncmp(absDestS.c_str(), "/lib/", 5) == 0 ||
+       strncmp(absDestS.c_str(), "/lib64/", 7) == 0 ||
+       strncmp(absDestS.c_str(), "/usr/lib/", 9) == 0 ||
+       strncmp(absDestS.c_str(), "/usr/lib64/", 11) == 0)
       {
-      // Assume this is a build for system package installation rather than a
-      // relocatable distribution.  Use an absolute prefix because some Linux
-      // distros symlink /lib to /usr/lib which confuses the relative path
-      // computation below if we generate for /lib under one prefix and but the
-      // file is loaded from another.
-      os << "set(_IMPORT_PREFIX \"" << installPrefix << "\")\n";
+      // Handle "/usr move" symlinks created by some Linux distros.
+      os <<
+        "# Use original install prefix when loaded through a\n"
+        "# cross-prefix symbolic link such as /lib -> /usr/lib.\n"
+        "get_filename_component(_realCurr \"${_IMPORT_PREFIX}\" REALPATH)\n"
+        "get_filename_component(_realOrig \"" << absDest << "\" REALPATH)\n"
+        "if(_realCurr STREQUAL _realOrig)\n"
+        "  set(_IMPORT_PREFIX \"" << absDest << "\")\n"
+        "endif()\n"
+        "unset(_realOrig)\n"
+        "unset(_realCurr)\n";
       }
-    else
+    std::string dest = installDest;
+    while(!dest.empty())
       {
-      std::string dest = installDest;
-      os << "# Compute the installation prefix relative to this file.\n"
-         << "get_filename_component(_IMPORT_PREFIX "
-         << "\"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
-      while(!dest.empty())
-        {
-        os <<
-         "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
-        dest = cmSystemTools::GetFilenamePath(dest);
-        }
-      os << "\n";
+      os <<
+        "get_filename_component(_IMPORT_PREFIX \"${_IMPORT_PREFIX}\" PATH)\n";
+      dest = cmSystemTools::GetFilenamePath(dest);
       }
+    os << "\n";
 
     // Import location properties may reference this variable.
     this->ImportPrefix = "${_IMPORT_PREFIX}/";
