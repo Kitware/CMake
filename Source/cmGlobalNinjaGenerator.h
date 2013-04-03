@@ -320,6 +320,7 @@ private:
   void WriteAssumedSourceDependencies();
 
   void WriteTargetAliases(std::ostream& os);
+  void WriteUnkownCustomDependencies(std::ostream& os);
 
   void WriteBuiltinTargets(std::ostream& os);
   void WriteTargetAll(std::ostream& os);
@@ -356,6 +357,14 @@ private:
 
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
+
+  /// the set of custom command files dependencies we have seen.
+  std::set<std::string> CustomCommandFileDependencies;
+
+  /// the set of custom command files dependencies that we haven't
+  /// been able to find ownership of. These are presumed to be
+  /// created as a side effect of some custom command
+  std::set<std::string> UnkownCustomCommandFileDependencies;
 
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string> > AssumedSourceDependencies;
