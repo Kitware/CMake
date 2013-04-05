@@ -123,6 +123,19 @@ add_custom_command(
   COMMENT "Running TDocument post-build commands"
   )
 
+# Setup a custom target that will fail if the POST_BUILD custom command
+# isn't run before it.
+add_custom_command(
+  OUTPUT doc3post.txt
+  DEPENDS ${PROJECT_BINARY_DIR}/doc2post.txt
+  COMMAND ${CMAKE_COMMAND} -E echo " Copying doc2pre.txt to doc3post.txt."
+  COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc2post.txt
+                                   ${PROJECT_BINARY_DIR}/doc3post.txt
+  COMMENT "Running TDocument post-build dependent custom command"
+  )
+add_custom_target(doc3Post ALL DEPENDS doc3post.txt)
+add_dependencies(doc3Post TDocument)
+
 ################################################################
 #
 #  Test using a multistep generated file
