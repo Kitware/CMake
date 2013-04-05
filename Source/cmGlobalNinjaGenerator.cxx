@@ -264,7 +264,7 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
 //
 for(cmNinjaDeps::const_iterator i=deps.begin(); i != deps.end(); ++i)
   {
-  this->UnkownCustomCommandFileDependencies.insert(*i);
+  this->UnknownCustomCommandFileDependencies.insert(*i);
   }
 }
 
@@ -485,7 +485,7 @@ void cmGlobalNinjaGenerator::Generate()
 
   this->WriteAssumedSourceDependencies();
   this->WriteTargetAliases(*this->BuildFileStream);
-  this->WriteUnkownCustomDependencies(*this->BuildFileStream);
+  this->WriteUnknownCustomDependencies(*this->BuildFileStream);
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
   if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -909,40 +909,54 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   }
 }
 
-void cmGlobalNinjaGenerator::WriteUnkownCustomDependencies(std::ostream& os)
+void cmGlobalNinjaGenerator::WriteUnknownCustomDependencies(std::ostream& os)
 {
-  //Know write out the unknown dependencies. Don't write out any
+  //now write out the unknown dependencies. Don't write out any
   //of these that are now have been added as a known output, file
   //dependency or alias
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "#Unkown Build Time  Dependencies.\n\n";
+  os << "# Unknown Build Time Dependencies."
+     << "# Tell Ninja that they may appear as side effects of build rules"
+     << "# otherwise ordered by order-only dependencies.\n\n";
 
-  const std::string rootBuildDirectory =
+  std::string const rootBuildDirectory =
       this->GetCMakeInstance()->GetHomeOutputDirectory();
 
   //remove the following possible targets that we know
   //are false positives
-  UnkownCustomCommandFileDependencies.erase("all");
+  UnknownCustomCommandFileDependencies.erase("all");
+
+  //get the list of files that cmake itself has generated as a
+  //product of configuration.
+  std::set<std::string> configuredFiles;
+  for (std::vector<cmLocalGenerator *>::const_iterator i =
+       this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i)
+    {
+    const std::vector<std::string>& of = (*i)->GetMakefile()->GetOutputFiles();
+    configuredFiles.insert(of.begin(), of.end());
+    }
 
   typedef std::set<std::string>::const_iterator uccfd_iterator;
-  for (uccfd_iterator i = UnkownCustomCommandFileDependencies.begin();
-       i != UnkownCustomCommandFileDependencies.end(); ++i)
+  for (uccfd_iterator i = UnknownCustomCommandFileDependencies.begin();
+       i != UnknownCustomCommandFileDependencies.end(); ++i)
     {
-    bool isUnkown = ( this->CustomCommandOutputs.find(*i) ==
+    bool isUnknown = ( this->CustomCommandOutputs.find(*i) ==
                       this->CustomCommandOutputs.end() );
-    isUnkown = isUnkown && ( this->CustomCommandFileDependencies.find(*i) ==
-                         this->CustomCommandFileDependencies.end() );
-    isUnkown = isUnkown && this->TargetAliases.count(*i) == 0;
+    isUnknown = isUnknown && configuredFiles.count(*i) == 0;
+    isUnknown = isUnknown && this->TargetAliases.count(*i) == 0;
 
-    if(!isUnkown)
+    if(!isUnknown)
     {
       continue;
     }
 
     //verify the file is in the build directory
-    const std::string absDepPath = cmSystemTools::CollapseFullPath(
+
+    std::string const absDepPath = cmSystemTools::CollapseFullPath(
                                      i->c_str(), rootBuildDirectory.c_str());
-    if(absDepPath.find(rootBuildDirectory) == 0)
+    bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath.c_str(),
+                                                  rootBuildDirectory.c_str());
+    if(inBuildDir)
       {
       cmNinjaDeps deps(1,*i);
       cmGlobalNinjaGenerator::WritePhonyBuild(os,
