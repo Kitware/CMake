@@ -1,3 +1,69 @@
+Changes in CMake 2.8.11-rc2 (since 2.8.11-rc1)
+----------------------------------------------
+Alex Neundorf (6):
+      Determine C/CXX/Fortran compiler: minor restructuring
+      Determine C/CXX/Fortran compiler: fix indentation
+      rename TI_DSP toolchain to TI, since it works also for the ARM compiler
+      TI compiler: add automatic detection of prefix and suffixes
+      Modules/readme.txt: switch from "XXX" to "Xxx"
+      Modules/readme.txt: make lines a bit shorter for easier readability
+
+Ben Boeckel (1):
+      Clang: Add -isystem flag support everywhere
+
+Bill Hoffman (1):
+      ExternalProject: Retry on a failed git clone
+
+Brad King (8):
+      string: Fix regex documentation of '^' and '$' (#14028)
+      Rename variable for including current directory in interfaces
+      Replace <TARGET> in CMAKE_<LANG>_COMPILE_OBJECT rule variables
+      Test evaluation of per-config COMPILE_DEFINITIONS (#14037)
+      VS: Fix VS 10/11 .sln headers (#14038)
+      add_dependencies: Distinguish target v. file dependencies in error (#14050)
+      automoc: Use a pre-build event in VS >= 7
+      Handle usr-move without forcing absolute paths (#14041)
+
+Clinton Stimpson (2):
+      FindQt4: If Qt5 is in CMAKE_PREFIX_PATH, be sure to find Qt4 includes.
+      Qt4: Fix typo setting a variable for FindThreads.
+
+James Bigler (1):
+      FindCUDA: Use the PRE_LINK mode only for MSVC >= 10
+
+Matthew Woehlke (4):
+      UseJava.cmake: simplify path logic
+      UseJava.cmake: fix passing jars to add_jar
+      UseJava.cmake: accept jar targets in add_jar
+      UseJava.cmake: require explicit request to include jars
+
+Paul Kunysch (1):
+      CPack: Avoid "format expects 'unsigned int'" warnings
+
+Petr Kmoch (1):
+      cmSystemTools: Generalize TrimWhitespace to all whitespace
+
+Rex Dieter (1):
+      FindImageMagick: Search versioned suffixes (#14012)
+
+Rolf Eike Beer (1):
+      FindRuby: improve version selection
+
+Stephen Kelly (13):
+      FindQt4: Set the Qt4_FOUND variable if Qt4 is found
+      FindQt4: Set the INTERFACE_QT_MAJOR_VERSION for Qt4::QtCore
+      Document that CMAKE_AUTOMOC works with Qt 5.
+      FPHSA: Fix FOUND_VAR check to work with if() auto-dereference
+      Fix cmGeneratorExpression::Preprocess for interleaved inputs.
+      cmake-gui: Use the QStandardItemModel workaround until 5.1.0.
+      Automoc: append implicit includes after user-specified dirs
+      Fix the evaluation of per-config COMPILE_DEFINITIONS (#14037)
+      Fix new target commands documentation.
+      install(EXPORT): Ensure clean INTERFACE_INCLUDE_DIRECTORIES
+      Report an error on IMPORTED targets with a faulty INTERFACE
+      Error if linked target has relative paths in INTERFACE_INCLUDE_DIRECTORIES
+      Fix the Qt 5 version required to run the IncompatibleQt test.
+
 Changes in CMake 2.8.11-rc1 (since 2.8.10.2)
 ----------------------------------------------
 Alan Witkowski (1):
