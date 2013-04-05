@@ -838,16 +838,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
   fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(targetBuilds)
-    {
-    // We need to specify a program database file name even for
-    // non-debug configurations because VS still creates .idb files.
-    fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-         << this->ConvertToXMLOutputPathSingle(
-              target.GetPDBDirectory(configName).c_str())
-         << "/"
-         << target.GetPDBName(configName) << "\"\n";
-    }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   tool = "VCCustomBuildTool";
   if(this->FortranProject)
