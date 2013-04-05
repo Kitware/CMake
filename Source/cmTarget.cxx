@@ -873,9 +873,9 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("PDB_NAME", cmProperty::TARGET,
-     "Output name for MS debug symbols .pdb file.",
+     "Output name for MS debug symbols .pdb file from linker.",
      "Set the base name for debug symbols file created for an "
-     "executable or library target.  "
+     "executable or shared library target.  "
      "If not set, the logical target name is used by default.  "
      "\n"
      "This property is not implemented by the Visual Studio 6 generator.");
@@ -1384,9 +1384,9 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("PDB_OUTPUT_DIRECTORY", cmProperty::TARGET,
-     "Output directory for MS debug symbols .pdb files.",
+     "Output directory for MS debug symbols .pdb file from linker.",
      "This property specifies the directory into which the MS debug symbols "
-     "will be placed.  "
+     "will be placed by the linker.  "
      "This property is initialized by the value of the variable "
      "CMAKE_PDB_OUTPUT_DIRECTORY if it is set when a target is created."
      "\n"
