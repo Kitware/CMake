@@ -1545,6 +1545,13 @@ void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
                                              std::string const& config,
                                              cmTarget* target)
 {
+  this->AppendFlags(flags,
+    this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
+  if(!config.empty())
+    {
+    std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + config;
+    this->AppendFlags(flags, this->Makefile->GetSafeDefinition(name.c_str()));
+    }
   this->AppendFlags(flags, target->GetProperty("STATIC_LIBRARY_FLAGS"));
   if(!config.empty())
     {
