@@ -12,7 +12,7 @@ set(CMakeLib_TESTS
   testXMLSafe
   )
 
-if(WIN32)
+if(WIN32 AND NOT UNIX) # Just if(WIN32) when CMake >= 2.8.4 is required
   list(APPEND CMakeLib_TESTS
     testVisualStudioSlnParser
     )
