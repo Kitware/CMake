@@ -569,11 +569,9 @@ cmNinjaTargetGenerator
   EnsureParentDirectoryExists(objectFileName);
 
   std::string objectDir = cmSystemTools::GetFilenamePath(objectFileName);
-  objectDir = this->GetLocalGenerator()->Convert(objectDir.c_str(),
-                            cmLocalGenerator::START_OUTPUT,
-                            cmLocalGenerator::SHELL);
-  vars["OBJECT_DIR"] = objectDir;
-
+  vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                         ConvertToNinjaPath(objectDir.c_str()).c_str(),
+                         cmLocalGenerator::SHELL);
 
   this->SetMsvcTargetPdbVariable(vars);
 
