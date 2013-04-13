@@ -1884,6 +1884,8 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
   if(use_build_rpath || use_link_rpath)
     {
+    std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    cmSystemTools::ConvertToUnixSlashes(rootPath);
     std::vector<std::string> const& rdirs = this->GetRuntimeSearchPath();
     for(std::vector<std::string>::const_iterator ri = rdirs.begin();
         ri != rdirs.end(); ++ri)
@@ -1907,9 +1909,14 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
            !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
            !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
           {
-          if(emitted.insert(*ri).second)
+          std::string d = *ri;
+          if (d.find(rootPath) == 0)
             {
-            runtimeDirs.push_back(*ri);
+            d = d.substr(rootPath.size());
+            }
+          if(emitted.insert(d).second)
+            {
+            runtimeDirs.push_back(d);
             }
           }
         }
