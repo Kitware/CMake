@@ -433,6 +433,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       flag += tcDef;
       cmakeFlags.push_back(flag);
       }
+    if (const char *rootDef
+              = this->Makefile->GetDefinition("CMAKE_SYSROOT"))
+      {
+      std::string flag="-DCMAKE_SYSROOT=";
+      flag += rootDef;
+      cmakeFlags.push_back(flag);
+      }
     if(this->Makefile->GetDefinition("CMAKE_POSITION_INDEPENDENT_CODE")!=0)
       {
       fprintf(fout, "set(CMAKE_POSITION_INDEPENDENT_CODE \"ON\")\n");
