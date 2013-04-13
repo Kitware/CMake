@@ -1047,6 +1047,8 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       const char* compilerOptionTarget = 0;
       const char* compilerExternalToolchain = 0;
       const char* compilerOptionExternalToolchain = 0;
+      const char* compilerSysroot = 0;
+      const char* compilerOptionSysroot = 0;
       if(actualReplace == "CMAKE_${LANG}_COMPILER")
         {
         std::string arg1 = actualReplace + "_ARG1";
@@ -1067,6 +1069,12 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
               = this->Makefile->GetDefinition(
                 (std::string("CMAKE_") + lang +
                               "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN").c_str());
+        compilerSysroot
+              = this->Makefile->GetDefinition("CMAKE_SYSROOT");
+        compilerOptionSysroot
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                              "_COMPILE_OPTIONS_SYSROOT").c_str());
         }
       if(actualReplace.find("${LANG}") != actualReplace.npos)
         {
@@ -1098,6 +1106,12 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             ret += " ";
             ret += compilerOptionExternalToolchain;
             ret += this->EscapeForShell(compilerExternalToolchain, true);
+            }
+          if (compilerSysroot && compilerOptionSysroot)
+            {
+            ret += " ";
+            ret += compilerOptionSysroot;
+            ret += this->EscapeForShell(compilerSysroot, true);
             }
           return ret;
           }
@@ -1493,6 +1507,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
     }
 
+  std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+
   std::vector<std::string> implicitDirs;
   // Load implicit include directories for this language.
   std::string impDirVar = "CMAKE_";
@@ -1505,7 +1521,9 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     for(std::vector<std::string>::const_iterator i = impDirVec.begin();
         i != impDirVec.end(); ++i)
       {
-      emitted.insert(*i);
+      std::string d = rootPath + *i;
+      cmSystemTools::ConvertToUnixSlashes(d);
+      emitted.insert(d);
       if (!stripImplicitInclDirs)
         {
         implicitDirs.push_back(*i);

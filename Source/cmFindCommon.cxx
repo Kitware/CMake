@@ -138,16 +138,27 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     {
     return;
     }
+  const char* sysroot =
+    this->Makefile->GetDefinition("CMAKE_SYSROOT");
   const char* rootPath =
     this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
-  if((rootPath == 0) || (strlen(rootPath) == 0))
+  const bool noSysroot = !sysroot || !*sysroot;
+  const bool noRootPath = !rootPath || !*rootPath;
+  if(noSysroot && noRootPath)
     {
     return;
     }
 
   // Construct the list of path roots with no trailing slashes.
   std::vector<std::string> roots;
-  cmSystemTools::ExpandListArgument(rootPath, roots);
+  if (rootPath)
+    {
+    cmSystemTools::ExpandListArgument(rootPath, roots);
+    }
+  if (sysroot)
+    {
+    roots.push_back(sysroot);
+    }
   for(std::vector<std::string>::iterator ri = roots.begin();
       ri != roots.end(); ++ri)
     {
