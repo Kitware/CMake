@@ -326,6 +326,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         {
         this->Makefile->IssueMessage(cmake::FATAL_ERROR,
                                      "could not write export file.");
+        fclose(fout);
         return -1;
         }
       fprintf(fout,
