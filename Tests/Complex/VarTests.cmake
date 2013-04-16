@@ -182,17 +182,3 @@ set(FOREACH_CONCAT "")
 foreach (INDEX a;b;c;d;e;f;g)
   set(FOREACH_CONCAT "${FOREACH_CONCAT}${INDEX}")
 endforeach()
-
-#
-# Test FIND_FILE, FIND_PATH and various GET_FILENAME_COMPONENT combinations
-#
-find_file(FILENAME_VAR "VarTests.cmake" ${Complex_SOURCE_DIR})
-
-get_filename_component(FILENAME_VAR_PATH ${FILENAME_VAR} PATH)
-get_filename_component(FILENAME_VAR_PATH_NAME ${FILENAME_VAR_PATH} NAME)
-get_filename_component(FILENAME_VAR_NAME ${FILENAME_VAR} NAME)
-get_filename_component(FILENAME_VAR_EXT ${FILENAME_VAR} EXT)
-get_filename_component(FILENAME_VAR_NAME_WE ${FILENAME_VAR} NAME_WE CACHE)
-
-find_path(PATH_VAR "cmTestConfigure.h.in" ${Complex_SOURCE_DIR})
-get_filename_component(PATH_VAR_NAME ${PATH_VAR} NAME)
