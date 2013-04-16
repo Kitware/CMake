@@ -58,7 +58,7 @@ bool cmGetFilenameComponentCommand
     }
   std::string storeArgs;
   std::string programArgs;
-  if (args[2] == "PATH")
+  if (args[2] == "DIRECTORY" || args[2] == "PATH")
     {
     result = cmSystemTools::GetFilenamePath(filename);
     }
