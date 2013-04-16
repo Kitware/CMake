@@ -1,0 +1,32 @@
+macro(check desc actual expect)
+  if(NOT "x${actual}" STREQUAL "x${expect}")
+    message(SEND_ERROR "${desc}: got \"${actual}\", not \"${expect}\"")
+  endif()
+endmacro()
+
+set(filename "/path/to/filename.ext.in")
+set(expect_PATH "/path/to")
+set(expect_NAME "filename.ext.in")
+set(expect_EXT ".ext.in")
+set(expect_NAME_WE "filename")
+foreach(c PATH NAME EXT NAME_WE)
+  get_filename_component(actual_${c} "${filename}" ${c})
+  check("${c}" "${actual_${c}}" "${expect_${c}}")
+endforeach()
+
+get_filename_component(test_slashes "c:\\path\\to\\filename.ext.in" PATH)
+check("PATH from backslashes" "${test_slashes}" "c:/path/to")
+
+get_filename_component(test_winroot "c:\\filename.ext.in" PATH)
+check("PATH in windows root" "${test_winroot}" "c:/")
+
+get_filename_component(test_absolute "/path/to/a/../filename.ext.in" ABSOLUTE)
+check("ABSOLUTE" "${test_absolute}" "/path/to/filename.ext.in")
+
+get_filename_component(test_cache "/path/to/filename.ext.in" PATH CACHE)
+check("CACHE 1" "${test_cache}" "/path/to")
+get_filename_component(test_cache "/path/to/other/filename.ext.in" PATH CACHE)
+check("CACHE 2" "${test_cache}" "/path/to")
+unset(test_cache CACHE)
+get_filename_component(test_cache "/path/to/other/filename.ext.in" PATH CACHE)
+check("CACHE 3" "${test_cache}" "/path/to/other")
