@@ -77,6 +77,7 @@ protected slots:
   bool doConfigureInternal();
   bool doGenerateInternal();
   void exitLoop(int);
+  void doOutputContextMenu(const QPoint &);
   void doOutputFindDialog();
   void doOutputFindNext(bool directionForward = true);
   void doOutputFindPrev();
