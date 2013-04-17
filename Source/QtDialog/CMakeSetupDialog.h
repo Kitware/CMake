@@ -81,6 +81,7 @@ protected slots:
   void doOutputFindDialog();
   void doOutputFindNext(bool directionForward = true);
   void doOutputFindPrev();
+  void doOutputErrorNext();
 
 protected:
 
