@@ -28,6 +28,7 @@
 #include <QShortcut>
 #include <QKeySequence>
 #include <QMacInstallDialog.h>
+#include <QInputDialog>
 
 #include "QCMake.h"
 #include "QCMakeCacheView.h"
@@ -122,6 +123,16 @@ CMakeSetupDialog::CMakeSetupDialog()
   QObject::connect(this->InstallForCommandLineAction, SIGNAL(triggered(bool)),
                    this, SLOT(doInstallForCommandLine()));
 #endif
+  ToolsMenu->addSeparator();
+  ToolsMenu->addAction(tr("&Find in Output..."),
+                       this, SLOT(doOutputFindDialog()));
+  ToolsMenu->addAction(tr("&Find Next"),
+                       this, SLOT(doOutputFindNext()),
+                       QKeySequence::FindNext);
+  ToolsMenu->addAction(tr("&Find Previous"),
+                       this, SLOT(doOutputFindPrev()),
+                       QKeySequence::FindPrevious);
+
   QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
   this->SuppressDevWarningsAction =
     OptionsMenu->addAction(tr("&Suppress dev Warnings (-Wno-dev)"));
@@ -1149,4 +1160,63 @@ void CMakeSetupDialog::setSearchFilter(const QString& str)
   this->CacheValues->setSearchFilter(str);
 }
 
+void CMakeSetupDialog::doOutputFindDialog()
+{
+  QStringList strings(this->FindHistory);
 
+  QString selection = this->Output->textCursor().selectedText();
+  if (!selection.isEmpty() && !selection.contains(QChar::ParagraphSeparator))
+    {
+    strings.push_front(selection);
+    }
+
+  bool ok;
+  QString search = QInputDialog::getItem(this, tr("Find in Output"),
+                                         tr("Find:"), strings, 0, true, &ok);
+  if (ok && !search.isEmpty())
+    {
+    this->FindHistory.push_front(search);
+    this->FindHistory.removeDuplicates();
+    doOutputFindNext();
+    }
+}
+
+void CMakeSetupDialog::doOutputFindPrev()
+{
+  doOutputFindNext(false);
+}
+
+void CMakeSetupDialog::doOutputFindNext(bool directionForward)
+{
+  if (this->FindHistory.isEmpty())
+    {
+    doOutputFindDialog(); //will re-call this function again
+    return;
+    }
+
+  QString search = this->FindHistory.front();
+
+  QTextCursor cursor = this->Output->textCursor();
+  QTextDocument* document = this->Output->document();
+  QTextDocument::FindFlags flags;
+  if (!directionForward)
+    {
+    flags |= QTextDocument::FindBackward;
+    }
+
+  cursor = document->find(search, cursor, flags);
+
+  if (cursor.isNull())
+    {
+    // first search found nothing, wrap around and search again
+    cursor = this->Output->textCursor();
+    cursor.movePosition(directionForward ? QTextCursor::Start
+                                         : QTextCursor::End);
+    cursor = document->find(search, cursor, flags);
+    }
+
+  if (cursor.hasSelection())
+    {
+    this->Output->setTextCursor(cursor);
+    }
+}
