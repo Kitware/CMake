@@ -133,6 +133,11 @@ CMakeSetupDialog::CMakeSetupDialog()
   ToolsMenu->addAction(tr("&Find Previous"),
                        this, SLOT(doOutputFindPrev()),
                        QKeySequence::FindPrevious);
+  ToolsMenu->addAction(tr("Goto Next Error"),
+                       this, SLOT(doOutputErrorNext()),
+                       QKeySequence(Qt::Key_F8));  // in Visual Studio
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Period),
+                       this, SLOT(doOutputErrorNext()));  // in Eclipse
 
   QMenu* OptionsMenu = this->menuBar()->addMenu(tr("&Options"));
   this->SuppressDevWarningsAction =
@@ -649,7 +654,13 @@ void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
 void CMakeSetupDialog::error(const QString& msg)
 {
   this->Output->setCurrentCharFormat(this->ErrorFormat);
-  this->Output->append(msg);
+  //QTextEdit will terminate the msg with a ParagraphSeparator, but it also replaces
+  //all newlines with ParagraphSeparators. By replacing the newlines by ourself, one
+  //error msg will be one paragraph.
+  QString paragraph(msg);
+  paragraph.replace(QLatin1Char('\n'), QChar::LineSeparator);
+  this->Output->append(paragraph);
+
 }
 
 void CMakeSetupDialog::message(const QString& msg)
@@ -1172,6 +1183,9 @@ void CMakeSetupDialog::doOutputContextMenu(const QPoint &pt)
                   this, SLOT(doOutputFindNext()), QKeySequence::FindNext);
   menu->addAction(tr("Find Previous"),
                   this, SLOT(doOutputFindPrev()), QKeySequence::FindPrevious);
+  menu->addSeparator();
+  menu->addAction(tr("Goto Next Error"),
+                  this, SLOT(doOutputErrorNext()), QKeySequence(Qt::Key_F8));
 
   menu->exec(this->Output->mapToGlobal(pt));
   delete menu;
@@ -1182,7 +1196,9 @@ void CMakeSetupDialog::doOutputFindDialog()
   QStringList strings(this->FindHistory);
 
   QString selection = this->Output->textCursor().selectedText();
-  if (!selection.isEmpty() && !selection.contains(QChar::ParagraphSeparator))
+  if (!selection.isEmpty() &&
+      !selection.contains(QChar::ParagraphSeparator) &&
+      !selection.contains(QChar::LineSeparator))
     {
     strings.push_front(selection);
     }
@@ -1236,6 +1252,54 @@ void CMakeSetupDialog::doOutputFindNext(bool directionForward)
 
   if (cursor.hasSelection())
     {
+    this->Output->setTextCursor(cursor);
+    }
+}
+
+void CMakeSetupDialog::doOutputErrorNext()
+{
+  QTextCursor cursor = this->Output->textCursor();
+  bool atEnd = false;
+
+  // move cursor out of current error-block
+  if (cursor.blockCharFormat() == this->ErrorFormat)
+    {
+    atEnd = !cursor.movePosition(QTextCursor::NextBlock);
+    }
+
+  // move cursor to next error-block
+  while (cursor.blockCharFormat() != this->ErrorFormat && !atEnd)
+    {
+    atEnd = !cursor.movePosition(QTextCursor::NextBlock);
+    }
+
+  if (atEnd)
+    {
+    // first search found nothing, wrap around and search again
+    atEnd = !cursor.movePosition(QTextCursor::Start);
+
+    // move cursor to next error-block
+    while (cursor.blockCharFormat() != this->ErrorFormat && !atEnd)
+      {
+      atEnd = !cursor.movePosition(QTextCursor::NextBlock);
+      }
+    }
+
+  if (!atEnd)
+    {
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+
+    QTextCharFormat selectionFormat;
+    selectionFormat.setBackground(Qt::yellow);
+    QTextEdit::ExtraSelection extraSelection = {cursor, selectionFormat};
+    this->Output->setExtraSelections(QList<QTextEdit::ExtraSelection>()
+                                     << extraSelection);
+
+    // make the whole error-block visible
+    this->Output->setTextCursor(cursor);
+
+    // remove the selection to see the extraSelection
+    cursor.setPosition(cursor.anchor());
     this->Output->setTextCursor(cursor);
     }
 }
