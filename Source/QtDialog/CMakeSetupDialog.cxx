@@ -125,7 +125,8 @@ CMakeSetupDialog::CMakeSetupDialog()
 #endif
   ToolsMenu->addSeparator();
   ToolsMenu->addAction(tr("&Find in Output..."),
-                       this, SLOT(doOutputFindDialog()));
+                       this, SLOT(doOutputFindDialog()),
+                       QKeySequence::Find);
   ToolsMenu->addAction(tr("&Find Next"),
                        this, SLOT(doOutputFindNext()),
                        QKeySequence::FindNext);
@@ -164,10 +165,6 @@ CMakeSetupDialog::CMakeSetupDialog()
   a = HelpMenu->addAction(tr("Help"));
   QObject::connect(a, SIGNAL(triggered(bool)),
                    this, SLOT(doHelp()));
-
-  QShortcut* filterShortcut = new QShortcut(QKeySequence::Find, this);
-  QObject::connect(filterShortcut, SIGNAL(activated()),
-                   this, SLOT(startSearch()));
 
   this->setAcceptDrops(true);
 
@@ -1170,7 +1167,7 @@ void CMakeSetupDialog::doOutputContextMenu(const QPoint &pt)
 
   menu->addSeparator();
   menu->addAction(tr("Find..."),
-                  this, SLOT(doOutputFindDialog()));
+                  this, SLOT(doOutputFindDialog()), QKeySequence::Find);
   menu->addAction(tr("Find Next"),
                   this, SLOT(doOutputFindNext()), QKeySequence::FindNext);
   menu->addAction(tr("Find Previous"),

@@ -107,7 +107,10 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Search:</string>
+            <string>S&amp;earch:</string>
+           </property>
+           <property name="buddy">
+            <cstring>Search</cstring>
            </property>
           </widget>
          </item>
