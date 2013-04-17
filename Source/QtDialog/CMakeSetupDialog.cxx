@@ -183,6 +183,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   this->Output->setFont(outputFont);
   this->ErrorFormat.setForeground(QBrush(Qt::red));
 
+  this->Output->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this->Output, SIGNAL(customContextMenuRequested(const QPoint&)),
+          this, SLOT(doOutputContextMenu(const QPoint &)));
+
   // start the cmake worker thread
   this->CMakeThread = new QCMakeThread(this);
   QObject::connect(this->CMakeThread, SIGNAL(cmakeInitialized()),
@@ -1158,6 +1162,22 @@ void CMakeSetupDialog::setSearchFilter(const QString& str)
 {
   this->CacheValues->selectionModel()->clear();
   this->CacheValues->setSearchFilter(str);
+}
+
+void CMakeSetupDialog::doOutputContextMenu(const QPoint &pt)
+{
+  QMenu *menu = this->Output->createStandardContextMenu();
+
+  menu->addSeparator();
+  menu->addAction(tr("Find..."),
+                  this, SLOT(doOutputFindDialog()));
+  menu->addAction(tr("Find Next"),
+                  this, SLOT(doOutputFindNext()), QKeySequence::FindNext);
+  menu->addAction(tr("Find Previous"),
+                  this, SLOT(doOutputFindPrev()), QKeySequence::FindPrevious);
+
+  menu->exec(this->Output->mapToGlobal(pt));
+  delete menu;
 }
 
 void CMakeSetupDialog::doOutputFindDialog()
