@@ -3458,6 +3458,10 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   if (propname == "INCLUDE_DIRECTORIES")
     {
     this->IncludeDirectoriesEntries.clear();
+      if (!value)
+        {
+        return;
+        }
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
