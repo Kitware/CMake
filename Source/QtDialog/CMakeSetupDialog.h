@@ -77,6 +77,9 @@ protected slots:
   bool doConfigureInternal();
   bool doGenerateInternal();
   void exitLoop(int);
+  void doOutputFindDialog();
+  void doOutputFindNext(bool directionForward = true);
+  void doOutputFindPrev();
 
 protected:
 
@@ -106,6 +109,7 @@ protected:
   QTextCharFormat MessageFormat;
 
   QStringList AddVariableCompletions;
+  QStringList FindHistory;
 
   QEventLoop LocalLoop;
 
