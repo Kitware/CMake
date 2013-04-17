@@ -28,9 +28,12 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+set(_OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
+
 if (CYGWIN)
 
   find_path(OPENGL_INCLUDE_DIR GL/gl.h )
+  list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
   find_library(OPENGL_gl_LIBRARY opengl32 )
 
@@ -51,6 +54,7 @@ elseif (APPLE)
   find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL lib for OSX")
   find_library(OPENGL_glu_LIBRARY AGL DOC "AGL lib for OSX")
   find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OSX")
+  list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
 else()
   if (CMAKE_SYSTEM_NAME MATCHES "HP-UX")
@@ -85,6 +89,7 @@ else()
     /opt/graphics/OpenGL/include /usr/X11R6/include
     ${_OPENGL_INCLUDE_PATH}
   )
+  list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
   find_path(OPENGL_xmesa_INCLUDE_DIR GL/xmesa.h
     /usr/share/doc/NVIDIA_GLX-1.0/include
@@ -153,7 +158,8 @@ set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 # handle the QUIETLY and REQUIRED arguments and set OPENGL_FOUND to TRUE if
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL DEFAULT_MSG OPENGL_gl_LIBRARY)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS})
+unset(_OpenGL_REQUIRED_VARS)
 
 mark_as_advanced(
   OPENGL_INCLUDE_DIR
