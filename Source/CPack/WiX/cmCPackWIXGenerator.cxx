@@ -377,10 +377,6 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     directoryDefinitions, fileDefinitions, featureDefinitions,
     directoryCounter, fileCounter, cpackPkgExecutables, dirIdExecutables);
 
-  for(size_t i = 1; i < install_root.size(); ++i)
-    {
-    directoryDefinitions.EndElement();
-    }
   directoryDefinitions.EndElement();
   directoryDefinitions.EndElement();
 
@@ -558,7 +554,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         fileCounter,
         pkgExecutables,
         dirIdExecutables);
-
+      directoryDefinitions.EndElement();
       }
     else
       {
