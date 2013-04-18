@@ -302,7 +302,12 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
     cmOStringStream cdCmd;
-    cdCmd << "cd " << this->ConvertToOutputFormat(wd, SHELL);
+#ifdef _WIN32
+        std::string cdStr = "cd /D ";
+#else
+        std::string cdStr = "cd ";
+#endif
+    cdCmd << cdStr << this->ConvertToOutputFormat(wd, SHELL);
     cmdLines.push_back(cdCmd.str());
   }
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
