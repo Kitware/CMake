@@ -1,3 +1,14 @@
+Changes in CMake 2.8.11-rc3 (since 2.8.11-rc2)
+----------------------------------------------
+Brad King (1):
+      get_filename_component: Document path components more clearly (#14091)
+
+Rolf Eike Beer (1):
+      try_compile: add missing fclose() to recently added error case
+
+Stephen Kelly (1):
+      Fix clearing of the INCLUDE_DIRECTORIES DIRECTORY property.
+
 Changes in CMake 2.8.11-rc2 (since 2.8.11-rc1)
 ----------------------------------------------
 Alex Neundorf (6):
