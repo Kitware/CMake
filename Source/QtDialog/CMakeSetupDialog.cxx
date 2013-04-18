@@ -127,10 +127,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   ToolsMenu->addAction(tr("&Find in Output..."),
                        this, SLOT(doOutputFindDialog()),
                        QKeySequence::Find);
-  ToolsMenu->addAction(tr("&Find Next"),
+  ToolsMenu->addAction(tr("Find Next"),
                        this, SLOT(doOutputFindNext()),
                        QKeySequence::FindNext);
-  ToolsMenu->addAction(tr("&Find Previous"),
+  ToolsMenu->addAction(tr("Find Previous"),
                        this, SLOT(doOutputFindPrev()),
                        QKeySequence::FindPrevious);
   ToolsMenu->addAction(tr("Goto Next Error"),
