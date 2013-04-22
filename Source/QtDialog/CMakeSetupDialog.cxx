@@ -1208,8 +1208,10 @@ void CMakeSetupDialog::doOutputFindDialog()
                                          tr("Find:"), strings, 0, true, &ok);
   if (ok && !search.isEmpty())
     {
-    this->FindHistory.push_front(search);
-    this->FindHistory.removeDuplicates();
+    if (!this->FindHistory.contains(search))
+      {
+      this->FindHistory.push_front(search);
+      }
     doOutputFindNext();
     }
 }
