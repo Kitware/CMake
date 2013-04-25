@@ -2947,8 +2947,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
       }
       cmGeneratorExpression ge(it->Backtrace);
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-          "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
+        "$<$<BOOL:"+it->Value+">:"
+          "$<TARGET_PROPERTY:"+it->Value+",INTERFACE_INCLUDE_DIRECTORIES>>");
 
       this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries.push_back(
                         new cmTargetInternals::IncludeDirectoriesEntry(cge,
