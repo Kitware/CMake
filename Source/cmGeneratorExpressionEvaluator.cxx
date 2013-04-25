@@ -993,6 +993,57 @@ std::string GeneratorExpressionContent::GetOriginalExpression() const
 }
 
 //----------------------------------------------------------------------------
+std::string GeneratorExpressionContent::ProcessArbitraryContent(
+    const cmGeneratorExpressionNode *node,
+    const std::string &identifier,
+    cmGeneratorExpressionContext *context,
+    cmGeneratorExpressionDAGChecker *dagChecker,
+    std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
+    pit) const
+{
+  std::string result;
+
+  const
+  std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
+                                      pend = this->ParamChildren.end();
+  for ( ; pit != pend; ++pit)
+    {
+    std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
+                                                            = pit->begin();
+    const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
+                                                              = pit->end();
+    for ( ; it != end; ++it)
+      {
+      if (node->RequiresLiteralInput())
+        {
+        if ((*it)->GetType() != cmGeneratorExpressionEvaluator::Text)
+          {
+          reportError(context, this->GetOriginalExpression(),
+                "$<" + identifier + "> expression requires literal input.");
+          return std::string();
+          }
+        }
+      result += (*it)->Evaluate(context, dagChecker);
+      if (context->HadError)
+        {
+        return std::string();
+        }
+      }
+      if ((pit + 1) != pend)
+        {
+        result += ",";
+        }
+    }
+  if (node->RequiresLiteralInput())
+    {
+    std::vector<std::string> parameters;
+    parameters.push_back(result);
+    return node->Evaluate(parameters, context, this, dagChecker);
+    }
+  return result;
+}
+
+//----------------------------------------------------------------------------
 std::string GeneratorExpressionContent::Evaluate(
                             cmGeneratorExpressionContext *context,
                             cmGeneratorExpressionDAGChecker *dagChecker) const
@@ -1043,47 +1094,9 @@ std::string GeneratorExpressionContent::Evaluate(
 
   if (node->AcceptsSingleArbitraryContentParameter())
     {
-    std::string result;
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
-                                        pit = this->ParamChildren.begin();
-    const
-    std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
-                                        pend = this->ParamChildren.end();
-    for ( ; pit != pend; ++pit)
-      {
-      std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
-                                                              = pit->begin();
-      const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
-                                                                = pit->end();
-      for ( ; it != end; ++it)
-        {
-        if (node->RequiresLiteralInput())
-          {
-          if ((*it)->GetType() != cmGeneratorExpressionEvaluator::Text)
-            {
-            reportError(context, this->GetOriginalExpression(),
-                  "$<" + identifier + "> expression requires literal input.");
-            return std::string();
-            }
-          }
-        result += (*it)->Evaluate(context, dagChecker);
-        if (context->HadError)
-          {
-          return std::string();
-          }
-        }
-      if ((pit + 1) != pend)
-        {
-        result += ",";
-        }
-      }
-    if (node->RequiresLiteralInput())
-      {
-      std::vector<std::string> parameters;
-      parameters.push_back(result);
-      return node->Evaluate(parameters, context, this, dagChecker);
-      }
-    return result;
+    return this->ProcessArbitraryContent(node, identifier, context,
+                                         dagChecker,
+                                         this->ParamChildren.begin());
     }
 
   std::vector<std::string> parameters;
