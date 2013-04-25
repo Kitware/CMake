@@ -51,7 +51,7 @@ struct cmGeneratorExpressionNode
 
   virtual bool RequiresLiteralInput() const { return false; }
 
-  virtual bool AcceptsSingleArbitraryContentParameter() const
+  virtual bool AcceptsArbitraryContentParameter() const
     { return false; }
 
   virtual int NumExpectedParameters() const { return 1; }
@@ -70,7 +70,7 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
 
   virtual bool GeneratesContent() const { return false; }
 
-  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+  virtual bool AcceptsArbitraryContentParameter() const { return true; }
 
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
@@ -87,7 +87,7 @@ static const struct OneNode : public cmGeneratorExpressionNode
 {
   OneNode() {}
 
-  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+  virtual bool AcceptsArbitraryContentParameter() const { return true; }
 
   std::string Evaluate(const std::vector<std::string> &,
                        cmGeneratorExpressionContext *,
@@ -600,7 +600,7 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
 
   virtual bool GeneratesContent() const { return true; }
 
-  virtual bool AcceptsSingleArbitraryContentParameter() const { return true; }
+  virtual bool AcceptsArbitraryContentParameter() const { return true; }
   virtual bool RequiresLiteralInput() const { return true; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
@@ -1075,7 +1075,8 @@ std::string GeneratorExpressionContent::Evaluate(
 
   if (!node->GeneratesContent())
     {
-    if (node->AcceptsSingleArbitraryContentParameter())
+    if (node->NumExpectedParameters() == 1
+        && node->AcceptsArbitraryContentParameter())
       {
       if (this->ParamChildren.empty())
         {
@@ -1092,7 +1093,8 @@ std::string GeneratorExpressionContent::Evaluate(
     return std::string();
     }
 
-  if (node->AcceptsSingleArbitraryContentParameter())
+  if (node->NumExpectedParameters() == 1
+        && node->AcceptsArbitraryContentParameter())
     {
     return this->ProcessArbitraryContent(node, identifier, context,
                                          dagChecker,
