@@ -1119,12 +1119,15 @@ std::string GeneratorExpressionContent::EvaluateParameters(
                                 cmGeneratorExpressionDAGChecker *dagChecker,
                                 std::vector<std::string> &parameters) const
 {
+  const int numExpected = node->NumExpectedParameters();
   {
   std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
                                         pit = this->ParamChildren.begin();
   const
   std::vector<std::vector<cmGeneratorExpressionEvaluator*> >::const_iterator
                                         pend = this->ParamChildren.end();
+  const bool acceptsArbitraryContent
+                                  = node->AcceptsArbitraryContentParameter();
   for ( ; pit != pend; ++pit)
     {
     std::string parameter;
@@ -1141,10 +1144,20 @@ std::string GeneratorExpressionContent::EvaluateParameters(
         }
       }
     parameters.push_back(parameter);
+    if (acceptsArbitraryContent
+        && parameters.size() == (unsigned int)numExpected - 1)
+      {
+      assert(pit != pend);
+      std::string lastParam = this->ProcessArbitraryContent(node, identifier,
+                                                            context,
+                                                            dagChecker,
+                                                            pit + 1);
+      parameters.push_back(lastParam);
+      return std::string();
+      }
     }
   }
 
-  int numExpected = node->NumExpectedParameters();
   if ((numExpected != -1 && (unsigned int)numExpected != parameters.size()))
     {
     if (numExpected == 0)
