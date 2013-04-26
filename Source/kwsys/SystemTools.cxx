@@ -2741,11 +2741,11 @@ bool SystemTools::FileIsDirectory(const char* name)
     return false;
     }
 
-  // Remove any trailing slash from the name.
+  // Remove any trailing slash from the name except in a root component.
   char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
   size_t last = length-1;
   if(last > 0 && (name[last] == '/' || name[last] == '\\')
-    && strcmp(name, "/") !=0)
+    && strcmp(name, "/") !=0 && name[last-1] != ':')
     {
     memcpy(buffer, name, last);
     buffer[last] = 0;
