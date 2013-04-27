@@ -362,6 +362,9 @@ public:
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const char* config);
 
+  /** Whether this library has @rpath and platform supports it.  */
+  bool HasMacOSXRpath(const char* config);
+
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const char* config);
@@ -407,7 +410,13 @@ public:
   /** Return true if builtin chrpath will work for this target */
   bool IsChrpathUsed(const char* config);
 
+  /** Return the install name directory for the target in the
+    * build tree.  For example: "@rpath/", "@loader_path/",
+    * or "/full/path/to/library".  */
   std::string GetInstallNameDirForBuildTree(const char* config);
+
+  /** Return the install name directory for the target in the
+    * install tree.  For example: "@rpath/" or "@loader_path/". */
   std::string GetInstallNameDirForInstallTree();
 
   cmComputeLinkInformation* GetLinkInformation(const char* config,

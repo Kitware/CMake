@@ -2413,6 +2413,27 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 }
 
 //----------------------------------------------------------------------------
+bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
+                                       std::string& soname)
+{
+  std::vector<cmStdString> cmds;
+  cmds.push_back("otool");
+  cmds.push_back("-D");
+  cmds.push_back(fullPath.c_str());
+
+  std::string output;
+  RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE);
+
+  std::vector<std::string> strs = cmSystemTools::tokenize(output, "\n");
+  if(strs.size() == 2)
+    {
+    soname = strs[1];
+    return true;
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 #if defined(CMAKE_USE_ELF_PARSER)
 std::string::size_type cmSystemToolsFindRPath(std::string const& have,
                                               std::string const& want)
