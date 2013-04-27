@@ -1161,6 +1161,15 @@ void cmTarget::DefineProperties(cmake *cm)
      "hard-code all the settings instead of using the target properties.");
 
   cm->DefineProperty
+    ("MACOSX_RPATH", cmProperty::TARGET,
+     "Whether to use rpaths on Mac OS X.",
+     "When this property is set to true, the directory portion of the"
+     "\"install_name\" field of shared libraries will default to \"@rpath\"."
+     "Runtime paths will also be embedded in binaries using this target."
+     "This property is initialized by the value of the variable "
+     "CMAKE_MACOSX_RPATH if it is set when a target is created.");
+
+  cm->DefineProperty
     ("ENABLE_EXPORTS", cmProperty::TARGET,
      "Specify whether an executable exports symbols for loadable modules.",
      "Normally an executable does not export any symbols because it is "
@@ -1488,6 +1497,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
   this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
   this->SetPropertyDefault("MACOSX_BUNDLE", 0);
+  this->SetPropertyDefault("MACOSX_RPATH", 0);
+
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -3793,6 +3804,75 @@ std::string cmTarget::GetSOName(const char* config)
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::HasMacOSXRpath(const char* config)
+{
+  bool install_name_is_rpath = false;
+  bool macosx_rpath = this->GetPropertyAsBool("MACOSX_RPATH");
+
+  if(!this->IsImportedTarget)
+    {
+    const char* install_name = this->GetProperty("INSTALL_NAME_DIR");
+    bool use_install_name =
+      this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
+    if(install_name && use_install_name &&
+       std::string(install_name) == "@rpath")
+      {
+      install_name_is_rpath = true;
+      }
+    }
+  else
+    {
+    // Lookup the imported soname.
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, this))
+      {
+      if(!info->NoSOName && !info->SOName.empty())
+        {
+        if(info->SOName.find("@rpath/") == 0)
+          {
+          install_name_is_rpath = true;
+          }
+        }
+      else
+        {
+        std::string install_name;
+        cmSystemTools::GuessLibraryInstallName(info->Location, install_name);
+        if(install_name.find("@rpath") != std::string::npos)
+          {
+          install_name_is_rpath = true;
+          }
+        }
+      }
+    }
+
+  if(!install_name_is_rpath && !macosx_rpath)
+    {
+    return false;
+    }
+
+  if(!this->Makefile->IsSet("CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG"))
+    {
+    cmOStringStream w;
+    w << "Attempting to use";
+    if(macosx_rpath)
+      {
+      w << " MACOSX_RPATH";
+      }
+    else
+      {
+      w << " @rpath";
+      }
+    w << " without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being set.";
+    w << "  This could be because you are using a Mac OS X version";
+    w << " less than 10.5 or because CMake's platform configuration is";
+    w << " corrupt.";
+    cmake* cm = this->Makefile->GetCMakeInstance();
+    cm->IssueMessage(cmake::FATAL_ERROR, w.str(), this->GetBacktrace());
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::IsImportedSharedLibWithoutSOName(const char* config)
 {
   if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
@@ -4432,7 +4512,15 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
      !this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
      !this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
     {
-    std::string dir = this->GetDirectory(config);
+    std::string dir;
+    if(this->GetPropertyAsBool("MACOSX_RPATH"))
+      {
+      dir = "@rpath";
+      }
+    else
+      {
+      dir = this->GetDirectory(config);
+      }
     dir += "/";
     return dir;
     }
@@ -4458,6 +4546,10 @@ std::string cmTarget::GetInstallNameDirForInstallTree()
         dir = install_name_dir;
         dir += "/";
         }
+      }
+    if(dir.empty() && this->GetPropertyAsBool("MACOSX_RPATH"))
+      {
+      dir = "@rpath/";
       }
     return dir;
     }
@@ -5040,7 +5132,6 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
 //----------------------------------------------------------------------------
 bool cmTarget::IsChrpathUsed(const char* config)
 {
-#if defined(CMAKE_USE_ELF_PARSER)
   // Only certain target types have an rpath.
   if(!(this->GetType() == cmTarget::SHARED_LIBRARY ||
        this->GetType() == cmTarget::MODULE_LIBRARY ||
@@ -5074,6 +5165,12 @@ bool cmTarget::IsChrpathUsed(const char* config)
     return false;
     }
 
+  if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    return true;
+    }
+
+#if defined(CMAKE_USE_ELF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
   if(const char* ll = this->GetLinkerLanguage(config, this))

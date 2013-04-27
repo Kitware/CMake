@@ -606,6 +606,12 @@ cmInstallTargetGenerator
     return;
     }
 
+  // Skip if on Apple
+  if(this->Target->GetMakefile()->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    return;
+    }
+
   // Get the link information for this target.
   // It can provide the RPATH.
   cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
@@ -645,30 +651,62 @@ cmInstallTargetGenerator
     return;
     }
 
-  // Construct the original rpath string to be replaced.
-  std::string oldRpath = cli->GetRPathString(false);
-
-  // Get the install RPATH from the link information.
-  std::string newRpath = cli->GetChrpathString();
-
-  // Skip the rule if the paths are identical
-  if(oldRpath == newRpath)
+  if(this->Target->GetMakefile()->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    return;
-    }
+    // If using install_name_tool, set up the rules to modify the rpaths.
+    std::string installNameTool =
+      this->Target->GetMakefile()->
+      GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
 
-  // Write a rule to run chrpath to set the install-tree RPATH
-  if(newRpath.empty())
-    {
-    os << indent << "FILE(RPATH_REMOVE\n"
-       << indent << "     FILE \"" << toDestDirPath << "\")\n";
+    std::vector<std::string> oldRuntimeDirs, newRuntimeDirs;
+    cli->GetRPath(oldRuntimeDirs, false);
+    cli->GetRPath(newRuntimeDirs, true);
+
+    // Note: These are separate commands to avoid install_name_tool
+    // corruption on 10.6.
+    for(std::vector<std::string>::const_iterator i = oldRuntimeDirs.begin();
+        i != oldRuntimeDirs.end(); ++i)
+      {
+      os << indent << "execute_process(COMMAND " << installNameTool << "\n";
+      os << indent << "  -delete_rpath \"" << *i << "\"\n";
+      os << indent << "  \"" << toDestDirPath << "\")\n";
+      }
+
+    for(std::vector<std::string>::const_iterator i = newRuntimeDirs.begin();
+        i != newRuntimeDirs.end(); ++i)
+      {
+      os << indent << "execute_process(COMMAND " << installNameTool << "\n";
+      os << indent << "  -add_rpath \"" << *i << "\"\n";
+      os << indent << "  \"" << toDestDirPath << "\")\n";
+      }
     }
   else
     {
-    os << indent << "FILE(RPATH_CHANGE\n"
-       << indent << "     FILE \"" << toDestDirPath << "\"\n"
-       << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
-       << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
+    // Construct the original rpath string to be replaced.
+    std::string oldRpath = cli->GetRPathString(false);
+
+    // Get the install RPATH from the link information.
+    std::string newRpath = cli->GetChrpathString();
+
+    // Skip the rule if the paths are identical
+    if(oldRpath == newRpath)
+      {
+      return;
+      }
+
+    // Write a rule to run chrpath to set the install-tree RPATH
+    if(newRpath.empty())
+      {
+      os << indent << "FILE(RPATH_REMOVE\n"
+         << indent << "     FILE \"" << toDestDirPath << "\")\n";
+      }
+    else
+      {
+      os << indent << "FILE(RPATH_CHANGE\n"
+         << indent << "     FILE \"" << toDestDirPath << "\"\n"
+         << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
+         << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
+      }
     }
 }
 
