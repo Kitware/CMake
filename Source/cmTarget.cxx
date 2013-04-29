@@ -2706,6 +2706,15 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::IncludeDirectoriesEntry(cge));
     return;
     }
+  if (strcmp(prop, "LINK_LIBRARIES") == 0)
+    {
+    this->Internal->LinkInterfaceIncludeDirectoriesEntries.clear();
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmValueWithOrigin entry(value, lfbt);
+    this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+    // Fall through
+    }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -2726,6 +2735,14 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Internal->IncludeDirectoriesEntries.push_back(
               new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
     return;
+    }
+  if (strcmp(prop, "LINK_LIBRARIES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmValueWithOrigin entry(value, lfbt);
+    this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+    // Fall through
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
@@ -2760,12 +2777,6 @@ void cmTarget::AppendBuildInterfaceIncludes()
                             ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
       }
     }
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::AppendTllInclude(const cmValueWithOrigin &entry)
-{
-  this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
 }
 
 //----------------------------------------------------------------------------
