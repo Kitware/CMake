@@ -2939,8 +2939,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                                         ge.Parse(it->Value);
       std::string result = cge->Evaluate(this->Makefile, config,
                                         false, this, 0, 0);
-      if (!cmGeneratorExpression::IsValidTargetName(result.c_str())
-          || !this->Makefile->FindTargetToUse(result.c_str()))
+      if (!this->Makefile->FindTargetToUse(result.c_str()))
         {
         continue;
         }
