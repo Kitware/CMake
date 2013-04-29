@@ -44,10 +44,14 @@ public:
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmSourceFile*> ExternalObjects;
   std::vector<cmSourceFile*> IDLSources;
+  std::vector<cmSourceFile*> ResxSources;
+  
   std::string ModuleDefinitionFile;
 
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
+
+  std::set<std::string> ExpectedResxHeaders;
 
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build

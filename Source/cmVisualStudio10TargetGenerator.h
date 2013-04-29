@@ -62,6 +62,7 @@ private:
   void WriteWinRTReferences();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();
+
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
   void WriteClOptions(std::string const& config,
@@ -91,7 +92,7 @@ private:
                          std::vector<cmSourceGroup>& );
   void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
-
+  bool IsResxHeader(const std::string& headerFile);
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
