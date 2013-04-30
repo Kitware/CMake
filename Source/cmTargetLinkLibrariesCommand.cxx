@@ -259,16 +259,6 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
   // Handle normal case first.
   if(this->CurrentProcessingState != ProcessingLinkInterface)
     {
-    if (cmGeneratorExpression::IsValidTargetName(lib)
-        || cmGeneratorExpression::Find(lib) != std::string::npos)
-      {
-      cmListFileBacktrace lfbt;
-      this->Makefile->GetBacktrace(lfbt);
-      cmValueWithOrigin entry(this->Target->GetDebugGeneratorExpressions(lib,
-                                                                        llt),
-                              lfbt);
-      this->Target->AppendTllInclude(entry);
-      }
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
     if (this->CurrentProcessingState != ProcessingPublicInterface)
