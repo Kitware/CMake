@@ -210,7 +210,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
     else
       {
       cmOStringStream e;
-      e << "PACKAGE given unknown argumsnt: " << args[i];
+      e << "PACKAGE given unknown argument: " << args[i];
       this->SetError(e.str().c_str());
       return false;
       }

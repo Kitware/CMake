@@ -279,7 +279,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "If not set here then it is set to target_EXPORTS by default "
      "(with some substitutions if the target is not a valid C "
      "identifier). This is useful for headers to know whether they are "
-     "being included from inside their library our outside to properly "
+     "being included from inside their library or outside to properly "
      "setup dllexport/dllimport decorations. ");
 
   cm->DefineProperty
@@ -1143,7 +1143,7 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("MACOSX_FRAMEWORK_INFO_PLIST", cmProperty::TARGET,
      "Specify a custom Info.plist template for a Mac OS X Framework.",
-     "An library target with FRAMEWORK enabled will be built as a "
+     "A library target with FRAMEWORK enabled will be built as a "
      "framework on Mac OS X.  "
      "By default its Info.plist file is created by configuring a template "
      "called MacOSXFrameworkInfo.plist.in located in the CMAKE_MODULE_PATH.  "
@@ -1234,7 +1234,7 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("GENERATOR_FILE_NAME", cmProperty::TARGET,
      "Generator's file for this target.",
-     "An internal property used by some generators to record the name of "
+     "An internal property used by some generators to record the name of the "
      "project or dsp file associated with this target. Note that at configure "
      "time, this property is only set for targets created by "
      "include_external_msproject().");

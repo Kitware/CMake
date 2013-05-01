@@ -1970,7 +1970,7 @@ bool cmFileInstaller
   else
     {
     cmOStringStream e;
-    e << "Option TYPE given uknown value \"" << stype << "\".";
+    e << "Option TYPE given unknown value \"" << stype << "\".";
     this->FileCommand->SetError(e.str().c_str());
     return false;
     }
@@ -1985,7 +1985,7 @@ bool cmFileInstaller::HandleInstallDestination()
   // allow for / to be a valid destination
   if ( destination.size() < 2 && destination != "/" )
     {
-    this->FileCommand->SetError("called with inapropriate arguments. "
+    this->FileCommand->SetError("called with inappropriate arguments. "
         "No DESTINATION provided or .");
     return false;
     }

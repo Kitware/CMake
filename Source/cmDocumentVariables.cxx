@@ -10,7 +10,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_AR", cmProperty::VARIABLE,
      "Name of archiving tool for static libraries.",
-     "This specifies name of the program that creates archive "
+     "This specifies the name of the program that creates archive "
      "or static libraries.",false,
      "Variables that Provide Information");
 
@@ -152,7 +152,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_CACHE_MAJOR_VERSION", cmProperty::VARIABLE,
      "Major version of CMake used to create the CMakeCache.txt file",
-     "This is stores the major version of CMake used to "
+     "This stores the major version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false,
@@ -160,7 +160,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_CACHE_MINOR_VERSION", cmProperty::VARIABLE,
      "Minor version of CMake used to create the CMakeCache.txt file",
-     "This is stores the minor version of CMake used to "
+     "This stores the minor version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false,
@@ -169,7 +169,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_CACHE_PATCH_VERSION", cmProperty::VARIABLE,
      "Patch version of CMake used to create the CMakeCache.txt file",
-     "This is stores the patch version of CMake used to "
+     "This stores the patch version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false,
@@ -616,7 +616,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_INSTALL_PREFIX", cmProperty::VARIABLE,
      "Install directory used by install.",
      "If \"make install\" is invoked or INSTALL is built"
-     ", this directory is pre-pended onto all install "
+     ", this directory is prepended onto all install "
      "directories. This variable defaults to /usr/local"
      " on UNIX and c:/Program Files on Windows.\n"
      "On UNIX one can use the DESTDIR mechanism in order"
@@ -627,11 +627,11 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "It is usually invoked like this:\n"
      " make DESTDIR=/home/john install\n"
      "which will install the concerned software using the"
-     " installation prefix, e.g. \"/usr/local\" pre-pended with "
+     " installation prefix, e.g. \"/usr/local\" prepended with "
      "the DESTDIR value which finally gives \"/home/john/usr/local\".\n"
      "WARNING: DESTDIR may not be used on Windows because installation"
      " prefix usually contains a drive letter like in \"C:/Program Files\""
-     " which cannot be pre-pended with some other prefix."
+     " which cannot be prepended with some other prefix."
      ,false,
      "Variables That Change Behavior");
 
@@ -792,7 +792,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This switch should be used during the initial CMake run. Otherwise if "
      "the package has already been found in a previous CMake run, the "
      "variables which have been stored in the cache will still be there. "
-     "In the case it is recommended to remove the cache variables for "
+     "In that case it is recommended to remove the cache variables for "
      "this package from the cache using the cache editor or cmake -U", false,
      "Variables That Change Behavior");
 
@@ -888,7 +888,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       " an ABSOLUTE DESTINATION path.",
       "This variable is defined by CMake-generated cmake_install.cmake "
       "scripts."
-      " It can be used (read-only) by program or script that source those"
+      " It can be used (read-only) by programs or scripts that source those"
       " install scripts. This is used by some CPack generators (e.g. RPM).",
       false,
       "Variables That Change Behavior");
@@ -898,7 +898,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       "Ask cmake_install.cmake script to warn each time a file with "
       "absolute INSTALL DESTINATION is encountered.",
       "This variable is used by CMake-generated cmake_install.cmake"
-      " scripts. If ones set this variable to ON while running the"
+      " scripts. If one sets this variable to ON while running the"
       " script, it may get warning messages from the script.", false,
       "Variables That Change Behavior");
 
@@ -909,7 +909,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       "The fatal error is emitted before the installation of "
       "the offending file takes place."
       " This variable is used by CMake-generated cmake_install.cmake"
-      " scripts. If ones set this variable to ON while running the"
+      " scripts. If one sets this variable to ON while running the"
       " script, it may get fatal error messages from the script.",false,
       "Variables That Change Behavior");
 
@@ -1110,7 +1110,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_HOST_APPLE", cmProperty::VARIABLE,
-     "True for Apple OSXoperating systems.",
+     "True for Apple OSX operating systems.",
      "Set to true when the host system is Apple OSX.",
      false,
      "Variables That Describe the System");
@@ -1395,7 +1395,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_USE_RELATIVE_PATHS", cmProperty::VARIABLE,
      "Use relative paths (May not work!).",
-     "If this is set to TRUE, then the CMake will use "
+     "If this is set to TRUE, then CMake will use "
      "relative paths between the source and binary tree. "
      "This option does not work for more complicated "
      "projects, and relative paths are used when possible.  "
@@ -1591,7 +1591,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_COMPILE_OBJECT", cmProperty::VARIABLE,
      "Rule variable to compile a single object file.",
      "This is a rule variable that tells CMake how to "
-     "compile a single object file for for the language <LANG>.",false,
+     "compile a single object file for the language <LANG>."
+     ,false,
      "Variables for Languages");
 
   cm->DefineProperty
@@ -1727,8 +1728,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_<LANG>_LINK_EXECUTABLE ", cmProperty::VARIABLE,
-     "Rule variable to link and executable.",
-     "Rule variable to link and executable for the given language.",false,
+     "Rule variable to link an executable.",
+     "Rule variable to link an executable for the given language."
+     ,false,
      "Variables for Languages");
 
   cm->DefineProperty
@@ -1742,7 +1744,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS", cmProperty::VARIABLE,
      "Extensions of source files for the given language.",
      "This is the list of extensions for a "
-     "given languages source files.",false,"Variables for Languages");
+     "given language's source files."
+     ,false,
+     "Variables for Languages");
 
   cm->DefineProperty(
     "CMAKE_<LANG>_COMPILER_LOADED", cmProperty::VARIABLE,

@@ -13,7 +13,7 @@
 #define cmDocumentGeneratorExpressions_h
 
 #define CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS                      \
-  "Generator expressions are evaluted during build system generation "  \
+  "Generator expressions are evaluated during build system generation " \
   "to produce information specific to each build configuration.  "      \
   "Valid expressions are:\n"                                            \
   "  $<0:...>                  = empty string (ignores \"...\")\n"      \

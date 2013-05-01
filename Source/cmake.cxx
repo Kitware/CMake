@@ -4173,7 +4173,7 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
     {
     if(verbose)
       {
-      std::cout << "Visual Studio Incremental Link with embeded manifests\n";
+      std::cout << "Visual Studio Incremental Link with embedded manifests\n";
       }
     return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
     }
