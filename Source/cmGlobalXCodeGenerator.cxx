@@ -2244,6 +2244,29 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   buildSettings->AddAttribute("INSTALL_PATH",
                               this->CreateString(install_name_dir.c_str()));
 
+  // Create the LD_RUNPATH_SEARCH_PATHS
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+  if(pcli)
+    {
+    std::string search_paths;
+    std::vector<std::string> runtimeDirs;
+    pcli->GetRPath(runtimeDirs, false);
+    for(std::vector<std::string>::const_iterator i = runtimeDirs.begin();
+        i != runtimeDirs.end(); ++i)
+      {
+      if(!search_paths.empty())
+        {
+        search_paths += " ";
+        }
+      search_paths += this->XCodeEscapePath((*i).c_str());
+      }
+    if(!search_paths.empty())
+      {
+      buildSettings->AddAttribute("LD_RUNPATH_SEARCH_PATHS",
+                                  this->CreateString(search_paths.c_str()));
+      }
+    }
+
   buildSettings->AddAttribute("OTHER_LDFLAGS",
                               this->CreateString(extraLinkOptions.c_str()));
   buildSettings->AddAttribute("OTHER_REZFLAGS",
