@@ -128,7 +128,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
       "by CMake in versions prior to 1.6. To fix this you might need to set "
       "the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less. If "
       "you are writing a CMakeLists file, (or have already set "
-      "CMAKE_BACKWARDS_COMPATABILITY to 1.4 or less) then you probably need "
+      "CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less) then you probably need "
       "to include a CMake module to test for the feature this variable "
       "defines.";
     cmSystemTools::Error(message.c_str());
@@ -4045,7 +4045,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   // TODO: Teach cmGeneratedFileStream to use a random temp file (with
   // multiple tries in unlikely case of conflict) and use that here.
   std::ofstream stamp(stampTemp);
-  stamp << "# CMake generation timestamp file this directory.\n";
+  stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if(cmSystemTools::RenameFile(stampTemp, stampName))
     {

@@ -202,7 +202,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   stampName += "/";
   stampName += "generate.stamp";
   std::ofstream stamp(stampName.c_str());
-  stamp << "# CMake generation timestamp file this directory.\n";
+  stamp << "# CMake generation timestamp file for this directory.\n";
 
   // Create a helper file so CMake can determine when it is run
   // through the rule created by CreateVCProjBuildRule whether it
@@ -443,12 +443,12 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"InlineFunctionExpansion", "Ob0", "no inlines",              "0", 0},
   {"InlineFunctionExpansion", "Ob1", "when inline keyword",     "1", 0},
   {"InlineFunctionExpansion", "Ob2", "any time you can inline", "2", 0},
-  {"RuntimeLibrary", "MTd", "Multithreded debug",     "1", 0},
-  {"RuntimeLibrary", "MT", "Multithreded", "0", 0},
-  {"RuntimeLibrary", "MDd", "Multithreded dll debug", "3", 0},
-  {"RuntimeLibrary", "MD", "Multithreded dll",        "2", 0},
-  {"RuntimeLibrary", "MLd", "Sinble Thread debug",    "5", 0},
-  {"RuntimeLibrary", "ML", "Sinble Thread",           "4", 0},
+  {"RuntimeLibrary", "MTd", "Multithreaded debug",     "1", 0},
+  {"RuntimeLibrary", "MT", "Multithreaded", "0", 0},
+  {"RuntimeLibrary", "MDd", "Multithreaded dll debug", "3", 0},
+  {"RuntimeLibrary", "MD", "Multithreaded dll",        "2", 0},
+  {"RuntimeLibrary", "MLd", "Single Thread debug",    "5", 0},
+  {"RuntimeLibrary", "ML", "Single Thread",           "4", 0},
   {"StructMemberAlignment", "Zp16", "struct align 16 byte ",   "5", 0},
   {"StructMemberAlignment", "Zp1", "struct align 1 byte ",     "1", 0},
   {"StructMemberAlignment", "Zp2", "struct align 2 byte ",     "2", 0},
