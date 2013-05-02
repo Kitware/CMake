@@ -180,7 +180,7 @@ void deleteAndClear(
 //----------------------------------------------------------------------------
 cmTargetInternals::~cmTargetInternals()
 {
-  deleteAndClear(CachedLinkInterfaceIncludeDirectoriesEntries);
+  deleteAndClear(this->CachedLinkInterfaceIncludeDirectoriesEntries);
 }
 
 //----------------------------------------------------------------------------
