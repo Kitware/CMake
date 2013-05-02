@@ -142,7 +142,7 @@ public:
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
 
-  std::vector<IncludeDirectoriesEntry*>
+  std::map<std::string, std::vector<IncludeDirectoriesEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
   std::map<std::string, std::string> CachedLinkInterfaceCompileDefinitions;
 
@@ -162,6 +162,19 @@ void deleteAndClear(
       delete *it;
     }
   entries.clear();
+}
+
+//----------------------------------------------------------------------------
+void deleteAndClear(
+  std::map<std::string,
+          std::vector<cmTargetInternals::IncludeDirectoriesEntry*> > &entries)
+{
+  for (std::map<std::string,
+          std::vector<cmTargetInternals::IncludeDirectoriesEntry*> >::iterator
+        it = entries.begin(), end = entries.end(); it != end; ++it)
+    {
+    deleteAndClear(it->second);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2976,14 +2989,15 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
                                                               includeGenex);
 
-      this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries.push_back(
+      this->Internal
+        ->CachedLinkInterfaceIncludeDirectoriesEntries[configString].push_back(
                         new cmTargetInternals::IncludeDirectoriesEntry(cge,
                                                               it->Value));
       }
     }
 
   processIncludeDirectories(this,
-              this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries,
+    this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries[configString],
                             includes,
                             uniqueIncludes,
                             &dagChecker,
@@ -2993,7 +3007,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
   if (!this->Makefile->IsGeneratingBuildSystem())
     {
     deleteAndClear(
-              this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries);
+                this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries);
     }
   else
     {
