@@ -577,26 +577,37 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
     cm->DefineProperty
     ("CMAKE_CONFIGURATION_TYPES",  cmProperty::VARIABLE,
-     "Specifies the available build types.",
-     "This specifies what build types will be available such as "
-     "Debug, Release, RelWithDebInfo etc. This has reasonable defaults "
-     "on most platforms. But can be extended to provide other "
-     "build types. See also CMAKE_BUILD_TYPE.",
-     false,
+     "Specifies the available build types on multi-config generators.",
+     "This specifies what build types (configurations) will be available "
+     "such as Debug, Release, RelWithDebInfo etc. "
+     "This has reasonable defaults on most platforms, "
+     "but can be extended to provide other build types. "
+     "See also CMAKE_BUILD_TYPE for details of managing configuration data, "
+     "and CMAKE_CFG_INTDIR."
+     ,false,
      "Variables That Change Behavior");
 
     cm->DefineProperty
     ("CMAKE_BUILD_TYPE",  cmProperty::VARIABLE,
-     "Specifies the build type for make based generators.",
-     "This specifies what build type will be built in this tree. "
-     " Possible values are empty, Debug, Release, RelWithDebInfo"
-     " and MinSizeRel. This variable is only supported for "
-     "make based generators. If this variable is supported, "
-     "then CMake will also provide initial values for the "
-     "variables with the name "
-     " CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]."
-     " For example, if CMAKE_BUILD_TYPE is Debug, then "
-     "CMAKE_C_FLAGS_DEBUG will be added to the CMAKE_C_FLAGS.",false,
+     "Specifies the build type on single-configuration generators.",
+     "This statically specifies what build type (configuration) "
+     "will be built in this build tree. Possible values are "
+     "empty, Debug, Release, RelWithDebInfo and MinSizeRel. "
+     "This variable is only meaningful to single-configuration generators "
+     "(such as make and Ninja) i.e. "
+     "those which choose a single configuration "
+     "when CMake runs to generate a build tree as opposed to "
+     "multi-configuration generators which offer selection of the build "
+     "configuration within the generated build environment. "
+     "There are many per-config properties and variables "
+     "(usually following clean SOME_VAR_<CONFIG> order conventions), "
+     "such as CMAKE_C_FLAGS_<CONFIG>, specified as uppercase: "
+     "CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]. "
+     "For example, in a build tree configured "
+     "to build type Debug, CMake will see to having "
+     "CMAKE_C_FLAGS_DEBUG settings get added to the CMAKE_C_FLAGS settings. "
+     "See also CMAKE_CONFIGURATION_TYPES."
+     ,false,
      "Variables That Change Behavior");
 
   cm->DefineProperty
