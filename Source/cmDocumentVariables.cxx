@@ -270,12 +270,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_LINK_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for libraries that you link to.",
-     "The suffix to use for the end of a library, .lib on Windows.",false,
+     "The suffix to use for the end of a library filename, .lib on Windows."
+     ,false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_EXECUTABLE_SUFFIX", cmProperty::VARIABLE,
      "The suffix for executables on this platform.",
-     "The suffix to use for the end of an executable if any, "
+     "The suffix to use for the end of an executable filename if any, "
      ".exe on Windows."
      "\n"
      "CMAKE_EXECUTABLE_SUFFIX_<LANG> overrides this for language <LANG>."
@@ -452,8 +453,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_IMPORT_LIBRARY_SUFFIX", cmProperty::VARIABLE,
-     "The suffix for import  libraries that you link to.",
-     "The suffix to use for the end of an import library if used "
+     "The suffix for import libraries that you link to.",
+     "The suffix to use for the end of an import library filename if used "
      "on this platform."
      "\n"
      "CMAKE_IMPORT_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
@@ -468,7 +469,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SHARED_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for shared libraries that you link to.",
-     "The suffix to use for the end of a shared library, .dll on Windows."
+     "The suffix to use for the end of a shared library filename, "
+     ".dll on Windows."
      "\n"
      "CMAKE_SHARED_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
      ,false, "Variables that Provide Information");
@@ -482,7 +484,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SHARED_MODULE_SUFFIX", cmProperty::VARIABLE,
      "The suffix for shared libraries that you link to.",
-     "The suffix to use for the end of a loadable module on this platform"
+     "The suffix to use for the end of a loadable module filename "
+     "on this platform"
      "\n"
      "CMAKE_SHARED_MODULE_SUFFIX_<LANG> overrides this for language <LANG>."
      ,false, "Variables that Provide Information");
@@ -496,7 +499,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_STATIC_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for static libraries that you link to.",
-     "The suffix to use for the end of a static library, .lib on Windows."
+     "The suffix to use for the end of a static library filename, "
+     ".lib on Windows."
      "\n"
      "CMAKE_STATIC_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
      ,false, "Variables that Provide Information");
