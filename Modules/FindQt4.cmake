@@ -635,10 +635,10 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
           )
     endif()
 
-    # try dropping a hint if trying to use Visual Studio with Qt built by mingw
+    # try dropping a hint if trying to use Visual Studio with Qt built by MinGW
     if(NOT QT_QTCORE_LIBRARY_RELEASE AND MSVC)
       if(EXISTS ${QT_LIBRARY_DIR_TMP}/libqtmain.a)
-        message( FATAL_ERROR "It appears you're trying to use Visual Studio with Qt built by mingw.  Those compilers do not produce code compatible with each other.")
+        message( FATAL_ERROR "It appears you're trying to use Visual Studio with Qt built by MinGW.  Those compilers do not produce code compatible with each other.")
       endif()
     endif()
 

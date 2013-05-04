@@ -129,9 +129,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      " needed to build the output of CMake.   If the "
      "generator selected was Visual Studio 6, the "
      "CMAKE_BUILD_TOOL will be set to msdev, for "
-     "Unix makefiles it will be set to make or gmake, "
+     "Unix Makefiles it will be set to make or gmake, "
      "and for Visual Studio 7 it set to devenv.  For "
-     "Nmake Makefiles the value is nmake. This can be "
+     "NMake Makefiles the value is nmake. This can be "
      "useful for adding special flags and commands based"
      " on the final build environment. ", false,
      "Variables that Provide Information");
@@ -940,7 +940,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "which CMake is targeting.   On systems that "
      "have the uname command, this variable is set "
      "to the output of uname -s.  Linux, Windows, "
-     " and Darwin for Mac OSX are the values found "
+     " and Darwin for Mac OS X are the values found "
      " on the big three operating systems."  ,false,
      "Variables That Describe the System");
   cm->DefineProperty
@@ -999,20 +999,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("APPLE", cmProperty::VARIABLE,
-     "True if running on Mac OSX.",
-     "Set to true on Mac OSX.",false,
+     "True if running on Mac OS X.",
+     "Set to true on Mac OS X."
+     ,false,
      "Variables That Describe the System");
 
   cm->DefineProperty
     ("BORLAND", cmProperty::VARIABLE,
-     "True if the borland compiler is being used.",
+     "True if the Borland compiler is being used.",
      "This is set to true if the Borland compiler is being used.",false,
      "Variables That Describe the System");
 
   cm->DefineProperty
     ("CYGWIN", cmProperty::VARIABLE,
-     "True for cygwin.",
-     "Set to true when using CYGWIN.",false,
+     "True for Cygwin.",
+     "Set to true when using Cygwin."
+     ,false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -1110,8 +1112,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_HOST_APPLE", cmProperty::VARIABLE,
-     "True for Apple OSX operating systems.",
-     "Set to true when the host system is Apple OSX.",
+     "True for Apple OS X operating systems.",
+     "Set to true when the host system is Apple OS X.",
      false,
      "Variables That Describe the System");
 
@@ -1125,7 +1127,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_HOST_WIN32", cmProperty::VARIABLE,
      "True on windows systems, including win64.",
-     "Set to true when the host system is Windows and on cygwin.",false,
+     "Set to true when the host system is Windows and on Cygwin."
+     ,false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -1198,7 +1201,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_INSTALL_NAME_DIR", cmProperty::VARIABLE,
-     "Mac OSX directory name for installed targets.",
+     "Mac OS X directory name for installed targets.",
      "CMAKE_INSTALL_NAME_DIR is used to initialize the "
      "INSTALL_NAME_DIR property on all targets. See that target "
      "property for more information.",
