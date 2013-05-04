@@ -1376,38 +1376,41 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_EXE_LINKER_FLAGS", cmProperty::VARIABLE,
-     "Linker flags used to create executables.",
-     "Flags used by the linker when creating an executable.",false,
+     "Linker flags to be used to create executables.",
+     "These flags will be used by the linker when creating an executable."
+     ,false,
      "Variables that Control the Build");
 
   cm->DefineProperty
-    ("CMAKE_EXE_LINKER_FLAGS_[CMAKE_BUILD_TYPE]", cmProperty::VARIABLE,
-     "Flag used when linking an executable.",
+    ("CMAKE_EXE_LINKER_FLAGS_<CONFIG>", cmProperty::VARIABLE,
+     "Flags to be used when linking an executable.",
      "Same as CMAKE_C_FLAGS_* but used by the linker "
      "when creating executables.",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LIBRARY_PATH_FLAG", cmProperty::VARIABLE,
-     "The flag used to add a library search path to a compiler.",
-     "The flag used to specify a library directory to the compiler. "
+     "The flag to be used to add a library search path to a compiler.",
+     "The flag will be used to specify a library directory to the compiler. "
      "On most compilers this is \"-L\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LINK_DEF_FILE_FLAG  ", cmProperty::VARIABLE,
-     "Linker flag used to specify a .def file for dll creation.",
-     "The flag used to add a .def file when creating "
-     "a dll on Windows, this is only defined on Windows.",false,
+     "Linker flag to be used to specify a .def file for dll creation.",
+     "The flag will be used to add a .def file when creating "
+     "a dll on Windows; this is only defined on Windows."
+     ,false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LINK_LIBRARY_FLAG", cmProperty::VARIABLE,
-     "Flag used to link a library into an executable.",
-     "The flag used to specify a library to link to an executable.  "
+     "Flag to be used to link a library into an executable.",
+     "The flag will be used to specify a library to link to an executable.  "
      "On most compilers this is \"-l\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LINK_LIBRARY_FILE_FLAG", cmProperty::VARIABLE,
-     "Flag used to link a library specified by a path to its file.",
-     "The flag used before a library file path is given to the linker.  "
+     "Flag to be used to link a library specified by a path to its file.",
+     "The flag will be used before a library file path is given to the "
+     "linker.  "
      "This is needed only on very few platforms.", false,
      "Variables that Control the Build");
   cm->DefineProperty
