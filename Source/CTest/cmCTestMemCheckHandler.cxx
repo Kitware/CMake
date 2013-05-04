@@ -491,6 +491,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   switch ( this->MemoryTesterStyle )
     {
     case cmCTestMemCheckHandler::VALGRIND:
+      {
       if ( this->MemoryTesterOptions.empty() )
         {
         this->MemoryTesterOptions.push_back("-q");
@@ -516,7 +517,11 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
           + this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
         this->MemoryTesterOptions.push_back(suppressions);
         }
+      std::string outputFile = "--log-file="
+        + this->MemoryTesterOutputFile;
+      this->MemoryTesterOptions.push_back(outputFile);
       break;
+      }
     case cmCTestMemCheckHandler::PURIFY:
       {
       std::string outputFile;
@@ -948,6 +953,21 @@ cmCTestMemCheckHandler::PostProcessPurifyTest(cmCTestTestResult& res)
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessPurifyTest for : "
              << res.Name.c_str() << std::endl);
+  appendMemTesterOutput(res);
+}
+
+void
+cmCTestMemCheckHandler::PostProcessValgrindTest(cmCTestTestResult& res)
+{
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "PostProcessValgrindTest for : "
+             << res.Name.c_str() << std::endl);
+  appendMemTesterOutput(res);
+}
+
+void
+cmCTestMemCheckHandler::appendMemTesterOutput(cmCTestTestResult& res)
+{
   if ( !cmSystemTools::FileExists(this->MemoryTesterOutputFile.c_str()) )
     {
     std::string log = "Cannot find memory tester output file: "
