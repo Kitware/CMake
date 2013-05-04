@@ -119,6 +119,10 @@ private:
 
   void PostProcessPurifyTest(cmCTestTestResult& res);
   void PostProcessBoundsCheckerTest(cmCTestTestResult& res);
+  void PostProcessValgrindTest(cmCTestTestResult& res);
+
+  ///! append MemoryTesterOutputFile to the test log
+  void appendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res);
 };
 
 #endif
