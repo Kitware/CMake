@@ -1,10 +1,13 @@
 foreach (_retval 0 1)
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/ret${_retval}.c" "int main(){return ${_retval};}\n")
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/memtester.cxx.in" "${CMAKE_CURRENT_BINARY_DIR}/ret${_retval}.cxx" @ONLY)
 endforeach ()
 
+include_directories(${CMake_SOURCE_DIR}/Source ${CMake_BINARY_DIR}/Source)
+
 # create binaries that we will use as a pseudo memory checker
-add_executable(pseudo_valgrind "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+add_executable(pseudo_valgrind "${CMAKE_CURRENT_BINARY_DIR}/ret0.cxx")
 set_target_properties(pseudo_valgrind PROPERTIES OUTPUT_NAME valgrind)
+target_link_libraries(pseudo_valgrind CMakeLib)
 
 # Xcode 2.x forgets to create the output directory before linking
 # the individual architectures.
@@ -14,13 +17,16 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]"
     )
 endif()
 
-add_executable(pseudo_purify "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+add_executable(pseudo_purify "${CMAKE_CURRENT_BINARY_DIR}/ret0.cxx")
 set_target_properties(pseudo_purify PROPERTIES OUTPUT_NAME purify)
-add_executable(pseudo_BC "${CMAKE_CURRENT_BINARY_DIR}/ret0.c")
+target_link_libraries(pseudo_purify CMakeLib)
+add_executable(pseudo_BC "${CMAKE_CURRENT_BINARY_DIR}/ret0.cxx")
 set_target_properties(pseudo_BC PROPERTIES OUTPUT_NAME BC)
+target_link_libraries(pseudo_BC CMakeLib)
 
 # binary to be used as pre- and post-memcheck command that fails
-add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.c")
+add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.cxx")
+target_link_libraries(memcheck_fail CMakeLib)
 
 foreach  (_test IN ITEMS Unknown UnknownQuoted NotExist
         DummyValgrind DummyValgrindPrePost
@@ -55,13 +61,16 @@ endforeach ()
 set_tests_properties(CTestTestMemcheckNotExist PROPERTIES
     PASS_REGULAR_EXPRESSION "Memory checker \\(MemoryCheckCommand\\) not set, or cannot find the specified program.")
 
-set(NORMAL_CTEST_OUTPUT "\n-- Processing memory checking output: \nMemory checking results:\n(BullseyeCoverage[^\n]*\n)?")
+set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-0]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
+set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
 # It is a valid result if valgrind does not output any files (can e.g. happen
 # if you have not compiled in debug mode), so these tests will not fail.
-set_tests_properties(CTestTestMemcheckDummyValgrind CTestTestMemcheckDummyValgrindPrePost
+set_tests_properties(CTestTestMemcheckDummyValgrind
+                     CTestTestMemcheckDummyValgrindPrePost
+                     CTestTestMemcheckDummyPurify
     PROPERTIES
-    PASS_REGULAR_EXPRESSION "${NORMAL_CTEST_OUTPUT}")
+    PASS_REGULAR_EXPRESSION "${NORMAL_CTEST_OUTPUT}${BULLSEYE_MSG}$")
 
 foreach (_pp Pre Post)
     string(TOLOWER ${_pp} _pp_lower)
@@ -72,10 +81,7 @@ endforeach ()
 
 set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
     PROPERTIES
-    PASS_REGULAR_EXPRESSION "\n2/2 Test #2: RunCMakeAgain .*\n1/1 MemCheck #1: RunCMake .*${NORMAL_CTEST_OUTPUT}")
-
-set_tests_properties(CTestTestMemcheckDummyPurify PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/DummyPurify/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyPurify/test.cmake\n")
+    PASS_REGULAR_EXPRESSION "\n2/2 Test #2: RunCMakeAgain .*${NORMAL_CTEST_OUTPUT}${BULLSEYE_MSG}$")
 
 set_tests_properties(CTestTestMemcheckDummyBC PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/DummyBC/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error parsing XML in stream at line 1: no element found\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyBC/test.cmake\n")
+    PASS_REGULAR_EXPRESSION "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-0]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n(.*\n)?Error parsing XML in stream at line 1: no element found\n")
