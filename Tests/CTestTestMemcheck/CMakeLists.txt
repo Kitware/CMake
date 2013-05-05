@@ -31,25 +31,52 @@ target_link_libraries(memcheck_fail CMakeLib)
 set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
 set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
-foreach  (_test IN ITEMS Unknown NotExist
-        DummyValgrind DummyValgrindPrePost
-        DummyValgrindFailPre DummyValgrindFailPost
-        DummyPurify DummyBC
-        DummyValgrindIgnoreMemcheck)
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/${_test}/test.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/${_test}/test.cmake"
-        @ONLY ESCAPE_QUOTES)
-    add_test(NAME CTestTestMemcheck${_test}
+function(gen_mc_test NAME CHECKER)
+    set(SUBTEST_NAME "${NAME}")
+    set(CHECKER_COMMAND "${CHECKER}")
+    foreach(_file IN ITEMS CMakeLists.txt CTestConfig.cmake test.cmake)
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${_file}.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/${_file}" @ONLY)
+    endforeach()
+    add_test(NAME CTestTestMemcheck${NAME}
         COMMAND ${CMAKE_CTEST_COMMAND}
-        -S "${CMAKE_CURRENT_BINARY_DIR}/${_test}/test.cmake" -V
-        --output-log "${CMAKE_CURRENT_BINARY_DIR}/${_test}/testOutput.log"
+        -C $<CONFIGURATION>
+        -S "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake" -V
+        --output-log "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/testOutput.log"
         -D PSEUDO_BC=$<TARGET_FILE:pseudo_BC>
         -D PSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
         -D PSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
         -D ERROR_COMMAND=$<TARGET_FILE:memcheck_fail>
         )
-endforeach ()
+endfunction(gen_mc_test)
+
+unset(CTEST_EXTRA_CONFIG)
+unset(CTEST_EXTRA_CODE)
+unset(CMAKELISTS_EXTRA_CODE)
+
+gen_mc_test(DummyPurify "\${PSEUDO_PURIFY}")
+gen_mc_test(DummyValgrind "\${PSEUDO_VALGRIND}")
+gen_mc_test(DummyBC "\${PSEUDO_BC}")
+
+set(CTEST_EXTRA_CODE "set(CTEST_CUSTOM_PRE_MEMCHECK \"\${CTEST_MEMORYCHECK_COMMAND}\")\nset(CTEST_CUSTOM_POST_MEMCHECK \"\${CTEST_MEMORYCHECK_COMMAND}\")")
+gen_mc_test(DummyValgrindPrePost "\${PSEUDO_VALGRIND}")
+
+set(CTEST_EXTRA_CODE "set(CTEST_CUSTOM_POST_MEMCHECK \"\${ERROR_COMMAND}\")")
+gen_mc_test(DummyValgrindFailPost "\${PSEUDO_VALGRIND}")
+
+set(CTEST_EXTRA_CODE "set(CTEST_CUSTOM_PRE_MEMCHECK \"\${ERROR_COMMAND}\")")
+gen_mc_test(DummyValgrindFailPre "\${PSEUDO_VALGRIND}")
+
+unset(CTEST_EXTRA_CODE)
+set(CTEST_EXTRA_CONFIG "set(CTEST_CUSTOM_MEMCHECK_IGNORE RunCMakeAgain)\n")
+set(CMAKELISTS_EXTRA_CODE "add_test(NAME RunCMakeAgain COMMAND \"\${CMAKE_COMMAND}\" --version)")
+gen_mc_test(DummyValgrindIgnoreMemcheck "\${PSEUDO_VALGRIND}")
+
+unset(CTEST_EXTRA_CONFIG)
+unset(CMAKELISTS_EXTRA_CODE)
+gen_mc_test(NotExist "\${CTEST_BINARY_DIRECTORY}/no-memcheck-exe")
+
+gen_mc_test(Unknown "${CMAKE_COMMAND}")
 
 string(REPLACE "\\" "\\\\" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND}")
 string(REPLACE "(" "\\(" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
