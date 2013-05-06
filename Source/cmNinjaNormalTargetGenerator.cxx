@@ -61,7 +61,6 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     }
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
-                                                      this->TargetNameOut,
                                                       this->GetConfigName());
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
@@ -383,24 +382,32 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (this->GetTarget()->IsAppBundleOnApple())
     {
     // Create the app bundle
-    std::string outpath;
+    std::string outpath =
+      this->GetTarget()->GetDirectory(this->GetConfigName());
     this->OSXBundleGenerator->CreateAppBundle(this->TargetNameOut, outpath);
 
     // Calculate the output path
-    targetOutput = outpath + this->TargetNameOut;
+    targetOutput = outpath;
+    targetOutput += "/";
+    targetOutput += this->TargetNameOut;
     targetOutput = this->ConvertToNinjaPath(targetOutput.c_str());
-    targetOutputReal = outpath + this->TargetNameReal;
+    targetOutputReal = outpath;
+    targetOutputReal += "/";
+    targetOutputReal += this->TargetNameReal;
     targetOutputReal = this->ConvertToNinjaPath(targetOutputReal.c_str());
     }
   else if (this->GetTarget()->IsFrameworkOnApple())
     {
     // Create the library framework.
-    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut);
+    std::string outpath =
+      this->GetTarget()->GetDirectory(this->GetConfigName());
+    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut, outpath);
     }
   else if(this->GetTarget()->IsCFBundleOnApple())
     {
     // Create the core foundation bundle.
-    std::string outpath;
+    std::string outpath =
+      this->GetTarget()->GetDirectory(this->GetConfigName());
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut, outpath);
     }
 

@@ -351,13 +351,7 @@ cmExportInstallFileGenerator
     prop += suffix;
 
     // Append the installed file name.
-    if(target->IsFrameworkOnApple())
-      {
-      value += itgen->GetInstallFilename(target, config);
-      value += ".framework/";
-      value += itgen->GetInstallFilename(target, config);
-      }
-    else if(target->IsCFBundleOnApple())
+    if(target->IsCFBundleOnApple())
       {
       const char *ext = target->GetProperty("BUNDLE_EXTENSION");
       if (!ext)

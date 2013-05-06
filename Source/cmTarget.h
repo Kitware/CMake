@@ -407,10 +407,8 @@ public:
   /** Return true if builtin chrpath will work for this target */
   bool IsChrpathUsed(const char* config);
 
-  std::string GetInstallNameDirForBuildTree(const char* config,
-                                            bool for_xcode = false);
-  std::string GetInstallNameDirForInstallTree(const char* config,
-                                              bool for_xcode = false);
+  std::string GetInstallNameDirForBuildTree(const char* config);
+  std::string GetInstallNameDirForInstallTree();
 
   cmComputeLinkInformation* GetLinkInformation(const char* config,
                                                cmTarget *head = 0);
@@ -462,6 +460,10 @@ public:
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple();
 
+  /** Return whether this target is an executable Bundle, a framework
+      or CFBundle on Apple.  */
+  bool IsBundleOnApple();
+
   /** Return the framework version string.  Undefined if
       IsFrameworkOnApple returns false.  */
   std::string GetFrameworkVersion();
@@ -476,21 +478,21 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
-  /** Append to @a base the mac content directory and return it. */
-  std::string BuildMacContentDirectory(const std::string& base,
-                                       const char* config = 0,
-                                       bool includeMacOS = true);
-
   /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const char* config = 0,
-                                     bool implib = false,
-                                     bool includeMacOS = true);
+  std::string GetMacContentDirectory(const char* config,
+                                     bool implib);
 
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles();
 
   /** @return the Mac framework directory without the base. */
-  std::string GetFrameworkDirectory(const char* config = 0);
+  std::string GetFrameworkDirectory(const char* config, bool rootDir);
+
+  /** @return the Mac CFBundle directory without the base */
+  std::string GetCFBundleDirectory(const char* config, bool contentOnly);
+
+  /** @return the Mac App directory without the base */
+  std::string GetAppBundleDirectory(const char* config, bool contentOnly);
 
   std::vector<std::string> GetIncludeDirectories(const char *config);
   void InsertInclude(const cmValueWithOrigin &entry,
@@ -596,6 +598,11 @@ private:
       the full versioned name.  If the target is not versioned this is
       the same as GetFullName.  */
   std::string NormalGetRealName(const char* config);
+
+  /** Append to @a base the mac content directory and return it. */
+  std::string BuildMacContentDirectory(const std::string& base,
+                                       const char* config,
+                                       bool contentOnly);
 
 private:
   std::string Name;

@@ -30,11 +30,8 @@ cmMakefileExecutableTargetGenerator
     this->TargetNamePDB, this->ConfigName);
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
-                                                      this->TargetNameOut,
                                                       this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
-  this->MacContentDirectory =
-    this->OSXBundleGenerator->GetMacContentDirectory();
 }
 
 //----------------------------------------------------------------------------
@@ -103,11 +100,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Construct the full path version of the names.
   std::string outpath = this->Target->GetDirectory(this->ConfigName);
-  outpath += "/";
   if(this->Target->IsAppBundleOnApple())
     {
     this->OSXBundleGenerator->CreateAppBundle(targetName, outpath);
     }
+  outpath += "/";
   std::string outpathImp;
   if(relink)
     {
