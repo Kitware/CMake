@@ -100,6 +100,9 @@ bool cmCPackWIXGenerator::RunLightCommand(const std::string& objectFiles)
   command << " -nologo";
   command << " -out " << QuotePath(packageFileNames.at(0));
   command << " -ext WixUIExtension";
+  const char* const cultures = GetOption("CPACK_WIX_CULTURES");
+  if(nullptr != cultures)
+	  command << " -cultures:" << cultures;
   command << " " << objectFiles;
 
   return RunWiXCommand(command.str());
