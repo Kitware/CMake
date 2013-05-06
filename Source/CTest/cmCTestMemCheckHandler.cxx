@@ -461,13 +461,6 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     return false;
     }
 
-  if ( this->MemoryTester[0] == '\"' &&
-    this->MemoryTester[this->MemoryTester.size()-1] == '\"' )
-    {
-    this->MemoryTester
-      = this->MemoryTester.substr(1, this->MemoryTester.size()-2);
-    }
-
   // Setup the options
   std::string memoryTesterOptions;
   if ( this->CTest->GetCTestConfiguration(
