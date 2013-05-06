@@ -28,7 +28,15 @@ target_link_libraries(pseudo_BC CMakeLib)
 add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.cxx")
 target_link_libraries(memcheck_fail CMakeLib)
 
-function(gen_mc_test NAME CHECKER)
+# Binaries that are used as memchecker that do not write the expected
+# output file. Need to be in their own subdirectory as they have the
+# same filenames.
+add_subdirectory(NoLogDummyChecker)
+
+set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-0]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
+set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
+
+function(gen_mc_test_internal NAME CHECKER)
     set(SUBTEST_NAME "${NAME}")
     set(CHECKER_COMMAND "${CHECKER}")
     foreach(_file IN ITEMS CMakeLists.txt CTestConfig.cmake test.cmake)
@@ -39,12 +47,29 @@ function(gen_mc_test NAME CHECKER)
         COMMAND ${CMAKE_CTEST_COMMAND}
         -S "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake" -V
         --output-log "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/testOutput.log"
+        ${ARGN}
+        )
+endfunction(gen_mc_test_internal)
+
+function(gen_mc_test NAME CHECKER)
+    gen_mc_test_internal(${NAME} "${CHECKER}"
         -D PSEUDO_BC=$<TARGET_FILE:pseudo_BC>
         -D PSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
         -D PSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
         -D ERROR_COMMAND=$<TARGET_FILE:memcheck_fail>
         )
 endfunction(gen_mc_test)
+
+function(gen_mcnl_test NAME CHECKER)
+    gen_mc_test_internal(${NAME} ${CHECKER}
+        -D PSEUDO_BC=$<TARGET_FILE:pseudonl_BC>
+        -D PSEUDO_PURIFY=$<TARGET_FILE:pseudonl_purify>
+        -D PSEUDO_VALGRIND=$<TARGET_FILE:pseudonl_valgrind>
+        )
+    set_tests_properties(CTestTestMemcheck${NAME}
+        PROPERTIES
+        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n${BULLSEYE_MSG}$")
+endfunction(gen_mcnl_test)
 
 unset(CTEST_EXTRA_CONFIG)
 unset(CTEST_EXTRA_CODE)
@@ -53,6 +78,9 @@ unset(CMAKELISTS_EXTRA_CODE)
 gen_mc_test(DummyPurify "\${PSEUDO_PURIFY}")
 gen_mc_test(DummyValgrind "\${PSEUDO_VALGRIND}")
 gen_mc_test(DummyBC "\${PSEUDO_BC}")
+gen_mcnl_test(DummyPurifyNoLogfile "\${PSEUDO_PURIFY}")
+gen_mcnl_test(DummyValgrindNoLogfile "\${PSEUDO_VALGRIND}")
+gen_mcnl_test(DummyBCNoLogfile "\${PSEUDO_BC}")
 
 set(CTEST_EXTRA_CODE "set(CTEST_CUSTOM_PRE_MEMCHECK \"\${CTEST_MEMORYCHECK_COMMAND}\")\nset(CTEST_CUSTOM_POST_MEMCHECK \"\${CTEST_MEMORYCHECK_COMMAND}\")")
 gen_mc_test(DummyValgrindPrePost "\${PSEUDO_VALGRIND}")
@@ -84,9 +112,6 @@ set_tests_properties(CTestTestMemcheckUnknown PROPERTIES
 
 set_tests_properties(CTestTestMemcheckNotExist PROPERTIES
     PASS_REGULAR_EXPRESSION "Memory checker \\(MemoryCheckCommand\\) not set, or cannot find the specified program.")
-
-set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-0]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
-set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
 # It is a valid result if valgrind does not output any files (can e.g. happen
 # if you have not compiled in debug mode), so these tests will not fail.
