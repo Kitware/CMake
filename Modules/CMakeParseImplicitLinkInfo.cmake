@@ -29,7 +29,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   endif()
   # Construct a regex to match linker lines.  It must match both the
   # whole line and just the command (argv[0]).
-  set(linker_regex "^( *|.*[/\\])(${linker}|ld|collect2)[^/\\]*( |$)")
+  set(linker_regex "^( *|.*[/\\])(${linker}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
   set(linker_exclude_regex "collect2 version ")
   set(log "${log}  link line regex: [${linker_regex}]\n")
   string(REGEX REPLACE "\r?\n" ";" output_lines "${text}")
