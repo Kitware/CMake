@@ -491,7 +491,6 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
         this->MemoryTesterOptions.push_back("--tool=memcheck");
         this->MemoryTesterOptions.push_back("--leak-check=yes");
         this->MemoryTesterOptions.push_back("--show-reachable=yes");
-        this->MemoryTesterOptions.push_back("--workaround-gcc296-bugs=yes");
         this->MemoryTesterOptions.push_back("--num-callers=50");
         }
       if ( this->CTest->GetCTestConfiguration(
