@@ -32,11 +32,8 @@ cmMakefileLibraryTargetGenerator
     this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
-                                                      this->TargetNameOut,
                                                       this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
-  this->MacContentDirectory =
-    this->OSXBundleGenerator->GetMacContentDirectory();
 }
 
 //----------------------------------------------------------------------------
@@ -292,14 +289,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string outpathImp;
   if(this->Target->IsFrameworkOnApple())
     {
-    outpath = this->MacContentDirectory;
-    this->OSXBundleGenerator->CreateFramework(targetName);
+    outpath = this->Target->GetDirectory(this->ConfigName);
+    this->OSXBundleGenerator->CreateFramework(targetName, outpath);
+    outpath += "/";
     }
   else if(this->Target->IsCFBundleOnApple())
     {
     outpath = this->Target->GetDirectory(this->ConfigName);
-    outpath += "/";
     this->OSXBundleGenerator->CreateCFBundle(targetName, outpath);
+    outpath += "/";
     }
   else if(relink)
     {
@@ -727,7 +725,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   commands1.clear();
 
   // Add a rule to create necessary symlinks for the library.
-  if(targetOutPath != targetOutPathReal)
+  // Frameworks are handled by cmOSXBundleGenerator.
+  if(targetOutPath != targetOutPathReal && !this->Target->IsFrameworkOnApple())
     {
     std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
     symlink += targetOutPathReal;

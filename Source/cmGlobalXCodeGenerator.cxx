@@ -1823,6 +1823,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       pndir = target.GetDirectory(configName);
       }
 
+    if(target.IsFrameworkOnApple())
+      {
+      pnprefix = "";
+      }
+
     buildSettings->AddAttribute("EXECUTABLE_PREFIX",
                                 this->CreateString(pnprefix.c_str()));
     buildSettings->AddAttribute("EXECUTABLE_SUFFIX",
@@ -2156,14 +2161,14 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
     // Get the install_name directory for the build tree.
-    install_name_dir = target.GetInstallNameDirForBuildTree(configName, true);
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
     if(install_name_dir.empty())
       {
       // Xcode will not pass the -install_name option at all if INSTALL_PATH
       // is not given or is empty.  We must explicitly put the flag in the
       // link flags to create an install_name with just the library soname.
       extraLinkOptions += " -install_name ";
-      extraLinkOptions += target.GetFullName(configName);
+      extraLinkOptions += target.GetSOName(configName);
       }
     else
       {

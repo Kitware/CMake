@@ -357,7 +357,7 @@ cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
   (cmSourceFile& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
-  if(this->Generator->MacContentDirectory.empty())
+  if(!this->Generator->GetTarget()->IsBundleOnApple())
     {
     return;
     }

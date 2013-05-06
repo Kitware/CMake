@@ -28,12 +28,18 @@ public:
   static void PrepareTargetProperties(cmTarget* target);
 
   cmOSXBundleGenerator(cmTarget* target,
-                       std::string targetNameOut,
                        const char* configName);
 
-  void CreateAppBundle(std::string& targetName, std::string& outpath);
-  void CreateFramework(std::string const& targetName);
-  void CreateCFBundle(std::string& targetName, std::string& outpath);
+  // create an app bundle at a given root, and return
+  // the directory within the bundle that contains the executable
+  void CreateAppBundle(const std::string& targetName, std::string& root);
+
+  // create a framework at a given root
+  void CreateFramework(const std::string& targetName, const std::string& outpath);
+
+  // create a cf bundle at a given root and return the
+  // directory within the bundle that contains the library
+  void CreateCFBundle(const std::string& targetName, std::string& outpath);
 
   struct MacOSXContentGeneratorType
   {
@@ -46,10 +52,6 @@ public:
     MacOSXContentGeneratorType* generator);
   std::string InitMacOSXContentDirectory(const char* pkgloc);
 
-  std::string GetMacContentDirectory() const
-  { return this->MacContentDirectory; }
-  std::string GetFrameworkVersion() const
-  { return this->FrameworkVersion; }
   void SetMacContentFolders(std::set<cmStdString>* macContentFolders)
   { this->MacContentFolders = macContentFolders; }
 
@@ -60,10 +62,7 @@ private:
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
-  std::string TargetNameOut;
   const char* ConfigName;
-  std::string MacContentDirectory;
-  std::string FrameworkVersion;
   std::set<cmStdString>* MacContentFolders;
 };
 

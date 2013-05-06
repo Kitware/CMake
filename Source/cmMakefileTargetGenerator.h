@@ -233,7 +233,6 @@ protected:
   std::string TargetNamePDB;
 
   // Mac OS X content info.
-  std::string MacContentDirectory;
   std::set<cmStdString> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;
