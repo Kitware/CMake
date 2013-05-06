@@ -28,7 +28,7 @@ target_link_libraries(pseudo_BC CMakeLib)
 add_executable(memcheck_fail "${CMAKE_CURRENT_BINARY_DIR}/ret1.cxx")
 target_link_libraries(memcheck_fail CMakeLib)
 
-foreach  (_test IN ITEMS Unknown UnknownQuoted NotExist
+foreach  (_test IN ITEMS Unknown NotExist
         DummyValgrind DummyValgrindPrePost
         DummyValgrindFailPre DummyValgrindFailPost
         DummyPurify DummyBC
@@ -53,10 +53,8 @@ string(REPLACE "(" "\\(" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 string(REPLACE ")" "\\)" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 string(REPLACE "+" "\\+" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 
-foreach (_unkn Unknown UnknownQuoted)
-    set_tests_properties(CTestTestMemcheck${_unkn} PROPERTIES
-        PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND_ESCAPED}\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${_unkn}/test.cmake\n")
-endforeach ()
+set_tests_properties(CTestTestMemcheckUnknown PROPERTIES
+    PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND_ESCAPED}\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/Unknown/test.cmake\n")
 
 set_tests_properties(CTestTestMemcheckNotExist PROPERTIES
     PASS_REGULAR_EXPRESSION "Memory checker \\(MemoryCheckCommand\\) not set, or cannot find the specified program.")
