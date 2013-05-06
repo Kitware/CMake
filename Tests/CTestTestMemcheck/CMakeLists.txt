@@ -97,8 +97,11 @@ set(CTEST_EXTRA_CONFIG "set(CTEST_CUSTOM_MEMCHECK_IGNORE RunCMakeAgain)\n")
 set(CMAKELISTS_EXTRA_CODE "add_test(NAME RunCMakeAgain COMMAND \"\${CMAKE_COMMAND}\" --version)")
 gen_mc_test(DummyValgrindIgnoreMemcheck "\${PSEUDO_VALGRIND}")
 
-unset(CTEST_EXTRA_CONFIG)
+set(CTEST_EXTRA_CONFIG "set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE \"\${CMAKE_CURRENT_BINARY_DIR}/does-not-exist\")")
 unset(CMAKELISTS_EXTRA_CODE)
+gen_mc_test(DummyValgrindInvalidSupFile "\${PSEUDO_VALGRIND}")
+
+unset(CTEST_EXTRA_CONFIG)
 gen_mc_test(NotExist "\${CTEST_BINARY_DIRECTORY}/no-memcheck-exe")
 
 gen_mc_test(Unknown "${CMAKE_COMMAND}")
@@ -135,3 +138,6 @@ set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
 
 set_tests_properties(CTestTestMemcheckDummyBC PROPERTIES
     PASS_REGULAR_EXPRESSION "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n(.*\n)?Error parsing XML in stream at line 1: no element found\n")
+
+set_tests_properties(CTestTestMemcheckDummyValgrindInvalidSupFile PROPERTIES
+    PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
