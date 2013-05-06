@@ -31,7 +31,7 @@ target_link_libraries(memcheck_fail CMakeLib)
 set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
 set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
-foreach  (_test IN ITEMS Unknown UnknownQuoted NotExist
+foreach  (_test IN ITEMS Unknown NotExist
         DummyValgrind DummyValgrindPrePost
         DummyValgrindFailPre DummyValgrindFailPost
         DummyPurify DummyBC
@@ -56,10 +56,8 @@ string(REPLACE "(" "\\(" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 string(REPLACE ")" "\\)" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 string(REPLACE "+" "\\+" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 
-foreach (_unkn Unknown UnknownQuoted)
-    set_tests_properties(CTestTestMemcheck${_unkn} PROPERTIES
-        PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND_ESCAPED}\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${_unkn}/test.cmake\n")
-endforeach ()
+set_tests_properties(CTestTestMemcheckUnknown PROPERTIES
+    PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND_ESCAPED}\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/Unknown/test.cmake\n")
 
 set_tests_properties(CTestTestMemcheckNotExist PROPERTIES
     PASS_REGULAR_EXPRESSION "Memory checker \\(MemoryCheckCommand\\) not set, or cannot find the specified program.")
