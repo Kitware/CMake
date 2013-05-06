@@ -142,7 +142,7 @@ public:
   std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
 
-  std::vector<IncludeDirectoriesEntry*>
+  std::map<std::string, std::vector<IncludeDirectoriesEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
   std::map<std::string, std::string> CachedLinkInterfaceCompileDefinitions;
 
@@ -162,6 +162,19 @@ void deleteAndClear(
       delete *it;
     }
   entries.clear();
+}
+
+//----------------------------------------------------------------------------
+void deleteAndClear(
+  std::map<std::string,
+          std::vector<cmTargetInternals::IncludeDirectoriesEntry*> > &entries)
+{
+  for (std::map<std::string,
+          std::vector<cmTargetInternals::IncludeDirectoriesEntry*> >::iterator
+        it = entries.begin(), end = entries.end(); it != end; ++it)
+    {
+    deleteAndClear(it->second);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2706,6 +2719,19 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::IncludeDirectoriesEntry(cge));
     return;
     }
+  if (strcmp(prop, "LINK_LIBRARIES") == 0)
+    {
+    this->Internal->LinkInterfaceIncludeDirectoriesEntries.clear();
+    if (cmGeneratorExpression::IsValidTargetName(value)
+        || cmGeneratorExpression::Find(value) != std::string::npos)
+      {
+      cmListFileBacktrace lfbt;
+      this->Makefile->GetBacktrace(lfbt);
+      cmValueWithOrigin entry(value, lfbt);
+      this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+      }
+    // Fall through
+    }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -2726,6 +2752,18 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Internal->IncludeDirectoriesEntries.push_back(
               new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
     return;
+    }
+  if (strcmp(prop, "LINK_LIBRARIES") == 0)
+    {
+    if (cmGeneratorExpression::IsValidTargetName(value)
+        || cmGeneratorExpression::Find(value) != std::string::npos)
+      {
+      cmListFileBacktrace lfbt;
+      this->Makefile->GetBacktrace(lfbt);
+      cmValueWithOrigin entry(value, lfbt);
+      this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+      }
+    // Fall through
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
@@ -2760,12 +2798,6 @@ void cmTarget::AppendBuildInterfaceIncludes()
                             ("$<BUILD_INTERFACE:" + dirs + ">").c_str());
       }
     }
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::AppendTllInclude(const cmValueWithOrigin &entry)
-{
-  this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
 }
 
 //----------------------------------------------------------------------------
@@ -2939,25 +2971,33 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                                                         ge.Parse(it->Value);
       std::string result = cge->Evaluate(this->Makefile, config,
                                         false, this, 0, 0);
-      if (!cmGeneratorExpression::IsValidTargetName(result.c_str())
-          || !this->Makefile->FindTargetToUse(result.c_str()))
+      if (!this->Makefile->FindTargetToUse(result.c_str()))
         {
         continue;
         }
       }
+      std::string includeGenex = "$<TARGET_PROPERTY:" +
+                              it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
+      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
+        {
+        // Because it->Value is a generator expression, ensure that it
+        // evaluates to the non-empty string before being used in the
+        // TARGET_PROPERTY expression.
+        includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
+        }
       cmGeneratorExpression ge(it->Backtrace);
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-          "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>");
+                                                              includeGenex);
 
-      this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries.push_back(
+      this->Internal
+        ->CachedLinkInterfaceIncludeDirectoriesEntries[configString].push_back(
                         new cmTargetInternals::IncludeDirectoriesEntry(cge,
                                                               it->Value));
       }
     }
 
   processIncludeDirectories(this,
-              this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries,
+    this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries[configString],
                             includes,
                             uniqueIncludes,
                             &dagChecker,
@@ -2967,7 +3007,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
   if (!this->Makefile->IsGeneratingBuildSystem())
     {
     deleteAndClear(
-              this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries);
+                this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries);
     }
   else
     {
