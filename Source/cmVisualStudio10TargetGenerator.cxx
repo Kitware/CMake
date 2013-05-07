@@ -1571,6 +1571,21 @@ void cmVisualStudio10TargetGenerator::
 WriteMidlOptions(std::string const& /*config*/,
                  std::vector<std::string> const & includes)
 {
+  // This processes *any* of the .idl files specified in the project's file
+  // list (and passed as the item metadata %(Filename) expressing the rule
+  // input filename) into output files at the per-config *build* dir
+  // ($(IntDir)) each.
+  //
+  // IOW, this MIDL section is intended to provide a fully generic syntax
+  // content suitable for most cases (read: if you get errors, then it's quite
+  // probable that the error is on your side of the .idl setup).
+  //
+  // Also, note that the marked-as-generated _i.c file in the Visual Studio
+  // generator case needs to be referred to as $(IntDir)\foo_i.c at the
+  // project's file list, otherwise the compiler-side processing won't pick it
+  // up (for non-directory form, it ends up looking in project binary dir
+  // only).  Perhaps there's something to be done to make this more automatic
+  // on the CMake side?
   this->WriteString("<Midl>\n", 2);
   this->OutputIncludes(includes);
   this->WriteString("<OutputDirectory>$(IntDir)</OutputDirectory>\n", 3);

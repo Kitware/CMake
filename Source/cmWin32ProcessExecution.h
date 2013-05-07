@@ -69,7 +69,7 @@ public:
   /**
    * Start the process in the directory path. Make sure that the
    * executable is either in the path or specify the full path. The
-   * argument verbose specifies wether or not to display output while
+   * argument verbose specifies whether or not to display output while
    * it is being generated.
    */
   bool StartProcess(const char*, const char* path, bool verbose);

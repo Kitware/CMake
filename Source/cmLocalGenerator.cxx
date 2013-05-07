@@ -294,7 +294,7 @@ void cmLocalGenerator::GenerateTestFiles()
        << "# Build directory: "
        << this->Makefile->GetStartOutputDirectory() << std::endl
        << "# " << std::endl
-       << "# This file includes the relevent testing commands "
+       << "# This file includes the relevant testing commands "
        << "required for " << std::endl
        << "# testing this directory and lists subdirectories to "
        << "be tested as well." << std::endl;

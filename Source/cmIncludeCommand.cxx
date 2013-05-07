@@ -61,7 +61,7 @@ bool cmIncludeCommand
       noPolicyScope = true;
       }
       else if(i > 1)  // compat.: in previous cmake versions the second
-                      // parameter was ignore if it wasn't "OPTIONAL"
+                      // parameter was ignored if it wasn't "OPTIONAL"
         {
         std::string errorText = "called with invalid argument: ";
         errorText += args[i];

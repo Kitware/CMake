@@ -225,7 +225,7 @@ static int process( const std::string& srcfilename,
 
 int main() {
 
-  // Use the Win32 api instead of argc/argv so we can avoid interpreting the
+  // Use the Win32 API instead of argc/argv so we can avoid interpreting the
   // rest of command line after the .d and .obj. Custom parsing seemed
   // preferable to the ugliness you get into in trying to re-escape quotes for
   // subprocesses, so by avoiding argc/argv, the subprocess is called with
