@@ -1,3 +1,13 @@
+Changes in CMake 2.8.11-rc4 (since 2.8.11-rc3)
+----------------------------------------------
+Brad King (1):
+      target_link_libraries: Update usage requirements documentation
+
+Stephen Kelly (3):
+      Centralize maintenance of usage requirement include directories
+      Fix include dir propagation from conditionally linked targets
+      Memoize usage requirement include directories in a config-specific map
+
 Changes in CMake 2.8.11-rc3 (since 2.8.11-rc2)
 ----------------------------------------------
 Brad King (1):
