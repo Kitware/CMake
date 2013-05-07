@@ -81,8 +81,8 @@
 #  CPACK_WIX_CULTURES - Language(s) of the installer
 #
 #  Languages are compiled into the WixUI extension library. To use them, simply provide the name of the culture. 
-#  If you specify more than one culture identifier in a comma delimited list, a separate installer will be created for all of them.
-#  You can find a list of supported languages at : http://wix.tramontana.co.hu/tutorial/user-interface/do-you-speak-english
+#  If you specify more than one culture identifier in a comma or semicolon delimited list, the first one that is found will be used.
+#  You can find a list of supported languages at : http://wix.sourceforge.net/manual-wix3/WixUI_localization.htm
 #
 ##end
 
