@@ -772,7 +772,7 @@ static int kwsys_shared_forward_get_settings(const char* self_path,
   const char** dir;
   for(dir = search_path; *dir; ++dir)
     {
-    /* Add seperator between path components.  */
+    /* Add separator between path components.  */
     if(dir != search_path)
       {
       strcat(ldpath, kwsys_shared_forward_path_sep);

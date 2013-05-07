@@ -117,8 +117,8 @@ public:
   // Get total system RAM in units of KiB available to this process.
   // This may differ from the host available if a per-process resource
   // limit is applied. per-process memory limits are applied on unix
-  // system via rlimit api. Resource limits that are not imposed via
-  // rlimit api may be reported to us via an application specified
+  // system via rlimit API. Resource limits that are not imposed via
+  // rlimit API may be reported to us via an application specified
   // environment variable.
   LongLong GetProcMemoryAvailable(
         const char *hostLimitEnvVarName=NULL,
