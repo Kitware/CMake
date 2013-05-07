@@ -78,6 +78,12 @@
 ##end
 #
 ##variable
+# CPACK_WIX_PROGRAM_MENU_FOLDER - Start menu folder name for launcher.
+#
+# If this variable is not set, it will be initialized with CPACK_PACKAGE_NAME
+##end
+#
+##variable
 #  CPACK_WIX_CULTURES - Language(s) of the installer
 #
 #  Languages are compiled into the WixUI extension library. To use them, simply provide the name of the culture. 
