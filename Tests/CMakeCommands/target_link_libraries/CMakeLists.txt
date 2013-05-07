@@ -115,7 +115,7 @@ endif()
 set(_exe_test $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
 target_link_libraries(targetC $<$<AND:${_exe_test},${_exe_test}>:depG>)
 
-add_library(libConsumer SHARED empty.cpp)
+add_library(libConsumer empty.cpp)
 # This line causes $<$<CONFIG:Debug>:depA> to be used when
 # determining the include directories for libConsumer based on the
 # interface properties of its LINK_LIBRARIES. Because the above expression
