@@ -4002,7 +4002,7 @@ void SystemTools::SplitProgramFromArgs(const char* path,
       args = dir.substr(spacePos, dir.size()-spacePos);
       return;
       }
-    // Now try and find the the program in the path
+    // Now try and find the program in the path
     findProg = SystemTools::FindProgram(tryProg.c_str(), e);
     if(findProg.size())
       {
