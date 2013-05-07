@@ -101,7 +101,7 @@ bool cmCPackWIXGenerator::RunLightCommand(const std::string& objectFiles)
   command << " -out " << QuotePath(packageFileNames.at(0));
   command << " -ext WixUIExtension";
   const char* const cultures = GetOption("CPACK_WIX_CULTURES");
-  if(nullptr != cultures)
+  if(NULL != cultures)
 	  command << " -cultures:" << cultures;
   command << " " << objectFiles;
 
