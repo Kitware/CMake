@@ -37,6 +37,10 @@ set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-0]+.[0-9]
 set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
 function(gen_mc_test_internal NAME CHECKER)
+    # just to clean old directories from the time these had real source dirs
+    file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/${NAME}")
+    # end
+
     set(SUBTEST_NAME "${NAME}")
     set(CHECKER_COMMAND "${CHECKER}")
     foreach(_file IN ITEMS CMakeLists.txt CTestConfig.cmake test.cmake)
