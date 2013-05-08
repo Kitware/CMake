@@ -14,7 +14,7 @@ main(int argc, char **argv)
     logarg = "--log-file=";
   else if (exename.find("purify") != exename.npos)
 #ifdef _WIN32
-    logarg = "/SAVETEXTDATA="
+    logarg = "/SAVETEXTDATA=";
 #else
     logarg = "-log-file=";
 #endif
