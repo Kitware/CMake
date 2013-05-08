@@ -383,7 +383,14 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   directoryDefinitions.EndElement();
   directoryDefinitions.EndElement();
 
-  if (dirIdExecutables.size() > 0 && dirIdExecutables.size() % 3 == 0) {
+  if (dirIdExecutables.size() > 0 && dirIdExecutables.size() % 3 == 0) 
+    {
+    fileDefinitions.BeginElement("DirectoryRef");
+    fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+    fileDefinitions.BeginElement("Component");
+    fileDefinitions.AddAttribute("Id", "SHORTCUT");
+    fileDefinitions.AddAttribute("Guid", "*");
+
     std::vector<std::string>::iterator it;
     for ( it = dirIdExecutables.begin() ;
           it != dirIdExecutables.end();
@@ -393,13 +400,12 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
       std::string iconName = *it++;
       std::string directoryId = *it;
 
-      fileDefinitions.BeginElement("DirectoryRef");
-      fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
-      fileDefinitions.BeginElement("Component");
-      fileDefinitions.AddAttribute("Id", "SHORTCUT");
-      fileDefinitions.AddAttribute("Guid", "*");
       fileDefinitions.BeginElement("Shortcut");
-      fileDefinitions.AddAttribute("Id", "SHORTCUT_");
+      std::string shortcutName = fileName; // the iconName is mor likely to contain blanks early on
+      const std::string::difference_type dotPos = shortcutName.find('.');
+      if(std::string::npos == dotPos)
+        shortcutName = shortcutName.substr(0, dotPos);
+      fileDefinitions.AddAttribute("Id", "SHORTCUT_" + shortcutName);
       fileDefinitions.AddAttribute("Name", iconName);
       std::string target = "[" + directoryId + "]" + fileName;
       fileDefinitions.AddAttribute("Target", target);
