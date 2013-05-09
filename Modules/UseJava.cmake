@@ -242,7 +242,7 @@ function(add_jar _TARGET_NAME)
         ${CMAKE_JAVA_LIBRARY_OUTPUT_PATH}
     )
 
-    if (WIN32 AND NOT CYGWIN)
+    if (WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
         set(CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
     else ()
         set(CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
