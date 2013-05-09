@@ -73,7 +73,7 @@ function(gen_mcnl_test NAME CHECKER)
         )
     set_tests_properties(CTestTestMemcheck${NAME}
         PROPERTIES
-        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n${BULLSEYE_MSG}$")
+        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n")
 endfunction(gen_mcnl_test)
 
 unset(CTEST_EXTRA_CONFIG)
