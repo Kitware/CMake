@@ -49,7 +49,7 @@ function(gen_mc_test_internal NAME CHECKER)
     endforeach()
     add_test(NAME CTestTestMemcheck${NAME}
         COMMAND ${CMAKE_CTEST_COMMAND}
-        -C \${CTEST_CONFIGURATION_TYPE}
+        -C $<CONFIGURATION>
         -S "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake" -V
         --output-log "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/testOutput.log"
         ${ARGN}
