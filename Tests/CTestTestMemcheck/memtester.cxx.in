@@ -28,6 +28,12 @@ main(int argc, char **argv)
     std::string logfile;
     for (int i = 1; i < argc; i++) {
       std::string arg = argv[i];
+      // stop processing options, this allows to force
+      // the logfile to be ignored
+      if (arg == "--")
+        {
+        break;
+        }
       if (arg.find(logarg) == 0)
         {
         if (nextarg)
