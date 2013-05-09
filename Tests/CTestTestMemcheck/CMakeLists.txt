@@ -33,7 +33,7 @@ target_link_libraries(memcheck_fail CMakeLib)
 # same filenames.
 add_subdirectory(NoLogDummyChecker)
 
-set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-0]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
+set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
 set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
 function(gen_mc_test_internal NAME CHECKER)
@@ -49,7 +49,7 @@ function(gen_mc_test_internal NAME CHECKER)
     endforeach()
     add_test(NAME CTestTestMemcheck${NAME}
         COMMAND ${CMAKE_CTEST_COMMAND}
-        -C "${CTEST_CONFIGURATION_TYPE}"
+        -C \${CTEST_CONFIGURATION_TYPE}
         -S "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake" -V
         --output-log "${CMAKE_CURRENT_BINARY_DIR}/${NAME}/testOutput.log"
         ${ARGN}
@@ -73,7 +73,7 @@ function(gen_mcnl_test NAME CHECKER)
         )
     set_tests_properties(CTestTestMemcheck${NAME}
         PROPERTIES
-        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n${BULLSEYE_MSG}$")
+        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n")
 endfunction(gen_mcnl_test)
 
 unset(CTEST_EXTRA_CONFIG)
