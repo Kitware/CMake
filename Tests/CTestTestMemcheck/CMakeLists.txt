@@ -101,6 +101,12 @@ set(CTEST_EXTRA_CONFIG "set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE \"\${CMAKE_CURRE
 unset(CMAKELISTS_EXTRA_CODE)
 gen_mc_test(DummyValgrindInvalidSupFile "\${PSEUDO_VALGRIND}")
 
+# CTest will add the logfile option as last option. Tell the dummy memcheck
+# to ignore that argument. This will cause the logfile to be missing, which
+# will be the prove for us that the custom option is indeed used.
+set(CTEST_EXTRA_CONFIG "set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"--\")")
+gen_mc_test(DummyValgrindCustomOptions "\${PSEUDO_VALGRIND}")
+
 unset(CTEST_EXTRA_CONFIG)
 gen_mc_test(NotExist "\${CTEST_BINARY_DIRECTORY}/no-memcheck-exe")
 
@@ -141,3 +147,6 @@ set_tests_properties(CTestTestMemcheckDummyBC PROPERTIES
 
 set_tests_properties(CTestTestMemcheckDummyValgrindInvalidSupFile PROPERTIES
     PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
+
+set_tests_properties(CTestTestMemcheckDummyValgrindCustomOptions PROPERTIES
+    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/test.cmake\n")
