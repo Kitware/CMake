@@ -43,8 +43,7 @@ static CatToErrorType cmCTestMemCheckBoundsChecker[] = {
   {0,0}
 };
 
-// parse the xml file storing the installed version of Xcode on
-// the machine
+// parse the xml file containing the results of last BoundsChecker run
 class cmBoundsCheckerParser : public cmXMLParser
 {
 public:
