@@ -175,6 +175,14 @@ int cmProcess::GetNextOutputLine(std::string& line, double timeout)
   // Record exit information.
   this->ExitValue = cmsysProcess_GetExitValue(this->Process);
   this->TotalTime = cmSystemTools::GetTime() - this->StartTime;
+  // Because of a processor clock scew the runtime may become slightly
+  // negative. If someone changed the system clock while the process was
+  // running this may be even more. Make sure not to report a negative
+  // duration here.
+  if (this->TotalTime <= 0.0)
+    {
+    this->TotalTime = 0.0;
+    }
   //  std::cerr << "Time to run: " << this->TotalTime << "\n";
   return cmsysProcess_Pipe_None;
 }
