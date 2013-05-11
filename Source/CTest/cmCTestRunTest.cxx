@@ -166,6 +166,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         {
         found = true;
         reason = "Required regular expression found.";
+        break;
         }
       }
     if ( !found )
@@ -196,6 +197,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         reason += passIt->second;
         reason += "]";
         forceFail = true;
+        break;
         }
       }
     }
