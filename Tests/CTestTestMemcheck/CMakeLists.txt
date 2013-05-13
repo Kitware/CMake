@@ -33,7 +33,13 @@ target_link_libraries(memcheck_fail CMakeLib)
 # same filenames.
 add_subdirectory(NoLogDummyChecker)
 
-set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
+if (XCODE)
+    # filter out additional messages by Guard Malloc integrated in Xcode
+    set(GUARD_MALLOC_MSG "(ctest\([0-9]+\) malloc: [^\n]*\n)*")
+    set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+\\.[0-9]+ sec\n${GUARD_MALLOC_MSG}\n${GUARD_MALLOC_MSG}100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \n${GUARD_MALLOC_MSG}Memory checking results:\n${GUARD_MALLOC_MSG}")
+else ()
+    set(NORMAL_CTEST_OUTPUT "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+\\.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n.*\n-- Processing memory checking output: \nMemory checking results:\n")
+endif ()
 set(BULLSEYE_MSG "(BullseyeCoverage[^\n]*\n)?")
 
 function(gen_mc_test_internal NAME CHECKER)
