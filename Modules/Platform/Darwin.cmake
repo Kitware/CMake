@@ -207,12 +207,8 @@ if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
     "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
 endif()
 
-if(NOT XCODE)
-  # Enable shared library versioning.  This flag is not actually referenced
-  # but the fact that the setting exists will cause the generators to support
-  # soname computation.
-  set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
-endif()
+# Enable shared library versioning.
+set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
 
 # Xcode does not support -isystem yet.
 if(XCODE)
