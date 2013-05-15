@@ -291,6 +291,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteCustomCommands();
   this->WriteAllSources();
   this->WriteDotNetReferences();
+
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
@@ -455,6 +456,12 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       this->WriteString("<WindowsAppContainer>true"
                         "</WindowsAppContainer>\n", 2);
       }
+
+    if(!this->GeneratorTarget->ResxSources.empty())
+      {
+      this->WriteString("<CLRSupport>true</CLRSupport>\n", 2);
+      }
+
     this->WriteString("</PropertyGroup>\n", 1);
     }
 }
@@ -647,6 +654,23 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
     }
 
+  std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
+  if(!resxObjs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<cmSourceFile*>::iterator oi = resxObjs.begin();
+        oi != resxObjs.end(); ++oi)
+      {
+      std::string obj = (*oi)->GetFullPath();
+      this->WriteString("<EmbeddedResource Include=\"", 2);
+      this->ConvertToWindowsSlash(obj);
+      (*this->BuildFileStream ) << obj << "\">\n";
+      this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+      this->WriteString("</EmbeddedResource>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+
   // Add object library contents as external objects.
   std::vector<std::string> objs;
   this->GeneratorTarget->UseObjectLibraries(objs);
@@ -701,6 +725,23 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                              << "</UniqueIdentifier>\n";
     this->WriteString("</Filter>\n", 2);
     }
+
+  if(!this->GeneratorTarget->ResxSources.empty())
+    {
+    this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
+    std::string guidName = "SG_Filter_Resource Files";
+    this->GlobalGenerator->CreateGUID(guidName.c_str());
+    this->WriteString("<UniqueIdentifier>", 3);
+    std::string guid =
+      this->GlobalGenerator->GetGUID(guidName.c_str());
+    (*this->BuildFileStream) << "{" << guid << "}"
+                             << "</UniqueIdentifier>\n";
+    this->WriteString("<Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;", 3);
+    (*this->BuildFileStream) << "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;";
+    (*this->BuildFileStream) << "mfcribbon-ms</Extensions>\n";
+    this->WriteString("</Filter>\n", 2);
+  }
+
   this->WriteString("</ItemGroup>\n", 1);
   this->WriteString("</Project>\n", 0);
   // restore stream pointer
@@ -832,8 +873,20 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
-  (*this->BuildFileStream ) << tool <<
-    " Include=\"" << sourceFile << "\"" << (end? end : " />\n");
+  (*this->BuildFileStream ) << tool << " Include=\"" << sourceFile << "\"";
+
+  if(sf->GetExtension() == "h" &&
+    this->IsResxHeader(sf->GetFullPath()))
+    {
+      (*this->BuildFileStream ) << ">\n";
+      this->WriteString("<FileType>CppForm</FileType>\n", 3);
+      this->WriteString("</ClInclude>\n", 2);
+    }
+  else
+    {
+      (*this->BuildFileStream ) << (end? end : " />\n");
+    }
+
   ToolSource toolSource = {sf, forceRelative};
   this->Tools[tool].push_back(toolSource);
 }
@@ -1724,4 +1777,13 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     this->WriteString("</ProjectReference>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
+}
+
+bool cmVisualStudio10TargetGenerator::
+  IsResxHeader(const std::string& headerFile)
+{
+  std::set<std::string>::iterator it =
+      this->GeneratorTarget->ExpectedResxHeaders.find(headerFile);
+
+  return it != this->GeneratorTarget->ExpectedResxHeaders.end();
 }

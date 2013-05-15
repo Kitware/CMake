@@ -1462,6 +1462,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
 
+    if(NOT "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [6789]( |$)")
+      ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
+    endif()
+
     add_test(VSExternalInclude ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/VSExternalInclude"
