@@ -657,8 +657,11 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     message(WARNING "${QT_QMAKE_EXECUTABLE} reported QT_INSTALL_LIBS as \"${QT_LIBRARY_DIR_TMP}\" "
                     "but QtCore could not be found there.  "
                     "Qt is NOT installed correctly for the target build environment.")
+    set(Qt4_FOUND FALSE)
     if(Qt4_FIND_REQUIRED)
       message( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
+    else()
+      return()
     endif()
   endif()
 
