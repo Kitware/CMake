@@ -1,0 +1,4 @@
+CMake Error at NoLinkLibraries.cmake:1 \(try_compile\):
+  LINK_LIBRARIES specified but there is no content
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

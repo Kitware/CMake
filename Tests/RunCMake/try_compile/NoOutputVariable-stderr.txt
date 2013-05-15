@@ -1,0 +1,4 @@
+CMake Error at NoOutputVariable.cmake:1 \(try_compile\):
+  OUTPUT_VARIABLE specified but there is no variable
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
