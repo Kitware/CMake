@@ -5,6 +5,9 @@ project(QtAutomoc)
 if (QT_TEST_VERSION STREQUAL 4)
   find_package(Qt4 REQUIRED)
 
+  # Include this directory before using the UseQt4 file.
+  add_subdirectory(defines_test)
+
   include(UseQt4)
 
   set(QT_QTCORE_TARGET Qt4::QtCore)
