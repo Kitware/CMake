@@ -82,7 +82,6 @@ bool cmCTestSubdirCommand
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   for ( it = args.begin(); it != args.end(); ++ it )
     {
-    cmSystemTools::ChangeDirectory(cwd.c_str());
     std::string fname;
 
     if(cmSystemTools::FileIsFullPath(it->c_str()))
@@ -116,7 +115,6 @@ bool cmCTestSubdirCommand
     else
       {
       // No CTestTestfile? Who cares...
-      cmSystemTools::ChangeDirectory(cwd.c_str());
       continue;
       }
     fname += "/";
@@ -133,6 +131,7 @@ bool cmCTestSubdirCommand
       return false;
       }
     }
+  cmSystemTools::ChangeDirectory(cwd.c_str());
   return true;
 }
 
