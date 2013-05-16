@@ -841,7 +841,7 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
   //  // Already specialized above or we leave sourcecode == "sourcecode"
   //  // which is probably the most correct choice. Extensionless headers,
   //  // for example... Or file types unknown to Xcode that do not map to a
-  //  // valid lastKnownFileType value.
+  //  // valid explicitFileType value.
   //  }
 
   return sourcecode;
@@ -884,7 +884,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
 
   std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
 
-  fileRef->AddAttribute("lastKnownFileType",
+  fileRef->AddAttribute("explicitFileType",
                         this->CreateString(sourcecode.c_str()));
 
   // Store the file path relative to the top of the source tree.
@@ -1005,7 +1005,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                     *i, cmtarget);
       cmXCodeObject* fr = xsf->GetObject("fileRef");
       cmXCodeObject* filetype =
-        fr->GetObject()->GetObject("lastKnownFileType");
+        fr->GetObject()->GetObject("explicitFileType");
 
       cmTarget::SourceFileFlags tsFlags =
         cmtarget.GetTargetSourceFileFlags(*i);
