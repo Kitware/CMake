@@ -2915,6 +2915,20 @@ void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
+                     bool before)
+{
+  cmGeneratorExpression ge(entry.Backtrace);
+
+  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
+                = before ? this->Internal->CompileOptionsEntries.begin()
+                         : this->Internal->CompileOptionsEntries.end();
+
+  this->Internal->CompileOptionsEntries.insert(position,
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+}
+
+//----------------------------------------------------------------------------
 static void processIncludeDirectories(cmTarget *tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &includes,
