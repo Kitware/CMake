@@ -750,10 +750,6 @@ void cmCacheManager::AddCacheEntry(const char* key,
     }
   e.SetProperty("HELPSTRING", helpString? helpString :
                 "(This variable does not exist and should not be used)");
-  if (this->Cache[key].Value == e.Value)
-    {
-    this->CMakeInstance->UnwatchUnusedCli(key);
-    }
   this->Cache[key] = e;
 }
 
