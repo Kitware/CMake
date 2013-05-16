@@ -6,6 +6,7 @@
 inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
 {
   std::string ret = s;
+  cmSystemTools::ReplaceString(ret, ";", "%3B");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
   cmSystemTools::ReplaceString(ret, ">", "&gt;");
