@@ -1334,6 +1334,14 @@ void cmLocalGenerator::GetCompileOptions(std::string& flags,
     {
     this->AppendFlags(flags, prop);
     }
+
+  std::vector<std::string> opts; // TODO: Emitted.
+  target->GetCompileOptions(opts, config);
+  for(std::vector<std::string>::const_iterator li = opts.begin();
+      li != opts.end(); ++li)
+    {
+    this->AppendFlags(flags, li->c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
