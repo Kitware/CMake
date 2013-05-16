@@ -2085,6 +2085,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   add_test(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
 
+  configure_file(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestFdSetSize/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  add_test(CTestTestFdSetSize ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/test.cmake" -j20 -V --timeout 120
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/testOutput.log"
+    )
+
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.
