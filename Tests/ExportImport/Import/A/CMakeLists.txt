@@ -183,6 +183,12 @@ else()
   endif()
 endif()
 
+add_executable(exp_renamed_test renamed_test.cpp)
+target_link_libraries(exp_renamed_test exp_renamed)
+
+add_executable(bld_renamed_test renamed_test.cpp)
+target_link_libraries(bld_renamed_test bld_renamed)
+
 if (run_pic_test)
   target_compile_definitions(deps_shared_iface PRIVATE CHECK_PIC_WORKS)
 endif()
