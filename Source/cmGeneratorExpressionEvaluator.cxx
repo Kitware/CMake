@@ -45,6 +45,11 @@ void reportError(cmGeneratorExpressionContext *context,
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionNode
 {
+  enum {
+    DynamicParameters = 0,
+    OneOrMoreParameters = -1,
+    ZeroOrMoreParameters = -2
+  };
   virtual ~cmGeneratorExpressionNode() {}
 
   virtual bool GeneratesContent() const { return true; }
@@ -110,8 +115,7 @@ static const struct ZeroNode installInterfaceNode;
 static const struct OP ## Node : public cmGeneratorExpressionNode \
 { \
   OP ## Node () {} \
-/* We let -1 carry the meaning 'at least one' */ \
-  virtual int NumExpectedParameters() const { return -1; } \
+  virtual int NumExpectedParameters() const { return OneOrMoreParameters; } \
  \
   std::string Evaluate(const std::vector<std::string> &parameters, \
                        cmGeneratorExpressionContext *context, \
@@ -306,6 +310,60 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
   }
 } configurationTestNode;
 
+//----------------------------------------------------------------------------
+static const struct LinkLanguageNode : public cmGeneratorExpressionNode
+{
+  LinkLanguageNode() {}
+
+  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    if (parameters.size() != 0 && parameters.size() != 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<LINK_LANGUAGE> expression requires one or two parameters");
+      return std::string();
+      }
+    cmTarget* target = context->HeadTarget;
+    if (!target)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<LINK_LANGUAGE> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      }
+
+    const char *lang = target->GetLinkerLanguage(context->Config);
+    if (parameters.size() == 0)
+      {
+      return lang ? lang : "";
+      }
+    else
+      {
+      cmsys::RegularExpression langValidator;
+      langValidator.compile("^[A-Za-z0-9_]*$");
+      if (!langValidator.find(parameters.begin()->c_str()))
+        {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return std::string();
+        }
+      if (!lang)
+        {
+        return parameters.front().empty() ? "1" : "0";
+        }
+
+      if (strcmp(parameters.begin()->c_str(), lang) == 0)
+        {
+        return "1";
+        }
+      return "0";
+      }
+  }
+} linkLanguageNode;
 
 static const struct JoinNode : public cmGeneratorExpressionNode
 {
@@ -347,7 +405,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   TargetPropertyNode() {}
 
   // This node handles errors on parameter count itself.
-  virtual int NumExpectedParameters() const { return -1; }
+  virtual int NumExpectedParameters() const { return OneOrMoreParameters; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -961,6 +1019,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &configurationNode;
   else if (identifier == "CONFIG")
     return &configurationTestNode;
+  else if (identifier == "LINK_LANGUAGE")
+    return &linkLanguageNode;
   else if (identifier == "TARGET_FILE")
     return &targetFileNode;
   else if (identifier == "TARGET_LINKER_FILE")
@@ -1188,7 +1248,8 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     }
   }
 
-  if ((numExpected != -1 && (unsigned int)numExpected != parameters.size()))
+  if ((numExpected > cmGeneratorExpressionNode::DynamicParameters
+      && (unsigned int)numExpected != parameters.size()))
     {
     if (numExpected == 0)
       {
@@ -1213,7 +1274,8 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     return std::string();
     }
 
-  if (numExpected == -1 && parameters.empty())
+  if (numExpected == cmGeneratorExpressionNode::OneOrMoreParameters
+      && parameters.empty())
     {
     reportError(context, this->GetOriginalExpression(), "$<" + identifier
                       + "> expression requires at least one parameter.");
