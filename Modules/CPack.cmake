@@ -263,8 +263,8 @@
 #
 ##variable
 #   CPACK_PACKAGE_INSTALL_REGISTRY_KEY - Registry key used when
-#   installing this project. This is only used
-#   by installer for Windows.
+#   installing this project. This is only used by installer for Windows.
+#   The default value is based on the installation directory.
 ##end
 ##variable
 #   CPACK_CREATE_DESKTOP_LINKS - List of desktop links to create.
