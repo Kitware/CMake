@@ -383,11 +383,22 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
       if(cmCacheManager::ParseEntry(entry.c_str(), var, value, type))
         {
+        // The value is transformed if it is a filepath for example, so
+        // we can't compare whether the value is already in the cache until
+        // after we call AddCacheEntry.
+        const char *cachedValue =
+                              this->CacheManager->GetCacheValue(var.c_str());
+
         this->CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
           "No help, variable specified on the command line.", type);
         if(this->WarnUnusedCli)
           {
-          this->WatchUnusedCli(var.c_str());
+          if (!cachedValue
+              || strcmp(this->CacheManager->GetCacheValue(var.c_str()),
+                        cachedValue) != 0)
+            {
+            this->WatchUnusedCli(var.c_str());
+            }
           }
         }
       else
