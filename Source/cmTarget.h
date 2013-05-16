@@ -503,6 +503,9 @@ public:
 
   void AppendBuildInterfaceIncludes();
 
+  void GetCompileOptions(std::vector<std::string> &result,
+                         const char *config);
+
   bool IsNullImpliedByLinkLibraries(const std::string &p);
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                             const char *config);
@@ -627,6 +630,7 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool DebugIncludesDone;
+  bool DebugCompileOptionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
