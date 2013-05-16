@@ -530,6 +530,20 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to link executables to "
     "qtmain.lib automatically when they link to QtCore IMPORTED target.",
     2,8,11,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0021, "CMP0021",
+    "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",
+    "CMake 2.8.10.2 and lower allowed the INCLUDE_DIRECTORIES target "
+    "property to contain relative paths.  The base path for such relative "
+    "entries is not well defined.  CMake 2.8.12 issues a FATAL_ERROR if the "
+    "INCLUDE_DIRECTORIES property contains a relative path."
+    "\n"
+    "The OLD behavior for this policy is not to warn about relative paths in "
+    "the INCLUDE_DIRECTORIES target property.  "
+    "The NEW behavior for this policy is to issue a FATAL_ERROR if "
+    "INCLUDE_DIRECTORIES contains a relative path.",
+    2,8,11,20130516, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

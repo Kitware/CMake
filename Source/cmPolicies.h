@@ -70,6 +70,8 @@ public:
     /// instead.
     CMP0019, ///< No variable re-expansion in include and link info
     CMP0020, ///< Automatically link Qt executables to qtmain target
+    CMP0021, ///< Fatal error on relative paths in INCLUDE_DIRECTORIES
+    /// target property
 
     /** \brief Always the last entry.
      *
