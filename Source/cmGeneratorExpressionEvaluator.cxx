@@ -495,6 +495,7 @@ static const struct JoinNode : public cmGeneratorExpressionNode
 static const char* targetPropertyTransitiveWhitelist[] = {
     "INTERFACE_INCLUDE_DIRECTORIES"
   , "INTERFACE_COMPILE_DEFINITIONS"
+  , "INTERFACE_COMPILE_OPTIONS"
 };
 
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
@@ -702,7 +703,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       else
         {
         assert(dagCheckerParent->EvaluatingIncludeDirectories()
-            || dagCheckerParent->EvaluatingCompileDefinitions());
+            || dagCheckerParent->EvaluatingCompileDefinitions()
+            || dagCheckerParent->EvaluatingCompileOptions());
         }
       }
 
@@ -720,6 +722,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         || strncmp(propertyName.c_str(), "COMPILE_DEFINITIONS_", 20) == 0)
       {
       interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
+      }
+    else if (propertyName == "INTERFACE_COMPILE_OPTIONS"
+        || propertyName == "COMPILE_OPTIONS")
+      {
+      interfacePropertyName = "INTERFACE_COMPILE_OPTIONS";
       }
 
     const char **transBegin = targetPropertyTransitiveWhitelist;
