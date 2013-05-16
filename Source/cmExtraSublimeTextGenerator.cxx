@@ -429,7 +429,9 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   lg->AppendFlags(flags, makefile->GetDefineFlags());
 
   // Add target-specific flags.
-  if(target->GetProperty("COMPILE_FLAGS"))
+  std::string targetFlags;
+  lg->GetCompileOptions(targetFlags, target, config);
+  if (!targetFlags.empty())
     {
     std::string langIncludeExpr = "CMAKE_";
     langIncludeExpr += language;
@@ -440,7 +442,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
       cmsys::RegularExpression r(regex);
       std::vector<std::string> args;
       cmSystemTools::
-        ParseWindowsCommandLine(target->GetProperty("COMPILE_FLAGS"), args);
+        ParseWindowsCommandLine(targetFlags.c_str(), args);
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
         {
@@ -452,7 +454,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
       }
     else
       {
-      lg->AppendFlags(flags, target->GetProperty("COMPILE_FLAGS"));
+      lg->AppendFlags(flags, targetFlags.c_str());
       }
     }
 

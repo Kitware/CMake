@@ -1325,6 +1325,18 @@ std::string cmLocalGenerator::GetIncludeFlags(
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::GetCompileOptions(std::string& flags,
+                                             cmTarget* target,
+                                             const char *config)
+{
+  // Add target-specific flags.
+  if(const char *prop = target->GetProperty("COMPILE_FLAGS"))
+    {
+    this->AppendFlags(flags, prop);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const char* lang,
