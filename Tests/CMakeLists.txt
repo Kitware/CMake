@@ -1618,17 +1618,23 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     FAIL_REGULAR_EXPRESSION "CMake Warning .*VariableUnusedViaUnset.CMakeLists.txt:5 \\(set\\):")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
-  add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/VariableUsage"
-    "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
-    ${build_generator_args}
-    --build-noclean
-    --build-project WarnUnusedCliUnused
-    --build-options "-DUNUSED_CLI_VARIABLE=Unused")
-  set_tests_properties(WarnUnusedCliUnused PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
+  if("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
+    # Ninja does not support ADDITIONAL_MAKE_CLEAN_FILES and therefore fails
+    # this test. (See #13371)
+    # Apparently Visual Studio does not support it either. As the MakeClean
+    # test above is only run with the Makefiles generator, only run this
+    # test with the Makefiles generator also.
+    add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
+      "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
+      ${build_generator_args}
+      --build-project WarnUnusedCliUnused
+      --build-options "-DUNUSED_CLI_VARIABLE=Unused")
+    set_tests_properties(WarnUnusedCliUnused PROPERTIES
+      PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
+  endif()
 
   add_test(WarnUnusedCliUsed ${CMAKE_CTEST_COMMAND}
     --build-and-test
