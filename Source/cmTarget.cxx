@@ -868,13 +868,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "OSX_ARCHITECTURES.");
 
   cm->DefineProperty
-    ("EXPORT_NAME", cmProperty::TARGET,
-     "Exported name for target files.",
-     "This sets the name for the IMPORTED target generated when it this "
-     "target is is exported.  "
-     "If not set, the logical target name is used by default.");
-
-  cm->DefineProperty
     ("OUTPUT_NAME", cmProperty::TARGET,
      "Output name for target files.",
      "This sets the base name for output files created for an executable or "
@@ -2777,26 +2770,6 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::GetExportName()
-{
-  const char *exportName = this->GetProperty("EXPORT_NAME");
-
-  if (exportName && *exportName)
-    {
-    if (!cmGeneratorExpression::IsValidTargetName(exportName))
-      {
-      cmOStringStream e;
-      e << "EXPORT_NAME property \"" << exportName << "\" for \""
-        << this->GetName() << "\": is not valid.";
-      cmSystemTools::Error(e.str().c_str());
-      return "";
-      }
-    return exportName;
-    }
-  return this->GetName();
 }
 
 //----------------------------------------------------------------------------

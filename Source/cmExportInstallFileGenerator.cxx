@@ -47,7 +47,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
       tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
-    expectedTargets += sep + this->Namespace + (*tei)->Target->GetExportName();
+    expectedTargets += sep + this->Namespace + (*tei)->Target->GetName();
     sep = " ";
     cmTargetExport const* te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
@@ -401,8 +401,7 @@ cmExportInstallFileGenerator::HandleMissingTarget(
   if (targetOccurrences == 1)
     {
     std::string missingTarget = namespaces[0];
-
-    missingTarget += dependee->GetExportName();
+    missingTarget += name;
     link_libs += missingTarget;
     missingTargets.push_back(missingTarget);
     }

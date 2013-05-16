@@ -30,7 +30,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         tei = this->Exports->begin();
       tei != this->Exports->end(); ++tei)
     {
-    expectedTargets += sep + this->Namespace + (*tei)->GetExportName();
+    expectedTargets += sep + this->Namespace + (*tei)->GetName();
     sep = " ";
     cmTarget* te = *tei;
     if(this->ExportedTargets.insert(te).second)
@@ -189,7 +189,7 @@ cmExportBuildFileGenerator::HandleMissingTarget(
   // Assume the target will be exported by another command.
   // Append it with the export namespace.
   link_libs += this->Namespace;
-  link_libs += dependee->GetExportName();
+  link_libs += dependee->GetName();
 }
 
 //----------------------------------------------------------------------------

@@ -5,7 +5,6 @@
 #include "testsharedlibdepends_export.h"
 
 #include "testSharedLibRequired.h"
-#include "renamed.h"
 
 struct TESTSHAREDLIBDEPENDS_EXPORT TestSharedLibDepends
 {

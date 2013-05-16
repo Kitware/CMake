@@ -4,6 +4,5 @@
 int TestSharedLibDepends::foo()
 {
   TestSharedLibRequired req;
-  Renamed renamed;
-  return req.foo() + renamed.foo();
+  return req.foo();
 }

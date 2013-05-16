@@ -165,8 +165,6 @@ set_property(TARGET testLibRequired APPEND PROPERTY
 
 include(GenerateExportHeader)
 
-add_subdirectory(renamed)
-
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
 generate_export_header(testSharedLibRequired)
 set_property(TARGET testSharedLibRequired
@@ -228,7 +226,6 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
 
 # LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
 target_link_libraries(testSharedLibDepends LINK_PRIVATE testSharedLibRequired)
-target_link_libraries(testSharedLibDepends LINK_PUBLIC renamed_on_export)
 
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
@@ -313,7 +310,7 @@ add_subdirectory(sublib) # For CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE test.
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
   testExe2libImp testLib3Imp testLib3ImpDep subdirlib
-  testSharedLibRequired testSharedLibDepends renamed_on_export
+  testSharedLibRequired testSharedLibDepends
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
