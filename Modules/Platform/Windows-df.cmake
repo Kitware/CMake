@@ -38,8 +38,6 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
 endif()
 if(CMAKE_GENERATOR MATCHES "Visual Studio 7" OR CMAKE_GENERATOR MATCHES "Visual Studio 8")
   set (CMAKE_NO_BUILD_TYPE 1)
-  set (CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING
-     "Semicolon separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
 endif()
 # does the compiler support pdbtype and is it the newer compiler
 
