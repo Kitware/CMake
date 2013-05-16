@@ -5316,7 +5316,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                  ImportInfo& info,
                                  cmTarget *headTarget)
 {
-  (void)headTarget;
   // This method finds information about an imported target from its
   // properties.  The "IMPORTED_" namespace is reserved for properties
   // defined by the project exporting the target.
