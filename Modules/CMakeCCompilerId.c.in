@@ -160,10 +160,9 @@
 # define COMPILER_ID "ADSP"
 
 /* IAR Systems compiler for embedded systems.
-   http://www.iar.com
-   Not supported yet by CMake
-#elif defined(__IAR_SYSTEMS_ICC__)
-# define COMPILER_ID "IAR" */
+   http://www.iar.com */
+#elif defined(__IAR_SYSTEMS_ICC__ ) || defined(__IAR_SYSTEMS_ICC)
+# define COMPILER_ID "IAR"
 
 /* sdcc, the small devices C compiler for embedded systems,
    http://sdcc.sourceforge.net  */
