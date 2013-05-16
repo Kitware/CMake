@@ -70,19 +70,6 @@ bool cmCTestHandlerCommand
     this->CTest->SetConfigType(ctestConfigType);
     }
 
-  cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
-  cmCTestGenericHandler* handler = this->InitializeHandler();
-  if ( !handler )
-    {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot instantiate test handler " << this->GetName()
-               << std::endl);
-    return false;
-    }
-
-  handler->SetAppendXML(this->AppendXML);
-
-  handler->PopulateCustomVectors(this->Makefile);
   if ( this->Values[ct_BUILD] )
     {
     this->CTest->SetCTestConfiguration("BuildDirectory",
@@ -119,6 +106,20 @@ bool cmCTestHandlerCommand
       cmSystemTools::CollapseFullPath(
         this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
     }
+
+  cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl;);
+  cmCTestGenericHandler* handler = this->InitializeHandler();
+  if ( !handler )
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot instantiate test handler " << this->GetName()
+               << std::endl);
+    return false;
+    }
+
+  handler->SetAppendXML(this->AppendXML);
+
+  handler->PopulateCustomVectors(this->Makefile);
   if ( this->Values[ct_SUBMIT_INDEX] )
     {
     if(!this->CTest->GetDropSiteCDash() && this->CTest->GetDartVersion() <= 1)
