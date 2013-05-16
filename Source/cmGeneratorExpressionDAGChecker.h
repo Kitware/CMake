@@ -40,6 +40,7 @@ struct cmGeneratorExpressionDAGChecker
   bool EvaluatingLinkLibraries();
   bool EvaluatingIncludeDirectories() const;
   bool EvaluatingCompileDefinitions() const;
+  bool EvaluatingCompileOptions() const;
 
 private:
   Result checkGraph() const;
