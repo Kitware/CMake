@@ -1264,14 +1264,6 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   *this->BuildFileStream << configName
                          << "</AssemblerListingLocation>\n";
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
-  if(this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
-    {
-    this->WriteString("<ProgramDataBaseFileName>", 3);
-    *this->BuildFileStream << this->Target->GetPDBDirectory(configName.c_str())
-                           << "/"
-                           << this->Target->GetPDBName(configName.c_str())
-                           << "</ProgramDataBaseFileName>\n";
-    }
   this->WriteString("</ClCompile>\n", 2);
 }
 
