@@ -225,6 +225,24 @@
 #     The refered file will be read and directly put after the %changelog
 #     section.
 ##end
+##variable
+#  CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST - list of path to be excluded.
+#     Mandatory : NO
+#     Default   : /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include
+#     May be used to exclude path (directories or files) from the auto-generated
+#     list of paths discovered by CPack RPM. The defaut value contains a reasonable
+#     set of values if the variable is not defined by the user. If the variable
+#     is defined by the user then CPackRPM will NOT any of the default path.
+#     If you want to add some path to the default list then you can use
+#     CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION variable.
+##end
+##variable
+#  CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION - additional list of path to be excluded.
+#     Mandatory : NO
+#     Default   : -
+#     May be used to add more exclude path (directories or files) from the initial
+#     default list of excluded paths. See CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST.
+##end
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -666,6 +684,30 @@ if(CPACK_RPM_PACKAGE_RELOCATABLE)
     separate_arguments(_OMIT_DIR)
     list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
   endforeach()
+endif()
+
+if (CPACK_RPM_PACKAGE_DEBUG)
+   message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
+endif()
+
+if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+  set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
+  if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
+    message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
+  endif()
+endif()
+
+if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+  if (CPACK_RPM_PACKAGE_DEBUG)
+   message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
+ endif()
+  foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
+    list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
+  endforeach()
+endif()
+if (CPACK_RPM_PACKAGE_DEBUG)
+   message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
 endif()
 
 # Use files tree to construct files command (spec file)
