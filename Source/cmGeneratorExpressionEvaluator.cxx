@@ -314,6 +314,17 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 };
 
 //----------------------------------------------------------------------------
+struct TransitiveWhitelistCompare
+{
+  explicit TransitiveWhitelistCompare(const std::string &needle)
+    : Needle(needle) {}
+  bool operator() (const char *item)
+  { return strcmp(item, this->Needle.c_str()) == 0; }
+private:
+  std::string Needle;
+};
+
+//----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
   TargetPropertyNode() {}
@@ -485,8 +496,12 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
       }
 
-    if (interfacePropertyName == "INTERFACE_INCLUDE_DIRECTORIES"
-        || interfacePropertyName == "INTERFACE_COMPILE_DEFINITIONS")
+    const char **transBegin = targetPropertyTransitiveWhitelist;
+    const char **transEnd = targetPropertyTransitiveWhitelist
+              + (sizeof(targetPropertyTransitiveWhitelist) /
+              sizeof(*targetPropertyTransitiveWhitelist));
+    if (std::find_if(transBegin, transEnd,
+              TransitiveWhitelistCompare(interfacePropertyName)) != transEnd)
       {
       const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                     context->Config,
