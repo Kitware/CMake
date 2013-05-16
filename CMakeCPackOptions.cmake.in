@@ -34,7 +34,7 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   set(CPACK_NSIS_MODIFY_PATH ON)
 endif()
 
-# include the cpack options for qt dialog if they exisit
+# include the cpack options for qt dialog if they exist
 # they might not if qt was not enabled for the build
 include("@QT_DIALOG_CPACK_OPTIONS_FILE@" OPTIONAL)
 

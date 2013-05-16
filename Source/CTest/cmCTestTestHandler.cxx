@@ -1363,7 +1363,7 @@ void cmCTestTestHandler
     tempPath += filename;
     attempted.push_back(tempPath);
     attemptedConfigs.push_back(ctest->GetConfigType());
-    // If the file is an OSX bundle then the configtyp
+    // If the file is an OSX bundle then the configtype
     // will be at the start of the path
     tempPath = ctest->GetConfigType();
     tempPath += "/";
@@ -1374,7 +1374,7 @@ void cmCTestTestHandler
     }
   else
     {
-    // no config specified to try some options
+    // no config specified - try some options...
     tempPath = filepath;
     tempPath += "Release/";
     tempPath += filename;

@@ -51,7 +51,7 @@
 #   MY_INSTALL_CONFIGURATIONS = "" (was not used)
 #   MY_INSTALL_UNPARSED_ARGUMENTS = "blub" (no value expected after "OPTIONAL"
 #
-# You can the continue and process these variables.
+# You can then continue and process these variables.
 #
 # Keywords terminate lists of values, e.g. if directly after a one_value_keyword
 # another recognized keyword follows, this is interpreted as the beginning of

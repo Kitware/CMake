@@ -51,7 +51,7 @@ if("${VTK_FIND_VERSION}" VERSION_LESS 4.1)
   endif()
 endif()
 
-# Construct consitent error messages for use below.
+# Construct consistent error messages for use below.
 set(VTK_DIR_DESCRIPTION "directory containing VTKConfig.cmake.  This is either the root of the build tree, or PREFIX/lib/vtk for an installation.")
 if(_VTK_40_ALLOW)
   set(VTK_DIR_DESCRIPTION "${VTK_DIR_DESCRIPTION}  For VTK 4.0, this is the location of UseVTK.cmake.  This is either the root of the build tree or PREFIX/include/vtk for an installation.")
@@ -127,7 +127,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 if(VTK_FOUND)
-  # Set USE_VTK_FILE for backward-compatability.
+  # Set USE_VTK_FILE for backward-compatibility.
   set(USE_VTK_FILE ${VTK_USE_FILE})
 else()
   # VTK not found, explain to the user how to specify its location.

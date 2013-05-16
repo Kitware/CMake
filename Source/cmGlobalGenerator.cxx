@@ -423,7 +423,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       {
       if (this->CMakeInstance->GetIsInTryCompile())
         {
-        cmSystemTools::Error("This should not have happen. "
+        cmSystemTools::Error("This should not have happened. "
                              "If you see this message, you are probably "
                              "using a broken CMakeLists.txt file or a "
                              "problematic release of CMake");

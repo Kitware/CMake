@@ -483,7 +483,7 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "the source file is. If it is not set the language is determined "
      "based on the file extension. Typical values are CXX C etc. Setting "
      "this property for a file means this file will be compiled. "
-     "Do not set this for header or files that should not be compiled.");
+     "Do not set this for headers or files that should not be compiled.");
 
   cm->DefineProperty
     ("LOCATION", cmProperty::SOURCE_FILE,
@@ -551,7 +551,7 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "Some packages can wrap source files into alternate languages "
      "to provide additional functionality. For example, C++ code "
      "can be wrapped into Java or Python etc using SWIG etc. "
-     "If WRAP_EXCLUDE is set to true (1 etc) that indicates then "
+     "If WRAP_EXCLUDE is set to true (1 etc) that indicates that "
      "this source file should not be wrapped.");
 }
 

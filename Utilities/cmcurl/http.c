@@ -178,7 +178,7 @@ static bool pickoneauth(struct auth *pick)
   picked = TRUE;
 
   /* The order of these checks is highly relevant, as this will be the order
-     of preference in case of the existance of multiple accepted types. */
+     of preference in case of the existence of multiple accepted types. */
   if(avail & CURLAUTH_GSSNEGOTIATE)
     pick->picked = CURLAUTH_GSSNEGOTIATE;
   else if(avail & CURLAUTH_DIGEST)

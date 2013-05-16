@@ -1436,7 +1436,7 @@ void cmMakefile::AddLinkDirectoryForTarget(const char *target,
   else
     {
     cmSystemTools::Error
-      ("Attempt to add link directories to non-existant target: ",
+      ("Attempt to add link directories to non-existent target: ",
        target, " for directory ", d);
     }
 }
@@ -2086,7 +2086,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
     }
   else if(i==-1)
     {
-    // group does not exists nor belong to any existing group
+    // group does not exist nor belong to any existing group
     // add its first component
     this->SourceGroups.push_back(cmSourceGroup(name[0].c_str(), regex));
     sg = this->GetSourceGroup(currentName);
@@ -4043,7 +4043,7 @@ void cmMakefile::DefineProperties(cmake *cm)
      "\n"
      "This property only works for Visual Studio 7 and above; it is ignored "
      "on other generators. The property only applies when set on a directory "
-     "whose CMakeLists.txt conatins a project() command.");
+     "whose CMakeLists.txt contains a project() command.");
   cm->DefineProperty
     ("VS_GLOBAL_SECTION_POST_<section>", cmProperty::DIRECTORY,
      "Specify a postSolution global section in Visual Studio.",
@@ -4059,7 +4059,7 @@ void cmMakefile::DefineProperties(cmake *cm)
      "\n"
      "This property only works for Visual Studio 7 and above; it is ignored "
      "on other generators. The property only applies when set on a directory "
-     "whose CMakeLists.txt conatins a project() command."
+     "whose CMakeLists.txt contains a project() command."
      "\n"
      "Note that CMake generates postSolution sections ExtensibilityGlobals "
      "and ExtensibilityAddIns by default. If you set the corresponding "

@@ -86,8 +86,8 @@ static const char * cmDocumentationOptions[][3] =
   {"-L[A][H]", "List non-advanced cached variables.",
    "List cache variables will run CMake and list all the variables from the "
    "CMake cache that are not marked as INTERNAL or ADVANCED. This will "
-   "effectively display current CMake settings, which can be then changed "
-   "with -D option. Changing some of the variable may result in more "
+   "effectively display current CMake settings, which can then be changed "
+   "with -D option. Changing some of the variables may result in more "
    "variables being created. If A is specified, then it will display also "
    "advanced variables. If H is specified, it will also display help for "
    "each variable."},
@@ -152,7 +152,7 @@ static const char * cmDocumentationOptions[][3] =
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},
   {"--help-commands [file]", "Print help for all commands and exit.",
-   "Full documentation specific for all current command is displayed."
+   "Full documentation specific for all current commands is displayed."
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},

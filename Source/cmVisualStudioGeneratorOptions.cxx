@@ -229,7 +229,7 @@ cmVisualStudioGeneratorOptions
     }
   if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
-    // if there are configuration specifc flags, then
+    // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
     if(this->Configuration.size())
       {

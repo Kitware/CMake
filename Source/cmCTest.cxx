@@ -2413,7 +2413,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 #endif
     if(retv != 0)
       {
-      cmCTestLog(this, DEBUG, "build and test failing returing: " << retv
+      cmCTestLog(this, DEBUG, "build and test failing returning: " << retv
                  << std::endl);
       }
     return retv;

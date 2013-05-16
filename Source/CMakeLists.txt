@@ -541,7 +541,8 @@ endif()
 add_executable(cmake cmakemain.cxx)
 target_link_libraries(cmake CMakeLib)
 
-# Build special executable for running programs on Windows 98
+# Build special executable for running programs on Windows 98.
+# Included on any Windows (unconditional packaging required!).
 if(WIN32)
   if(NOT UNIX)
     add_executable(cmw9xcom cmw9xcom.cxx)
