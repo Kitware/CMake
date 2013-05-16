@@ -28,6 +28,8 @@
   "strings which contain a ',' for example.\n"                          \
   "  $<SEMICOLON>              = A literal ';'. Used to prevent "       \
   "list expansion on an argument with ';'.\n"                           \
+  "  $<JOIN:list,...>          = joins the list with the content of "   \
+  "\"...\"\n"                                                           \
   "  $<TARGET_NAME:...>        = Marks ... as being the name of a "     \
   "target.  This is required if exporting targets to multiple "         \
   "dependent export sets.  The '...' must be a literal name of a "      \
