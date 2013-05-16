@@ -12,8 +12,7 @@
 
 project(QtDialog)
 find_package(Qt5Widgets QUIET)
-
-if (Qt5Widgets_FOUND AND EXISTS ${QT_MOC_EXECUTABLE})
+if (Qt5Widgets_FOUND)
   include_directories(${Qt5Widgets_INCLUDE_DIRS})
   add_definitions(${Qt5Widgets_DEFINITONS})
   macro(qt4_wrap_ui)
