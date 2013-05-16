@@ -331,17 +331,28 @@ function(add_compiler_export_flags)
     return()
   endif()
 
-  set (EXTRA_FLAGS "-fvisibility=hidden")
+  set (EXTRA_FLAGS_CXX "-fvisibility=hidden")
 
   if(COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
-    set (EXTRA_FLAGS "${EXTRA_FLAGS} -fvisibility-inlines-hidden")
+    set (EXTRA_FLAGS_CXX "${EXTRA_FLAGS_CXX} -fvisibility-inlines-hidden")
   endif()
 
   # Either return the extra flags needed in the supplied argument, or to the
   # CMAKE_CXX_FLAGS if no argument is supplied.
   if(ARGV0)
-    set(${ARGV0} "${EXTRA_FLAGS}" PARENT_SCOPE)
+    if (NOT "${ARGV0}" STREQUAL "CXX")
+      set(${ARGV0} "${EXTRA_FLAGS_CXX}" PARENT_SCOPE)
+    else()
+      set(options)
+      set(oneValueArgs CXX)
+      set(multiValueArgs)
+      cmake_parse_arguments(_CEF "${options}" "${oneValueArgs}" "${multiValueArgs}"
+          ${ARGN})
+      if (_CEF_CXX)
+        set(${_CEF_CXX} "${EXTRA_FLAGS_CXX}" PARENT_SCOPE)
+      endif()
+    endif()
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}" PARENT_SCOPE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS_CXX}" PARENT_SCOPE)
   endif()
 endfunction()

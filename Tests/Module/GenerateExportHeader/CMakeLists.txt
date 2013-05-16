@@ -23,13 +23,13 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 macro(TEST_FAIL value msg)
   if (${value})
-    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
   endif ()
 endmacro()
 
 macro(TEST_PASS value msg)
   if (NOT ${value})
-    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
   endif ()
 endmacro()
 
@@ -82,7 +82,7 @@ set(TEST_TOP_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 # We seem to get race conditions is writing this stuff to the same file at least on MinGW
 # So to write to separate source and build directories, we use a count to differentiate.
 set (COUNT 0)
-macro(_do_build Include Library LibrarySource Source)
+macro(_do_build Include Library LibrarySource Source Languages)
 
   math(EXPR COUNT "${COUNT} + 1" )
 
@@ -97,7 +97,7 @@ macro(_do_build Include Library LibrarySource Source)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
     "cmake_minimum_required(VERSION 2.8)\n"
 
-    "project(compiletest)\n"
+    "project(compiletest ${Languages})\n"
 
     "set(CMAKE_INCLUDE_CURRENT_DIR ON)\n"
 
@@ -129,13 +129,13 @@ macro(_do_build Include Library LibrarySource Source)
   )
 endmacro()
 
-macro(build_fail Include Library LibrarySource Source Message)
-  _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
+macro(build_fail Include Library LibrarySource Source Message Languages)
+  _do_build(${Include} ${Library} ${LibrarySource} "${Source}" "${Languages}")
   test_fail(Result ${Message})
 endmacro()
 
-macro(build_pass Include Library LibrarySource Source Message)
-  _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
+macro(build_pass Include Library LibrarySource Source Message Languages)
+  _do_build(${Include} ${Library} ${LibrarySource} "${Source}" "${Languages}")
   test_pass(Result ${Message})
 endmacro()
 

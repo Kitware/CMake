@@ -4,6 +4,8 @@
 
 #include "libshared_export.h"
 
+#ifdef __cplusplus
+
 class LIBSHARED_EXPORT Libshared {
 public:
   int libshared() const;
@@ -43,12 +45,14 @@ public:
   int LIBSHARED_NO_EXPORT libshared_excluded() const;
 };
 
-LIBSHARED_EXPORT int libshared_exported();
+#endif
 
-LIBSHARED_DEPRECATED_EXPORT int libshared_deprecated();
+LIBSHARED_EXPORT int libshared_exported(void);
 
-int libshared_not_exported();
+LIBSHARED_DEPRECATED_EXPORT int libshared_deprecated(void);
 
-int LIBSHARED_NO_EXPORT libshared_excluded();
+int libshared_not_exported(void);
+
+int LIBSHARED_NO_EXPORT libshared_excluded(void);
 
 #endif
