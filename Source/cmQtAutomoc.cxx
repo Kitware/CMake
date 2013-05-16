@@ -280,13 +280,9 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     _moc_incs += *incDirIt;
     }
 
-  const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
-  std::string _moc_compile_defs;
-  if (tmp)
-    {
-    _moc_compile_defs = target->GetCompileDefinitions(0);
-    }
-  tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
+  std::string _moc_compile_defs = target->GetCompileDefinitions(0);
+
+  const char* tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
   if (tmp)
     {
     _moc_compile_defs += ";";
