@@ -263,7 +263,7 @@ if(BUILD_TESTING)
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
 
   if(NOT QT4_FOUND)
-    find_package(Qt4 QUIET PATHS "${CMAKE_SOURCE_DIR}/Modules" NO_DEFAULT_PATH)
+    find_package(Qt4)
   endif()
 
   if(QT4_FOUND)
