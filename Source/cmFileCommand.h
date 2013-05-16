@@ -269,6 +269,13 @@ protected:
   bool HandleUploadCommand(std::vector<std::string> const& args);
 
   bool HandleTimestampCommand(std::vector<std::string> const& args);
+  bool HandleGenerateCommand(std::vector<std::string> const& args);
+
+private:
+  void AddEvaluationFile(const std::string &inputName,
+                         const std::string &outputExpr,
+                         const std::string &condition,
+                         bool inputIsContent);
 };
 
 

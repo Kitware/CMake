@@ -87,3 +87,5 @@ if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
   add_RunCMake_test(SolutionGlobalSections)
 endif()
+
+add_RunCMake_test(File_Generate)
