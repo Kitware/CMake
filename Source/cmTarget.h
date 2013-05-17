@@ -85,6 +85,7 @@ public:
 
   ///! Set/Get the name of the target
   const char* GetName() const {return this->Name.c_str();}
+  const char* GetExportName();
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
