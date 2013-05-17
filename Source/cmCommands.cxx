@@ -17,7 +17,6 @@
 #include "cmExportCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
-#include "cmGeneratorExpressionEvaluationFile.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmInstallProgramsCommand.cxx"
 #include "cmLinkLibrariesCommand.cxx"
