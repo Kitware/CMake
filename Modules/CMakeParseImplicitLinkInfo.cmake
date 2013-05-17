@@ -26,6 +26,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   set(linker "CMAKE_LINKER-NOTFOUND")
   if(CMAKE_LINKER)
     get_filename_component(linker ${CMAKE_LINKER} NAME)
+    string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" linker "${linker}")
   endif()
   # Construct a regex to match linker lines.  It must match both the
   # whole line and just the command (argv[0]).
