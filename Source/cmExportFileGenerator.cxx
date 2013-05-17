@@ -407,7 +407,7 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
     }
   if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
     {
-    input = this->Namespace + input;
+    input = this->Namespace + tgt->GetName();
     }
   else
     {
