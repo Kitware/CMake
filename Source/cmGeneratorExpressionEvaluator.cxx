@@ -1240,7 +1240,6 @@ GeneratorExpressionContent::~GeneratorExpressionContent()
   deleteAll(this->IdentifierChildren);
 
   typedef std::vector<cmGeneratorExpressionEvaluator*> EvaluatorVector;
-  typedef std::vector<cmGeneratorExpressionToken> TokenVector;
   std::vector<EvaluatorVector>::const_iterator pit =
                                                   this->ParamChildren.begin();
   const std::vector<EvaluatorVector>::const_iterator pend =
