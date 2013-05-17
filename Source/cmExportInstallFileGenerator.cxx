@@ -395,13 +395,14 @@ cmExportInstallFileGenerator::HandleMissingTarget(
   std::string& link_libs, std::vector<std::string>& missingTargets,
   cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
 {
-  std::string name = dependee->GetName();
+  const std::string name = dependee->GetName();
   std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
   int targetOccurrences = (int)namespaces.size();
   if (targetOccurrences == 1)
     {
     std::string missingTarget = namespaces[0];
-    missingTarget += name;
+
+    missingTarget += dependee->GetName();
     link_libs += missingTarget;
     missingTargets.push_back(missingTarget);
     }
