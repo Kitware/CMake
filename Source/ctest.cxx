@@ -71,7 +71,8 @@ static const char * cmDocumentationOptions[][3] =
   {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the"
    "given number of jobs.",
    "This option tells ctest to run the tests in parallel using given "
-   "number of jobs."},
+   "number of jobs.  This option can also be set by setting "
+   "the environment variable CTEST_PARALLEL_LEVEL"},
   {"-Q,--quiet", "Make ctest quiet.",
     "This option will suppress all the output. The output log file will "
     "still be generated if the --output-log is specified. Options such "
