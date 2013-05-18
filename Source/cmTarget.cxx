@@ -924,6 +924,24 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \"lib\") on a library name.");
 
   cm->DefineProperty
+    ("C_VISIBILITY_PRESET", cmProperty::TARGET,
+     "Value for symbol visibility compile flags",
+     "The C_VISIBILITY_PRESET property determines the value passed used in "
+     "a visibility related compile option, such as -fvisibility=.  This "
+     "property only has an affect for libraries and executables with "
+     "exports.  This property is initialized by the value of the variable "
+     "CMAKE_C_VISIBILITY_PRESET if it is set when a target is created.");
+
+  cm->DefineProperty
+    ("CXX_VISIBILITY_PRESET", cmProperty::TARGET,
+     "Value for symbol visibility compile flags",
+     "The CXX_VISIBILITY_PRESET property determines the value passed used in "
+     "a visibility related compile option, such as -fvisibility=.  This "
+     "property only has an affect for libraries and executables with "
+     "exports.  This property is initialized by the value of the variable "
+     "CMAKE_CXX_VISIBILITY_PRESET if it is set when a target is created.");
+
+  cm->DefineProperty
     ("POSITION_INDEPENDENT_CODE", cmProperty::TARGET,
      "Whether to create a position-independent target",
      "The POSITION_INDEPENDENT_CODE property determines whether position "
@@ -1559,6 +1577,9 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->InsertInclude(*it);
     }
+
+  this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);
+  this->SetPropertyDefault("CXX_VISIBILITY_PRESET", 0);
 
   if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
       || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
