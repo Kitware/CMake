@@ -65,6 +65,22 @@ add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
 if(NOT WIN32)
   add_RunCMake_test(PositionIndependentCode)
+  set(SKIP_VISIBILITY 0)
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.2)
+    set(SKIP_VISIBILITY 1)
+  endif()
+
+  if (CMAKE_CXX_COMPILER_ID MATCHES Watcom
+      OR CMAKE_SYSTEM_NAME MATCHES IRIX64
+      OR CMAKE_CXX_COMPILER_ID MATCHES HP
+      OR CMAKE_CXX_COMPILER_ID MATCHES XL
+      OR CMAKE_CXX_COMPILER_ID MATCHES SunPro)
+    set(SKIP_VISIBILITY 1)
+  endif()
+
+  if (NOT SKIP_VISIBILITY)
+    add_RunCMake_test(VisibilityPreset)
+  endif()
 endif()
 add_RunCMake_test(CompatibleInterface)
 
