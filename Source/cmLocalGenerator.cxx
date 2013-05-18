@@ -1993,6 +1993,54 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator
+::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+                            const char *lang)
+{
+  int targetType = target->GetType();
+  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
+                      || (targetType == cmTarget::MODULE_LIBRARY)
+                      || (target->IsExecutableWithExports()));
+
+  if (!suitableTarget)
+    {
+    return;
+    }
+
+  if (!lang)
+    {
+    return;
+    }
+  std::string l(lang);
+  std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
+  const char *opt = this->Makefile->GetDefinition(compileOption.c_str());
+  if (!opt)
+    {
+    return;
+    }
+  std::string flagDefine = l + "_VISIBILITY_PRESET";
+
+  const char *prop = target->GetProperty(flagDefine.c_str());
+  if (!prop)
+    {
+    return;
+    }
+  if (strcmp(prop, "hidden") != 0
+      && strcmp(prop, "default") != 0
+      && strcmp(prop, "protected") != 0
+      && strcmp(prop, "internal") != 0 )
+    {
+    cmOStringStream e;
+    e << "Target " << target->GetName() << " uses unsupported value \""
+      << prop << "\" for " << flagDefine << ".";
+    cmSystemTools::Error(e.str().c_str());
+    return;
+    }
+  std::string option = std::string(opt) + prop;
+  this->AppendFlags(flags, option.c_str());
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
                                        std::string const& lang,
                                        const char *config)
