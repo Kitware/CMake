@@ -65,6 +65,7 @@ add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
 if(NOT WIN32)
   add_RunCMake_test(PositionIndependentCode)
+  add_RunCMake_test(VisibilityPreset)
 endif()
 add_RunCMake_test(CompatibleInterface)
 
