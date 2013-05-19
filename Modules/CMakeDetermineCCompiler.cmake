@@ -158,6 +158,12 @@ if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
     get_filename_component(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
     if (COMPILER_BASENAME MATCHES "^(.+-)(clang|g?cc)(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
+    elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
+      set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_C_COMPILER_TARGET}-)
+    elseif(COMPILER_BASENAME MATCHES "qcc(\\.exe)?$")
+      if(CMAKE_C_COMPILER_TARGET MATCHES "gcc_nto([^_le]+)(le)?.*$")
+        set(_CMAKE_TOOLCHAIN_PREFIX nto${CMAKE_MATCH_1}-)
+      endif()
     endif ()
 
     # if "llvm-" is part of the prefix, remove it, since llvm doesn't have its own binutils
