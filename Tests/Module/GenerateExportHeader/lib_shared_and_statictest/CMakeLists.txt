@@ -38,5 +38,7 @@ endmacro()
 
 run_tests("")
 run_tests("CXX")
-run_tests("C")
+if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
+  run_tests("C")
+endif()
 run_tests("C CXX")
