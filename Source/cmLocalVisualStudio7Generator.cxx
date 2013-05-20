@@ -476,6 +476,9 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"ForcedIncludeFiles", "FI", "Forced include files", "",
    cmVS7FlagTable::UserValueRequired | cmVS7FlagTable::SemicolonAppendable},
 
+  {"AssemblerListingLocation", "Fa", "ASM List Location", "",
+   cmVS7FlagTable::UserValue},
+
   // boolean flags
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
   {"BufferSecurityCheck", "GS-", "Turn off Buffer security check", "FALSE", 0},
@@ -740,6 +743,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
+  std::string asmLocation = std::string(configName) + "/";
+  targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
@@ -836,7 +841,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"\n";
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
-  fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   tool = "VCCustomBuildTool";
