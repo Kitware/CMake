@@ -74,15 +74,143 @@ void cmExtraKateGenerator::CreateKateProjectFile(const cmMakefile* mf) const
     "{\n"
     "\t\"name\": \"" << this->ProjectName << "\",\n"
     "\t\"directory\": \"" << mf->GetHomeDirectory() << "\",\n"
-    "\t\"files\": [ { " << this->GenerateFilesString(mf) << "} ],\n"
-    "\t\"build\": {\n"
-    "\t\t\"directory\": \"" << mf->GetHomeOutputDirectory() << "\",\n"
-    "\t\t\"build\": \"" << make << " " << args <<" all\",\n"
-    "\t\t\"clean\": \"" << make << " clean\",\n"
-    "\t\t\"quick\": \"" << make << " help\"\n"
-    "\t}\n"
-    "}\n";
+    "\t\"files\": [ { " << this->GenerateFilesString(mf) << "} ],\n";
+  this->WriteTargets(mf, fout);
+  fout << "}\n";
 }
+
+
+void
+cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
+                                   cmGeneratedFileStream& fout) const
+{
+  fout <<
+  "\t\"build\": {\n"
+  "\t\t\"directory\": \"" << mf->GetHomeOutputDirectory() << "\",\n"
+  "\t\t\"default_target\": \"all\",\n"
+  "\t\t\"prev_target\": \"all\",\n"
+  "\t\t\"clean_target\": \"clean\",\n"
+  "\t\t\"targets\":[\n";
+
+  const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
+  const std::string makeArgs = mf->GetSafeDefinition(
+                                              "CMAKE_KATE_MAKE_ARGUMENTS");
+
+  this->AppendTarget(fout, "all", make, makeArgs,
+                     mf->GetHomeOutputDirectory());
+  this->AppendTarget(fout, "clean", make, makeArgs,
+                     mf->GetHomeOutputDirectory());
+
+  // add all executable and library targets and some of the GLOBAL
+  // and UTILITY targets
+  for (std::vector<cmLocalGenerator*>::const_iterator
+       it = this->GlobalGenerator->GetLocalGenerators().begin();
+       it != this->GlobalGenerator->GetLocalGenerators().end();
+       ++it)
+    {
+    const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
+    cmMakefile* makefile=(*it)->GetMakefile();
+    std::string currentDir = makefile->GetCurrentOutputDirectory();
+    bool topLevel = (currentDir == makefile->GetHomeOutputDirectory());
+
+    for(cmTargets::const_iterator ti=targets.begin(); ti!=targets.end(); ++ti)
+      {
+      switch(ti->second.GetType())
+        {
+        case cmTarget::GLOBAL_TARGET:
+          {
+          bool insertTarget = false;
+          // Only add the global targets from CMAKE_BINARY_DIR,
+          // not from the subdirs
+          if (topLevel)
+            {
+            insertTarget = true;
+            // only add the "edit_cache" target if it's not ccmake, because
+            // this will not work within the IDE
+            if (ti->first == "edit_cache")
+              {
+              const char* editCommand = makefile->GetDefinition
+              ("CMAKE_EDIT_COMMAND");
+              if (editCommand == 0)
+                {
+                insertTarget = false;
+                }
+              else if (strstr(editCommand, "ccmake")!=NULL)
+                {
+                insertTarget = false;
+                }
+              }
+            }
+          if (insertTarget)
+            {
+            this->AppendTarget(fout, ti->first, make, makeArgs, currentDir);
+            }
+        }
+        break;
+        case cmTarget::UTILITY:
+          // Add all utility targets, except the Nightly/Continuous/
+          // Experimental-"sub"targets as e.g. NightlyStart
+          if (((ti->first.find("Nightly")==0)   &&(ti->first!="Nightly"))
+            || ((ti->first.find("Continuous")==0)&&(ti->first!="Continuous"))
+            || ((ti->first.find("Experimental")==0)
+            && (ti->first!="Experimental")))
+            {
+              break;
+            }
+
+            this->AppendTarget(fout, ti->first, make, makeArgs, currentDir);
+          break;
+        case cmTarget::EXECUTABLE:
+        case cmTarget::STATIC_LIBRARY:
+        case cmTarget::SHARED_LIBRARY:
+        case cmTarget::MODULE_LIBRARY:
+        case cmTarget::OBJECT_LIBRARY:
+        {
+          this->AppendTarget(fout, ti->first, make, makeArgs, currentDir);
+          std::string fastTarget = ti->first;
+          fastTarget += "/fast";
+          this->AppendTarget(fout, fastTarget, make, makeArgs, currentDir);
+
+        }
+        break;
+        default:
+          break;
+      }
+    }
+
+    //insert rules for compiling, preprocessing and assembling individual files
+    std::vector<std::string> objectFileTargets;
+    (*it)->GetIndividualFileTargets(objectFileTargets);
+    for(std::vector<std::string>::const_iterator fit=objectFileTargets.begin();
+        fit != objectFileTargets.end();
+        ++fit)
+      {
+      this->AppendTarget(fout, *fit, make, makeArgs, currentDir);
+      }
+  }
+
+  fout <<
+  "\t] }\n";
+}
+
+
+void
+cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
+                                   const std::string&     target,
+                                   const std::string&     make,
+                                   const std::string&     makeArgs,
+                                   const std::string&     path) const
+{
+  static char JsonSep = ' ';
+
+  fout <<
+    "\t\t\t" << JsonSep << "{\"name\":\"" << target << "\", "
+    "\"build_cmd\":\"" << make << " -C " << path << " " << makeArgs << " "
+                       << target << "\"}\n";
+
+  JsonSep = ',';
+}
+
 
 
 void
