@@ -41,6 +41,13 @@ public:
 private:
   void CreateKateProjectFile(const cmMakefile* mf) const;
   void CreateDummyKateProjectFile(const cmMakefile* mf) const;
+  void WriteTargets(const cmMakefile* mf, cmGeneratedFileStream& fout) const;
+  void AppendTarget(cmGeneratedFileStream& fout,
+                    const std::string&     target,
+                    const std::string&     make,
+                    const std::string&     makeArgs,
+                    const std::string&     path) const;
+
   std::string GenerateFilesString(const cmMakefile* mf) const;
   std::string GetPathBasename(const std::string& path) const;
   std::string GenerateProjectName(const std::string& name,
