@@ -58,3 +58,14 @@ get_property(propContentAfter DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 if (NOT propContentAfter STREQUAL "")
   message(SEND_ERROR "Clearing DIRECTORY property failed.")
 endif()
+
+add_library(empty_entry_test SHARED empty.cpp)
+set_target_properties(empty_entry_test PROPERTIES INCLUDE_DIRECTORIES "")
+include_directories(/one/two
+  " "
+  "  "
+)
+get_target_property(incs empty_entry_test INCLUDE_DIRECTORIES)
+if (NOT incs STREQUAL ";/one/two")
+  message(SEND_ERROR "Empty include_directories entry was not ignored.")
+endif()
