@@ -3782,6 +3782,10 @@ std::string cmTarget::GetSOName(const char* config)
       else
         {
         // Use the soname given if any.
+        if(info->SOName.find("@rpath/") == 0)
+          {
+          return info->SOName.substr(6);
+          }
         return info->SOName;
         }
       }

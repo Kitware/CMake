@@ -211,3 +211,19 @@ cmExportBuildFileGenerator
     << "consider using the APPEND option with multiple separate calls.";
   this->ExportCommand->ErrorMessage = e.str();
 }
+
+std::string
+cmExportBuildFileGenerator::InstallNameDir(cmTarget* target,
+                                           const std::string& config)
+{
+  std::string install_name_dir;
+
+  cmMakefile* mf = target->GetMakefile();
+  if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    install_name_dir =
+      target->GetInstallNameDirForBuildTree(config.c_str());
+    }
+
+  return install_name_dir;
+}
