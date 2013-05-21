@@ -1271,6 +1271,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
   clOptions.FixExceptionHandlingDefault();
   clOptions.AddFlag("PrecompiledHeader", "NotUsing");
+  std::string asmLocation = configName + "/";
+  clOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   clOptions.AddDefines(this->Target->GetCompileDefinitions(
@@ -1313,9 +1315,6 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
-  this->WriteString("<AssemblerListingLocation>", 3);
-  *this->BuildFileStream << configName
-                         << "</AssemblerListingLocation>\n";
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
   this->WriteString("</ClCompile>\n", 2);
 }
