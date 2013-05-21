@@ -1084,8 +1084,6 @@ void
 cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                       const RuleVariables& replaceValues)
 {
-  std::vector<std::string> enabledLanguages;
-  this->GlobalGenerator->GetEnabledLanguages(enabledLanguages);
   this->InsertRuleLauncher(s, replaceValues.CMTarget,
                            replaceValues.RuleLauncher);
   std::string::size_type start = s.find('<');
