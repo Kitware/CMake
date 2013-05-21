@@ -71,12 +71,9 @@ bool cmakewizard::AskAdvanced()
     {
     buffer[0] = 0;
     }
-  if(buffer[0])
+  else if(buffer[0] == 'y' || buffer[0] == 'Y')
     {
-    if(buffer[0] == 'y' || buffer[0] == 'Y')
-      {
-      return true;
-      }
+    return true;
     }
   return false;
 }
