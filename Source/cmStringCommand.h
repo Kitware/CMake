@@ -178,8 +178,8 @@ public:
       "If no explicit <format string> is given it will default to:\n"
       "   %Y-%m-%dT%H:%M:%S    for local time.\n"
       "   %Y-%m-%dT%H:%M:%SZ   for UTC.\n"
-      "MAKE_C_IDENTIFIER will write a string which can be used as an\n"
-      "identifier in C";
+      "MAKE_C_IDENTIFIER will write a string which can be used as an "
+      "identifier in C.";
     }
 
   cmTypeMacro(cmStringCommand, cmCommand);
