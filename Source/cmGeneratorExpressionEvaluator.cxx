@@ -1051,11 +1051,6 @@ std::string GeneratorExpressionContent::Evaluate(
                                         pend = this->ParamChildren.end();
     for ( ; pit != pend; ++pit)
       {
-      if (!result.empty())
-        {
-        result += ",";
-        }
-
       std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
                                                               = pit->begin();
       const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
@@ -1076,6 +1071,10 @@ std::string GeneratorExpressionContent::Evaluate(
           {
           return std::string();
           }
+        }
+      if ((pit + 1) != pend)
+        {
+        result += ",";
         }
       }
     if (node->RequiresLiteralInput())
