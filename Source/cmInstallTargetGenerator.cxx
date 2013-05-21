@@ -198,14 +198,12 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       // Install the whole framework directory.
       type = cmInstallType_DIRECTORY;
       literal_args += " USE_SOURCE_PERMISSIONS";
-      std::string from1 = fromDirConfig + targetName + ".framework";
+
+      std::string from1 = fromDirConfig + targetName;
+      from1 = cmSystemTools::GetFilenamePath(from1);
 
       // Tweaks apply to the binary inside the bundle.
-      std::string to1 = toDir + targetName;
-      to1 += ".framework/Versions/";
-      to1 += this->Target->GetFrameworkVersion();
-      to1 += "/";
-      to1 += targetName;
+      std::string to1 = toDir + targetNameReal;
 
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
@@ -528,7 +526,7 @@ cmInstallTargetGenerator
       // components of the install_name field then we need to create a
       // mapping to be applied after installation.
       std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
-      std::string for_install = tgt->GetInstallNameDirForInstallTree(config);
+      std::string for_install = tgt->GetInstallNameDirForInstallTree();
       if(for_build != for_install)
         {
         // The directory portions differ.  Append the filename to
@@ -555,7 +553,7 @@ cmInstallTargetGenerator
     std::string for_build =
       this->Target->GetInstallNameDirForBuildTree(config);
     std::string for_install =
-      this->Target->GetInstallNameDirForInstallTree(config);
+      this->Target->GetInstallNameDirForInstallTree();
 
     if(this->Target->IsFrameworkOnApple() && for_install.empty())
       {
