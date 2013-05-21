@@ -82,7 +82,7 @@ public:
         {
         this->Find(key);
         }
-    }
+      }
   private:
     CacheEntry const& GetEntry() const { return this->Position->second; }
     CacheEntry& GetEntry() { return this->Position->second; }
