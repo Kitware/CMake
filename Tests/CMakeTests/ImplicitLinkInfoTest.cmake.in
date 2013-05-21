@@ -508,6 +508,7 @@ list(APPEND platforms msys_g77)
 
 #-----------------------------------------------------------------------------
 # Test parsing for all above examples.
+set(CMAKE_LINKER "not-a-linker[]().*+^$?")
 
 foreach(p IN LISTS platforms)
   cmake_parse_implicit_link_info("${${p}_text}" libs dirs fwks log "${${p}_obj_regex}")
