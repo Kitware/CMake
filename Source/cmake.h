@@ -532,9 +532,9 @@ private:
    "CMakeCache.txt file, globbing expressions using * and ? are supported. "\
    "The option may be repeated for as many cache entries as desired.\n" \
    "Use with care, you can make your CMakeCache.txt non-working."}, \
-  {"-G <generator-name>", "Specify a makefile generator.", \
+  {"-G <generator-name>", "Specify a build system generator.", \
    "CMake may support multiple native build systems on certain platforms.  " \
-   "A makefile generator is responsible for generating a particular build " \
+   "A generator is responsible for generating a particular build " \
    "system.  Possible generator names are specified in the Generators " \
    "section."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator.", \
