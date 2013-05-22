@@ -3208,10 +3208,7 @@ bool cmake::SymlinkInternal(std::string const& file, std::string const& link)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   return cmSystemTools::CopyFileAlways(file.c_str(), link.c_str());
 #else
-  std::string link_abs = "/" + link;
-  link_abs = cmSystemTools::GetFilenamePath(link_abs);
-  std::string file_abs = "/" + file;
-  std::string linktext = cmSystemTools::RelativePath(link_abs.c_str(), file_abs.c_str());
+  std::string linktext = cmSystemTools::GetFilenameName(file);
   return cmSystemTools::CreateSymlink(linktext.c_str(), link.c_str());
 #endif
 }
