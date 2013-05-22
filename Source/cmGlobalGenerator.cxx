@@ -70,6 +70,13 @@ cmGlobalGenerator::~cmGlobalGenerator()
     {
     delete this->LocalGenerators[i];
     }
+  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+      li = this->EvaluationFiles.begin();
+      li != this->EvaluationFiles.end();
+      ++li)
+    {
+    delete *li;
+    }
   this->LocalGenerators.clear();
 
   if (this->ExtraGenerator)
