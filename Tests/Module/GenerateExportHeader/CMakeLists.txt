@@ -23,13 +23,13 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 macro(TEST_FAIL value msg)
   if (${value})
-    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
+    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
   endif ()
 endmacro()
 
 macro(TEST_PASS value msg)
   if (NOT ${value})
-    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
+    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
   endif ()
 endmacro()
 
@@ -82,14 +82,11 @@ set(TEST_TOP_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 # We seem to get race conditions is writing this stuff to the same file at least on MinGW
 # So to write to separate source and build directories, we use a count to differentiate.
 set (COUNT 0)
-macro(_do_build Include Library LibrarySource Source Languages)
+macro(_do_build Include Library LibrarySource Source)
 
   math(EXPR COUNT "${COUNT} + 1" )
 
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/src.cpp" "#include \"${Include}\"\n"
-    "int main() { ${Source}; }\n"
-  )
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/src.c" "#include \"${Include}\"\n"
     "int main() { ${Source}; }\n"
   )
 
@@ -100,7 +97,7 @@ macro(_do_build Include Library LibrarySource Source Languages)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
     "cmake_minimum_required(VERSION 2.8)\n"
 
-    "project(compiletest ${Languages})\n"
+    "project(compiletest)\n"
 
     "set(CMAKE_INCLUDE_CURRENT_DIR ON)\n"
 
@@ -121,13 +118,8 @@ macro(_do_build Include Library LibrarySource Source Languages)
 
     "${CONDITIONAL_STATIC_DEFINE}"
 
-    "if(CMAKE_CXX_COMPILER_LOADED)\n"
-    "  add_executable(compiletest src.cpp)\n"
-    "  target_link_libraries(compiletest ${Library})\n"
-    "elseif(CMAKE_C_COMPILER_LOADED)\n"
-    "  add_executable(compiletest src.c)\n"
-    "  target_link_libraries(compiletest ${Library}_c)\n"
-    "endif()\n"
+    "add_executable(compiletest src.cpp)\n"
+    "target_link_libraries(compiletest ${Library})\n"
   )
 
   try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/fail${COUNT}
@@ -137,13 +129,13 @@ macro(_do_build Include Library LibrarySource Source Languages)
   )
 endmacro()
 
-macro(build_fail Include Library LibrarySource Source Message Languages)
-  _do_build(${Include} ${Library} ${LibrarySource} "${Source}" "${Languages}")
+macro(build_fail Include Library LibrarySource Source Message)
+  _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
   test_fail(Result ${Message})
 endmacro()
 
-macro(build_pass Include Library LibrarySource Source Message Languages)
-  _do_build(${Include} ${Library} ${LibrarySource} "${Source}" "${Languages}")
+macro(build_pass Include Library LibrarySource Source Message)
+  _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
   test_pass(Result ${Message})
 endmacro()
 

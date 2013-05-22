@@ -1,8 +1,6 @@
 
 #include "libshared.h"
 
-#ifdef __cplusplus
-
 int Libshared::libshared() const
 {
   return 0;
@@ -72,24 +70,22 @@ int LibsharedExcluded::libshared_excluded() const {
   return 0;
 }
 
-#endif
-
-int libshared(void) {
+int libshared() {
   return 0;
 }
 
-int libshared_exported(void) {
+int libshared_exported() {
   return 0;
 }
 
-int libshared_deprecated(void) {
+int libshared_deprecated() {
   return 0;
 }
 
-int libshared_not_exported(void) {
+int libshared_not_exported() {
   return 0;
 }
 
-int libshared_excluded(void) {
+int libshared_excluded() {
   return 0;
 }

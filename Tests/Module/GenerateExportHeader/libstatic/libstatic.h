@@ -43,12 +43,12 @@ public:
   int LIBSTATIC_NO_EXPORT libstatic_excluded() const;
 };
 
-LIBSTATIC_EXPORT int libstatic_exported(void);
+LIBSTATIC_EXPORT int libstatic_exported();
 
-LIBSTATIC_DEPRECATED_EXPORT int libstatic_deprecated(void);
+LIBSTATIC_DEPRECATED_EXPORT int libstatic_deprecated();
 
-int libstatic_not_exported(void);
+int libstatic_not_exported();
 
-int LIBSTATIC_NO_EXPORT libstatic_excluded(void);
+int LIBSTATIC_NO_EXPORT libstatic_excluded();
 
 #endif
