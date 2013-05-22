@@ -1,10 +1,10 @@
 
 macro(shared_build_pass Source Message)
-    build_pass("libshared.h" "libshared" "libshared" "${Source}" ${Message} "${ARGN}")
+    build_pass("libshared.h" "libshared" "libshared" "${Source}" ${Message})
 endmacro()
 
 macro(shared_build_fail Source Message)
-    build_fail("libshared.h" "libshared" "libshared" "${Source}" ${Message} "${ARGN}")
+    build_fail("libshared.h" "libshared" "libshared" "${Source}" ${Message})
 endmacro()
 
 shared_build_pass("Libshared l; return l.libshared_exported();" "Failed to build exported")
@@ -28,6 +28,9 @@ if (WIN32 OR COMPILER_HAS_HIDDEN_VISIBILITY)
   shared_build_fail("LibsharedExcluded l; return l.libshared();" "Built use of excluded class method. This should not be possible.")
   shared_build_fail("LibsharedExcluded l; return l.libshared_not_exported();" "Built use of excluded class method. This should not be possible.")
   shared_build_fail("LibsharedExcluded l; return l.libshared_excluded();" "Built use of excluded class method. This should not be possible.")
+
+  shared_build_fail("return libshared_excluded();" "Built use of excluded function. This should not be possible.")
+  shared_build_fail("return libshared_not_exported();" "Built use of not-exported function. This should not be possible.")
 else()
   shared_build_pass("LibsharedNotExported l; return l.libshared();" "Built use of not-exported class method.")
   shared_build_pass("LibsharedNotExported l; return l.libshared_not_exported();" "Built use of not-exported class method.")
@@ -35,24 +38,7 @@ else()
   shared_build_pass("LibsharedExcluded l; return l.libshared();" "Built use of excluded class method.")
   shared_build_pass("LibsharedExcluded l; return l.libshared_not_exported();" "Built use of excluded class method.")
   shared_build_pass("LibsharedExcluded l; return l.libshared_excluded();" "Built use of excluded class method.")
+
+  shared_build_pass("return libshared_excluded();" "Built use of excluded function.")
+  shared_build_pass("return libshared_not_exported();" "Built use of not-exported function.")
 endif()
-
-
-macro(run_tests Languages)
-  shared_build_pass("return libshared_exported();" "Failed to build exported function." "${Languages}")
-
-  if (WIN32 OR COMPILER_HAS_HIDDEN_VISIBILITY)
-    shared_build_fail("return libshared_excluded();" "Built use of excluded function. This should not be possible." "${Languages}")
-    shared_build_fail("return libshared_not_exported();" "Built use of not-exported function. This should not be possible." "${Languages}")
-  else()
-    shared_build_pass("return libshared_excluded();" "Built use of excluded function." "${Languages}")
-    shared_build_pass("return libshared_not_exported();" "Built use of not-exported function." "${Languages}")
-  endif()
-endmacro()
-
-run_tests("")
-run_tests("CXX")
-if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
-    run_tests("C")
-endif()
-run_tests("C CXX")

@@ -143,37 +143,11 @@
 #  License text for the above reference.)
 
 include(CMakeParseArguments)
-
-if (CMAKE_CXX_COMPILER_LOADED)
-  include(CheckCXXCompilerFlag)
-endif()
-
-if (CMAKE_C_COMPILER_LOADED)
-  include(CheckCCompilerFlag)
-endif()
-
-macro(_check_compiler_flag)
-  if (CMAKE_CXX_COMPILER_LOADED)
-      check_cxx_compiler_flag(${ARGN})
-  elseif(CMAKE_C_COMPILER_LOADED)
-      check_c_compiler_flag(${ARGN})
-  else()
-      message(FATAL_ERROR "This module requires at least a C or C++ compiler.")
-  endif()
-endmacro()
-macro(_check_source_compiles _CODE _RESULT)
-  if (CMAKE_CXX_COMPILER_LOADED)
-    check_cxx_source_compiles("${_CODE}" ${_RESULT})
-  elseif(CMAKE_C_COMPILER_LOADED)
-    check_c_source_compiles("${_CODE}" ${_RESULT})
-  else()
-      message(FATAL_ERROR "This module requires at least a C or C++ compiler.")
-  endif()
-endmacro()
+include(CheckCXXCompilerFlag)
 
 # TODO: Install this macro separately?
-macro(_check_compiler_attribute _ATTRIBUTE _RESULT)
-  _check_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
+macro(_check_cxx_compiler_attribute _ATTRIBUTE _RESULT)
+  check_cxx_source_compiles("${_ATTRIBUTE} int somefunc() { return 0; }
     int main() { return somefunc();}" ${_RESULT}
   )
 endmacro()
@@ -198,8 +172,8 @@ macro(_test_compiler_hidden_visibility)
       AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL
       AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
       AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
-    _check_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
-    _check_compiler_flag(-fvisibility-inlines-hidden
+    check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
+    check_cxx_compiler_flag(-fvisibility-inlines-hidden
       COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
     option(USE_COMPILER_HIDDEN_VISIBILITY
       "Use HIDDEN visibility support if available." ON)
@@ -216,13 +190,13 @@ macro(_test_compiler_has_deprecated)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL
       "Compiler support for a deprecated attribute")
   else()
-    _check_compiler_attribute("__attribute__((__deprecated__))"
+    _check_cxx_compiler_attribute("__attribute__((__deprecated__))"
       COMPILER_HAS_DEPRECATED_ATTR)
     if(COMPILER_HAS_DEPRECATED_ATTR)
       set(COMPILER_HAS_DEPRECATED "${COMPILER_HAS_DEPRECATED_ATTR}"
         CACHE INTERNAL "Compiler support for a deprecated attribute")
     else()
-      _check_compiler_attribute("__declspec(deprecated)"
+      _check_cxx_compiler_attribute("__declspec(deprecated)"
         COMPILER_HAS_DEPRECATED)
     endif()
   endif()
@@ -357,33 +331,17 @@ function(add_compiler_export_flags)
     return()
   endif()
 
-  set (EXTRA_FLAGS_C "-fvisibility=hidden")
-  set (EXTRA_FLAGS_CXX "-fvisibility=hidden")
+  set (EXTRA_FLAGS "-fvisibility=hidden")
 
   if(COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
-    set (EXTRA_FLAGS_CXX "${EXTRA_FLAGS_CXX} -fvisibility-inlines-hidden")
+    set (EXTRA_FLAGS "${EXTRA_FLAGS} -fvisibility-inlines-hidden")
   endif()
 
   # Either return the extra flags needed in the supplied argument, or to the
   # CMAKE_CXX_FLAGS if no argument is supplied.
   if(ARGV0)
-    if (NOT ("${ARGV0}" STREQUAL "CXX" OR "${ARGV0}" STREQUAL "C"))
-      set(${ARGV0} "${EXTRA_FLAGS_CXX}" PARENT_SCOPE)
-    else()
-      set(options)
-      set(oneValueArgs CXX C)
-      set(multiValueArgs)
-      cmake_parse_arguments(_CEF "${options}" "${oneValueArgs}" "${multiValueArgs}"
-          ${ARGN})
-      if (_CEF_CXX)
-        set(${_CEF_CXX} "${EXTRA_FLAGS_CXX}" PARENT_SCOPE)
-      endif()
-      if (_CEF_C)
-        set(${_CEF_C} "${EXTRA_FLAGS_C}" PARENT_SCOPE)
-      endif()
-    endif()
+    set(${ARGV0} "${EXTRA_FLAGS}" PARENT_SCOPE)
   else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS_CXX}" PARENT_SCOPE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS_C}" PARENT_SCOPE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}" PARENT_SCOPE)
   endif()
 endfunction()
