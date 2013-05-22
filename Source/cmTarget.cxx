@@ -2501,8 +2501,6 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
    }
  }
 
- typedef std::vector< std::string > LinkLine;
-
  // The dependency map.
  DependencyMap dep_map;
 
