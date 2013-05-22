@@ -35,7 +35,8 @@ public:
   void CreateAppBundle(const std::string& targetName, std::string& root);
 
   // create a framework at a given root
-  void CreateFramework(const std::string& targetName, const std::string& outpath);
+  void CreateFramework(const std::string& targetName,
+                       const std::string& root);
 
   // create a cf bundle at a given root and return the
   // directory within the bundle that contains the library
