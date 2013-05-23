@@ -2237,8 +2237,39 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(i->first.find("XCODE_ATTRIBUTE_") == 0)
       {
-      buildSettings->AddAttribute(i->first.substr(16).c_str(),
-                                  this->CreateString(i->second.GetValue()));
+      cmStdString attribute = i->first.substr(16);
+      // Handle [variant=<config>] condition explicitly here.
+      cmStdString::size_type beginVariant =
+        attribute.find("[variant=");
+      if (beginVariant != cmStdString::npos)
+        {
+        cmStdString::size_type endVariant =
+          attribute.find("]", beginVariant+9);
+        if (endVariant != cmStdString::npos)
+          {
+          // Compare the variant to the configuration.
+          cmStdString variant =
+            attribute.substr(beginVariant+9, endVariant-beginVariant-9);
+          if (variant == configName)
+            {
+            // The variant matches the configuration so use this
+            // attribute but drop the [variant=<config>] condition.
+            attribute.erase(beginVariant, endVariant-beginVariant+1);
+            }
+          else
+            {
+            // The variant does not match the configuration so
+            // do not use this attribute.
+            attribute.clear();
+            }
+          }
+        }
+
+      if (!attribute.empty())
+        {
+        buildSettings->AddAttribute(attribute.c_str(),
+                                    this->CreateString(i->second.GetValue()));
+        }
       }
     }
   }
