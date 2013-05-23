@@ -1992,28 +1992,12 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     }
 }
 
-//----------------------------------------------------------------------------
-void cmLocalGenerator
-::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
-                            const char *lang)
+static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
+                                       cmLocalGenerator *lg, const char *lang)
 {
-  int targetType = target->GetType();
-  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
-                      || (targetType == cmTarget::MODULE_LIBRARY)
-                      || (target->IsExecutableWithExports()));
-
-  if (!suitableTarget)
-    {
-    return;
-    }
-
-  if (!lang)
-    {
-    return;
-    }
   std::string l(lang);
   std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
-  const char *opt = this->Makefile->GetDefinition(compileOption.c_str());
+  const char *opt = lg->GetMakefile()->GetDefinition(compileOption.c_str());
   if (!opt)
     {
     return;
@@ -2037,7 +2021,50 @@ void cmLocalGenerator
     return;
     }
   std::string option = std::string(opt) + prop;
-  this->AppendFlags(flags, option.c_str());
+  lg->AppendFlags(flags, option.c_str());
+}
+
+static void AddInlineVisibilityCompileOption(std::string &flags,
+                                       cmTarget* target,
+                                       cmLocalGenerator *lg)
+{
+  std::string compileOption
+                = "CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN";
+  const char *opt = lg->GetMakefile()->GetDefinition(compileOption.c_str());
+  if (!opt)
+    {
+    return;
+    }
+
+  bool prop = target->GetPropertyAsBool("VISIBILITY_INLINES_HIDDEN");
+  if (!prop)
+    {
+    return;
+    }
+  lg->AppendFlags(flags, opt);
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator
+::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+                            const char *lang)
+{
+  int targetType = target->GetType();
+  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
+                      || (targetType == cmTarget::MODULE_LIBRARY)
+                      || (target->IsExecutableWithExports()));
+
+  if (!suitableTarget)
+    {
+    return;
+    }
+
+  if (!lang)
+    {
+    return;
+    }
+  AddVisibilityCompileOption(flags, target, this, lang);
+  AddInlineVisibilityCompileOption(flags, target, this);
 }
 
 //----------------------------------------------------------------------------
