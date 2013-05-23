@@ -1,7 +1,11 @@
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 if (CMAKE_CXX_FLAGS MATCHES "-fvisibility=hidden")
+  message(SEND_ERROR "Do not use add_compiler_export_flags before adding this directory")
+endif()
+if (CMAKE_CXX_FLAGS MATCHES "-fvisibility-inlines-hidden")
   message(SEND_ERROR "Do not use add_compiler_export_flags before adding this directory")
 endif()
 

@@ -1,2 +1,12 @@
 include(Compiler/GNU)
 __compiler_gnu(CXX)
+
+if (WIN32)
+  if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
+    set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN "-fno-keep-inline-dllexport")
+  endif()
+else()
+  if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
+    set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN "-fvisibility-inlines-hidden")
+  endif()
+endif()
