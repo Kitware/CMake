@@ -942,6 +942,17 @@ void cmTarget::DefineProperties(cmake *cm)
      "CMAKE_CXX_VISIBILITY_PRESET if it is set when a target is created.");
 
   cm->DefineProperty
+    ("VISIBILITY_INLINES_HIDDEN", cmProperty::TARGET,
+     "Whether to add a compile flag to hide symbols of inline functions",
+     "The VISIBILITY_INLINES_HIDDEN property determines whether a flag for "
+     "hiding symbols for inline functions. the value passed used in "
+     "a visibility related compile option, such as -fvisibility=.  This "
+     "property only has an affect for libraries and executables with "
+     "exports.  This property is initialized by the value of the variable "
+     "CMAKE_VISIBILITY_INLINES_HIDDEN if it is set when a target is "
+     "created.");
+
+  cm->DefineProperty
     ("POSITION_INDEPENDENT_CODE", cmProperty::TARGET,
      "Whether to create a position-independent target",
      "The POSITION_INDEPENDENT_CODE property determines whether position "
@@ -1580,6 +1591,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 
   this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);
   this->SetPropertyDefault("CXX_VISIBILITY_PRESET", 0);
+  this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", 0);
 
   if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
       || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
