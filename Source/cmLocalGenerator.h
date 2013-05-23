@@ -143,8 +143,7 @@ public:
                         const char* config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
                        std::string const& lang, const char *config);
-  void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
-                                 const char *lang);
+  void AddVisibilityPresetFlags(std::string &flags, cmTarget* target);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
   ///! Append flags to a string.
