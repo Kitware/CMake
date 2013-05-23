@@ -38,7 +38,7 @@ set_property(TARGET target_prop_c_executable APPEND PROPERTY COMPILE_DEFINITIONS
     )
 
 # Resulting link language will be CXX
-add_executable(target_prop_mixed_executable ../compiletest_mixed.c ../compiletest_mixed.cpp)
+add_executable(target_prop_mixed_executable ../compiletest_mixed_c.c ../compiletest_mixed_cxx.cpp)
 
 set_property(TARGET target_prop_mixed_executable APPEND PROPERTY COMPILE_DEFINITIONS
     "$<$<LINK_LANGUAGE:CXX>:LINK_CXX_DEFINE>"
