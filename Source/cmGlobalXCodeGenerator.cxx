@@ -1716,30 +1716,26 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
 
+  std::string extraLinkOptionsVar;
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions =
-      this->CurrentMakefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
-    std::string var = "CMAKE_EXE_LINKER_FLAGS_";
-    var += cmSystemTools::UpperCase(configName);
-    std::string val =
-      this->CurrentMakefile->GetSafeDefinition(var.c_str());
-    if(val.size())
-      {
-      extraLinkOptions += " ";
-      extraLinkOptions += val;
-      }
+    extraLinkOptionsVar = "CMAKE_EXE_LINKER_FLAGS";
     }
-  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+  else if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = this->CurrentMakefile->
-      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptionsVar = "CMAKE_SHARED_LINKER_FLAGS";
     }
-  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+  else if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = this->CurrentMakefile->
-      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptionsVar = "CMAKE_MODULE_LINKER_FLAGS";
+    }
+  if(extraLinkOptionsVar.size())
+    {
+    this->CurrentLocalGenerator
+      ->AddConfigVariableFlags(extraLinkOptions,
+                               extraLinkOptionsVar.c_str(),
+                               configName);
     }
 
   const char* linkFlagsProp = "LINK_FLAGS";
