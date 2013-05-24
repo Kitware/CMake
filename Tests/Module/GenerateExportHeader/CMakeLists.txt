@@ -168,6 +168,9 @@ add_subdirectory(lib_shared_and_statictest)
 add_subdirectory(override_symbol)
 add_subdirectory(nodeprecated)
 add_subdirectory(prefix)
+if(NOT BORLAND)
+  add_subdirectory(c_identifier)
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
   # We deliberately call deprecated methods, and test for that elsewhere.
