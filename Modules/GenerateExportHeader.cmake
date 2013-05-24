@@ -307,11 +307,9 @@ endmacro()
 
 function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
-  if(${type} STREQUAL "MODULE")
-    message(WARNING "This macro should not be used with libraries of type MODULE")
-    return()
-  endif()
-  if(NOT ${type} STREQUAL "STATIC_LIBRARY" AND NOT ${type} STREQUAL "SHARED_LIBRARY")
+  if(NOT ${type} STREQUAL "STATIC_LIBRARY"
+      AND NOT ${type} STREQUAL "SHARED_LIBRARY"
+      AND NOT ${type} STREQUAL "MODULE_LIBRARY")
     message(WARNING "This macro can only be used with libraries")
     return()
   endif()
