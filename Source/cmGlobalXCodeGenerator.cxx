@@ -2224,7 +2224,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // of dylib libraries, we want to specify the install_name.
     // This is done by adding a link flag to create an install_name
     // with just the library soname.
-    extraLinkOptions += " -install_name ";
     std::string install_name;
     if(!install_name_dir.empty())
       {
@@ -2234,7 +2233,13 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       install_name += "/";
       }
     install_name += target.GetSOName(configName);
-    extraLinkOptions += XCodeEscapePath(install_name.c_str());
+
+    if((realName != soName) || install_name_dir.empty())
+      {
+      install_name_dir = "";
+      extraLinkOptions += " -install_name ";
+      extraLinkOptions += XCodeEscapePath(install_name.c_str());
+      }
     }
   buildSettings->AddAttribute("INSTALL_PATH",
                               this->CreateString(install_name_dir.c_str()));
