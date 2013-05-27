@@ -963,7 +963,7 @@ void cmGlobalGenerator::Generate()
 
     for ( tit = targets->begin(); tit != targets->end(); ++ tit )
       {
-        tit->second.AppendBuildInterfaceIncludes();
+      tit->second.AppendBuildInterfaceIncludes();
       }
     }
 
