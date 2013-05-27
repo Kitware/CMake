@@ -2223,15 +2223,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // This is done by adding a link flag to create an install_name
     // with just the library soname.
     extraLinkOptions += " -install_name ";
+    std::string install_name;
     if(!install_name_dir.empty())
       {
       // Convert to a path for the native build tool.
       cmSystemTools::ConvertToUnixSlashes(install_name_dir);
-      // do not escape spaces on this since it is only a single path
-      extraLinkOptions += install_name_dir;
-      extraLinkOptions += "/";
+      install_name += install_name_dir;
+      install_name += "/";
       }
-    extraLinkOptions += target.GetSOName(configName);
+    install_name += target.GetSOName(configName);
+    extraLinkOptions += XCodeEscapePath(install_name.c_str());
     }
   buildSettings->AddAttribute("INSTALL_PATH",
                               this->CreateString(install_name_dir.c_str()));
