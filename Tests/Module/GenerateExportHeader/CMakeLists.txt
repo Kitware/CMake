@@ -141,6 +141,8 @@ endmacro()
 
 include(GenerateExportHeader)
 
+add_subdirectory(visibility_preset)
+
 add_compiler_export_flags()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

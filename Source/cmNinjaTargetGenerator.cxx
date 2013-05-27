@@ -150,6 +150,9 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                         language.c_str(),
                                         this->GetConfigName());
 
+  this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
+                                                 language.c_str());
+
   // Add include directory flags.
   {
   std::vector<std::string> includes;
