@@ -309,6 +309,23 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
           cmLocalGenerator::EscapeForCMake(_moc_headers.c_str()).c_str());
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
+  if (makefile->GetDefinition("Qt5Core_VERSION_MAJOR"))
+    {
+    cmTarget *qt5Moc = makefile->FindTargetToUse("Qt5::moc");
+    if (!qt5Moc)
+      {
+      cmSystemTools::Error("Qt5::moc target not found ",
+                          automocTargetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    }
+  else
+    {
+    const char *qtMoc = makefile->GetSafeDefinition("QT_MOC_EXECUTABLE");
+    makefile->AddDefinition("_qt_moc_executable", qtMoc);
+    }
+
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
   inputFile += "/Modules/AutomocInfo.cmake.in";
