@@ -884,16 +884,20 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endforeach()
 
   if(Q_WS_WIN)
-    set(QT_MODULES ${QT_MODULES} QAxContainer QAxServer)
-    # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
-    find_path(QT_QAXCONTAINER_INCLUDE_DIR ActiveQt
-      PATHS ${QT_HEADERS_DIR}/ActiveQt
-      NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
-      )
-    find_path(QT_QAXSERVER_INCLUDE_DIR ActiveQt
-      PATHS ${QT_HEADERS_DIR}/ActiveQt
-      NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
-      )
+    if (QT_QAXCONTAINER_FOUND)
+      set(QT_MODULES ${QT_MODULES} QAxContainer)
+      # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
+      find_path(QT_QAXCONTAINER_INCLUDE_DIR ActiveQt
+        PATHS ${QT_HEADERS_DIR}/ActiveQt
+        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
+        )
+    endif()
+    if (QT_QAXSERVER_FOUND)
+      find_path(QT_QAXSERVER_INCLUDE_DIR ActiveQt
+        PATHS ${QT_HEADERS_DIR}/ActiveQt
+        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
+        )
+    endif()
   endif()
 
   # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
@@ -1054,14 +1058,18 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   if(Q_WS_WIN)
     _QT4_ADJUST_LIB_VARS(qtmain)
 
-    _QT4_ADJUST_LIB_VARS(QAxServer)
-    set_property(TARGET Qt4::QAxServer PROPERTY
-      INTERFACE_QT4_NO_LINK_QTMAIN ON
-    )
-    set_property(TARGET Qt4::QAxServer APPEND PROPERTY
-      COMPATIBLE_INTERFACE_BOOL QT4_NO_LINK_QTMAIN)
+    if(QT_QAXSERVER_FOUND)
+      _QT4_ADJUST_LIB_VARS(QAxServer)
+      set_property(TARGET Qt4::QAxServer PROPERTY
+        INTERFACE_QT4_NO_LINK_QTMAIN ON
+      )
+      set_property(TARGET Qt4::QAxServer APPEND PROPERTY
+        COMPATIBLE_INTERFACE_BOOL QT4_NO_LINK_QTMAIN)
+    endif()
 
-    _QT4_ADJUST_LIB_VARS(QAxContainer)
+    if(QT_QAXCONTAINER_FOUND)
+      _QT4_ADJUST_LIB_VARS(QAxContainer)
+    endif()
   endif()
 
   # Only public dependencies are listed here.
@@ -1083,7 +1091,9 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   _qt4_add_target_depends(QtWebKit Gui Network)
 
   _qt4_add_target_private_depends(Qt3Support Xml)
-  _qt4_add_target_private_depends(QtSvg Xml)
+  if(QT_VERSION VERSION_GREATER 4.6)
+    _qt4_add_target_private_depends(QtSvg Xml)
+  endif()
   _qt4_add_target_private_depends(QtDBus Xml)
   _qt4_add_target_private_depends(QtUiTools Xml Gui)
   _qt4_add_target_private_depends(QtHelp Sql Xml Network)
@@ -1093,8 +1103,12 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   _qt4_add_target_private_depends(QtDeclarative XmlPatterns Svg Sql Gui)
   _qt4_add_target_private_depends(QtMultimedia Gui)
   _qt4_add_target_private_depends(QtOpenGL Gui)
-  _qt4_add_target_private_depends(QAxServer Gui)
-  _qt4_add_target_private_depends(QAxContainer Gui)
+  if(QT_QAXSERVER_FOUND)
+    _qt4_add_target_private_depends(QAxServer Gui)
+  endif()
+  if(QT_QAXCONTAINER_FOUND)
+    _qt4_add_target_private_depends(QAxContainer Gui)
+  endif()
   _qt4_add_target_private_depends(phonon Gui)
   if(QT_QTDBUS_FOUND)
     _qt4_add_target_private_depends(phonon DBus)
