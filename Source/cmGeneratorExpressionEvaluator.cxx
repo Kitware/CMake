@@ -498,6 +498,48 @@ static const char* targetPropertyTransitiveWhitelist[] = {
   , "INTERFACE_COMPILE_OPTIONS"
 };
 
+std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
+                                  cmTarget *target,
+                                  cmGeneratorExpressionContext *context,
+                                  cmGeneratorExpressionDAGChecker *dagChecker,
+                                  const std::string &interfacePropertyName)
+{
+  cmGeneratorExpression ge(context->Backtrace);
+
+  std::string sep;
+  std::string depString;
+  for (std::vector<std::string>::const_iterator
+      it = libraries.begin();
+      it != libraries.end(); ++it)
+    {
+    if (*it == target->GetName())
+      {
+      // Broken code can have a target in its own link interface.
+      // Don't follow such link interface entries so as not to create a
+      // self-referencing loop.
+      continue;
+      }
+    if (context->Makefile->FindTargetToUse(it->c_str()))
+      {
+      depString +=
+        sep + "$<TARGET_PROPERTY:" + *it + "," + interfacePropertyName + ">";
+      sep = ";";
+      }
+    }
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
+  std::string linkedTargetsContent = cge->Evaluate(context->Makefile,
+                      context->Config,
+                      context->Quiet,
+                      context->HeadTarget,
+                      target,
+                      dagChecker);
+  if (cge->GetHadContextSensitiveCondition())
+    {
+    context->HadContextSensitiveCondition = true;
+    }
+  return linkedTargetsContent;
+}
+
 //----------------------------------------------------------------------------
 struct TransitiveWhitelistCompare
 {
@@ -700,41 +742,24 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                     context->HeadTarget);
       if(iface)
         {
-        cmGeneratorExpression ge(context->Backtrace);
-
-        std::string sep;
-        std::string depString;
-        for (std::vector<std::string>::const_iterator
-            it = iface->Libraries.begin();
-            it != iface->Libraries.end(); ++it)
-          {
-          if (*it == target->GetName())
-            {
-            // Broken code can have a target in its own link interface.
-            // Don't follow such link interface entries so as not to create a
-            // self-referencing loop.
-            continue;
-            }
-          if (context->Makefile->FindTargetToUse(it->c_str()))
-            {
-            depString +=
-              sep + "$<TARGET_PROPERTY:" + *it + ","
-                                         + interfacePropertyName + ">";
-            sep = ";";
-            }
-          }
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                      ge.Parse(depString);
-        linkedTargetsContent = cge->Evaluate(context->Makefile,
-                            context->Config,
-                            context->Quiet,
-                            context->HeadTarget,
-                            target,
-                            &dagChecker);
-        if (cge->GetHadContextSensitiveCondition())
-          {
-          context->HadContextSensitiveCondition = true;
-          }
+        linkedTargetsContent =
+                  getLinkedTargetsContent(iface->Libraries, target,
+                                          context, &dagChecker,
+                                          interfacePropertyName);
+        }
+      }
+    else if (std::find_if(transBegin, transEnd,
+              TransitiveWhitelistCompare(propertyName)) != transEnd)
+      {
+      const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
+                                                    context->Config,
+                                                    context->HeadTarget);
+      if(impl)
+        {
+        linkedTargetsContent =
+                  getLinkedTargetsContent(impl->Libraries, target,
+                                          context, &dagChecker,
+                                          interfacePropertyName);
         }
       }
 
