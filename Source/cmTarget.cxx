@@ -140,7 +140,7 @@ public:
     const std::string TargetName;
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
-  std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
+  std::vector<cmValueWithOrigin> LinkInterfacePropertyEntries;
 
   std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
@@ -2741,14 +2741,14 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     }
   if (strcmp(prop, "LINK_LIBRARIES") == 0)
     {
-    this->Internal->LinkInterfaceIncludeDirectoriesEntries.clear();
+    this->Internal->LinkInterfacePropertyEntries.clear();
     if (cmGeneratorExpression::IsValidTargetName(value)
         || cmGeneratorExpression::Find(value) != std::string::npos)
       {
       cmListFileBacktrace lfbt;
       this->Makefile->GetBacktrace(lfbt);
       cmValueWithOrigin entry(value, lfbt);
-      this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+      this->Internal->LinkInterfacePropertyEntries.push_back(entry);
       }
     // Fall through
     }
@@ -2789,7 +2789,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
       cmListFileBacktrace lfbt;
       this->Makefile->GetBacktrace(lfbt);
       cmValueWithOrigin entry(value, lfbt);
-      this->Internal->LinkInterfaceIncludeDirectoriesEntries.push_back(entry);
+      this->Internal->LinkInterfacePropertyEntries.push_back(entry);
       }
     // Fall through
     }
@@ -3036,8 +3036,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
   if (!this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[configString])
     {
     for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkInterfaceIncludeDirectoriesEntries.begin(),
-        end = this->Internal->LinkInterfaceIncludeDirectoriesEntries.end();
+        it = this->Internal->LinkInterfacePropertyEntries.begin(),
+        end = this->Internal->LinkInterfacePropertyEntries.end();
         it != end; ++it)
       {
       {
