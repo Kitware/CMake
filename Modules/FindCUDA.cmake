@@ -920,7 +920,13 @@ function(CUDA_COMPUTE_BUILD_PATH path build_path)
   if (IS_ABSOLUTE "${bpath}")
     # Absolute paths are generally unnessary, especially if something like
     # file(GLOB_RECURSE) is used to pick up the files.
-    file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+
+    string(FIND "${bpath}" "${CMAKE_CURRENT_BINARY_DIR}" _binary_dir_pos)
+    if (_binary_dir_pos EQUAL 0)
+      file(RELATIVE_PATH bpath "${CMAKE_CURRENT_BINARY_DIR}" "${bpath}")
+    else()
+      file(RELATIVE_PATH bpath "${CMAKE_CURRENT_SOURCE_DIR}" "${bpath}")
+    endif()
   endif()
 
   # This recipie is from cmLocalGenerator::CreateSafeUniqueObjectFileName in the
@@ -1021,7 +1027,10 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   # Initialize our list of includes with the user ones followed by the CUDA system ones.
   set(CUDA_NVCC_INCLUDE_ARGS ${CUDA_NVCC_INCLUDE_ARGS_USER} "-I${CUDA_INCLUDE_DIRS}")
   # Get the include directories for this directory and use them for our nvcc command.
+  # Remove duplicate entries which may be present since include_directories
+  # in CMake >= 2.8.8 does not remove them.
   get_directory_property(CUDA_NVCC_INCLUDE_DIRECTORIES INCLUDE_DIRECTORIES)
+  list(REMOVE_DUPLICATES CUDA_NVCC_INCLUDE_DIRECTORIES)
   if(CUDA_NVCC_INCLUDE_DIRECTORIES)
     foreach(dir ${CUDA_NVCC_INCLUDE_DIRECTORIES})
       list(APPEND CUDA_NVCC_INCLUDE_ARGS -I${dir})

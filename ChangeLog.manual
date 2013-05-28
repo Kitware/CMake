@@ -1,3 +1,649 @@
+Changes in CMake 2.8.11 (since 2.8.11-rc4)
+----------------------------------------
+None
+
+Changes in CMake 2.8.11-rc4 (since 2.8.11-rc3)
+----------------------------------------------
+Brad King (1):
+      target_link_libraries: Update usage requirements documentation
+
+Stephen Kelly (3):
+      Centralize maintenance of usage requirement include directories
+      Fix include dir propagation from conditionally linked targets
+      Memoize usage requirement include directories in a config-specific map
+
+Changes in CMake 2.8.11-rc3 (since 2.8.11-rc2)
+----------------------------------------------
+Brad King (1):
+      get_filename_component: Document path components more clearly (#14091)
+
+Rolf Eike Beer (1):
+      try_compile: add missing fclose() to recently added error case
+
+Stephen Kelly (1):
+      Fix clearing of the INCLUDE_DIRECTORIES DIRECTORY property.
+
+Changes in CMake 2.8.11-rc2 (since 2.8.11-rc1)
+----------------------------------------------
+Alex Neundorf (6):
+      Determine C/CXX/Fortran compiler: minor restructuring
+      Determine C/CXX/Fortran compiler: fix indentation
+      rename TI_DSP toolchain to TI, since it works also for the ARM compiler
+      TI compiler: add automatic detection of prefix and suffixes
+      Modules/readme.txt: switch from "XXX" to "Xxx"
+      Modules/readme.txt: make lines a bit shorter for easier readability
+
+Ben Boeckel (1):
+      Clang: Add -isystem flag support everywhere
+
+Bill Hoffman (1):
+      ExternalProject: Retry on a failed git clone
+
+Brad King (8):
+      string: Fix regex documentation of '^' and '$' (#14028)
+      Rename variable for including current directory in interfaces
+      Replace <TARGET> in CMAKE_<LANG>_COMPILE_OBJECT rule variables
+      Test evaluation of per-config COMPILE_DEFINITIONS (#14037)
+      VS: Fix VS 10/11 .sln headers (#14038)
+      add_dependencies: Distinguish target v. file dependencies in error (#14050)
+      automoc: Use a pre-build event in VS >= 7
+      Handle usr-move without forcing absolute paths (#14041)
+
+Clinton Stimpson (2):
+      FindQt4: If Qt5 is in CMAKE_PREFIX_PATH, be sure to find Qt4 includes.
+      Qt4: Fix typo setting a variable for FindThreads.
+
+James Bigler (1):
+      FindCUDA: Use the PRE_LINK mode only for MSVC >= 10
+
+Matthew Woehlke (4):
+      UseJava.cmake: simplify path logic
+      UseJava.cmake: fix passing jars to add_jar
+      UseJava.cmake: accept jar targets in add_jar
+      UseJava.cmake: require explicit request to include jars
+
+Paul Kunysch (1):
+      CPack: Avoid "format expects 'unsigned int'" warnings
+
+Petr Kmoch (1):
+      cmSystemTools: Generalize TrimWhitespace to all whitespace
+
+Rex Dieter (1):
+      FindImageMagick: Search versioned suffixes (#14012)
+
+Rolf Eike Beer (1):
+      FindRuby: improve version selection
+
+Stephen Kelly (13):
+      FindQt4: Set the Qt4_FOUND variable if Qt4 is found
+      FindQt4: Set the INTERFACE_QT_MAJOR_VERSION for Qt4::QtCore
+      Document that CMAKE_AUTOMOC works with Qt 5.
+      FPHSA: Fix FOUND_VAR check to work with if() auto-dereference
+      Fix cmGeneratorExpression::Preprocess for interleaved inputs.
+      cmake-gui: Use the QStandardItemModel workaround until 5.1.0.
+      Automoc: append implicit includes after user-specified dirs
+      Fix the evaluation of per-config COMPILE_DEFINITIONS (#14037)
+      Fix new target commands documentation.
+      install(EXPORT): Ensure clean INTERFACE_INCLUDE_DIRECTORIES
+      Report an error on IMPORTED targets with a faulty INTERFACE
+      Error if linked target has relative paths in INTERFACE_INCLUDE_DIRECTORIES
+      Fix the Qt 5 version required to run the IncompatibleQt test.
+
+Changes in CMake 2.8.11-rc1 (since 2.8.10.2)
+----------------------------------------------
+Alan Witkowski (1):
+      FindBullet: Search in per-config dirs on Windows (#13738)
+
+Aleksey Avdeev (1):
+      Add module FindIcotool
+
+Alex Neundorf (30):
+      Eclipse: add switch to disable linked resources (#13189)
+      Eclipse: set source path once to fix Eclipse indexer (#13596)
+      cmDependsC: remove unused member variable
+      cmDependsC: remove code duplication
+      cmDependsC: fix indentation
+      cmDepends: allow multiple dependees per depender
+      AddCustomCommand: Handle multiple IMPLICIT_DEPENDS files (#10048)
+      Add support for Texas Instruments DSP compiler (#12405)
+      Squish: detect version
+      Squish: use FPHSA
+      Squish: find executables also under Windows
+      Squish: rename squish_add_test() to squish_v3_add_test() and fix docs a bit
+      Squish: use ${CMAKE_CURRENT_LIST_DIR}
+      Squish: add support for squish 4 (#9734)
+      Squish: fix new squish_v4_add_test() macro
+      Automoc: "inherit" FOLDER target property from target (#13688)
+      FPHSA: don't succeed if only checking for XX_FOUND (#13755)
+      CONFIGURE_PACKAGE_CONFIG_FILE(): improve generated comments
+      Automoc: get include dirs without stripping implicit include dirs off
+      configure_package_config_file: force absolute paths for usr-move
+      configure_package_config_file(): fix indentation
+      configure_package_config_file(): extend documentation
+      documentation: handling of relative paths by include- and link_directories()
+      automoc: use a std::vector<> instead a std::list
+      automoc: use the header extensions from cmMakefile
+      Eclipse: also detect include dirs and macro for clang (#13823)
+      cmLocalGenerator: remove "virtual" where not used
+      export files: rewrite the code for checking required targets
+      FPHSA: Add FOUND_VAR option to specify _FOUND variable name
+      FPHSA: improve documentation
+
+Alexander Chehovsky (2):
+      Xcode: Fix nested source group handling (#12943)
+      Xcode: Sort source files
+
+Amine Chadly (2):
+      file: remove dead code
+      Add test to secure the file(GLOB empty) behavior.
+
+Amit Kulkarni (6):
+      OpenBSD: Install shared libraries without executable permission
+      OpenBSD: Add paths for Java 1.6.0/1.7.0 JRE/JDK
+      OpenBSD: Add path for Freetype under X.org
+      OpenBSD: Add paths for Tcl/Tk 8.4/8.5
+      OpenBSD: Add path for Lua 5.1
+      OpenBSD: Add paths for Qt3/Qt4
+
+Andreas Mohr (4):
+      Documentation: Correct typos and grammar
+      Documentation: Clarify some command descriptions
+      Correct string literal typo (have "(NULL)" like all other cases).
+      Remove seemingly bogus duplicate CPACK_PACKAGE_FILE_NAME call.
+
+Anton Helwart (1):
+      VS: Avoid empty source groups in some cases (#3474)
+
+Benjamin Eikel (2):
+      Swap linking order of SDLmain and SDL (#0013769)
+      FindSDL_...: Restore dropped search paths (#13819)
+
+Brad King (109):
+      find_library: Refactor internal name iteration
+      find_library: Simplify framework search logic
+      find_library: Generalize helper macro in test case
+      find_library: Optionally consider all names in each directory
+      FindBoost: Remove extra indentation level
+      FindBoost: Mark Boost_DIR cache entry as advanced
+      FindBoost: Use PATH_SUFFIXES to look in "Program Files"
+      FindBoost: Overhaul caching and search repeat behavior
+      FindBoost: Construct a clean Boost_LIBRARIES value
+      FindBoost: Refactor Boost_FOUND computation and version check
+      FindBoost: Rewrite documentation
+      BSD: Do not require dlfcn.h to build shared libs (#13573)
+      Xcode: Fix ReRunCMake.make path to cmake.check_cache (#13603)
+      VS10: Refactor link options collection
+      VS10: Honor /DELAYSIGN and /KEYFILE flags (#13601)
+      Document external language support policy
+      CTest: Allow SUBMIT_INDEX with CDash
+      KWSys: Submit dashboard builds to PublicDashboard
+      pre-commit: Update KWSys rejection message for new workflow
+      CTestCustom: Suppress LNK4089 warning about PSAPI
+      load_command: Deprecate and document pending removal
+      Documentation: Clarify configure_file behavior
+      OS X: Warn about known SDK breakage by Xcode 3.2.6
+      Optionally skip link dependencies on shared library files
+      Teach BuildDepends test to cover LINK_DEPENDS_NO_SHARED
+      Serialize tests for EXCLUDE_FROM_DEFAULT_BUILD
+      MSVC: Drop default use of /Zm1000 for VS >= 7.1
+      Teach find_(path|file) about Linux multiarch (#13742)
+      Test find_path multiarch support (#13742)
+      Add policy CMP0019 to skip include/link variable re-expansion
+      Xcode: Add frameworks search paths from link dependeny closure (#13397)
+      Makefile: Use modern link information for framework search paths
+      Documentation: Clarify handling of implicit link directories
+      Remove references to KWSys Process Win9x support
+      add_library: Document object library portability suggestion
+      OS X: Link with all framework search paths, not just the last
+      OS X: Detect implicit link directories on modern toolchains
+      OS X: Detect implicit linker framework search paths
+      Revert "load_command: Deprecate and document pending removal"
+      VS11: Simplify external object file handling (#13831)
+      KWIML: Teach ABI about 'long long' on older GNU
+      CMake: Skip empty link.txt lines (#13845)
+      ExternalProject: Allow DEPENDS on normal targets (#13849)
+      VS11: Fix VSExternalInclude test
+      target_link_libraries: Document that new sigs privatize old (#13876)
+      Tests: Avoid CTestLimitDashJ crash on Borland 5.8 builds
+      Fix use of cmTypeMacro in new command classes
+      Fix cmSystemTools::RenameFile race on Windows
+      VS 6: Create .rule file directory before file
+      Add ExternalData module
+      ExternalData: Remove compatibility with CMake < 2.8.5
+      ExternalData: Do not match directory names when resolving DATA{}
+      ExternalData: Cleanup stray TODO and typo in comments
+      ExternalData: Remove unused private interface
+      ExternalData: Improve series matching using an explicit syntax
+      ExternalData: Add tests covering interfaces and errors
+      ExternalData: Allow ()-groups in series match regex
+      ExternalData: Allow DATA{} syntax to reference directories
+      ExternalData: Generalize hash algo/ext handling
+      ExternalData: Add support for SHA 1 and 2 hash algorithms
+      ExternalData: Collapse ../ components in DATA{} paths
+      Fix Module.ExternalData test on Cygwin
+      Fix Module.ExternalData test on VS 6
+      ExternalData: Attach download rules to content links in IDEs
+      find_package: Reword <package>_NO_INTERFACES documentation
+      Normalize full paths in implicit link library list
+      Fail early if no current working directory exists
+      MSVC: Fix CMAKE_CL_64 in CXX-only projects (#13896)
+      ExternalProject: Simplify CMake command line generation
+      Tests: Run ctest custom commands with VERBATIM
+      CMake: Add -T option to choose a generator toolset
+      VS: Implement generator toolset selection (#10722, #13774)
+      Xcode: Implement generator toolset selection (#9831, #13802)
+      CTest: Add options to set generator toolset
+      ExternalProject: Propagate the generator toolset
+      Tests: Consolidate ctest --build-and-test generator options
+      Tests: Add generator toolset support
+      Fix crash on empty CMAKE_<lang>_COMPILER value (#13901)
+      file: Do not remove symlinked directories recursively (#10538)
+      Embarcadero: Fix default link stack/heap flags (#13912)
+      Avoid duplicate RPATH entries
+      AIX-GNU: Put implicit link directories in runtime libpath (#13909)
+      VS: Replace generation timestamp file atomically
+      VS,Xcode: Remove unused CMAKE_GENERATOR_* variables
+      Delete entire CMakeFiles directory when deleting CMakeCache.txt (#13756)
+      Tests/RunCMake: Allow tests to control build tree behavior
+      Test Unix Makefiles generator support for changing compilers
+      Xcode: Drop check for circular target dependencies
+      Xcode: Each target dependency edge needs a unique object (#13935)
+      Tests: Replace exec_program with execute_process
+      Tests: Generalize decision for 'make' tool supporting spaces
+      ExternalData: Test content link with a space in its name
+      FPHSA: Convert FOUND_VAR failure test to RunCMake
+      VS: Restore CMAKE_GENERATOR_FC variable
+      Xcode: Generate recommended artwork setting (#13954)
+      CTest: Fix ctest_update with 'HEAD' file in source tree
+      VS 10: Fix CMAKE_<LANG>_STACK_SIZE implementation (#13968)
+      install(EXPORT): Force absolute paths for usr-move
+      AIX: Do not use -brtl to create shared libraries (#13997)
+      add_subdirectory: Compute output dir with consistent slashes (#10072)
+      ExternalData: Preserve escaped semicolons during argument expansion
+      Avoid crash when checking property link dependencies without link info
+      Avoid crash when checking property compatibility without link info
+      Refactor RunCMake.build_command test to allow more cases
+      build_command: Fail early without CMAKE_MAKE_PROGRAM (#14005)
+      CTest: Fail early without PROJECT_BINARY_DIR (#14005)
+      FindQt4: Fix QT_QMAKE{_QMAKE => }_EXECUTABLE typo
+      XL: Use -qpic for position independent code (#14010)
+      Configure Tests/CMakeTests only with BUILD_TESTING ON
+
+Casey Goodlett (1):
+      CTest: Prevent creation of unbounded number of tests in ctest (#12904)
+
+Clemens Heppner (1):
+      CMake: source_group needs to check its own regex after its children (#13611)
+
+Clinton Stimpson (5):
+      Fix for possible Rez errors when creating dmg.
+      PackageMaker: Enable postflight script in component mode (#12375)
+      CPack: Fix RPM/Deb package names to not include "ALL_COMPONENTS_IN_ONE"
+      Qt4: Add SYSTEM option to include_directories.
+      FindQt4: set QT_VERSION_* variables sooner.
+
+David Cole (19):
+      Begin post-2.8.10 development
+      CPack: Add automatic detection of the Unicode makensis (#9629)
+      BundleUtilities: Use a more inclusive REGEX for frameworks (#13600)
+      VS: Avoid empty, unreferenced solution folders... (#13571)
+      NMake: Add a test to demonstrate EmptyDepends issue (#13392)
+      NMake: Fix problem with empty DEPENDS args (#13392)
+      CMake: Remove "/STACK:10000000" from default linker flags (#12437)
+      Watcom: Avoid prompt from wmake about dll with no exports...
+      Tests: Use the right path to CPack value for running CPack tests
+      VS11: Allow using folders with the VS11 Express Edition (#13770)
+      CPack: Fix dashboard errors (#11575)
+      CPack: Fix dashboard warnings (#11575)
+      CPack: Fix dashboard errors and warnings (#11575)
+      CMake: Stylistic changes and documentation tweaks
+      CMake: Fix dashboard warnings
+      CMake: Fix dashboard test failure
+      CMake: Fix dashboard build errors and warnings
+      CTest: Coverage handler: expect certain output lines from gcov 4.7 (#13657)
+      Add CTestLimitDashJ test (#12904)
+
+David Golub (2):
+      CPack/NSIS: Fix compatibility issues with prerelease NSIS (#13202)
+      CPack/NSIS: Add support for 64-bit NSIS (#13203)
+
+Eric LaFranchi (1):
+      CPack: WIX Product Icon, UI Banner, UI Dialog support (#13789)
+
+Eric NOULARD (1):
+      CPackRPM fix #13898 uses IF(DEFINED var) to avoid wrong var value logic
+
+Gerald Hofmann (1):
+      CPack: Fix NSIS version check without release version (#9721)
+
+James Bigler (4):
+      Use PRE_LINK instead of PRE_BUILD when testing PRE_LINK.
+      FindCUDA: Remove linkage against CUDA driver library (#13084)
+      FindCUDA: Add support for separable compilation
+      FindCUDA: Added cupti library.
+
+Janne Rönkkö (1):
+      FindQt4: Do not use qmake from Qt5
+
+Jean-Christophe Fillion-Robin (1):
+      Add $<SEMICOLON> generator expression.
+
+Marcus D. Hanwell (1):
+      Removed GenerateExportHeader warnings about old compilers
+
+Mark Salisbury (2):
+      VS: Specify WinCE subsystem also for DLLs
+      VS: Specify WinCE subsystems correctly in VS 9 2008
+
+Mathias Gaunard (2):
+      enable CTEST_USE_LAUNCHERS with Ninja too
+      Ninja: fix usage of cldeps with ctest launchers
+
+Matt McCormick (7):
+      ExternalProject: Only run 'git fetch' when required.
+      ExternalProject: Do smoke tests for Git Tutorial builds.
+      ExternalProject: Add tests for UPDATE_COMMAND.
+      ExternalProject: Always do a git fetch for a remote ref.
+      ExternalProject: Make sure the ExternalProjectUpdate setup is available.
+      ExternalProject: Verify when a fetch occurs during update test.
+      ExternalProjectUpdateTest: Only support Git 1.6.5 and greater.
+
+Matthew Woehlke (1):
+      ccmake: Allow DEL key in first column
+
+Michael Tänzer (4):
+      GetPrerequisites: Move tool search paths up
+      GetPrerequisites: Add support for objdump
+      GetPrerequisites: Enable test for BundleUtilities on MinGW
+      GetPrerequisites: Add documentation for objdump
+
+Michael Wild (1):
+      cmDepends: No dependency-vector erasure in CheckDependencies
+
+Morné Chamberlain (15):
+      Added a generator for Sublime Text 2 project files.
+      Added some support for sublimeclang_options in the generated project file.
+      Changed SublimeClang include path generation to expand to absolute paths.
+      Cleaned up the Sublime Text 2 Generator code a bit.
+      Fixed support for the Ninja build system.
+      Added and cleaned up some comments.
+      The generator no longer generates an explicit list of source files.
+      The generator no longer generates absolute paths to the ninja.build/Makefiles.
+      Added a CMAKE_SUBLIMECLANG_DISABLED variable that disables SublimeClang.
+      Fixed Sublime Text project generation for in-source builds
+      Define flags in CMAKE_C(XX)_FLAGS are now included in SublimeClang settings.
+      SublimeText2 Gen: Improved use of define, include flags from CMAKE_C(XX)_FLAGS
+      SublimeText2 Gen: Fixed the issue where include directory flags used -D
+      Sublime Text 2 Gen: Per-source Compile flags are now saved in a separate file.
+      SublimeText 2 Gen: Set the sublimeclang_options_script property.
+
+Neil Carlson (1):
+      NAG: Use -PIC for Fortran position-independent code (#13932)
+
+Nils Gladitz (2):
+      CPack: Add a WiX Generator (#11575)
+      CMake: Add TIMESTAMP subcommand to string and file commands
+
+Patrick Gansterer (28):
+      Introduce the abstract class cmGlobalGeneratorFactory
+      Add cmGlobalGeneratorFactory::GetGenerators()
+      Search generator in cmake::ExtraGenerators before in cmake::Generators
+      Allow a GeneratorFactory handling of more than one generator
+      Make cmGlobalGenerator::GetDocumentation() a static function
+      VS: Remove AddPlatformDefinitions from platform-specific generators
+      VS: Fix ArchitectureId of Visual Studio 10 IA64 generator
+      VS: Remove GetPlatformName from platform-specific generators
+      VS: Remove EnableLanguage from platform-specific generators
+      VS: Remove platform specific generator files
+      FindBISON: Add support for the Win flex-bison distribution
+      FindFLEX: Add support for the Win flex-bison distribution
+      VS: Remove TargetMachine for linker when checking compiler id
+      VS: Add CMAKE_VS_PLATFORM_NAME definition to cmMakefile
+      VS: Add static method to get the base of the registry
+      VS: Change variable type of ArchitectureId from const char* to string
+      VS: Change variable type of Name from const char* to string
+      VS: Support setting correct subsystem and entry point for WinCE
+      VS: Add parser for WCE.VCPlatform.config to read WinCE platforms
+      VS: Allow setting the name of the target platform
+      VS: Make DetermineCompilerId working with WinCE too
+      VS: Added "Deploy" at project configuration for WindowsCE targets
+      Add command to generate environment for a Windows CE SDK
+      VS: Set the correct SubSystem when determinating the CompilerId
+      VS: Add the entry point when compiling for WindowsCE
+      VS: Ignore LIBC.lib when linking the CompilerId executables
+      Set WINCE to 1 when building for WindowsCE
+      Ninja: Avoid LNK1170 linker error
+
+Peter Kümmel (6):
+      Ninja: encode LINK_FLAGS to handle bash variables
+      Ninja: fix building from Codeblocks GUI
+      Ninja: remove implicit dependency on custom command outputs
+      Ninja: use MinGW generator code in EnableLanguage()
+      Ninja: the Ninja generator does not support Fortran yet.
+      Ninja: escape line breaks in literals
+
+Petr Kmoch (11):
+      Add tests for list() argument count
+      Add tests for list() invalid arguments
+      Consolidate list() argument count testing
+      Add several get_property() tests
+      Add tests for EXCLUDE_FROM_DEFAULT_BUILD
+      Add property EXCLUDE_FROM_DEFAULT_BUILD_<CONFIG>
+      Define property EXCLUDE_FROM_DEFAULT_BUILD
+      Add tests for VS_SOLUTION_GLOBAL_SECTIONS
+      Implement properties VS_GLOBAL_SECTION_*
+      Define properties VS_GLOBAL_SECTION_*
+      Documentation: Clarify a few subtleties
+
+Riku Voipio (1):
+      KWIML: Teach ABI.h about Aarch64
+
+Robert Maynard (4):
+      XCode generator won't infinitely parse compiler flags (bug #13354).
+      Correct missing parameter to CMP0018Flags call.
+      Remove ability to generate sublime clang files.
+      Update generator to use new cmGeneratorTarget api.
+
+Rodolfo Schulz de Lima (1):
+      FindGTK2: Fix GTK2_LIBRARIES order for static gtk libraries
+
+Rolf Eike Beer (21):
+      FindQt: improve version selection
+      FindQt: add some more places to look for Qt3
+      Tests: add MajorVersionSelection tests
+      Linux/PA-RISC: Link with --unique=.text.* to help binutils
+      FindQt: add to MajorVersionSelection test
+      CMakeTests: allow to call the check_cmake_test macro with a given file
+      list: add tests for CMP0007 behavior
+      GetProperty test: move doc property tests into main process
+      Find* (and some other): use ${CMAKE_CURRENT_LIST_DIR} in include()
+      bootstrap: use better defaults for Haiku
+      Haiku no longer defines __BEOS__
+      check for Haiku only with __HAIKU__
+      FindLua51: do not try to link libm on BeOS
+      FindGLUT: BeOS does not have libXi and libXmu
+      FindOpenGL: add Haiku paths
+      doc: fix linebreaks in generator expression documentation
+      ProcessorCount test: fix path to cmsysTestsCxx executable
+      ProcessorCount test: require SystemInformation process to work
+      FindOpenMP: improve documentation (#13895)
+      properly detect processor architecture on Windows
+      fix Windows processor detection
+
+Sean McBride (1):
+      libarchive: fixed undefined left shift with signed ints
+
+Slava Sysoltsev (1):
+      FindImageMagick: Search quantum depth suffixes (#13859)
+
+Stephen Kelly (158):
+      GenEx: Test early determination of AND and OR
+      Enable some compiler warnings when building CMake.
+      Resolve warnings about unused variables.
+      Resolve warnings about used enum values in switch blocks.
+      Resolve warnings about shadowing parameters and local variables.
+      Resolve ambiguity warning regarding use of && and ||.
+      Remove references to ancient and removed parts of the code.
+      Always use the auto_ptr from cmsys.
+      Port cmGeneratorExpression to cmTarget from cmGeneratorTarget.
+      Split link information processing into two steps.
+      Revert "Move GetLinkInformation to cmGeneratorTarget"
+      Genex: Extract a method to parse parameters.
+      Genex: Ensure that $<0:...> has a parameter.
+      Genex: Don't segfault on $<FOO,>
+      Generate an early-return guard in target Export files.
+      Fix some warnings from -Wundef
+      Make targets depend on the link interface of their dependees.
+      Use cmsys::auto_ptr to manage cmCompiledGeneratorExpressions
+      Keep track of INCLUDE_DIRECTORIES as a vector of structs.
+      Add a way to print the origins of used include directories.
+      Tests: Fix warning about unused variable
+      Qt4: Add module dependencies to the IMPORTED targets
+      Don't crash when a target is expected but is not available.
+      Add test for custom command with a genex referring to a target.
+      GenEx: Add expressions to specify build- or install-only values
+      Allow generator expressions to require literals.
+      Add the TARGET_NAME generator expression.
+      Add API to extract target names from a genex string.
+      Add API to populate INTERFACE properties in exported targets.
+      Make all relevant targets available in the genex context.
+      Use mapped config properties to evaluate $<CONFIG>
+      Make cycles in target properties ignored, not an error.
+      Populate the ExportedTargets member early in GenerateMainFile
+      Handle INTERFACE properties transitively for includes and defines.
+      Add CMAKE_BUILD_INTERFACE_INCLUDES build-variable.
+      Make linking APIs aware of 'head' target
+      Add LINK_LIBRARIES property for direct target link dependencies
+      Allow target_link_libraries with IMPORTED targets.
+      Add the -Wundef flag when compiling CMake.
+      FindQt4: Add INTERFACE includes and defines to Qt4 targets
+      Add the target_include_directories command.
+      Add the target_compile_definitions command.
+      Keep track of properties used to determine linker libraries.
+      Add API to calculate link-interface-dependent bool properties or error.
+      Process the INTERFACE_PIC property from linked dependencies
+      Fix linking to imported libraries test.
+      Add cmGeneratorExpression::Split() API.
+      Don't pass a position when determining if a target name is a literal.
+      Extract the AddTargetNamespace method.
+      Split the generator expression before extracting targets.
+      Split LINK_INTERFACE_LIBRARIES export handling into dedicated method.
+      Allow generator expressions in LINK_INTERFACE_LIBRARIES.
+      Add a way to check INTERFACE user property compatibility.
+      Don't include generator expressions in old-style link handling.
+      Document the use of generator expressions in new commands.
+      Add the TARGET_DEFINED generator expression
+      Strip consecutive semicolons when preprocessing genex strings.
+      Don't write a comment in the export file without the code.
+      Only generate one check per missing target.
+      Move the exported check for dependencies of targets
+      Move the exported check for file existence.
+      Add a test for the interfaces in targets exported from the build tree.
+      Make the BUILD_INTERFACE of export()ed targets work.
+      Export the INTERFACE_PIC property.
+      Test evaluation target via export for generator expressions
+      Make sure generator expressions can be used with target_include_directories.
+      Populate the link information cache before checking dependent properties.
+      Exit early if we find an inconsistent property.
+      Make INTERFACE determined properties readable in generator expressions.
+      Clear the link information in ClearLinkMaps.
+      Export the COMPATIBLE_INTERFACE_BOOL content properties
+      Add the $<TARGET_POLICY> expression
+      Automatically link to the qtmain library when linking to QtCore.
+      Don't wrap all targets in LINK_LIBRARIES in a TARGET_NAME genex.
+      Generate new-style cmake code during export.
+      Store includes from the same include_directories call together.
+      Only output includes once after the start of 'generate-time' when debugging.
+      Specify the target whose includes are being listed.
+      Output include directories as LOG messages, not warnings.
+      Revert "Allow target_link_libraries with IMPORTED targets."
+      Disallow porcelain to populate includes and defines of IMPORTED targets.
+      Exclude the LINK_LIBRARIES related properties from INTERFACE evaluation.
+      Make calculation of link-interface-dependent properties type-sensitive.
+      Add the COMPATIBLE_INTERFACE_STRING property.
+      Move GetCompileDefinitions to cmTarget.
+      Process COMPILE_DEFINITIONS as generator expressions in QtAutomoc.
+      Generate the _IMPORT_PREFIX in the non-config export file.
+      Add the INSTALL_PREFIX genex.
+      Fix TARGET_PROPERTY target extractions.
+      Make the Property name protected so that subclasses can use it.
+      Don't allow targets args in the new target commands.
+      Make subclasses responsible for joining content.
+      Use the result of converting to a unix path.
+      Handle reading empty properties defined by the link interface.
+      Advance more when preprocessing exported strings.
+      Make it an error for INSTALL_PREFIX to be evaluated.
+      Export targets to a targets file, not a Config file.
+      Add a way to exclude INTERFACE properties from exported targets.
+      Add API to check if we're reading a includes or defines property.
+      Add the $<LINKED:...> generator expression.
+      Add includes and compile definitions with target_link_libraries.
+      Test workaround of bad interface include directories from depends.
+      Optimize genex evaluation for includes and defines.
+      Cache context-independent includes on evaluation.
+      Style: Use this-> when invoking member functions.
+      Process generator expressions for 'system' include directories.
+      Deduplicate the isGeneratorExpression method.
+      De-duplicate validation of genex target names.
+      Test printing origin of include dirs from tll().
+      The COMPATIBLE_INTERFACE does not affect the target it is set on.
+      Ensure type specific compatible interface properties do not intersect.
+      Fix generation of COMPILE_DEFINITIONS in DependInfo.cmake.
+      Fix determination of evaluating link libraries.
+      Only use early evaluation termination for transitive properties.
+      Move a special case for PIC from the genex to the cmTarget code.
+      Don't keep track of content determined by target property values.
+      Only append build interface include dirs to particular targets.
+      Ensure that the build interface includes have been added.
+      Whitelist target types in target_{include_directories,compile_definitions}
+      Make sure INTERFACE properties work with OBJECT libraries.
+      Don't allow utility or global targets in the LINKED expression.
+      Generate config-specific interface link libraries propeties.
+      Fix determination of when we're evaluating compile definitions.
+      Rename the IncludeDirectoriesEntry to be more generic.
+      Don't use LINKED where not needed.
+      Use the link information as a source of compile definitions and includes.
+      Revert "Don't allow utility or global targets in the LINKED expression."
+      Don't populate INTERFACE includes and defines properties in tll.
+      Revert "Add the $<LINKED:...> generator expression."
+      Revert "find_package: Reword <package>_NO_INTERFACES documentation"
+      Revert "Add a way to exclude INTERFACE properties from exported targets."
+      Don't add target-specific interface includes and defines to Qt 4 targets.
+      Fix GenerateExportHeader documentation #13936
+      automoc: Add source file to target early to set the linker language
+      Keep track of all targets seen while evaluating a genex.
+      Add a new Export generator for IMPORTED targets.
+      Handle targets in the LINK_LIBRARIES of try_compile.
+      Strip stray semicolons when evaluating generator expressions.
+      Workaround broken code where a target has itself in its link iface.
+      Fix DAG checker finding cycling dependencies.
+      Expand includes and defines transitively in 'external' genexes.
+      Fix constness of accessors.
+      Fix the tests for evaluating includes and defines.
+      Memoize includes and defines from interface libraries.
+      Remove use of TARGET_DEFINED from target_include_directories test.
+      Remove use of TARGET_DEFINED from the ExportImport test.
+      Remove use of TARGET_DEFINED from the target_link_libraries test.
+      Revert "Add the TARGET_DEFINED generator expression"
+      Only add existing targets to the Qt4 target depends properties.
+      Fix the cmGeneratorExpression::Split when leading chars are present.
+      Fix RPATH information when only a genex is used as a link library.
+      Mention that IMPORTED targets may be created by a find_package call.
+      Remove unused parameters from target_link_libraries tests.
+      Only process transitive interface properties for valid target names.
+      Restore support for target names with '+' (#13986)
+      Automoc: Don't create automoc targets if Qt is not used (#13999)
+      cmake-gui: Use -fPIE if required by Qt.
+      cmake-gui: Workaround bug in Qt 5.0.0 to 5.0.3 QStandardItemModel
+
+Thomas Klausner (1):
+      KWIML: Teach ABI.h that VAX is big endian
+
+Yury G. Kudryashov (3):
+      Automoc: Fix automoc for OBJECT libraries.
+      Automoc: add OBJECT library to QtAutomoc test
+      spell: fix a few typos in comments
+
 Changes in CMake 2.8.10.2 (since 2.8.10.1)
 ----------------------------------------------
 Alex Neundorf (1):

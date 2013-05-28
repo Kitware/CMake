@@ -54,6 +54,7 @@ public:
    */
   virtual std::string GenerateBuildCommand(const char* makeProgram,
                                            const char *projectName,
+                                           const char *projectDir,
                                            const char* additionalOptions,
                                            const char *targetName,
                                            const char* config,

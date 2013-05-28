@@ -45,3 +45,11 @@ function(some_function)
 endfunction()
 
 some_function()
+
+add_library(bar "${CMAKE_CURRENT_BINARY_DIR}/DebugIncludes.cpp")
+target_include_directories(bar
+  INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/nine"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ten"
+)
+set_property(TARGET lll APPEND PROPERTY LINK_LIBRARIES bar)

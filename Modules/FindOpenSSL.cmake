@@ -143,7 +143,7 @@ if(WIN32 AND NOT CYGWIN)
     # same player, for MingW
     set(LIB_EAY_NAMES libeay32)
     set(SSL_EAY_NAMES ssleay32)
-    if(CMAKE_CROSS_COMPILING)
+    if(CMAKE_CROSSCOMPILING)
       list(APPEND LIB_EAY_NAMES crypto)
       list(APPEND SSL_EAY_NAMES ssl)
     endif()

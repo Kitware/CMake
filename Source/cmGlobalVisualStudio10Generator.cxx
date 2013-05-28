@@ -14,6 +14,8 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
+#include "cmVisualStudioSlnData.h"
+#include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
 
 static const char vs10Win32generatorName[] = "Visual Studio 10";
@@ -215,7 +217,7 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
 
 std::string cmGlobalVisualStudio10Generator
 ::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName,
+                       const char *projectName, const char *projectDir,
                        const char* additionalOptions, const char *targetName,
                        const char* config, bool ignoreErrors, bool fast)
 {
@@ -230,7 +232,8 @@ std::string cmGlobalVisualStudio10Generator
       lowerCaseCommand.find("VCExpress") != std::string::npos)
     {
     return cmGlobalVisualStudio7Generator::GenerateBuildCommand(makeProgram,
-      projectName, additionalOptions, targetName, config, ignoreErrors, fast);
+      projectName, projectDir, additionalOptions, targetName, config,
+      ignoreErrors, fast);
     }
 
   // Otherwise, assume MSBuild command line, and construct accordingly.
@@ -258,9 +261,38 @@ std::string cmGlobalVisualStudio10Generator
     }
   else
     {
+    std::string targetProject(targetName);
+    targetProject += ".vcxproj";
+    if (targetProject.find('/') == std::string::npos)
+      {
+      // it might be in a subdir
+      cmVisualStudioSlnParser parser;
+      cmSlnData slnData;
+      std::string slnFile;
+      if (projectDir && *projectDir)
+        {
+        slnFile = projectDir;
+        slnFile += '/';
+        slnFile += projectName;
+        }
+      else
+        {
+        slnFile = projectName;
+        }
+      if (parser.ParseFile(slnFile + ".sln", slnData,
+                           cmVisualStudioSlnParser::DataGroupProjects))
+        {
+        if (cmSlnProjectEntry const* proj =
+            slnData.GetProjectByName(targetName))
+          {
+          targetProject = proj->GetRelativePath();
+          cmSystemTools::ConvertToUnixSlashes(targetProject);
+          }
+        }
+      }
     makeCommand += " ";
-    makeCommand += targetName;
-    makeCommand += ".vcxproj ";
+    makeCommand += targetProject;
+    makeCommand += " ";
     }
   makeCommand += "/p:Configuration=";
   if(config && strlen(config))

@@ -122,7 +122,7 @@ bool cmBuildCommand
   //
   std::string makecommand = this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->GenerateBuildCommand
-    (makeprogram, project_name, 0, target, configuration, true, false);
+    (makeprogram, project_name, 0, 0, target, configuration, true, false);
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -153,7 +153,7 @@ bool cmBuildCommand
 
   std::string makecommand = this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->GenerateBuildCommand
-    (makeprogram.c_str(), this->Makefile->GetProjectName(), 0,
+    (makeprogram.c_str(), this->Makefile->GetProjectName(), 0, 0,
      0, configType.c_str(), true, false);
 
   if(cacheValue)

@@ -1495,6 +1495,29 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       unset(_last_test)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild")
     endif()
+
+    if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio ([0-5]|[6-9][0-9])")
+      if(CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+        set(MSBUILD_EXECUTABLE "${CMAKE_TEST_MAKEPROGRAM}")
+      else()
+        set(_FDIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkDir32]")
+        set(_FVER "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkVer32]")
+        find_program(MSBUILD_EXECUTABLE NAMES msbuild HINTS ${_FDIR}/${_FVER})
+      endif()
+      if(MSBUILD_EXECUTABLE)
+        add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
+          --build-and-test
+          "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
+          "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
+          --build-two-config
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
+          --build-makeprogram "${MSBUILD_EXECUTABLE}"
+          --build-project VSProjectInSubdir
+          --build-target test)
+        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
+      endif()
+    endif()
   endif()
 
   if (APPLE)
@@ -1636,6 +1659,20 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 #  add_test(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
 #        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
 #        )
+
+  # A test for ctest_build() with targets in subdirectories
+  if(CMAKE_TEST_GENERATOR_TOOLSET)
+    set(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION "-T;${CMAKE_TEST_GENERATOR_TOOLSET};")
+  else()
+    set(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION)
+  endif()
+  configure_file("${CMake_SOURCE_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake.in"
+                 "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake" @ONLY)
+  unset(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION)
+  add_test(CTest.BuildCommand.ProjectInSubdir
+    ${CMAKE_CTEST_COMMAND} -S "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake"
+                           -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/Nested")
 
   set(CTEST_TEST_UPDATE 1)
   if(CTEST_TEST_UPDATE)
@@ -2084,6 +2121,15 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   add_test(CTestTestShowOnly ${CMAKE_CTEST_COMMAND} -N)
 
   add_test(CTestBatchTest ${CMAKE_CTEST_COMMAND} -B)
+
+  configure_file(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestFdSetSize/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  add_test(CTestTestFdSetSize ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/test.cmake" -j20 -V --timeout 120
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/testOutput.log"
+    )
 
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
