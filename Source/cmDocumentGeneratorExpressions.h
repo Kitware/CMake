@@ -40,6 +40,14 @@
   "is exported using export(), or when the target is used by another "  \
   "target in the same buildsystem. Expands to the empty string "        \
   "otherwise.\n"                                                        \
+  "  $<C_COMPILER_ID>          = The CMake-id of the C compiler "       \
+  "used.\n"                                                             \
+  "  $<C_COMPILER_ID:comp>     = '1' if the CMake-id of the C "         \
+  "compiler matches comp, otherwise '0'.\n"                             \
+  "  $<CXX_COMPILER_ID>          = The CMake-id of the CXX compiler "   \
+  "used.\n"                                                             \
+  "  $<CXX_COMPILER_ID:comp>     = '1' if the CMake-id of the CXX "     \
+  "compiler matches comp, otherwise '0'.\n"                             \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \
