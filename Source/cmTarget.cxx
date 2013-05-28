@@ -130,19 +130,19 @@ public:
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
 
-  struct IncludeDirectoriesEntry {
-    IncludeDirectoriesEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
+  struct TargetPropertyEntry {
+    TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
       const std::string &targetName = std::string())
       : ge(cge), TargetName(targetName)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
-    std::vector<std::string> CachedIncludes;
+    std::vector<std::string> CachedEntries;
     const std::string TargetName;
   };
-  std::vector<IncludeDirectoriesEntry*> IncludeDirectoriesEntries;
+  std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> LinkInterfaceIncludeDirectoriesEntries;
 
-  std::map<std::string, std::vector<IncludeDirectoriesEntry*> >
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
   std::map<std::string, std::string> CachedLinkInterfaceCompileDefinitions;
 
@@ -152,9 +152,9 @@ public:
 
 //----------------------------------------------------------------------------
 void deleteAndClear(
-      std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries)
+      std::vector<cmTargetInternals::TargetPropertyEntry*> &entries)
 {
-  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+  for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(),
       end = entries.end();
       it != end; ++it)
@@ -167,10 +167,10 @@ void deleteAndClear(
 //----------------------------------------------------------------------------
 void deleteAndClear(
   std::map<std::string,
-          std::vector<cmTargetInternals::IncludeDirectoriesEntry*> > &entries)
+          std::vector<cmTargetInternals::TargetPropertyEntry*> > &entries)
 {
   for (std::map<std::string,
-          std::vector<cmTargetInternals::IncludeDirectoriesEntry*> >::iterator
+          std::vector<cmTargetInternals::TargetPropertyEntry*> >::iterator
         it = entries.begin(), end = entries.end(); it != end; ++it)
     {
     deleteAndClear(it->second);
@@ -2728,7 +2728,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     deleteAndClear(this->Internal->IncludeDirectoriesEntries);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
     this->Internal->IncludeDirectoriesEntries.push_back(
-                          new cmTargetInternals::IncludeDirectoriesEntry(cge));
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
   if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
@@ -2770,7 +2770,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
     this->Internal->IncludeDirectoriesEntries.push_back(
-              new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
+              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
   if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
@@ -2854,17 +2854,17 @@ void cmTarget::InsertInclude(const cmValueWithOrigin &entry,
 {
   cmGeneratorExpression ge(entry.Backtrace);
 
-  std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::iterator position
+  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
                 = before ? this->Internal->IncludeDirectoriesEntries.begin()
                          : this->Internal->IncludeDirectoriesEntries.end();
 
   this->Internal->IncludeDirectoriesEntries.insert(position,
-      new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(entry.Value)));
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
 }
 
 //----------------------------------------------------------------------------
 static void processIncludeDirectories(cmTarget *tgt,
-      const std::vector<cmTargetInternals::IncludeDirectoriesEntry*> &entries,
+      const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &includes,
       std::set<std::string> &uniqueIncludes,
       cmGeneratorExpressionDAGChecker *dagChecker,
@@ -2872,12 +2872,12 @@ static void processIncludeDirectories(cmTarget *tgt,
 {
   cmMakefile *mf = tgt->GetMakefile();
 
-  for (std::vector<cmTargetInternals::IncludeDirectoriesEntry*>::const_iterator
+  for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
     bool testIsOff = true;
     bool cacheIncludes = false;
-    std::vector<std::string> entryIncludes = (*it)->CachedIncludes;
+    std::vector<std::string> entryIncludes = (*it)->CachedEntries;
     if(!entryIncludes.empty())
       {
       testIsOff = false;
@@ -2980,7 +2980,7 @@ static void processIncludeDirectories(cmTarget *tgt,
       }
     if (cacheIncludes)
       {
-      (*it)->CachedIncludes = entryIncludes;
+      (*it)->CachedEntries = entryIncludes;
       }
     if (!usedIncludes.empty())
       {
@@ -3066,7 +3066,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 
       this->Internal
         ->CachedLinkInterfaceIncludeDirectoriesEntries[configString].push_back(
-                        new cmTargetInternals::IncludeDirectoriesEntry(cge,
+                        new cmTargetInternals::TargetPropertyEntry(cge,
                                                               it->Value));
       }
     }
@@ -3512,9 +3512,9 @@ const char *cmTarget::GetProperty(const char* prop,
     static std::string output;
     output = "";
     std::string sep;
-    typedef cmTargetInternals::IncludeDirectoriesEntry
-                                IncludeDirectoriesEntry;
-    for (std::vector<IncludeDirectoriesEntry*>::const_iterator
+    typedef cmTargetInternals::TargetPropertyEntry
+                                TargetPropertyEntry;
+    for (std::vector<TargetPropertyEntry*>::const_iterator
         it = this->Internal->IncludeDirectoriesEntries.begin(),
         end = this->Internal->IncludeDirectoriesEntries.end();
         it != end; ++it)
