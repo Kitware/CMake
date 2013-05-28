@@ -1687,7 +1687,8 @@ void cmLocalVisualStudio6Generator
       }
 
     {
-    std::string targetFlags = this->GetCompileOptions(targetFlags, &target, 0);
+    std::string targetFlags;
+    this->GetCompileOptions(targetFlags, &target, 0);
     // Add per-target flags.
     if(!targetFlags.empty())
       {
@@ -1697,7 +1698,8 @@ void cmLocalVisualStudio6Generator
     }
 #define ADD_FLAGS(CONFIG) \
     { \
-    std::string targetFlags = this->GetCompileOptions(targetFlags, &target, #CONFIG); \
+    std::string targetFlags; \
+    this->GetCompileOptions(targetFlags, &target, #CONFIG); \
     if(!targetFlags.empty()) \
       { \
       flags ## CONFIG += " "; \
