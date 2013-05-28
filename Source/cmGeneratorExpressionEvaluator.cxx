@@ -498,9 +498,11 @@ static const char* targetPropertyTransitiveWhitelist[] = {
   , "INTERFACE_COMPILE_OPTIONS"
 };
 
+//----------------------------------------------------------------------------
 struct TransitiveWhitelistCompare
 {
-  explicit TransitiveWhitelistCompare(const std::string &needle) : Needle(needle) {}
+  explicit TransitiveWhitelistCompare(const std::string &needle)
+    : Needle(needle) {}
   bool operator() (const char *item)
   { return strcmp(item, this->Needle.c_str()) == 0; }
 private:
