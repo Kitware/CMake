@@ -52,6 +52,7 @@
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
 #include "cmFunctionCommand.cxx"
+#include "cmGeneratorExpressionEvaluationFile.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
