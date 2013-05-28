@@ -1,7 +1,7 @@
 
 #ifdef DO_GNU_TESTS
-#  ifndef __PIE__
-#    error Expected __PIE__
+#  ifndef TEST_DEFINE
+#    error Expected TEST_DEFINE
 #  endif
 #endif
 
