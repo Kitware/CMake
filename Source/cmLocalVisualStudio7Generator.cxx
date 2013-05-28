@@ -723,8 +723,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
     }
 
+  std::string targetFlags;
+  this->GetCompileOptions(targetFlags, &target, configName);
   // Add the target-specific flags.
-  if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
+  if(!targetFlags.empty())
     {
     flags += " ";
     flags += targetFlags;

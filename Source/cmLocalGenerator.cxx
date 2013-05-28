@@ -1325,6 +1325,26 @@ std::string cmLocalGenerator::GetIncludeFlags(
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::GetCompileOptions(std::string& flags,
+                                             cmTarget* target,
+                                             const char *config)
+{
+  // Add target-specific flags.
+  if(const char *prop = target->GetProperty("COMPILE_FLAGS"))
+    {
+    this->AppendFlags(flags, prop);
+    }
+
+  std::vector<std::string> opts; // TODO: Emitted.
+  target->GetCompileOptions(opts, config);
+  for(std::vector<std::string>::const_iterator li = opts.begin();
+      li != opts.end(); ++li)
+    {
+    this->AppendFlags(flags, li->c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const char* lang,

@@ -247,6 +247,104 @@ static const struct SemicolonNode : public cmGeneratorExpressionNode
 } semicolonNode;
 
 //----------------------------------------------------------------------------
+struct CompilerIdNode : public cmGeneratorExpressionNode
+{
+  CompilerIdNode() {}
+
+  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+
+  std::string EvaluateWithLanguage(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *,
+                       const std::string &lang) const
+  {
+    const char *compilerId = context->Makefile ?
+                              context->Makefile->GetSafeDefinition((
+                              "CMAKE_" + lang + "_COMPILER_ID").c_str()) : "";
+    if (parameters.size() == 0)
+      {
+      return compilerId ? compilerId : "";
+      }
+    else
+    {
+    cmsys::RegularExpression compilerIdValidator;
+    compilerIdValidator.compile("^[A-Za-z0-9_]*$");
+    if (!compilerIdValidator.find(parameters.begin()->c_str()))
+      {
+      reportError(context, content->GetOriginalExpression(),
+                  "Expression syntax not recognized.");
+      return std::string();
+      }
+    if (!compilerId)
+      {
+      return parameters.front().empty() ? "1" : "0";
+      }
+
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
+      {
+      return "1";
+      }
+    return "0";
+    }
+  }
+};
+
+//----------------------------------------------------------------------------
+static const struct CCompilerIdNode : public CompilerIdNode
+{
+  CCompilerIdNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (parameters.size() != 0 && parameters.size() != 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<C_COMPILER_ID> expression requires one or two parameters");
+      return std::string();
+      }
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<C_COMPILER_ID> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "C");
+  }
+} cCompilerIdNode;
+
+//----------------------------------------------------------------------------
+static const struct CXXCompilerIdNode : public CompilerIdNode
+{
+  CXXCompilerIdNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (parameters.size() != 0 && parameters.size() != 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<CXX_COMPILER_ID> expression requires one or two parameters");
+      return std::string();
+      }
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<CXX_COMPILER_ID> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "CXX");
+  }
+} cxxCompilerIdNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -397,7 +495,18 @@ static const struct JoinNode : public cmGeneratorExpressionNode
 static const char* targetPropertyTransitiveWhitelist[] = {
     "INTERFACE_INCLUDE_DIRECTORIES"
   , "INTERFACE_COMPILE_DEFINITIONS"
+  , "INTERFACE_COMPILE_OPTIONS"
 };
+
+struct TransitiveWhitelistCompare
+{
+  explicit TransitiveWhitelistCompare(const std::string &needle) : Needle(needle) {}
+  bool operator() (const char *item)
+  { return strcmp(item, this->Needle.c_str()) == 0; }
+private:
+  std::string Needle;
+};
+
 
 //----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
@@ -551,7 +660,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       else
         {
         assert(dagCheckerParent->EvaluatingIncludeDirectories()
-            || dagCheckerParent->EvaluatingCompileDefinitions());
+            || dagCheckerParent->EvaluatingCompileDefinitions()
+            || dagCheckerParent->EvaluatingCompileOptions());
         }
       }
 
@@ -570,9 +680,18 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
       }
+    else if (propertyName == "INTERFACE_COMPILE_OPTIONS"
+        || propertyName == "COMPILE_OPTIONS")
+      {
+      interfacePropertyName = "INTERFACE_COMPILE_OPTIONS";
+      }
 
-    if (interfacePropertyName == "INTERFACE_INCLUDE_DIRECTORIES"
-        || interfacePropertyName == "INTERFACE_COMPILE_DEFINITIONS")
+    const char **transBegin = targetPropertyTransitiveWhitelist;
+    const char **transEnd = targetPropertyTransitiveWhitelist
+              + (sizeof(targetPropertyTransitiveWhitelist) /
+              sizeof(*targetPropertyTransitiveWhitelist));
+    if (std::find_if(transBegin, transEnd,
+              TransitiveWhitelistCompare(interfacePropertyName)) != transEnd)
       {
       const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                     context->Config,
@@ -1015,6 +1134,10 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &orNode;
   else if (identifier == "NOT")
     return &notNode;
+  else if (identifier == "C_COMPILER_ID")
+    return &cCompilerIdNode;
+  else if (identifier == "CXX_COMPILER_ID")
+    return &cxxCompilerIdNode;
   else if (identifier == "CONFIGURATION")
     return &configurationNode;
   else if (identifier == "CONFIG")
