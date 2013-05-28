@@ -12,6 +12,13 @@ target_compile_options(target_compile_options
   INTERFACE $<$<CXX_COMPILER_ID:GNU>:-DMY_INTERFACE_DEFINE>
 )
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  target_compile_definitions(target_compile_options
+    PRIVATE
+      "DO_GNU_TESTS"
+  )
+endif()
+
 add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
@@ -19,3 +26,10 @@ add_executable(consumer
 target_compile_options(consumer
   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<TARGET_PROPERTY:target_compile_options,INTERFACE_COMPILE_OPTIONS>>
 )
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  target_compile_definitions(consumer
+    PRIVATE
+      "DO_GNU_TESTS"
+  )
+endif()
