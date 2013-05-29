@@ -3259,8 +3259,8 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
   cmListFileBacktrace lfbt;
 
   cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                              this->GetName(),
-                                              "INCLUDE_DIRECTORIES", 0, 0);
+                                             this->GetName(),
+                                             "INCLUDE_DIRECTORIES", 0, 0);
 
   this->AppendBuildInterfaceIncludes();
 
