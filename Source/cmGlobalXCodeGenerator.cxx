@@ -1718,6 +1718,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add shared-library flags if needed.
     this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target,
                                                  lang, configName);
+
+    this->CurrentLocalGenerator->AddVisibilityPresetFlags(flags, &target,
+                                                   lang);
     }
   else if(binary)
   {
