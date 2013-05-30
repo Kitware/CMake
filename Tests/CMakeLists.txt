@@ -1248,6 +1248,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
 
+  if(APPLE AND "${DARWIN_MAJOR_VERSION}" GREATER 9)
+    add_test(MacRuntimePath ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/MacRuntimePath"
+      "${CMake_BINARY_DIR}/Tests/MacRuntimePath"
+      ${build_generator_args}
+      --build-project MacRuntimePath
+      )
+  endif()
+
   add_test(linkorder1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LinkLineOrder"

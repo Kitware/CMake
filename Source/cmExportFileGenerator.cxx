@@ -624,8 +624,12 @@ cmExportFileGenerator
       std::string value;
       if(target->HasSOName(config))
         {
+        if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+          {
+          value = this->InstallNameDir(target, config);
+          }
         prop = "IMPORTED_SONAME";
-        value = target->GetSOName(config);
+        value += target->GetSOName(config);
         }
       else
         {
