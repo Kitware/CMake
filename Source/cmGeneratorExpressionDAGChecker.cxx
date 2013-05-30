@@ -168,11 +168,3 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions() const
        || strcmp(prop, "INTERFACE_COMPILE_DEFINITIONS") == 0
        || strncmp(prop, "COMPILE_DEFINITIONS_", 20) == 0);
 }
-
-//----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingCompileOptions() const
-{
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "COMPILE_OPTIONS") == 0
-       || strcmp(prop, "INTERFACE_COMPILE_OPTIONS") == 0 );
-}

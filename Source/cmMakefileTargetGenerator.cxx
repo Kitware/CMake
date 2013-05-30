@@ -335,25 +335,21 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
       this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
     }
 
-  std::string targetFlags;
   for(std::set<cmStdString>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
     *this->FlagFileStream << *l << "_DEFINES = " << this->GetDefines(*l) <<
       "\n\n";
-    std::string targetLangFlags;
-    this->LocalGenerator->GetCompileOptions(targetLangFlags, this->Target,
-                            this->LocalGenerator->ConfigurationName.c_str());
-    if (!targetFlags.empty() && targetFlags != targetLangFlags)
-      {
-      targetFlags += " " + targetLangFlags;
-      }
     }
 
-  if (!targetFlags.empty())
+  // Add target-specific flags.
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
-    *this->FlagFileStream << "# TARGET_FLAGS = " << targetFlags << "\n\n";
+    std::string flags;
+    this->LocalGenerator->AppendFlags
+      (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+    *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";
     }
 }
 
@@ -539,13 +535,8 @@ cmMakefileTargetGenerator
   langFlags += "_FLAGS)";
   this->LocalGenerator->AppendFlags(flags, langFlags.c_str());
 
-  std::string configUpper =
-    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
-
-  std::string targetFlags;
-  this->LocalGenerator->GetCompileOptions(targetFlags, this->Target,
-                                          configUpper.c_str());
-  if (!targetFlags.empty())
+  // Add target-specific flags.
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
     std::string langIncludeExpr = "CMAKE_";
     langIncludeExpr += lang;
@@ -557,7 +548,7 @@ cmMakefileTargetGenerator
       cmsys::RegularExpression r(regex);
       std::vector<std::string> args;
       cmSystemTools::ParseWindowsCommandLine(
-        targetFlags.c_str(),
+        this->Target->GetProperty("COMPILE_FLAGS"),
         args);
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
@@ -571,7 +562,8 @@ cmMakefileTargetGenerator
       }
     else
       {
-      this->LocalGenerator->AppendFlags(flags, targetFlags.c_str());
+      this->LocalGenerator->AppendFlags
+        (flags, this->Target->GetProperty("COMPILE_FLAGS"));
       }
     }
 
@@ -605,6 +597,8 @@ cmMakefileTargetGenerator
                           << compile_defs << "\n"
                           << "\n";
     }
+  std::string configUpper =
+    cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += configUpper;
   if(const char* config_compile_defs =

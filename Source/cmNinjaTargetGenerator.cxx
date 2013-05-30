@@ -154,9 +154,9 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                                  language.c_str());
 
   // Add include directory flags.
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   {
   std::vector<std::string> includes;
+  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               language.c_str(), config);
@@ -174,9 +174,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
 
   // Add target-specific flags.
-  std::string targetFlags;
-  this->LocalGenerator->GetCompileOptions(targetFlags, this->Target, config);
-  if(!targetFlags.empty())
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
     {
     std::string langIncludeExpr = "CMAKE_";
     langIncludeExpr += language;
@@ -188,7 +186,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
       cmsys::RegularExpression r(regex);
       std::vector<std::string> args;
       cmSystemTools::ParseWindowsCommandLine(
-        targetFlags.c_str(),
+        this->Target->GetProperty("COMPILE_FLAGS"),
         args);
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
@@ -203,7 +201,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
     else
       {
       this->LocalGenerator->AppendFlags
-        (flags, targetFlags.c_str());
+        (flags, this->Target->GetProperty("COMPILE_FLAGS"));
       }
     }
 
