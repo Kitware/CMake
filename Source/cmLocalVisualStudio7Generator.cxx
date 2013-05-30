@@ -202,7 +202,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
   stampName += "/";
   stampName += "generate.stamp";
   std::ofstream stamp(stampName.c_str());
-  stamp << "# CMake generation timestamp file this directory.\n";
+  stamp << "# CMake generation timestamp file for this directory.\n";
 
   // Create a helper file so CMake can determine when it is run
   // through the rule created by CreateVCProjBuildRule whether it
@@ -443,12 +443,12 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   {"InlineFunctionExpansion", "Ob0", "no inlines",              "0", 0},
   {"InlineFunctionExpansion", "Ob1", "when inline keyword",     "1", 0},
   {"InlineFunctionExpansion", "Ob2", "any time you can inline", "2", 0},
-  {"RuntimeLibrary", "MTd", "Multithreded debug",     "1", 0},
-  {"RuntimeLibrary", "MT", "Multithreded", "0", 0},
-  {"RuntimeLibrary", "MDd", "Multithreded dll debug", "3", 0},
-  {"RuntimeLibrary", "MD", "Multithreded dll",        "2", 0},
-  {"RuntimeLibrary", "MLd", "Sinble Thread debug",    "5", 0},
-  {"RuntimeLibrary", "ML", "Sinble Thread",           "4", 0},
+  {"RuntimeLibrary", "MTd", "Multithreaded debug",     "1", 0},
+  {"RuntimeLibrary", "MT", "Multithreaded", "0", 0},
+  {"RuntimeLibrary", "MDd", "Multithreaded dll debug", "3", 0},
+  {"RuntimeLibrary", "MD", "Multithreaded dll",        "2", 0},
+  {"RuntimeLibrary", "MLd", "Single Thread debug",    "5", 0},
+  {"RuntimeLibrary", "ML", "Single Thread",           "4", 0},
   {"StructMemberAlignment", "Zp16", "struct align 16 byte ",   "5", 0},
   {"StructMemberAlignment", "Zp1", "struct align 1 byte ",     "1", 0},
   {"StructMemberAlignment", "Zp2", "struct align 2 byte ",     "2", 0},
@@ -475,6 +475,9 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
   // their values differ based on the VS IDE version.
   {"ForcedIncludeFiles", "FI", "Forced include files", "",
    cmVS7FlagTable::UserValueRequired | cmVS7FlagTable::SemicolonAppendable},
+
+  {"AssemblerListingLocation", "Fa", "ASM List Location", "",
+   cmVS7FlagTable::UserValue},
 
   // boolean flags
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
@@ -740,6 +743,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
+  std::string asmLocation = std::string(configName) + "/";
+  targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
@@ -836,18 +841,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   fout << "\"\n";
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
-  fout << "\t\t\t\tAssemblerListingLocation=\"" << configName << "\"\n";
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
-  if(targetBuilds)
-    {
-    // We need to specify a program database file name even for
-    // non-debug configurations because VS still creates .idb files.
-    fout <<  "\t\t\t\tProgramDataBaseFileName=\""
-         << this->ConvertToXMLOutputPathSingle(
-              target.GetPDBDirectory(configName).c_str())
-         << "/"
-         << target.GetPDBName(configName) << "\"\n";
-    }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   tool = "VCCustomBuildTool";
   if(this->FortranProject)

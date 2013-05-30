@@ -116,13 +116,19 @@ void cmIncludeDirectoryCommand::GetIncludes(const std::string &arg,
       {
       std::string inc = arg.substr(lastPos,pos);
       this->NormalizeInclude(inc);
-      incs.push_back(inc);
+      if (!inc.empty())
+        {
+        incs.push_back(inc);
+        }
       }
     lastPos = pos + 1;
     }
   std::string inc = arg.substr(lastPos);
   this->NormalizeInclude(inc);
-  incs.push_back(inc);
+  if (!inc.empty())
+    {
+    incs.push_back(inc);
+    }
 }
 
 void cmIncludeDirectoryCommand::NormalizeInclude(std::string &inc)
@@ -132,6 +138,11 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string &inc)
   if ((b!=inc.npos) && (e!=inc.npos))
     {
     inc.assign(inc, b, 1+e-b);   // copy the remaining substring
+    }
+  else
+    {
+    inc = "";
+    return;
     }
 
   if (!cmSystemTools::IsOff(inc.c_str()))

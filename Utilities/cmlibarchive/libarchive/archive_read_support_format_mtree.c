@@ -407,7 +407,7 @@ bid_keyword(const char *p,  ssize_t len)
 		if (l > 0)
 			return (l);
 	}
-	return (0);/* Unkown key */
+	return (0);/* Unknown key */
 }
 
 /*

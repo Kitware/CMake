@@ -20,10 +20,16 @@ static const char very_fun_string[] = CMAKE_IS_REALLY;
 #endif
 
 enum {
-  StringLiteralTest1 = sizeof(CMakeStaticAssert<sizeof(CMAKE_IS_) == sizeof("Fun")>)
+  StringLiteralTest1 = sizeof(CMakeStaticAssert<sizeof(CMAKE_IS_) == sizeof("Fun")>),
 #ifndef NO_SPACES_IN_DEFINE_VALUES
-  ,
-  StringLiteralTest2 = sizeof(CMakeStaticAssert<sizeof(CMAKE_IS_REALLY) == sizeof("Very Fun")>)
+  StringLiteralTest2 = sizeof(CMakeStaticAssert<sizeof(CMAKE_IS_REALLY) == sizeof("Very Fun")>),
+#endif
+#ifdef TEST_GENERATOR_EXPRESSIONS
+  StringLiteralTest3 = sizeof(CMakeStaticAssert<sizeof(LETTER_LIST1) == sizeof("A,B,C,D")>),
+  StringLiteralTest4 = sizeof(CMakeStaticAssert<sizeof(LETTER_LIST2) == sizeof("A,,B,,C,,D")>),
+  StringLiteralTest5 = sizeof(CMakeStaticAssert<sizeof(LETTER_LIST3) == sizeof("A,-B,-C,-D")>),
+  StringLiteralTest6 = sizeof(CMakeStaticAssert<sizeof(LETTER_LIST4) == sizeof("A-,-B-,-C-,-D")>),
+  StringLiteralTest7 = sizeof(CMakeStaticAssert<sizeof(LETTER_LIST5) == sizeof("A-,B-,C-,D")>)
 #endif
 };
 
@@ -41,6 +47,29 @@ enum {
 #ifndef LIST
 #error Expected define expanded from list
 #endif
+
+#ifndef PREFIX_DEF1
+#error Expect PREFIX_DEF1
+#endif
+
+#ifndef PREFIX_DEF2
+#error Expect PREFIX_DEF2
+#endif
+
+#ifndef LINK_CXX_DEFINE
+#error Expected LINK_CXX_DEFINE
+#endif
+#ifndef LINK_LANGUAGE_IS_CXX
+#error Expected LINK_LANGUAGE_IS_CXX
+#endif
+
+#ifdef LINK_C_DEFINE
+#error Unexpected LINK_C_DEFINE
+#endif
+#ifdef LINK_LANGUAGE_IS_C
+#error Unexpected LINK_LANGUAGE_IS_C
+#endif
+
 
 // TEST_GENERATOR_EXPRESSIONS
 #endif

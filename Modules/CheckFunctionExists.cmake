@@ -4,7 +4,7 @@
 # Check that the <function> is provided by libraries on the system and
 # store the result in a <variable>.  This does not verify that any
 # system header file declares the function, only that it can be found
-# at link time (considure using CheckSymbolExists).
+# at link time (consider using CheckSymbolExists).
 #
 # The following variables may be set before calling this macro to
 # modify the way the check is run:

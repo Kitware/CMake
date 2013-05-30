@@ -167,6 +167,10 @@ bool cmFileCommand
     {
     return this->HandleTimestampCommand(args);
     }
+  else if ( subCommand == "GENERATE" )
+    {
+    return this->HandleGenerateCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e.c_str());
@@ -1970,7 +1974,7 @@ bool cmFileInstaller
   else
     {
     cmOStringStream e;
-    e << "Option TYPE given uknown value \"" << stype << "\".";
+    e << "Option TYPE given unknown value \"" << stype << "\".";
     this->FileCommand->SetError(e.str().c_str());
     return false;
     }
@@ -1985,7 +1989,7 @@ bool cmFileInstaller::HandleInstallDestination()
   // allow for / to be a valid destination
   if ( destination.size() < 2 && destination != "/" )
     {
-    this->FileCommand->SetError("called with inapropriate arguments. "
+    this->FileCommand->SetError("called with inappropriate arguments. "
         "No DESTINATION provided or .");
     return false;
     }
@@ -3247,6 +3251,80 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   this->SetError("UPLOAD not supported by bootstrap cmake.");
   return false;
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmFileCommand::AddEvaluationFile(const std::string &inputName,
+                                      const std::string &outputExpr,
+                                      const std::string &condition,
+                                      bool inputIsContent
+                                     )
+{
+  cmListFileBacktrace lfbt;
+  this->Makefile->GetBacktrace(lfbt);
+
+  cmGeneratorExpression outputGe(lfbt);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> outputCge
+                                                = outputGe.Parse(outputExpr);
+
+  cmGeneratorExpression conditionGe(lfbt);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> conditionCge
+                                              = conditionGe.Parse(condition);
+
+  this->Makefile->GetLocalGenerator()
+                ->GetGlobalGenerator()->AddEvaluationFile(inputName,
+                                                          outputCge,
+                                                          this->Makefile,
+                                                          conditionCge,
+                                                          inputIsContent);
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleGenerateCommand(
+  std::vector<std::string> const& args)
+{
+  if (args.size() < 5)
+    {
+    this->SetError("Incorrect arguments to GENERATE subcommand.");
+    return false;
+    }
+  if (args[1] != "OUTPUT")
+    {
+    this->SetError("Incorrect arguments to GENERATE subcommand.");
+    return false;
+    }
+  std::string condition;
+  if (args.size() > 5)
+    {
+    if (args[5] != "CONDITION")
+      {
+      this->SetError("Incorrect arguments to GENERATE subcommand.");
+      return false;
+      }
+    if (args.size() != 7)
+      {
+      this->SetError("Incorrect arguments to GENERATE subcommand.");
+      return false;
+      }
+    condition = args[6];
+    if (condition.empty())
+      {
+      this->SetError("CONDITION of sub-command GENERATE must not be empty if "
+        "specified.");
+      return false;
+      }
+    }
+  std::string output = args[2];
+  const bool inputIsContent = args[3] != "INPUT";
+  if (inputIsContent && args[3] != "CONTENT")
+    {
+    this->SetError("Incorrect arguments to GENERATE subcommand.");
+    return false;
+    }
+  std::string input = args[4];
+
+  this->AddEvaluationFile(input, output, condition, inputIsContent);
+  return true;
 }
 
 //----------------------------------------------------------------------------

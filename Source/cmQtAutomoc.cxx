@@ -280,13 +280,9 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
     _moc_incs += *incDirIt;
     }
 
-  const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
-  std::string _moc_compile_defs;
-  if (tmp)
-    {
-    _moc_compile_defs = target->GetCompileDefinitions(0);
-    }
-  tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
+  std::string _moc_compile_defs = target->GetCompileDefinitions(0);
+
+  const char* tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
   if (tmp)
     {
     _moc_compile_defs += ";";
@@ -696,7 +692,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   std::string ownMocHeaderFile;
 
   std::string::size_type matchOffset = 0;
-  // first a simply string check for "moc" is *much* faster than the regexp,
+  // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   if ((strstr(contentsString.c_str(), "moc") != NULL)
@@ -870,7 +866,7 @@ void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
   bool dotMocIncluded = false;
 
   std::string::size_type matchOffset = 0;
-  // first a simply string check for "moc" is *much* faster than the regexp,
+  // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   if ((strstr(contentsString.c_str(), "moc") != NULL)

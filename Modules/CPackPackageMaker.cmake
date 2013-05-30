@@ -2,7 +2,7 @@
 ##end
 ##module
 # - PackageMaker CPack generator (Mac OS X).
-# The following variable is specific to installers build on Mac OS X
+# The following variable is specific to installers built on Mac OS X
 # using PackageMaker:
 ##end
 #

@@ -38,7 +38,7 @@
  **
  ****************************************************************************/
 
-#include <QtGui>
+#include <QApplication>
 
 #include "codeeditor.h"
 #include "calwidget.h"

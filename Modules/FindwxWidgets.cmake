@@ -458,7 +458,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       wxWidgets-2.5.2
       wxWidgets-2.5.1
       wxWidgets
-    DOC "wxWidgets base/installation directory?"
+    DOC "wxWidgets base/installation directory"
     )
 
   # If wxWidgets_ROOT_DIR changed, clear lib dir.
@@ -492,7 +492,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         PATHS
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll   # prefer shared
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib
-        DOC "Path to wxWidgets libraries?"
+        DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
         )
     else()
@@ -509,7 +509,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
         PATHS
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_lib   # prefer static
         ${WX_ROOT_DIR}/lib/${WX_LIB_DIR_PREFIX}_dll
-        DOC "Path to wxWidgets libraries?"
+        DOC "Path to wxWidgets libraries"
         NO_DEFAULT_PATH
         )
     endif()
@@ -703,6 +703,7 @@ else()
     #-----------------------------------------------------------------
     # Support cross-compiling, only search in the target platform.
     find_program(wxWidgets_CONFIG_EXECUTABLE wx-config
+      DOC "Location of wxWidgets library configuration provider binary (wx-config)."
       ONLY_CMAKE_FIND_ROOT_PATH
       )
 
@@ -843,6 +844,7 @@ set(wxWidgets_FOUND ${WXWIDGETS_FOUND})
 # Resource file compiler.
 find_program(wxWidgets_wxrc_EXECUTABLE wxrc
   ${wxWidgets_ROOT_DIR}/utils/wxrc/vc_msw
+  DOC "Location of wxWidgets resource file compiler binary (wxrc)"
   )
 
 #

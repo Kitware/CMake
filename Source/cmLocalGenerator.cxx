@@ -294,7 +294,7 @@ void cmLocalGenerator::GenerateTestFiles()
        << "# Build directory: "
        << this->Makefile->GetStartOutputDirectory() << std::endl
        << "# " << std::endl
-       << "# This file includes the relevent testing commands "
+       << "# This file includes the relevant testing commands "
        << "required for " << std::endl
        << "# testing this directory and lists subdirectories to "
        << "be tested as well." << std::endl;
@@ -1084,8 +1084,6 @@ void
 cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                       const RuleVariables& replaceValues)
 {
-  std::vector<std::string> enabledLanguages;
-  this->GlobalGenerator->GetEnabledLanguages(enabledLanguages);
   this->InsertRuleLauncher(s, replaceValues.CMTarget,
                            replaceValues.RuleLauncher);
   std::string::size_type start = s.find('<');
@@ -2011,13 +2009,13 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
   else
     {
     if (target->GetType() == cmTarget::OBJECT_LIBRARY)
-    {
+      {
       if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE"))
         {
         this->AddPositionIndependentFlags(flags, lang, targetType);
         }
       return;
-    }
+      }
 
     if (target->GetLinkInterfaceDependentBoolProperty(
                                                 "POSITION_INDEPENDENT_CODE",

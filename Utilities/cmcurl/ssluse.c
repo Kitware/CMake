@@ -442,7 +442,7 @@ int cert_stuff(struct connectdata *conn,
             failf(data, "no key set to load from crypto engine\n");
             return 0;
           }
-          /* the typecast below was added to please mingw32 */
+          /* the typecast below was added to please MinGW32 */
           priv_key = (EVP_PKEY *)
             ENGINE_load_private_key(conn->data->state.engine,key_file,
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS

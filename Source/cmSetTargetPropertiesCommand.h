@@ -104,7 +104,7 @@ public:
         "are common values for this property."
         "\n"
         "For shared libraries VERSION and SOVERSION can be used to specify "
-        "the build version and api version respectively. When building or "
+        "the build version and API version respectively. When building or "
         "installing appropriate symlinks are created if the platform "
         "supports symlinks and the linker supports so-names. "
         "If only one of both is specified the missing is assumed to have "

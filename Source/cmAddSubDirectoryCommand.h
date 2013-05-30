@@ -61,7 +61,7 @@ public:
       "  add_subdirectory(source_dir [binary_dir] \n"
       "                   [EXCLUDE_FROM_ALL])\n"
       "Add a subdirectory to the build. The source_dir specifies the "
-      "directory in which the source CmakeLists.txt and code files are "
+      "directory in which the source CMakeLists.txt and code files are "
       "located. If it is a relative "
       "path it will be evaluated with respect to the current "
       "directory (the typical usage), but it may also be an absolute path. "

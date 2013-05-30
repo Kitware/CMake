@@ -8,6 +8,7 @@ macro(shared_build_fail Source Message)
 endmacro()
 
 shared_build_pass("Libshared l; return l.libshared_exported();" "Failed to build exported")
+shared_build_pass("return libshared_exported();" "Failed to build exported function.")
 
 # if (COMPILER_HAS_DEPRECATED)
 #   shared_build_fail("Libshared l; return l.libshared_deprecated();" "Built use of deprecated class method. This should not be possible.")

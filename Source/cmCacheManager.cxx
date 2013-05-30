@@ -491,7 +491,7 @@ bool cmCacheManager::SaveCache(const char* path)
        << "# The syntax for the file is as follows:\n"
        << "# KEY:TYPE=VALUE\n"
        << "# KEY is the name of a variable in the cache.\n"
-       << "# TYPE is a hint to GUI's for the type of VALUE, DO NOT EDIT "
+       << "# TYPE is a hint to GUIs for the type of VALUE, DO NOT EDIT "
        "TYPE!." << std::endl
        << "# VALUE is the current value for the KEY.\n\n";
 

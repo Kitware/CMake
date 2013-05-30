@@ -60,7 +60,7 @@ void cmCPackDocumentVariables::DefineVariables(cmake* cm)
            "It is usually invoked like this:\n"
            " make DESTDIR=/home/john install\n"
            "which will install the concerned software using the"
-           " installation prefix, e.g. \"/usr/local\" pre-pended with "
+           " installation prefix, e.g. \"/usr/local\" prepended with "
            "the DESTDIR value which finally gives \"/home/john/usr/local\"."
            " When preparing a package, CPack first installs the items to be "
            "packaged in a local (to the build tree) directory by using the "

@@ -56,7 +56,7 @@ public:
 
   typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
   /**
-   *  Set the function used by GUI's to display error messages
+   *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).

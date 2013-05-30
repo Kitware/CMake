@@ -45,7 +45,7 @@ if(APPLE)
   set( FLTK2_PLATFORM_DEPENDENT_LIBS  "-framework Carbon -framework Cocoa -framework ApplicationServices -lz")
 endif()
 
-# If FLTK2_INCLUDE_DIR is already defined we assigne its value to FLTK2_DIR
+# If FLTK2_INCLUDE_DIR is already defined we assign its value to FLTK2_DIR
 if(FLTK2_INCLUDE_DIR)
   set(FLTK2_DIR ${FLTK2_INCLUDE_DIR})
 else()

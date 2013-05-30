@@ -60,7 +60,7 @@ static const char * cmDocumentationOptions[][3] =
    "Test output is normally suppressed and only summary information is "
    "displayed.  This option will show even more test output."},
   {"--debug", "Displaying more verbose internals of CTest.",
-    "This feature will result in large number of output that is mostly "
+    "This feature will result in a large number of output that is mostly "
     "useful for debugging dashboard problems."},
   {"--output-on-failure", "Output anything outputted by the test program "
    "if the test should fail.  This option can also be enabled by setting "
@@ -71,7 +71,8 @@ static const char * cmDocumentationOptions[][3] =
   {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the"
    "given number of jobs.",
    "This option tells ctest to run the tests in parallel using given "
-   "number of jobs."},
+   "number of jobs.  This option can also be set by setting "
+   "the environment variable CTEST_PARALLEL_LEVEL."},
   {"-Q,--quiet", "Make ctest quiet.",
     "This option will suppress all the output. The output log file will "
     "still be generated if the --output-log is specified. Options such "
@@ -99,7 +100,7 @@ static const char * cmDocumentationOptions[][3] =
    "This option tells ctest to NOT run the tests whose labels match the "
    "given regular expression."},
   {"-D <dashboard>, --dashboard <dashboard>", "Execute dashboard test",
-   "This option tells ctest to perform act as a Dart client and perform "
+   "This option tells ctest to act as a Dart client and perform "
    "a dashboard test. All tests are <Mode><Test>, where Mode can be "
    "Experimental, Nightly, and Continuous, and Test can be Start, Update, "
    "Configure, Build, Test, Coverage, and Submit."},
@@ -171,7 +172,7 @@ static const char * cmDocumentationOptions[][3] =
    "to this command line are the source and binary directories. By default "
    "this will run CMake on the Source/Bin directories specified unless "
    "--build-nocmake is specified. Both --build-makeprogram and "
-   "--build-generator MUST be provided to use --built-and-test. If "
+   "--build-generator MUST be provided to use --build-and-test. If "
    "--test-command is specified then that will be run after the build is "
    "complete. Other options that affect this mode are --build-target "
    "--build-nocmake, --build-run-dir, "

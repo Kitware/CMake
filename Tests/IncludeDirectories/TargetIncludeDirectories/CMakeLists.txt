@@ -123,3 +123,24 @@ target_link_libraries(lib5 libbad libgood)
 target_include_directories(lib5
   BEFORE PRIVATE $<TARGET_PROPERTY:libgood,INTERFACE_INCLUDE_DIRECTORIES>
 )
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/prefix_foo/prefix_bar/prefix_bat")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/prefix_foo/prefix_bar/prefix_bat/prefix_foo_bar_bat.h" "// prefix_foo_bar_bat.h\n")
+
+target_include_directories(TargetIncludeDirectories PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/prefix_$<JOIN:foo;bar;bat,/prefix_>")
+
+# Test that the language generator expressions work
+set_property(TARGET TargetIncludeDirectories
+  APPEND PROPERTY INCLUDE_DIRECTORIES
+  "$<$<LINK_LANGUAGE:C>:${CMAKE_CURRENT_BINARY_DIR}/bad>"
+  "$<$<LINK_LANGUAGE:CXX>:${CMAKE_CURRENT_BINARY_DIR}/good>"
+  "$<$<STREQUAL:$<LINK_LANGUAGE>,CXX>:${CMAKE_CURRENT_BINARY_DIR}/othergood/>"
+)
+
+add_executable(TargetIncludeDirectories_C main.c)
+set_property(TARGET TargetIncludeDirectories_C
+  APPEND PROPERTY INCLUDE_DIRECTORIES
+  "$<$<LINK_LANGUAGE:CXX>:${CMAKE_CURRENT_BINARY_DIR}/bad>"
+  "$<$<LINK_LANGUAGE:C>:${CMAKE_CURRENT_BINARY_DIR}/good>"
+  "$<$<STREQUAL:$<LINK_LANGUAGE>,C>:${CMAKE_CURRENT_BINARY_DIR}/othergood/>"
+)

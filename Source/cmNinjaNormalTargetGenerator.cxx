@@ -505,7 +505,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     const std::string objPath = GetTarget()->GetSupportDirectory();
     vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath.c_str());
     EnsureDirectoryExists(objPath);
-    // ar.exe can't handle backslashes in rsp files (implictly used by gcc)
+    // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
     }

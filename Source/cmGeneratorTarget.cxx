@@ -98,6 +98,18 @@ void cmGeneratorTarget::ClassifySources()
       this->IDLSources.push_back(sf);
       if(isObjLib) { badObjLib.push_back(sf); }
       }
+    else if(ext == "resx")
+      {
+      // Build and save the name of the corresponding .h file
+      // This relationship will be used later when building the project files.
+      // Both names would have been auto generated from Visual Studio
+      // where the user supplied the file name and Visual Studio
+      // appended the suffix.
+      std::string resx = sf->GetFullPath();
+      std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
+      this->ExpectedResxHeaders.insert(hFileName);
+      this->ResxSources.push_back(sf);
+      }
     else if(header.find(sf->GetFullPath().c_str()))
       {
       this->HeaderSources.push_back(sf);

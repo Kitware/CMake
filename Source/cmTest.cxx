@@ -135,7 +135,7 @@ void cmTest::DefineProperties(cmake *cm)
      "If the output matches this regular expression the test will fail.",
      "If set, if the output matches one of "
      "specified regular expressions, the test will fail."
-     "For example: PASS_REGULAR_EXPRESSION \"[^a-z]Error;ERROR;Failed\"");
+     "For example: FAIL_REGULAR_EXPRESSION \"[^a-z]Error;ERROR;Failed\"");
 
   cm->DefineProperty
     ("LABELS", cmProperty::TEST,

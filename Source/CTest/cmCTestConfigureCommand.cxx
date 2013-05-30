@@ -31,32 +31,6 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
     cmSystemTools::ExpandListArgument(this->Values[ctc_OPTIONS], options);
     }
 
-  if ( this->Values[ct_BUILD] )
-    {
-    this->CTest->SetCTestConfiguration("BuildDirectory",
-      cmSystemTools::CollapseFullPath(
-        this->Values[ct_BUILD]).c_str());
-    }
-  else
-    {
-    this->CTest->SetCTestConfiguration("BuildDirectory",
-      cmSystemTools::CollapseFullPath(
-       this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY")).c_str());
-    }
-
-  if ( this->Values[ct_SOURCE] )
-    {
-    this->CTest->SetCTestConfiguration("SourceDirectory",
-      cmSystemTools::CollapseFullPath(
-        this->Values[ct_SOURCE]).c_str());
-    }
-  else
-    {
-    this->CTest->SetCTestConfiguration("SourceDirectory",
-      cmSystemTools::CollapseFullPath(
-        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")).c_str());
-    }
-
   if ( this->CTest->GetCTestConfiguration("BuildDirectory").empty() )
     {
     this->SetError("Build directory not specified. Either use BUILD "
