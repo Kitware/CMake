@@ -1639,9 +1639,9 @@ void cmLocalVisualStudio6Generator
     // store flags for each configuration
     std::string flags = " ";
     std::string flagsRelease = " ";
-    std::string flagsMinSizeRel = " ";
+    std::string flagsMinSize = " ";
     std::string flagsDebug = " ";
-    std::string flagsRelWithDebInfo = " ";
+    std::string flagsDebugRel = " ";
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
@@ -1664,16 +1664,16 @@ void cmLocalVisualStudio6Generator
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
 
       flagVar = baseFlagVar + "_MINSIZEREL";
-      flagsMinSizeRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
-      flagsMinSizeRel += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
+      flagsMinSize = this->Makefile->GetSafeDefinition(flagVar.c_str());
+      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
 
       flagVar = baseFlagVar + "_DEBUG";
       flagsDebug = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
 
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
-      flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
-      flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+      flagsDebugRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
+      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
       }
 
     // if _UNICODE and _SBCS are not found, then add -D_MBCS
@@ -1686,31 +1686,12 @@ void cmLocalVisualStudio6Generator
       flags += " /D \"_MBCS\"";
       }
 
-    {
-    std::string targetFlags;
-    this->GetCompileOptions(targetFlags, &target, 0);
     // Add per-target flags.
-    if(!targetFlags.empty())
+    if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
       {
       flags += " ";
       flags += targetFlags;
       }
-    }
-#define ADD_FLAGS(CONFIG) \
-    { \
-    std::string targetFlags; \
-    this->GetCompileOptions(targetFlags, &target, #CONFIG); \
-    if(!targetFlags.empty()) \
-      { \
-      flags ## CONFIG += " "; \
-      flags ## CONFIG += targetFlags; \
-      } \
-    }
-
-    ADD_FLAGS(Debug)
-    ADD_FLAGS(Release)
-    ADD_FLAGS(MinSizeRel)
-    ADD_FLAGS(RelWithDebInfo)
 
     // Add per-target and per-configuration preprocessor definitions.
     std::set<std::string> definesSet;
@@ -1750,19 +1731,19 @@ void cmLocalVisualStudio6Generator
     flags += defines;
     flagsDebug += debugDefines;
     flagsRelease += releaseDefines;
-    flagsMinSizeRel += minsizeDefines;
-    flagsRelWithDebInfo += debugrelDefines;
+    flagsMinSize += minsizeDefines;
+    flagsDebugRel += debugrelDefines;
 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
     // the correct C or CXX flags
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
-                                 flagsMinSizeRel.c_str());
+                                 flagsMinSize.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG",
                                  flagsDebug.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
-                                 flagsRelWithDebInfo.c_str());
+                                 flagsDebugRel.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE",
                                  flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());

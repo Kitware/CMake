@@ -681,11 +681,9 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 {
   // Add flags from target and source file properties.
   std::string flags;
-  std::string targetFlags;
-  lg->GetCompileOptions(targetFlags, &cmtarget, 0); // TODO: Config?
-  if(!targetFlags.empty())
+  if(cmtarget.GetProperty("COMPILE_FLAGS"))
     {
-    lg->AppendFlags(flags, targetFlags.c_str());
+    lg->AppendFlags(flags, cmtarget.GetProperty("COMPILE_FLAGS"));
     }
   const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
   switch(this->CurrentLocalGenerator->GetFortranFormat(srcfmt))

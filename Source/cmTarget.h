@@ -500,13 +500,8 @@ public:
   std::vector<std::string> GetIncludeDirectories(const char *config);
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
-  void InsertCompileOption(const cmValueWithOrigin &entry,
-                     bool before = false);
 
   void AppendBuildInterfaceIncludes();
-
-  void GetCompileOptions(std::vector<std::string> &result,
-                         const char *config);
 
   bool IsNullImpliedByLinkLibraries(const std::string &p);
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
@@ -632,7 +627,6 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool DebugIncludesDone;
-  bool DebugCompileOptionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
