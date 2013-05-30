@@ -144,3 +144,21 @@ set_property(TARGET TargetIncludeDirectories_C
   "$<$<LINK_LANGUAGE:C>:${CMAKE_CURRENT_BINARY_DIR}/good>"
   "$<$<STREQUAL:$<LINK_LANGUAGE>,C>:${CMAKE_CURRENT_BINARY_DIR}/othergood/>"
 )
+
+add_library(includes_source_good ../empty.cpp)
+target_include_directories(includes_source_good
+  INTERFACE
+    "${CMAKE_CURRENT_BINARY_DIR}/good"
+    "${CMAKE_CURRENT_BINARY_DIR}/othergood/"
+)
+add_library(includes_source_bad ../empty.cpp)
+target_include_directories(includes_source_bad
+  INTERFACE
+    "${CMAKE_CURRENT_BINARY_DIR}/bad"
+)
+
+add_library(includes_proxy SHARED ../empty.cpp)
+target_link_libraries(includes_proxy includes_source_good)
+target_link_libraries(includes_proxy LINK_INTERFACE_LIBRARIES includes_source_bad)
+add_executable(copy_includes copy_includes.cpp)
+target_include_directories(copy_includes PRIVATE $<TARGET_PROPERTY:includes_proxy,INCLUDE_DIRECTORIES>)
