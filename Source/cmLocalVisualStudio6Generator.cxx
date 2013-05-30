@@ -1686,12 +1686,31 @@ void cmLocalVisualStudio6Generator
       flags += " /D \"_MBCS\"";
       }
 
+    {
+    std::string targetFlags;
+    this->GetCompileOptions(targetFlags, &target, 0);
     // Add per-target flags.
-    if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
+    if(!targetFlags.empty())
       {
       flags += " ";
       flags += targetFlags;
       }
+    }
+#define ADD_FLAGS(CONFIG) \
+    { \
+    std::string targetFlags; \
+    this->GetCompileOptions(targetFlags, &target, #CONFIG); \
+    if(!targetFlags.empty()) \
+      { \
+      flags ## CONFIG += " "; \
+      flags ## CONFIG += targetFlags; \
+      } \
+    }
+
+    ADD_FLAGS(Debug)
+    ADD_FLAGS(Release)
+    ADD_FLAGS(MinSizeRel)
+    ADD_FLAGS(RelWithDebInfo)
 
     // Add per-target and per-configuration preprocessor definitions.
     std::set<std::string> definesSet;
