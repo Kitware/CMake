@@ -543,7 +543,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
               + (sizeof(targetPropertyTransitiveWhitelist) /
               sizeof(*targetPropertyTransitiveWhitelist));
     if (std::find_if(transBegin, transEnd,
-              TransitiveWhitelistCompare(interfacePropertyName)) != transEnd)
+              TransitiveWhitelistCompare(propertyName)) != transEnd)
       {
       const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                     context->Config,
@@ -552,6 +552,20 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         linkedTargetsContent =
                   getLinkedTargetsContent(iface->Libraries, target,
+                                          context, &dagChecker,
+                                          interfacePropertyName);
+        }
+      }
+    else if (std::find_if(transBegin, transEnd,
+              TransitiveWhitelistCompare(interfacePropertyName)) != transEnd)
+      {
+      const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
+                                                    context->Config,
+                                                    context->HeadTarget);
+      if(impl)
+        {
+        linkedTargetsContent =
+                  getLinkedTargetsContent(impl->Libraries, target,
                                           context, &dagChecker,
                                           interfacePropertyName);
         }
