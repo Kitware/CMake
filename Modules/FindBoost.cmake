@@ -928,9 +928,13 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
   endif()
+
+  # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
+  string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS}")
+
   _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
     NAMES ${_boost_RELEASE_NAMES}
-    HINTS ${_boost_LIBRARY_SEARCH_DIRS}
+    HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
     NAMES_PER_DIR
     DOC "${_boost_docstring_release}"
     )
@@ -960,9 +964,13 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
     message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
                    "Searching for ${UPPERCOMPONENT}_LIBRARY_DEBUG: ${_boost_DEBUG_NAMES}")
   endif()
+
+  # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
+  string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS}")
+
   _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
     NAMES ${_boost_DEBUG_NAMES}
-    HINTS ${_boost_LIBRARY_SEARCH_DIRS}
+    HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
     NAMES_PER_DIR
     DOC "${_boost_docstring_debug}"
     )
