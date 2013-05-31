@@ -111,7 +111,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
           ++i)
         {
         extraArgs++;
-        libsToLink += argv[i] + " ";
+        libsToLink += "\"" + cmSystemTools::TrimWhitespace(argv[i]) + "\" ";
         cmTarget *tgt = this->Makefile->FindTargetToUse(argv[i].c_str());
         if (!tgt)
           {
