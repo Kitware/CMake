@@ -30,8 +30,8 @@ set(CMAKE_SHARED_MODULE_SUFFIX ".so")
 set(CMAKE_MODULE_EXISTS 1)
 set(CMAKE_DL_LIBS "")
 
-# Enable rpath support for 10.6 and greater where it is known to work.
-if("${DARWIN_MAJOR_VERSION}" GREATER 9)
+# Enable rpath support for 10.5 and greater where it is known to work.
+if("${DARWIN_MAJOR_VERSION}" GREATER 8)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 endif()
 
