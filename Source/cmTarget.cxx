@@ -4252,7 +4252,7 @@ bool cmTarget::HasMacOSXRpath(const char* config)
       }
     w << " without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being set.";
     w << "  This could be because you are using a Mac OS X version";
-    w << " less than 10.6 or because CMake's platform configuration is";
+    w << " less than 10.5 or because CMake's platform configuration is";
     w << " corrupt.";
     cmake* cm = this->Makefile->GetCMakeInstance();
     cm->IssueMessage(cmake::FATAL_ERROR, w.str(), this->GetBacktrace());
