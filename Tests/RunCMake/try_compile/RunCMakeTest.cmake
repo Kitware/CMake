@@ -1,0 +1,12 @@
+include(RunCMake)
+
+run_cmake(NoArgs)
+run_cmake(OneArg)
+run_cmake(TwoArgs)
+run_cmake(NoCopyFile)
+run_cmake(NoCopyFile2)
+run_cmake(NoOutputVariable)
+run_cmake(NoOutputVariable2)
+run_cmake(BadLinkLibraries)
+run_cmake(NonSourceCopyFile)
+run_cmake(NonSourceCompileDefinitions)

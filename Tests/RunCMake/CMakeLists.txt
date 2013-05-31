@@ -92,6 +92,7 @@ add_RunCMake_test(if)
 add_RunCMake_test(include)
 add_RunCMake_test(include_directories)
 add_RunCMake_test(list)
+add_RunCMake_test(try_compile)
 add_RunCMake_test(CMP0004)
 
 find_package(Qt4 QUIET)
