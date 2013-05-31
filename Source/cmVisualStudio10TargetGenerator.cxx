@@ -262,6 +262,15 @@ void cmVisualStudio10TargetGenerator::Generate()
       "</Keyword>\n";
     }
 
+  const char* vsGlobalRootNamespace =
+    this->Target->GetProperty("VS_GLOBAL_ROOTNAMESPACE");
+  if(vsGlobalRootNamespace)
+    {
+    this->WriteString("<RootNamespace>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(vsGlobalRootNamespace) <<
+      "</RootNamespace>\n";
+    }
+
   this->WriteString("<Platform>", 2);
   (*this->BuildFileStream) << this->Platform << "</Platform>\n";
   const char* projLabel = this->Target->GetProperty("PROJECT_LABEL");

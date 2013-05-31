@@ -1398,6 +1398,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "this value with \"ManagedCProj\", for example, in a Visual "
      "Studio managed C++ unit test project.");
   cm->DefineProperty
+    ("VS_GLOBAL_ROOTNAMESPACE", cmProperty::TARGET,
+     "Visual Studio project root namespace.",
+     "Sets the \"RootNamespace\" attribute for a generated Visual Studio "
+     "project.  The attribute will be generated only if this is set.");
+  cm->DefineProperty
     ("VS_DOTNET_REFERENCES", cmProperty::TARGET,
      "Visual Studio managed project .NET references",
      "Adds one or more semicolon-delimited .NET references to a "
