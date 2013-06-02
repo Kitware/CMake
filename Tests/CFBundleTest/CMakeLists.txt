@@ -54,3 +54,5 @@ set_source_files_properties(
     ${CMAKE_CURRENT_BINARY_DIR}/InfoPlist.strings
     ${CMAKE_CURRENT_BINARY_DIR}/Localized.rsrc
     PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/English.lproj")
+
+export(TARGETS CFBundleTest FILE ${CMAKE_CURRENT_BINARY_DIR}/exp.cmake)

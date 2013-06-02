@@ -3278,7 +3278,7 @@ const char* cmTarget::NormalGetLocation(const char* config)
     this->Location += cfgid;
     }
 
-  if(this->IsCFBundleOnApple() || this->IsAppBundleOnApple())
+  if(this->IsAppBundleOnApple())
     {
     std::string macdir = this->BuildMacContentDirectory("", config, false);
     if(!macdir.empty())
@@ -3891,7 +3891,7 @@ std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
 {
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
-  if(this->IsCFBundleOnApple() || this->IsAppBundleOnApple())
+  if(this->IsAppBundleOnApple())
     {
     fpath = this->BuildMacContentDirectory(fpath, config, false);
     fpath += "/";
@@ -4033,6 +4033,21 @@ void cmTarget::GetFullNameInternal(const char* config,
     {
     fw_prefix = this->GetOutputName(config, false);
     fw_prefix += ".framework/";
+    targetPrefix = fw_prefix.c_str();
+    targetSuffix = 0;
+    }
+
+  if(this->IsCFBundleOnApple())
+    {
+    fw_prefix = this->GetOutputName(config, false);
+    fw_prefix += ".";
+    const char *ext = this->GetProperty("BUNDLE_EXTENSION");
+    if (!ext)
+      {
+      ext = "bundle";
+      }
+    fw_prefix += ext;
+    fw_prefix += "/Contents/MacOS/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = 0;
     }

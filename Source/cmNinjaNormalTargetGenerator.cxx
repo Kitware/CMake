@@ -36,8 +36,6 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNamePDB()
   , TargetLinkLanguage(0)
 {
-  cmOSXBundleGenerator::PrepareTargetProperties(target);
-
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
     target->GetExecutableNames(this->TargetNameOut,
