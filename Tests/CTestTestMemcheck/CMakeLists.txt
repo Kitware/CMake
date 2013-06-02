@@ -1,3 +1,5 @@
+REGEX_ESCAPE_STRING(CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
 foreach (_retval 0 1)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/memtester.cxx.in" "${CMAKE_CURRENT_BINARY_DIR}/ret${_retval}.cxx" @ONLY)
 endforeach ()
@@ -75,7 +77,7 @@ function(gen_mcnl_test NAME CHECKER)
         )
     set_tests_properties(CTestTestMemcheck${NAME}
         PROPERTIES
-        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n")
+        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n")
 endfunction(gen_mcnl_test)
 
 unset(CTEST_EXTRA_CONFIG)
@@ -124,7 +126,7 @@ string(REPLACE ")" "\\)" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 string(REPLACE "+" "\\+" CMAKE_COMMAND_ESCAPED "${CMAKE_COMMAND_ESCAPED}")
 
 set_tests_properties(CTestTestMemcheckUnknown PROPERTIES
-    PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND_ESCAPED}\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/Unknown/test.cmake\n")
+    PASS_REGULAR_EXPRESSION "Do not understand memory checker: ${CMAKE_COMMAND_ESCAPED}\n(.*\n)?Error in read script: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/Unknown/test.cmake\n")
 
 set_tests_properties(CTestTestMemcheckNotExist PROPERTIES
     PASS_REGULAR_EXPRESSION "Memory checker \\(MemoryCheckCommand\\) not set, or cannot find the specified program.")
@@ -141,7 +143,7 @@ foreach (_pp Pre Post)
     string(TOLOWER ${_pp} _pp_lower)
     set_tests_properties(CTestTestMemcheckDummyValgrindFail${_pp}
         PROPERTIES
-        PASS_REGULAR_EXPRESSION "\nProblem running command: ${CMAKE_CURRENT_BINARY_DIR}[^\n]*fail[^\n]*\n(.*\n)?Problem executing ${_pp_lower}-memcheck command\\(s\\\).\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindFail${_pp}/test.cmake\n")
+        PASS_REGULAR_EXPRESSION "\nProblem running command: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}[^\n]*fail[^\n]*\n(.*\n)?Problem executing ${_pp_lower}-memcheck command\\(s\\\).\n(.*\n)?Error in read script: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindFail${_pp}/test.cmake\n")
 endforeach ()
 
 set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
@@ -152,7 +154,7 @@ set_tests_properties(CTestTestMemcheckDummyBC PROPERTIES
     PASS_REGULAR_EXPRESSION "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n(.*\n)?Error parsing XML in stream at line 1: no element found\n")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindInvalidSupFile PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
+    PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindCustomOptions PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/test.cmake\n")
+    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/test.cmake\n")
