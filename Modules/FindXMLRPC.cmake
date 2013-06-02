@@ -53,7 +53,7 @@ if(XMLRPC_FOUND)
   endif()
 
   # Parse the include flags.
-  if("${XMLRPC_C_CONFIG_RESULT}" MATCHES "^0$")
+  if("${XMLRPC_C_CONFIG_RESULT}" STREQUAL "0")
     # Convert the compile flags to a CMake list.
     string(REGEX REPLACE " +" ";"
       XMLRPC_C_CONFIG_CFLAGS "${XMLRPC_C_CONFIG_CFLAGS}")
@@ -91,7 +91,7 @@ if(XMLRPC_FOUND)
   endif()
 
   # Parse the library names and directories.
-  if("${XMLRPC_C_CONFIG_RESULT}" MATCHES "^0$")
+  if("${XMLRPC_C_CONFIG_RESULT}" STREQUAL "0")
     string(REGEX REPLACE " +" ";"
       XMLRPC_C_CONFIG_LIBS "${XMLRPC_C_CONFIG_LIBS}")
 

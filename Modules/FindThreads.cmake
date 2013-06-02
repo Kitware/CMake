@@ -93,7 +93,7 @@ else()
           COMPILE_OUTPUT_VARIABLE OUTPUT)
 
         if(THREADS_HAVE_PTHREAD_ARG)
-          if(THREADS_PTHREAD_ARG MATCHES "^2$")
+          if(THREADS_PTHREAD_ARG STREQUAL "2")
             set(Threads_FOUND TRUE)
             message(STATUS "Check if compiler accepts -pthread - yes")
           else()
