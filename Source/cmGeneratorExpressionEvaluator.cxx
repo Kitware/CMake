@@ -729,8 +729,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       interfacePropertyName = "INTERFACE_COMPILE_OPTIONS";
       }
 
-    cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
-
     const char **transBegin = targetPropertyTransitiveWhitelist;
     const char **transEnd = targetPropertyTransitiveWhitelist
               + (sizeof(targetPropertyTransitiveWhitelist) /
