@@ -309,6 +309,46 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
           cmLocalGenerator::EscapeForCMake(_moc_headers.c_str()).c_str());
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
+  const char *qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
+  if (!qtVersion)
+    {
+    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
+    }
+  if (const char *targetQtVersion =
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+    {
+    qtVersion = targetQtVersion;
+    }
+  if (qtVersion)
+    {
+    makefile->AddDefinition("_target_qt_version", qtVersion);
+    }
+
+  {
+  const char *qtMoc = makefile->GetSafeDefinition("QT_MOC_EXECUTABLE");
+  makefile->AddDefinition("_qt_moc_executable", qtMoc);
+  }
+
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Moc = makefile->FindTargetToUse("Qt5::moc");
+    if (!qt5Moc)
+      {
+      cmSystemTools::Error("Qt5::moc target not found ",
+                          automocTargetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    }
+  else
+    {
+    if (strcmp(qtVersion, "4") != 0)
+      {
+      cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
+                          "Qt 5 ", automocTargetName.c_str());
+      }
+    }
+
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
   inputFile += "/Modules/AutomocInfo.cmake.in";
