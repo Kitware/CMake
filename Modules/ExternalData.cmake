@@ -391,7 +391,7 @@ function(_ExternalData_arg target arg options var_file)
       # Regular expression to match associated files.
       string(REGEX REPLACE "^REGEX:" "" regex "${opt}")
       list(APPEND associated_regex "${regex}")
-    elseif("x${opt}" MATCHES "^x:$")
+    elseif(opt STREQUAL ":")
       # Activate series matching.
       set(series_option "${opt}")
     elseif("x${opt}" MATCHES "^[^][:/*?]+$")
