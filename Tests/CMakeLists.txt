@@ -1645,7 +1645,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     # this test. (See #13371)
     add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/VariableUsage"
+      "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
       "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
       ${build_generator_args}
       --build-project WarnUnusedCliUnused
