@@ -1270,8 +1270,12 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       flags += " /TP ";
       }
     }
+
+  std::string targetFlags;
+  this->LocalGenerator->GetCompileOptions(targetFlags, this->Target,
+                                          configName.c_str());
   // Add the target-specific flags.
-  if(const char* targetFlags = this->Target->GetProperty("COMPILE_FLAGS"))
+  if(!targetFlags.empty())
     {
     flags += " ";
     flags += targetFlags;
