@@ -260,6 +260,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 std::string cmGlobalXCodeGenerator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName,
+                       const char *projectDir,
                        const char* additionalOptions,
                        const char *targetName,
                        const char* config,
@@ -268,6 +269,7 @@ std::string cmGlobalXCodeGenerator
 {
   // Config is not used yet
   (void) ignoreErrors;
+  (void) projectDir;
 
   // now build the test
   if(makeProgram == 0 || !strlen(makeProgram))
@@ -839,7 +841,7 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
   //  // Already specialized above or we leave sourcecode == "sourcecode"
   //  // which is probably the most correct choice. Extensionless headers,
   //  // for example... Or file types unknown to Xcode that do not map to a
-  //  // valid lastKnownFileType value.
+  //  // valid explicitFileType value.
   //  }
 
   return sourcecode;
@@ -882,7 +884,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
 
   std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
 
-  fileRef->AddAttribute("lastKnownFileType",
+  fileRef->AddAttribute("explicitFileType",
                         this->CreateString(sourcecode.c_str()));
 
   // Store the file path relative to the top of the source tree.
@@ -1003,7 +1005,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                     *i, cmtarget);
       cmXCodeObject* fr = xsf->GetObject("fileRef");
       cmXCodeObject* filetype =
-        fr->GetObject()->GetObject("lastKnownFileType");
+        fr->GetObject()->GetObject("explicitFileType");
 
       cmTarget::SourceFileFlags tsFlags =
         cmtarget.GetTargetSourceFileFlags(*i);
@@ -1714,30 +1716,26 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
 
+  std::string extraLinkOptionsVar;
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions =
-      this->CurrentMakefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
-    std::string var = "CMAKE_EXE_LINKER_FLAGS_";
-    var += cmSystemTools::UpperCase(configName);
-    std::string val =
-      this->CurrentMakefile->GetSafeDefinition(var.c_str());
-    if(val.size())
-      {
-      extraLinkOptions += " ";
-      extraLinkOptions += val;
-      }
+    extraLinkOptionsVar = "CMAKE_EXE_LINKER_FLAGS";
     }
-  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+  else if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = this->CurrentMakefile->
-      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptionsVar = "CMAKE_SHARED_LINKER_FLAGS";
     }
-  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+  else if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = this->CurrentMakefile->
-      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptionsVar = "CMAKE_MODULE_LINKER_FLAGS";
+    }
+  if(extraLinkOptionsVar.size())
+    {
+    this->CurrentLocalGenerator
+      ->AddConfigVariableFlags(extraLinkOptions,
+                               extraLinkOptionsVar.c_str(),
+                               configName);
     }
 
   const char* linkFlagsProp = "LINK_FLAGS";
@@ -2239,8 +2237,39 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(i->first.find("XCODE_ATTRIBUTE_") == 0)
       {
-      buildSettings->AddAttribute(i->first.substr(16).c_str(),
-                                  this->CreateString(i->second.GetValue()));
+      cmStdString attribute = i->first.substr(16);
+      // Handle [variant=<config>] condition explicitly here.
+      cmStdString::size_type beginVariant =
+        attribute.find("[variant=");
+      if (beginVariant != cmStdString::npos)
+        {
+        cmStdString::size_type endVariant =
+          attribute.find("]", beginVariant+9);
+        if (endVariant != cmStdString::npos)
+          {
+          // Compare the variant to the configuration.
+          cmStdString variant =
+            attribute.substr(beginVariant+9, endVariant-beginVariant-9);
+          if (variant == configName)
+            {
+            // The variant matches the configuration so use this
+            // attribute but drop the [variant=<config>] condition.
+            attribute.erase(beginVariant, endVariant-beginVariant+1);
+            }
+          else
+            {
+            // The variant does not match the configuration so
+            // do not use this attribute.
+            attribute.clear();
+            }
+          }
+        }
+
+      if (!attribute.empty())
+        {
+        buildSettings->AddAttribute(attribute.c_str(),
+                                    this->CreateString(i->second.GetValue()));
+        }
       }
     }
   }

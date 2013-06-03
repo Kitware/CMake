@@ -180,7 +180,7 @@ void deleteAndClear(
 //----------------------------------------------------------------------------
 cmTargetInternals::~cmTargetInternals()
 {
-  deleteAndClear(CachedLinkInterfaceIncludeDirectoriesEntries);
+  deleteAndClear(this->CachedLinkInterfaceIncludeDirectoriesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -191,6 +191,7 @@ cmTarget::cmTarget()
   this->PolicyStatusCMP0004 = cmPolicies::WARN;
   this->PolicyStatusCMP0008 = cmPolicies::WARN;
   this->PolicyStatusCMP0020 = cmPolicies::WARN;
+  this->PolicyStatusCMP0021 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -277,6 +278,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "Contents of COMPILE_DEFINITIONS may use \"generator expressions\" with "
      "the syntax \"$<...>\".  "
      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS
      CM_DOCUMENT_COMPILE_DEFINITIONS_DISCLAIMER);
 
   cm->DefineProperty
@@ -292,7 +294,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "If not set here then it is set to target_EXPORTS by default "
      "(with some substitutions if the target is not a valid C "
      "identifier). This is useful for headers to know whether they are "
-     "being included from inside their library our outside to properly "
+     "being included from inside their library or outside to properly "
      "setup dllexport/dllimport decorations. ");
 
   cm->DefineProperty
@@ -605,7 +607,8 @@ void cmTarget::DefineProperties(cmake *cm)
      "See also the include_directories command.\n"
      "Contents of INCLUDE_DIRECTORIES may use \"generator expressions\" with "
      "the syntax \"$<...>\".  "
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,
@@ -802,7 +805,8 @@ void cmTarget::DefineProperties(cmake *cm)
      "as $<TARGET_PROPERTY:foo,INTERFACE_INCLUDE_DIRECTORIES> to use the "
      "include directories specified in the interface of 'foo'."
      "\n"
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INTERFACE_COMPILE_DEFINITIONS", cmProperty::TARGET,
@@ -813,7 +817,8 @@ void cmTarget::DefineProperties(cmake *cm)
      "as $<TARGET_PROPERTY:foo,INTERFACE_COMPILE_DEFINITIONS> to use the "
      "compile definitions specified in the interface of 'foo'."
      "\n"
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("LINK_INTERFACE_MULTIPLICITY", cmProperty::TARGET,
@@ -867,6 +872,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "OSX_ARCHITECTURES.");
 
   cm->DefineProperty
+    ("EXPORT_NAME", cmProperty::TARGET,
+     "Exported name for target files.",
+     "This sets the name for the IMPORTED target generated when it this "
+     "target is is exported.  "
+     "If not set, the logical target name is used by default.");
+
+  cm->DefineProperty
     ("OUTPUT_NAME", cmProperty::TARGET,
      "Output name for target files.",
      "This sets the base name for output files created for an executable or "
@@ -886,9 +898,9 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("PDB_NAME", cmProperty::TARGET,
-     "Output name for MS debug symbols .pdb file.",
+     "Output name for MS debug symbols .pdb file from linker.",
      "Set the base name for debug symbols file created for an "
-     "executable or library target.  "
+     "executable or shared library target.  "
      "If not set, the logical target name is used by default.  "
      "\n"
      "This property is not implemented by the Visual Studio 6 generator.");
@@ -1054,7 +1066,7 @@ void cmTarget::DefineProperties(cmake *cm)
     ("SOVERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
-     "the build version and api version respectively. When building or "
+     "the build version and API version respectively. When building or "
      "installing appropriate symlinks are created if the platform "
      "supports symlinks and the linker supports so-names. "
      "If only one of both is specified the missing is assumed to have "
@@ -1092,7 +1104,7 @@ void cmTarget::DefineProperties(cmake *cm)
     ("VERSION", cmProperty::TARGET,
      "What version number is this target.",
      "For shared libraries VERSION and SOVERSION can be used to specify "
-     "the build version and api version respectively. When building or "
+     "the build version and API version respectively. When building or "
      "installing appropriate symlinks are created if the platform "
      "supports symlinks and the linker supports so-names. "
      "If only one of both is specified the missing is assumed to have "
@@ -1156,7 +1168,7 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("MACOSX_FRAMEWORK_INFO_PLIST", cmProperty::TARGET,
      "Specify a custom Info.plist template for a Mac OS X Framework.",
-     "An library target with FRAMEWORK enabled will be built as a "
+     "A library target with FRAMEWORK enabled will be built as a "
      "framework on Mac OS X.  "
      "By default its Info.plist file is created by configuring a template "
      "called MacOSXFrameworkInfo.plist.in located in the CMAKE_MODULE_PATH.  "
@@ -1247,7 +1259,7 @@ void cmTarget::DefineProperties(cmake *cm)
   cm->DefineProperty
     ("GENERATOR_FILE_NAME", cmProperty::TARGET,
      "Generator's file for this target.",
-     "An internal property used by some generators to record the name of "
+     "An internal property used by some generators to record the name of the "
      "project or dsp file associated with this target. Note that at configure "
      "time, this property is only set for targets created by "
      "include_external_msproject().");
@@ -1397,9 +1409,9 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("PDB_OUTPUT_DIRECTORY", cmProperty::TARGET,
-     "Output directory for MS debug symbols .pdb files.",
+     "Output directory for MS debug symbols .pdb file from linker.",
      "This property specifies the directory into which the MS debug symbols "
-     "will be placed.  "
+     "will be placed by the linker.  "
      "This property is initialized by the value of the variable "
      "CMAKE_PDB_OUTPUT_DIRECTORY if it is set when a target is created."
      "\n"
@@ -1568,6 +1580,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0008);
   this->PolicyStatusCMP0020 =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0020);
+  this->PolicyStatusCMP0021 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0021);
 }
 
 //----------------------------------------------------------------------------
@@ -2491,8 +2505,6 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
    }
  }
 
- typedef std::vector< std::string > LinkLine;
-
  // The dependency map.
  DependencyMap dep_map;
 
@@ -2719,6 +2731,14 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::IncludeDirectoriesEntry(cge));
     return;
     }
+  if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
+    {
+    cmOStringStream e;
+    e << "EXPORT_NAME property can't be set on imported targets (\""
+          << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    return;
+    }
   if (strcmp(prop, "LINK_LIBRARIES") == 0)
     {
     this->Internal->LinkInterfaceIncludeDirectoriesEntries.clear();
@@ -2753,6 +2773,14 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
               new cmTargetInternals::IncludeDirectoriesEntry(ge.Parse(value)));
     return;
     }
+  if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
+    {
+    cmOStringStream e;
+    e << "EXPORT_NAME property can't be set on imported targets (\""
+          << this->Name << "\")\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    return;
+    }
   if (strcmp(prop, "LINK_LIBRARIES") == 0)
     {
     if (cmGeneratorExpression::IsValidTargetName(value)
@@ -2767,6 +2795,26 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
+}
+
+//----------------------------------------------------------------------------
+const char* cmTarget::GetExportName()
+{
+  const char *exportName = this->GetProperty("EXPORT_NAME");
+
+  if (exportName && *exportName)
+    {
+    if (!cmGeneratorExpression::IsValidTargetName(exportName))
+      {
+      cmOStringStream e;
+      e << "EXPORT_NAME property \"" << exportName << "\" for \""
+        << this->GetName() << "\": is not valid.";
+      cmSystemTools::Error(e.str().c_str());
+      return "";
+      }
+    return exportName;
+    }
+  return this->GetName();
 }
 
 //----------------------------------------------------------------------------
@@ -2876,14 +2924,41 @@ static void processIncludeDirectories(cmTarget *tgt,
 
       if (!cmSystemTools::FileIsFullPath(li->c_str()))
         {
+        cmOStringStream e;
+        bool noMessage = false;
+        cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (!(*it)->TargetName.empty())
           {
-          cmOStringStream e;
           e << "Target \"" << (*it)->TargetName << "\" contains relative "
             "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
             "  \"" << *li << "\" ";
-          tgt->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
-                                           e.str().c_str());
+          }
+        else
+          {
+          switch(tgt->GetPolicyStatusCMP0021())
+            {
+            case cmPolicies::WARN:
+              {
+              cmOStringStream w;
+              e << (mf->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0021)) << "\n";
+              messageType = cmake::AUTHOR_WARNING;
+              }
+              break;
+            case cmPolicies::OLD:
+              noMessage = true;
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::NEW:
+              // Issue the fatal message.
+              break;
+            }
+          e << "Found relative path while evaluating include directories of "
+          "\"" << tgt->GetName() << "\":\n  \"" << *li << "\"\n";
+          }
+        if (!noMessage)
+          {
+          tgt->GetMakefile()->IssueMessage(messageType, e.str().c_str());
           return;
           }
         }
@@ -5289,7 +5364,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
                                  ImportInfo& info,
                                  cmTarget *headTarget)
 {
-  (void)headTarget;
   // This method finds information about an imported target from its
   // properties.  The "IMPORTED_" namespace is reserved for properties
   // defined by the project exporting the target.

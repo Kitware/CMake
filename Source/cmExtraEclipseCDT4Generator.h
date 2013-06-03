@@ -111,6 +111,7 @@ private:
   bool GenerateSourceProject;
   bool GenerateLinkedResources;
   bool SupportsVirtualFolders;
+  bool SupportsGmakeErrorParser;
 
 };
 

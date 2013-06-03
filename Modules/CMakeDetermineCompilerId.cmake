@@ -131,6 +131,8 @@ Id flags: ${testflags}
     elseif("${id_arch}" STREQUAL "Itanium")
       set(id_machine_10 MachineIA64)
       set(id_arch ia64)
+    elseif("${id_arch}" STREQUAL "ARM")
+      set(id_machine_10 MachineARM)
     else()
       set(id_machine_6 x86)
       set(id_machine_10 MachineX86)

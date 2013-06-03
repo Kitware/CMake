@@ -38,7 +38,14 @@
  **
  ****************************************************************************/
 
- #include <QtGui>
+ #include <QComboBox>
+ #include <QGridLayout>
+ #include <QLabel>
+ #include <QGroupBox>
+ #include <QCheckBox>
+ #include <QDateEdit>
+ #include <QCalendarWidget>
+ #include <QTextCharFormat>
 
  #include "calwidget.h"
 
@@ -414,10 +421,10 @@
 QComboBox *Window::createColorComboBox()
  {
      QComboBox *comboBox = new QComboBox;
-     comboBox->addItem(tr("Red"), Qt::red);
-     comboBox->addItem(tr("Blue"), Qt::blue);
-     comboBox->addItem(tr("Black"), Qt::black);
-     comboBox->addItem(tr("Magenta"), Qt::magenta);
+     comboBox->addItem(tr("Red"), QColor(Qt::red));
+     comboBox->addItem(tr("Blue"), QColor(Qt::blue));
+     comboBox->addItem(tr("Black"), QColor(Qt::black));
+     comboBox->addItem(tr("Magenta"), QColor(Qt::magenta));
      return comboBox;
  }
 

@@ -13,7 +13,7 @@
 #define cmDocumentGeneratorExpressions_h
 
 #define CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS                      \
-  "Generator expressions are evaluted during build system generation "  \
+  "Generator expressions are evaluated during build system generation " \
   "to produce information specific to each build configuration.  "      \
   "Valid expressions are:\n"                                            \
   "  $<0:...>                  = empty string (ignores \"...\")\n"      \
@@ -28,6 +28,8 @@
   "strings which contain a ',' for example.\n"                          \
   "  $<SEMICOLON>              = A literal ';'. Used to prevent "       \
   "list expansion on an argument with ';'.\n"                           \
+  "  $<JOIN:list,...>          = joins the list with the content of "   \
+  "\"...\"\n"                                                           \
   "  $<TARGET_NAME:...>        = Marks ... as being the name of a "     \
   "target.  This is required if exporting targets to multiple "         \
   "dependent export sets.  The '...' must be a literal name of a "      \
@@ -70,6 +72,14 @@
   "Expressions with an implicit 'this' target:\n"                       \
   "  $<TARGET_PROPERTY:prop>   = The value of the property prop on "    \
   "the target on which the generator expression is evaluated.\n"        \
+  ""
+
+#define CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS                      \
+  "Language related expressions:\n"                                     \
+  "  $<LINK_LANGUAGE>          = The link language of the target "      \
+  "being generated.\n"                                                  \
+  "  $<LINK_LANGUAGE:lang>     = '1' if the link language of the "      \
+  "target being generated matches lang, else '0'.\n"                    \
   ""
 
 #endif

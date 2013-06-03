@@ -2741,15 +2741,24 @@ bool SystemTools::FileIsDirectory(const char* name)
     return false;
     }
 
-  // Remove any trailing slash from the name.
-  char buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
+  // Remove any trailing slash from the name except in a root component.
+  char local_buffer[KWSYS_SYSTEMTOOLS_MAXPATH];
+  std::string string_buffer;
   size_t last = length-1;
   if(last > 0 && (name[last] == '/' || name[last] == '\\')
-    && strcmp(name, "/") !=0)
+    && strcmp(name, "/") !=0 && name[last-1] != ':')
     {
-    memcpy(buffer, name, last);
-    buffer[last] = 0;
-    name = buffer;
+    if(last < sizeof(local_buffer))
+      {
+      memcpy(local_buffer, name, last);
+      local_buffer[last] = 0;
+      name = local_buffer;
+      }
+    else
+      {
+      string_buffer.append(name, last);
+      name = string_buffer.c_str();
+      }
     }
 
   // Now check the file node type.
@@ -4002,7 +4011,7 @@ void SystemTools::SplitProgramFromArgs(const char* path,
       args = dir.substr(spacePos, dir.size()-spacePos);
       return;
       }
-    // Now try and find the the program in the path
+    // Now try and find the program in the path
     findProg = SystemTools::FindProgram(tryProg.c_str(), e);
     if(findProg.size())
       {

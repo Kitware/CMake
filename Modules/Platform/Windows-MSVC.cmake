@@ -22,7 +22,7 @@ set(CMAKE_LIBRARY_PATH_FLAG "-LIBPATH:")
 set(CMAKE_LINK_LIBRARY_FLAG "")
 set(MSVC 1)
 
-# hack: if a new cmake (which uses CMAKE__LINKER) runs on an old build tree
+# hack: if a new cmake (which uses CMAKE_LINKER) runs on an old build tree
 # (where link was hardcoded) and where CMAKE_LINKER isn't in the cache
 # and still cmake didn't fail in CMakeFindBinUtils.cmake (because it isn't rerun)
 # hardcode CMAKE_LINKER here to link, so it behaves as it did before, Alex
@@ -52,9 +52,6 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
 endif()
 if(NOT CMAKE_NO_BUILD_TYPE AND CMAKE_GENERATOR MATCHES "Visual Studio")
   set (CMAKE_NO_BUILD_TYPE 1)
-  set (CMAKE_CONFIGURATION_TYPES "Debug;Release;MinSizeRel;RelWithDebInfo" CACHE STRING
-     "Semicolon separated list of supported configuration types, only supports Debug, Release, MinSizeRel, and RelWithDebInfo, anything else will be ignored.")
-  mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # make sure to enable languages after setting configuration types
@@ -228,7 +225,7 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_LINKER> /lib ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
 
   set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <FLAGS> <DEFINES> /Fo<OBJECT> /Fd<TARGET_PDB> -c <SOURCE>${CMAKE_END_TEMP_FILE}")
+    "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <FLAGS> <DEFINES> /Fo<OBJECT> /Fd<OBJECT_DIR>/ -c <SOURCE>${CMAKE_END_TEMP_FILE}")
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE
     "<CMAKE_${lang}_COMPILER> > <PREPROCESSED_SOURCE> ${CMAKE_START_TEMP_FILE} ${CMAKE_CL_NOLOGO}${_COMPILE_${lang}} <FLAGS> <DEFINES> -E <SOURCE>${CMAKE_END_TEMP_FILE}")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE
@@ -237,7 +234,7 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_COMPILER_LINKER_OPTION_FLAG_EXECUTABLE "/link")
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
   set(CMAKE_${lang}_LINK_EXECUTABLE
-    "${_CMAKE_VS_LINK_EXE}<CMAKE_${lang}_COMPILER> ${CMAKE_CL_NOLOGO} ${CMAKE_START_TEMP_FILE} <FLAGS> /Fe<TARGET> /Fd<TARGET_PDB> <OBJECTS> /link /implib:<TARGET_IMPLIB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
+    "${_CMAKE_VS_LINK_EXE}<CMAKE_LINKER> ${CMAKE_CL_NOLOGO} <OBJECTS> ${CMAKE_START_TEMP_FILE} /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES>${CMAKE_END_TEMP_FILE}")
 
   set(CMAKE_${lang}_FLAGS_INIT "${_PLATFORM_DEFINES}${_PLATFORM_DEFINES_${lang}} /D_WINDOWS /W3${_FLAGS_${lang}}")
   set(CMAKE_${lang}_FLAGS_DEBUG_INIT "/D_DEBUG /MDd /Zi /Ob0 /Od ${_RTC1}")

@@ -85,6 +85,7 @@ public:
 
   ///! Set/Get the name of the target
   const char* GetName() const {return this->Name.c_str();}
+  const char* GetExportName();
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
@@ -105,6 +106,10 @@ public:
   /** Get the status of policy CMP0020 when the target was created.  */
   cmPolicies::PolicyStatus GetPolicyStatusCMP0020() const
     { return this->PolicyStatusCMP0020; }
+
+  /** Get the status of policy CMP0021 when the target was created.  */
+  cmPolicies::PolicyStatus GetPolicyStatusCMP0021() const
+    { return this->PolicyStatusCMP0021; }
 
   /**
    * Get the list of the custom commands for this target
@@ -664,6 +669,7 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0004;
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
   cmPolicies::PolicyStatus PolicyStatusCMP0020;
+  cmPolicies::PolicyStatus PolicyStatusCMP0021;
 
   // Internal representation details.
   friend class cmTargetInternals;

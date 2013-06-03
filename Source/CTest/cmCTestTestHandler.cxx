@@ -82,7 +82,6 @@ bool cmCTestSubdirCommand
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   for ( it = args.begin(); it != args.end(); ++ it )
     {
-    cmSystemTools::ChangeDirectory(cwd.c_str());
     std::string fname;
 
     if(cmSystemTools::FileIsFullPath(it->c_str()))
@@ -116,7 +115,6 @@ bool cmCTestSubdirCommand
     else
       {
       // No CTestTestfile? Who cares...
-      cmSystemTools::ChangeDirectory(cwd.c_str());
       continue;
       }
     fname += "/";
@@ -133,6 +131,7 @@ bool cmCTestSubdirCommand
       return false;
       }
     }
+  cmSystemTools::ChangeDirectory(cwd.c_str());
   return true;
 }
 
@@ -1363,7 +1362,7 @@ void cmCTestTestHandler
     tempPath += filename;
     attempted.push_back(tempPath);
     attemptedConfigs.push_back(ctest->GetConfigType());
-    // If the file is an OSX bundle then the configtyp
+    // If the file is an OSX bundle then the configtype
     // will be at the start of the path
     tempPath = ctest->GetConfigType();
     tempPath += "/";
@@ -1374,7 +1373,7 @@ void cmCTestTestHandler
     }
   else
     {
-    // no config specified to try some options
+    // no config specified - try some options...
     tempPath = filepath;
     tempPath += "Release/";
     tempPath += filename;

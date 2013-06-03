@@ -80,12 +80,15 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
 std::string cmGlobalVisualStudio6Generator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName,
+                       const char *projectDir,
                        const char* additionalOptions,
                        const char *targetName,
                        const char* config,
                        bool ignoreErrors,
                        bool)
 {
+  // Visual studio 6 doesn't need project dir
+  (void) projectDir;
   // Ingoring errors is not implemented in visual studio 6
   (void) ignoreErrors;
 

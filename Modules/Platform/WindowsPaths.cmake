@@ -77,10 +77,12 @@ list(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   # Project install destination.
   "${CMAKE_INSTALL_PREFIX}"
-
-  # MinGW (useful when cross compiling from linux with CMAKE_FIND_ROOT_PATH set)
-  /
   )
+
+if(CMAKE_CROSSCOMPILING AND NOT CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+  # MinGW (useful when cross compiling from linux with CMAKE_FIND_ROOT_PATH set)
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH /)
+endif()
 
 list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   )

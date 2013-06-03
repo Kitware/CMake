@@ -10,7 +10,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_AR", cmProperty::VARIABLE,
      "Name of archiving tool for static libraries.",
-     "This specifies name of the program that creates archive "
+     "This specifies the name of the program that creates archive "
      "or static libraries.",false,
      "Variables that Provide Information");
 
@@ -129,9 +129,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      " needed to build the output of CMake.   If the "
      "generator selected was Visual Studio 6, the "
      "CMAKE_BUILD_TOOL will be set to msdev, for "
-     "Unix makefiles it will be set to make or gmake, "
+     "Unix Makefiles it will be set to make or gmake, "
      "and for Visual Studio 7 it set to devenv.  For "
-     "Nmake Makefiles the value is nmake. This can be "
+     "NMake Makefiles the value is nmake. This can be "
      "useful for adding special flags and commands based"
      " on the final build environment. ", false,
      "Variables that Provide Information");
@@ -152,7 +152,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_CACHE_MAJOR_VERSION", cmProperty::VARIABLE,
      "Major version of CMake used to create the CMakeCache.txt file",
-     "This is stores the major version of CMake used to "
+     "This stores the major version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false,
@@ -160,7 +160,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_CACHE_MINOR_VERSION", cmProperty::VARIABLE,
      "Minor version of CMake used to create the CMakeCache.txt file",
-     "This is stores the minor version of CMake used to "
+     "This stores the minor version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false,
@@ -169,7 +169,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_CACHE_PATCH_VERSION", cmProperty::VARIABLE,
      "Patch version of CMake used to create the CMakeCache.txt file",
-     "This is stores the patch version of CMake used to "
+     "This stores the patch version of CMake used to "
      "write a CMake cache file. It is only different when "
      "a different version of CMake is run on a previously "
      "created cache file.", false,
@@ -270,12 +270,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_LINK_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for libraries that you link to.",
-     "The suffix to use for the end of a library, .lib on Windows.",false,
+     "The suffix to use for the end of a library filename, .lib on Windows."
+     ,false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_EXECUTABLE_SUFFIX", cmProperty::VARIABLE,
      "The suffix for executables on this platform.",
-     "The suffix to use for the end of an executable if any, "
+     "The suffix to use for the end of an executable filename if any, "
      ".exe on Windows."
      "\n"
      "CMAKE_EXECUTABLE_SUFFIX_<LANG> overrides this for language <LANG>."
@@ -452,8 +453,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      ,false, "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_IMPORT_LIBRARY_SUFFIX", cmProperty::VARIABLE,
-     "The suffix for import  libraries that you link to.",
-     "The suffix to use for the end of an import library if used "
+     "The suffix for import libraries that you link to.",
+     "The suffix to use for the end of an import library filename if used "
      "on this platform."
      "\n"
      "CMAKE_IMPORT_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
@@ -468,7 +469,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SHARED_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for shared libraries that you link to.",
-     "The suffix to use for the end of a shared library, .dll on Windows."
+     "The suffix to use for the end of a shared library filename, "
+     ".dll on Windows."
      "\n"
      "CMAKE_SHARED_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
      ,false, "Variables that Provide Information");
@@ -482,7 +484,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SHARED_MODULE_SUFFIX", cmProperty::VARIABLE,
      "The suffix for shared libraries that you link to.",
-     "The suffix to use for the end of a loadable module on this platform"
+     "The suffix to use for the end of a loadable module filename "
+     "on this platform"
      "\n"
      "CMAKE_SHARED_MODULE_SUFFIX_<LANG> overrides this for language <LANG>."
      ,false, "Variables that Provide Information");
@@ -496,7 +499,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_STATIC_LIBRARY_SUFFIX", cmProperty::VARIABLE,
      "The suffix for static libraries that you link to.",
-     "The suffix to use for the end of a static library, .lib on Windows."
+     "The suffix to use for the end of a static library filename, "
+     ".lib on Windows."
      "\n"
      "CMAKE_STATIC_LIBRARY_SUFFIX_<LANG> overrides this for language <LANG>."
      ,false, "Variables that Provide Information");
@@ -577,26 +581,37 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
     cm->DefineProperty
     ("CMAKE_CONFIGURATION_TYPES",  cmProperty::VARIABLE,
-     "Specifies the available build types.",
-     "This specifies what build types will be available such as "
-     "Debug, Release, RelWithDebInfo etc. This has reasonable defaults "
-     "on most platforms. But can be extended to provide other "
-     "build types. See also CMAKE_BUILD_TYPE.",
-     false,
+     "Specifies the available build types on multi-config generators.",
+     "This specifies what build types (configurations) will be available "
+     "such as Debug, Release, RelWithDebInfo etc. "
+     "This has reasonable defaults on most platforms, "
+     "but can be extended to provide other build types. "
+     "See also CMAKE_BUILD_TYPE for details of managing configuration data, "
+     "and CMAKE_CFG_INTDIR."
+     ,false,
      "Variables That Change Behavior");
 
     cm->DefineProperty
     ("CMAKE_BUILD_TYPE",  cmProperty::VARIABLE,
-     "Specifies the build type for make based generators.",
-     "This specifies what build type will be built in this tree. "
-     " Possible values are empty, Debug, Release, RelWithDebInfo"
-     " and MinSizeRel. This variable is only supported for "
-     "make based generators. If this variable is supported, "
-     "then CMake will also provide initial values for the "
-     "variables with the name "
-     " CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]."
-     " For example, if CMAKE_BUILD_TYPE is Debug, then "
-     "CMAKE_C_FLAGS_DEBUG will be added to the CMAKE_C_FLAGS.",false,
+     "Specifies the build type on single-configuration generators.",
+     "This statically specifies what build type (configuration) "
+     "will be built in this build tree. Possible values are "
+     "empty, Debug, Release, RelWithDebInfo and MinSizeRel. "
+     "This variable is only meaningful to single-configuration generators "
+     "(such as make and Ninja) i.e. "
+     "those which choose a single configuration "
+     "when CMake runs to generate a build tree as opposed to "
+     "multi-configuration generators which offer selection of the build "
+     "configuration within the generated build environment. "
+     "There are many per-config properties and variables "
+     "(usually following clean SOME_VAR_<CONFIG> order conventions), "
+     "such as CMAKE_C_FLAGS_<CONFIG>, specified as uppercase: "
+     "CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]. "
+     "For example, in a build tree configured "
+     "to build type Debug, CMake will see to having "
+     "CMAKE_C_FLAGS_DEBUG settings get added to the CMAKE_C_FLAGS settings. "
+     "See also CMAKE_CONFIGURATION_TYPES."
+     ,false,
      "Variables That Change Behavior");
 
   cm->DefineProperty
@@ -616,7 +631,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_INSTALL_PREFIX", cmProperty::VARIABLE,
      "Install directory used by install.",
      "If \"make install\" is invoked or INSTALL is built"
-     ", this directory is pre-pended onto all install "
+     ", this directory is prepended onto all install "
      "directories. This variable defaults to /usr/local"
      " on UNIX and c:/Program Files on Windows.\n"
      "On UNIX one can use the DESTDIR mechanism in order"
@@ -627,11 +642,11 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "It is usually invoked like this:\n"
      " make DESTDIR=/home/john install\n"
      "which will install the concerned software using the"
-     " installation prefix, e.g. \"/usr/local\" pre-pended with "
+     " installation prefix, e.g. \"/usr/local\" prepended with "
      "the DESTDIR value which finally gives \"/home/john/usr/local\".\n"
      "WARNING: DESTDIR may not be used on Windows because installation"
      " prefix usually contains a drive letter like in \"C:/Program Files\""
-     " which cannot be pre-pended with some other prefix."
+     " which cannot be prepended with some other prefix."
      ,false,
      "Variables That Change Behavior");
 
@@ -792,7 +807,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This switch should be used during the initial CMake run. Otherwise if "
      "the package has already been found in a previous CMake run, the "
      "variables which have been stored in the cache will still be there. "
-     "In the case it is recommended to remove the cache variables for "
+     "In that case it is recommended to remove the cache variables for "
      "this package from the cache using the cache editor or cmake -U", false,
      "Variables That Change Behavior");
 
@@ -888,7 +903,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       " an ABSOLUTE DESTINATION path.",
       "This variable is defined by CMake-generated cmake_install.cmake "
       "scripts."
-      " It can be used (read-only) by program or script that source those"
+      " It can be used (read-only) by programs or scripts that source those"
       " install scripts. This is used by some CPack generators (e.g. RPM).",
       false,
       "Variables That Change Behavior");
@@ -898,7 +913,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       "Ask cmake_install.cmake script to warn each time a file with "
       "absolute INSTALL DESTINATION is encountered.",
       "This variable is used by CMake-generated cmake_install.cmake"
-      " scripts. If ones set this variable to ON while running the"
+      " scripts. If one sets this variable to ON while running the"
       " script, it may get warning messages from the script.", false,
       "Variables That Change Behavior");
 
@@ -909,7 +924,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
       "The fatal error is emitted before the installation of "
       "the offending file takes place."
       " This variable is used by CMake-generated cmake_install.cmake"
-      " scripts. If ones set this variable to ON while running the"
+      " scripts. If one sets this variable to ON while running the"
       " script, it may get fatal error messages from the script.",false,
       "Variables That Change Behavior");
 
@@ -940,7 +955,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "which CMake is targeting.   On systems that "
      "have the uname command, this variable is set "
      "to the output of uname -s.  Linux, Windows, "
-     " and Darwin for Mac OSX are the values found "
+     " and Darwin for Mac OS X are the values found "
      " on the big three operating systems."  ,false,
      "Variables That Describe the System");
   cm->DefineProperty
@@ -999,20 +1014,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("APPLE", cmProperty::VARIABLE,
-     "True if running on Mac OSX.",
-     "Set to true on Mac OSX.",false,
+     "True if running on Mac OS X.",
+     "Set to true on Mac OS X."
+     ,false,
      "Variables That Describe the System");
 
   cm->DefineProperty
     ("BORLAND", cmProperty::VARIABLE,
-     "True if the borland compiler is being used.",
+     "True if the Borland compiler is being used.",
      "This is set to true if the Borland compiler is being used.",false,
      "Variables That Describe the System");
 
   cm->DefineProperty
     ("CYGWIN", cmProperty::VARIABLE,
-     "True for cygwin.",
-     "Set to true when using CYGWIN.",false,
+     "True for Cygwin.",
+     "Set to true when using Cygwin."
+     ,false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -1110,8 +1127,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_HOST_APPLE", cmProperty::VARIABLE,
-     "True for Apple OSXoperating systems.",
-     "Set to true when the host system is Apple OSX.",
+     "True for Apple OS X operating systems.",
+     "Set to true when the host system is Apple OS X.",
      false,
      "Variables That Describe the System");
 
@@ -1125,7 +1142,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_HOST_WIN32", cmProperty::VARIABLE,
      "True on windows systems, including win64.",
-     "Set to true when the host system is Windows and on cygwin.",false,
+     "Set to true when the host system is Windows and on Cygwin."
+     ,false,
      "Variables That Describe the System");
 
   cm->DefineProperty
@@ -1198,7 +1216,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_INSTALL_NAME_DIR", cmProperty::VARIABLE,
-     "Mac OSX directory name for installed targets.",
+     "Mac OS X directory name for installed targets.",
      "CMAKE_INSTALL_NAME_DIR is used to initialize the "
      "INSTALL_NAME_DIR property on all targets. See that target "
      "property for more information.",
@@ -1252,7 +1270,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_PDB_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
-     "Where to put all the MS debug symbol files.",
+     "Where to put all the MS debug symbol files from linker.",
      "This variable is used to initialize the "
      "PDB_OUTPUT_DIRECTORY property on all the targets. "
      "See that target property for additional information.",
@@ -1358,44 +1376,47 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_EXE_LINKER_FLAGS", cmProperty::VARIABLE,
-     "Linker flags used to create executables.",
-     "Flags used by the linker when creating an executable.",false,
+     "Linker flags to be used to create executables.",
+     "These flags will be used by the linker when creating an executable."
+     ,false,
      "Variables that Control the Build");
 
   cm->DefineProperty
-    ("CMAKE_EXE_LINKER_FLAGS_[CMAKE_BUILD_TYPE]", cmProperty::VARIABLE,
-     "Flag used when linking an executable.",
+    ("CMAKE_EXE_LINKER_FLAGS_<CONFIG>", cmProperty::VARIABLE,
+     "Flags to be used when linking an executable.",
      "Same as CMAKE_C_FLAGS_* but used by the linker "
      "when creating executables.",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LIBRARY_PATH_FLAG", cmProperty::VARIABLE,
-     "The flag used to add a library search path to a compiler.",
-     "The flag used to specify a library directory to the compiler. "
+     "The flag to be used to add a library search path to a compiler.",
+     "The flag will be used to specify a library directory to the compiler. "
      "On most compilers this is \"-L\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LINK_DEF_FILE_FLAG  ", cmProperty::VARIABLE,
-     "Linker flag used to specify a .def file for dll creation.",
-     "The flag used to add a .def file when creating "
-     "a dll on Windows, this is only defined on Windows.",false,
+     "Linker flag to be used to specify a .def file for dll creation.",
+     "The flag will be used to add a .def file when creating "
+     "a dll on Windows; this is only defined on Windows."
+     ,false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LINK_LIBRARY_FLAG", cmProperty::VARIABLE,
-     "Flag used to link a library into an executable.",
-     "The flag used to specify a library to link to an executable.  "
+     "Flag to be used to link a library into an executable.",
+     "The flag will be used to specify a library to link to an executable.  "
      "On most compilers this is \"-l\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_LINK_LIBRARY_FILE_FLAG", cmProperty::VARIABLE,
-     "Flag used to link a library specified by a path to its file.",
-     "The flag used before a library file path is given to the linker.  "
+     "Flag to be used to link a library specified by a path to its file.",
+     "The flag will be used before a library file path is given to the "
+     "linker.  "
      "This is needed only on very few platforms.", false,
      "Variables that Control the Build");
   cm->DefineProperty
     ("CMAKE_USE_RELATIVE_PATHS", cmProperty::VARIABLE,
      "Use relative paths (May not work!).",
-     "If this is set to TRUE, then the CMake will use "
+     "If this is set to TRUE, then CMake will use "
      "relative paths between the source and binary tree. "
      "This option does not work for more complicated "
      "projects, and relative paths are used when possible.  "
@@ -1591,7 +1612,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_COMPILE_OBJECT", cmProperty::VARIABLE,
      "Rule variable to compile a single object file.",
      "This is a rule variable that tells CMake how to "
-     "compile a single object file for for the language <LANG>.",false,
+     "compile a single object file for the language <LANG>."
+     ,false,
      "Variables for Languages");
 
   cm->DefineProperty
@@ -1727,8 +1749,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_<LANG>_LINK_EXECUTABLE ", cmProperty::VARIABLE,
-     "Rule variable to link and executable.",
-     "Rule variable to link and executable for the given language.",false,
+     "Rule variable to link an executable.",
+     "Rule variable to link an executable for the given language."
+     ,false,
      "Variables for Languages");
 
   cm->DefineProperty
@@ -1742,7 +1765,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS", cmProperty::VARIABLE,
      "Extensions of source files for the given language.",
      "This is the list of extensions for a "
-     "given languages source files.",false,"Variables for Languages");
+     "given language's source files."
+     ,false,
+     "Variables for Languages");
 
   cm->DefineProperty(
     "CMAKE_<LANG>_COMPILER_LOADED", cmProperty::VARIABLE,

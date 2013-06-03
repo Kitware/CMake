@@ -485,6 +485,7 @@ private:
   int                     MaxTestNameWidth;
 
   int                     ParallelLevel;
+  bool                    ParallelLevelSetInCli;
 
   int                     CompatibilityMode;
 

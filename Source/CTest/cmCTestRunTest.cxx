@@ -166,6 +166,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         {
         found = true;
         reason = "Required regular expression found.";
+        break;
         }
       }
     if ( !found )
@@ -196,6 +197,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
         reason += passIt->second;
         reason += "]";
         forceFail = true;
+        break;
         }
       }
     }
@@ -384,13 +386,19 @@ void cmCTestRunTest::MemCheckPostProcess()
              << this->TestResult.Name.c_str() << std::endl);
   cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
     (this->TestHandler);
-  if(handler->MemoryTesterStyle == cmCTestMemCheckHandler::BOUNDS_CHECKER)
+  switch ( handler->MemoryTesterStyle )
     {
-    handler->PostProcessBoundsCheckerTest(this->TestResult);
-    }
-  else if(handler->MemoryTesterStyle == cmCTestMemCheckHandler::PURIFY)
-    {
-    handler->PostProcessPurifyTest(this->TestResult);
+    case cmCTestMemCheckHandler::VALGRIND:
+      handler->PostProcessValgrindTest(this->TestResult);
+      break;
+    case cmCTestMemCheckHandler::PURIFY:
+      handler->PostProcessPurifyTest(this->TestResult);
+      break;
+    case cmCTestMemCheckHandler::BOUNDS_CHECKER:
+      handler->PostProcessBoundsCheckerTest(this->TestResult);
+      break;
+    default:
+      break;
     }
 }
 

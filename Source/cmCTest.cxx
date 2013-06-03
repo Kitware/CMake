@@ -294,6 +294,7 @@ cmCTest::cmCTest()
 {
   this->LabelSummary           = true;
   this->ParallelLevel          = 1;
+  this->ParallelLevelSetInCli  = false;
   this->SubmitIndex            = 0;
   this->Failover               = false;
   this->BatchJobs              = false;
@@ -1999,11 +2000,13 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     i++;
     int plevel = atoi(args[i].c_str());
     this->SetParallelLevel(plevel);
+    this->ParallelLevelSetInCli = true;
     }
   else if(arg.find("-j") == 0)
     {
     int plevel = atoi(arg.substr(2).c_str());
     this->SetParallelLevel(plevel);
+    this->ParallelLevelSetInCli = true;
     }
 
   if(this->CheckArgument(arg, "--no-compress-output"))
@@ -2398,6 +2401,14 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
       }
     } // the close of the for argument loop
 
+  if (!this->ParallelLevelSetInCli)
+    {
+    if (const char *parallel = cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL"))
+      {
+      int plevel = atoi(parallel);
+      this->SetParallelLevel(plevel);
+      }
+    }
 
   // now what sould cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
@@ -2413,7 +2424,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 #endif
     if(retv != 0)
       {
-      cmCTestLog(this, DEBUG, "build and test failing returing: " << retv
+      cmCTestLog(this, DEBUG, "build and test failing returning: " << retv
                  << std::endl);
       }
     return retv;

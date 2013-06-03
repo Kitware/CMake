@@ -56,7 +56,7 @@
 		2C18F0B415DC1DC700593670 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
-			lastKnownFileType = @id_type@;
+			explicitFileType = @id_type@;
 			path = @id_src@;
 			refType = 4;
 			sourceTree = "<group>";

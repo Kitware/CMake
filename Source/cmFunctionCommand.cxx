@@ -267,7 +267,7 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
     std::vector<std::string> expandedArguments;
     mf.ExpandArguments(lff.Arguments, expandedArguments);
     // if the endfunction has arguments then make sure
-    // they match the ones in the openeing function command
+    // they match the ones in the opening function command
     if ((expandedArguments.empty() ||
          (expandedArguments[0] == this->Args[0])))
       {

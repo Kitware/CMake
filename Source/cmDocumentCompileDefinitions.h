@@ -23,7 +23,7 @@
   "in a (configured) header file.  Then report the limitation.  "       \
   "Known limitations include:\n"                                        \
   "  #          - broken almost everywhere\n"                           \
-  "  ;          - broken in VS IDE and Borland Makefiles\n"             \
+  "  ;          - broken in VS IDE 7.0 and Borland Makefiles\n"         \
   "  ,          - broken in VS IDE\n"                                   \
   "  %          - broken in some cases in NMake\n"                      \
   "  & |        - broken in some cases on MinGW\n"                      \

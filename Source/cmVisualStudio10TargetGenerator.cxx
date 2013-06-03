@@ -291,6 +291,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteCustomCommands();
   this->WriteAllSources();
   this->WriteDotNetReferences();
+
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
@@ -455,6 +456,12 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       this->WriteString("<WindowsAppContainer>true"
                         "</WindowsAppContainer>\n", 2);
       }
+
+    if(!this->GeneratorTarget->ResxSources.empty())
+      {
+      this->WriteString("<CLRSupport>true</CLRSupport>\n", 2);
+      }
+
     this->WriteString("</PropertyGroup>\n", 1);
     }
 }
@@ -647,6 +654,23 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
     }
 
+  std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
+  if(!resxObjs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<cmSourceFile*>::iterator oi = resxObjs.begin();
+        oi != resxObjs.end(); ++oi)
+      {
+      std::string obj = (*oi)->GetFullPath();
+      this->WriteString("<EmbeddedResource Include=\"", 2);
+      this->ConvertToWindowsSlash(obj);
+      (*this->BuildFileStream ) << obj << "\">\n";
+      this->WriteString("<Filter>Resource Files</Filter>\n", 3);
+      this->WriteString("</EmbeddedResource>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+
   // Add object library contents as external objects.
   std::vector<std::string> objs;
   this->GeneratorTarget->UseObjectLibraries(objs);
@@ -701,6 +725,23 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                              << "</UniqueIdentifier>\n";
     this->WriteString("</Filter>\n", 2);
     }
+
+  if(!this->GeneratorTarget->ResxSources.empty())
+    {
+    this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
+    std::string guidName = "SG_Filter_Resource Files";
+    this->GlobalGenerator->CreateGUID(guidName.c_str());
+    this->WriteString("<UniqueIdentifier>", 3);
+    std::string guid =
+      this->GlobalGenerator->GetGUID(guidName.c_str());
+    (*this->BuildFileStream) << "{" << guid << "}"
+                             << "</UniqueIdentifier>\n";
+    this->WriteString("<Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;", 3);
+    (*this->BuildFileStream) << "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;";
+    (*this->BuildFileStream) << "mfcribbon-ms</Extensions>\n";
+    this->WriteString("</Filter>\n", 2);
+  }
+
   this->WriteString("</ItemGroup>\n", 1);
   this->WriteString("</Project>\n", 0);
   // restore stream pointer
@@ -832,8 +873,20 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
-  (*this->BuildFileStream ) << tool <<
-    " Include=\"" << sourceFile << "\"" << (end? end : " />\n");
+  (*this->BuildFileStream ) << tool << " Include=\"" << sourceFile << "\"";
+
+  if(sf->GetExtension() == "h" &&
+    this->IsResxHeader(sf->GetFullPath()))
+    {
+      (*this->BuildFileStream ) << ">\n";
+      this->WriteString("<FileType>CppForm</FileType>\n", 3);
+      this->WriteString("</ClInclude>\n", 2);
+    }
+  else
+    {
+      (*this->BuildFileStream ) << (end? end : " />\n");
+    }
+
   ToolSource toolSource = {sf, forceRelative};
   this->Tools[tool].push_back(toolSource);
 }
@@ -1218,6 +1271,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
   clOptions.FixExceptionHandlingDefault();
   clOptions.AddFlag("PrecompiledHeader", "NotUsing");
+  std::string asmLocation = configName + "/";
+  clOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   clOptions.AddDefines(this->Target->GetCompileDefinitions(
@@ -1260,18 +1315,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
-  this->WriteString("<AssemblerListingLocation>", 3);
-  *this->BuildFileStream << configName
-                         << "</AssemblerListingLocation>\n";
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
-  if(this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
-    {
-    this->WriteString("<ProgramDataBaseFileName>", 3);
-    *this->BuildFileStream << this->Target->GetPDBDirectory(configName.c_str())
-                           << "/"
-                           << this->Target->GetPDBName(configName.c_str())
-                           << "</ProgramDataBaseFileName>\n";
-    }
   this->WriteString("</ClCompile>\n", 2);
 }
 
@@ -1579,6 +1623,21 @@ void cmVisualStudio10TargetGenerator::
 WriteMidlOptions(std::string const& /*config*/,
                  std::vector<std::string> const & includes)
 {
+  // This processes *any* of the .idl files specified in the project's file
+  // list (and passed as the item metadata %(Filename) expressing the rule
+  // input filename) into output files at the per-config *build* dir
+  // ($(IntDir)) each.
+  //
+  // IOW, this MIDL section is intended to provide a fully generic syntax
+  // content suitable for most cases (read: if you get errors, then it's quite
+  // probable that the error is on your side of the .idl setup).
+  //
+  // Also, note that the marked-as-generated _i.c file in the Visual Studio
+  // generator case needs to be referred to as $(IntDir)\foo_i.c at the
+  // project's file list, otherwise the compiler-side processing won't pick it
+  // up (for non-directory form, it ends up looking in project binary dir
+  // only).  Perhaps there's something to be done to make this more automatic
+  // on the CMake side?
   this->WriteString("<Midl>\n", 2);
   this->OutputIncludes(includes);
   this->WriteString("<OutputDirectory>$(IntDir)</OutputDirectory>\n", 3);
@@ -1717,4 +1776,13 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     this->WriteString("</ProjectReference>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
+}
+
+bool cmVisualStudio10TargetGenerator::
+  IsResxHeader(const std::string& headerFile)
+{
+  std::set<std::string>::iterator it =
+      this->GeneratorTarget->ExpectedResxHeaders.find(headerFile);
+
+  return it != this->GeneratorTarget->ExpectedResxHeaders.end();
 }

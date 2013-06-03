@@ -134,7 +134,8 @@ private:
   bool OpenBSD;
   void AddLinkPrefix(const char* p);
   void AddLinkExtension(const char* e, LinkType type);
-  std::string CreateExtensionRegex(std::vector<std::string> const& exts);
+  std::string CreateExtensionRegex(std::vector<std::string> const& exts,
+                                   LinkType type);
   std::string NoCaseExpression(const char* str);
 
   // Handling of link items.

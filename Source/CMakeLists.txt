@@ -357,6 +357,10 @@ if (WIN32)
       cmLocalVisualStudio7Generator.h
       cmLocalVisualStudioGenerator.cxx
       cmLocalVisualStudioGenerator.h
+      cmVisualStudioSlnData.h
+      cmVisualStudioSlnData.cxx
+      cmVisualStudioSlnParser.h
+      cmVisualStudioSlnParser.cxx
       cmVisualStudioWCEPlatformParser.h
       cmVisualStudioWCEPlatformParser.cxx
       cmWin32ProcessExecution.cxx
@@ -537,7 +541,8 @@ endif()
 add_executable(cmake cmakemain.cxx)
 target_link_libraries(cmake CMakeLib)
 
-# Build special executable for running programs on Windows 98
+# Build special executable for running programs on Windows 98.
+# Included on any Windows (unconditional packaging required!).
 if(WIN32)
   if(NOT UNIX)
     add_executable(cmw9xcom cmw9xcom.cxx)

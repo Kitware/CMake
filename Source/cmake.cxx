@@ -128,7 +128,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
       "by CMake in versions prior to 1.6. To fix this you might need to set "
       "the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less. If "
       "you are writing a CMakeLists file, (or have already set "
-      "CMAKE_BACKWARDS_COMPATABILITY to 1.4 or less) then you probably need "
+      "CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less) then you probably need "
       "to include a CMake module to test for the feature this variable "
       "defines.";
     cmSystemTools::Error(message.c_str());
@@ -2365,7 +2365,7 @@ int cmake::ActualConfigure()
   // EXECUTABLE_OUTPUT_PATH.  They are now documented as old-style and
   // should no longer be used.  Therefore we present them only if the
   // project requires compatibility with CMake 2.4.  We detect this
-  // here by looking for the old CMAKE_BACKWARDS_COMPATABILITY
+  // here by looking for the old CMAKE_BACKWARDS_COMPATIBILITY
   // variable created when CMP0001 is not set to NEW.
   if(this->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
@@ -4045,7 +4045,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   // TODO: Teach cmGeneratedFileStream to use a random temp file (with
   // multiple tries in unlikely case of conflict) and use that here.
   std::ofstream stamp(stampTemp);
-  stamp << "# CMake generation timestamp file this directory.\n";
+  stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if(cmSystemTools::RenameFile(stampTemp, stampName))
     {
@@ -4117,7 +4117,7 @@ int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
   return -1;
 }
 
-// For visual studio 2005 and newer manifest files need to be embeded into
+// For visual studio 2005 and newer manifest files need to be embedded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
 int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
@@ -4173,7 +4173,7 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
     {
     if(verbose)
       {
-      std::cout << "Visual Studio Incremental Link with embeded manifests\n";
+      std::cout << "Visual Studio Incremental Link with embedded manifests\n";
       }
     return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
     }

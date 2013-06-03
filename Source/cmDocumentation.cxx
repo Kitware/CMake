@@ -53,7 +53,7 @@ static const char *cmModulesDocumentationDescription[][3] =
   "This is the documentation for the modules and scripts coming with CMake. "
   "Using these modules you can check the computer system for "
   "installed software packages, features of the compiler and the "
-  "existance of headers to name just a few.", 0},
+  "existence of headers to name just a few.", 0},
   {0,0,0}
 };
 
@@ -67,7 +67,7 @@ static const char *cmCustomModulesDocumentationDescription[][3] =
   "This is the documentation for additional modules and scripts for CMake. "
   "Using these modules you can check the computer system for "
   "installed software packages, features of the compiler and the "
-  "existance of headers to name just a few.", 0},
+  "existence of headers to name just a few.", 0},
   {0,0,0}
 };
 
