@@ -1321,8 +1321,40 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     = cmtarget.GetPreBuildCommands();
   std::vector<cmCustomCommand> const & prelink
     = cmtarget.GetPreLinkCommands();
-  std::vector<cmCustomCommand> const & postbuild
+  std::vector<cmCustomCommand> postbuild
     = cmtarget.GetPostBuildCommands();
+
+  if(cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
+    !cmtarget.IsFrameworkOnApple())
+    {
+    cmCustomCommandLines cmd;
+    cmd.resize(1);
+    cmd[0].push_back(this->CurrentMakefile->GetDefinition("CMAKE_COMMAND"));
+    cmd[0].push_back("-E");
+    cmd[0].push_back("cmake_symlink_library");
+    std::string str_file = "$<TARGET_FILE:";
+    str_file += cmtarget.GetName();
+    str_file += ">";
+    std::string str_so_file = "$<TARGET_SONAME_FILE:";
+    str_so_file += cmtarget.GetName();
+    str_so_file += ">";
+    std::string str_link_file = "$<TARGET_LINKER_FILE:";
+    str_link_file += cmtarget.GetName();
+    str_link_file += ">";
+    cmd[0].push_back(str_file);
+    cmd[0].push_back(str_so_file);
+    cmd[0].push_back(str_link_file);
+
+    cmCustomCommand command(this->CurrentMakefile,
+      std::vector<std::string>(),
+      std::vector<std::string>(),
+      cmd,
+      "Creating symlinks",
+      "");
+
+    postbuild.push_back(command);
+    }
+
   std::vector<cmSourceFile*>const &classes = cmtarget.GetSourceFiles();
   // add all the sources
   std::vector<cmCustomCommand> commands;
@@ -1795,8 +1827,33 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string pnprefix;
   std::string pnbase;
   std::string pnsuffix;
-
   target.GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
+
+  const char* version = target.GetProperty("VERSION");
+  const char* soversion = target.GetProperty("SOVERSION");
+  if(!target.HasSOName(configName) || target.IsFrameworkOnApple())
+    {
+    version = 0;
+    soversion = 0;
+    }
+  if(version && !soversion)
+    {
+    soversion = version;
+    }
+  if(!version && soversion)
+    {
+    version = soversion;
+    }
+
+  std::string realName = pnbase;
+  std::string soName = pnbase;
+  if(version && soversion)
+    {
+    realName += ".";
+    realName += version;
+    soName += ".";
+    soName += soversion;
+    }
 
   // Set attributes to specify the proper name for the target.
   std::string pndir = this->CurrentMakefile->GetCurrentOutputDirectory();
@@ -1855,7 +1912,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   // Store the product name for all target types.
   buildSettings->AddAttribute("PRODUCT_NAME",
-                              this->CreateString(pnbase.c_str()));
+                              this->CreateString(realName.c_str()));
   buildSettings->AddAttribute("SYMROOT",
                               this->CreateString(pndir.c_str()));
 
@@ -1933,9 +1990,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(target.GetPropertyAsBool("FRAMEWORK"))
       {
-      std::string version = target.GetFrameworkVersion();
+      std::string fw_version = target.GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
-                                  this->CreateString(version.c_str()));
+                                  this->CreateString(fw_version.c_str()));
 
       std::string plist = this->ComputeInfoPListLocation(target);
       // Xcode will create the final version of Info.plist at build time,
@@ -2160,19 +2217,26 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     // Get the install_name directory for the build tree.
     install_name_dir = target.GetInstallNameDirForBuildTree(configName);
-    if(install_name_dir.empty())
-      {
-      // Xcode will not pass the -install_name option at all if INSTALL_PATH
-      // is not given or is empty.  We must explicitly put the flag in the
-      // link flags to create an install_name with just the library soname.
-      extraLinkOptions += " -install_name ";
-      extraLinkOptions += target.GetSOName(configName);
-      }
-    else
+    // Xcode doesn't create the correct install_name in some cases.
+    // That is, if the INSTALL_PATH is empty, or if we have versioning
+    // of dylib libraries, we want to specify the install_name.
+    // This is done by adding a link flag to create an install_name
+    // with just the library soname.
+    std::string install_name;
+    if(!install_name_dir.empty())
       {
       // Convert to a path for the native build tool.
       cmSystemTools::ConvertToUnixSlashes(install_name_dir);
-      // do not escape spaces on this since it is only a single path
+      install_name += install_name_dir;
+      install_name += "/";
+      }
+    install_name += target.GetSOName(configName);
+
+    if((realName != soName) || install_name_dir.empty())
+      {
+      install_name_dir = "";
+      extraLinkOptions += " -install_name ";
+      extraLinkOptions += XCodeEscapePath(install_name.c_str());
       }
     }
   buildSettings->AddAttribute("INSTALL_PATH",
