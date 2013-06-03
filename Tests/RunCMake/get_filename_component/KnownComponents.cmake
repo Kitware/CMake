@@ -24,6 +24,11 @@ check("DIRECTORY in windows root" "${test_winroot}" "c:/")
 get_filename_component(test_absolute "/path/to/a/../filename.ext.in" ABSOLUTE)
 check("ABSOLUTE" "${test_absolute}" "/path/to/filename.ext.in")
 
+get_filename_component(test_absolute "/../path/to/filename.ext.in" ABSOLUTE)
+check("ABSOLUTE .. in root" "${test_absolute}" "/path/to/filename.ext.in")
+get_filename_component(test_absolute "c:/../path/to/filename.ext.in" ABSOLUTE)
+check("ABSOLUTE .. in windows root" "${test_absolute}" "c:/path/to/filename.ext.in")
+
 get_filename_component(test_cache "/path/to/filename.ext.in" DIRECTORY CACHE)
 check("CACHE 1" "${test_cache}" "/path/to")
 get_filename_component(test_cache "/path/to/other/filename.ext.in" DIRECTORY CACHE)
