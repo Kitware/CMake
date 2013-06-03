@@ -1,0 +1,4 @@
+my_func
+\* Variable "b" was accessed using MODIFIED_ACCESS in: .*/Tests/RunCMake/variable_watch/NoWatcher.cmake
+  The value of the variable: ""
+  The list file stack: .*/Tests/RunCMake/variable_watch/CMakeLists.txt;.*/Tests/RunCMake/variable_watch/NoWatcher.cmake$
