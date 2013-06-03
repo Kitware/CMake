@@ -1082,6 +1082,8 @@ KWSYS_STL_HAS_ALLOCATOR_OBJECTS=0
 KWSYS_CXX_HAS_SETENV=0
 KWSYS_CXX_HAS_UNSETENV=0
 KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0
+KWSYS_CXX_HAS_UTIMENSAT=0
+KWSYS_CXX_HAS_UTIMES=0
 KWSYS_CXX_HAS_CSTDDEF=0
 KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=0
 KWSYS_CXX_HAS_MEMBER_TEMPLATES=0
@@ -1466,7 +1468,13 @@ if [ "x${cmake_cxx_flags}" != "x" ]; then
 fi
 
 cmake_c_flags_String="-DKWSYS_STRING_C"
-cmake_cxx_flags_SystemTools="-DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV} -DKWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV} -DKWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}"
+cmake_cxx_flags_SystemTools="
+  -DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV}
+  -DKWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV}
+  -DKWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}
+  -DKWSYS_CXX_HAS_UTIMENSAT=${KWSYS_CXX_HAS_UTIMENSAT}
+  -DKWSYS_CXX_HAS_UTIMES=${KWSYS_CXX_HAS_UTIMES}
+"
 cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
   -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 cmake_cxx_flags="${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \

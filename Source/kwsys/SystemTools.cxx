@@ -1124,22 +1124,58 @@ bool SystemTools::Touch(const char* filename, bool create)
       }
     return false;
     }
-#ifdef _MSC_VER
-#define utime _utime
-#define utimbuf _utimbuf
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  HANDLE h = CreateFile(filename, FILE_WRITE_ATTRIBUTES,
+                        FILE_SHARE_WRITE, 0, OPEN_EXISTING,
+                        FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if(!h)
+    {
+    return false;
+    }
+  FILETIME mtime;
+  GetSystemTimeAsFileTime(&mtime);
+  if(!SetFileTime(h, 0, 0, &mtime))
+    {
+    CloseHandle(h);
+    return false;
+    }
+  CloseHandle(h);
+#elif KWSYS_CXX_HAS_UTIMENSAT
+  struct timespec times[2] = {{0,UTIME_OMIT},{0,UTIME_NOW}};
+  if(utimensat(AT_FDCWD, filename, times, 0) < 0)
+    {
+    return false;
+    }
+#else
+  struct stat st;
+  if(stat(filename, &st) < 0)
+    {
+    return false;
+    }
+  struct timeval mtime;
+  gettimeofday(&mtime, 0);
+# if KWSYS_CXX_HAS_UTIMES
+  struct timeval times[2] =
+    {
+#  if KWSYS_STAT_HAS_ST_MTIM
+      {st.st_atim.tv_sec, st.st_atim.tv_nsec/1000}, /* tv_sec, tv_usec */
+#  else
+      {st.st_atime, 0},
+#  endif
+      mtime
+    };
+  if(utimes(filename, times) < 0)
+    {
+    return false;
+    }
+# else
+  struct utimbuf times = {st.st_atime, mtime.tv_sec};
+  if(utime(filename, &times) < 0)
+    {
+    return false;
+    }
+# endif
 #endif
-  struct stat fromStat;
-  if(stat(filename, &fromStat) < 0)
-    {
-    return false;
-    }
-  struct utimbuf buf;
-  buf.actime = fromStat.st_atime;
-  buf.modtime = static_cast<time_t>(SystemTools::GetTime());
-  if(utime(filename, &buf) < 0)
-    {
-    return false;
-    }
   return true;
 }
 

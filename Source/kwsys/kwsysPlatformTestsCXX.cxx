@@ -494,6 +494,25 @@ int main()
 }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_UTIMES
+#include <sys/time.h>
+int main()
+{
+  struct timeval* current_time = 0;
+  return utimes("/example", current_time);
+}
+#endif
+
+#ifdef TEST_KWSYS_CXX_HAS_UTIMENSAT
+#include <fcntl.h>
+#include <sys/stat.h>
+int main()
+{
+  struct timespec times[2] = {{0,UTIME_OMIT},{0,UTIME_NOW}};
+  return utimensat(AT_FDCWD, "/example", times, AT_SYMLINK_NOFOLLOW);
+}
+#endif
+
 #ifdef TEST_KWSYS_CXX_TYPE_INFO
 /* Collect fundamental type information and save it to a CMake script.  */
 
