@@ -15,10 +15,7 @@ macro(ADD_TEST_MACRO NAME COMMAND)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 endmacro()
 
-macro(REGEX_ESCAPE_STRING _OUT _IN)
-    # Escape special regex metacharacters with a backslash
-    string(REGEX REPLACE "([$^.[|*+?()]|])" "\\\\\\1" ${_OUT} "${_IN}")
-endmacro()
+include(${CMAKE_CURRENT_SOURCE_DIR}/RegexEscapeString.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
 
