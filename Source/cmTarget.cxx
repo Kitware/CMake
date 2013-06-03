@@ -1683,6 +1683,13 @@ bool cmTarget::IsCFBundleOnApple()
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::IsBundleOnApple()
+{
+  return this->IsFrameworkOnApple() || this->IsAppBundleOnApple() ||
+         this->IsCFBundleOnApple();
+}
+
+//----------------------------------------------------------------------------
 class cmTargetTraceDependencies
 {
 public:
@@ -3379,17 +3386,23 @@ const char* cmTarget::NormalGetLocation(const char* config)
 
   // Now handle the deprecated build-time configuration location.
   this->Location = this->GetDirectory();
-  if(!this->Location.empty())
-    {
-    this->Location += "/";
-    }
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if(cfgid && strcmp(cfgid, ".") != 0)
     {
-    this->Location += cfgid;
     this->Location += "/";
+    this->Location += cfgid;
     }
-  this->Location = this->BuildMacContentDirectory(this->Location, config);
+
+  if(this->IsCFBundleOnApple() || this->IsAppBundleOnApple())
+    {
+    std::string macdir = this->BuildMacContentDirectory("", config, false);
+    if(!macdir.empty())
+      {
+      this->Location += "/";
+      this->Location += macdir;
+      }
+    }
+  this->Location += "/";
   this->Location += this->GetFullName(config, false);
   return this->Location.c_str();
 }
@@ -3991,7 +4004,13 @@ std::string cmTarget::GetFullPath(const char* config, bool implib,
 std::string cmTarget::NormalGetFullPath(const char* config, bool implib,
                                         bool realname)
 {
-  std::string fpath = this->GetMacContentDirectory(config, implib);
+  std::string fpath = this->GetDirectory(config, implib);
+  fpath += "/";
+  if(this->IsCFBundleOnApple() || this->IsAppBundleOnApple())
+    {
+    fpath = this->BuildMacContentDirectory(fpath, config, false);
+    fpath += "/";
+    }
 
   // Add the full name of the target.
   if(implib)
@@ -4123,10 +4142,13 @@ void cmTarget::GetFullNameInternal(const char* config,
     targetSuffix = this->Makefile->GetSafeDefinition(suffixVar);
     }
 
-  // frameworks do not have a prefix or a suffix
+  // frameworks have directory prefix but no suffix
+  std::string fw_prefix;
   if(this->IsFrameworkOnApple())
     {
-    targetPrefix = 0;
+    fw_prefix = this->GetOutputName(config, false);
+    fw_prefix += ".framework/";
+    targetPrefix = fw_prefix.c_str();
     targetSuffix = 0;
     }
 
@@ -4206,13 +4228,24 @@ void cmTarget::GetLibraryNames(std::string& name,
   // The library name.
   name = prefix+base+suffix;
 
-  // The library's soname.
-  this->ComputeVersionedName(soName, prefix, base, suffix,
-                             name, soversion);
-
-  // The library's real name on disk.
-  this->ComputeVersionedName(realName, prefix, base, suffix,
-                             name, version);
+  if(this->IsFrameworkOnApple())
+    {
+    realName = prefix;
+    realName += "Versions/";
+    realName += this->GetFrameworkVersion();
+    realName += "/";
+    realName += base;
+    soName = realName;
+    }
+  else
+    {
+    // The library's soname.
+    this->ComputeVersionedName(soName, prefix, base, suffix,
+                               name, soversion);
+    // The library's real name on disk.
+    this->ComputeVersionedName(realName, prefix, base, suffix,
+                               name, version);
+    }
 
   // The import library name.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -4500,14 +4533,13 @@ bool cmTarget::NeedRelinkBeforeInstall(const char* config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
-                                                    bool for_xcode)
+std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
 {
   // If building directly for installation then the build tree install_name
   // is the same as the install tree.
   if(this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
     {
-    return GetInstallNameDirForInstallTree(config, for_xcode);
+    return GetInstallNameDirForInstallTree();
     }
 
   // Use the build tree directory for the target.
@@ -4517,10 +4549,6 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
     {
     std::string dir = this->GetDirectory(config);
     dir += "/";
-    if(this->IsFrameworkOnApple() && !for_xcode)
-      {
-      dir += this->GetFrameworkDirectory(config);
-      }
     return dir;
     }
   else
@@ -4530,8 +4558,7 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
-                                                      bool for_xcode)
+std::string cmTarget::GetInstallNameDirForInstallTree()
 {
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
@@ -4547,12 +4574,6 @@ std::string cmTarget::GetInstallNameDirForInstallTree(const char* config,
         dir += "/";
         }
       }
-
-    if(this->IsFrameworkOnApple() && !for_xcode)
-      {
-      dir += this->GetFrameworkDirectory(config);
-      }
-
     return dir;
     }
   else
@@ -6010,59 +6031,86 @@ cmTarget::GetLinkInformation(const char* config, cmTarget *head)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetFrameworkDirectory(const char* config)
+std::string cmTarget::GetFrameworkDirectory(const char* config,
+                                            bool rootDir)
 {
   std::string fpath;
-  fpath += this->GetFullName(config, false);
-  fpath += ".framework/Versions/";
-  fpath += this->GetFrameworkVersion();
-  fpath += "/";
+  fpath += this->GetOutputName(config, false);
+  fpath += ".framework";
+  if(!rootDir)
+    {
+    fpath += "/Versions/";
+    fpath += this->GetFrameworkVersion();
+    }
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetCFBundleDirectory(const char* config,
+                                           bool contentOnly)
+{
+  std::string fpath;
+  fpath += this->GetOutputName(config, false);
+  fpath += ".";
+  const char *ext = this->GetProperty("BUNDLE_EXTENSION");
+  if (!ext)
+    {
+    ext = "bundle";
+    }
+  fpath += ext;
+  fpath += "/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
+  return fpath;
+}
+
+//----------------------------------------------------------------------------
+std::string cmTarget::GetAppBundleDirectory(const char* config,
+                                            bool contentOnly)
+{
+  std::string fpath = this->GetFullName(config, false);
+  fpath += ".app/Contents";
+  if(!contentOnly)
+    fpath += "/MacOS";
   return fpath;
 }
 
 //----------------------------------------------------------------------------
 std::string cmTarget::BuildMacContentDirectory(const std::string& base,
                                                const char* config,
-                                               bool includeMacOS)
+                                               bool contentOnly)
 {
   std::string fpath = base;
   if(this->IsAppBundleOnApple())
     {
-    fpath += this->GetFullName(config, false);
-    fpath += ".app/Contents/";
-    if(includeMacOS)
-      fpath += "MacOS/";
+    fpath += this->GetAppBundleDirectory(config, contentOnly);
     }
   if(this->IsFrameworkOnApple())
     {
-    fpath += this->GetFrameworkDirectory(config);
+    fpath += this->GetFrameworkDirectory(config, contentOnly);
     }
   if(this->IsCFBundleOnApple())
     {
-    fpath += this->GetFullName(config, false);
-    fpath += ".";
-    const char *ext = this->GetProperty("BUNDLE_EXTENSION");
-    if (!ext)
-      {
-      ext = "bundle";
-      }
-    fpath += ext;
-    fpath += "/Contents/";
-    if(includeMacOS)
-      fpath += "MacOS/";
+    fpath += this->GetCFBundleDirectory(config, contentOnly);
     }
   return fpath;
 }
 
 //----------------------------------------------------------------------------
 std::string cmTarget::GetMacContentDirectory(const char* config,
-                                             bool implib,
-                                             bool includeMacOS)
+                                             bool implib)
 {
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
-  fpath = this->BuildMacContentDirectory(fpath, config, includeMacOS);
+  bool contentOnly = true;
+  if(this->IsFrameworkOnApple())
+    {
+    // additional files with a framework go into the version specific
+    // directory
+    contentOnly = false;
+    }
+  fpath = this->BuildMacContentDirectory(fpath, config, contentOnly);
   return fpath;
 }
 

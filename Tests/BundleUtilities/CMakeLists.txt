@@ -12,8 +12,7 @@ add_library(shared2 SHARED shared2.cpp shared2.h)
 
 # a framework library
 add_library(framework SHARED framework.cpp framework.h)
-# TODO: fix problems with local frameworks without rpaths
-#set_target_properties(framework PROPERTIES FRAMEWORK 1)
+set_target_properties(framework PROPERTIES FRAMEWORK 1)
 
 # make sure rpaths are not helping BundleUtilities or the executables
 set_target_properties(shared shared2 framework PROPERTIES
