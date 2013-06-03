@@ -1,0 +1,3 @@
+\* Variable "b" was accessed using MODIFIED_ACCESS in: .*/Tests/RunCMake/variable_watch/ModifiedAccess.cmake
+  The value of the variable: "b"
+  The list file stack: .*/Tests/RunCMake/variable_watch/CMakeLists.txt;.*/Tests/RunCMake/variable_watch/ModifiedAccess.cmake
