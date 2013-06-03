@@ -24,8 +24,6 @@ cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmTarget* target):
   cmMakefileTargetGenerator(target)
 {
-  cmOSXBundleGenerator::PrepareTargetProperties(this->Target);
-
   this->CustomCommandDriver = OnDepends;
   this->Target->GetLibraryNames(
     this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,

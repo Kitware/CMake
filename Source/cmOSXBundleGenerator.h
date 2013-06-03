@@ -25,8 +25,6 @@ class cmLocalGenerator;
 class cmOSXBundleGenerator
 {
 public:
-  static void PrepareTargetProperties(cmTarget* target);
-
   cmOSXBundleGenerator(cmTarget* target,
                        const char* configName);
 
@@ -38,9 +36,9 @@ public:
   void CreateFramework(const std::string& targetName,
                        const std::string& root);
 
-  // create a cf bundle at a given root and return the
-  // directory within the bundle that contains the library
-  void CreateCFBundle(const std::string& targetName, std::string& outpath);
+  // create a cf bundle at a given root
+  void CreateCFBundle(const std::string& targetName,
+                      const std::string& root);
 
   struct MacOSXContentGeneratorType
   {
