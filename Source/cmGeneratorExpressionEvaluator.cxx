@@ -538,6 +538,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
       }
 
+    cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
+
     const char **transBegin = targetPropertyTransitiveWhitelist;
     const char **transEnd = targetPropertyTransitiveWhitelist
               + (sizeof(targetPropertyTransitiveWhitelist) /
@@ -547,7 +549,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                     context->Config,
-                                                    context->HeadTarget);
+                                                    headTarget);
       if(iface)
         {
         linkedTargetsContent =
@@ -561,7 +563,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
                                                     context->Config,
-                                                    context->HeadTarget);
+                                                    headTarget);
       if(impl)
         {
         linkedTargetsContent =
@@ -614,7 +616,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         std::string result = cge->Evaluate(context->Makefile,
                             context->Config,
                             context->Quiet,
-                            context->HeadTarget,
+                            headTarget,
                             target,
                             &dagChecker);
 
