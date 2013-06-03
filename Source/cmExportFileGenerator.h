@@ -159,6 +159,9 @@ private:
                                     std::vector<std::string> &missingTargets);
 
   virtual void ReplaceInstallPrefix(std::string &input);
+
+  virtual std::string InstallNameDir(cmTarget* target,
+                                     const std::string& config) = 0;
 };
 
 #endif

@@ -439,6 +439,10 @@ public:
   static bool GuessLibrarySOName(std::string const& fullPath,
                                  std::string& soname);
 
+  /** Try to guess the install name of a shared library.  */
+  static bool GuessLibraryInstallName(std::string const& fullPath,
+                                 std::string& soname);
+
   /** Try to set the RPATH in an ELF binary.  */
   static bool ChangeRPath(std::string const& file,
                           std::string const& oldRPath,
