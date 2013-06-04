@@ -544,6 +544,28 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to issue a FATAL_ERROR if "
     "INCLUDE_DIRECTORIES contains a relative path.",
     2,8,11,20130516, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0022, "CMP0022",
+    "INTERFACE_LINK_LIBRARIES defines the link interface.",
+    "CMake 2.8.11 constructed the 'link interface' of a target from "
+    "properties matching (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.  "
+    "The modern way to specify config-sensitive content is to use generator "
+    "expressions and the IMPORTED_ prefix makes uniform processing of the "
+    "link interface with generator expressions impossible.  The "
+    "INTERFACE_LINK_LIBRARIES target property was introduced as a "
+    "replacement in CMake 2.8.12. This new property is named consistently "
+    "with the INTERFACE_COMPILE_DEFINITIONS, INTERFACE_INCLUDE_DIRECTORIES "
+    "and INTERFACE_COMPILE_OPTIONS properties.  For in-build targets, CMake "
+    "will use the INTERFACE_LINK_LIBRARIES property as the source of the "
+    "link interface only if policy CMP0022 is NEW.  "
+    "\n"
+    "The OLD behavior for this policy is to ignore the "
+    "INTERFACE_LINK_LIBRARIES property for in-build targets.  "
+    "The NEW behavior for this policy is to use the INTERFACE_LINK_LIBRARIES "
+    "property for in-build targets, and ignore the old properties matching "
+    "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.",
+    2,8,11,20130516, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
