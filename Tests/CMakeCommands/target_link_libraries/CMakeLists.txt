@@ -122,3 +122,5 @@ add_library(libConsumer empty.cpp)
 # evaluates to the empty string in non-Debug cases, ensure that that causes
 # no problems.
 target_link_libraries(libConsumer debug depA)
+
+add_subdirectory(cmp0022)
