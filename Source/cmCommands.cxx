@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmCommands.h"
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#include "cmAddCompileOptionsCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
 #include "cmElseIfCommand.cxx"
@@ -52,6 +53,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   )
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+  commands.push_back(new cmAddCompileOptionsCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmElseIfCommand);
