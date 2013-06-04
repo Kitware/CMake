@@ -30,6 +30,7 @@ cmExportCommand::cmExportCommand()
 ,Append(&Helper, "APPEND", &ArgumentGroup)
 ,Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
 ,Filename(&Helper, "FILE", &ArgumentGroup)
+,ExportOld(&Helper, "EXPORT_LINK_INTERFACE_LIBRARIES", &ArgumentGroup)
 {
   // at first TARGETS
   this->Targets.Follows(0);
@@ -158,6 +159,7 @@ bool cmExportCommand
   ebfg.SetAppendMode(this->Append.IsEnabled());
   ebfg.SetExports(&targets);
   ebfg.SetCommand(this);
+  ebfg.SetExportOld(this->ExportOld.IsEnabled());
 
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes;
