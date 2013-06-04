@@ -6000,6 +6000,22 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::GetTransitivePropertyLinkLibraries(
+                                      const char* config,
+                                      cmTarget *headTarget,
+                                      std::vector<std::string> &libs)
+{
+  cmTarget::LinkInterface const* iface = this->GetLinkInterface(config,
+                                                                headTarget);
+  if (!iface)
+    {
+    return;
+    }
+
+  libs = iface->Libraries;
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                     cmTarget *headTarget)
 {
