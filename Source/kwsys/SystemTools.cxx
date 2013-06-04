@@ -3085,7 +3085,7 @@ SystemToolsAppendComponents(
     {
     if(*i == "..")
       {
-      if(out_components.begin() != out_components.end())
+      if(out_components.size() > 1)
         {
         out_components.erase(out_components.end()-1, out_components.end());
         }
