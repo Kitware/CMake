@@ -21,15 +21,20 @@
 ######################################
 
 
-macro (QT4_EXTRACT_OPTIONS _qt4_files _qt4_options)
+macro (QT4_EXTRACT_OPTIONS _qt4_files _qt4_options _qt4_target)
   set(${_qt4_files})
   set(${_qt4_options})
   set(_QT4_DOING_OPTIONS FALSE)
+  set(_QT4_DOING_TARGET FALSE)
   foreach(_currentArg ${ARGN})
-    if ("${_currentArg}" STREQUAL "OPTIONS")
+    if ("x${_currentArg}" STREQUAL "xOPTIONS")
       set(_QT4_DOING_OPTIONS TRUE)
+    elseif ("x${_currentArg}" STREQUAL "xTARGET")
+      set(_QT4_DOING_TARGET TRUE)
     else ()
-      if(_QT4_DOING_OPTIONS)
+      if(_QT4_DOING_TARGET)
+        set(${_qt4_target} "${_currentArg}")
+      elseif(_QT4_DOING_OPTIONS)
         list(APPEND ${_qt4_options} "${_currentArg}")
       else()
         list(APPEND ${_qt4_files} "${_currentArg}")
@@ -92,34 +97,49 @@ endmacro()
 
 
 # helper macro to set up a moc rule
-macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options)
+macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
   # For Windows, create a parameters file to work around command line length limit
-  if (WIN32)
-    # Pass the parameters in a file.  Set the working directory to
-    # be that containing the parameters file and reference it by
-    # just the file name.  This is necessary because the moc tool on
-    # MinGW builds does not seem to handle spaces in the path to the
-    # file given with the @ syntax.
-    get_filename_component(_moc_outfile_name "${outfile}" NAME)
-    get_filename_component(_moc_outfile_dir "${outfile}" PATH)
-    if(_moc_outfile_dir)
-      set(_moc_working_dir WORKING_DIRECTORY ${_moc_outfile_dir})
-    endif()
-    set (_moc_parameters_file ${outfile}_parameters)
-    set (_moc_parameters ${moc_flags} ${moc_options} -o "${outfile}" "${infile}")
-    string (REPLACE ";" "\n" _moc_parameters "${_moc_parameters}")
-    file (WRITE ${_moc_parameters_file} "${_moc_parameters}")
-    add_custom_command(OUTPUT ${outfile}
-                       COMMAND ${QT_MOC_EXECUTABLE} @${_moc_outfile_name}_parameters
-                       DEPENDS ${infile}
-                       ${_moc_working_dir}
-                       VERBATIM)
-  else ()
-    add_custom_command(OUTPUT ${outfile}
-                       COMMAND ${QT_MOC_EXECUTABLE}
-                       ARGS ${moc_flags} ${moc_options} -o ${outfile} ${infile}
-                       DEPENDS ${infile} VERBATIM)
-  endif ()
+  # Pass the parameters in a file.  Set the working directory to
+  # be that containing the parameters file and reference it by
+  # just the file name.  This is necessary because the moc tool on
+  # MinGW builds does not seem to handle spaces in the path to the
+  # file given with the @ syntax.
+  get_filename_component(_moc_outfile_name "${outfile}" NAME)
+  get_filename_component(_moc_outfile_dir "${outfile}" PATH)
+  if(_moc_outfile_dir)
+    set(_moc_working_dir WORKING_DIRECTORY ${_moc_outfile_dir})
+  endif()
+  set (_moc_parameters_file ${outfile}_parameters)
+  set (_moc_parameters ${moc_flags} ${moc_options} -o "${outfile}" "${infile}")
+  string (REPLACE ";" "\n" _moc_parameters "${_moc_parameters}")
+
+  set(targetincludes)
+  set(targetdefines)
+  if(moc_target)
+    list(APPEND targetincludes "$<TARGET_PROPERTY:${moc_target},INCLUDE_DIRECTORIES>")
+    list(APPEND targetdefines "$<TARGET_PROPERTY:${moc_target},COMPILE_DEFINITIONS>")
+
+    set(targetincludes "$<$<BOOL:${targetincludes}>:-I$<JOIN:${targetincludes},\n-I>\n>")
+    set(targetdefines "$<$<BOOL:${targetdefines}>:-D$<JOIN:${targetdefines},\n-D>\n>")
+
+    file (GENERATE
+      OUTPUT ${_moc_parameters_file}
+      CONTENT "${targetdefines}${targetincludes}${targetoptions}${_moc_parameters}\n"
+      CONDITION 1
+    )
+
+    set(targetincludes)
+    set(targetdefines)
+  else()
+    file(WRITE ${_moc_parameters_file} "${_moc_parameters}\n")
+  endif()
+
+  set(_moc_extra_parameters_file @${_moc_parameters_file})
+  add_custom_command(OUTPUT ${outfile}
+                      COMMAND ${QT_MOC_EXECUTABLE} ${_moc_extra_parameters_file}
+                      DEPENDS ${infile}
+                      ${_moc_working_dir}
+                      VERBATIM)
 endmacro ()
 
 
@@ -131,7 +151,11 @@ macro (QT4_GENERATE_MOC infile outfile )
    if(NOT IS_ABSOLUTE "${outfile}")
      set(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfile}")
    endif()
-   QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "")
+
+   if ("x${ARGV2}" STREQUAL "xTARGET")
+      set(moc_target ${ARGV3})
+   endif()
+   QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
    set_source_files_properties(${outfile} PROPERTIES SKIP_AUTOMOC TRUE)  # dont run automoc on this file
 endmacro ()
 
@@ -141,12 +165,12 @@ endmacro ()
 macro (QT4_WRAP_CPP outfiles )
   # get include dirs
   QT4_GET_MOC_FLAGS(moc_flags)
-  QT4_EXTRACT_OPTIONS(moc_files moc_options ${ARGN})
+  QT4_EXTRACT_OPTIONS(moc_files moc_options moc_target ${ARGN})
 
   foreach (it ${moc_files})
     get_filename_component(it ${it} ABSOLUTE)
     QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
-    QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}")
+    QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}" "${moc_target}")
     set(${outfiles} ${${outfiles}} ${outfile})
   endforeach()
 
@@ -156,7 +180,7 @@ endmacro ()
 # QT4_WRAP_UI(outfiles inputfile ... )
 
 macro (QT4_WRAP_UI outfiles )
-  QT4_EXTRACT_OPTIONS(ui_files ui_options ${ARGN})
+  QT4_EXTRACT_OPTIONS(ui_files ui_options ui_target ${ARGN})
 
   foreach (it ${ui_files})
     get_filename_component(outfile ${it} NAME_WE)
@@ -175,7 +199,7 @@ endmacro ()
 # QT4_ADD_RESOURCES(outfiles inputfile ... )
 
 macro (QT4_ADD_RESOURCES outfiles )
-  QT4_EXTRACT_OPTIONS(rcc_files rcc_options ${ARGN})
+  QT4_EXTRACT_OPTIONS(rcc_files rcc_options rcc_target ${ARGN})
 
   foreach (it ${rcc_files})
     get_filename_component(outfilename ${it} NAME_WE)
@@ -270,7 +294,7 @@ endmacro()
 
 
 macro(QT4_GENERATE_DBUS_INTERFACE _header) # _customName OPTIONS -some -options )
-  QT4_EXTRACT_OPTIONS(_customName _qt4_dbus_options ${ARGN})
+  QT4_EXTRACT_OPTIONS(_customName _qt4_dbus_options _qt4_dbus_target ${ARGN})
 
   get_filename_component(_in_file ${_header} ABSOLUTE)
   get_filename_component(_basename ${_header} NAME_WE)
@@ -366,7 +390,7 @@ macro(QT4_AUTOMOC)
             set(_header ${_abs_PATH}/${_basename}.h)
           endif()
           set(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
-          QT4_CREATE_MOC_COMMAND(${_header} ${_moc} "${_moc_INCS}" "")
+          QT4_CREATE_MOC_COMMAND(${_header} ${_moc} "${_moc_INCS}" "" "")
           MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
         endforeach ()
       endif()
@@ -376,7 +400,7 @@ endmacro()
 
 
 macro(QT4_CREATE_TRANSLATION _qm_files)
-   QT4_EXTRACT_OPTIONS(_lupdate_files _lupdate_options ${ARGN})
+   QT4_EXTRACT_OPTIONS(_lupdate_files _lupdate_options _lupdate_target ${ARGN})
    set(_my_sources)
    set(_my_dirs)
    set(_my_tsfiles)
