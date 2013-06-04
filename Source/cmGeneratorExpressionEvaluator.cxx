@@ -732,6 +732,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
 
+    cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
+
     const char **transBegin = targetPropertyTransitiveWhitelist;
     const char **transEnd = targetPropertyTransitiveWhitelist
               + (sizeof(targetPropertyTransitiveWhitelist) /
