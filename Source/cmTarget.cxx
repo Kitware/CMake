@@ -5938,10 +5938,15 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
 
   // Get the link interface.
   {
-  std::string linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-  linkProp += suffix;
-
+  std::string linkProp = "INTERFACE_LINK_LIBRARIES";
   const char *propertyLibs = this->GetProperty(linkProp.c_str());
+
+  if (!propertyLibs)
+    {
+    linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
+    linkProp += suffix;
+    propertyLibs = this->GetProperty(linkProp.c_str());
+    }
 
   if(!propertyLibs)
     {
