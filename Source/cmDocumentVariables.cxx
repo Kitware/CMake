@@ -345,11 +345,12 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_PARENT_LIST_FILE", cmProperty::VARIABLE,
-     "Full path to the parent listfile of the one currently being processed.",
-     "As CMake processes the listfiles in your project this "
-     "variable will always be set to the listfile that included "
-     "or somehow invoked the one currently being "
-     "processed. See also CMAKE_CURRENT_LIST_FILE.",false,
+     "Full path to the CMake file that included the current one.",
+     "While processing a CMake file loaded by include() or find_package() "
+     "this variable contains the full path to the file including it.  "
+     "The top of the include stack is always the CMakeLists.txt for the "
+     "current directory.  "
+     "See also CMAKE_CURRENT_LIST_FILE.",false,
      "Variables that Provide Information");
 
   cm->DefineProperty
