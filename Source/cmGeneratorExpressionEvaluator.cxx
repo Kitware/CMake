@@ -315,6 +315,7 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
                                   cmTarget *target,
+                                  cmTarget *headTarget,
                                   cmGeneratorExpressionContext *context,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   const std::string &interfacePropertyName)
@@ -345,7 +346,7 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
   std::string linkedTargetsContent = cge->Evaluate(context->Makefile,
                       context->Config,
                       context->Quiet,
-                      context->HeadTarget,
+                      headTarget,
                       target,
                       dagChecker);
   if (cge->GetHadContextSensitiveCondition())
@@ -554,6 +555,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         linkedTargetsContent =
                   getLinkedTargetsContent(iface->Libraries, target,
+                                          headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
         }
@@ -568,6 +570,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         linkedTargetsContent =
                   getLinkedTargetsContent(impl->Libraries, target,
+                                          headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
         }
