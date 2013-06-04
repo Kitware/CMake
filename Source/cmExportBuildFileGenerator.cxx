@@ -74,6 +74,15 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
+    const bool newCMP0022Behavior =
+                              te->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                           && te->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+    if (newCMP0022Behavior)
+      {
+      this->PopulateInterfaceLinkLibrariesProperty(te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+      }
     this->PopulateCompatibleInterfaceProperties(te, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
