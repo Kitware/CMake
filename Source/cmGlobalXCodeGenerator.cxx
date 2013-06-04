@@ -750,12 +750,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
       }
     }
 
-  if(cmtarget.IsCFBundleOnApple())
-    {
-    cmtarget.SetProperty("PREFIX", "");
-    cmtarget.SetProperty("SUFFIX", "");
-    }
-
   // Add the fileRef to the top level Resources group/folder if it is not
   // already there.
   //
@@ -1880,7 +1874,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       pndir = target.GetDirectory(configName);
       }
 
-    if(target.IsFrameworkOnApple())
+    if(target.IsFrameworkOnApple() || target.IsCFBundleOnApple())
       {
       pnprefix = "";
       }
