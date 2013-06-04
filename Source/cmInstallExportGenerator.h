@@ -31,7 +31,7 @@ public:
                            const std::vector<std::string>& configurations,
                            const char* component,
                            const char* filename, const char* name_space,
-                           cmMakefile* mf);
+                           bool exportOld, cmMakefile* mf);
   ~cmInstallExportGenerator();
 
   cmExportSet* GetExportSet() {return this->ExportSet;}
@@ -52,6 +52,7 @@ protected:
   std::string FilePermissions;
   std::string FileName;
   std::string Namespace;
+  bool ExportOld;
   cmMakefile* Makefile;
 
   std::string TempDir;

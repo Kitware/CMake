@@ -130,6 +130,16 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   te,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
+
+    const bool newCMP0022Behavior =
+                              te->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                           && te->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+    if (newCMP0022Behavior)
+      {
+      this->PopulateInterfaceLinkLibrariesProperty(te,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets);
+      }
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
     this->PopulateCompatibleInterfaceProperties(te, properties);
