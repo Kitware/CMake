@@ -250,6 +250,7 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
   cmNinjaVars vars;
   vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
+
   cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
                                      comment,
                                      "CUSTOM_COMMAND",
@@ -258,14 +259,6 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                      cmNinjaDeps(),
                                      orderOnlyDeps,
                                      vars);
-
-//we need to track every dependency that comes in, since we are trying
-//to find dependencies that are side effects of other custom commands
-//
-for(cmNinjaDeps::const_iterator i=deps.begin(); i != deps.end(); ++i)
-  {
-  this->UnknownCustomCommandFileDependencies.insert(*i);
-  }
 }
 
 void
@@ -485,7 +478,6 @@ void cmGlobalNinjaGenerator::Generate()
 
   this->WriteAssumedSourceDependencies();
   this->WriteTargetAliases(*this->BuildFileStream);
-  this->WriteUnknownCustomDependencies(*this->BuildFileStream);
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
   if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -895,7 +887,7 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Target aliases.\n\n";
 
-  for (TargetAliasMap::const_iterator i = TargetAliases.begin();
+  for (TargetAliasMap::iterator i = TargetAliases.begin();
        i != TargetAliases.end(); ++i) {
     // Don't write ambiguous aliases.
     if (!i->second)
@@ -909,64 +901,6 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
                                             cmNinjaDeps(1, i->first),
                                             deps);
   }
-}
-
-void cmGlobalNinjaGenerator::WriteUnknownCustomDependencies(std::ostream& os)
-{
-  //now write out the unknown dependencies. Don't write out any
-  //of these that are now have been added as a known output, file
-  //dependency or alias
-  cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "# Unknown Build Time Dependencies."
-     << "# Tell Ninja that they may appear as side effects of build rules"
-     << "# otherwise ordered by order-only dependencies.\n\n";
-
-  std::string const rootBuildDirectory =
-      this->GetCMakeInstance()->GetHomeOutputDirectory();
-
-  //remove the following possible targets that we know
-  //are false positives
-  UnknownCustomCommandFileDependencies.erase("all");
-
-  //get the list of files that cmake itself has generated as a
-  //product of configuration.
-  std::set<std::string> configuredFiles;
-  for (std::vector<cmLocalGenerator *>::const_iterator i =
-       this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i)
-    {
-    const std::vector<std::string>& of = (*i)->GetMakefile()->GetOutputFiles();
-    configuredFiles.insert(of.begin(), of.end());
-    }
-
-  typedef std::set<std::string>::const_iterator uccfd_iterator;
-  for (uccfd_iterator i = UnknownCustomCommandFileDependencies.begin();
-       i != UnknownCustomCommandFileDependencies.end(); ++i)
-    {
-    bool isUnknown = ( this->CustomCommandOutputs.find(*i) ==
-                      this->CustomCommandOutputs.end() );
-    isUnknown = isUnknown && configuredFiles.count(*i) == 0;
-    isUnknown = isUnknown && this->TargetAliases.count(*i) == 0;
-
-    if(!isUnknown)
-    {
-      continue;
-    }
-
-    //verify the file is in the build directory
-
-    std::string const absDepPath = cmSystemTools::CollapseFullPath(
-                                     i->c_str(), rootBuildDirectory.c_str());
-    bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath.c_str(),
-                                                  rootBuildDirectory.c_str());
-    if(inBuildDir)
-      {
-      cmNinjaDeps deps(1,*i);
-      cmGlobalNinjaGenerator::WritePhonyBuild(os,
-                                              "",
-                                              deps,
-                                              deps);
-      }
-   }
 }
 
 void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
