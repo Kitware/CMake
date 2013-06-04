@@ -1618,9 +1618,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     FAIL_REGULAR_EXPRESSION "CMake Warning .*VariableUnusedViaUnset.CMakeLists.txt:5 \\(set\\):")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
-  if (NOT CMAKE_TEST_GENERATOR MATCHES "Ninja")
+  if("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
     # Ninja does not support ADDITIONAL_MAKE_CLEAN_FILES and therefore fails
     # this test. (See #13371)
+    # Apparently Visual Studio does not support it either. As the MakeClean
+    # test above is only run with the Makefiles generator, only run this
+    # test with the Makefiles generator also.
     add_test(WarnUnusedCliUnused ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/WarnUnusedCliUnused"
