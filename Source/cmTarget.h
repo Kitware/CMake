@@ -190,6 +190,12 @@ public:
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
                       LinkLibraryType llt);
+  enum TLLSignature {
+    NewTLLSignature,
+    OldTLLSignature
+  };
+  bool PushTLLCommandTrace(TLLSignature signature);
+  void GetTllSignatureTraces(cmOStringStream &s, TLLSignature sig) const;
 
   void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
                            const LinkLibraryVectorType& libs );
@@ -547,6 +553,8 @@ private:
   // The set of include directories that are marked as system include
   // directories.
   std::set<cmStdString> SystemIncludeDirectories;
+
+  std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
 
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
