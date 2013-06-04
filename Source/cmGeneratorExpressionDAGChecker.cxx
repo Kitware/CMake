@@ -174,7 +174,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char *tgt)
        || strcmp(prop, "LINK_INTERFACE_LIBRARIES") == 0
        || strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
        || strncmp(prop, "LINK_INTERFACE_LIBRARIES_", 25) == 0
-       || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 34) == 0);
+       || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 34) == 0)
+       || strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
 }
 
 //----------------------------------------------------------------------------
