@@ -224,12 +224,17 @@ bool cmTargetLinkLibrariesCommand
     cmSystemTools::SetFatalErrorOccured();
     }
 
+  const cmPolicies::PolicyStatus policy22Status
+                      = this->Target->GetPolicyStatusCMP0022();
+
   // If any of the LINK_ options were given, make sure the
   // LINK_INTERFACE_LIBRARIES target property exists.
   // Use of any of the new keywords implies awareness of
   // this property. And if no libraries are named, it should
   // result in an empty link interface.
-  if(this->CurrentProcessingState != ProcessingLinkLibraries &&
+  if((policy22Status == cmPolicies::OLD ||
+      policy22Status == cmPolicies::WARN) &&
+      this->CurrentProcessingState != ProcessingLinkLibraries &&
      !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
     {
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
@@ -263,9 +268,28 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
     if (this->CurrentProcessingState != ProcessingPublicInterface)
       {
+      if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+        {
+        this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+                  ("$<LINK_ONLY:" +
+                  this->Target->GetDebugGeneratorExpressions(lib, llt) +
+                  ">").c_str());
+        }
       // Not LINK_INTERFACE_LIBRARIES or LINK_PUBLIC, do not add to interface.
       return;
       }
+    }
+
+  this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+              this->Target->GetDebugGeneratorExpressions(lib, llt).c_str());
+
+  const cmPolicies::PolicyStatus policy22Status
+                      = this->Target->GetPolicyStatusCMP0022();
+
+  if (policy22Status != cmPolicies::OLD
+      && policy22Status != cmPolicies::WARN)
+    {
+    return;
     }
 
   // Get the list of configurations considered to be DEBUG.
