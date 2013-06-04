@@ -109,13 +109,6 @@ set_property(TARGET libbad APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}/bad"
 )
 
-add_library(lib6 SHARED other.cpp)
-add_library(lib7 SHARED other.cpp)
-target_link_libraries(lib7 $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:lib6>)
-target_include_directories(lib7 PUBLIC $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:/lib7/include>)
-add_custom_target(head_target_test "$<TARGET_PROPERTY:lib7,INCLUDE_DIRECTORIES>
-$<TARGET_PROPERTY:lib7,INTERFACE_INCLUDE_DIRECTORIES>
-")
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lib5.cpp" "#include \"common.h\"\n")
 add_library(lib5 "${CMAKE_CURRENT_BINARY_DIR}/lib5.cpp")
