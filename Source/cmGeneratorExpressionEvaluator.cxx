@@ -900,13 +900,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (std::find_if(transBegin, transEnd,
               TransitiveWhitelistCompare(propertyName)) != transEnd)
       {
-      const cmTarget::LinkInterface *iface = target->GetLinkInterface(
-                                                    context->Config,
-                                                    headTarget);
-      if(iface)
+
+      std::vector<std::string> libs;
+      target->GetTransitivePropertyLinkLibraries(context->Config,
+                                                 headTarget, libs);
+      if (!libs.empty())
         {
         linkedTargetsContent =
-                  getLinkedTargetsContent(iface->Libraries, target,
+                  getLinkedTargetsContent(libs, target,
                                           headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
