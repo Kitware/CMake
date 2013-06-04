@@ -500,7 +500,6 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
                                   cmTarget *target,
-                                  cmTarget *headTarget,
                                   cmGeneratorExpressionContext *context,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   const std::string &interfacePropertyName)
@@ -531,7 +530,7 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
   std::string linkedTargetsContent = cge->Evaluate(context->Makefile,
                       context->Config,
                       context->Quiet,
-                      headTarget,
+                      context->HeadTarget,
                       target,
                       dagChecker);
   if (cge->GetHadContextSensitiveCondition())
@@ -730,8 +729,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       interfacePropertyName = "INTERFACE_COMPILE_OPTIONS";
       }
 
-    cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
-
     const char **transBegin = targetPropertyTransitiveWhitelist;
     const char **transEnd = targetPropertyTransitiveWhitelist
               + (sizeof(targetPropertyTransitiveWhitelist) /
@@ -741,12 +738,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       const cmTarget::LinkInterface *iface = target->GetLinkInterface(
                                                     context->Config,
-                                                    headTarget);
+                                                    context->HeadTarget);
       if(iface)
         {
         linkedTargetsContent =
                   getLinkedTargetsContent(iface->Libraries, target,
-                                          headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
         }
@@ -756,12 +752,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
                                                     context->Config,
-                                                    headTarget);
+                                                    context->HeadTarget);
       if(impl)
         {
         linkedTargetsContent =
                   getLinkedTargetsContent(impl->Libraries, target,
-                                          headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
         }
@@ -810,7 +805,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         std::string result = cge->Evaluate(context->Makefile,
                             context->Config,
                             context->Quiet,
-                            headTarget,
+                            context->HeadTarget,
                             target,
                             &dagChecker);
 
