@@ -73,8 +73,6 @@ public:
     }
 
   cmTypeMacro(cmAddDefinitionsCommand, cmCommand);
-private:
-  bool ParseDefinition(std::string const& def);
 };
 
 
