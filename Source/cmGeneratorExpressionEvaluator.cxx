@@ -396,6 +396,24 @@ static const struct VersionEqualNode : public cmGeneratorExpressionNode
 } versionEqualNode;
 
 //----------------------------------------------------------------------------
+static const struct LinkOnlyNode : public cmGeneratorExpressionNode
+{
+  LinkOnlyNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if(!dagChecker->GetTransitivePropertiesOnly())
+      {
+      return parameters.front();
+      }
+    return "";
+  }
+} linkOnlyNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -1296,6 +1314,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &installPrefixNode;
   else if (identifier == "JOIN")
     return &joinNode;
+  else if (identifier == "LINK_ONLY")
+    return &linkOnlyNode;
   return 0;
 
 }
