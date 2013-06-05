@@ -2028,20 +2028,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       dirs.Add(incpath.c_str());
       }
     }
-  if(target.GetType() != cmTarget::OBJECT_LIBRARY &&
-     target.GetType() != cmTarget::STATIC_LIBRARY)
+  // Add framework search paths needed for linking.
+  if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
     {
-    // Add framework search paths needed for linking.
-    if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
+    std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
+    for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+        fdi != fwDirs.end(); ++fdi)
       {
-      std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
-      for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
-          fdi != fwDirs.end(); ++fdi)
+      if(emitted.insert(*fdi).second)
         {
-        if(emitted.insert(*fdi).second)
-          {
-          fdirs.Add(this->XCodeEscapePath(fdi->c_str()).c_str());
-          }
+        fdirs.Add(this->XCodeEscapePath(fdi->c_str()).c_str());
         }
       }
     }
