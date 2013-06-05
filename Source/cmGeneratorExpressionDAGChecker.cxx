@@ -22,7 +22,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
                 const GeneratorExpressionContent *content,
                 cmGeneratorExpressionDAGChecker *parent)
   : Parent(parent), Target(target), Property(property),
-    Content(content), Backtrace(backtrace)
+    Content(content), Backtrace(backtrace), TransitivePropertiesOnly(false)
 {
   const cmGeneratorExpressionDAGChecker *top = this;
   const cmGeneratorExpressionDAGChecker *p = this->Parent;
@@ -136,6 +136,20 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
     parent = parent->Parent;
     }
   return DAG;
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
+{
+  const cmGeneratorExpressionDAGChecker *top = this;
+  const cmGeneratorExpressionDAGChecker *parent = this->Parent;
+  while (parent)
+    {
+    top = parent;
+    parent = parent->Parent;
+    }
+
+  return top->TransitivePropertiesOnly;
 }
 
 //----------------------------------------------------------------------------
