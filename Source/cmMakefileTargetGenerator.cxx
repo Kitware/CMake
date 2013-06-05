@@ -271,6 +271,9 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
                                           lang, this->ConfigName);
 
+    this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
+                                                   lang);
+
     // Add include directory flags.
     this->AddIncludeFlags(flags, lang);
 

@@ -2012,6 +2012,81 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     }
 }
 
+static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
+                                       cmLocalGenerator *lg, const char *lang)
+{
+  std::string l(lang);
+  std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
+  const char *opt = lg->GetMakefile()->GetDefinition(compileOption.c_str());
+  if (!opt)
+    {
+    return;
+    }
+  std::string flagDefine = l + "_VISIBILITY_PRESET";
+
+  const char *prop = target->GetProperty(flagDefine.c_str());
+  if (!prop)
+    {
+    return;
+    }
+  if (strcmp(prop, "hidden") != 0
+      && strcmp(prop, "default") != 0
+      && strcmp(prop, "protected") != 0
+      && strcmp(prop, "internal") != 0 )
+    {
+    cmOStringStream e;
+    e << "Target " << target->GetName() << " uses unsupported value \""
+      << prop << "\" for " << flagDefine << ".";
+    cmSystemTools::Error(e.str().c_str());
+    return;
+    }
+  std::string option = std::string(opt) + prop;
+  lg->AppendFlags(flags, option.c_str());
+}
+
+static void AddInlineVisibilityCompileOption(std::string &flags,
+                                       cmTarget* target,
+                                       cmLocalGenerator *lg)
+{
+  std::string compileOption
+                = "CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN";
+  const char *opt = lg->GetMakefile()->GetDefinition(compileOption.c_str());
+  if (!opt)
+    {
+    return;
+    }
+
+  bool prop = target->GetPropertyAsBool("VISIBILITY_INLINES_HIDDEN");
+  if (!prop)
+    {
+    return;
+    }
+  lg->AppendFlags(flags, opt);
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator
+::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+                            const char *lang)
+{
+  int targetType = target->GetType();
+  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
+                      || (targetType == cmTarget::MODULE_LIBRARY)
+                      || (target->IsExecutableWithExports()));
+
+  if (!suitableTarget)
+    {
+    return;
+    }
+
+  if (!lang)
+    {
+    return;
+    }
+  AddVisibilityCompileOption(flags, target, this, lang);
+  AddInlineVisibilityCompileOption(flags, target, this);
+}
+
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
                                        std::string const& lang,
