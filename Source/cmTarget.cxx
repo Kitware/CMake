@@ -297,7 +297,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "List of options to pass to the compiler.",
      "This property specifies the list of options specified "
      "so far for this property.  "
-     "This property exists on targets only.  "
+     "This property exists on directories and targets.  "
      "\n"
      "The target property values are used by the generators to set "
      "the options for the compiler.\n"
@@ -1639,6 +1639,14 @@ void cmTarget::SetMakefile(cmMakefile* mf)
               = parentIncludes.begin(); it != parentIncludes.end(); ++it)
     {
     this->InsertInclude(*it);
+    }
+  const std::vector<cmValueWithOrigin> parentOptions =
+                              this->Makefile->GetCompileOptionsEntries();
+
+  for (std::vector<cmValueWithOrigin>::const_iterator it
+              = parentOptions.begin(); it != parentOptions.end(); ++it)
+    {
+    this->InsertCompileOption(*it);
     }
 
   this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);

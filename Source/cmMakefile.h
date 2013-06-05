@@ -206,6 +206,7 @@ public:
    */
   void AddDefineFlag(const char* definition);
   void RemoveDefineFlag(const char* definition);
+  void AddCompileOption(const char* option);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const char* name, cmTarget::TargetType type,
@@ -866,6 +867,10 @@ public:
   {
     return this->IncludeDirectoriesEntries;
   }
+  std::vector<cmValueWithOrigin> GetCompileOptionsEntries() const
+  {
+    return this->CompileOptionsEntries;
+  }
 
   bool IsGeneratingBuildSystem(){ return this->GeneratingBuildSystem; }
   void SetGeneratingBuildSystem(){ this->GeneratingBuildSystem = true; }
@@ -919,6 +924,7 @@ protected:
   std::string DefineFlags;
 
   std::vector<cmValueWithOrigin> IncludeDirectoriesEntries;
+  std::vector<cmValueWithOrigin> CompileOptionsEntries;
 
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);

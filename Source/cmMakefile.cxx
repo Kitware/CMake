@@ -21,6 +21,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmDocumentGeneratorExpressions.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmDocumentCompileDefinitions.h"
 #include "cmGeneratorExpression.h"
@@ -1270,6 +1271,11 @@ void cmMakefile::RemoveDefineFlag(const char* flag,
     }
 }
 
+void cmMakefile::AddCompileOption(const char* option)
+{
+  this->AppendProperty("COMPILE_OPTIONS", option);
+}
+
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.
@@ -1492,6 +1498,12 @@ void cmMakefile::InitializeFromParent()
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
                                        parentIncludes.begin(),
                                        parentIncludes.end());
+
+  const std::vector<cmValueWithOrigin> parentOptions =
+                                        parent->GetCompileOptionsEntries();
+  this->CompileOptionsEntries.insert(this->CompileOptionsEntries.end(),
+                                     parentOptions.begin(),
+                                     parentOptions.end());
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
@@ -3468,6 +3480,18 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
+  if (propname == "COMPILE_OPTIONS")
+    {
+    this->CompileOptionsEntries.clear();
+      if (!value)
+        {
+        return;
+        }
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
+    return;
+    }
 
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
@@ -3504,6 +3528,14 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
+                                        cmValueWithOrigin(value, lfbt));
+    return;
+    }
+  if (propname == "COMPILE_OPTIONS")
+    {
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->CompileOptionsEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
@@ -3624,6 +3656,20 @@ const char *cmMakefile::GetProperty(const char* prop,
     for (std::vector<cmValueWithOrigin>::const_iterator
         it = this->IncludeDirectoriesEntries.begin(),
         end = this->IncludeDirectoriesEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  else if (!strcmp("COMPILE_OPTIONS",prop))
+    {
+    std::string sep;
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->CompileOptionsEntries.begin(),
+        end = this->CompileOptionsEntries.end();
         it != end; ++it)
       {
       output += sep;
@@ -4001,6 +4047,20 @@ void cmMakefile::DefineProperties(cmake *cm)
      "The target property values are used by the generators to set "
      "the include paths for the compiler. "
      "See also the include_directories command.");
+
+  cm->DefineProperty
+    ("COMPILE_OPTIONS", cmProperty::DIRECTORY,
+     "List of options to pass to the compiler.",
+     "This property specifies the list of directories given "
+     "so far for this property.  "
+     "This property exists on directories and targets.  "
+     "\n"
+     "The target property values are used by the generators to set "
+     "the options for the compiler.\n"
+     "Contents of COMPILE_OPTIONS may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("LINK_DIRECTORIES", cmProperty::DIRECTORY,
