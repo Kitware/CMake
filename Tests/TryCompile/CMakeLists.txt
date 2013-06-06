@@ -71,6 +71,24 @@ if(SHOULD_FAIL)
    message(SEND_ERROR "Should fail passed ${TRY_OUT}")
 endif()
 
+# try to compile two files that should compile
+try_compile(SHOULD_PASS
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    SOURCES ${TryCompile_SOURCE_DIR}/pass2a.c ${TryCompile_SOURCE_DIR}/pass2b.cxx
+    OUTPUT_VARIABLE TRY_OUT)
+if(NOT SHOULD_PASS)
+  message(SEND_ERROR "should pass failed ${TRY_OUT}")
+endif()
+
+# try to compile two files that should not compile
+try_compile(SHOULD_FAIL
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    SOURCES ${TryCompile_SOURCE_DIR}/fail2a.c ${TryCompile_SOURCE_DIR}/fail2b.c
+    OUTPUT_VARIABLE TRY_OUT)
+if(SHOULD_FAIL)
+   message(SEND_ERROR "Should fail passed ${TRY_OUT}")
+endif()
+
 if(NOT SHOULD_FAIL)
   if(SHOULD_PASS)
     message("All Tests passed, ignore all previous output.")
