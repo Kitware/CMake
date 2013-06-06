@@ -2425,7 +2425,10 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE);
 
   std::vector<std::string> strs = cmSystemTools::tokenize(output, "\n");
-  if(strs.size() == 2)
+  // otool returns extra lines reporting multiple install names
+  // in case the binary is multi-arch and none of the architectures
+  // is native (e.g. i386;ppc on x86_64)
+  if(strs.size() >= 2)
     {
     soname = strs[1];
     return true;
