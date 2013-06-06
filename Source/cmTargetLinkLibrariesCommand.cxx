@@ -256,6 +256,11 @@ void
 cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                             cmTarget::LinkLibraryType llt)
 {
+  const cmPolicies::PolicyStatus policy22Status
+                      = this->Target->GetPolicyStatusCMP0022();
+  const bool policy22IsNew = policy22Status != cmPolicies::OLD
+                          && policy22Status != cmPolicies::WARN;
+
   // Handle normal case first.
   if(this->CurrentProcessingState != ProcessingLinkInterface)
     {
@@ -263,9 +268,22 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
     if (this->CurrentProcessingState != ProcessingPublicInterface)
       {
+      if (policy22IsNew
+            && this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+        {
+        this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+                          ("$<LINK_ONLY:" +  std::string(lib) + ">").c_str());
+        }
       // Not LINK_INTERFACE_LIBRARIES or LINK_PUBLIC, do not add to interface.
       return;
       }
+    }
+
+
+  if (policy22IsNew)
+    {
+    this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES", lib);
+    return;
     }
 
   // Get the list of configurations considered to be DEBUG.
