@@ -1,5 +1,4 @@
 
-#ifdef _WIN32
-__declspec(dllexport)
-#endif
-int cmp0022();
+#include "cmp0022_export.h"
+
+int CMP0022_EXPORT cmp0022();
