@@ -229,8 +229,11 @@ target_link_libraries(testSharedLibDepends LINK_INTERFACE_LIBRARIES
   $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>)
 
 add_library(cmp0022OLD SHARED cmp0022.cpp)
+generate_export_header(cmp0022OLD BASE_NAME cmp0022)
+target_include_directories(cmp0022OLD PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>")
 cmake_policy(SET CMP0022 NEW)
 add_library(cmp0022NEW SHARED cmp0022.cpp)
+target_include_directories(cmp0022NEW PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>")
 cmake_policy(SET CMP0022 OLD)
 
 set_property(TARGET testLib2 APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS USING_TESTLIB2)
