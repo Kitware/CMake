@@ -3384,7 +3384,8 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetCompileDefinitions(const char *config)
+void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
+                                            const char *config)
 {
   const char *configProp = 0;
   if (config)
@@ -3419,7 +3420,8 @@ std::string cmTarget::GetCompileDefinitions(const char *config)
 
   if (libs.empty())
     {
-    return result;
+    cmSystemTools::ExpandListArgument(result, list);
+    return;
     }
 
   std::string sep;
@@ -3467,7 +3469,7 @@ std::string cmTarget::GetCompileDefinitions(const char *config)
                                                                       = true;
     }
 
-  return result;
+  cmSystemTools::ExpandListArgument(result, list);
 }
 
 //----------------------------------------------------------------------------

@@ -1962,8 +1962,8 @@ void cmLocalUnixMakefileGenerator3
 
   // Build a list of preprocessor definitions for the target.
   std::set<std::string> defines;
-  this->AppendDefines(defines, target.GetCompileDefinitions(
-                                            this->ConfigurationName.c_str()));
+  this->AddCompileDefinitions(defines, &target,
+                               this->ConfigurationName.c_str());
   if(!defines.empty())
     {
     cmakefileStream
