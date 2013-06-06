@@ -201,9 +201,9 @@ ComputeDefines(cmSourceFile *source, const std::string& language)
     }
 
   // Add preprocessor definitions for this target and configuration.
-  this->LocalGenerator->AppendDefines
-    (defines,
-     this->Target->GetCompileDefinitions(this->GetConfigName()));
+  std::vector<std::string> targetDefines;
+  this->Target->GetCompileDefinitions(targetDefines, this->GetConfigName());
+  this->LocalGenerator->AppendDefines(defines, targetDefines);
   this->LocalGenerator->AppendDefines
     (defines,
      source->GetProperty("COMPILE_DEFINITIONS"));
