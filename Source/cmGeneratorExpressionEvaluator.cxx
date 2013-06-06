@@ -345,6 +345,22 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
 } cxxCompilerIdNode;
 
 //----------------------------------------------------------------------------
+static const struct LinkOnlyNode : public cmGeneratorExpressionNode
+{
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if(!dagChecker->GetTransitivePropertiesOnly())
+      {
+      return parameters.front();
+      }
+    return "";
+  }
+} linkOnlyNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -739,13 +755,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (std::find_if(transBegin, transEnd,
               TransitiveWhitelistCompare(propertyName)) != transEnd)
       {
-      const cmTarget::LinkInterface *iface = target->GetLinkInterface(
-                                                    context->Config,
-                                                    headTarget);
-      if(iface)
+
+      std::vector<std::string> libs;
+      target->GetTransitivePropertyLinkLibraries(context->Config,
+                                                 headTarget, libs);
+      if (!libs.empty())
         {
         linkedTargetsContent =
-                  getLinkedTargetsContent(iface->Libraries, target,
+                  getLinkedTargetsContent(libs, target,
                                           headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
@@ -1217,6 +1234,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &installPrefixNode;
   else if (identifier == "JOIN")
     return &joinNode;
+  else if (identifier == "LINK_ONLY")
+    return &linkOnlyNode;
   return 0;
 
 }

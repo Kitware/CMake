@@ -22,7 +22,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
                 const GeneratorExpressionContent *content,
                 cmGeneratorExpressionDAGChecker *parent)
   : Parent(parent), Target(target), Property(property),
-    Content(content), Backtrace(backtrace)
+    Content(content), Backtrace(backtrace), TransitivePropertiesOnly(false)
 {
   const cmGeneratorExpressionDAGChecker *top = this;
   const cmGeneratorExpressionDAGChecker *p = this->Parent;
@@ -134,6 +134,20 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly()
+{
+  const cmGeneratorExpressionDAGChecker *top = this;
+  const cmGeneratorExpressionDAGChecker *parent = this->Parent;
+  while (parent)
+    {
+    top = parent;
+    parent = parent->Parent;
+    }
+
+  return top->TransitivePropertiesOnly;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
 {
   const cmGeneratorExpressionDAGChecker *top = this;
@@ -149,7 +163,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
        || strcmp(prop, "LINK_INTERFACE_LIBRARIES") == 0
        || strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
        || strncmp(prop, "LINK_INTERFACE_LIBRARIES_", 25) == 0
-       || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 34) == 0);
+       || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 34) == 0)
+       || strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
 }
 
 //----------------------------------------------------------------------------
