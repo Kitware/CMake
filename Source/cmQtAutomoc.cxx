@@ -175,15 +175,17 @@ static void GetCompileDefinitionsAndDirectories(cmTarget *target,
     incs += *incDirIt;
     }
 
-  defs = target->GetCompileDefinitions(config);
+  std::set<std::string> defines;
+  localGen->AddCompileDefinitions(defines, target, config);
 
-  const char *tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
   sep = "";
-  if (tmp)
+  for(std::set<std::string>::const_iterator defIt = defines.begin();
+      defIt != defines.end();
+      ++defIt)
     {
     defs += sep;
     sep = ";";
-    defs += tmp;
+    defs += *defIt;
     }
 }
 

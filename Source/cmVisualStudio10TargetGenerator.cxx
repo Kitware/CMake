@@ -1337,8 +1337,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   clOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
-  clOptions.AddDefines(this->Target->GetCompileDefinitions(
-                                                configName.c_str()).c_str());
+  std::vector<std::string> targetDefines;
+  this->Target->GetCompileDefinitions(targetDefines, configName.c_str());
+  clOptions.AddDefines(targetDefines);
   clOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
