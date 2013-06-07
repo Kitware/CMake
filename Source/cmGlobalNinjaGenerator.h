@@ -77,27 +77,27 @@ public:
    * It also writes the variables bound to this build statement.
    * @warning no escaping of any kind is done here.
    */
-  static void WriteBuild(std::ostream& os,
-                         const std::string& comment,
-                         const std::string& rule,
-                         const cmNinjaDeps& outputs,
-                         const cmNinjaDeps& explicitDeps,
-                         const cmNinjaDeps& implicitDeps,
-                         const cmNinjaDeps& orderOnlyDeps,
-                         const cmNinjaVars& variables,
-                         const std::string& rspfile = std::string(),
-                         int cmdLineLimit = -1);
+  void WriteBuild(std::ostream& os,
+                  const std::string& comment,
+                  const std::string& rule,
+                  const cmNinjaDeps& outputs,
+                  const cmNinjaDeps& explicitDeps,
+                  const cmNinjaDeps& implicitDeps,
+                  const cmNinjaDeps& orderOnlyDeps,
+                  const cmNinjaVars& variables,
+                  const std::string& rspfile = std::string(),
+                  int cmdLineLimit = -1);
 
   /**
    * Helper to write a build statement with the special 'phony' rule.
    */
-  static void WritePhonyBuild(std::ostream& os,
-                              const std::string& comment,
-                              const cmNinjaDeps& outputs,
-                              const cmNinjaDeps& explicitDeps,
-                              const cmNinjaDeps& implicitDeps = cmNinjaDeps(),
-                              const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps(),
-                              const cmNinjaVars& variables = cmNinjaVars());
+  void WritePhonyBuild(std::ostream& os,
+                       const std::string& comment,
+                       const cmNinjaDeps& outputs,
+                       const cmNinjaDeps& explicitDeps,
+                       const cmNinjaDeps& implicitDeps = cmNinjaDeps(),
+                       const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps(),
+                       const cmNinjaVars& variables = cmNinjaVars());
 
   void WriteCustomCommandBuild(const std::string& command,
                                const std::string& description,
