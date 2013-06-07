@@ -10,11 +10,12 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
+#include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpressionEvaluationFile.h"
+#include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
 #include "cmMakefile.h"
-#include "cmGeneratedFileStream.h"
-#include "cmGeneratorTarget.h"
 #include "cmVersion.h"
 
 #include <algorithm>
@@ -140,7 +141,14 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   for(cmNinjaDeps::const_iterator i = explicitDeps.begin();
       i != explicitDeps.end();
       ++i)
+    {
     arguments  << " " << EncodeIdent(EncodePath(*i), os);
+
+    //we need to track every dependency that comes in, since we are trying
+    //to find dependencies that are side effects of build commands
+    //
+    this->CombinedBuildExplicitDependencies.insert(*i);
+    }
 
   // Write implicit dependencies.
   if(!implicitDeps.empty())
@@ -170,7 +178,10 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   build << "build";
   for(cmNinjaDeps::const_iterator i = outputs.begin();
       i != outputs.end(); ++i)
+    {
     build << " " << EncodeIdent(EncodePath(*i), os);
+    this->CombinedBuildOutputs.insert(*i);
+    }
   build << ":";
 
   // Write the rule.
@@ -478,6 +489,7 @@ void cmGlobalNinjaGenerator::Generate()
 
   this->WriteAssumedSourceDependencies();
   this->WriteTargetAliases(*this->BuildFileStream);
+  this->WriteUnknownExplicitDependencies(*this->BuildFileStream);
   this->WriteBuiltinTargets(*this->BuildFileStream);
 
   if (cmSystemTools::GetErrorOccuredFlag()) {
@@ -887,7 +899,7 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Target aliases.\n\n";
 
-  for (TargetAliasMap::iterator i = TargetAliases.begin();
+  for (TargetAliasMap::const_iterator i = TargetAliases.begin();
        i != TargetAliases.end(); ++i) {
     // Don't write ambiguous aliases.
     if (!i->second)
@@ -901,6 +913,113 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
                           cmNinjaDeps(1, i->first),
                           deps);
   }
+}
+
+void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
+{
+  //now write out the unknown explicit dependencies.
+
+  //union the configured files, evaluations files and the CombinedBuildOutputs,
+  //and then difference with CombinedExplicitDependencies to find the explicit
+  //dependencies that we have no rule for
+
+  cmGlobalNinjaGenerator::WriteDivider(os);
+  os << "# Unknown Build Time Dependencies.\n"
+     << "# Tell Ninja that they may appear as side effects of build rules\n"
+     << "# otherwise ordered by order-only dependencies.\n\n";
+
+  //get the list of files that cmake itself has generated as a
+  //product of configuration.
+  cmLocalNinjaGenerator *ng =
+    static_cast<cmLocalNinjaGenerator *>(this->LocalGenerators[0]);
+
+  std::set<std::string> knownDependencies;
+  for (std::vector<cmLocalGenerator *>::const_iterator i =
+       this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i)
+    {
+    //get the vector of files created by this makefile and convert them
+    //to ninja paths, which are all relative in respect to the build directory
+    const std::vector<std::string>& files = (*i)->GetMakefile()->GetOutputFiles();
+    typedef std::vector<std::string>::const_iterator vect_it;
+    for(vect_it j = files.begin(); j != files.end(); ++j)
+      {
+      knownDependencies.insert(ng->ConvertToNinjaPath( j->c_str() ));
+      }
+    }
+
+  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+      li = this->EvaluationFiles.begin();
+      li != this->EvaluationFiles.end();
+      ++li)
+    {
+    //get all the files created by generator expressions and convert them
+    //to ninja paths
+    std::vector<std::string> files = (*li)->GetFiles();
+    typedef std::vector<std::string>::const_iterator vect_it;
+    for(vect_it j = files.begin(); j != files.end(); ++j)
+      {
+      knownDependencies.insert(ng->ConvertToNinjaPath( j->c_str() ));
+      }
+    }
+
+  //insert outputs from all WirteBuild commands
+  knownDependencies.insert(this->CombinedBuildOutputs.begin(),
+                           this->CombinedBuildOutputs.end());
+
+  //after we have combined the data into knownDependencies we have no need
+  //to keep this data around
+  this->CombinedBuildOutputs.clear();
+
+  for(TargetAliasMap::const_iterator i= this->TargetAliases.begin();
+      i != this->TargetAliases.end();
+      ++i)
+    {
+    knownDependencies.insert(i->first);
+    }
+
+  //remove all source files we know will exist.
+  typedef std::map<std::string, std::set<std::string> >::const_iterator map_it;
+  for(map_it i = this->AssumedSourceDependencies.begin();
+      i != this->AssumedSourceDependencies.end();
+      ++i)
+    {
+    knownDependencies.insert(i->first);
+    }
+
+  //now we difference with CombinedBuildExplicitDependencies to find
+  //the list of items we know nothing about
+
+  std::vector<std::string> unkownExplicitDepends;
+  this->CombinedBuildExplicitDependencies.erase("all");
+
+  std::set_difference(this->CombinedBuildExplicitDependencies.begin(),
+                      this->CombinedBuildExplicitDependencies.end(),
+                      knownDependencies.begin(),
+                      knownDependencies.end(),
+                      std::back_inserter(unkownExplicitDepends));
+
+
+  std::string const rootBuildDirectory =
+      this->GetCMakeInstance()->GetHomeOutputDirectory();
+  for (std::vector<std::string>::const_iterator
+       i = unkownExplicitDepends.begin();
+       i != unkownExplicitDepends.end();
+       ++i)
+    {
+    //verify the file is in the build directory
+    std::string const absDepPath = cmSystemTools::CollapseFullPath(
+                                     i->c_str(), rootBuildDirectory.c_str());
+    bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath.c_str(),
+                                                  rootBuildDirectory.c_str());
+    if(inBuildDir)
+      {
+      cmNinjaDeps deps(1,*i);
+      this->WritePhonyBuild(os,
+                            "",
+                            deps,
+                            deps);
+      }
+   }
 }
 
 void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
