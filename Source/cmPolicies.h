@@ -72,7 +72,6 @@ public:
     CMP0020, ///< Automatically link Qt executables to qtmain target
     CMP0021, ///< Fatal error on relative paths in INCLUDE_DIRECTORIES
     /// target property
-    CMP0022, ///< Enable use of INTERFACE_LINK_LIBRARIES property
 
     /** \brief Always the last entry.
      *

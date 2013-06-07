@@ -30,7 +30,6 @@
 cmExportFileGenerator::cmExportFileGenerator()
 {
   this->AppendMode = false;
-  this->ExportOld = false;
 }
 
 //----------------------------------------------------------------------------
@@ -165,28 +164,6 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
       this->ResolveTargetsInGeneratorExpressions(prepro, target,
                                                  missingTargets);
       properties[outputName] = prepro;
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
-                      cmTarget *target,
-                      cmGeneratorExpression::PreprocessContext preprocessRule,
-                      ImportPropertyMap &properties,
-                      std::vector<std::string> &missingTargets)
-{
-  const char *input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
-  if (input)
-    {
-    std::string prepro = cmGeneratorExpression::Preprocess(input,
-                                                           preprocessRule);
-    if (!prepro.empty())
-      {
-      this->ResolveTargetsInGeneratorExpressions(prepro, target,
-                                                 missingTargets,
-                                                 ReplaceFreeTargets);
-      properties["INTERFACE_LINK_LIBRARIES"] = prepro;
       }
     }
 }
@@ -581,24 +558,8 @@ cmExportFileGenerator
     return;
     }
 
-  const bool newCMP0022Behavior =
-                        target->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                     && target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
-
   if (iface->ImplementationIsInterface)
     {
-    if(newCMP0022Behavior && !this->ExportOld)
-      {
-      cmMakefile *mf = target->GetMakefile();
-      cmOStringStream e;
-      e << "Target \"" << target->GetName() << "\" has policy CMP0022 "
-            "enabled, but also has old-style INTERFACE_LINK_LIBRARIES "
-            "properties populated, but it was exported without the "
-          "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style "
-          "properties";
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-      return;
-      }
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties, missingTargets);
@@ -619,18 +580,6 @@ cmExportFileGenerator
     }
   else
     {
-    return;
-    }
-
-  if(newCMP0022Behavior && !this->ExportOld)
-    {
-    cmMakefile *mf = target->GetMakefile();
-    cmOStringStream e;
-    e << "Target \"" << target->GetName() << "\" has policy CMP0022 enabled, "
-         "but also has old-style INTERFACE_LINK_LIBRARIES properties "
-         "populated, but it was exported without the "
-         "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
