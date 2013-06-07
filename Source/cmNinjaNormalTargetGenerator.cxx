@@ -598,32 +598,37 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 #endif
   }
 
+  //Get the global generator as we are going to be call WriteBuild numerous
+  //times in the following section
+  cmGlobalNinjaGenerator* globalGenerator = this->GetGlobalGenerator();
+
+
   const std::string rspfile = std::string
                               (cmake::GetCMakeFilesDirectoryPostSlash()) +
                               this->GetTarget()->GetName() + ".rsp";
 
   // Write the build statement for this target.
-  cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
-                                     comment.str(),
-                                     this->LanguageLinkerRule(),
-                                     outputs,
-                                     explicitDeps,
-                                     implicitDeps,
-                                     emptyDeps,
-                                     vars,
-                                     rspfile,
-                                     commandLineLengthLimit);
+  globalGenerator->WriteBuild(this->GetBuildFileStream(),
+                              comment.str(),
+                              this->LanguageLinkerRule(),
+                              outputs,
+                              explicitDeps,
+                              implicitDeps,
+                              emptyDeps,
+                              vars,
+                              rspfile,
+                              commandLineLengthLimit);
 
   if (targetOutput != targetOutputReal) {
     if (targetType == cmTarget::EXECUTABLE) {
-      cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
+      globalGenerator->WriteBuild(this->GetBuildFileStream(),
                                   "Create executable symlink " + targetOutput,
-                                         "CMAKE_SYMLINK_EXECUTABLE",
-                                         cmNinjaDeps(1, targetOutput),
-                                         cmNinjaDeps(1, targetOutputReal),
-                                         emptyDeps,
-                                         emptyDeps,
-                                         symlinkVars);
+                                  "CMAKE_SYMLINK_EXECUTABLE",
+                                  cmNinjaDeps(1, targetOutput),
+                                  cmNinjaDeps(1, targetOutputReal),
+                                  emptyDeps,
+                                  emptyDeps,
+                                  symlinkVars);
     } else {
       cmNinjaDeps symlinks;
       const std::string soName = this->GetTargetFilePath(this->TargetNameSO);
@@ -635,30 +640,30 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         symlinks.push_back(soName);
       }
       symlinks.push_back(targetOutput);
-      cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
-                                      "Create library symlink " + targetOutput,
-                                         "CMAKE_SYMLINK_LIBRARY",
-                                         symlinks,
-                                         cmNinjaDeps(1, targetOutputReal),
-                                         emptyDeps,
-                                         emptyDeps,
-                                         symlinkVars);
+      globalGenerator->WriteBuild(this->GetBuildFileStream(),
+                                  "Create library symlink " + targetOutput,
+                                     "CMAKE_SYMLINK_LIBRARY",
+                                  symlinks,
+                                  cmNinjaDeps(1, targetOutputReal),
+                                  emptyDeps,
+                                  emptyDeps,
+                                  symlinkVars);
     }
   }
 
   if (!this->TargetNameImport.empty()) {
     // Since using multiple outputs would mess up the $out variable, use an
     // alias for the import library.
-    cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
-                                            "Alias for import library.",
-                                            cmNinjaDeps(1, targetOutputImplib),
-                                            cmNinjaDeps(1, targetOutputReal));
+    globalGenerator->WritePhonyBuild(this->GetBuildFileStream(),
+                                     "Alias for import library.",
+                                     cmNinjaDeps(1, targetOutputImplib),
+                                     cmNinjaDeps(1, targetOutputReal));
   }
 
   // Add aliases for the file name and the target name.
-  this->GetGlobalGenerator()->AddTargetAlias(this->TargetNameOut,
+  globalGenerator->AddTargetAlias(this->TargetNameOut,
                                              this->GetTarget());
-  this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
+  globalGenerator->AddTargetAlias(this->GetTargetName(),
                                              this->GetTarget());
 }
 
@@ -669,11 +674,11 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement()
   cmNinjaDeps outputs;
   this->GetLocalGenerator()->AppendTargetOutputs(this->GetTarget(), outputs);
   cmNinjaDeps depends = this->GetObjects();
-  cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
-                                          "Object library "
-                                          + this->GetTargetName(),
-                                          outputs,
-                                          depends);
+  this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                              "Object library "
+                                                + this->GetTargetName(),
+                                              outputs,
+                                              depends);
 
   // Add aliases for the target name.
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),

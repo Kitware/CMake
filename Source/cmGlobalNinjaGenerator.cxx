@@ -208,14 +208,14 @@ void cmGlobalNinjaGenerator::WritePhonyBuild(std::ostream& os,
                                              const cmNinjaDeps& orderOnlyDeps,
                                              const cmNinjaVars& variables)
 {
-  cmGlobalNinjaGenerator::WriteBuild(os,
-                                     comment,
-                                     "phony",
-                                     outputs,
-                                     explicitDeps,
-                                     implicitDeps,
-                                     orderOnlyDeps,
-                                     variables);
+  this->WriteBuild(os,
+                   comment,
+                   "phony",
+                   outputs,
+                   explicitDeps,
+                   implicitDeps,
+                   orderOnlyDeps,
+                   variables);
 }
 
 void cmGlobalNinjaGenerator::AddCustomCommandRule()
@@ -251,14 +251,14 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
   vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
 
-  cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
-                                     comment,
-                                     "CUSTOM_COMMAND",
-                                     outputs,
-                                     deps,
-                                     cmNinjaDeps(),
-                                     orderOnlyDeps,
-                                     vars);
+  this->WriteBuild(*this->BuildFileStream,
+                   comment,
+                   "CUSTOM_COMMAND",
+                   outputs,
+                   deps,
+                   cmNinjaDeps(),
+                   orderOnlyDeps,
+                   vars);
 }
 
 void
@@ -293,14 +293,14 @@ cmGlobalNinjaGenerator::WriteMacOSXContentBuild(const std::string& input,
   deps.push_back(input);
   cmNinjaVars vars;
 
-  cmGlobalNinjaGenerator::WriteBuild(*this->BuildFileStream,
-                                     "",
-                                     "COPY_OSX_CONTENT",
-                                     outputs,
-                                     deps,
-                                     cmNinjaDeps(),
-                                     cmNinjaDeps(),
-                                     cmNinjaVars());
+  this->WriteBuild(*this->BuildFileStream,
+                   "",
+                   "COPY_OSX_CONTENT",
+                   outputs,
+                   deps,
+                   cmNinjaDeps(),
+                   cmNinjaDeps(),
+                   cmNinjaVars());
 }
 
 void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
@@ -896,10 +896,10 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
     cmNinjaDeps deps;
     this->AppendTargetOutputs(i->second, deps);
 
-    cmGlobalNinjaGenerator::WritePhonyBuild(os,
-                                            "",
-                                            cmNinjaDeps(1, i->first),
-                                            deps);
+    this->WritePhonyBuild(os,
+                          "",
+                          cmNinjaDeps(1, i->first),
+                          deps);
   }
 }
 
@@ -920,10 +920,10 @@ void cmGlobalNinjaGenerator::WriteTargetAll(std::ostream& os)
   cmNinjaDeps outputs;
   outputs.push_back("all");
 
-  cmGlobalNinjaGenerator::WritePhonyBuild(os,
-                                          "The main all target.",
-                                          outputs,
-                                          this->AllDependencies);
+  this->WritePhonyBuild(os,
+                        "The main all target.",
+                        outputs,
+                        this->AllDependencies);
 
   cmGlobalNinjaGenerator::WriteDefault(os,
                                        outputs,
@@ -970,19 +970,19 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                      implicitDeps.end());
   implicitDeps.push_back("CMakeCache.txt");
 
-  WriteBuild(os,
-             "Re-run CMake if any of its inputs changed.",
-             "RERUN_CMAKE",
-             /*outputs=*/ cmNinjaDeps(1, NINJA_BUILD_FILE),
-             /*explicitDeps=*/ cmNinjaDeps(),
-             implicitDeps,
-             /*orderOnlyDeps=*/ cmNinjaDeps(),
-             /*variables=*/ cmNinjaVars());
+  this->WriteBuild(os,
+                   "Re-run CMake if any of its inputs changed.",
+                   "RERUN_CMAKE",
+                   /*outputs=*/ cmNinjaDeps(1, NINJA_BUILD_FILE),
+                   /*explicitDeps=*/ cmNinjaDeps(),
+                   implicitDeps,
+                   /*orderOnlyDeps=*/ cmNinjaDeps(),
+                   /*variables=*/ cmNinjaVars());
 
-  WritePhonyBuild(os,
-                  "A missing CMake input file is not an error.",
-                  implicitDeps,
-                  cmNinjaDeps());
+  this->WritePhonyBuild(os,
+                        "A missing CMake input file is not an error.",
+                        implicitDeps,
+                        cmNinjaDeps());
 }
 
 std::string cmGlobalNinjaGenerator::ninjaCmd() const
