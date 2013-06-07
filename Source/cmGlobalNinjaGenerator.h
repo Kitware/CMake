@@ -321,6 +321,7 @@ private:
   void WriteAssumedSourceDependencies();
 
   void WriteTargetAliases(std::ostream& os);
+  void WriteUnknownExplicitDependencies(std::ostream& os);
 
   void WriteBuiltinTargets(std::ostream& os);
   void WriteTargetAll(std::ostream& os);
@@ -357,6 +358,12 @@ private:
 
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
+
+  //The combined explicit dependencies of all build commands that the global
+  //generator has issued. When combined with CombinedBuildOutputs it allows
+  //us to detect the set of explicit dependencies that have
+  std::set<std::string> CombinedBuildExplicitDependencies;
+  std::set<std::string> CombinedBuildOutputs;
 
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string> > AssumedSourceDependencies;
