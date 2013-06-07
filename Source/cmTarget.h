@@ -111,10 +111,6 @@ public:
   cmPolicies::PolicyStatus GetPolicyStatusCMP0021() const
     { return this->PolicyStatusCMP0021; }
 
-  /** Get the status of policy CMP0022 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0022() const
-    { return this->PolicyStatusCMP0022; }
-
   /**
    * Get the list of the custom commands for this target
    */
@@ -280,9 +276,6 @@ public:
       if the target cannot be linked.  */
   LinkInterface const* GetLinkInterface(const char* config,
                                         cmTarget *headTarget);
-  void GetTransitivePropertyLinkLibraries(const char* config,
-                                        cmTarget *headTarget,
-                                        std::vector<std::string> &libs);
 
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
@@ -699,7 +692,6 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
   cmPolicies::PolicyStatus PolicyStatusCMP0020;
   cmPolicies::PolicyStatus PolicyStatusCMP0021;
-  cmPolicies::PolicyStatus PolicyStatusCMP0022;
 
   // Internal representation details.
   friend class cmTargetInternals;

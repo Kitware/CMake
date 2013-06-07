@@ -35,8 +35,6 @@ public:
   /** Set the namespace in which to place exported target names.  */
   void SetNamespace(const char* ns) { this->Namespace = ns; }
 
-  void SetExportOld(bool exportOld) { this->ExportOld = exportOld; }
-
   /** Add a configuration to be exported.  */
   void AddConfiguration(const char* config);
 
@@ -103,10 +101,6 @@ protected:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
-  void PopulateInterfaceLinkLibrariesProperty(cmTarget *target,
-                                 cmGeneratorExpression::PreprocessContext,
-                                 ImportPropertyMap &properties,
-                                 std::vector<std::string> &missingTargets);
   void PopulateInterfaceProperty(const char *propName, cmTarget *target,
                                  ImportPropertyMap &properties);
   void PopulateCompatibleInterfaceProperties(cmTarget *target,
@@ -136,8 +130,6 @@ protected:
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
-
-  bool ExportOld;
 
   // The set of configurations to export.
   std::vector<std::string> Configurations;
