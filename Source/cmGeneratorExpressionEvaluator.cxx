@@ -347,6 +347,8 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
 //----------------------------------------------------------------------------
 static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 {
+  LinkOnlyNode() {}
+
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
