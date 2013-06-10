@@ -25,6 +25,12 @@
 #include "renamed.h"
 #endif
 
+#ifdef DO_GNU_TESTS
+#ifndef CUSTOM_COMPILE_OPTION
+#error Expected CUSTOM_COMPILE_OPTION
+#endif
+#endif
+
 int main(int,char **)
 {
   TestSharedLibDepends dep;
