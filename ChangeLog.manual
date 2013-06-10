@@ -1,3 +1,26 @@
+Changes in CMake 2.8.11.1 (since 2.8.11)
+----------------------------------------
+Brad King (5):
+      ExternalData: Do not re-stage staged object files
+      try_compile: Fix quoting of libraries in generated CMakeLists.txt
+      KWSys: Fix SystemTools::FileIsDirectory with long paths (#14176)
+      FindBoost: Fix handling of \ in input paths (#14179)
+      Xcode: Fix framework search paths in STATIC library targets (#14191)
+
+Modestas Vainius (1):
+      Fix test failures caused by regexp-sensitive characters in the build paths
+
+Stephen Kelly (9):
+      include_directories: Fix handling of empty or space-only entries
+      try_compile: Trim whitespace from LINK_LIBRARIES entries
+      cmTarget: Remove some hardcoding of transitive property names.
+      GenexEval: Extract a getLinkedTargetsContent from TargetPropertyNode.
+      GenexEval: Fix evaluation of INCLUDE_DIRECTORIES target property.
+      GenexEval: Test evaluation of INCLUDE_DIRECTORIES target property.
+      FindQt4: Don't fail if certain Qt modules are unavailable.
+      Qt4Macros: Handle Qt ActiveX libraries in qt4_use_modules.
+      Genex: Fix the HEAD target used for evaluated expressions
+
 Changes in CMake 2.8.11 (since 2.8.11-rc4)
 ----------------------------------------
 None
