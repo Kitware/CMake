@@ -31,9 +31,10 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 
       ImportPropertyMap properties;
 
-      this->FindTargets("INTERFACE_INCLUDE_DIRECTORIES", te, emittedDeps);
-      this->FindTargets("INTERFACE_COMPILE_DEFINITIONS", te, emittedDeps);
-      this->FindTargets("INTERFACE_COMPILE_OPTIONS", te, emittedDeps);
+#define FIND_TARGETS(PROPERTY) \
+      this->FindTargets(#PROPERTY, te, emittedDeps);
+
+      CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
 
       this->PopulateProperties(te, properties, emittedDeps);
 

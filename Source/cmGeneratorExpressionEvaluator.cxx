@@ -491,11 +491,13 @@ static const struct JoinNode : public cmGeneratorExpressionNode
   }
 } joinNode;
 
+#define TRANSITIVE_PROPERTY_NAME(PROPERTY) \
+  , #PROPERTY
+
 //----------------------------------------------------------------------------
 static const char* targetPropertyTransitiveWhitelist[] = {
-    "INTERFACE_INCLUDE_DIRECTORIES"
-  , "INTERFACE_COMPILE_DEFINITIONS"
-  , "INTERFACE_COMPILE_OPTIONS"
+  0
+  CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
 };
 
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
@@ -675,7 +677,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       // No error. We just skip cyclic references.
       return std::string();
     case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
-      for (size_t i = 0;
+      for (size_t i = 1;
           i < (sizeof(targetPropertyTransitiveWhitelist) /
                 sizeof(*targetPropertyTransitiveWhitelist));
           ++i)
@@ -703,9 +705,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       else
         {
-        assert(dagCheckerParent->EvaluatingIncludeDirectories()
-            || dagCheckerParent->EvaluatingCompileDefinitions()
-            || dagCheckerParent->EvaluatingCompileOptions());
+#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) \
+  dagCheckerParent->METHOD () ||
+
+        assert(
+          CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
+                                            ASSERT_TRANSITIVE_PROPERTY_METHOD)
+          false);
         }
       }
 
@@ -732,7 +738,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
 
-    const char **transBegin = targetPropertyTransitiveWhitelist;
+    const char **transBegin = targetPropertyTransitiveWhitelist + 1;
     const char **transEnd = targetPropertyTransitiveWhitelist
               + (sizeof(targetPropertyTransitiveWhitelist) /
               sizeof(*targetPropertyTransitiveWhitelist));
@@ -798,7 +804,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return linkedTargetsContent;
       }
 
-    for (size_t i = 0;
+    for (size_t i = 1;
          i < (sizeof(targetPropertyTransitiveWhitelist) /
               sizeof(*targetPropertyTransitiveWhitelist));
          ++i)
