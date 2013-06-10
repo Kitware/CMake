@@ -205,3 +205,36 @@ target_compile_definitions(deps_shared_iface2
   $<$<BOOL:$<TARGET_PROPERTY:CUSTOM_PROP>>:CUSTOM_PROPERTY_IS_ON>
   $<$<STREQUAL:$<TARGET_PROPERTY:CUSTOM_STRING>,testcontent>:CUSTOM_STRING_IS_MATCH>
 )
+
+add_subdirectory(excludedFromAll)
+
+add_executable(iface_test_bld iface_test.cpp)
+target_link_libraries(iface_test_bld bld_testSharedLibDepends)
+
+set_property(TARGET bld_testSharedLibRequired APPEND PROPERTY
+    LINK_INTERFACE_LIBRARIES
+        excludedFromAll
+)
+get_target_property(_configs bld_testSharedLibRequired IMPORTED_CONFIGURATIONS)
+foreach(_config ${_configs})
+    set_property(TARGET bld_testSharedLibRequired APPEND PROPERTY
+        IMPORTED_LINK_INTERFACE_LIBRARIES_${_config}
+        excludedFromAll
+    )
+endforeach()
+unset(_configs)
+add_executable(iface_test_exp iface_test.cpp)
+target_link_libraries(iface_test_exp testSharedLibDepends)
+
+set_property(TARGET testSharedLibDepends APPEND PROPERTY
+    LINK_INTERFACE_LIBRARIES
+        excludedFromAll
+)
+get_target_property(_configs testSharedLibDepends IMPORTED_CONFIGURATIONS)
+foreach(_config ${_configs})
+    set_property(TARGET testSharedLibDepends APPEND PROPERTY
+        IMPORTED_LINK_INTERFACE_LIBRARIES_${_config}
+        excludedFromAll
+    )
+endforeach()
+unset(_configs)
