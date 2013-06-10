@@ -16,6 +16,16 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 
+#define CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(F) \
+  F(EvaluatingIncludeDirectories) \
+  F(EvaluatingCompileDefinitions) \
+  F(EvaluatingCompileOptions)
+
+#define CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(F) \
+  F(INTERFACE_INCLUDE_DIRECTORIES) \
+  F(INTERFACE_COMPILE_DEFINITIONS) \
+  F(INTERFACE_COMPILE_OPTIONS)
+
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionDAGChecker
 {
@@ -38,9 +48,11 @@ struct cmGeneratorExpressionDAGChecker
                    const std::string &expr);
 
   bool EvaluatingLinkLibraries();
-  bool EvaluatingIncludeDirectories() const;
-  bool EvaluatingCompileDefinitions() const;
-  bool EvaluatingCompileOptions() const;
+
+#define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) \
+  bool METHOD () const;
+
+CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(DECLARE_TRANSITIVE_PROPERTY_METHOD)
 
 private:
   Result checkGraph() const;

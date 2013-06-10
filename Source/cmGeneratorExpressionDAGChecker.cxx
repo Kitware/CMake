@@ -33,9 +33,13 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     }
   this->CheckResult = this->checkGraph();
 
-  if (CheckResult == DAG && (top->EvaluatingIncludeDirectories()
-      || top->EvaluatingCompileDefinitions()
-      || top->EvaluatingCompileOptions()))
+#define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) \
+  top->METHOD () ||
+
+  if (CheckResult == DAG && (
+      CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(TEST_TRANSITIVE_PROPERTY_METHOD)
+      false)
+     )
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
