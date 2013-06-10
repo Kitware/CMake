@@ -33,6 +33,7 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 
       this->FindTargets("INTERFACE_INCLUDE_DIRECTORIES", te, emittedDeps);
       this->FindTargets("INTERFACE_COMPILE_DEFINITIONS", te, emittedDeps);
+      this->FindTargets("INTERFACE_COMPILE_OPTIONS", te, emittedDeps);
 
       this->PopulateProperties(te, properties, emittedDeps);
 
