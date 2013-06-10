@@ -34,7 +34,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   this->CheckResult = this->checkGraph();
 
   if (CheckResult == DAG && (top->EvaluatingIncludeDirectories()
-      || top->EvaluatingCompileDefinitions()))
+      || top->EvaluatingCompileDefinitions()
+      || top->EvaluatingCompileOptions()))
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
