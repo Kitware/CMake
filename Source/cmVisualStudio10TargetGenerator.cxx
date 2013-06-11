@@ -300,7 +300,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteCustomCommands();
   this->WriteAllSources();
   this->WriteDotNetReferences();
-
+  this->WriteEmbeddedResourceGroup();  
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
@@ -334,6 +334,31 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
       this->WriteString("<ReferenceOutputAssembly>true"
                         "</ReferenceOutputAssembly>\n", 3);
       this->WriteString("</Reference>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
+{
+  std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
+  if(!resxObjs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<cmSourceFile*>::iterator oi = resxObjs.begin();
+        oi != resxObjs.end(); ++oi)
+      {
+      std::string obj = (*oi)->GetFullPath();
+      this->WriteString("<EmbeddedResource Include=\"", 2);
+      this->ConvertToWindowsSlash(obj);
+      (*this->BuildFileStream ) << obj << "\">\n";
+
+      this->WriteString("<DependentUpon>", 3);
+      std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
+      (*this->BuildFileStream ) << hFileName;
+      this->WriteString("</DependentUpon>\n", 3);
+
+      this->WriteString("</EmbeddedResource>\n", 2);
       }
     this->WriteString("</ItemGroup>\n", 1);
     }
@@ -661,23 +686,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       ti != this->Tools.end(); ++ti)
     {
     this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
-    }
-
-  std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
-  if(!resxObjs.empty())
-    {
-    this->WriteString("<ItemGroup>\n", 1);
-    for(std::vector<cmSourceFile*>::iterator oi = resxObjs.begin();
-        oi != resxObjs.end(); ++oi)
-      {
-      std::string obj = (*oi)->GetFullPath();
-      this->WriteString("<EmbeddedResource Include=\"", 2);
-      this->ConvertToWindowsSlash(obj);
-      (*this->BuildFileStream ) << obj << "\">\n";
-      this->WriteString("<Filter>Resource Files</Filter>\n", 3);
-      this->WriteString("</EmbeddedResource>\n", 2);
-      }
-    this->WriteString("</ItemGroup>\n", 1);
     }
 
   // Add object library contents as external objects.
