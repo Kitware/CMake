@@ -266,8 +266,6 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       {
       return compilerId ? compilerId : "";
       }
-    else
-    {
     cmsys::RegularExpression compilerIdValidator;
     compilerIdValidator.compile("^[A-Za-z0-9_]*$");
     if (!compilerIdValidator.find(parameters.begin()->c_str()))
@@ -286,7 +284,6 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       return "1";
       }
     return "0";
-    }
   }
 };
 

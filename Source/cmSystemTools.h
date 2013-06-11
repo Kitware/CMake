@@ -274,7 +274,7 @@ public:
   static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
 
   /**
-   * Come constants for different file formats.
+   * Some constants for different file formats.
    */
   enum FileFormat {
     NO_FILE_FORMAT = 0,
