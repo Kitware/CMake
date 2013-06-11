@@ -396,6 +396,101 @@ static const struct VersionEqualNode : public cmGeneratorExpressionNode
 } versionEqualNode;
 
 //----------------------------------------------------------------------------
+struct CompilerVersionNode : public cmGeneratorExpressionNode
+{
+  CompilerVersionNode() {}
+
+  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+
+  std::string EvaluateWithLanguage(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *,
+                       const std::string &lang) const
+  {
+    const char *compilerVersion = context->Makefile ?
+                              context->Makefile->GetSafeDefinition((
+                        "CMAKE_" + lang + "_COMPILER_VERSION").c_str()) : "";
+    if (parameters.size() == 0)
+      {
+      return compilerVersion ? compilerVersion : "";
+      }
+
+    cmsys::RegularExpression compilerIdValidator;
+    compilerIdValidator.compile("^[0-9\\.]*$");
+    if (!compilerIdValidator.find(parameters.begin()->c_str()))
+      {
+      reportError(context, content->GetOriginalExpression(),
+                  "Expression syntax not recognized.");
+      return std::string();
+      }
+    if (!compilerVersion)
+      {
+      return parameters.front().empty() ? "1" : "0";
+      }
+
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
+                                      parameters.begin()->c_str(),
+                                      compilerVersion) ? "1" : "0";
+  }
+};
+
+//----------------------------------------------------------------------------
+static const struct CCompilerVersionNode : public CompilerVersionNode
+{
+  CCompilerVersionNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (parameters.size() != 0 && parameters.size() != 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<C_COMPILER_VERSION> expression requires one or two parameters");
+      return std::string();
+      }
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<C_COMPILER_VERSION> may only be used with targets.  It may not "
+          "be used with add_custom_command.");
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "C");
+  }
+} cCompilerVersionNode;
+
+//----------------------------------------------------------------------------
+static const struct CxxCompilerVersionNode : public CompilerVersionNode
+{
+  CxxCompilerVersionNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if (parameters.size() != 0 && parameters.size() != 1)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<CXX_COMPILER_VERSION> expression requires one or two "
+          "parameters");
+      return std::string();
+      }
+    if (!context->HeadTarget)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<CXX_COMPILER_VERSION> may only be used with targets.  It may "
+          "not be used with add_custom_command.");
+      }
+    return this->EvaluateWithLanguage(parameters, context, content,
+                                      dagChecker, "CXX");
+  }
+} cxxCompilerVersionNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -1247,6 +1342,10 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &versionLessNode;
   else if (identifier == "VERSION_EQUAL")
     return &versionEqualNode;
+  else if (identifier == "C_COMPILER_VERSION")
+    return &cCompilerVersionNode;
+  else if (identifier == "CXX_COMPILER_VERSION")
+    return &cxxCompilerVersionNode;
   else if (identifier == "CONFIGURATION")
     return &configurationNode;
   else if (identifier == "CONFIG")
