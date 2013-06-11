@@ -14,7 +14,7 @@
 
 # Find the nasm assembler. yasm (http://www.tortall.net/projects/yasm/) is nasm compatible
 
-set(CMAKE_ASM_NASM_COMPILER_INIT nasm yasm)
+set(CMAKE_ASM_NASM_COMPILER_LIST nasm yasm)
 
 if(NOT CMAKE_ASM_NASM_COMPILER)
   find_program(CMAKE_ASM_NASM_COMPILER nasm

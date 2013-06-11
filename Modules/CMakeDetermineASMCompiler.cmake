@@ -39,8 +39,8 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
       endif()
     endif()
   else() # some specific assembler "dialect"
-    if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT)
-      message(FATAL_ERROR "CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT must be preset !")
+    if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT  AND NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST)
+      message(FATAL_ERROR "CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT or CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST must be preset !")
     endif()
   endif()
 
