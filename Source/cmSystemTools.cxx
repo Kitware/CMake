@@ -2680,13 +2680,18 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
                                    const char* lhss, const char* rhss)
 {
-  unsigned int lhs[4] = {0,0,0,0};
-  unsigned int rhs[4] = {0,0,0,0};
-  sscanf(lhss, "%u.%u.%u.%u", &lhs[0], &lhs[1], &lhs[2], &lhs[3]);
-  sscanf(rhss, "%u.%u.%u.%u", &rhs[0], &rhs[1], &rhs[2], &rhs[3]);
+  // Parse out up to 8 components.
+  unsigned int lhs[8] = {0,0,0,0,0,0,0,0};
+  unsigned int rhs[8] = {0,0,0,0,0,0,0,0};
+  sscanf(lhss, "%u.%u.%u.%u.%u.%u.%u.%u",
+         &lhs[0], &lhs[1], &lhs[2], &lhs[3],
+         &lhs[4], &lhs[5], &lhs[6], &lhs[7]);
+  sscanf(rhss, "%u.%u.%u.%u.%u.%u.%u.%u",
+         &rhs[0], &rhs[1], &rhs[2], &rhs[3],
+         &rhs[4], &rhs[5], &rhs[6], &rhs[7]);
 
   // Do component-wise comparison.
-  for(unsigned int i=0; i < 4; ++i)
+  for(unsigned int i=0; i < 8; ++i)
     {
     if(lhs[i] < rhs[i])
       {
