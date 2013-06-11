@@ -345,6 +345,60 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
 } cxxCompilerIdNode;
 
 //----------------------------------------------------------------------------
+static const struct VersionGreaterNode : public cmGeneratorExpressionNode
+{
+  VersionGreaterNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str()) ? "1" : "0";
+  }
+} versionGreaterNode;
+
+//----------------------------------------------------------------------------
+static const struct VersionLessNode : public cmGeneratorExpressionNode
+{
+  VersionLessNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str()) ? "1" : "0";
+  }
+} versionLessNode;
+
+//----------------------------------------------------------------------------
+static const struct VersionEqualNode : public cmGeneratorExpressionNode
+{
+  VersionEqualNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return cmSystemTools::VersionCompare(cmSystemTools::OP_EQUAL,
+                                         parameters.front().c_str(),
+                                         parameters[1].c_str()) ? "1" : "0";
+  }
+} versionEqualNode;
+
+//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -1169,6 +1223,12 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &cCompilerIdNode;
   else if (identifier == "CXX_COMPILER_ID")
     return &cxxCompilerIdNode;
+  else if (identifier == "VERSION_GREATER")
+    return &versionGreaterNode;
+  else if (identifier == "VERSION_LESS")
+    return &versionLessNode;
+  else if (identifier == "VERSION_EQUAL")
+    return &versionEqualNode;
   else if (identifier == "CONFIGURATION")
     return &configurationNode;
   else if (identifier == "CONFIG")

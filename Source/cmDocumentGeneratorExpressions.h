@@ -48,6 +48,12 @@
   "used.\n"                                                             \
   "  $<CXX_COMPILER_ID:comp>     = '1' if the CMake-id of the CXX "     \
   "compiler matches comp, otherwise '0'.\n"                             \
+  "  $<VERSION_GREATER:v1,v2>  = '1' if v1 is a version greater than "  \
+  "v2, else '0'.\n"                                                     \
+  "  $<VERSION_LESS:v1,v2>     = '1' if v1 is a version less than v2, " \
+  "else '0'.\n"                                                         \
+  "  $<VERSION_EQUAL:v1,v2>    = '1' if v1 is the same version as v2, " \
+  "else '0'.\n"                                                         \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \
