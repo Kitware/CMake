@@ -723,16 +723,16 @@ namespace
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
-        Op op = OpEqual;
+        cmSystemTools::CompareOp op = cmSystemTools::OP_EQUAL;
         if(*argP1 == "VERSION_LESS")
           {
-          op = OpLess;
+          op = cmSystemTools::OP_LESS;
           }
         else if(*argP1 == "VERSION_GREATER")
           {
-          op = OpGreater;
+          op = cmSystemTools::OP_GREATER;
           }
-        bool result = HandleVersionCompare(op, def, def2);
+        bool result = cmSystemTools::VersionCompare(op, def, def2);
         HandleBinaryOp(result,
           reducible, arg, newArgs, argP1, argP2);
         }
