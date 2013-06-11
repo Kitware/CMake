@@ -491,11 +491,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
                         "</WindowsAppContainer>\n", 2);
       }
 
-    if(!this->GeneratorTarget->ResxSources.empty())
-      {
-      this->WriteString("<CLRSupport>true</CLRSupport>\n", 2);
-      }
-
     this->WriteString("</PropertyGroup>\n", 1);
     }
 }
