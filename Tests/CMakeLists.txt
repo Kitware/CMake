@@ -1640,7 +1640,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     FAIL_REGULAR_EXPRESSION "CMake Warning .*VariableUnusedViaUnset.CMakeLists.txt:5 \\(set\\):")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
-  if("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
+  if("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile" AND NOT WIN32)
     # Ninja does not support ADDITIONAL_MAKE_CLEAN_FILES and therefore fails
     # this test. (See #13371)
     # Apparently Visual Studio does not support it either. As the MakeClean
