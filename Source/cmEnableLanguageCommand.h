@@ -59,18 +59,21 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
-      "  enable_language(languageName [OPTIONAL] )\n"
+      "  enable_language(<lang> [OPTIONAL] )\n"
       "This command enables support for the named language in CMake. "
       "This is the same as the project command but does not create "
       "any of the extra variables that are created by the project command. "
       "Example languages are CXX, C, Fortran. "
-      "If OPTIONAL is used, use the CMAKE_<languageName>_COMPILER_WORKS "
-      "variable to check whether the language has been enabled successfully."
       "\n"
-      "This command must be called on file scope (not inside a function) and "
-      "the language enabled can only be used in the calling project or its "
-      "subdirectories added by add_subdirectory(). Also note that at present, "
-      "the OPTIONAL argument does not work.";
+      "This command must be called in file scope, not in a function call.  "
+      "Furthermore, it must be called in the highest directory common to "
+      "all targets using the named language directly for compiling sources "
+      "or indirectly through link dependencies.  "
+      "It is simplest to enable all needed languages in the top-level "
+      "directory of a project."
+      "\n"
+      "The OPTIONAL keyword is a placeholder for future implementation "
+      "and does not currently work.";
     }
 
   cmTypeMacro(cmEnableLanguageCommand, cmCommand);
