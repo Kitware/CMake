@@ -1505,6 +1505,12 @@ void cmMakefile::InitializeFromParent()
                                      parentOptions.begin(),
                                      parentOptions.end());
 
+  const std::vector<cmValueWithOrigin> parentDefines =
+                                      parent->GetCompileDefinitionsEntries();
+  this->CompileDefinitionsEntries.insert(this->CompileDefinitionsEntries.end(),
+                                     parentDefines.begin(),
+                                     parentDefines.end());
+
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
   // define flags
@@ -3493,6 +3499,19 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
     return;
     }
+  if (propname == "COMPILE_DEFINITIONS")
+    {
+    this->CompileDefinitionsEntries.clear();
+    if (!value)
+      {
+      return;
+      }
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    cmValueWithOrigin entry(value, lfbt);
+    this->CompileDefinitionsEntries.push_back(entry);
+    return;
+    }
 
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
@@ -3537,6 +3556,14 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->CompileOptionsEntries.push_back(
+                                        cmValueWithOrigin(value, lfbt));
+    return;
+    }
+  if (propname == "COMPILE_DEFINITIONS")
+    {
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->CompileDefinitionsEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
@@ -3671,6 +3698,20 @@ const char *cmMakefile::GetProperty(const char* prop,
     for (std::vector<cmValueWithOrigin>::const_iterator
         it = this->CompileOptionsEntries.begin(),
         end = this->CompileOptionsEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  else if (!strcmp("COMPILE_DEFINITIONS",prop))
+    {
+    std::string sep;
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->CompileDefinitionsEntries.begin(),
+        end = this->CompileDefinitionsEntries.end();
         it != end; ++it)
       {
       output += sep;
