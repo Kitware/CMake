@@ -223,6 +223,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
+  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
   if(strstr(gg->GetName(), "Visual Studio"))
     {
