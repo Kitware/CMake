@@ -514,6 +514,8 @@ public:
                      bool before = false);
   void InsertCompileOption(const cmValueWithOrigin &entry,
                      bool before = false);
+  void InsertCompileDefinition(const cmValueWithOrigin &entry,
+                     bool before = false);
 
   void AppendBuildInterfaceIncludes();
 
@@ -650,6 +652,7 @@ private:
   bool IsImportedTarget;
   bool DebugIncludesDone;
   bool DebugCompileOptionsDone;
+  bool DebugCompileDefinitionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
