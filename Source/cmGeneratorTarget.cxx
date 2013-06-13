@@ -229,6 +229,12 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
 }
 
+cmGeneratorTarget::~cmGeneratorTarget()
+{
+  cmDeleteAll(this->LinkInformation);
+  this->LinkInformation.clear();
+}
+
 cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
 {
   return this->LocalGenerator;
@@ -1516,4 +1522,36 @@ bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
     return false;
     }
   return this->GetCompatibleInterfaces(config).PropsNumberMax.count(p) > 0;
+}
+
+
+//----------------------------------------------------------------------------
+cmComputeLinkInformation*
+cmGeneratorTarget::GetLinkInformation(const std::string& config) const
+{
+  // Lookup any existing information for this configuration.
+  std::string key(cmSystemTools::UpperCase(config));
+  cmTargetLinkInformationMap::iterator
+    i = this->LinkInformation.find(key);
+  if(i == this->LinkInformation.end())
+    {
+    // Compute information for this configuration.
+    cmComputeLinkInformation* info =
+      new cmComputeLinkInformation(this->Target, config);
+    if(!info || !info->Compute())
+      {
+      delete info;
+      info = 0;
+      }
+
+    // Store the information for this configuration.
+    cmTargetLinkInformationMap::value_type entry(key, info);
+    i = this->LinkInformation.insert(entry).first;
+
+    if (info)
+      {
+      this->Target->CheckPropertyCompatibility(info, config);
+      }
+    }
+  return i->second;
 }

@@ -529,7 +529,7 @@ void getCompatibleInterfaceProperties(cmGeneratorTarget *target,
                                       std::set<std::string> &ifaceProperties,
                                       const std::string& config)
 {
-  cmComputeLinkInformation *info = target->Target->GetLinkInformation(config);
+  cmComputeLinkInformation *info = target->GetLinkInformation(config);
 
   if (!info)
     {
