@@ -20,11 +20,13 @@ class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
 class cmTarget;
+class cmComputeLinkInformation;
 
 class cmGeneratorTarget
 {
 public:
   cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
+  ~cmGeneratorTarget();
 
   cmLocalGenerator* GetLocalGenerator() const;
 
@@ -35,6 +37,9 @@ public:
       referencing the configuration in the native build system.  This
       location is suitable for use as the LOCATION target property.  */
   const char* GetLocationForBuild() const;
+
+  cmComputeLinkInformation*
+    GetLinkInformation(const std::string& config) const;
 
   int GetType() const;
   std::string GetName() const;
@@ -212,6 +217,10 @@ private:
     bool Done;
   };
   mutable std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
+
+  typedef std::map<std::string, cmComputeLinkInformation*>
+                                                   cmTargetLinkInformationMap;
+  mutable cmTargetLinkInformationMap LinkInformation;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

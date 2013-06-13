@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmGeneratorTarget.h"
 #include "cmake.h"
+#include "cmGeneratorTarget.h"
 
 #include <assert.h>
 
@@ -557,8 +558,7 @@ cmInstallTargetGenerator
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
   std::map<std::string, std::string> install_name_remap;
-  if(cmComputeLinkInformation* cli =
-     this->Target->Target->GetLinkInformation(config))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
     std::set<cmTarget const*> const& sharedLibs
                                             = cli->GetSharedLibrariesLinked();
@@ -667,8 +667,7 @@ cmInstallTargetGenerator
 
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-      this->Target->Target->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;
@@ -700,8 +699,7 @@ cmInstallTargetGenerator
 
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-      this->Target->Target->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;
