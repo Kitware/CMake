@@ -1597,7 +1597,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   // Replace spaces in libs with ;
   cmSystemTools::ReplaceString(libs, " ", ";");
   cmComputeLinkInformation* pcli =
-    this->Target->GetLinkInformation(config.c_str());
+    this->GeneratorTarget->GetLinkInformation(config.c_str());
   if(!pcli)
     {
     cmSystemTools::Error

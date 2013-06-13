@@ -245,7 +245,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->Target->GetLinkInformation(this->GetConfigName());
+    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 

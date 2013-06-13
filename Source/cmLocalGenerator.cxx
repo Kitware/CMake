@@ -1791,7 +1791,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 {
   cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
+  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
   if(!pcli)
     {
     return;
@@ -2213,8 +2213,10 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
         }
       return;
       }
-
-    if (target->GetLinkInterfaceDependentBoolProperty(
+    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                    ->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(target);
+    if (gtgt->GetLinkInterfaceDependentBoolProperty(
                                                 "POSITION_INDEPENDENT_CODE",
                                                 config))
       {
