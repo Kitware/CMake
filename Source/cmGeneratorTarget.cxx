@@ -14,6 +14,7 @@
 #include "cmTarget.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
+#include "cmComputeLinkInformation.h"
 #include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
 #include "cmGeneratorExpression.h"
@@ -21,6 +22,31 @@
 #include "cmComputeLinkInformation.h"
 
 #include <queue>
+#include <assert.h>
+#include <errno.h>
+
+//----------------------------------------------------------------------------
+cmTargetLinkInformationMap
+::cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r): derived()
+{
+  // Ideally cmTarget instances should never be copied.  However until
+  // we can make a sweep to remove that, this copy constructor avoids
+  // allowing the resources (LinkInformation) from getting copied.  In
+  // the worst case this will lead to extra cmComputeLinkInformation
+  // instances.  We also enforce in debug mode that the map be emptied
+  // when copied.
+  static_cast<void>(r);
+  assert(r.empty());
+}
+
+//----------------------------------------------------------------------------
+cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
+{
+  for(derived::iterator i = this->begin(); i != this->end(); ++i)
+    {
+    delete i->second;
+    }
+}
 
 #include "assert.h"
 
@@ -65,6 +91,14 @@ void deleteAndClear2(
 cmGeneratorTarget::~cmGeneratorTarget()
 {
   deleteAndClear2(this->CachedLinkInterfaceIncludeDirectoriesEntries);
+
+  for (cmTargetLinkInformationMap::const_iterator it
+      = this->LinkInformation.begin();
+      it != this->LinkInformation.end(); ++it)
+    {
+    delete it->second;
+    }
+  this->LinkInformation.clear();
 }
 
 //----------------------------------------------------------------------------
@@ -593,12 +627,868 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
 }
 
 //----------------------------------------------------------------------------
+template<typename PropertyType>
+PropertyType getTypedProperty(cmTarget const* tgt, const char *prop,
+                              PropertyType *);
+
+//----------------------------------------------------------------------------
+template<>
+bool getTypedProperty<bool>(cmTarget const* tgt, const char *prop, bool *)
+{
+  return tgt->GetPropertyAsBool(prop);
+}
+
+//----------------------------------------------------------------------------
+template<>
+const char *getTypedProperty<const char *>(cmTarget const* tgt,
+                                           const char *prop,
+                                           const char **)
+{
+  return tgt->GetProperty(prop);
+}
+
+enum CompatibleType
+{
+  BoolType,
+  StringType,
+  NumberMinType,
+  NumberMaxType
+};
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+std::pair<bool, PropertyType> consistentProperty(PropertyType lhs,
+                                                 PropertyType rhs,
+                                                 CompatibleType t);
+
+//----------------------------------------------------------------------------
+template<>
+std::pair<bool, bool> consistentProperty(bool lhs, bool rhs, CompatibleType)
+{
+  return std::make_pair(lhs == rhs, lhs);
+}
+
+//----------------------------------------------------------------------------
+std::pair<bool, const char*> consistentStringProperty(const char *lhs,
+                                                      const char *rhs)
+{
+  const bool b = strcmp(lhs, rhs) == 0;
+  return std::make_pair(b, b ? lhs : 0);
+}
+
+#if defined(_MSC_VER) && _MSC_VER <= 1200
+template<typename T> const T&
+cmMaximum(const T& l, const T& r) {return l > r ? l : r;}
+template<typename T> const T&
+cmMinimum(const T& l, const T& r) {return l < r ? l : r;}
+#else
+#define cmMinimum std::min
+#define cmMaximum std::max
+#endif
+
+//----------------------------------------------------------------------------
+std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
+                                                      const char *rhs,
+                                                      CompatibleType t)
+{
+  char *pEnd;
+
+#if defined(_MSC_VER)
+  static const char* const null_ptr = 0;
+#else
+# define null_ptr 0
+#endif
+
+  long lnum = strtol(lhs, &pEnd, 0);
+  if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
+    {
+    return std::pair<bool, const char*>(false, null_ptr);
+    }
+
+  long rnum = strtol(rhs, &pEnd, 0);
+  if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
+    {
+    return std::pair<bool, const char*>(false, null_ptr);
+    }
+
+#if !defined(_MSC_VER)
+#undef null_ptr
+#endif
+
+  if (t == NumberMaxType)
+    {
+    return std::make_pair(true, cmMaximum(lnum, rnum) == lnum ? lhs : rhs);
+    }
+  else
+    {
+    return std::make_pair(true, cmMinimum(lnum, rnum) == lnum ? lhs : rhs);
+    }
+}
+
+//----------------------------------------------------------------------------
+template<>
+std::pair<bool, const char*> consistentProperty(const char *lhs,
+                                                const char *rhs,
+                                                CompatibleType t)
+{
+  if (!lhs && !rhs)
+    {
+    return std::make_pair(true, lhs);
+    }
+  if (!lhs)
+    {
+    return std::make_pair(true, rhs);
+    }
+  if (!rhs)
+    {
+    return std::make_pair(true, lhs);
+    }
+
+#if defined(_MSC_VER)
+  static const char* const null_ptr = 0;
+#else
+# define null_ptr 0
+#endif
+
+  switch(t)
+  {
+  case BoolType:
+    assert(!"consistentProperty for strings called with BoolType");
+    return std::pair<bool, const char*>(false, null_ptr);
+  case StringType:
+    return consistentStringProperty(lhs, rhs);
+  case NumberMinType:
+  case NumberMaxType:
+    return consistentNumberProperty(lhs, rhs, t);
+  }
+  assert(!"Unreachable!");
+  return std::pair<bool, const char*>(false, null_ptr);
+
+#if !defined(_MSC_VER)
+#undef null_ptr
+#endif
+
+}
+
+template<typename PropertyType>
+PropertyType impliedValue(PropertyType);
+template<>
+bool impliedValue<bool>(bool)
+{
+  return false;
+}
+
+template<>
+const char* impliedValue<const char*>(const char*)
+{
+  return "";
+}
+
+template<typename PropertyType>
+std::string valueAsString(PropertyType);
+template<>
+std::string valueAsString<bool>(bool value)
+{
+  return value ? "TRUE" : "FALSE";
+}
+template<>
+std::string valueAsString<const char*>(const char* value)
+{
+  return value ? value : "(unset)";
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::ReportPropertyOrigin(const std::string &p,
+                               const std::string &result,
+                               const std::string &report,
+                               const std::string &compatibilityType) const
+{
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+          this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugOrigin = !this->DebugCompatiblePropertiesDone[p]
+                    && std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 p)
+                        != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->DebugCompatiblePropertiesDone[p] = true;
+    }
+  if (!debugOrigin)
+    {
+    return;
+    }
+
+  std::string areport = compatibilityType;
+  areport += std::string(" of property \"") + p + "\" for target \"";
+  areport += std::string(this->GetName());
+  areport += "\" (result: \"";
+  areport += result;
+  areport += "\"):\n" + report;
+
+  cmListFileBacktrace lfbt;
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport, lfbt);
+}
+
+//----------------------------------------------------------------------------
+std::string compatibilityType(CompatibleType t)
+{
+  switch(t)
+    {
+    case BoolType:
+      return "Boolean compatibility";
+    case StringType:
+      return "String compatibility";
+    case NumberMaxType:
+      return "Numeric maximum compatibility";
+    case NumberMinType:
+      return "Numeric minimum compatibility";
+    }
+  assert(!"Unreachable!");
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string compatibilityAgree(CompatibleType t, bool dominant)
+{
+  switch(t)
+    {
+    case BoolType:
+    case StringType:
+      return dominant ? "(Disagree)\n" : "(Agree)\n";
+    case NumberMaxType:
+    case NumberMinType:
+      return dominant ? "(Dominant)\n" : "(Ignored)\n";
+    }
+  assert(!"Unreachable!");
+  return "";
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
+                                          const std::string &p,
+                                          const char *config,
+                                          const char *defaultValue,
+                                          CompatibleType t,
+                                          PropertyType *)
+{
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt->Target,
+                                                            p.c_str(),
+                                                            0);
+  const bool explicitlySet = tgt->Target->GetProperties()
+                                  .find(p.c_str())
+                                  != tgt->Target->GetProperties().end();
+  const bool impliedByUse =
+          tgt->Target->IsNullImpliedByLinkLibraries(p);
+  assert((impliedByUse ^ explicitlySet)
+      || (!impliedByUse && !explicitlySet));
+
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+  if(!info)
+    {
+    return propContent;
+    }
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+  bool propInitialized = explicitlySet;
+
+  std::string report = " * Target \"";
+  report += tgt->GetName();
+  if (explicitlySet)
+    {
+    report += "\" has property content \"";
+    report += valueAsString<PropertyType>(propContent);
+    report += "\"\n";
+    }
+  else if (impliedByUse)
+    {
+    report += "\" property is implied by use.\n";
+    }
+  else
+    {
+    report += "\" property not set.\n";
+    }
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    // An error should be reported if one dependency
+    // has INTERFACE_POSITION_INDEPENDENT_CODE ON and the other
+    // has INTERFACE_POSITION_INDEPENDENT_CODE OFF, or if the
+    // target itself has a POSITION_INDEPENDENT_CODE which disagrees
+    // with a dependency.
+
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    const bool ifaceIsSet = li->Target->GetProperties()
+                            .find("INTERFACE_" + p)
+                            != li->Target->GetProperties().end();
+    PropertyType ifacePropContent =
+                    getTypedProperty<PropertyType>(li->Target,
+                              ("INTERFACE_" + p).c_str(), 0);
+
+    std::string reportEntry;
+    if (ifaceIsSet)
+      {
+      reportEntry += " * Target \"";
+      reportEntry += li->Target->GetName();
+      reportEntry += "\" property value \"";
+      reportEntry += valueAsString<PropertyType>(ifacePropContent);
+      reportEntry += "\" ";
+      }
+
+    if (explicitlySet)
+      {
+      if (ifaceIsSet)
+        {
+        std::pair<bool, PropertyType> consistent =
+                                  consistentProperty(propContent,
+                                                     ifacePropContent, t);
+        report += reportEntry;
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first)
+          {
+          cmOStringStream e;
+          e << "Property " << p << " on target \""
+            << tgt->GetName() << "\" does\nnot match the "
+            "INTERFACE_" << p << " property requirement\nof "
+            "dependency \"" << li->Target->GetName() << "\".\n";
+          cmSystemTools::Error(e.str().c_str());
+          break;
+          }
+        else
+          {
+          propContent = consistent.second;
+          continue;
+          }
+        }
+      else
+        {
+        // Explicitly set on target and not set in iface. Can't disagree.
+        continue;
+        }
+      }
+    else if (impliedByUse)
+      {
+      propContent = impliedValue<PropertyType>(propContent);
+
+      if (ifaceIsSet)
+        {
+        std::pair<bool, PropertyType> consistent =
+                                  consistentProperty(propContent,
+                                                     ifacePropContent, t);
+        report += reportEntry;
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first)
+          {
+          cmOStringStream e;
+          e << "Property " << p << " on target \""
+            << tgt->GetName() << "\" is\nimplied to be " << defaultValue
+            << " because it was used to determine the link libraries\n"
+               "already. The INTERFACE_" << p << " property on\ndependency \""
+            << li->Target->GetName() << "\" is in conflict.\n";
+          cmSystemTools::Error(e.str().c_str());
+          break;
+          }
+        else
+          {
+          propContent = consistent.second;
+          continue;
+          }
+        }
+      else
+        {
+        // Implicitly set on target and not set in iface. Can't disagree.
+        continue;
+        }
+      }
+    else
+      {
+      if (ifaceIsSet)
+        {
+        if (propInitialized)
+          {
+          std::pair<bool, PropertyType> consistent =
+                                    consistentProperty(propContent,
+                                                       ifacePropContent, t);
+          report += reportEntry;
+          report += compatibilityAgree(t, propContent != consistent.second);
+          if (!consistent.first)
+            {
+            cmOStringStream e;
+            e << "The INTERFACE_" << p << " property of \""
+              << li->Target->GetName() << "\" does\nnot agree with the value "
+                "of " << p << " already determined\nfor \""
+              << tgt->GetName() << "\".\n";
+            cmSystemTools::Error(e.str().c_str());
+            break;
+            }
+          else
+            {
+            propContent = consistent.second;
+            continue;
+            }
+          }
+        else
+          {
+          report += reportEntry + "(Interface set)\n";
+          propContent = ifacePropContent;
+          propInitialized = true;
+          }
+        }
+      else
+        {
+        // Not set. Nothing to agree on.
+        continue;
+        }
+      }
+    }
+
+  tgt->ReportPropertyOrigin(p, valueAsString<PropertyType>(propContent),
+                            report, compatibilityType(t));
+  return propContent;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGeneratorTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
+                                                     const char *config) const
+{
+  return checkInterfacePropertyCompatibility<bool>(this, p, config, "FALSE",
+                                                   BoolType, 0);
+}
+
+//----------------------------------------------------------------------------
+const char * cmGeneratorTarget::GetLinkInterfaceDependentStringProperty(
+                                                      const std::string &p,
+                                                      const char *config) const
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty",
+                                                           StringType, 0);
+}
+
+//----------------------------------------------------------------------------
+const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMinProperty(
+                                                      const std::string &p,
+                                                      const char *config) const
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty",
+                                                           NumberMinType, 0);
+}
+
+//----------------------------------------------------------------------------
+const char * cmGeneratorTarget::GetLinkInterfaceDependentNumberMaxProperty(
+                                                      const std::string &p,
+                                                      const char *config) const
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty",
+                                                           NumberMaxType, 0);
+}
+
+//----------------------------------------------------------------------------
+bool isLinkDependentProperty(cmGeneratorTarget const* tgt,
+                             const std::string &p,
+                             const char *interfaceProperty,
+                             const char *config)
+{
+  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
+  if(!info)
+    {
+    return false;
+    }
+
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+    const char *prop = li->Target->GetProperty(interfaceProperty);
+    if (!prop)
+      {
+      continue;
+      }
+
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop, props);
+
+    for(std::vector<std::string>::iterator pi = props.begin();
+        pi != props.end(); ++pi)
+      {
+      if (*pi == p)
+        {
+        return true;
+        }
+      }
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGeneratorTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
+                                           const char *config) const
+{
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return (p == "POSITION_INDEPENDENT_CODE") ||
+    isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGeneratorTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
+                                    const char *config) const
+{
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_STRING",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMinProperty(
+                                    const std::string &p,
+                                    const char *config) const
+{
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_NUMBER_MIN",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsLinkInterfaceDependentNumberMaxProperty(
+                                    const std::string &p,
+                                    const char *config) const
+{
+  if (this->GetType() == cmTarget::OBJECT_LIBRARY
+      || this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return false;
+    }
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_NUMBER_MAX",
+                                 config);
+}
+
+template<typename PropertyType>
+PropertyType getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
+                                               const std::string prop,
+                                               const char *config,
+                                               CompatibleType,
+                                               PropertyType *);
+
+template<>
+bool getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
+                                       const std::string prop,
+                                       const char *config,
+                                       CompatibleType, bool *)
+{
+  return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
+}
+
+template<>
+const char * getLinkInterfaceDependentProperty(cmGeneratorTarget const* tgt,
+                                               const std::string prop,
+                                               const char *config,
+                                               CompatibleType t,
+                                               const char **)
+{
+  switch(t)
+  {
+  case BoolType:
+    assert(!"String compatibility check function called for boolean");
+    return 0;
+  case StringType:
+    return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+  case NumberMinType:
+    return tgt->GetLinkInterfaceDependentNumberMinProperty(prop, config);
+  case NumberMaxType:
+    return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
+  }
+  assert(!"Unreachable!");
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+template<typename PropertyType>
+void checkPropertyConsistency(cmGeneratorTarget const* depender,
+                              cmTarget const* dependee,
+                              const char *propName,
+                              std::set<cmStdString> &emitted,
+                              const char *config,
+                              CompatibleType t,
+                              PropertyType *)
+{
+  const char *prop = dependee->GetProperty(propName);
+  if (!prop)
+    {
+    return;
+    }
+
+  std::vector<std::string> props;
+  cmSystemTools::ExpandListArgument(prop, props);
+  std::string pdir =
+    dependee->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
+  pdir += "/Help/prop_tgt/";
+
+  for(std::vector<std::string>::iterator pi = props.begin();
+      pi != props.end(); ++pi)
+    {
+    std::string pname = cmSystemTools::HelpFileName(*pi);
+    std::string pfile = pdir + pname + ".rst";
+    if(cmSystemTools::FileExists(pfile.c_str(), true))
+      {
+      cmOStringStream e;
+      e << "Target \"" << dependee->GetName() << "\" has property \""
+        << *pi << "\" listed in its " << propName << " property.  "
+          "This is not allowed.  Only user-defined properties may appear "
+          "listed in the " << propName << " property.";
+      depender->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    if(emitted.insert(*pi).second)
+      {
+      getLinkInterfaceDependentProperty<PropertyType>(depender, *pi, config,
+                                                      t, 0);
+      if (cmSystemTools::GetErrorOccuredFlag())
+        {
+        return;
+        }
+      }
+    }
+}
+
+cmMakefile* cmGeneratorTarget::GetMakefile() const
+{
+  return this->Target->GetMakefile();
+}
+
+static cmStdString intersect(const std::set<cmStdString> &s1,
+                             const std::set<cmStdString> &s2)
+{
+  std::set<cmStdString> intersect;
+  std::set_intersection(s1.begin(),s1.end(),
+                        s2.begin(),s2.end(),
+                      std::inserter(intersect,intersect.begin()));
+  if (!intersect.empty())
+    {
+    return *intersect.begin();
+    }
+  return "";
+}
+static cmStdString intersect(const std::set<cmStdString> &s1,
+                       const std::set<cmStdString> &s2,
+                       const std::set<cmStdString> &s3)
+{
+  cmStdString result;
+  result = intersect(s1, s2);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s3);
+  if (!result.empty())
+    return result;
+  return intersect(s2, s3);
+}
+static cmStdString intersect(const std::set<cmStdString> &s1,
+                       const std::set<cmStdString> &s2,
+                       const std::set<cmStdString> &s3,
+                       const std::set<cmStdString> &s4)
+{
+  cmStdString result;
+  result = intersect(s1, s2);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s3);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s4);
+  if (!result.empty())
+    return result;
+  return intersect(s2, s3, s4);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
+                                              const char* config) const
+{
+  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
+
+  std::set<cmStdString> emittedBools;
+  std::set<cmStdString> emittedStrings;
+  std::set<cmStdString> emittedMinNumbers;
+  std::set<cmStdString> emittedMaxNumbers;
+
+  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+      deps.begin();
+      li != deps.end(); ++li)
+    {
+    if (!li->Target)
+      {
+      continue;
+      }
+
+    checkPropertyConsistency<bool>(this, li->Target,
+                                   "COMPATIBLE_INTERFACE_BOOL",
+                                   emittedBools, config, BoolType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_STRING",
+                                           emittedStrings, config,
+                                           StringType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_NUMBER_MIN",
+                                           emittedMinNumbers, config,
+                                           NumberMinType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_NUMBER_MAX",
+                                           emittedMaxNumbers, config,
+                                           NumberMaxType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    }
+
+  std::string prop = intersect(emittedBools,
+                               emittedStrings,
+                               emittedMinNumbers,
+                               emittedMaxNumbers);
+
+  if (!prop.empty())
+    {
+    std::set<std::string> props;
+    std::set<cmStdString>::const_iterator i = emittedBools.find(prop);
+    if (i != emittedBools.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_BOOL");
+      }
+    i = emittedStrings.find(prop);
+    if (i != emittedStrings.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_STRING");
+      }
+    i = emittedMinNumbers.find(prop);
+    if (i != emittedMinNumbers.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
+      }
+    i = emittedMaxNumbers.find(prop);
+    if (i != emittedMaxNumbers.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
+      }
+
+    std::string propsString = *props.begin();
+    props.erase(props.begin());
+    while (props.size() > 1)
+      {
+      propsString += ", " + *props.begin();
+      props.erase(props.begin());
+      }
+   if (props.size() == 1)
+     {
+     propsString += " and the " + *props.begin();
+     }
+    cmOStringStream e;
+    e << "Property \"" << prop << "\" appears in both the "
+      << propsString <<
+    " property in the dependencies of target \"" << this->GetName() <<
+    "\".  This is not allowed. A property may only require compatibility "
+    "in a boolean interpretation, a numeric minimum, a numeric maximum or a "
+    "string interpretation, but not a mixture.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+}
+
+//----------------------------------------------------------------------------
+cmComputeLinkInformation*
+cmGeneratorTarget::GetLinkInformation(const char* config,
+                                      cmTarget const* head) const
+{
+  cmTarget const* headTarget = head ? head : this->Target;
+  // Lookup any existing information for this configuration.
+  TargetConfigPair key(headTarget,
+                                  cmSystemTools::UpperCase(config?config:""));
+  cmTargetLinkInformationMap::iterator
+    i = this->LinkInformation.find(key);
+  if(i == this->LinkInformation.end())
+    {
+    // Compute information for this configuration.
+    cmComputeLinkInformation* info =
+      new cmComputeLinkInformation(this->Target, config, headTarget);
+    if(!info || !info->Compute())
+      {
+      delete info;
+      info = 0;
+      }
+
+    // Store the information for this configuration.
+    cmTargetLinkInformationMap::value_type entry(key, info);
+    i = this->LinkInformation.insert(entry).first;
+
+    if (info)
+      {
+      this->CheckPropertyCompatibility(info, config);
+      }
+    }
+  return i->second;
+}
+
+//----------------------------------------------------------------------------
 void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
                                  const char *config) const
 {
   const char *prop
-            = this->Target->
-                    GetLinkInterfaceDependentStringProperty("AUTOUIC_OPTIONS",
+            = this->GetLinkInterfaceDependentStringProperty("AUTOUIC_OPTIONS",
                                                             config);
   if (!prop)
     {

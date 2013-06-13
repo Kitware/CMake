@@ -2114,7 +2114,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     }
   // Add framework search paths needed for linking.
-  if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
+  if(cmComputeLinkInformation* cli = gtgt->GetLinkInformation(configName))
     {
     std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
     for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
@@ -2264,7 +2264,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(install_name_dir.c_str()));
 
   // Create the LD_RUNPATH_SEARCH_PATHS
-  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+  cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
   if(pcli)
     {
     std::string search_paths;
@@ -2834,7 +2834,8 @@ void cmGlobalXCodeGenerator
       }
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation* pcli = cmtarget->GetLinkInformation(configName);
+    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(cmtarget);
+    cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
     if(!pcli)
       {
       continue;

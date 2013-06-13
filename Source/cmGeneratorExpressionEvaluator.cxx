@@ -16,6 +16,9 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"
 
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+
 #include <cmsys/String.h>
 
 #include <assert.h>
@@ -1058,6 +1061,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmTarget const* headTarget = context->HeadTarget
                                ? context->HeadTarget : target;
 
+    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                    ->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(target);
+
     const char * const *transBegin =
                         cmArrayBegin(targetPropertyTransitiveWhitelist) + 1;
     const char * const *transEnd =
@@ -1105,40 +1112,40 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         return linkedTargetsContent;
         }
-      if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config))
         {
         context->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(
+        return gtgt->GetLinkInterfaceDependentBoolProperty(
                                                 propertyName,
                                                 context->Config) ? "1" : "0";
         }
-      if (target->IsLinkInterfaceDependentStringProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentStringProperty(propertyName,
                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                              target->GetLinkInterfaceDependentStringProperty(
+                              gtgt->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMinProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMaxProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1147,25 +1154,25 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return linkedTargetsContent;
       }
 
-    if (!target->IsImported()
+    if (!gtgt->IsImported()
         && dagCheckerParent && !dagCheckerParent->EvaluatingLinkLibraries())
       {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                         context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMinProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
                                                         context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMaxProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
