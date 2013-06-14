@@ -15,6 +15,6 @@
 # determine the compiler to use for ASM using AT&T syntax, e.g. GNU as
 
 set(ASM_DIALECT "-ATT")
-set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT ${_CMAKE_TOOLCHAIN_PREFIX}gas ${_CMAKE_TOOLCHAIN_PREFIX}as)
+set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST ${_CMAKE_TOOLCHAIN_PREFIX}gas ${_CMAKE_TOOLCHAIN_PREFIX}as)
 include(CMakeDetermineASMCompiler)
 set(ASM_DIALECT)
