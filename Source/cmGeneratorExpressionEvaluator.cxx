@@ -415,8 +415,15 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *) const
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
   {
+    if (dagChecker && dagChecker->EvaluatingLinkLibraries())
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<LINK_LANGUAGE> expression can not be used while evaluating "
+          "link libraries");
+      return std::string();
+      }
     if (parameters.size() != 0 && parameters.size() != 1)
       {
       reportError(context, content->GetOriginalExpression(),
