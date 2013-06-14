@@ -113,7 +113,8 @@ endif()
 set(SRCS
   cmStandardIncludes.cxx
   cmArchiveWrite.cxx
-  cmBootstrapCommands.cxx
+  cmBootstrapCommands1.cxx
+  cmBootstrapCommands2.cxx
   cmCacheManager.cxx
   cmCacheManager.h
   cmCommands.cxx
