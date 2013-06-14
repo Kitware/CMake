@@ -429,6 +429,7 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(),
           "$<LINK_LANGUAGE> may only be used with targets.  It may not "
           "be used with add_custom_command.");
+      return std::string();
       }
 
     const char *lang = target->GetLinkerLanguage(context->Config);
