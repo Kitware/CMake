@@ -554,12 +554,15 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
                 fileIt != sFiles.end();
                 ++fileIt)
               {
-              std::string linkName4 = linkName3;
-              linkName4 += "/";
-              linkName4 +=
-                      cmSystemTools::GetFilenameName((*fileIt)->GetFullPath());
-              this->AppendLinkedResource(fout, linkName4,
-                                         (*fileIt)->GetFullPath(), LinkToFile);
+              std::string fullPath = (*fileIt)->GetFullPath();
+              if (!cmSystemTools::FileIsDirectory(fullPath.c_str()))
+                {
+                std::string linkName4 = linkName3;
+                linkName4 += "/";
+                linkName4 += cmSystemTools::GetFilenameName(fullPath);
+                this->AppendLinkedResource(fout, linkName4,
+                                           fullPath, LinkToFile);
+                }
               }
             }
           }
