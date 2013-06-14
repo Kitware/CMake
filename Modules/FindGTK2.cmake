@@ -460,6 +460,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GTK2_PANGO_INCLUDE_DIR pango/pango.h)
         _GTK2_FIND_LIBRARY    (GTK2_PANGO_LIBRARY pango false true)
 
+        _GTK2_FIND_LIBRARY    (GTK2_PANGOCAIRO_LIBRARY pangocairo false true)
+
         _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_PIXBUF_INCLUDE_DIR gdk-pixbuf/gdk-pixbuf.h)
         _GTK2_FIND_LIBRARY    (GTK2_GDK_PIXBUF_LIBRARY gdk_pixbuf false true)
 
@@ -488,8 +490,6 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMM_INCLUDE_DIR pangomm.h)
         _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMMCONFIG_INCLUDE_DIR pangommconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_PANGOMM_LIBRARY pangomm true true)
-
-        _GTK2_FIND_LIBRARY    (GTK2_PANGOCAIRO_LIBRARY pangocairo true true)
 
         _GTK2_FIND_INCLUDE_DIR(GTK2_CAIROMM_INCLUDE_DIR cairomm/cairomm.h)
         _GTK2_FIND_INCLUDE_DIR(GTK2_CAIROMMCONFIG_INCLUDE_DIR cairommconfig.h)
