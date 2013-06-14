@@ -54,8 +54,8 @@ std::string cmCryptoHash::HashFile(const char* file)
   this->Initialize();
 
   // Should be efficient enough on most system:
-  const int bufferSize = 4096;
-  char buffer[bufferSize];
+  cm_sha2_uint64_t buffer[512];
+  char* buffer_c = reinterpret_cast<char*>(buffer);
   unsigned char const* buffer_uc =
     reinterpret_cast<unsigned char const*>(buffer);
   // This copy loop is very sensitive on certain platforms with
@@ -65,7 +65,7 @@ std::string cmCryptoHash::HashFile(const char* file)
   // error occurred.  Therefore, the loop should be safe everywhere.
   while(fin)
     {
-    fin.read(buffer, bufferSize);
+    fin.read(buffer_c, sizeof(buffer));
     if(int gcount = static_cast<int>(fin.gcount()))
       {
       this->Append(buffer_uc, gcount);
