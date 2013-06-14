@@ -374,7 +374,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     // if the source is not in CMakeTmp
     if(source.find("CMakeTmp") == source.npos)
       {
-      this->Makefile->AddCMakeDependFile(source.c_str());
+      this->Makefile->AddCMakeDependFile(source);
       }
 
     }
