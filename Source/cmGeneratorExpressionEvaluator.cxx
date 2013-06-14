@@ -1100,7 +1100,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *) const
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
   {
     // Lookup the referenced target.
     std::string name = *parameters.begin();
@@ -1123,6 +1123,13 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       {
       ::reportError(context, content->GetOriginalExpression(),
                   "Target \"" + name + "\" is not an executable or library.");
+      return std::string();
+      }
+    if (dagChecker && dagChecker->EvaluatingLinkLibraries(name.c_str()))
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expressions which require the linker language may not "
+                    "be used while evaluating link libraries");
       return std::string();
       }
     context->DependTargets.insert(target);
