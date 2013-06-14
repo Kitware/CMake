@@ -139,7 +139,7 @@ cmGeneratorExpressionDAGChecker::checkGraph() const
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char *tgt)
 {
   const cmGeneratorExpressionDAGChecker *top = this;
   const cmGeneratorExpressionDAGChecker *parent = this->Parent;
@@ -150,6 +150,12 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries()
     }
 
   const char *prop = top->Property.c_str();
+
+  if (tgt)
+    {
+    return top->Target == tgt && strcmp(prop, "LINK_LIBRARIES") == 0;
+    }
+
   return (strcmp(prop, "LINK_LIBRARIES") == 0
        || strcmp(prop, "LINK_INTERFACE_LIBRARIES") == 0
        || strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
