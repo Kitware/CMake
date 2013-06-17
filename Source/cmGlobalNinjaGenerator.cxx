@@ -961,6 +961,9 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
        this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i) {
     const std::vector<std::string>& lf = (*i)->GetMakefile()->GetListFiles();
     implicitDeps.insert(implicitDeps.end(), lf.begin(), lf.end());
+
+    const std::vector<std::string>& of = (*i)->GetMakefile()->GetOutputFiles();
+    implicitDeps.insert(implicitDeps.end(), of.begin(), of.end());
   }
   std::sort(implicitDeps.begin(), implicitDeps.end());
   implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
