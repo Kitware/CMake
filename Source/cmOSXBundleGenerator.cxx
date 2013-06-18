@@ -49,7 +49,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   out += "/";
   out += this->Target->GetAppBundleDirectory(this->ConfigName, false);
   cmSystemTools::MakeDirectory(out.c_str());
-  this->Makefile->AddCMakeOutputFile(out.c_str());
+  this->Makefile->AddCMakeOutputFile(out);
 
   std::string newoutpath = out;
 
@@ -62,7 +62,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   this->LocalGenerator->GenerateAppleInfoPList(this->Target,
                                                targetName.c_str(),
                                                plist.c_str());
-  this->Makefile->AddCMakeOutputFile(plist.c_str());
+  this->Makefile->AddCMakeOutputFile(plist);
   outpath = newoutpath;
 }
 
@@ -114,7 +114,7 @@ void cmOSXBundleGenerator::CreateFramework(
   newName += "/Current";
   cmSystemTools::RemoveFile(newName.c_str());
   cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-  this->Makefile->AddCMakeOutputFile(newName.c_str());
+  this->Makefile->AddCMakeOutputFile(newName);
 
   // foo -> Versions/Current/foo
   oldName = "Versions/Current/";
@@ -123,7 +123,7 @@ void cmOSXBundleGenerator::CreateFramework(
   newName += name;
   cmSystemTools::RemoveFile(newName.c_str());
   cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-  this->Makefile->AddCMakeOutputFile(newName.c_str());
+  this->Makefile->AddCMakeOutputFile(newName);
 
   // Resources -> Versions/Current/Resources
   if(this->MacContentFolders->find("Resources") !=
@@ -134,7 +134,7 @@ void cmOSXBundleGenerator::CreateFramework(
     newName += "Resources";
     cmSystemTools::RemoveFile(newName.c_str());
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-    this->Makefile->AddCMakeOutputFile(newName.c_str());
+    this->Makefile->AddCMakeOutputFile(newName);
     }
 
   // Headers -> Versions/Current/Headers
@@ -146,7 +146,7 @@ void cmOSXBundleGenerator::CreateFramework(
     newName += "Headers";
     cmSystemTools::RemoveFile(newName.c_str());
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-    this->Makefile->AddCMakeOutputFile(newName.c_str());
+    this->Makefile->AddCMakeOutputFile(newName);
     }
 
   // PrivateHeaders -> Versions/Current/PrivateHeaders
@@ -158,7 +158,7 @@ void cmOSXBundleGenerator::CreateFramework(
     newName += "PrivateHeaders";
     cmSystemTools::RemoveFile(newName.c_str());
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
-    this->Makefile->AddCMakeOutputFile(newName.c_str());
+    this->Makefile->AddCMakeOutputFile(newName);
     }
 }
 
@@ -174,7 +174,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
   out += "/";
   out += this->Target->GetCFBundleDirectory(this->ConfigName, false);
   cmSystemTools::MakeDirectory(out.c_str());
-  this->Makefile->AddCMakeOutputFile(out.c_str());
+  this->Makefile->AddCMakeOutputFile(out);
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
@@ -184,7 +184,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
   this->LocalGenerator->GenerateAppleInfoPList(this->Target,
                                                targetName.c_str(),
                                                plist.c_str());
-  this->Makefile->AddCMakeOutputFile(plist.c_str());
+  this->Makefile->AddCMakeOutputFile(plist);
 }
 
 //----------------------------------------------------------------------------

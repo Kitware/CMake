@@ -648,7 +648,7 @@ public:
   const std::vector<std::string>& GetListFiles() const
     { return this->ListFiles; }
   ///! When the file changes cmake will be re-run from the build system.
-  void AddCMakeDependFile(const char* file)
+  void AddCMakeDependFile(const std::string& file)
     { this->ListFiles.push_back(file);}
 
     /**
@@ -666,7 +666,7 @@ public:
    */
   const std::vector<std::string>& GetOutputFiles() const
     { return this->OutputFiles; }
-  void AddCMakeOutputFile(const char* file)
+  void AddCMakeOutputFile(const std::string& file)
     { this->OutputFiles.push_back(file);}
 
   /**
