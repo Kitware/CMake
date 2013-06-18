@@ -94,7 +94,7 @@ private:
   bool GetValue(cmsys::SystemInformation &info,
     std::string const& key, std::string &value);
 
-  std::string ValueToString(std::size_t value) const;
+  std::string ValueToString(size_t value) const;
   std::string ValueToString(const char *value) const;
   std::string ValueToString(std::string const& value) const;
 };
