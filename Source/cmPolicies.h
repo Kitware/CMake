@@ -74,6 +74,7 @@ public:
     /// target property
     CMP0022, ///< INTERFACE_LINK_LIBRARIES defines the link interface
     CMP0023, ///< Disallow mixing keyword and plain tll signatures
+    CMP0024, ///< Disallow including export() result.
 
     /** \brief Always the last entry.
      *
