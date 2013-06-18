@@ -3371,6 +3371,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   std::string sinfile = infile;
   this->AddCMakeDependFile(sinfile);
   cmSystemTools::ConvertToUnixSlashes(soutfile);
+  this->AddCMakeOutputFile(soutfile);
   mode_t perm = 0;
   cmSystemTools::GetPermissions(sinfile.c_str(), perm);
   std::string::size_type pos = soutfile.rfind('/');
