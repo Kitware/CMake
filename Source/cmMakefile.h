@@ -489,6 +489,18 @@ public:
       return this->cmCurrentListFile.c_str();
     }
 
+  void AddExportedTargetsFile(const std::string &filename)
+  {
+    this->ExportedTargetsFiles.insert(filename);
+  }
+
+  bool IsExportedTargetsFile(const std::string &filename) const
+  {
+    const std::set<std::string>::const_iterator it
+                                  = this->ExportedTargetsFiles.find(filename);
+    return it != this->ExportedTargetsFiles.end();
+  }
+
   //@}
 
   /**
@@ -1041,7 +1053,7 @@ private:
   void EnforceDirectoryLevelRules();
 
   bool GeneratingBuildSystem;
-
+  std::set<std::string> ExportedTargetsFiles;
   /**
    * Old version of GetSourceFileWithOutput(const char*) kept for
    * backward-compatibility. It implements a linear search and support
