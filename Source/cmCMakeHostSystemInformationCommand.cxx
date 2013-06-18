@@ -40,7 +40,7 @@ bool cmCMakeHostSystemInformationCommand
   info.RunMemoryCheck();
 
   std::string result_list;
-  for(std::size_t i = current_index + 1; i < args.size(); ++i)
+  for(size_t i = current_index + 1; i < args.size(); ++i)
     {
     std::string key = args[i];
     if(i != current_index + 1)
@@ -105,7 +105,7 @@ bool cmCMakeHostSystemInformationCommand
 }
 
 std::string cmCMakeHostSystemInformationCommand
-::ValueToString(std::size_t value) const
+::ValueToString(size_t value) const
 {
   cmsys_ios::stringstream tmp;
   tmp << value;
