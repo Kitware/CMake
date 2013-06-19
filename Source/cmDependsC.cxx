@@ -193,17 +193,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
           // Construct the name of the file as if it were in the current
           // include directory.  Avoid using a leading "./".
 
-          tempPathStr = "";
-          if((*i) == ".")
-            {
-            tempPathStr += current.FileName;
-            }
-          else
-            {
-            tempPathStr += *i;
-            tempPathStr+="/";
-            tempPathStr+=current.FileName;
-            }
+          tempPathStr = cmSystemTools::CollapsePath(*i, current.FileName);
 
           // Look for the file in this location.
           if(cmSystemTools::FileExists(tempPathStr.c_str(), true))
@@ -458,9 +448,7 @@ void cmDependsC::Scan(std::istream& is, const char* directory,
         // This was a double-quoted include with a relative path.  We
         // must check for the file in the directory containing the
         // file we are scanning.
-        entry.QuotedLocation = directory;
-        entry.QuotedLocation += "/";
-        entry.QuotedLocation += entry.FileName;
+        entry.QuotedLocation = cmSystemTools::CollapsePath(directory, entry.FileName);
         }
 
       // Queue the file if it has not yet been encountered and it
