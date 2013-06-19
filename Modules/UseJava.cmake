@@ -221,6 +221,13 @@ set(_JAVA_SYMLINK_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/UseJavaSymlinks.cmake)
 
 function(add_jar _TARGET_NAME)
 
+    # In CMake < 2.8.12, add_jar used variables which were set prior to calling
+    # add_jar for customizing the behavior of add_jar. In order to be backwards
+    # compatible, check if any of those variables are set, and use them to
+    # initialize values of the named arguments. (Giving the corresponding named
+    # argument will override the value set here.)
+    #
+    # New features should use named arguments only.
     if(DEFINED CMAKE_JAVA_TARGET_VERSION)
         set(_add_jar_VERSION "${CMAKE_JAVA_TARGET_VERSION}")
     endif()
