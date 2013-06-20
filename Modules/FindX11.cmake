@@ -68,6 +68,7 @@ if (UNIX)
     /usr/openwin/include
     /usr/openwin/share/include
     /opt/graphics/OpenGL/include
+    /opt/X11/include
   )
 
   set(X11_LIB_SEARCH_PATH
@@ -75,6 +76,7 @@ if (UNIX)
     /usr/X11R6/lib
     /usr/X11R7/lib
     /usr/openwin/lib
+    /opt/X11/lib
   )
 
   find_path(X11_X11_INCLUDE_PATH X11/X.h                             ${X11_INC_SEARCH_PATH})
