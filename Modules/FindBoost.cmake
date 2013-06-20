@@ -1020,7 +1020,12 @@ if(Boost_FOUND)
     # We were unable to find some libraries, so generate a sensible
     # error message that lists the libraries we were unable to find.
     set(Boost_ERROR_REASON
-      "${Boost_ERROR_REASON}\nThe following Boost libraries could not be found:\n")
+      "${Boost_ERROR_REASON}\nCould not find the following")
+    if(Boost_USE_STATIC_LIBS)
+      set(Boost_ERROR_REASON "${Boost_ERROR_REASON} static")
+    endif()
+    set(Boost_ERROR_REASON
+      "${Boost_ERROR_REASON} Boost libraries:\n")
     foreach(COMPONENT ${_Boost_MISSING_COMPONENTS})
       set(Boost_ERROR_REASON
         "${Boost_ERROR_REASON}        boost_${COMPONENT}\n")
