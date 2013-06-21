@@ -686,7 +686,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     if(!linkLanguage)
       {
       cmSystemTools::Error
-        ("CMake can not determine linker language for target:",
+        ("CMake can not determine linker language for target: ",
          target.GetName());
       return;
       }

@@ -415,7 +415,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         {
         if(!mf->ReadListFile(0,fpath.c_str()))
           {
-          cmSystemTools::Error("Could not find cmake module file:",
+          cmSystemTools::Error("Could not find cmake module file: ",
                                fpath.c_str());
           }
         // if this file was found then the language was already determined
@@ -445,7 +445,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         mf->GetModulesFile(determineCompiler.c_str());
       if(!mf->ReadListFile(0,determineFile.c_str()))
         {
-        cmSystemTools::Error("Could not find cmake module file:",
+        cmSystemTools::Error("Could not find cmake module file: ",
                              determineFile.c_str());
         }
       needTestLanguage[lang] = true;
@@ -479,7 +479,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       fpath += "Compiler.cmake";
       if(!mf->ReadListFile(0,fpath.c_str()))
         {
-        cmSystemTools::Error("Could not find cmake module file:",
+        cmSystemTools::Error("Could not find cmake module file: ",
                              fpath.c_str());
         }
       this->SetLanguageEnabledFlag(lang, mf);
@@ -498,7 +498,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     fpath = mf->GetModulesFile("CMakeSystemSpecificInformation.cmake");
     if(!mf->ReadListFile(0,fpath.c_str()))
       {
-      cmSystemTools::Error("Could not find cmake module file:",
+      cmSystemTools::Error("Could not find cmake module file: ",
                            fpath.c_str());
       }
     }
@@ -524,12 +524,12 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       std::string informationFile = mf->GetModulesFile(fpath.c_str());
       if (informationFile.empty())
         {
-        cmSystemTools::Error("Could not find cmake module file:",
+        cmSystemTools::Error("Could not find cmake module file: ",
                              fpath.c_str());
         }
       else if(!mf->ReadListFile(0, informationFile.c_str()))
         {
-        cmSystemTools::Error("Could not process cmake module file:",
+        cmSystemTools::Error("Could not process cmake module file: ",
                              informationFile.c_str());
         }
       }
@@ -568,7 +568,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         std::string ifpath = mf->GetModulesFile(testLang.c_str());
         if(!mf->ReadListFile(0,ifpath.c_str()))
           {
-          cmSystemTools::Error("Could not find cmake module file:",
+          cmSystemTools::Error("Could not find cmake module file: ",
                                ifpath.c_str());
           }
         std::string compilerWorks = "CMAKE_";
