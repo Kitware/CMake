@@ -11,7 +11,11 @@
 #=============================================================================
 include(CheckIncludeFile)
 # Check if we can build support for ELF parsing.
-CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
+if(CMAKE_CXX_PLATFORM_ID MATCHES "OpenBSD")
+  CHECK_INCLUDE_FILES("stdint.h;elf_abi.h" HAVE_ELF_H)
+else()
+  CHECK_INCLUDE_FILE("elf.h" HAVE_ELF_H)
+endif()
 if(HAVE_ELF_H)
   set(CMAKE_USE_ELF_PARSER 1)
 else()
