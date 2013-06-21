@@ -1,32 +1,25 @@
-# - Includes a public function for assisting users in trying to determine the
-# Visual Studio service pack in use.
-#
-# Sets the passed in variable to one of the following values or an empty
-# string if unknown.
-#    vc80
-#    vc80sp1
-#    vc90
-#    vc90sp1
-#    vc100
-#    vc100sp1
-#    vc110
+# - Determine the Visual Studio service pack of the 'cl' in use.
+# The functionality of this module has been superseded by the platform
+# variable CMAKE_<LANG>_COMPILER_VERSION that contains the compiler version
+# number.
 #
 # Usage:
-# ===========================
-#
-#    if(MSVC)
-#       include(CMakeDetermineVSServicePack)
-#       DetermineVSServicePack( my_service_pack )
-#
-#       if( my_service_pack )
-#           message(STATUS "Detected: ${my_service_pack}")
-#       endif()
+#  if(MSVC)
+#    include(CMakeDetermineVSServicePack)
+#    DetermineVSServicePack( my_service_pack )
+#    if( my_service_pack )
+#      message(STATUS "Detected: ${my_service_pack}")
 #    endif()
-#
-# ===========================
+#  endif()
+# Function DetermineVSServicePack sets the given variable to one of the
+# following values or an empty string if unknown:
+#  vc80, vc80sp1
+#  vc90, vc90sp1
+#  vc100, vc100sp1
+#  vc110
 
 #=============================================================================
-# Copyright 2009-2011 Kitware, Inc.
+# Copyright 2009-2013 Kitware, Inc.
 # Copyright 2009-2010 Philip Lowman <philip@yhbt.com>
 # Copyright 2010-2011 Aaron C. meadows <cmake@shadowguarddev.com>
 #
