@@ -1228,7 +1228,7 @@ void cmLocalVisualStudio6Generator
     if(!linkLanguage)
       {
       cmSystemTools::Error
-        ("CMake can not determine linker language for target:",
+        ("CMake can not determine linker language for target: ",
          target.GetName());
       return;
       }
@@ -1649,7 +1649,7 @@ void cmLocalVisualStudio6Generator
       if(!linkLanguage)
         {
         cmSystemTools::Error
-          ("CMake can not determine linker language for target:",
+          ("CMake can not determine linker language for target: ",
            target.GetName());
         return;
         }

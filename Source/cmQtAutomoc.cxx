@@ -495,7 +495,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
 
   if (!makefile->ReadListFile(0, filename.c_str()))
     {
-    cmSystemTools::Error("Error processing file:", filename.c_str());
+    cmSystemTools::Error("Error processing file: ", filename.c_str());
     return false;
     }
 

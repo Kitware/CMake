@@ -1951,7 +1951,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         {
         cmSystemTools::Error("Problem with archive_write_header(): ",
                              archive_error_string(ext));
-        cmSystemTools::Error("Current file:",
+        cmSystemTools::Error("Current file: ",
                              archive_entry_pathname(entry));
         break;
         }
