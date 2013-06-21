@@ -1719,7 +1719,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   else if(binary)
   {
     cmSystemTools::Error
-      ("CMake can not determine linker language for target:",
+      ("CMake can not determine linker language for target: ",
        target.GetName());
     return;
   }

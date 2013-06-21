@@ -499,7 +499,7 @@ bool cmComputeLinkInformation::Compute()
   if(!this->LinkLanguage)
     {
     cmSystemTools::
-      Error("CMake can not determine linker language for target:",
+      Error("CMake can not determine linker language for target: ",
             this->Target->GetName());
     return false;
     }
