@@ -1242,7 +1242,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if(!linkLanguage)
       {
       cmSystemTools::Error
-        ("CMake can not determine linker language for target:",
+        ("CMake can not determine linker language for target: ",
          this->Name.c_str());
       return false;
       }
@@ -1422,7 +1422,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   if(!linkLanguage)
     {
     cmSystemTools::Error
-      ("CMake can not determine linker language for target:",
+      ("CMake can not determine linker language for target: ",
        this->Name.c_str());
     return false;
     }
@@ -1504,7 +1504,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   if(!pcli)
     {
     cmSystemTools::Error
-      ("CMake can not compute cmComputeLinkInformation for target:",
+      ("CMake can not compute cmComputeLinkInformation for target: ",
        this->Name.c_str());
     return false;
     }

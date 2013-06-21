@@ -761,7 +761,7 @@ void cmLocalGenerator
         if(!llang)
           {
           cmSystemTools::Error
-            ("CMake can not determine linker language for target:",
+            ("CMake can not determine linker language for target: ",
              target.Target->GetName());
           return;
           }
@@ -1600,7 +1600,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(!linkLanguage)
         {
         cmSystemTools::Error
-          ("CMake can not determine linker language for target:",
+          ("CMake can not determine linker language for target: ",
            target->Target->GetName());
         return;
         }
