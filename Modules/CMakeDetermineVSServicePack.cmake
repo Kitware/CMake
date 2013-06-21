@@ -16,7 +16,7 @@
 #  vc80, vc80sp1
 #  vc90, vc90sp1
 #  vc100, vc100sp1
-#  vc110
+#  vc110, vc110sp1, vc110sp2
 
 #=============================================================================
 # Copyright 2009-2013 Kitware, Inc.
@@ -50,6 +50,10 @@ function(_DetermineVSServicePackFromCompiler _OUT_VAR _cl_version)
        set(_version "vc100sp1")
    elseif(${_cl_version} VERSION_EQUAL "17.00.50727.1")
        set(_version "vc110")
+   elseif(${_cl_version} VERSION_EQUAL "17.00.51106.1")
+       set(_version "vc110sp1")
+   elseif(${_cl_version} VERSION_EQUAL "17.00.60315.1")
+       set(_version "vc110sp2")
    else()
        set(_version "")
    endif()
