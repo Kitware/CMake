@@ -14,6 +14,7 @@
 #include "cmAddCompileOptionsCommand.cxx"
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
+#include "cmCMakeHostSystemInformationCommand.cxx"
 #include "cmElseIfCommand.cxx"
 #include "cmExportCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
@@ -56,6 +57,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmAddCompileOptionsCommand);
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
+  commands.push_back(new cmCMakeHostSystemInformationCommand);
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmExportCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);
