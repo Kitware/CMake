@@ -549,7 +549,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       }
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
-      cmSystemTools::Error("Error processing file:", path);
+      cmSystemTools::Error("Error processing file: ", path);
       }
     }
 
