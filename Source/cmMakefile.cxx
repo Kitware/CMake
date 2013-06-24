@@ -3369,7 +3369,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
   std::string soutfile = outfile;
   std::string sinfile = infile;
-  this->AddCMakeDependFile(infile);
+  this->AddCMakeDependFile(sinfile);
   cmSystemTools::ConvertToUnixSlashes(soutfile);
   this->AddCMakeOutputFile(soutfile);
   mode_t perm = 0;
