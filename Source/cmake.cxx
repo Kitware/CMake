@@ -2642,7 +2642,8 @@ const char* cmake::GetCacheDefinition(const char* name) const
 void cmake::AddDefaultCommands()
 {
   std::list<cmCommand*> commands;
-  GetBootstrapCommands(commands);
+  GetBootstrapCommands1(commands);
+  GetBootstrapCommands2(commands);
   GetPredefinedCommands(commands);
   for(std::list<cmCommand*>::iterator i = commands.begin();
       i != commands.end(); ++i)

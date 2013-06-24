@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmGetCMakePropertyCommand.h"
 
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
 #include "cmake.h"
 
 // cmGetCMakePropertyCommand

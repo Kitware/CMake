@@ -13,6 +13,9 @@
 
 #include "cmake.h"
 #include "cmTest.h"
+#include "cmGlobalGenerator.h"
+#include "cmLocalGenerator.h"
+#include "cmSourceFile.h"
 #include "cmPropertyDefinition.h"
 
 //----------------------------------------------------------------------------
