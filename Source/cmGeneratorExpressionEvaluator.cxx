@@ -469,8 +469,15 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *) const
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
   {
+    if (dagChecker && dagChecker->EvaluatingLinkLibraries())
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<LINK_LANGUAGE> expression can not be used while evaluating "
+          "link libraries");
+      return std::string();
+      }
     if (parameters.size() != 0 && parameters.size() != 1)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -483,6 +490,7 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(),
           "$<LINK_LANGUAGE> may only be used with targets.  It may not "
           "be used with add_custom_command.");
+      return std::string();
       }
 
     const char *lang = target->GetLinkerLanguage(context->Config);
@@ -1146,7 +1154,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *) const
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
   {
     // Lookup the referenced target.
     std::string name = *parameters.begin();
@@ -1169,6 +1177,13 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       {
       ::reportError(context, content->GetOriginalExpression(),
                   "Target \"" + name + "\" is not an executable or library.");
+      return std::string();
+      }
+    if (dagChecker && dagChecker->EvaluatingLinkLibraries(name.c_str()))
+      {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "Expressions which require the linker language may not "
+                    "be used while evaluating link libraries");
       return std::string();
       }
     context->DependTargets.insert(target);
