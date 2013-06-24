@@ -280,6 +280,13 @@ void cmVisualStudio10TargetGenerator::Generate()
     }
   this->WriteString("<ProjectName>", 2);
   (*this->BuildFileStream) << projLabel << "</ProjectName>\n";
+  if(const char* targetFrameworkVersion = this->Target->GetProperty(
+       "VS_DOTNET_TARGET_FRAMEWORK_VERSION"))
+    {
+    this->WriteString("<TargetFrameworkVersion>", 2);
+    (*this->BuildFileStream) << targetFrameworkVersion
+                             << "</TargetFrameworkVersion>\n";
+    }
   this->WriteString("</PropertyGroup>\n", 1);
   this->WriteString("<Import Project="
                     "\"$(VCTargetsPath)\\Microsoft.Cpp.Default.props\" />\n",
