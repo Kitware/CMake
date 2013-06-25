@@ -642,24 +642,24 @@ cmNinjaTargetGenerator
                                                      sourceFileName);
     }
 
-  cmGlobalNinjaGenerator::WriteBuild(this->GetBuildFileStream(),
-                                     comment,
-                                     rule,
-                                     outputs,
-                                     explicitDeps,
-                                     implicitDeps,
-                                     orderOnlyDeps,
-                                     vars);
+  this->GetGlobalGenerator()->WriteBuild(this->GetBuildFileStream(),
+                                         comment,
+                                         rule,
+                                         outputs,
+                                         explicitDeps,
+                                         implicitDeps,
+                                         orderOnlyDeps,
+                                         vars);
 
   if(const char* objectOutputs = source->GetProperty("OBJECT_OUTPUTS")) {
     std::vector<std::string> outputList;
     cmSystemTools::ExpandListArgument(objectOutputs, outputList);
     std::transform(outputList.begin(), outputList.end(), outputList.begin(),
                    MapToNinjaPath());
-    cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
-                                            "Additional output files.",
-                                            outputList,
-                                            outputs);
+    this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                                "Additional output files.",
+                                                outputList,
+                                                outputs);
   }
 }
 
