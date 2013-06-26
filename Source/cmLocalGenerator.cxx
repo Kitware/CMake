@@ -1044,11 +1044,20 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       // If this is the compiler then look for the extra variable
       // _COMPILER_ARG1 which must be the first argument to the compiler
       const char* compilerArg1 = 0;
+      const char* compilerTarget = 0;
+      const char* compilerOptionTarget = 0;
       if(actualReplace == "CMAKE_${LANG}_COMPILER")
         {
         std::string arg1 = actualReplace + "_ARG1";
         cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
         compilerArg1 = this->Makefile->GetDefinition(arg1.c_str());
+        compilerTarget
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang + "_COMPILER_TARGET").c_str());
+        compilerOptionTarget
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                                          "_COMPILE_OPTION_TARGET").c_str());
         }
       if(actualReplace.find("${LANG}") != actualReplace.npos)
         {
@@ -1068,6 +1077,11 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             {
             ret += " ";
             ret += compilerArg1;
+            }
+          if (compilerTarget && compilerOptionTarget)
+            {
+            ret += compilerOptionTarget;
+            ret += compilerTarget;
             }
           return ret;
           }
