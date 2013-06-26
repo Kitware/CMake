@@ -47,7 +47,7 @@ struct cmGeneratorExpressionDAGChecker
   void reportError(cmGeneratorExpressionContext *context,
                    const std::string &expr);
 
-  bool EvaluatingLinkLibraries();
+  bool EvaluatingLinkLibraries(const char *tgt = 0);
 
 #define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) \
   bool METHOD () const;
