@@ -162,7 +162,6 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<BUILD_INTERFACE:BuildOnly_DEFINE>
     $<INSTALL_INTERFACE:InstallOnly_DEFINE>
 )
-
 include(GenerateExportHeader)
 
 add_subdirectory(renamed)
@@ -201,6 +200,11 @@ set_property(TARGET testSharedLibRequired
   PROPERTY
     INTERFACE_CUSTOM_STRING testcontent
 )
+set_property(TARGET testSharedLibRequired APPEND PROPERTY
+  INTERFACE_COMPILE_OPTIONS
+    $<$<CXX_COMPILER_ID:GNU>:-DCUSTOM_COMPILE_OPTION>
+)
+
 
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
