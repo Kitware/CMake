@@ -939,7 +939,8 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     {
     //get the vector of files created by this makefile and convert them
     //to ninja paths, which are all relative in respect to the build directory
-    const std::vector<std::string>& files = (*i)->GetMakefile()->GetOutputFiles();
+    const std::vector<std::string>& files =
+                                    (*i)->GetMakefile()->GetOutputFiles();
     typedef std::vector<std::string>::const_iterator vect_it;
     for(vect_it j = files.begin(); j != files.end(); ++j)
       {
