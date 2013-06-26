@@ -1594,6 +1594,29 @@ std::string cmSystemTools::RelativePath(const char* local, const char* remote)
   return cmsys::SystemTools::RelativePath(local, remote);
 }
 
+std::string cmSystemTools::CollapsePath(const std::string &dir, const std::string &file)
+{
+  if (dir.empty() || dir == ".")
+    return file;
+
+  std::vector<std::string> dirComponents, fileComponents;;
+  cmSystemTools::SplitPath(dir.c_str(), dirComponents);
+  cmSystemTools::SplitPath(file.c_str(), fileComponents);
+
+  if (fileComponents[0] != "") // Not relative path
+    return file;
+
+  std::vector<std::string>::iterator i = fileComponents.begin();
+  while (dirComponents.size() > 1 && ++i != fileComponents.end())
+  {
+    if (*i != "..") break;
+    dirComponents.pop_back();
+  }
+
+  dirComponents.insert(dirComponents.end(), i, fileComponents.end());
+  return cmSystemTools::JoinPath(dirComponents);
+}
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------
 bool cmSystemTools::UnsetEnv(const char* value)
