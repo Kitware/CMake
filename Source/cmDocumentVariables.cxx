@@ -1180,6 +1180,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "The value must be an integer no less than 128.",false,
      "Variables That Describe the System");
 
+  cm->DefineProperty
+    ("ENV", cmProperty::VARIABLE,
+     "Access environment variables.",
+     "Use the syntax $ENV{VAR} to read environment variable VAR.  "
+     "See also the set() command to set ENV{VAR}."
+     ,false,
+     "Variables That Describe the System");
+
   // Variables that affect the building of object files and
   // targets.
   //
