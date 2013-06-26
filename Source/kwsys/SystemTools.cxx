@@ -605,7 +605,7 @@ bool SystemTools::MakeDirectory(const char* path)
     }
   if(SystemTools::FileExists(path))
     {
-    return true;
+    return SystemTools::FileIsDirectory(path);
     }
   kwsys_stl::string dir = path;
   if(dir.size() == 0)
