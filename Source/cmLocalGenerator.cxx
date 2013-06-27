@@ -1354,7 +1354,7 @@ void cmLocalGenerator::GetCompileOptions(std::string& flags,
   for(std::vector<std::string>::const_iterator li = opts.begin();
       li != opts.end(); ++li)
     {
-    this->AppendFlags(flags, li->c_str());
+    this->AppendFlagEscape(flags, li->c_str());
     }
 }
 
@@ -2216,7 +2216,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     for(std::vector<std::string>::const_iterator oi = options.begin();
         oi != options.end(); ++oi)
       {
-      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      this->AppendFlagEscape(flags, oi->c_str());
       }
     }
 }
@@ -2251,6 +2251,13 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       }
     flags += newFlags;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFlagEscape(std::string& flags,
+                                        const char* rawFlag)
+{
+  this->AppendFlags(flags, this->EscapeForShell(rawFlag).c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -2359,7 +2366,7 @@ void cmLocalGenerator::AppendFeatureOptions(
     for(std::vector<std::string>::const_iterator oi = options.begin();
         oi != options.end(); ++oi)
       {
-      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      this->AppendFlagEscape(flags, oi->c_str());
       }
     }
 }

@@ -149,6 +149,7 @@ public:
                               const char* config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
+  virtual void AppendFlagEscape(std::string& flags, const char* rawFlag);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               const char* lang, bool forResponseFile = false,
