@@ -711,6 +711,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       {
       flags += " /TP ";
       }
+
+    // Add the target-specific flags.
+    this->AddCompileOptions(flags, &target, linkLanguage, configName);
     }
 
   if(this->FortranProject)
@@ -721,15 +724,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       case FortranFormatFree: flags += " -free"; break;
       default: break;
       }
-    }
-
-  std::string targetFlags;
-  this->GetCompileOptions(targetFlags, &target, configName);
-  // Add the target-specific flags.
-  if(!targetFlags.empty())
-    {
-    flags += " ";
-    flags += targetFlags;
     }
 
   // Get preprocessor definitions for this directory.

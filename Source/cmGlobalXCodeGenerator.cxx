@@ -681,12 +681,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 {
   // Add flags from target and source file properties.
   std::string flags;
-  std::string targetFlags;
-  lg->GetCompileOptions(targetFlags, &cmtarget, 0); // TODO: Config?
-  if(!targetFlags.empty())
-    {
-    lg->AppendFlags(flags, targetFlags.c_str());
-    }
   const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
   switch(this->CurrentLocalGenerator->GetFortranFormat(srcfmt))
     {
@@ -1704,6 +1698,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
       this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
                                                    "C", configName);
+      this->CurrentLocalGenerator->
+        AddCompileOptions(cflags, &target, "C", configName);
       }
 
     // Add language-specific flags.
@@ -1715,6 +1711,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
     this->CurrentLocalGenerator->AddVisibilityPresetFlags(flags, &target,
                                                    lang);
+
+    this->CurrentLocalGenerator->
+      AddCompileOptions(flags, &target, lang, configName);
     }
   else if(binary)
   {

@@ -1276,17 +1276,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       {
       flags += " /TP ";
       }
+    this->LocalGenerator->AddCompileOptions(flags, this->Target,
+                                            linkLanguage, configName.c_str());
     }
 
-  std::string targetFlags;
-  this->LocalGenerator->GetCompileOptions(targetFlags, this->Target,
-                                          configName.c_str());
-  // Add the target-specific flags.
-  if(!targetFlags.empty())
-    {
-    flags += " ";
-    flags += targetFlags;
-    }
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
   clOptions.FixExceptionHandlingDefault();

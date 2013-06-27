@@ -218,9 +218,8 @@ public:
                              cmGeneratorTarget* target,
                              const char* lang = "C", const char *config = 0,
                              bool stripImplicitInclDirs = true);
-  void GetCompileOptions(std::string& flags,
-                         cmTarget* target,
-                         const char *config);
+  void AddCompileOptions(std::string& flags, cmTarget* target,
+                         const char* lang, const char* config);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);
