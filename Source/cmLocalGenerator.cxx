@@ -1354,7 +1354,7 @@ void cmLocalGenerator::GetCompileOptions(std::string& flags,
   for(std::vector<std::string>::const_iterator li = opts.begin();
       li != opts.end(); ++li)
     {
-    this->AppendFlags(flags, this->EscapeForShell(li->c_str()).c_str());
+    this->AppendFlags(flags, li->c_str());
     }
 }
 
