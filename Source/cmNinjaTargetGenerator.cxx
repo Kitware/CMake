@@ -174,38 +174,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
 
   // Add target-specific flags.
-  std::string targetFlags;
-  this->LocalGenerator->GetCompileOptions(targetFlags, this->Target, config);
-  if(!targetFlags.empty())
-    {
-    std::string langIncludeExpr = "CMAKE_";
-    langIncludeExpr += language;
-    langIncludeExpr += "_FLAG_REGEX";
-    const char* regex = this->Makefile->
-      GetDefinition(langIncludeExpr.c_str());
-    if(regex)
-      {
-      cmsys::RegularExpression r(regex);
-      std::vector<std::string> args;
-      cmSystemTools::ParseWindowsCommandLine(
-        targetFlags.c_str(),
-        args);
-      for(std::vector<std::string>::iterator i = args.begin();
-          i != args.end(); ++i)
-        {
-        if(r.find(i->c_str()))
-          {
-          this->LocalGenerator->AppendFlags
-            (flags, i->c_str());
-          }
-        }
-      }
-    else
-      {
-      this->LocalGenerator->AppendFlags
-        (flags, targetFlags.c_str());
-      }
-    }
+  this->LocalGenerator->AddCompileOptions(flags, this->Target,
+                                          language.c_str(), config);
 
     // Add source file specific flags.
     this->LocalGenerator->AppendFlags(flags,

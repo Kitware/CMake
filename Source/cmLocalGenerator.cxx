@@ -1339,22 +1339,50 @@ std::string cmLocalGenerator::GetIncludeFlags(
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::GetCompileOptions(std::string& flags,
-                                             cmTarget* target,
-                                             const char *config)
+void cmLocalGenerator::AddCompileOptions(
+  std::string& flags, cmTarget* target,
+  const char* lang, const char* config
+  )
 {
-  // Add target-specific flags.
-  if(const char *prop = target->GetProperty("COMPILE_FLAGS"))
+  std::string langFlagRegexVar = std::string("CMAKE_")+lang+"_FLAG_REGEX";
+  if(const char* langFlagRegexStr =
+     this->Makefile->GetDefinition(langFlagRegexVar.c_str()))
     {
-    this->AppendFlags(flags, prop);
+    // Filter flags acceptable to this language.
+    cmsys::RegularExpression r(langFlagRegexStr);
+    std::vector<std::string> opts;
+    if(const char* targetFlags = target->GetProperty("COMPILE_FLAGS"))
+      {
+      cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
+      }
+    target->GetCompileOptions(opts, config);
+    for(std::vector<std::string>::const_iterator i = opts.begin();
+        i != opts.end(); ++i)
+      {
+      if(r.find(i->c_str()))
+        {
+        // (Re-)Escape this flag.  COMPILE_FLAGS were already parsed
+        // as a command line above, and COMPILE_OPTIONS are escaped.
+        this->AppendFlagEscape(flags, i->c_str());
+        }
+      }
     }
-
-  std::vector<std::string> opts; // TODO: Emitted.
-  target->GetCompileOptions(opts, config);
-  for(std::vector<std::string>::const_iterator li = opts.begin();
-      li != opts.end(); ++li)
+  else
     {
-    this->AppendFlags(flags, li->c_str());
+    // Use all flags.
+    if(const char* targetFlags = target->GetProperty("COMPILE_FLAGS"))
+      {
+      // COMPILE_FLAGS are not escaped for historical reasons.
+      this->AppendFlags(flags, targetFlags);
+      }
+    std::vector<std::string> opts; // TODO: Emitted.
+    target->GetCompileOptions(opts, config);
+    for(std::vector<std::string>::const_iterator i = opts.begin();
+        i != opts.end(); ++i)
+      {
+      // COMPILE_OPTIONS are escaped.
+      this->AppendFlagEscape(flags, i->c_str());
+      }
     }
 }
 
@@ -2216,7 +2244,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     for(std::vector<std::string>::const_iterator oi = options.begin();
         oi != options.end(); ++oi)
       {
-      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      this->AppendFlagEscape(flags, oi->c_str());
       }
     }
 }
@@ -2251,6 +2279,13 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       }
     flags += newFlags;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFlagEscape(std::string& flags,
+                                        const char* rawFlag)
+{
+  this->AppendFlags(flags, this->EscapeForShell(rawFlag).c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -2359,7 +2394,7 @@ void cmLocalGenerator::AppendFeatureOptions(
     for(std::vector<std::string>::const_iterator oi = options.begin();
         oi != options.end(); ++oi)
       {
-      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      this->AppendFlagEscape(flags, oi->c_str());
       }
     }
 }

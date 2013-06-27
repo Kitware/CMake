@@ -33,3 +33,12 @@ cmLocalXCodeGenerator::GetTargetDirectory(cmTarget const&) const
   // No per-target directory for this generator (yet).
   return "";
 }
+
+//----------------------------------------------------------------------------
+void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
+                                             const char* rawFlag)
+{
+  cmGlobalXCodeGenerator* gg =
+    static_cast<cmGlobalXCodeGenerator*>(this->GlobalGenerator);
+  gg->AppendFlag(flags, rawFlag);
+}

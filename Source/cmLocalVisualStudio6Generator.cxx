@@ -1674,6 +1674,14 @@ void cmLocalVisualStudio6Generator
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
       flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+
+      this->AddCompileOptions(flags, &target, linkLanguage, 0);
+      this->AddCompileOptions(flagsDebug, &target, linkLanguage, "Debug");
+      this->AddCompileOptions(flagsRelease, &target, linkLanguage, "Release");
+      this->AddCompileOptions(flagsMinSizeRel, &target, linkLanguage,
+                              "MinSizeRel");
+      this->AddCompileOptions(flagsRelWithDebInfo, &target, linkLanguage,
+                              "RelWithDebInfo");
       }
 
     // if _UNICODE and _SBCS are not found, then add -D_MBCS
@@ -1685,32 +1693,6 @@ void cmLocalVisualStudio6Generator
       {
       flags += " /D \"_MBCS\"";
       }
-
-    {
-    std::string targetFlags;
-    this->GetCompileOptions(targetFlags, &target, 0);
-    // Add per-target flags.
-    if(!targetFlags.empty())
-      {
-      flags += " ";
-      flags += targetFlags;
-      }
-    }
-#define ADD_FLAGS(CONFIG) \
-    { \
-    std::string targetFlags; \
-    this->GetCompileOptions(targetFlags, &target, #CONFIG); \
-    if(!targetFlags.empty()) \
-      { \
-      flags ## CONFIG += " "; \
-      flags ## CONFIG += targetFlags; \
-      } \
-    }
-
-    ADD_FLAGS(Debug)
-    ADD_FLAGS(Release)
-    ADD_FLAGS(MinSizeRel)
-    ADD_FLAGS(RelWithDebInfo)
 
     // Add per-target and per-configuration preprocessor definitions.
     std::set<std::string> definesSet;
