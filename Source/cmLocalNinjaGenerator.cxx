@@ -340,14 +340,15 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   this->AppendCustomCommandLines(cc, cmdLines);
 
   if (cmdLines.empty()) {
-    this->GetGlobalNinjaGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
-                                                   "Phony custom command for " +
-                                                    ninjaOutputs[0],
-                                                   ninjaOutputs,
-                                                   ninjaDeps,
-                                                   cmNinjaDeps(),
-                                                   orderOnlyDeps,
-                                                   cmNinjaVars());
+    this->GetGlobalNinjaGenerator()->WritePhonyBuild(
+      this->GetBuildFileStream(),
+      "Phony custom command for " +
+      ninjaOutputs[0],
+      ninjaOutputs,
+      ninjaDeps,
+      cmNinjaDeps(),
+      orderOnlyDeps,
+      cmNinjaVars());
   } else {
     this->GetGlobalNinjaGenerator()->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines),
