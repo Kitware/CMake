@@ -60,7 +60,7 @@ add_custom_target(check-part1 ALL
     -Dtest_colons_4=$<1:C:\\CMake>
     -Dtest_colons_5=$<1:C:/CMake>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part1.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 2)"
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 1 of 3)"
   VERBATIM
   )
 
@@ -130,13 +130,20 @@ add_custom_target(check-part2 ALL
     -Dtest_arbitrary_content_comma_8=$<1:a,,b>
     -Dtest_arbitrary_content_comma_9=$<1:a,,b,,>
     -Dtest_arbitrary_content_comma_10=$<1:,,a,,b,,>
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 3)"
+  VERBATIM
+)
+
+add_custom_target(check-part3 ALL
+  COMMAND ${CMAKE_COMMAND}
     -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
     -Dtest_version_greater_2=$<VERSION_GREATER:1.1.1,1.0>
     -Dtest_version_less_1=$<VERSION_LESS:1.1.1,1.0>
     -Dtest_version_less_2=$<VERSION_LESS:1.0,1.1.1>
     -Dtest_version_equal_1=$<VERSION_EQUAL:1.0.1,1.1>
     -Dtest_version_equal_2=$<VERSION_EQUAL:1.1,1.1>
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
-  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
+  COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM
   )
