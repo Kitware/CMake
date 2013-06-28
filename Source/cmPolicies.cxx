@@ -637,6 +637,28 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to use compiler id \"Clang\".  "
     "The NEW behavior for this policy is to use compiler id \"AppleClang\".",
     2,8,13,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0026, "CMP0026",
+    "Disallow use of the LOCATION target property.",
+    "CMake 2.8.12 and lower allowed reading the LOCATION target property to "
+    "determine the eventual location of build targets.  This relies on the "
+    "assumption that all necessary information is available at "
+    "configure-time to determine the final location and filename of the "
+    "target.  However, this property is not fully determined until later at "
+    "generate-time.  At generate time, the $<TARGET_FILE> generator "
+    "expression can be used to determine the eventual LOCATION of a target "
+    "output."
+    "\n"
+    "Code which reads the LOCATION target property can be ported to use the "
+    "$<TARGET_FILE> generator expression together with the file(GENERATE) "
+    "subcommand to generate a file containing the target location."
+    "\n"
+    "The OLD behavior for this policy is to allow reading the LOCATION "
+    "property from build-targets.  "
+    "The NEW behavior for this policy is to not to allow reading the "
+    "LOCATION property from build-targets.",
+    2,8,13,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

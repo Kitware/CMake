@@ -4130,6 +4130,43 @@ const char *cmTarget::GetProperty(const char* prop)
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::HandleLocationPropertyPolicy()
+{
+  if (this->IsImported())
+    {
+    return true;
+    }
+  const char *modal = 0;
+  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0026))
+    {
+    case cmPolicies::WARN:
+      modal = "should";
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      modal = "may";
+      messageType = cmake::FATAL_ERROR;
+    }
+
+  if (modal)
+    {
+    cmOStringStream e;
+    e << (this->Makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0026)) << "\n";
+    e << "The LOCATION property " << modal << " not be read from target \""
+      << this->GetName() << "\".  Use the target name directly with "
+      "add_custom_command, or use the generator expression $<TARGET_FILE>, "
+      "as appropriate.\n";
+    this->Makefile->IssueMessage(messageType, e.str().c_str());
+    }
+
+  return messageType != cmake::FATAL_ERROR;
+}
+
+//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const char* prop,
                                   cmProperty::ScopeType scope)
 {
@@ -4154,6 +4191,11 @@ const char *cmTarget::GetProperty(const char* prop,
     {
     if(strcmp(prop,"LOCATION") == 0)
       {
+      if (!this->HandleLocationPropertyPolicy())
+        {
+        return 0;
+        }
+
       // Set the LOCATION property of the target.
       //
       // For an imported target this is the location of an arbitrary
@@ -4169,6 +4211,10 @@ const char *cmTarget::GetProperty(const char* prop,
     // Support "LOCATION_<CONFIG>".
     if(strncmp(prop, "LOCATION_", 9) == 0)
       {
+      if (!this->HandleLocationPropertyPolicy())
+        {
+        return 0;
+        }
       std::string configName = prop+9;
       this->SetProperty(prop, this->GetLocation(configName.c_str()));
       }
@@ -4181,6 +4227,10 @@ const char *cmTarget::GetProperty(const char* prop,
         std::string configName(prop, len-9);
         if(configName != "IMPORTED")
           {
+          if (!this->HandleLocationPropertyPolicy())
+            {
+            return 0;
+            }
           this->SetProperty(prop, this->GetLocation(configName.c_str()));
           }
         }
