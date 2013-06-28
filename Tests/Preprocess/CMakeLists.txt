@@ -40,6 +40,9 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 11")
   set(PP_VS110 1)
 endif()
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 12")
+  set(PP_VS120 1)
+endif()
 
 # Some tests below check the PP_* variables set above.  They are meant
 # to test the case that the build tool is at fault.  Other tests below
@@ -55,7 +58,8 @@ endif()
 # must not have it escaped inside the configured header.
 set(STRING_EXTRA "")
 
-if(NOT BORLAND AND NOT PP_VS70 AND NOT PP_VS100 AND NOT PP_VS110)
+if(NOT BORLAND AND NOT PP_VS70
+    AND NOT PP_VS100 AND NOT PP_VS110 AND NOT PP_VS120)
   # Borland, VS70 IDE: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
