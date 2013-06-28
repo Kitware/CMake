@@ -9,6 +9,9 @@
 #  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/V110/1033/cl.xml"
 #  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/V110/1033/lib.xml"
 #  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/V110/1033/link.xml"
+#  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/v120/1033/cl.xml"
+#  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/v120/1033/lib.xml"
+#  "${PROGRAMFILES}/MSBuild/Microsoft.Cpp/v4.0/v120/1033/link.xml"
 #
 #  BoolProperty  <Name>true|false</Name>
 #   simple example:

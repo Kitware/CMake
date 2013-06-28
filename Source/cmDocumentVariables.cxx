@@ -1055,7 +1055,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      false,
      "Variables That Describe the System");
 
-  int msvc_versions[] = { 60, 70, 71, 80, 90, 100, 110, 0 };
+  int msvc_versions[] = { 60, 70, 71, 80, 90, 100, 110, 120, 0 };
   for (int i = 0; msvc_versions[i] != 0; i ++)
     {
     const char minor = (char)('0' + (msvc_versions[i] % 10));
@@ -1102,6 +1102,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "  1500 = VS  9.0\n"
      "  1600 = VS 10.0\n"
      "  1700 = VS 11.0\n"
+     "  1800 = VS 12.0\n"
      "",
      false,
      "Variables That Describe the System");
