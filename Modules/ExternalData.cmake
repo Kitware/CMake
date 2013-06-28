@@ -391,7 +391,7 @@ function(_ExternalData_arg target arg options var_file)
       # Regular expression to match associated files.
       string(REGEX REPLACE "^REGEX:" "" regex "${opt}")
       list(APPEND associated_regex "${regex}")
-    elseif("x${opt}" MATCHES "^x:$")
+    elseif(opt STREQUAL ":")
       # Activate series matching.
       set(series_option "${opt}")
     elseif("x${opt}" MATCHES "^[^][:/*?]+$")
@@ -551,7 +551,10 @@ function(_ExternalData_arg_find_files pattern regex)
       set(relname "${entry}")
       set(alg "")
     endif()
-    if("x${relname}" MATCHES "^x${regex}$" AND NOT IS_DIRECTORY "${top_src}/${entry}")
+    if("x${relname}" MATCHES "^x${regex}$" # matches
+        AND NOT IS_DIRECTORY "${top_src}/${entry}" # not a directory
+        AND NOT "x${relname}" MATCHES "(^x|/)\\.ExternalData_" # not staged obj
+        )
       set(name "${top_src}/${relname}")
       set(file "${top_bin}/${relname}")
       if(alg)

@@ -621,7 +621,7 @@ typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
  * Store's request specific data in the easy handle (SessionHandle).
  * Previously, these members were on the connectdata struct but since
  * a conn struct may now be shared between different SessionHandles,
- * we store connection-specifc data here.
+ * we store connection-specific data here.
  *
  */
 struct HandleData {

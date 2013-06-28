@@ -440,7 +440,8 @@ cmPolicies::cmPolicies()
 
     this->DefinePolicy(
     CMP0016, "CMP0016",
-    "target_link_libraries() reports error if only argument is not a target.",
+    "target_link_libraries() reports error if its only argument "
+    "is not a target.",
     "In CMake 2.8.2 and lower the target_link_libraries() command silently "
     "ignored if it was called with only one argument, and this argument "
     "wasn't a valid target. "
@@ -452,7 +453,7 @@ cmPolicies::cmPolicies()
     "Prefer files from the CMake module directory when including from there.",
     "Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e. "
     "located in the CMake module directory) calls include() or "
-    "find_package(), the files located in the the CMake module directory are "
+    "find_package(), the files located in the CMake module directory are "
     "preferred over the files in CMAKE_MODULE_PATH.  "
     "This makes sure that the modules belonging to "
     "CMake always get those files included which they expect, and against "
@@ -529,6 +530,20 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to link executables to "
     "qtmain.lib automatically when they link to QtCore IMPORTED target.",
     2,8,11,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0021, "CMP0021",
+    "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",
+    "CMake 2.8.10.2 and lower allowed the INCLUDE_DIRECTORIES target "
+    "property to contain relative paths.  The base path for such relative "
+    "entries is not well defined.  CMake 2.8.12 issues a FATAL_ERROR if the "
+    "INCLUDE_DIRECTORIES property contains a relative path."
+    "\n"
+    "The OLD behavior for this policy is not to warn about relative paths in "
+    "the INCLUDE_DIRECTORIES target property.  "
+    "The NEW behavior for this policy is to issue a FATAL_ERROR if "
+    "INCLUDE_DIRECTORIES contains a relative path.",
+    2,8,11,20130516, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
@@ -770,7 +785,7 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
   {
     cmSystemTools::Error(
       "Request for error text for undefined policy!");
-    return "Request for warning text for undefined policy!";
+    return "Request for error text for undefined policy!";
   }
 
   cmOStringStream error;

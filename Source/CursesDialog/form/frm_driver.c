@@ -176,7 +176,7 @@ static int FE_Delete_Previous(FORM *);
 #define Address_Of_Current_Position_In_Buffer(form) \
   Address_Of_Current_Position_In_Nth_Buffer(form,0)
 
-/* Logic to decide wether or not a field is actually a field with
+/* Logic to decide whether or not a field is actually a field with
    vertical or horizontal scrolling */
 #define Is_Scroll_Field(field)          \
    (((field)->drows > (field)->rows) || \
@@ -2100,7 +2100,7 @@ static int Insert_String(FORM *form, int row, char *txt, int len)
 |                    the wrapping.
 |
 |   Return Values :  E_OK              - no wrapping required or wrapping
-|                                        was successfull
+|                                        was successful
 |                    E_REQUEST_DENIED  -
 |                    E_SYSTEM_ERROR    - some system error
 +--------------------------------------------------------------------------*/
@@ -3825,7 +3825,7 @@ int set_field_buffer(FIELD * field, int buffer, const char * value)
                            (int)(1 + (vlen-len)/((field->rows+field->nrow)*field->cols))))
             RETURN(E_SYSTEM_ERROR);
 
-          /* in this case we also have to check, wether or not the remaining
+          /* in this case we also have to check, whether or not the remaining
              characters in value are also printable for buffer 0. */
           if (buffer==0)
             {

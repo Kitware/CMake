@@ -21,6 +21,7 @@
 #include "cmCacheManager.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
+#include "cmDocumentGeneratorExpressions.h"
 #include "cmCommandArgumentParserHelper.h"
 #include "cmDocumentCompileDefinitions.h"
 #include "cmGeneratorExpression.h"
@@ -1270,6 +1271,11 @@ void cmMakefile::RemoveDefineFlag(const char* flag,
     }
 }
 
+void cmMakefile::AddCompileOption(const char* option)
+{
+  this->AppendProperty("COMPILE_OPTIONS", option);
+}
+
 bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 {
   // Create a regular expression to match valid definitions.
@@ -1436,7 +1442,7 @@ void cmMakefile::AddLinkDirectoryForTarget(const char *target,
   else
     {
     cmSystemTools::Error
-      ("Attempt to add link directories to non-existant target: ",
+      ("Attempt to add link directories to non-existent target: ",
        target, " for directory ", d);
     }
 }
@@ -1492,6 +1498,12 @@ void cmMakefile::InitializeFromParent()
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
                                        parentIncludes.begin(),
                                        parentIncludes.end());
+
+  const std::vector<cmValueWithOrigin> parentOptions =
+                                        parent->GetCompileOptionsEntries();
+  this->CompileOptionsEntries.insert(this->CompileOptionsEntries.end(),
+                                     parentOptions.begin(),
+                                     parentOptions.end());
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
@@ -2086,7 +2098,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
     }
   else if(i==-1)
     {
-    // group does not exists nor belong to any existing group
+    // group does not exist nor belong to any existing group
     // add its first component
     this->SourceGroups.push_back(cmSourceGroup(name[0].c_str(), regex));
     sg = this->GetSourceGroup(currentName);
@@ -3357,8 +3369,9 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     }
   std::string soutfile = outfile;
   std::string sinfile = infile;
-  this->AddCMakeDependFile(infile);
+  this->AddCMakeDependFile(sinfile);
   cmSystemTools::ConvertToUnixSlashes(soutfile);
+  this->AddCMakeOutputFile(soutfile);
   mode_t perm = 0;
   cmSystemTools::GetPermissions(sinfile.c_str(), perm);
   std::string::size_type pos = soutfile.rfind('/');
@@ -3468,6 +3481,18 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
+  if (propname == "COMPILE_OPTIONS")
+    {
+    this->CompileOptionsEntries.clear();
+      if (!value)
+        {
+        return;
+        }
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
+    return;
+    }
 
   if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
     {
@@ -3504,6 +3529,14 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
     this->IncludeDirectoriesEntries.push_back(
+                                        cmValueWithOrigin(value, lfbt));
+    return;
+    }
+  if (propname == "COMPILE_OPTIONS")
+    {
+    cmListFileBacktrace lfbt;
+    this->GetBacktrace(lfbt);
+    this->CompileOptionsEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
@@ -3624,6 +3657,20 @@ const char *cmMakefile::GetProperty(const char* prop,
     for (std::vector<cmValueWithOrigin>::const_iterator
         it = this->IncludeDirectoriesEntries.begin(),
         end = this->IncludeDirectoriesEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  else if (!strcmp("COMPILE_OPTIONS",prop))
+    {
+    std::string sep;
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->CompileOptionsEntries.begin(),
+        end = this->CompileOptionsEntries.end();
         it != end; ++it)
       {
       output += sep;
@@ -3986,21 +4033,35 @@ void cmMakefile::DefineProperties(cmake *cm)
     ("INCLUDE_DIRECTORIES", cmProperty::DIRECTORY,
      "List of preprocessor include file search directories.",
      "This property specifies the list of directories given "
-     "so far to the include_directories command. "
-     "This property exists on directories and targets. "
+     "so far to the include_directories command.  "
+     "This property exists on directories and targets.  "
      "In addition to accepting values from the include_directories "
      "command, values may be set directly on any directory or any "
-     "target using the set_property command. "
+     "target using the set_property command.  "
      "A target gets its initial value for this property from the value "
-     "of the directory property. "
+     "of the directory property.  "
      "A directory gets its initial value from its parent directory if "
-     "it has one. "
+     "it has one.  "
      "Both directory and target property values are adjusted by calls "
      "to the include_directories command."
      "\n"
      "The target property values are used by the generators to set "
-     "the include paths for the compiler. "
+     "the include paths for the compiler.  "
      "See also the include_directories command.");
+
+  cm->DefineProperty
+    ("COMPILE_OPTIONS", cmProperty::DIRECTORY,
+     "List of options to pass to the compiler.",
+     "This property specifies the list of directories given "
+     "so far for this property.  "
+     "This property exists on directories and targets.  "
+     "\n"
+     "The target property values are used by the generators to set "
+     "the options for the compiler.\n"
+     "Contents of COMPILE_OPTIONS may use \"generator expressions\" with "
+     "the syntax \"$<...>\".  "
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("LINK_DIRECTORIES", cmProperty::DIRECTORY,
@@ -4043,7 +4104,7 @@ void cmMakefile::DefineProperties(cmake *cm)
      "\n"
      "This property only works for Visual Studio 7 and above; it is ignored "
      "on other generators. The property only applies when set on a directory "
-     "whose CMakeLists.txt conatins a project() command.");
+     "whose CMakeLists.txt contains a project() command.");
   cm->DefineProperty
     ("VS_GLOBAL_SECTION_POST_<section>", cmProperty::DIRECTORY,
      "Specify a postSolution global section in Visual Studio.",
@@ -4059,7 +4120,7 @@ void cmMakefile::DefineProperties(cmake *cm)
      "\n"
      "This property only works for Visual Studio 7 and above; it is ignored "
      "on other generators. The property only applies when set on a directory "
-     "whose CMakeLists.txt conatins a project() command."
+     "whose CMakeLists.txt contains a project() command."
      "\n"
      "Note that CMake generates postSolution sections ExtensibilityGlobals "
      "and ExtensibilityAddIns by default. If you set the corresponding "

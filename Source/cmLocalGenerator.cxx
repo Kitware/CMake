@@ -294,7 +294,7 @@ void cmLocalGenerator::GenerateTestFiles()
        << "# Build directory: "
        << this->Makefile->GetStartOutputDirectory() << std::endl
        << "# " << std::endl
-       << "# This file includes the relevent testing commands "
+       << "# This file includes the relevant testing commands "
        << "required for " << std::endl
        << "# testing this directory and lists subdirectories to "
        << "be tested as well." << std::endl;
@@ -761,7 +761,7 @@ void cmLocalGenerator
         if(!llang)
           {
           cmSystemTools::Error
-            ("CMake can not determine linker language for target:",
+            ("CMake can not determine linker language for target: ",
              target.Target->GetName());
           return;
           }
@@ -1044,11 +1044,20 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       // If this is the compiler then look for the extra variable
       // _COMPILER_ARG1 which must be the first argument to the compiler
       const char* compilerArg1 = 0;
+      const char* compilerTarget = 0;
+      const char* compilerOptionTarget = 0;
       if(actualReplace == "CMAKE_${LANG}_COMPILER")
         {
         std::string arg1 = actualReplace + "_ARG1";
         cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
         compilerArg1 = this->Makefile->GetDefinition(arg1.c_str());
+        compilerTarget
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang + "_COMPILER_TARGET").c_str());
+        compilerOptionTarget
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                                          "_COMPILE_OPTION_TARGET").c_str());
         }
       if(actualReplace.find("${LANG}") != actualReplace.npos)
         {
@@ -1069,6 +1078,11 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             ret += " ";
             ret += compilerArg1;
             }
+          if (compilerTarget && compilerOptionTarget)
+            {
+            ret += compilerOptionTarget;
+            ret += compilerTarget;
+            }
           return ret;
           }
         return replace;
@@ -1084,8 +1098,6 @@ void
 cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                       const RuleVariables& replaceValues)
 {
-  std::vector<std::string> enabledLanguages;
-  this->GlobalGenerator->GetEnabledLanguages(enabledLanguages);
   this->InsertRuleLauncher(s, replaceValues.CMTarget,
                            replaceValues.RuleLauncher);
   std::string::size_type start = s.find('<');
@@ -1327,6 +1339,54 @@ std::string cmLocalGenerator::GetIncludeFlags(
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AddCompileOptions(
+  std::string& flags, cmTarget* target,
+  const char* lang, const char* config
+  )
+{
+  std::string langFlagRegexVar = std::string("CMAKE_")+lang+"_FLAG_REGEX";
+  if(const char* langFlagRegexStr =
+     this->Makefile->GetDefinition(langFlagRegexVar.c_str()))
+    {
+    // Filter flags acceptable to this language.
+    cmsys::RegularExpression r(langFlagRegexStr);
+    std::vector<std::string> opts;
+    if(const char* targetFlags = target->GetProperty("COMPILE_FLAGS"))
+      {
+      cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
+      }
+    target->GetCompileOptions(opts, config);
+    for(std::vector<std::string>::const_iterator i = opts.begin();
+        i != opts.end(); ++i)
+      {
+      if(r.find(i->c_str()))
+        {
+        // (Re-)Escape this flag.  COMPILE_FLAGS were already parsed
+        // as a command line above, and COMPILE_OPTIONS are escaped.
+        this->AppendFlagEscape(flags, i->c_str());
+        }
+      }
+    }
+  else
+    {
+    // Use all flags.
+    if(const char* targetFlags = target->GetProperty("COMPILE_FLAGS"))
+      {
+      // COMPILE_FLAGS are not escaped for historical reasons.
+      this->AppendFlags(flags, targetFlags);
+      }
+    std::vector<std::string> opts; // TODO: Emitted.
+    target->GetCompileOptions(opts, config);
+    for(std::vector<std::string>::const_iterator i = opts.begin();
+        i != opts.end(); ++i)
+      {
+      // COMPILE_OPTIONS are escaped.
+      this->AppendFlagEscape(flags, i->c_str());
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
                                              const char* lang,
@@ -1407,6 +1467,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
     }
 
+  std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+
   std::vector<std::string> implicitDirs;
   // Load implicit include directories for this language.
   std::string impDirVar = "CMAKE_";
@@ -1419,7 +1481,9 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     for(std::vector<std::string>::const_iterator i = impDirVec.begin();
         i != impDirVec.end(); ++i)
       {
-      emitted.insert(*i);
+      std::string d = rootPath + *i;
+      cmSystemTools::ConvertToUnixSlashes(d);
+      emitted.insert(d);
       if (!stripImplicitInclDirs)
         {
         implicitDirs.push_back(*i);
@@ -1582,7 +1646,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(!linkLanguage)
         {
         cmSystemTools::Error
-          ("CMake can not determine linker language for target:",
+          ("CMake can not determine linker language for target: ",
            target->Target->GetName());
         return;
         }
@@ -1994,6 +2058,81 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     }
 }
 
+static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
+                                       cmLocalGenerator *lg, const char *lang)
+{
+  std::string l(lang);
+  std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
+  const char *opt = lg->GetMakefile()->GetDefinition(compileOption.c_str());
+  if (!opt)
+    {
+    return;
+    }
+  std::string flagDefine = l + "_VISIBILITY_PRESET";
+
+  const char *prop = target->GetProperty(flagDefine.c_str());
+  if (!prop)
+    {
+    return;
+    }
+  if (strcmp(prop, "hidden") != 0
+      && strcmp(prop, "default") != 0
+      && strcmp(prop, "protected") != 0
+      && strcmp(prop, "internal") != 0 )
+    {
+    cmOStringStream e;
+    e << "Target " << target->GetName() << " uses unsupported value \""
+      << prop << "\" for " << flagDefine << ".";
+    cmSystemTools::Error(e.str().c_str());
+    return;
+    }
+  std::string option = std::string(opt) + prop;
+  lg->AppendFlags(flags, option.c_str());
+}
+
+static void AddInlineVisibilityCompileOption(std::string &flags,
+                                       cmTarget* target,
+                                       cmLocalGenerator *lg)
+{
+  std::string compileOption
+                = "CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN";
+  const char *opt = lg->GetMakefile()->GetDefinition(compileOption.c_str());
+  if (!opt)
+    {
+    return;
+    }
+
+  bool prop = target->GetPropertyAsBool("VISIBILITY_INLINES_HIDDEN");
+  if (!prop)
+    {
+    return;
+    }
+  lg->AppendFlags(flags, opt);
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator
+::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+                            const char *lang)
+{
+  int targetType = target->GetType();
+  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
+                      || (targetType == cmTarget::MODULE_LIBRARY)
+                      || (target->IsExecutableWithExports()));
+
+  if (!suitableTarget)
+    {
+    return;
+    }
+
+  if (!lang)
+    {
+    return;
+    }
+  AddVisibilityCompileOption(flags, target, this, lang);
+  AddInlineVisibilityCompileOption(flags, target, this);
+}
+
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
                                        std::string const& lang,
@@ -2011,13 +2150,13 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
   else
     {
     if (target->GetType() == cmTarget::OBJECT_LIBRARY)
-    {
+      {
       if (target->GetPropertyAsBool("POSITION_INDEPENDENT_CODE"))
         {
         this->AddPositionIndependentFlags(flags, lang, targetType);
         }
       return;
-    }
+      }
 
     if (target->GetLinkInterfaceDependentBoolProperty(
                                                 "POSITION_INDEPENDENT_CODE",
@@ -2105,7 +2244,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
     for(std::vector<std::string>::const_iterator oi = options.begin();
         oi != options.end(); ++oi)
       {
-      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      this->AppendFlagEscape(flags, oi->c_str());
       }
     }
 }
@@ -2140,6 +2279,13 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       }
     flags += newFlags;
     }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFlagEscape(std::string& flags,
+                                        const char* rawFlag)
+{
+  this->AppendFlags(flags, this->EscapeForShell(rawFlag).c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -2248,7 +2394,7 @@ void cmLocalGenerator::AppendFeatureOptions(
     for(std::vector<std::string>::const_iterator oi = options.begin();
         oi != options.end(); ++oi)
       {
-      this->AppendFlags(flags, this->EscapeForShell(oi->c_str()).c_str());
+      this->AppendFlagEscape(flags, oi->c_str());
       }
     }
 }

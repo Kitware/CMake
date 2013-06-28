@@ -1951,7 +1951,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         {
         cmSystemTools::Error("Problem with archive_write_header(): ",
                              archive_error_string(ext));
-        cmSystemTools::Error("Current file:",
+        cmSystemTools::Error("Current file: ",
                              archive_entry_pathname(entry));
         break;
         }
@@ -2413,6 +2413,30 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 }
 
 //----------------------------------------------------------------------------
+bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
+                                       std::string& soname)
+{
+  std::vector<cmStdString> cmds;
+  cmds.push_back("otool");
+  cmds.push_back("-D");
+  cmds.push_back(fullPath.c_str());
+
+  std::string output;
+  RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE);
+
+  std::vector<std::string> strs = cmSystemTools::tokenize(output, "\n");
+  // otool returns extra lines reporting multiple install names
+  // in case the binary is multi-arch and none of the architectures
+  // is native (e.g. i386;ppc on x86_64)
+  if(strs.size() >= 2)
+    {
+    soname = strs[1];
+    return true;
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 #if defined(CMAKE_USE_ELF_PARSER)
 std::string::size_type cmSystemToolsFindRPath(std::string const& have,
                                               std::string const& want)
@@ -2659,13 +2683,18 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
                                    const char* lhss, const char* rhss)
 {
-  unsigned int lhs[4] = {0,0,0,0};
-  unsigned int rhs[4] = {0,0,0,0};
-  sscanf(lhss, "%u.%u.%u.%u", &lhs[0], &lhs[1], &lhs[2], &lhs[3]);
-  sscanf(rhss, "%u.%u.%u.%u", &rhs[0], &rhs[1], &rhs[2], &rhs[3]);
+  // Parse out up to 8 components.
+  unsigned int lhs[8] = {0,0,0,0,0,0,0,0};
+  unsigned int rhs[8] = {0,0,0,0,0,0,0,0};
+  sscanf(lhss, "%u.%u.%u.%u.%u.%u.%u.%u",
+         &lhs[0], &lhs[1], &lhs[2], &lhs[3],
+         &lhs[4], &lhs[5], &lhs[6], &lhs[7]);
+  sscanf(rhss, "%u.%u.%u.%u.%u.%u.%u.%u",
+         &rhs[0], &rhs[1], &rhs[2], &rhs[3],
+         &rhs[4], &rhs[5], &rhs[6], &rhs[7]);
 
   // Do component-wise comparison.
-  for(unsigned int i=0; i < 4; ++i)
+  for(unsigned int i=0; i < 8; ++i)
     {
     if(lhs[i] < rhs[i])
       {

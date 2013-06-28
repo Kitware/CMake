@@ -85,6 +85,7 @@ public:
 
   ///! Set/Get the name of the target
   const char* GetName() const {return this->Name.c_str();}
+  const char* GetExportName();
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
@@ -105,6 +106,10 @@ public:
   /** Get the status of policy CMP0020 when the target was created.  */
   cmPolicies::PolicyStatus GetPolicyStatusCMP0020() const
     { return this->PolicyStatusCMP0020; }
+
+  /** Get the status of policy CMP0021 when the target was created.  */
+  cmPolicies::PolicyStatus GetPolicyStatusCMP0021() const
+    { return this->PolicyStatusCMP0021; }
 
   /**
    * Get the list of the custom commands for this target
@@ -362,6 +367,9 @@ public:
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(const char* config);
 
+  /** Whether this library has @rpath and platform supports it.  */
+  bool HasMacOSXRpath(const char* config);
+
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
   bool IsImportedSharedLibWithoutSOName(const char* config);
@@ -407,10 +415,14 @@ public:
   /** Return true if builtin chrpath will work for this target */
   bool IsChrpathUsed(const char* config);
 
-  std::string GetInstallNameDirForBuildTree(const char* config,
-                                            bool for_xcode = false);
-  std::string GetInstallNameDirForInstallTree(const char* config,
-                                              bool for_xcode = false);
+  /** Return the install name directory for the target in the
+    * build tree.  For example: "@rpath/", "@loader_path/",
+    * or "/full/path/to/library".  */
+  std::string GetInstallNameDirForBuildTree(const char* config);
+
+  /** Return the install name directory for the target in the
+    * install tree.  For example: "@rpath/" or "@loader_path/". */
+  std::string GetInstallNameDirForInstallTree();
 
   cmComputeLinkInformation* GetLinkInformation(const char* config,
                                                cmTarget *head = 0);
@@ -462,6 +474,10 @@ public:
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple();
 
+  /** Return whether this target is an executable Bundle, a framework
+      or CFBundle on Apple.  */
+  bool IsBundleOnApple();
+
   /** Return the framework version string.  Undefined if
       IsFrameworkOnApple returns false.  */
   std::string GetFrameworkVersion();
@@ -476,27 +492,32 @@ public:
       directory.  */
   bool UsesDefaultOutputDir(const char* config, bool implib);
 
-  /** Append to @a base the mac content directory and return it. */
-  std::string BuildMacContentDirectory(const std::string& base,
-                                       const char* config = 0,
-                                       bool includeMacOS = true);
-
   /** @return the mac content directory for this target. */
-  std::string GetMacContentDirectory(const char* config = 0,
-                                     bool implib = false,
-                                     bool includeMacOS = true);
+  std::string GetMacContentDirectory(const char* config,
+                                     bool implib);
 
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles();
 
   /** @return the Mac framework directory without the base. */
-  std::string GetFrameworkDirectory(const char* config = 0);
+  std::string GetFrameworkDirectory(const char* config, bool rootDir);
+
+  /** @return the Mac CFBundle directory without the base */
+  std::string GetCFBundleDirectory(const char* config, bool contentOnly);
+
+  /** @return the Mac App directory without the base */
+  std::string GetAppBundleDirectory(const char* config, bool contentOnly);
 
   std::vector<std::string> GetIncludeDirectories(const char *config);
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
+  void InsertCompileOption(const cmValueWithOrigin &entry,
+                     bool before = false);
 
   void AppendBuildInterfaceIncludes();
+
+  void GetCompileOptions(std::vector<std::string> &result,
+                         const char *config);
 
   bool IsNullImpliedByLinkLibraries(const std::string &p);
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
@@ -596,6 +617,11 @@ private:
       the same as GetFullName.  */
   std::string NormalGetRealName(const char* config);
 
+  /** Append to @a base the mac content directory and return it. */
+  std::string BuildMacContentDirectory(const std::string& base,
+                                       const char* config,
+                                       bool contentOnly);
+
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -622,6 +648,7 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   bool DebugIncludesDone;
+  bool DebugCompileOptionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
@@ -664,6 +691,7 @@ private:
   cmPolicies::PolicyStatus PolicyStatusCMP0004;
   cmPolicies::PolicyStatus PolicyStatusCMP0008;
   cmPolicies::PolicyStatus PolicyStatusCMP0020;
+  cmPolicies::PolicyStatus PolicyStatusCMP0021;
 
   // Internal representation details.
   friend class cmTargetInternals;

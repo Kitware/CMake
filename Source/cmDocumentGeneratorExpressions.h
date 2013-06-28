@@ -13,7 +13,7 @@
 #define cmDocumentGeneratorExpressions_h
 
 #define CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS                      \
-  "Generator expressions are evaluted during build system generation "  \
+  "Generator expressions are evaluated during build system generation " \
   "to produce information specific to each build configuration.  "      \
   "Valid expressions are:\n"                                            \
   "  $<0:...>                  = empty string (ignores \"...\")\n"      \
@@ -28,6 +28,8 @@
   "strings which contain a ',' for example.\n"                          \
   "  $<SEMICOLON>              = A literal ';'. Used to prevent "       \
   "list expansion on an argument with ';'.\n"                           \
+  "  $<JOIN:list,...>          = joins the list with the content of "   \
+  "\"...\"\n"                                                           \
   "  $<TARGET_NAME:...>        = Marks ... as being the name of a "     \
   "target.  This is required if exporting targets to multiple "         \
   "dependent export sets.  The '...' must be a literal name of a "      \
@@ -38,6 +40,20 @@
   "is exported using export(), or when the target is used by another "  \
   "target in the same buildsystem. Expands to the empty string "        \
   "otherwise.\n"                                                        \
+  "  $<C_COMPILER_ID>          = The CMake-id of the C compiler "       \
+  "used.\n"                                                             \
+  "  $<C_COMPILER_ID:comp>     = '1' if the CMake-id of the C "         \
+  "compiler matches comp, otherwise '0'.\n"                             \
+  "  $<CXX_COMPILER_ID>        = The CMake-id of the CXX compiler "     \
+  "used.\n"                                                             \
+  "  $<CXX_COMPILER_ID:comp>   = '1' if the CMake-id of the CXX "       \
+  "compiler matches comp, otherwise '0'.\n"                             \
+  "  $<VERSION_GREATER:v1,v2>  = '1' if v1 is a version greater than "  \
+  "v2, else '0'.\n"                                                     \
+  "  $<VERSION_LESS:v1,v2>     = '1' if v1 is a version less than v2, " \
+  "else '0'.\n"                                                         \
+  "  $<VERSION_EQUAL:v1,v2>    = '1' if v1 is the same version as v2, " \
+  "else '0'.\n"                                                         \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \
@@ -70,6 +86,14 @@
   "Expressions with an implicit 'this' target:\n"                       \
   "  $<TARGET_PROPERTY:prop>   = The value of the property prop on "    \
   "the target on which the generator expression is evaluated.\n"        \
+  ""
+
+#define CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS                      \
+  "Language related expressions:\n"                                     \
+  "  $<LINK_LANGUAGE>          = The link language of the target "      \
+  "being generated.\n"                                                  \
+  "  $<LINK_LANGUAGE:lang>     = '1' if the link language of the "      \
+  "target being generated matches lang, else '0'.\n"                    \
   ""
 
 #endif

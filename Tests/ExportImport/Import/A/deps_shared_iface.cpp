@@ -22,6 +22,13 @@
 
 #ifdef TEST_SUBDIR_LIB
 #include "subdir.h"
+#include "renamed.h"
+#endif
+
+#ifdef DO_GNU_TESTS
+#ifndef CUSTOM_COMPILE_OPTION
+#error Expected CUSTOM_COMPILE_OPTION
+#endif
 #endif
 
 int main(int,char **)
@@ -31,11 +38,12 @@ int main(int,char **)
 
 #ifdef TEST_SUBDIR_LIB
   SubDirObject sdo;
+  Renamed ren;
 #endif
 
   return dep.foo() + req.foo()
 #ifdef TEST_SUBDIR_LIB
-                   + sdo.foo()
+                   + sdo.foo() + ren.foo()
 #endif
                               ;
 }

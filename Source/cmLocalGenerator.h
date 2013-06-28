@@ -143,10 +143,13 @@ public:
                         const char* config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
                        std::string const& lang, const char *config);
+  void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+                                const char *lang);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
+  virtual void AppendFlagEscape(std::string& flags, const char* rawFlag);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               const char* lang, bool forResponseFile = false,
@@ -215,6 +218,8 @@ public:
                              cmGeneratorTarget* target,
                              const char* lang = "C", const char *config = 0,
                              bool stripImplicitInclDirs = true);
+  void AddCompileOptions(std::string& flags, cmTarget* target,
+                         const char* lang, const char* config);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);

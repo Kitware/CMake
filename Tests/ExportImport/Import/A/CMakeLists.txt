@@ -169,6 +169,13 @@ target_compile_definitions(deps_shared_iface
     $<$<STREQUAL:$<TARGET_PROPERTY:CUSTOM_STRING>,testcontent>:CUSTOM_STRING_IS_MATCH>
 )
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  target_compile_definitions(deps_shared_iface
+    PRIVATE
+      "DO_GNU_TESTS"
+  )
+endif()
+
 if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   include(CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-fPIE run_pic_test)
@@ -183,6 +190,12 @@ else()
   endif()
 endif()
 
+add_executable(exp_renamed_test renamed_test.cpp)
+target_link_libraries(exp_renamed_test exp_renamed)
+
+add_executable(bld_renamed_test renamed_test.cpp)
+target_link_libraries(bld_renamed_test bld_renamed)
+
 if (run_pic_test)
   target_compile_definitions(deps_shared_iface PRIVATE CHECK_PIC_WORKS)
 endif()
@@ -193,6 +206,12 @@ endif()
 
 add_executable(deps_shared_iface2 deps_shared_iface.cpp)
 target_link_libraries(deps_shared_iface2 bld_testSharedLibDepends bld_subdirlib)
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  target_compile_definitions(deps_shared_iface2
+    PRIVATE
+      "DO_GNU_TESTS"
+  )
+endif()
 target_compile_definitions(deps_shared_iface2
   PRIVATE TEST_SUBDIR_LIB
   $<$<BOOL:$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>>:PIC_PROPERTY_IS_ON>

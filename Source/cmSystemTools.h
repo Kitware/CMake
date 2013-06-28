@@ -56,7 +56,7 @@ public:
 
   typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
   /**
-   *  Set the function used by GUI's to display error messages
+   *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).
@@ -274,7 +274,7 @@ public:
   static bool GetRunCommandOutput() { return s_DisableRunCommandOutput; }
 
   /**
-   * Come constants for different file formats.
+   * Some constants for different file formats.
    */
   enum FileFormat {
     NO_FILE_FORMAT = 0,
@@ -437,6 +437,10 @@ public:
 
   /** Try to guess the soname of a shared library.  */
   static bool GuessLibrarySOName(std::string const& fullPath,
+                                 std::string& soname);
+
+  /** Try to guess the install name of a shared library.  */
+  static bool GuessLibraryInstallName(std::string const& fullPath,
                                  std::string& soname);
 
   /** Try to set the RPATH in an ELF binary.  */

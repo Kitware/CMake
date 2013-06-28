@@ -132,10 +132,10 @@ macro(ECOS_ADJUST_DIRECTORY _target_FILES )
 endmacro()
 
 # the default ecos config file name
-# maybe in the future also out-of-source builds may be possible
+# maybe in future also out-of-source builds may be possible
 set(ECOS_CONFIG_FILE ecos.ecc)
 
-#creates the dependancy from all source files on the ecos target.ld,
+#creates the dependency from all source files on the ecos target.ld,
 #adds the command for compiling ecos
 macro(ECOS_ADD_TARGET_LIB)
 # when building out-of-source, create the ecos/ subdir

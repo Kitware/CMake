@@ -4,4 +4,4 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/main.cpp"
 
 add_executable(TargetPropertyGeneratorExpressions
            "${CMAKE_CURRENT_BINARY_DIR}/main.cpp")
-include_directories("$<TARGET_PROPERTY:NonExistant,INCLUDE_DIRECTORIES>")
+include_directories("$<TARGET_PROPERTY:NonExistent,INCLUDE_DIRECTORIES>")

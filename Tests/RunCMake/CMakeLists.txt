@@ -65,15 +65,35 @@ add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
 if(NOT WIN32)
   add_RunCMake_test(PositionIndependentCode)
+  set(SKIP_VISIBILITY 0)
+  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.2)
+    set(SKIP_VISIBILITY 1)
+  endif()
+
+  if (CMAKE_CXX_COMPILER_ID MATCHES Watcom
+      OR CMAKE_SYSTEM_NAME MATCHES IRIX64
+      OR CMAKE_CXX_COMPILER_ID MATCHES HP
+      OR CMAKE_CXX_COMPILER_ID MATCHES XL
+      OR CMAKE_CXX_COMPILER_ID MATCHES SunPro)
+    set(SKIP_VISIBILITY 1)
+  endif()
+
+  if (NOT SKIP_VISIBILITY)
+    add_RunCMake_test(VisibilityPreset)
+  endif()
 endif()
 add_RunCMake_test(CompatibleInterface)
 
 add_RunCMake_test(add_dependencies)
 add_RunCMake_test(build_command)
 add_RunCMake_test(find_package)
+add_RunCMake_test(get_filename_component)
+add_RunCMake_test(if)
 add_RunCMake_test(include)
 add_RunCMake_test(include_directories)
 add_RunCMake_test(list)
+add_RunCMake_test(try_compile)
+add_RunCMake_test(variable_watch)
 add_RunCMake_test(CMP0004)
 
 find_package(Qt4 QUIET)
@@ -86,3 +106,5 @@ if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
   add_RunCMake_test(SolutionGlobalSections)
 endif()
+
+add_RunCMake_test(File_Generate)

@@ -23,13 +23,13 @@ set( CMAKE_INCLUDE_CURRENT_DIR ON )
 
 macro(TEST_FAIL value msg)
   if (${value})
-    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
   endif ()
 endmacro()
 
 macro(TEST_PASS value msg)
   if (NOT ${value})
-    message (SEND_ERROR "Test fail:" ${msg} ${Out} )
+    message (SEND_ERROR "Test fail:" "${msg}\n" ${Out} )
   endif ()
 endmacro()
 
@@ -141,6 +141,8 @@ endmacro()
 
 include(GenerateExportHeader)
 
+add_subdirectory(visibility_preset)
+
 add_compiler_export_flags()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -168,6 +170,9 @@ add_subdirectory(lib_shared_and_statictest)
 add_subdirectory(override_symbol)
 add_subdirectory(nodeprecated)
 add_subdirectory(prefix)
+if(NOT BORLAND)
+  add_subdirectory(c_identifier)
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
   # We deliberately call deprecated methods, and test for that elsewhere.

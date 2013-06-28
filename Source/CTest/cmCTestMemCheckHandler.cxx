@@ -43,8 +43,7 @@ static CatToErrorType cmCTestMemCheckBoundsChecker[] = {
   {0,0}
 };
 
-// parse the xml file storing the installed version of Xcode on
-// the machine
+// parse the xml file containing the results of last BoundsChecker run
 class cmBoundsCheckerParser : public cmXMLParser
 {
 public:
@@ -461,13 +460,6 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     return false;
     }
 
-  if ( this->MemoryTester[0] == '\"' &&
-    this->MemoryTester[this->MemoryTester.size()-1] == '\"' )
-    {
-    this->MemoryTester
-      = this->MemoryTester.substr(1, this->MemoryTester.size()-2);
-    }
-
   // Setup the options
   std::string memoryTesterOptions;
   if ( this->CTest->GetCTestConfiguration(
@@ -491,13 +483,13 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   switch ( this->MemoryTesterStyle )
     {
     case cmCTestMemCheckHandler::VALGRIND:
+      {
       if ( this->MemoryTesterOptions.empty() )
         {
         this->MemoryTesterOptions.push_back("-q");
         this->MemoryTesterOptions.push_back("--tool=memcheck");
         this->MemoryTesterOptions.push_back("--leak-check=yes");
         this->MemoryTesterOptions.push_back("--show-reachable=yes");
-        this->MemoryTesterOptions.push_back("--workaround-gcc296-bugs=yes");
         this->MemoryTesterOptions.push_back("--num-callers=50");
         }
       if ( this->CTest->GetCTestConfiguration(
@@ -516,7 +508,11 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
           + this->CTest->GetCTestConfiguration("MemoryCheckSuppressionFile");
         this->MemoryTesterOptions.push_back(suppressions);
         }
+      std::string outputFile = "--log-file="
+        + this->MemoryTesterOutputFile;
+      this->MemoryTesterOptions.push_back(outputFile);
       break;
+      }
     case cmCTestMemCheckHandler::PURIFY:
       {
       std::string outputFile;
@@ -948,6 +944,21 @@ cmCTestMemCheckHandler::PostProcessPurifyTest(cmCTestTestResult& res)
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessPurifyTest for : "
              << res.Name.c_str() << std::endl);
+  appendMemTesterOutput(res);
+}
+
+void
+cmCTestMemCheckHandler::PostProcessValgrindTest(cmCTestTestResult& res)
+{
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "PostProcessValgrindTest for : "
+             << res.Name.c_str() << std::endl);
+  appendMemTesterOutput(res);
+}
+
+void
+cmCTestMemCheckHandler::appendMemTesterOutput(cmCTestTestResult& res)
+{
   if ( !cmSystemTools::FileExists(this->MemoryTesterOutputFile.c_str()) )
     {
     std::string log = "Cannot find memory tester output file: "

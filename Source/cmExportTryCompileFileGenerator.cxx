@@ -31,8 +31,10 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 
       ImportPropertyMap properties;
 
-      this->FindTargets("INTERFACE_INCLUDE_DIRECTORIES", te, emittedDeps);
-      this->FindTargets("INTERFACE_COMPILE_DEFINITIONS", te, emittedDeps);
+#define FIND_TARGETS(PROPERTY) \
+      this->FindTargets(#PROPERTY, te, emittedDeps);
+
+      CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
 
       this->PopulateProperties(te, properties, emittedDeps);
 
@@ -111,4 +113,19 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget* target,
         }
       }
     }
+}
+std::string
+cmExportTryCompileFileGenerator::InstallNameDir(cmTarget* target,
+                                                const std::string& config)
+{
+  std::string install_name_dir;
+
+  cmMakefile* mf = target->GetMakefile();
+  if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    install_name_dir =
+      target->GetInstallNameDirForBuildTree(config.c_str());
+    }
+
+  return install_name_dir;
 }

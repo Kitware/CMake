@@ -376,7 +376,7 @@ void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
   if (!properties.empty())
     {
     std::string targetName = this->Namespace;
-    targetName += target->GetName();
+    targetName += target->GetExportName();
     os << "set_target_properties(" << targetName << " PROPERTIES\n";
     for(ImportPropertyMap::const_iterator pi = properties.begin();
         pi != properties.end(); ++pi)
@@ -407,7 +407,7 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
     }
   if(this->ExportedTargets.find(tgt) != this->ExportedTargets.end())
     {
-    input = this->Namespace + input;
+    input = this->Namespace + tgt->GetExportName();
     }
   else
     {
@@ -624,8 +624,12 @@ cmExportFileGenerator
       std::string value;
       if(target->HasSOName(config))
         {
+        if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+          {
+          value = this->InstallNameDir(target, config);
+          }
         prop = "IMPORTED_SONAME";
-        value = target->GetSOName(config);
+        value += target->GetSOName(config);
         }
       else
         {
@@ -772,7 +776,8 @@ cmExportFileGenerator
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
-  targetName += target->GetName();
+
+  targetName += target->GetExportName();
 
   // Create the imported target.
   os << "# Create imported target " << targetName << "\n";
@@ -835,7 +840,8 @@ cmExportFileGenerator
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
-  targetName += target->GetName();
+
+  targetName += target->GetExportName();
 
   // Set the import properties.
   os << "# Import target \"" << targetName << "\" for configuration \""
@@ -954,7 +960,7 @@ cmExportFileGenerator
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
-  targetName += target->GetName();
+  targetName += target->GetExportName();
 
   os << "list(APPEND _IMPORT_CHECK_TARGETS " << targetName << " )\n"
         "list(APPEND _IMPORT_CHECK_FILES_FOR_" << targetName << " ";

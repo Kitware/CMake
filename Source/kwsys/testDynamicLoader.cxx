@@ -109,9 +109,9 @@ int testDynamicLoader(int argc, char *argv[])
 
 // dlopen() on Syllable before 11/22/2007 doesn't return 0 on error
 #ifndef __SYLLABLE__
-  // Make sure that inexistant lib is giving correct result
+  // Make sure that inexistent lib is giving correct result
   res += TestDynamicLoader("azerty_", "foo_bar",0,0,0);
-  // Make sure that random binary file cannnot be assimilated as dylib
+  // Make sure that random binary file cannot be assimilated as dylib
   res += TestDynamicLoader(TEST_SYSTEMTOOLS_BIN_FILE, "wp",0,0,0);
 #endif
 

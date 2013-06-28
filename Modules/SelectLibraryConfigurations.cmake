@@ -62,7 +62,7 @@ macro( select_library_configurations basename )
         # if the generator supports configuration types or CMAKE_BUILD_TYPE
         # is set, then set optimized and debug options.
         if( CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE )
-            set( ${basename}_LIBRARY )
+            set( ${basename}_LIBRARY "" )
             foreach( _libname IN LISTS ${basename}_LIBRARY_RELEASE )
                 list( APPEND ${basename}_LIBRARY optimized "${_libname}" )
             endforeach()

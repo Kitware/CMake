@@ -163,6 +163,8 @@
 #     May be set by the user in order to specify a USER binary spec file
 #     to be used by CPackRPM instead of generating the file.
 #     The specified file will be processed by configure_file( @ONLY).
+#     One can provide a component specific file by setting
+#     CPACK_RPM_<componentName>_USER_BINARY_SPECFILE.
 ##end
 ##variable
 #  CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE - Spec file template.
@@ -222,6 +224,24 @@
 #     May be used to embed a changelog in the spec file.
 #     The refered file will be read and directly put after the %changelog
 #     section.
+##end
+##variable
+#  CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST - list of path to be excluded.
+#     Mandatory : NO
+#     Default   : /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include
+#     May be used to exclude path (directories or files) from the auto-generated
+#     list of paths discovered by CPack RPM. The defaut value contains a reasonable
+#     set of values if the variable is not defined by the user. If the variable
+#     is defined by the user then CPackRPM will NOT any of the default path.
+#     If you want to add some path to the default list then you can use
+#     CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION variable.
+##end
+##variable
+#  CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION - additional list of path to be excluded.
+#     Mandatory : NO
+#     Default   : -
+#     May be used to add more exclude path (directories or files) from the initial
+#     default list of excluded paths. See CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST.
 ##end
 
 #=============================================================================
@@ -666,6 +686,30 @@ if(CPACK_RPM_PACKAGE_RELOCATABLE)
   endforeach()
 endif()
 
+if (CPACK_RPM_PACKAGE_DEBUG)
+   message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
+endif()
+
+if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+  set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
+  if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
+    message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
+    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
+  endif()
+endif()
+
+if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+  if (CPACK_RPM_PACKAGE_DEBUG)
+   message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
+ endif()
+  foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
+    list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
+  endforeach()
+endif()
+if (CPACK_RPM_PACKAGE_DEBUG)
+   message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
+endif()
+
 # Use files tree to construct files command (spec file)
 # We should not forget to include symlinks (thus -o -type l)
 # We should include directory as well (thus -type d)
@@ -832,11 +876,18 @@ if(CPACK_RPM_PACKAGE_DEBUG)
    message("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
 endif()
 
-# USER generated spec file handling.
-# We should generate a spec file template:
+#
+# USER generated/provided spec file handling.
+#
+
+# We can have a component specific spec file.
+if(CPACK_RPM_PACKAGE_COMPONENT AND CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE)
+  set(CPACK_RPM_USER_BINARY_SPECFILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE})
+endif()
+
+# We should generate a USER spec file template:
 #  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
 #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
-#
 if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
    file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
       "# -*- rpm-spec -*-
@@ -902,9 +953,9 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-${CPACK_RPM_INSTALL_FILES}
-${CPACK_RPM_ABSOLUTE_INSTALL_FILES}
-${CPACK_RPM_USER_INSTALL_FILES}
+\@CPACK_RPM_INSTALL_FILES\@
+\@CPACK_RPM_ABSOLUTE_INSTALL_FILES\@
+\@CPACK_RPM_USER_INSTALL_FILES\@
 
 %changelog
 \@CPACK_RPM_SPEC_CHANGELOG\@

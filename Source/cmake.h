@@ -35,7 +35,7 @@ class cmGeneratedFileStream;
 /** \brief Represents a cmake invocation.
  *
  * This class represents a cmake invocation. It is the top level class when
- * running cmake. Most cmake based GUIS should primarily create an instance
+ * running cmake. Most cmake based GUIs should primarily create an instance
  * of this class and communicate with it.
  *
  * The basic process for a GUI is as follows:
@@ -255,7 +255,7 @@ class cmake
   typedef  void (*ProgressCallbackType)
     (const char*msg, float progress, void *);
   /**
-   *  Set the function used by GUI's to receive progress updates
+   *  Set the function used by GUIs to receive progress updates
    *  Function gets passed: message as a const char*, a progress
    *  amount ranging from 0 to 1.0 and client data. The progress
    *  number provided may be negative in cases where a message is
@@ -532,9 +532,9 @@ private:
    "CMakeCache.txt file, globbing expressions using * and ? are supported. "\
    "The option may be repeated for as many cache entries as desired.\n" \
    "Use with care, you can make your CMakeCache.txt non-working."}, \
-  {"-G <generator-name>", "Specify a makefile generator.", \
+  {"-G <generator-name>", "Specify a build system generator.", \
    "CMake may support multiple native build systems on certain platforms.  " \
-   "A makefile generator is responsible for generating a particular build " \
+   "A generator is responsible for generating a particular build " \
    "system.  Possible generator names are specified in the Generators " \
    "section."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator.", \

@@ -120,6 +120,22 @@ add_custom_target(check-part2 ALL
     -Dtest_target_includes6=$<TARGET_PROPERTY:empty3,INCLUDE_DIRECTORIES>
     -Dtest_target_includes7=$<TARGET_PROPERTY:empty1,INTERFACE_INCLUDE_DIRECTORIES>
     -Dtest_target_includes8=$<TARGET_PROPERTY:empty5,INCLUDE_DIRECTORIES>
+    -Dtest_arbitrary_content_comma_1=$<1:a,>
+    -Dtest_arbitrary_content_comma_2=$<1:,a>
+    -Dtest_arbitrary_content_comma_3=$<1:a,,>
+    -Dtest_arbitrary_content_comma_4=$<1:,>
+    -Dtest_arbitrary_content_comma_5=$<1:,,>
+    -Dtest_arbitrary_content_comma_6=$<1:,,,>
+    -Dtest_arbitrary_content_comma_7=$<1:,,a>
+    -Dtest_arbitrary_content_comma_8=$<1:a,,b>
+    -Dtest_arbitrary_content_comma_9=$<1:a,,b,,>
+    -Dtest_arbitrary_content_comma_10=$<1:,,a,,b,,>
+    -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
+    -Dtest_version_greater_2=$<VERSION_GREATER:1.1.1,1.0>
+    -Dtest_version_less_1=$<VERSION_LESS:1.1.1,1.0>
+    -Dtest_version_less_2=$<VERSION_LESS:1.0,1.1.1>
+    -Dtest_version_equal_1=$<VERSION_EQUAL:1.0.1,1.1>
+    -Dtest_version_equal_2=$<VERSION_EQUAL:1.1,1.1>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part2.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 2 of 2)"
   VERBATIM

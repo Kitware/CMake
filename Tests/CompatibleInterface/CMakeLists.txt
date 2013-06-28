@@ -57,10 +57,10 @@ set_property(TARGET iface2 APPEND PROPERTY
 # properties defined only in the interface - they should be implicitly zero
 set_property(TARGET iface2
   APPEND PROPERTY
-    LINK_INTERFACE_LIBRARIES $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP4>>:nonexistant>
+    LINK_INTERFACE_LIBRARIES $<$<BOOL:$<TARGET_PROPERTY:BOOL_PROP4>>:nonexistent>
 )
 target_link_libraries(CompatibleInterface iface2
-      $<$<BOOL:$<TARGET_PROPERTY:Iface2_PROP>>:nonexistant>
+      $<$<BOOL:$<TARGET_PROPERTY:Iface2_PROP>>:nonexistent>
 )
 # Test that this does not segfault:
 target_compile_definitions(CompatibleInterface
@@ -70,7 +70,7 @@ target_compile_definitions(CompatibleInterface
 
 # The COMPATIBLE_INTERFACE_* properties are only read from dependencies
 # in the interface. Populating it on the CompatibleInterface target does
-# not have any affect on the interpretation of the INTERFACE variants
+# not have any effect on the interpretation of the INTERFACE variants
 # in dependencies.
 set_property(TARGET iface1 PROPERTY
   INTERFACE_NON_RELEVANT_PROP ON

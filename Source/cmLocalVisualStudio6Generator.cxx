@@ -1228,7 +1228,7 @@ void cmLocalVisualStudio6Generator
     if(!linkLanguage)
       {
       cmSystemTools::Error
-        ("CMake can not determine linker language for target:",
+        ("CMake can not determine linker language for target: ",
          target.GetName());
       return;
       }
@@ -1639,9 +1639,9 @@ void cmLocalVisualStudio6Generator
     // store flags for each configuration
     std::string flags = " ";
     std::string flagsRelease = " ";
-    std::string flagsMinSize = " ";
+    std::string flagsMinSizeRel = " ";
     std::string flagsDebug = " ";
-    std::string flagsDebugRel = " ";
+    std::string flagsRelWithDebInfo = " ";
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
@@ -1649,7 +1649,7 @@ void cmLocalVisualStudio6Generator
       if(!linkLanguage)
         {
         cmSystemTools::Error
-          ("CMake can not determine linker language for target:",
+          ("CMake can not determine linker language for target: ",
            target.GetName());
         return;
         }
@@ -1664,16 +1664,24 @@ void cmLocalVisualStudio6Generator
       flagsRelease += " -DCMAKE_INTDIR=\\\"Release\\\" ";
 
       flagVar = baseFlagVar + "_MINSIZEREL";
-      flagsMinSize = this->Makefile->GetSafeDefinition(flagVar.c_str());
-      flagsMinSize += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
+      flagsMinSizeRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
+      flagsMinSizeRel += " -DCMAKE_INTDIR=\\\"MinSizeRel\\\" ";
 
       flagVar = baseFlagVar + "_DEBUG";
       flagsDebug = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsDebug += " -DCMAKE_INTDIR=\\\"Debug\\\" ";
 
       flagVar = baseFlagVar + "_RELWITHDEBINFO";
-      flagsDebugRel = this->Makefile->GetSafeDefinition(flagVar.c_str());
-      flagsDebugRel += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+      flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
+      flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
+
+      this->AddCompileOptions(flags, &target, linkLanguage, 0);
+      this->AddCompileOptions(flagsDebug, &target, linkLanguage, "Debug");
+      this->AddCompileOptions(flagsRelease, &target, linkLanguage, "Release");
+      this->AddCompileOptions(flagsMinSizeRel, &target, linkLanguage,
+                              "MinSizeRel");
+      this->AddCompileOptions(flagsRelWithDebInfo, &target, linkLanguage,
+                              "RelWithDebInfo");
       }
 
     // if _UNICODE and _SBCS are not found, then add -D_MBCS
@@ -1684,13 +1692,6 @@ void cmLocalVisualStudio6Generator
        defs.find("D_SBCS") == flags.npos)
       {
       flags += " /D \"_MBCS\"";
-      }
-
-    // Add per-target flags.
-    if(const char* targetFlags = target.GetProperty("COMPILE_FLAGS"))
-      {
-      flags += " ";
-      flags += targetFlags;
       }
 
     // Add per-target and per-configuration preprocessor definitions.
@@ -1731,19 +1732,19 @@ void cmLocalVisualStudio6Generator
     flags += defines;
     flagsDebug += debugDefines;
     flagsRelease += releaseDefines;
-    flagsMinSize += minsizeDefines;
-    flagsDebugRel += debugrelDefines;
+    flagsMinSizeRel += minsizeDefines;
+    flagsRelWithDebInfo += debugrelDefines;
 
     // The template files have CXX FLAGS in them, that need to be replaced.
     // There are not separate CXX and C template files, so we use the same
     // variable names.   The previous code sets up flags* variables to contain
     // the correct C or CXX flags
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
-                                 flagsMinSize.c_str());
+                                 flagsMinSizeRel.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG",
                                  flagsDebug.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
-                                 flagsDebugRel.c_str());
+                                 flagsRelWithDebInfo.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE",
                                  flagsRelease.c_str());
     cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());

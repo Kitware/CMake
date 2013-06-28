@@ -58,8 +58,7 @@ endif()
 # must not have it escaped inside the configured header.
 set(STRING_EXTRA "")
 
-if(NOT BORLAND AND NOT PP_VS70
-    AND NOT PP_VS100 AND NOT PP_VS110 AND NOT PP_VS120)
+if(NOT BORLAND AND NOT PP_VS70)
   # Borland, VS70 IDE: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
@@ -67,7 +66,6 @@ if(NOT BORLAND AND NOT PP_VS70
   #
   # The VS 7.0 IDE separates definitions on semicolons and commas with
   # no regard for quotes.  Fortunately VS 7.1 and above are okay.
-  # VS 10 seems to also not like semicolons
   set(SEMICOLON "\;")
 endif()
 

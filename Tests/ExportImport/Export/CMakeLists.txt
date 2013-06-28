@@ -162,8 +162,9 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<BUILD_INTERFACE:BuildOnly_DEFINE>
     $<INSTALL_INTERFACE:InstallOnly_DEFINE>
 )
-
 include(GenerateExportHeader)
+
+add_subdirectory(renamed)
 
 add_library(testSharedLibRequired SHARED testSharedLibRequired.cpp)
 generate_export_header(testSharedLibRequired)
@@ -199,6 +200,11 @@ set_property(TARGET testSharedLibRequired
   PROPERTY
     INTERFACE_CUSTOM_STRING testcontent
 )
+set_property(TARGET testSharedLibRequired APPEND PROPERTY
+  INTERFACE_COMPILE_OPTIONS
+    $<$<CXX_COMPILER_ID:GNU>:-DCUSTOM_COMPILE_OPTION>
+)
+
 
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
@@ -219,13 +225,12 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/testSharedLibDepends>"
                                 "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
 )
-set_property(TARGET testSharedLibDepends APPEND PROPERTY
-  LINK_INTERFACE_LIBRARIES
-    $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>
-)
 
 # LINK_PRIVATE because the LINK_INTERFACE_LIBRARIES is specified above.
 target_link_libraries(testSharedLibDepends LINK_PRIVATE testSharedLibRequired)
+target_link_libraries(testSharedLibDepends LINK_PUBLIC renamed_on_export)
+target_link_libraries(testSharedLibDepends LINK_INTERFACE_LIBRARIES
+  $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>)
 
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
@@ -310,7 +315,7 @@ add_subdirectory(sublib) # For CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE test.
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
   testExe2libImp testLib3Imp testLib3ImpDep subdirlib
-  testSharedLibRequired testSharedLibDepends
+  testSharedLibRequired testSharedLibDepends renamed_on_export
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )

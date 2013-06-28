@@ -152,10 +152,44 @@ bool cmQtAutomoc::InitializeMocSourceFile(cmTarget* target)
   return true;
 }
 
-void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
+static void GetCompileDefinitionsAndDirectories(cmTarget *target,
+                                                const char * config,
+                                                std::string &incs,
+                                                std::string &defs)
 {
   cmMakefile* makefile = target->GetMakefile();
   cmLocalGenerator* localGen = makefile->GetLocalGenerator();
+  std::vector<std::string> includeDirs;
+  cmGeneratorTarget gtgt(target);
+  // Get the include dirs for this target, without stripping the implicit
+  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
+  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", config, false);
+  const char* sep = "";
+  incs = "";
+  for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
+      incDirIt != includeDirs.end();
+      ++incDirIt)
+    {
+    incs += sep;
+    sep = ";";
+    incs += *incDirIt;
+    }
+
+  defs = target->GetCompileDefinitions(config);
+
+  const char *tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
+  sep = "";
+  if (tmp)
+    {
+    defs += sep;
+    sep = ";";
+    defs += tmp;
+    }
+}
+
+void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
+{
+  cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
 
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
@@ -175,6 +209,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   currentLine.push_back("-E");
   currentLine.push_back("cmake_automoc");
   currentLine.push_back(targetDir);
+  currentLine.push_back("$<CONFIGURATION>");
 
   cmCustomCommandLines commandLines;
   commandLines.push_back(currentLine);
@@ -188,6 +223,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
+  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
   if(strstr(gg->GetName(), "Visual Studio"))
     {
@@ -263,36 +299,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
       }
     }
 
-
-  std::vector<std::string> includeDirs;
-  cmGeneratorTarget gtgt(target);
-  // Get the include dirs for this target, without stripping the implicit
-  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
-  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", 0, false);
-  std::string _moc_incs = "";
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
-      incDirIt != includeDirs.end();
-      ++incDirIt)
-    {
-    _moc_incs += sep;
-    sep = ";";
-    _moc_incs += *incDirIt;
-    }
-
-  const char* tmp = target->GetProperty("COMPILE_DEFINITIONS");
-  std::string _moc_compile_defs;
-  if (tmp)
-    {
-    _moc_compile_defs = target->GetCompileDefinitions(0);
-    }
-  tmp = makefile->GetProperty("COMPILE_DEFINITIONS");
-  if (tmp)
-    {
-    _moc_compile_defs += ";";
-    _moc_compile_defs += tmp;
-    }
-  tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
+  const char* tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
   std::string _moc_options = (tmp!=0 ? tmp : "");
 
   // forget the variables added here afterwards again:
@@ -301,10 +308,6 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 
   makefile->AddDefinition("_moc_target_name",
           cmLocalGenerator::EscapeForCMake(automocTargetName.c_str()).c_str());
-  makefile->AddDefinition("_moc_incs",
-          cmLocalGenerator::EscapeForCMake(_moc_incs.c_str()).c_str());
-  makefile->AddDefinition("_moc_compile_defs",
-          cmLocalGenerator::EscapeForCMake(_moc_compile_defs.c_str()).c_str());
   makefile->AddDefinition("_moc_options",
           cmLocalGenerator::EscapeForCMake(_moc_options.c_str()).c_str());
   makefile->AddDefinition("_moc_files",
@@ -313,6 +316,89 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
           cmLocalGenerator::EscapeForCMake(_moc_headers.c_str()).c_str());
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
+  std::string _moc_incs;
+  std::string _moc_compile_defs;
+  std::vector<std::string> configs;
+  const char *config = makefile->GetConfigurations(configs);
+  GetCompileDefinitionsAndDirectories(target, config,
+                                      _moc_incs, _moc_compile_defs);
+
+  makefile->AddDefinition("_moc_incs",
+          cmLocalGenerator::EscapeForCMake(_moc_incs.c_str()).c_str());
+  makefile->AddDefinition("_moc_compile_defs",
+          cmLocalGenerator::EscapeForCMake(_moc_compile_defs.c_str()).c_str());
+
+  std::map<std::string, std::string> configIncludes;
+  std::map<std::string, std::string> configDefines;
+
+  for (std::vector<std::string>::const_iterator li = configs.begin();
+       li != configs.end(); ++li)
+    {
+    std::string config_moc_incs;
+    std::string config_moc_compile_defs;
+    GetCompileDefinitionsAndDirectories(target, li->c_str(),
+                                        config_moc_incs,
+                                        config_moc_compile_defs);
+    if (config_moc_incs != _moc_incs)
+      {
+      configIncludes["_moc_incs_" + *li] =
+                    cmLocalGenerator::EscapeForCMake(config_moc_incs.c_str());
+      if(_moc_incs.empty())
+        {
+        _moc_incs = config_moc_incs;
+        }
+      }
+    if (config_moc_compile_defs != _moc_compile_defs)
+      {
+      configDefines["_moc_compile_defs_" + *li] =
+            cmLocalGenerator::EscapeForCMake(config_moc_compile_defs.c_str());
+      if(_moc_compile_defs.empty())
+        {
+        _moc_compile_defs = config_moc_compile_defs;
+        }
+      }
+    }
+
+  const char *qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
+  if (!qtVersion)
+    {
+    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
+    }
+  if (const char *targetQtVersion =
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+    {
+    qtVersion = targetQtVersion;
+    }
+  if (qtVersion)
+    {
+    makefile->AddDefinition("_target_qt_version", qtVersion);
+    }
+
+  {
+  const char *qtMoc = makefile->GetSafeDefinition("QT_MOC_EXECUTABLE");
+  makefile->AddDefinition("_qt_moc_executable", qtMoc);
+  }
+
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Moc = makefile->FindTargetToUse("Qt5::moc");
+    if (!qt5Moc)
+      {
+      cmSystemTools::Error("Qt5::moc target not found ",
+                          automocTargetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    }
+  else
+    {
+    if (strcmp(qtVersion, "4") != 0)
+      {
+      cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
+                          "Qt 5 ", automocTargetName.c_str());
+      }
+    }
+
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
   inputFile += "/Modules/AutomocInfo.cmake.in";
@@ -320,17 +406,50 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
   outputFile += "/AutomocInfo.cmake";
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
                           false, true, false);
+
+  if (!configDefines.empty() || !configIncludes.empty())
+    {
+    std::ofstream infoFile(outputFile.c_str(), std::ios::app);
+    if ( !infoFile )
+      {
+      std::string error = "Internal CMake error when trying to open file: ";
+      error += outputFile.c_str();
+      error += " for writing.";
+      cmSystemTools::Error(error.c_str());
+      return;
+      }
+    if (!configDefines.empty())
+      {
+      for (std::map<std::string, std::string>::iterator
+            it = configDefines.begin(), end = configDefines.end();
+            it != end; ++it)
+        {
+        infoFile << "SET(AM_MOC_COMPILE_DEFINITIONS_" << it->first <<
+          " " << it->second << ")\n";
+        }
+      }
+    if (!configIncludes.empty())
+      {
+      for (std::map<std::string, std::string>::iterator
+            it = configIncludes.begin(), end = configIncludes.end();
+            it != end; ++it)
+        {
+        infoFile << "SET(AM_MOC_INCLUDES_" << it->first <<
+          " " << it->second << ")\n";
+        }
+      }
+    }
 }
 
 
-bool cmQtAutomoc::Run(const char* targetDirectory)
+bool cmQtAutomoc::Run(const char* targetDirectory, const char *config)
 {
   bool success = true;
   cmake cm;
   cmGlobalGenerator* gg = this->CreateGlobalGenerator(&cm, targetDirectory);
   cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
 
-  this->ReadAutomocInfoFile(makefile, targetDirectory);
+  this->ReadAutomocInfoFile(makefile, targetDirectory, config);
   this->ReadOldMocDefinitionsFile(makefile, targetDirectory);
 
   this->Init();
@@ -367,7 +486,8 @@ cmGlobalGenerator* cmQtAutomoc::CreateGlobalGenerator(cmake* cm,
 
 
 bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
-                                      const char* targetDirectory)
+                                      const char* targetDirectory,
+                                      const char *config)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
@@ -375,7 +495,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
 
   if (!makefile->ReadListFile(0, filename.c_str()))
     {
-    cmSystemTools::Error("Error processing file:", filename.c_str());
+    cmSystemTools::Error("Error processing file: ", filename.c_str());
     return false;
     }
 
@@ -392,9 +512,26 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
   this->Srcdir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
   this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
-  this->MocCompileDefinitionsStr = makefile->GetSafeDefinition(
-                                                 "AM_MOC_COMPILE_DEFINITIONS");
-  this->MocIncludesStr = makefile->GetSafeDefinition("AM_MOC_INCLUDES");
+  std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
+  std::string compileDefsProp = compileDefsPropOrig;
+  if(config)
+    {
+    compileDefsProp += "_";
+    compileDefsProp += config;
+    }
+  const char *compileDefs = makefile->GetDefinition(compileDefsProp.c_str());
+  this->MocCompileDefinitionsStr = compileDefs ? compileDefs
+                  : makefile->GetSafeDefinition(compileDefsPropOrig.c_str());
+  std::string includesPropOrig = "AM_MOC_INCLUDES";
+  std::string includesProp = includesPropOrig;
+  if(config)
+    {
+    includesProp += "_";
+    includesProp += config;
+    }
+  const char *includes = makefile->GetDefinition(includesProp.c_str());
+  this->MocIncludesStr = includes ? includes
+                      : makefile->GetSafeDefinition(includesPropOrig.c_str());
   this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
@@ -696,7 +833,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   std::string ownMocHeaderFile;
 
   std::string::size_type matchOffset = 0;
-  // first a simply string check for "moc" is *much* faster than the regexp,
+  // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   if ((strstr(contentsString.c_str(), "moc") != NULL)
@@ -870,7 +1007,7 @@ void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
   bool dotMocIncluded = false;
 
   std::string::size_type matchOffset = 0;
-  // first a simply string check for "moc" is *much* faster than the regexp,
+  // first a simple string check for "moc" is *much* faster than the regexp,
   // and if the string search already fails, we don't have to try the
   // expensive regexp
   if ((strstr(contentsString.c_str(), "moc") != NULL)

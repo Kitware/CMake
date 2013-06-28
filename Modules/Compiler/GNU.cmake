@@ -25,8 +25,12 @@ macro(__compiler_gnu lang)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.4)
     set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
   endif()
+  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.2)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
+  endif()
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
+  set(CMAKE_SYSROOT_FLAG "--sysroot=")
 
   # Older versions of gcc (< 4.5) contain a bug causing them to report a missing
   # header file as a warning if depfiles are enabled, causing check_header_file

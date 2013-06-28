@@ -63,7 +63,7 @@ public:
       "but it was originally intended to add preprocessor definitions.  "
       "Flags beginning in -D or /D that look like preprocessor definitions "
       "are automatically added to the COMPILE_DEFINITIONS property for "
-      "the current directory.  Definitions with non-trival values may be "
+      "the current directory.  Definitions with non-trivial values may be "
       "left in the set of flags instead of being converted for reasons of "
       "backwards compatibility.  See documentation of the directory, "
       "target, and source file COMPILE_DEFINITIONS properties for details "
@@ -73,8 +73,6 @@ public:
     }
 
   cmTypeMacro(cmAddDefinitionsCommand, cmCommand);
-private:
-  bool ParseDefinition(std::string const& def);
 };
 
 

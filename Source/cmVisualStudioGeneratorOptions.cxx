@@ -6,6 +6,7 @@
 inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
 {
   std::string ret = s;
+  cmSystemTools::ReplaceString(ret, ";", "%3B");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
   cmSystemTools::ReplaceString(ret, ">", "&gt;");
@@ -229,7 +230,7 @@ cmVisualStudioGeneratorOptions
     }
   if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
-    // if there are configuration specifc flags, then
+    // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
     if(this->Configuration.size())
       {

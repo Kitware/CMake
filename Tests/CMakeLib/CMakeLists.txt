@@ -12,6 +12,14 @@ set(CMakeLib_TESTS
   testXMLSafe
   )
 
+if(WIN32 AND NOT UNIX) # Just if(WIN32) when CMake >= 2.8.4 is required
+  list(APPEND CMakeLib_TESTS
+    testVisualStudioSlnParser
+    )
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testVisualStudioSlnParser.h.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/testVisualStudioSlnParser.h @ONLY)
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testXMLParser.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/testXMLParser.h @ONLY)
 

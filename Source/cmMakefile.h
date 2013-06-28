@@ -206,6 +206,7 @@ public:
    */
   void AddDefineFlag(const char* definition);
   void RemoveDefineFlag(const char* definition);
+  void AddCompileOption(const char* option);
 
   /** Create a new imported target with the name and type given.  */
   cmTarget* AddImportedTarget(const char* name, cmTarget::TargetType type,
@@ -647,7 +648,7 @@ public:
   const std::vector<std::string>& GetListFiles() const
     { return this->ListFiles; }
   ///! When the file changes cmake will be re-run from the build system.
-  void AddCMakeDependFile(const char* file)
+  void AddCMakeDependFile(const std::string& file)
     { this->ListFiles.push_back(file);}
 
     /**
@@ -665,7 +666,7 @@ public:
    */
   const std::vector<std::string>& GetOutputFiles() const
     { return this->OutputFiles; }
-  void AddCMakeOutputFile(const char* file)
+  void AddCMakeOutputFile(const std::string& file)
     { this->OutputFiles.push_back(file);}
 
   /**
@@ -866,6 +867,10 @@ public:
   {
     return this->IncludeDirectoriesEntries;
   }
+  std::vector<cmValueWithOrigin> GetCompileOptionsEntries() const
+  {
+    return this->CompileOptionsEntries;
+  }
 
   bool IsGeneratingBuildSystem(){ return this->GeneratingBuildSystem; }
   void SetGeneratingBuildSystem(){ this->GeneratingBuildSystem = true; }
@@ -919,6 +924,7 @@ protected:
   std::string DefineFlags;
 
   std::vector<cmValueWithOrigin> IncludeDirectoriesEntries;
+  std::vector<cmValueWithOrigin> CompileOptionsEntries;
 
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);

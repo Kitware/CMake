@@ -26,6 +26,12 @@ include(CheckCSourceCompiles)
 macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+   # Normalize locale during test compilation.
+   set(_CheckCCompilerFlag_LOCALE_VARS LC_ALL LC_MESSAGES LANG)
+   foreach(v ${_CheckCCompilerFlag_LOCALE_VARS})
+     set(_CheckCCompilerFlag_SAVED_${v} "$ENV{${v}}")
+     set(ENV{${v}} C)
+   endforeach()
    CHECK_C_SOURCE_COMPILES("int main(void) { return 0; }" ${_RESULT}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "command line option .* is valid for .* but not for C" # GNU
@@ -41,5 +47,11 @@ macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
      FAIL_REGEX "command option .* is not recognized"       # XL
      FAIL_REGEX "WARNING: unknown flag:"                    # Open64
      )
+   foreach(v ${_CheckCCompilerFlag_LOCALE_VARS})
+     set(ENV{${v}} ${_CheckCCompilerFlag_SAVED_${v}})
+     unset(_CheckCCompilerFlag_SAVED_${v})
+   endforeach()
+   unset(_CheckCCompilerFlag_LOCALE_VARS)
+
    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro ()

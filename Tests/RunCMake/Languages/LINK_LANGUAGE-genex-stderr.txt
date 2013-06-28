@@ -1,0 +1,6 @@
+CMake Error:
+  Error evaluating generator expression:
+
+    \$<LINK_LANGUAGE>
+
+  \$<LINK_LANGUAGE> expression can not be used while evaluating link libraries

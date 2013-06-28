@@ -129,7 +129,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
       "by CMake in versions prior to 1.6. To fix this you might need to set "
       "the cache value of CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less. If "
       "you are writing a CMakeLists file, (or have already set "
-      "CMAKE_BACKWARDS_COMPATABILITY to 1.4 or less) then you probably need "
+      "CMAKE_BACKWARDS_COMPATIBILITY to 1.4 or less) then you probably need "
       "to include a CMake module to test for the feature this variable "
       "defines.";
     cmSystemTools::Error(message.c_str());
@@ -384,11 +384,22 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
       cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
       if(cmCacheManager::ParseEntry(entry.c_str(), var, value, type))
         {
+        // The value is transformed if it is a filepath for example, so
+        // we can't compare whether the value is already in the cache until
+        // after we call AddCacheEntry.
+        const char *cachedValue =
+                              this->CacheManager->GetCacheValue(var.c_str());
+
         this->CacheManager->AddCacheEntry(var.c_str(), value.c_str(),
           "No help, variable specified on the command line.", type);
         if(this->WarnUnusedCli)
           {
-          this->WatchUnusedCli(var.c_str());
+          if (!cachedValue
+              || strcmp(this->CacheManager->GetCacheValue(var.c_str()),
+                        cachedValue) != 0)
+            {
+            this->WatchUnusedCli(var.c_str());
+            }
           }
         }
       else
@@ -539,7 +550,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       }
     if (!lg->GetMakefile()->ReadListFile(0, path))
       {
-      cmSystemTools::Error("Error processing file:", path);
+      cmSystemTools::Error("Error processing file: ", path);
       }
     }
 
@@ -1158,9 +1169,8 @@ void CMakeCommandUsage(const char* program)
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
-    << "  tar [cxt][vfz][cvfj] file.tar "
-    "file/dir1 file/dir2 ... - create a tar "
-    "archive\n"
+    << "  tar [cxt][vfz][cvfj] file.tar [file/dir1 file/dir2 ...]\n"
+    << "                            - create or extract a tar or zip archive\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
@@ -1727,7 +1737,8 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "cmake_automoc")
       {
         cmQtAutomoc automoc;
-        bool automocSuccess = automoc.Run(args[2].c_str());
+        const char *config = args[3].empty() ? 0 : args[3].c_str();
+        bool automocSuccess = automoc.Run(args[2].c_str(), config);
         return automocSuccess ? 0 : 1;
       }
 #endif
@@ -2367,7 +2378,7 @@ int cmake::ActualConfigure()
   // EXECUTABLE_OUTPUT_PATH.  They are now documented as old-style and
   // should no longer be used.  Therefore we present them only if the
   // project requires compatibility with CMake 2.4.  We detect this
-  // here by looking for the old CMAKE_BACKWARDS_COMPATABILITY
+  // here by looking for the old CMAKE_BACKWARDS_COMPATIBILITY
   // variable created when CMP0001 is not set to NEW.
   if(this->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
@@ -2633,7 +2644,8 @@ const char* cmake::GetCacheDefinition(const char* name) const
 void cmake::AddDefaultCommands()
 {
   std::list<cmCommand*> commands;
-  GetBootstrapCommands(commands);
+  GetBootstrapCommands1(commands);
+  GetBootstrapCommands2(commands);
   GetPredefinedCommands(commands);
   for(std::list<cmCommand*>::iterator i = commands.begin();
       i != commands.end(); ++i)
@@ -4049,7 +4061,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   // TODO: Teach cmGeneratedFileStream to use a random temp file (with
   // multiple tries in unlikely case of conflict) and use that here.
   std::ofstream stamp(stampTemp);
-  stamp << "# CMake generation timestamp file this directory.\n";
+  stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if(cmSystemTools::RenameFile(stampTemp, stampName))
     {
@@ -4121,7 +4133,7 @@ int cmake::WindowsCEEnvironment(const char* version, const std::string& name)
   return -1;
 }
 
-// For visual studio 2005 and newer manifest files need to be embeded into
+// For visual studio 2005 and newer manifest files need to be embedded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
 int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
@@ -4177,7 +4189,7 @@ int cmake::VisualStudioLink(std::vector<std::string>& args, int type)
     {
     if(verbose)
       {
-      std::cout << "Visual Studio Incremental Link with embeded manifests\n";
+      std::cout << "Visual Studio Incremental Link with embedded manifests\n";
       }
     return cmake::VisualStudioLinkIncremental(expandedArgs, type, verbose);
     }

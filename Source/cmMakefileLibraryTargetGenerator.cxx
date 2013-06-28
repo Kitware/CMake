@@ -24,19 +24,14 @@ cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmTarget* target):
   cmMakefileTargetGenerator(target)
 {
-  cmOSXBundleGenerator::PrepareTargetProperties(this->Target);
-
   this->CustomCommandDriver = OnDepends;
   this->Target->GetLibraryNames(
     this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
     this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
-                                                      this->TargetNameOut,
                                                       this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
-  this->MacContentDirectory =
-    this->OSXBundleGenerator->GetMacContentDirectory();
 }
 
 //----------------------------------------------------------------------------
@@ -292,14 +287,15 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string outpathImp;
   if(this->Target->IsFrameworkOnApple())
     {
-    outpath = this->MacContentDirectory;
-    this->OSXBundleGenerator->CreateFramework(targetName);
+    outpath = this->Target->GetDirectory(this->ConfigName);
+    this->OSXBundleGenerator->CreateFramework(targetName, outpath);
+    outpath += "/";
     }
   else if(this->Target->IsCFBundleOnApple())
     {
     outpath = this->Target->GetDirectory(this->ConfigName);
-    outpath += "/";
     this->OSXBundleGenerator->CreateCFBundle(targetName, outpath);
+    outpath += "/";
     }
   else if(relink)
     {
@@ -593,6 +589,26 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                          cmLocalGenerator::SHELL);
   vars.ObjectDir = objdir.c_str();
   vars.Target = targetOutPathReal.c_str();
+
+  if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    if (const char *rootPath =
+                    this->Makefile->GetSafeDefinition("CMAKE_SYSROOT"))
+      {
+      if (*rootPath)
+        {
+        if (const char *sysrootFlag =
+                        this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
+          {
+          linkFlags += " ";
+          linkFlags += sysrootFlag;
+          linkFlags += this->LocalGenerator->EscapeForShell(rootPath);
+          linkFlags += " ";
+          }
+        }
+      }
+    }
+
   vars.LinkLibraries = linkLibs.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
   if (this->Target->HasSOName(this->ConfigName))
@@ -727,7 +743,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   commands1.clear();
 
   // Add a rule to create necessary symlinks for the library.
-  if(targetOutPath != targetOutPathReal)
+  // Frameworks are handled by cmOSXBundleGenerator.
+  if(targetOutPath != targetOutPathReal && !this->Target->IsFrameworkOnApple())
     {
     std::string symlink = "$(CMAKE_COMMAND) -E cmake_symlink_library ";
     symlink += targetOutPathReal;

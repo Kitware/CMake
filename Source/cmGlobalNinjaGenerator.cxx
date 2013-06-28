@@ -523,14 +523,16 @@ bool cmGlobalNinjaGenerator::UsingMinGW = false;
 std::string cmGlobalNinjaGenerator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char* projectName,
+                       const char* projectDir,
                        const char* additionalOptions,
                        const char* targetName,
                        const char* config,
                        bool ignoreErrors,
                        bool fast)
 {
-  // Project name and config are not used yet.
+  // Project name & dir and config are not used yet.
   (void)projectName;
+  (void)projectDir;
   (void)config;
   // Ninja does not have -i equivalent option yet.
   (void)ignoreErrors;
@@ -959,6 +961,9 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
        this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i) {
     const std::vector<std::string>& lf = (*i)->GetMakefile()->GetListFiles();
     implicitDeps.insert(implicitDeps.end(), lf.begin(), lf.end());
+
+    const std::vector<std::string>& of = (*i)->GetMakefile()->GetOutputFiles();
+    implicitDeps.insert(implicitDeps.end(), of.begin(), of.end());
   }
   std::sort(implicitDeps.begin(), implicitDeps.end());
   implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),

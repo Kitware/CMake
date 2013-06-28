@@ -36,8 +36,6 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
   , TargetNamePDB()
   , TargetLinkLanguage(0)
 {
-  cmOSXBundleGenerator::PrepareTargetProperties(target);
-
   this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
     target->GetExecutableNames(this->TargetNameOut,
@@ -61,7 +59,6 @@ cmNinjaNormalTargetGenerator(cmTarget* target)
     }
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
-                                                      this->TargetNameOut,
                                                       this->GetConfigName());
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }
@@ -74,7 +71,8 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 void cmNinjaNormalTargetGenerator::Generate()
 {
   if (!this->TargetLinkLanguage) {
-    cmSystemTools::Error("CMake can not determine linker language for target:",
+    cmSystemTools::Error("CMake can not determine linker language for "
+                         "target: ",
                          this->GetTarget()->GetName());
     return;
   }
@@ -226,7 +224,27 @@ cmNinjaNormalTargetGenerator
     vars.TargetVersionMajor = targetVersionMajor.c_str();
     vars.TargetVersionMinor = targetVersionMinor.c_str();
 
-    vars.Flags = "$FLAGS";
+
+    std::string flags = "$FLAGS";
+
+    if (const char *rootPath =
+                      this->GetMakefile()->GetSafeDefinition("CMAKE_SYSROOT"))
+      {
+      if (*rootPath)
+        {
+        if (const char *sysrootFlag =
+                    this->GetMakefile()->GetDefinition("CMAKE_SYSROOT_FLAG"))
+          {
+          flags += " ";
+          flags += sysrootFlag;
+          flags += this->GetLocalGenerator()->EscapeForShell(rootPath);
+          flags += " ";
+          }
+        }
+      }
+
+    vars.Flags = flags.c_str();
+
     vars.LinkFlags = "$LINK_FLAGS";
 
     std::string langFlags;
@@ -383,24 +401,32 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (this->GetTarget()->IsAppBundleOnApple())
     {
     // Create the app bundle
-    std::string outpath;
+    std::string outpath =
+      this->GetTarget()->GetDirectory(this->GetConfigName());
     this->OSXBundleGenerator->CreateAppBundle(this->TargetNameOut, outpath);
 
     // Calculate the output path
-    targetOutput = outpath + this->TargetNameOut;
+    targetOutput = outpath;
+    targetOutput += "/";
+    targetOutput += this->TargetNameOut;
     targetOutput = this->ConvertToNinjaPath(targetOutput.c_str());
-    targetOutputReal = outpath + this->TargetNameReal;
+    targetOutputReal = outpath;
+    targetOutputReal += "/";
+    targetOutputReal += this->TargetNameReal;
     targetOutputReal = this->ConvertToNinjaPath(targetOutputReal.c_str());
     }
   else if (this->GetTarget()->IsFrameworkOnApple())
     {
     // Create the library framework.
-    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut);
+    std::string outpath =
+      this->GetTarget()->GetDirectory(this->GetConfigName());
+    this->OSXBundleGenerator->CreateFramework(this->TargetNameOut, outpath);
     }
   else if(this->GetTarget()->IsCFBundleOnApple())
     {
     // Create the core foundation bundle.
-    std::string outpath;
+    std::string outpath =
+      this->GetTarget()->GetDirectory(this->GetConfigName());
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut, outpath);
     }
 
@@ -505,7 +531,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     const std::string objPath = GetTarget()->GetSupportDirectory();
     vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath.c_str());
     EnsureDirectoryExists(objPath);
-    // ar.exe can't handle backslashes in rsp files (implictly used by gcc)
+    // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
     }

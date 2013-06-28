@@ -260,6 +260,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 std::string cmGlobalXCodeGenerator
 ::GenerateBuildCommand(const char* makeProgram,
                        const char *projectName,
+                       const char *projectDir,
                        const char* additionalOptions,
                        const char *targetName,
                        const char* config,
@@ -268,6 +269,7 @@ std::string cmGlobalXCodeGenerator
 {
   // Config is not used yet
   (void) ignoreErrors;
+  (void) projectDir;
 
   // now build the test
   if(makeProgram == 0 || !strlen(makeProgram))
@@ -679,10 +681,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 {
   // Add flags from target and source file properties.
   std::string flags;
-  if(cmtarget.GetProperty("COMPILE_FLAGS"))
-    {
-    lg->AppendFlags(flags, cmtarget.GetProperty("COMPILE_FLAGS"));
-    }
   const char* srcfmt = sf->GetProperty("Fortran_FORMAT");
   switch(this->CurrentLocalGenerator->GetFortranFormat(srcfmt))
     {
@@ -744,12 +742,6 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
       settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
       }
-    }
-
-  if(cmtarget.IsCFBundleOnApple())
-    {
-    cmtarget.SetProperty("PREFIX", "");
-    cmtarget.SetProperty("SUFFIX", "");
     }
 
   // Add the fileRef to the top level Resources group/folder if it is not
@@ -839,7 +831,7 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
   //  // Already specialized above or we leave sourcecode == "sourcecode"
   //  // which is probably the most correct choice. Extensionless headers,
   //  // for example... Or file types unknown to Xcode that do not map to a
-  //  // valid lastKnownFileType value.
+  //  // valid explicitFileType value.
   //  }
 
   return sourcecode;
@@ -882,7 +874,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
 
   std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
 
-  fileRef->AddAttribute("lastKnownFileType",
+  fileRef->AddAttribute("explicitFileType",
                         this->CreateString(sourcecode.c_str()));
 
   // Store the file path relative to the top of the source tree.
@@ -1003,7 +995,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                     *i, cmtarget);
       cmXCodeObject* fr = xsf->GetObject("fileRef");
       cmXCodeObject* filetype =
-        fr->GetObject()->GetObject("lastKnownFileType");
+        fr->GetObject()->GetObject("explicitFileType");
 
       cmTarget::SourceFileFlags tsFlags =
         cmtarget.GetTargetSourceFileFlags(*i);
@@ -1319,8 +1311,40 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     = cmtarget.GetPreBuildCommands();
   std::vector<cmCustomCommand> const & prelink
     = cmtarget.GetPreLinkCommands();
-  std::vector<cmCustomCommand> const & postbuild
+  std::vector<cmCustomCommand> postbuild
     = cmtarget.GetPostBuildCommands();
+
+  if(cmtarget.GetType() == cmTarget::SHARED_LIBRARY &&
+    !cmtarget.IsFrameworkOnApple())
+    {
+    cmCustomCommandLines cmd;
+    cmd.resize(1);
+    cmd[0].push_back(this->CurrentMakefile->GetDefinition("CMAKE_COMMAND"));
+    cmd[0].push_back("-E");
+    cmd[0].push_back("cmake_symlink_library");
+    std::string str_file = "$<TARGET_FILE:";
+    str_file += cmtarget.GetName();
+    str_file += ">";
+    std::string str_so_file = "$<TARGET_SONAME_FILE:";
+    str_so_file += cmtarget.GetName();
+    str_so_file += ">";
+    std::string str_link_file = "$<TARGET_LINKER_FILE:";
+    str_link_file += cmtarget.GetName();
+    str_link_file += ">";
+    cmd[0].push_back(str_file);
+    cmd[0].push_back(str_so_file);
+    cmd[0].push_back(str_link_file);
+
+    cmCustomCommand command(this->CurrentMakefile,
+      std::vector<std::string>(),
+      std::vector<std::string>(),
+      cmd,
+      "Creating symlinks",
+      "");
+
+    postbuild.push_back(command);
+    }
+
   std::vector<cmSourceFile*>const &classes = cmtarget.GetSourceFiles();
   // add all the sources
   std::vector<cmCustomCommand> commands;
@@ -1674,6 +1698,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
       this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
                                                    "C", configName);
+      this->CurrentLocalGenerator->
+        AddCompileOptions(cflags, &target, "C", configName);
       }
 
     // Add language-specific flags.
@@ -1682,11 +1708,17 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add shared-library flags if needed.
     this->CurrentLocalGenerator->AddCMP0018Flags(flags, &target,
                                                  lang, configName);
+
+    this->CurrentLocalGenerator->AddVisibilityPresetFlags(flags, &target,
+                                                   lang);
+
+    this->CurrentLocalGenerator->
+      AddCompileOptions(flags, &target, lang, configName);
     }
   else if(binary)
   {
     cmSystemTools::Error
-      ("CMake can not determine linker language for target:",
+      ("CMake can not determine linker language for target: ",
        target.GetName());
     return;
   }
@@ -1714,30 +1746,26 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
 
+  std::string extraLinkOptionsVar;
   std::string extraLinkOptions;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions =
-      this->CurrentMakefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
-    std::string var = "CMAKE_EXE_LINKER_FLAGS_";
-    var += cmSystemTools::UpperCase(configName);
-    std::string val =
-      this->CurrentMakefile->GetSafeDefinition(var.c_str());
-    if(val.size())
-      {
-      extraLinkOptions += " ";
-      extraLinkOptions += val;
-      }
+    extraLinkOptionsVar = "CMAKE_EXE_LINKER_FLAGS";
     }
-  if(target.GetType() == cmTarget::SHARED_LIBRARY)
+  else if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions = this->CurrentMakefile->
-      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptionsVar = "CMAKE_SHARED_LINKER_FLAGS";
     }
-  if(target.GetType() == cmTarget::MODULE_LIBRARY)
+  else if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions = this->CurrentMakefile->
-      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptionsVar = "CMAKE_MODULE_LINKER_FLAGS";
+    }
+  if(extraLinkOptionsVar.size())
+    {
+    this->CurrentLocalGenerator
+      ->AddConfigVariableFlags(extraLinkOptions,
+                               extraLinkOptionsVar.c_str(),
+                               configName);
     }
 
   const char* linkFlagsProp = "LINK_FLAGS";
@@ -1797,8 +1825,33 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string pnprefix;
   std::string pnbase;
   std::string pnsuffix;
-
   target.GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
+
+  const char* version = target.GetProperty("VERSION");
+  const char* soversion = target.GetProperty("SOVERSION");
+  if(!target.HasSOName(configName) || target.IsFrameworkOnApple())
+    {
+    version = 0;
+    soversion = 0;
+    }
+  if(version && !soversion)
+    {
+    soversion = version;
+    }
+  if(!version && soversion)
+    {
+    version = soversion;
+    }
+
+  std::string realName = pnbase;
+  std::string soName = pnbase;
+  if(version && soversion)
+    {
+    realName += ".";
+    realName += version;
+    soName += ".";
+    soName += soversion;
+    }
 
   // Set attributes to specify the proper name for the target.
   std::string pndir = this->CurrentMakefile->GetCurrentOutputDirectory();
@@ -1821,6 +1874,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       buildSettings->AddAttribute("OBJROOT",
                                   this->CreateString(pndir.c_str()));
       pndir = target.GetDirectory(configName);
+      }
+
+    if(target.IsFrameworkOnApple() || target.IsCFBundleOnApple())
+      {
+      pnprefix = "";
       }
 
     buildSettings->AddAttribute("EXECUTABLE_PREFIX",
@@ -1852,7 +1910,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
   // Store the product name for all target types.
   buildSettings->AddAttribute("PRODUCT_NAME",
-                              this->CreateString(pnbase.c_str()));
+                              this->CreateString(realName.c_str()));
   buildSettings->AddAttribute("SYMROOT",
                               this->CreateString(pndir.c_str()));
 
@@ -1930,9 +1988,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(target.GetPropertyAsBool("FRAMEWORK"))
       {
-      std::string version = target.GetFrameworkVersion();
+      std::string fw_version = target.GetFrameworkVersion();
       buildSettings->AddAttribute("FRAMEWORK_VERSION",
-                                  this->CreateString(version.c_str()));
+                                  this->CreateString(fw_version.c_str()));
 
       std::string plist = this->ComputeInfoPListLocation(target);
       // Xcode will create the final version of Info.plist at build time,
@@ -2028,20 +2086,16 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       dirs.Add(incpath.c_str());
       }
     }
-  if(target.GetType() != cmTarget::OBJECT_LIBRARY &&
-     target.GetType() != cmTarget::STATIC_LIBRARY)
+  // Add framework search paths needed for linking.
+  if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
     {
-    // Add framework search paths needed for linking.
-    if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
+    std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
+    for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+        fdi != fwDirs.end(); ++fdi)
       {
-      std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
-      for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
-          fdi != fwDirs.end(); ++fdi)
+      if(emitted.insert(*fdi).second)
         {
-        if(emitted.insert(*fdi).second)
-          {
-          fdirs.Add(this->XCodeEscapePath(fdi->c_str()).c_str());
-          }
+        fdirs.Add(this->XCodeEscapePath(fdi->c_str()).c_str());
         }
       }
     }
@@ -2156,24 +2210,54 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
     // Get the install_name directory for the build tree.
-    install_name_dir = target.GetInstallNameDirForBuildTree(configName, true);
-    if(install_name_dir.empty())
-      {
-      // Xcode will not pass the -install_name option at all if INSTALL_PATH
-      // is not given or is empty.  We must explicitly put the flag in the
-      // link flags to create an install_name with just the library soname.
-      extraLinkOptions += " -install_name ";
-      extraLinkOptions += target.GetFullName(configName);
-      }
-    else
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
+    // Xcode doesn't create the correct install_name in some cases.
+    // That is, if the INSTALL_PATH is empty, or if we have versioning
+    // of dylib libraries, we want to specify the install_name.
+    // This is done by adding a link flag to create an install_name
+    // with just the library soname.
+    std::string install_name;
+    if(!install_name_dir.empty())
       {
       // Convert to a path for the native build tool.
       cmSystemTools::ConvertToUnixSlashes(install_name_dir);
-      // do not escape spaces on this since it is only a single path
+      install_name += install_name_dir;
+      install_name += "/";
+      }
+    install_name += target.GetSOName(configName);
+
+    if((realName != soName) || install_name_dir.empty())
+      {
+      install_name_dir = "";
+      extraLinkOptions += " -install_name ";
+      extraLinkOptions += XCodeEscapePath(install_name.c_str());
       }
     }
   buildSettings->AddAttribute("INSTALL_PATH",
                               this->CreateString(install_name_dir.c_str()));
+
+  // Create the LD_RUNPATH_SEARCH_PATHS
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+  if(pcli)
+    {
+    std::string search_paths;
+    std::vector<std::string> runtimeDirs;
+    pcli->GetRPath(runtimeDirs, false);
+    for(std::vector<std::string>::const_iterator i = runtimeDirs.begin();
+        i != runtimeDirs.end(); ++i)
+      {
+      if(!search_paths.empty())
+        {
+        search_paths += " ";
+        }
+      search_paths += this->XCodeEscapePath((*i).c_str());
+      }
+    if(!search_paths.empty())
+      {
+      buildSettings->AddAttribute("LD_RUNPATH_SEARCH_PATHS",
+                                  this->CreateString(search_paths.c_str()));
+      }
+    }
 
   buildSettings->AddAttribute("OTHER_LDFLAGS",
                               this->CreateString(extraLinkOptions.c_str()));
@@ -2239,8 +2323,39 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(i->first.find("XCODE_ATTRIBUTE_") == 0)
       {
-      buildSettings->AddAttribute(i->first.substr(16).c_str(),
-                                  this->CreateString(i->second.GetValue()));
+      cmStdString attribute = i->first.substr(16);
+      // Handle [variant=<config>] condition explicitly here.
+      cmStdString::size_type beginVariant =
+        attribute.find("[variant=");
+      if (beginVariant != cmStdString::npos)
+        {
+        cmStdString::size_type endVariant =
+          attribute.find("]", beginVariant+9);
+        if (endVariant != cmStdString::npos)
+          {
+          // Compare the variant to the configuration.
+          cmStdString variant =
+            attribute.substr(beginVariant+9, endVariant-beginVariant-9);
+          if (variant == configName)
+            {
+            // The variant matches the configuration so use this
+            // attribute but drop the [variant=<config>] condition.
+            attribute.erase(beginVariant, endVariant-beginVariant+1);
+            }
+          else
+            {
+            // The variant does not match the configuration so
+            // do not use this attribute.
+            attribute.clear();
+            }
+          }
+        }
+
+      if (!attribute.empty())
+        {
+        buildSettings->AddAttribute(attribute.c_str(),
+                                    this->CreateString(i->second.GetValue()));
+        }
       }
     }
   }

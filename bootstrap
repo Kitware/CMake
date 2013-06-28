@@ -247,7 +247,8 @@ CMAKE_CXX_SOURCES="\
   cmMakefileUtilityTargetGenerator \
   cmOSXBundleGenerator \
   cmNewLineStyle \
-  cmBootstrapCommands \
+  cmBootstrapCommands1 \
+  cmBootstrapCommands2 \
   cmCommands \
   cmTarget \
   cmTest \
@@ -1082,6 +1083,8 @@ KWSYS_STL_HAS_ALLOCATOR_OBJECTS=0
 KWSYS_CXX_HAS_SETENV=0
 KWSYS_CXX_HAS_UNSETENV=0
 KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0
+KWSYS_CXX_HAS_UTIMENSAT=0
+KWSYS_CXX_HAS_UTIMES=0
 KWSYS_CXX_HAS_CSTDDEF=0
 KWSYS_CXX_HAS_NULL_TEMPLATE_ARGS=0
 KWSYS_CXX_HAS_MEMBER_TEMPLATES=0
@@ -1447,11 +1450,15 @@ for a in ${CMAKE_CXX_SOURCES} ${CMAKE_C_SOURCES} ${KWSYS_CXX_SOURCES} ${KWSYS_C_
   objs="${objs} ${a}.o"
 done
 
-# Generate dependencies for cmBootstrapCommands.cxx
-for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
-  cmBootstrapCommandsDeps="${cmBootstrapCommandsDeps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
+# Generate dependencies for cmBootstrapCommands1.cxx
+for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands1.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
+  cmBootstrapCommands1Deps="${cmBootstrapCommands1Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
 done
-cmBootstrapCommandsDeps=`echo $cmBootstrapCommandsDeps`
+cmBootstrapCommands1Deps=`echo $cmBootstrapCommands1Deps`
+for file in `grep "#include.*cm[^.]*.cxx" "${cmake_source_dir}/Source/cmBootstrapCommands2.cxx" | sed "s/.* \"\(.*\)\"/\1/"`; do
+  cmBootstrapCommands2Deps="${cmBootstrapCommands2Deps} `cmake_escape "${cmake_source_dir}/Source/$file"`"
+done
+cmBootstrapCommands2Deps=`echo $cmBootstrapCommands2Deps`
 
 if [ "x${cmake_ansi_cxx_flags}" != "x" ]; then
   cmake_cxx_flags="${cmake_ansi_cxx_flags} ${cmake_cxx_flags}"
@@ -1466,7 +1473,13 @@ if [ "x${cmake_cxx_flags}" != "x" ]; then
 fi
 
 cmake_c_flags_String="-DKWSYS_STRING_C"
-cmake_cxx_flags_SystemTools="-DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV} -DKWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV} -DKWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}"
+cmake_cxx_flags_SystemTools="
+  -DKWSYS_CXX_HAS_SETENV=${KWSYS_CXX_HAS_SETENV}
+  -DKWSYS_CXX_HAS_UNSETENV=${KWSYS_CXX_HAS_UNSETENV}
+  -DKWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=${KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H}
+  -DKWSYS_CXX_HAS_UTIMENSAT=${KWSYS_CXX_HAS_UTIMENSAT}
+  -DKWSYS_CXX_HAS_UTIMES=${KWSYS_CXX_HAS_UTIMES}
+"
 cmake_c_flags="${cmake_c_flags}-I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
   -I`cmake_escape \"${cmake_bootstrap_dir}\"`"
 cmake_cxx_flags="${cmake_cxx_flags} -I`cmake_escape \"${cmake_bootstrap_dir}\"` -I`cmake_escape \"${cmake_source_dir}/Source\"` \
@@ -1478,7 +1491,8 @@ for a in ${CMAKE_CXX_SOURCES}; do
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
   echo "	${cmake_cxx_compiler} ${cmake_cxx_flags} -c ${src} -o ${a}.o" >> "${cmake_bootstrap_dir}/Makefile"
 done
-echo "cmBootstrapCommands.o : $cmBootstrapCommandsDeps" >> "${cmake_bootstrap_dir}/Makefile"
+echo "cmBootstrapCommands1.o : $cmBootstrapCommands1Deps" >> "${cmake_bootstrap_dir}/Makefile"
+echo "cmBootstrapCommands2.o : $cmBootstrapCommands2Deps" >> "${cmake_bootstrap_dir}/Makefile"
 for a in ${CMAKE_C_SOURCES}; do
   src=`cmake_escape "${cmake_source_dir}/Source/${a}.c"`
   echo "${a}.o : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"

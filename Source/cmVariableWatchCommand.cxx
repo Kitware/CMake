@@ -117,24 +117,9 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
   if ( !processed )
     {
     cmOStringStream msg;
-    msg << "* Variable \"" << variable.c_str() << "\" was accessed using "
-      << accessString << " in: " << currentListFile << std::endl;
-    msg << "  The value of the variable: \"" << newValue << "\"" << std::endl;
-    msg << "  The list file stack: " << stack.c_str();
-    cmSystemTools::Message(msg.str().c_str());
-    std::vector<std::string> vars = makefile->GetDefinitions();
-    cmOStringStream msg2;
-    size_t cc;
-    for ( cc = 0; cc < vars.size(); cc ++ )
-      {
-      if ( vars[cc] == variable )
-        {
-        continue;
-        }
-      msg2 << vars[cc] << " = \""
-        << makefile->GetDefinition(vars[cc].c_str()) << "\"" << std::endl;
-      }
-    //cmSystemTools::Message(msg2.str().c_str());
+    msg << "Variable \"" << variable.c_str() << "\" was accessed using "
+        << accessString << " with value \"" << newValue << "\".";
+    makefile->IssueMessage(cmake::LOG, msg.str());
     }
   this->InCallback = false;
 }

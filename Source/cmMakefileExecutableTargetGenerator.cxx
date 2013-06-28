@@ -30,11 +30,8 @@ cmMakefileExecutableTargetGenerator
     this->TargetNamePDB, this->ConfigName);
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
-                                                      this->TargetNameOut,
                                                       this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
-  this->MacContentDirectory =
-    this->OSXBundleGenerator->GetMacContentDirectory();
 }
 
 //----------------------------------------------------------------------------
@@ -103,11 +100,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Construct the full path version of the names.
   std::string outpath = this->Target->GetDirectory(this->ConfigName);
-  outpath += "/";
   if(this->Target->IsAppBundleOnApple())
     {
     this->OSXBundleGenerator->CreateAppBundle(targetName, outpath);
     }
+  outpath += "/";
   std::string outpathImp;
   if(relink)
     {
@@ -367,6 +364,22 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
   vars.TargetVersionMajor = targetVersionMajor.c_str();
   vars.TargetVersionMinor = targetVersionMinor.c_str();
+
+  if (const char *rootPath =
+                    this->Makefile->GetDefinition("CMAKE_SYSROOT"))
+    {
+    if (*rootPath)
+      {
+      if (const char *sysrootFlag =
+                      this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
+        {
+        flags += " ";
+        flags += sysrootFlag;
+        flags += this->LocalGenerator->EscapeForShell(rootPath);
+        flags += " ";
+        }
+      }
+    }
 
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();

@@ -449,7 +449,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
       }
     }
 
-  // Collext explicit util dependencies (add_dependencies).
+  // Collect explicit util dependencies (add_dependencies).
   std::set<cmTarget*> utilDepends;
   for(TargetDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)

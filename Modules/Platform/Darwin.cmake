@@ -30,6 +30,11 @@ set(CMAKE_SHARED_MODULE_SUFFIX ".so")
 set(CMAKE_MODULE_EXISTS 1)
 set(CMAKE_DL_LIBS "")
 
+# Enable rpath support for 10.5 and greater where it is known to work.
+if("${DARWIN_MAJOR_VERSION}" GREATER 8)
+  set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
+endif()
+
 set(CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG "-compatibility_version ")
 set(CMAKE_C_OSX_CURRENT_VERSION_FLAG "-current_version ")
 set(CMAKE_CXX_OSX_COMPATIBILITY_VERSION_FLAG "${CMAKE_C_OSX_COMPATIBILITY_VERSION_FLAG}")
@@ -207,12 +212,8 @@ if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
     "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
 endif()
 
-if(NOT XCODE)
-  # Enable shared library versioning.  This flag is not actually referenced
-  # but the fact that the setting exists will cause the generators to support
-  # soname computation.
-  set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
-endif()
+# Enable shared library versioning.
+set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
 
 # Xcode does not support -isystem yet.
 if(XCODE)

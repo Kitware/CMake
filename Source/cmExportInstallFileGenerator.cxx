@@ -47,7 +47,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         tei = this->IEGen->GetExportSet()->GetTargetExports()->begin();
       tei != this->IEGen->GetExportSet()->GetTargetExports()->end(); ++tei)
     {
-    expectedTargets += sep + this->Namespace + (*tei)->Target->GetName();
+    expectedTargets += sep + this->Namespace + (*tei)->Target->GetExportName();
     sep = " ";
     cmTargetExport const* te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
@@ -127,6 +127,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
+                                  te,
+                                  cmGeneratorExpression::InstallInterface,
+                                  properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_OPTIONS",
                                   te,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
@@ -351,27 +355,7 @@ cmExportInstallFileGenerator
     prop += suffix;
 
     // Append the installed file name.
-    if(target->IsFrameworkOnApple())
-      {
-      value += itgen->GetInstallFilename(target, config);
-      value += ".framework/";
-      value += itgen->GetInstallFilename(target, config);
-      }
-    else if(target->IsCFBundleOnApple())
-      {
-      const char *ext = target->GetProperty("BUNDLE_EXTENSION");
-      if (!ext)
-        {
-        ext = "bundle";
-        }
-
-      value += itgen->GetInstallFilename(target, config);
-      value += ".";
-      value += ext;
-      value += "/";
-      value += itgen->GetInstallFilename(target, config);
-      }
-    else if(target->IsAppBundleOnApple())
+    if(target->IsAppBundleOnApple())
       {
       value += itgen->GetInstallFilename(target, config);
       value += ".app/Contents/MacOS/";
@@ -395,13 +379,14 @@ cmExportInstallFileGenerator::HandleMissingTarget(
   std::string& link_libs, std::vector<std::string>& missingTargets,
   cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
 {
-  std::string name = dependee->GetName();
+  const std::string name = dependee->GetName();
   std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
   int targetOccurrences = (int)namespaces.size();
   if (targetOccurrences == 1)
     {
     std::string missingTarget = namespaces[0];
-    missingTarget += name;
+
+    missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
     missingTargets.push_back(missingTarget);
     }
@@ -495,4 +480,20 @@ cmExportInstallFileGenerator
     << " times in others.";
     }
   cmSystemTools::Error(e.str().c_str());
+}
+
+std::string
+cmExportInstallFileGenerator::InstallNameDir(cmTarget* target,
+                                             const std::string&)
+{
+  std::string install_name_dir;
+
+  cmMakefile* mf = target->GetMakefile();
+  if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
+    {
+    install_name_dir =
+      target->GetInstallNameDirForInstallTree();
+    }
+
+  return install_name_dir;
 }

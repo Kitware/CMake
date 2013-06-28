@@ -766,7 +766,7 @@ public:
   static kwsys_stl::string GetCurrentWorkingDirectory(bool collapse =true);
 
   /**
-   * Change directory the the directory specified
+   * Change directory to the directory specified
    */
   static int ChangeDirectory(const char* dir);
 
