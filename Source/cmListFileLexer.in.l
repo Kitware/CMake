@@ -20,6 +20,7 @@ Run flex like this:
 
 Modify cmListFileLexer.c:
   - remove TABs
+  - remove use of the 'register' storage class specifier
   - remove the yyunput function
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
