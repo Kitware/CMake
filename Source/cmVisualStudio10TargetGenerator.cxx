@@ -25,31 +25,43 @@
 #include "cmVS11CLFlagTable.h"
 #include "cmVS11LinkFlagTable.h"
 #include "cmVS11LibFlagTable.h"
+#include "cmVS12CLFlagTable.h"
+#include "cmVS12LinkFlagTable.h"
+#include "cmVS12LibFlagTable.h"
 
 #include <cmsys/auto_ptr.hxx>
 
 static cmVS7FlagTable const*
 cmVSGetCLFlagTable(cmLocalVisualStudioGenerator* lg)
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+    { return cmVS12CLFlagTable; }
+  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11CLFlagTable; }
-  return cmVS10CLFlagTable;
+  else
+    { return cmVS10CLFlagTable; }
 }
 
 static cmVS7FlagTable const*
 cmVSGetLibFlagTable(cmLocalVisualStudioGenerator* lg)
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+    { return cmVS12LibFlagTable; }
+  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LibFlagTable; }
-  return cmVS10LibFlagTable;
+  else
+    { return cmVS10LibFlagTable; }
 }
 
 static cmVS7FlagTable const*
 cmVSGetLinkFlagTable(cmLocalVisualStudioGenerator* lg)
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS11)
+  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+    { return cmVS12LinkFlagTable; }
+  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LinkFlagTable; }
-  return cmVS10LinkFlagTable;
+  else
+    { return cmVS10LinkFlagTable; }
 }
 
 static std::string cmVS10EscapeXML(std::string arg)
