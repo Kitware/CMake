@@ -59,6 +59,7 @@ private:
   void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
+  void WriteEmbeddedResourceGroup();
   void WriteWinRTReferences();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();
