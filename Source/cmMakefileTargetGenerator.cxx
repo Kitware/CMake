@@ -285,6 +285,10 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
     this->LocalGenerator->
       AppendFlags(flags,this->GetFrameworkFlags().c_str());
 
+    // Add target-specific flags.
+    this->LocalGenerator->AddCompileOptions(flags, this->Target,
+                                            lang, this->ConfigName);
+
     ByLanguageMap::value_type entry(l, flags);
     i = this->FlagsByLanguage.insert(entry).first;
     }
@@ -335,25 +339,12 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
       this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
     }
 
-  std::string targetFlags;
   for(std::set<cmStdString>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
     *this->FlagFileStream << *l << "_DEFINES = " << this->GetDefines(*l) <<
       "\n\n";
-    std::string targetLangFlags;
-    this->LocalGenerator->GetCompileOptions(targetLangFlags, this->Target,
-                            this->LocalGenerator->ConfigurationName.c_str());
-    if (!targetFlags.empty() && targetFlags != targetLangFlags)
-      {
-      targetFlags += " " + targetLangFlags;
-      }
-    }
-
-  if (!targetFlags.empty())
-    {
-    *this->FlagFileStream << "# TARGET_FLAGS = " << targetFlags << "\n\n";
     }
 }
 
@@ -541,39 +532,6 @@ cmMakefileTargetGenerator
 
   std::string configUpper =
     cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
-
-  std::string targetFlags;
-  this->LocalGenerator->GetCompileOptions(targetFlags, this->Target,
-                                          configUpper.c_str());
-  if (!targetFlags.empty())
-    {
-    std::string langIncludeExpr = "CMAKE_";
-    langIncludeExpr += lang;
-    langIncludeExpr += "_FLAG_REGEX";
-    const char* regex = this->Makefile->
-      GetDefinition(langIncludeExpr.c_str());
-    if(regex)
-      {
-      cmsys::RegularExpression r(regex);
-      std::vector<std::string> args;
-      cmSystemTools::ParseWindowsCommandLine(
-        targetFlags.c_str(),
-        args);
-      for(std::vector<std::string>::iterator i = args.begin();
-          i != args.end(); ++i)
-        {
-        if(r.find(i->c_str()))
-          {
-          this->LocalGenerator->AppendFlags
-            (flags, i->c_str());
-          }
-        }
-      }
-    else
-      {
-      this->LocalGenerator->AppendFlags(flags, targetFlags.c_str());
-      }
-    }
 
   // Add Fortran format flags.
   if(strcmp(lang, "Fortran") == 0)
