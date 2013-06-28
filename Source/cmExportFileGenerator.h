@@ -134,7 +134,8 @@ protected:
                           std::vector<std::string> &missingTargets,
                           FreeTargetsReplace replace = NoReplaceFreeTargets);
 
-  void GenerateRequiredCMakeVersion(std::ostream& os, const char *versionString);
+  void GenerateRequiredCMakeVersion(std::ostream& os,
+                                    const char *versionString);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
