@@ -20,6 +20,7 @@ Run flex like this:
 
 Modify cmExprLexer.cxx:
   - remove TABs
+  - remove use of the 'register' storage class specifier
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmExpr_yyalloc, cmExpr_yyrealloc, cmExpr_yyfree
   - remove all YY_BREAK lines occurring right after return statements
