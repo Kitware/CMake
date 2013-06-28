@@ -937,10 +937,13 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
 
 //----------------------------------------------------------------------------
 static const char* targetPolicyWhitelist[] = {
-    "CMP0003"
-  , "CMP0004"
-  , "CMP0008"
-  , "CMP0020"
+  0
+#define TARGET_POLICY_STRING(POLICY) \
+  , #POLICY
+
+  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_STRING)
+
+#undef TARGET_POLICY_STRING
 };
 
 cmPolicies::PolicyStatus statusForTarget(cmTarget *tgt, const char *policy)
@@ -951,10 +954,7 @@ cmPolicies::PolicyStatus statusForTarget(cmTarget *tgt, const char *policy)
     return tgt->GetPolicyStatus ## POLICY (); \
   } \
 
-  RETURN_POLICY(CMP0003)
-  RETURN_POLICY(CMP0004)
-  RETURN_POLICY(CMP0008)
-  RETURN_POLICY(CMP0020)
+  CM_FOR_EACH_TARGET_POLICY(RETURN_POLICY)
 
 #undef RETURN_POLICY
 
@@ -970,10 +970,7 @@ cmPolicies::PolicyID policyForString(const char *policy_id)
     return cmPolicies:: POLICY_ID; \
   } \
 
-  RETURN_POLICY_ID(CMP0003)
-  RETURN_POLICY_ID(CMP0004)
-  RETURN_POLICY_ID(CMP0008)
-  RETURN_POLICY_ID(CMP0020)
+  CM_FOR_EACH_TARGET_POLICY(RETURN_POLICY_ID)
 
 #undef RETURN_POLICY_ID
 
@@ -1003,7 +1000,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 
     context->HadContextSensitiveCondition = true;
 
-    for (size_t i = 0;
+    for (size_t i = 1;
          i < (sizeof(targetPolicyWhitelist) /
               sizeof(*targetPolicyWhitelist));
          ++i)
@@ -1029,8 +1026,17 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
       }
     reportError(context, content->GetOriginalExpression(),
       "$<TARGET_POLICY:prop> may only be used with a limited number of "
-      "policies.  Currently it may be used with policies CMP0003, CMP0004, "
-      "CMP0008 and CMP0020."
+      "policies.  Currently it may be used with the following policies:\n"
+
+#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+#define TARGET_POLICY_LIST_ITEM(POLICY) \
+      " * " STRINGIFY(POLICY) "\n"
+
+      CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_LIST_ITEM)
+
+#undef TARGET_POLICY_LIST_ITEM
       );
     return std::string();
   }
