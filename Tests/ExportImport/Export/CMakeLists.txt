@@ -235,6 +235,33 @@ target_link_libraries(testSharedLibDepends LINK_PUBLIC renamed_on_export)
 target_link_libraries(testSharedLibDepends LINK_INTERFACE_LIBRARIES
   $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:$<TARGET_NAME:testSharedLibRequired>>)
 
+add_library(cmp0022OLD SHARED cmp0022.cpp)
+generate_export_header(cmp0022OLD BASE_NAME cmp0022)
+target_include_directories(cmp0022OLD PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/cmp0022>"
+)
+cmake_policy(SET CMP0022 NEW)
+add_library(cmp0022NEW SHARED cmp0022.cpp)
+target_include_directories(cmp0022NEW PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/cmp0022>"
+)
+cmake_policy(SET CMP0022 OLD)
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmp0022.h"
+  "${CMAKE_CURRENT_BINARY_DIR}/cmp0022_export.h"
+    DESTINATION include/cmp0022
+)
+
+set_property(TARGET testLib2 APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS USING_TESTLIB2)
+set_property(TARGET testLib3 APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS USING_TESTLIB3)
+
+set_property(TARGET cmp0022NEW APPEND PROPERTY INTERFACE_LINK_LIBRARIES testLib2)
+# set_property(TARGET cmp0022NEW APPEND PROPERTY LINK_INTERFACE_LIBRARIES testLibIncludeRequired2) # TODO: Test for error
+set_property(TARGET cmp0022OLD APPEND PROPERTY INTERFACE_LINK_LIBRARIES testLib2)
+set_property(TARGET cmp0022OLD APPEND PROPERTY LINK_INTERFACE_LIBRARIES testLib3)
+
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
                 testLibIncludeRequired2
@@ -276,6 +303,7 @@ install(
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6
   testLibCycleA testLibCycleB
+  cmp0022NEW cmp0022OLD
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib NAMELINK_SKIP
@@ -319,6 +347,7 @@ add_subdirectory(sublib) # For CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE test.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
   testExe2libImp testLib3Imp testLib3ImpDep subdirlib
   testSharedLibRequired testSharedLibDepends renamed_on_export
+  cmp0022NEW cmp0022OLD
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
