@@ -2489,7 +2489,7 @@ namespace {
   cmWriteToFileCallback(void *ptr, size_t size, size_t nmemb,
                         void *data)
     {
-    register int realsize = (int)(size * nmemb);
+    int realsize = (int)(size * nmemb);
     std::ofstream* fout = static_cast<std::ofstream*>(data);
     const char* chPtr = static_cast<char*>(ptr);
     fout->write(chPtr, realsize);
@@ -2501,7 +2501,7 @@ namespace {
   cmWriteToMemoryCallback(void *ptr, size_t size, size_t nmemb,
                           void *data)
     {
-    register int realsize = (int)(size * nmemb);
+    int realsize = (int)(size * nmemb);
     cmFileCommandVectorOfChar *vec
       = static_cast<cmFileCommandVectorOfChar*>(data);
     const char* chPtr = static_cast<char*>(ptr);
