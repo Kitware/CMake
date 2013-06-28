@@ -964,8 +964,11 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     }
 
   //insert outputs from all WirteBuild commands
-  knownDependencies.insert(this->CombinedBuildOutputs.begin(),
-                           this->CombinedBuildOutputs.end());
+  for(std::set<std::string>::iterator i = this->CombinedBuildOutputs.begin();
+      i != this->CombinedBuildOutputs.end(); ++i)
+    {
+    knownDependencies.insert(*i);
+    }
 
   //after we have combined the data into knownDependencies we have no need
   //to keep this data around
