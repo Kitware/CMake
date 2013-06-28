@@ -255,8 +255,18 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
                                 automocTargetName.c_str(), true,
                                 workingDirectory.c_str(), depends,
                                 commandLines, false, automocComment.c_str());
-    // inherit FOLDER property from target (#13688)
-    copyTargetProperty(automocTarget, target, "FOLDER");
+    // Set target folder
+    const char* automocFolder = makefile->GetCMakeInstance()->GetProperty(
+                                                     "AUTOMOC_TARGETS_FOLDER");
+    if (automocFolder && *automocFolder)
+      {
+      automocTarget->SetProperty("FOLDER", automocFolder);
+      }
+    else
+      {
+      // inherit FOLDER property from target (#13688)
+      copyTargetProperty(automocTarget, target, "FOLDER");
+      }
 
     target->AddUtility(automocTargetName.c_str());
     }
