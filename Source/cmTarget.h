@@ -19,6 +19,14 @@
 
 #include <cmsys/auto_ptr.hxx>
 
+#define CM_FOR_EACH_TARGET_POLICY(F) \
+  F(CMP0003) \
+  F(CMP0004) \
+  F(CMP0008) \
+  F(CMP0020) \
+  F(CMP0021) \
+  F(CMP0022)
+
 class cmake;
 class cmMakefile;
 class cmSourceFile;
@@ -91,29 +99,13 @@ public:
   void SetMakefile(cmMakefile *mf);
   cmMakefile *GetMakefile() const { return this->Makefile;};
 
-  /** Get the status of policy CMP0003 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0003() const
-    { return this->PolicyStatusCMP0003; }
+#define DECLARE_TARGET_POLICY(POLICY) \
+  cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
+    { return this->PolicyStatus ## POLICY; }
 
-  /** Get the status of policy CMP0004 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0004() const
-    { return this->PolicyStatusCMP0004; }
+  CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
 
-  /** Get the status of policy CMP0008 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0008() const
-    { return this->PolicyStatusCMP0008; }
-
-  /** Get the status of policy CMP0020 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0020() const
-    { return this->PolicyStatusCMP0020; }
-
-  /** Get the status of policy CMP0021 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0021() const
-    { return this->PolicyStatusCMP0021; }
-
-  /** Get the status of policy CMP0022 when the target was created.  */
-  cmPolicies::PolicyStatus GetPolicyStatusCMP0022() const
-    { return this->PolicyStatusCMP0022; }
+#undef DECLARE_TARGET_POLICY
 
   /**
    * Get the list of the custom commands for this target
@@ -694,12 +686,12 @@ private:
   cmMakefile* Makefile;
 
   // Policy status recorded when target was created.
-  cmPolicies::PolicyStatus PolicyStatusCMP0003;
-  cmPolicies::PolicyStatus PolicyStatusCMP0004;
-  cmPolicies::PolicyStatus PolicyStatusCMP0008;
-  cmPolicies::PolicyStatus PolicyStatusCMP0020;
-  cmPolicies::PolicyStatus PolicyStatusCMP0021;
-  cmPolicies::PolicyStatus PolicyStatusCMP0022;
+#define TARGET_POLICY_MEMBER(POLICY) \
+  cmPolicies::PolicyStatus PolicyStatus ## POLICY;
+
+  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_MEMBER)
+
+#undef TARGET_POLICY_MEMBER
 
   // Internal representation details.
   friend class cmTargetInternals;
