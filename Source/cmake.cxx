@@ -3603,6 +3603,14 @@ void cmake::DefineProperties(cmake *cm)
      "for the FOLDER target property.");
 
   cm->DefineProperty
+    ("AUTOMOC_TARGETS_FOLDER", cmProperty::GLOBAL,
+     "Name of FOLDER for *_automoc targets that are added automatically by "
+     "CMake for targets for which AUTOMOC is enabled.",
+     "If not set, CMake uses the FOLDER property of the parent target as a "
+     "default value for this property. See also the documentation for the "
+     "FOLDER target property and the AUTOMOC target property.");
+
+  cm->DefineProperty
     ("PREDEFINED_TARGETS_FOLDER", cmProperty::GLOBAL,
      "Name of FOLDER for targets that are added automatically by CMake.",
      "If not set, CMake uses \"CMakePredefinedTargets\" as a default "
