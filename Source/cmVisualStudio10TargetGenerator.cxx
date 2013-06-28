@@ -307,7 +307,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteCustomCommands();
   this->WriteAllSources();
   this->WriteDotNetReferences();
-
+  this->WriteEmbeddedResourceGroup();  
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
@@ -341,6 +341,46 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
       this->WriteString("<ReferenceOutputAssembly>true"
                         "</ReferenceOutputAssembly>\n", 3);
       this->WriteString("</Reference>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
+{
+  const std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
+  if(!resxObjs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<cmSourceFile*>::const_iterator oi = resxObjs.begin();
+        oi != resxObjs.end(); ++oi)
+      {
+      std::string obj = (*oi)->GetFullPath();
+      this->WriteString("<EmbeddedResource Include=\"", 2);
+      this->ConvertToWindowsSlash(obj);
+      (*this->BuildFileStream ) << obj << "\">\n";
+
+      this->WriteString("<DependentUpon>", 3);
+      std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
+      (*this->BuildFileStream ) << hFileName;
+      this->WriteString("</DependentUpon>\n", 3);
+
+      this->GlobalGenerator->GetConfigurations();
+      const std::vector<std::string> *configs = this->GlobalGenerator->GetConfigurations();
+      for(std::vector<std::string>::const_iterator i = configs->begin();
+          i != configs->end(); ++i)
+        {
+        this->WritePlatformConfigTag("LogicalName", i->c_str(), 3);
+        if(this->Target->GetProperty("VS_GLOBAL_ROOTNAMESPACE"))
+          {
+            (*this->BuildFileStream ) << "$(RootNamespace).";
+          }
+        (*this->BuildFileStream ) << "%(Filename)";
+        (*this->BuildFileStream ) << ".resources";
+        (*this->BuildFileStream ) << "</LogicalName>\n";
+        }
+
+      this->WriteString("</EmbeddedResource>\n", 2);
       }
     this->WriteString("</ItemGroup>\n", 1);
     }
@@ -471,11 +511,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
       {
       this->WriteString("<WindowsAppContainer>true"
                         "</WindowsAppContainer>\n", 2);
-      }
-
-    if(!this->GeneratorTarget->ResxSources.empty())
-      {
-      this->WriteString("<CLRSupport>true</CLRSupport>\n", 2);
       }
 
     this->WriteString("</PropertyGroup>\n", 1);
@@ -670,11 +705,11 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
     }
 
-  std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
+  const std::vector<cmSourceFile*> resxObjs = this->GeneratorTarget->ResxSources;
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
-    for(std::vector<cmSourceFile*>::iterator oi = resxObjs.begin();
+    for(std::vector<cmSourceFile*>::const_iterator oi = resxObjs.begin();
         oi != resxObjs.end(); ++oi)
       {
       std::string obj = (*oi)->GetFullPath();
