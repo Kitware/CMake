@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 2.8.8)
 project(GeneratorExpression CXX)
 
+# This test is split into multiple parts as needed to avoid NMake command
+# length limits.
+
 add_custom_target(check-part1 ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_0=$<0:nothing>
