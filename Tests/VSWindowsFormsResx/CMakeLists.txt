@@ -25,6 +25,7 @@ set(TARGET_SRC
   WindowsFormsResx/MyForm.cpp
   WindowsFormsResx/Source.cpp
   )
+set_source_files_properties(${TARGET_SRC} PROPERTIES COMPILE_FLAGS "/clr")
 
 set(TARGET_RESX
   WindowsFormsResx/MyForm.resx
@@ -42,3 +43,4 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES "System" "Syst
 # Note: Modification of compiler flags is required for CLR compatibility now that we are using .resx files.
 string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+
