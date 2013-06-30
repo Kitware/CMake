@@ -6172,29 +6172,46 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     {
     if (newExplicitLibraries)
       {
-      switch(this->GetPolicyStatusCMP0022())
+      cmListFileBacktrace lfbt;
+      cmGeneratorExpression ge(lfbt);
+      cmGeneratorExpressionDAGChecker dagChecker(lfbt, this->GetName(),
+                                            "INTERFACE_LINK_LIBRARIES", 0, 0);
+      std::vector<std::string> ifaceLibs;
+      cmSystemTools::ExpandListArgument(
+          ge.Parse(newExplicitLibraries)->Evaluate(
+                                          this->Makefile,
+                                          config,
+                                          false,
+                                          headTarget,
+                                          this, &dagChecker), ifaceLibs);
+      LinkImplementation const* impl = this->GetLinkImplementation(config,
+                                                                headTarget);
+      if (ifaceLibs != impl->Libraries)
         {
-        case cmPolicies::WARN:
+        switch(this->GetPolicyStatusCMP0022())
           {
-          cmOStringStream w;
-          w << (this->Makefile->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
-            << "Static library target \"" << this->GetName() << "\" has a "
-              "INTERFACE_LINK_LIBRARIES property.  This should be preferred "
-              "as the source of the link interface for this library.  "
-              "Ignoring the property and using the link implementation "
-              "as the link interface instead.";
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          case cmPolicies::WARN:
+            {
+            cmOStringStream w;
+            w << (this->Makefile->GetPolicies()
+                  ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
+              << "Static library target \"" << this->GetName() << "\" has a "
+                "INTERFACE_LINK_LIBRARIES property.  This should be preferred "
+                "as the source of the link interface for this library.  "
+                "Ignoring the property and using the link implementation "
+                "as the link interface instead.";
+            this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+            }
+            // Fall through
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            explicitLibraries = newExplicitLibraries;
+            linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
+            break;
           }
-          // Fall through
-        case cmPolicies::OLD:
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::NEW:
-          explicitLibraries = newExplicitLibraries;
-          linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-          break;
         }
       }
     }
