@@ -1294,7 +1294,6 @@ std::string cmLocalGenerator::GetIncludeFlags(
       continue;
       }
 
-    std::string include = *i;
     if(!flagUsed || repeatFlag)
       {
       if(sysIncludeFlag &&
