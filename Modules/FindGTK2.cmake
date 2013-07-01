@@ -18,6 +18,7 @@
 #   GTK2_FOUND - Were all of your specified components found?
 #   GTK2_INCLUDE_DIRS - All include directories
 #   GTK2_LIBRARIES - All libraries
+#   GTK2_DEFINITIONS - Additional compiler flags
 #
 #   GTK2_VERSION - The version of GTK2 found (x.y.z)
 #   GTK2_MAJOR_VERSION - The major version of GTK2
@@ -374,6 +375,7 @@ endfunction()
 set(GTK2_FOUND)
 set(GTK2_INCLUDE_DIRS)
 set(GTK2_LIBRARIES)
+set(GTK2_DEFINITIONS)
 
 if(NOT GTK2_FIND_COMPONENTS)
     # Assume they only want GTK
@@ -542,6 +544,20 @@ if(NOT GTK2_FIND_VERSION AND GTK2_GTK_INCLUDE_DIR)
 endif()
 
 #
+# On MSVC, according to https://wiki.gnome.org/gtkmm/MSWindows, the /vd2 flag needs to be
+# passed to the compiler in order to use gtkmm
+#
+if(MSVC)
+    foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
+        if(_GTK2_component STREQUAL "gtkmm")
+            set(GTK2_DEFINITIONS "/vd2")
+        elseif(_GTK2_component STREQUAL "glademm")
+            set(GTK2_DEFINITIONS "/vd2")
+        endif()
+    endforeach()
+endif()
+
+#
 # Try to enforce components
 #
 
@@ -609,6 +625,7 @@ else()
     set(GTK2_VERSION_PATCH)
     set(GTK2_INCLUDE_DIRS)
     set(GTK2_LIBRARIES)
+    set(GTK2_DEFINITIONS)
 endif()
 
 if(GTK2_INCLUDE_DIRS)
