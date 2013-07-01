@@ -717,9 +717,9 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
                                        const std::string& toDestDirPath)
 {
 
-  // don't strip static libraries, because it removes the only symbol table
-  // they have so you can't link to them anymore
-  if(this->Target->GetType() == cmTarget::STATIC_LIBRARY)
+  // don't strip static and import libraries, because it removes the only
+  // symbol table they have so you can't link to them anymore
+  if(this->Target->GetType()==cmTarget::STATIC_LIBRARY || this->ImportLibrary)
     {
     return;
     }
