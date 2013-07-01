@@ -30,6 +30,7 @@ Run flex like this:
 
 Modify cmDependsFortranLexer.cxx:
   - remove TABs
+  - remove use of the 'register' storage class specifier
   - remove "yyscanner" argument from these methods:
       yy_fatal_error, cmDependsFortran_yyalloc, cmDependsFortran_yyrealloc, cmDependsFortran_yyfree
   - remove "yyscanner = NULL" from end of cmDependsFortran_yylex_destroy

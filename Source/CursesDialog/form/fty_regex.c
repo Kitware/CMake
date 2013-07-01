@@ -40,7 +40,7 @@ static char *RegEx_Error(int code)
 	return 0;
 }
 
-#define INIT 		register char *sp = RegEx_Init(instring);
+#define INIT 		char *sp = RegEx_Init(instring);
 #define GETC()		(*sp++)
 #define PEEKC()		(*sp)
 #define UNGETC(c)	(--sp)

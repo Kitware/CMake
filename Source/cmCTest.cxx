@@ -175,7 +175,7 @@ std::string cmCTest::GetCostDataFile()
 static size_t
 HTTPResponseCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
-  register int realsize = (int)(size * nmemb);
+  int realsize = (int)(size * nmemb);
 
   std::string *response
     = static_cast<std::string*>(data);
