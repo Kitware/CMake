@@ -54,6 +54,13 @@
   "else '0'.\n"                                                         \
   "  $<VERSION_EQUAL:v1,v2>    = '1' if v1 is the same version as v2, " \
   "else '0'.\n"                                                         \
+  "  $<C_COMPILER_VERSION>     = The version of the C compiler used.\n" \
+  "  $<C_COMPILER_VERSION:ver> = '1' if the version of the C "          \
+  "compiler matches ver, otherwise '0'.\n"                              \
+  "  $<CXX_COMPILER_VERSION>   = The version of the CXX compiler "      \
+  "used.\n"                                                             \
+  "  $<CXX_COMPILER_VERSION:ver> = '1' if the version of the CXX "      \
+  "compiler matches ver, otherwise '0'.\n"                              \
   "  $<TARGET_FILE:tgt>        = main file (.exe, .so.1.2, .a)\n"       \
   "  $<TARGET_LINKER_FILE:tgt> = file used to link (.a, .lib, .so)\n"   \
   "  $<TARGET_SONAME_FILE:tgt> = file with soname (.so.3)\n"            \
