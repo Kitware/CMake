@@ -126,19 +126,27 @@ void cmTargetPropCommandBase
     }
   if (scope == "INTERFACE" || scope == "PUBLIC")
     {
-    if (prepend)
-      {
-      const std::string propName = std::string("INTERFACE_") + this->Property;
-      const char *propValue = this->Target->GetProperty(propName.c_str());
-      const std::string totalContent = this->Join(content) + (propValue
-                                                ? std::string(";") + propValue
-                                                : std::string());
-      this->Target->SetProperty(propName.c_str(), totalContent.c_str());
-      }
-    else
-      {
-      this->Target->AppendProperty(("INTERFACE_" + this->Property).c_str(),
-                                   this->Join(content).c_str());
-      }
+    this->HandleInterfaceContent(this->Target, content, prepend);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTargetPropCommandBase::HandleInterfaceContent(cmTarget *tgt,
+                                  const std::vector<std::string> &content,
+                                  bool prepend)
+{
+  if (prepend)
+    {
+    const std::string propName = std::string("INTERFACE_") + this->Property;
+    const char *propValue = tgt->GetProperty(propName.c_str());
+    const std::string totalContent = this->Join(content) + (propValue
+                                              ? std::string(";") + propValue
+                                              : std::string());
+    tgt->SetProperty(propName.c_str(), totalContent.c_str());
+    }
+  else
+    {
+    tgt->AppendProperty(("INTERFACE_" + this->Property).c_str(),
+                          this->Join(content).c_str());
     }
 }

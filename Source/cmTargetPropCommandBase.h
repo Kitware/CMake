@@ -36,6 +36,9 @@ protected:
   std::string Property;
   cmTarget *Target;
 
+  virtual void HandleInterfaceContent(cmTarget *tgt,
+                                   const std::vector<std::string> &content,
+                                   bool prepend);
 private:
   virtual void HandleImportedTarget(const std::string &tgt) = 0;
   virtual void HandleMissingTarget(const std::string &name) = 0;
