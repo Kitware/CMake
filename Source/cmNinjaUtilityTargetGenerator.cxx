@@ -61,11 +61,11 @@ void cmNinjaUtilityTargetGenerator::Generate()
   this->GetLocalGenerator()->AppendTargetDepends(this->GetTarget(), deps);
 
   if (commands.empty()) {
-    cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
-                                            "Utility command for "
-                                            + this->GetTargetName(),
-                                            outputs,
-                                            deps);
+    this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                                "Utility command for "
+                                                  + this->GetTargetName(),
+                                                outputs,
+                                                deps);
   } else {
     std::string command =
       this->GetLocalGenerator()->BuildCommandLine(commands);
@@ -105,10 +105,11 @@ void cmNinjaUtilityTargetGenerator::Generate()
       cmNinjaDeps(1, utilCommandName),
       deps);
 
-    cmGlobalNinjaGenerator::WritePhonyBuild(this->GetBuildFileStream(),
-                                            "",
-                                            outputs,
-                                            cmNinjaDeps(1, utilCommandName));
+    this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                                "",
+                                                outputs,
+                                                cmNinjaDeps(1, utilCommandName)
+                                                );
   }
 
   this->GetGlobalGenerator()->AddTargetAlias(this->GetTargetName(),
