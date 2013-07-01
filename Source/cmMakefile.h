@@ -875,6 +875,9 @@ public:
   bool IsGeneratingBuildSystem(){ return this->GeneratingBuildSystem; }
   void SetGeneratingBuildSystem(){ this->GeneratingBuildSystem = true; }
 
+  std::set<cmStdString> const & GetSystemIncludeDirectories() const
+    { return this->SystemIncludeDirectories; }
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);

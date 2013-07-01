@@ -1647,6 +1647,17 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->InsertInclude(*it);
     }
+
+  const std::set<cmStdString> parentSystemIncludes =
+                              this->Makefile->GetSystemIncludeDirectories();
+
+  for (std::set<cmStdString>::const_iterator it
+        = parentSystemIncludes.begin();
+        it != parentSystemIncludes.end(); ++it)
+    {
+    this->SystemIncludeDirectories.insert(*it);
+    }
+
   const std::vector<cmValueWithOrigin> parentOptions =
                               this->Makefile->GetCompileOptionsEntries();
 
@@ -2520,6 +2531,28 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                            cmCacheManager::STATIC );
     }
 
+}
+
+//----------------------------------------------------------------------------
+void
+cmTarget::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
+{
+  for(std::set<cmStdString>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    this->SystemIncludeDirectories.insert(*li);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
+{
+  for(std::vector<std::string>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    this->SystemIncludeDirectories.insert(*li);
+    }
 }
 
 //----------------------------------------------------------------------------
