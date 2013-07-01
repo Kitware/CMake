@@ -47,7 +47,8 @@ public:
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
     entry.Name = "Visual Studio 10";
-    entry.Brief = "Generates Visual Studio 10 (Visual Studio 2010) project files.";
+    entry.Brief = "Generates Visual Studio 10 (Visual Studio 2010)\
+                  project files.";
     entry.Full =
       "It is possible to append a space followed by the platform name "
       "to create project files for a specific target platform. E.g. "
