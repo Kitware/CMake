@@ -40,6 +40,9 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 11")
   set(PP_VS110 1)
 endif()
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 12")
+  set(PP_VS120 1)
+endif()
 
 # Some tests below check the PP_* variables set above.  They are meant
 # to test the case that the build tool is at fault.  Other tests below

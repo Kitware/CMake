@@ -38,7 +38,8 @@ public:
     VS8 = 80,
     VS9 = 90,
     VS10 = 100,
-    VS11 = 110
+    VS11 = 110,
+    VS12 = 120
   };
 
   cmLocalVisualStudioGenerator(VSVersion v);

@@ -6,7 +6,7 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio 6")
 else()
   set(PROJECT_EXT vcproj)
 endif()
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[01]")
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[012]")
   set(PROJECT_EXT vcxproj)
 endif()
 
@@ -54,7 +54,7 @@ add_dependencies(VSExternalInclude lib2)
 # and the sln file can no longer be the only source
 # of that depend.  So, for VS 10 make the executable
 # depend on lib1 and lib2
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[01]")
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[012]")
   add_dependencies(VSExternalInclude lib1)
 endif()
 
