@@ -48,6 +48,13 @@ const char *cmGeneratorTarget::GetProperty(const char *prop)
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
+                                                 const char *config)
+{
+  return this->Makefile->IsSystemIncludeDirectory(dir, config);
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetPropertyAsBool(const char *prop)
 {
   return this->Target->GetPropertyAsBool(prop);
