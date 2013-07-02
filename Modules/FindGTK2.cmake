@@ -117,6 +117,9 @@
 #   _OUT_micro = Micro version number
 #   _gtkversion_hdr = Header file to parse
 #=============================================================
+
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+
 function(_GTK2_GET_VERSION _OUT_major _OUT_minor _OUT_micro _gtkversion_hdr)
     file(STRINGS ${_gtkversion_hdr} _contents REGEX "#define GTK_M[A-Z]+_VERSION[ \t]+")
     if(_contents)
@@ -325,7 +328,7 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
                        "While searching for ${_var}, our proposed library list is ${_lib_list}")
     endif()
 
-    find_library(${_var}
+    find_library(${_var}_RELEASE
         NAMES ${_lib_list}
         PATHS
             /opt/gnome/lib
@@ -349,24 +352,31 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
             [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]/lib
             [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]/lib
         )
-
-        if(${_var} AND ${_var}_DEBUG)
-            if(NOT GTK2_SKIP_MARK_AS_ADVANCED)
-                mark_as_advanced(${_var}_DEBUG)
-            endif()
-            set(GTK2_LIBRARIES ${GTK2_LIBRARIES} optimized ${${_var}} debug ${${_var}_DEBUG})
-            set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
-        endif()
-    else()
-        if(NOT GTK2_SKIP_MARK_AS_ADVANCED)
-            mark_as_advanced(${_var})
-        endif()
-        set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${${_var}})
-        set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
-        # Set debug to release
-        set(${_var}_DEBUG ${${_var}})
-        set(${_var}_DEBUG ${${_var}} PARENT_SCOPE)
     endif()
+
+    # FIXME Do not pass "_LIBRARY" to this function
+    string(REPLACE "_LIBRARY" "" _var2 ${_var})
+    select_library_configurations(${_var2})
+
+    if(NOT GTK2_SKIP_MARK_AS_ADVANCED)
+        mark_as_advanced(${_var}_RELEASE)
+        mark_as_advanced(${_var}_DEBUG)
+    endif()
+
+    set(${_var} ${${_var}} PARENT_SCOPE)
+
+    set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${${_var}})
+    set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
+
+    if(GTK2_DEBUG)
+        message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
+                       "${_var}_RELEASE = \"${${_var}_RELEASE}\"")
+        message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
+                       "${_var}_DEBUG   = \"${${_var}_DEBUG}\"")
+        message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
+                       "${_var}         = \"${${_var}}\"")
+    endif()
+
 endfunction()
 
 #=============================================================
