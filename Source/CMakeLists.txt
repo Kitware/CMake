@@ -345,6 +345,8 @@ if (WIN32)
       cmGlobalVisualStudio10Generator.cxx
       cmGlobalVisualStudio11Generator.h
       cmGlobalVisualStudio11Generator.cxx
+      cmGlobalVisualStudio12Generator.h
+      cmGlobalVisualStudio12Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmGlobalWatcomWMakeGenerator.cxx

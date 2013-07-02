@@ -65,6 +65,7 @@
 #    include "cmGlobalVisualStudio9Generator.h"
 #    include "cmGlobalVisualStudio10Generator.h"
 #    include "cmGlobalVisualStudio11Generator.h"
+#    include "cmGlobalVisualStudio12Generator.h"
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
@@ -2244,6 +2245,7 @@ int cmake::ActualConfigure()
         {"9.0", "Visual Studio 9 2008"},
         {"10.0", "Visual Studio 10"},
         {"11.0", "Visual Studio 11"},
+        {"12.0", "Visual Studio 12"},
         {0, 0}};
       for(int i=0; version[i].MSVersion != 0; i++)
         {
@@ -2652,6 +2654,8 @@ void cmake::AddDefaultGenerators()
     cmGlobalVisualStudio10Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio11Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio71Generator::NewFactory());
   this->Generators.push_back(
