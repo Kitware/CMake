@@ -76,6 +76,15 @@
 # This image must be 493 by 312 pixels.
 #
 ##end
+##variable
+# CPACK_WIX_TEMPLATE - Template file for WiX generation
+#
+# If this variable is set, the specified template will be used to generate the WiX wxs file.
+# This should be used if further customization of the output is required.
+#
+# If this variable is not set, the default MSI template included with CMake will be used.
+#
+##end
 
 #=============================================================================
 # Copyright 2012 Kitware, Inc.
