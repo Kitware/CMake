@@ -72,7 +72,7 @@ else()
     message(STATUS "Checking whether ${CMAKE_Fortran_COMPILER} supports Fortran 90")
     file(WRITE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompilerF90.f90 "
       PROGRAM TESTFortran90
-      stop = 1 ; do while ( stop .eq. 0 ) ; end do
+      integer stop ; stop = 1 ; do while ( stop .eq. 0 ) ; end do
       END PROGRAM TESTFortran90
 ")
     try_compile(CMAKE_Fortran_COMPILER_SUPPORTS_F90 ${CMAKE_BINARY_DIR}
