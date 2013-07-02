@@ -563,7 +563,8 @@ cmPolicies::cmPolicies()
     "INTERFACE_LINK_LIBRARIES property will be processed and generated for "
     "the IMPORTED target by default.  A new option to the install(EXPORT) "
     "and export commands allows export of the old-style properties for "
-    "compatibility with downstream users of CMake versions older than 2.8.12."
+    "compatibility with downstream users of CMake versions older than "
+    "2.8.12.  "
     "The target_link_libraries command will no longer populate the "
     "properties matching LINK_INTERFACE_LIBRARIES(_<CONFIG>)? if this policy "
     "is NEW."
@@ -571,7 +572,7 @@ cmPolicies::cmPolicies()
     "The OLD behavior for this policy is to ignore the "
     "INTERFACE_LINK_LIBRARIES property for in-build targets.  "
     "The NEW behavior for this policy is to use the INTERFACE_LINK_LIBRARIES "
-    "property for in-build targets, and ignore the old properties matching"
+    "property for in-build targets, and ignore the old properties matching "
     "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.",
     2,8,11,20130516, cmPolicies::WARN);
 }
