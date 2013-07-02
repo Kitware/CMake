@@ -1,3 +1,21 @@
+Changes in CMake 2.8.11.2 (since 2.8.11.1)
+------------------------------------------
+Alex Neundorf (1):
+      asm support: adapt to changes in CMakeDetectCompiler in 2.8.10
+
+Bjoern Thiel (1):
+      SelectLibraryConfigurations: Fix for cached <base>_LIBRARY
+
+Brad King (5):
+      cmCryptoHash: Increase alignment of HashFile buffer
+      cmcurl: Backport curl bug 1192 fix (#14250)
+      VS12: Add Visual Studio 12 generator (#14251)
+      VS12: Generate flag tables from MSBuild v120 tool files
+      FindBoost: Add -vc120 mangling for VS 12
+
+Robert Maynard (1):
+      VS: Clarify Visual Studio product year for each version
+
 Changes in CMake 2.8.11.1 (since 2.8.11)
 ----------------------------------------
 Brad King (5):
