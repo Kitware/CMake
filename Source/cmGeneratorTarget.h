@@ -78,6 +78,8 @@ private:
   void ClassifySources();
   void LookupObjectLibraries();
 
+  std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
 };
