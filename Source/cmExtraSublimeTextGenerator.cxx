@@ -421,7 +421,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   std::vector<std::string> includes;
   lg->GetIncludeDirectories(includes, gtgt, language, config);
   std::string includeFlags =
-    lg->GetIncludeFlags(includes, language, true); // full include paths
+    lg->GetIncludeFlags(includes, gtgt, language, true); // full include paths
   lg->AppendFlags(flags, includeFlags.c_str());
   }
 

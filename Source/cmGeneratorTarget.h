@@ -72,9 +72,13 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(const char *config);
 
+  bool IsSystemIncludeDirectory(const char *dir, const char *config);
+
 private:
   void ClassifySources();
   void LookupObjectLibraries();
+
+  std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

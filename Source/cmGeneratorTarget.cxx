@@ -48,6 +48,51 @@ const char *cmGeneratorTarget::GetProperty(const char *prop)
 }
 
 //----------------------------------------------------------------------------
+bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
+                                                 const char *config)
+{
+  std::string config_upper;
+  if(config && *config)
+    {
+    config_upper = cmSystemTools::UpperCase(config);
+    }
+
+  typedef std::map<std::string, std::vector<std::string> > IncludeCacheType;
+  IncludeCacheType::iterator iter =
+      this->SystemIncludesCache.find(config_upper);
+
+  if (iter == this->SystemIncludesCache.end())
+    {
+    std::vector<std::string> result;
+    for (std::set<cmStdString>::const_iterator
+        it = this->Target->GetSystemIncludeDirectories().begin();
+        it != this->Target->GetSystemIncludeDirectories().end(); ++it)
+      {
+      cmListFileBacktrace lfbt;
+      cmGeneratorExpression ge(lfbt);
+
+      cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                                this->GetName(),
+                                "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
+
+      cmSystemTools::ExpandListArgument(ge.Parse(*it)
+                                        ->Evaluate(this->Makefile,
+                                        config, false, this->Target,
+                                        &dagChecker), result);
+      }
+    IncludeCacheType::value_type entry(config_upper, result);
+    iter = this->SystemIncludesCache.insert(entry).first;
+    }
+
+  if (std::find(iter->second.begin(),
+                iter->second.end(), dir) != iter->second.end())
+    {
+    return true;
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::GetPropertyAsBool(const char *prop)
 {
   return this->Target->GetPropertyAsBool(prop);

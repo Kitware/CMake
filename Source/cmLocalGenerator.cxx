@@ -577,7 +577,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     {
     std::vector<std::string> includes;
     this->GetIncludeDirectories(includes, &target, lang);
-    flags += this->GetIncludeFlags(includes, lang);
+    flags += this->GetIncludeFlags(includes, &target, lang);
     }
   flags += this->Makefile->GetDefineFlags();
 
@@ -1224,6 +1224,7 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::GetIncludeFlags(
                                      const std::vector<std::string> &includes,
+                                     cmGeneratorTarget* target,
                                      const char* lang, bool forResponseFile,
                                      const char *config)
 {
@@ -1294,11 +1295,10 @@ std::string cmLocalGenerator::GetIncludeFlags(
       continue;
       }
 
-    std::string include = *i;
     if(!flagUsed || repeatFlag)
       {
-      if(sysIncludeFlag &&
-         this->Makefile->IsSystemIncludeDirectory(i->c_str(), config))
+      if(sysIncludeFlag && target &&
+         target->IsSystemIncludeDirectory(i->c_str(), config))
         {
         includeFlags << sysIncludeFlag;
         }

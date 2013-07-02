@@ -1675,27 +1675,13 @@ cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
     {
     this->SystemIncludeDirectories.insert(*li);
     }
-}
 
-//----------------------------------------------------------------------------
-bool cmMakefile::IsSystemIncludeDirectory(const char* dir, const char *config)
-{
-  for (std::set<cmStdString>::const_iterator
-      it = this->SystemIncludeDirectories.begin();
-      it != this->SystemIncludeDirectories.end(); ++it)
+  for (cmTargets::iterator l = this->Targets.begin();
+       l != this->Targets.end(); ++l)
     {
-    cmListFileBacktrace lfbt;
-    cmGeneratorExpression ge(lfbt);
-
-    std::vector<std::string> incs;
-    cmSystemTools::ExpandListArgument(ge.Parse(*it)
-                                       ->Evaluate(this, config, false), incs);
-    if (std::find(incs.begin(), incs.end(), dir) != incs.end())
-      {
-      return true;
-      }
+    cmTarget &t = l->second;
+    t.AddSystemIncludeDirectories(incs);
     }
-  return false;
 }
 
 void cmMakefile::AddDefinition(const char* name, const char* value)
