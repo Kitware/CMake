@@ -126,6 +126,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateIncludeDirectoriesInterface(te,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
+                                  te,
+                                  cmGeneratorExpression::InstallInterface,
+                                  properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS",
                                   te,
                                   cmGeneratorExpression::InstallInterface,

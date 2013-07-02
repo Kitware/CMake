@@ -172,6 +172,14 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories() const
 }
 
 //----------------------------------------------------------------------------
+bool
+cmGeneratorExpressionDAGChecker::EvaluatingSystemIncludeDirectories() const
+{
+  const char *prop = this->Property.c_str();
+  return strcmp(prop, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES") == 0;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions() const
 {
   const char *prop = this->Property.c_str();

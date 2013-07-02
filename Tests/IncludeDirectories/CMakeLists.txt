@@ -47,6 +47,10 @@ else()
 endif()
 
 add_subdirectory(TargetIncludeDirectories)
+if ((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 3)
+    OR CMAKE_C_COMPILER_ID STREQUAL Clang)
+  add_subdirectory(SystemIncludeDirectories)
+endif()
 
 set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}")
 get_property(propContent DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
