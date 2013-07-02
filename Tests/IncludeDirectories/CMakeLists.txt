@@ -1,6 +1,15 @@
 cmake_minimum_required (VERSION 2.6)
 project(IncludeDirectories)
 
+if ((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 3)
+    OR CMAKE_C_COMPILER_ID STREQUAL Clang)
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
+  if (run_sys_includes_test)
+    add_subdirectory(SystemIncludeDirectories)
+  endif()
+endif()
+
 file(WRITE ${CMAKE_BINARY_DIR}/Flags/Flags.h
 "//Flags.h
 ")
