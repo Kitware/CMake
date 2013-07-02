@@ -199,8 +199,15 @@ CURLcode Curl_SOCKS4(const char *proxy_name,
    * This is currently not supporting "Identification Protocol (RFC1413)".
    */
   socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
-  if (proxy_name)
-    strlcat((char*)socksreq + 8, proxy_name, sizeof(socksreq) - 8);
+  if(proxy_name) {
+    size_t plen = strlen(proxy_name);
+    if(plen >= sizeof(socksreq) - 8) {
+      failf(data, "Too long SOCKS proxy name, can't use!\n");
+      return CURLE_COULDNT_CONNECT;
+    }
+    /* copy the proxy name WITH trailing zero */
+    memcpy(socksreq + 8, proxy_name, plen+1);
+  }
 
   /*
    * Make connection
