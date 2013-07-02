@@ -282,6 +282,8 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
       if(emitted.insert(*lib).second)
         {
         this->AddTargetDepend(depender_index, lib->c_str(), true);
+        this->AddInterfaceDepends(depender_index, lib->c_str(),
+                                  true, emitted);
         }
       }
     }
