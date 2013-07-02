@@ -879,6 +879,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       interfacePropertyName = "INTERFACE_INCLUDE_DIRECTORIES";
       }
+    else if (propertyName == "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")
+      {
+      interfacePropertyName = "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES";
+      }
     else if (propertyName == "INTERFACE_COMPILE_DEFINITIONS"
         || propertyName == "COMPILE_DEFINITIONS"
         || strncmp(propertyName.c_str(), "COMPILE_DEFINITIONS_", 20) == 0)
