@@ -538,6 +538,9 @@ public:
   void AddSystemIncludeDirectories(const std::vector<std::string> &incs);
   std::set<cmStdString> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
+
+  void FinalizeSystemIncludeDirectories();
+
 private:
   // The set of include directories that are marked as system include
   // directories.

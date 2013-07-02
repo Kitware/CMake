@@ -84,10 +84,21 @@ void cmTargetIncludeDirectoriesCommand
                          const std::vector<std::string> &content,
                          bool prepend, bool system)
 {
-  if (system)
-    {
-    // Error.
-    }
   cmTargetPropCommandBase::HandleInterfaceContent(tgt, content,
                                                   prepend, system);
+
+  if (system)
+    {
+    std::string joined;
+    std::string sep;
+    for(std::vector<std::string>::const_iterator it = content.begin();
+      it != content.end(); ++it)
+      {
+      joined += sep;
+      sep = ";";
+      joined += *it;
+      }
+    tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
+                        joined.c_str());
+    }
 }
