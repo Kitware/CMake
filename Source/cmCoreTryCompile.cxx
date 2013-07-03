@@ -12,6 +12,7 @@
 #include "cmCoreTryCompile.h"
 #include "cmake.h"
 #include "cmCacheManager.h"
+#include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include <cmsys/Directory.hxx>
@@ -214,8 +215,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
 
     // Detect languages to enable.
-    cmGlobalGenerator* gg =
-      this->Makefile->GetCMakeInstance()->GetGlobalGenerator();
+    cmLocalGenerator* lg = this->Makefile->GetLocalGenerator();
+    cmGlobalGenerator* gg = lg->GetGlobalGenerator();
     std::set<std::string> testLangs;
     for(std::vector<std::string>::iterator si = sources.begin();
         si != sources.end(); ++si)
@@ -295,13 +296,12 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     for(std::set<std::string>::iterator li = testLangs.begin();
         li != testLangs.end(); ++li)
       {
-      fprintf(fout, "SET(CMAKE_%s_FLAGS \"", li->c_str());
       std::string langFlags = "CMAKE_" + *li + "_FLAGS";
-      if(const char* flags = this->Makefile->GetDefinition(langFlags.c_str()))
-        {
-        fprintf(fout, " %s ", flags);
-        }
-      fprintf(fout, " ${COMPILE_DEFINITIONS}\")\n");
+      const char* flags = this->Makefile->GetDefinition(langFlags.c_str());
+      fprintf(fout, "SET(CMAKE_%s_FLAGS %s)\n", li->c_str(),
+              lg->EscapeForCMake(flags?flags:"").c_str());
+      fprintf(fout, "SET(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
+              " ${COMPILE_DEFINITIONS}\")\n", li->c_str(), li->c_str());
       }
     fprintf(fout, "INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "SET(CMAKE_SUPPRESS_REGENERATION 1)\n");
