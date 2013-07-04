@@ -30,7 +30,7 @@ macro(__compiler_gnu lang)
   endif()
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-fPIC")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
-  set(CMAKE_SYSROOT_FLAG "--sysroot=")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_SYSROOT "--sysroot=")
 
   # Older versions of gcc (< 4.5) contain a bug causing them to report a missing
   # header file as a warning if depfiles are enabled, causing check_header_file

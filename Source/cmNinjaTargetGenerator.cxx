@@ -390,8 +390,11 @@ cmNinjaTargetGenerator
       {
       if (*rootPath)
         {
+        std::string sysrootDef = "CMAKE_";
+        sysrootDef += language;
+        sysrootDef += "_COMPILE_OPTIONS_SYSROOT";
         if (const char *sysrootFlag =
-                        this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
+                        mf->GetDefinition(sysrootDef.c_str()))
           {
           flags += " ";
           flags += sysrootFlag;
