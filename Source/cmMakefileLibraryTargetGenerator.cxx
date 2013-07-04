@@ -597,8 +597,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       {
       if (*rootPath)
         {
+        std::string sysrootDef = "CMAKE_";
+        sysrootDef += linkLanguage;
+        sysrootDef += "_COMPILE_OPTIONS_SYSROOT";
         if (const char *sysrootFlag =
-                        this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
+                        this->Makefile->GetDefinition(sysrootDef.c_str()))
           {
           linkFlags += " ";
           linkFlags += sysrootFlag;
