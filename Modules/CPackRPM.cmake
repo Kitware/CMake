@@ -876,6 +876,13 @@ if(CPACK_RPM_PACKAGE_DEBUG)
    message("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
 endif()
 
+# protect @ in pathname in order to avoid their
+# interpretation during the configure_file step
+set(CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES}")
+set(PROTECTED_AT "@")
+string(REPLACE "@" "\@PROTECTED_AT\@" CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES_LIST}")
+set(CPACK_RPM_INSTALL_FILES_LIST "")
+
 #
 # USER generated/provided spec file handling.
 #
@@ -981,6 +988,9 @@ else()
   # Note the just created file is processed for @var replacement
   configure_file(${CPACK_RPM_BINARY_SPECFILE}.in ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
 endif()
+
+# remove AT protection
+unset(PROTECTED_AT)
 
 if(RPMBUILD_EXECUTABLE)
   # Now call rpmbuild using the SPECFILE
