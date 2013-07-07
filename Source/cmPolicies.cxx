@@ -543,7 +543,7 @@ cmPolicies::cmPolicies()
     "the INCLUDE_DIRECTORIES target property.  "
     "The NEW behavior for this policy is to issue a FATAL_ERROR if "
     "INCLUDE_DIRECTORIES contains a relative path.",
-    2,8,12,0, cmPolicies::WARN);
+    2,8,11,20130516, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0022, "CMP0022",
@@ -573,7 +573,7 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to use the INTERFACE_LINK_LIBRARIES "
     "property for in-build targets, and ignore the old properties matching"
     "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.",
-    2,8,12,0, cmPolicies::WARN);
+    2,8,11,20130516, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
