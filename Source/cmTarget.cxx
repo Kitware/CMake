@@ -191,14 +191,13 @@ cmTargetInternals::~cmTargetInternals()
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
 {
-#define INITIALIZE_TARGET_POLICY_MEMBER(POLICY) \
-  this->PolicyStatus ## POLICY = cmPolicies::WARN;
-
-  CM_FOR_EACH_TARGET_POLICY(INITIALIZE_TARGET_POLICY_MEMBER)
-
-#undef INITIALIZE_TARGET_POLICY_MEMBER
-
   this->Makefile = 0;
+  this->PolicyStatusCMP0003 = cmPolicies::WARN;
+  this->PolicyStatusCMP0004 = cmPolicies::WARN;
+  this->PolicyStatusCMP0008 = cmPolicies::WARN;
+  this->PolicyStatusCMP0020 = cmPolicies::WARN;
+  this->PolicyStatusCMP0021 = cmPolicies::WARN;
+  this->PolicyStatusCMP0022 = cmPolicies::WARN;
   this->LinkLibrariesAnalyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
@@ -1693,13 +1692,18 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);
 
   // Record current policies for later use.
-#define CAPTURE_TARGET_POLICY(POLICY) \
-  this->PolicyStatus ## POLICY = \
-    this->Makefile->GetPolicyStatus(cmPolicies::POLICY);
-
-  CM_FOR_EACH_TARGET_POLICY(CAPTURE_TARGET_POLICY)
-
-#undef CAPTURE_TARGET_POLICY
+  this->PolicyStatusCMP0003 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0003);
+  this->PolicyStatusCMP0004 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0004);
+  this->PolicyStatusCMP0008 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0008);
+  this->PolicyStatusCMP0020 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0020);
+  this->PolicyStatusCMP0021 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0021);
+  this->PolicyStatusCMP0022 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0022);
 }
 
 //----------------------------------------------------------------------------
