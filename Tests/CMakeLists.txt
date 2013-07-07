@@ -2528,16 +2528,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
-  add_test(InterfaceLinkLibraries ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/InterfaceLinkLibraries"
-    "${CMake_BINARY_DIR}/Tests/InterfaceLinkLibraries"
-    --build-two-config
-    ${build_generator_args}
-    --build-project InterfaceLinkLibraries
-    --test-command InterfaceLinkLibraries)
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceLinkLibraries")
-
   if(CMAKE_USE_KWSTYLE AND KWSTYLE_EXECUTABLE)
     # The "make StyleCheck" command line as a test. If the test fails, look
     # for lines like "Error #0 (624) Line length exceed 88 (max=79)" in the

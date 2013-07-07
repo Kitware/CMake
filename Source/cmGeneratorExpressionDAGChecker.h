@@ -56,10 +56,6 @@ struct cmGeneratorExpressionDAGChecker
 
 CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(DECLARE_TRANSITIVE_PROPERTY_METHOD)
 
-  bool GetTransitivePropertiesOnly();
-  void SetTransitivePropertiesOnly()
-    { this->TransitivePropertiesOnly = true; }
-
 private:
   Result checkGraph() const;
 
@@ -71,7 +67,6 @@ private:
   const GeneratorExpressionContent * const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;
-  bool TransitivePropertiesOnly;
 };
 
 #endif
