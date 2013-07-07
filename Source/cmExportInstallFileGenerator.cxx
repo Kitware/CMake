@@ -113,6 +113,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   std::vector<std::string> missingTargets;
 
+  bool require2_8_12 = false;
   // Create all the imported targets.
   for(std::vector<cmTarget*>::const_iterator
         tei = allTargets.begin();
@@ -138,6 +139,20 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   te,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
+
+    const bool newCMP0022Behavior =
+                              te->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                           && te->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+    if (newCMP0022Behavior)
+      {
+      if (this->PopulateInterfaceLinkLibrariesProperty(te,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties, missingTargets)
+          && !this->ExportOld)
+        {
+        require2_8_12 = true;
+        }
+      }
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
     this->PopulateCompatibleInterfaceProperties(te, properties);
@@ -145,6 +160,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateInterfaceProperties(te, os, properties);
     }
 
+  if (require2_8_12)
+    {
+    this->GenerateRequiredCMakeVersion(os, "2.8.11.20130626");
+    }
 
   // Now load per-configuration properties for them.
   os << "# Load information for each installed configuration.\n"
