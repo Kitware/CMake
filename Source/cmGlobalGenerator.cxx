@@ -1078,7 +1078,6 @@ bool cmGlobalGenerator::CheckTargets()
           {
           return false;
           }
-        target.FinalizeSystemIncludeDirectories();
         }
       }
     }
