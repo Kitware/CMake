@@ -2343,6 +2343,14 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
     {
     // We call this so that the dependencies get written to the cache
     this->AddLinkLibrary( mf, selfname, i->first.c_str(), i->second );
+
+    if (this->GetType() == cmTarget::STATIC_LIBRARY)
+      {
+      this->AppendProperty("INTERFACE_LINK_LIBRARIES",
+            ("$<LINK_ONLY:" +
+            this->GetDebugGeneratorExpressions(i->first.c_str(), i->second) +
+            ">").c_str());
+      }
     }
   this->PrevLinkedLibraries = libs;
 }
