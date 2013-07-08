@@ -73,15 +73,11 @@ macro( select_library_configurations basename )
         endif()
     endif()
 
-    set( ${basename}_LIBRARY ${${basename}_LIBRARY} CACHE FILEPATH
-        "The ${basename} library" )
-
     if( ${basename}_LIBRARY )
         set( ${basename}_FOUND TRUE )
     endif()
 
-    mark_as_advanced( ${basename}_LIBRARY
-        ${basename}_LIBRARY_RELEASE
+    mark_as_advanced( ${basename}_LIBRARY_RELEASE
         ${basename}_LIBRARY_DEBUG
     )
 endmacro()
