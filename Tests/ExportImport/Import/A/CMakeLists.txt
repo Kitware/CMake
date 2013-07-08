@@ -200,6 +200,10 @@ if (run_pic_test)
   target_compile_definitions(deps_shared_iface PRIVATE CHECK_PIC_WORKS)
 endif()
 
+if(APPLE)
+  add_subdirectory(framework_interface)
+endif()
+
 #-----------------------------------------------------------------------------
 # Test that targets imported from the build tree have their dependencies
 # evaluated correctly. The above already tests the same for the install tree.
