@@ -1697,6 +1697,25 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     this->Internal->LinkImplementationPropertyEntries.push_back(entry);
     return;
     }
+  if (prop == "SOURCES")
+    {
+    if(this->IsImported())
+      {
+      cmOStringStream e;
+      e << "SOURCES property can't be set on imported targets (\""
+            << this->Name << "\")\n";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->SourceEntries.clear();
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
+    return;
+    }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
 }
@@ -1762,6 +1781,25 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     this->Makefile->GetBacktrace(lfbt);
     cmValueWithOrigin entry(value, lfbt);
     this->Internal->LinkImplementationPropertyEntries.push_back(entry);
+    return;
+    }
+  if (prop == "SOURCES")
+    {
+    if(this->IsImported())
+      {
+      cmOStringStream e;
+      e << "SOURCES property can't be set on imported targets (\""
+            << this->Name << "\")\n";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+
+      cmListFileBacktrace lfbt;
+      this->Makefile->GetBacktrace(lfbt);
+      cmGeneratorExpression ge(lfbt);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+      this->Internal->SourceEntries.push_back(
+                            new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);

@@ -12,3 +12,7 @@ set_property(TARGET iface PROPERTY INTERFACE_SOURCES
 
 add_library(OriginDebug empty_2.cpp)
 target_link_libraries(OriginDebug iface)
+
+set_property(TARGET OriginDebug APPEND PROPERTY SOURCES
+  empty_3.cpp
+)

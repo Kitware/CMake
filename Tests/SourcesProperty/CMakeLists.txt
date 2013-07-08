@@ -8,3 +8,5 @@ set_property(TARGET iface PROPERTY INTERFACE_SOURCES iface.cpp)
 
 add_executable(SourcesProperty main.cpp)
 target_link_libraries(SourcesProperty iface)
+
+set_property(TARGET SourcesProperty APPEND PROPERTY SOURCES prop.cpp)

@@ -3,5 +3,5 @@
 
 int main(int argc, char** argv)
 {
-  return iface();
+  return iface() + prop();
 }

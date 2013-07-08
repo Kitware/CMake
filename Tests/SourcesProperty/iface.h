@@ -1,2 +1,4 @@
 
 int iface();
+
+int prop();
