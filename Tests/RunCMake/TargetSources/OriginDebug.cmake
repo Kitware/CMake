@@ -16,3 +16,5 @@ target_link_libraries(OriginDebug iface)
 set_property(TARGET OriginDebug APPEND PROPERTY SOURCES
   empty_3.cpp
 )
+
+target_sources(OriginDebug PRIVATE empty_4.cpp)

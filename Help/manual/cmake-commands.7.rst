@@ -94,6 +94,7 @@ These commands may be used freely in CMake projects.
    /command/target_compile_options
    /command/target_include_directories
    /command/target_link_libraries
+   /command/target_sources
    /command/try_compile
    /command/try_run
    /command/unset

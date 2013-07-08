@@ -16,6 +16,15 @@ Call Stack \(most recent call first\):
   OriginDebugIDE.cmake:4 \(include\)
   CMakeLists.txt:3 \(include\)
 +
+CMake Debug Log at OriginDebug.cmake:20 \(target_sources\):
+  Used sources for target OriginDebug:
+
+   \* .*Tests/RunCMake/TargetSources/empty_4.cpp
+
+Call Stack \(most recent call first\):
+  OriginDebugIDE.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
++
 CMake Debug Log:
   Used sources for target OriginDebug:
 

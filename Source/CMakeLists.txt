@@ -348,6 +348,7 @@ foreach(command_file
     cmTargetCompileDefinitionsCommand
     cmTargetCompileOptionsCommand
     cmTargetIncludeDirectoriesCommand
+    cmTargetSourcesCommand
     cmUseMangledMesaCommand
     cmUtilitySourceCommand
     cmVariableRequiresCommand
