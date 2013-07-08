@@ -3395,6 +3395,34 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
                         new cmTargetInternals::TargetPropertyEntry(cge,
                                                               it->Value));
       }
+
+    if(this->Makefile->IsOn("APPLE"))
+      {
+      LinkImplementation const* impl = this->GetLinkImplementation(config,
+                                                                   this);
+      for(std::vector<std::string>::const_iterator
+          it = impl->Libraries.begin();
+          it != impl->Libraries.end(); ++it)
+        {
+        std::string libDir = cmSystemTools::CollapseFullPath(it->c_str());
+
+        static cmsys::RegularExpression
+          frameworkCheck("(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
+        if(!frameworkCheck.find(libDir))
+          {
+          continue;
+          }
+
+        libDir = frameworkCheck.match(1);
+
+        cmGeneratorExpression ge(lfbt);
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                  ge.Parse(libDir.c_str());
+        this->Internal
+                ->CachedLinkInterfaceIncludeDirectoriesEntries[configString]
+                .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
+        }
+      }
     }
 
   processIncludeDirectories(this,
