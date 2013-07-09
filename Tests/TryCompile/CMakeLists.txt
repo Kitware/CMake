@@ -46,11 +46,12 @@ endif()
 
 # try to compile a file that should compile
 # also check that COPY_FILE_ERROR works
+file(WRITE ${TryCompile_BINARY_DIR}/invalid "")
 try_compile(SHOULD_PASS
     ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
     ${TryCompile_SOURCE_DIR}/pass.c
     OUTPUT_VARIABLE TRY_OUT
-    COPY_FILE /invalid/path
+    COPY_FILE ${TryCompile_BINARY_DIR}/invalid/path
     COPY_FILE_ERROR _captured
     )
 if(NOT SHOULD_PASS)
