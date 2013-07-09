@@ -3615,17 +3615,6 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
     }
   defsString += (configProp ? configProp : "");
 
-  {
-  cmGeneratorExpression ge(lfbt);
-  std::string result = ge.Parse(defsString.c_str())->Evaluate(this->Makefile,
-                                config,
-                                false,
-                                this,
-                                &dagChecker);
-
-  cmSystemTools::ExpandListArgument(result, list);
-  }
-
   std::string configString = config ? config : "";
   if (!this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString])
     {
@@ -3682,8 +3671,6 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
     this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString]
                                                                       = true;
     }
-
-  cmSystemTools::ExpandListArgument(result, list);
 }
 
 //----------------------------------------------------------------------------
