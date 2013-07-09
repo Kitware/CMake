@@ -201,7 +201,7 @@ static cmVS7FlagTable cmVS10LinkFlagTable[] =
    cmVS7FlagTable::UserValueRequired},
   {"GenerateMapFile", "MAP", "", "true",
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"MapFileName", "MAP", "Generate Map File", "",
+  {"MapFileName", "MAP:", "Generate Map File", "",
    cmVS7FlagTable::UserValueRequired},
 
   //String List Properties
