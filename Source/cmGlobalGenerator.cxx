@@ -892,12 +892,28 @@ void cmGlobalGenerator::Configure()
 
   if ( this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE)
     {
-    const char* msg = "Configuring done";
+    cmOStringStream msg;
     if(cmSystemTools::GetErrorOccuredFlag())
       {
-      msg = "Configuring incomplete, errors occurred!";
+      msg << "Configuring incomplete, errors occurred!";
+      const char* logs[] = {"CMakeOutput.log", "CMakeError.log", 0};
+      for(const char** log = logs; *log; ++log)
+        {
+        std::string f = this->CMakeInstance->GetHomeOutputDirectory();
+        f += this->CMakeInstance->GetCMakeFilesDirectory();
+        f += "/";
+        f += *log;
+        if(cmSystemTools::FileExists(f.c_str()))
+          {
+          msg << "\nSee also \"" << f << "\".";
+          }
+        }
       }
-    this->CMakeInstance->UpdateProgress(msg, -1);
+    else
+      {
+      msg << "Configuring done";
+      }
+    this->CMakeInstance->UpdateProgress(msg.str().c_str(), -1);
     }
 }
 
