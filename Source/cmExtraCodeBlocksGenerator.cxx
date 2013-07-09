@@ -621,15 +621,19 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                   ->GetGeneratorTarget(target);
 
     // the compilerdefines for this target
-    std::vector<std::string> cdefs;
-    target->GetCompileDefinitions(cdefs, buildType);
+    std::string cdefs = target->GetCompileDefinitions(buildType);
 
-    // Expand the list.
-    for(std::vector<std::string>::const_iterator di = cdefs.begin();
-        di != cdefs.end(); ++di)
+    if(!cdefs.empty())
       {
-      cmXMLSafe safedef(di->c_str());
-      fout <<"            <Add option=\"-D" << safedef.str() << "\" />\n";
+      // Expand the list.
+      std::vector<std::string> defs;
+      cmSystemTools::ExpandListArgument(cdefs.c_str(), defs);
+      for(std::vector<std::string>::const_iterator di = defs.begin();
+          di != defs.end(); ++di)
+        {
+        cmXMLSafe safedef(di->c_str());
+        fout <<"            <Add option=\"-D" << safedef.str() << "\" />\n";
+        }
       }
 
     // the include directories for this target

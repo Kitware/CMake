@@ -1148,9 +1148,8 @@ void cmGlobalGenerator::CreateGeneratorTargets()
     cmGeneratorTargetsType generatorTargets;
 
     cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
-
-    const std::vector<cmValueWithOrigin> noconfig_compile_definitions =
-                                mf->GetCompileDefinitionsEntries();
+    const char *noconfig_compile_definitions =
+                                      mf->GetProperty("COMPILE_DEFINITIONS");
 
     std::vector<std::string> configs;
     mf->GetConfigurations(configs);
@@ -1162,13 +1161,7 @@ void cmGlobalGenerator::CreateGeneratorTargets()
       cmTarget* t = &ti->second;
 
       {
-      for (std::vector<cmValueWithOrigin>::const_iterator it
-                                      = noconfig_compile_definitions.begin();
-          it != noconfig_compile_definitions.end(); ++it)
-        {
-        t->InsertCompileDefinition(*it);
-        }
-
+      t->AppendProperty("COMPILE_DEFINITIONS", noconfig_compile_definitions);
       for(std::vector<std::string>::const_iterator ci = configs.begin();
           ci != configs.end(); ++ci)
         {

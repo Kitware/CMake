@@ -871,10 +871,6 @@ public:
   {
     return this->CompileOptionsEntries;
   }
-  std::vector<cmValueWithOrigin> GetCompileDefinitionsEntries() const
-  {
-    return this->CompileDefinitionsEntries;
-  }
 
   bool IsGeneratingBuildSystem(){ return this->GeneratingBuildSystem; }
   void SetGeneratingBuildSystem(){ this->GeneratingBuildSystem = true; }
@@ -932,7 +928,6 @@ protected:
 
   std::vector<cmValueWithOrigin> IncludeDirectoriesEntries;
   std::vector<cmValueWithOrigin> CompileOptionsEntries;
-  std::vector<cmValueWithOrigin> CompileDefinitionsEntries;
 
   // Track the value of the computed DEFINITIONS property.
   void AddDefineFlag(const char*, std::string&);
