@@ -44,6 +44,22 @@ else()
    file(REMOVE "${TryCompile_BINARY_DIR}/CopyOfPass")
 endif()
 
+# try to compile a file that should compile
+# also check that COPY_FILE_ERROR works
+try_compile(SHOULD_PASS
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_SOURCE_DIR}/pass.c
+    OUTPUT_VARIABLE TRY_OUT
+    COPY_FILE /invalid/path
+    COPY_FILE_ERROR _captured
+    )
+if(NOT SHOULD_PASS)
+  message(SEND_ERROR "should pass failed ${TRY_OUT}")
+endif()
+if(NOT _captured MATCHES "Cannot copy output executable.*/invalid/path")
+  message(SEND_ERROR "COPY_FILE_ERROR did not capture expected message")
+endif()
+
 # try to compile a file that should not compile
 try_compile(SHOULD_FAIL
     ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
