@@ -32,18 +32,20 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   std::vector<std::string> compileDefs;
   std::string outputVariable;
   std::string copyFile;
+  std::string copyFileError;
   std::vector<cmTarget*> targets;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
   char targetNameBuf[64];
   bool didOutputVariable = false;
   bool didCopyFile = false;
+  bool didCopyFileError = false;
   bool useSources = argv[2] == "SOURCES";
   std::vector<std::string> sources;
 
   enum Doing { DoingNone, DoingCMakeFlags, DoingCompileDefinitions,
                DoingLinkLibraries, DoingOutputVariable, DoingCopyFile,
-               DoingSources };
+               DoingCopyFileError, DoingSources };
   Doing doing = useSources? DoingSources : DoingNone;
   for(size_t i=3; i < argv.size(); ++i)
     {
@@ -73,6 +75,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       doing = DoingCopyFile;
       didCopyFile = true;
+      }
+    else if(argv[i] == "COPY_FILE_ERROR")
+      {
+      doing = DoingCopyFileError;
+      didCopyFileError = true;
       }
     else if(doing == DoingCMakeFlags)
       {
@@ -121,6 +128,11 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       copyFile = argv[i].c_str();
       doing = DoingNone;
       }
+    else if(doing == DoingCopyFileError)
+      {
+      copyFileError = argv[i].c_str();
+      doing = DoingNone;
+      }
     else if(doing == DoingSources)
       {
       sources.push_back(argv[i]);
@@ -146,6 +158,20 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
       "COPY_FILE must be followed by a file path");
+    return -1;
+    }
+
+  if(didCopyFileError && copyFileError.empty())
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "COPY_FILE_ERROR must be followed by a variable name");
+    return -1;
+    }
+
+  if(didCopyFileError && !didCopyFile)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "COPY_FILE_ERROR may be used only with COPY_FILE");
     return -1;
     }
 
@@ -444,6 +470,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
 
   if (this->SrcFileSignature)
     {
+    std::string copyFileErrorMessage;
     this->FindOutputFile(targetName);
 
     if ((res==0) && (copyFile.size()))
@@ -461,9 +488,22 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
           {
           emsg << this->FindErrorMessage.c_str();
           }
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR, emsg.str());
-        return -1;
+        if(copyFileError.empty())
+          {
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR, emsg.str());
+          return -1;
+          }
+        else
+          {
+          copyFileErrorMessage = emsg.str();
+          }
         }
+      }
+
+    if(!copyFileError.empty())
+      {
+      this->Makefile->AddDefinition(copyFileError.c_str(),
+                                    copyFileErrorMessage.c_str());
       }
     }
   return res;
