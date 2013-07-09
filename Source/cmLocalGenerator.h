@@ -166,9 +166,6 @@ public:
   {
     this->AppendDefines(defines, defines_list.c_str());
   }
-  void AppendDefines(std::set<std::string>& defines,
-                     const std::vector<std::string> &defines_vec);
-
   /**
    * Join a set of defines into a definesString with a space separator.
    */
