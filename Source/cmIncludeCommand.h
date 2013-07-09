@@ -55,7 +55,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() const
     {
-    return "Read CMake listfile code from the given file.";
+    return "Load and run CMake code from a file or module.";
     }
 
   /**
@@ -66,9 +66,10 @@ public:
     return
       "  include(<file|module> [OPTIONAL] [RESULT_VARIABLE <VAR>]\n"
       "                        [NO_POLICY_SCOPE])\n"
-      "Reads CMake listfile code from the given file.  Commands in the file "
-      "are processed immediately as if they were written in place of the "
-      "include command.  If OPTIONAL is present, then no error "
+      "Load and run CMake code from the file given.  "
+      "Variable reads and writes access the scope of the caller "
+      "(dynamic scoping).  "
+      "If OPTIONAL is present, then no error "
       "is raised if the file does not exist.  If RESULT_VARIABLE is given "
       "the variable will be set to the full filename which "
       "has been included or NOTFOUND if it failed.\n"
