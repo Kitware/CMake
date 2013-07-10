@@ -3284,12 +3284,36 @@ static void processCompileOptionsInternal(cmTarget *tgt,
     std::vector<std::string> entryOptions = (*it)->CachedEntries;
     if(entryOptions.empty())
       {
-      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+      std::string result = (*it)->ge->Evaluate(mf,
                                                 config,
                                                 false,
                                                 tgt,
-                                                dagChecker),
-                                      entryOptions);
+                                                dagChecker);
+
+      std::vector<std::string> list;
+      {
+      size_t pos = 0;
+      while((pos = result.find("\\;", pos)) != std::string::npos)
+        {
+        result.replace(pos, 2, "<SEMICOLON>");
+        pos += 11;
+        }
+      }
+      cmSystemTools::ExpandListArgument(result, list);
+      for (std::vector<std::string>::const_iterator it2 = list.begin();
+          it2 != list.end(); ++it2)
+        {
+        std::string item = *it2;
+        {
+        size_t pos = 0;
+        while((pos = item.find("<SEMICOLON>", pos)) != std::string::npos)
+          {
+            item.replace(pos, 11, "\\;");
+            pos += 2;
+            }
+        }
+        entryOptions.push_back(item);
+        }
       if (mf->IsGeneratingBuildSystem()
           && !(*it)->ge->GetHadContextSensitiveCondition())
         {
