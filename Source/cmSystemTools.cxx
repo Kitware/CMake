@@ -1696,6 +1696,7 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 
 void cmSystemTools::EnableVSConsoleOutput()
 {
+#ifdef _WIN32
   // Visual Studio 8 2005 (devenv.exe or VCExpress.exe) will not
   // display output to the console unless this environment variable is
   // set.  We need it to capture the output of these build tools.
@@ -1703,8 +1704,15 @@ void cmSystemTools::EnableVSConsoleOutput()
   // either of these executables where NAME is created with
   // CreateNamedPipe.  This would bypass the internal buffering of the
   // output and allow it to be captured on the fly.
-#ifdef _WIN32
   cmSystemTools::PutEnv("vsconsoleoutput=1");
+
+# ifdef CMAKE_BUILD_WITH_CMAKE
+  // VS sets an environment variable to tell MS tools like "cl" to report
+  // output through a backdoor pipe instead of stdout/stderr.  Unset the
+  // environment variable to close this backdoor for any path of process
+  // invocations that passes through CMake so we can capture the output.
+  cmSystemTools::UnsetEnv("VS_UNICODE_OUTPUT");
+# endif
 #endif
 }
 
