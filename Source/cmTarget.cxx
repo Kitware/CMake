@@ -3421,7 +3421,7 @@ static void processCompileOptionsInternal(cmTarget *tgt,
         size_t pos = 0;
         while((pos = item.find("<SEMICOLON>", pos)) != std::string::npos)
           {
-            item.replace(pos, 11, "\\;");
+            item.replace(pos, 11, ";");
             pos += 2;
             }
         }
