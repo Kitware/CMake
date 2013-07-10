@@ -176,9 +176,7 @@ static void GetCompileDefinitionsAndDirectories(cmTarget *target,
     }
 
   std::set<std::string> defines;
-  std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines, config);
-  localGen->AppendDefines(defines, targetDefines);
+  localGen->AddCompileDefinitions(defines, target, config);
 
   sep = "";
   for(std::set<std::string>::const_iterator defIt = defines.begin();
