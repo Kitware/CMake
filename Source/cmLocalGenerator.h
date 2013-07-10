@@ -223,8 +223,6 @@ public:
                              bool stripImplicitInclDirs = true);
   void AddCompileOptions(std::string& flags, cmTarget* target,
                          const char* lang, const char* config);
-//   void AddCompileDefinitions(std::string& defines, cmTarget* target,
-//                          const char* config);
   void AddCompileDefinitions(std::set<std::string>& defines, cmTarget* target,
                          const char* config);
 
