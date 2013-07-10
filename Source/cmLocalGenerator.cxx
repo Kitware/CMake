@@ -1338,17 +1338,6 @@ std::string cmLocalGenerator::GetIncludeFlags(
   return flags;
 }
 
-// //----------------------------------------------------------------------------
-// void cmLocalGenerator::AddCompileDefinitions(std::string& defines,
-//                                              cmTarget* target,
-//                                              const char* config)
-// {
-//   std::vector<std::string> targetDefines;
-//   target->GetCompileDefinitions(targetDefines,
-//                                config);
-//   this->AppendDefines(defines, targetDefines);
-// }
-
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              cmTarget* target,
