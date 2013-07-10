@@ -1541,6 +1541,18 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
 }
 
+void cmLocalGenerator::GetStaticLibraryFlags(std::string& flags,
+                                             std::string const& config,
+                                             cmTarget* target)
+{
+  this->AppendFlags(flags, target->GetProperty("STATIC_LIBRARY_FLAGS"));
+  if(!config.empty())
+    {
+    std::string name = "STATIC_LIBRARY_FLAGS_" + config;
+    this->AppendFlags(flags, target->GetProperty(name.c_str()));
+    }
+}
+
 void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
                                  std::string& flags,
                                  std::string& linkFlags,
@@ -1557,26 +1569,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
   switch(target->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
-      {
-      const char* targetLinkFlags =
-        target->GetProperty("STATIC_LIBRARY_FLAGS");
-      if(targetLinkFlags)
-        {
-        linkFlags += targetLinkFlags;
-        linkFlags += " ";
-        }
-      if(!buildType.empty())
-        {
-        std::string build = "STATIC_LIBRARY_FLAGS_";
-        build += buildType;
-        targetLinkFlags = target->GetProperty(build.c_str());
-        if(targetLinkFlags)
-          {
-          linkFlags += targetLinkFlags;
-          linkFlags += " ";
-          }
-        }
-      }
+      this->GetStaticLibraryFlags(linkFlags, buildType, target->Target);
       break;
     case cmTarget::MODULE_LIBRARY:
       libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
