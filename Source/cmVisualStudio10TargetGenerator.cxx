@@ -1339,17 +1339,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   clOptions.Parse(defineFlags.c_str());
   std::vector<std::string> targetDefines;
   this->Target->GetCompileDefinitions(targetDefines, configName.c_str());
-  std::string targetDefinesString = "";
-  const char *sep = "";
-  for(std::vector<std::string>::const_iterator defIt = targetDefines.begin();
-      defIt != targetDefines.end();
-      ++defIt)
-    {
-    targetDefinesString += sep;
-    sep = ";";
-    targetDefinesString += *defIt;
-    }
-  clOptions.AddDefines(targetDefinesString.c_str());
+  clOptions.AddDefines(targetDefines);
   clOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
