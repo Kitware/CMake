@@ -1741,9 +1741,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->AppendDefines(ppDefs, exportMacro);
     }
   cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
-  std::vector<std::string> targetDefines;
-  target.GetCompileDefinitions(targetDefines, configName);
-  this->AppendDefines(ppDefs, targetDefines);
+  this->CurrentLocalGenerator->AddCompileDefinitions(ppDefs,
+                                                     &target, configName);
   buildSettings->AddAttribute
     ("GCC_PREPROCESSOR_DEFINITIONS", ppDefs.CreateList());
 

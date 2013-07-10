@@ -165,6 +165,11 @@ void cmIDEOptions::AddDefines(const char* defines)
     cmSystemTools::ExpandListArgument(defines, this->Defines);
     }
 }
+//----------------------------------------------------------------------------
+void cmIDEOptions::AddDefines(const std::vector<std::string> &defines)
+{
+  this->Defines.insert(this->Defines.end(), defines.begin(), defines.end());
+}
 
 //----------------------------------------------------------------------------
 void cmIDEOptions::AddFlag(const char* flag, const char* value)

@@ -748,17 +748,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     this->GlobalGenerator->GetGeneratorTarget(&target);
   std::vector<std::string> targetDefines;
   target.GetCompileDefinitions(targetDefines, configName);
-  std::string targetDefinesString = "";
-  const char *sep = "";
-  for(std::vector<std::string>::const_iterator defIt = targetDefines.begin();
-      defIt != targetDefines.end();
-      ++defIt)
-    {
-    targetDefinesString += sep;
-    sep = ";";
-    targetDefinesString += *defIt;
-    }
-  targetOptions.AddDefines(targetDefinesString.c_str());
+  targetOptions.AddDefines(targetDefines);
   targetOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
 
