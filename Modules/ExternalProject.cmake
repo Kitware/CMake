@@ -961,7 +961,7 @@ endif()
         set(sep ";")
       endif()
     endforeach()
-    set(code "set(ENV{VS_UNICODE_OUTPUT} \"\")\n${code}set(command \"${cmd}\")${code_execute_process}")
+    set(code "${code}set(command \"${cmd}\")${code_execute_process}")
     file(WRITE ${stamp_dir}/${name}-${step}-impl.cmake "${code}")
     set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-impl.cmake)
   endif()
@@ -971,7 +971,6 @@ endif()
   set(logbase ${stamp_dir}/${name}-${step})
   file(WRITE ${script} "
 ${code_cygpath_make}
-set(ENV{VS_UNICODE_OUTPUT} \"\")
 set(command \"${command}\")
 execute_process(
   COMMAND \${command}
