@@ -141,13 +141,15 @@ public:
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
+  std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<cmValueWithOrigin> LinkInterfacePropertyEntries;
 
   std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
   std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceCompileOptionsEntries;
-  std::map<std::string, std::string> CachedLinkInterfaceCompileDefinitions;
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
+                                CachedLinkInterfaceCompileDefinitionsEntries;
 
   std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
   std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
@@ -186,6 +188,7 @@ cmTargetInternals::~cmTargetInternals()
 {
   deleteAndClear(this->CachedLinkInterfaceIncludeDirectoriesEntries);
   deleteAndClear(this->CachedLinkInterfaceCompileOptionsEntries);
+  deleteAndClear(this->CachedLinkInterfaceCompileDefinitionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2958,6 +2961,17 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
+  if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    deleteAndClear(this->Internal->CompileDefinitionsEntries);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->CompileDefinitionsEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
+    return;
+    }
   if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
     {
     cmOStringStream e;
@@ -3006,6 +3020,15 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
     this->Internal->CompileOptionsEntries.push_back(
+              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    return;
+    }
+  if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->CompileDefinitionsEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
@@ -3109,6 +3132,20 @@ void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
                          : this->Internal->CompileOptionsEntries.end();
 
   this->Internal->CompileOptionsEntries.insert(position,
+      new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry,
+                     bool before)
+{
+  cmGeneratorExpression ge(entry.Backtrace);
+
+  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
+                = before ? this->Internal->CompileDefinitionsEntries.begin()
+                         : this->Internal->CompileDefinitionsEntries.end();
+
+  this->Internal->CompileDefinitionsEntries.insert(position,
       new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
 }
 
@@ -3344,12 +3381,12 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 }
 
 //----------------------------------------------------------------------------
-static void processCompileOptions(cmTarget *tgt,
+static void processCompileOptionsInternal(cmTarget *tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
       std::set<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
-      const char *config, bool debugOptions)
+      const char *config, bool debugOptions, const char *logName)
 {
   cmMakefile *mf = tgt->GetMakefile();
 
@@ -3360,12 +3397,36 @@ static void processCompileOptions(cmTarget *tgt,
     std::vector<std::string> entryOptions = (*it)->CachedEntries;
     if(entryOptions.empty())
       {
-      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+      std::string result = (*it)->ge->Evaluate(mf,
                                                 config,
                                                 false,
                                                 tgt,
-                                                dagChecker),
-                                      entryOptions);
+                                                dagChecker);
+
+      std::vector<std::string> list;
+      {
+      size_t pos = 0;
+      while((pos = result.find("\\;", pos)) != std::string::npos)
+        {
+        result.replace(pos, 2, "<SEMICOLON>");
+        pos += 11;
+        }
+      }
+      cmSystemTools::ExpandListArgument(result, list);
+      for (std::vector<std::string>::const_iterator it2 = list.begin();
+          it2 != list.end(); ++it2)
+        {
+        std::string item = *it2;
+        {
+        size_t pos = 0;
+        while((pos = item.find("<SEMICOLON>", pos)) != std::string::npos)
+          {
+            item.replace(pos, 11, "\\;");
+            pos += 2;
+            }
+        }
+        entryOptions.push_back(item);
+        }
       if (mf->IsGeneratingBuildSystem()
           && !(*it)->ge->GetHadContextSensitiveCondition())
         {
@@ -3394,11 +3455,25 @@ static void processCompileOptions(cmTarget *tgt,
     if (!usedOptions.empty())
       {
       mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
-                            std::string("Used compile options for target ")
+                            std::string("Used compile ") + logName
+                            + std::string(" for target ")
                             + tgt->GetName() + ":\n"
                             + usedOptions, (*it)->ge->GetBacktrace());
       }
     }
+}
+
+//----------------------------------------------------------------------------
+static void processCompileOptions(cmTarget *tgt,
+      const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
+      std::vector<std::string> &options,
+      std::set<std::string> &uniqueOptions,
+      cmGeneratorExpressionDAGChecker *dagChecker,
+      const char *config, bool debugOptions)
+{
+  return processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
+                                       dagChecker, config, debugOptions,
+                                       "options");
 }
 
 //----------------------------------------------------------------------------
@@ -3497,90 +3572,127 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetCompileDefinitions(const char *config)
+static void processCompileDefinitions(cmTarget *tgt,
+      const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
+      std::vector<std::string> &options,
+      std::set<std::string> &uniqueOptions,
+      cmGeneratorExpressionDAGChecker *dagChecker,
+      const char *config, bool debugOptions)
 {
-  const char *configProp = 0;
-  if (config)
-    {
-    std::string configPropName;
-    configPropName = "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
-    configProp = this->GetProperty(configPropName.c_str());
-    }
+  return processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
+                                       dagChecker, config, debugOptions,
+                                       "definitions");
+}
 
-  const char *noconfigProp = this->GetProperty("COMPILE_DEFINITIONS");
+//----------------------------------------------------------------------------
+void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
+                                            const char *config)
+{
+  std::set<std::string> uniqueOptions;
   cmListFileBacktrace lfbt;
+
   cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                            this->GetName(),
-                                            "COMPILE_DEFINITIONS", 0, 0);
+                                              this->GetName(),
+                                              "COMPILE_DEFINITIONS", 0, 0);
 
-  std::string defsString = (noconfigProp ? noconfigProp : "");
-  if (configProp && noconfigProp)
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
     {
-    defsString += ";";
-    }
-  defsString += (configProp ? configProp : "");
-
-  cmGeneratorExpression ge(lfbt);
-  std::string result = ge.Parse(defsString.c_str())->Evaluate(this->Makefile,
-                                config,
-                                false,
-                                this,
-                                &dagChecker);
-
-  std::vector<std::string> libs;
-  this->GetDirectLinkLibraries(config, libs, this);
-
-  if (libs.empty())
-    {
-    return result;
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
     }
 
-  std::string sep;
-  std::string depString;
-  for (std::vector<std::string>::const_iterator it = libs.begin();
-      it != libs.end(); ++it)
+  bool debugDefines = !this->DebugCompileDefinitionsDone
+                          && std::find(debugProperties.begin(),
+                                debugProperties.end(),
+                                "COMPILE_DEFINITIONS")
+                        != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
     {
-    if ((cmGeneratorExpression::IsValidTargetName(it->c_str())
-          || cmGeneratorExpression::Find(it->c_str()) != std::string::npos)
-        && this->Makefile->FindTargetToUse(it->c_str()))
-      {
-      depString += sep + "$<TARGET_PROPERTY:"
-                + *it + ",INTERFACE_COMPILE_DEFINITIONS>";
-      sep = ";";
-      }
+    this->DebugCompileDefinitionsDone = true;
     }
+
+  processCompileDefinitions(this,
+                            this->Internal->CompileDefinitionsEntries,
+                            list,
+                            uniqueOptions,
+                            &dagChecker,
+                            config,
+                            debugDefines);
 
   std::string configString = config ? config : "";
   if (!this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString])
     {
-    cmGeneratorExpression ge2(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge2 =
-                                                        ge2.Parse(depString);
-    this->Internal->CachedLinkInterfaceCompileDefinitions[configString] =
-                                                cge2->Evaluate(this->Makefile,
-                                                               config,
-                                                               false,
-                                                               this,
-                                                               &dagChecker);
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->Internal->LinkInterfacePropertyEntries.begin(),
+        end = this->Internal->LinkInterfacePropertyEntries.end();
+        it != end; ++it)
+      {
+      {
+      cmGeneratorExpression ge(lfbt);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                        ge.Parse(it->Value);
+      std::string targetResult = cge->Evaluate(this->Makefile, config,
+                                        false, this, 0, 0);
+      if (!this->Makefile->FindTargetToUse(targetResult.c_str()))
+        {
+        continue;
+        }
+      }
+      std::string defsGenex = "$<TARGET_PROPERTY:" +
+                              it->Value + ",INTERFACE_COMPILE_DEFINITIONS>";
+      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
+        {
+        // Because it->Value is a generator expression, ensure that it
+        // evaluates to the non-empty string before being used in the
+        // TARGET_PROPERTY expression.
+        defsGenex = "$<$<BOOL:" + it->Value + ">:" + defsGenex + ">";
+        }
+      cmGeneratorExpression ge(it->Backtrace);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
+                                                                defsGenex);
+
+      this->Internal
+        ->CachedLinkInterfaceCompileDefinitionsEntries[configString].push_back(
+                        new cmTargetInternals::TargetPropertyEntry(cge,
+                                                              it->Value));
+      }
+    if (config)
+      {
+      std::string configPropName = "COMPILE_DEFINITIONS_"
+                                          + cmSystemTools::UpperCase(config);
+      const char *configProp = this->GetProperty(configPropName.c_str());
+      std::string defsString = (configProp ? configProp : "");
+
+      cmGeneratorExpression ge(lfbt);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                        ge.Parse(defsString);
+      this->Internal
+        ->CachedLinkInterfaceCompileDefinitionsEntries[configString].push_back(
+                        new cmTargetInternals::TargetPropertyEntry(cge));
+      }
+
     }
-  if (!this->Internal->CachedLinkInterfaceCompileDefinitions[configString]
-                                                                    .empty())
-    {
-    result += (result.empty() ? "" : ";")
-        + this->Internal->CachedLinkInterfaceCompileDefinitions[configString];
-    }
+
+  processCompileDefinitions(this,
+    this->Internal->CachedLinkInterfaceCompileDefinitionsEntries[configString],
+                            list,
+                            uniqueOptions,
+                            &dagChecker,
+                            config,
+                            debugDefines);
 
   if (!this->Makefile->IsGeneratingBuildSystem())
     {
-    this->Internal->CachedLinkInterfaceCompileDefinitions[configString] = "";
+    deleteAndClear(this->Internal->CachedLinkInterfaceCompileDefinitionsEntries);
     }
   else
     {
     this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString]
                                                                       = true;
     }
-
-  return result;
 }
 
 //----------------------------------------------------------------------------
@@ -3974,6 +4086,24 @@ const char *cmTarget::GetProperty(const char* prop,
     for (std::vector<TargetPropertyEntry*>::const_iterator
         it = this->Internal->CompileOptionsEntries.begin(),
         end = this->Internal->CompileOptionsEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += (*it)->ge->GetInput();
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
+    {
+    static std::string output;
+    output = "";
+    std::string sep;
+    typedef cmTargetInternals::TargetPropertyEntry
+                                TargetPropertyEntry;
+    for (std::vector<TargetPropertyEntry*>::const_iterator
+        it = this->Internal->CompileDefinitionsEntries.begin(),
+        end = this->Internal->CompileDefinitionsEntries.end();
         it != end; ++it)
       {
       output += sep;
@@ -6835,6 +6965,7 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
 {
   deleteAndClear(this->Pointer->IncludeDirectoriesEntries);
   deleteAndClear(this->Pointer->CompileOptionsEntries);
+  deleteAndClear(this->Pointer->CompileDefinitionsEntries);
   delete this->Pointer;
 }
 

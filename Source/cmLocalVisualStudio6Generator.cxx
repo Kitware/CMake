@@ -1701,21 +1701,31 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-    this->AppendDefines(
-      definesSet,
-      target.GetCompileDefinitions(0));
-    this->AppendDefines(
-      debugDefinesSet,
-      target.GetCompileDefinitions("DEBUG"));
-    this->AppendDefines(
-      releaseDefinesSet,
-      target.GetCompileDefinitions("RELEASE"));
-    this->AppendDefines(
-      minsizeDefinesSet,
-      target.GetCompileDefinitions("MINSIZEREL"));
-    this->AppendDefines(
-      debugrelDefinesSet,
-      target.GetCompileDefinitions("RELWITHDEBINFO"));
+    {
+    std::vector<std::string> targetDefines;
+    target.GetCompileDefinitions(targetDefines, 0);
+    this->AppendDefines(definesSet, targetDefines);
+    }
+    {
+    std::vector<std::string> targetDefines;
+    target.GetCompileDefinitions(targetDefines, "DEBUG");
+    this->AppendDefines(debugDefinesSet, targetDefines);
+    }
+    {
+    std::vector<std::string> targetDefines;
+    target.GetCompileDefinitions(targetDefines, "RELEASE");
+    this->AppendDefines(releaseDefinesSet, targetDefines);
+    }
+    {
+    std::vector<std::string> targetDefines;
+    target.GetCompileDefinitions(targetDefines, "MINSIZEREL");
+    this->AppendDefines(minsizeDefinesSet, targetDefines);
+    }
+    {
+    std::vector<std::string> targetDefines;
+    target.GetCompileDefinitions(targetDefines, "RELWITHDEBINFO");
+    this->AppendDefines(debugrelDefinesSet, targetDefines);
+    }
 
     std::string defines = " ";
     std::string debugDefines = " ";
