@@ -1037,17 +1037,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         }
       }
     std::string libflags;
-    if(const char* flags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
-      {
-      libflags += flags;
-      }
-    std::string libFlagsConfig = "STATIC_LIBRARY_FLAGS_";
-    libFlagsConfig += configTypeUpper;
-    if(const char* flagsConfig = target.GetProperty(libFlagsConfig.c_str()))
-      {
-      libflags += " ";
-      libflags += flagsConfig;
-      }
+    this->GetStaticLibraryFlags(libflags, configTypeUpper, &target);
     if(!libflags.empty())
       {
       fout << "\t\t\t\tAdditionalOptions=\"" << libflags << "\"\n";
