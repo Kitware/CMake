@@ -100,6 +100,7 @@
 #        because you need a custom filename for the moc file or something similar.
 #
 #  macro QT4_AUTOMOC(sourcefile1 sourcefile2 ... )
+#        The qt4_automoc macro is obsolete.  Use the CMAKE_AUTOMOC feature instead.
 #        This macro is still experimental.
 #        It can be used to have moc automatically handled.
 #        So if you have the files foo.h and foo.cpp, and in foo.h a
@@ -174,6 +175,7 @@
 #        must exist and are not updated in any way.
 #
 # function QT4_USE_MODULES( target [link_type] modules...)
+#        This function is obsolete. Use target_link_libraries with IMPORTED targets instead.
 #        Make <target> use the <modules> from Qt. Using a Qt module means
 #        to link to the library, add the relevant include directories for the module,
 #        and add the relevant compiler defines for using the module.
