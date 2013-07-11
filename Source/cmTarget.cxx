@@ -3662,7 +3662,8 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 
   if (!this->Makefile->IsGeneratingBuildSystem())
     {
-    deleteAndClear(this->Internal->CachedLinkInterfaceCompileDefinitionsEntries);
+    deleteAndClear(this->Internal
+                              ->CachedLinkInterfaceCompileDefinitionsEntries);
     }
   else
     {
