@@ -208,6 +208,7 @@ cmTarget::cmTarget()
   this->BuildInterfaceIncludesAppended = false;
   this->DebugIncludesDone = false;
   this->DebugCompileOptionsDone = false;
+  this->DebugCompileDefinitionsDone = false;
 }
 
 //----------------------------------------------------------------------------
