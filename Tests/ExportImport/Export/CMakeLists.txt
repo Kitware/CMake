@@ -311,6 +311,9 @@ install(
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications
   )
+if (APPLE)
+  install(FILES testLib4.h DESTINATION Frameworks/testLib4.framework/Headers)
+endif()
 install(
   TARGETS
   testExe2libImp testLib3Imp
