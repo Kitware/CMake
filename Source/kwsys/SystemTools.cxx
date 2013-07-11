@@ -4261,17 +4261,13 @@ bool SystemTools::IsSubDirectory(const char* cSubdir, const char* cDir)
     }
   kwsys_stl::string subdir = cSubdir;
   kwsys_stl::string dir = cDir;
+  SystemTools::ConvertToUnixSlashes(subdir);
   SystemTools::ConvertToUnixSlashes(dir);
-  kwsys_stl::string path = subdir;
-  do
+  if(subdir.size() > dir.size() && subdir[dir.size()] == '/')
     {
-    path = SystemTools::GetParentDirectory(path.c_str());
-    if(SystemTools::ComparePath(dir.c_str(), path.c_str()))
-      {
-      return true;
-      }
+    std::string s = subdir.substr(0, dir.size());
+    return SystemTools::ComparePath(s.c_str(), dir.c_str());
     }
-  while ( path.size() > dir.size() );
   return false;
 }
 
