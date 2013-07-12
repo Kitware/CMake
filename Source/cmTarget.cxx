@@ -3444,9 +3444,8 @@ static void processCompileOptions(cmTarget *tgt,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const char *config, bool debugOptions)
 {
-  return processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                       dagChecker, config, debugOptions,
-                                       "options");
+  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
+                                dagChecker, config, debugOptions, "options");
 }
 
 //----------------------------------------------------------------------------
@@ -3552,9 +3551,9 @@ static void processCompileDefinitions(cmTarget *tgt,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const char *config, bool debugOptions)
 {
-  return processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                       dagChecker, config, debugOptions,
-                                       "definitions");
+  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
+                                dagChecker, config, debugOptions,
+                                "definitions");
 }
 
 //----------------------------------------------------------------------------
