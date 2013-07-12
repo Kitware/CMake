@@ -114,6 +114,15 @@ bool cmExportCommand
       currentTarget != this->Targets.GetVector().end();
       ++currentTarget)
     {
+    if (this->Makefile->IsAlias(currentTarget->c_str()))
+      {
+      cmOStringStream e;
+      e << "given ALIAS target \"" << *currentTarget
+        << "\" which may not be exported.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
     if(cmTarget* target =
        this->Makefile->GetLocalGenerator()->
        GetGlobalGenerator()->FindTarget(0, currentTarget->c_str()))

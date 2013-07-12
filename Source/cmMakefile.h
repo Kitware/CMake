@@ -337,6 +337,7 @@ public:
   cmTarget* AddLibrary(const char *libname, cmTarget::TargetType type,
                   const std::vector<std::string> &srcs,
                   bool excludeFromAll = false);
+  void AddAlias(const char *libname, cmTarget *tgt);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
@@ -536,11 +537,12 @@ public:
       this->GeneratorTargets = targets;
     }
 
-  cmTarget* FindTarget(const char* name);
+  cmTarget* FindTarget(const char* name, bool excludeAliases = false);
 
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
-  cmTarget* FindTargetToUse(const char* name);
+  cmTarget* FindTargetToUse(const char* name, bool excludeAliases = false);
+  bool IsAlias(const char *name);
   cmGeneratorTarget* FindGeneratorTargetToUse(const char* name);
 
   /**
@@ -902,6 +904,7 @@ protected:
 
   // libraries, classes, and executables
   cmTargets Targets;
+  std::map<std::string, cmTarget*> AliasTargets;
   cmGeneratorTargetsType GeneratorTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
