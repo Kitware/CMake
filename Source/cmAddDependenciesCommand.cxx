@@ -24,6 +24,13 @@ bool cmAddDependenciesCommand
     }
 
   std::string target_name = args[0];
+  if(this->Makefile->IsAlias(target_name.c_str()))
+    {
+    cmOStringStream e;
+    e << "Cannot add target-level dependencies to alias target \""
+      << target_name << "\".\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
   if(cmTarget* target = this->Makefile->FindTargetToUse(target_name.c_str()))
     {
     std::vector<std::string>::const_iterator s = args.begin();
