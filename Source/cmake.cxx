@@ -3670,7 +3670,9 @@ void cmake::ReportUndefinedPropertyAccesses(const char *filename)
   FILE *progFile = fopen(filename,"w");
   if (!progFile || !this->GlobalGenerator)
     {
-    return;
+      if(progFile)
+        fclose(progFile);
+      return;
     }
 
   // what are the enabled languages?

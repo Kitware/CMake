@@ -421,7 +421,8 @@ Int32 main ( Int32 argc, Char** argv )
    };
 
    fprintf ( stderr, "%s: splitting into blocks\n", progName );
-
+   if (inFile)
+     fclose(inFile);
    inFile = fopen ( inFileName, "rb" );
    if (inFile == NULL) {
       fprintf ( stderr, "%s: can't open `%s'\n", progName, inFileName );
@@ -504,6 +505,10 @@ Int32 main ( Int32 argc, Char** argv )
    }
 
    fprintf ( stderr, "%s: finished\n", progName );
+   if (inFile)
+     fclose(inFile);
+   if (outFile)
+     fclose(outFile);
    return 0;
 }
 
