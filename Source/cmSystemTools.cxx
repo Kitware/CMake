@@ -638,6 +638,12 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
     }
 
+  if (outputflag == OUTPUT_PASSTHROUGH)
+    {
+    cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
+    cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
+    }
+
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
 
@@ -645,7 +651,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
   char* data;
   int length;
   int pipe;
-  if ( output || outputflag != OUTPUT_NONE )
+  if(outputflag != OUTPUT_PASSTHROUGH && (output || outputflag != OUTPUT_NONE))
     {
     while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
