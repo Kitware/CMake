@@ -589,26 +589,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                          cmLocalGenerator::SHELL);
   vars.ObjectDir = objdir.c_str();
   vars.Target = targetOutPathReal.c_str();
-
-  if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
-    {
-    if (const char *rootPath =
-                    this->Makefile->GetSafeDefinition("CMAKE_SYSROOT"))
-      {
-      if (*rootPath)
-        {
-        if (const char *sysrootFlag =
-                        this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
-          {
-          linkFlags += " ";
-          linkFlags += sysrootFlag;
-          linkFlags += this->LocalGenerator->EscapeForShell(rootPath);
-          linkFlags += " ";
-          }
-        }
-      }
-    }
-
   vars.LinkLibraries = linkLibs.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
   if (this->Target->HasSOName(this->ConfigName))

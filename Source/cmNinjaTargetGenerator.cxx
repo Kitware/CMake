@@ -384,23 +384,7 @@ cmNinjaTargetGenerator
     cmSystemTools::ReplaceString(depFlagsStr, "<CMAKE_C_COMPILER>",
                        mf->GetDefinition("CMAKE_C_COMPILER"));
     flags += " " + depFlagsStr;
-
-    if (const char *rootPath =
-                      this->Makefile->GetSafeDefinition("CMAKE_SYSROOT"))
-      {
-      if (*rootPath)
-        {
-        if (const char *sysrootFlag =
-                        this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
-          {
-          flags += " ";
-          flags += sysrootFlag;
-          flags += this->LocalGenerator->EscapeForShell(rootPath);
-          flags += " ";
-          }
-        }
-      }
-    }
+  }
   vars.Flags = flags.c_str();
 
 
