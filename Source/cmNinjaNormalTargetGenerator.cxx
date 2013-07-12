@@ -224,27 +224,7 @@ cmNinjaNormalTargetGenerator
     vars.TargetVersionMajor = targetVersionMajor.c_str();
     vars.TargetVersionMinor = targetVersionMinor.c_str();
 
-
-    std::string flags = "$FLAGS";
-
-    if (const char *rootPath =
-                      this->GetMakefile()->GetSafeDefinition("CMAKE_SYSROOT"))
-      {
-      if (*rootPath)
-        {
-        if (const char *sysrootFlag =
-                    this->GetMakefile()->GetDefinition("CMAKE_SYSROOT_FLAG"))
-          {
-          flags += " ";
-          flags += sysrootFlag;
-          flags += this->GetLocalGenerator()->EscapeForShell(rootPath);
-          flags += " ";
-          }
-        }
-      }
-
-    vars.Flags = flags.c_str();
-
+    vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
 
     std::string langFlags;

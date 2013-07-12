@@ -62,15 +62,10 @@ void cmFindCommon::GenerateDocumentation()
     "The CMake variable CMAKE_FIND_ROOT_PATH specifies one or more "
     "directories to be prepended to all other search directories. "
     "This effectively \"re-roots\" the entire search under given locations. "
-    "By default it is empty.  "
-    "The variable CMAKE_SYSROOT can also be used to specify exactly one "
-    "directory to use as a prefix.  Setting CMAKE_SYSROOT also has other "
-    "effects.  See the documentation for that variable for more.  "
-    "These are especially useful when "
+    "By default it is empty. It is especially useful when "
     "cross-compiling to point to the root directory of the "
     "target environment and CMake will search there too. By default at first "
-    "the CMAKE_SYSROOT directory is searched, then the directories listed in "
-    "CMAKE_FIND_ROOT_PATH and then the non-rooted "
+    "the directories listed in CMAKE_FIND_ROOT_PATH and then the non-rooted "
     "directories will be searched. "
     "The default behavior can be adjusted by setting "
     "CMAKE_FIND_ROOT_PATH_MODE_XXX.  This behavior can be manually "
@@ -192,27 +187,16 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     {
     return;
     }
-  const char* sysroot =
-    this->Makefile->GetDefinition("CMAKE_SYSROOT");
   const char* rootPath =
     this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
-  const bool noSysroot = !sysroot || !*sysroot;
-  const bool noRootPath = !rootPath || !*rootPath;
-  if(noSysroot && noRootPath)
+  if((rootPath == 0) || (strlen(rootPath) == 0))
     {
     return;
     }
 
   // Construct the list of path roots with no trailing slashes.
   std::vector<std::string> roots;
-  if (sysroot)
-    {
-    roots.push_back(sysroot);
-    }
-  if (rootPath)
-    {
-    cmSystemTools::ExpandListArgument(rootPath, roots);
-    }
+  cmSystemTools::ExpandListArgument(rootPath, roots);
   for(std::vector<std::string>::iterator ri = roots.begin();
       ri != roots.end(); ++ri)
     {
