@@ -43,6 +43,7 @@ bool cmAddLibraryCommand
   // the type of library.  Otherwise, it is treated as a source or
   // source list name. There may be two keyword arguments, check for them
   bool haveSpecifiedType = false;
+  bool isAlias = false;
   while ( s != args.end() )
     {
     std::string libType = *s;
@@ -76,6 +77,11 @@ bool cmAddLibraryCommand
       type = cmTarget::UNKNOWN_LIBRARY;
       haveSpecifiedType = true;
       }
+    else if(libType == "ALIAS")
+      {
+      ++s;
+      isAlias = true;
+      }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
@@ -95,6 +101,80 @@ bool cmAddLibraryCommand
       {
       break;
       }
+    }
+  if (isAlias)
+    {
+    if(!cmGeneratorExpression::IsValidTargetName(libName.c_str()))
+      {
+      this->SetError(("Invalid name for ALIAS: " + libName).c_str());
+      return false;
+      }
+    if(excludeFromAll)
+      {
+      this->SetError("EXCLUDE_FROM_ALL with ALIAS makes no sense.");
+      return false;
+      }
+    if(importTarget || importGlobal)
+      {
+      this->SetError("IMPORTED with ALIAS is not allowed.");
+      return false;
+      }
+    if(args.size() != 3)
+      {
+      cmOStringStream e;
+      e << "ALIAS requires exactly one target argument.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    const char *aliasedName = s->c_str();
+    if(this->Makefile->IsAlias(aliasedName))
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << libName
+        << "\" because target \"" << aliasedName << "\" is itself an ALIAS.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    cmTarget *aliasedTarget =
+                    this->Makefile->FindTargetToUse(aliasedName, true);
+    if(!aliasedTarget)
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << libName
+        << "\" because target \"" << aliasedName << "\" does not already "
+        "exist.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    cmTarget::TargetType aliasedType = aliasedTarget->GetType();
+    if(aliasedType != cmTarget::SHARED_LIBRARY
+        && aliasedType != cmTarget::STATIC_LIBRARY
+        && aliasedType != cmTarget::MODULE_LIBRARY
+        && aliasedType != cmTarget::OBJECT_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << libName
+        << "\" because target \"" << aliasedName << "\" is not a library.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    if(aliasedTarget->IsImported())
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << libName
+        << "\" because target \"" << aliasedName << "\" is IMPORTED.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    this->Makefile->AddAlias(libName.c_str(), aliasedTarget);
+    return true;
+    }
+
+  if(importTarget && excludeFromAll)
+    {
+    this->SetError("excludeFromAll with IMPORTED target makes no sense.");
+    return false;
     }
 
   /* ideally we should check whether for the linker language of the target

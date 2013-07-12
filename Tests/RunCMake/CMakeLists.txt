@@ -98,6 +98,7 @@ add_RunCMake_test(try_compile)
 add_RunCMake_test(variable_watch)
 add_RunCMake_test(CMP0004)
 add_RunCMake_test(TargetPolicies)
+add_RunCMake_test(alias_targets)
 
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)
