@@ -969,6 +969,8 @@ int Curl_cookie_output(struct CookieInfo *c, char *dumphere)
       format_ptr = get_netscape_format(co);
       if (format_ptr == NULL) {
         fprintf(out, "#\n# Fatal libcurl error\n");
+        if(!use_stdout)
+          fclose(out);
         return 1;
       }
       fprintf(out, "%s\n", format_ptr);
