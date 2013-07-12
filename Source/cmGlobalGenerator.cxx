@@ -1769,10 +1769,21 @@ cmLocalGenerator* cmGlobalGenerator::FindLocalGenerator(const char* start_dir)
   return 0;
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::AddAlias(const char *name, cmTarget *tgt)
+{
+  this->AliasTargets[name] = tgt;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalGenerator::IsAlias(const char *name)
+{
+  return this->AliasTargets.find(name) != this->AliasTargets.end();
+}
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmGlobalGenerator::FindTarget(const char* project, const char* name)
+cmGlobalGenerator::FindTarget(const char* project, const char* name, bool excludeAliases)
 {
   // if project specific
   if(project)
@@ -1780,7 +1791,7 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name)
     std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
     for(unsigned int i = 0; i < gens->size(); ++i)
       {
-      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name);
+      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name, excludeAliases);
       if(ret)
         {
         return ret;
@@ -1790,6 +1801,14 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name)
   // if all projects/directories
   else
     {
+    if (!excludeAliases)
+      {
+      std::map<cmStdString, cmTarget*>::iterator ai = this->AliasTargets.find(name);
+      if (ai != this->AliasTargets.end())
+        {
+        return ai->second;
+        }
+      }
     std::map<cmStdString,cmTarget *>::iterator i =
       this->TotalTargets.find ( name );
     if ( i != this->TotalTargets.end() )
