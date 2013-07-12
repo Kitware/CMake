@@ -1783,7 +1783,8 @@ bool cmGlobalGenerator::IsAlias(const char *name)
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmGlobalGenerator::FindTarget(const char* project, const char* name, bool excludeAliases)
+cmGlobalGenerator::FindTarget(const char* project, const char* name,
+                              bool excludeAliases)
 {
   // if project specific
   if(project)
@@ -1791,7 +1792,8 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name, bool exclud
     std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
     for(unsigned int i = 0; i < gens->size(); ++i)
       {
-      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name, excludeAliases);
+      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name,
+                                                            excludeAliases);
       if(ret)
         {
         return ret;
@@ -1803,7 +1805,8 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name, bool exclud
     {
     if (!excludeAliases)
       {
-      std::map<cmStdString, cmTarget*>::iterator ai = this->AliasTargets.find(name);
+      std::map<cmStdString, cmTarget*>::iterator ai
+                                              = this->AliasTargets.find(name);
       if (ai != this->AliasTargets.end())
         {
         return ai->second;
