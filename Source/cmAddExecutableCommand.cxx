@@ -30,6 +30,7 @@ bool cmAddExecutableCommand
   bool excludeFromAll = false;
   bool importTarget = false;
   bool importGlobal = false;
+  bool isAlias = false;
   while ( s != args.end() )
     {
     if (*s == "WIN32")
@@ -57,6 +58,11 @@ bool cmAddExecutableCommand
       ++s;
       importGlobal = true;
       }
+    else if(*s == "ALIAS")
+      {
+      ++s;
+      isAlias = true;
+      }
     else
       {
       break;
@@ -82,6 +88,62 @@ bool cmAddExecutableCommand
         "may not be given EXCLUDE_FROM_ALL for an IMPORTED target.");
       }
     return false;
+    }
+  if (isAlias)
+    {
+    if(!cmGeneratorExpression::IsValidTargetName(exename.c_str()))
+      {
+      this->SetError(("Invalid name for ALIAS: " + exename).c_str());
+      return false;
+      }
+    if(excludeFromAll)
+      {
+      this->SetError("EXCLUDE_FROM_ALL with ALIAS makes no sense.");
+      return false;
+      }
+    if(importTarget || importGlobal)
+      {
+      this->SetError("IMPORTED with ALIAS is not allowed.");
+      return false;
+      }
+    if(std::distance(s, args.end()) != 1)
+      {
+      cmOStringStream e;
+      e << "ALIAS requires exactly one target argument.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    const char *aliasedName = s->c_str();
+    cmTarget *aliasedTarget =
+                    this->Makefile->FindTargetToUse(aliasedName, true);
+    if(this->Makefile->IsAlias(aliasedName))
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << exename
+        << "\" because target \"" << aliasedName << "\" is itself an ALIAS.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    if(!aliasedTarget)
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << exename
+        << "\" because target \"" << aliasedName << "\" does not already "
+        "exist.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    if(aliasedTarget->IsImported())
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << exename
+        << "\" because target \"" << aliasedName << "\" is IMPORTED.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    this->Makefile->AddAlias(exename.c_str(), aliasedTarget);
+    return true;
     }
 
   // Handle imported target creation.
