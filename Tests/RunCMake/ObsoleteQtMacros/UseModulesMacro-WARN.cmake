@@ -1,4 +1,25 @@
 
+function(QUERY_QMAKE VAR RESULT)
+  execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query ${VAR}
+    RESULT_VARIABLE return_code
+    OUTPUT_VARIABLE output
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+  if(NOT return_code)
+    file(TO_CMAKE_PATH "${output}" output)
+    set(${RESULT} ${output} PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(get_version_components VERSION RESULT_MAJOR RESULT_MINOR RESULT_PATCH)
+  string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" QT_VERSION_MAJOR "${QTVERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" QT_VERSION_MINOR "${QTVERSION}")
+  string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" QT_VERSION_PATCH "${QTVERSION}")
+
+  set(${RESULT_MAJOR} ${QT_VERSION_MAJOR} PARENT_SCOPE)
+  set(${RESULT_MINOR} ${QT_VERSION_MINOR} PARENT_SCOPE)
+  set(${RESULT_PATCH} ${QT_VERSION_PATCH} PARENT_SCOPE)
+endfunction()
+
 function(test_find_qmake QMAKE_NAMES QMAKE_RESULT VERSION_RESULT)
   list(LENGTH QMAKE_NAMES QMAKE_NAMES_LEN)
   if(${QMAKE_NAMES_LEN} EQUAL 0)
@@ -18,8 +39,8 @@ function(test_find_qmake QMAKE_NAMES QMAKE_RESULT VERSION_RESULT)
 
   set(major 0)
   if (QT_QMAKE_EXECUTABLE)
-    _qt4_query_qmake(QT_VERSION QTVERSION)
-    _qt4_get_version_components("${QTVERSION}" major minor patch)
+    query_qmake(QT_VERSION QTVERSION)
+    get_version_components("${QTVERSION}" major minor patch)
   endif()
 
   if (NOT QT_QMAKE_EXECUTABLE OR NOT "${major}" EQUAL 4)
@@ -30,7 +51,7 @@ function(test_find_qmake QMAKE_NAMES QMAKE_RESULT VERSION_RESULT)
     list(REMOVE_AT QMAKE_NAMES 0)
     test_find_qmake("${QMAKE_NAMES}" QMAKE QTVERSION)
 
-    _qt4_get_version_components("${QTVERSION}" major minor patch)
+    get_version_components("${QTVERSION}" major minor patch)
     if (NOT ${major} EQUAL 4)
       # Restore possibly found qmake and it's version; these are used later
       # in error message if incorrect version is found
