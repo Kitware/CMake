@@ -311,6 +311,10 @@ install(
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications
   )
+if (APPLE)
+  file(COPY testLib4.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/testLib4.framework/Headers)
+  install(FILES testLib4.h DESTINATION Frameworks/testLib4.framework/Headers)
+endif()
 install(
   TARGETS
   testExe2libImp testLib3Imp
