@@ -282,6 +282,8 @@ install(
   )
 if (APPLE)
   file(COPY testLib4.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/testLib4.framework/Headers)
+  file(COPY testLib4.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug/testLib4.framework/Headers)
+  file(COPY testLib4.h DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Release/testLib4.framework/Headers)
   install(FILES testLib4.h DESTINATION Frameworks/testLib4.framework/Headers)
 endif()
 install(
