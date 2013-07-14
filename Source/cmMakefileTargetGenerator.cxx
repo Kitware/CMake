@@ -1143,8 +1143,8 @@ cmMakefileTargetGenerator
 ::DriveCustomCommands(std::vector<std::string>& depends)
 {
   // Depend on all custom command outputs.
-  const std::vector<cmSourceFile*>& sources =
-    this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {

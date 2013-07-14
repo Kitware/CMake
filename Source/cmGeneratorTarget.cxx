@@ -279,9 +279,9 @@ bool cmGeneratorTarget::GetPropertyAsBool(const char *prop) const
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles() const
+void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
-  return this->Target->GetSourceFiles();
+  this->Target->GetSourceFiles(files);
 }
 
 //----------------------------------------------------------------------------
@@ -293,7 +293,8 @@ void cmGeneratorTarget::ClassifySources()
   bool isObjLib = targetType == cmTarget::OBJECT_LIBRARY;
 
   std::vector<cmSourceFile*> badObjLib;
-  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
     {
@@ -491,7 +492,8 @@ cmTargetTraceDependencies
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
-  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
     {

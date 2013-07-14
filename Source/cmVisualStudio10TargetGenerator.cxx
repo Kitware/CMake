@@ -697,7 +697,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   // collect up group information
   std::vector<cmSourceGroup> sourceGroups =
     this->Makefile->GetSourceGroups();
-  std::vector<cmSourceFile*>  classes = this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> classes;
+  this->Target->GetSourceFiles(classes);
 
   std::set<cmSourceGroup*> groupsUsed;
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin();

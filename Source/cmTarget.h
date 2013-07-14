@@ -132,7 +132,7 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  std::vector<cmSourceFile*> const& GetSourceFiles() const;
+  void GetSourceFiles(std::vector<cmSourceFile*> &files) const;
   void AddSourceFile(cmSourceFile* sf);
   std::vector<std::string> const& GetObjectLibraries() const
     {
