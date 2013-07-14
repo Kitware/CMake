@@ -30,7 +30,7 @@ public:
   const char *GetName() const;
   const char *GetProperty(const char *prop) const;
   bool GetPropertyAsBool(const char *prop) const;
-  std::vector<cmSourceFile*> const& GetSourceFiles() const;
+  void GetSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   void GetObjectSources(std::vector<cmSourceFile*> &) const;
   const std::string& GetObjectName(cmSourceFile const* file);

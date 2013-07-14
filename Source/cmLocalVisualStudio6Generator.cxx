@@ -314,7 +314,8 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> const & classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*> classes;
+  target.GetSourceFiles(classes);
 
   // now all of the source files have been properly assigned to the target
   // now stick them into source groups using the reg expressions
