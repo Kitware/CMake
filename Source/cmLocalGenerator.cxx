@@ -657,7 +657,8 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
   cmStdString objs;
   std::vector<std::string> objVector;
   // Add all the sources outputs to the depends of the target
-  std::vector<cmSourceFile*> const& classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*> classes;
+  target.GetSourceFiles(classes);
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); ++i)
     {
@@ -1631,7 +1632,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
       if(this->Makefile->IsOn("WIN32") &&
          !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
         {
-        const std::vector<cmSourceFile*>& sources = target->GetSourceFiles();
+        std::vector<cmSourceFile*> sources;
+        target->GetSourceFiles(sources);
         for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
             i != sources.end(); ++i)
           {

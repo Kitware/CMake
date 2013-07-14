@@ -42,8 +42,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
     }
   }
 
-  const std::vector<cmSourceFile*>& sources =
-    this->GetTarget()->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->GetTarget()->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {

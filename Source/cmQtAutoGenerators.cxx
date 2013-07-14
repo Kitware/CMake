@@ -451,7 +451,8 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
   const char* sepFiles = "";
   const char* sepHeaders = "";
 
-  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+  std::vector<cmSourceFile*> srcFiles;
+  target->GetSourceFiles(srcFiles);
 
   std::string skip_moc;
   const char *sep = "";
@@ -643,7 +644,8 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   const char *qtUic = makefile->GetSafeDefinition("QT_UIC_EXECUTABLE");
   makefile->AddDefinition("_qt_uic_executable", qtUic);
 
-  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+  std::vector<cmSourceFile*> srcFiles;
+  target->GetSourceFiles(srcFiles);
 
   std::string skip_uic;
   const char *sep = "";
@@ -809,7 +811,8 @@ void cmQtAutoGenerators::InitializeAutoRccTarget(cmTarget* target)
 {
   cmMakefile *makefile = target->GetMakefile();
 
-  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+  std::vector<cmSourceFile*> srcFiles;
+  target->GetSourceFiles(srcFiles);
 
   std::vector<cmSourceFile*> newFiles;
 
@@ -855,7 +858,8 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   const char* sepRccFiles = "";
   cmMakefile *makefile = target->GetMakefile();
 
-  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+  std::vector<cmSourceFile*> srcFiles;
+  target->GetSourceFiles(srcFiles);
 
   std::string rccFileFiles;
   std::string rccFileOptions;

@@ -2884,7 +2884,8 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
 
     // List the source files with any per-source labels.
     fout << "# Source files and their labels\n";
-    std::vector<cmSourceFile*> const& sources = target->GetSourceFiles();
+    std::vector<cmSourceFile*> sources;
+    target->GetSourceFiles(sources);
     for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
         si != sources.end(); ++si)
       {

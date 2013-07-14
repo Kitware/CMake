@@ -398,7 +398,8 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::OBJECT_LIBRARY:
         case cmTarget::UTILITY: // can have sources since 2.6.3
           {
-          const std::vector<cmSourceFile*>&sources=ti->second.GetSourceFiles();
+          std::vector<cmSourceFile*> sources;
+          ti->second.GetSourceFiles(sources);
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
             {

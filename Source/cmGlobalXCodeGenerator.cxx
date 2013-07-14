@@ -991,7 +991,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       }
 
     // organize the sources
-    std::vector<cmSourceFile*> classes = cmtarget.GetSourceFiles();
+    std::vector<cmSourceFile*> classes;
+    cmtarget.GetSourceFiles(classes);
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
     std::vector<cmXCodeObject*> externalObjFiles;
@@ -1360,7 +1361,8 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     postbuild.push_back(command);
     }
 
-  std::vector<cmSourceFile*>const &classes = cmtarget.GetSourceFiles();
+  std::vector<cmSourceFile*> classes;
+  cmtarget.GetSourceFiles(classes);
   // add all the sources
   std::vector<cmCustomCommand> commands;
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -2442,7 +2444,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   // Add source files without build rules for editing convenience.
   if(cmtarget.GetType() == cmTarget::UTILITY)
     {
-    std::vector<cmSourceFile*> const& sources = cmtarget.GetSourceFiles();
+    std::vector<cmSourceFile*> sources;
+    cmtarget.GetSourceFiles(sources);
     for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
         i != sources.end(); ++i)
       {
@@ -2945,7 +2948,8 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         cmtarget.AddSourceFile(sf);
         }
 
-      std::vector<cmSourceFile*>  classes = cmtarget.GetSourceFiles();
+      std::vector<cmSourceFile*> classes;
+      cmtarget.GetSourceFiles(classes);
 
       // Put cmSourceFile instances in proper groups:
       for(std::vector<cmSourceFile*>::const_iterator s = classes.begin();
