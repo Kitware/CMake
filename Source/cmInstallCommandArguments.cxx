@@ -215,8 +215,9 @@ cmInstallCommandIncludesArgument::GetIncludeDirs() const
   return this->IncludeDirs;
 }
 
-void cmInstallCommandIncludesArgument::Parse(const std::vector<std::string>* args,
-                                      std::vector<std::string>*)
+void cmInstallCommandIncludesArgument::Parse(
+                                        const std::vector<std::string>* args,
+                                        std::vector<std::string>*)
 {
   if(args->empty())
     {
