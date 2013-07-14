@@ -65,4 +65,17 @@ class cmInstallCommandArguments
     bool CheckPermissions();
 };
 
+class cmInstallCommandIncludesArgument
+{
+  public:
+    cmInstallCommandIncludesArgument();
+    void Parse(const std::vector<std::string>* args,
+               std::vector<std::string>* unconsumedArgs);
+
+    const std::vector<std::string>& GetIncludeDirs() const;
+
+  private:
+    std::vector<std::string> IncludeDirs;
+};
+
 #endif
