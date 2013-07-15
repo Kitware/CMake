@@ -3667,11 +3667,11 @@ void cmake::RecordPropertyAccess(const char *name,
 
 void cmake::ReportUndefinedPropertyAccesses(const char *filename)
 {
+  if(!this->GlobalGenerator)
+    { return; }
   FILE *progFile = fopen(filename,"w");
-  if (!progFile || !this->GlobalGenerator)
-    {
-    return;
-    }
+  if(!progFile)
+    { return; }
 
   // what are the enabled languages?
   std::vector<std::string> enLangs;
