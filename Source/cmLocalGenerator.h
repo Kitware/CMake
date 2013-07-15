@@ -166,6 +166,9 @@ public:
   {
     this->AppendDefines(defines, defines_list.c_str());
   }
+  void AppendDefines(std::set<std::string>& defines,
+                     const std::vector<std::string> &defines_vec);
+
   /**
    * Join a set of defines into a definesString with a space separator.
    */
@@ -220,6 +223,8 @@ public:
                              bool stripImplicitInclDirs = true);
   void AddCompileOptions(std::string& flags, cmTarget* target,
                          const char* lang, const char* config);
+  void AddCompileDefinitions(std::set<std::string>& defines, cmTarget* target,
+                         const char* config);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);

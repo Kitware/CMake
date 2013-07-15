@@ -27,6 +27,7 @@ public:
   // Store definitions and flags.
   void AddDefine(const std::string& define);
   void AddDefines(const char* defines);
+  void AddDefines(const std::vector<std::string> &defines);
   void AddFlag(const char* flag, const char* value);
   void RemoveFlag(const char* flag);
   const char* GetFlag(const char* flag);

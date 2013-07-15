@@ -1339,6 +1339,17 @@ std::string cmLocalGenerator::GetIncludeFlags(
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
+                                             cmTarget* target,
+                                             const char* config)
+{
+  std::vector<std::string> targetDefines;
+  target->GetCompileDefinitions(targetDefines,
+                               config);
+  this->AppendDefines(defines, targetDefines);
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileOptions(
   std::string& flags, cmTarget* target,
   const char* lang, const char* config
@@ -2297,7 +2308,13 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
   // Expand the list of definitions.
   std::vector<std::string> defines_vec;
   cmSystemTools::ExpandListArgument(defines_list, defines_vec);
+  this->AppendDefines(defines, defines_vec);
+}
 
+//----------------------------------------------------------------------------
+void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
+                                  const std::vector<std::string> &defines_vec)
+{
   for(std::vector<std::string>::const_iterator di = defines_vec.begin();
       di != defines_vec.end(); ++di)
     {

@@ -441,7 +441,8 @@ public:
       If no macro should be defined null is returned.  */
   const char* GetExportMacro();
 
-  std::string GetCompileDefinitions(const char *config);
+  void GetCompileDefinitions(std::vector<std::string> &result,
+                             const char *config);
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -511,6 +512,8 @@ public:
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
   void InsertCompileOption(const cmValueWithOrigin &entry,
+                     bool before = false);
+  void InsertCompileDefinition(const cmValueWithOrigin &entry,
                      bool before = false);
 
   void AppendBuildInterfaceIncludes();
@@ -648,6 +651,7 @@ private:
   bool IsImportedTarget;
   bool DebugIncludesDone;
   bool DebugCompileOptionsDone;
+  bool DebugCompileDefinitionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
