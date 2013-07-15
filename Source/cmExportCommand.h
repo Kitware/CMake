@@ -63,7 +63,7 @@ public:
     {
     return
       "  export(TARGETS [target1 [target2 [...]]] [NAMESPACE <namespace>]\n"
-      "         [APPEND] FILE <filename>)\n"
+      "         [APPEND] FILE <filename> [EXPORT_LINK_INTERFACE_LIBRARIES])\n"
       "Create a file <filename> that may be included by outside projects to "
       "import targets from the current project's build tree.  "
       "This is useful during cross-compiling to build utility executables "
@@ -73,6 +73,10 @@ public:
       "prepended to all target names written to the file.  "
       "If the APPEND option is given the generated code will be appended "
       "to the file instead of overwriting it.  "
+      "The EXPORT_LINK_INTERFACE_LIBRARIES keyword, if present, causes the "
+      "contents of the properties matching "
+      "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? to be exported, when "
+      "policy CMP0022 is NEW.  "
       "If a library target is included in the export but "
       "a target to which it links is not included the behavior is "
       "unspecified."
@@ -104,6 +108,7 @@ private:
   cmCAEnabler Append;
   cmCAString Namespace;
   cmCAString Filename;
+  cmCAEnabler ExportOld;
 
   friend class cmExportBuildFileGenerator;
   std::string ErrorMessage;

@@ -68,6 +68,16 @@ target_link_libraries(imp_testExe1b
   bld_testLibCycleA
   )
 
+add_executable(cmp0022OLD_test cmp0022OLD_test_vs6_1.cpp)
+target_link_libraries(cmp0022OLD_test bld_cmp0022OLD)
+add_executable(cmp0022NEW_test cmp0022NEW_test_vs6_1.cpp)
+target_link_libraries(cmp0022NEW_test bld_cmp0022NEW)
+
+add_executable(cmp0022OLD_exp_test cmp0022OLD_test_vs6_2.cpp)
+target_link_libraries(cmp0022OLD_exp_test exp_cmp0022OLD)
+add_executable(cmp0022NEW_exp_test cmp0022NEW_test_vs6_2.cpp)
+target_link_libraries(cmp0022NEW_exp_test exp_cmp0022NEW)
+
 # Try building a plugin to an executable imported from the build tree.
 add_library(imp_mod1b MODULE imp_mod1.c)
 target_link_libraries(imp_mod1b bld_testExe2)

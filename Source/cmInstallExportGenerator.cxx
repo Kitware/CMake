@@ -33,12 +33,14 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   std::vector<std::string> const& configurations,
   const char* component,
   const char* filename, const char* name_space,
+  bool exportOld,
   cmMakefile* mf)
   :cmInstallGenerator(destination, configurations, component)
   ,ExportSet(exportSet)
   ,FilePermissions(file_permissions)
   ,FileName(filename)
   ,Namespace(name_space)
+  ,ExportOld(exportOld)
   ,Makefile(mf)
 {
   this->EFGen = new cmExportInstallFileGenerator(this);
@@ -137,6 +139,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   // Generate the import file for this export set.
   this->EFGen->SetExportFile(this->MainImportFile.c_str());
   this->EFGen->SetNamespace(this->Namespace.c_str());
+  this->EFGen->SetExportOld(this->ExportOld);
   if(this->ConfigurationTypes->empty())
     {
     if(this->ConfigurationName && *this->ConfigurationName)

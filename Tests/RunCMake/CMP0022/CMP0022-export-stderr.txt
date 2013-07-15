@@ -1,0 +1,4 @@
+CMake Error at CMP0022-export.cmake:11 \(export\):
+  Target "cmp0022NEW" has policy CMP0022 enabled, but also has old-style
+  INTERFACE_LINK_LIBRARIES properties populated, but it was exported without
+  the EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties
