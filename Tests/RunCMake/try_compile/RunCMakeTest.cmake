@@ -1,10 +1,12 @@
 include(RunCMake)
 
+run_cmake(CopyFileErrorNoCopyFile)
 run_cmake(NoArgs)
 run_cmake(OneArg)
 run_cmake(TwoArgs)
 run_cmake(NoCopyFile)
 run_cmake(NoCopyFile2)
+run_cmake(NoCopyFileError)
 run_cmake(NoOutputVariable)
 run_cmake(NoOutputVariable2)
 run_cmake(NoSources)
