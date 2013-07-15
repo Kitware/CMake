@@ -564,10 +564,26 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       const char* loc = 0;
       const char* imp = 0;
       std::string suffix;
-      return context->CurrentTarget->GetMappedConfig(context->Config,
+      if (context->CurrentTarget->GetMappedConfig(context->Config,
                                                   &loc,
                                                   &imp,
-                                                  suffix) ? "1" : "0";
+                                                  suffix))
+        {
+        // This imported target has an appropriate location
+        // for this (possibly mapped) config.
+        // Check if there is a proper config mapping for the tested config.
+        std::vector<std::string> mappedConfigs;
+        std::string mapProp = "MAP_IMPORTED_CONFIG_";
+        mapProp += context->Config;
+        if(const char* mapValue =
+                        context->CurrentTarget->GetProperty(mapProp.c_str()))
+          {
+          cmSystemTools::ExpandListArgument(cmSystemTools::UpperCase(mapValue),
+                                            mappedConfigs);
+          return std::find(mappedConfigs.begin(), mappedConfigs.end(),
+                          context->Config) != mappedConfigs.end() ? "1" : "0";
+          }
+        }
       }
     return "0";
   }
