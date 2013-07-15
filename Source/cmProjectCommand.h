@@ -71,7 +71,13 @@ public:
       "language \"NONE\" all checks for any language can be disabled. "
       "If a variable exists called CMAKE_PROJECT_<projectName>_INCLUDE, "
       "the file pointed to by that variable will be included as the last step "
-      "of the project command.";
+      "of the project command."
+      "\n"
+      "The top-level CMakeLists.txt file for a project must contain a "
+      "literal, direct call to the project() command; loading one through "
+      "the include() command is not sufficient.  "
+      "If no such call exists CMake will implicitly add one to the top that "
+      "enables the default languages (C and CXX).";
     }
 
   cmTypeMacro(cmProjectCommand, cmCommand);
