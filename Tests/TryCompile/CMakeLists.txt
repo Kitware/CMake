@@ -89,6 +89,24 @@ if(SHOULD_FAIL)
    message(SEND_ERROR "Should fail passed ${TRY_OUT}")
 endif()
 
+# try to compile a file that should compile
+set(_c_flags "${CMAKE_C_FLAGS}")
+if(CMAKE_GENERATOR STREQUAL "Visual Studio 6")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D \"TESTDEF\"")
+elseif(WATCOM)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -dTESTDEF")
+else()
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} \"-DTESTDEF\"")
+endif()
+try_compile(SHOULD_PASS
+    ${TryCompile_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
+    ${TryCompile_SOURCE_DIR}/testdef.c
+    OUTPUT_VARIABLE TRY_OUT)
+if(NOT SHOULD_PASS)
+  message(SEND_ERROR "should pass failed ${TRY_OUT}")
+endif()
+set(CMAKE_C_FLAGS "${_c_flags}")
+
 if(NOT SHOULD_FAIL)
   if(SHOULD_PASS)
     message("All Tests passed, ignore all previous output.")
