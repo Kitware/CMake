@@ -1,0 +1,13 @@
+  Error evaluating generator expression:
+
+    \$<TARGET_POLICY:NOT_A_POLICY>
+
+  \$<TARGET_POLICY:prop> may only be used with a limited number of policies.
+  Currently it may be used with the following policies:
+
+   \* CMP0003
+   \* CMP0004
+   \* CMP0008
+   \* CMP0020
+   \* CMP0021
+   \* CMP0022
