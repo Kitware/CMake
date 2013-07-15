@@ -134,7 +134,7 @@ public:
       "The INCLUDES DESTINATION specifies a list of directories which will "
       "be added to the INTERFACE_INCLUDE_DIRECTORIES of the <targets> when "
       "exported by install(EXPORT).  If a relative path is specified, it is "
-      "treated as relative to the $<INSTALL_PREFIX>.  "
+      "treated as relative to the $<INSTALL_PREFIX>."
       "\n"
       "The PRIVATE_HEADER, PUBLIC_HEADER, and RESOURCE arguments cause "
       "subsequent properties to be applied to installing a FRAMEWORK "
