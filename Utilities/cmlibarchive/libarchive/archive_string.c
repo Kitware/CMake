@@ -1248,8 +1248,8 @@ create_sconv_object(const char *fc, const char *tc,
 	}
 	sc->to_charset = strdup(tc);
 	if (sc->to_charset == NULL) {
-		free(sc);
 		free(sc->from_charset);
+		free(sc);
 		return (NULL);
 	}
 	archive_string_init(&sc->utftmp);

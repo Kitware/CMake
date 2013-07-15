@@ -137,5 +137,6 @@ int main ( int argc, char** argv )
 #endif
 
    fprintf ( stderr, "all ok\n" );
+   fclose(f);
    return 0;
 }
