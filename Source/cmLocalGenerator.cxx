@@ -55,7 +55,6 @@ cmLocalGenerator::cmLocalGenerator()
   this->UseRelativePaths = false;
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
-  this->IsMakefileGenerator = false;
   this->RelativePathsConfigured = false;
   this->PathConversionsSetup = false;
   this->BackwardsCompatibility = 0;
@@ -260,12 +259,7 @@ void cmLocalGenerator::TraceDependencies()
   cmTargets& targets = this->Makefile->GetTargets();
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    const char* projectFilename = 0;
-    if (this->IsMakefileGenerator == false)  // only use of this variable
-      {
-      projectFilename = t->second.GetName();
-      }
-    t->second.TraceDependencies(projectFilename);
+    t->second.TraceDependencies();
     }
 }
 

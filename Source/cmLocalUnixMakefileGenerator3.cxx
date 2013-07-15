@@ -92,7 +92,6 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;
   this->MakeCommandEscapeTargetTwice = false;
-  this->IsMakefileGenerator = true;
   this->BorlandMakeCurlyHack = false;
 }
 
