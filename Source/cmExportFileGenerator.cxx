@@ -243,31 +243,27 @@ static bool checkInterfaceDirs(const std::string &prepro,
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
-                      cmTargetExport *tei,
+                      cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
-  cmTarget *target = tei->Target;
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
 
   const char *propName = "INTERFACE_INCLUDE_DIRECTORIES";
   const char *input = target->GetProperty(propName);
-  if (!input && tei->InterfaceIncludeDirectories.empty())
+  if (!input)
     {
     return;
     }
-  if (!*input && tei->InterfaceIncludeDirectories.empty())
+  if (!*input)
     {
     // Set to empty
     properties[propName] = "";
     return;
     }
 
-  std::string includes = (input?input:"");
-  const char* sep = input ? ";" : "";
-  includes += sep + tei->InterfaceIncludeDirectories;
-  std::string prepro = cmGeneratorExpression::Preprocess(includes,
+  std::string prepro = cmGeneratorExpression::Preprocess(input,
                                                           preprocessRule);
   if (!prepro.empty())
     {

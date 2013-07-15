@@ -386,6 +386,21 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         this->SetError(e.str().c_str());
         return false;
         }
+      std::vector<std::string> dirs = includesArgs.GetIncludeDirs();
+      if(!dirs.empty())
+        {
+        std::string dirString;
+        const char *sep = "";
+        for (std::vector<std::string>::const_iterator it = dirs.begin();
+            it != dirs.end(); ++it)
+          {
+          dirString += sep;
+          dirString += *it;
+          sep = ";";
+          }
+        target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
+          ("$<INSTALL_INTERFACE:" + dirString + ">").c_str());
+        }
       // Store the target in the list to be installed.
       targets.push_back(target);
       }
@@ -750,20 +765,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->RuntimeGenerator = runtimeGenerator;
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->GetExportSets()[exports.GetString()]->AddTargetExport(te);
-
-      std::vector<std::string> dirs = includesArgs.GetIncludeDirs();
-      if(!dirs.empty())
-        {
-        std::string dirString;
-        const char *sep = "";
-        for (std::vector<std::string>::const_iterator it = dirs.begin();
-            it != dirs.end(); ++it)
-          {
-          te->InterfaceIncludeDirectories += sep;
-          te->InterfaceIncludeDirectories += *it;
-          sep = ";";
-          }
-        }
       }
     }
 
