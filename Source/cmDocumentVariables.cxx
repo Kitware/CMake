@@ -514,6 +514,13 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "analysis of libraries linked by a target.",
      false,
      "Variables that Provide Information");
+  cm->DefineProperty
+    ("CMAKE_MINIMUM_REQUIRED_VERSION", cmProperty::VARIABLE,
+     "Version specified to cmake_minimum_required command",
+     "Variable containing the VERSION component specified in the "
+     "cmake_minimum_required command.",
+     false,
+     "Variables that Provide Information");
 
 
   // Variables defined by cmake, that change the behavior
@@ -674,6 +681,23 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Commands like include() and find_package() search for files in "
      "directories listed by this variable before checking the default "
      "modules that come with CMake.",
+     false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_WARN_DEPRECATED", cmProperty::VARIABLE,
+     "Whether to issue deprecation warnings for macros and functions.",
+     "If TRUE, this can be used by macros and functions to issue "
+     "deprecation warnings.  This variable is FALSE by default.",
+     false,
+     "Variables That Change Behavior");
+
+  cm->DefineProperty
+    ("CMAKE_ERROR_DEPRECATED", cmProperty::VARIABLE,
+     "Whether to issue deprecation errors for macros and functions.",
+     "If TRUE, this can be used by macros and functions to issue "
+     "fatal errors when deprecated macros or functions are used.  This "
+     "variable is FALSE by default.",
      false,
      "Variables That Change Behavior");
 
