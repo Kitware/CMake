@@ -114,6 +114,15 @@
 # and <TMP_DIR>
 # with corresponding property values.
 #
+# Any builtin step that specifies a "<step>_COMMAND cmd..." or custom
+# step that specifies a "COMMAND cmd..." may specify additional command
+# lines using the form "COMMAND cmd...".  At build time the commands will
+# be executed in order and aborted if any one fails.  For example:
+#  ... BUILD_COMMAND make COMMAND echo done ...
+# specifies to run "make" and then "echo done" during the build step.
+# Whether the current working directory is preserved between commands
+# is not defined.  Behavior of shell operators like "&&" is not defined.
+#
 # The 'ExternalProject_Get_Property' function retrieves external project
 # target properties:
 #  ExternalProject_Get_Property(<name> [prop1 [prop2 [...]]])
