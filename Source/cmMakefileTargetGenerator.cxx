@@ -644,23 +644,6 @@ cmMakefileTargetGenerator
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);
   vars.ObjectDir = objectDir.c_str();
-
-  if (const char *rootPath =
-                    this->Makefile->GetSafeDefinition("CMAKE_SYSROOT"))
-    {
-    if (*rootPath)
-      {
-      if (const char *sysrootFlag =
-                      this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
-        {
-        flags += " ";
-        flags += sysrootFlag;
-        flags += this->LocalGenerator->EscapeForShell(rootPath);
-        flags += " ";
-        }
-      }
-    }
-
   vars.Flags = flags.c_str();
 
   std::string definesString = "$(";

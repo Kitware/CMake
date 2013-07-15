@@ -561,16 +561,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables That Change Behavior");
 
     cm->DefineProperty
-    ("CMAKE_SYSROOT",  cmProperty::VARIABLE,
-     "Path to pass to the compiler in the --sysroot flag.",
-     "The CMAKE_SYSROOT content is passed to the compiler in the --sysroot "
-     "flag, if supported.  The path is also stripped from the RPATH if "
-     "necessary on installation.  The CMAKE_SYSROOT is also used to prefix "
-     "paths searched by the find_* commands.",
-     false,
-     "Variables That Change Behavior");
-
-    cm->DefineProperty
     ("CMAKE_FIND_LIBRARY_PREFIXES",  cmProperty::VARIABLE,
      "Prefixes to prepend when looking for libraries.",
      "This specifies what prefixes to add to library names when "

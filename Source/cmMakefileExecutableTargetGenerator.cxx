@@ -365,22 +365,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.TargetVersionMajor = targetVersionMajor.c_str();
   vars.TargetVersionMinor = targetVersionMinor.c_str();
 
-  if (const char *rootPath =
-                    this->Makefile->GetDefinition("CMAKE_SYSROOT"))
-    {
-    if (*rootPath)
-      {
-      if (const char *sysrootFlag =
-                      this->Makefile->GetDefinition("CMAKE_SYSROOT_FLAG"))
-        {
-        flags += " ";
-        flags += sysrootFlag;
-        flags += this->LocalGenerator->EscapeForShell(rootPath);
-        flags += " ";
-        }
-      }
-    }
-
   vars.LinkLibraries = linkLibs.c_str();
   vars.Flags = flags.c_str();
   vars.LinkFlags = linkFlags.c_str();
