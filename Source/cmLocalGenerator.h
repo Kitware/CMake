@@ -435,8 +435,6 @@ protected:
   bool IgnoreLibPrefix;
   bool Configured;
   bool EmitUniversalBinaryFlags;
-  // A type flag is not nice. It's used only in TraceDependencies().
-  bool IsMakefileGenerator;
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
   std::string TargetImplib;

@@ -1789,8 +1789,7 @@ bool cmTarget::IsBundleOnApple()
 class cmTargetTraceDependencies
 {
 public:
-  cmTargetTraceDependencies(cmTarget* target, cmTargetInternals* internal,
-                            const char* vsProjectFile);
+  cmTargetTraceDependencies(cmTarget* target, cmTargetInternals* internal);
   void Trace();
 private:
   cmTarget* Target;
@@ -1814,8 +1813,7 @@ private:
 
 //----------------------------------------------------------------------------
 cmTargetTraceDependencies
-::cmTargetTraceDependencies(cmTarget* target, cmTargetInternals* internal,
-                            const char* vsProjectFile):
+::cmTargetTraceDependencies(cmTarget* target, cmTargetInternals* internal):
   Target(target), Internal(internal)
 {
   // Convenience.
@@ -1830,13 +1828,6 @@ cmTargetTraceDependencies
       si != sources.end(); ++si)
     {
     this->QueueSource(*si);
-    }
-
-  // Queue the VS project file to check dependencies on the rule to
-  // generate it.
-  if(vsProjectFile)
-    {
-    this->FollowName(vsProjectFile);
     }
 
   // Queue pre-build, pre-link, and post-build rule dependencies.
@@ -2057,7 +2048,7 @@ cmTargetTraceDependencies
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::TraceDependencies(const char* vsProjectFile)
+void cmTarget::TraceDependencies()
 {
   // CMake-generated targets have no dependencies to trace.  Normally tracing
   // would find nothing anyway, but when building CMake itself the "install"
@@ -2069,7 +2060,7 @@ void cmTarget::TraceDependencies(const char* vsProjectFile)
     }
 
   // Use a helper object to trace the dependencies.
-  cmTargetTraceDependencies tracer(this, this->Internal.Get(), vsProjectFile);
+  cmTargetTraceDependencies tracer(this, this->Internal.Get());
   tracer.Trace();
 }
 

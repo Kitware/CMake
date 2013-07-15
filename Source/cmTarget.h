@@ -341,7 +341,7 @@ public:
    * Trace through the source files in this target and add al source files
    * that they depend on, used by all generators
    */
-  void TraceDependencies(const char* vsProjectFile);
+  void TraceDependencies();
 
   /**
    * Make sure the full path to all source files is known.
