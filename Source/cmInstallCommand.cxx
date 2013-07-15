@@ -219,7 +219,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   cmCAStringVector runtimeArgVector      (&argHelper,"RUNTIME",&group);
   cmCAStringVector frameworkArgVector    (&argHelper,"FRAMEWORK",&group);
   cmCAStringVector bundleArgVector       (&argHelper,"BUNDLE",&group);
-  cmCAStringVector includesArgVector     (&argHelper,"INCLUDES",&group);
   cmCAStringVector privateHeaderArgVector(&argHelper,"PRIVATE_HEADER",&group);
   cmCAStringVector publicHeaderArgVector (&argHelper,"PUBLIC_HEADER",&group);
   cmCAStringVector resourceArgVector     (&argHelper,"RESOURCE",&group);
@@ -248,7 +247,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   cmInstallCommandArguments privateHeaderArgs(this->DefaultComponentName);
   cmInstallCommandArguments publicHeaderArgs(this->DefaultComponentName);
   cmInstallCommandArguments resourceArgs(this->DefaultComponentName);
-  cmInstallCommandIncludesArgument includesArgs;
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME, ARCHIVE etc.
@@ -260,7 +258,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   privateHeaderArgs.Parse(&privateHeaderArgVector.GetVector(), &unknownArgs);
   publicHeaderArgs.Parse (&publicHeaderArgVector.GetVector(),  &unknownArgs);
   resourceArgs.Parse     (&resourceArgVector.GetVector(),      &unknownArgs);
-  includesArgs.Parse     (&includesArgVector.GetVector(),      &unknownArgs);
 
   if(!unknownArgs.empty())
     {
@@ -750,20 +747,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       te->RuntimeGenerator = runtimeGenerator;
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->GetExportSets()[exports.GetString()]->AddTargetExport(te);
-
-      std::vector<std::string> dirs = includesArgs.GetIncludeDirs();
-      if(!dirs.empty())
-        {
-        std::string dirString;
-        const char *sep = "";
-        for (std::vector<std::string>::const_iterator it = dirs.begin();
-            it != dirs.end(); ++it)
-          {
-          te->InterfaceIncludeDirectories += sep;
-          te->InterfaceIncludeDirectories += *it;
-          sep = ";";
-          }
-        }
       }
     }
 

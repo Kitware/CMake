@@ -270,25 +270,8 @@ install(TARGETS testLibRequired
                 testLibIncludeRequired5
                 testLibIncludeRequired6
                 testSharedLibRequired
-        EXPORT RequiredExp DESTINATION lib
-        INCLUDES DESTINATION
-          installIncludesTest
-          $<INSTALL_PREFIX>/installIncludesTest2)
+        EXPORT RequiredExp DESTINATION lib )
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredTargets.cmake DESTINATION lib/cmake/testLibRequired)
-
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h" "// No content\n")
-
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2/installIncludesTest2.h" "// No content\n")
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h"
-  DESTINATION installIncludesTest
-)
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2/installIncludesTest2.h"
-  DESTINATION installIncludesTest2
-)
 
 install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
 install(EXPORT DependsExp FILE testLibDependsTargets.cmake DESTINATION lib/cmake/testLibDepends)
