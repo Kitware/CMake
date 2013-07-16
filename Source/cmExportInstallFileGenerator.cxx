@@ -39,7 +39,7 @@ std::string cmExportInstallFileGenerator::GetConfigImportFileGlob()
 //----------------------------------------------------------------------------
 bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::vector<cmTarget*> allTargets;
+  std::vector<cmTargetExport*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
@@ -49,10 +49,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     {
     expectedTargets += sep + this->Namespace + (*tei)->Target->GetExportName();
     sep = " ";
-    cmTargetExport const* te = *tei;
+    cmTargetExport * te = *tei;
     if(this->ExportedTargets.insert(te->Target).second)
       {
-      allTargets.push_back(te->Target);
+      allTargets.push_back(te);
       }
     else
       {
@@ -115,16 +115,16 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   bool require2_8_12 = false;
   // Create all the imported targets.
-  for(std::vector<cmTarget*>::const_iterator
+  for(std::vector<cmTargetExport*>::const_iterator
         tei = allTargets.begin();
       tei != allTargets.end(); ++tei)
     {
-    cmTarget* te = *tei;
+    cmTarget* te = (*tei)->Target;
     this->GenerateImportTargetCode(os, te);
 
     ImportPropertyMap properties;
 
-    this->PopulateIncludeDirectoriesInterface(te,
+    this->PopulateIncludeDirectoriesInterface(*tei,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
