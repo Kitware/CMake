@@ -240,6 +240,7 @@ target_include_directories(cmp0022OLD PUBLIC
 )
 cmake_policy(SET CMP0022 NEW)
 add_library(cmp0022NEW SHARED cmp0022_vs6_1.cpp)
+set_property(TARGET cmp0022NEW PROPERTY DEFINE_SYMBOL cmp0022OLD_EXPORTS)
 target_include_directories(cmp0022NEW PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/cmp0022>"
