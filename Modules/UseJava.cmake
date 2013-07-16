@@ -190,6 +190,7 @@
 #
 
 #=============================================================================
+# Copyright 2013 OpenGamma Ltd. <graham@opengamma.com>
 # Copyright 2010-2011 Andreas schneider <asn@redhat.com>
 # Copyright 2010 Ben Boeckel <ben.boeckel@kitware.com>
 #
@@ -367,6 +368,11 @@ function(add_jar _TARGET_NAME)
     endif()
 
     if (_JAVA_COMPILE_FILES)
+        # Create the list of files to compile.
+        set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources)
+        string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES}\"")
+        file(WRITE ${_JAVA_SOURCES_FILE} ${_JAVA_COMPILE_STRING})
+
         # Compile the java files and create a list of class files
         add_custom_command(
             # NOTE: this command generates an artificial dependency file
@@ -375,7 +381,7 @@ function(add_jar _TARGET_NAME)
                 ${CMAKE_JAVA_COMPILE_FLAGS}
                 -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"
                 -d ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
-                ${_JAVA_COMPILE_FILES}
+                @${_JAVA_SOURCES_FILE}
             COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
             DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_DEPENDS}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
