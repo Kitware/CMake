@@ -25,7 +25,7 @@ add_subdirectory(add_definitions_command_with_target_prop)
 
 add_executable(CompileDefinitions runtest.c)
 
-if(NOT BORLAND AND NOT PP_VS70)
+if(NOT BORLAND AND NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 7$")
   # Borland, VS70 IDE: ;
   # The Borland compiler will simply not accept a non-escaped semicolon
   # on the command line.  If it is escaped \; then the escape character
