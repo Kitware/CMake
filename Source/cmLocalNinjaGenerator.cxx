@@ -27,7 +27,6 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator()
   , ConfigName("")
   , HomeRelativeOutputPath("")
 {
-  this->IsMakefileGenerator = true;
 #ifdef _WIN32
   this->WindowsShell = true;
 #endif
