@@ -1017,6 +1017,17 @@ void cmGlobalGenerator::Generate()
   // it builds by default.
   this->FillLocalGeneratorToTargetMap();
 
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
+    cmTargets* targets = &(mf->GetTargets());
+    for ( cmTargets::iterator it = targets->begin();
+        it != targets->end(); ++ it )
+      {
+      it->second.FinalizeSystemIncludeDirectories();
+      }
+    }
+
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {

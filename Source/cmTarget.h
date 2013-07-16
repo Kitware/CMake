@@ -535,7 +535,19 @@ public:
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt);
+
+  void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
+  void AddSystemIncludeDirectories(const std::vector<std::string> &incs);
+  std::set<cmStdString> const & GetSystemIncludeDirectories() const
+    { return this->SystemIncludeDirectories; }
+
+  void FinalizeSystemIncludeDirectories();
+
 private:
+  // The set of include directories that are marked as system include
+  // directories.
+  std::set<cmStdString> SystemIncludeDirectories;
+
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
    */

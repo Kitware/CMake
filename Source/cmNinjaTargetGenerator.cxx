@@ -161,7 +161,8 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                               this->GeneratorTarget,
                                               language.c_str(), config);
   std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(includes, language.c_str(),
+    this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
+                                          language.c_str(),
     language == "RC" ? true : false); // full include paths for RC
                                       // needed by cmcldeps
   if(cmGlobalNinjaGenerator::IsMinGW())

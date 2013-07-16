@@ -612,7 +612,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::vector<std::string> includeDirs;
     cmSystemTools::ExpandListArgument(includes, includeDirs);
 
-    std::string includeFlags = lg->GetIncludeFlags(includeDirs,
+    std::string includeFlags = lg->GetIncludeFlags(includeDirs, 0,
                                                    language.c_str(), false);
 
     std::string definitions = mf->GetSafeDefinition("PACKAGE_DEFINITIONS");

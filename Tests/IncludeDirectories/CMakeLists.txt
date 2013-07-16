@@ -1,6 +1,23 @@
 cmake_minimum_required (VERSION 2.6)
 project(IncludeDirectories)
 
+if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
+    OR CMAKE_C_COMPILER_ID STREQUAL Clang)
+    AND (CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja"))
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
+  if(run_sys_includes_test)
+    # The Bullseye wrapper appears to break the -isystem effect.
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE out ERROR_VARIABLE out)
+    if("x${out}" MATCHES "Bullseye")
+      set(run_sys_includes_test 0)
+    endif()
+  endif()
+  if (run_sys_includes_test)
+    add_subdirectory(SystemIncludeDirectories)
+  endif()
+endif()
+
 file(WRITE ${CMAKE_BINARY_DIR}/Flags/Flags.h
 "//Flags.h
 ")

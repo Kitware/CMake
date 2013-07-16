@@ -152,6 +152,7 @@ public:
   virtual void AppendFlagEscape(std::string& flags, const char* rawFlag);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
+                              cmGeneratorTarget* target,
                               const char* lang, bool forResponseFile = false,
                               const char *config = 0);
 

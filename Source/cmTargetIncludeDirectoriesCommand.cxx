@@ -15,7 +15,8 @@
 bool cmTargetIncludeDirectoriesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
-  return this->HandleArguments(args, "INCLUDE_DIRECTORIES", PROCESS_BEFORE);
+  return this->HandleArguments(args, "INCLUDE_DIRECTORIES",
+                               ArgumentFlags(PROCESS_BEFORE | PROCESS_SYSTEM));
 }
 
 //----------------------------------------------------------------------------
@@ -65,10 +66,39 @@ std::string cmTargetIncludeDirectoriesCommand
 //----------------------------------------------------------------------------
 void cmTargetIncludeDirectoriesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
-                      bool prepend)
+                      bool prepend, bool system)
 {
   cmListFileBacktrace lfbt;
   this->Makefile->GetBacktrace(lfbt);
   cmValueWithOrigin entry(this->Join(content), lfbt);
   tgt->InsertInclude(entry, prepend);
+  if (system)
+    {
+    tgt->AddSystemIncludeDirectories(content);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTargetIncludeDirectoriesCommand
+::HandleInterfaceContent(cmTarget *tgt,
+                         const std::vector<std::string> &content,
+                         bool prepend, bool system)
+{
+  cmTargetPropCommandBase::HandleInterfaceContent(tgt, content,
+                                                  prepend, system);
+
+  if (system)
+    {
+    std::string joined;
+    std::string sep;
+    for(std::vector<std::string>::const_iterator it = content.begin();
+      it != content.end(); ++it)
+      {
+      joined += sep;
+      sep = ";";
+      joined += *it;
+      }
+    tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
+                        joined.c_str());
+    }
 }

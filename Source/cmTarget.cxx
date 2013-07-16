@@ -874,6 +874,17 @@ void cmTarget::DefineProperties(cmake *cm)
      CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
+    ("SYSTEM_INTERFACE_INCLUDE_DIRECTORIES", cmProperty::TARGET,
+     "List of public system include directories for a library.",
+     "Targets may populate this property to publish the include directories "
+     "which contain system headers, and therefore should not result in "
+     "compiler warnings.  Consuming targets will then mark the same include "
+     "directories as system headers."
+     "\n"
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
+     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+
+  cm->DefineProperty
     ("INTERFACE_COMPILE_DEFINITIONS", cmProperty::TARGET,
      "List of public compile definitions for a library.",
      "Targets may populate this property to publish the compile definitions "
@@ -1678,6 +1689,17 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->InsertInclude(*it);
     }
+
+  const std::set<cmStdString> parentSystemIncludes =
+                              this->Makefile->GetSystemIncludeDirectories();
+
+  for (std::set<cmStdString>::const_iterator it
+        = parentSystemIncludes.begin();
+        it != parentSystemIncludes.end(); ++it)
+    {
+    this->SystemIncludeDirectories.insert(*it);
+    }
+
   const std::vector<cmValueWithOrigin> parentOptions =
                               this->Makefile->GetCompileOptionsEntries();
 
@@ -2556,6 +2578,61 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                            cmCacheManager::STATIC );
     }
 
+}
+
+//----------------------------------------------------------------------------
+void
+cmTarget::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
+{
+  for(std::set<cmStdString>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    this->SystemIncludeDirectories.insert(*li);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
+{
+  for(std::vector<std::string>::const_iterator li = incs.begin();
+      li != incs.end(); ++li)
+    {
+    this->SystemIncludeDirectories.insert(*li);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::FinalizeSystemIncludeDirectories()
+{
+  for (std::vector<cmValueWithOrigin>::const_iterator
+      it = this->Internal->LinkInterfacePropertyEntries.begin(),
+      end = this->Internal->LinkInterfacePropertyEntries.end();
+      it != end; ++it)
+    {
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                      ge.Parse(it->Value);
+    std::string targetName = cge->Evaluate(this->Makefile, 0,
+                                      false, this, 0, 0);
+    if (!this->Makefile->FindTargetToUse(targetName.c_str()))
+      {
+      continue;
+      }
+    }
+    std::string includeGenex = "$<TARGET_PROPERTY:" +
+                        it->Value + ",INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>";
+    if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
+      {
+      // Because it->Value is a generator expression, ensure that it
+      // evaluates to the non-empty string before being used in the
+      // TARGET_PROPERTY expression.
+      includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
+      }
+    this->SystemIncludeDirectories.insert(includeGenex);
+    }
 }
 
 //----------------------------------------------------------------------------

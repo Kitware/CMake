@@ -53,7 +53,7 @@ std::string cmTargetCompileOptionsCommand
 //----------------------------------------------------------------------------
 void cmTargetCompileOptionsCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
-                                   bool)
+                                   bool, bool)
 {
   cmListFileBacktrace lfbt;
   this->Makefile->GetBacktrace(lfbt);
