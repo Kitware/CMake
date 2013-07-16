@@ -40,9 +40,10 @@ public:
     if(file.rfind(".framework") != std::string::npos)
       {
       cmsys::RegularExpression splitFramework;
-      splitFramework.compile("^(.*)/(.*).framework/.*/(.*)$");
+      splitFramework.compile("^(.*)/(.*).framework/(.*)$");
       if(splitFramework.find(file) &&
-        (splitFramework.match(2) == splitFramework.match(3)))
+        (std::string::npos !=
+         splitFramework.match(3).find(splitFramework.match(2))))
         {
         this->Directory = splitFramework.match(1);
         this->FileName =
@@ -318,7 +319,6 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
   // Add the runtime library at most once.
   if(this->EmmittedConstraintSOName.insert(fullPath).second)
     {
-    std::string soname2 = soname ? soname : "";
     // Implicit link directories need special handling.
     if(!this->ImplicitDirectories.empty())
       {
@@ -327,16 +327,12 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
       if(fullPath.rfind(".framework") != std::string::npos)
         {
         cmsys::RegularExpression splitFramework;
-        splitFramework.compile("^(.*)/(.*).framework/(.*)/(.*)$");
+        splitFramework.compile("^(.*)/(.*).framework/(.*)$");
         if(splitFramework.find(fullPath) &&
-          (splitFramework.match(2) == splitFramework.match(4)))
+          (std::string::npos !=
+           splitFramework.match(3).find(splitFramework.match(2))))
           {
           dir = splitFramework.match(1);
-          soname2 = splitFramework.match(2);
-          soname2 += ".framework/";
-          soname2 += splitFramework.match(3);
-          soname2 += "/";
-          soname2 += splitFramework.match(4);
           }
         }
 
@@ -344,16 +340,14 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
          this->ImplicitDirectories.end())
         {
         this->ImplicitDirEntries.push_back(
-          new cmOrderDirectoriesConstraintSOName(this, fullPath,
-                                                 soname2.c_str()));
+          new cmOrderDirectoriesConstraintSOName(this, fullPath, soname));
         return;
         }
       }
 
     // Construct the runtime information entry for this library.
     this->ConstraintEntries.push_back(
-      new cmOrderDirectoriesConstraintSOName(this, fullPath,
-                                             soname2.c_str()));
+      new cmOrderDirectoriesConstraintSOName(this, fullPath, soname));
     }
   else
     {
