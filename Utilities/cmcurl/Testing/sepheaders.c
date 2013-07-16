@@ -56,6 +56,7 @@ int main(int argc, char **argv)
   bodyfile = fopen(bodyfilename,"w");
   if (bodyfile == NULL) {
     curl_easy_cleanup(curl_handle);
+    fclose(headerfile);
     return -1;
   }
 
@@ -70,6 +71,7 @@ int main(int argc, char **argv)
 
   /* close the header file */
   fclose(headerfile);
+  fclose(bodyfile);
 
   /* cleanup curl stuff */
   curl_easy_cleanup(curl_handle);
