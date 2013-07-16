@@ -46,7 +46,8 @@ int main()
 #ifdef TEST_SEMICOLON
   if(strcmp(SEMICOLON_STRING1, "foo;bar") != 0
       || strcmp(SEMICOLON_STRING2, "foo;bar") != 0
-      || strcmp(SEMICOLON_STRING3, "foo;bar") != 0)
+      || strcmp(SEMICOLON_STRING3, "foo;bar") != 0
+      || strcmp(SEMICOLON_STRING4, "foo;bar") != 0)
     {
     fprintf(stderr, "SEMICOLON_STRING is not \"foo;bar\"\n");
     return 1;

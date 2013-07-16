@@ -46,6 +46,20 @@ target_compile_definitions(CompileDefinitions PRIVATE
 )
 add_definitions("-DSEMICOLON_STRING3=\"foo${SEMICOLON}bar\"")
 
+add_library(emptyTarget empty.cpp)
+set_property(
+  TARGET emptyTarget
+  APPEND PROPERTY COMPILE_DEFINITIONS
+  "SEMICOLON_STRING4=\"foo${SEMICOLON}bar\""
+  )
+
+get_target_property(_roundtrip emptyTarget COMPILE_DEFINITIONS)
+set_property(
+  TARGET CompileDefinitions
+  APPEND PROPERTY COMPILE_DEFINITIONS
+  "${_roundtrip}"
+  )
+
 if (SEMICOLON)
   set_property(
     TARGET CompileDefinitions
