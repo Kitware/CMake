@@ -265,7 +265,8 @@ cmNinjaNormalTargetGenerator
                                         rspcontent);
   }
 
-  if (this->TargetNameOut != this->TargetNameReal) {
+  if (this->TargetNameOut != this->TargetNameReal &&
+    !this->GetTarget()->IsFrameworkOnApple()) {
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         this->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND"),
@@ -599,7 +600,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                               rspfile,
                               commandLineLengthLimit);
 
-  if (targetOutput != targetOutputReal) {
+  if (targetOutput != targetOutputReal &&
+    !this->GetTarget()->IsFrameworkOnApple()) {
     if (targetType == cmTarget::EXECUTABLE) {
       globalGenerator->WriteBuild(this->GetBuildFileStream(),
                                   "Create executable symlink " + targetOutput,

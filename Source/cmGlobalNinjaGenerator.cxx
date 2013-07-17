@@ -824,13 +824,19 @@ cmGlobalNinjaGenerator
   cmLocalNinjaGenerator *ng =
     static_cast<cmLocalNinjaGenerator *>(this->LocalGenerators[0]);
 
+  // for frameworks, we want the real name, not smple name
+  // frameworks always appear versioned, and the build.ninja
+  // will always attempt to manage symbolic links instead
+  // of letting cmOSXBundleGenerator do it.
+  bool realname = target->IsFrameworkOnApple();
+
   switch (target->GetType()) {
   case cmTarget::EXECUTABLE:
   case cmTarget::SHARED_LIBRARY:
   case cmTarget::STATIC_LIBRARY:
   case cmTarget::MODULE_LIBRARY:
     outputs.push_back(ng->ConvertToNinjaPath(
-      target->GetFullPath(configName).c_str()));
+      target->GetFullPath(configName, false, realname).c_str()));
     break;
 
   case cmTarget::OBJECT_LIBRARY:
