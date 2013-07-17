@@ -13,6 +13,8 @@
 
 #include "cmMakefile.h"
 
+#include <cmsys/auto_ptr.hxx>
+
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
 {
@@ -33,6 +35,32 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   EscapeOldStyle(r.EscapeOldStyle),
   Backtrace(new cmListFileBacktrace(*r.Backtrace))
 {
+}
+
+//----------------------------------------------------------------------------
+cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
+{
+  if(this == &r)
+    {
+    return *this;
+    }
+
+  this->Outputs = r.Outputs;
+  this->Depends = r.Depends;
+  this->CommandLines = r.CommandLines;
+  this->HaveComment = r.HaveComment;
+  this->Comment = r.Comment;
+  this->WorkingDirectory = r.WorkingDirectory;
+  this->EscapeAllowMakeVars = r.EscapeAllowMakeVars;
+  this->EscapeOldStyle = r.EscapeOldStyle;
+  this->ImplicitDepends = r.ImplicitDepends;
+
+  cmsys::auto_ptr<cmListFileBacktrace>
+    newBacktrace(new cmListFileBacktrace(*r.Backtrace));
+  delete this->Backtrace;
+  this->Backtrace = newBacktrace.release();
+
+  return *this;
 }
 
 //----------------------------------------------------------------------------
