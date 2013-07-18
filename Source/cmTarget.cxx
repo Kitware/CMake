@@ -3206,7 +3206,7 @@ static void processIncludeDirectories(cmTarget *tgt,
           {
           e << "Target \"" << (*it)->TargetName << "\" contains relative "
             "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
-            "  \"" << *li << "\" ";
+            "  \"" << *li << "\"";
           }
         else
           {
