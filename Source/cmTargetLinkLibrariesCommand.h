@@ -109,13 +109,25 @@ public:
       " INTERFACE_POSITION_INDEPENDENT_CODE: Sets POSITION_INDEPENDENT_CODE\n"
       "   or checked for consistency with existing value\n"
       "\n"
+      "  target_link_libraries(<target>\n"
+      "                      <PRIVATE|PUBLIC|INTERFACE> <lib> ...\n"
+      "                      [<PRIVATE|PUBLIC|INTERFACE> <lib> ... ] ...])\n"
+      "The PUBLIC, PRIVATE and INTERFACE keywords can be used to specify "
+      "both the link dependencies and the link interface in one command.  "
+      "Libraries and targets following PUBLIC are linked to, and are "
+      "made part of the link interface.  Libraries and targets "
+      "following PRIVATE are linked to, but are not made part of the "
+      "link interface.  Libraries following INTERFACE are appended "
+      "to the link interface and are not used for linking <target>."
+      "\n"
       "  target_link_libraries(<target> LINK_INTERFACE_LIBRARIES\n"
       "                        [[debug|optimized|general] <lib>] ...)\n"
       "The LINK_INTERFACE_LIBRARIES mode appends the libraries "
       "to the INTERFACE_LINK_LIBRARIES target property instead of using them "
       "for linking.  If policy CMP0022 is not NEW, then this mode also "
       "appends libraries to the LINK_INTERFACE_LIBRARIES and its "
-      "per-configuration equivalent.  "
+      "per-configuration equivalent.  This signature "
+      "is for compatibility only. Prefer the INTERFACE mode instead.  "
       "Libraries specified as \"debug\" are wrapped in a generator "
       "expression to correspond to debug builds.  If policy CMP0022 is not "
       "NEW, the libraries are also appended to the "
@@ -134,7 +146,9 @@ public:
       "                        [<LINK_PRIVATE|LINK_PUBLIC>\n"
       "                          [[debug|optimized|general] <lib>] ...])\n"
       "The LINK_PUBLIC and LINK_PRIVATE modes can be used to specify both "
-      "the link dependencies and the link interface in one command.  "
+      "the link dependencies and the link interface in one command.  This "
+      "signature is for compatibility only. Prefer the PUBLIC or PRIVATE "
+      "keywords instead.  "
       "Libraries and targets following LINK_PUBLIC are linked to, and are "
       "made part of the INTERFACE_LINK_LIBRARIES.  If policy CMP0022 is not "
       "NEW, they are also made part of the LINK_INTERFACE_LIBRARIES.  "
@@ -180,14 +194,17 @@ private:
   cmTarget* Target;
   enum ProcessingState {
     ProcessingLinkLibraries,
-    ProcessingLinkInterface,
-    ProcessingPublicInterface,
-    ProcessingPrivateInterface
+    ProcessingPlainLinkInterface,
+    ProcessingKeywordLinkInterface,
+    ProcessingPlainPublicInterface,
+    ProcessingKeywordPublicInterface,
+    ProcessingPlainPrivateInterface,
+    ProcessingKeywordPrivateInterface
   };
 
   ProcessingState CurrentProcessingState;
 
-  void HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
+  bool HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
 };
 
 

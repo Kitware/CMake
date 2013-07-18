@@ -575,6 +575,20 @@ cmPolicies::cmPolicies()
     "property for in-build targets, and ignore the old properties matching "
     "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.",
     2,8,11,20130516, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0023, "CMP0023",
+    "Similar target_link_libraries signatures can not be mixed.",
+    "CMake 2.8.12 included new keyword signatures for the "
+    "target_link_libraries command.  If this policy is NEW, the new keyword "
+    "signatures and the old plain signatures can not both be used on the "
+    "same target.  Attempting to do so will result in an error."
+    "\n"
+    "The OLD behavior for this policy is to allow keyword and plain "
+    "target_link_libraries signatures to be mixed.  "
+    "The NEW behavior for this policy is to not to allow mixing of the "
+    "keyword and plain signatures.",
+    2,8,11,20130516, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
