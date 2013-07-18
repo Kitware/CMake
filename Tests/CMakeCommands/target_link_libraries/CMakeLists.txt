@@ -124,9 +124,3 @@ add_library(libConsumer empty.cpp)
 target_link_libraries(libConsumer debug depA)
 
 add_subdirectory(cmp0022)
-
-add_executable(newsignature1 newsignature1.cpp)
-target_link_libraries(newsignature1 PRIVATE depC INTERFACE depD PUBLIC depB PRIVATE subdirlib INTERFACE INTERFACE PUBLIC)
-
-assert_property(newsignature1 INTERFACE_LINK_LIBRARIES "depD;depB")
-assert_property(newsignature1 LINK_LIBRARIES "depC;depB;subdirlib")

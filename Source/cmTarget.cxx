@@ -2494,56 +2494,6 @@ static std::string targetNameGenex(const char *lib)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
-{
-  bool ret = true;
-  if (!this->TLLCommands.empty())
-    {
-    if (this->TLLCommands.back().first != signature)
-      {
-      ret = false;
-      }
-    }
-  cmListFileBacktrace lfbt;
-  this->Makefile->GetBacktrace(lfbt);
-  this->TLLCommands.push_back(std::make_pair(signature, lfbt));
-  return ret;
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
-                                     TLLSignature sig) const
-{
-  std::vector<cmListFileBacktrace> sigs;
-  typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> > Container;
-  for(Container::const_iterator it = this->TLLCommands.begin();
-      it != this->TLLCommands.end(); ++it)
-    {
-    if (it->first == sig)
-      {
-      sigs.push_back(it->second);
-      }
-    }
-  if (!sigs.empty())
-    {
-    const char *sigString
-                        = (sig == cmTarget::NewTLLSignature ? "old" : "new");
-    s << "The uses of the " << sigString << " signature are here:\n";
-    for(std::vector<cmListFileBacktrace>::const_iterator it = sigs.begin();
-        it != sigs.end(); ++it)
-      {
-      cmListFileBacktrace::const_iterator i = it->begin();
-      if(i != it->end())
-        {
-        cmListFileContext const& lfc = *i;
-        s << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
-        ++i;
-        }
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib,
                               LinkLibraryType llt)

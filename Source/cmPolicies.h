@@ -73,7 +73,6 @@ public:
     CMP0021, ///< Fatal error on relative paths in INCLUDE_DIRECTORIES
     /// target property
     CMP0022, ///< INTERFACE_LINK_LIBRARIES defines the link interface
-    CMP0023, ///< Disallow mixing old and new tll signatures
 
     /** \brief Always the last entry.
      *

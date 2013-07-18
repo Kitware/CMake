@@ -115,4 +115,3 @@ if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
 endif()
 
 add_RunCMake_test(File_Generate)
-add_RunCMake_test(target_link_libraries)
