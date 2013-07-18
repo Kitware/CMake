@@ -1,6 +1,7 @@
 CMake Error:
   Error evaluating generator expression:
 
-    \$<LINK_LANGUAGE>
+    \$<TARGET_PROPERTY:LINKER_LANGUAGE>
 
-  \$<LINK_LANGUAGE> expression can not be used while evaluating link libraries
+  LINKER_LANGUAGE target property can not be used while evaluating link
+  libraries

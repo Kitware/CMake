@@ -292,7 +292,6 @@ void cmTarget::DefineProperties(cmake *cm)
      "Contents of COMPILE_DEFINITIONS may use \"generator expressions\" with "
      "the syntax \"$<...>\".  "
      CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS
      CM_DOCUMENT_COMPILE_DEFINITIONS_DISCLAIMER);
 
   cm->DefineProperty
@@ -311,8 +310,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "the options for the compiler.\n"
      "Contents of COMPILE_OPTIONS may use \"generator expressions\" with "
      "the syntax \"$<...>\".  "
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INTERFACE_COMPILE_OPTIONS", cmProperty::TARGET,
@@ -323,8 +321,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "as $<TARGET_PROPERTY:foo,INTERFACE_COMPILE_OPTIONS> to use the "
      "compile options specified in the interface of 'foo'."
      "\n"
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("DEFINE_SYMBOL", cmProperty::TARGET,
@@ -653,8 +650,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "See also the include_directories command.\n"
      "Contents of INCLUDE_DIRECTORIES may use \"generator expressions\" with "
      "the syntax \"$<...>\".  "
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INSTALL_NAME_DIR", cmProperty::TARGET,
@@ -749,7 +745,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "file providing the program entry point (main).  "
      "If not set, the language with the highest linker preference "
      "value is the default.  "
-     "See documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables.");
+     "See documentation of CMAKE_<LANG>_LINKER_PREFERENCE variables."
+     "\n"
+     "If this property is not set by the user, it will be calculated at "
+     "generate-time by CMake."
+    );
 
   cm->DefineProperty
     ("LOCATION", cmProperty::TARGET,
@@ -870,8 +870,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "as $<TARGET_PROPERTY:foo,INTERFACE_INCLUDE_DIRECTORIES> to use the "
      "include directories specified in the interface of 'foo'."
      "\n"
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("SYSTEM_INTERFACE_INCLUDE_DIRECTORIES", cmProperty::TARGET,
@@ -881,8 +880,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "compiler warnings.  Consuming targets will then mark the same include "
      "directories as system headers."
      "\n"
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("INTERFACE_COMPILE_DEFINITIONS", cmProperty::TARGET,
@@ -893,8 +891,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "as $<TARGET_PROPERTY:foo,INTERFACE_COMPILE_DEFINITIONS> to use the "
      "compile definitions specified in the interface of 'foo'."
      "\n"
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("LINK_INTERFACE_MULTIPLICITY", cmProperty::TARGET,
