@@ -138,6 +138,31 @@ add_custom_target(check-part2 ALL
   VERBATIM
 )
 
+add_library(imported1 SHARED IMPORTED)
+set_property(TARGET imported1 PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
+set_property(TARGET imported1 PROPERTY IMPORTED_LOCATION_DEBUG debug_loc)
+set_property(TARGET imported1 PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
+set_property(TARGET imported1 PROPERTY INTERFACE_INCLUDE_DIRECTORIES /imported1/include)
+
+add_library(imported2 SHARED IMPORTED)
+set_property(TARGET imported2 PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
+set_property(TARGET imported2 PROPERTY IMPORTED_LOCATION_DEBUG debug_loc)
+set_property(TARGET imported2 PROPERTY IMPORTED_CONFIGURATIONS RELEASE DEBUG)
+set_property(TARGET imported2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES /imported2/include)
+
+add_library(imported3 SHARED IMPORTED)
+set_property(TARGET imported3 PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
+set_property(TARGET imported3 PROPERTY IMPORTED_LOCATION_DEBUG debug_loc)
+# Both Debug and Release should not be true when this is evaluated.
+set_property(TARGET imported3 APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:DEBUG>:$<TARGET_PROPERTY:imported1,INTERFACE_INCLUDE_DIRECTORIES>>)
+set_property(TARGET imported3 APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES $<$<CONFIG:RELEASE>:$<TARGET_PROPERTY:imported2,INTERFACE_INCLUDE_DIRECTORIES>>)
+
+add_library(imported4 SHARED IMPORTED)
+set_property(TARGET imported4 APPEND PROPERTY
+  INCLUDE_DIRECTORIES $<TARGET_PROPERTY:imported3,INTERFACE_INCLUDE_DIRECTORIES>)
+
 add_custom_target(check-part3 ALL
   COMMAND ${CMAKE_COMMAND}
     -Dtest_version_greater_1=$<VERSION_GREATER:1.0,1.1.1>
@@ -146,6 +171,10 @@ add_custom_target(check-part3 ALL
     -Dtest_version_less_2=$<VERSION_LESS:1.0,1.1.1>
     -Dtest_version_equal_1=$<VERSION_EQUAL:1.0.1,1.1>
     -Dtest_version_equal_2=$<VERSION_EQUAL:1.1,1.1>
+    -Dtest_imported_debug=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
+    -Dtest_imported_release=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
+    -Dtest_imported_relwithdebinfo=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
+    -Dtest_imported_minsizerel=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM
