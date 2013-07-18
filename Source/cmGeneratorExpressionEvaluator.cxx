@@ -774,7 +774,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (propertyName == "LINKER_LANGUAGE")
       {
-      // Does this need to move down in order to support $<TARGET_PROPERTY,foo,LINKER_LANGUAGE> ?
       if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
         {
         reportError(context, content->GetOriginalExpression(),
