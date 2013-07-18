@@ -4087,8 +4087,7 @@ void cmMakefile::DefineProperties(cmake *cm)
      "the options for the compiler.\n"
      "Contents of COMPILE_OPTIONS may use \"generator expressions\" with "
      "the syntax \"$<...>\".  "
-     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS
-     CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
+     CM_DOCUMENT_COMMAND_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
     ("LINK_DIRECTORIES", cmProperty::DIRECTORY,
