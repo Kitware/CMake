@@ -192,7 +192,7 @@
 #=============================================================================
 # Copyright 2013 OpenGamma Ltd. <graham@opengamma.com>
 # Copyright 2010-2011 Andreas schneider <asn@redhat.com>
-# Copyright 2010 Ben Boeckel <ben.boeckel@kitware.com>
+# Copyright 2010-2013 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
