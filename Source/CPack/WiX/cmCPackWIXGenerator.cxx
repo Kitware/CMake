@@ -100,6 +100,11 @@ bool cmCPackWIXGenerator::RunLightCommand(const std::string& objectFiles)
   command << " -nologo";
   command << " -out " << QuotePath(packageFileNames.at(0));
   command << " -ext WixUIExtension";
+  const char* const cultures = GetOption("CPACK_WIX_CULTURES");
+  if(cultures)
+    {
+    command << " -cultures:" << cultures;
+    }
   command << " " << objectFiles;
 
   return RunWiXCommand(command.str());
@@ -224,6 +229,9 @@ bool cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   CopyDefinition(includeFile, "CPACK_WIX_PRODUCT_ICON");
   CopyDefinition(includeFile, "CPACK_WIX_UI_BANNER");
   CopyDefinition(includeFile, "CPACK_WIX_UI_DIALOG");
+  SetOptionIfNotSet("CPACK_WIX_PROGRAM_MENU_FOLDER",
+    GetOption("CPACK_PACKAGE_NAME"));
+  CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
 
   return true;
 }
@@ -339,25 +347,114 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   featureDefinitions.BeginElement("FeatureRef");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
 
+  const char *cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
+  std::vector<std::string> cpackPkgExecutables;
+  std::string regKey;
+  if ( cpackPackageExecutables )
+    {
+    cmSystemTools::ExpandListArgument(cpackPackageExecutables,
+      cpackPkgExecutables);
+    if ( cpackPkgExecutables.size() % 2 != 0 )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
+        "<icon name>." << std::endl);
+      cpackPkgExecutables.clear();
+      }
+
+    const char *cpackVendor = GetOption("CPACK_PACKAGE_VENDOR");
+    const char *cpackPkgName = GetOption("CPACK_PACKAGE_NAME");
+    if (!cpackVendor || !cpackPkgName)
+      {
+      cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_PACKAGE_VENDOR and "
+                    "CPACK_PACKAGE_NAME must be defined for shortcut creation" << std::endl);
+      cpackPkgExecutables.clear();
+      }
+    else
+      {
+        regKey = std::string("Software/") + cpackVendor + "/" + cpackPkgName;
+      }
+    }
+
+  std::vector<std::string> dirIdExecutables;
   AddDirectoryAndFileDefinitons(
     toplevel, "INSTALL_ROOT",
     directoryDefinitions, fileDefinitions, featureDefinitions,
-    directoryCounter, fileCounter);
+    directoryCounter, fileCounter, cpackPkgExecutables, dirIdExecutables);
+
+  directoryDefinitions.EndElement();
+  directoryDefinitions.EndElement();
+
+  if (dirIdExecutables.size() > 0 && dirIdExecutables.size() % 3 == 0)
+    {
+    fileDefinitions.BeginElement("DirectoryRef");
+    fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+    fileDefinitions.BeginElement("Component");
+    fileDefinitions.AddAttribute("Id", "SHORTCUT");
+    fileDefinitions.AddAttribute("Guid", "*");
+
+    std::vector<std::string>::iterator it;
+    for ( it = dirIdExecutables.begin() ;
+          it != dirIdExecutables.end();
+          ++it)
+      {
+      std::string fileName = *it++;
+      std::string iconName = *it++;
+      std::string directoryId = *it;
+
+      fileDefinitions.BeginElement("Shortcut");
+      std::string shortcutName = fileName; // the iconName is mor likely to contain blanks early on
+      const std::string::difference_type dotPos = shortcutName.find('.');
+      if(std::string::npos == dotPos)
+        shortcutName = shortcutName.substr(0, dotPos);
+      fileDefinitions.AddAttribute("Id", "SHORTCUT_" + shortcutName);
+      fileDefinitions.AddAttribute("Name", iconName);
+      std::string target = "[" + directoryId + "]" + fileName;
+      fileDefinitions.AddAttribute("Target", target);
+      fileDefinitions.AddAttribute("WorkingDirectory", directoryId);
+      fileDefinitions.EndElement();
+      }
+    fileDefinitions.BeginElement("Shortcut");
+    fileDefinitions.AddAttribute("Id", "UNINSTALL");
+    std::string pkgName = GetOption("CPACK_PACKAGE_NAME");
+    fileDefinitions.AddAttribute("Name", "Uninstall " + pkgName);
+    fileDefinitions.AddAttribute("Description", "Uninstalls " + pkgName);
+    fileDefinitions.AddAttribute("Target", "[SystemFolder]msiexec.exe");
+    fileDefinitions.AddAttribute("Arguments", "/x [ProductCode]");
+    fileDefinitions.EndElement();
+    fileDefinitions.BeginElement("RemoveFolder");
+    fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+    fileDefinitions.AddAttribute("On", "uninstall");
+    fileDefinitions.EndElement();
+    fileDefinitions.BeginElement("RegistryValue");
+    fileDefinitions.AddAttribute("Root", "HKCU");
+    fileDefinitions.AddAttribute("Key", regKey);
+    fileDefinitions.AddAttribute("Name", "installed");
+    fileDefinitions.AddAttribute("Type", "integer");
+    fileDefinitions.AddAttribute("Value", "1");
+    fileDefinitions.AddAttribute("KeyPath", "yes");
+
+    featureDefinitions.BeginElement("ComponentRef");
+    featureDefinitions.AddAttribute("Id", "SHORTCUT");
+    featureDefinitions.EndElement();
+    directoryDefinitions.BeginElement("Directory");
+    directoryDefinitions.AddAttribute("Id", "ProgramMenuFolder");
+    directoryDefinitions.BeginElement("Directory");
+    directoryDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+    const char *startMenuFolder = GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
+    directoryDefinitions.AddAttribute("Name", startMenuFolder);
+  }
 
   featureDefinitions.EndElement();
   featureDefinitions.EndElement();
   fileDefinitions.EndElement();
-
-  for(size_t i = 1; i < install_root.size(); ++i)
-    {
-    directoryDefinitions.EndElement();
-    }
-
-  directoryDefinitions.EndElement();
-  directoryDefinitions.EndElement();
   directoryDefinitions.EndElement();
 
   std::string wixTemplate = FindTemplate("WIX.template.in");
+  if(GetOption("CPACK_WIX_TEMPLATE") != 0)
+    {
+    wixTemplate = GetOption("CPACK_WIX_TEMPLATE");
+    }
   if(wixTemplate.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -435,7 +532,9 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmWIXSourceWriter& fileDefinitions,
   cmWIXSourceWriter& featureDefinitions,
   size_t& directoryCounter,
-  size_t& fileCounter)
+  size_t& fileCounter,
+  const std::vector<std::string>& pkgExecutables,
+  std::vector<std::string>& dirIdExecutables)
 {
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
@@ -467,8 +566,9 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         fileDefinitions,
         featureDefinitions,
         directoryCounter,
-        fileCounter);
-
+        fileCounter,
+        pkgExecutables,
+        dirIdExecutables);
       directoryDefinitions.EndElement();
       }
     else
@@ -499,6 +599,23 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       featureDefinitions.BeginElement("ComponentRef");
       featureDefinitions.AddAttribute("Id", componentId);
       featureDefinitions.EndElement();
+
+      std::vector<std::string>::const_iterator it;
+      for (it = pkgExecutables.begin() ;
+           it != pkgExecutables.end() ;
+           ++it)
+        {
+        std::string execName = *it++;
+        std::string iconName = *it;
+
+        if (cmSystemTools::LowerCase(fileName) ==
+            cmSystemTools::LowerCase(execName) + ".exe")
+          {
+            dirIdExecutables.push_back(fileName);
+            dirIdExecutables.push_back(iconName);
+            dirIdExecutables.push_back(directoryId);
+          }
+        }
       }
     }
 }
