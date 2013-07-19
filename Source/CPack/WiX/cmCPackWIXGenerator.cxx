@@ -358,6 +358,10 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   directoryDefinitions.EndElement();
 
   std::string wixTemplate = FindTemplate("WIX.template.in");
+  if(GetOption("CPACK_WIX_TEMPLATE") != 0)
+	{
+	wixTemplate = GetOption("CPACK_WIX_TEMPLATE");
+	}
   if(wixTemplate.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
