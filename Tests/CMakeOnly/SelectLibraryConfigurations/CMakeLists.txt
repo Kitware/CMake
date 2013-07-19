@@ -29,7 +29,7 @@ if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
-check_slc(empty "")
+check_slc(empty "empty_LIBRARY-NOTFOUND")
 
 set(OPTONLY_LIBRARY_RELEASE "opt")
 check_slc(OPTONLY "opt")
