@@ -792,7 +792,9 @@ void cmExportFileGenerator::GenerateImportVersionCode(std::ostream& os)
 void cmExportFileGenerator::GenerateExpectedTargetsCode(std::ostream& os,
                                             const std::string &expectedTargets)
 {
-  os << "set(_targetsDefined)\n"
+  os << "# Protect against multiple inclusion, which would fail when already "
+        "imported targets are added once more.\n"
+        "set(_targetsDefined)\n"
         "set(_targetsNotDefined)\n"
         "set(_expectedTargets)\n"
         "foreach(_expectedTarget " << expectedTargets << ")\n"
