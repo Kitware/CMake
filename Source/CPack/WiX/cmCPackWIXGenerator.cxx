@@ -404,9 +404,9 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
       fileDefinitions.BeginElement("Shortcut");
       std::string shortcutName = fileName; // the iconName is mor likely to contain blanks early on
-      const std::string::difference_type dotPos = shortcutName.find('.');
+      std::string::size_type const dotPos = shortcutName.find('.');
       if(std::string::npos == dotPos)
-        shortcutName = shortcutName.substr(0, dotPos);
+        { shortcutName = shortcutName.substr(0, dotPos); }
       fileDefinitions.AddAttribute("Id", "SHORTCUT_" + shortcutName);
       fileDefinitions.AddAttribute("Name", iconName);
       std::string target = "[" + directoryId + "]" + fileName;
