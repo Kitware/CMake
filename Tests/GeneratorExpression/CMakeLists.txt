@@ -171,6 +171,7 @@ add_custom_target(check-part3 ALL
     -Dtest_version_less_2=$<VERSION_LESS:1.0,1.1.1>
     -Dtest_version_equal_1=$<VERSION_EQUAL:1.0.1,1.1>
     -Dtest_version_equal_2=$<VERSION_EQUAL:1.1,1.1>
+    -Dconfig=$<CONFIGURATION>
     -Dtest_imported_debug=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -Dtest_imported_release=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
     -Dtest_imported_relwithdebinfo=$<TARGET_PROPERTY:imported4,INCLUDE_DIRECTORIES>
