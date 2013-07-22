@@ -3407,15 +3407,17 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
         std::string libDir = cmSystemTools::CollapseFullPath(it->c_str());
 
         static cmsys::RegularExpression
-          frameworkCheck("(\\.framework)(/Versions/[^/]+)?/[^/]+$");
+          frameworkCheck("(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
         if(!frameworkCheck.find(libDir))
           {
           continue;
           }
 
+        libDir = frameworkCheck.match(1);
+
         cmGeneratorExpression ge(lfbt);
         cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                  ge.Parse(cmSystemTools::GetParentDirectory(libDir.c_str()));
+                  ge.Parse(libDir.c_str());
         this->Internal
                 ->CachedLinkInterfaceIncludeDirectoriesEntries[configString]
                 .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
