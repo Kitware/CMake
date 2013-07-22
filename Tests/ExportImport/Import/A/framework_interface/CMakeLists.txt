@@ -1,6 +1,7 @@
 
 add_library(exp_framework_test framework_test.cpp)
 get_target_property(exp_loc exp_testLib4 LOCATION)
+message("Framework location: ${exp_loc}")
 target_link_libraries(exp_framework_test ${exp_loc})
 
 
