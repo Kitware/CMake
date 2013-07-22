@@ -84,12 +84,14 @@ bool cmSetPropertyCommand
       {
       doing = DoingNone;
       this->AppendMode = true;
+      this->Remove = false;
       this->AppendAsString = false;
       }
     else if(*arg == "APPEND_STRING")
       {
       doing = DoingNone;
       this->AppendMode = true;
+      this->Remove = false;
       this->AppendAsString = true;
       }
     else if(doing == DoingNames)
