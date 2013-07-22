@@ -1345,12 +1345,23 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
     return;
     }
 
+  std::string fw_path = this->SplitFramework.match(1);
+  std::string fw = this->SplitFramework.match(2);
+  std::string full_fw = fw_path;
+  full_fw += "/";
+  full_fw += fw;
+  full_fw += ".framework";
+  full_fw += "/";
+  full_fw += fw;
+
   // Add the directory portion to the framework search path.
-  this->AddFrameworkPath(this->SplitFramework.match(1));
+  this->AddFrameworkPath(fw_path);
+
+  // add runtime information
+  this->AddLibraryRuntimeInfo(full_fw);
 
   // Add the item using the -framework option.
   this->Items.push_back(Item("-framework", false));
-  std::string fw = this->SplitFramework.match(2);
   fw = this->LocalGenerator->EscapeForShell(fw.c_str());
   this->Items.push_back(Item(fw, false));
 }
@@ -1813,9 +1824,10 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
     if(fullPath.find(".framework") != std::string::npos)
       {
       cmsys::RegularExpression splitFramework;
-      splitFramework.compile("^(.*)/(.*).framework/.*/(.*)$");
+      splitFramework.compile("^(.*)/(.*).framework/(.*)$");
       if(splitFramework.find(fullPath) &&
-        (splitFramework.match(2) == splitFramework.match(3)))
+        (std::string::npos !=
+         splitFramework.match(3).find(splitFramework.match(2))))
         {
         is_shared_library = true;
         }
