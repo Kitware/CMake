@@ -162,7 +162,7 @@ bool cmSetPropertyCommand::HandleGlobalMode()
     }
   if(this->AppendMode)
     {
-    cm->AppendProperty(name, value, this->AppendAsString);
+    cm->AppendProperty(name, value ? value : "", this->AppendAsString);
     }
   else
     {
@@ -228,7 +228,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
     }
   if(this->AppendMode)
     {
-    mf->AppendProperty(name, value, this->AppendAsString);
+    mf->AppendProperty(name, value ? value : "", this->AppendAsString);
     }
   else
     {
