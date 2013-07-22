@@ -76,6 +76,21 @@
 # This image must be 493 by 312 pixels.
 #
 ##end
+#
+##variable
+# CPACK_WIX_PROGRAM_MENU_FOLDER - Start menu folder name for launcher.
+#
+# If this variable is not set, it will be initialized with CPACK_PACKAGE_NAME
+##end
+#
+##variable
+#  CPACK_WIX_CULTURES - Language(s) of the installer
+#
+#  Languages are compiled into the WixUI extension library. To use them, simply provide the name of the culture. 
+#  If you specify more than one culture identifier in a comma or semicolon delimited list, the first one that is found will be used.
+#  You can find a list of supported languages at : http://wix.sourceforge.net/manual-wix3/WixUI_localization.htm
+#
+##end
 
 #=============================================================================
 # Copyright 2012 Kitware, Inc.
