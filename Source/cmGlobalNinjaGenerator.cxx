@@ -147,7 +147,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     //we need to track every dependency that comes in, since we are trying
     //to find dependencies that are side effects of build commands
     //
-    this->CombinedBuildExplicitDependencies.insert(*i);
+    this->CombinedBuildExplicitDependencies.insert( EncodePath(*i) );
     }
 
   // Write implicit dependencies.
@@ -180,7 +180,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       i != outputs.end(); ++i)
     {
     build << " " << EncodeIdent(EncodePath(*i), os);
-    this->CombinedBuildOutputs.insert(*i);
+    this->CombinedBuildOutputs.insert( EncodePath(*i) );
     }
   build << ":";
 
@@ -944,7 +944,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     typedef std::vector<std::string>::const_iterator vect_it;
     for(vect_it j = files.begin(); j != files.end(); ++j)
       {
-      knownDependencies.insert(ng->ConvertToNinjaPath( j->c_str() ));
+      knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
       }
     }
 
@@ -959,26 +959,15 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     typedef std::vector<std::string>::const_iterator vect_it;
     for(vect_it j = files.begin(); j != files.end(); ++j)
       {
-      knownDependencies.insert(ng->ConvertToNinjaPath( j->c_str() ));
+      knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
       }
     }
-
-  //insert outputs from all WirteBuild commands
-  for(std::set<std::string>::iterator i = this->CombinedBuildOutputs.begin();
-      i != this->CombinedBuildOutputs.end(); ++i)
-    {
-    knownDependencies.insert(*i);
-    }
-
-  //after we have combined the data into knownDependencies we have no need
-  //to keep this data around
-  this->CombinedBuildOutputs.clear();
 
   for(TargetAliasMap::const_iterator i= this->TargetAliases.begin();
       i != this->TargetAliases.end();
       ++i)
     {
-    knownDependencies.insert(i->first);
+    knownDependencies.insert( ng->ConvertToNinjaPath(i->first.c_str()) );
     }
 
   //remove all source files we know will exist.
@@ -987,11 +976,26 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       i != this->AssumedSourceDependencies.end();
       ++i)
     {
-    knownDependencies.insert(i->first);
+    knownDependencies.insert( ng->ConvertToNinjaPath(i->first.c_str()) );
     }
 
+  //insert outputs from all WirteBuild commands
+  for(std::set<std::string>::iterator i = this->CombinedBuildOutputs.begin();
+      i != this->CombinedBuildOutputs.end(); ++i)
+    {
+    //these paths have already be encoded when added to CombinedBuildOutputs
+    knownDependencies.insert(*i);
+    }
+
+  //after we have combined the data into knownDependencies we have no need
+  //to keep this data around
+  this->CombinedBuildOutputs.clear();
+
   //now we difference with CombinedBuildExplicitDependencies to find
-  //the list of items we know nothing about
+  //the list of items we know nothing about.
+  //We have encoded all the paths in CombinedBuildExplicitDependencies
+  //and knownDependencies so no matter if unix or windows paths they
+  //should all match now.
 
   std::vector<std::string> unkownExplicitDepends;
   this->CombinedBuildExplicitDependencies.erase("all");
