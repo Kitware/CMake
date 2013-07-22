@@ -76,6 +76,32 @@
 # This image must be 493 by 312 pixels.
 #
 ##end
+#
+##variable
+# CPACK_WIX_PROGRAM_MENU_FOLDER - Start menu folder name for launcher.
+#
+# If this variable is not set, it will be initialized with CPACK_PACKAGE_NAME
+#
+##end
+##variable
+# CPACK_WIX_CULTURES - Language(s) of the installer
+#
+# Languages are compiled into the WixUI extension library. To use them,
+# simply provide the name of the culture.  If you specify more than one
+# culture identifier in a comma or semicolon delimited list, the first one
+# that is found will be used.  You can find a list of supported languages at:
+# http://wix.sourceforge.net/manual-wix3/WixUI_localization.htm
+#
+##end
+##variable
+# CPACK_WIX_TEMPLATE - Template file for WiX generation
+#
+# If this variable is set, the specified template will be used to generate the WiX wxs file.
+# This should be used if further customization of the output is required.
+#
+# If this variable is not set, the default MSI template included with CMake will be used.
+#
+##end
 
 #=============================================================================
 # Copyright 2012 Kitware, Inc.
