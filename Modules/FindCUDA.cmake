@@ -602,13 +602,16 @@ macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
     PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
     ENV CUDA_PATH
     ENV CUDA_LIB_PATH
-    "/usr/lib/nvidia-current"
     PATH_SUFFIXES ${_cuda_64bit_lib_dir} "${_path_ext}lib/Win32" "${_path_ext}lib" "${_path_ext}libWin32"
     DOC ${_doc}
     NO_DEFAULT_PATH
     )
   # Search default search paths, after we search our own set of paths.
-  find_library(${_var} NAMES ${_names} DOC ${_doc})
+  find_library(${_var}
+    NAMES ${_names}
+    PATHS "/usr/lib/nvidia-current"
+    DOC ${_doc}
+    )
 endmacro()
 
 macro(cuda_find_library_local_first _var _names _doc)
