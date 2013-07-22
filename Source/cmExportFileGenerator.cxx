@@ -349,6 +349,16 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 {
   cmComputeLinkInformation *info = target->GetLinkInformation(config);
 
+  if (!info)
+    {
+    cmMakefile* mf = target->GetMakefile();
+    cmOStringStream e;
+    e << "Exporting the target \"" << target->GetName() << "\" is not "
+         "allowed since its linker language cannot be determined";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+    }
+
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
 
   for(cmComputeLinkInformation::ItemVector::const_iterator li =
