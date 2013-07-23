@@ -1622,6 +1622,12 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
+     ("CMAKE_<LANG>_FLAGS", cmProperty::VARIABLE,
+      "Flags for all build types.",
+      "<LANG> flags used regardless of the value of CMAKE_BUILD_TYPE.",false,
+      "Variables for Languages");
+
+  cm->DefineProperty
     ("CMAKE_<LANG>_FLAGS_DEBUG", cmProperty::VARIABLE,
      "Flags for Debug build type or configuration.",
      "<LANG> flags used when CMAKE_BUILD_TYPE is Debug.",false,
@@ -1861,8 +1867,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_<LANG>_CREATE_ASSEMBLY_SOURCE",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_CREATE_PREPROCESSED_SOURCE",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_<LANG>_FLAGS",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_FLAGS_DEBUG_INIT",
                      cmProperty::VARIABLE,0,0);
