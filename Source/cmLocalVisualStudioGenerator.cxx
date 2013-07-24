@@ -56,9 +56,10 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
   command.push_back(impDir);
   std::vector<std::string> no_output;
   std::vector<std::string> no_depends;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   cmCustomCommandLines commands;
   commands.push_back(command);
-  pcc.reset(new cmCustomCommand(0, no_output, no_depends, commands, 0, 0));
+  pcc.reset(new cmCustomCommand(0, no_output, no_depends, no_env_variables, commands, 0, 0));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;
@@ -85,6 +86,8 @@ cmLocalVisualStudioGenerator
 {
   bool useLocal = this->CustomCommandUseLocal();
   const char* workingDirectory = cc.GetWorkingDirectory();
+  const cmCustomCommand::EnvVariablesMap &env_variables = cc.GetEnvVariables();
+
   cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
   RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
 
@@ -113,6 +116,36 @@ cmLocalVisualStudioGenerator
     newline = newline_text;
     script += "setlocal";
     }
+
+  // Construct environment variables args
+  cmCustomCommandLines env_cmd_lines;
+  cmCustomCommandLine env_cmd_line;
+  env_cmd_line.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  env_cmd_line.push_back("-E");
+  env_cmd_line.push_back("env");
+  
+  // Get the environment varibles args
+  if(!env_variables.empty())
+    {
+    typedef cmCustomCommand::EnvVariablesMap::const_iterator env_iter_type;
+    env_iter_type env_var_it_end(env_variables.end());
+
+    for(env_iter_type env_var_it(env_variables.begin());
+        env_var_it != env_var_it_end;
+        ++env_var_it)
+      {
+      env_cmd_line.push_back(env_var_it->first+"="+(env_var_it->second.c_str()));
+      }
+    }
+
+  // Create a custom command generator for the environment modification
+  std::vector<std::string> no_output, no_depends;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
+  env_cmd_lines.push_back(env_cmd_line);
+  cmCustomCommand env_cmd(0, no_output, no_depends, no_env_variables, env_cmd_lines, 0, 0);
+  env_cmd.SetEscapeOldStyle(false);
+  env_cmd.SetEscapeAllowMakeVars(true);
+  cmCustomCommandGenerator env_cmd_generator(env_cmd, configName, this->Makefile);
 
   if(workingDirectory)
     {
@@ -172,6 +205,14 @@ cmLocalVisualStudioGenerator
         script += "call ";
         }
       }
+
+    // Modify the environment, if necessary
+    if(!env_variables.empty()) {
+      std::string env_cmd_str = this->Convert(env_cmd_generator.GetCommand(0).c_str(), relativeRoot, SHELL);
+      script += env_cmd_str;
+      env_cmd_generator.AppendArguments(0, script);
+      script+=" ";
+    }
 
     script += this->Convert(cmd.c_str(), relativeRoot, SHELL);
     ccg.AppendArguments(c, script);

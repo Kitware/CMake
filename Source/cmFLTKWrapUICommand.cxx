@@ -81,12 +81,15 @@ bool cmFLTKWrapUICommand
       const char* no_main_dependency = 0;
       const char* no_comment = 0;
       const char* no_working_dir = 0;
+      cmCustomCommand::EnvVariablesMap no_env_variables;
       this->Makefile->AddCustomCommandToOutput(cxxres.c_str(),
                                            depends, no_main_dependency,
+                                           no_env_variables,
                                            commandLines, no_comment,
                                            no_working_dir);
       this->Makefile->AddCustomCommandToOutput(hname.c_str(),
                                            depends, no_main_dependency,
+                                           no_env_variables,
                                            commandLines, no_comment,
                                            no_working_dir);
 

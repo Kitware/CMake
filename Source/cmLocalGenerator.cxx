@@ -617,12 +617,16 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   comment += lang;
   comment += " object ";
   comment += this->Convert(ofname, START_OUTPUT);
+  
+  // Create an empty environment variable array
+  cmCustomCommand::EnvVariablesMap no_env_variables;
 
   // Add the custom command to build the object file.
   this->Makefile->AddCustomCommandToOutput(
     ofname,
     depends,
     source.GetFullPath().c_str(),
+    no_env_variables,
     commandLines,
     comment.c_str(),
     this->Makefile->GetStartOutputDirectory()
@@ -719,10 +723,14 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
   comment += llang;
   comment += " target ";
   comment += this->Convert(targetFullPath.c_str(), START_OUTPUT);
+  // Create an empty environment variable array
+  cmCustomCommand::EnvVariablesMap no_env_variables;
+
   this->Makefile->AddCustomCommandToOutput(
     targetFullPath.c_str(),
     objVector,
     0,
+    no_env_variables,
     commandLines,
     comment.c_str(),
     this->Makefile->GetStartOutputDirectory()

@@ -174,6 +174,7 @@ public:
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(const char* target,
                                 const std::vector<std::string>& depends,
+                                const std::map<std::string,std::string>& envVariables,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
@@ -182,6 +183,7 @@ public:
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& depends,
     const char* main_dependency,
+    const std::map<std::string,std::string>& envVariables,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
@@ -190,6 +192,7 @@ public:
     const char* output,
     const std::vector<std::string>& depends,
     const char* main_dependency,
+    const std::map<std::string,std::string>& envVariables,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
@@ -198,6 +201,7 @@ public:
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
                                 const char* source,
+                                const std::map<std::string,std::string>& envVariables,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment);
 

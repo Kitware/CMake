@@ -1161,6 +1161,8 @@ void CMakeCommandUsage(const char* program)
     << "  echo [string]...          - displays arguments as text\n"
     << "  echo_append [string]...   - displays arguments as text but no new "
        "line\n"
+    << "  env [NAME=VALUE]... [COMMAND [ARG]...]\n"
+    << "                            - run a program in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory dir        - create a directory\n"
     << "  md5sum file1 [...]        - compute md5sum of files\n"
@@ -1288,6 +1290,48 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         space = " ";
         }
       return 0;
+      }
+
+    else if (args[1] == "env" )
+      {
+      std::string cmd_str = "";
+
+      std::vector<std::string>::const_iterator arg_it;
+      for ( arg_it = args.begin() + 2;
+            arg_it != args.end(); 
+            ++arg_it )
+        {
+          // Parse args as environment assignments until we see an argument
+          // without an equals sign ("=")
+          if (arg_it->find("=") != std::string::npos )
+            {
+            // This is an environment variable, so set it
+            cmSystemTools::PutEnv( arg_it->c_str() );
+            }
+          else 
+            {
+            // We're not parsing environment args any more
+            break;
+            }
+        }
+
+        // Get sub-command vector
+        std::vector<std::string>::const_iterator arg_it_end = args.end();
+        std::vector<cmStdString> sub_cmd = std::vector<cmStdString>(arg_it, arg_it_end);
+
+        // Execute the command
+        int retval = 0;
+        int timeout = 0;
+        if ( cmSystemTools::RunSingleCommand(sub_cmd,
+                                             0, &retval,
+                                             NULL,
+                                             cmSystemTools::OUTPUT_NORMAL, 
+                                             timeout) )
+          {
+          return retval;
+          }
+
+        return 1;
       }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)

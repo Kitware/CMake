@@ -131,9 +131,11 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
       const char* no_main_dependency = 0;
       const char* no_comment = 0;
       const char* no_working_dir = 0;
+      std::map<std::string,std::string> no_env_variables;
       this->Makefile->AddCustomCommandToOutput(hName.c_str(),
                                                depends,
                                                no_main_dependency,
+                                               no_env_variables,
                                                hCommandLines,
                                                no_comment,
                                                no_working_dir);
@@ -142,6 +144,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
       this->Makefile->AddCustomCommandToOutput(cxxName.c_str(),
                                                depends,
                                                no_main_dependency,
+                                               no_env_variables,
                                                cxxCommandLines,
                                                no_comment,
                                                no_working_dir);
@@ -151,6 +154,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
       this->Makefile->AddCustomCommandToOutput(mocName.c_str(),
                                                depends,
                                                no_main_dependency,
+                                               no_env_variables,
                                                mocCommandLines,
                                                no_comment,
                                                no_working_dir);

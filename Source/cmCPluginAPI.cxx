@@ -275,8 +275,9 @@ void CCONV cmAddCustomCommand(void *arg, const char* source,
 
   // Pass the call to the makefile instance.
   const char* no_comment = 0;
+  std::map<std::string,std::string> no_env_variables;
   mf->AddCustomCommandOldStyle(target, outputs2, depends2, source,
-                               commandLines, no_comment);
+                               no_env_variables, commandLines, no_comment);
 }
 
 void CCONV cmAddCustomCommandToOutput(void *arg, const char* output,
@@ -312,8 +313,10 @@ void CCONV cmAddCustomCommandToOutput(void *arg, const char* output,
   // Pass the call to the makefile instance.
   const char* no_comment = 0;
   const char* no_working_dir = 0;
+  std::map<std::string,std::string> no_env_variables;
   mf->AddCustomCommandToOutput(output, depends2, main_dependency,
-                               commandLines, no_comment, no_working_dir);
+                               no_env_variables, commandLines, no_comment,
+                               no_working_dir);
 }
 
 void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
@@ -356,8 +359,10 @@ void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
   std::vector<std::string> no_depends;
   const char* no_comment = 0;
   const char* no_working_dir = 0;
-  mf->AddCustomCommandToTarget(target, no_depends, commandLines,
-                               cctype, no_comment, no_working_dir);
+  std::map<std::string,std::string> no_env_variables;
+  mf->AddCustomCommandToTarget(target, no_depends, no_env_variables,
+                               commandLines, cctype, no_comment,
+                               no_working_dir);
 }
 
 void CCONV cmAddLinkLibraryForTarget(void *arg, const char *tgt,

@@ -236,11 +236,15 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();
 
+  // Create an empty environment variable array
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   cmCustomCommandLines commandLines;
   commandLines.push_back(commandLine);
   const char* no_working_directory = 0;
   this->Makefile->AddCustomCommandToOutput(dspname.c_str(), listFiles,
-                                           makefileIn.c_str(), commandLines,
+                                           makefileIn.c_str(),
+                                           no_env_variables,
+                                           commandLines,
                                            comment.c_str(),
                                            no_working_directory, true);
   if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
@@ -573,9 +577,12 @@ cmLocalVisualStudio6Generator
 
   // Add the rule with the given dependencies and commands.
   const char* no_main_dependency = 0;
+  // Create an empty environment variable array
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   this->Makefile->AddCustomCommandToOutput(output,
                                        depends,
                                        no_main_dependency,
+                                       no_env_variables,
                                        origCommand.GetCommandLines(),
                                        comment.c_str(),
                                        origCommand.GetWorkingDirectory());
@@ -798,9 +805,10 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
   command.push_back(outDir);
   std::vector<std::string> no_output;
   std::vector<std::string> no_depends;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   cmCustomCommandLines commands;
   commands.push_back(command);
-  pcc.reset(new cmCustomCommand(0, no_output, no_depends, commands, 0, 0));
+  pcc.reset(new cmCustomCommand(0, no_output, no_depends, no_env_variables, commands, 0, 0));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;

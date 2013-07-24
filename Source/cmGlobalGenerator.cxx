@@ -2176,8 +2176,9 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
 
   std::vector<std::string> no_outputs;
   std::vector<std::string> no_depends;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
   // Store the custom command in the target.
-  cmCustomCommand cc(0, no_outputs, no_depends, *commandLines, 0,
+  cmCustomCommand cc(0, no_outputs, no_depends, no_env_variables, *commandLines, 0,
                      workingDirectory);
   target.GetPostBuildCommands().push_back(cc);
   target.SetProperty("EchoString", message);

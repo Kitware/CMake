@@ -163,6 +163,7 @@ if(BUILD_TESTING)
 
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
+  ADD_TEST_MACRO(CommandLineEnvTest CommandLineEnvTest)
   ADD_TEST_MACRO(FindPackageTest FindPackageTest)
   ADD_TEST_MACRO(FindModulesExecuteAll FindModulesExecuteAll)
   ADD_TEST_MACRO(StringFileTest StringFileTest)
@@ -620,6 +621,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command working
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory")
+
+  add_test(CustomCommandEnvVariables  ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/CustomCommandEnvVariables"
+    "${CMake_BINARY_DIR}/Tests/CustomCommandEnvVariables"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-project TestEnvVariables
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandEnvVariables")
 
    #add_test(SimpleExclude ${CMAKE_CTEST_COMMAND}
    #  --build-and-test

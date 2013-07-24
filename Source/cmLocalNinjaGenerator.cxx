@@ -294,6 +294,43 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
 void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
                                             std::vector<std::string> &cmdLines)
 {
+  // Build the export line
+  const cmCustomCommand::EnvVariablesMap &env_variables = cc->GetEnvVariables();
+  cmCustomCommand::EnvVariablesMap::const_iterator env_var_it;
+  std::string env_variable_command = "";
+
+  // Construct environment variables args
+  cmCustomCommandLines env_cmd_lines;
+  cmCustomCommandLine env_cmd_line;
+  env_cmd_line.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  env_cmd_line.push_back("-E");
+  env_cmd_line.push_back("env");
+  
+  // Get the environment varibles args
+  if(!env_variables.empty()) {
+    typedef cmCustomCommand::EnvVariablesMap::const_iterator env_iter_type;
+    env_iter_type env_var_it_end(env_variables.end());
+
+    for(env_iter_type env_var_it(env_variables.begin());
+        env_var_it != env_var_it_end;
+        ++env_var_it)
+    {
+      env_cmd_line.push_back(env_var_it->first+"="+(env_var_it->second.c_str()));
+    }
+  }
+
+  // Create a custom command generator for the environment modification
+  std::vector<std::string> no_output, no_depends;
+  cmCustomCommand::EnvVariablesMap no_env_variables;
+  env_cmd_lines.push_back(env_cmd_line);
+  cmCustomCommand env_cmd(0, no_output, no_depends, no_env_variables, env_cmd_lines, 0, 0);
+  env_cmd.SetEscapeOldStyle(false);
+  env_cmd.SetEscapeAllowMakeVars(true);
+  cmCustomCommandGenerator env_cmd_generator(env_cmd,
+                                             this->GetConfigName(),
+                                             this->Makefile);
+
+  // Generate the actual command
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
   if (ccg.GetNumberOfCommands() > 0) {
     const char* wd = cc->GetWorkingDirectory();
@@ -313,6 +350,15 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
     cmdLines.push_back(this->ConvertToOutputFormat(ccg.GetCommand(i).c_str(),
                                                    SHELL));
     std::string& cmd = cmdLines.back();
+
+    // Modify the environment, if necessary
+    if(!env_variables.empty()) {
+      std::string env_cmd_str = env_cmd_generator.GetCommand(0);
+      env_cmd_generator.AppendArguments(0, env_cmd_str);
+      // Add the environment variable string to the command
+      cmd = env_cmd_str+" "+cmd;
+    }
+
     ccg.AppendArguments(i, cmd);
   }
 }
