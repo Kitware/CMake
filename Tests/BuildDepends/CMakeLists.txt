@@ -53,6 +53,8 @@ write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot.hxx.in
   "static const char* zot = \"zot\";\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/dir/header.txt
+  "#define HEADER_STRING \"ninja\"\n" )
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_custom.hxx.in
   "static const char* zot_custom = \"zot_custom\";\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/zot_macro_dir.hxx
