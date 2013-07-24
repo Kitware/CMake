@@ -84,12 +84,14 @@ bool cmSetPropertyCommand
       {
       doing = DoingNone;
       this->AppendMode = true;
+      this->Remove = false;
       this->AppendAsString = false;
       }
     else if(*arg == "APPEND_STRING")
       {
       doing = DoingNone;
       this->AppendMode = true;
+      this->Remove = false;
       this->AppendAsString = true;
       }
     else if(doing == DoingNames)
@@ -160,7 +162,7 @@ bool cmSetPropertyCommand::HandleGlobalMode()
     }
   if(this->AppendMode)
     {
-    cm->AppendProperty(name, value, this->AppendAsString);
+    cm->AppendProperty(name, value ? value : "", this->AppendAsString);
     }
   else
     {
@@ -226,7 +228,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
     }
   if(this->AppendMode)
     {
-    mf->AppendProperty(name, value, this->AppendAsString);
+    mf->AppendProperty(name, value ? value : "", this->AppendAsString);
     }
   else
     {
