@@ -886,20 +886,16 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endforeach()
 
   if(Q_WS_WIN)
-    if (QT_QAXCONTAINER_FOUND)
-      set(QT_MODULES ${QT_MODULES} QAxContainer)
-      # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
-      find_path(QT_QAXCONTAINER_INCLUDE_DIR ActiveQt
-        PATHS ${QT_HEADERS_DIR}/ActiveQt
-        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
-        )
-    endif()
-    if (QT_QAXSERVER_FOUND)
-      find_path(QT_QAXSERVER_INCLUDE_DIR ActiveQt
-        PATHS ${QT_HEADERS_DIR}/ActiveQt
-        NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
-        )
-    endif()
+    set(QT_MODULES ${QT_MODULES} QAxContainer)
+    # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
+    find_path(QT_QAXCONTAINER_INCLUDE_DIR ActiveQt
+      PATHS ${QT_HEADERS_DIR}/ActiveQt
+      NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
+      )
+    find_path(QT_QAXSERVER_INCLUDE_DIR ActiveQt
+      PATHS ${QT_HEADERS_DIR}/ActiveQt
+      NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
+      )
   endif()
 
   # Set QT_QTDESIGNERCOMPONENTS_INCLUDE_DIR
@@ -1060,8 +1056,8 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   if(Q_WS_WIN)
     _QT4_ADJUST_LIB_VARS(qtmain)
 
+    _QT4_ADJUST_LIB_VARS(QAxServer)
     if(QT_QAXSERVER_FOUND)
-      _QT4_ADJUST_LIB_VARS(QAxServer)
       set_property(TARGET Qt4::QAxServer PROPERTY
         INTERFACE_QT4_NO_LINK_QTMAIN ON
       )
@@ -1069,9 +1065,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
         COMPATIBLE_INTERFACE_BOOL QT4_NO_LINK_QTMAIN)
     endif()
 
-    if(QT_QAXCONTAINER_FOUND)
-      _QT4_ADJUST_LIB_VARS(QAxContainer)
-    endif()
+    _QT4_ADJUST_LIB_VARS(QAxContainer)
   endif()
 
   # Only public dependencies are listed here.
