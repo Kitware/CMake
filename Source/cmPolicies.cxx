@@ -600,7 +600,7 @@ cmPolicies::cmPolicies()
     "target_link_libraries signatures to be mixed.  "
     "The NEW behavior for this policy is to not to allow mixing of the "
     "keyword and plain signatures.",
-    2,8,11,20130516, cmPolicies::WARN);
+    2,8,11,20130724, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
