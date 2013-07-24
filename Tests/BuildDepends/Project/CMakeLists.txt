@@ -124,15 +124,6 @@ add_custom_target(link_depends_no_shared_check ALL
   )
 add_dependencies(link_depends_no_shared_check link_depends_no_shared_exe)
 
-# add a test for ninja dep handler
-add_custom_command(
-  OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/dir/header.txt
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/dir/header.txt
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/dir/header.txt
-  ${CMAKE_CURRENT_BINARY_DIR}/dir/header.txt
-  )
-
 add_custom_command(
   OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/dir/header.h
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dir/header.txt

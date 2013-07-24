@@ -1,1 +1,0 @@
-#define HEADER_STRING "ninja"
