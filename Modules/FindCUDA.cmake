@@ -607,7 +607,11 @@ macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
     NO_DEFAULT_PATH
     )
   # Search default search paths, after we search our own set of paths.
-  find_library(${_var} NAMES ${_names} DOC ${_doc})
+  find_library(${_var}
+    NAMES ${_names}
+    PATHS "/usr/lib/nvidia-current"
+    DOC ${_doc}
+    )
 endmacro()
 
 macro(cuda_find_library_local_first _var _names _doc)
