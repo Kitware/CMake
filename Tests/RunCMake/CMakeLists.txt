@@ -28,7 +28,7 @@
 #   <SubTest>-stdout.txt  = Regex matching expected stdout content
 #   <SubTest>-stderr.txt  = Regex matching expected stderr content
 #   <SubTest>-check.cmake = Custom result check
-# Note that trailing newlines will be stripped from actual test
+# Note that trailing newlines will be stripped from actual and expected test
 # output before matching against the stdout and stderr expressions.
 # The code in <SubTest>-check.cmake may use variables
 #   RunCMake_TEST_SOURCE_DIR = Top of test source tree
@@ -115,4 +115,5 @@ if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
 endif()
 
 add_RunCMake_test(File_Generate)
+add_RunCMake_test(ExportWithoutLanguage)
 add_RunCMake_test(target_link_libraries)
