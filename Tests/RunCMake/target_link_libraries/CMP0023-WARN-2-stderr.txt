@@ -1,7 +1,8 @@
 CMake Warning \(dev\) at CMP0023-WARN-2.cmake:9 \(target_link_libraries\):
-  Policy CMP0023 is not set: Similar target_link_libraries signatures can not
-  be mixed.  Run "cmake --help-policy CMP0023" for policy details.  Use the
-  cmake_policy command to set the policy and suppress this warning.
+  Policy CMP0023 is not set: Plain and keyword target_link_libraries
+  signatures cannot be mixed.  Run "cmake --help-policy CMP0023" for policy
+  details.  Use the cmake_policy command to set the policy and suppress this
+  warning.
 
   The plain signature for target_link_libraries has already been used with
   the target "foo".  All uses of target_link_libraries with a target should
