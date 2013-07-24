@@ -575,6 +575,32 @@ cmPolicies::cmPolicies()
     "property for in-build targets, and ignore the old properties matching "
     "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.",
     2,8,11,20130516, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0023, "CMP0023",
+    "Plain and keyword target_link_libraries signatures cannot be mixed.",
+    "CMake 2.8.12 introduced the target_link_libraries signature using "
+    "the PUBLIC, PRIVATE, and INTERFACE keywords to generalize the "
+    "LINK_PUBLIC and LINK_PRIVATE keywords introduced in CMake 2.8.7.  "
+    "Use of signatures with any of these keywords sets the link interface "
+    "of a target explicitly, even if empty.  "
+    "This produces confusing behavior when used in combination with the "
+    "historical behavior of the plain target_link_libraries signature.  "
+    "For example, consider the code:\n"
+    " target_link_libraries(mylib A)\n"
+    " target_link_libraries(mylib PRIVATE B)\n"
+    "After the first line the link interface has not been set explicitly "
+    "so CMake would use the link implementation, A, as the link interface.  "
+    "However, the second line sets the link interface to empty.  "
+    "In order to avoid this subtle behavior CMake now prefers to disallow "
+    "mixing the plain and keyword signatures of target_link_libraries for "
+    "a single target."
+    "\n"
+    "The OLD behavior for this policy is to allow keyword and plain "
+    "target_link_libraries signatures to be mixed.  "
+    "The NEW behavior for this policy is to not to allow mixing of the "
+    "keyword and plain signatures.",
+    2,8,11,20130724, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

@@ -1380,7 +1380,7 @@ void cmLocalGenerator::AddCompileOptions(
       // COMPILE_FLAGS are not escaped for historical reasons.
       this->AppendFlags(flags, targetFlags);
       }
-    std::vector<std::string> opts; // TODO: Emitted.
+    std::vector<std::string> opts;
     target->GetCompileOptions(opts, config);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)

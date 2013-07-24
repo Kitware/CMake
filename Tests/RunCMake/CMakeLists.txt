@@ -116,3 +116,4 @@ endif()
 
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
+add_RunCMake_test(target_link_libraries)

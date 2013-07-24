@@ -564,77 +564,30 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       const char* loc = 0;
       const char* imp = 0;
       std::string suffix;
-      return context->CurrentTarget->GetMappedConfig(context->Config,
+      if (context->CurrentTarget->GetMappedConfig(context->Config,
                                                   &loc,
                                                   &imp,
-                                                  suffix) ? "1" : "0";
+                                                  suffix))
+        {
+        // This imported target has an appropriate location
+        // for this (possibly mapped) config.
+        // Check if there is a proper config mapping for the tested config.
+        std::vector<std::string> mappedConfigs;
+        std::string mapProp = "MAP_IMPORTED_CONFIG_";
+        mapProp += context->Config;
+        if(const char* mapValue =
+                        context->CurrentTarget->GetProperty(mapProp.c_str()))
+          {
+          cmSystemTools::ExpandListArgument(cmSystemTools::UpperCase(mapValue),
+                                            mappedConfigs);
+          return std::find(mappedConfigs.begin(), mappedConfigs.end(),
+                          context->Config) != mappedConfigs.end() ? "1" : "0";
+          }
+        }
       }
     return "0";
   }
 } configurationTestNode;
-
-//----------------------------------------------------------------------------
-static const struct LinkLanguageNode : public cmGeneratorExpressionNode
-{
-  LinkLanguageNode() {}
-
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
-
-  std::string Evaluate(const std::vector<std::string> &parameters,
-                       cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *dagChecker) const
-  {
-    if (dagChecker && dagChecker->EvaluatingLinkLibraries())
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<LINK_LANGUAGE> expression can not be used while evaluating "
-          "link libraries");
-      return std::string();
-      }
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<LINK_LANGUAGE> expression requires one or two parameters");
-      return std::string();
-      }
-    cmTarget* target = context->HeadTarget;
-    if (!target)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<LINK_LANGUAGE> may only be used with targets.  It may not "
-          "be used with add_custom_command.");
-      return std::string();
-      }
-
-    const char *lang = target->GetLinkerLanguage(context->Config);
-    if (parameters.size() == 0)
-      {
-      return lang ? lang : "";
-      }
-    else
-      {
-      cmsys::RegularExpression langValidator;
-      langValidator.compile("^[A-Za-z0-9_]*$");
-      if (!langValidator.find(parameters.begin()->c_str()))
-        {
-        reportError(context, content->GetOriginalExpression(),
-                    "Expression syntax not recognized.");
-        return std::string();
-        }
-      if (!lang)
-        {
-        return parameters.front().empty() ? "1" : "0";
-        }
-
-      if (strcmp(parameters.begin()->c_str(), lang) == 0)
-        {
-        return "1";
-        }
-      return "0";
-      }
-  }
-} linkLanguageNode;
 
 static const struct JoinNode : public cmGeneratorExpressionNode
 {
@@ -834,6 +787,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 
     assert(target);
+
+    if (propertyName == "LINKER_LANGUAGE")
+      {
+      if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "LINKER_LANGUAGE target property can not be used while evaluating "
+            "link libraries");
+        return std::string();
+        }
+      const char *lang = target->GetLinkerLanguage(context->Config);
+      return lang ? lang : "";
+      }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
                                                target->GetName(),
@@ -1380,8 +1346,6 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &configurationNode;
   else if (identifier == "CONFIG")
     return &configurationTestNode;
-  else if (identifier == "LINK_LANGUAGE")
-    return &linkLanguageNode;
   else if (identifier == "TARGET_FILE")
     return &targetFileNode;
   else if (identifier == "TARGET_LINKER_FILE")
