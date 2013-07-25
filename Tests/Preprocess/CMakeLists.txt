@@ -259,6 +259,19 @@ set_property(
   ${DEF_FILE_PATH}
   )
 
+# Try reading and writing the property value to ensure the string is
+# preserved.
+get_property(defs1 TARGET Preprocess PROPERTY COMPILE_DEFINITIONS)
+set_property(TARGET Preprocess PROPERTY COMPILE_DEFINITIONS "${defs1}")
+get_property(defs2 TARGET Preprocess PROPERTY COMPILE_DEFINITIONS)
+if(NOT "x${defs1}" STREQUAL "x${defs2}")
+  message(FATAL_ERROR "get/set/get COMPILE_DEFINITIONS round trip failed.  "
+    "First get:\n"
+    "  ${defs1}\n"
+    "Second get:\n"
+    "  ${defs2}")
+endif()
+
 # Helper target for running test manually in build tree.
 add_custom_target(drive COMMAND Preprocess)
 
