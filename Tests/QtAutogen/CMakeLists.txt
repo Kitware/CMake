@@ -35,6 +35,8 @@ add_definitions(-DFOO -DSomeDefine="Barx")
 # enable relaxed mode so automoc can handle all the special cases:
 set(CMAKE_AUTOMOC_RELAXED_MODE TRUE)
 
+set(CMAKE_AUTOUIC ON)
+
 # create an executable and two library targets, each requiring automoc:
 add_library(codeeditorLib STATIC codeeditor.cpp)
 

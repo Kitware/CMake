@@ -1336,6 +1336,15 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables that Control the Build");
 
   cm->DefineProperty
+    ("CMAKE_AUTOUIC", cmProperty::VARIABLE,
+     "Whether to handle uic automatically for Qt targets.",
+     "This variable is used to initialize the "
+     "AUTOUIC property on all the targets.  "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
     ("CMAKE_AUTOMOC_MOC_OPTIONS", cmProperty::VARIABLE,
      "Additional options for moc when using automoc (see CMAKE_AUTOMOC).",
      "This variable is used to initialize the "
