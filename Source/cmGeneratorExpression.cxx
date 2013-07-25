@@ -229,8 +229,27 @@ static std::string stripAllGeneratorExpressions(const std::string &input)
 }
 
 //----------------------------------------------------------------------------
+static void prefixItems(const std::string &content, std::string &result,
+                        const std::string &prefix)
+{
+  std::vector<std::string> entries;
+  cmGeneratorExpression::Split(content, entries);
+  for(std::vector<std::string>::const_iterator ei = entries.begin();
+      ei != entries.end(); ++ei)
+    {
+    if (!cmSystemTools::FileIsFullPath(ei->c_str())
+        && cmGeneratorExpression::Find(*ei) == std::string::npos)
+      {
+      result += prefix;
+      }
+    result += *ei;
+    }
+}
+
+//----------------------------------------------------------------------------
 static std::string stripExportInterface(const std::string &input,
-                          cmGeneratorExpression::PreprocessContext context)
+                          cmGeneratorExpression::PreprocessContext context,
+                          bool resolveRelative)
 {
   std::string result;
 
@@ -289,7 +308,15 @@ static std::string stripExportInterface(const std::string &input,
         else if(context == cmGeneratorExpression::InstallInterface
             && gotInstallInterface)
           {
-          result += input.substr(pos, c - cStart);
+          const std::string content = input.substr(pos, c - cStart);
+          if (resolveRelative)
+            {
+            prefixItems(content, result, "${_IMPORT_PREFIX}/");
+            }
+          else
+            {
+            result += content;
+            }
           }
         break;
         }
@@ -380,7 +407,8 @@ void cmGeneratorExpression::Split(const std::string &input,
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorExpression::Preprocess(const std::string &input,
-                                              PreprocessContext context)
+                                              PreprocessContext context,
+                                              bool resolveRelative)
 {
   if (context == StripAllGeneratorExpressions)
     {
@@ -388,7 +416,7 @@ std::string cmGeneratorExpression::Preprocess(const std::string &input,
     }
   else if (context == BuildInterface || context == InstallInterface)
     {
-    return stripExportInterface(input, context);
+    return stripExportInterface(input, context, resolveRelative);
     }
 
   assert(!"cmGeneratorExpression::Preprocess called with invalid args");
