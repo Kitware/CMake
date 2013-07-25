@@ -886,7 +886,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endforeach()
 
   if(Q_WS_WIN)
-    set(QT_MODULES ${QT_MODULES} QAxContainer)
+    set(QT_MODULES ${QT_MODULES} QAxContainer QAxServer)
     # Set QT_AXCONTAINER_INCLUDE_DIR and QT_AXSERVER_INCLUDE_DIR
     find_path(QT_QAXCONTAINER_INCLUDE_DIR ActiveQt
       PATHS ${QT_HEADERS_DIR}/ActiveQt
