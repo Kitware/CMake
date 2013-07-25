@@ -148,7 +148,7 @@ endfunction()
 #=============================================================
 # _GTK2_FIND_INCLUDE_DIR
 # Internal function to find the GTK include directories
-#   _var = variable to set
+#   _var = variable to set (_INCLUDE_DIR is appended)
 #   _hdr = header file to look for
 #=============================================================
 function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
@@ -204,7 +204,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         message(STATUS "Adding ${_gtk2_arch_dir} to search path for multiarch support")
       endif()
     endif()
-    find_path(${_var} ${_hdr}
+    find_path(${_var}_INCLUDE_DIR ${_hdr}
         PATHS
             ${_gtk2_arch_dir}
             /usr/local/lib64
@@ -231,10 +231,10 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             ${_suffixes}
     )
 
-    if(${_var})
-        set(GTK2_INCLUDE_DIRS ${GTK2_INCLUDE_DIRS} ${${_var}} PARENT_SCOPE)
+    if(${_var}_INCLUDE_DIR)
+        set(GTK2_INCLUDE_DIRS ${GTK2_INCLUDE_DIRS} ${${_var}_INCLUDE_DIR} PARENT_SCOPE)
         if(NOT GTK2_SKIP_MARK_AS_ADVANCED)
-            mark_as_advanced(${_var})
+            mark_as_advanced(${_var}_INCLUDE_DIR)
         endif()
     endif()
 
@@ -403,7 +403,7 @@ if(GTK2_FIND_VERSION)
         message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}] "
                        "Searching for version ${GTK2_FIND_VERSION}")
     endif()
-    _GTK2_FIND_INCLUDE_DIR(GTK2_GTK_INCLUDE_DIR gtk/gtk.h)
+    _GTK2_FIND_INCLUDE_DIR(GTK2_GTK gtk/gtk.h)
     if(GTK2_GTK_INCLUDE_DIR)
         _GTK2_GET_VERSION(GTK2_MAJOR_VERSION
                           GTK2_MINOR_VERSION
@@ -453,7 +453,7 @@ list(APPEND GTK2_LIBRARIES ${FREETYPE_LIBRARIES})
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     if(_GTK2_component STREQUAL "gtk")
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GTK_INCLUDE_DIR gtk/gtk.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GTK gtk/gtk.h)
 
         if(UNIX)
             _GTK2_FIND_LIBRARY    (GTK2_GTK gtk-x11 false true)
@@ -463,78 +463,78 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
             _GTK2_FIND_LIBRARY    (GTK2_GDK gdk-win32 false true)
         endif()
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_INCLUDE_DIR gdk/gdk.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GDKCONFIG_INCLUDE_DIR gdkconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GDK gdk/gdk.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GDKCONFIG gdkconfig.h)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_CAIRO_INCLUDE_DIR cairo.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_CAIRO cairo.h)
         _GTK2_FIND_LIBRARY    (GTK2_CAIRO cairo false false)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_FONTCONFIG fontconfig/fontconfig.h)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGO_INCLUDE_DIR pango/pango.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGO pango/pango.h)
         _GTK2_FIND_LIBRARY    (GTK2_PANGO pango false true)
 
         _GTK2_FIND_LIBRARY    (GTK2_PANGOCAIRO pangocairo false true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_PIXBUF_INCLUDE_DIR gdk-pixbuf/gdk-pixbuf.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_PIXBUF gdk-pixbuf/gdk-pixbuf.h)
         _GTK2_FIND_LIBRARY    (GTK2_GDK_PIXBUF gdk_pixbuf false true)
 
         _GTK2_FIND_LIBRARY    (GTK2_GTHREAD gthread false true)
 
         _GTK2_FIND_LIBRARY    (GTK2_GIO gio false true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_ATK_INCLUDE_DIR atk/atk.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_ATK atk/atk.h)
         _GTK2_FIND_LIBRARY    (GTK2_ATK atk false true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GOBJECT_INCLUDE_DIR gobject/gobject.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GOBJECT gobject/gobject.h)
         _GTK2_FIND_LIBRARY    (GTK2_GOBJECT gobject false true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIB_INCLUDE_DIR glib.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBCONFIG_INCLUDE_DIR glibconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIB glib.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBCONFIG glibconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GLIB glib false true)
 
     elseif(_GTK2_component STREQUAL "gtkmm")
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GTKMM_INCLUDE_DIR gtkmm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GTKMMCONFIG_INCLUDE_DIR gtkmmconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GTKMM gtkmm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GTKMMCONFIG gtkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GTKMM gtkmm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GDKMM_INCLUDE_DIR gdkmm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GDKMMCONFIG_INCLUDE_DIR gdkmmconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GDKMM gdkmm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GDKMMCONFIG gdkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GDKMM gdkmm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMM_INCLUDE_DIR pangomm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMMCONFIG_INCLUDE_DIR pangommconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMM pangomm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_PANGOMMCONFIG pangommconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_PANGOMM pangomm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_CAIROMM_INCLUDE_DIR cairomm/cairomm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_CAIROMMCONFIG_INCLUDE_DIR cairommconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_CAIROMM cairomm/cairomm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_CAIROMMCONFIG cairommconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_CAIROMM cairomm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GIOMM_INCLUDE_DIR giomm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GIOMMCONFIG_INCLUDE_DIR giommconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GIOMM giomm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GIOMMCONFIG giommconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GIOMM giomm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_ATKMM_INCLUDE_DIR atkmm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_ATKMM atkmm.h)
         _GTK2_FIND_LIBRARY    (GTK2_ATKMM atkmm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBMM_INCLUDE_DIR glibmm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBMMCONFIG_INCLUDE_DIR glibmmconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBMM glibmm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLIBMMCONFIG glibmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GLIBMM glibmm true true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_SIGC++_INCLUDE_DIR sigc++/sigc++.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_SIGC++CONFIG_INCLUDE_DIR sigc++config.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_SIGC++ sigc++/sigc++.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_SIGC++CONFIG sigc++config.h)
         _GTK2_FIND_LIBRARY    (GTK2_SIGC++ sigc true true)
 
     elseif(_GTK2_component STREQUAL "glade")
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLADE_INCLUDE_DIR glade/glade.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLADE glade/glade.h)
         _GTK2_FIND_LIBRARY    (GTK2_GLADE glade false true)
 
     elseif(_GTK2_component STREQUAL "glademm")
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLADEMM_INCLUDE_DIR libglademm.h)
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GLADEMMCONFIG_INCLUDE_DIR libglademmconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLADEMM libglademm.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GLADEMMCONFIG libglademmconfig.h)
         _GTK2_FIND_LIBRARY    (GTK2_GLADEMM glademm true true)
 
     else()
