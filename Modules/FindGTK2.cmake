@@ -28,7 +28,6 @@
 # Optional variables you can define prior to calling this module:
 #
 #   GTK2_DEBUG - Enables verbose debugging of the module
-#   GTK2_SKIP_MARK_AS_ADVANCED - Disable marking cache variables as advanced
 #   GTK2_ADDITIONAL_SUFFIXES - Allows defining additional directories to
 #                              search for include files
 #
@@ -76,6 +75,8 @@
 #            (i.e. MSVC)
 #   * Use the optimized/debug syntax for _LIBRARY and _LIBRARIES variables when
 #     appropriate. A new set of _RELEASE variables was also added.
+#   * Remove GTK2_SKIP_MARK_AS_ADVANCED option, as now the variables are
+#     marked as advanced by SelectLibraryConfigurations
 # Version 1.4 (10/4/2012) (CMake 2.8.10)
 #   * 12596: Missing paths for FindGTK2 on NetBSD
 #   * 12049: Fixed detection of GTK include files in the lib folder on
@@ -242,9 +243,6 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
 
     if(${_var}_INCLUDE_DIR)
         set(GTK2_INCLUDE_DIRS ${GTK2_INCLUDE_DIRS} ${${_var}_INCLUDE_DIR} PARENT_SCOPE)
-        if(NOT GTK2_SKIP_MARK_AS_ADVANCED)
-            mark_as_advanced(${_var}_INCLUDE_DIR)
-        endif()
     endif()
 
 endfunction()
@@ -364,11 +362,6 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
     endif()
 
     select_library_configurations(${_var})
-
-    if(NOT GTK2_SKIP_MARK_AS_ADVANCED)
-        mark_as_advanced(${_var}_LIBRARY_RELEASE)
-        mark_as_advanced(${_var}_LIBRARY_DEBUG)
-    endif()
 
     set(${_var}_LIBRARY ${${_var}_LIBRARY} PARENT_SCOPE)
 
