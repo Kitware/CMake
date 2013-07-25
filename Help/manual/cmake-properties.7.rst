@@ -73,6 +73,8 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC
+   /prop_tgt/AUTOUIC
+   /prop_tgt/AUTOUIC_OPTIONS
    /prop_tgt/BUILD_WITH_INSTALL_RPATH
    /prop_tgt/BUNDLE_EXTENSION
    /prop_tgt/BUNDLE
@@ -234,6 +236,7 @@ Properties on Source Files
 
 .. toctree::
    /prop_sf/ABSTRACT
+   /prop_sf/AUTOUIC_OPTIONS
    /prop_sf/COMPILE_DEFINITIONS_CONFIG
    /prop_sf/COMPILE_DEFINITIONS
    /prop_sf/COMPILE_FLAGS

@@ -1225,7 +1225,9 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
          target.GetType() == cmTarget::MODULE_LIBRARY ||
          target.GetType() == cmTarget::OBJECT_LIBRARY)
         {
-        if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
+        if((target.GetPropertyAsBool("AUTOMOC")
+              || target.GetPropertyAsBool("AUTOUIC"))
+            && !target.IsImported())
           {
           cmQtAutoGenerators autogen;
           if(autogen.InitializeMocSourceFile(&target))
