@@ -843,7 +843,7 @@ void cmTarget::DefineProperties(cmake *cm)
      CM_DOCUMENT_LANGUAGE_GENERATOR_EXPRESSIONS);
 
   cm->DefineProperty
-    ("SYSTEM_INTERFACE_INCLUDE_DIRECTORIES", cmProperty::TARGET,
+    ("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", cmProperty::TARGET,
      "List of public system include directories for a library.",
      "Targets may populate this property to publish the include directories "
      "which contain system headers, and therefore should not result in "
