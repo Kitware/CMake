@@ -6244,7 +6244,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   }
 
   // Get the link languages.
-  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+  if(this->LinkLanguageDependsOnLinkImplementation())
     {
     std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
     linkProp += suffix;
@@ -6546,7 +6546,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     iface.ImplementationIsInterface = true;
     iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
-    if(this->GetType() == cmTarget::STATIC_LIBRARY)
+    if(this->LinkLanguageDependsOnLinkImplementation())
       {
       // Targets using this archive need its language runtime libraries.
       iface.Languages = impl->Languages;
