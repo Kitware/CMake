@@ -49,7 +49,10 @@
 
  #include "calwidget.h"
 
+ #include "ui_calwidget.h"
+
  Window::Window()
+  : ui(new Ui::Window)
  {
      createPreviewGroupBox();
      createGeneralOptionsGroupBox();
