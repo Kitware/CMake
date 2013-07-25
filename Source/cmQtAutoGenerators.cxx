@@ -117,6 +117,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,ColorOutput(true)
 ,RunMocFailed(false)
+,RunUicFailed(false)
 ,GenerateAll(false)
 {
 
@@ -255,7 +256,22 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
                                     "", makefile->GetCurrentOutputDirectory());
 
   std::vector<std::string> depends;
-  std::string tools = "moc";
+  std::vector<std::string> toolNames;
+  if (target->GetPropertyAsBool("AUTOMOC"))
+    {
+    toolNames.push_back("moc");
+    }
+  if (target->GetPropertyAsBool("AUTOUIC"))
+    {
+    toolNames.push_back("uic");
+    }
+
+  std::string tools = toolNames[0];
+  toolNames.erase(toolNames.begin());
+  if (toolNames.size() == 1)
+    {
+    tools += " and " + toolNames[0];
+    }
   std::string autogenComment = "Automatic " + tools + " for target ";
   autogenComment += targetName;
 
@@ -321,6 +337,10 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     {
     this->SetupAutoMocTarget(target, autogenTargetName,
                              configIncludes, configDefines);
+    }
+  if (target->GetPropertyAsBool("AUTOUIC"))
+    {
+    this->SetupAutoUicTarget(target);
     }
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
@@ -499,6 +519,90 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
     }
 }
 
+void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget* target)
+{
+  cmMakefile *makefile = target->GetMakefile();
+
+  const char *qtUic = makefile->GetSafeDefinition("QT_UIC_EXECUTABLE");
+  makefile->AddDefinition("_qt_uic_executable", qtUic);
+
+  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+
+  std::string skip_uic;
+  const char *sep = "";
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+      fileIt != srcFiles.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                    sf->GetFullPath().c_str());
+    bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
+
+    if (skip)
+      {
+      skip_uic += sep;
+      skip_uic += absFile;
+      sep = ";";
+      }
+    }
+
+  makefile->AddDefinition("_skip_uic",
+          cmLocalGenerator::EscapeForCMake(skip_uic.c_str()).c_str());
+
+  std::vector<cmSourceFile*> uiFilesWithOptions
+                                        = makefile->GetQtUiFilesWithOptions();
+
+  std::string uiFileFiles;
+  std::string uiFileOptions;
+  sep = "";
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt =
+      uiFilesWithOptions.begin();
+      fileIt != uiFilesWithOptions.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                    sf->GetFullPath().c_str());
+    uiFileFiles += sep;
+    uiFileFiles += absFile;
+    uiFileOptions += sep;
+    std::string opts = sf->GetProperty("AUTOUIC_OPTIONS");
+    cmSystemTools::ReplaceString(opts, ";", "@list_sep@");
+    uiFileOptions += opts;
+    sep = ";";
+    }
+
+  makefile->AddDefinition("_qt_uic_options_files",
+              cmLocalGenerator::EscapeForCMake(uiFileFiles.c_str()).c_str());
+  makefile->AddDefinition("_qt_uic_options_options",
+            cmLocalGenerator::EscapeForCMake(uiFileOptions.c_str()).c_str());
+
+  const char* targetName = target->GetName();
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Uic = makefile->FindTargetToUse("Qt5::uic");
+    if (!qt5Uic)
+      {
+      cmSystemTools::Error("Qt5::uic target not found ",
+                          targetName);
+      return;
+      }
+    makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
+    }
+  else
+    {
+    if (strcmp(qtVersion, "4") != 0)
+      {
+      cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
+                          "Qt 5 ", targetName);
+      }
+    }
+}
+
 bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 {
   bool success = true;
@@ -563,12 +667,15 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                                      "AM_Qt5Core_VERSION_MAJOR");
     }
   this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
+  this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
+  this->SkipUic = makefile->GetSafeDefinition("AM_SKIP_UIC");
   this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
   this->IncludeProjectDirsBefore = makefile->IsOn(
                                 "AM_CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE");
   this->Srcdir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_SOURCE_DIR");
   this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
+  this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
   std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
   std::string compileDefsProp = compileDefsPropOrig;
   if(config)
@@ -594,6 +701,28 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
 
+  {
+  const char *uicOptionsFiles
+                        = makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
+  const char *uicOptionsOptions
+                      = makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS");
+  std::vector<std::string> uicFilesVec;
+  cmSystemTools::ExpandListArgument(uicOptionsFiles, uicFilesVec);
+  std::vector<std::string> uicOptionsVec;
+  cmSystemTools::ExpandListArgument(uicOptionsOptions, uicOptionsVec);
+  if (uicFilesVec.size() != uicOptionsVec.size())
+    {
+    return false;
+    }
+  for (std::vector<std::string>::iterator fileIt = uicFilesVec.begin(),
+                                            optionIt = uicOptionsVec.begin();
+                                            fileIt != uicFilesVec.end();
+                                            ++fileIt, ++optionIt)
+    {
+    cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+    this->UicOptions[*fileIt] = *optionIt;
+    }
+  }
   this->CurrentCompileSettingsStr = this->MakeCompileSettingsString(makefile);
 
   this->RelaxedMode = makefile->IsOn("AM_RELAXED_MODE");
@@ -767,10 +896,18 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   const std::vector<std::string>& headerExtensions =
                                                makefile->GetHeaderExtensions();
 
+  std::vector<std::string> includedUis;
+  std::vector<std::string> skippedUis;
+  std::vector<std::string> uicSkipped;
+  cmSystemTools::ExpandListArgument(this->SkipUic, uicSkipped);
+
   for (std::vector<std::string>::const_iterator it = sourceFiles.begin();
        it != sourceFiles.end();
        ++it)
     {
+    const bool skipUic = std::find(uicSkipped.begin(), uicSkipped.end(), *it)
+        != uicSkipped.end();
+    std::vector<std::string>& uiFiles = skipUic ? skippedUis : includedUis;
     const std::string &absFilename = *it;
     if (this->Verbose)
       {
@@ -778,14 +915,36 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
       }
     if (this->RelaxedMode)
       {
-      this->ParseCppFile(absFilename, headerExtensions, includedMocs);
+      this->ParseCppFile(absFilename, headerExtensions, includedMocs,
+                         uiFiles);
       }
     else
       {
-      this->StrictParseCppFile(absFilename, headerExtensions, includedMocs);
+      this->StrictParseCppFile(absFilename, headerExtensions, includedMocs,
+                               uiFiles);
       }
     this->SearchHeadersForCppFile(absFilename, headerExtensions, headerFiles);
     }
+
+  {
+  std::vector<std::string> mocSkipped;
+  cmSystemTools::ExpandListArgument(this->SkipMoc, mocSkipped);
+  for (std::vector<std::string>::const_iterator it = mocSkipped.begin();
+       it != mocSkipped.end();
+       ++it)
+    {
+    if (std::find(uicSkipped.begin(), uicSkipped.end(), *it)
+        != uicSkipped.end())
+      {
+      const std::string &absFilename = *it;
+      if (this->Verbose)
+        {
+        std::cout << "AUTOGEN: Checking " << absFilename << std::endl;
+        }
+      this->ParseForUic(absFilename, includedUis);
+      }
+    }
+  }
 
   std::vector<std::string> headerFilesVec;
   cmSystemTools::ExpandListArgument(this->Headers, headerFilesVec);
@@ -798,7 +957,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   // key = moc source filepath, value = moc output filename
   std::map<std::string, std::string> notIncludedMocs;
-  this->ParseHeaders(headerFiles, includedMocs, notIncludedMocs);
+  this->ParseHeaders(headerFiles, includedMocs, notIncludedMocs, includedUis);
 
   // run moc on all the moc's that are #included in source files
   for(std::map<std::string, std::string>::const_iterator
@@ -807,6 +966,12 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
       ++it)
     {
     this->GenerateMoc(it->first, it->second);
+    }
+  for(std::vector<std::string>::const_iterator it = includedUis.begin();
+      it != includedUis.end();
+      ++it)
+    {
+    this->GenerateUi(*it);
     }
 
   cmsys_ios::stringstream outStream;
@@ -840,6 +1005,12 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     std::cerr << "moc failed..."<< std::endl;
     return false;
     }
+
+  if (this->RunUicFailed)
+    {
+    std::cerr << "uic failed..."<< std::endl;
+    return false;
+    }
   outStream.flush();
   std::string automocSource = outStream.str();
   if (!automocCppChanged)
@@ -866,7 +1037,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
 void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
-                              std::map<std::string, std::string>& includedMocs)
+                              std::map<std::string, std::string>& includedMocs,
+                              std::vector<std::string> &includedUis)
 {
   cmsys::RegularExpression mocIncludeRegExp(
               "[\n][ \t]*#[ \t]*include[ \t]+"
@@ -1007,6 +1179,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
     }
+  this->ParseForUic(absFilename, contentsString, includedUis);
 
   // In this case, check whether the scanned file itself contains a Q_OBJECT.
   // If this is the case, the moc_foo.cpp should probably be generated from
@@ -1047,7 +1220,8 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
 
 void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
-                              std::map<std::string, std::string>& includedMocs)
+                              std::map<std::string, std::string>& includedMocs,
+                              std::vector<std::string>& includedUis)
 {
   cmsys::RegularExpression mocIncludeRegExp(
               "[\n][ \t]*#[ \t]*include[ \t]+"
@@ -1138,6 +1312,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
     }
+  this->ParseForUic(absFilename, contentsString, includedUis);
 
   // In this case, check whether the scanned file itself contains a Q_OBJECT.
   // If this is the case, the moc_foo.cpp should probably be generated from
@@ -1155,6 +1330,61 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
     ::exit(EXIT_FAILURE);
     }
 
+}
+
+
+void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
+                              std::vector<std::string>& includedUis)
+{
+  if (this->UicExecutable.empty())
+    {
+    return;
+    }
+  const std::string contentsString = this->ReadAll(absFilename);
+  if (contentsString.empty())
+    {
+    std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
+              << std::endl;
+    return;
+    }
+  this->ParseForUic(absFilename, contentsString, includedUis);
+}
+
+
+void cmQtAutoGenerators::ParseForUic(const std::string&,
+                                     const std::string& contentsString,
+                                     std::vector<std::string>& includedUis)
+{
+  if (this->UicExecutable.empty())
+    {
+    return;
+    }
+  cmsys::RegularExpression uiIncludeRegExp(
+              "[\n][ \t]*#[ \t]*include[ \t]+"
+              "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
+
+  std::string::size_type matchOffset = 0;
+
+  matchOffset = 0;
+  if ((strstr(contentsString.c_str(), "ui_") != NULL)
+                                    && (uiIncludeRegExp.find(contentsString)))
+    {
+    do
+      {
+      const std::string currentUi = uiIncludeRegExp.match(1);
+
+      std::string basename = cmsys::SystemTools::
+                                  GetFilenameWithoutLastExtension(currentUi);
+
+      // basename should be the part of the ui filename used for
+      // finding the correct header, so we need to remove the ui_ part
+      basename = basename.substr(3);
+
+      includedUis.push_back(basename);
+
+      matchOffset += uiIncludeRegExp.end();
+      } while(uiIncludeRegExp.find(contentsString.c_str() + matchOffset));
+    }
 }
 
 
@@ -1197,13 +1427,15 @@ cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
 
 void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
                         const std::map<std::string, std::string>& includedMocs,
-                        std::map<std::string, std::string>& notIncludedMocs)
+                        std::map<std::string, std::string>& notIncludedMocs,
+                        std::vector<std::string>& includedUis)
 {
   for(std::set<std::string>::const_iterator hIt=absHeaders.begin();
       hIt!=absHeaders.end();
       ++hIt)
     {
     const std::string& headerName = *hIt;
+    const std::string contents = this->ReadAll(headerName);
 
     if (includedMocs.find(headerName) == includedMocs.end())
       {
@@ -1216,7 +1448,6 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
                                    GetFilenameWithoutLastExtension(headerName);
 
       const std::string currentMoc = "moc_" + basename + ".cpp";
-      const std::string contents = this->ReadAll(headerName);
       std::string macroName;
       if (requiresMocing(contents, macroName))
         {
@@ -1224,10 +1455,9 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
         notIncludedMocs[headerName] = currentMoc;
         }
       }
+    this->ParseForUic(headerName, contents, includedUis);
     }
-
 }
-
 
 bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                               const std::string& mocFileName)
@@ -1305,6 +1535,66 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   return false;
 }
 
+bool cmQtAutoGenerators::GenerateUi(const std::string& uiFileName)
+{
+  if (!cmsys::SystemTools::FileExists(this->Builddir.c_str(), false))
+    {
+    cmsys::SystemTools::MakeDirectory(this->Builddir.c_str());
+    }
+
+  std::string ui_output_file = "ui_" + uiFileName + ".h";
+  std::string ui_input_file = uiFileName + ".ui";
+
+  std::string msg = "Generating ";
+  msg += ui_output_file;
+  cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundBlue
+                                          |cmsysTerminal_Color_ForegroundBold,
+                                    msg.c_str(), true, this->ColorOutput);
+
+  std::vector<cmStdString> command;
+  command.push_back(this->UicExecutable);
+
+  std::string options;
+  std::map<std::string, std::string>::const_iterator optionIt
+          = this->UicOptions.find(this->ProjectSourceDir + ui_input_file);
+  if (optionIt != this->UicOptions.end())
+    {
+    std::vector<std::string> opts;
+    cmSystemTools::ExpandListArgument(optionIt->second, opts);
+    for(std::vector<std::string>::const_iterator optIt = opts.begin();
+        optIt != opts.end();
+        ++optIt)
+      {
+      command.push_back(*optIt);
+      }
+    }
+
+  command.push_back("-o");
+  command.push_back(ui_output_file);
+  command.push_back(this->ProjectSourceDir + ui_input_file);
+
+  if (this->Verbose)
+    {
+    for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+        cmdIt != command.end();
+        ++cmdIt)
+      {
+      std::cout << *cmdIt << " ";
+      }
+    std::cout << std::endl;
+    }
+  std::string output;
+  int retVal = 0;
+  bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
+  if (!result || retVal)
+    {
+    std::cerr << "AUTOUIC: error: process for " << ui_output_file <<
+              " failed:\n" << output << std::endl;
+    this->RunUicFailed = true;
+    cmSystemTools::RemoveFile(ui_output_file.c_str());
+    }
+  return true;
+}
 
 std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
                               char separator)

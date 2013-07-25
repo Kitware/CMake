@@ -899,6 +899,9 @@ public:
   std::set<cmStdString> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
+  void AddQtUiFileWithOptions(cmSourceFile *sf);
+  std::vector<cmSourceFile*> GetQtUiFilesWithOptions() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
@@ -1074,6 +1077,8 @@ private:
                                cmSourceFile* source);
   void UpdateOutputToSourceMap(std::string const& output,
                                cmSourceFile* source);
+
+  std::vector<cmSourceFile*> QtUiFilesWithOptions;
 };
 
 //----------------------------------------------------------------------------

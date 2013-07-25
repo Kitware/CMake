@@ -52,6 +52,11 @@
  class QGroupBox;
  class QLabel;
 
+ namespace Ui
+ {
+ class Window;
+ }
+
  class Window : public QWidget
  {
      Q_OBJECT
@@ -116,6 +121,8 @@
 
      QCheckBox *firstFridayCheckBox;
      QCheckBox *mayFirstCheckBox;
+
+     Ui::Window *ui;
  };
 
  #endif

@@ -31,6 +31,7 @@ private:
                           const std::string &autogenTargetName,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
+  void SetupAutoUicTarget(cmTarget* target);
 
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
                                            const char* targetDirectory);
@@ -47,19 +48,30 @@ private:
   bool RunAutogen(cmMakefile* makefile);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
+  bool GenerateUi(const std::string& uiFileName);
   void ParseCppFile(const std::string& absFilename,
                     const std::vector<std::string>& headerExtensions,
-                    std::map<std::string, std::string>& includedMocs);
+                    std::map<std::string, std::string>& includedMocs,
+                          std::vector<std::string>& includedUis);
   void StrictParseCppFile(const std::string& absFilename,
                           const std::vector<std::string>& headerExtensions,
-                          std::map<std::string, std::string>& includedMocs);
+                          std::map<std::string, std::string>& includedMocs,
+                          std::vector<std::string>& includedUis);
   void SearchHeadersForCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders);
 
   void ParseHeaders(const std::set<std::string>& absHeaders,
                     const std::map<std::string, std::string>& includedMocs,
-                    std::map<std::string, std::string>& notIncludedMocs);
+                    std::map<std::string, std::string>& notIncludedMocs,
+                          std::vector<std::string>& includedUis);
+
+  void ParseForUic(const std::string& fileName,
+                   const std::string& contentsString,
+                   std::vector<std::string>& includedUis);
+
+  void ParseForUic(const std::string& fileName,
+                   std::vector<std::string>& includedUis);
 
   void Init();
 
@@ -70,11 +82,14 @@ private:
 
   std::string QtMajorVersion;
   std::string Sources;
+  std::string SkipMoc;
+  std::string SkipUic;
   std::string Headers;
   bool IncludeProjectDirsBefore;
   std::string Srcdir;
   std::string Builddir;
   std::string MocExecutable;
+  std::string UicExecutable;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
@@ -89,10 +104,12 @@ private:
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  std::map<std::string, std::string> UicOptions;
 
   bool Verbose;
   bool ColorOutput;
   bool RunMocFailed;
+  bool RunUicFailed;
   bool GenerateAll;
   bool RelaxedMode;
 
