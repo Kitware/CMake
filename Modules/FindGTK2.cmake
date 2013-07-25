@@ -67,6 +67,15 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# Version 1.5 (UNRELEASED) (CMake 2.8.12)
+#   * 14236: Detect gthread library
+#            Detect pangocairo on windows
+#            Detect pangocairo with gtk module instead of with gtkmm
+#   * 14259: Use vc100 libraries with MSVC11
+#   * 14260: Export a GTK2_DEFINITIONS variable to set /vd2 when appropriate
+#            (i.e. MSVC)
+#   * Use the optimized/debug syntax for _LIBRARY and _LIBRARIES variables when
+#     appropriate. A new set of _RELEASE variables was also added.
 # Version 1.4 (10/4/2012) (CMake 2.8.10)
 #   * 12596: Missing paths for FindGTK2 on NetBSD
 #   * 12049: Fixed detection of GTK include files in the lib folder on
