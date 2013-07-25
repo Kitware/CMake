@@ -90,7 +90,7 @@ public:
       "  file(TIMESTAMP filename variable [<format string>] [UTC])\n"
       "  file(GENERATE OUTPUT output_file\n"
       "       <INPUT input_file|CONTENT input_content>\n"
-      "       CONDITION expression)\n"
+      "       [CONDITION expression])\n"
       "WRITE will write a message into a file called 'filename'. It "
       "overwrites the file if it already exists, and creates the file "
       "if it does not exist. (If the file is a build input, use "
