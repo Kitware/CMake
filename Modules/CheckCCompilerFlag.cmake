@@ -2,9 +2,10 @@
 # CHECK_C_COMPILER_FLAG(<flag> <var>)
 #  <flag> - the compiler flag
 #  <var>  - variable to store the result
-# This internally calls the check_c_source_compiles macro.
+# This internally calls the check_c_source_compiles macro and
+# sets CMAKE_REQUIRED_DEFINITIONS to <flag>.
 # See help for CheckCSourceCompiles for a listing of variables
-# that can modify the build.
+# that can otherwise modify the build.
 
 #=============================================================================
 # Copyright 2006-2011 Kitware, Inc.
