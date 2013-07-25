@@ -740,7 +740,8 @@ void SHA1_Final(sha_byte digest[], SHA_CTX* context) {
 	/* Convert FROM host byte order */
 	REVERSE64(context->s1.bitcount,context->s1.bitcount);
 #endif
-	*(sha_word64*)&context->s1.buffer[56] = context->s1.bitcount;
+	MEMCPY_BCOPY(&context->s1.buffer[56], &context->s1.bitcount,
+		     sizeof(sha_word64));
 
 	/* Final transform: */
 	SHA1_Internal_Transform(context, (sha_word32*)context->s1.buffer);
@@ -1067,7 +1068,8 @@ void SHA256_Internal_Last(SHA_CTX* context) {
 		*context->s256.buffer = 0x80;
 	}
 	/* Set the bit count: */
-	*(sha_word64*)&context->s256.buffer[56] = context->s256.bitcount;
+	MEMCPY_BCOPY(&context->s256.buffer[56], &context->s256.bitcount,
+		     sizeof(sha_word64));
 
 	/* Final transform: */
 	SHA256_Internal_Transform(context, (sha_word32*)context->s256.buffer);
@@ -1475,8 +1477,10 @@ void SHA512_Internal_Last(SHA_CTX* context) {
 		*context->s512.buffer = 0x80;
 	}
 	/* Store the length of input data (in bits): */
-	*(sha_word64*)&context->s512.buffer[112] = context->s512.bitcount[1];
-	*(sha_word64*)&context->s512.buffer[120] = context->s512.bitcount[0];
+	MEMCPY_BCOPY(&context->s512.buffer[112], &context->s512.bitcount[1],
+		     sizeof(sha_word64));
+	MEMCPY_BCOPY(&context->s512.buffer[120], &context->s512.bitcount[0],
+		     sizeof(sha_word64));
 
 	/* Final transform: */
 	SHA512_Internal_Transform(context, (sha_word64*)context->s512.buffer);
