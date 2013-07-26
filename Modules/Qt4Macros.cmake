@@ -124,7 +124,7 @@ macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
 
     file (GENERATE
       OUTPUT ${_moc_parameters_file}
-      CONTENT "${targetdefines}${targetincludes}${targetoptions}${_moc_parameters}\n"
+      CONTENT "${targetdefines}${targetincludes}${_moc_parameters}\n"
     )
 
     set(targetincludes)
