@@ -11,7 +11,7 @@ branch, but it is merged into our history.
 Update libarchive from upstream as follows.  Create a local branch to
 explicitly reference the upstream snapshot branch head:
 
- git branch libarchive-upstream 4f4fe6e5
+ git branch libarchive-upstream 35df7c8b
 
 Use a temporary directory to checkout the branch:
 
@@ -24,7 +24,7 @@ Use a temporary directory to checkout the branch:
 Now place the (reduced) libarchive content in this directory.  See
 instructions shown by
 
- git log 4f4fe6e5
+ git log 35df7c8b
 
 for help extracting the content from the upstream svn repo.  Then run
 the following commands to commit the new version.  Substitute the
@@ -34,8 +34,8 @@ appropriate date and version number:
 
  GIT_AUTHOR_NAME='LibArchive Upstream' \
  GIT_AUTHOR_EMAIL='libarchive-discuss@googlegroups.com' \
- GIT_AUTHOR_DATE='2011-12-31 13:54:34 -0500' \
- git commit -m 'libarchive 3.0.2-r4051 (reduced)' &&
+ GIT_AUTHOR_DATE='2013-02-09 12:17:57 -0500' \
+ git commit -m 'libarchive 3.1.2 (reduced)' &&
  git commit --amend
 
 Edit the commit message to describe the procedure used to obtain the
