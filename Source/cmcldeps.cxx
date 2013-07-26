@@ -145,7 +145,7 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
     return;
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   replaceAll(cwd, "/", "\\");
-  cwd.push_back('\\');
+  cwd += "\\";
 
   std::string tmp = objfile;
   escapePath(tmp);
