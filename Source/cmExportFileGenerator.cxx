@@ -302,7 +302,8 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   const char* sep = input ? ";" : "";
   includes += sep + tei->InterfaceIncludeDirectories;
   std::string prepro = cmGeneratorExpression::Preprocess(includes,
-                                                          preprocessRule);
+                                                         preprocessRule,
+                                                         true);
   if (!prepro.empty())
     {
     this->ResolveTargetsInGeneratorExpressions(prepro, target,

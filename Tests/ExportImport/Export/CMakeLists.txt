@@ -140,6 +140,12 @@ install(FILES
 )
 add_include_lib(testLibIncludeRequired6)
 
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired7/testLibIncludeRequired7.h" "// No content\n")
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibIncludeRequired7/testLibIncludeRequired7.h"
+    DESTINATION include/testLibIncludeRequired7
+)
+
 set_property(TARGET testLibRequired APPEND PROPERTY
   INTERFACE_INCLUDE_DIRECTORIES
     $<TARGET_PROPERTY:testLibIncludeRequired1,INTERFACE_INCLUDE_DIRECTORIES>
@@ -154,6 +160,7 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired5,INTERFACE_INCLUDE_DIRECTORIES>>
     # Test that the below is non-fatal
     $<$<STREQUAL:one,two>:$<TARGET_PROPERTY:not_a_target,INTERFACE_INCLUDE_DIRECTORIES>>
+    $<INSTALL_INTERFACE:include/testLibIncludeRequired7>
 )
 
 set_property(TARGET testLibRequired APPEND PROPERTY
