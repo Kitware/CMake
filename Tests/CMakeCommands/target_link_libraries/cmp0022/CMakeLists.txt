@@ -16,3 +16,12 @@ assert_property(cmp0022ifacelib INTERFACE_LINK_LIBRARIES "")
 
 add_executable(cmp0022exe cmp0022exe.cpp)
 target_link_libraries(cmp0022exe cmp0022lib)
+
+add_library(staticlib1 STATIC staticlib1.cpp)
+generate_export_header(staticlib1)
+add_library(staticlib2 STATIC staticlib2.cpp)
+generate_export_header(staticlib2)
+target_link_libraries(staticlib1 LINK_PUBLIC staticlib2)
+
+add_executable(staticlib_exe staticlib_exe.cpp)
+target_link_libraries(staticlib_exe staticlib1)

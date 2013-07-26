@@ -2521,6 +2521,7 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
                         = (sig == cmTarget::KeywordTLLSignature ? "keyword"
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
+    std::set<cmStdString> emitted;
     for(std::vector<cmListFileBacktrace>::const_iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
@@ -2528,7 +2529,12 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
       if(i != it->end())
         {
         cmListFileContext const& lfc = *i;
-        s << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+        cmOStringStream line;
+        line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+        if (emitted.insert(line.str()).second)
+          {
+          s << line.str();
+          }
         ++i;
         }
       }
@@ -6461,6 +6467,15 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             break;
           }
         }
+      else
+        {
+        iface.Libraries = impl->Libraries;
+        if(this->GetType() == cmTarget::STATIC_LIBRARY)
+          {
+          // Targets using this archive need its language runtime libraries.
+          iface.Languages = impl->Languages;
+          }
+        }
       }
     }
 
@@ -6489,7 +6504,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                         headTarget,
                                         this, &dagChecker), iface.Libraries);
 
-    if(this->GetType() == cmTarget::SHARED_LIBRARY)
+    if(this->GetType() == cmTarget::SHARED_LIBRARY
+        || this->GetType() == cmTarget::STATIC_LIBRARY)
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
@@ -6522,6 +6538,11 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             // construction.
             }
           }
+        }
+      if(this->GetType() == cmTarget::STATIC_LIBRARY)
+        {
+        // Targets using this archive need its language runtime libraries.
+        iface.Languages = impl->Languages;
         }
       }
     }
