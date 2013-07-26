@@ -963,9 +963,11 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Enables tracing output for target properties.",
      "This variable can be populated with a list of properties to generate "
      "debug output for when evaluating target properties.  Currently it can "
-     "only be used when evaluating the INCLUDE_DIRECTORIES target property.  "
-     "In that case, it outputs a backtrace for each include directory in "
-     "the build.  Default is unset.",false,"Variables That Change Behavior");
+     "only be used when evaluating the INCLUDE_DIRECTORIES, "
+     "COMPILE_DEFINITIONS and COMPILE_OPTIONS target properties.  "
+     "In that case, it outputs a backtrace for each entry in the target "
+     "propertythe build.  Default is unset.",
+     false,"Variables That Change Behavior");
 
   // Variables defined by CMake that describe the system
 
