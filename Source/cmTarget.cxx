@@ -304,7 +304,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "List of options to pass to the compiler.",
      "This property specifies the list of options specified "
      "so far for this property.  "
-     "This property exists on directories and targets.  "
+     "This property exists on directories and targets."
      "\n"
      "The target property values are used by the generators to set "
      "the options for the compiler.\n"
