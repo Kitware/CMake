@@ -12,6 +12,8 @@
 #ifndef cmTargetExport_h
 #define cmTargetExport_h
 
+#include "cmStandardIncludes.h"
+
 class cmTarget;
 class cmInstallTargetGenerator;
 class cmInstallFilesGenerator;
@@ -33,6 +35,7 @@ public:
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
   cmInstallFilesGenerator* HeaderGenerator;
+  std::string InterfaceIncludeDirectories;
   ///@}
 };
 
