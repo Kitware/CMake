@@ -790,12 +790,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (propertyName == "LINKER_LANGUAGE")
       {
-      if (target->LinkLanguageDependsOnLinkImplementation() &&
-          dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
+      if (dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
         {
         reportError(context, content->GetOriginalExpression(),
             "LINKER_LANGUAGE target property can not be used while evaluating "
-            "link libraries for a static library");
+            "link libraries");
         return std::string();
         }
       const char *lang = target->GetLinkerLanguage(context->Config);
