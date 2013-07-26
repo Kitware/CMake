@@ -127,6 +127,9 @@
 #   _OUT_micro = Micro version number
 #   _gtkversion_hdr = Header file to parse
 #=============================================================
+
+include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+
 function(_GTK2_GET_VERSION _OUT_major _OUT_minor _OUT_micro _gtkversion_hdr)
     file(STRINGS ${_gtkversion_hdr} _contents REGEX "#define GTK_M[A-Z]+_VERSION[ \t]+")
     if(_contents)
@@ -358,7 +361,6 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
         )
     endif()
 
-    include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
     select_library_configurations(${_var})
 
     set(${_var}_LIBRARY ${${_var}_LIBRARY} PARENT_SCOPE)
