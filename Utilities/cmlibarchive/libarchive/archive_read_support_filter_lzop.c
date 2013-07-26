@@ -50,7 +50,7 @@ __FBSDID("$FreeBSD$");
 #include <lzo/lzo1x.h>
 #endif
 #ifdef HAVE_ZLIB_H
-#include <zlib.h> /* for crc32 and adler32 */
+#include <cm_zlib.h> /* for crc32 and adler32 */
 #endif
 
 #include "archive.h"
