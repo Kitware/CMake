@@ -50,6 +50,7 @@
 #define	ARCHIVE_READ_MAGIC	(0xdeb0c5U)
 #define	ARCHIVE_WRITE_DISK_MAGIC (0xc001b0c5U)
 #define	ARCHIVE_READ_DISK_MAGIC (0xbadb0c5U)
+#define	ARCHIVE_MATCH_MAGIC	(0xcad11c9U)
 
 #define	ARCHIVE_STATE_NEW	1U
 #define	ARCHIVE_STATE_HEADER	2U
@@ -133,6 +134,7 @@ int	__archive_check_magic(struct archive *, unsigned int magic,
 
 void	__archive_errx(int retvalue, const char *msg) __LA_DEAD;
 
+void	__archive_ensure_cloexec_flag(int fd);
 int	__archive_mktemp(const char *tmpdir);
 
 int	__archive_clean(struct archive *);
