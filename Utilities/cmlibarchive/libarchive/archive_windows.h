@@ -49,6 +49,9 @@
 #define	LIBARCHIVE_ARCHIVE_WINDOWS_H_INCLUDED
 
 /* Start of configuration for native Win32  */
+#ifndef MINGW_HAS_SECURE_API
+#define MINGW_HAS_SECURE_API 1
+#endif
 
 #include <errno.h>
 #define	set_errno(val)	((errno)=val)
@@ -72,7 +75,6 @@
 //#define	EFTYPE 7
 
 #if defined(_MSC_VER)
-/* TODO: Fix the code, don't suppress the warnings. */
 #pragma warning(push,1)
 #pragma warning(disable:4761)   /* integral size mismatch in argument; conversion supplied */
 #endif
@@ -95,8 +97,14 @@
 #ifndef fileno
 #define	fileno		_fileno
 #endif
+#ifdef fstat
+#undef fstat
+#endif
 #define	fstat		__la_fstat
 #if !defined(__BORLANDC__)
+#ifdef lseek
+#undef lseek
+#endif
 #define	lseek		_lseeki64
 #else
 #define	lseek		__la_lseek
@@ -107,6 +115,9 @@
 #define	read		__la_read
 #if !defined(__BORLANDC__)
 #define setmode		_setmode
+#endif
+#ifdef stat
+#undef stat
 #endif
 #define	stat(path,stref)		__la_stat(path,stref)
 #if !defined(__BORLANDC__)
@@ -257,7 +268,7 @@ extern __int64	 __la_lseek(int fd, __int64 offset, int whence);
 extern int	 __la_open(const char *path, int flags, ...);
 extern ssize_t	 __la_read(int fd, void *buf, size_t nbytes);
 extern int	 __la_stat(const char *path, struct stat *st);
-extern pid_t	 __la_waitpid(pid_t wpid, int *status, int option);
+extern pid_t	 __la_waitpid(HANDLE child, int *status, int option);
 extern ssize_t	 __la_write(int fd, const void *buf, size_t nbytes);
 
 #define _stat64i32(path, st)	__la_stat(path, st)
@@ -270,6 +281,8 @@ extern wchar_t *__la_win_permissive_name(const char *name);
 extern wchar_t *__la_win_permissive_name_w(const wchar_t *wname);
 extern void __la_dosmaperr(unsigned long e);
 #define la_dosmaperr(e) __la_dosmaperr(e)
+extern struct archive_entry *__la_win_entry_in_posix_pathseparator(
+    struct archive_entry *);
 
 #if defined(HAVE_WCRTOMB) && defined(__BORLANDC__)
 typedef int mbstate_t;
@@ -278,14 +291,14 @@ size_t wcrtomb(char *, wchar_t, mbstate_t *);
 
 #if defined(_MSC_VER) && _MSC_VER < 1300
 WINBASEAPI BOOL WINAPI GetVolumePathNameW(
-	LPCWSTR lpszFileName,
-	LPWSTR lpszVolumePathName,
-	DWORD cchBufferLength
-	);
+       LPCWSTR lpszFileName,
+       LPWSTR lpszVolumePathName,
+       DWORD cchBufferLength
+       );
 # if _WIN32_WINNT < 0x0500 /* windows.h not providing 0x500 API */
 typedef struct _FILE_ALLOCATED_RANGE_BUFFER {
-	LARGE_INTEGER FileOffset;
-	LARGE_INTEGER Length;
+       LARGE_INTEGER FileOffset;
+       LARGE_INTEGER Length;
 } FILE_ALLOCATED_RANGE_BUFFER, *PFILE_ALLOCATED_RANGE_BUFFER;
 #  define FSCTL_SET_SPARSE \
      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 49, METHOD_BUFFERED, FILE_WRITE_DATA)

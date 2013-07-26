@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2010-2011 Michihiro NAKAJIMA
+ * Copyright (c) 2010-2012 Michihiro NAKAJIMA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,8 @@ archive_write_set_format_xar(struct archive *_a)
 #else	/* Support xar format */
 
 /*#define DEBUG_PRINT_TOC		1 */
+
+#define BAD_CAST_CONST (const xmlChar *)
 
 #define HEADER_MAGIC	0x78617221
 #define HEADER_SIZE	28
@@ -468,7 +470,7 @@ xar_options(struct archive_write *a, const char *key, const char *value)
 		    value[1] != '\0') {
 			archive_set_error(&(a->archive),
 			    ARCHIVE_ERRNO_MISC,
-			    "Illeagal value `%s'",
+			    "Illegal value `%s'",
 			    value);
 			return (ARCHIVE_FAILED);
 		}
@@ -492,7 +494,10 @@ xar_options(struct archive_write *a, const char *key, const char *value)
 		return (ARCHIVE_OK);
 	}
 
-	return (ARCHIVE_FAILED);
+	/* Note: The "warn" return is just to inform the options
+	 * supervisor that we didn't handle it.  It will generate
+	 * a suitable error if no one used this option. */
+	return (ARCHIVE_WARN);
 }
 
 static int
@@ -621,11 +626,11 @@ static int
 write_to_temp(struct archive_write *a, const void *buff, size_t s)
 {
 	struct xar *xar;
-	unsigned char *p;
+	const unsigned char *p;
 	ssize_t ws;
 
 	xar = (struct xar *)a->format_data;
-	p = (unsigned char *)buff;
+	p = (const unsigned char *)buff;
 	while (s) {
 		ws = write(xar->temp_fd, p, s);
 		if (ws < 0) {
@@ -651,7 +656,7 @@ xar_write_data(struct archive_write *a, const void *buff, size_t s)
 	xar = (struct xar *)a->format_data;
 
 	if (s > xar->bytes_remaining)
-		s = xar->bytes_remaining;
+		s = (size_t)xar->bytes_remaining;
 	if (s == 0 || xar->cur_file == NULL)
 		return (0);
 	if (xar->cur_file->data.compression == NONE) {
@@ -676,7 +681,7 @@ xar_write_data(struct archive_write *a, const void *buff, size_t s)
 	}
 #if !defined(_WIN32) || defined(__CYGWIN__)
 	if (xar->bytes_remaining ==
-	    archive_entry_size(xar->cur_file->entry)) {
+	    (uint64_t)archive_entry_size(xar->cur_file->entry)) {
 		/*
 		 * Get the path of a shell script if so.
 		 */
@@ -732,7 +737,7 @@ xar_finish_entry(struct archive_write *a)
 		return (ARCHIVE_OK);
 
 	while (xar->bytes_remaining > 0) {
-		s = xar->bytes_remaining;
+		s = (size_t)xar->bytes_remaining;
 		if (s > a->null_length)
 			s = a->null_length;
 		w = xar_write_data(a, a->nulls, s);
@@ -756,7 +761,7 @@ xmlwrite_string_attr(struct archive_write *a, xmlTextWriterPtr writer,
 {
 	int r;
 
-	r = xmlTextWriterStartElement(writer, BAD_CAST(key));
+	r = xmlTextWriterStartElement(writer, BAD_CAST_CONST(key));
 	if (r < 0) {
 		archive_set_error(&a->archive,
 		    ARCHIVE_ERRNO_MISC,
@@ -765,7 +770,7 @@ xmlwrite_string_attr(struct archive_write *a, xmlTextWriterPtr writer,
 	}
 	if (attrkey != NULL && attrvalue != NULL) {
 		r = xmlTextWriterWriteAttribute(writer,
-		    BAD_CAST(attrkey), BAD_CAST(attrvalue));
+		    BAD_CAST_CONST(attrkey), BAD_CAST_CONST(attrvalue));
 		if (r < 0) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_MISC,
@@ -774,7 +779,7 @@ xmlwrite_string_attr(struct archive_write *a, xmlTextWriterPtr writer,
 		}
 	}
 	if (value != NULL) {
-		r = xmlTextWriterWriteString(writer, BAD_CAST(value));
+		r = xmlTextWriterWriteString(writer, BAD_CAST_CONST(value));
 		if (r < 0) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_MISC,
@@ -801,7 +806,7 @@ xmlwrite_string(struct archive_write *a, xmlTextWriterPtr writer,
 	if (value == NULL)
 		return (ARCHIVE_OK);
 	
-	r = xmlTextWriterStartElement(writer, BAD_CAST(key));
+	r = xmlTextWriterStartElement(writer, BAD_CAST_CONST(key));
 	if (r < 0) {
 		archive_set_error(&a->archive,
 		    ARCHIVE_ERRNO_MISC,
@@ -809,7 +814,7 @@ xmlwrite_string(struct archive_write *a, xmlTextWriterPtr writer,
 		return (ARCHIVE_FATAL);
 	}
 	if (value != NULL) {
-		r = xmlTextWriterWriteString(writer, BAD_CAST(value));
+		r = xmlTextWriterWriteString(writer, BAD_CAST_CONST(value));
 		if (r < 0) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_MISC,
@@ -1062,7 +1067,7 @@ make_fflags_entry(struct archive_write *a, xmlTextWriterPtr writer,
 	} while (p != NULL);
 
 	if (n > 0) {
-		r = xmlTextWriterStartElement(writer, BAD_CAST(element));
+		r = xmlTextWriterStartElement(writer, BAD_CAST_CONST(element));
 		if (r < 0) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_MISC,
@@ -1557,7 +1562,7 @@ make_toc(struct archive_write *a)
 			goto exit_toc;
 		}
 		r = xmlTextWriterWriteAttribute(writer, BAD_CAST("style"),
-		    BAD_CAST(getalgname(xar->opt_toc_sumalg)));
+		    BAD_CAST_CONST(getalgname(xar->opt_toc_sumalg)));
 		if (r < 0) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_MISC,
@@ -1865,8 +1870,8 @@ static int
 file_cmp_node(const struct archive_rb_node *n1,
     const struct archive_rb_node *n2)
 {
-	struct file *f1 = (struct file *)n1;
-	struct file *f2 = (struct file *)n2;
+	const struct file *f1 = (const struct file *)n1;
+	const struct file *f2 = (const struct file *)n2;
 
 	return (strcmp(f1->basename.s, f2->basename.s));
 }
@@ -1874,7 +1879,7 @@ file_cmp_node(const struct archive_rb_node *n1,
 static int
 file_cmp_key(const struct archive_rb_node *n, const void *key)
 {
-	struct file *f = (struct file *)n;
+	const struct file *f = (const struct file *)n;
 
 	return (strcmp(f->basename.s, (const char *)key));
 }
@@ -1937,6 +1942,8 @@ file_create_virtual_dir(struct archive_write *a, struct xar *xar,
     const char *pathname)
 {
 	struct file *file;
+
+	(void)xar; /* UNUSED */
 
 	file = file_new(a, NULL);
 	if (file == NULL)
@@ -2464,8 +2471,8 @@ static int
 file_hd_cmp_node(const struct archive_rb_node *n1,
     const struct archive_rb_node *n2)
 {
-	struct hardlink *h1 = (struct hardlink *)n1;
-	struct hardlink *h2 = (struct hardlink *)n2;
+	const struct hardlink *h1 = (const struct hardlink *)n1;
+	const struct hardlink *h2 = (const struct hardlink *)n2;
 
 	return (strcmp(archive_entry_pathname(h1->file_list.first->entry),
 		       archive_entry_pathname(h2->file_list.first->entry)));
@@ -2474,7 +2481,7 @@ file_hd_cmp_node(const struct archive_rb_node *n1,
 static int
 file_hd_cmp_key(const struct archive_rb_node *n, const void *key)
 {
-	struct hardlink *h = (struct hardlink *)n;
+	const struct hardlink *h = (const struct hardlink *)n;
 
 	return (strcmp(archive_entry_pathname(h->file_list.first->entry),
 		       (const char *)key));
@@ -2589,10 +2596,10 @@ compression_init_encoder_gzip(struct archive *a,
 	 * a non-const pointer. */
 	strm->next_in = (Bytef *)(uintptr_t)(const void *)lastrm->next_in;
 	strm->avail_in = lastrm->avail_in;
-	strm->total_in = lastrm->total_in;
+	strm->total_in = (uLong)lastrm->total_in;
 	strm->next_out = lastrm->next_out;
 	strm->avail_out = lastrm->avail_out;
-	strm->total_out = lastrm->total_out;
+	strm->total_out = (uLong)lastrm->total_out;
 	if (deflateInit2(strm, level, Z_DEFLATED,
 	    (withheader)?15:-15,
 	    8, Z_DEFAULT_STRATEGY) != Z_OK) {
@@ -2622,10 +2629,10 @@ compression_code_gzip(struct archive *a,
 	 * a non-const pointer. */
 	strm->next_in = (Bytef *)(uintptr_t)(const void *)lastrm->next_in;
 	strm->avail_in = lastrm->avail_in;
-	strm->total_in = lastrm->total_in;
+	strm->total_in = (uLong)lastrm->total_in;
 	strm->next_out = lastrm->next_out;
 	strm->avail_out = lastrm->avail_out;
-	strm->total_out = lastrm->total_out;
+	strm->total_out = (uLong)lastrm->total_out;
 	r = deflate(strm,
 	    (action == ARCHIVE_Z_FINISH)? Z_FINISH: Z_NO_FLUSH);
 	lastrm->next_in = strm->next_in;
@@ -2861,6 +2868,7 @@ compression_init_encoder_xz(struct archive *a,
 	if (level > 6)
 		level = 6;
 	if (lzma_lzma_preset(&lzma_opt, level)) {
+		free(strm);
 		lastrm->real_stream = NULL;
 		archive_set_error(a, ENOMEM,
 		    "Internal error initializing compression library");
@@ -3082,8 +3090,10 @@ save_xattrs(struct archive_write *a, struct file *file)
 			checksum_update(&(xar->a_sumwrk), value, size);
 			checksum_final(&(xar->a_sumwrk), &(heap->a_sum));
 			if (write_to_temp(a, value, size)
-			    != ARCHIVE_OK)
+			    != ARCHIVE_OK) {
+				free(heap);
 				return (ARCHIVE_FATAL);
+			}
 			heap->length = size;
 			/* Add heap to the tail of file->xattr. */
 			heap->next = NULL;

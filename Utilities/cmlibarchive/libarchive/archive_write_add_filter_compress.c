@@ -135,7 +135,7 @@ archive_write_add_filter_compress(struct archive *_a)
 	archive_check_magic(&a->archive, ARCHIVE_WRITE_MAGIC,
 	    ARCHIVE_STATE_NEW, "archive_write_add_filter_compress");
 	f->open = &archive_compressor_compress_open;
-	f->code = ARCHIVE_COMPRESSION_COMPRESS;
+	f->code = ARCHIVE_FILTER_COMPRESS;
 	f->name = "compress";
 	return (ARCHIVE_OK);
 }
@@ -148,8 +148,9 @@ archive_compressor_compress_open(struct archive_write_filter *f)
 {
 	int ret;
 	struct private_data *state;
+	size_t bs = 65536, bpb;
 
-	f->code = ARCHIVE_COMPRESSION_COMPRESS;
+	f->code = ARCHIVE_FILTER_COMPRESS;
 	f->name = "compress";
 
 	ret = __archive_write_open_filter(f->next_filter);
@@ -163,7 +164,16 @@ archive_compressor_compress_open(struct archive_write_filter *f)
 		return (ARCHIVE_FATAL);
 	}
 
-	state->compressed_buffer_size = 65536;
+	if (f->archive->magic == ARCHIVE_WRITE_MAGIC) {
+		/* Buffer size should be a multiple number of the of bytes
+		 * per block for performance. */
+		bpb = archive_write_get_bytes_per_block(f->archive);
+		if (bpb > bs)
+			bs = bpb;
+		else if (bpb != 0)
+			bs -= bs % bpb;
+	}
+	state->compressed_buffer_size = bs;
 	state->compressed = malloc(state->compressed_buffer_size);
 
 	if (state->compressed == NULL) {
@@ -386,12 +396,12 @@ archive_compressor_compress_write(struct archive_write_filter *f,
 
 		state->checkpoint = state->in_count + CHECK_GAP;
 
-		if (state->in_count <= 0x007fffff)
-			ratio = state->in_count * 256 / state->out_count;
-		else if ((ratio = state->out_count / 256) == 0)
+		if (state->in_count <= 0x007fffff && state->out_count != 0)
+			ratio = (int)(state->in_count * 256 / state->out_count);
+		else if ((ratio = (int)(state->out_count / 256)) == 0)
 			ratio = 0x7fffffff;
 		else
-			ratio = state->in_count / ratio;
+			ratio = (int)(state->in_count / ratio);
 
 		if (ratio > state->compress_ratio)
 			state->compress_ratio = ratio;

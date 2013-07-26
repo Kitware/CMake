@@ -85,6 +85,7 @@ archive_read_support_filter_rpm(struct archive *_a)
 		return (ARCHIVE_FATAL);
 
 	bidder->data = NULL;
+	bidder->name = "rpm";
 	bidder->bid = rpm_bidder_bid;
 	bidder->init = rpm_bidder_init;
 	bidder->options = NULL;
@@ -137,7 +138,7 @@ rpm_bidder_init(struct archive_read_filter *self)
 {
 	struct rpm   *rpm;
 
-	self->code = ARCHIVE_COMPRESSION_RPM;
+	self->code = ARCHIVE_FILTER_RPM;
 	self->name = "rpm";
 	self->read = rpm_filter_read;
 	self->skip = NULL; /* not supported */
@@ -188,7 +189,7 @@ rpm_filter_read(struct archive_read_filter *self, const void **buff)
 			if (rpm->total_in + avail_in < RPM_LEAD_SIZE)
 				used += avail_in;
 			else {
-				n = RPM_LEAD_SIZE - rpm->total_in;
+				n = (size_t)(RPM_LEAD_SIZE - rpm->total_in);
 				used += n;
 				b += n;
 				rpm->state = ST_HEADER;

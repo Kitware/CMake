@@ -244,6 +244,9 @@ archive_entry_linkify(struct archive_entry_linkresolver *res,
 			 * for future use.
 			 */
 			le = insert_entry(res, *e);
+			if (le == NULL)
+				/* XXX We should return an error code XXX */
+				return;
 			le->entry = *e;
 			*e = NULL;
 		}
@@ -362,7 +365,7 @@ insert_entry(struct archive_entry_linkresolver *res,
 	if (res->number_entries > res->number_buckets * 2)
 		grow_hash(res);
 
-	hash = archive_entry_dev(entry) ^ archive_entry_ino64(entry);
+	hash = (size_t)(archive_entry_dev(entry) ^ archive_entry_ino64(entry));
 	bucket = hash & (res->number_buckets - 1);
 
 	/* If we could allocate the entry, record it. */
