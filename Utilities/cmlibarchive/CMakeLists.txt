@@ -1,6 +1,3 @@
-#
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6 FATAL_ERROR)
-#
 PROJECT(libarchive C)
 #
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
@@ -48,7 +45,7 @@ SET(SOVERSION "${INTERFACE_VERSION}")
 
 # Enalbe CMAKE_PUSH_CHECK_STATE() and CMAKE_POP_CHECK_STATE() macros
 # saving and restoring the state of the variables.
-INCLUDE(CMakePushCheckState)
+INCLUDE(${CMake_SOURCE_DIR}/Modules/CMakePushCheckState.cmake)
 
 # Initialize the state of the variables. This initialization is not
 # necessary but this shows you what value the variables initially have.
