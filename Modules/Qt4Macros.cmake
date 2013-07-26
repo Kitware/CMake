@@ -113,11 +113,9 @@ macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
   set (_moc_parameters ${moc_flags} ${moc_options} -o "${outfile}" "${infile}")
   string (REPLACE ";" "\n" _moc_parameters "${_moc_parameters}")
 
-  set(targetincludes)
-  set(targetdefines)
   if(moc_target)
-    list(APPEND targetincludes "$<TARGET_PROPERTY:${moc_target},INCLUDE_DIRECTORIES>")
-    list(APPEND targetdefines "$<TARGET_PROPERTY:${moc_target},COMPILE_DEFINITIONS>")
+    set(targetincludes "$<TARGET_PROPERTY:${moc_target},INCLUDE_DIRECTORIES>")
+    set(targetdefines "$<TARGET_PROPERTY:${moc_target},COMPILE_DEFINITIONS>")
 
     set(targetincludes "$<$<BOOL:${targetincludes}>:-I$<JOIN:${targetincludes},\n-I>\n>")
     set(targetdefines "$<$<BOOL:${targetdefines}>:-D$<JOIN:${targetdefines},\n-D>\n>")
