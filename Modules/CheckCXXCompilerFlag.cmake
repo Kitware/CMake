@@ -2,9 +2,10 @@
 # CHECK_CXX_COMPILER_FLAG(<flag> <var>)
 #  <flag> - the compiler flag
 #  <var>  - variable to store the result
-# This internally calls the check_cxx_source_compiles macro.  See help
-# for CheckCXXSourceCompiles for a listing of variables that can
-# modify the build.
+# This internally calls the check_cxx_source_compiles macro and
+# sets CMAKE_REQUIRED_DEFINITIONS to <flag>.
+# See help for CheckCXXSourceCompiles for a listing of variables
+# that can otherwise modify the build.
 
 #=============================================================================
 # Copyright 2006-2010 Kitware, Inc.
