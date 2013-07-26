@@ -1520,6 +1520,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_<LANG>_VISIBILITY_PRESET", cmProperty::VARIABLE,
+     "Default value for <LANG>_VISIBILITY_PRESET of targets.",
+     "This variable is used to initialize the "
+     "<LANG>_VISIBILITY_PRESET property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_VISIBILITY_INLINES_HIDDEN", cmProperty::VARIABLE,
+     "Default value for VISIBILITY_INLINES_HIDDEN of targets.",
+     "This variable is used to initialize the "
+     "VISIBILITY_INLINES_HIDDEN property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
 
 //   Variables defined when the a language is enabled These variables will
 // also be defined whenever CMake has loaded its support for compiling (LANG)
