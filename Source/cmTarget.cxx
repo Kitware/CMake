@@ -2521,6 +2521,7 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
                         = (sig == cmTarget::KeywordTLLSignature ? "keyword"
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
+    std::set<cmStdString> emitted;
     for(std::vector<cmListFileBacktrace>::const_iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
@@ -2528,7 +2529,12 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
       if(i != it->end())
         {
         cmListFileContext const& lfc = *i;
-        s << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+        cmOStringStream line;
+        line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+        if (emitted.insert(line.str()).second)
+          {
+          s << line.str();
+          }
         ++i;
         }
       }
