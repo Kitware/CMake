@@ -29,7 +29,7 @@
 # CMAKE_REQUIRED_LINKER_FLAGS = string of linker command line flags
 #
 
-include(CMakeExpandImportedTargets)
+include(${CMake_SOURCE_DIR}/Modules/CMakeExpandImportedTargets.cmake)
 
 
 macro(LIBARCHIVE_CHECK_C_SOURCE_RUNS SOURCE VAR)
