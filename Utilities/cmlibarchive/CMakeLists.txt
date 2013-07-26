@@ -1,6 +1,3 @@
-#
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6 FATAL_ERROR)
-#
 PROJECT(libarchive C)
 #
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
@@ -48,7 +45,7 @@ SET(SOVERSION "${INTERFACE_VERSION}")
 
 # Enalbe CMAKE_PUSH_CHECK_STATE() and CMAKE_POP_CHECK_STATE() macros
 # saving and restoring the state of the variables.
-INCLUDE(CMakePushCheckState)
+INCLUDE(${CMake_SOURCE_DIR}/Modules/CMakePushCheckState.cmake)
 
 # Initialize the state of the variables. This initialization is not
 # necessary but this shows you what value the variables initially have.
@@ -90,8 +87,8 @@ IF("${CMAKE_C_PLATFORM_ID}" MATCHES "^(HP-UX)$")
 ENDIF()
 
 #
-INCLUDE(LibarchiveCheckCSourceCompiles)
-INCLUDE(LibarchiveCheckCSourceRuns)
+INCLUDE(CheckCSourceCompiles)
+INCLUDE(CheckCSourceRuns)
 INCLUDE(CheckFileOffsetBits)
 INCLUDE(CheckFuncs)
 INCLUDE(CheckHeaderDirent)
@@ -155,9 +152,9 @@ MACRO (TRY_MACRO_FOR_LIBRARY INCLUDES LIBRARIES
       ENDIF(NOT "${PREV_VAR_WITH_LIB}" STREQUAL "${LIBRARIES}")
       # Check if the library can be used with the macro.
       IF("${TRY_TYPE}" MATCHES "COMPILES")
-        LIBARCHIVE_CHECK_C_SOURCE_COMPILES("${SAMPLE_SOURCE}" ${VAR})
+        CHECK_C_SOURCE_COMPILES("${SAMPLE_SOURCE}" ${VAR})
       ELSEIF("${TRY_TYPE}" MATCHES "RUNS")
-        LIBARCHIVE_CHECK_C_SOURCE_RUNS("${SAMPLE_SOURCE}" ${VAR})
+        CHECK_C_SOURCE_RUNS("${SAMPLE_SOURCE}" ${VAR})
       ELSE("${TRY_TYPE}" MATCHES "COMPILES")
         MESSAGE(FATAL_ERROR "UNKNOWN KEYWORD \"${TRY_TYPE}\" FOR TRY_TYPE")
       ENDIF("${TRY_TYPE}" MATCHES "COMPILES")
@@ -338,7 +335,7 @@ LA_CHECK_INCLUDE_FILE("dlfcn.h" HAVE_DLFCN_H)
 LA_CHECK_INCLUDE_FILE("errno.h" HAVE_ERRNO_H)
 LA_CHECK_INCLUDE_FILE("ext2fs/ext2_fs.h" HAVE_EXT2FS_EXT2_FS_H)
 
-LIBARCHIVE_CHECK_C_SOURCE_COMPILES("#include <sys/ioctl.h>
+CHECK_C_SOURCE_COMPILES("#include <sys/ioctl.h>
 #include <ext2fs/ext2_fs.h>
 int main(void) { return EXT2_IOC_GETFLAGS; }" HAVE_WORKING_EXT2_IOC_GETFLAGS)
 
@@ -401,7 +398,7 @@ FOREACH (it ${_HEADER})
    SET(_INCLUDE_FILES "${_INCLUDE_FILES}#include <${it}>\n")
 ENDFOREACH (it)
 
-LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
+CHECK_C_SOURCE_COMPILES(
   "#define __EXTENSIONS__ 1
    ${_INCLUDE_FILES}
    int main() { return 0;}"
@@ -662,7 +659,7 @@ MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} /WX")
     ENDIF (MSVC)
     #
-    LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
+    CHECK_C_SOURCE_COMPILES(
       "#include <stdlib.h>
        #include <iconv.h>
        int main() {
@@ -922,14 +919,14 @@ CMAKE_POP_CHECK_STATE()	# Restore the state of the variables
 
 # Make sure we have the POSIX version of readdir_r, not the
 # older 2-argument version.
-LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
+CHECK_C_SOURCE_COMPILES(
   "#include <dirent.h>\nint main() {DIR *d = opendir(\".\"); struct dirent e,*r; return readdir_r(d,&e,&r);}"
   HAVE_READDIR_R)
 
 
 # Only detect readlinkat() if we also have AT_FDCWD in unistd.h.
 # NOTE: linux requires fcntl.h for AT_FDCWD.
-LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
+CHECK_C_SOURCE_COMPILES(
   "#include <fcntl.h>\n#include <unistd.h>\nint main() {char buf[10]; return readlinkat(AT_FDCWD, \"\", buf, 0);}"
   HAVE_READLINKAT)
 
@@ -938,10 +935,10 @@ LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
 # of interest and verify that the result can be linked.
 # CHECK_FUNCTION_EXISTS doesn't accept a header argument,
 # CHECK_SYMBOL_EXISTS doesn't test linkage.
-LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
+CHECK_C_SOURCE_COMPILES(
   "#include <sys/mkdev.h>\nint main() { return major(256); }"
   MAJOR_IN_MKDEV)
-LIBARCHIVE_CHECK_C_SOURCE_COMPILES(
+CHECK_C_SOURCE_COMPILES(
   "#include <sys/sysmacros.h>\nint main() { return major(256); }"
   MAJOR_IN_SYSMACROS)
 
