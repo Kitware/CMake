@@ -1001,22 +1001,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \"lib\") on a library name.");
 
   cm->DefineProperty
-    ("C_VISIBILITY_PRESET", cmProperty::TARGET,
+    ("<LANG>_VISIBILITY_PRESET", cmProperty::TARGET,
      "Value for symbol visibility compile flags",
-     "The C_VISIBILITY_PRESET property determines the value passed used in "
-     "a visibility related compile option, such as -fvisibility=.  This "
-     "property only has an affect for libraries and executables with "
+     "The <LANG>_VISIBILITY_PRESET property determines the value passed in "
+     "a visibility related compile option, such as -fvisibility= for <LANG>.  "
+     "This property only has an affect for libraries and executables with "
      "exports.  This property is initialized by the value of the variable "
-     "CMAKE_C_VISIBILITY_PRESET if it is set when a target is created.");
-
-  cm->DefineProperty
-    ("CXX_VISIBILITY_PRESET", cmProperty::TARGET,
-     "Value for symbol visibility compile flags",
-     "The CXX_VISIBILITY_PRESET property determines the value passed used in "
-     "a visibility related compile option, such as -fvisibility=.  This "
-     "property only has an affect for libraries and executables with "
-     "exports.  This property is initialized by the value of the variable "
-     "CMAKE_CXX_VISIBILITY_PRESET if it is set when a target is created.");
+     "CMAKE_<LANG>_VISIBILITY_PRESET if it is set when a target is created.");
 
   cm->DefineProperty
     ("VISIBILITY_INLINES_HIDDEN", cmProperty::TARGET,
