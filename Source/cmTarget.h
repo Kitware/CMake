@@ -549,6 +549,9 @@ public:
 
   void FinalizeSystemIncludeDirectories();
 
+  bool LinkLanguagePropagatesToDependents() const
+  { return this->TargetTypeValue == STATIC_LIBRARY; }
+
 private:
   // The set of include directories that are marked as system include
   // directories.
