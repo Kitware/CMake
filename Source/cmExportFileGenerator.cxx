@@ -636,7 +636,7 @@ cmExportFileGenerator
     cmMakefile *mf = target->GetMakefile();
     cmOStringStream e;
     e << "Target \"" << target->GetName() << "\" has policy CMP0022 enabled, "
-         "but also has old-style INTERFACE_LINK_LIBRARIES properties "
+         "but also has old-style LINK_INTERFACE_LIBRARIES properties "
          "populated, but it was exported without the "
          "EXPORT_LINK_INTERFACE_LIBRARIES to export the old-style properties";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
