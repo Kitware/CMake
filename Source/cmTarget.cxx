@@ -6467,6 +6467,15 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             break;
           }
         }
+      else
+        {
+        iface.Libraries = impl->Libraries;
+        if(this->GetType() == cmTarget::STATIC_LIBRARY)
+          {
+          // Targets using this archive need its language runtime libraries.
+          iface.Languages = impl->Languages;
+          }
+        }
       }
     }
 
@@ -6495,7 +6504,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                         headTarget,
                                         this, &dagChecker), iface.Libraries);
 
-    if(this->GetType() == cmTarget::SHARED_LIBRARY)
+    if(this->GetType() == cmTarget::SHARED_LIBRARY
+        || this->GetType() == cmTarget::STATIC_LIBRARY)
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
@@ -6528,6 +6538,11 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             // construction.
             }
           }
+        }
+      if(this->GetType() == cmTarget::STATIC_LIBRARY)
+        {
+        // Targets using this archive need its language runtime libraries.
+        iface.Languages = impl->Languages;
         }
       }
     }
