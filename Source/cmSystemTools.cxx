@@ -2464,7 +2464,15 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   cmds.push_back(fullPath.c_str());
 
   std::string output;
-  RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE);
+  if(!RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE))
+    {
+    cmds.insert(cmds.begin(), "-r");
+    cmds.insert(cmds.begin(), "xcrun");
+    if(!RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE))
+      {
+      return false;
+      }
+    }
 
   std::vector<std::string> strs = cmSystemTools::tokenize(output, "\n");
   // otool returns extra lines reporting multiple install names
