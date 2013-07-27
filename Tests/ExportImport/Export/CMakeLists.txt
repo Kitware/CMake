@@ -270,6 +270,8 @@ set_property(TARGET cmp0022NEW APPEND PROPERTY INTERFACE_LINK_LIBRARIES testLib2
 set_property(TARGET cmp0022OLD APPEND PROPERTY INTERFACE_LINK_LIBRARIES testLib2)
 set_property(TARGET cmp0022OLD APPEND PROPERTY LINK_INTERFACE_LIBRARIES testLib3)
 
+add_library(noIncludesInterface empty.cpp)
+
 install(TARGETS testLibRequired
                 testLibIncludeRequired1
                 testLibIncludeRequired2
@@ -278,6 +280,7 @@ install(TARGETS testLibRequired
                 testLibIncludeRequired5
                 testLibIncludeRequired6
                 testSharedLibRequired
+                noIncludesInterface
         EXPORT RequiredExp DESTINATION lib
         INCLUDES DESTINATION
           installIncludesTest
