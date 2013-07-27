@@ -39,10 +39,37 @@ if(ZLIB_FOUND)
   )
 
   list(APPEND PNG_NAMES png libpng)
-  foreach(v 16 15 14 12)
-    list(APPEND PNG_NAMES png${v} libpng${v} png${v}d libpng${v}d)
+  unset(PNG_NAMES_DEBUG)
+  set(_PNG_VERSION_SUFFIXES 17 16 15 14 12)
+  if (PNG_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\..*)?$")
+    string(REGEX REPLACE
+        "^([0-9]+)\\.([0-9]+).*" "\\1\\2"
+        _PNG_VERSION_SUFFIX_MIN "${PNG_FIND_VERSION}")
+    if (PNG_FIND_VERSION_EXACT)
+      set(_PNG_VERSION_SUFFIXES ${_PNG_VERSION_SUFFIX_MIN})
+    else ()
+      string(REGEX REPLACE
+          "${_PNG_VERSION_SUFFIX_MIN}.*" "${_PNG_VERSION_SUFFIX_MIN}"
+          _PNG_VERSION_SUFFIXES "${_PNG_VERSION_SUFFIXES}")
+    endif ()
+    unset(_PNG_VERSION_SUFFIX_MIN)
+  endif ()
+  foreach(v IN LISTS _PNG_VERSION_SUFFIXES)
+    list(APPEND PNG_NAMES png${v} libpng${v})
+    list(APPEND PNG_NAMES_DEBUG png${v}d libpng${v}d)
   endforeach()
-  find_library(PNG_LIBRARY NAMES ${PNG_NAMES} )
+message(STATUS "PNG r: ${PNG_NAMES} d: ${PNG_NAMES_DEBUG}")
+  unset(_PNG_VERSION_SUFFIXES)
+  find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES})
+  find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG})
+  unset(PNG_NAMES)
+  unset(PNG_NAMES_DEBUG)
+
+  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+  select_library_configurations(PNG)
+  # Set by select_library_configurations(), but we want the one from
+  # find_package_handle_standard_args() below.
+  unset(PNG_FOUND)
 
   if (PNG_LIBRARY AND PNG_PNG_INCLUDE_DIR)
       # png.h includes zlib.h. Sigh.
