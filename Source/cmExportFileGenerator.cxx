@@ -291,7 +291,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
     {
     return;
     }
-  if (!*input && tei->InterfaceIncludeDirectories.empty())
+  if ((input && !*input) && tei->InterfaceIncludeDirectories.empty())
     {
     // Set to empty
     properties[propName] = "";
