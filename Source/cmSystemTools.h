@@ -211,7 +211,7 @@ public:
    * user-viewable output from the program being run will be generated.
    * OUTPUT_MERGE is the legacy behaviour where stdout and stderr are merged
    * into stdout.  OUTPUT_NORMAL passes through the output to stdout/stderr as
-   * it was received.
+   * it was received.  OUTPUT_PASSTHROUGH passes through the original handles.
    *
    * If timeout is specified, the command will be terminated after
    * timeout expires. Timeout is specified in seconds.
@@ -230,7 +230,8 @@ public:
    {
      OUTPUT_NONE = 0,
      OUTPUT_MERGE,
-     OUTPUT_NORMAL
+     OUTPUT_NORMAL,
+     OUTPUT_PASSTHROUGH
    };
   static bool RunSingleCommand(const char* command, std::string* output = 0,
                                int* retVal = 0, const char* dir = 0,
