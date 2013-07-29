@@ -1435,38 +1435,39 @@ void cmLocalVisualStudio6Generator
   std::string staticLibOptionsRelWithDebInfo;
   if(target.GetType() == cmTarget::STATIC_LIBRARY )
     {
-    if(const char* libflags = target.GetProperty("STATIC_LIBRARY_FLAGS"))
-      {
-      staticLibOptions = libflags;
-      staticLibOptionsDebug = libflags;
-      staticLibOptionsRelease = libflags;
-      staticLibOptionsMinSizeRel = libflags;
-      staticLibOptionsRelWithDebInfo = libflags;
-      }
-    if(const char* libflagsDebug =
-       target.GetProperty("STATIC_LIBRARY_FLAGS_DEBUG"))
-      {
-      staticLibOptionsDebug += " ";
-      staticLibOptionsDebug = libflagsDebug;
-      }
-    if(const char* libflagsRelease =
-       target.GetProperty("STATIC_LIBRARY_FLAGS_RELEASE"))
-      {
-      staticLibOptionsRelease += " ";
-      staticLibOptionsRelease = libflagsRelease;
-      }
-    if(const char* libflagsMinSizeRel =
-       target.GetProperty("STATIC_LIBRARY_FLAGS_MINSIZEREL"))
-      {
-      staticLibOptionsMinSizeRel += " ";
-      staticLibOptionsMinSizeRel = libflagsMinSizeRel;
-      }
-    if(const char* libflagsRelWithDebInfo =
-       target.GetProperty("STATIC_LIBRARY_FLAGS_RELWITHDEBINFO"))
-      {
-      staticLibOptionsRelWithDebInfo += " ";
-      staticLibOptionsRelWithDebInfo = libflagsRelWithDebInfo;
-      }
+    const char *libflagsGlobal =
+      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS");
+    this->AppendFlags(staticLibOptions, libflagsGlobal);
+    this->AppendFlags(staticLibOptionsDebug, libflagsGlobal);
+    this->AppendFlags(staticLibOptionsRelease, libflagsGlobal);
+    this->AppendFlags(staticLibOptionsMinSizeRel, libflagsGlobal);
+    this->AppendFlags(staticLibOptionsRelWithDebInfo, libflagsGlobal);
+
+    this->AppendFlags(staticLibOptionsDebug, this->Makefile->
+      GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS_DEBUG"));
+    this->AppendFlags(staticLibOptionsRelease, this->Makefile->
+      GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS_RELEASE"));
+    this->AppendFlags(staticLibOptionsMinSizeRel, this->Makefile->
+      GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL"));
+    this->AppendFlags(staticLibOptionsRelWithDebInfo, this->Makefile->
+      GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO"));
+
+    const char *libflags = target.GetProperty("STATIC_LIBRARY_FLAGS");
+    this->AppendFlags(staticLibOptions, libflags);
+    this->AppendFlags(staticLibOptionsDebug, libflags);
+    this->AppendFlags(staticLibOptionsRelease, libflags);
+    this->AppendFlags(staticLibOptionsMinSizeRel, libflags);
+    this->AppendFlags(staticLibOptionsRelWithDebInfo, libflags);
+
+    this->AppendFlags(staticLibOptionsDebug,
+      target.GetProperty("STATIC_LIBRARY_FLAGS_DEBUG"));
+    this->AppendFlags(staticLibOptionsRelease,
+      target.GetProperty("STATIC_LIBRARY_FLAGS_RELEASE"));
+    this->AppendFlags(staticLibOptionsMinSizeRel,
+      target.GetProperty("STATIC_LIBRARY_FLAGS_MINSIZEREL"));
+    this->AppendFlags(staticLibOptionsRelWithDebInfo,
+      target.GetProperty("STATIC_LIBRARY_FLAGS_RELWITHDEBINFO"));
+
     std::string objects;
     this->OutputObjects(target, "LIB", objects);
     if(!objects.empty())

@@ -1428,6 +1428,49 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Same as CMAKE_C_FLAGS_* but used by the linker "
      "when creating executables.",false,
      "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_MODULE_LINKER_FLAGS", cmProperty::VARIABLE,
+     "Linker flags to be used to create modules.",
+     "These flags will be used by the linker when creating a module."
+     ,false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_MODULE_LINKER_FLAGS_<CONFIG>", cmProperty::VARIABLE,
+     "Flags to be used when linking a module.",
+     "Same as CMAKE_C_FLAGS_* but used by the linker "
+     "when creating modules.",false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_SHARED_LINKER_FLAGS", cmProperty::VARIABLE,
+     "Linker flags to be used to create shared libraries.",
+     "These flags will be used by the linker when creating a shared library."
+     ,false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_SHARED_LINKER_FLAGS_<CONFIG>", cmProperty::VARIABLE,
+     "Flags to be used when linking a shared library.",
+     "Same as CMAKE_C_FLAGS_* but used by the linker "
+     "when creating shared libraries.",false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_STATIC_LINKER_FLAGS", cmProperty::VARIABLE,
+     "Linker flags to be used to create static libraries.",
+     "These flags will be used by the linker when creating a static library."
+     ,false,
+     "Variables that Control the Build");
+
+  cm->DefineProperty
+    ("CMAKE_STATIC_LINKER_FLAGS_<CONFIG>", cmProperty::VARIABLE,
+     "Flags to be used when linking a static library.",
+     "Same as CMAKE_C_FLAGS_* but used by the linker "
+     "when creating static libraries.",false,
+     "Variables that Control the Build");
+
   cm->DefineProperty
     ("CMAKE_LIBRARY_PATH_FLAG", cmProperty::VARIABLE,
      "The flag to be used to add a library search path to a compiler.",

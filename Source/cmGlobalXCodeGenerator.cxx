@@ -1769,27 +1769,29 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                configName);
     }
 
-  const char* linkFlagsProp = "LINK_FLAGS";
   if(target.GetType() == cmTarget::OBJECT_LIBRARY ||
      target.GetType() == cmTarget::STATIC_LIBRARY)
     {
-    linkFlagsProp = "STATIC_LIBRARY_FLAGS";
+    this->CurrentLocalGenerator
+      ->GetStaticLibraryFlags(extraLinkOptions, configName, &target);
     }
-  const char* targetLinkFlags = target.GetProperty(linkFlagsProp);
-  if(targetLinkFlags)
+  else
     {
-    extraLinkOptions += " ";
-    extraLinkOptions += targetLinkFlags;
-    }
-  if(configName && *configName)
-    {
-    std::string linkFlagsVar = linkFlagsProp;
-    linkFlagsVar += "_";
-    linkFlagsVar += cmSystemTools::UpperCase(configName);
-    if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
+    const char* targetLinkFlags = target.GetProperty("LINK_FLAGS");
+    if(targetLinkFlags)
       {
-      extraLinkOptions += " ";
-      extraLinkOptions += linkFlags;
+      this->CurrentLocalGenerator->
+        AppendFlags(extraLinkOptions, targetLinkFlags);
+      }
+    if(configName && *configName)
+      {
+      std::string linkFlagsVar = "LINK_FLAGS_";
+      linkFlagsVar += cmSystemTools::UpperCase(configName);
+      if(const char* linkFlags = target.GetProperty(linkFlagsVar.c_str()))
+        {
+        this->CurrentLocalGenerator->
+          AppendFlags(extraLinkOptions, linkFlags);
+        }
       }
     }
 

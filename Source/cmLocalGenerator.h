@@ -348,6 +348,11 @@ public:
                                              std::string const& dir_max,
                                              bool* hasSourceExtension = 0);
 
+  /** Fill out the static linker flags for the given target.  */
+  void GetStaticLibraryFlags(std::string& flags,
+                             std::string const& config,
+                             cmTarget* target);
+
   /** Fill out these strings for the given target.  Libraries to link,
    *  flags, and linkflags. */
   void GetTargetFlags(std::string& linkLibs,
