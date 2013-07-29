@@ -3,7 +3,8 @@
 # CMAKE_POP_CHECK_STATE()
 # and
 # CMAKE_RESET_CHECK_STATE()
-# These macros can be used to save, restore and reset the state of the variables
+# These macros can be used to save, restore and reset (i.e., clear contents)
+# the state of the variables
 # CMAKE_REQUIRED_FLAGS, CMAKE_REQUIRED_DEFINITIONS, CMAKE_REQUIRED_LIBRARIES
 # and CMAKE_REQUIRED_INCLUDES used by the various Check-files coming with CMake,
 # like e.g. check_function_exists() etc.
@@ -12,7 +13,9 @@
 # but after the Find-module has been executed they should have the same value
 # as they had before.
 #
-# CMAKE_PUSH_CHECK_STATE() macro receives optional
+# CMAKE_PUSH_CHECK_STATE() macro receives optional argument RESET. Whether it's specified,
+# CMAKE_PUSH_CHECK_STATE() will set all CMAKE_REQUIRED_* variables to empty values, same
+# as CMAKE_RESET_CHECK_STATE() call will do.
 #
 # Usage:
 #   cmake_push_check_state(RESET)
