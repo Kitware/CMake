@@ -963,9 +963,11 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Enables tracing output for target properties.",
      "This variable can be populated with a list of properties to generate "
      "debug output for when evaluating target properties.  Currently it can "
-     "only be used when evaluating the INCLUDE_DIRECTORIES target property.  "
-     "In that case, it outputs a backtrace for each include directory in "
-     "the build.  Default is unset.",false,"Variables That Change Behavior");
+     "only be used when evaluating the INCLUDE_DIRECTORIES, "
+     "COMPILE_DEFINITIONS and COMPILE_OPTIONS target properties.  "
+     "In that case, it outputs a backtrace for each entry in the target "
+     "propertythe build.  Default is unset.",
+     false,"Variables That Change Behavior");
 
   // Variables defined by CMake that describe the system
 
@@ -1515,6 +1517,22 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Default value for POSITION_INDEPENDENT_CODE of targets.",
      "This variable is used to initialize the "
      "POSITION_INDEPENDENT_CODE property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_<LANG>_VISIBILITY_PRESET", cmProperty::VARIABLE,
+     "Default value for <LANG>_VISIBILITY_PRESET of targets.",
+     "This variable is used to initialize the "
+     "<LANG>_VISIBILITY_PRESET property on all the targets. "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+  cm->DefineProperty
+    ("CMAKE_VISIBILITY_INLINES_HIDDEN", cmProperty::VARIABLE,
+     "Default value for VISIBILITY_INLINES_HIDDEN of targets.",
+     "This variable is used to initialize the "
+     "VISIBILITY_INLINES_HIDDEN property on all the targets. "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");

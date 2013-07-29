@@ -304,7 +304,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "List of options to pass to the compiler.",
      "This property specifies the list of options specified "
      "so far for this property.  "
-     "This property exists on directories and targets.  "
+     "This property exists on directories and targets."
      "\n"
      "The target property values are used by the generators to set "
      "the options for the compiler.\n"
@@ -1001,22 +1001,13 @@ void cmTarget::DefineProperties(cmake *cm)
      "(such as \"lib\") on a library name.");
 
   cm->DefineProperty
-    ("C_VISIBILITY_PRESET", cmProperty::TARGET,
+    ("<LANG>_VISIBILITY_PRESET", cmProperty::TARGET,
      "Value for symbol visibility compile flags",
-     "The C_VISIBILITY_PRESET property determines the value passed used in "
-     "a visibility related compile option, such as -fvisibility=.  This "
-     "property only has an affect for libraries and executables with "
+     "The <LANG>_VISIBILITY_PRESET property determines the value passed in "
+     "a visibility related compile option, such as -fvisibility= for <LANG>.  "
+     "This property only has an affect for libraries and executables with "
      "exports.  This property is initialized by the value of the variable "
-     "CMAKE_C_VISIBILITY_PRESET if it is set when a target is created.");
-
-  cm->DefineProperty
-    ("CXX_VISIBILITY_PRESET", cmProperty::TARGET,
-     "Value for symbol visibility compile flags",
-     "The CXX_VISIBILITY_PRESET property determines the value passed used in "
-     "a visibility related compile option, such as -fvisibility=.  This "
-     "property only has an affect for libraries and executables with "
-     "exports.  This property is initialized by the value of the variable "
-     "CMAKE_CXX_VISIBILITY_PRESET if it is set when a target is created.");
+     "CMAKE_<LANG>_VISIBILITY_PRESET if it is set when a target is created.");
 
   cm->DefineProperty
     ("VISIBILITY_INLINES_HIDDEN", cmProperty::TARGET,
@@ -2530,6 +2521,7 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
                         = (sig == cmTarget::KeywordTLLSignature ? "keyword"
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
+    std::set<cmStdString> emitted;
     for(std::vector<cmListFileBacktrace>::const_iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
@@ -2537,7 +2529,12 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
       if(i != it->end())
         {
         cmListFileContext const& lfc = *i;
-        s << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+        cmOStringStream line;
+        line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+        if (emitted.insert(line.str()).second)
+          {
+          s << line.str();
+          }
         ++i;
         }
       }
@@ -6244,7 +6241,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   }
 
   // Get the link languages.
-  if(this->GetType() == cmTarget::STATIC_LIBRARY)
+  if(this->LinkLanguagePropagatesToDependents())
     {
     std::string linkProp = "IMPORTED_LINK_INTERFACE_LANGUAGES";
     linkProp += suffix;
@@ -6470,6 +6467,15 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             break;
           }
         }
+      else
+        {
+        iface.Libraries = impl->Libraries;
+        if(this->LinkLanguagePropagatesToDependents())
+          {
+          // Targets using this archive need its language runtime libraries.
+          iface.Languages = impl->Languages;
+          }
+        }
       }
     }
 
@@ -6498,7 +6504,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                         headTarget,
                                         this, &dagChecker), iface.Libraries);
 
-    if(this->GetType() == cmTarget::SHARED_LIBRARY)
+    if(this->GetType() == cmTarget::SHARED_LIBRARY
+        || this->GetType() == cmTarget::STATIC_LIBRARY)
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
@@ -6532,6 +6539,11 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             }
           }
         }
+      if(this->LinkLanguagePropagatesToDependents())
+        {
+        // Targets using this archive need its language runtime libraries.
+        iface.Languages = impl->Languages;
+        }
       }
     }
   else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
@@ -6546,7 +6558,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     iface.ImplementationIsInterface = true;
     iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
-    if(this->GetType() == cmTarget::STATIC_LIBRARY)
+    if(this->LinkLanguagePropagatesToDependents())
       {
       // Targets using this archive need its language runtime libraries.
       iface.Languages = impl->Languages;
