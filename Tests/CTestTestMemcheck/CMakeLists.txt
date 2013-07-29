@@ -91,7 +91,11 @@ gen_mcnl_test(DummyPurifyNoLogfile "\${PSEUDO_PURIFY}")
 gen_mcnl_test(DummyValgrindNoLogfile "\${PSEUDO_VALGRIND}")
 gen_mcnl_test(DummyBCNoLogfile "\${PSEUDO_BC}")
 
-set(CTEST_EXTRA_CODE "set(CTEST_CUSTOM_PRE_MEMCHECK \"\${CTEST_MEMORYCHECK_COMMAND}\")\nset(CTEST_CUSTOM_POST_MEMCHECK \"\${CTEST_MEMORYCHECK_COMMAND}\")")
+set(CTEST_EXTRA_CODE "string(REPLACE \" \" \"\\\\ \" PRE_POST_COMMAND \"\${CTEST_MEMORYCHECK_COMMAND}\")
+
+set(CTEST_CUSTOM_PRE_MEMCHECK \"\${PRE_POST_COMMAND} pre command\")
+set(CTEST_CUSTOM_POST_MEMCHECK \"\${PRE_POST_COMMAND} post command \")
+")
 gen_mc_test(DummyValgrindPrePost "\${PSEUDO_VALGRIND}")
 
 set(CTEST_EXTRA_CODE "set(CTEST_CUSTOM_POST_MEMCHECK \"\${ERROR_COMMAND}\")")
