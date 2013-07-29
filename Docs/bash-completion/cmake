@@ -100,11 +100,13 @@ _cmake()
             return
             ;;
         -G)
-            # FIXME: doesn't work properly
             local IFS=$'\n'
+            local quoted
+            printf -v quoted %q "$cur"
             COMPREPLY=( $( compgen -W '$( cmake --help 2>/dev/null | sed -n \
-                "/^.*[^ ].*= Generates/{s|^ *\(.*[^ ]\) *= Generates.*$|\1|;s| |\\\\ |g;p}" \
-                2>/dev/null )' -- "$cur" ) )
+                -e "1,/^Generators/d" \
+                -e "/^  *[^ =]/{s|^ *\([^=]*[^ =]\).*$|\1|;s| |\\\\ |g;p}" \
+                2>/dev/null )' -- "$quoted" ) )
             return
             ;;
         --help-command)
