@@ -108,9 +108,11 @@ static const char * cmDocumentationOptions[][3] =
    "to stdout. This can be used to use cmake instead of pkg-config to find "
    "installed libraries in plain Makefile-based projects or in "
    "autoconf-based projects (via share/aclocal/cmake.m4)."},
-  {"--graphviz=[file]", "Generate graphviz of dependencies.",
+  {"--graphviz=[file]", "Generate graphviz of dependencies, see "
+   "CMakeGraphVizOptions.cmake for more.",
    "Generate a graphviz input file that will contain all the library and "
-   "executable dependencies in the project."},
+   "executable dependencies in the project. See the documentation for "
+   "CMakeGraphVizOptions.cmake for more details. "},
   {"--system-information [file]", "Dump information about this system.",
    "Dump a wide range of information about the current system. If run "
    "from the top of a binary tree for a CMake project it will dump "
