@@ -22,7 +22,7 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.Dd February 21, 2010
+.Dd February 2, 2012
 .Dt ARCHIVE_ENTRY_ACL 3
 .Os
 .Sh NAME
@@ -35,6 +35,8 @@
 .Nm archive_entry_acl_reset ,
 .Nm archive_entry_acl_text_w
 .Nd functions for manipulating Access Control Lists in archive entry descriptions
+.Sh LIBRARY
+Streaming Archive Library (libarchive, -larchive)
 .Sh SYNOPSIS
 .In archive_entry.h
 .Ft void
@@ -132,7 +134,7 @@ All files have an access ACL
 This specifies the permissions required for access to the file itself.
 Directories have an additional ACL
 .Pq Dv ARCHIVE_ENTRY_ACL_TYPE_DEFAULT ,
-which controlls the initial access ACL for newly created directory entries.
+which controls the initial access ACL for newly created directory entries.
 .Pp
 .Fn archive_entry_acl_add_entry
 and
