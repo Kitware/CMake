@@ -295,13 +295,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     return false;
     }
 
-  if(!includesArgs.GetIncludeDirs().empty() && exports.GetString().empty())
-    {
-    this->SetError("TARGETS given INCLUDES DESTINATION, but EXPORT set "
-      "not specified.");
-    return false;
-    }
-
   // Enforce argument rules too complex to specify for the
   // general-purpose parser.
   if(archiveArgs.GetNamelinkOnly() ||
