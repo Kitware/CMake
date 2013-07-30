@@ -79,6 +79,8 @@ public:
     CMP0026, ///< Disallow use of the LOCATION target property.
     CMP0027, ///< Conditionally linked imported targets with missing include
     /// directories.
+    CMP0028, ///< Double semicolon in target name means ALIAS or IMPORTED
+    /// target.
 
     /** \brief Always the last entry.
      *
