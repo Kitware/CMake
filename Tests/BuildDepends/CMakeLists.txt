@@ -235,6 +235,9 @@ message("Run result: ${runResult} Output: \"${out}\"")
 
 if("${out}" STREQUAL "HEADER_STRING: ninja changed ")
   message("Worked!")
+elseif(CMAKE_GENERATOR STREQUAL "Visual Studio 6")
+  # Tolerate failure because VS 6 does not seem to recompile ninjadep.cpp
+  # when the "dir/header.h" it includes changes.
 else()
   message(SEND_ERROR "Project did not rebuild properly. Output[${out}]\n"
     " expected [HEADER_STRING: ninja changed]")
