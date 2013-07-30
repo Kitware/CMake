@@ -1171,18 +1171,42 @@ void cmLocalVisualStudio6Generator
   std::string extraLinkOptionsRelWithDebInfo;
   if(target.GetType() == cmTarget::EXECUTABLE)
     {
-    extraLinkOptions =
-      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptions = this->Makefile->
+      GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS");
+    extraLinkOptionsDebug = this->Makefile->
+      GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS_DEBUG");
+    extraLinkOptionsRelease = this->Makefile->
+      GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS_RELEASE");
+    extraLinkOptionsMinSizeRel = this->Makefile->
+      GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS_MINSIZEREL");
+    extraLinkOptionsRelWithDebInfo = this->Makefile->
+      GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO");
     }
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    extraLinkOptions =
-      this->Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptions = this->Makefile->
+      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS");
+    extraLinkOptionsDebug = this->Makefile->
+      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS_DEBUG");
+    extraLinkOptionsRelease = this->Makefile->
+      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS_RELEASE");
+    extraLinkOptionsMinSizeRel = this->Makefile->
+      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL");
+    extraLinkOptionsRelWithDebInfo = this->Makefile->
+      GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO");
     }
   if(target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    extraLinkOptions =
-      this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptions = this->Makefile->
+      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS");
+    extraLinkOptionsDebug = this->Makefile->
+      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS_DEBUG");
+    extraLinkOptionsRelease = this->Makefile->
+      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS_RELEASE");
+    extraLinkOptionsMinSizeRel = this->Makefile->
+      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL");
+    extraLinkOptionsRelWithDebInfo = this->Makefile->
+      GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO");
     }
 
   // Get extra linker options for this target.
