@@ -103,12 +103,9 @@ int
 archive_read_open_filename(struct archive *a, const char *filename,
     size_t block_size)
 {
-#if defined(__BORLANDC__)
-	const char *filenames[2] = { NULL, NULL };
+	const char *filenames[2];
 	filenames[0] = filename;
-#else
-	const char *filenames[2] = { filename, NULL };
-#endif
+	filenames[1] = NULL;
 	return archive_read_open_filenames(a, filenames, block_size);
 }
 
