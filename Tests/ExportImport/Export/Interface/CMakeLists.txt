@@ -24,7 +24,7 @@ add_library(sharediface INTERFACE)
 target_link_libraries(sharediface INTERFACE sharedlib)
 
 export(TARGETS sharediface sharedlib headeronly
-  NAMESPACE bld_
+  NAMESPACE bld::
   FILE ../ExportInterfaceBuildTree.cmake
 )
 
@@ -46,4 +46,4 @@ install(FILES
   DESTINATION include/sharedlib
 )
 
-install(EXPORT expInterface NAMESPACE exp_ DESTINATION lib/exp)
+install(EXPORT expInterface NAMESPACE exp:: DESTINATION lib/exp)
