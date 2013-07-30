@@ -1773,7 +1773,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
      target.GetType() == cmTarget::STATIC_LIBRARY)
     {
     this->CurrentLocalGenerator
-      ->GetStaticLibraryFlags(extraLinkOptions, configName, &target);
+      ->GetStaticLibraryFlags(extraLinkOptions,
+                              cmSystemTools::UpperCase(configName),
+                              &target);
     }
   else
     {
