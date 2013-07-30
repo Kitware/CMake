@@ -241,6 +241,11 @@ cmPolicies::cmPolicies()
     CMP0027, "CMP0027",
     "Conditionally linked imported targets with missing include directories.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0028, "CMP0028",
+    "Double semicolon in target name means ALIAS or IMPORTED target.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
