@@ -632,6 +632,44 @@ cmTarget* cmComputeLinkDepends::FindTargetToLink(int depender_index,
     }
   cmTarget* tgt = mf->FindTargetToUse(name);
 
+  if(!tgt && std::string(name).find("::") != std::string::npos)
+    {
+    bool noMessage = false;
+    cmake::MessageType messageType = cmake::FATAL_ERROR;
+    cmOStringStream e;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
+      {
+      case cmPolicies::WARN:
+        {
+        e << (mf->GetPolicies()
+              ->GetPolicyWarning(cmPolicies::CMP0028)) << "\n";
+        messageType = cmake::AUTHOR_WARNING;
+        }
+        break;
+      case cmPolicies::OLD:
+        noMessage = true;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::NEW:
+        // Issue the fatal message.
+        break;
+      }
+
+    if(!noMessage)
+      {
+      e << "Target \"" << this->Target->GetName() << "\" links to target \""
+        << name << "\" but the target was not found.  Perhaps a "
+        "find_package() call is missing for an IMPORTED target, or a ALIAS "
+        "target is missing?";
+      this->CMakeInstance->IssueMessage(messageType, e.str(),
+                                        this->Target->GetBacktrace());
+      if (messageType == cmake::FATAL_ERROR)
+        {
+        return 0;
+        }
+      }
+    }
+
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
