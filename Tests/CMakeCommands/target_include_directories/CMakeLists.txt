@@ -47,3 +47,17 @@ target_include_directories(consumer
     $<TARGET_PROPERTY:target_include_directories,INTERFACE_INCLUDE_DIRECTORIES>
   relative_dir
 )
+
+# Test no items
+target_include_directories(consumer
+  PRIVATE
+)
+target_include_directories(consumer
+  BEFORE PRIVATE
+)
+target_include_directories(consumer
+  SYSTEM BEFORE PRIVATE
+)
+target_include_directories(consumer
+  SYSTEM PRIVATE
+)

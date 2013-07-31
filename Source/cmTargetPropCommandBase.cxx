@@ -19,7 +19,7 @@ bool cmTargetPropCommandBase
 ::HandleArguments(std::vector<std::string> const& args, const char *prop,
                  ArgumentFlags flags)
 {
-  if(args.size() < 3)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -53,7 +53,7 @@ bool cmTargetPropCommandBase
 
   if ((flags & PROCESS_SYSTEM) && args[argIndex] == "SYSTEM")
     {
-    if (args.size() < 4)
+    if (args.size() < 3)
       {
       this->SetError("called with incorrect number of arguments");
       return false;
@@ -65,7 +65,7 @@ bool cmTargetPropCommandBase
   bool prepend = false;
   if ((flags & PROCESS_BEFORE) && args[argIndex] == "BEFORE")
     {
-    if (args.size() < 4)
+    if (args.size() < 3)
       {
       this->SetError("called with incorrect number of arguments");
       return false;
