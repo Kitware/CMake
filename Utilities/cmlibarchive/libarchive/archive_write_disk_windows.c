@@ -1,6 +1,6 @@
 /*-
  * Copyright (c) 2003-2010 Tim Kientzle
- * Copyright (c) 2011 Michihiro NAKAJIMA
+ * Copyright (c) 2011-2012 Michihiro NAKAJIMA
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,6 @@ __FBSDID("$FreeBSD$");
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #ifdef HAVE_SYS_UTIME_H
 #include <sys/utime.h>
 #endif
@@ -48,12 +45,8 @@ __FBSDID("$FreeBSD$");
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
 #endif
 #include <winioctl.h>
 
@@ -89,7 +82,7 @@ static BOOL SetFilePointerEx_perso(HANDLE hFile,
 	if(lpNewFilePointer) {
 		lpNewFilePointer->QuadPart = li.QuadPart;
 	}
-	return li.LowPart != -1 || GetLastError() == NO_ERROR;
+	return li.LowPart != (DWORD)-1 || GetLastError() == NO_ERROR;
 }
 
 struct fixup_entry {
@@ -144,8 +137,8 @@ struct archive_write_disk {
 	struct fixup_entry	*current_fixup;
 	int64_t			 user_uid;
 	int			 skip_file_set;
-	dev_t			 skip_file_dev;
-	ino_t			 skip_file_ino;
+	int64_t			 skip_file_dev;
+	int64_t			 skip_file_ino;
 	time_t			 start_time;
 
 	int64_t (*lookup_gid)(void *private, const char *gname, int64_t gid);
@@ -214,26 +207,24 @@ struct archive_write_disk {
 
 static int	check_symlinks(struct archive_write_disk *);
 static int	create_filesystem_object(struct archive_write_disk *);
-static struct fixup_entry *current_fixup(struct archive_write_disk *, const wchar_t *pathname);
-#if defined(HAVE_FCHDIR) && defined(PATH_MAX)
-static void	edit_deep_directories(struct archive_write_disk *ad);
-#endif
+static struct fixup_entry *current_fixup(struct archive_write_disk *,
+		    const wchar_t *pathname);
 static int	cleanup_pathname(struct archive_write_disk *);
 static int	create_dir(struct archive_write_disk *, wchar_t *);
 static int	create_parent_dir(struct archive_write_disk *, wchar_t *);
+static int	la_chmod(const wchar_t *, mode_t);
 static int	older(BY_HANDLE_FILE_INFORMATION *, struct archive_entry *);
+static int	permissive_name_w(struct archive_write_disk *);
 static int	restore_entry(struct archive_write_disk *);
-#ifdef HAVE_POSIX_ACL
-static int	set_acl(struct archive_write_disk *, int fd, const char *, struct archive_acl *,
-		    acl_type_t, int archive_entry_acl_type, const char *tn);
-#endif
-static int	set_acls(struct archive_write_disk *, HANDLE h, const wchar_t *, struct archive_acl *);
+static int	set_acls(struct archive_write_disk *, HANDLE h,
+		    const wchar_t *, struct archive_acl *);
 static int	set_xattrs(struct archive_write_disk *);
 static int	set_fflags(struct archive_write_disk *);
 static int	set_ownership(struct archive_write_disk *);
 static int	set_mode(struct archive_write_disk *, int mode);
-static int	set_times(struct archive_write_disk *, HANDLE, int, const wchar_t *,
-		    time_t, long, time_t, long, time_t, long, time_t, long);
+static int	set_times(struct archive_write_disk *, HANDLE, int,
+		    const wchar_t *, time_t, long, time_t, long, time_t,
+		    long, time_t, long);
 static int	set_times_from_entry(struct archive_write_disk *);
 static struct fixup_entry *sort_dir_list(struct fixup_entry *p);
 static ssize_t	write_data_block(struct archive_write_disk *,
@@ -243,11 +234,14 @@ static struct archive_vtable *archive_write_disk_vtable(void);
 
 static int	_archive_write_disk_close(struct archive *);
 static int	_archive_write_disk_free(struct archive *);
-static int	_archive_write_disk_header(struct archive *, struct archive_entry *);
+static int	_archive_write_disk_header(struct archive *,
+		    struct archive_entry *);
 static int64_t	_archive_write_disk_filter_bytes(struct archive *, int);
 static int	_archive_write_disk_finish_entry(struct archive *);
-static ssize_t	_archive_write_disk_data(struct archive *, const void *, size_t);
-static ssize_t	_archive_write_disk_data_block(struct archive *, const void *, size_t, int64_t);
+static ssize_t	_archive_write_disk_data(struct archive *, const void *,
+		    size_t);
+static ssize_t	_archive_write_disk_data_block(struct archive *, const void *,
+		    size_t, int64_t);
 
 #define bhfi_dev(bhfi)	((bhfi)->dwVolumeSerialNumber)
 /* Treat FileIndex as i-node. We should remove a sequence number
@@ -361,7 +355,7 @@ file_information(struct archive_write_disk *a, wchar_t *path,
  * So we have to make the full-pathname in another way, which does not
  * break "../" path string.
  */
-int
+static int
 permissive_name_w(struct archive_write_disk *a)
 {
 	wchar_t *wn, *wnp;
@@ -424,10 +418,12 @@ permissive_name_w(struct archive_write_disk *a)
 				wn = _wcsdup(wnp);
 				if (wn == NULL)
 					return (-1);
-				archive_wstring_ensure(&(a->_name_data), 8 + wcslen(wn) + 1);
+				archive_wstring_ensure(&(a->_name_data),
+					8 + wcslen(wn) + 1);
 				a->name = a->_name_data.s;
 				/* Prepend "\\?\UNC\" */
-				archive_wstrncpy(&(a->_name_data), L"\\\\?\\UNC\\", 8);
+				archive_wstrncpy(&(a->_name_data),
+					L"\\\\?\\UNC\\", 8);
 				archive_wstrcat(&(a->_name_data), wn+2);
 				free(wn);
 				return (0);
@@ -457,7 +453,8 @@ permissive_name_w(struct archive_write_disk *a)
 		wn = _wcsdup(wnp);
 		if (wn == NULL)
 			return (-1);
-		archive_wstring_ensure(&(a->_name_data), 4 + 2 + wcslen(wn) + 1);
+		archive_wstring_ensure(&(a->_name_data),
+			4 + 2 + wcslen(wn) + 1);
 		a->name = a->_name_data.s;
 		/* Prepend "\\?\" and drive name. */
 		archive_wstrncpy(&(a->_name_data), L"\\\\?\\", 4);
@@ -484,7 +481,7 @@ permissive_name_w(struct archive_write_disk *a)
 	return (0);
 }
 
-int
+static int
 la_chmod(const wchar_t *path, mode_t mode)
 {
 	DWORD attr;
@@ -610,7 +607,7 @@ lazy_stat(struct archive_write_disk *a)
 
 	/*
 	 * XXX At this point, symlinks should not be hit, otherwise
-	 * XXX a race occured.  Do we want to check explicitly for that?
+	 * XXX a race occurred.  Do we want to check explicitly for that?
 	 */
 	if (file_information(a, a->name, &a->st, NULL, 1) == 0) {
 		a->pst = &a->st;
@@ -917,6 +914,7 @@ archive_write_disk_set_skip_file(struct archive *_a, int64_t d, int64_t i)
 static ssize_t
 write_data_block(struct archive_write_disk *a, const char *buff, size_t size)
 {
+	OVERLAPPED ol;
 	uint64_t start_size = size;
 	DWORD bytes_written = 0;
 	ssize_t block_size = 0, bytes_to_write;
@@ -968,26 +966,13 @@ write_data_block(struct archive_write_disk *a, const char *buff, size_t size)
 			 * truncate it to the block boundary. */
 			bytes_to_write = size;
 			if (a->offset + bytes_to_write > block_end)
-				bytes_to_write = block_end - a->offset;
+				bytes_to_write = (DWORD)(block_end - a->offset);
 		}
-		/* Seek if necessary to the specified offset. */
-		if (a->offset != a->fd_offset) {
-			LARGE_INTEGER distance;
-			distance.QuadPart = a->offset;
-			if (SetFilePointerEx_perso(a->fh, distance, NULL, FILE_BEGIN) == 0) {
-				DWORD lasterr = GetLastError();
-				if (lasterr == ERROR_ACCESS_DENIED)
-					errno = EBADF;
-				else
-					la_dosmaperr(lasterr);
-				archive_set_error(&a->archive, errno,
-				    "Seek failed");
-				return (ARCHIVE_FATAL);
-			}
-			a->fd_offset = a->offset;
- 		}
+		memset(&ol, 0, sizeof(ol));
+		ol.Offset = (DWORD)(a->offset & 0xFFFFFFFF);
+		ol.OffsetHigh = (DWORD)(a->offset >> 32);
 		if (!WriteFile(a->fh, buff, (uint32_t)bytes_to_write,
-		    &bytes_written, NULL)) {
+		    &bytes_written, &ol)) {
 			DWORD lasterr;
 
 			lasterr = GetLastError();
@@ -1004,7 +989,7 @@ write_data_block(struct archive_write_disk *a, const char *buff, size_t size)
 		a->offset += bytes_written;
 		a->fd_offset = a->offset;
 	}
-	return (start_size - size);
+	return ((ssize_t)(start_size - size));
 }
 
 static ssize_t
@@ -1062,47 +1047,10 @@ _archive_write_disk_finish_entry(struct archive *_a)
 		/* Last write ended at exactly the filesize; we're done. */
 		/* Hopefully, this is the common case. */
 	} else {
-		if (la_ftruncate(a->fh, a->filesize) == -1 &&
-		    a->filesize == 0) {
+		if (la_ftruncate(a->fh, a->filesize) == -1) {
 			archive_set_error(&a->archive, errno,
 			    "File size could not be restored");
 			return (ARCHIVE_FAILED);
-		}
-		/*
-		 * Not all platforms implement the XSI option to
-		 * extend files via ftruncate.  Stat() the file again
-		 * to see what happened.
-		 */
-		a->pst = NULL;
-		if ((ret = lazy_stat(a)) != ARCHIVE_OK)
-			return (ret);
-		/* We can use lseek()/write() to extend the file if
-		 * ftruncate didn't work or isn't available. */
-		if (bhfi_size(&(a->st)) < a->filesize) {
-			const char nul = '\0';
-			LARGE_INTEGER distance;
-			distance.QuadPart = a->filesize - 1;
-			if (!SetFilePointerEx_perso(a->fh, distance, NULL, FILE_BEGIN)) {
-				DWORD lasterr = GetLastError();
-				if (lasterr == ERROR_ACCESS_DENIED)
-					errno = EBADF;
-				else
-					la_dosmaperr(lasterr);
-				archive_set_error(&a->archive, errno,
-				    "Seek failed");
-				return (ARCHIVE_FATAL);
-			}
-			if (!WriteFile(a->fh, &nul, 1, NULL, NULL)) {
-				DWORD lasterr = GetLastError();
-				if (lasterr == ERROR_ACCESS_DENIED)
-					errno = EBADF;
-				else
-					la_dosmaperr(lasterr);
-				archive_set_error(&a->archive, errno,
-				    "Write to restore size failed");
-				return (ARCHIVE_FATAL);
-			}
-			a->pst = NULL;
 		}
 	}
 
@@ -1430,7 +1378,8 @@ restore_entry(struct archive_write_disk *a)
 		if (a->skip_file_set &&
 		    bhfi_dev(&a->st) == a->skip_file_dev &&
 		    bhfi_ino(&a->st) == a->skip_file_ino) {
-			archive_set_error(&a->archive, 0, "Refusing to overwrite archive");
+			archive_set_error(&a->archive, 0,
+			    "Refusing to overwrite archive");
 			return (ARCHIVE_FAILED);
 		}
 
@@ -1471,7 +1420,7 @@ restore_entry(struct archive_write_disk *a)
 
 	if (en) {
 		/* Everything failed; give up here. */
-		archive_set_error(&a->archive, en, "Can't create '%s'",
+		archive_set_error(&a->archive, en, "Can't create '%ls'",
 		    a->name);
 		return (ARCHIVE_FAILED);
 	}
@@ -1520,7 +1469,7 @@ create_filesystem_object(struct archive_write_disk *a)
 		 *
 		 * If the hardlink was successfully created and
 		 * the archive doesn't have carry data for it,
-		 * consider it to be non-authoritive for meta data.
+		 * consider it to be non-authoritative for meta data.
 		 * This is consistent with GNU tar and BSD pax.
 		 * If the hardlink does carry data, let the last
 		 * archive entry decide ownership.
@@ -1562,7 +1511,7 @@ create_filesystem_object(struct archive_write_disk *a)
 	 * that SUID, SGID, etc, require additional work to ensure
 	 * security, so we never restore them at this point.
 	 */
-	mode = final_mode & 0777 & a->user_umask;
+	mode = final_mode & 0777 & ~a->user_umask;
 
 	switch (a->mode & AE_IFMT) {
 	default:
@@ -1881,7 +1830,7 @@ check_symlinks(struct archive_write_disk *a)
 				 */
 				if (disk_unlink(a->name)) {
 					archive_set_error(&a->archive, errno,
-					    "Could not remove symlink %s",
+					    "Could not remove symlink %ls",
 					    a->name);
 					pn[0] = c;
 					return (ARCHIVE_FAILED);
@@ -1895,7 +1844,7 @@ check_symlinks(struct archive_write_disk *a)
 				 */
 				if (!S_ISLNK(a->mode)) {
 					archive_set_error(&a->archive, 0,
-					    "Removing symlink %s",
+					    "Removing symlink %ls",
 					    a->name);
 				}
 				/* Symlink gone.  No more problem! */
@@ -1905,15 +1854,15 @@ check_symlinks(struct archive_write_disk *a)
 				/* User asked us to remove problems. */
 				if (disk_unlink(a->name) != 0) {
 					archive_set_error(&a->archive, 0,
-					    "Cannot remove intervening symlink %s",
-					    a->name);
+					    "Cannot remove intervening "
+					    "symlink %ls", a->name);
 					pn[0] = c;
 					return (ARCHIVE_FAILED);
 				}
 				a->pst = NULL;
 			} else {
 				archive_set_error(&a->archive, 0,
-				    "Cannot extract through symlink %s",
+				    "Cannot extract through symlink %ls",
 				    a->name);
 				pn[0] = c;
 				return (ARCHIVE_FAILED);
@@ -2184,19 +2133,20 @@ create_dir(struct archive_write_disk *a, wchar_t *path)
 			return (ARCHIVE_OK);
 		if ((a->flags & ARCHIVE_EXTRACT_NO_OVERWRITE)) {
 			archive_set_error(&a->archive, EEXIST,
-			    "Can't create directory '%s'", path);
+			    "Can't create directory '%ls'", path);
 			return (ARCHIVE_FAILED);
 		}
 		if (disk_unlink(path) != 0) {
 			archive_set_error(&a->archive, errno,
-			    "Can't create directory '%s': "
+			    "Can't create directory '%ls': "
 			    "Conflicting file cannot be removed",
 			    path);
 			return (ARCHIVE_FAILED);
 		}
 	} else if (errno != ENOENT && errno != ENOTDIR) {
 		/* Stat failed? */
-		archive_set_error(&a->archive, errno, "Can't test directory '%s'", path);
+		archive_set_error(&a->archive, errno,
+		    "Can't test directory '%ls'", path);
 		return (ARCHIVE_FAILED);
 	} else if (slash != NULL) {
 		*slash = '\0';
@@ -2245,10 +2195,11 @@ create_dir(struct archive_write_disk *a, wchar_t *path)
 	 * don't add it to the fixup list here, as it's already been
 	 * added.
 	 */
-	if (file_information(a, path, &st, &st_mode, 0) == 0 && S_ISDIR(st_mode))
+	if (file_information(a, path, &st, &st_mode, 0) == 0 &&
+	    S_ISDIR(st_mode))
 		return (ARCHIVE_OK);
 
-	archive_set_error(&a->archive, errno, "Failed to create dir '%s'",
+	archive_set_error(&a->archive, errno, "Failed to create dir '%ls'",
 	    path);
 	return (ARCHIVE_FAILED);
 }
@@ -2277,7 +2228,7 @@ set_ownership(struct archive_write_disk *a)
 	}
 
 	archive_set_error(&a->archive, errno,
-	    "Can't set user=%jd/group=%jd for %s",
+	    "Can't set user=%jd/group=%jd for %ls",
 	    (intmax_t)a->uid, (intmax_t)a->gid, a->name);
 	return (ARCHIVE_WARN);
 }
@@ -2288,7 +2239,7 @@ set_times(struct archive_write_disk *a,
     time_t atime, long atime_nanos,
     time_t birthtime, long birthtime_nanos,
     time_t mtime, long mtime_nanos,
-    time_t ctime, long ctime_nanos)
+    time_t ctime_sec, long ctime_nanos)
 {
 #define EPOC_TIME ARCHIVE_LITERAL_ULL(116444736000000000)
 #define WINTIME(sec, nsec) ((Int32x32To64(sec, 10000000) + EPOC_TIME)\
@@ -2299,7 +2250,7 @@ set_times(struct archive_write_disk *a,
 	FILETIME *pfbtime;
 	FILETIME fatime, fbtime, fmtime;
 
-	(void)ctime; /* UNUSED */
+	(void)ctime_sec; /* UNUSED */
 	(void)ctime_nanos; /* UNUSED */
 
 	if (h != INVALID_HANDLE_VALUE) {
@@ -2350,11 +2301,11 @@ settimes_failed:
 static int
 set_times_from_entry(struct archive_write_disk *a)
 {
-	time_t atime, birthtime, mtime, ctime;
+	time_t atime, birthtime, mtime, ctime_sec;
 	long atime_nsec, birthtime_nsec, mtime_nsec, ctime_nsec;
 
 	/* Suitable defaults. */
-	atime = birthtime = mtime = ctime = a->start_time;
+	atime = birthtime = mtime = ctime_sec = a->start_time;
 	atime_nsec = birthtime_nsec = mtime_nsec = ctime_nsec = 0;
 
 	/* If no time was provided, we're done. */
@@ -2376,7 +2327,7 @@ set_times_from_entry(struct archive_write_disk *a)
 		mtime_nsec = archive_entry_mtime_nsec(a->entry);
 	}
 	if (archive_entry_ctime_is_set(a->entry)) {
-		ctime = archive_entry_ctime(a->entry);
+		ctime_sec = archive_entry_ctime(a->entry);
 		ctime_nsec = archive_entry_ctime_nsec(a->entry);
 	}
 
@@ -2384,7 +2335,7 @@ set_times_from_entry(struct archive_write_disk *a)
 			 atime, atime_nsec,
 			 birthtime, birthtime_nsec,
 			 mtime, mtime_nsec,
-			 ctime, ctime_nsec);
+			 ctime_sec, ctime_nsec);
 }
 
 static int
@@ -2507,7 +2458,7 @@ set_xattrs(struct archive_write_disk *a)
 }
 
 static void
-fileTimeToUtc(const FILETIME *filetime, time_t *time, long *ns)
+fileTimeToUtc(const FILETIME *filetime, time_t *t, long *ns)
 {
 	ULARGE_INTEGER utc;
 
@@ -2516,11 +2467,11 @@ fileTimeToUtc(const FILETIME *filetime, time_t *time, long *ns)
 	if (utc.QuadPart >= EPOC_TIME) {
 		utc.QuadPart -= EPOC_TIME;
 		/* milli seconds base */
-		*time = (time_t)(utc.QuadPart / 10000000);
+		*t = (time_t)(utc.QuadPart / 10000000);
 		/* nano seconds base */
 		*ns = (long)(utc.QuadPart % 10000000) * 100;
 	} else {
-		*time = 0;
+		*t = 0;
 		*ns = 0;
 	}
 }

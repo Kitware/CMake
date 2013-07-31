@@ -72,7 +72,7 @@ struct archive_write {
 
 	/* Dev/ino of the archive being written. */
 	int		  skip_file_set;
-	dev_t		  skip_file_dev;
+	int64_t		  skip_file_dev;
 	int64_t		  skip_file_ino;
 
 	/* Utility:  Pointer to a block of nulls. */
@@ -133,4 +133,13 @@ __archive_write_format_header_ustar(struct archive_write *, char buff[512],
     struct archive_entry *, int tartype, int strict,
     struct archive_string_conv *);
 
+struct archive_write_program_data;
+struct archive_write_program_data * __archive_write_program_allocate(void);
+int	__archive_write_program_free(struct archive_write_program_data *);
+int	__archive_write_program_open(struct archive_write_filter *,
+	    struct archive_write_program_data *, const char *);
+int	__archive_write_program_close(struct archive_write_filter *,
+	    struct archive_write_program_data *);
+int	__archive_write_program_write(struct archive_write_filter *,
+	    struct archive_write_program_data *, const void *, size_t);
 #endif
