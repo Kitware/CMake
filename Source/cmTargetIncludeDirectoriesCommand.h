@@ -55,7 +55,7 @@ public:
     {
     return
       "  target_include_directories(<target> [SYSTEM] [BEFORE] "
-      "<INTERFACE|PUBLIC|PRIVATE> [items1...]\n"
+      "<INTERFACE|PUBLIC|PRIVATE> item [items1...]\n"
       "    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])\n"
       "Specify include directories or targets to use when compiling a given "
       "target.  "
