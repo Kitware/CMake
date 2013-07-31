@@ -54,7 +54,7 @@ _ctest()
             return
             ;;
         -S|--script|-SP|--script-new-process)
-            # FIXME ?
+            _filedir '@(cmake|ctest)'
             return
             ;;
         --interactive-debug-mode)
