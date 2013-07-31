@@ -287,11 +287,33 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 
   const char *propName = "INTERFACE_INCLUDE_DIRECTORIES";
   const char *input = target->GetProperty(propName);
-  if (!input && tei->InterfaceIncludeDirectories.empty())
+
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  std::string dirs = tei->InterfaceIncludeDirectories;
+  this->ReplaceInstallPrefix(dirs);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
+  std::string exportDirs = cge->Evaluate(target->GetMakefile(), 0,
+                                         false, target);
+
+  if (cge->GetHadContextSensitiveCondition())
+    {
+    cmMakefile* mf = target->GetMakefile();
+    cmOStringStream e;
+    e << "Target \"" << target->GetName() << "\" is installed with "
+    "INCLUDES DESTINATION set to a context sensitive path.  Paths which "
+    "depend on the configuration, policy values or the link interface are "
+    "not supported.  Consider using target_include_directories instead.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+    }
+
+  if (!input && exportDirs.empty())
     {
     return;
     }
-  if ((input && !*input) && tei->InterfaceIncludeDirectories.empty())
+  if ((input && !*input) && exportDirs.empty())
     {
     // Set to empty
     properties[propName] = "";
@@ -300,7 +322,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 
   std::string includes = (input?input:"");
   const char* sep = input ? ";" : "";
-  includes += sep + tei->InterfaceIncludeDirectories;
+  includes += sep + exportDirs;
   std::string prepro = cmGeneratorExpression::Preprocess(includes,
                                                          preprocessRule,
                                                          true);

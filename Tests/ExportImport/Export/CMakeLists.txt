@@ -99,7 +99,6 @@ macro(add_include_lib _libName)
   set_property(TARGET ${_libName} APPEND PROPERTY
       INTERFACE_INCLUDE_DIRECTORIES
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${_libName}>"
-        "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/${_libName}>"
       )
   if (NOT "${ARGV1}" STREQUAL "NO_HEADER")
       file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${_libName}/${_libName}.h" "// no content\n")
@@ -188,8 +187,7 @@ install(FILES
     DESTINATION include/testSharedLibRequired
 )
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
-  INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/testSharedLibRequired>"
-                                "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
+  INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
 )
 set_property(TARGET testSharedLibRequired APPEND PROPERTY
   INTERFACE_COMPILE_DEFINITIONS USING_TESTSHAREDLIBREQUIRED
@@ -273,18 +271,24 @@ set_property(TARGET cmp0022OLD APPEND PROPERTY LINK_INTERFACE_LIBRARIES testLib3
 add_library(noIncludesInterface empty.cpp)
 
 install(TARGETS testLibRequired
-                testLibIncludeRequired1
-                testLibIncludeRequired2
-                testLibIncludeRequired3
-                testLibIncludeRequired4
-                testLibIncludeRequired5
-                testLibIncludeRequired6
-                testSharedLibRequired
-                noIncludesInterface
         EXPORT RequiredExp DESTINATION lib
         INCLUDES DESTINATION
           installIncludesTest
-          $<INSTALL_PREFIX>/installIncludesTest2)
+          $<INSTALL_PREFIX>/installIncludesTest2
+          )
+install(TARGETS
+          testLibIncludeRequired1
+          testLibIncludeRequired2
+          testLibIncludeRequired3
+          testLibIncludeRequired4
+          testLibIncludeRequired5
+          testLibIncludeRequired6
+          testSharedLibRequired
+          noIncludesInterface
+        EXPORT RequiredExp DESTINATION lib
+        INCLUDES DESTINATION
+          $<INSTALL_PREFIX>/include/$<TARGET_PROPERTY:NAME>
+)
 install(EXPORT RequiredExp NAMESPACE Req:: FILE testLibRequiredTargets.cmake DESTINATION lib/cmake/testLibRequired)
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest")
