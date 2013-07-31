@@ -62,7 +62,10 @@ static const char * cmDocumentationDescription[][3] =
   "  --config <cfg> = For multi-configuration tools, choose <cfg>.\n"   \
   "  --clean-first  = Build target 'clean' first, then build.\n"        \
   "                   (To clean only, use --target 'clean'.)\n"         \
-  "  --use-stderr  =  Don't merge stdout/stderr.\n"                     \
+  "  --use-stderr   = Don't merge stdout/stderr output and pass the\n"  \
+  "                   original stdout/stderr handles to the native\n"   \
+  "                   tool so it can use the capabilities of the\n"     \
+  "                   calling terminal (e.g. colored output).\n"        \
   "  --             = Pass remaining options to the native tool.\n"
 
 //----------------------------------------------------------------------------
@@ -606,7 +609,7 @@ static int do_build(int ac, char** av)
       }
     else if(strcmp(av[i], "--use-stderr") == 0)
       {
-        outputflag = cmSystemTools::OUTPUT_NORMAL;
+      outputflag = cmSystemTools::OUTPUT_PASSTHROUGH;
       }
     else if(strcmp(av[i], "--") == 0)
       {
