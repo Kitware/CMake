@@ -77,7 +77,7 @@
 #     appropriate. A new set of _RELEASE variables was also added.
 #   * Remove GTK2_SKIP_MARK_AS_ADVANCED option, as now the variables are
 #     marked as advanced by SelectLibraryConfigurations
-#   * Detect gmodule library
+#   * Detect gmodule, pangoft2 and pangoxft libraries
 # Version 1.4 (10/4/2012) (CMake 2.8.10)
 #   * 12596: Missing paths for FindGTK2 on NetBSD
 #   * 12049: Fixed detection of GTK include files in the lib folder on
@@ -477,6 +477,10 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (GTK2_PANGO pango false true)
 
         _GTK2_FIND_LIBRARY    (GTK2_PANGOCAIRO pangocairo false true)
+
+        _GTK2_FIND_LIBRARY    (GTK2_PANGOFT2 pangoft2 false true)
+
+        _GTK2_FIND_LIBRARY    (GTK2_PANGOXFT pangoxft false true)
 
         _GTK2_FIND_INCLUDE_DIR(GTK2_GDK_PIXBUF gdk-pixbuf/gdk-pixbuf.h)
         _GTK2_FIND_LIBRARY    (GTK2_GDK_PIXBUF gdk_pixbuf false true)
