@@ -1417,20 +1417,17 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     {
     return;
     }
-  const char* libflags = this->Target->GetProperty("STATIC_LIBRARY_FLAGS");
-  std::string flagsConfigVar = "STATIC_LIBRARY_FLAGS_";
-  flagsConfigVar += cmSystemTools::UpperCase(config);
-  const char* libflagsConfig =
-    this->Target->GetProperty(flagsConfigVar.c_str());
-  if(libflags || libflagsConfig)
+  std::string libflags;
+  this->LocalGenerator->GetStaticLibraryFlags(libflags,
+    cmSystemTools::UpperCase(config), this->Target);
+  if(!libflags.empty())
     {
     this->WriteString("<Lib>\n", 2);
     cmVisualStudioGeneratorOptions
       libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
                  cmVSGetLibFlagTable(this->LocalGenerator), 0, this);
-    libOptions.Parse(libflags?libflags:"");
-    libOptions.Parse(libflagsConfig?libflagsConfig:"");
+    libOptions.Parse(libflags.c_str());
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
     this->WriteString("</Lib>\n", 2);
