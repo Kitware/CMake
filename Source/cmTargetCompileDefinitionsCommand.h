@@ -54,7 +54,7 @@ public:
     {
     return
       "  target_compile_definitions(<target> "
-      "<INTERFACE|PUBLIC|PRIVATE> item [items1...]\n"
+      "<INTERFACE|PUBLIC|PRIVATE> [items1...]\n"
       "    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])\n"
       "Specify compile definitions to use when compiling a given target.  "
       "The named <target> must have been created by a command such as "
