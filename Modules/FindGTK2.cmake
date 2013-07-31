@@ -178,7 +178,6 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         cairo
         cairomm-1.0
         gdk-pixbuf-2.0
-        gthread-2.0
         gdkmm-2.4
         giomm-2.4
         gtk-2.0
