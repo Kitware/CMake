@@ -196,7 +196,8 @@ public:
   void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, const char* name, bool excludeAliases = false);
+  cmTarget* FindTarget(const char* project, const char* name,
+                       bool excludeAliases = false);
 
   void AddAlias(const char *name, cmTarget *tgt);
   bool IsAlias(const char *name);

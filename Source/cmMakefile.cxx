@@ -3777,7 +3777,8 @@ cmTarget* cmMakefile::FindTarget(const char* name, bool excludeAliases)
 {
   if (!excludeAliases)
     {
-    std::map<std::string, cmTarget*>::iterator i = this->AliasTargets.find(name);
+    std::map<std::string, cmTarget*>::iterator i
+                                              = this->AliasTargets.find(name);
     if (i != this->AliasTargets.end())
       {
       return i->second;
@@ -4225,7 +4226,8 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name, bool excludeAliases)
     }
 
   // Look for a target built in this project.
-  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name, excludeAliases);
+  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name,
+                                                              excludeAliases);
 }
 
 //----------------------------------------------------------------------------

@@ -142,7 +142,8 @@ bool cmAddLibraryCommand
       {
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
-        << "\" because target \"" << aliasedName << "\" does not already exist.";
+        << "\" because target \"" << aliasedName << "\" does not already "
+        "exist.";
       this->SetError(e.str().c_str());
       return false;
       }
