@@ -1520,11 +1520,11 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     }
   if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
     {
-    flags += " /SUBSYSTEM:WINDOWS";
+    linkOptions.AddFlag("SubSystem", "Windows");
     }
   else
     {
-    flags += " /SUBSYSTEM:CONSOLE";
+    linkOptions.AddFlag("SubSystem", "Console");
     }
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
