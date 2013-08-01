@@ -33,3 +33,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       "DO_GNU_TESTS"
   )
 endif()
+
+# Test no items
+target_compile_options(consumer
+  PRIVATE
+)
