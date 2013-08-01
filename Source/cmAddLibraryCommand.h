@@ -138,6 +138,15 @@ public:
       "Some native build systems may not like targets that have only "
       "object files, so consider adding at least one real source file "
       "to any target that references $<TARGET_OBJECTS:objlib>."
+      "\n"
+      "The signature\n"
+      "  add_library(<name> ALIAS <target>)\n"
+      "creates an alias, such that <name> can be used to refer to <target> "
+      "in subsequent commands.  The <name> does not appear in the generated "
+      "buildsystem as a make target.  The <target> may not be an IMPORTED "
+      "target or an ALIAS.  The <name> may not be used to modify properties "
+      "of <target>, that is, it may not be used as the operand of "
+      "set_property, set_target_properties, target_link_libraries etc."
       ;
     }
 

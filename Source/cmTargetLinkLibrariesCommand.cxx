@@ -31,6 +31,11 @@ bool cmTargetLinkLibrariesCommand
     return false;
     }
 
+  if (this->Makefile->IsAlias(args[0].c_str()))
+    {
+    this->SetError("can not be used on an ALIAS target.");
+    return false;
+    }
   // Lookup the target for which libraries are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()

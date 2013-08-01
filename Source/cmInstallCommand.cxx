@@ -362,6 +362,15 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       targetIt!=targetList.GetVector().end();
       ++targetIt)
     {
+
+    if (this->Makefile->IsAlias(targetIt->c_str()))
+      {
+      cmOStringStream e;
+      e << "TARGETS given target \"" << (*targetIt)
+        << "\" which is an alias.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     // Lookup this target in the current directory.
     if(cmTarget* target=this->Makefile->FindTarget(targetIt->c_str()))
       {
