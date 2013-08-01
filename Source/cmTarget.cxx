@@ -945,6 +945,11 @@ void cmTarget::DefineProperties(cmake *cm)
      "OSX_ARCHITECTURES.");
 
   cm->DefineProperty
+    ("NAME", cmProperty::TARGET,
+     "Logical name for the target.",
+     "Read-only logical name for the target as used by CMake.");
+
+  cm->DefineProperty
     ("EXPORT_NAME", cmProperty::TARGET,
      "Exported name for target files.",
      "This sets the name for the IMPORTED target generated when it this "
@@ -2971,7 +2976,13 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     {
     return;
     }
-
+  if (strcmp(prop, "NAME") == 0)
+    {
+    cmOStringStream e;
+    e << "NAME property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    return;
+    }
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
     {
     cmListFileBacktrace lfbt;
@@ -3036,6 +3047,13 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 {
   if (!prop)
     {
+    return;
+    }
+  if (strcmp(prop, "NAME") == 0)
+    {
+    cmOStringStream e;
+    e << "NAME property is read-only\n";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
@@ -4051,6 +4069,11 @@ const char *cmTarget::GetProperty(const char* prop,
   if(!prop)
     {
     return 0;
+    }
+
+  if (strcmp(prop, "NAME") == 0)
+    {
+    return this->GetName();
     }
 
   // Watch for special "computed" properties that are dependent on
