@@ -1389,7 +1389,7 @@ OutputIncludes(std::vector<std::string> const & includes)
   for(std::vector<std::string>::const_iterator i =  includes.begin();
       i != includes.end(); ++i)
     {
-    *this->BuildFileStream << *i << ";";
+    *this->BuildFileStream << cmVS10EscapeXML(*i) << ";";
     }
   this->WriteString("%(AdditionalIncludeDirectories)"
                     "</AdditionalIncludeDirectories>\n", 0);
