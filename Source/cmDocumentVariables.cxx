@@ -966,8 +966,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "only be used when evaluating the INCLUDE_DIRECTORIES, "
      "COMPILE_DEFINITIONS and COMPILE_OPTIONS target properties.  "
      "In that case, it outputs a backtrace for each entry in the target "
-     "propertythe build.  Default is unset.",
-     false,"Variables That Change Behavior");
+     "property.  Default is unset.", false, "Variables That Change Behavior");
 
   // Variables defined by CMake that describe the system
 
