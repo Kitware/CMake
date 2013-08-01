@@ -18,3 +18,7 @@ add_executable(PREFIX::AliasTarget ALIAS AliasTarget)
 
 add_library(bat SHARED bat.cpp)
 target_link_libraries(bat PREFIX::Foo)
+
+if (NOT TARGET Another::Alias)
+  message(SEND_ERROR "Another::Alias is not considered a target.")
+endif()
