@@ -4247,6 +4247,14 @@ cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
                                    bool isCustom)
 {
+  if(this->IsAlias(name.c_str()))
+    {
+    cmOStringStream e;
+    e << "cannot create target \"" << name
+      << "\" because an alias with the same name already exists.";
+    msg = e.str();
+    return false;
+    }
   if(cmTarget* existing = this->FindTargetToUse(name.c_str()))
     {
     // The name given conflicts with an existing target.  Produce an
