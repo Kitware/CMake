@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 2.8.11)
-project(Foo)
+project(AliasTarget)
 
 add_library(foo SHARED empty.cpp)
 add_library(PREFIX::Foo ALIAS foo)
