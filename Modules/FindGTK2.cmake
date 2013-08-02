@@ -763,7 +763,6 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
             GTK2_GLIBMM_INCLUDE_DIR
             GTK2_GLIBMMCONFIG_INCLUDE_DIR
             GTK2_GLIBMM_LIBRARY
-
         )
     elseif(_GTK2_component STREQUAL "glade")
         FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK2_${_COMPONENT_UPPER} "The glade library was not found."
