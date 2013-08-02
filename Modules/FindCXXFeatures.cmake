@@ -22,7 +22,7 @@
 #  CXXFeatures_variadic_templates_FOUND   - variadic templates
 
 #=============================================================================
-# Copyright 2011,2012,2013 Rolf Eike Beer <eike@sf-mail.de>
+# Copyright 2011-2013 Rolf Eike Beer <eike@sf-mail.de>
 # Copyright 2012 Andreas Weis
 # Copyright 2013 Jan Kundrát
 #
