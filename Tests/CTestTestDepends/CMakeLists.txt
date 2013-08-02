@@ -3,7 +3,8 @@ project(CTestTestDepends)
 include(CTest)
 
 add_executable (simple simple.cxx)
-add_test (one simple)
+add_executable (TestExe::Simple ALIAS simple)
+add_test (NAME one COMMAND TestExe::Simple)
 add_test (two simple)
 add_test (three simple)
 
