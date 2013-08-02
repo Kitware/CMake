@@ -70,7 +70,7 @@ protected:
     Pair() : Method(0), ClientData(0) {}
   };
 
-  typedef std::vector< Pair > VectorOfPairs;
+  typedef std::vector< Pair* > VectorOfPairs;
   typedef std::map<cmStdString, VectorOfPairs > StringToVectorOfPairs;
 
   StringToVectorOfPairs WatchMap;
