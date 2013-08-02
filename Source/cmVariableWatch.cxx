@@ -53,11 +53,13 @@ cmVariableWatch::~cmVariableWatch()
 }
 
 void cmVariableWatch::AddWatch(const std::string& variable,
-                               WatchMethod method, void* client_data /*=0*/)
+                               WatchMethod method, void* client_data /*=0*/,
+                               DeleteData delete_data /*=0*/)
 {
   cmVariableWatch::Pair* p = new cmVariableWatch::Pair;
   p->Method = method;
   p->ClientData = client_data;
+  p->DeleteDataCall = delete_data;
   cmVariableWatch::VectorOfPairs* vp = &this->WatchMap[variable];
   cmVariableWatch::VectorOfPairs::size_type cc;
   for ( cc = 0; cc < vp->size(); cc ++ )
