@@ -30,9 +30,30 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         set(_expected_features ${_all_cxx_features})
         set(_expected_cxx11_flag "-std=c++11")
-    else ()
-        set(_expected_features CXXFeatures_long_long_FOUND)
+    else (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
+        set(_expected_features CXXFeatures_long_long_FOUND
+                               CXXFeatures_func_identifier_FOUND)
         set(_expected_cxx11_flag "-std=c++0x")
+    else ()
+        # no idea since when this is supported, but it is at least
+        # supported since 3.1
+        set(_expected_features CXXFeatures_long_long_FOUND
+                               CXXFeatures_func_identifier_FOUND)
+        set(_expected_cxx11_flag "")
+    endif ()
+elseif (MSVC)
+    set(_expected_cxx11_flag "")
+    if (NOT MSVC_VERSION VERSION_LESS 1600)
+        set(_expected_features CXXFeatures_auto_FOUND
+                               CXXFeatures_cstdint_header_FOUND
+                               CXXFeatures_decltype_FOUND
+                               CXXFeatures_lambda_FOUND
+                               CXXFeatures_long_long_FOUND
+                               CXXFeatures_nullptr_FOUND
+                               CXXFeatures_rvalue_references_FOUND
+                               CXXFeatures_static_assert_FOUND)
+    else (NOT MSVC_VERSION VERSION_LESS 1301)
+        set(_expected_features CXXFeatures_long_long_FOUND)
     endif ()
 else ()
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
@@ -54,7 +75,8 @@ foreach (flag IN LISTS _all_cxx_features)
     endif ()
 endforeach (flag)
 
-if (NOT CXX11_COMPILER_FLAGS STREQUAL _expected_cxx11_flag AND NOT _compiler_unknown_features)
+# variables must be expanded here so it still works if both are empty
+if (NOT "${CXX11_COMPILER_FLAGS}" STREQUAL "${_expected_cxx11_flag}" AND NOT _compiler_unknown_features)
     message(SEND_ERROR "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
 endif ()
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS})
