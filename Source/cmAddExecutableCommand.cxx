@@ -106,7 +106,7 @@ bool cmAddExecutableCommand
       this->SetError("IMPORTED with ALIAS is not allowed.");
       return false;
       }
-    if(std::distance(s, args.end()) != 1)
+    if(args.size() != 3)
       {
       cmOStringStream e;
       e << "ALIAS requires exactly one target argument.";

@@ -119,7 +119,7 @@ bool cmAddLibraryCommand
       this->SetError("IMPORTED with ALIAS is not allowed.");
       return false;
       }
-    if(std::distance(s, args.end()) != 1)
+    if(args.size() != 3)
       {
       cmOStringStream e;
       e << "ALIAS requires exactly one target argument.";
@@ -147,11 +147,11 @@ bool cmAddLibraryCommand
       this->SetError(e.str().c_str());
       return false;
       }
-    cmTarget::TargetType type = aliasedTarget->GetType();
-    if(type != cmTarget::SHARED_LIBRARY
-        && type != cmTarget::STATIC_LIBRARY
-        && type != cmTarget::MODULE_LIBRARY
-        && type != cmTarget::OBJECT_LIBRARY)
+    cmTarget::TargetType aliasedType = aliasedTarget->GetType();
+    if(aliasedType != cmTarget::SHARED_LIBRARY
+        && aliasedType != cmTarget::STATIC_LIBRARY
+        && aliasedType != cmTarget::MODULE_LIBRARY
+        && aliasedType != cmTarget::OBJECT_LIBRARY)
       {
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
