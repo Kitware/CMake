@@ -33,7 +33,9 @@ public:
    */
   virtual cmCommand* Clone()
     {
-    return new cmVariableWatchCommand;
+    cmVariableWatchCommand* cmd = new cmVariableWatchCommand;
+    cmd->Handlers = this->Handlers;
+    return cmd;
     }
 
   //! Default constructor
