@@ -80,6 +80,10 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
                                   WatchMethod method,
                                   void* client_data /*=0*/)
 {
+  if ( !this->WatchMap.count(variable) )
+    {
+    return;
+    }
   cmVariableWatch::VectorOfPairs* vp = &this->WatchMap[variable];
   cmVariableWatch::VectorOfPairs::iterator it;
   for ( it = vp->begin(); it != vp->end(); ++it )
