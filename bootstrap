@@ -1525,14 +1525,6 @@ set (CMAKE_MAN_DIR "'"${cmake_man_dir}"'" CACHE PATH "Install location for man p
 set (CMAKE_DATA_DIR "'"${cmake_data_dir}"'" CACHE PATH "Install location for data (relative to prefix)." FORCE)
 ' > "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 
-# Suppress -isysroot if user-provided flags already have it.
-if echo "${cmake_c_flags}"   | grep isysroot >/dev/null 2>&1 &&
-   echo "${cmake_cxx_flags}" | grep isysroot >/dev/null 2>&1; then
-  echo '
-set(CMAKE_OSX_SYSROOT "" CACHE PATH "" FORCE)
-' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
-fi
-
 # Add configuration settings given as command-line options.
 if [ "x${cmake_bootstrap_qt_gui}" != "x" ]; then
   echo '
