@@ -449,6 +449,20 @@ if(GTK2_FIND_VERSION)
 endif()
 
 #
+# On MSVC, according to https://wiki.gnome.org/gtkmm/MSWindows, the /vd2 flag needs to be
+# passed to the compiler in order to use gtkmm
+#
+if(MSVC)
+    foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
+        if(_GTK2_component STREQUAL "gtkmm")
+            set(GTK2_DEFINITIONS "/vd2")
+        elseif(_GTK2_component STREQUAL "glademm")
+            set(GTK2_DEFINITIONS "/vd2")
+        endif()
+    endforeach()
+endif()
+
+#
 # Find all components
 #
 
@@ -562,20 +576,6 @@ if(NOT GTK2_FIND_VERSION AND GTK2_GTK_INCLUDE_DIR)
                       GTK2_PATCH_VERSION
                       ${GTK2_GTK_INCLUDE_DIR}/gtk/gtkversion.h)
     set(GTK2_VERSION ${GTK2_MAJOR_VERSION}.${GTK2_MINOR_VERSION}.${GTK2_PATCH_VERSION})
-endif()
-
-#
-# On MSVC, according to https://wiki.gnome.org/gtkmm/MSWindows, the /vd2 flag needs to be
-# passed to the compiler in order to use gtkmm
-#
-if(MSVC)
-    foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
-        if(_GTK2_component STREQUAL "gtkmm")
-            set(GTK2_DEFINITIONS "/vd2")
-        elseif(_GTK2_component STREQUAL "glademm")
-            set(GTK2_DEFINITIONS "/vd2")
-        endif()
-    endforeach()
 endif()
 
 #
