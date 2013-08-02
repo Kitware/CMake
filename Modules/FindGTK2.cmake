@@ -365,6 +365,7 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
     select_library_configurations(${_var})
 
     set(${_var}_LIBRARY ${${_var}_LIBRARY} PARENT_SCOPE)
+    set(${_var}_FOUND ${${_var}_FOUND} PARENT_SCOPE)
 
     set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${${_var}_LIBRARY})
     set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
@@ -376,6 +377,8 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
                        "${_var}_LIBRARY_DEBUG   = \"${${_var}_LIBRARY_DEBUG}\"")
         message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
                        "${_var}_LIBRARY         = \"${${_var}_LIBRARY}\"")
+        message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
+                       "${_var}_FOUND           = \"${${_var}_FOUND}\"")
     endif()
 
 endfunction()
