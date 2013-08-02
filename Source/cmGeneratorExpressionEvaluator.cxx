@@ -747,6 +747,18 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                       "Target name not supported.");
         return std::string();
         }
+      if(propertyName == "ALIASED_TARGET")
+        {
+        if(context->Makefile->IsAlias(targetName.c_str()))
+          {
+          if(cmTarget* tgt =
+                      context->Makefile->FindTargetToUse(targetName.c_str()))
+            {
+            return tgt->GetName();
+            }
+          }
+        return "";
+        }
       target = context->Makefile->FindTargetToUse(
                                                 targetName.c_str());
 
