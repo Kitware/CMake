@@ -115,7 +115,8 @@ public:
       "buildsystem as a make target.  The <target> may not be an IMPORTED "
       "target or an ALIAS.  The <name> may not be used to modify properties "
       "of <target>, that is, it may not be used as the operand of "
-      "set_property, set_target_properties, target_link_libraries etc."
+      "set_property, set_target_properties, target_link_libraries etc.  An "
+      "ALIAS target may not be installed of exported."
       ;
     }
 
