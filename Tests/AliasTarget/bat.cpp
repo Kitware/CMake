@@ -13,6 +13,11 @@
 #error Expected COMMANDOUTPUT_DEFINE
 #endif
 
+#include "targetoutput.h"
+
+#ifndef TARGETOUTPUT_DEFINE
+#error Expected TARGETOUTPUT_DEFINE
+#endif
 
 int bar()
 {
