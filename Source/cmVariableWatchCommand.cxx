@@ -106,7 +106,7 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
       cmOStringStream error;
       error << "Error in cmake code at\n"
         << arg.FilePath << ":" << arg.Line << ":\n"
-        << "A command failed during the invocation of callback\""
+        << "A command failed during the invocation of callback \""
         << command << "\".";
       cmSystemTools::Error(error.str().c_str());
       this->InCallback = false;
