@@ -128,8 +128,6 @@ bool cmAddLibraryCommand
       }
 
     const char *aliasedName = s->c_str();
-    cmTarget *aliasedTarget =
-                    this->Makefile->FindTargetToUse(aliasedName, true);
     if(this->Makefile->IsAlias(aliasedName))
       {
       cmOStringStream e;
@@ -138,12 +136,26 @@ bool cmAddLibraryCommand
       this->SetError(e.str().c_str());
       return false;
       }
+    cmTarget *aliasedTarget =
+                    this->Makefile->FindTargetToUse(aliasedName, true);
     if(!aliasedTarget)
       {
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" does not already "
         "exist.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    cmTarget::TargetType type = aliasedTarget->GetType();
+    if(type != cmTarget::SHARED_LIBRARY
+        && type != cmTarget::STATIC_LIBRARY
+        && type != cmTarget::MODULE_LIBRARY
+        && type != cmTarget::OBJECT_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << libName
+        << "\" because target \"" << aliasedName << "\" is not a library.";
       this->SetError(e.str().c_str());
       return false;
       }
