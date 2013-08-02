@@ -13,11 +13,14 @@ target_compile_definitions(bar PUBLIC BAR_DEFINE)
 
 target_link_libraries(foo LINK_PUBLIC $<$<STREQUAL:$<TARGET_PROPERTY:PREFIX::Foo,ALIASED_TARGET>,foo>:bar>)
 
-add_executable(AliasTarget empty.cpp)
+add_executable(AliasTarget commandgenerator.cpp)
 add_executable(PREFIX::AliasTarget ALIAS AliasTarget)
 
-add_library(bat SHARED bat.cpp)
+add_custom_command(OUTPUT commandoutput.h COMMAND PREFIX::AliasTarget)
+
+add_library(bat SHARED bat.cpp "${CMAKE_CURRENT_BINARY_DIR}/commandoutput.h")
 target_link_libraries(bat PREFIX::Foo)
+target_include_directories(bat PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if (NOT TARGET Another::Alias)
   message(SEND_ERROR "Another::Alias is not considered a target.")
