@@ -1,6 +1,8 @@
 
 #include <fstream>
 
+#include "object.h"
+
 int main(int argc, char **argv)
 {
   std::fstream fout;
@@ -9,5 +11,5 @@ int main(int argc, char **argv)
     return 1;
   fout << "#define COMMANDOUTPUT_DEFINE\n";
   fout.close();
-  return 0;
+  return object();
 }
