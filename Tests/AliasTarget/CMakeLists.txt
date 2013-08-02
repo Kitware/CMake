@@ -6,6 +6,9 @@ add_library(foo SHARED empty.cpp)
 add_library(PREFIX::Foo ALIAS foo)
 add_library(Another::Alias ALIAS foo)
 
+add_library(objects OBJECT object.cpp)
+add_library(Alias::Objects ALIAS objects)
+
 target_compile_definitions(foo PUBLIC FOO_DEFINE)
 
 add_library(bar SHARED empty.cpp)
@@ -13,7 +16,7 @@ target_compile_definitions(bar PUBLIC BAR_DEFINE)
 
 target_link_libraries(foo LINK_PUBLIC $<$<STREQUAL:$<TARGET_PROPERTY:PREFIX::Foo,ALIASED_TARGET>,foo>:bar>)
 
-add_executable(AliasTarget commandgenerator.cpp)
+add_executable(AliasTarget commandgenerator.cpp $<TARGET_OBJECTS:Alias::Objects>)
 add_executable(PREFIX::AliasTarget ALIAS AliasTarget)
 add_executable(Generator::Command ALIAS AliasTarget)
 
