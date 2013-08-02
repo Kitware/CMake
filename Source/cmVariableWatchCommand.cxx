@@ -24,6 +24,14 @@ static void cmVariableWatchCommandVariableAccessed(
 }
 
 //----------------------------------------------------------------------------
+static void deleteVariableWatchCommand(void* client_data)
+{
+  cmVariableWatchCommand* command
+    = static_cast<cmVariableWatchCommand*>(client_data);
+  delete command;
+}
+
+//----------------------------------------------------------------------------
 cmVariableWatchCommand::cmVariableWatchCommand()
 {
   this->InCallback = false;
@@ -53,7 +61,8 @@ bool cmVariableWatchCommand
     }
 
   this->Makefile->GetCMakeInstance()->GetVariableWatch()->AddWatch(
-    variable, cmVariableWatchCommandVariableAccessed, this);
+    variable, cmVariableWatchCommandVariableAccessed,
+    this->Clone(), deleteVariableWatchCommand);
 
   return true;
 }
@@ -106,7 +115,7 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
       cmOStringStream error;
       error << "Error in cmake code at\n"
         << arg.FilePath << ":" << arg.Line << ":\n"
-        << "A command failed during the invocation of callback\""
+        << "A command failed during the invocation of callback \""
         << command << "\".";
       cmSystemTools::Error(error.str().c_str());
       this->InCallback = false;
