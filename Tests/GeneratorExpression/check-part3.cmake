@@ -23,3 +23,4 @@ endforeach()
 
 check(test_alias_file_exe "1")
 check(test_alias_file_lib "1")
+check(test_alias_target_name "1")
