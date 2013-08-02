@@ -54,7 +54,7 @@ foreach (flag IN LISTS _all_cxx_features)
     endif ()
 endforeach (flag)
 
-if (NOT CXX11_COMPILER_FLAGS STREQUAL _expected_cxx11_flag)
+if (NOT CXX11_COMPILER_FLAGS STREQUAL _expected_cxx11_flag AND NOT _compiler_unknown_features)
     message(SEND_ERROR "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
 endif ()
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS})
