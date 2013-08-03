@@ -35,23 +35,31 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         set(_expected_features ${_all_cxx_features})
         set(_expected_cxx11_flag "-std=c++11")
-    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
-        list(APPEND _expected_features
-             CXXFeatures_auto_FOUND
-             CXXFeatures_constexpr_FOUND
-             CXXFeatures_cstdint_header_FOUND
-             CXXFeatures_decltype_FOUND
-             CXXFeatures_defaulted_functions_FOUND
-             CXXFeatures_deleted_functions_FOUND
-             CXXFeatures_initializer_list_FOUND
-             CXXFeatures_lambda_FOUND
-             CXXFeatures_nullptr_FOUND
-             CXXFeatures_rvalue_references_FOUND
-             CXXFeatures_sizeof_member_FOUND
-             CXXFeatures_static_assert_FOUND
-             CXXFeatures_variadic_templates_FOUND)
     elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
         set(_expected_cxx11_flag "-std=c++0x")
+        if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
+            list(APPEND _expected_features
+                CXXFeatures_nullptr_FOUND)
+        endif ()
+        if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
+            list(APPEND _expected_features
+                CXXFeatures_lambda_FOUND)
+        endif ()
+        if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
+            list(APPEND _expected_features
+                CXXFeatures_auto_FOUND
+                CXXFeatures_constexpr_FOUND
+                CXXFeatures_cstdint_header_FOUND
+                CXXFeatures_defaulted_functions_FOUND
+                CXXFeatures_deleted_functions_FOUND
+                CXXFeatures_initializer_list_FOUND
+                CXXFeatures_sizeof_member_FOUND)
+        endif ()
+        list(APPEND _expected_features
+                CXXFeatures_decltype_FOUND
+                CXXFeatures_rvalue_references_FOUND
+                CXXFeatures_static_assert_FOUND
+                CXXFeatures_variadic_templates_FOUND)
     endif ()
 elseif (MSVC)
     if (NOT MSVC_VERSION VERSION_LESS 1700)
