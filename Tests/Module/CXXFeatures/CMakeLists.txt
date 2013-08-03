@@ -30,7 +30,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         set(_expected_features ${_all_cxx_features})
         set(_expected_cxx11_flag "-std=c++11")
-    else (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
         set(_expected_features CXXFeatures_long_long_FOUND
                                CXXFeatures_func_identifier_FOUND)
         set(_expected_cxx11_flag "-std=c++0x")
