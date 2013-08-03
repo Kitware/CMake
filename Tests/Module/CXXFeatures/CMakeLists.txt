@@ -27,34 +27,53 @@ unset(_expected_cxx11_flag)
 unset(_compiler_unknown_features)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
+    # no idea since when this is supported, but it is at least
+    # supported since 3.1
+    set(_expected_features CXXFeatures_long_long_FOUND
+                           CXXFeatures_func_identifier_FOUND)
+
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         set(_expected_features ${_all_cxx_features})
         set(_expected_cxx11_flag "-std=c++11")
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
+        list(APPEND _expected_features
+             CXXFeatures_auto_FOUND
+             CXXFeatures_constexpr_FOUND
+             CXXFeatures_cstdint_header_FOUND
+             CXXFeatures_decltype_FOUND
+             CXXFeatures_defaulted_functions_FOUND
+             CXXFeatures_deleted_functions_FOUND
+             CXXFeatures_initializer_list_FOUND
+             CXXFeatures_lambda_FOUND
+             CXXFeatures_nullptr_FOUND
+             CXXFeatures_rvalue_references_FOUND
+             CXXFeatures_sizeof_member_FOUND
+             CXXFeatures_static_assert_FOUND
+             CXXFeatures_variadic_templates_FOUND)
     elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
-        set(_expected_features CXXFeatures_long_long_FOUND
-                               CXXFeatures_func_identifier_FOUND)
         set(_expected_cxx11_flag "-std=c++0x")
-    else ()
-        # no idea since when this is supported, but it is at least
-        # supported since 3.1
-        set(_expected_features CXXFeatures_long_long_FOUND
-                               CXXFeatures_func_identifier_FOUND)
-        set(_expected_cxx11_flag "")
     endif ()
 elseif (MSVC)
-    set(_expected_cxx11_flag "")
-    if (NOT MSVC_VERSION VERSION_LESS 1600)
-        set(_expected_features CXXFeatures_auto_FOUND
-                               CXXFeatures_cstdint_header_FOUND
-                               CXXFeatures_decltype_FOUND
-                               CXXFeatures_lambda_FOUND
-                               CXXFeatures_long_long_FOUND
-                               CXXFeatures_nullptr_FOUND
-                               CXXFeatures_rvalue_references_FOUND
-                               CXXFeatures_static_assert_FOUND)
-    else (NOT MSVC_VERSION VERSION_LESS 1301)
-        set(_expected_features CXXFeatures_long_long_FOUND)
+    if (NOT MSVC_VERSION VERSION_LESS 1700)
+        list(APPEND _expected_features
+             CXXFeatures_class_override_final_FOUND)
     endif ()
+    if (NOT MSVC_VERSION VERSION_LESS 1600)
+        list(APPEND _expected_features
+             CXXFeatures_auto_FOUND
+             CXXFeatures_cstdint_header_FOUND
+             CXXFeatures_decltype_FOUND
+             CXXFeatures_lambda_FOUND
+             CXXFeatures_nullptr_FOUND
+             CXXFeatures_rvalue_references_FOUND
+             CXXFeatures_static_assert_FOUND)
+    endif ()
+    if (NOT MSVC_VERSION VERSION_LESS 1301)
+        list(APPEND _expected_features
+             CXXFeatures_long_long_FOUND)
+    endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES Borland)
+    # nothing supported
 else ()
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
     set(_compiler_unknown_features TRUE)
