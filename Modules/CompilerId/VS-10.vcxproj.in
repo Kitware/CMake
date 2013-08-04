@@ -40,7 +40,6 @@
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <TargetMachine>@id_machine_10@</TargetMachine>
     </Link>
     <PostBuildEvent>
       <Command>for %%i in (@id_cl@) do %40echo CMAKE_@id_lang@_COMPILER=%%~$PATH:i</Command>
