@@ -30,17 +30,17 @@ public:
     if(!strcmp(name, vs10Win32generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        vs10Win32generatorName, "Win32", NULL);
+        name, "Win32", NULL);
       }
     if(!strcmp(name, vs10Win64generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        vs10Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
+        name, "x64", "CMAKE_FORCE_WIN64");
       }
     if(!strcmp(name, vs10IA64generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        vs10IA64generatorName, "Itanium", "CMAKE_FORCE_IA64");
+        name, "Itanium", "CMAKE_FORCE_IA64");
       }
     return 0;
   }

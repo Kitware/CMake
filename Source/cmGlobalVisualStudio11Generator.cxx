@@ -25,17 +25,17 @@ public:
     if(!strcmp(name, vs11Win32generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win32generatorName, "Win32", NULL);
+        name, "Win32", NULL);
       }
     if(!strcmp(name, vs11Win64generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
+        name, "x64", "CMAKE_FORCE_WIN64");
       }
     if(!strcmp(name, vs11ARMgeneratorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11ARMgeneratorName, "ARM", NULL);
+        name, "ARM", NULL);
       }
     return 0;
   }
