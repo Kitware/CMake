@@ -33,7 +33,7 @@ public:
     if(p[0] == '\0')
       {
       return new cmGlobalVisualStudio8Generator(
-        name, NULL, NULL);
+        name, "Win32", NULL);
       }
 
     if(p[0] != ' ')
@@ -57,8 +57,7 @@ public:
       }
 
     cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
-      name, parser.GetArchitectureFamily(), NULL);
-    ret->PlatformName = p;
+      name, p, NULL);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -96,34 +95,18 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  const char* name, const char* architectureId,
+  const char* name, const char* platformName,
   const char* additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
-  if (architectureId)
-    {
-    this->ArchitectureId = architectureId;
-    }
+  this->PlatformName = platformName;
+
   if (additionalPlatformDefinition)
     {
     this->AdditionalPlatformDefinition = additionalPlatformDefinition;
     }
-}
-
-//----------------------------------------------------------------------------
-const char* cmGlobalVisualStudio8Generator::GetPlatformName() const
-{
-  if (!this->PlatformName.empty())
-    {
-    return this->PlatformName.c_str();
-    }
-  if (this->ArchitectureId == "X86")
-    {
-    return "Win32";
-    }
-  return this->ArchitectureId.c_str();
 }
 
 //----------------------------------------------------------------------------

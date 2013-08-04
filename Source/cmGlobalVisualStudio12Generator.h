@@ -21,7 +21,7 @@ class cmGlobalVisualStudio12Generator:
 {
 public:
   cmGlobalVisualStudio12Generator(const char* name,
-    const char* architectureId, const char* additionalPlatformDefinition);
+    const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual void WriteSLNHeader(std::ostream& fout);
@@ -33,7 +33,6 @@ public:
   virtual std::string GetUserMacrosDirectory() { return ""; }
 protected:
   virtual const char* GetIDEVersion() { return "12.0"; }
-  bool UseFolderProperty();
 private:
   class Factory;
 };
