@@ -134,7 +134,6 @@ Id flags: ${testflags}
     elseif("${id_arch}" STREQUAL "ARM")
       set(id_machine_10 MachineARM)
     else()
-      set(id_machine_6 x86)
       set(id_machine_10 MachineX86)
     endif()
     if(CMAKE_VS_PLATFORM_TOOLSET)
