@@ -70,7 +70,7 @@ function(cxx_check_feature FEATURE_NAME)
 
     set(_bindir "${CMAKE_CURRENT_BINARY_DIR}/cxx_${FEATURE_NAME}")
 
-    set(_SRCFILE_BASE ${CMAKE_CURRENT_LIST_DIR}/FindCXXFeatures/cxx11-test-${FEATURE_NAME})
+    set(_SRCFILE_BASE ${CMAKE_CURRENT_LIST_DIR}/FindCXXFeatures/cxx11-${FEATURE_NAME})
     set(_LOG_NAME "\"${FEATURE_NAME}\"")
     message(STATUS "Checking C++ support for ${_LOG_NAME}")
 
