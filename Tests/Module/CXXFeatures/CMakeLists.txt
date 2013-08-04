@@ -42,6 +42,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
             list(APPEND _expected_features
+                 CXXFeatures_constexpr_FOUND
                  CXXFeatures_nullptr_FOUND)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
@@ -51,7 +52,6 @@ if (CMAKE_COMPILER_IS_GNUCXX)
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
             list(APPEND _expected_features
                  CXXFeatures_auto_FOUND
-                 CXXFeatures_constexpr_FOUND
                  CXXFeatures_cstdint_header_FOUND
                  CXXFeatures_defaulted_functions_FOUND
                  CXXFeatures_deleted_functions_FOUND
@@ -127,7 +127,7 @@ endforeach (flag)
 if (NOT "${CXX11_COMPILER_FLAGS}" STREQUAL "${_expected_cxx11_flag}" AND NOT _compiler_unknown_features)
     message(SEND_ERROR "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
 endif ()
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
 add_executable(CXXFeatures cxxfeatures.cxx)
 
 enable_testing()
