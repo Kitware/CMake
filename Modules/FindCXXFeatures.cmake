@@ -10,6 +10,7 @@
 #  CXXFeatures_cstdint_header_FOUND       - cstdint header
 #  CXXFeatures_decltype_FOUND             - decltype keyword
 #  CXXFeatures_defaulted_functions_FOUND  - default keyword for functions
+#  CXXFeatures_delegating_constructors_FOUND - delegating constructors
 #  CXXFeatures_deleted_functions_FOUND    - delete keyword for functions
 #  CXXFeatures_func_identifier_FOUND      - __func__ preprocessor constant
 #  CXXFeatures_initializer_list_FOUND     - initializer list
@@ -69,7 +70,7 @@ function(cxx_check_feature FEATURE_NAME)
 
     set(_bindir "${CMAKE_CURRENT_BINARY_DIR}/cxx_${FEATURE_NAME}")
 
-    set(_SRCFILE_BASE ${CMAKE_CURRENT_LIST_DIR}/FindCXXFeatures/cxx11-test-${FEATURE_NAME})
+    set(_SRCFILE_BASE ${CMAKE_CURRENT_LIST_DIR}/FindCXXFeatures/cxx11-${FEATURE_NAME})
     set(_LOG_NAME "\"${FEATURE_NAME}\"")
     message(STATUS "Checking C++ support for ${_LOG_NAME}")
 
@@ -104,6 +105,7 @@ set(_CXX_ALL_FEATURES
     cstdint_header
     decltype
     defaulted_functions
+    delegating_constructors
     deleted_functions
     func_identifier
     initializer_list
