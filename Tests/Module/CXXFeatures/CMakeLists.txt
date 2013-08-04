@@ -29,8 +29,9 @@ unset(_compiler_unknown_features)
 if (CMAKE_COMPILER_IS_GNUCXX)
     # no idea since when this is supported, but it is at least
     # supported since 3.1
-    set(_expected_features CXXFeatures_long_long_FOUND
-                           CXXFeatures_func_identifier_FOUND)
+    list(APPEND _expected_features
+         CXXFeatures_long_long_FOUND
+         CXXFeatures_func_identifier_FOUND)
 
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         set(_expected_features ${_all_cxx_features})
@@ -39,27 +40,27 @@ if (CMAKE_COMPILER_IS_GNUCXX)
         set(_expected_cxx11_flag "-std=c++0x")
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
             list(APPEND _expected_features
-                CXXFeatures_nullptr_FOUND)
+                 CXXFeatures_nullptr_FOUND)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
             list(APPEND _expected_features
-                CXXFeatures_lambda_FOUND)
+                 CXXFeatures_lambda_FOUND)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
             list(APPEND _expected_features
-                CXXFeatures_auto_FOUND
-                CXXFeatures_constexpr_FOUND
-                CXXFeatures_cstdint_header_FOUND
-                CXXFeatures_defaulted_functions_FOUND
-                CXXFeatures_deleted_functions_FOUND
-                CXXFeatures_initializer_list_FOUND
-                CXXFeatures_sizeof_member_FOUND)
+                 CXXFeatures_auto_FOUND
+                 CXXFeatures_constexpr_FOUND
+                 CXXFeatures_cstdint_header_FOUND
+                 CXXFeatures_defaulted_functions_FOUND
+                 CXXFeatures_deleted_functions_FOUND
+                 CXXFeatures_initializer_list_FOUND
+                 CXXFeatures_sizeof_member_FOUND)
         endif ()
         list(APPEND _expected_features
-                CXXFeatures_decltype_FOUND
-                CXXFeatures_rvalue_references_FOUND
-                CXXFeatures_static_assert_FOUND
-                CXXFeatures_variadic_templates_FOUND)
+             CXXFeatures_decltype_FOUND
+             CXXFeatures_rvalue_references_FOUND
+             CXXFeatures_static_assert_FOUND
+             CXXFeatures_variadic_templates_FOUND)
     endif ()
 elseif (MSVC)
     if (NOT MSVC_VERSION VERSION_LESS 1700)
@@ -80,8 +81,28 @@ elseif (MSVC)
         list(APPEND _expected_features
              CXXFeatures_long_long_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES Borland)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Borland")
     # nothing supported
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
+        set(_expected_cxx11_flag "-qlanglvl=extended0x")
+        list(APPEND _expected_features
+             CXXFeatures_long_long_FOUND)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
+        list(APPEND _expected_features
+             CXXFeatures_auto_FOUND
+             CXXFeatures_decltype_FOUND
+             CXXFeatures_static_assert_FOUND
+             CXXFeatures_variadic_templates_FOUND)
+              )
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+        list(APPEND _expected_features
+             CXXFeatures_constexpr_FOUND
+             CXXFeatures_rvalue_references_FOUND)
+              )
+    endif ()
 else ()
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
     set(_compiler_unknown_features TRUE)
