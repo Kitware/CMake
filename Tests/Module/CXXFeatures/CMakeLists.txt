@@ -33,11 +33,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
          CXXFeatures_long_long_FOUND
          CXXFeatures_func_identifier_FOUND)
 
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
-        set(_expected_features ${_all_cxx_features})
-        set(_expected_cxx11_flag "-std=c++11")
-    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
         set(_expected_cxx11_flag "-std=c++0x")
+        if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+            set(_expected_cxx11_flag "-std=c++11")
+            list(APPEND _expected_features
+                 CXXFeatures_class_override_final_FOUND)
+        endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
             list(APPEND _expected_features
                  CXXFeatures_nullptr_FOUND)
@@ -95,13 +97,11 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_decltype_FOUND
              CXXFeatures_static_assert_FOUND
              CXXFeatures_variadic_templates_FOUND)
-              )
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
         list(APPEND _expected_features
              CXXFeatures_constexpr_FOUND
              CXXFeatures_rvalue_references_FOUND)
-              )
     endif ()
 else ()
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
