@@ -25,7 +25,7 @@ class cmGlobalVisualStudio10Generator :
 {
 public:
   cmGlobalVisualStudio10Generator(const char* name,
-    const char* architectureId, const char* additionalPlatformDefinition);
+    const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool SetGeneratorToolset(std::string const& ts);

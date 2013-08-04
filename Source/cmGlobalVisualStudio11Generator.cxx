@@ -25,7 +25,7 @@ public:
     if(!strcmp(name, vs11Win32generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        vs11Win32generatorName, NULL, NULL);
+        vs11Win32generatorName, "Win32", NULL);
       }
     if(!strcmp(name, vs11Win64generatorName))
       {
@@ -64,9 +64,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
-  const char* name, const char* architectureId,
+  const char* name, const char* platformName,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio10Generator(name, architectureId,
+  : cmGlobalVisualStudio10Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS11FindMake.cmake";
