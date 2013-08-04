@@ -10,6 +10,7 @@ set(_all_cxx_features
         CXXFeatures_cstdint_header_FOUND
         CXXFeatures_decltype_FOUND
         CXXFeatures_defaulted_functions_FOUND
+        CXXFeatures_delegating_constructors_FOUND
         CXXFeatures_deleted_functions_FOUND
         CXXFeatures_func_identifier_FOUND
         CXXFeatures_initializer_list_FOUND
@@ -38,7 +39,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
             set(_expected_cxx11_flag "-std=c++11")
             list(APPEND _expected_features
-                 CXXFeatures_class_override_final_FOUND)
+                 CXXFeatures_class_override_final_FOUND
+                 CXXFeatures_delegating_constructors_FOUND)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
             list(APPEND _expected_features
@@ -95,6 +97,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
         list(APPEND _expected_features
              CXXFeatures_auto_FOUND
              CXXFeatures_decltype_FOUND
+             CXXFeatures_delegating_constructors_FOUND
              CXXFeatures_static_assert_FOUND
              CXXFeatures_variadic_templates_FOUND)
     endif ()

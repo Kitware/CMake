@@ -10,6 +10,7 @@
 #  CXXFeatures_cstdint_header_FOUND       - cstdint header
 #  CXXFeatures_decltype_FOUND             - decltype keyword
 #  CXXFeatures_defaulted_functions_FOUND  - default keyword for functions
+#  CXXFeatures_delegating_constructors_FOUND - delegating constructors
 #  CXXFeatures_deleted_functions_FOUND    - delete keyword for functions
 #  CXXFeatures_func_identifier_FOUND      - __func__ preprocessor constant
 #  CXXFeatures_initializer_list_FOUND     - initializer list
@@ -104,6 +105,7 @@ set(_CXX_ALL_FEATURES
     cstdint_header
     decltype
     defaulted_functions
+    delegating_constructors
     deleted_functions
     func_identifier
     initializer_list
