@@ -32,7 +32,7 @@ public:
     if(p[0] == '\0')
       {
       return new cmGlobalVisualStudio9Generator(
-        name, "Win32", NULL);
+        name, NULL, NULL);
       }
 
     if(p[0] != ' ')
@@ -62,7 +62,8 @@ public:
       }
 
     cmGlobalVisualStudio9Generator* ret = new cmGlobalVisualStudio9Generator(
-      name, p, NULL);
+      name, parser.GetArchitectureFamily(), NULL);
+    ret->PlatformName = p;
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -101,9 +102,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
-  const char* name, const char* platformName,
+  const char* name, const char* architectureId,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio8Generator(name, platformName,
+  : cmGlobalVisualStudio8Generator(name, architectureId,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS9FindMake.cmake";
