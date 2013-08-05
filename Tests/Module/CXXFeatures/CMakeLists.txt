@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 project(CxxFeatures CXX)
 
-find_package(CXXFeatures)
-
 set(_all_cxx_features
         CXXFeatures_auto_FOUND
         CXXFeatures_class_override_final_FOUND
@@ -112,9 +110,12 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_rvalue_references_FOUND)
     endif ()
 else ()
+    message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
     set(_compiler_unknown_features TRUE)
 endif ()
+
+find_package(CXXFeatures)
 
 foreach (flag IN LISTS _all_cxx_features)
     list(FIND _expected_features "${flag}" _flag_index)
