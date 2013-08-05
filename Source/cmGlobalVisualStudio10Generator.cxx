@@ -79,6 +79,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
+  this->MasmEnabled = false;
 }
 
 //----------------------------------------------------------------------------
@@ -168,6 +169,16 @@ void cmGlobalVisualStudio10Generator
       return;
       }
     }
+
+  for(std::vector<std::string>::const_iterator it = lang.begin();
+      it != lang.end(); ++it)
+    {
+    if(*it == "ASM_MASM")
+      {
+      this->MasmEnabled = true;
+      }
+    }
+
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }
 

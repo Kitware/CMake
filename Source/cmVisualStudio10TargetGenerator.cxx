@@ -307,6 +307,11 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString(
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.props\" />\n", 1);
   this->WriteString("<ImportGroup Label=\"ExtensionSettings\">\n", 1);
+  if (this->GlobalGenerator->IsMasmEnabled())
+    {
+    this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
+                      "BuildCustomizations\\masm.props\" />\n", 2);
+    }
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
   this->WriteString("<Import Project=\"" VS10_USER_PROPS "\""
@@ -326,6 +331,11 @@ void cmVisualStudio10TargetGenerator::Generate()
     "<Import Project=\"$(VCTargetsPath)\\Microsoft.Cpp.targets\""
     " />\n", 1);
   this->WriteString("<ImportGroup Label=\"ExtensionTargets\">\n", 1);
+  if (this->GlobalGenerator->IsMasmEnabled())
+    {
+    this->WriteString("<Import Project=\"$(VCTargetsPath)\\"
+                      "BuildCustomizations\\masm.targets\" />\n", 2);
+    }
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("</Project>", 0);
   // The groups are stored in a separate file for VS 10
@@ -982,24 +992,37 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       si != this->GeneratorTarget->ObjectSources.end(); ++si)
     {
     const char* lang = (*si)->GetLanguage();
-    bool cl = strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0;
-    bool rc = strcmp(lang, "RC") == 0;
-    const char* tool = cl? "ClCompile" : (rc? "ResourceCompile" : "None");
-    this->WriteSource(tool, *si, " ");
-    // ouput any flags specific to this source file
-    if(cl && this->OutputSourceSpecificFlags(*si))
+    const char* tool = NULL;
+    if (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0)
       {
-      // if the source file has specific flags the tag
-      // is ended on a new line
-      this->WriteString("</ClCompile>\n", 2);
+      tool = "ClCompile";
       }
-    else if(rc && this->OutputSourceSpecificFlags(*si))
+    else if (strcmp(lang, "ASM_MASM") == 0 &&
+             this->GlobalGenerator->IsMasmEnabled())
       {
-      this->WriteString("</ResourceCompile>\n", 2);
+      tool = "MASM";
+      }
+    else if (strcmp(lang, "RC") == 0)
+      {
+      tool = "ResourceCompile";
+      }
+
+    if (tool)
+      {
+      this->WriteSource(tool, *si, " ");
+      if (this->OutputSourceSpecificFlags(*si))
+        {
+        this->WriteString("</", 2);
+        (*this->BuildFileStream ) << tool << ">\n";
+        }
+      else
+        {
+        (*this->BuildFileStream ) << " />\n";
+        }
       }
     else
       {
-      (*this->BuildFileStream ) << " />\n";
+      this->WriteSource("None", *si);
       }
     }
 
