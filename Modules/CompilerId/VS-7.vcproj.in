@@ -10,12 +10,12 @@
 	>
 	<Platforms>
 		<Platform
-			Name="@id_platform@"
+			Name="@id_arch@"
 		/>
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Debug|@id_platform@"
+			Name="Debug|@id_arch@"
 			OutputDirectory="."
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"

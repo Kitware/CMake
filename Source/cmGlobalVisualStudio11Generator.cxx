@@ -25,17 +25,17 @@ public:
     if(!strcmp(name, vs11Win32generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        name, "Win32", NULL);
+        vs11Win32generatorName, NULL, NULL);
       }
     if(!strcmp(name, vs11Win64generatorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        name, "x64", "CMAKE_FORCE_WIN64");
+        vs11Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
     if(!strcmp(name, vs11ARMgeneratorName))
       {
       return new cmGlobalVisualStudio11Generator(
-        name, "ARM", NULL);
+        vs11ARMgeneratorName, "ARM", NULL);
       }
     return 0;
   }
@@ -64,9 +64,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
-  const char* name, const char* platformName,
+  const char* name, const char* architectureId,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio10Generator(name, platformName,
+  : cmGlobalVisualStudio10Generator(name, architectureId,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS11FindMake.cmake";

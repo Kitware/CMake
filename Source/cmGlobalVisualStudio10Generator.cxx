@@ -30,17 +30,17 @@ public:
     if(!strcmp(name, vs10Win32generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        name, "Win32", NULL);
+        vs10Win32generatorName, NULL, NULL);
       }
     if(!strcmp(name, vs10Win64generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        name, "x64", "CMAKE_FORCE_WIN64");
+        vs10Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
     if(!strcmp(name, vs10IA64generatorName))
       {
       return new cmGlobalVisualStudio10Generator(
-        name, "Itanium", "CMAKE_FORCE_IA64");
+        vs10IA64generatorName, "Itanium", "CMAKE_FORCE_IA64");
       }
     return 0;
   }
@@ -69,9 +69,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
-  const char* name, const char* platformName,
+  const char* name, const char* architectureId,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio8Generator(name, platformName,
+  : cmGlobalVisualStudio8Generator(name, architectureId,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
@@ -161,7 +161,7 @@ void cmGlobalVisualStudio10Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
-  if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
+  if(this->ArchitectureId == "Itanium" || this->ArchitectureId == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
       {

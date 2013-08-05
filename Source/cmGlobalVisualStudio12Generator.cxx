@@ -25,17 +25,17 @@ public:
     if(!strcmp(name, vs12Win32generatorName))
       {
       return new cmGlobalVisualStudio12Generator(
-        name, "Win32", NULL);
+        vs12Win32generatorName, NULL, NULL);
       }
     if(!strcmp(name, vs12Win64generatorName))
       {
       return new cmGlobalVisualStudio12Generator(
-        name, "x64", "CMAKE_FORCE_WIN64");
+        vs12Win64generatorName, "x64", "CMAKE_FORCE_WIN64");
       }
     if(!strcmp(name, vs12ARMgeneratorName))
       {
       return new cmGlobalVisualStudio12Generator(
-        name, "ARM", NULL);
+        vs12ARMgeneratorName, "ARM", NULL);
       }
     return 0;
   }
@@ -64,9 +64,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio12Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
-  const char* name, const char* platformName,
+  const char* name, const char* architectureId,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio11Generator(name, platformName,
+  : cmGlobalVisualStudio11Generator(name, architectureId,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS12FindMake.cmake";
@@ -99,4 +99,13 @@ cmLocalGenerator *cmGlobalVisualStudio12Generator::CreateLocalGenerator()
   lg->SetPlatformName(this->GetPlatformName());
   lg->SetGlobalGenerator(this);
   return lg;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio12Generator::UseFolderProperty()
+{
+  // Intentionally skip over the parent class implementation and call the
+  // grand-parent class's implementation. Folders are not supported by the
+  // Express editions in VS10 and earlier, but they are in VS12 Express.
+  return cmGlobalVisualStudio8Generator::UseFolderProperty();
 }
