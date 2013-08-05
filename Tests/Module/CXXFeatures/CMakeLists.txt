@@ -44,11 +44,11 @@ if (CMAKE_COMPILER_IS_GNUCXX)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
             list(APPEND _expected_features
-                 CXXFeatures_constexpr_FOUND
                  CXXFeatures_nullptr_FOUND)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
             list(APPEND _expected_features
+                 CXXFeatures_constexpr_FOUND
                  CXXFeatures_lambda_FOUND)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
@@ -86,7 +86,8 @@ elseif (MSVC)
              CXXFeatures_long_long_FOUND)
     endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Borland")
-    # nothing supported
+    list(APPEND _expected_features
+         CXXFeatures_long_long_FOUND)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
         set(_expected_cxx11_flag "-qlanglvl=extended0x")
