@@ -84,8 +84,10 @@ elseif (MSVC)
              CXXFeatures_long_long_FOUND)
     endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Borland")
-    list(APPEND _expected_features
-         CXXFeatures_long_long_FOUND)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.60)
+        list(APPEND _expected_features
+             CXXFeatures_long_long_FOUND)
+    endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
         set(_expected_cxx11_flag "-qlanglvl=extended0x")
