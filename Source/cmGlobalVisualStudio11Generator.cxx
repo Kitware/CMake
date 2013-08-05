@@ -64,9 +64,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
-  const char* name, const char* architectureId,
+  const char* name, const char* platformName,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio10Generator(name, architectureId,
+  : cmGlobalVisualStudio10Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS11FindMake.cmake";

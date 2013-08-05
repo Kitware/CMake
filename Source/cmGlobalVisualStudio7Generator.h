@@ -26,7 +26,7 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator();
+  cmGlobalVisualStudio7Generator(const char* platformName = NULL);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalVisualStudio7Generator>(); }
@@ -37,7 +37,7 @@ public:
   static const char* GetActualName() {return "Visual Studio 7";}
 
   ///! Get the name for the platform.
-  const char* GetPlatformName() const;
+  const char* GetPlatformName() const { return this->PlatformName.c_str(); }
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();

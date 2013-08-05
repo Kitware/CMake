@@ -57,8 +57,7 @@ public:
       }
 
     cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
-      name, parser.GetArchitectureFamily(), NULL);
-    ret->PlatformName = p;
+      name, p, NULL);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -96,16 +95,14 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  const char* name, const char* architectureId,
+  const char* name, const char* platformName,
   const char* additionalPlatformDefinition)
+  : cmGlobalVisualStudio71Generator(platformName)
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
-  if (architectureId)
-    {
-    this->ArchitectureId = architectureId;
-    }
+
   if (additionalPlatformDefinition)
     {
     this->AdditionalPlatformDefinition = additionalPlatformDefinition;

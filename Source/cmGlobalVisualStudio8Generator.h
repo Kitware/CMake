@@ -24,7 +24,7 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator(const char* name,
-    const char* architectureId, const char* additionalPlatformDefinition);
+    const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.

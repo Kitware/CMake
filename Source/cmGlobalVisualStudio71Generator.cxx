@@ -16,7 +16,8 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator()
+cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
+  const char* platformName) : cmGlobalVisualStudio7Generator(platformName)
 {
   this->FindMakeProgramFile = "CMakeVS71FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfiguration";

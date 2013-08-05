@@ -17,9 +17,16 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
+cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
+  const char* platformName)
 {
   this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
+
+  if (!platformName)
+    {
+    platformName = "Win32";
+    }
+  this->PlatformName = platformName;
 }
 
 
@@ -149,20 +156,6 @@ void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
-}
-
-//----------------------------------------------------------------------------
-const char* cmGlobalVisualStudio7Generator::GetPlatformName() const
-{
-  if (!this->PlatformName.empty())
-    {
-    return this->PlatformName.c_str();
-    }
-  if (this->ArchitectureId == "X86")
-    {
-    return "Win32";
-    }
-  return this->ArchitectureId.c_str();
 }
 
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)

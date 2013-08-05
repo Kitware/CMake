@@ -25,7 +25,7 @@ class cmGlobalVisualStudio9Generator :
 {
 public:
   cmGlobalVisualStudio9Generator(const char* name,
-    const char* architectureId, const char* additionalPlatformDefinition);
+    const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! create the correct local generator

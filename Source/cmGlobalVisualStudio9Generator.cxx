@@ -62,8 +62,7 @@ public:
       }
 
     cmGlobalVisualStudio9Generator* ret = new cmGlobalVisualStudio9Generator(
-      name, parser.GetArchitectureFamily(), NULL);
-    ret->PlatformName = p;
+      name, p, NULL);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -102,9 +101,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
-  const char* name, const char* architectureId,
+  const char* name, const char* platformName,
   const char* additionalPlatformDefinition)
-  : cmGlobalVisualStudio8Generator(name, architectureId,
+  : cmGlobalVisualStudio8Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
   this->FindMakeProgramFile = "CMakeVS9FindMake.cmake";
