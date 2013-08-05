@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 project(CxxFeatures CXX)
 
-find_package(CXXFeatures)
-
 set(_all_cxx_features
         CXXFeatures_auto_FOUND
         CXXFeatures_class_override_final_FOUND
@@ -86,8 +84,10 @@ elseif (MSVC)
              CXXFeatures_long_long_FOUND)
     endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Borland")
-    list(APPEND _expected_features
-         CXXFeatures_long_long_FOUND)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.60)
+        list(APPEND _expected_features
+             CXXFeatures_long_long_FOUND)
+    endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
         set(_expected_cxx11_flag "-qlanglvl=extended0x")
@@ -95,10 +95,14 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_long_long_FOUND)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
+        # func_identifier and sizeof_member are here because they were detected on a
+        # test machine but it is unclear since when they are supported
         list(APPEND _expected_features
              CXXFeatures_auto_FOUND
              CXXFeatures_decltype_FOUND
              CXXFeatures_delegating_constructors_FOUND
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_sizeof_member_FOUND
              CXXFeatures_static_assert_FOUND
              CXXFeatures_variadic_templates_FOUND)
     endif ()
@@ -108,9 +112,12 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_rvalue_references_FOUND)
     endif ()
 else ()
+    message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
     set(_compiler_unknown_features TRUE)
 endif ()
+
+find_package(CXXFeatures)
 
 foreach (flag IN LISTS _all_cxx_features)
     list(FIND _expected_features "${flag}" _flag_index)
