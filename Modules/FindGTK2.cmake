@@ -512,7 +512,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GTK2_ATK atk/atk.h)
         _GTK2_FIND_LIBRARY    (GTK2_ATK atk false true)
 
-        _GTK2_FIND_INCLUDE_DIR(GTK2_GOBJECT gobject/gobject.h)
+        _GTK2_FIND_INCLUDE_DIR(GTK2_GOBJECT glib-object.h)
         _GTK2_FIND_LIBRARY    (GTK2_GOBJECT gobject false true)
 
         _GTK2_FIND_INCLUDE_DIR(GTK2_GLIB glib.h)
