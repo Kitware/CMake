@@ -95,10 +95,14 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_long_long_FOUND)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
+        # func_identifier and sizeof_member are here because they were detected on a
+        # test machine but it is unclear since when they are supported
         list(APPEND _expected_features
              CXXFeatures_auto_FOUND
              CXXFeatures_decltype_FOUND
              CXXFeatures_delegating_constructors_FOUND
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_sizeof_member_FOUND
              CXXFeatures_static_assert_FOUND
              CXXFeatures_variadic_templates_FOUND)
     endif ()
