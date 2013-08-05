@@ -326,6 +326,12 @@ set(CMAKE_SYSTEM_APPBUNDLE_PATH
 unset(_apps_paths)
 
 include(Platform/UnixPaths)
+if(_CMAKE_OSX_SYSROOT_PATH AND EXISTS ${_CMAKE_OSX_SYSROOT_PATH}/usr/include)
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${_CMAKE_OSX_SYSROOT_PATH}/usr)
+  foreach(lang C CXX)
+    list(APPEND CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES ${_CMAKE_OSX_SYSROOT_PATH}/usr/include)
+  endforeach()
+endif()
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH
   /sw        # Fink
   /opt/local # MacPorts
