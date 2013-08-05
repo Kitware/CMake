@@ -920,7 +920,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
 
   this->OutputTargetRules(fout, configName, target, libName);
-  this->OutputBuildTool(fout, configName, target, targetOptions.IsDebug());
+  this->OutputBuildTool(fout, configName, target, targetOptions);
   fout << "\t\t</Configuration>\n";
 }
 
@@ -941,9 +941,7 @@ cmLocalVisualStudio7Generator
 }
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
-                                                    const char* configName,
-                                                    cmTarget &target,
-                                                    bool isDebug)
+  const char* configName, cmTarget &target, const Options& targetOptions)
 {
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
@@ -1111,7 +1109,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     temp += targetNamePDB;
     fout << "\t\t\t\tProgramDatabaseFile=\"" <<
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
-    if(isDebug)
+    if(targetOptions.IsDebug())
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
@@ -1209,7 +1207,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t\tProgramDatabaseFile=\""
          << path << "/" << targetNamePDB
          << "\"\n";
-    if(isDebug)
+    if(targetOptions.IsDebug())
       {
       fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
       }
@@ -1223,9 +1221,14 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
         {
         fout << "\t\t\t\tSubSystem=\"8\"\n";
         }
-      fout << "\t\t\t\tEntryPointSymbol=\""
-           << (isWin32Executable ? "WinMainCRTStartup" : "mainACRTStartup")
-           << "\"\n";
+
+      if(!linkOptions.GetFlag("EntryPointSymbol"))
+        {
+        const char* entryPointSymbol = targetOptions.UsingUnicode() ?
+          (isWin32Executable ? "wWinMainCRTStartup" : "mainWCRTStartup") :
+          (isWin32Executable ? "WinMainCRTStartup" : "mainACRTStartup");
+        fout << "\t\t\t\tEntryPointSymbol=\"" << entryPointSymbol << "\"\n";
+        }
       }
     else if ( this->FortranProject )
       {
