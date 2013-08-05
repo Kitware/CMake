@@ -90,7 +90,7 @@ private:
   void OutputTargetRules(std::ostream& fout, const char* configName,
                          cmTarget &target, const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
-                       cmTarget& t, bool debug);
+                       cmTarget& t, const Options& targetOptions);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmTarget& target);
