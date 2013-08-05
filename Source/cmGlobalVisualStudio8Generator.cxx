@@ -113,20 +113,6 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
 }
 
 //----------------------------------------------------------------------------
-const char* cmGlobalVisualStudio8Generator::GetPlatformName() const
-{
-  if (!this->PlatformName.empty())
-    {
-    return this->PlatformName.c_str();
-    }
-  if (this->ArchitectureId == "X86")
-    {
-    return "Win32";
-    }
-  return this->ArchitectureId.c_str();
-}
-
-//----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {
@@ -142,7 +128,6 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudio71Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
 
   if(this->TargetsWindowsCE())
   {

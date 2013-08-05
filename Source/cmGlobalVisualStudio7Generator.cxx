@@ -144,6 +144,27 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
   return lg;
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
+}
+
+//----------------------------------------------------------------------------
+const char* cmGlobalVisualStudio7Generator::GetPlatformName() const
+{
+  if (!this->PlatformName.empty())
+    {
+    return this->PlatformName.c_str();
+    }
+  if (this->ArchitectureId == "X86")
+    {
+    return "Win32";
+    }
+  return this->ArchitectureId.c_str();
+}
+
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
 {
   // process the configurations
@@ -601,20 +622,20 @@ void cmGlobalVisualStudio7Generator
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
+  const char* platformName =
+    platformMapping ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
-         << ".ActiveCfg = " << *i << "|"
-         << (platformMapping ? platformMapping : "Win32") << "\n";
+         << ".ActiveCfg = " << *i << "|" << platformName << "\n";
       std::set<std::string>::const_iterator
         ci = configsPartOfDefaultBuild.find(*i);
       if(!(ci == configsPartOfDefaultBuild.end()))
       {
       fout << "\t\t{" << guid << "}." << *i
-           << ".Build.0 = " << *i << "|"
-           << (platformMapping ? platformMapping : "Win32") << "\n";
+           << ".Build.0 = " << *i << "|" << platformName << "\n";
       }
     }
 }
