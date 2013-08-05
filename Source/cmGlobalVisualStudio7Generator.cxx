@@ -17,9 +17,16 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator()
+cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
+  const char* platformName)
 {
   this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
+
+  if (!platformName)
+    {
+    platformName = "Win32";
+    }
+  this->PlatformName = platformName;
 }
 
 
@@ -142,6 +149,13 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
+{
+  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
 }
 
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
@@ -601,20 +615,20 @@ void cmGlobalVisualStudio7Generator
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
+  const char* platformName =
+    platformMapping ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
-         << ".ActiveCfg = " << *i << "|"
-         << (platformMapping ? platformMapping : "Win32") << "\n";
+         << ".ActiveCfg = " << *i << "|" << platformName << "\n";
       std::set<std::string>::const_iterator
         ci = configsPartOfDefaultBuild.find(*i);
       if(!(ci == configsPartOfDefaultBuild.end()))
       {
       fout << "\t\t{" << guid << "}." << *i
-           << ".Build.0 = " << *i << "|"
-           << (platformMapping ? platformMapping : "Win32") << "\n";
+           << ".Build.0 = " << *i << "|" << platformName << "\n";
       }
     }
 }
