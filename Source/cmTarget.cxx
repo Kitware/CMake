@@ -969,6 +969,12 @@ void cmTarget::DefineProperties(cmake *cm)
      "This is the configuration-specific version of OUTPUT_NAME.");
 
   cm->DefineProperty
+    ("ALIASED_TARGET", cmProperty::TARGET,
+     "Name of target aliased by this target.",
+     "If this is an ALIAS target, this property contains the name of the "
+     "target aliased.");
+
+  cm->DefineProperty
     ("<CONFIG>_OUTPUT_NAME", cmProperty::TARGET,
      "Old per-configuration target file base name.",
      "This is a configuration-specific version of OUTPUT_NAME.  "
