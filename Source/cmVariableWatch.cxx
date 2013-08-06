@@ -52,7 +52,7 @@ cmVariableWatch::~cmVariableWatch()
     }
 }
 
-void cmVariableWatch::AddWatch(const std::string& variable,
+bool cmVariableWatch::AddWatch(const std::string& variable,
                                WatchMethod method, void* client_data /*=0*/,
                                DeleteData delete_data /*=0*/)
 {
@@ -69,14 +69,16 @@ void cmVariableWatch::AddWatch(const std::string& variable,
          client_data && client_data == pair->ClientData)
       {
       // Callback already exists
-      return;
+      return false;
       }
     }
   vp->push_back(p);
+  return true;
 }
 
 void cmVariableWatch::RemoveWatch(const std::string& variable,
-                                  WatchMethod method)
+                                  WatchMethod method,
+                                  void* client_data /*=0*/)
 {
   if ( !this->WatchMap.count(variable) )
     {
@@ -86,7 +88,10 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
   cmVariableWatch::VectorOfPairs::iterator it;
   for ( it = vp->begin(); it != vp->end(); ++it )
     {
-    if ( (*it)->Method == method )
+    if ( (*it)->Method == method &&
+         // If client_data is NULL, we want to disconnect all watches against
+         // the given method; otherwise match ClientData as well.
+         (!client_data || (client_data == (*it)->ClientData)))
       {
       vp->erase(it);
       return;
