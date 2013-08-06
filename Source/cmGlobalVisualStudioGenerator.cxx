@@ -21,7 +21,6 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
-  this->ArchitectureId = "X86";
   this->AdditionalPlatformDefinition = NULL;
 }
 
@@ -499,9 +498,6 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  mf->AddDefinition("MSVC_C_ARCHITECTURE_ID", this->ArchitectureId.c_str());
-  mf->AddDefinition("MSVC_CXX_ARCHITECTURE_ID", this->ArchitectureId.c_str());
-
   if(this->AdditionalPlatformDefinition)
     {
     mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");

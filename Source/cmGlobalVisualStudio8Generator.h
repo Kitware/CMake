@@ -24,13 +24,11 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator(const char* name,
-    const char* architectureId, const char* additionalPlatformDefinition);
+    const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
   virtual const char* GetName() const {return this->Name.c_str();}
-
-  const char* GetPlatformName() const;
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -87,7 +85,6 @@ protected:
                                    const char* path, cmTarget &t);
 
   std::string Name;
-  std::string PlatformName;
   std::string WindowsCEVersion;
 
 private:

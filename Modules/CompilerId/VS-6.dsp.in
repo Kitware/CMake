@@ -1,7 +1,7 @@
 # Microsoft Developer Studio Project File - Name="CompilerId@id_lang@" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 
-# TARGTYPE "Win32 (@id_machine_6@) Application" 0x0101
+# TARGTYPE "Win32 (x86) Application" 0x0101
 
 CFG=CompilerId@id_lang@ - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
@@ -16,7 +16,7 @@ CFG=CompilerId@id_lang@ - Win32 Debug
 !MESSAGE
 !MESSAGE Possible choices for configuration are:
 !MESSAGE
-!MESSAGE "CompilerId@id_lang@ - Win32 Debug" (based on "Win32 (@id_machine_6@) Application")
+!MESSAGE "CompilerId@id_lang@ - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE
 
 # Begin Project
@@ -29,7 +29,7 @@ CPP=cl.exe
 # PROP Target_Dir ""
 # ADD CPP /nologo /MDd /c
 LINK32=link.exe
-# ADD LINK32 /nologo /version:0.0 /subsystem:console /machine:@id_machine_6@ /out:"CompilerId@id_lang@.exe" /IGNORE:4089
+# ADD LINK32 /nologo /version:0.0 /subsystem:console /machine:x86 /out:"CompilerId@id_lang@.exe" /IGNORE:4089
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=for %%i in (@id_cl@) do @echo CMAKE_@id_lang@_COMPILER=%%~$PATH:i
