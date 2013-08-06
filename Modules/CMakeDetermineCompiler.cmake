@@ -71,7 +71,7 @@ macro(_cmake_find_compiler lang)
   unset(_languages)
 
   # Look for a make tool provided by Xcode
-  if(NOT CMAKE_${lang}_COMPILER AND CMAKE_HOST_APPLE)
+  if(CMAKE_${lang}_COMPILER STREQUAL "CMAKE_${lang}_COMPILER-NOTFOUND" AND CMAKE_HOST_APPLE)
     foreach(comp ${CMAKE_${lang}_COMPILER_LIST})
       execute_process(COMMAND xcrun --find ${comp}
         OUTPUT_VARIABLE _xcrun_out OUTPUT_STRIP_TRAILING_WHITESPACE
