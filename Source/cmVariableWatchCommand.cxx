@@ -80,7 +80,7 @@ static void cmVariableWatchCommandVariableAccessed(
     {
     cmOStringStream msg;
     msg << "Variable \"" << variable.c_str() << "\" was accessed using "
-        << accessString << " with value \"" << newValue << "\".";
+        << accessString << " with value \"" << (newValue?newValue:"") << "\".";
     makefile->IssueMessage(cmake::LOG, msg.str());
     }
 
