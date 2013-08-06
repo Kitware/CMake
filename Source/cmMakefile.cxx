@@ -150,6 +150,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Initialize();
   this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
+  this->OutputToSource = mf.OutputToSource;
 }
 
 //----------------------------------------------------------------------------
@@ -1010,8 +1011,29 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
+    this->UpdateOutputToSourceMap(outputs, file);
     }
   return file;
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
+                                    cmSourceFile* source)
+{
+  for(std::vector<std::string>::const_iterator o = outputs.begin();
+      o != outputs.end(); ++o)
+    {
+    this->UpdateOutputToSourceMap(*o, source);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::UpdateOutputToSourceMap(std::string const& output,
+                                    cmSourceFile* source)
+{
+  this->OutputToSource[output] = source;
 }
 
 //----------------------------------------------------------------------------
@@ -1994,7 +2016,7 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
   return &it->second;
 }
 
-cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+cmSourceFile *cmMakefile::LinearGetSourceFileWithOutput(const char *cname)
 {
   std::string name = cname;
   std::string out;
@@ -2027,6 +2049,25 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     }
 
   // otherwise return NULL
+  return 0;
+}
+
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+{
+  std::string name = cname;
+
+  // If the queried path is not absolute we use the backward compatible
+  // linear-time search for an output with a matching suffix.
+  if(!cmSystemTools::FileIsFullPath(cname))
+    {
+    return LinearGetSourceFileWithOutput(cname);
+    }
+  // Otherwise we use an efficient lookup map.
+  OutputToSourceMap::iterator o = this->OutputToSource.find(name);
+  if (o != this->OutputToSource.end())
+    {
+    return (*o).second;
+    }
   return 0;
 }
 
