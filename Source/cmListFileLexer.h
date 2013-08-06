@@ -15,6 +15,7 @@
 typedef enum cmListFileLexer_Type_e
 {
   cmListFileLexer_Token_None,
+  cmListFileLexer_Token_Space,
   cmListFileLexer_Token_Newline,
   cmListFileLexer_Token_Identifier,
   cmListFileLexer_Token_ParenLeft,
