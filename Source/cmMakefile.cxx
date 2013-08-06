@@ -2867,6 +2867,12 @@ bool cmMakefile::ExpandArguments(
   outArgs.reserve(inArgs.size());
   for(i = inArgs.begin(); i != inArgs.end(); ++i)
     {
+    // No expansion in a bracket argument.
+    if(i->Delim == cmListFileArgument::Bracket)
+      {
+      outArgs.push_back(i->Value);
+      continue;
+      }
     // Expand the variables in the argument.
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false,

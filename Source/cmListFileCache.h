@@ -28,7 +28,8 @@ struct cmListFileArgument
   enum Delimiter
     {
     Unquoted,
-    Quoted
+    Quoted,
+    Bracket
     };
   cmListFileArgument(): Value(), Delim(Unquoted), FilePath(0), Line(0) {}
   cmListFileArgument(const cmListFileArgument& r):

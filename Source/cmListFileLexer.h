@@ -22,7 +22,10 @@ typedef enum cmListFileLexer_Type_e
   cmListFileLexer_Token_ParenRight,
   cmListFileLexer_Token_ArgumentUnquoted,
   cmListFileLexer_Token_ArgumentQuoted,
+  cmListFileLexer_Token_ArgumentBracket,
+  cmListFileLexer_Token_CommentBracket,
   cmListFileLexer_Token_BadCharacter,
+  cmListFileLexer_Token_BadBracket,
   cmListFileLexer_Token_BadString
 } cmListFileLexer_Type;
 

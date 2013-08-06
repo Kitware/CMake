@@ -42,6 +42,8 @@ Modify cmListFileLexer.c:
 struct cmListFileLexer_s
 {
   cmListFileLexer_Token token;
+  int bracket;
+  int comment;
   int line;
   int column;
   int size;
@@ -75,22 +77,57 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %option noyywrap
 %pointer
 %x STRING
+%x BRACKET
+%x BRACKETEND
+%x COMMENT
 
 MAKEVAR \$\([A-Za-z0-9_]*\)
-UNQUOTED ([^ \t\r\n\(\)#\\\"]|\\.)
-LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t])*\"
+UNQUOTED ([^ \t\r\n\(\)#\\\"[=]|\\.)
+LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 
 %%
 
-\n {
+<INITIAL,COMMENT>\n {
   lexer->token.type = cmListFileLexer_Token_Newline;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   ++lexer->line;
   lexer->column = 1;
+  BEGIN(INITIAL);
   return 1;
 }
 
-#.* {
+#?\[=*\[\n? {
+  const char* bracket = yytext;
+  lexer->comment = yytext[0] == '#';
+  if(lexer->comment)
+    {
+    lexer->token.type = cmListFileLexer_Token_CommentBracket;
+    bracket += 1;
+    }
+  else
+    {
+    lexer->token.type = cmListFileLexer_Token_ArgumentBracket;
+    }
+  cmListFileLexerSetToken(lexer, "", 0);
+  lexer->bracket = (int)(strchr(bracket+1, '[') - bracket);
+  if(yytext[yyleng-1] == '\n')
+    {
+    ++lexer->line;
+    lexer->column = 1;
+    }
+  else
+    {
+    lexer->column += yyleng;
+    }
+  BEGIN(BRACKET);
+}
+
+# {
+  lexer->column += yyleng;
+  BEGIN(COMMENT);
+}
+
+<COMMENT>.* {
   lexer->column += yyleng;
 }
 
@@ -115,14 +152,57 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t])*\"
   return 1;
 }
 
-({UNQUOTED})({UNQUOTED})* {
+<BRACKET>\]=* {
+  /* Handle ]]====]=======]*/
+  cmListFileLexerAppend(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+  if(yyleng == lexer->bracket)
+    {
+    BEGIN(BRACKETEND);
+    }
+}
+
+<BRACKETEND>\] {
+  lexer->column += yyleng;
+  /* Erase the partial bracket from the token.  */
+  lexer->token.length -= lexer->bracket;
+  lexer->token.text[lexer->token.length] = 0;
+  BEGIN(INITIAL);
+  return 1;
+}
+
+<BRACKET>([^]\n])+ {
+  cmListFileLexerAppend(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+}
+
+<BRACKET,BRACKETEND>\n {
+  cmListFileLexerAppend(lexer, yytext, yyleng);
+  ++lexer->line;
+  lexer->column = 1;
+  BEGIN(BRACKET);
+}
+
+<BRACKET,BRACKETEND>. {
+  cmListFileLexerAppend(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+  BEGIN(BRACKET);
+}
+
+<BRACKET,BRACKETEND><<EOF>> {
+  lexer->token.type = cmListFileLexer_Token_BadBracket;
+  BEGIN(INITIAL);
+  return 1;
+}
+
+({UNQUOTED}|=|\[=*{UNQUOTED})({UNQUOTED}|[[=])* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
   return 1;
 }
 
-({MAKEVAR}|{UNQUOTED})({LEGACY})* {
+({MAKEVAR}|{UNQUOTED}|=|\[=*{LEGACY})({LEGACY}|[[=])* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -513,7 +593,10 @@ const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
     case cmListFileLexer_Token_ParenRight: return "right paren";
     case cmListFileLexer_Token_ArgumentUnquoted: return "unquoted argument";
     case cmListFileLexer_Token_ArgumentQuoted: return "quoted argument";
+    case cmListFileLexer_Token_ArgumentBracket: return "bracket argument";
+    case cmListFileLexer_Token_CommentBracket: return "bracket comment";
     case cmListFileLexer_Token_BadCharacter: return "bad character";
+    case cmListFileLexer_Token_BadBracket: return "unterminated bracket";
     case cmListFileLexer_Token_BadString: return "unterminated string";
     }
   return "unknown token";
