@@ -14,63 +14,27 @@
 #include "cmVariableWatch.h"
 
 //----------------------------------------------------------------------------
+struct cmVariableWatchCallbackData
+{
+  bool InCallback;
+  std::string Command;
+};
+
+//----------------------------------------------------------------------------
 static void cmVariableWatchCommandVariableAccessed(
   const std::string& variable, int access_type, void* client_data,
   const char* newValue, const cmMakefile* mf)
 {
-  cmVariableWatchCommand* command
-    = static_cast<cmVariableWatchCommand*>(client_data);
-  command->VariableAccessed(variable, access_type, newValue, mf);
-}
+  cmVariableWatchCallbackData* data
+    = static_cast<cmVariableWatchCallbackData*>(client_data);
 
-//----------------------------------------------------------------------------
-cmVariableWatchCommand::cmVariableWatchCommand()
-{
-  this->InCallback = false;
-}
-
-//----------------------------------------------------------------------------
-bool cmVariableWatchCommand
-::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
-{
-  if ( args.size() < 1 )
-    {
-    this->SetError("must be called with at least one argument.");
-    return false;
-    }
-  std::string variable = args[0];
-  if ( args.size() > 1 )
-    {
-    std::string command = args[1];
-    this->Handlers[variable].Commands.push_back(args[1]);
-    }
-  if ( variable == "CMAKE_CURRENT_LIST_FILE" )
-    {
-    cmOStringStream ostr;
-    ostr << "cannot be set on the variable: " << variable.c_str();
-    this->SetError(ostr.str().c_str());
-    return false;
-    }
-
-  this->Makefile->GetCMakeInstance()->GetVariableWatch()->AddWatch(
-    variable, cmVariableWatchCommandVariableAccessed, this);
-
-  return true;
-}
-
-//----------------------------------------------------------------------------
-void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
-  int access_type, const char* newValue, const cmMakefile* mf)
-{
-  if ( this->InCallback )
+  if ( data->InCallback )
     {
     return;
     }
-  this->InCallback = true;
+  data->InCallback = true;
 
   cmListFileFunction newLFF;
-  cmVariableWatchCommandHandler *handler = &this->Handlers[variable];
-  cmVariableWatchCommandHandler::VectorOfCommands::iterator it;
   cmListFileArgument arg;
   bool processed = false;
   const char* accessString = cmVariableWatch::GetAccessAsString(access_type);
@@ -80,10 +44,8 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
   cmMakefile* makefile = const_cast<cmMakefile*>(mf);
 
   std::string stack = makefile->GetProperty("LISTFILE_STACK");
-  for ( it = handler->Commands.begin(); it != handler->Commands.end();
-    ++ it )
+  if ( !data->Command.empty() )
     {
-    std::string command = *it;
     newLFF.Arguments.clear();
     newLFF.Arguments.push_back(
       cmListFileArgument(variable, cmListFileArgument::Quoted,
@@ -100,7 +62,7 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
     newLFF.Arguments.push_back(
       cmListFileArgument(stack, cmListFileArgument::Quoted,
                          "unknown", 9999));
-    newLFF.Name = command;
+    newLFF.Name = data->Command;
     newLFF.FilePath = "Some weird path";
     newLFF.Line = 9999;
     cmExecutionStatus status;
@@ -111,10 +73,10 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
       cmOStringStream error;
       error << "Error in cmake code at\n"
         << arg.FilePath << ":" << arg.Line << ":\n"
-        << "A command failed during the invocation of callback\""
-        << command << "\".";
+        << "A command failed during the invocation of callback \""
+        << data->Command << "\".";
       cmSystemTools::Error(error.str().c_str());
-      this->InCallback = false;
+      data->InCallback = false;
       return;
       }
     processed = true;
@@ -123,8 +85,75 @@ void cmVariableWatchCommand::VariableAccessed(const std::string& variable,
     {
     cmOStringStream msg;
     msg << "Variable \"" << variable.c_str() << "\" was accessed using "
-        << accessString << " with value \"" << newValue << "\".";
+        << accessString << " with value \"" << (newValue?newValue:"") << "\".";
     makefile->IssueMessage(cmake::LOG, msg.str());
     }
-  this->InCallback = false;
+
+  data->InCallback = false;
+}
+
+//----------------------------------------------------------------------------
+static void deleteVariableWatchCallbackData(void* client_data)
+{
+  cmVariableWatchCallbackData* data
+    = static_cast<cmVariableWatchCallbackData*>(client_data);
+  delete data;
+}
+
+//----------------------------------------------------------------------------
+cmVariableWatchCommand::cmVariableWatchCommand()
+{
+}
+
+//----------------------------------------------------------------------------
+cmVariableWatchCommand::~cmVariableWatchCommand()
+{
+  std::set<std::string>::const_iterator it;
+  for ( it = this->WatchedVariables.begin();
+        it != this->WatchedVariables.end();
+        ++it )
+    {
+    this->Makefile->GetCMakeInstance()->GetVariableWatch()->RemoveWatch(
+      *it, cmVariableWatchCommandVariableAccessed);
+    }
+}
+
+//----------------------------------------------------------------------------
+bool cmVariableWatchCommand
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
+{
+  if ( args.size() < 1 )
+    {
+    this->SetError("must be called with at least one argument.");
+    return false;
+    }
+  std::string variable = args[0];
+  std::string command;
+  if ( args.size() > 1 )
+    {
+    command = args[1];
+    }
+  if ( variable == "CMAKE_CURRENT_LIST_FILE" )
+    {
+    cmOStringStream ostr;
+    ostr << "cannot be set on the variable: " << variable.c_str();
+    this->SetError(ostr.str().c_str());
+    return false;
+    }
+
+  cmVariableWatchCallbackData* data = new cmVariableWatchCallbackData;
+
+  data->InCallback = false;
+  data->Command = command;
+
+  this->WatchedVariables.insert(variable);
+  if ( !this->Makefile->GetCMakeInstance()->GetVariableWatch()->AddWatch(
+          variable, cmVariableWatchCommandVariableAccessed,
+          data, deleteVariableWatchCallbackData) )
+    {
+    deleteVariableWatchCallbackData(data);
+    return false;
+    }
+
+  return true;
 }
