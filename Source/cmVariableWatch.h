@@ -36,7 +36,8 @@ public:
    */
   bool AddWatch(const std::string& variable, WatchMethod method,
                 void* client_data=0, DeleteData delete_data=0);
-  void RemoveWatch(const std::string& variable, WatchMethod method);
+  void RemoveWatch(const std::string& variable, WatchMethod method,
+                   void* client_data=0);
 
   /**
    * This method is called when variable is accessed

@@ -77,13 +77,17 @@ bool cmVariableWatch::AddWatch(const std::string& variable,
 }
 
 void cmVariableWatch::RemoveWatch(const std::string& variable,
-                                  WatchMethod method)
+                                  WatchMethod method,
+                                  void* client_data /*=0*/)
 {
   cmVariableWatch::VectorOfPairs* vp = &this->WatchMap[variable];
   cmVariableWatch::VectorOfPairs::iterator it;
   for ( it = vp->begin(); it != vp->end(); ++it )
     {
-    if ( (*it)->Method == method )
+    if ( (*it)->Method == method &&
+         // If client_data is NULL, we want to disconnect all watches against
+         // the given method; otherwise match ClientData as well.
+         (!client_data || (client_data == (*it)->ClientData)))
       {
       delete *it;
       vp->erase(it);
