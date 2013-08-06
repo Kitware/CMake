@@ -2657,6 +2657,11 @@ void cmTarget::FinalizeSystemIncludeDirectories()
       end = this->Internal->LinkInterfacePropertyEntries.end();
       it != end; ++it)
     {
+    if (!cmGeneratorExpression::IsValidTargetName(it->Value)
+        && cmGeneratorExpression::Find(it->Value) == std::string::npos)
+      {
+      continue;
+      }
     {
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
@@ -3033,15 +3038,11 @@ void cmTarget::SetProperty(const char* prop, const char* value)
   if (strcmp(prop, "LINK_LIBRARIES") == 0)
     {
     this->Internal->LinkInterfacePropertyEntries.clear();
-    if (cmGeneratorExpression::IsValidTargetName(value)
-        || cmGeneratorExpression::Find(value) != std::string::npos)
-      {
-      cmListFileBacktrace lfbt;
-      this->Makefile->GetBacktrace(lfbt);
-      cmValueWithOrigin entry(value, lfbt);
-      this->Internal->LinkInterfacePropertyEntries.push_back(entry);
-      }
-    // Fall through
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmValueWithOrigin entry(value, lfbt);
+    this->Internal->LinkInterfacePropertyEntries.push_back(entry);
+    return;
     }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
   this->MaybeInvalidatePropertyCache(prop);
@@ -3099,15 +3100,11 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     }
   if (strcmp(prop, "LINK_LIBRARIES") == 0)
     {
-    if (cmGeneratorExpression::IsValidTargetName(value)
-        || cmGeneratorExpression::Find(value) != std::string::npos)
-      {
-      cmListFileBacktrace lfbt;
-      this->Makefile->GetBacktrace(lfbt);
-      cmValueWithOrigin entry(value, lfbt);
-      this->Internal->LinkInterfacePropertyEntries.push_back(entry);
-      }
-    // Fall through
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmValueWithOrigin entry(value, lfbt);
+    this->Internal->LinkInterfacePropertyEntries.push_back(entry);
+    return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
   this->MaybeInvalidatePropertyCache(prop);
@@ -3387,6 +3384,11 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
         end = this->Internal->LinkInterfacePropertyEntries.end();
         it != end; ++it)
       {
+      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
+          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
+        {
+        continue;
+        }
       {
       cmGeneratorExpression ge(lfbt);
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
@@ -3585,6 +3587,11 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
         end = this->Internal->LinkInterfacePropertyEntries.end();
         it != end; ++it)
       {
+      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
+          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
+        {
+        continue;
+        }
       {
       cmGeneratorExpression ge(lfbt);
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
@@ -3693,6 +3700,11 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
         end = this->Internal->LinkInterfacePropertyEntries.end();
         it != end; ++it)
       {
+      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
+          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
+        {
+        continue;
+        }
       {
       cmGeneratorExpression ge(lfbt);
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
@@ -4177,6 +4189,22 @@ const char *cmTarget::GetProperty(const char* prop,
       {
       output += sep;
       output += (*it)->ge->GetInput();
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  if(strcmp(prop,"LINK_LIBRARIES") == 0)
+    {
+    static std::string output;
+    output = "";
+    std::string sep;
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->Internal->LinkInterfacePropertyEntries.begin(),
+        end = this->Internal->LinkInterfacePropertyEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += it->Value;
       sep = ";";
       }
     return output.c_str();
