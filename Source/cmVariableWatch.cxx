@@ -65,10 +65,10 @@ void cmVariableWatch::AddWatch(const std::string& variable,
   for ( cc = 0; cc < vp->size(); cc ++ )
     {
     cmVariableWatch::Pair* pair = (*vp)[cc];
-    if ( pair->Method == method )
+    if ( pair->Method == method &&
+         client_data && client_data == pair->ClientData)
       {
-      delete pair;
-      (*vp)[cc] = p;
+      // Callback already exists
       return;
       }
     }
