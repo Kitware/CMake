@@ -100,13 +100,13 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
     }
 }
 
-bool cmVisualStudioGeneratorOptions::IsDebug()
+bool cmVisualStudioGeneratorOptions::IsDebug() const
 {
   return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
 }
 
 //----------------------------------------------------------------------------
-bool cmVisualStudioGeneratorOptions::UsingUnicode()
+bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for the a _UNICODE definition.
   for(std::vector<std::string>::const_iterator di = this->Defines.begin();
@@ -120,7 +120,7 @@ bool cmVisualStudioGeneratorOptions::UsingUnicode()
   return false;
 }
 //----------------------------------------------------------------------------
-bool cmVisualStudioGeneratorOptions::UsingSBCS()
+bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
   // Look for the a _SBCS definition.
   for(std::vector<std::string>::const_iterator di = this->Defines.begin();
