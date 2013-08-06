@@ -343,6 +343,27 @@ void cmListFileParser::AddArgument(cmListFileLexer_Token* token,
 {
   cmListFileArgument a(token->text, delim, this->FileName, token->line);
   this->Function.Arguments.push_back(a);
+  if(delim == cmListFileArgument::Unquoted)
+    {
+    // Warn about a future behavior change.
+    const char* c = a.Value.c_str();
+    if(*c++ == '[')
+      {
+      while(*c == '=')
+        { ++c; }
+      if(*c == '[')
+        {
+        cmOStringStream m;
+        m << "Syntax Warning in cmake code at\n"
+          << "  " << this->FileName << ":" << token->line << ":"
+          << token->column << "\n"
+          << "A future version of CMake may treat unquoted argument:\n"
+          << "  " << a.Value << "\n"
+          << "as an opening long bracket.  Double-quote the argument.";
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str().c_str());
+        }
+      }
+    }
   if(this->Separation == SeparationOkay)
     {
     return;
