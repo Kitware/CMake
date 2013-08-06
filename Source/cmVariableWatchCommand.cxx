@@ -101,6 +101,18 @@ cmVariableWatchCommand::cmVariableWatchCommand()
 }
 
 //----------------------------------------------------------------------------
+cmVariableWatchCommand::~cmVariableWatchCommand()
+{
+  std::set<std::string>::const_iterator it;
+  for ( it = this->WatchedVariables.begin(); it != this->WatchedVariables.end();
+        ++it )
+    {
+    this->Makefile->GetCMakeInstance()->GetVariableWatch()->RemoveWatch(
+      *it, cmVariableWatchCommandVariableAccessed);
+    }
+}
+
+//----------------------------------------------------------------------------
 bool cmVariableWatchCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
@@ -128,6 +140,7 @@ bool cmVariableWatchCommand
   data->InCallback = false;
   data->Command = command;
 
+  this->WatchedVariables.insert(variable);
   if ( !this->Makefile->GetCMakeInstance()->GetVariableWatch()->AddWatch(
           variable, cmVariableWatchCommandVariableAccessed,
           data, deleteVariableWatchCallbackData) )

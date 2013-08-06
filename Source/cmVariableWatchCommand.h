@@ -32,6 +32,9 @@ public:
   //! Default constructor
   cmVariableWatchCommand();
 
+  //! Destructor.
+  ~cmVariableWatchCommand();
+
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
@@ -75,6 +78,9 @@ public:
     }
 
   cmTypeMacro(cmVariableWatchCommand, cmCommand);
+
+protected:
+  std::set<std::string> WatchedVariables;
 };
 
 
