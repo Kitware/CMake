@@ -104,7 +104,8 @@ cmVariableWatchCommand::cmVariableWatchCommand()
 cmVariableWatchCommand::~cmVariableWatchCommand()
 {
   std::set<std::string>::const_iterator it;
-  for ( it = this->WatchedVariables.begin(); it != this->WatchedVariables.end();
+  for ( it = this->WatchedVariables.begin();
+        it != this->WatchedVariables.end();
         ++it )
     {
     this->Makefile->GetCMakeInstance()->GetVariableWatch()->RemoveWatch(
