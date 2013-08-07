@@ -11,6 +11,9 @@
 #=============================================================================
 
 project(QtDialog)
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW) # Drop when CMake >= 2.8.11 required
+endif()
 find_package(Qt5Widgets QUIET)
 if (Qt5Widgets_FOUND)
   include_directories(${Qt5Widgets_INCLUDE_DIRS})
@@ -29,6 +32,11 @@ if (Qt5Widgets_FOUND)
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+
+  if(WIN32 AND TARGET Qt5::Core)
+    get_property(_Qt5_Core_LOCATION TARGET Qt5::Core PROPERTY LOCATION)
+    get_filename_component(Qt_BIN_DIR "${_Qt5_Core_LOCATION}" PATH)
+  endif()
 else()
   set(QT_MIN_VERSION "4.4.0")
   find_package(Qt4 REQUIRED)
@@ -38,6 +46,13 @@ else()
   endif()
 
   include(${QT_USE_FILE})
+
+  if(WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
+    get_filename_component(_Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
+    if(EXISTS "${_Qt_BIN_DIR}/QtCore4.dll")
+      set(Qt_BIN_DIR ${_Qt_BIN_DIR})
+    endif()
+  endif()
 endif()
 
 set(SRCS
@@ -91,6 +106,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
 target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
+if(Qt_BIN_DIR)
+  set_property(TARGET cmake-gui PROPERTY Qt_BIN_DIR ${Qt_BIN_DIR})
+endif()
 
 if(APPLE)
   set_target_properties(cmake-gui PROPERTIES
