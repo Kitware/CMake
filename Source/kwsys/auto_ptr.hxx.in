@@ -31,6 +31,17 @@
 # define @KWSYS_NAMESPACE@_AUTO_PTR_CAST(a) a
 #endif
 
+// In C++11, clang will warn about using dynamic exception specifications
+// as they are deprecated.  But as this class is trying to faithfully
+// mimic std::auto_ptr, we want to keep the 'throw()' decorations below.
+// So we suppress the warning.
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wdeprecated")
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated"
+# endif
+#endif
+
 namespace @KWSYS_NAMESPACE@
 {
 
@@ -197,5 +208,12 @@ public:
 };
 
 } // namespace @KWSYS_NAMESPACE@
+
+// Undo warning suppression.
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wdeprecated")
+#  pragma clang diagnostic pop
+# endif
+#endif
 
 #endif

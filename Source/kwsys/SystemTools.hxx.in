@@ -716,6 +716,13 @@ public:
   enum KeyWOW64 { KeyWOW64_Default, KeyWOW64_32, KeyWOW64_64 };
 
   /**
+   * Get a list of subkeys.
+   */
+  static bool GetRegistrySubKeys(const char *key,
+                                 kwsys_stl::vector<kwsys_stl::string>& subkeys,
+                                 KeyWOW64 view = KeyWOW64_Default);
+
+  /**
    * Read a registry value
    */
   static bool ReadRegistryValue(const char *key, kwsys_stl::string &value,
