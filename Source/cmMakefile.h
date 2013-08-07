@@ -29,6 +29,9 @@
 
 #include <cmsys/auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmsys/hash_map.hxx>
+#endif
 
 class cmFunctionBlocker;
 class cmCommand;
@@ -1039,6 +1042,26 @@ private:
 
   bool GeneratingBuildSystem;
 
+  /**
+   * Old version of GetSourceFileWithOutput(const char*) kept for
+   * backward-compatibility. It implements a linear search and support
+   * relative file paths. It is used as a fall back by
+   * GetSourceFileWithOutput(const char*).
+   */
+  cmSourceFile *LinearGetSourceFileWithOutput(const char *cname);
+
+  // A map for fast output to input look up.
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  typedef cmsys::hash_map<std::string, cmSourceFile*> OutputToSourceMap;
+#else
+  typedef std::map<std::string, cmSourceFile*> OutputToSourceMap;
+#endif
+  OutputToSourceMap OutputToSource;
+
+  void UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
+                               cmSourceFile* source);
+  void UpdateOutputToSourceMap(std::string const& output,
+                               cmSourceFile* source);
 };
 
 //----------------------------------------------------------------------------

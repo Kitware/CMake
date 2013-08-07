@@ -146,11 +146,10 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force += "/";
       force += tgt.GetName();
       force += "_force";
-      this->Makefile->AddCustomCommandToOutput(force.c_str(), no_depends,
-                                               no_main_dependency,
-                                               force_commands, " ", 0, true);
       if(cmSourceFile* file =
-         this->Makefile->GetSourceFileWithOutput(force.c_str()))
+         this->Makefile->AddCustomCommandToOutput(
+           force.c_str(), no_depends, no_main_dependency,
+           force_commands, " ", 0, true))
         {
         tgt.AddSourceFile(file);
         }
