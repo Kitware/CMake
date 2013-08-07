@@ -93,6 +93,7 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
          // the given method; otherwise match ClientData as well.
          (!client_data || (client_data == (*it)->ClientData)))
       {
+      delete *it;
       vp->erase(it);
       return;
       }
