@@ -117,7 +117,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
         i != pm.end(); ++i)
       {
       os << " " << i->first
-         << " " << lg->EscapeForCMake(i->second.GetValue());
+         << " " << lg->EscapeForCMake(
+           ge.Parse(i->second.GetValue())->Evaluate(mf, config));
       }
     os << ")" << std::endl;
     }

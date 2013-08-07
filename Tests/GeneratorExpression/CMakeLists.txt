@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 2.8.8)
-project(GeneratorExpression CXX)
+project(GeneratorExpression)
+
+include(CTest)
 
 # This test is split into multiple parts as needed to avoid NMake command
 # length limits.
@@ -190,3 +192,29 @@ add_custom_target(check-part3 ALL
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM
   )
+
+#-----------------------------------------------------------------------------
+# Cover test properties with generator expressions.
+add_executable(echo echo.c)
+add_executable(pwd pwd.c)
+
+add_test(NAME echo-configuration COMMAND echo $<CONFIGURATION>)
+set_property(TEST echo-configuration PROPERTY
+  PASS_REGULAR_EXPRESSION "^$<CONFIGURATION>\n$")
+
+add_test(NAME echo-target-file COMMAND echo $<TARGET_FILE:echo>)
+set_property(TEST echo-target-file PROPERTY
+  PASS_REGULAR_EXPRESSION "/echo${CMAKE_EXECUTABLE_SUFFIX}\n$")
+
+add_test(NAME working-dir-arg
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/WorkingDirectory/$<CONFIGURATION>"
+  COMMAND pwd)
+set_property(TEST working-dir-arg PROPERTY
+  PASS_REGULAR_EXPRESSION "WorkingDirectory/$<CONFIGURATION>\n$")
+foreach(c ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE})
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/WorkingDirectory/${c}")
+endforeach()
+
+add_test(echo-old-style echo "\$<CONFIGURATION>")
+set_property(TEST echo-old-style PROPERTY
+    PASS_REGULAR_EXPRESSION "^\\$<CONFIGURATION>\n$")
