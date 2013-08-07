@@ -32,16 +32,28 @@
 #include "cmQtAutomoc.h"
 
 
-static bool containsQ_OBJECT(const std::string& text)
+static bool requiresMocing(const std::string& text, std::string &macroName)
 {
   // this simple check is much much faster than the regexp
-  if (strstr(text.c_str(), "Q_OBJECT") == NULL)
+  if (strstr(text.c_str(), "Q_OBJECT") == NULL
+      && strstr(text.c_str(), "Q_GADGET") == NULL)
     {
     return false;
     }
 
   cmsys::RegularExpression qObjectRegExp("[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]");
-  return qObjectRegExp.find(text);
+  if (qObjectRegExp.find(text))
+    {
+    macroName = "Q_OBJECT";
+    return true;
+    }
+  cmsys::RegularExpression qGadgetRegExp("[\n][ \t]*Q_GADGET[^a-zA-Z0-9_]");
+  if (qGadgetRegExp.find(text))
+    {
+    macroName = "Q_GADGET";
+    return true;
+    }
+  return false;
 }
 
 
@@ -837,7 +849,8 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
   const std::string scannedFileBasename = cmsys::SystemTools::
                                   GetFilenameWithoutLastExtension(absFilename);
-  const bool cppContainsQ_OBJECT = containsQ_OBJECT(contentsString);
+  std::string macroName;
+  const bool requiresMoc = requiresMocing(contentsString, macroName);
   bool dotMocIncluded = false;
   bool mocUnderscoreIncluded = false;
   std::string ownMocUnderscoreFile;
@@ -908,7 +921,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
       else
         {
         std::string fileToMoc = absFilename;
-        if ((basename != scannedFileBasename) || (cppContainsQ_OBJECT==false))
+        if ((basename != scannedFileBasename) || (requiresMoc==false))
           {
           std::string mocSubDir = extractSubDir(absPath, currentMoc);
           std::string headerToMoc = findMatchingHeader(
@@ -917,12 +930,12 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
             {
             // this is for KDE4 compatibility:
             fileToMoc = headerToMoc;
-            if ((cppContainsQ_OBJECT==false) &&(basename==scannedFileBasename))
+            if ((requiresMoc==false) &&(basename==scannedFileBasename))
               {
               std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
                             "includes the moc file \"" << currentMoc <<
-                            "\", but does not contain a Q_OBJECT macro. "
-                            "Running moc on "
+                            "\", but does not contain a " << macroName
+                            << " macro. Running moc on "
                         << "\"" << headerToMoc << "\" ! Include \"moc_"
                         << basename << ".cpp\" for a compatiblity with "
                            "strict mode (see CMAKE_AUTOMOC_RELAXED_MODE).\n"
@@ -965,13 +978,14 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
   // If this is the case, the moc_foo.cpp should probably be generated from
   // foo.cpp instead of foo.h, because otherwise it won't build.
   // But warn, since this is not how it is supposed to be used.
-  if ((dotMocIncluded == false) && (cppContainsQ_OBJECT == true))
+  if ((dotMocIncluded == false) && (requiresMoc == true))
     {
     if (mocUnderscoreIncluded == true)
       {
       // this is for KDE4 compatibility:
       std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
-                << "contains a Q_OBJECT macro, but does not include "
+                << "contains a " << macroName << " macro, but does not "
+                "include "
                 << "\"" << scannedFileBasename << ".moc\", but instead "
                    "includes "
                 << "\"" << ownMocUnderscoreFile  << "\". Running moc on "
@@ -986,7 +1000,8 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
       {
       // otherwise always error out since it will not compile:
       std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
-                << "contains a Q_OBJECT macro, but does not include "
+                << "contains a " << macroName << " macro, but does not "
+                "include "
                 << "\"" << scannedFileBasename << ".moc\" !\n"
                 << std::endl;
       ::exit(EXIT_FAILURE);
@@ -1094,11 +1109,13 @@ void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
   // If this is the case, the moc_foo.cpp should probably be generated from
   // foo.cpp instead of foo.h, because otherwise it won't build.
   // But warn, since this is not how it is supposed to be used.
-  if ((dotMocIncluded == false) && (containsQ_OBJECT(contentsString)))
+  std::string macroName;
+  if ((dotMocIncluded == false) && (requiresMocing(contentsString,
+                                                     macroName)))
     {
     // otherwise always error out since it will not compile:
     std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
-              << "contains a Q_OBJECT macro, but does not include "
+              << "contains a " << macroName << " macro, but does not include "
               << "\"" << scannedFileBasename << ".moc\" !\n"
               << std::endl;
     ::exit(EXIT_FAILURE);
@@ -1165,7 +1182,8 @@ void cmQtAutomoc::ParseHeaders(const std::set<std::string>& absHeaders,
 
       const std::string currentMoc = "moc_" + basename + ".cpp";
       const std::string contents = this->ReadAll(headerName);
-      if (containsQ_OBJECT(contents))
+      std::string macroName;
+      if (requiresMocing(contents, macroName))
         {
         //std::cout << "header contains Q_OBJECT macro";
         notIncludedMocs[headerName] = currentMoc;
