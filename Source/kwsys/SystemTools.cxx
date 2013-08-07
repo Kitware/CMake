@@ -695,6 +695,52 @@ void SystemTools::ReplaceString(kwsys_stl::string& source,
 #endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
+static bool SystemToolsParseRegistryKey(const char* key,
+                                        HKEY& primaryKey,
+                                        kwsys_stl::string& second,
+                                        kwsys_stl::string& valuename)
+{
+  kwsys_stl::string primary = key;
+
+  size_t start = primary.find("\\");
+  if (start == kwsys_stl::string::npos)
+    {
+    return false;
+    }
+
+  size_t valuenamepos = primary.find(";");
+  if (valuenamepos != kwsys_stl::string::npos)
+    {
+    valuename = primary.substr(valuenamepos+1);
+    }
+
+  second = primary.substr(start+1, valuenamepos-start-1);
+  primary = primary.substr(0, start);
+
+  if (primary == "HKEY_CURRENT_USER")
+    {
+    primaryKey = HKEY_CURRENT_USER;
+    }
+  if (primary == "HKEY_CURRENT_CONFIG")
+    {
+    primaryKey = HKEY_CURRENT_CONFIG;
+    }
+  if (primary == "HKEY_CLASSES_ROOT")
+    {
+    primaryKey = HKEY_CLASSES_ROOT;
+    }
+  if (primary == "HKEY_LOCAL_MACHINE")
+    {
+    primaryKey = HKEY_LOCAL_MACHINE;
+    }
+  if (primary == "HKEY_USERS")
+    {
+    primaryKey = HKEY_USERS;
+    }
+
+  return true;
+}
+
 static DWORD SystemToolsMakeRegistryMode(DWORD mode,
                                          SystemTools::KeyWOW64 view)
 {
@@ -718,6 +764,55 @@ static DWORD SystemToolsMakeRegistryMode(DWORD mode,
 }
 #endif
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+bool
+SystemTools::GetRegistrySubKeys(const char *key,
+                                kwsys_stl::vector<kwsys_stl::string>& subkeys,
+                                KeyWOW64 view)
+{
+  HKEY primaryKey = HKEY_CURRENT_USER;
+  kwsys_stl::string second;
+  kwsys_stl::string valuename;
+  if (!SystemToolsParseRegistryKey(key, primaryKey, second, valuename))
+    {
+    return false;
+    }
+
+  HKEY hKey;
+  if(RegOpenKeyEx(primaryKey,
+                  second.c_str(),
+                  0,
+                  SystemToolsMakeRegistryMode(KEY_READ, view),
+                  &hKey) != ERROR_SUCCESS)
+    {
+    return false;
+    }
+  else
+    {
+    char name[1024];
+    DWORD dwNameSize = sizeof(name)/sizeof(name[0]);
+
+    DWORD i = 0;
+    while (RegEnumKey(hKey, i, name, dwNameSize) == ERROR_SUCCESS)
+      {
+      subkeys.push_back(name);
+      ++i;
+      }
+
+    RegCloseKey(hKey);
+    }
+
+  return true;
+}
+#else
+bool SystemTools::GetRegistrySubKeys(const char *,
+                                     kwsys_stl::vector<kwsys_stl::string>&,
+                                     KeyWOW64)
+{
+  return false;
+}
+#endif
+
 // Read a registry value.
 // Example :
 //      HKEY_LOCAL_MACHINE\SOFTWARE\Python\PythonCore\2.1\InstallPath
@@ -730,45 +825,12 @@ bool SystemTools::ReadRegistryValue(const char *key, kwsys_stl::string &value,
                                     KeyWOW64 view)
 {
   bool valueset = false;
-  kwsys_stl::string primary = key;
+  HKEY primaryKey = HKEY_CURRENT_USER;
   kwsys_stl::string second;
   kwsys_stl::string valuename;
-
-  size_t start = primary.find("\\");
-  if (start == kwsys_stl::string::npos)
+  if (!SystemToolsParseRegistryKey(key, primaryKey, second, valuename))
     {
     return false;
-    }
-
-  size_t valuenamepos = primary.find(";");
-  if (valuenamepos != kwsys_stl::string::npos)
-    {
-    valuename = primary.substr(valuenamepos+1);
-    }
-
-  second = primary.substr(start+1, valuenamepos-start-1);
-  primary = primary.substr(0, start);
-
-  HKEY primaryKey = HKEY_CURRENT_USER;
-  if (primary == "HKEY_CURRENT_USER")
-    {
-    primaryKey = HKEY_CURRENT_USER;
-    }
-  if (primary == "HKEY_CURRENT_CONFIG")
-    {
-    primaryKey = HKEY_CURRENT_CONFIG;
-    }
-  if (primary == "HKEY_CLASSES_ROOT")
-    {
-    primaryKey = HKEY_CLASSES_ROOT;
-    }
-  if (primary == "HKEY_LOCAL_MACHINE")
-    {
-    primaryKey = HKEY_LOCAL_MACHINE;
-    }
-  if (primary == "HKEY_USERS")
-    {
-    primaryKey = HKEY_USERS;
     }
 
   HKEY hKey;
@@ -834,45 +896,12 @@ bool SystemTools::ReadRegistryValue(const char *, kwsys_stl::string &,
 bool SystemTools::WriteRegistryValue(const char *key, const char *value,
                                      KeyWOW64 view)
 {
-  kwsys_stl::string primary = key;
+  HKEY primaryKey = HKEY_CURRENT_USER;
   kwsys_stl::string second;
   kwsys_stl::string valuename;
-
-  size_t start = primary.find("\\");
-  if (start == kwsys_stl::string::npos)
+  if (!SystemToolsParseRegistryKey(key, primaryKey, second, valuename))
     {
     return false;
-    }
-
-  size_t valuenamepos = primary.find(";");
-  if (valuenamepos != kwsys_stl::string::npos)
-    {
-    valuename = primary.substr(valuenamepos+1);
-    }
-
-  second = primary.substr(start+1, valuenamepos-start-1);
-  primary = primary.substr(0, start);
-
-  HKEY primaryKey = HKEY_CURRENT_USER;
-  if (primary == "HKEY_CURRENT_USER")
-    {
-    primaryKey = HKEY_CURRENT_USER;
-    }
-  if (primary == "HKEY_CURRENT_CONFIG")
-    {
-    primaryKey = HKEY_CURRENT_CONFIG;
-    }
-  if (primary == "HKEY_CLASSES_ROOT")
-    {
-    primaryKey = HKEY_CLASSES_ROOT;
-    }
-  if (primary == "HKEY_LOCAL_MACHINE")
-    {
-    primaryKey = HKEY_LOCAL_MACHINE;
-    }
-  if (primary == "HKEY_USERS")
-    {
-    primaryKey = HKEY_USERS;
     }
 
   HKEY hKey;
@@ -919,45 +948,12 @@ bool SystemTools::WriteRegistryValue(const char *, const char *, KeyWOW64)
 #if defined(_WIN32) && !defined(__CYGWIN__)
 bool SystemTools::DeleteRegistryValue(const char *key, KeyWOW64 view)
 {
-  kwsys_stl::string primary = key;
+  HKEY primaryKey = HKEY_CURRENT_USER;
   kwsys_stl::string second;
   kwsys_stl::string valuename;
-
-  size_t start = primary.find("\\");
-  if (start == kwsys_stl::string::npos)
+  if (!SystemToolsParseRegistryKey(key, primaryKey, second, valuename))
     {
     return false;
-    }
-
-  size_t valuenamepos = primary.find(";");
-  if (valuenamepos != kwsys_stl::string::npos)
-    {
-    valuename = primary.substr(valuenamepos+1);
-    }
-
-  second = primary.substr(start+1, valuenamepos-start-1);
-  primary = primary.substr(0, start);
-
-  HKEY primaryKey = HKEY_CURRENT_USER;
-  if (primary == "HKEY_CURRENT_USER")
-    {
-    primaryKey = HKEY_CURRENT_USER;
-    }
-  if (primary == "HKEY_CURRENT_CONFIG")
-    {
-    primaryKey = HKEY_CURRENT_CONFIG;
-    }
-  if (primary == "HKEY_CLASSES_ROOT")
-    {
-    primaryKey = HKEY_CLASSES_ROOT;
-    }
-  if (primary == "HKEY_LOCAL_MACHINE")
-    {
-    primaryKey = HKEY_LOCAL_MACHINE;
-    }
-  if (primary == "HKEY_USERS")
-    {
-    primaryKey = HKEY_USERS;
     }
 
   HKEY hKey;
@@ -4869,7 +4865,8 @@ static int SystemToolsDebugReport(int, char* message, int*)
 
 void SystemTools::EnableMSVCDebugHook()
 {
-  if (getenv("DART_TEST_FROM_DART"))
+  if (getenv("DART_TEST_FROM_DART") ||
+      getenv("DASHBOARD_TEST_FROM_CTEST"))
     {
     _CrtSetReportHook(SystemToolsDebugReport);
     }
