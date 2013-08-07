@@ -249,7 +249,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   // Command name has already been parsed.  Read the left paren.
   cmListFileLexer_Token* token;
   while((token = cmListFileLexer_Scan(this->Lexer)) &&
-        token->type == cmListFileLexer_Token_Space);
+        token->type == cmListFileLexer_Token_Space) {}
   if(!token)
     {
     cmOStringStream error;
