@@ -153,7 +153,7 @@ protected:
   // compute a final test list
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
-  virtual void GenerateTestCommand(std::vector<std::string>& args);
+  virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
   int ExecuteCommands(std::vector<cmStdString>& vec);
 
   void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
