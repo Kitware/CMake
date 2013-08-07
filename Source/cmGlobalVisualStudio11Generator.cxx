@@ -85,7 +85,7 @@ public:
     for(std::set<std::string>::const_iterator i =
         installedSDKs.begin(); i != installedSDKs.end(); ++i)
       {
-      names.push_back("Visual Studio 8 2005 " + *i);
+      names.push_back("Visual Studio 11 " + *i);
       }
   }
 };
