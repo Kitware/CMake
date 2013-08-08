@@ -34,7 +34,9 @@ public:
 protected:
   virtual const char* GetIDEVersion() { return "11.0"; }
   bool UseFolderProperty();
+  static std::set<std::string> GetInstalledWindowsCESDKs();
 private:
   class Factory;
+  friend class Factory;
 };
 #endif
