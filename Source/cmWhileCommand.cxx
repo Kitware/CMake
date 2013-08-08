@@ -49,9 +49,9 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
           unsigned int i;
           for(i =0; i < this->Args.size(); ++i)
             {
-            err += (this->Args[i].Quoted?"\"":"");
+            err += (this->Args[i].Delim?"\"":"");
             err += this->Args[i].Value;
-            err += (this->Args[i].Quoted?"\"":"");
+            err += (this->Args[i].Delim?"\"":"");
             err += " ";
             }
           err += "(";

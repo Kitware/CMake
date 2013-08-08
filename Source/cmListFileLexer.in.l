@@ -24,6 +24,7 @@ Modify cmListFileLexer.c:
   - remove the yyunput function
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
+  - remove statement "yyscanner = NULL;" from cmListFileLexer_yylex_destroy
   - remove all YY_BREAK lines occurring right after return statements
   - remove the isatty forward declaration
 
@@ -75,6 +76,8 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %x STRING
 
 MAKEVAR \$\([A-Za-z0-9_]*\)
+UNQUOTED ([^ \t\r\n\(\)#\\\"]|\\.)
+LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t])*\"
 
 %%
 
@@ -111,7 +114,14 @@ MAKEVAR \$\([A-Za-z0-9_]*\)
   return 1;
 }
 
-({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.)({MAKEVAR}|[^ \t\r\n\(\)#\\\"]|\\.|\"({MAKEVAR}|[^\r\n\(\)#\\\"]|\\.)*\")* {
+({UNQUOTED})({UNQUOTED})* {
+  lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+  return 1;
+}
+
+({MAKEVAR}|{UNQUOTED})({LEGACY})* {
   lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
@@ -125,9 +135,15 @@ MAKEVAR \$\([A-Za-z0-9_]*\)
   BEGIN(STRING);
 }
 
-<STRING>([^\\\n\"]|\\(.|\n))+ {
+<STRING>([^\\\n\"]|\\.)+ {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
+}
+
+<STRING>\\\n {
+  cmListFileLexerAppend(lexer, yytext, yyleng);
+  ++lexer->line;
+  lexer->column = 1;
 }
 
 <STRING>\n {
@@ -153,8 +169,11 @@ MAKEVAR \$\([A-Za-z0-9_]*\)
   return 1;
 }
 
-[ \t\r] {
+[ \t\r]+ {
+  lexer->token.type = cmListFileLexer_Token_Space;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
+  return 1;
 }
 
 . {
@@ -405,6 +424,7 @@ const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
   switch(type)
     {
     case cmListFileLexer_Token_None: return "nothing";
+    case cmListFileLexer_Token_Space: return "space";
     case cmListFileLexer_Token_Newline: return "newline";
     case cmListFileLexer_Token_Identifier: return "identifier";
     case cmListFileLexer_Token_ParenLeft: return "left paren";
