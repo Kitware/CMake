@@ -1045,6 +1045,8 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       const char* compilerArg1 = 0;
       const char* compilerTarget = 0;
       const char* compilerOptionTarget = 0;
+      const char* compilerExternalToolchain = 0;
+      const char* compilerOptionExternalToolchain = 0;
       if(actualReplace == "CMAKE_${LANG}_COMPILER")
         {
         std::string arg1 = actualReplace + "_ARG1";
@@ -1057,6 +1059,14 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
               = this->Makefile->GetDefinition(
                 (std::string("CMAKE_") + lang +
                                           "_COMPILE_OPTIONS_TARGET").c_str());
+        compilerExternalToolchain
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                                    "_COMPILER_EXTERNAL_TOOLCHAIN").c_str());
+        compilerOptionExternalToolchain
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                              "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN").c_str());
         }
       if(actualReplace.find("${LANG}") != actualReplace.npos)
         {
@@ -1082,6 +1092,12 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             ret += " ";
             ret += compilerOptionTarget;
             ret += compilerTarget;
+            }
+          if (compilerExternalToolchain && compilerOptionExternalToolchain)
+            {
+            ret += " ";
+            ret += compilerOptionExternalToolchain;
+            ret += this->EscapeForShell(compilerExternalToolchain, true);
             }
           return ret;
           }
