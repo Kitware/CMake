@@ -66,6 +66,7 @@ function(gen_mc_test NAME CHECKER)
         -D PSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
         -D PSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
         -D ERROR_COMMAND=$<TARGET_FILE:memcheck_fail>
+        ${ARGN}
         )
 endfunction(gen_mc_test)
 
@@ -74,10 +75,11 @@ function(gen_mcnl_test NAME CHECKER)
         -D PSEUDO_BC=$<TARGET_FILE:pseudonl_BC>
         -D PSEUDO_PURIFY=$<TARGET_FILE:pseudonl_purify>
         -D PSEUDO_VALGRIND=$<TARGET_FILE:pseudonl_valgrind>
+        ${ARGN}
         )
     set_tests_properties(CTestTestMemcheck${NAME}
         PROPERTIES
-        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n")
+        PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/${NAME}/Testing/Temporary/MemoryChecker.1.log\n(.*\n)?Error in read script: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/${NAME}/test.cmake\n")
 endfunction(gen_mcnl_test)
 
 unset(CTEST_EXTRA_CONFIG)
@@ -109,14 +111,17 @@ set(CTEST_EXTRA_CONFIG "set(CTEST_CUSTOM_MEMCHECK_IGNORE RunCMakeAgain)\n")
 set(CMAKELISTS_EXTRA_CODE "add_test(NAME RunCMakeAgain COMMAND \"\${CMAKE_COMMAND}\" --version)")
 gen_mc_test(DummyValgrindIgnoreMemcheck "\${PSEUDO_VALGRIND}")
 
+unset(CTEST_EXTRA_CONFIG)
+gen_mc_test(DummyValgrindTwoTargets "\${PSEUDO_VALGRIND}" "-VV")
+
 set(CTEST_EXTRA_CONFIG "set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE \"\${CMAKE_CURRENT_BINARY_DIR}/does-not-exist\")")
 unset(CMAKELISTS_EXTRA_CODE)
 gen_mc_test(DummyValgrindInvalidSupFile "\${PSEUDO_VALGRIND}")
 
-# CTest will add the logfile option as last option. Tell the dummy memcheck
-# to ignore that argument. This will cause the logfile to be missing, which
-# will be the prove for us that the custom option is indeed used.
-set(CTEST_EXTRA_CONFIG "set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"--\")")
+# CTest will add the logfile option before any custom options. Set the logfile
+# again, this time to an empty string. This will cause the logfile to be
+# missing, which will be the prove for us that the custom option is indeed used.
+set(CTEST_EXTRA_CONFIG "set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"--log-file=\")")
 gen_mc_test(DummyValgrindCustomOptions "\${PSEUDO_VALGRIND}")
 
 unset(CTEST_EXTRA_CONFIG)
@@ -161,4 +166,8 @@ set_tests_properties(CTestTestMemcheckDummyValgrindInvalidSupFile PROPERTIES
     PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindCustomOptions PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/Testing/Temporary/MemoryChecker.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/test.cmake\n")
+    PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/Testing/Temporary/MemoryChecker.1.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/test.cmake\n")
+
+set_tests_properties(CTestTestMemcheckDummyValgrindTwoTargets PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "\nMemory check project ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindTwoTargets\n.*\n *Start 1: RunCMake\n(.*\n)?Memory check command: .* \"--log-file=${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindTwoTargets/Testing/Temporary/MemoryChecker.1.log\" \"-q\".*\n *Start 2: RunCMakeAgain\n(.*\n)?Memory check command: .* \"--log-file=${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindTwoTargets/Testing/Temporary/MemoryChecker.2.log\" \"-q\".*\n")
