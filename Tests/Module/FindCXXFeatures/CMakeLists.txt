@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
-project(CxxFeatures CXX)
+project(FindCXXFeatures CXX)
 
 set(_all_cxx_features
         CXXFeatures_auto_FOUND
@@ -193,9 +193,9 @@ if (NOT "${CXX11_COMPILER_FLAGS}" STREQUAL "${_expected_cxx11_flag}" AND NOT _co
     message(SEND_ERROR "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
 endif ()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
-add_executable(CXXFeatures cxxfeatures.cxx)
+add_executable(FindCXXFeatures cxxfeatures.cxx)
 
 enable_testing()
 if (NOT CROSS_COMPILING)
-    add_test(NAME CXXFeatures COMMAND CXXFeatures)
+    add_test(NAME FindCXXFeatures COMMAND FindCXXFeatures)
 endif ()

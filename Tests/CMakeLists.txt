@@ -339,7 +339,7 @@ if(BUILD_TESTING)
   list(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
 
   ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
-  ADD_TEST_MACRO(Module.CXXFeatures CXXFeatures)
+  ADD_TEST_MACRO(Module.FindCXXFeatures FindCXXFeatures)
 
   add_test(Module.ExternalData ${CMAKE_CTEST_COMMAND}
     --build-and-test
