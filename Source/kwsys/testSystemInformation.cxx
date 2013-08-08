@@ -95,7 +95,24 @@ int testSystemInformation(int, char*[])
       kwsys_ios::cout << "CPU feature " << i << "\n";
       }
     }
-  //int GetProcessorCacheXSize(long int);
-//  bool DoesCPUSupportFeature(long int);
+
+  /* test stack trace
+  */
+  kwsys_ios::cout
+    << "Program Stack:" << kwsys_ios::endl
+    << kwsys::SystemInformation::GetProgramStack(0,0) << kwsys_ios::endl
+    << kwsys_ios::endl;
+
+  /* test segv handler
+  info.SetStackTraceOnError(1);
+  double *d = (double*)100;
+  *d=0;
+  */
+
+  /* test abort handler
+  info.SetStackTraceOnError(1);
+  abort();
+  */
+
   return 0;
 }
