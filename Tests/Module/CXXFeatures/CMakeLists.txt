@@ -111,6 +111,60 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_constexpr_FOUND
              CXXFeatures_rvalue_references_FOUND)
     endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "SunPro")
+    # values found by looking on the test output, may be present much longer
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.9)
+        list(APPEND _expected_features
+             CXXFeatures_long_long_FOUND
+             CXXFeatures_sizeof_member_FOUND)
+    endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+    # values found by looking on the test output, may be present much longer
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.3)
+        list(APPEND _expected_features
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_long_long_FOUND)
+    endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+    # FIXME: newer version support -std=c++11, Windows has /Q flag
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
+        set(_expected_cxx11_flag "-std=c++0x")
+        list(APPEND _expected_features
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_long_long_FOUND
+             CXXFeatures_static_assert_FOUND)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12)
+        list(APPEND _expected_features
+             CXXFeatures_auto_FOUND
+             CXXFeatures_decltype_FOUND
+             CXXFeatures_defaulted_functions_FOUND
+             CXXFeatures_deleted_functions_FOUND
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_lambda_FOUND
+             CXXFeatures_long_long_FOUND
+             CXXFeatures_rvalue_references_FOUND
+             CXXFeatures_sizeof_member_FOUND
+             CXXFeatures_static_assert_FOUND)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
+        list(APPEND _expected_features
+             CXXFeatures_variadic_templates_FOUND)
+    endif ()
+    # constexpr is partially supported in version 13, it may
+    # already show up for this version depending on the check file.
+    # The same applies to initializer lists.
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13)
+        list(APPEND _expected_features
+             CXXFeatures_nullptr_FOUND)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+        list(APPEND _expected_features
+             CXXFeatures_class_override_final_FOUND
+             CXXFeatures_constexpr_FOUND
+             CXXFeatures_delegating_constructors_FOUND
+             CXXFeatures_initializer_list_FOUND)
+    endif ()
 else ()
     message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
