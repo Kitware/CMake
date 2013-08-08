@@ -12,9 +12,9 @@
 #include "cmCommandArgumentParserHelper.h"
 
 #include "cmSystemTools.h"
-#include "cmCommandArgumentLexer.h"
-
 #include "cmMakefile.h"
+
+#include "cmCommandArgumentLexer.h"
 
 int cmCommandArgument_yyparse( yyscan_t yyscanner );
 //
