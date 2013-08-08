@@ -419,6 +419,20 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       flag += cDef;
       cmakeFlags.push_back(flag);
       }
+    if (const char *tcxxDef = this->Makefile->GetDefinition(
+                                  "CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN"))
+      {
+      std::string flag="-DCMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=";
+      flag += tcxxDef;
+      cmakeFlags.push_back(flag);
+      }
+    if (const char *tcDef = this->Makefile->GetDefinition(
+                                    "CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN"))
+      {
+      std::string flag="-DCMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=";
+      flag += tcDef;
+      cmakeFlags.push_back(flag);
+      }
     if(this->Makefile->GetDefinition("CMAKE_POSITION_INDEPENDENT_CODE")!=0)
       {
       fprintf(fout, "set(CMAKE_POSITION_INDEPENDENT_CODE \"ON\")\n");
