@@ -22,11 +22,18 @@ endmacro()
 set(DESIRED_QT_VERSION 4)
 set(NO_QT4_MODULES "Qt3" "KDE3")
 
+# ignore everything that has it's own test in Tests/Module/
+file(GLOB OWN_TEST_MODULES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/../../Module/" "${CMAKE_CURRENT_SOURCE_DIR}/../../Module/Find*")
+foreach(FIND_MODULE IN LISTS OWN_TEST_MODULES)
+    string(REGEX REPLACE "^Find" "" _MOD_NAME "${FIND_MODULE}")
+    list(APPEND NO_FIND_MODULES "${_MOD_NAME}")
+endforeach()
+
 # These modules are named Find*.cmake, but are nothing that works in
 # find_package().
-set(NO_FIND_MODULES "PackageHandleStandardArgs" "PackageMessage")
+list(APPEND NO_FIND_MODULES "PackageHandleStandardArgs" "PackageMessage")
 
-foreach(FIND_MODULE ${FIND_MODULES})
+foreach(FIND_MODULE IN LISTS FIND_MODULES)
     string(REGEX REPLACE ".*/Find(.*)\\.cmake$" "\\1" MODULE_NAME "${FIND_MODULE}")
 
     list(FIND NO_QT4_MODULES ${MODULE_NAME} NO_QT4_INDEX)
