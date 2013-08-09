@@ -1069,34 +1069,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
 
-  if(NOT GTK2_FOUND)
-    find_package(GTK2 COMPONENTS gtk glade gtkmm glademm QUIET)
-  endif()
-
-  if(GTK2_GTK_FOUND)
-     add_test(GTK2Gtk ${CMAKE_CTEST_COMMAND}
-       --build-and-test
-       "${CMake_SOURCE_DIR}/Tests/GTK2Gtk"
-       "${CMake_BINARY_DIR}/Tests/GTK2Gtk"
-       ${build_generator_args}
-       --build-project GTK2Gtk
-       --build-exe-dir "${CMake_BINARY_DIR}/Tests/GTK2Gtk"
-       --force-new-ctest-process
-       --test-command ${CMAKE_CTEST_COMMAND} -V
-       )
-  endif()
-
-  if(GTK2_GTKMM_FOUND)
-     add_test(GTK2GtkMM ${CMAKE_CTEST_COMMAND}
-       --build-and-test
-       "${CMake_SOURCE_DIR}/Tests/GTK2GtkMM"
-       "${CMake_BINARY_DIR}/Tests/GTK2GtkMM"
-        ${build_generator_args}
-       --build-project GTK2GtkMM
-       --build-exe-dir "${CMake_BINARY_DIR}/Tests/GTK2GtkMM"
-       --force-new-ctest-process
-       --test-command ${CMAKE_CTEST_COMMAND} -V
-       )
+  find_package(GTK2 QUIET)
+  if(GTK2_FOUND)
+    add_subdirectory(GTK2Targets)
   endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}

@@ -1,7 +1,7 @@
 #include <gtkmm.h>
 #include "helloworld.h"
 
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     Gtk::Main kit(argc, argv);
 
