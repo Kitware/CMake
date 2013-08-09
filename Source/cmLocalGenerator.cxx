@@ -1074,7 +1074,6 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             }
           if (compilerTarget && compilerOptionTarget)
             {
-            ret += " ";
             ret += compilerOptionTarget;
             ret += compilerTarget;
             }
