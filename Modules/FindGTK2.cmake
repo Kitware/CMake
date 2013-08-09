@@ -450,7 +450,7 @@ endif()
 # Find all components
 #
 
-find_package(Freetype)
+find_package(Freetype QUIET)
 list(APPEND GTK2_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})
 list(APPEND GTK2_LIBRARIES ${FREETYPE_LIBRARIES})
 
