@@ -456,11 +456,13 @@ function(_GTK2_ADD_TARGET_DEPENDS _var)
 
     string(TOLOWER "${_var}" _basename)
 
-    get_target_property(_configs GTK2::${_basename} IMPORTED_CONFIGURATIONS)
-    _GTK2_ADD_TARGET_DEPENDS_INTERNAL(${_var} INTERFACE_LINK_LIBRARIES ${ARGN})
-    foreach(_config ${_configs})
-        _GTK2_ADD_TARGET_DEPENDS_INTERNAL(${_var} IMPORTED_LINK_INTERFACE_LIBRARIES_${_config} ${ARGN})
-    endforeach()
+    if(TARGET GTK2::${_basename})
+        get_target_property(_configs GTK2::${_basename} IMPORTED_CONFIGURATIONS)
+        _GTK2_ADD_TARGET_DEPENDS_INTERNAL(${_var} INTERFACE_LINK_LIBRARIES ${ARGN})
+        foreach(_config ${_configs})
+            _GTK2_ADD_TARGET_DEPENDS_INTERNAL(${_var} IMPORTED_LINK_INTERFACE_LIBRARIES_${_config} ${ARGN})
+        endforeach()
+    endif()
 endfunction()
 
 function(_GTK2_ADD_TARGET_INCLUDE_DIRS _var)
