@@ -240,6 +240,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         PATH_SUFFIXES
             ${_suffixes}
     )
+    mark_as_advanced(GTK2_${_var}_INCLUDE_DIR)
 
     if(${_var}_INCLUDE_DIR)
         set(GTK2_INCLUDE_DIRS ${GTK2_INCLUDE_DIRS} ${${_var}_INCLUDE_DIR} PARENT_SCOPE)
