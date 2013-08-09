@@ -477,6 +477,22 @@ function(_GTK2_ADD_TARGET_INCLUDE_DIRS _var)
     endif()
 endfunction()
 
+function(_GTK2_ADD_TARGET_LIBRARIES _var)
+    if(GTK2_DEBUG)
+        message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}] "
+                       "_GTK2_ADD_TARGET_LIBRARIES( ${_var} )")
+    endif()
+
+    string(TOLOWER "${_var}" _basename)
+
+    if(TARGET GTK2::${_basename})
+        set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${ARGN}")
+        foreach(_library ${ARGN})
+            set_property(TARGET GTK2::${_basename} APPEND PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_$ "${_library}")
+        endforeach()
+    endif()
+endfunction()
+
 #=============================================================
 
 #
@@ -637,6 +653,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADD_TARGET_DEPENDS(GMODULE glib)
         _GTK2_ADD_TARGET_DEPENDS(GDK_PIXBUF gobject glib)
         _GTK2_ADD_TARGET_INCLUDE_DIRS(CAIRO ${FREETYPE_INCLUDE_DIRS} ${GTK2_FONTCONFIG_INCLUDE_DIRS})
+        _GTK2_ADD_TARGET_LIBRARIES(CAIRO ${FREETYPE_LIBRARIES})
         _GTK2_ADD_TARGET_DEPENDS(PANGO gobject glib)
         _GTK2_ADD_TARGET_DEPENDS(PANGOCAIRO pango cairo gobject glib)
         _GTK2_ADD_TARGET_DEPENDS(GDK pangocairo pango cairo gdk_pixbuf gobject glib)
@@ -690,8 +707,10 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADD_TARGET_DEPENDS(PANGOMM glibmm cairomm pangocairo sigc++ pango cairo gobject glib)
         _GTK2_ADD_TARGET_DEPENDS(GDKMM giomm pangomm gtk glibmm cairomm sigc++ gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib)
         _GTK2_ADD_TARGET_INCLUDE_DIRS(GDKMM ${FREETYPE_INCLUDE_DIRS} ${GTK2_FONTCONFIG_INCLUDE_DIRS})
+        _GTK2_ADD_TARGET_LIBRARIES(GDKMM ${FREETYPE_LIBRARIES})
         _GTK2_ADD_TARGET_DEPENDS(GTKMM atkmm gdkmm giomm pangomm gtk glibmm cairomm sigc++ gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib)
         _GTK2_ADD_TARGET_INCLUDE_DIRS(GTKMM ${FREETYPE_INCLUDE_DIRS} ${GTK2_FONTCONFIG_INCLUDE_DIRS})
+        _GTK2_ADD_TARGET_LIBRARIES(GTKMM ${FREETYPE_LIBRARIES})
 
     elseif(_GTK2_component STREQUAL "glade")
 
@@ -700,6 +719,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADJUST_LIB_VARS (GLADE)
         _GTK2_ADD_TARGET_DEPENDS(GLADE gtk gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib)
         _GTK2_ADD_TARGET_INCLUDE_DIRS(GLADE ${FREETYPE_INCLUDE_DIRS} ${GTK2_FONTCONFIG_INCLUDE_DIRS})
+        _GTK2_ADD_TARGET_LIBRARIES(GLADE ${FREETYPE_LIBRARIES})
 
     elseif(_GTK2_component STREQUAL "glademm")
 
@@ -709,6 +729,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADJUST_LIB_VARS (GLADEMM)
         _GTK2_ADD_TARGET_DEPENDS(GLADEMM gtkmm glade atkmm gdkmm giomm pangomm glibmm cairomm sigc++ gtk gdk atk gio pangoft pangocairo gdk_pixbuf cairo pango gthread gobject glib)
         _GTK2_ADD_TARGET_INCLUDE_DIRS(GLADEMM ${FREETYPE_INCLUDE_DIRS} ${GTK2_FONTCONFIG_INCLUDE_DIRS})
+        _GTK2_ADD_TARGET_LIBRARIES(GLADEMM ${FREETYPE_LIBRARIES})
 
     else()
         message(FATAL_ERROR "Unknown GTK2 component ${_component}")
