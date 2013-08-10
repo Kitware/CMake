@@ -22,12 +22,12 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(${CMAKE_CURRENT_LIST_DIR}/CheckCXXSourceCompiles.cmake)
+include(CheckCXXSourceCompiles)
 
 # This is a function to have the include in a scope to force people to
 # explicitely include CheckCCompilerFlag if they need it.
 function (CHECK_CXX_COMPILER_FLAG_COMMON_PATTERNS _VAR)
-   include(${CMAKE_CURRENT_LIST_DIR}/CheckCCompilerFlag.cmake)
+   include(CheckCCompilerFlag)
    CHECK_COMPILER_FLAG_COMMON_PATTERNS(${_VAR})
    set(${_VAR} ${${_VAR}} PARENT_SCOPE)
 endfunction ()
