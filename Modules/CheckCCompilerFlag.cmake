@@ -22,7 +22,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-include(${CMAKE_CURRENT_LIST_DIR}/CheckCSourceCompiles.cmake)
+include(CheckCSourceCompiles)
 
 macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
    set(${_VAR}
