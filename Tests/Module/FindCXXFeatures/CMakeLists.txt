@@ -165,6 +165,27 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
              CXXFeatures_delegating_constructors_FOUND
              CXXFeatures_initializer_list_FOUND)
     endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Watcom")
+    # values found by looking on the test output, may be present much longer
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.70)
+        list(APPEND _expected_features
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_long_long_FOUND)
+    endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MIPSpro")
+    # values found by looking on the test output, may be present much longer
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4.4)
+        list(APPEND _expected_features
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_long_long_FOUND)
+    endif ()
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "HP")
+    # values found by looking on the test output, may be present much longer
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.20)
+        list(APPEND _expected_features
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_long_long_FOUND)
+    endif ()
 else ()
     message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
