@@ -194,6 +194,38 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
              CXXFeatures_func_identifier_FOUND
              CXXFeatures_long_long_FOUND)
     endif ()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9)
+         set(_expected_cxx11_flag "-std=c++0x")
+        list(APPEND _expected_features
+             CXXFeatures_auto_FOUND
+             CXXFeatures_class_override_final_FOUND
+             CXXFeatures_constexpr_FOUND
+             CXXFeatures_decltype_FOUND
+             CXXFeatures_deleted_functions_FOUND
+             CXXFeatures_func_identifier_FOUND
+             CXXFeatures_long_long_FOUND
+             CXXFeatures_rvalue_references_FOUND
+             CXXFeatures_sizeof_member_FOUND
+             CXXFeatures_static_assert_FOUND
+             CXXFeatures_variadic_templates_FOUND)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3)
+          # FIXME: I've seen both :( FreeBSD 9.0 has 0x, 10.0 has 11
+         set(_expected_cxx11_flag "-std=c++11")
+         list(APPEND _expected_features
+             CXXFeatures_defaulted_functions_FOUND
+             CXXFeatures_delegating_constructors_FOUND)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.1)
+         set(_expected_cxx11_flag "-std=c++11")
+         list(APPEND _expected_features
+             CXXFeatures_cstdint_header_FOUND
+             CXXFeatures_initializer_list_FOUND
+             CXXFeatures_lambda_FOUND
+             CXXFeatures_nullptr_FOUND)
+    endif ()
+
 else ()
     message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
