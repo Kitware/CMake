@@ -113,7 +113,7 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
     endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "SunPro")
     # values found by looking on the test output, may be present much longer
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.9)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
         list(APPEND _expected_features
              CXXFeatures_long_long_FOUND
              CXXFeatures_sizeof_member_FOUND)
@@ -126,9 +126,12 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
              CXXFeatures_long_long_FOUND)
     endif ()
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    # FIXME: newer version support -std=c++11, Windows has /Q flag
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
-        set(_expected_cxx11_flag "-std=c++0x")
+        if (WIN32)
+            set(_expected_cxx11_flag "/Qstd=c++0x")
+        else ()
+            set(_expected_cxx11_flag "-std=c++0x")
+        endif ()
         list(APPEND _expected_features
              CXXFeatures_func_identifier_FOUND
              CXXFeatures_long_long_FOUND
@@ -155,6 +158,11 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
     # already show up for this version depending on the check file.
     # The same applies to initializer lists.
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13)
+        if (WIN32)
+            set(_expected_cxx11_flag "/Qstd=c++11")
+        else ()
+            set(_expected_cxx11_flag "-std=c++11")
+        endif ()
         list(APPEND _expected_features
              CXXFeatures_nullptr_FOUND)
     endif ()
