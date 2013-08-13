@@ -6,6 +6,9 @@
 # sets CMAKE_REQUIRED_DEFINITIONS to <flag>.
 # See help for CheckCSourceCompiles for a listing of variables
 # that can otherwise modify the build.
+# The result only tells that the compiler does not give an error message when
+# it encounters the flag. If the flag has any effect or even a specific one is
+# beyond the scope of this module.
 
 #=============================================================================
 # Copyright 2006-2011 Kitware, Inc.
@@ -23,26 +26,7 @@
 #  License text for the above reference.)
 
 include(CheckCSourceCompiles)
-
-macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
-   set(${_VAR}
-     FAIL_REGEX "unrecognized .*option"                     # GNU
-     FAIL_REGEX "unknown .*option"                          # Clang
-     FAIL_REGEX "ignoring unknown option"                   # MSVC
-     FAIL_REGEX "warning D9002"                             # MSVC, any lang
-     FAIL_REGEX "option.*not supported"                     # Intel
-     FAIL_REGEX "invalid argument .*option"                 # Intel
-     FAIL_REGEX "ignoring option .*argument required"       # Intel
-     FAIL_REGEX "[Uu]nknown option"                         # HP
-     FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
-     FAIL_REGEX "command option .* is not recognized"       # XL
-     FAIL_REGEX "command option .* contains an incorrect subargument" # XL
-     FAIL_REGEX "not supported in this configuration; ignored"       # AIX
-     FAIL_REGEX "File with unknown suffix passed to linker" # PGI
-     FAIL_REGEX "WARNING: unknown flag:"                    # Open64
-     FAIL_REGEX "Incorrect command line option:"            # Borland
-   )
-endmacro ()
+include(CMakeCheckCompilerFlagCommonPatterns)
 
 macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
