@@ -25,7 +25,7 @@ unset(_expected_features)
 unset(_expected_cxx11_flag)
 unset(_compiler_unknown_features)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # no idea since when this is supported, but it is at least
     # supported since 3.1
     list(APPEND _expected_features
@@ -64,12 +64,12 @@ if (CMAKE_COMPILER_IS_GNUCXX)
              CXXFeatures_static_assert_FOUND
              CXXFeatures_variadic_templates_FOUND)
     endif ()
-elseif (MSVC)
-    if (NOT MSVC_VERSION VERSION_LESS 1700)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
         list(APPEND _expected_features
              CXXFeatures_class_override_final_FOUND)
     endif ()
-    if (NOT MSVC_VERSION VERSION_LESS 1600)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
         list(APPEND _expected_features
              CXXFeatures_auto_FOUND
              CXXFeatures_cstdint_header_FOUND
@@ -79,16 +79,16 @@ elseif (MSVC)
              CXXFeatures_rvalue_references_FOUND
              CXXFeatures_static_assert_FOUND)
     endif ()
-    if (NOT MSVC_VERSION VERSION_LESS 1301)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.01)
         list(APPEND _expected_features
              CXXFeatures_long_long_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Borland")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Borland")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.60)
         list(APPEND _expected_features
              CXXFeatures_long_long_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "XL")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
         set(_expected_cxx11_flag "-qlanglvl=extended0x")
         list(APPEND _expected_features
@@ -111,21 +111,21 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
              CXXFeatures_constexpr_FOUND
              CXXFeatures_rvalue_references_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "SunPro")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
         list(APPEND _expected_features
              CXXFeatures_long_long_FOUND
              CXXFeatures_sizeof_member_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.3)
         list(APPEND _expected_features
              CXXFeatures_func_identifier_FOUND
              CXXFeatures_long_long_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
         if (WIN32)
             set(_expected_cxx11_flag "/Qstd=c++0x")
@@ -173,21 +173,21 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
              CXXFeatures_delegating_constructors_FOUND
              CXXFeatures_initializer_list_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Watcom")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Watcom")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.70)
         list(APPEND _expected_features
              CXXFeatures_func_identifier_FOUND
              CXXFeatures_long_long_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MIPSpro")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MIPSpro")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4.4)
         list(APPEND _expected_features
              CXXFeatures_func_identifier_FOUND
              CXXFeatures_long_long_FOUND)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "HP")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.20)
         list(APPEND _expected_features
