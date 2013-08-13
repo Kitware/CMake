@@ -2,190 +2,230 @@ cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 project(FindCXXFeatures CXX)
 
 set(_all_cxx_features
-        CXXFeatures_auto_FOUND
-        CXXFeatures_class_override_final_FOUND
-        CXXFeatures_constexpr_FOUND
-        CXXFeatures_cstdint_header_FOUND
-        CXXFeatures_decltype_FOUND
-        CXXFeatures_defaulted_functions_FOUND
-        CXXFeatures_delegating_constructors_FOUND
-        CXXFeatures_deleted_functions_FOUND
-        CXXFeatures_func_identifier_FOUND
-        CXXFeatures_initializer_list_FOUND
-        CXXFeatures_lambda_FOUND
-        CXXFeatures_long_long_FOUND
-        CXXFeatures_nullptr_FOUND
-        CXXFeatures_rvalue_references_FOUND
-        CXXFeatures_sizeof_member_FOUND
-        CXXFeatures_static_assert_FOUND
-        CXXFeatures_variadic_templates_FOUND
+        auto
+        class_override_final
+        constexpr
+        cstdint_header
+        decltype
+        defaulted_functions
+        delegating_constructors
+        deleted_functions
+        func_identifier
+        initializer_list
+        lambda
+        long_long
+        nullptr
+        rvalue_references
+        sizeof_member
+        static_assert
+        variadic_templates
 )
 
 unset(_expected_features)
 unset(_expected_cxx11_flag)
 unset(_compiler_unknown_features)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # no idea since when this is supported, but it is at least
     # supported since 3.1
     list(APPEND _expected_features
-         CXXFeatures_long_long_FOUND
-         CXXFeatures_func_identifier_FOUND)
+         long_long
+         func_identifier)
 
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
         set(_expected_cxx11_flag "-std=c++0x")
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
             set(_expected_cxx11_flag "-std=c++11")
             list(APPEND _expected_features
-                 CXXFeatures_class_override_final_FOUND
-                 CXXFeatures_delegating_constructors_FOUND)
+                 class_override_final
+                 delegating_constructors)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
             list(APPEND _expected_features
-                 CXXFeatures_nullptr_FOUND)
+                 nullptr)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.5)
             list(APPEND _expected_features
-                 CXXFeatures_constexpr_FOUND
-                 CXXFeatures_lambda_FOUND)
+                 constexpr
+                 lambda)
         endif ()
         if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.4)
             list(APPEND _expected_features
-                 CXXFeatures_auto_FOUND
-                 CXXFeatures_cstdint_header_FOUND
-                 CXXFeatures_defaulted_functions_FOUND
-                 CXXFeatures_deleted_functions_FOUND
-                 CXXFeatures_initializer_list_FOUND
-                 CXXFeatures_sizeof_member_FOUND)
+                 auto
+                 cstdint_header
+                 defaulted_functions
+                 deleted_functions
+                 initializer_list
+                 sizeof_member)
         endif ()
         list(APPEND _expected_features
-             CXXFeatures_decltype_FOUND
-             CXXFeatures_rvalue_references_FOUND
-             CXXFeatures_static_assert_FOUND
-             CXXFeatures_variadic_templates_FOUND)
+             decltype
+             rvalue_references
+             static_assert
+             variadic_templates)
     endif ()
-elseif (MSVC)
-    if (NOT MSVC_VERSION VERSION_LESS 1700)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
         list(APPEND _expected_features
-             CXXFeatures_class_override_final_FOUND)
+             class_override_final)
     endif ()
-    if (NOT MSVC_VERSION VERSION_LESS 1600)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
         list(APPEND _expected_features
-             CXXFeatures_auto_FOUND
-             CXXFeatures_cstdint_header_FOUND
-             CXXFeatures_decltype_FOUND
-             CXXFeatures_lambda_FOUND
-             CXXFeatures_nullptr_FOUND
-             CXXFeatures_rvalue_references_FOUND
-             CXXFeatures_static_assert_FOUND)
+             auto
+             cstdint_header
+             decltype
+             lambda
+             nullptr
+             rvalue_references
+             static_assert)
     endif ()
-    if (NOT MSVC_VERSION VERSION_LESS 1301)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13.01)
         list(APPEND _expected_features
-             CXXFeatures_long_long_FOUND)
+             long_long)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Borland")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Borland")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.60)
         list(APPEND _expected_features
-             CXXFeatures_long_long_FOUND)
+             long_long)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "XL")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "XL")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
         set(_expected_cxx11_flag "-qlanglvl=extended0x")
         list(APPEND _expected_features
-             CXXFeatures_long_long_FOUND)
+             long_long)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
         # func_identifier and sizeof_member are here because they were detected on a
         # test machine but it is unclear since when they are supported
         list(APPEND _expected_features
-             CXXFeatures_auto_FOUND
-             CXXFeatures_decltype_FOUND
-             CXXFeatures_delegating_constructors_FOUND
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_sizeof_member_FOUND
-             CXXFeatures_static_assert_FOUND
-             CXXFeatures_variadic_templates_FOUND)
+             auto
+             decltype
+             delegating_constructors
+             func_identifier
+             sizeof_member
+             static_assert
+             variadic_templates)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
         list(APPEND _expected_features
-             CXXFeatures_constexpr_FOUND
-             CXXFeatures_rvalue_references_FOUND)
+             constexpr
+             rvalue_references)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "SunPro")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     # values found by looking on the test output, may be present much longer
-    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.9)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
         list(APPEND _expected_features
-             CXXFeatures_long_long_FOUND
-             CXXFeatures_sizeof_member_FOUND)
+             long_long
+             sizeof_member)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.3)
         list(APPEND _expected_features
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_long_long_FOUND)
+             func_identifier
+             long_long)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    # FIXME: newer version support -std=c++11, Windows has /Q flag
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
-        set(_expected_cxx11_flag "-std=c++0x")
+        if (WIN32)
+            set(_expected_cxx11_flag "/Qstd=c++0x")
+        else ()
+            set(_expected_cxx11_flag "-std=c++0x")
+        endif ()
         list(APPEND _expected_features
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_long_long_FOUND
-             CXXFeatures_static_assert_FOUND)
+             func_identifier
+             long_long
+             static_assert)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12)
         list(APPEND _expected_features
-             CXXFeatures_auto_FOUND
-             CXXFeatures_decltype_FOUND
-             CXXFeatures_defaulted_functions_FOUND
-             CXXFeatures_deleted_functions_FOUND
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_lambda_FOUND
-             CXXFeatures_long_long_FOUND
-             CXXFeatures_rvalue_references_FOUND
-             CXXFeatures_sizeof_member_FOUND
-             CXXFeatures_static_assert_FOUND)
+             auto
+             decltype
+             defaulted_functions
+             deleted_functions
+             func_identifier
+             lambda
+             long_long
+             rvalue_references
+             sizeof_member
+             static_assert)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.1)
         list(APPEND _expected_features
-             CXXFeatures_variadic_templates_FOUND)
+             variadic_templates)
     endif ()
     # constexpr is partially supported in version 13, it may
     # already show up for this version depending on the check file.
     # The same applies to initializer lists.
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13)
+        if (WIN32)
+            set(_expected_cxx11_flag "/Qstd=c++11")
+        else ()
+            set(_expected_cxx11_flag "-std=c++11")
+        endif ()
         list(APPEND _expected_features
-             CXXFeatures_nullptr_FOUND)
+             nullptr)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
         list(APPEND _expected_features
-             CXXFeatures_class_override_final_FOUND
-             CXXFeatures_constexpr_FOUND
-             CXXFeatures_delegating_constructors_FOUND
-             CXXFeatures_initializer_list_FOUND)
+             class_override_final
+             constexpr
+             delegating_constructors
+             initializer_list)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Watcom")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Watcom")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.70)
         list(APPEND _expected_features
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_long_long_FOUND)
+             func_identifier
+             long_long)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "MIPSpro")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MIPSpro")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.4.4)
         list(APPEND _expected_features
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_long_long_FOUND)
+             func_identifier
+             long_long)
     endif ()
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "HP")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
     # values found by looking on the test output, may be present much longer
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.20)
         list(APPEND _expected_features
-             CXXFeatures_func_identifier_FOUND
-             CXXFeatures_long_long_FOUND)
+             func_identifier
+             long_long)
     endif ()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9)
+         set(_expected_cxx11_flag "-std=c++0x")
+        list(APPEND _expected_features
+             auto
+             class_override_final
+             constexpr
+             decltype
+             deleted_functions
+             func_identifier
+             long_long
+             rvalue_references
+             sizeof_member
+             static_assert
+             variadic_templates)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3)
+          # FIXME: I've seen both :( FreeBSD 9.0 has 0x, 10.0 has 11
+         set(_expected_cxx11_flag "-std=c++11")
+         list(APPEND _expected_features
+             defaulted_functions
+             delegating_constructors)
+    endif ()
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.1)
+         set(_expected_cxx11_flag "-std=c++11")
+         list(APPEND _expected_features
+             cstdint_header
+             initializer_list
+             lambda
+             nullptr)
+    endif ()
+
 else ()
     message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
@@ -196,11 +236,12 @@ find_package(CXXFeatures)
 
 foreach (flag IN LISTS _all_cxx_features)
     list(FIND _expected_features "${flag}" _flag_index)
-    if (${flag})
-        add_definitions("-D${flag}")
-        message(STATUS "Compiler C++ support flag ${flag} set")
+    set(_full_flag CXXFeatures_${flag}_FOUND)
+    if (${_full_flag})
+        add_definitions("-D${_full_flag}")
+        message(STATUS "Compiler C++ support flag ${_full_flag} set")
         if (_flag_index EQUAL -1 AND NOT _compiler_unknown_features)
-            message(SEND_ERROR "C++ feature '${flag}' was detected, but not expected")
+            message(WARNING "C++ feature '${flag}' was detected, but not expected")
         endif ()
     else ()
         if (NOT _flag_index EQUAL -1)
