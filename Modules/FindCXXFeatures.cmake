@@ -88,11 +88,13 @@ function(cxx_check_feature FEATURE_NAME)
     set(_SRCFILE_FAIL_COMPILE "${_SRCFILE_BASE}_fail_compile.cxx")
 
     try_compile(${RESULT_VAR} "${_bindir}" "${_SRCFILE}"
-                COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}")
+                COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}"
+                OUTPUT_VARIABLE _SRCFILE_COMPILE_PASS_OUTPUT)
 
     if (${RESULT_VAR} AND EXISTS ${_SRCFILE_FAIL_COMPILE})
         try_compile(_TMP_RESULT "${_bindir}_fail_compile" "${_SRCFILE_FAIL_COMPILE}"
-                    COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}")
+                    COMPILE_DEFINITIONS "${CXX11_COMPILER_FLAGS}"
+                    OUTPUT_VARIABLE _SRCFILE_COMPILE_FAIL_OUTPUT)
         if (_TMP_RESULT)
             set(${RESULT_VAR} FALSE)
         else ()
@@ -102,8 +104,16 @@ function(cxx_check_feature FEATURE_NAME)
 
     if (${RESULT_VAR})
         message(STATUS "Checking C++ support for ${_LOG_NAME}: works")
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "Checking C++ support for ${_LOG_NAME} passed.\n"
+          "Compile pass output:\n${_SRCFILE_COMPILE_PASS_OUTPUT}\n"
+          "Compile fail output:\n${_SRCFILE_COMPILE_FAIL_OUTPUT}\n")
     else ()
         message(STATUS "Checking C++ support for ${_LOG_NAME}: not supported")
+        file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "Checking C++ support for ${_LOG_NAME} failed.\n"
+          "Compile pass output:\n${_SRCFILE_COMPILE_PASS_OUTPUT}\n"
+          "Compile fail output:\n${_SRCFILE_COMPILE_FAIL_OUTPUT}\n")
     endif ()
     set(${RESULT_VAR} "${${RESULT_VAR}}" CACHE INTERNAL "C++ support for ${_LOG_NAME}")
 endfunction(cxx_check_feature)
