@@ -65,6 +65,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
              static_assert
              variadic_templates)
     endif ()
+    # At least on one AIX dashboard machine the detection fails with
+    # gcc 2.9, looks like that didn't properly detect the flags.
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3)
+        set(_compiler_unknown_flag)
+    endif ()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17)
         list(APPEND _expected_features
