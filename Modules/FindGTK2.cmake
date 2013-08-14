@@ -418,7 +418,9 @@ function(_GTK2_ADJUST_LIB_VARS _var)
             set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${GTK2_${_var}CONFIG_INCLUDE_DIR}")
         endif()
 
-        set_property(TARGET GTK2::${_basename} PROPERTY INTERFACE_COMPILE_DEFINITIONS "${GTK2_DEFINITIONS}")
+        if(GTK2_DEFINITIONS)
+            set_property(TARGET GTK2::${_basename} PROPERTY INTERFACE_COMPILE_DEFINITIONS "${GTK2_DEFINITIONS}")
+        endif()
 
         if(GTK2_USE_IMPORTED_TARGETS)
             set(GTK2_${_var}_LIBRARY GTK2::${_basename} PARENT_SCOPE)
