@@ -134,11 +134,23 @@ elseif("${CMAKE_GENERATOR}" MATCHES Xcode
     set(_CMAKE_OSX_SDKS_VER_SUFFIX_10.3 ".9")
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
       set(_CMAKE_OSX_SDKS_VER ${CMAKE_OSX_DEPLOYMENT_TARGET}${_CMAKE_OSX_SDKS_VER_SUFFIX_${CMAKE_OSX_DEPLOYMENT_TARGET}})
+      set(_CMAKE_OSX_SYSROOT_CHECK "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
+      if(IS_DIRECTORY "${_CMAKE_OSX_SYSROOT_CHECK}")
+        set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SYSROOT_CHECK}")
+      else()
+        set(_CMAKE_OSX_SDKS_VER ${_CURRENT_OSX_VERSION}${_CMAKE_OSX_SDKS_VER_SUFFIX_${_CURRENT_OSX_VERSION}})
+        set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
+        message(WARNING
+          "CMAKE_OSX_DEPLOYMENT_TARGET is '${CMAKE_OSX_DEPLOYMENT_TARGET}' "
+          "but the matching SDK does not exist at:\n \"${_CMAKE_OSX_SYSROOT_CHECK}\"\n"
+          "Instead using SDK:\n \"${_CMAKE_OSX_SYSROOT_DEFAULT}\"\n"
+          "matching the host OS X version."
+          )
+      endif()
     else()
       set(_CMAKE_OSX_SDKS_VER ${_CURRENT_OSX_VERSION}${_CMAKE_OSX_SDKS_VER_SUFFIX_${_CURRENT_OSX_VERSION}})
+      set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
     endif()
-    set(_CMAKE_OSX_SYSROOT_DEFAULT
-      "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_SDKS_VER}.sdk")
   else()
     # Assume developer files are in root (such as Xcode 4.5 command-line tools).
     set(_CMAKE_OSX_SYSROOT_DEFAULT "")
