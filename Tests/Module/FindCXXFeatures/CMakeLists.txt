@@ -24,6 +24,7 @@ set(_all_cxx_features
 unset(_expected_features)
 unset(_expected_cxx11_flag)
 unset(_compiler_unknown_features)
+unset(_compiler_unknown_flag)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # no idea since when this is supported, but it is at least
@@ -195,8 +196,10 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "HP")
              long_long)
     endif ()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.1)
+        set(_expected_cxx11_flag "-std=c++0x")
+    endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9)
-         set(_expected_cxx11_flag "-std=c++0x")
         list(APPEND _expected_features
              auto
              class_override_final
@@ -210,8 +213,12 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
              static_assert
              variadic_templates)
     endif ()
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.0.0)
+        # FreeBSD 9.0 and 10.0 both identify as Clang 3.0, but one has -std=c++0x,
+        # the other has -stc=c++11.
+        set(_compiler_unknown_flag TRUE)
+    endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3)
-          # FIXME: I've seen both :( FreeBSD 9.0 has 0x, 10.0 has 11
          set(_expected_cxx11_flag "-std=c++11")
          list(APPEND _expected_features
              defaulted_functions
@@ -225,11 +232,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
              lambda
              nullptr)
     endif ()
-
 else ()
     message(STATUS "CTEST_FULL_OUTPUT")
     message(WARNING "Your C++ compiler configuration is not in the list of known configurations")
     set(_compiler_unknown_features TRUE)
+    set(_compiler_unknown_flag TRUE)
 endif ()
 
 find_package(CXXFeatures)
@@ -250,9 +257,13 @@ foreach (flag IN LISTS _all_cxx_features)
     endif ()
 endforeach (flag)
 
-# variables must be expanded here so it still works if both are empty
-if (NOT "${CXX11_COMPILER_FLAGS}" STREQUAL "${_expected_cxx11_flag}" AND NOT _compiler_unknown_features)
-    message(SEND_ERROR "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
+# Variables must be expanded here so it still works if both are empty.
+if (NOT "${CXX11_COMPILER_FLAGS}" STREQUAL "${_expected_cxx11_flag}")
+    if (_compiler_unknown_flag)
+        message(WARNING    "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
+    else ()
+        message(SEND_ERROR "Found C++11 flag '${CXX11_COMPILER_FLAGS}' but expected '${_expected_cxx11_flag}'")
+    endif ()
 endif ()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
 add_executable(FindCXXFeatures cxxfeatures.cxx)
