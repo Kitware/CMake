@@ -287,8 +287,8 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     if(token->type == cmListFileLexer_Token_ParenLeft)
       {
       parenDepth++;
-      this->AddArgument(token, cmListFileArgument::Unquoted);
       this->Separation = SeparationOkay;
+      this->AddArgument(token, cmListFileArgument::Unquoted);
       }
     else if(token->type == cmListFileLexer_Token_ParenRight)
       {
