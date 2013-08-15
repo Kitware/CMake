@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 project(FindCXXFeatures CXX)
 
+# all detectable features
 set(_all_cxx_features
         auto
         class_override_final
@@ -19,6 +20,21 @@ set(_all_cxx_features
         sizeof_member
         static_assert
         variadic_templates
+)
+
+# a feature that even a non-supporting compiler can offer
+# when the correct headers are present
+set(_header_on_features
+        cstdint_header
+)
+
+# features that need the proper headers in place, i.e. a
+# supporting compiler with older headers will fail
+# nullptr test intentionally does not test for nullptr_t so it
+# is independent of any headers
+set(_header_off_features
+        ${_header_on_features}
+        initializer_list
 )
 
 unset(_expected_features)
@@ -255,12 +271,22 @@ foreach (flag IN LISTS _all_cxx_features)
         add_definitions("-D${_full_flag}")
         message(STATUS "Compiler C++ support flag ${_full_flag} set")
         if (_flag_index EQUAL -1 AND NOT _compiler_unknown_features)
-            message(WARNING "C++ feature '${flag}' was detected, but not expected")
-            set(_compiler_unknown_flag)
+            list(FIND _header_on_features "${flag}" _flag_index)
+            if (_flag_index EQUAL -1)
+                message(WARNING "C++ feature '${flag}' was detected, but not expected")
+                set(_compiler_unknown_flag)
+            else ()
+                message(STATUS "C++ feature '${flag}' was detected because of additional header present")
+            endif ()
         endif ()
     else ()
         if (NOT _flag_index EQUAL -1)
-            message(SEND_ERROR "Expected C++ feature '${flag}' not detected")
+            list(FIND _header_off_features "${flag}" _flag_index)
+            if (_flag_index EQUAL -1)
+                message(SEND_ERROR "Expected C++ feature '${flag}' not detected")
+            else ()
+                message(WARNING "Expected C++ feature '${flag}' not detected, support probably missing in library")
+            endif ()
             set(_send_logs TRUE)
         endif ()
     endif ()

@@ -19,7 +19,7 @@ struct thing {
 int main()
 {
 #if defined (CXXFEATURES_NULLPTR_FOUND)
-    nullptr_t *nix = nullptr;
+    void *nix = nullptr;
 #else /* CXXFEATURES_NULLPTR_FOUND */
     void *nix = 0;
 #endif /* CXXFEATURES_NULLPTR_FOUND */
