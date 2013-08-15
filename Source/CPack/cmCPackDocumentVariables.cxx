@@ -28,7 +28,7 @@ void cmCPackDocumentVariables::DefineVariables(cmake* cm)
          " the so-called top level directory. The purpose of"
          " is to include (set to 1 or ON or TRUE) the top level directory"
          " in the package or not (set to 0 or OFF or FALSE).\n"
-         "Each CPack generator as a built-in default value for this"
+         "Each CPack generator has a built-in default value for this"
          " variable. E.g. Archive generators (ZIP, TGZ, ...) includes"
          " the top level whereas RPM or DEB don't. The user may override"
          " the default value by setting this variable.\n"
