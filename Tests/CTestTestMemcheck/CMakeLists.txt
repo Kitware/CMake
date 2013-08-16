@@ -52,7 +52,7 @@ endif()
 #  - Valgrind memcheck may add extra "==..." lines.
 set(other_tool_output "((${guard_malloc_output}BullseyeCoverage|==)[^\n]*\n)*")
 
-set(ctest_and_tool_outputs "
+string(REPLACE "\r\n" "\n" ctest_and_tool_outputs "
 1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+\\.[0-9]+ sec
 ${guard_malloc_lines}
 100% tests passed, 0 tests failed out of 1
