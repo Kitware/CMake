@@ -49,7 +49,8 @@ endif()
 # When this entire test runs under coverage or memcheck tools
 # they may add output to the end, so match known cases:
 #  - Bullseye adds a "BullseyeCoverage..." line.
-set(other_tool_output "((${guard_malloc_output}BullseyeCoverage)[^\n]*\n)*")
+#  - Valgrind memcheck may add extra "==..." lines.
+set(other_tool_output "((${guard_malloc_output}BullseyeCoverage|==)[^\n]*\n)*")
 
 set(ctest_and_tool_outputs "
 1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+\\.[0-9]+ sec
