@@ -46,8 +46,8 @@ endif ()
 # When this entire test runs under coverage or memcheck tools
 # they may add output to the end, so match known cases:
 #  - Bullseye adds a "BullseyeCoverage..." line.
-#  - Valgrind memcheck may add extra newlines and tabs.
-set(OTHER_TOOL_OUTPUT "(BullseyeCoverage[^\n]*\n|[\t\n]+)?")
+#  - Valgrind memcheck may add extra "==..." lines.
+set(OTHER_TOOL_OUTPUT "((BullseyeCoverage|==)[^\n]*\n)*")
 
 function(gen_mc_test_internal NAME CHECKER)
     set(SUBTEST_NAME "${NAME}")
