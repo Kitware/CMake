@@ -243,15 +243,15 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
          set(_expected_cxx11_flag "-std=c++11")
          list(APPEND _expected_features
              defaulted_functions
-             delegating_constructors)
+             delegating_constructors
+             nullptr)
     endif ()
     if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.1)
          set(_expected_cxx11_flag "-std=c++11")
          list(APPEND _expected_features
              cstdint_header
              initializer_list
-             lambda
-             nullptr)
+             lambda)
     endif ()
 else ()
     message(STATUS "CTEST_FULL_OUTPUT")
