@@ -5,17 +5,17 @@ find_package(testLibRequired 2.5 REQUIRED)
 
 include(CheckCXXSourceCompiles)
 
-set(CMAKE_REQUIRED_LIBRARIES Req::testSharedLibRequired)
+set(CMAKE_REQUIRED_LIBRARIES Req::testSharedLibRequiredUser)
 check_cxx_source_compiles(
   "
-#include \"testSharedLibRequired.h\"
+#include \"testSharedLibRequiredUser.h\"
 int main(int argc, char **argv)
 {
-  TestSharedLibRequired req;
-  return req.foo();
+  TestSharedLibRequiredUser user;
+  return user.foo();
 }
-" SHARED_LIB_REQUIRED)
+" SHARED_LIB_DEPENDS)
 
-if(NOT SHARED_LIB_REQUIRED)
+if(NOT SHARED_LIB_DEPENDS)
   message(SEND_ERROR "try_compile with IMPORTED targets failed!\n\n${OUTPUT}")
 endif()
