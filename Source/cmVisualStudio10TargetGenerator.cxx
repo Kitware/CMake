@@ -219,11 +219,10 @@ void cmVisualStudio10TargetGenerator::Generate()
 
   //get the tools version to use
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
-  const std::string project_defaults =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-    "<Project DefaultTargets=\"Build\" ToolsVersion=\" " + toolsVer + "\" " +
-    "xmlns=\"http://schemas.microsoft.com/" +
-    "developer/msbuild/2003\">\n";
+  std::string project_defaults = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  project_defaults.append("<Project DefaultTargets=\"Build\" ToolsVersion=\"");
+  project_defaults.append(toolsVer +" \" ");
+  project_defaults.append("xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(),0);
 
   this->WriteProjectConfigurations();
@@ -723,11 +722,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
   //get the tools version to use
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
-  const std::string project_defaults =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-    "<Project ToolsVersion=\" " + toolsVer + "\" " +
-    "xmlns=\"http://schemas.microsoft.com/" +
-    "developer/msbuild/2003\">\n";
+  std::string project_defaults = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  project_defaults.append("<Project ToolsVersion=\"");
+  project_defaults.append(toolsVer +" \" ");
+  project_defaults.append("xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(),0);
 
   for(ToolSourceMap::const_iterator ti = this->Tools.begin();
