@@ -81,9 +81,11 @@ public:
 
   void PathTooLong(cmTarget* target, cmSourceFile* sf,
                    std::string const& sfRel);
+
+  virtual const char* GetToolsVersion() { return "4.0"; }
+
 protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
-  virtual const char* GetToolsVersion() { return "4.0"; }
 
   std::string PlatformToolset;
   bool ExpressEdition;
