@@ -216,12 +216,16 @@ void cmVisualStudio10TargetGenerator::Generate()
   // Write the encoding header into the file
   char magic[] = {0xEF,0xBB, 0xBF};
   this->BuildFileStream->write(magic, 3);
-  this->WriteString("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n",0);
-  this->WriteString("<Project DefaultTargets=\"Build\" "
-                    "ToolsVersion=\"4.0\" "
-                    "xmlns=\"http://schemas.microsoft.com/"
-                    "developer/msbuild/2003\">\n",
-                    0);
+
+  //get the tools version to use
+  const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
+  const std::string project_defaults =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+    "<Project DefaultTargets=\"Build\" ToolsVersion=\" " + toolsVer + "\" " +
+    "xmlns=\"http://schemas.microsoft.com/" +
+    "developer/msbuild/2003\">\n";
+  this->WriteString(project_defaults.c_str(),0);
+
   this->WriteProjectConfigurations();
   this->WriteString("<PropertyGroup Label=\"Globals\">\n", 1);
   this->WriteString("<ProjectGUID>", 2);
@@ -716,12 +720,16 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   fout.write(magic, 3);
   cmGeneratedFileStream* save = this->BuildFileStream;
   this->BuildFileStream = & fout;
-  this->WriteString("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-                    "<Project "
-                    "ToolsVersion=\"4.0\" "
-                    "xmlns=\"http://schemas.microsoft.com/"
-                    "developer/msbuild/2003\">\n",
-                    0);
+
+  //get the tools version to use
+  const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
+  const std::string project_defaults =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+    "<Project ToolsVersion=\" " + toolsVer + "\" " +
+    "xmlns=\"http://schemas.microsoft.com/" +
+    "developer/msbuild/2003\">\n";
+  this->WriteString(project_defaults.c_str(),0);
+
   for(ToolSourceMap::const_iterator ti = this->Tools.begin();
       ti != this->Tools.end(); ++ti)
     {
