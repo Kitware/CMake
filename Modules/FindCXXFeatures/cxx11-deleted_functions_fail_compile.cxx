@@ -1,9 +1,18 @@
 struct A {
+    A() = delete;
     ~A() = delete;
+    int m;
+    int ret();
 };
+
+int A::ret()
+{
+    return 2 * m;
+}
 
 int main(void)
 {
     A bar;
-    return 0;
+    bar.m = 1;
+    return bar.ret();
 }
