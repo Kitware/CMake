@@ -221,7 +221,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
   std::string project_defaults="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
   project_defaults.append("<Project DefaultTargets=\"Build\" ToolsVersion=\"");
-  project_defaults.append(toolsVer +" \" ");
+  project_defaults.append(toolsVer +"\" ");
   project_defaults.append(
           "xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(),0);
@@ -725,7 +725,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
   std::string project_defaults="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
   project_defaults.append("<Project ToolsVersion=\"");
-  project_defaults.append(toolsVer +" \" ");
+  project_defaults.append(toolsVer +"\" ");
   project_defaults.append(
         "xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(),0);
