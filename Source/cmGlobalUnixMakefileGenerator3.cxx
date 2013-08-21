@@ -435,6 +435,7 @@ cmGlobalUnixMakefileGenerator3
        (l->second.GetType() == cmTarget::SHARED_LIBRARY) ||
        (l->second.GetType() == cmTarget::MODULE_LIBRARY) ||
        (l->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
+       (l->second.GetType() == cmTarget::INTERFACE_LIBRARY) ||
        (l->second.GetType() == cmTarget::UTILITY))
       {
       // Add this to the list of depends rules in this directory.
@@ -612,6 +613,7 @@ cmGlobalUnixMakefileGenerator3
           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
           (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
+          (t->second.GetType() == cmTarget::INTERFACE_LIBRARY) ||
           (t->second.GetType() == cmTarget::UTILITY)))
         {
         // Add a rule to build the target by name.
@@ -633,6 +635,10 @@ cmGlobalUnixMakefileGenerator3
                           t->second.GetName(), depends, commands,
                           true);
 
+        if (t->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+          {
+          continue;
+          }
         // Add a fast rule to build the target
         std::string localName = lg->GetRelativeTargetDirectory(t->second);
         std::string makefileName;
@@ -699,6 +705,7 @@ cmGlobalUnixMakefileGenerator3
         || (t->second.GetType() == cmTarget::SHARED_LIBRARY)
         || (t->second.GetType() == cmTarget::MODULE_LIBRARY)
         || (t->second.GetType() == cmTarget::OBJECT_LIBRARY)
+        || (t->second.GetType() == cmTarget::INTERFACE_LIBRARY)
         || (t->second.GetType() == cmTarget::UTILITY)))
       {
       std::string makefileName;
@@ -715,69 +722,77 @@ cmGlobalUnixMakefileGenerator3
         << localName << "\n\n";
 
       commands.clear();
-      makeTargetName = localName;
-      makeTargetName += "/depend";
-      commands.push_back(lg->GetRecursiveMakeCall
-                         (makefileName.c_str(),makeTargetName.c_str()));
 
-      // add requires if we need it for this generator
-      if (needRequiresStep)
+      if(t->second.GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         makeTargetName = localName;
-        makeTargetName += "/requires";
+        makeTargetName += "/depend";
         commands.push_back(lg->GetRecursiveMakeCall
-                           (makefileName.c_str(),makeTargetName.c_str()));
-        }
-      makeTargetName = localName;
-      makeTargetName += "/build";
-      commands.push_back(lg->GetRecursiveMakeCall
                           (makefileName.c_str(),makeTargetName.c_str()));
 
-      // Write the rule.
-      localName += "/all";
-      depends.clear();
-
-      std::string progressDir =
-        lg->GetMakefile()->GetHomeOutputDirectory();
-      progressDir += cmake::GetCMakeFilesDirectory();
-        {
-        cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-        // all target counts
-        progCmd << lg->Convert(progressDir.c_str(),
-                                cmLocalGenerator::FULL,
-                                cmLocalGenerator::SHELL);
-        progCmd << " ";
-        std::vector<unsigned long>& progFiles =
-          this->ProgressMap[&t->second].Marks;
-        for (std::vector<unsigned long>::iterator i = progFiles.begin();
-              i != progFiles.end(); ++i)
+        // add requires if we need it for this generator
+        if (needRequiresStep)
           {
-          progCmd << " " << *i;
+          makeTargetName = localName;
+          makeTargetName += "/requires";
+          commands.push_back(lg->GetRecursiveMakeCall
+                            (makefileName.c_str(),makeTargetName.c_str()));
           }
-        commands.push_back(progCmd.str());
+        makeTargetName = localName;
+        makeTargetName += "/build";
+        commands.push_back(lg->GetRecursiveMakeCall
+                            (makefileName.c_str(),makeTargetName.c_str()));
+
+        // Write the rule.
+        localName += "/all";
+        depends.clear();
+
+        std::string progressDir =
+          lg->GetMakefile()->GetHomeOutputDirectory();
+        progressDir += cmake::GetCMakeFilesDirectory();
+          {
+          cmOStringStream progCmd;
+          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+          // all target counts
+          progCmd << lg->Convert(progressDir.c_str(),
+                                  cmLocalGenerator::FULL,
+                                  cmLocalGenerator::SHELL);
+          progCmd << " ";
+          std::vector<unsigned long>& progFiles =
+            this->ProgressMap[&t->second].Marks;
+          for (std::vector<unsigned long>::iterator i = progFiles.begin();
+                i != progFiles.end(); ++i)
+            {
+            progCmd << " " << *i;
+            }
+          commands.push_back(progCmd.str());
+          }
+        progressDir = "Built target ";
+        progressDir += t->first;
+        lg->AppendEcho(commands,progressDir.c_str());
         }
-      progressDir = "Built target ";
-      progressDir += t->first;
-      lg->AppendEcho(commands,progressDir.c_str());
 
       this->AppendGlobalTargetDepends(depends,t->second);
+
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands, true);
 
-      // add the all/all dependency
-      if(!this->IsExcluded(this->LocalGenerators[0], t->second))
+      if(t->second.GetType() != cmTarget::INTERFACE_LIBRARY)
         {
-        depends.clear();
-        depends.push_back(localName);
-        commands.clear();
-        lg->WriteMakeRule(ruleFileStream, "Include target in all.",
-                          "all", depends, commands, true);
+        // add the all/all dependency
+        if(!this->IsExcluded(this->LocalGenerators[0], t->second))
+          {
+          depends.clear();
+          depends.push_back(localName);
+          commands.clear();
+          lg->WriteMakeRule(ruleFileStream, "Include target in all.",
+                            "all", depends, commands, true);
+          }
         }
 
       // Write the rule.
       commands.clear();
-      progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
+      std::string progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
       progressDir += cmake::GetCMakeFilesDirectory();
 
       {
