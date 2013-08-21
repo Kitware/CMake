@@ -177,6 +177,9 @@ public:
   void GetDirectLinkLibraries(const char *config,
                               std::vector<std::string> &,
                               cmTarget *head);
+  void GetInterfaceLinkLibraries(const char *config,
+                              std::vector<std::string> &,
+                              cmTarget *head);
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config);

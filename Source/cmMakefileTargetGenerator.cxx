@@ -75,6 +75,7 @@ cmMakefileTargetGenerator::New(cmTarget *tgt)
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
     case cmTarget::OBJECT_LIBRARY:
+    case cmTarget::INTERFACE_LIBRARY:
       result = new cmMakefileLibraryTargetGenerator(tgt);
       break;
     case cmTarget::UTILITY:

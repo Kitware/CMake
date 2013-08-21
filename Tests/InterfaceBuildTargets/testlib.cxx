@@ -1,0 +1,5 @@
+
+void testlib(void)
+{
+
+}
