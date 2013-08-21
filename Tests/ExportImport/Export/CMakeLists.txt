@@ -227,6 +227,21 @@ install(FILES
     DESTINATION include/testSharedLibRequiredUser
 )
 
+cmake_policy(SET CMP0022 NEW)
+add_library(testSharedLibRequiredUser2 SHARED testSharedLibRequiredUser2.cpp)
+generate_export_header(testSharedLibRequiredUser2)
+set_property(TARGET testSharedLibRequiredUser2 APPEND PROPERTY
+  INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}>"
+)
+set_property(TARGET testSharedLibRequiredUser2 PROPERTY LINK_LIBRARIES testSharedLibRequired)
+set_property(TARGET testSharedLibRequiredUser2 PROPERTY INTERFACE_LINK_LIBRARIES testSharedLibRequired)
+install(FILES
+  "${CMAKE_CURRENT_SOURCE_DIR}/testSharedLibRequiredUser2.h"
+  "${CMAKE_CURRENT_BINARY_DIR}/testsharedlibrequireduser2_export.h"
+    DESTINATION include/testSharedLibRequiredUser2
+)
+cmake_policy(SET CMP0022 OLD)
+
 add_library(testSharedLibDepends SHARED testSharedLibDepends.cpp)
 set_property(TARGET testSharedLibDepends APPEND PROPERTY
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}"
@@ -298,6 +313,7 @@ install(TARGETS
           testLibIncludeRequired6
           testSharedLibRequired
           testSharedLibRequiredUser
+          testSharedLibRequiredUser2
           noIncludesInterface
         EXPORT RequiredExp DESTINATION lib
         INCLUDES DESTINATION
@@ -398,7 +414,8 @@ add_subdirectory(sublib) # For CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE test.
 # Export from build tree.
 export(TARGETS testExe1 testLib1 testLib2 testLib3
   testExe2libImp testLib3Imp testLib3ImpDep subdirlib
-  testSharedLibRequired testSharedLibRequiredUser testSharedLibDepends renamed_on_export
+  testSharedLibRequired testSharedLibRequiredUser testSharedLibRequiredUser2
+  testSharedLibDepends renamed_on_export
   cmp0022NEW cmp0022OLD
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
