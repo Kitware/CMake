@@ -250,7 +250,13 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
          set(_expected_cxx11_flag "-std=c++11")
          list(APPEND _expected_features
              cstdint_header
-             initializer_list
+             initializer_list)
+    endif ()
+    # Clang supports lambda since 3.1, but at least the version shipped with
+    # MacOS 10.7 crashes with our testcase, so this support wouldn't be reliable.
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.2)
+         set(_expected_cxx11_flag "-std=c++11")
+         list(APPEND _expected_features
              lambda)
     endif ()
 else ()
