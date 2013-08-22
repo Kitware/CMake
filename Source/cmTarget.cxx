@@ -1617,7 +1617,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->IsApple = this->Makefile->IsOn("APPLE");
 
   // Setup default property values.
-  this->SetPropertyDefault("INSTALL_NAME_DIR", "");
+  this->SetPropertyDefault("INSTALL_NAME_DIR", 0);
   this->SetPropertyDefault("INSTALL_RPATH", "");
   this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
   this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
@@ -4567,6 +4567,10 @@ bool cmTarget::HasMacOSXRpath(const char* config)
       {
       install_name_is_rpath = true;
       }
+    else if(install_name && use_install_name)
+      {
+      return false;
+      }
     }
   else
     {
@@ -5299,18 +5303,18 @@ std::string cmTarget::GetInstallNameDirForInstallTree()
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     std::string dir;
+    const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
 
     if(!this->Makefile->IsOn("CMAKE_SKIP_RPATH") &&
        !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH"))
       {
-      const char* install_name_dir = this->GetProperty("INSTALL_NAME_DIR");
       if(install_name_dir && *install_name_dir)
         {
         dir = install_name_dir;
         dir += "/";
         }
       }
-    if(dir.empty() && this->GetPropertyAsBool("MACOSX_RPATH"))
+    if(!install_name_dir && this->GetPropertyAsBool("MACOSX_RPATH"))
       {
       dir = "@rpath/";
       }
