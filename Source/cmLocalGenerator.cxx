@@ -297,7 +297,7 @@ void cmLocalGenerator::GenerateTestFiles()
     this->Makefile->GetProperty("TEST_INCLUDE_FILE");
   if ( testIncludeFile )
     {
-    fout << "INCLUDE(\"" << testIncludeFile << "\")" << std::endl;
+    fout << "include(\"" << testIncludeFile << "\")" << std::endl;
     }
 
   // Ask each test generator to write its code.
@@ -313,7 +313,8 @@ void cmLocalGenerator::GenerateTestFiles()
     size_t i;
     for(i = 0; i < this->Children.size(); ++i)
       {
-      fout << "SUBDIRS(";
+      // TODO: Use add_subdirectory instead?
+      fout << "subdirs(";
       std::string outP =
         this->Children[i]->GetMakefile()->GetStartOutputDirectory();
       fout << this->Convert(outP.c_str(),START_OUTPUT);
@@ -416,39 +417,39 @@ void cmLocalGenerator::GenerateInstallRules()
   fout << "# Install script for directory: "
        << this->Makefile->GetCurrentDirectory() << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
-       << "IF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
-       << "  SET(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
-       << "ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
-       << "STRING(REGEX REPLACE \"/$\" \"\" CMAKE_INSTALL_PREFIX "
+       << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
+       << "  set(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
+       << "endif()" << std::endl
+       << "string(REGEX REPLACE \"/$\" \"\" CMAKE_INSTALL_PREFIX "
        << "\"${CMAKE_INSTALL_PREFIX}\")" << std::endl
        << std::endl;
 
   // Write support code for generating per-configuration install rules.
   fout <<
     "# Set the install configuration name.\n"
-    "IF(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)\n"
-    "  IF(BUILD_TYPE)\n"
-    "    STRING(REGEX REPLACE \"^[^A-Za-z0-9_]+\" \"\"\n"
+    "if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)\n"
+    "  if(BUILD_TYPE)\n"
+    "    string(REGEX REPLACE \"^[^A-Za-z0-9_]+\" \"\"\n"
     "           CMAKE_INSTALL_CONFIG_NAME \"${BUILD_TYPE}\")\n"
-    "  ELSE(BUILD_TYPE)\n"
-    "    SET(CMAKE_INSTALL_CONFIG_NAME \"" << default_config << "\")\n"
-    "  ENDIF(BUILD_TYPE)\n"
-    "  MESSAGE(STATUS \"Install configuration: "
+    "  else()\n"
+    "    set(CMAKE_INSTALL_CONFIG_NAME \"" << default_config << "\")\n"
+    "  endif()\n"
+    "  message(STATUS \"Install configuration: "
     "\\\"${CMAKE_INSTALL_CONFIG_NAME}\\\"\")\n"
-    "ENDIF(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)\n"
+    "endif()\n"
     "\n";
 
   // Write support code for dealing with component-specific installs.
   fout <<
     "# Set the component getting installed.\n"
-    "IF(NOT CMAKE_INSTALL_COMPONENT)\n"
-    "  IF(COMPONENT)\n"
-    "    MESSAGE(STATUS \"Install component: \\\"${COMPONENT}\\\"\")\n"
-    "    SET(CMAKE_INSTALL_COMPONENT \"${COMPONENT}\")\n"
-    "  ELSE(COMPONENT)\n"
-    "    SET(CMAKE_INSTALL_COMPONENT)\n"
-    "  ENDIF(COMPONENT)\n"
-    "ENDIF(NOT CMAKE_INSTALL_COMPONENT)\n"
+    "if(NOT CMAKE_INSTALL_COMPONENT)\n"
+    "  if(COMPONENT)\n"
+    "    message(STATUS \"Install component: \\\"${COMPONENT}\\\"\")\n"
+    "    set(CMAKE_INSTALL_COMPONENT \"${COMPONENT}\")\n"
+    "  else()\n"
+    "    set(CMAKE_INSTALL_COMPONENT)\n"
+    "  endif()\n"
+    "endif()\n"
     "\n";
 
   // Copy user-specified install options to the install code.
@@ -457,9 +458,9 @@ void cmLocalGenerator::GenerateInstallRules()
     {
     fout <<
       "# Install shared libraries without execute permission?\n"
-      "IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
-      "  SET(CMAKE_INSTALL_SO_NO_EXE \"" << so_no_exe << "\")\n"
-      "ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
+      "if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
+      "  set(CMAKE_INSTALL_SO_NO_EXE \"" << so_no_exe << "\")\n"
+      "endif()\n"
       "\n";
     }
 
@@ -479,7 +480,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Include install scripts from subdirectories.
   if(!this->Children.empty())
     {
-    fout << "IF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
+    fout << "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n";
     fout << "  # Include the install script for each subdirectory.\n";
     for(std::vector<cmLocalGenerator*>::const_iterator
           ci = this->Children.begin(); ci != this->Children.end(); ++ci)
@@ -488,34 +489,34 @@ void cmLocalGenerator::GenerateInstallRules()
         {
         std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
-        fout << "  INCLUDE(\"" <<  odir.c_str()
+        fout << "  include(\"" <<  odir.c_str()
              << "/cmake_install.cmake\")" << std::endl;
         }
       }
     fout << "\n";
-    fout << "ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)\n\n";
+    fout << "endif()\n\n";
     }
 
   // Record the install manifest.
   if ( toplevel_install )
     {
     fout <<
-      "IF(CMAKE_INSTALL_COMPONENT)\n"
-      "  SET(CMAKE_INSTALL_MANIFEST \"install_manifest_"
+      "if(CMAKE_INSTALL_COMPONENT)\n"
+      "  set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
       "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
-      "ELSE(CMAKE_INSTALL_COMPONENT)\n"
-      "  SET(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
-      "ENDIF(CMAKE_INSTALL_COMPONENT)\n\n";
+      "else()\n"
+      "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
+      "endif()\n\n";
     fout
-      << "FILE(WRITE \""
+      << "file(WRITE \""
       << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
       << "\"\")" << std::endl;
     fout
-      << "FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
-      << "  FILE(APPEND \""
+      << "foreach(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
+      << "  file(APPEND \""
       << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
       << "\"${file}\\n\")" << std::endl
-      << "ENDFOREACH(file)" << std::endl;
+      << "endforeach()" << std::endl;
     }
 }
 
