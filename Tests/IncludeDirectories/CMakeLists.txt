@@ -86,3 +86,5 @@ get_target_property(incs empty_entry_test INCLUDE_DIRECTORIES)
 if (NOT incs STREQUAL ";/one/two")
   message(SEND_ERROR "Empty include_directories entry was not ignored.")
 endif()
+
+add_subdirectory(CMP0021)
