@@ -98,7 +98,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
     bool found = this->FindMumpsFile(routine, filepath);
     if(found)
       {
-      int lineoffset;
+      int lineoffset = 0;
       if(this->FindFunctionInMumpsFile(filepath,
                                        function,
                                        lineoffset))
