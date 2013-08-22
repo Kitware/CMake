@@ -474,9 +474,9 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
   // Setup relative path conversion tops.
   infoFileStream
     << "# Relative path conversion top directories.\n"
-    << "SET(CMAKE_RELATIVE_PATH_TOP_SOURCE \"" << this->RelativePathTopSource
+    << "set(CMAKE_RELATIVE_PATH_TOP_SOURCE \"" << this->RelativePathTopSource
     << "\")\n"
-    << "SET(CMAKE_RELATIVE_PATH_TOP_BINARY \"" << this->RelativePathTopBinary
+    << "set(CMAKE_RELATIVE_PATH_TOP_BINARY \"" << this->RelativePathTopBinary
     << "\")\n"
     << "\n";
 
@@ -485,7 +485,7 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
     {
     infoFileStream
       << "# Force unix paths in dependencies.\n"
-      << "SET(CMAKE_FORCE_UNIX_PATHS 1)\n"
+      << "set(CMAKE_FORCE_UNIX_PATHS 1)\n"
       << "\n";
     }
 
@@ -495,21 +495,21 @@ void cmLocalUnixMakefileGenerator3::WriteDirectoryInformationFile()
     << "# The C and CXX include file regular expressions for "
     << "this directory.\n";
   infoFileStream
-    << "SET(CMAKE_C_INCLUDE_REGEX_SCAN ";
+    << "set(CMAKE_C_INCLUDE_REGEX_SCAN ";
   this->WriteCMakeArgument(infoFileStream,
                            this->Makefile->GetIncludeRegularExpression());
   infoFileStream
     << ")\n";
   infoFileStream
-    << "SET(CMAKE_C_INCLUDE_REGEX_COMPLAIN ";
+    << "set(CMAKE_C_INCLUDE_REGEX_COMPLAIN ";
   this->WriteCMakeArgument(infoFileStream,
                            this->Makefile->GetComplainRegularExpression());
   infoFileStream
     << ")\n";
   infoFileStream
-    << "SET(CMAKE_CXX_INCLUDE_REGEX_SCAN ${CMAKE_C_INCLUDE_REGEX_SCAN})\n";
+    << "set(CMAKE_CXX_INCLUDE_REGEX_SCAN ${CMAKE_C_INCLUDE_REGEX_SCAN})\n";
   infoFileStream
-    << "SET(CMAKE_CXX_INCLUDE_REGEX_COMPLAIN "
+    << "set(CMAKE_CXX_INCLUDE_REGEX_COMPLAIN "
     "${CMAKE_C_INCLUDE_REGEX_COMPLAIN})\n";
 }
 
@@ -1176,7 +1176,7 @@ cmLocalUnixMakefileGenerator3
       {
       cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
       }
-    fout << "FILE(REMOVE_RECURSE\n";
+    fout << "file(REMOVE_RECURSE\n";
     std::string remove = "$(CMAKE_COMMAND) -P ";
     remove += this->Convert(cleanfile.c_str(), START_OUTPUT, SHELL);
     for(std::vector<std::string>::const_iterator f = files.begin();
@@ -1196,16 +1196,16 @@ cmLocalUnixMakefileGenerator3
       target.GetLanguages(languages);
       fout << "\n"
            << "# Per-language clean rules from dependency scanning.\n"
-           << "FOREACH(lang";
+           << "foreach(lang";
       for(std::set<cmStdString>::const_iterator l = languages.begin();
           l != languages.end(); ++l)
         {
         fout << " " << *l;
         }
       fout << ")\n"
-           << "  INCLUDE(" << this->GetTargetDirectory(target)
+           << "  include(" << this->GetTargetDirectory(target)
            << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
-           << "ENDFOREACH(lang)\n";
+           << "endforeach()\n";
       }
     }
 }
@@ -1915,7 +1915,7 @@ void cmLocalUnixMakefileGenerator3
   cmakefileStream
     << "# The set of languages for which implicit dependencies are needed:\n";
   cmakefileStream
-    << "SET(CMAKE_DEPENDS_LANGUAGES\n";
+    << "set(CMAKE_DEPENDS_LANGUAGES\n";
   for(ImplicitDependLanguageMap::const_iterator
         l = implicitLangs.begin(); l != implicitLangs.end(); ++l)
     {
@@ -1930,7 +1930,7 @@ void cmLocalUnixMakefileGenerator3
         l = implicitLangs.begin(); l != implicitLangs.end(); ++l)
     {
     cmakefileStream
-      << "SET(CMAKE_DEPENDS_CHECK_" << l->first.c_str() << "\n";
+      << "set(CMAKE_DEPENDS_CHECK_" << l->first.c_str() << "\n";
     ImplicitDependFileMap const& implicitPairs = l->second;
 
     // for each file pair
@@ -1954,7 +1954,7 @@ void cmLocalUnixMakefileGenerator3
     if(cid && *cid)
       {
       cmakefileStream
-        << "SET(CMAKE_" << l->first.c_str() << "_COMPILER_ID \""
+        << "set(CMAKE_" << l->first.c_str() << "_COMPILER_ID \""
         << cid << "\")\n";
       }
     }
@@ -1968,7 +1968,7 @@ void cmLocalUnixMakefileGenerator3
     cmakefileStream
       << "\n"
       << "# Preprocessor definitions for this target.\n"
-      << "SET(CMAKE_TARGET_DEFINITIONS\n";
+      << "set(CMAKE_TARGET_DEFINITIONS\n";
     for(std::set<std::string>::const_iterator di = defines.begin();
         di != defines.end(); ++di)
       {
@@ -1995,7 +1995,7 @@ void cmLocalUnixMakefileGenerator3
   if(!transformRules.empty())
     {
     cmakefileStream
-      << "SET(CMAKE_INCLUDE_TRANSFORMS\n";
+      << "set(CMAKE_INCLUDE_TRANSFORMS\n";
     for(std::vector<std::string>::const_iterator tri = transformRules.begin();
         tri != transformRules.end(); ++tri)
       {

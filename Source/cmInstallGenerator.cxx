@@ -80,18 +80,18 @@ void cmInstallGenerator
                  }
              }
      os << "\")\n";
-     os << indent << "IF (CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << "if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
      os << indent << indent << "message(WARNING \"ABSOLUTE path INSTALL "
         << "DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
-     os << indent << "ENDIF (CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << "endif()\n";
 
-     os << indent << "IF (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << "if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
      os << indent << indent << "message(FATAL_ERROR \"ABSOLUTE path INSTALL "
         << "DESTINATION forbidden (by caller): "
         << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
-     os << indent << "ENDIF (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)\n";
+     os << indent << "endif()\n";
      }
-  os << "FILE(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
+  os << "file(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
   if(optional)
     {
     os << " OPTIONAL";
@@ -153,13 +153,13 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   // Begin this block of installation.
   std::string component_test =
     this->CreateComponentTest(this->Component.c_str());
-  os << indent << "IF(" << component_test << ")\n";
+  os << indent << "if(" << component_test << ")\n";
 
   // Generate the script possibly with per-configuration code.
   this->GenerateScriptConfigs(os, indent.Next());
 
   // End this block of installation.
-  os << indent << "ENDIF(" << component_test << ")\n\n";
+  os << indent << "endif()\n\n";
 }
 
 //----------------------------------------------------------------------------

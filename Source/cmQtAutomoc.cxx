@@ -436,7 +436,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
             it = configDefines.begin(), end = configDefines.end();
             it != end; ++it)
         {
-        infoFile << "SET(AM_MOC_COMPILE_DEFINITIONS_" << it->first <<
+        infoFile << "set(AM_MOC_COMPILE_DEFINITIONS_" << it->first <<
           " " << it->second << ")\n";
         }
       }
@@ -446,7 +446,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
             it = configIncludes.begin(), end = configIncludes.end();
             it != end; ++it)
         {
-        infoFile << "SET(AM_MOC_INCLUDES_" << it->first <<
+        infoFile << "set(AM_MOC_INCLUDES_" << it->first <<
           " " << it->second << ")\n";
         }
       }

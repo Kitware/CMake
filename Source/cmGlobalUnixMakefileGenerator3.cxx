@@ -281,7 +281,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // Save the generator name
   cmakefileStream
     << "# The generator used is:\n"
-    << "SET(CMAKE_DEPENDS_GENERATOR \"" << this->GetName() << "\")\n\n";
+    << "set(CMAKE_DEPENDS_GENERATOR \"" << this->GetName() << "\")\n\n";
 
   // for each cmMakefile get its list of dependencies
   std::vector<std::string> lfiles;
@@ -312,7 +312,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // Save the list to the cmake file.
   cmakefileStream
     << "# The top level Makefile was generated from the following files:\n"
-    << "SET(CMAKE_MAKEFILE_DEPENDS\n"
+    << "set(CMAKE_MAKEFILE_DEPENDS\n"
     << "  \""
     << lg->Convert(cache.c_str(),
                    cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
@@ -335,7 +335,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   // Set the corresponding makefile in the cmake file.
   cmakefileStream
     << "# The corresponding makefile is:\n"
-    << "SET(CMAKE_MAKEFILE_OUTPUTS\n"
+    << "set(CMAKE_MAKEFILE_OUTPUTS\n"
     << "  \""
     << lg->Convert(makefileName.c_str(),
                    cmLocalGenerator::START_OUTPUT).c_str() << "\"\n"
@@ -348,7 +348,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
   {
   cmakefileStream
     << "# Byproducts of CMake generate step:\n"
-    << "SET(CMAKE_MAKEFILE_PRODUCTS\n";
+    << "set(CMAKE_MAKEFILE_PRODUCTS\n";
   const std::vector<std::string>& outfiles =
     lg->GetMakefile()->GetOutputFiles();
   for(std::vector<std::string>::const_iterator k = outfiles.begin();
@@ -390,7 +390,7 @@ void cmGlobalUnixMakefileGenerator3
   cmakefileStream
     << "# Dependency information for all targets:\n";
   cmakefileStream
-    << "SET(CMAKE_DEPEND_INFO_FILES\n";
+    << "set(CMAKE_DEPEND_INFO_FILES\n";
   for (unsigned int i = 0; i < lGenerators.size(); ++i)
     {
     lg = static_cast<cmLocalUnixMakefileGenerator3 *>(lGenerators[i]);

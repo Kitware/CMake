@@ -407,10 +407,10 @@ cmInstallTargetGenerator
   std::string tws = tw.str();
   if(!tws.empty())
     {
-    os << indent << "IF(EXISTS \"" << file << "\" AND\n"
+    os << indent << "if(EXISTS \"" << file << "\" AND\n"
        << indent << "   NOT IS_SYMLINK \"" << file << "\")\n";
     os << tws;
-    os << indent << "ENDIF()\n";
+    os << indent << "endif()\n";
     }
 }
 
@@ -434,7 +434,7 @@ cmInstallTargetGenerator
     if(!tws.empty())
       {
       Indent indent2 = indent.Next().Next();
-      os << indent << "FOREACH(file\n";
+      os << indent << "foreach(file\n";
       for(std::vector<std::string>::const_iterator i = files.begin();
           i != files.end(); ++i)
         {
@@ -442,7 +442,7 @@ cmInstallTargetGenerator
         }
       os << indent2 << ")\n";
       os << tws;
-      os << indent << "ENDFOREACH()\n";
+      os << indent << "endforeach()\n";
       }
     }
 }
@@ -577,7 +577,7 @@ cmInstallTargetGenerator
   // install_name value and references.
   if(!new_id.empty() || !install_name_remap.empty())
     {
-    os << indent << "EXECUTE_PROCESS(COMMAND \"" << installNameTool;
+    os << indent << "execute_process(COMMAND \"" << installNameTool;
     os << "\"";
     if(!new_id.empty())
       {
@@ -626,7 +626,7 @@ cmInstallTargetGenerator
   // Write a rule to remove the installed file if its rpath is not the
   // new rpath.  This is needed for existing build/install trees when
   // the installed rpath changes but the file is not rebuilt.
-  os << indent << "FILE(RPATH_CHECK\n"
+  os << indent << "file(RPATH_CHECK\n"
      << indent << "     FILE \"" << toDestDirPath << "\"\n"
      << indent << "     RPATH \"" << newRpath << "\")\n";
 }
@@ -697,12 +697,12 @@ cmInstallTargetGenerator
     // Write a rule to run chrpath to set the install-tree RPATH
     if(newRpath.empty())
       {
-      os << indent << "FILE(RPATH_REMOVE\n"
+      os << indent << "file(RPATH_REMOVE\n"
          << indent << "     FILE \"" << toDestDirPath << "\")\n";
       }
     else
       {
-      os << indent << "FILE(RPATH_CHANGE\n"
+      os << indent << "file(RPATH_CHANGE\n"
          << indent << "     FILE \"" << toDestDirPath << "\"\n"
          << indent << "     OLD_RPATH \"" << oldRpath << "\"\n"
          << indent << "     NEW_RPATH \"" << newRpath << "\")\n";
@@ -736,11 +736,11 @@ cmInstallTargetGenerator::AddStripRule(std::ostream& os,
     return;
     }
 
-  os << indent << "IF(CMAKE_INSTALL_DO_STRIP)\n";
-  os << indent << "  EXECUTE_PROCESS(COMMAND \""
+  os << indent << "if(CMAKE_INSTALL_DO_STRIP)\n";
+  os << indent << "  execute_process(COMMAND \""
      << this->Target->GetMakefile()->GetDefinition("CMAKE_STRIP")
      << "\" \"" << toDestDirPath << "\")\n";
-  os << indent << "ENDIF(CMAKE_INSTALL_DO_STRIP)\n";
+  os << indent << "endif()\n";
 }
 
 //----------------------------------------------------------------------------
@@ -769,6 +769,6 @@ cmInstallTargetGenerator::AddRanlibRule(std::ostream& os,
     return;
     }
 
-  os << indent << "EXECUTE_PROCESS(COMMAND \""
+  os << indent << "execute_process(COMMAND \""
      << ranlib << "\" \"" << toDestDirPath << "\")\n";
 }

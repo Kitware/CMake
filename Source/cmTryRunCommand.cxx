@@ -353,13 +353,13 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
 
-      file << "SET( " << this->RunResultVariable << " \n     \""
+      file << "set( " << this->RunResultVariable << " \n     \""
            << this->Makefile->GetDefinition(this->RunResultVariable.c_str())
            << "\"\n     CACHE STRING \"Result from TRY_RUN\" FORCE)\n\n";
 
       if (out!=0)
         {
-        file << "SET( " << internalRunOutputName << " \n     \""
+        file << "set( " << internalRunOutputName << " \n     \""
              << this->Makefile->GetDefinition(internalRunOutputName.c_str())
              << "\"\n     CACHE STRING \"Output from TRY_RUN\" FORCE)\n\n";
         }
