@@ -3303,7 +3303,10 @@ static void processIncludeDirectories(cmTarget *tgt,
         if (!noMessage)
           {
           tgt->GetMakefile()->IssueMessage(messageType, e.str().c_str());
-          return;
+          if (messageType == cmake::FATAL_ERROR)
+            {
+            return;
+            }
           }
         }
 
