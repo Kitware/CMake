@@ -43,9 +43,9 @@ if [ "$cmake_version_tweak" != "0" ]; then
   cmake_version="${cmake_version}.${cmake_version_tweak}"
 fi
 
-cmake_data_dir="/share/cmake-${cmake_version_major}.${cmake_version_minor}"
-cmake_doc_dir="/doc/cmake-${cmake_version_major}.${cmake_version_minor}"
-cmake_man_dir="/man"
+cmake_data_dir="share/cmake-${cmake_version_major}.${cmake_version_minor}"
+cmake_doc_dir="doc/cmake-${cmake_version_major}.${cmake_version_minor}"
+cmake_man_dir="man"
 cmake_init_file=""
 cmake_bootstrap_system_libs=""
 cmake_bootstrap_qt_gui=""
@@ -160,8 +160,8 @@ if ${cmake_system_mingw}; then
   fi
 elif ${cmake_system_haiku}; then
   cmake_default_prefix=`finddir B_COMMON_DIRECTORY`
-  cmake_man_dir="/documentation/man"
-  cmake_doc_dir="/documentation/doc/cmake-${cmake_version}"
+  cmake_man_dir="documentation/man"
+  cmake_doc_dir="documentation/doc/cmake-${cmake_version}"
 else
   cmake_default_prefix="/usr/local"
 fi
@@ -353,13 +353,13 @@ Configuration:
 
 Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
-                          [${cmake_default_prefix}]
+                          ['"${cmake_default_prefix}"']
   --datadir=DIR           install data files in PREFIX/DIR
-                          [/share/CMake]
+                          ['"${cmake_data_dir}"']
   --docdir=DIR            install documentation files in PREFIX/DIR
-                          [/doc/CMake]
+                          ['"${cmake_doc_dir}"']
   --mandir=DIR            install man pages files in PREFIX/DIR/manN
-                          [/man]
+                          ['"${cmake_man_dir}"']
 '
   exit 10
 }
@@ -1400,7 +1400,7 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_versi
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_TWEAK ${cmake_version_tweak}"
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"${cmake_data_dir}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/${cmake_data_dir}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 
 # Regenerate configured headers

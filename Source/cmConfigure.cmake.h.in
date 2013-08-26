@@ -19,4 +19,4 @@
 #cmakedefine CMAKE_STRICT
 #define  CMAKE_ROOT_DIR "${CMake_SOURCE_DIR}"
 #define  CMAKE_BUILD_DIR "${CMake_BINARY_DIR}"
-#define CMAKE_DATA_DIR "@CMAKE_DATA_DIR@"
+#define CMAKE_DATA_DIR "/@CMAKE_DATA_DIR@"

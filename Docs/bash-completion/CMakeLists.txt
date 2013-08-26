@@ -5,4 +5,4 @@
 # add symlinks to the files in appropriate places
 #  /etc/bash_completion.d/
 #  DATADIR/completions (may be /usr/share/<package>/completions
-install(FILES cmake cpack ctest DESTINATION ${REL_CMAKE_DATA_DIR}/completions)
+install(FILES cmake cpack ctest DESTINATION ${CMAKE_DATA_DIR}/completions)
