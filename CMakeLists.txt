@@ -231,7 +231,7 @@ macro (CMAKE_BUILD_UTILITIES)
   set(KWSYS_USE_Process 1)
   set(KWSYS_USE_CommandLineArguments 1)
   set(KWSYS_HEADER_ROOT ${CMake_BINARY_DIR}/Source)
-  set(KWSYS_INSTALL_DOC_DIR "${CMake_DOC_DEST}")
+  set(KWSYS_INSTALL_DOC_DIR "${CMAKE_DOC_DIR}")
   add_subdirectory(Source/kwsys)
   set(kwsys_folder "Utilities/KWSys")
   CMAKE_SET_TARGET_FOLDER(${KWSYS_NAMESPACE} "${kwsys_folder}")
@@ -460,26 +460,27 @@ set(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
 # install tree.
 set(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
-set(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
+set(CMAKE_DATA_DIR "share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
   "Install location for data (relative to prefix).")
-set(CMAKE_DOC_DIR "/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
+set(CMAKE_DOC_DIR "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
   "Install location for documentation (relative to prefix).")
-set(CMAKE_MAN_DIR "/man" CACHE STRING
+set(CMAKE_MAN_DIR "man" CACHE STRING
   "Install location for man pages (relative to prefix).")
 mark_as_advanced(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
 if(CYGWIN AND EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   # Force doc, data and man dirs to conform to cygwin layout.
-  set(CMAKE_DOC_DIR  "/share/doc/cmake-${CMake_VERSION}")
-  set(CMAKE_DATA_DIR "/share/cmake-${CMake_VERSION}")
-  set(CMAKE_MAN_DIR  "/share/man")
+  set(CMAKE_DOC_DIR  "share/doc/cmake-${CMake_VERSION}")
+  set(CMAKE_DATA_DIR "share/cmake-${CMake_VERSION}")
+  set(CMAKE_MAN_DIR  "share/man")
   # let the user know we just forced these values
   message(STATUS "Setup for Cygwin packaging")
   message(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
   message(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
   message(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
 endif()
-string(REGEX REPLACE "^/" "" CMake_DATA_DEST "${CMAKE_DATA_DIR}")
-string(REGEX REPLACE "^/" "" CMake_DOC_DEST "${CMAKE_DOC_DIR}")
+string(REGEX REPLACE "^/" "" CMAKE_DATA_DIR "${CMAKE_DATA_DIR}")
+string(REGEX REPLACE "^/" "" CMAKE_DOC_DIR "${CMAKE_DOC_DIR}")
+string(REGEX REPLACE "^/" "" CMAKE_MAN_DIR "${CMAKE_MAN_DIR}")
 
 if(BUILD_TESTING)
   include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
@@ -625,12 +626,12 @@ add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
   --system-information  -G "${CMAKE_TEST_GENERATOR}" )
 
 # Install license file as it requires.
-install(FILES Copyright.txt DESTINATION ${CMake_DOC_DEST})
+install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
 
 # Install script directories.
 install(
   DIRECTORY Modules Templates
-  DESTINATION "${CMake_DATA_DEST}"
+  DESTINATION ${CMAKE_DATA_DIR}
   FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
   DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                         GROUP_READ GROUP_EXECUTE
