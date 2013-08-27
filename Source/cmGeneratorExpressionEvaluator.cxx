@@ -438,6 +438,39 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
 
 
 //----------------------------------------------------------------------------
+struct PlatformIdNode : public cmGeneratorExpressionNode
+{
+  PlatformIdNode() {}
+
+  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    const char *platformId = context->Makefile ?
+                              context->Makefile->GetSafeDefinition(
+                        "CMAKE_SYSTEM_NAME") : "";
+    if (parameters.size() == 0)
+      {
+      return platformId ? platformId : "";
+      }
+
+    if (!platformId)
+      {
+      return parameters.front().empty() ? "1" : "0";
+      }
+
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(), platformId) == 0)
+      {
+      return "1";
+      }
+    return "0";
+  }
+} platformIdNode;
+
+//----------------------------------------------------------------------------
 static const struct VersionGreaterNode : public cmGeneratorExpressionNode
 {
   VersionGreaterNode() {}
@@ -1355,6 +1388,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &cCompilerVersionNode;
   else if (identifier == "CXX_COMPILER_VERSION")
     return &cxxCompilerVersionNode;
+  else if (identifier == "PLATFORM_ID")
+    return &platformIdNode;
   else if (identifier == "CONFIGURATION")
     return &configurationNode;
   else if (identifier == "CONFIG")
