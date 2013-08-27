@@ -172,6 +172,8 @@ set(TCLTK_POSSIBLE_INCLUDE_PATHS
   /usr/include/tcl8.3
   /usr/include/tcl8.2
   /usr/include/tcl8.0
+  /usr/local/include/tcl8.6
+  /usr/local/include/tk8.6
   /usr/local/include/tcl8.5
   /usr/local/include/tk8.5
   /usr/local/include/tcl8.4
