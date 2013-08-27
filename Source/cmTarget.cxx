@@ -924,7 +924,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "The first configuration in the list found to be provided by the "
      "imported target is selected.  If this property is set and no matching "
      "configurations are available, then the imported target is considered "
-     "to be not found.  This property is ignored for non-imported targets.",
+     "to be not found.  This property is ignored for non-imported targets.\n"
+     "This property is initialized by the value of the variable "
+     "CMAKE_MAP_IMPORTED_CONFIG_<CONFIG> if it is set when a target is "
+     "created.",
      false /* TODO: make this chained */ );
 
   cm->DefineProperty
@@ -1649,6 +1652,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     "LIBRARY_OUTPUT_DIRECTORY_",
     "RUNTIME_OUTPUT_DIRECTORY_",
     "PDB_OUTPUT_DIRECTORY_",
+    "MAP_IMPORTED_CONFIG_",
     0};
   for(std::vector<std::string>::iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
