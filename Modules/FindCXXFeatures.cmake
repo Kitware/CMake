@@ -2,25 +2,25 @@
 #
 # When found it will set the following variables
 #
-#  CXX11_COMPILER_FLAGS                   - the compiler flags needed to get C++11 features
+#  CXX11_COMPILER_FLAGS                      - the compiler flags needed to get C++11 features
 #
-#  CXXFeatures_auto_FOUND                 - auto keyword
-#  CXXFeatures_class_override_final_FOUND - override and final keywords for classes and methods
-#  CXXFeatures_constexpr_FOUND            - constexpr keyword
-#  CXXFeatures_cstdint_header_FOUND       - cstdint header
-#  CXXFeatures_decltype_FOUND             - decltype keyword
-#  CXXFeatures_defaulted_functions_FOUND  - default keyword for functions
+#  CXXFeatures_auto_FOUND                    - auto keyword
+#  CXXFeatures_class_override_final_FOUND    - override and final keywords for classes and methods
+#  CXXFeatures_constexpr_FOUND               - constexpr keyword
+#  CXXFeatures_cstdint_header_FOUND          - cstdint header
+#  CXXFeatures_decltype_FOUND                - decltype keyword
+#  CXXFeatures_defaulted_functions_FOUND     - default keyword for functions
 #  CXXFeatures_delegating_constructors_FOUND - delegating constructors
-#  CXXFeatures_deleted_functions_FOUND    - delete keyword for functions
-#  CXXFeatures_func_identifier_FOUND      - __func__ preprocessor constant
-#  CXXFeatures_initializer_list_FOUND     - initializer list
-#  CXXFeatures_lambda_FOUND               - lambdas
-#  CXXFeatures_long_long_FOUND            - long long signed & unsigned types
-#  CXXFeatures_nullptr_FOUND              - nullptr
-#  CXXFeatures_rvalue_references_FOUND    - rvalue references
-#  CXXFeatures_sizeof_member_FOUND        - sizeof() non-static members
-#  CXXFeatures_static_assert_FOUND        - static_assert()
-#  CXXFeatures_variadic_templates_FOUND   - variadic templates
+#  CXXFeatures_deleted_functions_FOUND       - delete keyword for functions
+#  CXXFeatures_func_identifier_FOUND         - __func__ preprocessor constant
+#  CXXFeatures_initializer_list_FOUND        - initializer list
+#  CXXFeatures_lambda_FOUND                  - lambdas
+#  CXXFeatures_long_long_FOUND               - long long signed & unsigned types
+#  CXXFeatures_nullptr_FOUND                 - nullptr
+#  CXXFeatures_rvalue_references_FOUND       - rvalue references
+#  CXXFeatures_sizeof_member_FOUND           - sizeof() non-static members
+#  CXXFeatures_static_assert_FOUND           - static_assert()
+#  CXXFeatures_variadic_templates_FOUND      - variadic templates
 
 #=============================================================================
 # Copyright 2011-2013 Rolf Eike Beer <eike@sf-mail.de>
@@ -53,7 +53,7 @@ function(test_set_flag FLAG NAME)
     endif ()
 endfunction()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "XL")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "XL")
     test_set_flag("-qlanglvl=extended0x" CXX0x)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "(Borland|Watcom)")
     # No C++11 flag for those compilers, but check_cxx_compiler_flag()
