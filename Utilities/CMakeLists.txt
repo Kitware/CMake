@@ -123,11 +123,12 @@ add_custom_command(
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )
 
-install_files(${CMAKE_MAN_DIR}/man1 FILES ${MAN_FILES})
-install_files(${CMAKE_DOC_DIR} FILES
+install(FILES ${MAN_FILES} DESTINATION ${CMAKE_MAN_DIR}/man1)
+install(FILES
   ${TEXT_FILES}
   ${HTML_FILES}
   ${DOCBOOK_FILES}
+  DESTINATION ${CMAKE_DOC_DIR}
   )
 install(FILES cmake.m4 DESTINATION share/aclocal)
 

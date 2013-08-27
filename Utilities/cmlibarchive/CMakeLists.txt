@@ -1311,4 +1311,4 @@ ENDIF(APPLE)
 
 add_subdirectory(libarchive)
 
-install(FILES COPYING DESTINATION ${CMake_DOC_DEST}/cmlibarchive)
+install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmlibarchive)
