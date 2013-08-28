@@ -202,7 +202,7 @@ std::string cmGlobalVisualStudio8Generator::GetUserMacrosRegKeyBase()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio8Generator::AddCheckTarget()
+bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 {
   // Add a special target on which all other targets depend that
   // checks the build system and optionally re-runs CMake.
@@ -216,7 +216,7 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Skip the target if no regeneration is to be done.
   if(mf->IsOn("CMAKE_SUPPRESS_REGENERATION"))
     {
-    return;
+    return false;
     }
 
   std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
@@ -315,21 +315,24 @@ void cmGlobalVisualStudio8Generator::AddCheckTarget()
     cmSystemTools::Error("Error adding rule for ", stamps[0].c_str());
     }
   }
+
+  return true;
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::Generate()
 {
-  this->AddCheckTarget();
-
-  // All targets depend on the build-system check target.
-  for(std::map<cmStdString,cmTarget *>::const_iterator
-        ti = this->TotalTargets.begin();
-      ti != this->TotalTargets.end(); ++ti)
+  if(this->AddCheckTarget())
     {
-    if(ti->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+    // All targets depend on the build-system check target.
+    for(std::map<cmStdString,cmTarget *>::const_iterator
+          ti = this->TotalTargets.begin();
+        ti != this->TotalTargets.end(); ++ti)
       {
-      ti->second->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+      if(ti->first != CMAKE_CHECK_BUILD_SYSTEM_TARGET)
+        {
+        ti->second->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
+        }
       }
     }
 
