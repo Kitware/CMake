@@ -41,7 +41,7 @@ add_library(codeeditorLib STATIC codeeditor.cpp)
 add_library(privateSlot OBJECT private_slot.cpp)
 
 add_executable(foo main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
-               xyz.cpp yaf.cpp $<TARGET_OBJECTS:privateSlot>)
+               xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>)
 
 set_target_properties(foo codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 
