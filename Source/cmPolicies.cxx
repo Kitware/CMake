@@ -27,11 +27,11 @@ public:
             cmPolicies::PolicyStatus status)
   {
     if (!idString || !shortDescription || ! longDescription)
-    {
+      {
       cmSystemTools::Error("Attempt to define a policy without "
         "all parameters being specified!");
       return;
-    }
+      }
     this->ID = iD;
     this->IDString = idString;
     this->ShortDescription = shortDescription;
@@ -61,29 +61,29 @@ public:
                          unsigned int tweakV)
   {
     if (majorV < this->MajorVersionIntroduced)
-    {
+      {
       return true;
-    }
+      }
     if (majorV > this->MajorVersionIntroduced)
-    {
+      {
       return false;
-    }
+      }
     if (minorV < this->MinorVersionIntroduced)
-    {
+      {
       return true;
-    }
+      }
     if (minorV > this->MinorVersionIntroduced)
-    {
+      {
       return false;
-    }
+      }
     if (patchV < this->PatchVersionIntroduced)
-    {
+      {
       return true;
-    }
+      }
     if (patchV > this->PatchVersionIntroduced)
-    {
+      {
       return false;
-    }
+      }
     return (tweakV < this->TweakVersionIntroduced);
   }
 
@@ -623,9 +623,9 @@ cmPolicies::~cmPolicies()
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
-  {
+    {
     delete i->second;
-  }
+    }
 }
 
 void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
@@ -640,11 +640,11 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
 {
   // a policy must be unique and can only be defined once
   if (this->Policies.find(iD) != this->Policies.end())
-  {
+    {
     cmSystemTools::Error("Attempt to redefine a CMake policy for policy "
       "ID ", this->GetPolicyIDString(iD).c_str());
     return;
-  }
+    }
 
   this->Policies[iD] = new cmPolicy(iD, idString,
                                     shortDescription,
@@ -798,15 +798,15 @@ bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
 bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 {
   if (!id || strlen(id) < 1)
-  {
+    {
     return false;
-  }
+    }
   std::map<std::string,cmPolicies::PolicyID>::iterator pos =
     this->PolicyStringMap.find(id);
   if (pos == this->PolicyStringMap.end())
-  {
+    {
     return false;
-  }
+    }
   pid = pos->second;
   return true;
 }
@@ -816,9 +816,9 @@ std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(pid);
   if (pos == this->Policies.end())
-  {
+    {
     return "";
-  }
+    }
   return pos->second->IDString;
 }
 
@@ -829,11 +829,11 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
   if (pos == this->Policies.end())
-  {
+    {
     cmSystemTools::Error(
       "Request for warning text for undefined policy!");
     return "Request for warning text for undefined policy!";
-  }
+    }
 
   cmOStringStream msg;
   msg <<
@@ -853,11 +853,11 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
   if (pos == this->Policies.end())
-  {
+    {
     cmSystemTools::Error(
       "Request for error text for undefined policy!");
     return "Request for error text for undefined policy!";
-  }
+    }
 
   cmOStringStream error;
   error <<
@@ -883,10 +883,10 @@ cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
   if (pos == this->Policies.end())
-  {
+    {
     // TODO is this right?
     return cmPolicies::WARN;
-  }
+    }
 
   return pos->second->Status;
 }
@@ -897,7 +897,7 @@ void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
     = this->Policies.begin();
   for (;i != this->Policies.end(); ++i)
-  {
+    {
     cmOStringStream full;
     full << i->second->LongDescription;
     full << "\nThis policy was introduced in CMake version ";
@@ -934,7 +934,7 @@ void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
                            i->second->ShortDescription.c_str(),
                            full.str().c_str());
     v.push_back(e);
-  }
+    }
 }
 
 //----------------------------------------------------------------------------
