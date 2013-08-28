@@ -574,14 +574,15 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         // Check if there is a proper config mapping for the tested config.
         std::vector<std::string> mappedConfigs;
         std::string mapProp = "MAP_IMPORTED_CONFIG_";
-        mapProp += context->Config;
+        mapProp += cmSystemTools::UpperCase(context->Config);
         if(const char* mapValue =
                         context->CurrentTarget->GetProperty(mapProp.c_str()))
           {
           cmSystemTools::ExpandListArgument(cmSystemTools::UpperCase(mapValue),
                                             mappedConfigs);
           return std::find(mappedConfigs.begin(), mappedConfigs.end(),
-                          context->Config) != mappedConfigs.end() ? "1" : "0";
+                           cmSystemTools::UpperCase(parameters.front()))
+              != mappedConfigs.end() ? "1" : "0";
           }
         }
       }
