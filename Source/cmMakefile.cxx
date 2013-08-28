@@ -814,6 +814,18 @@ bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
     }
 }
 
+
+namespace
+{
+  struct file_exists
+  {
+    bool operator()(const std::string& path) const
+    {
+      return cmSystemTools::FileExists(path.c_str());
+    }
+  };
+}
+
 void cmMakefile::FinalPass()
 {
   // do all the variable expansions here
@@ -826,6 +838,20 @@ void cmMakefile::FinalPass()
     {
     (*i)->FinalPass();
     }
+
+  //go through all configured files and see which ones still exist.
+  //we don't want cmake to re-run if a configured file is created and deleted
+  //during processing as that would make it a transient file that can't
+  //influence the build process
+
+  //remove_if will move all items that don't have a valid file name to the
+  //back of the vector
+  std::vector<std::string>::iterator new_end = std::remove_if(
+                                                this->OutputFiles.begin(),
+                                                this->OutputFiles.end(),
+                                                file_exists() );
+  //we just have to erase all items at the back
+  this->OutputFiles.erase(new_end, this->OutputFiles.end() );
 
 }
 
@@ -3371,11 +3397,12 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   std::string sinfile = infile;
   this->AddCMakeDependFile(sinfile);
   cmSystemTools::ConvertToUnixSlashes(soutfile);
+
   // Re-generate if non-temporary outputs are missing.
-  if(soutfile.find("CMakeTmp") == soutfile.npos)
-    {
-    this->AddCMakeOutputFile(soutfile);
-    }
+  //when we finalize the configuration we will remove all
+  //output files that now don't exist.
+  this->AddCMakeOutputFile(soutfile);
+
   mode_t perm = 0;
   cmSystemTools::GetPermissions(sinfile.c_str(), perm);
   std::string::size_type pos = soutfile.rfind('/');
