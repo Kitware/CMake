@@ -613,7 +613,12 @@ cmPolicies::cmPolicies()
     "list of link libraries.  Future refactoring will change the effect of "
     "the export() command to be executed at generate-time.  Use ALIAS "
     "targets instead in cases where the goal is to refer to targets by "
-    "another name",
+    "another name"
+    "\n"
+    "The OLD behavior for this policy is to allow including the result "
+    "of an export() command.  "
+    "The NEW behavior for this policy is to not to allow including the "
+    "result of an export() command.",
     2,8,13,0, cmPolicies::WARN);
 }
 
