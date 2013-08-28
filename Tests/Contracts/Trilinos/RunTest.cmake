@@ -4,4 +4,4 @@ set(dir "${CMAKE_CURRENT_BINARY_DIR}/Contracts/${project}")
 set(exe "${CMAKE_COMMAND}")
 set(args -P "${dir}/ValidateBuild.cmake")
 
-set(Trilinos-10-6_RUN_TEST ${exe} ${args})
+set(Trilinos_RUN_TEST ${exe} ${args})
