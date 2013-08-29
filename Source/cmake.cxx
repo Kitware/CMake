@@ -2437,11 +2437,6 @@ int cmake::ActualConfigure()
     {
     this->CacheManager->SaveCache(this->GetHomeOutputDirectory());
     }
-  if ( !this->GraphVizFile.empty() )
-    {
-    std::cout << "Generate graphviz: " << this->GraphVizFile << std::endl;
-    this->GenerateGraphViz(this->GraphVizFile.c_str());
-    }
   if(cmSystemTools::GetErrorOccuredFlag())
     {
     return -1;
@@ -2604,6 +2599,11 @@ int cmake::Generate()
     return -1;
     }
   this->GlobalGenerator->Generate();
+  if ( !this->GraphVizFile.empty() )
+    {
+    std::cout << "Generate graphviz: " << this->GraphVizFile << std::endl;
+    this->GenerateGraphViz(this->GraphVizFile.c_str());
+    }
   if(this->WarnUnusedCli)
     {
     this->RunCheckForUnusedVariables();
