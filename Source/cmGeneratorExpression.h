@@ -126,7 +126,7 @@ private:
   cmListFileBacktrace Backtrace;
   std::vector<cmGeneratorExpressionEvaluator*> Evaluators;
   const std::string Input;
-  bool NeedsParsing;
+  bool NeedsEvaluation;
 
   mutable std::set<cmTarget*> DependTargets;
   mutable std::set<cmTarget*> AllTargetsSeen;
