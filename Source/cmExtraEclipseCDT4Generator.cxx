@@ -465,6 +465,18 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     fout << "\t\t<nature>" << *nit << "</nature>\n";
     }
 
+  if (const char *extraNaturesProp = mf->GetCMakeInstance()->
+        GetProperty("ECLIPSE_EXTRA_NATURES", cmProperty::GLOBAL))
+    {
+    std::vector<std::string> extraNatures;
+    cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);
+    for (std::vector<std::string>::const_iterator nit = extraNatures.begin();
+         nit != extraNatures.end(); ++nit)
+      {
+      fout << "\t\t<nature>" << *nit << "</nature>\n";
+      }
+    }
+
   fout << "\t</natures>\n";
 
   fout << "\t<linkedResources>\n";

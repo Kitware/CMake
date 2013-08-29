@@ -28,6 +28,7 @@ Properties of Global Scope
    /prop_gbl/PACKAGES_FOUND
    /prop_gbl/PACKAGES_NOT_FOUND
    /prop_gbl/PREDEFINED_TARGETS_FOLDER
+   /prop_gbl/ECLIPSE_EXTRA_NATURES
    /prop_gbl/REPORT_UNDEFINED_PROPERTIES
    /prop_gbl/RULE_LAUNCH_COMPILE
    /prop_gbl/RULE_LAUNCH_CUSTOM
