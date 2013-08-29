@@ -80,6 +80,12 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                         config, false, this->Target,
                                         &dagChecker), result);
       }
+    for(std::vector<std::string>::iterator li = result.begin();
+        li != result.end(); ++li)
+      {
+      cmSystemTools::ConvertToUnixSlashes(*li);
+      }
+
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;
     }
