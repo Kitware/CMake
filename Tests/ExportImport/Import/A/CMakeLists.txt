@@ -265,3 +265,50 @@ foreach(_config ${_configs})
     )
 endforeach()
 unset(_configs)
+
+if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
+    OR CMAKE_C_COMPILER_ID STREQUAL Clang)
+    AND (CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja"))
+  include(CheckCXXCompilerFlag)
+  check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
+  if(run_sys_includes_test)
+    # The Bullseye wrapper appears to break the -isystem effect.
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE out ERROR_VARIABLE out)
+    if("x${out}" MATCHES "Bullseye")
+      set(run_sys_includes_test 0)
+    endif()
+  endif()
+  if (run_sys_includes_test)
+    add_executable(test_system_exp test_system.cpp)
+    target_link_libraries(test_system_exp exp_systemlib)
+    target_compile_options(test_system_exp PRIVATE -Wunused-variable -Werror=unused-variable)
+
+    unset(EXP_ERROR_VARIABLE CACHE)
+    try_compile(EXP_ERROR_VARIABLE
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+      COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
+      LINK_LIBRARIES exp_systemlib
+      OUTPUT_VARIABLE OUTPUT
+      )
+    if(NOT EXP_ERROR_VARIABLE)
+      message(SEND_ERROR "EXP_ERROR_VARIABLE try_compile failed, but it was expected to succeed ${OUTPUT}.")
+    endif()
+
+    add_executable(test_system_bld test_system.cpp)
+    target_link_libraries(test_system_bld bld_systemlib)
+    target_compile_options(test_system_bld PRIVATE -Wunused-variable -Werror=unused-variable)
+
+    unset(BLD_ERROR_VARIABLE CACHE)
+    try_compile(BLD_ERROR_VARIABLE
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+      COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
+      LINK_LIBRARIES bld_systemlib
+      OUTPUT_VARIABLE OUTPUT
+      )
+    if(NOT BLD_ERROR_VARIABLE)
+      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed.")
+    endif()
+  endif()
+endif()
