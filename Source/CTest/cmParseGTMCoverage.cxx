@@ -106,8 +106,8 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
         cmCTestCoverageHandlerContainer::SingleFileCoverageVector&
           coverageVector = this->Coverage.TotalCoverage[filepath];
         coverageVector[lineoffset + linenumber] += count;
+        lastoffset = lineoffset;
         }
-      lastoffset = lineoffset;
       }
     else
       {
