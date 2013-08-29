@@ -695,6 +695,11 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     {
     mf->ReadListFile(0,projectCompatibility.c_str());
     }
+  // Inform any extra generator of the new language.
+  if (this->ExtraGenerator)
+    {
+    this->ExtraGenerator->EnableLanguage(languages, mf, false);
+    }
 
   if(fatalError)
     {

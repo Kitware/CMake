@@ -41,6 +41,8 @@ public:
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const char* fullName) const = 0;
+  virtual void EnableLanguage(std::vector<std::string> const& languages,
+                              cmMakefile *, bool optional);
 
   ///! set the global generator which will generate the makefiles
   virtual void SetGlobalGenerator(cmGlobalGenerator* generator)
