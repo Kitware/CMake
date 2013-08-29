@@ -1563,6 +1563,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      false,
      "Variables that Control the Build");
   cm->DefineProperty
+    ("CMAKE_NO_SYSTEM_FROM_IMPORTED", cmProperty::VARIABLE,
+     "Default value for NO_SYSTEM_FROM_IMPORTED of targets.",
+     "This variable is used to initialize the "
+     "NO_SYSTEM_FROM_IMPORTED property on all the targets.  "
+     "See that target property for additional information.",
+     false,
+     "Variables that Control the Build");
+  cm->DefineProperty
     ("CMAKE_<LANG>_VISIBILITY_PRESET", cmProperty::VARIABLE,
      "Default value for <LANG>_VISIBILITY_PRESET of targets.",
      "This variable is used to initialize the "

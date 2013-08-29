@@ -928,6 +928,17 @@ void cmTarget::DefineProperties(cmake *cm)
      false /* TODO: make this chained */ );
 
   cm->DefineProperty
+    ("NO_SYSTEM_FROM_IMPORTED", cmProperty::TARGET,
+     "Do not treat includes from IMPORTED target interfaces as SYSTEM.",
+     "The contents of the INTERFACE_INCLUDE_DIRECTORIES of IMPORTED targets "
+     "are treated as SYSTEM includes by default.  If this property is "
+     "enabled, the contents of the INTERFACE_INCLUDE_DIRECTORIES of IMPORTED "
+     "targets are not treated as system includes.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_NO_SYSTEM_FROM_IMPORTED if it is set when a target is "
+     "created.");
+
+  cm->DefineProperty
     ("OSX_ARCHITECTURES", cmProperty::TARGET,
      "Target specific architectures for OS X.",
      "The OSX_ARCHITECTURES property sets the target binary architecture "
@@ -1637,6 +1648,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
   this->SetPropertyDefault("MACOSX_BUNDLE", 0);
   this->SetPropertyDefault("MACOSX_RPATH", 0);
+  this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", 0);
 
 
   // Collect the set of configuration types.
@@ -2664,9 +2676,28 @@ void cmTarget::FinalizeSystemIncludeDirectories()
                                                       ge.Parse(it->Value);
     std::string targetName = cge->Evaluate(this->Makefile, 0,
                                       false, this, 0, 0);
-    if (!this->Makefile->FindTargetToUse(targetName.c_str()))
+    cmTarget *tgt = this->Makefile->FindTargetToUse(targetName.c_str());
+    if (!tgt)
       {
       continue;
+      }
+    if (tgt->IsImported()
+        && tgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")
+        && !this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED")
+        && !this->Makefile->GetCMakeInstance()->GetIsInTryCompile())
+      {
+      std::string includeGenex = "$<TARGET_PROPERTY:" +
+                                it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
+      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
+        {
+        // Because it->Value is a generator expression, ensure that it
+        // evaluates to the non-empty string before being used in the
+        // TARGET_PROPERTY expression.
+        includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
+        }
+      this->SystemIncludeDirectories.insert(includeGenex);
+      return; // The INTERFACE_SYSTEM_INCLUDE_DIRECTORIES are a subset
+              // of the INTERFACE_INCLUDE_DIRECTORIES
       }
     }
     std::string includeGenex = "$<TARGET_PROPERTY:" +
