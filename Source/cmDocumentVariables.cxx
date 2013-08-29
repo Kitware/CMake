@@ -19,7 +19,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "The full path to the cmake executable.",
      "This is the full path to the CMake executable cmake which is "
      "useful from custom commands that want to use the cmake -E "
-     "option for portable system commands. "
+     "option for portable system commands.  "
      "(e.g. /usr/local/bin/cmake", false,
      "Variables that Provide Information");
   cm->DefineProperty
@@ -27,14 +27,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "The path to the top level of the build tree.",
      "This is the full path to the top level of the current CMake "
      "build tree. For an in-source build, this would be the same "
-     "as CMAKE_SOURCE_DIR. ", false,
+     "as CMAKE_SOURCE_DIR.", false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_SOURCE_DIR", cmProperty::VARIABLE,
      "The path to the top level of the source tree.",
      "This is the full path to the top level of the current CMake "
      "source tree. For an in-source build, this would be the same "
-     "as CMAKE_BINARY_DIR. ", false,
+     "as CMAKE_BINARY_DIR.", false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_CURRENT_BINARY_DIR", cmProperty::VARIABLE,
@@ -42,7 +42,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "This the full path to the build directory that is currently "
      "being processed by cmake.  Each directory added by "
      "add_subdirectory will create a binary directory in the build "
-     "tree, and as it is being processed this variable will be set. "
+     "tree, and as it is being processed this variable will be set.  "
      "For in-source builds this is the current source directory "
      "being processed.", false,
      "Variables that Provide Information");
@@ -100,7 +100,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_SCRIPT_MODE_FILE", cmProperty::VARIABLE,
-     "Full path to the -P script file currently being processed. ",
+     "Full path to the -P script file currently being processed.",
      "When run in -P script mode, CMake sets this variable to the full "
      "path of the script file. When run to configure a CMakeLists.txt "
      "file, this variable is not set.", false,
@@ -108,14 +108,14 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
 
   cm->DefineProperty
     ("CMAKE_ARGC", cmProperty::VARIABLE,
-     "Number of command line arguments passed to CMake in script mode. ",
+     "Number of command line arguments passed to CMake in script mode.",
      "When run in -P script mode, CMake sets this variable to the number "
-     "of command line arguments. See also CMAKE_ARGV0, 1, 2 ... ", false,
+     "of command line arguments. See also CMAKE_ARGV0, 1, 2 ...", false,
      "Variables that Provide Information");
 
   cm->DefineProperty
     ("CMAKE_ARGV0", cmProperty::VARIABLE,
-     "Command line argument passed to CMake in script mode. ",
+     "Command line argument passed to CMake in script mode.",
      "When run in -P script mode, CMake sets this variable to "
      "the first command line argument. It then also sets CMAKE_ARGV1, "
      "CMAKE_ARGV2, ... and so on, up to the number of command line arguments "
@@ -133,7 +133,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "and for Visual Studio 7 it set to devenv.  For "
      "NMake Makefiles the value is nmake. This can be "
      "useful for adding special flags and commands based"
-     " on the final build environment. ", false,
+     " on the final build environment.", false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("CMAKE_CROSSCOMPILING", cmProperty::VARIABLE,
@@ -393,7 +393,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SOURCE_DIR", cmProperty::VARIABLE,
      "Source directory for project.",
-     "This is the top level source directory for the project. "
+     "This is the top level source directory for the project.  "
      "It corresponds to the source directory given to "
      "cmake-gui or ccmake.",false,
      "Variables that Provide Information");
@@ -419,7 +419,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("PROJECT_NAME", cmProperty::VARIABLE,
      "Name of the project given to the project command.",
      "This is the name given to the most "
-     "recent PROJECT command. ",false,
+     "recent PROJECT command.",false,
      "Variables that Provide Information");
   cm->DefineProperty
     ("PROJECT_SOURCE_DIR", cmProperty::VARIABLE,
@@ -550,7 +550,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "By default, automoc behaves exactly as described in the documentation "
      "of the AUTOMOC target property.  "
      "When set to TRUE, it accepts more input and tries to find the correct "
-     "input file for moc even if it differs from the documented behaviour. "
+     "input file for moc even if it differs from the documented behaviour.  "
      "In this mode it e.g. also checks whether a header file is intended to "
      "be processed by moc when a \"foo.moc\" file has been included.\n"
      "Relaxed mode has to be enabled for KDE4 compatibility.",
@@ -563,7 +563,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "If an install() command is used without the COMPONENT argument, "
      "these files will be grouped into a default component. The name of this "
      "default install component will be taken from this variable.  "
-     "It defaults to \"Unspecified\". ",
+     "It defaults to \"Unspecified\".",
      false,
      "Variables That Change Behavior");
 
@@ -591,9 +591,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_CONFIGURATION_TYPES",  cmProperty::VARIABLE,
      "Specifies the available build types on multi-config generators.",
      "This specifies what build types (configurations) will be available "
-     "such as Debug, Release, RelWithDebInfo etc. "
+     "such as Debug, Release, RelWithDebInfo etc.  "
      "This has reasonable defaults on most platforms, "
-     "but can be extended to provide other build types. "
+     "but can be extended to provide other build types.  "
      "See also CMAKE_BUILD_TYPE for details of managing configuration data, "
      "and CMAKE_CFG_INTDIR."
      ,false,
@@ -604,20 +604,20 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Specifies the build type on single-configuration generators.",
      "This statically specifies what build type (configuration) "
      "will be built in this build tree. Possible values are "
-     "empty, Debug, Release, RelWithDebInfo and MinSizeRel. "
+     "empty, Debug, Release, RelWithDebInfo and MinSizeRel.  "
      "This variable is only meaningful to single-configuration generators "
      "(such as make and Ninja) i.e. "
      "those which choose a single configuration "
      "when CMake runs to generate a build tree as opposed to "
      "multi-configuration generators which offer selection of the build "
-     "configuration within the generated build environment. "
+     "configuration within the generated build environment.  "
      "There are many per-config properties and variables "
      "(usually following clean SOME_VAR_<CONFIG> order conventions), "
      "such as CMAKE_C_FLAGS_<CONFIG>, specified as uppercase: "
-     "CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL]. "
+     "CMAKE_C_FLAGS_[DEBUG|RELEASE|RELWITHDEBINFO|MINSIZEREL].  "
      "For example, in a build tree configured "
      "to build type Debug, CMake will see to having "
-     "CMAKE_C_FLAGS_DEBUG settings get added to the CMAKE_C_FLAGS settings. "
+     "CMAKE_C_FLAGS_DEBUG settings get added to the CMAKE_C_FLAGS settings.  "
      "See also CMAKE_CONFIGURATION_TYPES."
      ,false,
      "Variables That Change Behavior");
@@ -643,10 +643,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "directories. This variable defaults to /usr/local"
      " on UNIX and c:/Program Files on Windows.\n"
      "On UNIX one can use the DESTDIR mechanism in order"
-     " to relocate the whole installation. "
+     " to relocate the whole installation.  "
      "DESTDIR means DESTination DIRectory. It is "
      "commonly used by makefile users "
-     "in order to install software at non-default location. "
+     "in order to install software at non-default location.  "
      "It is usually invoked like this:\n"
      " make DESTDIR=/home/john install\n"
      "which will install the concerned software using the"
@@ -665,10 +665,10 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY", cmProperty::VARIABLE,
      "Don't make the install target depend on the all target.",
-     "By default, the \"install\" target depends on the \"all\" target. "
+     "By default, the \"install\" target depends on the \"all\" target.  "
      "This has the effect, that when \"make install\" is invoked or INSTALL "
      "is built, first the \"all\" target is built, then the installation "
-     "starts. "
+     "starts.  "
      "If CMAKE_SKIP_INSTALL_ALL_DEPENDENCY is set to TRUE, this dependency "
      "is not created, so the installation process will start immediately, "
      "independent from whether the project has been completely built or not."
@@ -769,9 +769,9 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "directories contain incompatible but possibly linkable libraries. For "
      "example, on cross-compiled cluster environments, this allows a user to "
      "ignore directories containing libraries meant for the front-end "
-     "machine that modules like FindX11 (and others) would normally search. "
+     "machine that modules like FindX11 (and others) would normally search.  "
      "By default this contains a list of directories containing incompatible "
-     "binaries for the host system. "
+     "binaries for the host system.  "
      "See also CMAKE_SYSTEM_PREFIX_PATH, CMAKE_SYSTEM_LIBRARY_PATH, "
      "CMAKE_SYSTEM_INCLUDE_PATH, and CMAKE_SYSTEM_PROGRAM_PATH.", false,
      "Variables That Change Behavior");
@@ -785,11 +785,11 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "directories contain incompatible but possibly linkable libraries. For "
      "example, on cross-compiled cluster environments, this allows a user to "
      "ignore directories containing libraries meant for the front-end "
-     "machine that modules like FindX11 (and others) would normally search. "
-     "By default this is empty; it is intended to be set by the project. "
+     "machine that modules like FindX11 (and others) would normally search.  "
+     "By default this is empty; it is intended to be set by the project.  "
      "Note that CMAKE_IGNORE_PATH takes a list of directory names, NOT a "
      "list of prefixes. If you want to ignore paths under prefixes (bin, "
-     "include, lib, etc.), you'll need to specify them explicitly. "
+     "include, lib, etc.), you'll need to specify them explicitly.  "
      "See also CMAKE_PREFIX_PATH, CMAKE_LIBRARY_PATH, CMAKE_INCLUDE_PATH, "
      "CMAKE_PROGRAM_PATH.", false,
      "Variables That Change Behavior");
@@ -836,7 +836,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "although that package is installed.\n"
      "This switch should be used during the initial CMake run. Otherwise if "
      "the package has already been found in a previous CMake run, the "
-     "variables which have been stored in the cache will still be there. "
+     "variables which have been stored in the cache will still be there.  "
      "In that case it is recommended to remove the cache variables for "
      "this package from the cache using the cache editor or cmake -U", false,
      "Variables That Change Behavior");
@@ -923,7 +923,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_COLOR_MAKEFILE", cmProperty::VARIABLE,
      "Enables color output when using the Makefile generator.",
-     "When enabled, the generated Makefiles will produce colored output. "
+     "When enabled, the generated Makefiles will produce colored output.  "
      "Default is ON.",false,
      "Variables That Change Behavior");
 
@@ -975,7 +975,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Name of system cmake is compiling for.",
      "This variable is the composite of CMAKE_SYSTEM_NAME "
      "and CMAKE_SYSTEM_VERSION, like this "
-     "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}. "
+     "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_VERSION}.  "
      "If CMAKE_SYSTEM_VERSION is not set, then "
      "CMAKE_SYSTEM is the same as CMAKE_SYSTEM_NAME.",false,
      "Variables That Describe the System");
@@ -1237,7 +1237,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_INSTALL_RPATH", cmProperty::VARIABLE,
      "The rpath to use for installed targets.",
      "A semicolon-separated list specifying the rpath "
-     "to use in installed targets (for platforms that support it). "
+     "to use in installed targets (for platforms that support it).  "
      "This is used to initialize the target property "
      "INSTALL_RPATH for all targets.",
      false,
@@ -1248,7 +1248,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Add paths to linker search and installed rpath.",
      "CMAKE_INSTALL_RPATH_USE_LINK_PATH is a boolean that if set to true "
      "will append directories in the linker search path and outside the "
-     "project to the INSTALL_RPATH. "
+     "project to the INSTALL_RPATH.  "
      "This is used to initialize the target property "
      "INSTALL_RPATH_USE_LINK_PATH for all targets.",
      false,
@@ -1267,7 +1267,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_Fortran_FORMAT", cmProperty::VARIABLE,
      "Set to FIXED or FREE to indicate the Fortran source layout.",
      "This variable is used to initialize the Fortran_FORMAT "
-     "property on all the targets. "
+     "property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1276,7 +1276,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_Fortran_MODULE_DIRECTORY", cmProperty::VARIABLE,
      "Fortran module output directory.",
      "This variable is used to initialize the "
-     "Fortran_MODULE_DIRECTORY property on all the targets. "
+     "Fortran_MODULE_DIRECTORY property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1285,7 +1285,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_LIBRARY_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
      "Where to put all the LIBRARY targets when built.",
      "This variable is used to initialize the "
-     "LIBRARY_OUTPUT_DIRECTORY property on all the targets. "
+     "LIBRARY_OUTPUT_DIRECTORY property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1294,7 +1294,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_ARCHIVE_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
      "Where to put all the ARCHIVE targets when built.",
      "This variable is used to initialize the "
-     "ARCHIVE_OUTPUT_DIRECTORY property on all the targets. "
+     "ARCHIVE_OUTPUT_DIRECTORY property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1303,7 +1303,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_RUNTIME_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
      "Where to put all the RUNTIME targets when built.",
      "This variable is used to initialize the "
-     "RUNTIME_OUTPUT_DIRECTORY property on all the targets. "
+     "RUNTIME_OUTPUT_DIRECTORY property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1312,7 +1312,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_PDB_OUTPUT_DIRECTORY", cmProperty::VARIABLE,
      "Where to put all the MS debug symbol files from linker.",
      "This variable is used to initialize the "
-     "PDB_OUTPUT_DIRECTORY property on all the targets. "
+     "PDB_OUTPUT_DIRECTORY property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1330,7 +1330,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_AUTOMOC", cmProperty::VARIABLE,
      "Whether to handle moc automatically for Qt targets.",
      "This variable is used to initialize the "
-     "AUTOMOC property on all the targets. "
+     "AUTOMOC property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1339,7 +1339,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_AUTOMOC_MOC_OPTIONS", cmProperty::VARIABLE,
      "Additional options for moc when using automoc (see CMAKE_AUTOMOC).",
      "This variable is used to initialize the "
-     "AUTOMOC_MOC_OPTIONS property on all the targets. "
+     "AUTOMOC_MOC_OPTIONS property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1473,7 +1473,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_LIBRARY_PATH_FLAG", cmProperty::VARIABLE,
      "The flag to be used to add a library search path to a compiler.",
-     "The flag will be used to specify a library directory to the compiler. "
+     "The flag will be used to specify a library directory to the compiler.  "
      "On most compilers this is \"-L\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
@@ -1500,7 +1500,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_USE_RELATIVE_PATHS", cmProperty::VARIABLE,
      "Use relative paths (May not work!).",
      "If this is set to TRUE, then CMake will use "
-     "relative paths between the source and binary tree. "
+     "relative paths between the source and binary tree.  "
      "This option does not work for more complicated "
      "projects, and relative paths are used when possible.  "
      "In general, it is not possible to move CMake generated"
@@ -1534,7 +1534,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_LINK_INTERFACE_LIBRARIES", cmProperty::VARIABLE,
      "Default value for LINK_INTERFACE_LIBRARIES of targets.",
      "This variable is used to initialize the "
-     "LINK_INTERFACE_LIBRARIES property on all the targets. "
+     "LINK_INTERFACE_LIBRARIES property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1542,7 +1542,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_WIN32_EXECUTABLE", cmProperty::VARIABLE,
      "Default value for WIN32_EXECUTABLE of targets.",
      "This variable is used to initialize the "
-     "WIN32_EXECUTABLE property on all the targets. "
+     "WIN32_EXECUTABLE property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1550,7 +1550,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_MACOSX_BUNDLE", cmProperty::VARIABLE,
      "Default value for MACOSX_BUNDLE of targets.",
      "This variable is used to initialize the "
-     "MACOSX_BUNDLE property on all the targets. "
+     "MACOSX_BUNDLE property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1558,7 +1558,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_POSITION_INDEPENDENT_CODE", cmProperty::VARIABLE,
      "Default value for POSITION_INDEPENDENT_CODE of targets.",
      "This variable is used to initialize the "
-     "POSITION_INDEPENDENT_CODE property on all the targets. "
+     "POSITION_INDEPENDENT_CODE property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1566,7 +1566,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_VISIBILITY_PRESET", cmProperty::VARIABLE,
      "Default value for <LANG>_VISIBILITY_PRESET of targets.",
      "This variable is used to initialize the "
-     "<LANG>_VISIBILITY_PRESET property on all the targets. "
+     "<LANG>_VISIBILITY_PRESET property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1574,7 +1574,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_VISIBILITY_INLINES_HIDDEN", cmProperty::VARIABLE,
      "Default value for VISIBILITY_INLINES_HIDDEN of targets.",
      "This variable is used to initialize the "
-     "VISIBILITY_INLINES_HIDDEN property on all the targets. "
+     "VISIBILITY_INLINES_HIDDEN property on all the targets.  "
      "See that target property for additional information.",
      false,
      "Variables that Control the Build");
@@ -1595,7 +1595,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_<LANG>_COMPILER", cmProperty::VARIABLE,
      "The full path to the compiler for LANG.",
-     "This is the command that will be used as the <LANG> compiler. "
+     "This is the command that will be used as the <LANG> compiler.  "
      "Once set, you can not change this variable.",false,
      "Variables for Languages");
 
@@ -1671,7 +1671,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_COMPILER_IS_GNU<LANG>", cmProperty::VARIABLE,
      "True if the compiler is GNU.",
      "If the selected <LANG> compiler is the GNU "
-     "compiler then this is TRUE, if not it is FALSE. "
+     "compiler then this is TRUE, if not it is FALSE.  "
      "Unlike the other per-language variables, this uses the GNU syntax for "
      "identifying languages instead of the CMake syntax. Recognized values of "
      "the <LANG> suffix are:\n"
@@ -1709,7 +1709,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty
     ("CMAKE_<LANG>_FLAGS_RELWITHDEBINFO", cmProperty::VARIABLE,
      "Flags for RelWithDebInfo type or configuration.",
-     "<LANG> flags used when CMAKE_BUILD_TYPE is RelWithDebInfo. "
+     "<LANG> flags used when CMAKE_BUILD_TYPE is RelWithDebInfo.  "
      "Short for Release With Debug Information.",false,
      "Variables for Languages");
 
@@ -1773,7 +1773,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
     ("CMAKE_<LANG>_IGNORE_EXTENSIONS", cmProperty::VARIABLE,
      "File extensions that should be ignored by the build.",
      "This is a list of file extensions that may be "
-     "part of a project for a given language but are not compiled. ",false,
+     "part of a project for a given language but are not compiled.",false,
      "Variables for Languages");
 
   cm->DefineProperty
