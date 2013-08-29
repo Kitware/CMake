@@ -41,6 +41,8 @@ public:
 
   virtual void GetDocumentation(cmDocumentationEntry& entry,
                                 const char*           fullName) const;
+  virtual void EnableLanguage(std::vector<std::string> const& languages,
+                              cmMakefile *, bool optional);
 
   virtual void Generate();
 
@@ -105,6 +107,7 @@ private:
   void CreateLinksForTargets(cmGeneratedFileStream& fout);
 
   std::vector<std::string> SrcLinkedResources;
+  std::set<std::string> Natures;
   std::string HomeDirectory;
   std::string HomeOutputDirectory;
   bool IsOutOfSourceBuild;
