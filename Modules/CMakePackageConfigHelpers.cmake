@@ -3,7 +3,8 @@
 #    CONFIGURE_PACKAGE_CONFIG_FILE(<input> <output> INSTALL_DESTINATION <path>
 #                                                   [PATH_VARS <var1> <var2> ... <varN>]
 #                                                   [NO_SET_AND_CHECK_MACRO]
-#                                                   [NO_CHECK_REQUIRED_COMPONENTS_MACRO])
+#                                                   [NO_CHECK_REQUIRED_COMPONENTS_MACRO]
+#                                                   [NO_FIND_DEPENDENCY_MACRO])
 #
 # CONFIGURE_PACKAGE_CONFIG_FILE() should be used instead of the plain
 # configure_file() command when creating the <Name>Config.cmake or <Name>-config.cmake
@@ -154,7 +155,7 @@ endmacro()
 
 
 function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
-  set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+  set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO NO_FIND_DEPENDENCY_MACRO)
   set(oneValueArgs INSTALL_DESTINATION )
   set(multiValueArgs PATH_VARS )
 
@@ -236,6 +237,40 @@ macro(check_required_components _NAME)
       endif()
     endif()
   endforeach()
+endmacro()
+")
+  endif()
+
+  if(NOT CCF_NO_FIND_DEPENDENCY_MACRO)
+    set(PACKAGE_INIT "${PACKAGE_INIT}
+macro(find_dependency dep)
+  if (NOT \${dep}_FOUND)
+    if (\${ARGV1})
+      set(version \${ARGV1})
+    endif()
+    set(exact_arg)
+    if(\${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION_EXACT)
+      set(exact_arg EXACT)
+    endif()
+    set(quiet_arg)
+    if(\${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
+      set(quiet_arg QUIET)
+    endif()
+    set(required_arg)
+    if(\${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED)
+      set(required_arg REQUIRED)
+    endif()
+
+    find_package(\${dep} \${version} \${exact_arg} \${quiet_arg} \${required_arg})
+    if (NOT \${dep}_FOUND)
+      set(\${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE \"\${CMAKE_FIND_PACKAGE_NAME} could not be found because dependency \${dep} could not be found.\")
+      set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND False)
+      return()
+    endif()
+    set(required_arg)
+    set(quiet_arg)
+    set(exact_arg)
+  endif()
 endmacro()
 ")
   endif()
