@@ -1,3 +1,39 @@
+Changes in CMake 2.8.12-rc2 (since 2.8.12-rc1)
+----------------------------------------------
+Brad King (2):
+      Fix RunCMake.Configure test expectation newline matching
+      Clean up install rules of CMake itself (#14371)
+
+Clinton Stimpson (1):
+      OSX: Allow an empty INSTALL_NAME_DIR to override MACOSX_RPATH.
+
+Eric Bélanger (1):
+      FindImageMagick: Find libraries named with HDRI support (#14348)
+
+Raphael Kubo da Costa (1):
+      FindTCL: Add BSD paths for Tcl/Tk 8.6
+
+Robert Maynard (2):
+      VS: Generate ToolsVersion matching each VS version
+      cmMakefile: Do not track configured files known to be temporary
+
+Rolf Eike Beer (1):
+      CheckC*CompilerFlag: add documentation what to expect from a positive result
+
+Stephen Kelly (6):
+      Fix OLD behavior of CMP0021.
+      try_compile: Extract IMPORTED targets from LINK_DEPENDENT_LIBRARIES
+      try_compile: Extract IMPORTED targets from INTERFACE_LINK_LIBRARIES
+      Genex: Fix evaluation of MAP_IMPORTED_CONFIG_<CONFIG>
+      Fix some whitespace errors in docs.
+      Normalize system directories from the interface target property
+
+Yury G. Kudryashov (1):
+      CPack: Fix a typo in documentation
+
+Zack Galbreath (1):
+      CTest: Fix GTM coverage parsing line offset bug
+
 Changes in CMake 2.8.12-rc1 (since 2.8.11.2)
 --------------------------------------------
 Adam J. Weigold (1):
