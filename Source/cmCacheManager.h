@@ -39,9 +39,9 @@ private:
     std::string Value;
     CacheEntryType Type;
     cmPropertyMap Properties;
-    const char* GetProperty(const char*) const;
-    void SetProperty(const char* property, const char* value);
-    void AppendProperty(const char* property, const char* value,
+    const char* GetProperty(const std::string&) const;
+    void SetProperty(const std::string& property, const char* value);
+    void AppendProperty(const std::string& property, const char* value,
                         bool asString=false);
     bool Initialized;
     CacheEntry() : Value(""), Type(UNINITIALIZED), Initialized(false)
@@ -58,13 +58,13 @@ public:
     void Next();
     const char *GetName() const {
       return this->Position->first.c_str(); }
-    const char* GetProperty(const char*) const ;
-    bool GetPropertyAsBool(const char*) const ;
-    bool PropertyExists(const char*) const;
-    void SetProperty(const char* property, const char* value);
-    void AppendProperty(const char* property, const char* value,
+    const char* GetProperty(const std::string&) const ;
+    bool GetPropertyAsBool(const std::string&) const ;
+    bool PropertyExists(const std::string&) const;
+    void SetProperty(const std::string& property, const char* value);
+    void AppendProperty(const std::string& property, const char* value,
                         bool asString=false);
-    void SetProperty(const char* property, bool value);
+    void SetProperty(const std::string& property, bool value);
     const char* GetValue() const { return this->GetEntry().Value.c_str(); }
     bool GetValueAsBool() const;
     void SetValue(const char*);

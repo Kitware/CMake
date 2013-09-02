@@ -382,9 +382,9 @@ protected:
   std::string ExpandRuleVariable(std::string const& variable,
                                  const RuleVariables& replaceValues);
 
-  const char* GetRuleLauncher(cmTarget* target, const char* prop);
+  const char* GetRuleLauncher(cmTarget* target, const std::string& prop);
   void InsertRuleLauncher(std::string& s, cmTarget* target,
-                          const char* prop);
+                          const std::string& prop);
 
 
   /** Convert a target to a utility target for unsupported

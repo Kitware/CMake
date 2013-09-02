@@ -95,7 +95,7 @@ protected:
                                  ImportPropertyMap& properties,
                                  std::vector<std::string>& missingTargets);
   void SetImportLinkProperty(std::string const& suffix,
-                             cmTarget* target, const char* propName,
+                             cmTarget* target, const std::string& propName,
                              std::vector<std::string> const& entries,
                              ImportPropertyMap& properties,
                              std::vector<std::string>& missingTargets);
@@ -116,7 +116,7 @@ protected:
                                    cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee) = 0;
-  void PopulateInterfaceProperty(const char *,
+  void PopulateInterfaceProperty(const std::string&,
                                  cmTarget *target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
@@ -125,7 +125,7 @@ protected:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
-  void PopulateInterfaceProperty(const char *propName, cmTarget *target,
+  void PopulateInterfaceProperty(const std::string& propName, cmTarget *target,
                                  ImportPropertyMap &properties);
   void PopulateCompatibleInterfaceProperties(cmTarget *target,
                                  ImportPropertyMap &properties);
@@ -174,7 +174,7 @@ protected:
   std::set<cmTarget*> ExportedTargets;
 
 private:
-  void PopulateInterfaceProperty(const char *, const char *,
+  void PopulateInterfaceProperty(const std::string&, const cmStdString&,
                                  cmTarget *target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,

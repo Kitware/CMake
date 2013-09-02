@@ -21,16 +21,16 @@ public std::map<cmStdString,cmPropertyDefinition>
 {
 public:
   // define the property
-  void DefineProperty(const char *name, cmProperty::ScopeType scope,
+  void DefineProperty(const cmStdString& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
                       bool chain);
 
   // has a named property been defined
-  bool IsPropertyDefined(const char *name);
+  bool IsPropertyDefined(const cmStdString& name);
 
   // is a named property set to chain
-  bool IsPropertyChained(const char *name);
+  bool IsPropertyChained(const cmStdString& name);
 };
 
 #endif

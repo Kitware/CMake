@@ -54,7 +54,7 @@ void cmTest::SetCommand(std::vector<std::string> const& command)
 }
 
 //----------------------------------------------------------------------------
-const char *cmTest::GetProperty(const char* prop) const
+const char *cmTest::GetProperty(const std::string& prop) const
 {
   bool chain = false;
   const char *retVal =
@@ -67,28 +67,20 @@ const char *cmTest::GetProperty(const char* prop) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTest::GetPropertyAsBool(const char* prop) const
+bool cmTest::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
 //----------------------------------------------------------------------------
-void cmTest::SetProperty(const char* prop, const char* value)
+void cmTest::SetProperty(const std::string& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
-
   this->Properties.SetProperty(prop, value, cmProperty::TEST);
 }
 
 //----------------------------------------------------------------------------
-void cmTest::AppendProperty(const char* prop, const char* value, bool asString)
+void cmTest::AppendProperty(const std::string& prop,
+                            const char* value, bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
   this->Properties.AppendProperty(prop, value, cmProperty::TEST, asString);
 }

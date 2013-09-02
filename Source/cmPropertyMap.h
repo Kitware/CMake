@@ -19,15 +19,15 @@ class cmake;
 class cmPropertyMap : public std::map<cmStdString,cmProperty>
 {
 public:
-  cmProperty *GetOrCreateProperty(const char *name);
+  cmProperty *GetOrCreateProperty(const std::string& name);
 
-  void SetProperty(const char *name, const char *value,
+  void SetProperty(const std::string& name, const char *value,
                    cmProperty::ScopeType scope);
 
-  void AppendProperty(const char* name, const char* value,
+  void AppendProperty(const std::string& name, const char* value,
                       cmProperty::ScopeType scope, bool asString=false);
 
-  const char *GetPropertyValue(const char *name,
+  const char *GetPropertyValue(const std::string& name,
                                cmProperty::ScopeType scope,
                                bool &chain) const;
 

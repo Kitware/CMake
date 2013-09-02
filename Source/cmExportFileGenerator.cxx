@@ -136,7 +136,8 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+void cmExportFileGenerator::PopulateInterfaceProperty(
+                                              const std::string& propName,
                                               cmTarget *target,
                                               ImportPropertyMap &properties)
 {
@@ -148,8 +149,9 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
-                      const char *outputName,
+void cmExportFileGenerator::PopulateInterfaceProperty(
+                      const std::string& propName,
+                      const cmStdString& outputName,
                       cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,
@@ -391,7 +393,8 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+void cmExportFileGenerator::PopulateInterfaceProperty(
+                      const std::string& propName,
                       cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,
@@ -403,7 +406,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 
 
 //----------------------------------------------------------------------------
-void getPropertyContents(cmTarget const* tgt, const char *prop,
+void getPropertyContents(cmTarget const* tgt, const std::string& prop,
          std::set<std::string> &ifaceProperties)
 {
   const char *p = tgt->GetProperty(prop);
@@ -825,7 +828,7 @@ void
 cmExportFileGenerator
 ::SetImportLinkProperty(std::string const& suffix,
                         cmTarget* target,
-                        const char* propName,
+                        const std::string& propName,
                         std::vector<std::string> const& entries,
                         ImportPropertyMap& properties,
                         std::vector<std::string>& missingTargets

@@ -223,12 +223,14 @@ public:
   void FinishConfigure();
 
   ///! Set/Get a property of this target file
-  void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char* prop, const char* value,bool asString=false);
-  const char *GetProperty(const char *prop) const;
-  const char *GetProperty(const char *prop, cmProperty::ScopeType scope) const;
-  bool GetPropertyAsBool(const char *prop) const;
-  void CheckProperty(const char* prop, cmMakefile* context) const;
+  void SetProperty(const std::string& prop, const char *value);
+  void AppendProperty(const std::string&  prop, const char* value,
+          bool asString=false);
+  const char *GetProperty(const std::string& prop) const;
+  const char *GetProperty(const std::string& prop,
+          cmProperty::ScopeType scope) const;
+  bool GetPropertyAsBool(const std::string& prop) const;
+  void CheckProperty(const std::string& prop, cmMakefile* context) const;
 
   const char* GetFeature(const char* feature, const char* config) const;
 
@@ -632,7 +634,8 @@ private:
 
   // Use a makefile variable to set a default for the given property.
   // If the variable is not defined use the given default instead.
-  void SetPropertyDefault(const char* property, const char* default_value);
+  void SetPropertyDefault(const std::string& property,
+                          const char* default_value);
 
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(bool implib) const;
@@ -729,7 +732,7 @@ private:
 
   void ClearLinkMaps();
 
-  void MaybeInvalidatePropertyCache(const char* prop);
+  void MaybeInvalidatePropertyCache(const std::string& prop);
 
   void ProcessSourceExpression(std::string const& expr);
 

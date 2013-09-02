@@ -1156,8 +1156,11 @@ void
 cmLocalGenerator::ExpandRuleVariables(std::string& s,
                                       const RuleVariables& replaceValues)
 {
-  this->InsertRuleLauncher(s, replaceValues.CMTarget,
-                           replaceValues.RuleLauncher);
+  if(replaceValues.RuleLauncher)
+    {
+    this->InsertRuleLauncher(s, replaceValues.CMTarget,
+                             replaceValues.RuleLauncher);
+    }
   std::string::size_type start = s.find('<');
   // no variables to expand
   if(start == s.npos)
@@ -1201,7 +1204,7 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
 
 //----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetRuleLauncher(cmTarget* target,
-                                              const char* prop)
+                                              const std::string& prop)
 {
   if(target)
     {
@@ -1215,7 +1218,7 @@ const char* cmLocalGenerator::GetRuleLauncher(cmTarget* target,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
-                                          const char* prop)
+                                          const std::string& prop)
 {
   if(const char* val = this->GetRuleLauncher(target, prop))
     {
@@ -3455,11 +3458,12 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 }
 
 //----------------------------------------------------------------------------
-static void cmLGInfoProp(cmMakefile* mf, cmTarget* target, const char* prop)
+static void cmLGInfoProp(cmMakefile* mf, cmTarget* target,
+    const std::string& prop)
 {
   if(const char* val = target->GetProperty(prop))
     {
-    mf->AddDefinition(prop, val);
+    mf->AddDefinition(prop.c_str(), val);
     }
 }
 

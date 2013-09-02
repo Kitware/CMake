@@ -46,7 +46,7 @@ protected:
   std::string InstallNameDir(cmTarget* target,
                              const std::string& config);
 private:
-  std::string FindTargets(const char *prop, cmTarget const* tgt,
+  std::string FindTargets(const std::string& prop, cmTarget const* tgt,
                    std::set<cmTarget const*> &emitted);
 
 

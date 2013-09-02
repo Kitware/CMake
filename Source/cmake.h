@@ -269,11 +269,13 @@ class cmake
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
 
   ///! Set/Get a property of this target file
-  void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char *prop, const char *value,bool asString=false);
-  const char *GetProperty(const char *prop);
-  const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
-  bool GetPropertyAsBool(const char *prop);
+  void SetProperty(const std::string& prop, const char *value);
+  void AppendProperty(const std::string& prop,
+                      const char *value,bool asString=false);
+  const char *GetProperty(const std::string& prop);
+  const char *GetProperty(const std::string& prop,
+                          cmProperty::ScopeType scope);
+  bool GetPropertyAsBool(const std::string& prop);
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
@@ -317,18 +319,18 @@ class cmake
   void MarkCliAsUsed(const std::string& variable);
 
   // Define a property
-  void DefineProperty(const char *name, cmProperty::ScopeType scope,
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
                       bool chain = false);
 
   // get property definition
   cmPropertyDefinition *GetPropertyDefinition
-  (const char *name, cmProperty::ScopeType scope);
+  (const std::string& name, cmProperty::ScopeType scope);
 
   // Is a property defined?
-  bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
-  bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);
+  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
+  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
 
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/

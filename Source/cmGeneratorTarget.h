@@ -28,8 +28,8 @@ public:
 
   int GetType() const;
   const char *GetName() const;
-  const char *GetProperty(const char *prop) const;
-  bool GetPropertyAsBool(const char *prop) const;
+  const char *GetProperty(const std::string& prop) const;
+  bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   void GetObjectSources(std::vector<cmSourceFile*> &) const;

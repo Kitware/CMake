@@ -2144,7 +2144,8 @@ void cmake::GenerateGraphViz(const char* fileName) const
 #endif
 }
 
-void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
+void cmake::DefineProperty(const std::string& name,
+                           cmProperty::ScopeType scope,
                            const char *ShortDescription,
                            const char *FullDescription,
                            bool chained)
@@ -2155,7 +2156,7 @@ void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
 }
 
 cmPropertyDefinition *cmake
-::GetPropertyDefinition(const char *name,
+::GetPropertyDefinition(const std::string& name,
                         cmProperty::ScopeType scope)
 {
   if (this->IsPropertyDefined(name,scope))
@@ -2165,25 +2166,22 @@ cmPropertyDefinition *cmake
   return 0;
 }
 
-bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)
+bool cmake::IsPropertyDefined(const std::string& name,
+                              cmProperty::ScopeType scope)
 {
   return this->PropertyDefinitions[scope].IsPropertyDefined(name);
 }
 
-bool cmake::IsPropertyChained(const char *name, cmProperty::ScopeType scope)
+bool cmake::IsPropertyChained(const std::string& name,
+                              cmProperty::ScopeType scope)
 {
   return this->PropertyDefinitions[scope].IsPropertyChained(name);
 }
 
-void cmake::SetProperty(const char* prop, const char* value)
+void cmake::SetProperty(const std::string& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
-
   // Special hook to invalidate cached value.
-  if(strcmp(prop, "DEBUG_CONFIGURATIONS") == 0)
+  if(prop == "DEBUG_CONFIGURATIONS")
     {
     this->DebugConfigs.clear();
     }
@@ -2191,15 +2189,11 @@ void cmake::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
-void cmake::AppendProperty(const char* prop, const char* value, bool asString)
+void cmake::AppendProperty(const std::string& prop,
+                           const char* value, bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
-
   // Special hook to invalidate cached value.
-  if(strcmp(prop, "DEBUG_CONFIGURATIONS") == 0)
+  if(prop == "DEBUG_CONFIGURATIONS")
     {
     this->DebugConfigs.clear();
     }
@@ -2207,23 +2201,19 @@ void cmake::AppendProperty(const char* prop, const char* value, bool asString)
   this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
 }
 
-const char *cmake::GetProperty(const char* prop)
+const char *cmake::GetProperty(const std::string& prop)
 {
   return this->GetProperty(prop, cmProperty::GLOBAL);
 }
 
-const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
+const char *cmake::GetProperty(const std::string& prop,
+                               cmProperty::ScopeType scope)
 {
-  if(!prop)
-    {
-    return 0;
-    }
   bool chain = false;
 
   // watch for special properties
-  std::string propname = prop;
   std::string output = "";
-  if ( propname == "CACHE_VARIABLES" )
+  if ( prop == "CACHE_VARIABLES" )
     {
     cmCacheManager::CacheIterator cit =
       this->GetCacheManager()->GetCacheIterator();
@@ -2237,7 +2227,7 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
       }
     this->SetProperty("CACHE_VARIABLES", output.c_str());
     }
-  else if ( propname == "COMMANDS" )
+  else if ( prop == "COMMANDS" )
     {
     cmake::RegisteredCommandsMap::iterator cmds
         = this->GetCommands()->begin();
@@ -2252,12 +2242,12 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
       }
     this->SetProperty("COMMANDS",output.c_str());
     }
-  else if ( propname == "IN_TRY_COMPILE" )
+  else if ( prop == "IN_TRY_COMPILE" )
     {
     this->SetProperty("IN_TRY_COMPILE",
                       this->GetIsInTryCompile()? "1":"0");
     }
-  else if ( propname == "ENABLED_LANGUAGES" )
+  else if ( prop == "ENABLED_LANGUAGES" )
     {
     std::string lang;
     if(this->GlobalGenerator)
@@ -2278,7 +2268,7 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
 
-bool cmake::GetPropertyAsBool(const char* prop)
+bool cmake::GetPropertyAsBool(const std::string& prop)
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }

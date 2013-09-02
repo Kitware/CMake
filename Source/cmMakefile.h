@@ -800,12 +800,14 @@ public:
   std::string GetModulesFile(const char* name) const;
 
   ///! Set/Get a property of this directory
-  void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char *prop, const char *value,bool asString=false);
-  const char *GetProperty(const char *prop) const;
-  const char *GetPropertyOrDefinition(const char *prop) const;
-  const char *GetProperty(const char *prop, cmProperty::ScopeType scope) const;
-  bool GetPropertyAsBool(const char *prop) const;
+  void SetProperty(const std::string& prop, const char *value);
+  void AppendProperty(const std::string& prop, const char *value,
+                      bool asString=false);
+  const char *GetProperty(const std::string& prop) const;
+  const char *GetPropertyOrDefinition(const std::string& prop) const;
+  const char *GetProperty(const std::string& prop,
+                          cmProperty::ScopeType scope) const;
+  bool GetPropertyAsBool(const std::string& prop) const;
 
   const char* GetFeature(const char* feature, const char* config);
 
@@ -835,7 +837,7 @@ public:
   // push and pop variable scopes
   void PushScope();
   void PopScope();
-  void RaiseScope(const char *var, const char *value);
+  void RaiseScope(const cmStdString& var, const char *value);
 
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop

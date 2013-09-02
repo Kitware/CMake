@@ -807,13 +807,13 @@ bool cmCacheManager::CacheIterator::GetValueAsBool() const
 
 //----------------------------------------------------------------------------
 const char*
-cmCacheManager::CacheEntry::GetProperty(const char* prop) const
+cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 {
-  if(strcmp(prop, "TYPE") == 0)
+  if(prop == "TYPE")
     {
     return cmCacheManagerTypes[this->Type];
     }
-  else if(strcmp(prop, "VALUE") == 0)
+  else if(prop == "VALUE")
     {
     return this->Value.c_str();
     }
@@ -823,14 +823,14 @@ cmCacheManager::CacheEntry::GetProperty(const char* prop) const
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheEntry::SetProperty(const char* prop,
+void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
                                              const char* value)
 {
-  if(strcmp(prop, "TYPE") == 0)
+  if(prop == "TYPE")
     {
     this->Type = cmCacheManager::StringToType(value? value : "STRING");
     }
-  else if(strcmp(prop, "VALUE") == 0)
+  else if(prop == "VALUE")
     {
     this->Value = value? value : "";
     }
@@ -841,15 +841,15 @@ void cmCacheManager::CacheEntry::SetProperty(const char* prop,
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
+void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
                                                 const char* value,
                                                 bool asString)
 {
-  if(strcmp(prop, "TYPE") == 0)
+  if(prop == "TYPE")
     {
     this->Type = cmCacheManager::StringToType(value? value : "STRING");
     }
-  else if(strcmp(prop, "VALUE") == 0)
+  else if(prop == "VALUE")
     {
     if(value)
       {
@@ -867,7 +867,8 @@ void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
 }
 
 //----------------------------------------------------------------------------
-const char* cmCacheManager::CacheIterator::GetProperty(const char* prop) const
+const char* cmCacheManager::CacheIterator::GetProperty(
+    const std::string& prop) const
 {
   if(!this->IsAtEnd())
     {
@@ -877,7 +878,8 @@ const char* cmCacheManager::CacheIterator::GetProperty(const char* prop) const
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
+void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
+                                                const char* v)
 {
   if(!this->IsAtEnd())
     {
@@ -886,7 +888,7 @@ void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheIterator::AppendProperty(const char* p,
+void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
                                                    const char* v,
                                                    bool asString)
 {
@@ -897,7 +899,8 @@ void cmCacheManager::CacheIterator::AppendProperty(const char* p,
 }
 
 //----------------------------------------------------------------------------
-bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* prop) const
+bool cmCacheManager::CacheIterator::GetPropertyAsBool(
+    const std::string& prop) const
 {
   if(const char* value = this->GetProperty(prop))
     {
@@ -907,13 +910,14 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* prop) const
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v)
+void cmCacheManager::CacheIterator::SetProperty(const std::string& p, bool v)
 {
   this->SetProperty(p, v ? "ON" : "OFF");
 }
 
 //----------------------------------------------------------------------------
-bool cmCacheManager::CacheIterator::PropertyExists(const char* prop) const
+bool cmCacheManager::CacheIterator::PropertyExists(
+    const std::string& prop) const
 {
   return this->GetProperty(prop)? true:false;
 }

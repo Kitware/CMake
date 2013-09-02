@@ -105,7 +105,7 @@ static std::string extractSubDir(const std::string& absPath,
 
 static void copyTargetProperty(cmTarget* destinationTarget,
                                cmTarget* sourceTarget,
-                               const char* propertyName)
+                               const std::string& propertyName)
 {
   const char* propertyValue = sourceTarget->GetProperty(propertyName);
   if (propertyValue)

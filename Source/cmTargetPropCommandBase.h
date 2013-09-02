@@ -29,7 +29,8 @@ public:
   };
 
   bool HandleArguments(std::vector<std::string> const& args,
-                           const char *prop, ArgumentFlags flags = NO_FLAGS);
+                       const std::string& prop,
+                       ArgumentFlags flags = NO_FLAGS);
 
   cmTypeMacro(cmTargetPropCommandBase, cmCommand);
 protected:

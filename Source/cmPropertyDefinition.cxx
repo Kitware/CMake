@@ -13,7 +13,7 @@
 #include "cmSystemTools.h"
 
 void cmPropertyDefinition
-::DefineProperty(const char *name, cmProperty::ScopeType scope,
+::DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                  const char *shortDescription,
                  const char *fullDescription,
                  bool chain)

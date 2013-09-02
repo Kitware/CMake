@@ -46,10 +46,11 @@ public:
   void Print() const;
 
   ///! Set/Get a property of this source file
-  void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char* prop, const char* value,bool asString=false);
-  const char *GetProperty(const char *prop) const;
-  bool GetPropertyAsBool(const char *prop) const;
+  void SetProperty(const std::string& prop, const char *value);
+  void AppendProperty(const std::string& prop,
+                      const char* value,bool asString=false);
+  const char *GetProperty(const std::string& prop) const;
+  bool GetPropertyAsBool(const std::string& prop) const;
   cmPropertyMap &GetProperties() { return this->Properties; };
 
   /** Get the cmMakefile instance that owns this test.  */

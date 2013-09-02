@@ -16,8 +16,9 @@
 
 //----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
-::HandleArguments(std::vector<std::string> const& args, const char *prop,
-                 ArgumentFlags flags)
+::HandleArguments(std::vector<std::string> const& args,
+                  const std::string& prop,
+                  ArgumentFlags flags)
 {
   if(args.size() < 2)
     {

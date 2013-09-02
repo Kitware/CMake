@@ -12,14 +12,15 @@
 #include "cmProperty.h"
 #include "cmSystemTools.h"
 
-void cmProperty::Set(const char *name, const char *value)
+void cmProperty::Set(const std::string& name, const char *value)
 {
   this->Name = name;
   this->Value = value;
   this->ValueHasBeenSet = true;
 }
 
-void cmProperty::Append(const char *name, const char *value, bool asString)
+void cmProperty::Append(const std::string& name, const char *value,
+                        bool asString)
 {
   this->Name = name;
   if(!this->Value.empty() && *value && !asString)

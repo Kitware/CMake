@@ -234,7 +234,7 @@ const char *cmGeneratorTarget::GetName() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetProperty(const char *prop) const
+const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
   return this->Target->GetProperty(prop);
 }
@@ -486,7 +486,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::GetPropertyAsBool(const char *prop) const
+bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return this->Target->GetPropertyAsBool(prop);
 }
