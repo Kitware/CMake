@@ -406,11 +406,12 @@ bool cmSystemTools::IsNOTFOUND(const char* val)
 
 bool cmSystemTools::IsOff(const char* val)
 {
-  if (!val || strlen(val) == 0)
+  if (!val || !*val)
     {
     return true;
     }
-  std::basic_string<char> v = val;
+  size_t len = val ? strlen(val) : 0;
+  std::basic_string<char> v(val, len);
 
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
