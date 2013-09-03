@@ -2876,9 +2876,18 @@ set_time_tru64(int fd, int mode, const char *name,
 	times[1].tv_usec = mtime_nsec / 1000;
 	times[2].tv_sec = ctime;
 	times[2].tv_usec = ctime_nsec / 1000;
+#ifdef __hpux
+	tstamp.atime.tv_sec = times[0].tv_sec;
+        tstamp.atime.tv_nsec = times[0].tv_usec * 1000;
+        tstamp.mtime.tv_sec = times[1].tv_sec;
+        tstamp.mtime.tv_nsec = times[1].tv_usec * 1000;
+        tstamp.ctime.tv_sec = times[2].tv_sec;
+        tstamp.ctime.tv_nsec = times[2].tv_usec * 1000;
+#else // __hpux
 	tstamp.atime = times[0];
 	tstamp.mtime = times[1];
 	tstamp.ctime = times[2];
+#endif // __hpux
 	return (fcntl(fd,F_SETTIMES,&tstamp));
 }
 #endif /* Tru64 */
