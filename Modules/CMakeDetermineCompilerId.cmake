@@ -157,7 +157,8 @@ Id flags: ${testflags}
       )
     # Match the compiler location line printed out.
     if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "CMAKE_${lang}_COMPILER=([^%\r\n]+)[\r\n]")
-      set(_comp "${CMAKE_MATCH_1}")
+      # Strip VS diagnostic output from the end of the line.
+      string(REGEX REPLACE " \\(TaskId:[0-9]*\\)$" "" _comp "${CMAKE_MATCH_1}")
       if(EXISTS "${_comp}")
         file(TO_CMAKE_PATH "${_comp}" _comp)
         set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
