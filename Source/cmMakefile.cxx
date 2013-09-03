@@ -847,12 +847,22 @@ void cmMakefile::FinalPass()
 
   //remove_if will move all items that don't have a valid file name to the
   //back of the vector
-  std::vector<std::string>::iterator new_end = std::remove_if(
-                                                this->OutputFiles.begin(),
-                                                this->OutputFiles.end(),
-                                                file_not_persistent());
+  std::vector<std::string>::iterator new_output_files_end = std::remove_if(
+                                                     this->OutputFiles.begin(),
+                                                     this->OutputFiles.end(),
+                                                     file_not_persistent() );
   //we just have to erase all items at the back
-  this->OutputFiles.erase(new_end, this->OutputFiles.end() );
+  this->OutputFiles.erase(new_output_files_end, this->OutputFiles.end() );
+
+  //if a configured file is used as input for another configured file,
+  //and then deleted it will show up in the input list files so we
+  //need to scan those too
+  std::vector<std::string>::iterator new_list_files_end = std::remove_if(
+                                                   this->ListFiles.begin(),
+                                                   this->ListFiles.end(),
+                                                   file_not_persistent() );
+
+  this->ListFiles.erase(new_list_files_end, this->ListFiles.end() );
 }
 
 // Generate the output file
