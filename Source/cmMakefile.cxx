@@ -817,12 +817,13 @@ bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
 
 namespace
 {
-  struct file_exists
+  struct file_not_persistent
   {
     bool operator()(const std::string& path) const
-    {
-      return cmSystemTools::FileExists(path.c_str());
-    }
+      {
+      return !(path.find("CMakeTmp") == path.npos &&
+               cmSystemTools::FileExists(path.c_str()));
+      }
   };
 }
 
@@ -849,10 +850,9 @@ void cmMakefile::FinalPass()
   std::vector<std::string>::iterator new_end = std::remove_if(
                                                 this->OutputFiles.begin(),
                                                 this->OutputFiles.end(),
-                                                file_exists() );
+                                                file_not_persistent());
   //we just have to erase all items at the back
   this->OutputFiles.erase(new_end, this->OutputFiles.end() );
-
 }
 
 // Generate the output file
