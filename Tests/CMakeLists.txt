@@ -1071,7 +1071,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
   find_package(GTK2 QUIET)
   if(GTK2_FOUND)
-    add_subdirectory(GTK2Targets)
+    add_subdirectory(FindGTK2)
   endif()
 
   add_test(ExternalProject ${CMAKE_CTEST_COMMAND}
