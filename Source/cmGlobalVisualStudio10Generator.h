@@ -25,7 +25,7 @@ class cmGlobalVisualStudio10Generator :
 {
 public:
   cmGlobalVisualStudio10Generator(const char* name,
-    const char* architectureId, const char* additionalPlatformDefinition);
+    const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool SetGeneratorToolset(std::string const& ts);
@@ -53,6 +53,9 @@ public:
 
   /** Is the installed VS an Express edition?  */
   bool IsExpressEdition() const { return this->ExpressEdition; }
+
+  /** Is the Microsoft Assembler enabled?  */
+  bool IsMasmEnabled() const { return this->MasmEnabled; }
 
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset();
@@ -83,6 +86,7 @@ protected:
 
   std::string PlatformToolset;
   bool ExpressEdition;
+  bool MasmEnabled;
 
   bool UseFolderProperty();
 

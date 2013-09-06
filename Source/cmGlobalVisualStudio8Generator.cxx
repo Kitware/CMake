@@ -57,8 +57,7 @@ public:
       }
 
     cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
-      name, parser.GetArchitectureFamily(), NULL);
-    ret->PlatformName = p;
+      name, p, NULL);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -96,34 +95,18 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  const char* name, const char* architectureId,
+  const char* name, const char* platformName,
   const char* additionalPlatformDefinition)
+  : cmGlobalVisualStudio71Generator(platformName)
 {
   this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
-  if (architectureId)
-    {
-    this->ArchitectureId = architectureId;
-    }
+
   if (additionalPlatformDefinition)
     {
     this->AdditionalPlatformDefinition = additionalPlatformDefinition;
     }
-}
-
-//----------------------------------------------------------------------------
-const char* cmGlobalVisualStudio8Generator::GetPlatformName() const
-{
-  if (!this->PlatformName.empty())
-    {
-    return this->PlatformName.c_str();
-    }
-  if (this->ArchitectureId == "X86")
-    {
-    return "Win32";
-    }
-  return this->ArchitectureId.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -142,7 +125,6 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudio71Generator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
 
   if(this->TargetsWindowsCE())
   {

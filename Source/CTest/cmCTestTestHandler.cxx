@@ -1107,7 +1107,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
 }
 
 //----------------------------------------------------------------------
-void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&)
+void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&, int)
 {
 }
 

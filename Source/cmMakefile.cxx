@@ -41,6 +41,7 @@
 
 #include <stack>
 #include <ctype.h> // for isspace
+#include <assert.h>
 
 class cmMakefile::Internals
 {
@@ -149,6 +150,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Initialize();
   this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
+  this->OutputToSource = mf.OutputToSource;
 }
 
 //----------------------------------------------------------------------------
@@ -1009,8 +1011,29 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
+    this->UpdateOutputToSourceMap(outputs, file);
     }
   return file;
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::UpdateOutputToSourceMap(std::vector<std::string> const& outputs,
+                                    cmSourceFile* source)
+{
+  for(std::vector<std::string>::const_iterator o = outputs.begin();
+      o != outputs.end(); ++o)
+    {
+    this->UpdateOutputToSourceMap(*o, source);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefile::UpdateOutputToSourceMap(std::string const& output,
+                                    cmSourceFile* source)
+{
+  this->OutputToSource[output] = source;
 }
 
 //----------------------------------------------------------------------------
@@ -1437,6 +1460,14 @@ void cmMakefile::AddLinkDirectoryForTarget(const char *target,
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
     {
+    if(this->IsAlias(target))
+      {
+      cmOStringStream e;
+      e << "ALIAS target \"" << target << "\" "
+        << "may not be linked into another target.";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+      return;
+      }
     i->second.AddLinkDirectory( d );
     }
   else
@@ -1923,6 +1954,12 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 }
 
 
+void cmMakefile::AddAlias(const char* lname, cmTarget *tgt)
+{
+  this->AliasTargets[lname] = tgt;
+  this->LocalGenerator->GetGlobalGenerator()->AddAlias(lname, tgt);
+}
+
 cmTarget* cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
                             const std::vector<std::string> &srcs,
                             bool excludeFromAll)
@@ -1979,7 +2016,7 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
   return &it->second;
 }
 
-cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+cmSourceFile *cmMakefile::LinearGetSourceFileWithOutput(const char *cname)
 {
   std::string name = cname;
   std::string out;
@@ -2012,6 +2049,25 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     }
 
   // otherwise return NULL
+  return 0;
+}
+
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+{
+  std::string name = cname;
+
+  // If the queried path is not absolute we use the backward compatible
+  // linear-time search for an output with a matching suffix.
+  if(!cmSystemTools::FileIsFullPath(cname))
+    {
+    return LinearGetSourceFileWithOutput(cname);
+    }
+  // Otherwise we use an efficient lookup map.
+  OutputToSourceMap::iterator o = this->OutputToSource.find(name);
+  if (o != this->OutputToSource.end())
+    {
+    return (*o).second;
+    }
   return 0;
 }
 
@@ -2784,7 +2840,7 @@ bool cmMakefile::ExpandArguments(
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
-    if(i->Quoted)
+    if(i->Delim == cmListFileArgument::Quoted)
       {
       outArgs.push_back(value);
       }
@@ -3758,8 +3814,17 @@ const char* cmMakefile::GetFeature(const char* feature, const char* config)
   return 0;
 }
 
-cmTarget* cmMakefile::FindTarget(const char* name)
+cmTarget* cmMakefile::FindTarget(const char* name, bool excludeAliases)
 {
+  if (!excludeAliases)
+    {
+    std::map<std::string, cmTarget*>::iterator i
+                                              = this->AliasTargets.find(name);
+    if (i != this->AliasTargets.end())
+      {
+      return i->second;
+      }
+    }
   cmTargets& tgts = this->GetTargets();
 
   cmTargets::iterator i = tgts.find ( name );
@@ -4184,7 +4249,7 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
 }
 
 //----------------------------------------------------------------------------
-cmTarget* cmMakefile::FindTargetToUse(const char* name)
+cmTarget* cmMakefile::FindTargetToUse(const char* name, bool excludeAliases)
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
@@ -4196,15 +4261,25 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name)
     }
 
   // Look for a target built in this directory.
-  if(cmTarget* t = this->FindTarget(name))
+  if(cmTarget* t = this->FindTarget(name, excludeAliases))
     {
     return t;
     }
 
   // Look for a target built in this project.
-  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name);
+  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name,
+                                                              excludeAliases);
 }
 
+//----------------------------------------------------------------------------
+bool cmMakefile::IsAlias(const char *name)
+{
+  if (this->AliasTargets.find(name) != this->AliasTargets.end())
+    return true;
+  return this->GetLocalGenerator()->GetGlobalGenerator()->IsAlias(name);
+}
+
+//----------------------------------------------------------------------------
 cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 {
   cmTarget *t = this->FindTargetToUse(name);
@@ -4215,6 +4290,14 @@ cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
                                    bool isCustom)
 {
+  if(this->IsAlias(name.c_str()))
+    {
+    cmOStringStream e;
+    e << "cannot create target \"" << name
+      << "\" because an alias with the same name already exists.";
+    msg = e.str();
+    return false;
+    }
   if(cmTarget* existing = this->FindTargetToUse(name.c_str()))
     {
     // The name given conflicts with an existing target.  Produce an

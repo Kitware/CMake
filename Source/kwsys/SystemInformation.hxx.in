@@ -136,6 +136,12 @@ public:
   static
   void SetStackTraceOnError(int enable);
 
+  // format and return the current program stack in a string. In
+  // order to produce an informative stack trace the application
+  // should be dynamically linked and compiled with debug symbols.
+  static
+  kwsys_stl::string GetProgramStack(int firstFrame, int wholePath);
+
   /** Run the different checks */
   void RunCPUCheck();
   void RunOSCheck();

@@ -196,7 +196,11 @@ public:
   void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, const char* name);
+  cmTarget* FindTarget(const char* project, const char* name,
+                       bool excludeAliases = false);
+
+  void AddAlias(const char *name, cmTarget *tgt);
+  bool IsAlias(const char *name);
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
@@ -347,6 +351,7 @@ protected:
 
   // All targets in the entire project.
   std::map<cmStdString,cmTarget *> TotalTargets;
+  std::map<cmStdString,cmTarget *> AliasTargets;
   std::map<cmStdString,cmTarget *> ImportedTargets;
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 

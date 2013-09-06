@@ -12,9 +12,9 @@
 #include "cmExprParserHelper.h"
 
 #include "cmSystemTools.h"
-#include "cmExprLexer.h"
-
 #include "cmMakefile.h"
+
+#include "cmExprLexer.h"
 
 int cmExpr_yyparse( yyscan_t yyscanner );
 //

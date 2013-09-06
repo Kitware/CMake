@@ -22,16 +22,29 @@ bool cmGetTargetPropertyCommand
     }
   std::string var = args[0].c_str();
   const char* targetName = args[1].c_str();
+  const char *prop = 0;
 
-  if(cmTarget* tgt = this->Makefile->FindTargetToUse(targetName))
+  if(args[2] == "ALIASED_TARGET")
+    {
+    if(this->Makefile->IsAlias(targetName))
+      {
+      if(cmTarget* target =
+                          this->Makefile->FindTargetToUse(targetName))
+        {
+        prop = target->GetName();
+        }
+      }
+    }
+  else if(cmTarget* tgt = this->Makefile->FindTargetToUse(targetName))
     {
     cmTarget& target = *tgt;
-    const char *prop = target.GetProperty(args[2].c_str());
-    if (prop)
-      {
-      this->Makefile->AddDefinition(var.c_str(), prop);
-      return true;
-      }
+    prop = target.GetProperty(args[2].c_str());
+    }
+
+  if (prop)
+    {
+    this->Makefile->AddDefinition(var.c_str(), prop);
+    return true;
     }
   this->Makefile->AddDefinition(var.c_str(), (var+"-NOTFOUND").c_str());
   return true;

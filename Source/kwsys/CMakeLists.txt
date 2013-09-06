@@ -649,6 +649,68 @@ IF(KWSYS_USE_SystemInformation)
     SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
       COMPILE_DEFINITIONS KWSYS_CXX_HAS__ATOI64=1)
   ENDIF()
+  IF(UNIX)
+    INCLUDE(CheckIncludeFileCXX)
+    # check for simple stack trace
+    # usually it's in libc but on FreeBSD
+    # it's in libexecinfo
+    FIND_LIBRARY(EXECINFO_LIB "execinfo")
+    IF (NOT EXECINFO_LIB)
+      SET(EXECINFO_LIB "")
+    ENDIF()
+    CHECK_INCLUDE_FILE_CXX("execinfo.h" KWSYS_CXX_HAS_EXECINFOH)
+    IF (KWSYS_CXX_HAS_EXECINFOH)
+      # we have the backtrace header check if it
+      # can be used  with this compiler
+      SET(KWSYS_PLATFORM_CXX_TEST_LINK_LIBRARIES ${EXECINFO_LIB})
+      KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_BACKTRACE
+         "Checking whether backtrace works with this C++ compiler" DIRECT)
+      SET(KWSYS_PLATFORM_CXX_TEST_LINK_LIBRARIES)
+      IF (KWSYS_CXX_HAS_BACKTRACE)
+        # backtrace is supported by this system and compiler.
+        # now check for the more advanced capabilities.
+        SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+          COMPILE_DEFINITIONS KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1)
+        # check for symbol lookup using dladdr
+        CHECK_INCLUDE_FILE_CXX("dlfcn.h" KWSYS_CXX_HAS_DLFCNH)
+        IF (KWSYS_CXX_HAS_DLFCNH)
+          # we have symbol lookup libraries and headers
+          # check if they can be used with this compiler
+          SET(KWSYS_PLATFORM_CXX_TEST_LINK_LIBRARIES ${CMAKE_DL_LIBS})
+            KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_DLADDR
+            "Checking whether dladdr works with this C++ compiler" DIRECT)
+          SET(KWSYS_PLATFORM_CXX_TEST_LINK_LIBRARIES)
+          IF (KWSYS_CXX_HAS_DLADDR)
+            # symbol lookup is supported by this system
+            # and compiler.
+            SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+              COMPILE_DEFINITIONS KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1)
+          ENDIF()
+        ENDIF()
+        # c++ demangling support
+        # check for cxxabi headers
+        CHECK_INCLUDE_FILE_CXX("cxxabi.h" KWSYS_CXX_HAS_CXXABIH)
+        IF (KWSYS_CXX_HAS_CXXABIH)
+          # check if cxxabi can be used with this
+          # system and compiler.
+          KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_CXXABI
+            "Checking whether cxxabi works with this C++ compiler" DIRECT)
+          IF (KWSYS_CXX_HAS_CXXABI)
+            # c++ demangle using cxxabi is supported with
+            # this system and compiler
+            SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+              COMPILE_DEFINITIONS KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1)
+          ENDIF()
+        ENDIF()
+        # basic backtrace works better with release build
+        # don't bother with advanced features for release
+        SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+          COMPILE_DEFINITIONS_DEBUG KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD=1)
+        SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+          COMPILE_DEFINITIONS_RELWITHDEBINFO KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD=1)
+      ENDIF()
+    ENDIF()
+  ENDIF()
   IF(BORLAND)
     KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_BORLAND_ASM
       "Checking whether Borland CXX compiler supports assembler instructions" DIRECT)
@@ -913,12 +975,23 @@ IF(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
     ENDIF(UNIX)
   ENDIF(KWSYS_USE_DynamicLoader)
 
-  IF(KWSYS_USE_SystemInformation AND WIN32)
-    TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ws2_32)
-    IF(KWSYS_SYS_HAS_PSAPI)
-      TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} Psapi)
+  IF(KWSYS_USE_SystemInformation)
+    IF(WIN32)
+      TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ws2_32)
+      IF(KWSYS_SYS_HAS_PSAPI)
+        TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} Psapi)
+      ENDIF()
+    ELSEIF(UNIX)
+      IF (EXECINFO_LIB AND KWSYS_CXX_HAS_BACKTRACE)
+        # backtrace on FreeBSD is not in libc
+        TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${EXECINFO_LIB})
+      ENDIF()
+      IF (KWSYS_CXX_HAS_DLADDR)
+        # for symbol lookup using dladdr
+        TARGET_LINK_LIBRARIES(${KWSYS_NAMESPACE} ${CMAKE_DL_LIBS})
+      ENDIF()
     ENDIF()
-  ENDIF(KWSYS_USE_SystemInformation AND WIN32)
+  ENDIF()
 
   # Apply user-defined target properties to the library.
   IF(KWSYS_PROPERTIES_CXX)

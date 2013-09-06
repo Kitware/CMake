@@ -26,7 +26,7 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator();
+  cmGlobalVisualStudio7Generator(const char* platformName = NULL);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalVisualStudio7Generator>(); }
@@ -36,8 +36,13 @@ public:
     return cmGlobalVisualStudio7Generator::GetActualName();}
   static const char* GetActualName() {return "Visual Studio 7";}
 
+  ///! Get the name for the platform.
+  const char* GetPlatformName() const { return this->PlatformName.c_str(); }
+
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
+
+  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -153,6 +158,7 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
+  std::string PlatformName;
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

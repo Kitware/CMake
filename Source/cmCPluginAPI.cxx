@@ -422,8 +422,9 @@ int CCONV cmExecuteCommand(void *arg, const char *name,
   for(int i = 0; i < numArgs; ++i)
     {
     // Assume all arguments are quoted.
-    lff.Arguments.push_back(cmListFileArgument(args[i], true,
-                                               "[CMake-Plugin]", 0));
+    lff.Arguments.push_back(
+      cmListFileArgument(args[i], cmListFileArgument::Quoted,
+                         "[CMake-Plugin]", 0));
     }
   cmExecutionStatus status;
   return mf->ExecuteCommand(lff,status);

@@ -245,6 +245,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompileDefinitions CompileDefinitions)
   ADD_TEST_MACRO(CompileOptions CompileOptions)
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
+  ADD_TEST_MACRO(AliasTarget AliasTarget)
   set_tests_properties(EmptyLibrary PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error: CMake can not determine linker language for target: test")
   ADD_TEST_MACRO(CrossCompile CrossCompile)
@@ -2060,9 +2061,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
 
-  set(CTestLimitDashJ_EXTRA_OPTIONS --force-new-ctest-process)
-  add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
-    --output-on-failure -C "\${CTestTest_CONFIG}")
+  if(NOT BORLAND)
+    set(CTestLimitDashJ_EXTRA_OPTIONS --force-new-ctest-process)
+    add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
+      --output-on-failure -C "\${CTestTest_CONFIG}")
+  endif()
 
   add_test(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
   set_tests_properties(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")
