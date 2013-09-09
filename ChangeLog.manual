@@ -1,3 +1,8 @@
+Changes in CMake 2.8.12-rc3 (since 2.8.12-rc2)
+----------------------------------------------
+Robert Maynard (1):
+      cmMakefile: Do not track CMake temporary files.
+
 Changes in CMake 2.8.12-rc2 (since 2.8.12-rc1)
 ----------------------------------------------
 Brad King (2):
