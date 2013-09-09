@@ -475,6 +475,8 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     # settings.
     if(MINGW)
       set(WX_LIB_DIR_PREFIX gcc)
+    elseif(CMAKE_CL_64)
+      set(WX_LIB_DIR_PREFIX vc_x64)
     else()
       set(WX_LIB_DIR_PREFIX vc)
     endif()
