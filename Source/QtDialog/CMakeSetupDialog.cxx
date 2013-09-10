@@ -66,9 +66,8 @@ CMakeSetupDialog::CMakeSetupDialog()
   // create the GUI
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
-  int h = settings.value("Height", 500).toInt();
-  int w = settings.value("Width", 700).toInt();
-  this->resize(w, h);
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
 
   this->AddVariableCompletions = settings.value("AddVariableCompletionEntries",
                            QStringList("CMAKE_INSTALL_PREFIX")).toStringList();
@@ -299,8 +298,8 @@ CMakeSetupDialog::~CMakeSetupDialog()
 {
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
-  settings.setValue("Height", this->height());
-  settings.setValue("Width", this->width());
+  settings.setValue("windowState", QVariant(saveState()));
+  settings.setValue("geometry", QVariant(saveGeometry()));
   settings.setValue("SplitterSizes", this->Splitter->saveState());
 
   // wait for thread to stop
