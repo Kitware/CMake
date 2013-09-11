@@ -17,7 +17,6 @@
 #include "cmNinjaTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
-#include "cmComputeLinkInformation.h"
 #include "cmake.h"
 
 #include <assert.h>
