@@ -47,6 +47,8 @@ const char* cmTarget::GetTargetTypeName(TargetType targetType)
         return "UTILITY";
       case cmTarget::GLOBAL_TARGET:
         return "GLOBAL_TARGET";
+      case cmTarget::INTERFACE_LIBRARY:
+        return "INTERFACE_LIBRARY";
       case cmTarget::UNKNOWN_LIBRARY:
         return "UNKNOWN_LIBRARY";
     }
@@ -1731,6 +1733,14 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   CM_FOR_EACH_TARGET_POLICY(CAPTURE_TARGET_POLICY)
 
 #undef CAPTURE_TARGET_POLICY
+
+  if (this->TargetTypeValue == INTERFACE_LIBRARY)
+    {
+    // This policy is checked in a few conditions. The properties relevant
+    // to the policy are always ignored for INTERFACE_LIBRARY targets,
+    // so ensure that the conditions don't lead to nonsense.
+    this->PolicyStatusCMP0022 = cmPolicies::NEW;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1796,6 +1806,7 @@ bool cmTarget::IsLinkable()
           this->GetType() == cmTarget::SHARED_LIBRARY ||
           this->GetType() == cmTarget::MODULE_LIBRARY ||
           this->GetType() == cmTarget::UNKNOWN_LIBRARY ||
+          this->GetType() == cmTarget::INTERFACE_LIBRARY ||
           this->IsExecutableWithExports());
 }
 
@@ -2567,8 +2578,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
     return;
     }
 
-  {
   cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
+  {
   const bool isNonImportedTarget = tgt && !tgt->IsImported();
 
   const std::string libName = (isNonImportedTarget && llt != GENERAL)
@@ -2579,7 +2590,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                                                           llt).c_str());
   }
 
-  if (cmGeneratorExpression::Find(lib) != std::string::npos)
+  if (cmGeneratorExpression::Find(lib) != std::string::npos
+      || (tgt && tgt->GetType() == INTERFACE_LIBRARY))
     {
     return;
     }
@@ -4107,6 +4119,7 @@ const char *cmTarget::GetProperty(const char* prop,
      this->GetType() == cmTarget::STATIC_LIBRARY ||
      this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->GetType() == cmTarget::MODULE_LIBRARY ||
+     this->GetType() == cmTarget::INTERFACE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
     if(strcmp(prop,"LOCATION") == 0)
@@ -6031,6 +6044,10 @@ cmTarget::GetImportInfo(const char* config, cmTarget *headTarget)
     i = this->Internal->ImportInfoMap.insert(entry).first;
     }
 
+  if(this->GetType() == INTERFACE_LIBRARY)
+    {
+    return &i->second;
+    }
   // If the location is empty then the target is not available for
   // this configuration.
   if(i->second.Location.empty() && i->second.ImportLibrary.empty())
@@ -6179,7 +6196,51 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   const char* loc = 0;
   const char* imp = 0;
   std::string suffix;
-  if (!this->GetMappedConfig(desired_config, &loc, &imp, suffix))
+  if (this->GetType() != INTERFACE_LIBRARY &&
+      !this->GetMappedConfig(desired_config, &loc, &imp, suffix))
+    {
+    return;
+    }
+
+  // Get the link interface.
+  {
+  std::string linkProp = "INTERFACE_LINK_LIBRARIES";
+  const char *propertyLibs = this->GetProperty(linkProp.c_str());
+
+  if (this->GetType() != INTERFACE_LIBRARY)
+    {
+    if(!propertyLibs)
+      {
+      linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
+      linkProp += suffix;
+      propertyLibs = this->GetProperty(linkProp.c_str());
+      }
+
+    if(!propertyLibs)
+      {
+      linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
+      propertyLibs = this->GetProperty(linkProp.c_str());
+      }
+    }
+  if(propertyLibs)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        linkProp, 0, 0);
+    cmSystemTools::ExpandListArgument(ge.Parse(propertyLibs)
+                                       ->Evaluate(this->Makefile,
+                                                  desired_config.c_str(),
+                                                  false,
+                                                  headTarget,
+                                                  this,
+                                                  &dagChecker),
+                                    info.LinkInterface.Libraries);
+    }
+  }
+  if(this->GetType() == INTERFACE_LIBRARY)
     {
     return;
     }
@@ -6255,42 +6316,6 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
       info.ImportLibrary = implib;
       }
     }
-
-  // Get the link interface.
-  {
-  std::string linkProp = "INTERFACE_LINK_LIBRARIES";
-  const char *propertyLibs = this->GetProperty(linkProp.c_str());
-
-  if (!propertyLibs)
-    {
-    linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-    linkProp += suffix;
-    propertyLibs = this->GetProperty(linkProp.c_str());
-    }
-
-  if(!propertyLibs)
-    {
-    linkProp = "IMPORTED_LINK_INTERFACE_LIBRARIES";
-    propertyLibs = this->GetProperty(linkProp.c_str());
-    }
-  if(propertyLibs)
-    {
-    cmListFileBacktrace lfbt;
-    cmGeneratorExpression ge(lfbt);
-
-    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                        this->GetName(),
-                                        linkProp, 0, 0);
-    cmSystemTools::ExpandListArgument(ge.Parse(propertyLibs)
-                                       ->Evaluate(this->Makefile,
-                                                  desired_config.c_str(),
-                                                  false,
-                                                  headTarget,
-                                                  this,
-                                                  &dagChecker),
-                                    info.LinkInterface.Libraries);
-    }
-  }
 
   // Get the link dependencies.
   {
@@ -6546,6 +6571,11 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         }
       }
     }
+  else if (this->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    explicitLibraries = newExplicitLibraries;
+    linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
+    }
 
   // There is no implicit link interface for executables or modules
   // so if none was explicitly set then there is no link interface.
@@ -6573,7 +6603,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                         this, &dagChecker), iface.Libraries);
 
     if(this->GetType() == cmTarget::SHARED_LIBRARY
-        || this->GetType() == cmTarget::STATIC_LIBRARY)
+        || this->GetType() == cmTarget::STATIC_LIBRARY
+        || this->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.

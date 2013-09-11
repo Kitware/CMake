@@ -246,6 +246,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompileOptions CompileOptions)
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
+  ADD_TEST_MACRO(InterfaceLibrary InterfaceLibrary)
   set_tests_properties(EmptyLibrary PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error: CMake can not determine linker language for target: test")
   ADD_TEST_MACRO(CrossCompile CrossCompile)

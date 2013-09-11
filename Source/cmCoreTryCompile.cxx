@@ -99,6 +99,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
           {
           case cmTarget::SHARED_LIBRARY:
           case cmTarget::STATIC_LIBRARY:
+          case cmTarget::INTERFACE_LIBRARY:
           case cmTarget::UNKNOWN_LIBRARY:
             break;
           case cmTarget::EXECUTABLE:

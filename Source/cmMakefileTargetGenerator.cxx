@@ -1004,7 +1004,12 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
           i = items.begin(); i != items.end(); ++i)
       {
       cmTarget const* linkee = i->Target;
-      if(linkee && !linkee->IsImported() && emitted.insert(linkee).second)
+      if(linkee && !linkee->IsImported()
+                // We can ignore the INTERFACE_LIBRARY items because
+                // Target->GetLinkInformation already processed their
+                // link interface and they don't have any output themselves.
+                && linkee->GetType() != cmTarget::INTERFACE_LIBRARY
+                && emitted.insert(linkee).second)
         {
         cmMakefile* mf = linkee->GetMakefile();
         cmLocalGenerator* lg = mf->GetLocalGenerator();

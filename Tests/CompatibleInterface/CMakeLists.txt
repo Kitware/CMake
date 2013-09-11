@@ -6,7 +6,7 @@ project(CompatibleInterface)
 include(GenerateExportHeader)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-add_library(iface1 empty.cpp)
+add_library(iface1 INTERFACE)
 set_property(TARGET iface1 APPEND PROPERTY
   COMPATIBLE_INTERFACE_BOOL
     BOOL_PROP1

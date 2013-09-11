@@ -130,7 +130,8 @@ bool cmExportCommand
       if((target->GetType() == cmTarget::EXECUTABLE) ||
          (target->GetType() == cmTarget::STATIC_LIBRARY) ||
          (target->GetType() == cmTarget::SHARED_LIBRARY) ||
-         (target->GetType() == cmTarget::MODULE_LIBRARY))
+         (target->GetType() == cmTarget::MODULE_LIBRARY) ||
+         (target->GetType() == cmTarget::INTERFACE_LIBRARY))
         {
         targets.push_back(target);
         }

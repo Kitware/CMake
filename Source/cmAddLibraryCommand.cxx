@@ -82,6 +82,12 @@ bool cmAddLibraryCommand
       ++s;
       isAlias = true;
       }
+    else if(libType == "INTERFACE")
+      {
+      ++s;
+      type = cmTarget::INTERFACE_LIBRARY;
+      haveSpecifiedType = true;
+      }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
       ++s;
@@ -151,7 +157,8 @@ bool cmAddLibraryCommand
     if(aliasedType != cmTarget::SHARED_LIBRARY
         && aliasedType != cmTarget::STATIC_LIBRARY
         && aliasedType != cmTarget::MODULE_LIBRARY
-        && aliasedType != cmTarget::OBJECT_LIBRARY)
+        && aliasedType != cmTarget::OBJECT_LIBRARY
+        && aliasedType != cmTarget::INTERFACE_LIBRARY)
       {
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
@@ -213,6 +220,16 @@ bool cmAddLibraryCommand
         );
       return true;
       }
+    if(type == cmTarget::INTERFACE_LIBRARY)
+      {
+      if (!cmGeneratorExpression::IsValidTargetName(libName))
+        {
+        cmOStringStream e;
+        e << "Invalid name for IMPORTED INTERFACE library target: " << libName;
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      }
 
     // Make sure the target does not already exist.
     if(this->Makefile->FindTargetToUse(libName.c_str()))
@@ -249,6 +266,26 @@ bool cmAddLibraryCommand
     }
   }
 
+  std::vector<std::string> srclists;
+
+  if(type == cmTarget::INTERFACE_LIBRARY)
+    {
+    if (!cmGeneratorExpression::IsValidTargetName(libName)
+        || libName.find("::") != std::string::npos)
+      {
+      cmOStringStream e;
+      e << "Invalid name for INTERFACE library target: " << libName;
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    this->Makefile->AddLibrary(libName.c_str(),
+                               type,
+                               srclists,
+                               excludeFromAll);
+    return true;
+    }
+
   if (s == args.end())
     {
     std::string msg = "You have called ADD_LIBRARY for library ";
@@ -258,7 +295,6 @@ bool cmAddLibraryCommand
     cmSystemTools::Message(msg.c_str() ,"Warning");
     }
 
-  std::vector<std::string> srclists;
   while (s != args.end())
     {
     srclists.push_back(*s);

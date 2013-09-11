@@ -881,6 +881,10 @@ cmGlobalUnixMakefileGenerator3
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
+      if ((*di)->GetType() == cmTarget::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
       count += this->CountProgressMarksInTarget(*di, emitted);
       }
     }
@@ -967,6 +971,10 @@ cmGlobalUnixMakefileGenerator3
     {
     // Create the target-level dependency.
     cmTarget const* dep = *i;
+    if (dep->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     cmLocalUnixMakefileGenerator3* lg3 =
       static_cast<cmLocalUnixMakefileGenerator3*>
       (dep->GetMakefile()->GetLocalGenerator());
