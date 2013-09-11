@@ -235,6 +235,24 @@ static const char * cmDocumentationOptions[][3] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},
+  {"--help-concept concept [file]",
+   "Print help for a single concept and exit.",
+   "Full documentation specific to the given concept is displayed.  "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML, DocBook and plain text."},
+  {"--help-concept-list [file]", "List documented concepts and exit.",
+   "The list contains all concepts for which help may be obtained by using "
+   "the --help-concept argument followed by a concept id.  If a file is "
+   "specified, the help is written into it.  "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML, DocBook and plain text."},
+  {"--help-concepts [file]", "Print help for all concepts and exit.",
+   "Full documentation for all concepts is displayed."
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML, DocBook and plain text."},
   {0,0,0}
 };
 
@@ -249,6 +267,7 @@ static const char * cmDocumentationSeeAlso[][3] =
   {0, "cmakemodules", 0},
   {0, "cmakeprops", 0},
   {0, "cmakevars", 0},
+  {0, "cmakeconcepts", 0},
   {0, 0, 0}
 };
 
@@ -384,6 +403,7 @@ int do_cmake(int ac, char** av)
     std::vector<cmDocumentationEntry> policies;
     std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> generators;
+    std::vector<cmDocumentationEntry> concepts;
     std::map<std::string,cmDocumentationSection *> propDocs;
 
     hcm.GetPolicyDocumentation(policies);
@@ -391,6 +411,7 @@ int do_cmake(int ac, char** av)
     hcm.GetCommandDocumentation(compatCommands, false, true);
     hcm.GetPropertiesDocumentation(propDocs);
     hcm.GetGeneratorDocumentation(generators);
+    hcm.GetConceptDocumentation(concepts);
 
     doc.SetName("cmake");
     doc.SetSection("Name",cmDocumentationName);
@@ -401,6 +422,7 @@ int do_cmake(int ac, char** av)
     doc.SetSection("Commands",commands);
     doc.SetSection("Policies",policies);
     doc.AppendSection("Compatibility Commands",compatCommands);
+    doc.AppendSection("Concepts",concepts);
     doc.SetSections(propDocs);
 
     cmDocumentationEntry e;
