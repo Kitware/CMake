@@ -28,7 +28,8 @@ public:
   { None, Usage, Single, SingleModule, SingleProperty, SingleVariable,
     List, ModuleList, PropertyList, VariableList,
     Full, Properties, Variables, Modules, CustomModules, Commands,
-    CompatCommands, Copyright, Version, Policies, SinglePolicy };
+    CompatCommands, Copyright, Version, Policies, SinglePolicy, Concepts,
+    SingleConcept, ConceptList };
 
   /** Forms of documentation output.  */
   enum Form { TextForm, HTMLForm, ManForm, UsageForm, DocbookForm };
