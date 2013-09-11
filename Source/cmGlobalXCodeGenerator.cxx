@@ -2842,8 +2842,8 @@ void cmGlobalXCodeGenerator
         {
         linkLibs += this->XCodeEscapePath(li->Value.c_str());
         }
-      else if (!l->Target
-          || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
+      else if (!li->Target
+          || li->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         linkLibs += li->Value;
         }
