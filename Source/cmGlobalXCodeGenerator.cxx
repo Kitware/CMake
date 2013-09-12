@@ -2903,7 +2903,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         {
         continue;
         }
-      if(cmtarget.GetType() == cmTarget::INTERFACE_TARGET)
+      if(cmtarget.GetType() == cmTarget::INTERFACE_LIBRARY)
         {
         continue;
         }
