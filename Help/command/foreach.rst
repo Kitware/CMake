@@ -27,13 +27,13 @@ Foreach can also iterate over a generated range of numbers.  There are
 three types of this iteration:
 
 * When specifying single number, the range will have elements 0 to
-"total".
+  "total".
 
 * When specifying two numbers, the range will have elements from the
-first number to the second number.
+  first number to the second number.
 
 * The third optional number is the increment used to iterate from the
-first number to the second number.
+  first number to the second number.
 
 ::
 

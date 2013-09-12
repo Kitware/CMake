@@ -71,7 +71,7 @@
 #    [STEP_TARGETS st1 st2 ...]  # Generate custom targets for these steps
 #    )
 #
-# The *_DIR options specify directories for the project, with default
+# The ``*_DIR`` options specify directories for the project, with default
 # directories computed as follows.  If the PREFIX option is given to
 # ExternalProject_Add() or the EP_PREFIX directory property is set, then
 # an external project is built and installed under the specified prefix:

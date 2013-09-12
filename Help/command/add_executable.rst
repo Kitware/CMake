@@ -49,7 +49,7 @@ the GLOBAL option extends visibility.  It may be referenced like any
 target built within the project.  IMPORTED executables are useful for
 convenient reference from commands like add_custom_command.  Details
 about the imported executable are specified by setting properties
-whose names begin in "IMPORTED_".  The most important such property is
+whose names begin in ``IMPORTED_``.  The most important such property is
 IMPORTED_LOCATION (and its per-configuration version
 IMPORTED_LOCATION_<CONFIG>) which specifies the location of the main
 executable file on disk.  See documentation of the IMPORTED_*

@@ -50,6 +50,7 @@ native tool on their platform.
 * ``--version,-version,/V [file]``: Show program name/version banner and exit.
 
   If a file is specified, the version is written into it.
+
 The following generators are available on this platform:
 
 ::

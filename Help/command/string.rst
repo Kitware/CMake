@@ -106,7 +106,7 @@ The following characters have special meaning in regular expressions:
              by all regular expression-related commands, including
              e.g. if( MATCHES ), in the variables CMAKE_MATCH_(0..9).
 
-*, + and ? have higher precedence than concatenation.  | has lower
+``*``, ``+`` and ``?`` have higher precedence than concatenation.  | has lower
 precedence than concatenation.  This means that the regular expression
 "^ab+d$" matches "abbd" but not "ababd", and the regular expression
 "^(ab|cd)$" matches "ab" but not "abd".

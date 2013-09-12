@@ -18,7 +18,7 @@ names written to the file.  If the APPEND option is given the
 generated code will be appended to the file instead of overwriting it.
 The EXPORT_LINK_INTERFACE_LIBRARIES keyword, if present, causes the
 contents of the properties matching
-(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? to be exported, when
+``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
 policy CMP0022 is NEW.  If a library target is included in the export
 but a target to which it links is not included the behavior is
 unspecified.

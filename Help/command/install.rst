@@ -287,7 +287,7 @@ when one of the named configurations is installed.  Additionally, the
 generated import file will reference only the matching target
 configurations.  The EXPORT_LINK_INTERFACE_LIBRARIES keyword, if
 present, causes the contents of the properties matching
-(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)? to be exported, when
+``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?`` to be exported, when
 policy CMP0022 is NEW.  If a COMPONENT option is specified that does
 not match that given to the targets associated with <export-name> the
 behavior is undefined.  If a library target is included in the export

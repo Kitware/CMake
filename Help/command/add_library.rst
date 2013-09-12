@@ -54,7 +54,7 @@ GLOBAL option extends visibility.  It may be referenced like any
 target built within the project.  IMPORTED libraries are useful for
 convenient reference from commands like target_link_libraries.
 Details about the imported library are specified by setting properties
-whose names begin in "IMPORTED_".  The most important such property is
+whose names begin in ``IMPORTED_``.  The most important such property is
 IMPORTED_LOCATION (and its per-configuration version
 IMPORTED_LOCATION_<CONFIG>) which specifies the location of the main
 library file on disk.  See documentation of the IMPORTED_* properties

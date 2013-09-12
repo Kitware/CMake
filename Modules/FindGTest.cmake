@@ -2,8 +2,6 @@
 # FindGTest
 # ---------
 #
-# --------------------
-#
 # Locate the Google C++ Testing Framework.
 #
 # Defines the following variables:

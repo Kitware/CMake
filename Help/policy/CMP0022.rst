@@ -4,9 +4,9 @@ CMP0022
 INTERFACE_LINK_LIBRARIES defines the link interface.
 
 CMake 2.8.11 constructed the 'link interface' of a target from
-properties matching (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.
+properties matching ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?``.
 The modern way to specify config-sensitive content is to use generator
-expressions and the IMPORTED_ prefix makes uniform processing of the
+expressions and the ``IMPORTED_`` prefix makes uniform processing of the
 link interface with generator expressions impossible.  The
 INTERFACE_LINK_LIBRARIES target property was introduced as a
 replacement in CMake 2.8.12.  This new property is named consistently
@@ -26,7 +26,7 @@ The OLD behavior for this policy is to ignore the
 INTERFACE_LINK_LIBRARIES property for in-build targets.  The NEW
 behavior for this policy is to use the INTERFACE_LINK_LIBRARIES
 property for in-build targets, and ignore the old properties matching
-(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.
+``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?``.
 
 This policy was introduced in CMake version 2.8.12.  CMake version
 |release| warns when the policy is not set and uses OLD behavior.  Use

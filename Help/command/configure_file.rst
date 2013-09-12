@@ -31,7 +31,7 @@ will be replaced and ${VAR} will be ignored.  This is useful for
 configuring scripts that use ${VAR}.
 
 Input file lines of the form "#cmakedefine VAR ..." will be replaced
-with either "#define VAR ..." or "/* #undef VAR */" depending on
+with either "#define VAR ..." or ``/* #undef VAR */`` depending on
 whether VAR is set in CMake to any value not considered a false
 constant by the if() command.  (Content of "...", if any, is processed
 as above.) Input file lines of the form "#cmakedefine01 VAR" will be
