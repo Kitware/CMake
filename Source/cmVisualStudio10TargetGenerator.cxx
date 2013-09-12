@@ -490,6 +490,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
         break;
       case cmTarget::GLOBAL_TARGET:
       case cmTarget::UNKNOWN_LIBRARY:
+      case cmTarget::INTERFACE_LIBRARY:
         break;
       }
     configType += "</ConfigurationType>\n";
