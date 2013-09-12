@@ -972,6 +972,11 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       continue;
       }
 
+    if(cmtarget.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
+
     if(cmtarget.GetType() == cmTarget::UTILITY ||
        cmtarget.GetType() == cmTarget::GLOBAL_TARGET)
       {
@@ -1679,6 +1684,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                                  cmXCodeObject* buildSettings,
                                                  const char* configName)
 {
+  if(target.GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return;
+    }
+
   std::string flags;
   std::string defFlags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
@@ -2543,6 +2553,10 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
                                           cmXCodeObject* buildPhases)
 {
+  if(cmtarget.GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return 0;
+    }
   cmXCodeObject* target =
     this->CreateObject(cmXCodeObject::PBXNativeTarget);
   target->AddAttribute("buildPhases", buildPhases);
@@ -2749,6 +2763,10 @@ void cmGlobalXCodeGenerator
 ::AddDependAndLinkInformation(cmXCodeObject* target)
 {
   cmTarget* cmtarget = target->GetTarget();
+  if(cmtarget->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return;
+    }
   if(!cmtarget)
     {
     cmSystemTools::Error("Error no target on xobject\n");
@@ -2882,6 +2900,10 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       // groups:
       //
       if(cmtarget.GetType() == cmTarget::GLOBAL_TARGET)
+        {
+        continue;
+        }
+      if(cmtarget.GetType() == cmTarget::INTERFACE_TARGET)
         {
         continue;
         }
