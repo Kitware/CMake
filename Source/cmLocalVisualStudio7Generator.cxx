@@ -1258,6 +1258,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     }
     case cmTarget::UTILITY:
     case cmTarget::GLOBAL_TARGET:
+    case cmTarget::INTERFACE_LIBRARY:
       break;
     }
 }
