@@ -4115,7 +4115,7 @@ const char *cmTarget::GetProperty(const char* prop,
       }
     else
       {
-      // Support "<CONFIG>_LOCATION" for compatiblity.
+      // Support "<CONFIG>_LOCATION" for compatibility.
       int len = static_cast<int>(strlen(prop));
       if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
         {
