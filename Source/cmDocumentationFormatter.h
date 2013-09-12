@@ -31,7 +31,7 @@ public:
     CompatCommands, Copyright, Version, Policies, SinglePolicy };
 
   /** Forms of documentation output.  */
-  enum Form { TextForm, HTMLForm, ManForm, UsageForm, DocbookForm };
+  enum Form { TextForm, HTMLForm, RSTForm, ManForm, UsageForm, DocbookForm };
 };
 
 class cmDocumentationSection;

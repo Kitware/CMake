@@ -162,6 +162,7 @@ set(SRCS
   cmDocumentationFormatterHTML.cxx
   cmDocumentationFormatterDocbook.cxx
   cmDocumentationFormatterMan.cxx
+  cmDocumentationFormatterRST.cxx
   cmDocumentationFormatterText.cxx
   cmDocumentationFormatterUsage.cxx
   cmDocumentationSection.cxx

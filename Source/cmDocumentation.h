@@ -18,6 +18,7 @@
 #include "cmDocumentationFormatterHTML.h"
 #include "cmDocumentationFormatterDocbook.h"
 #include "cmDocumentationFormatterMan.h"
+#include "cmDocumentationFormatterRST.h"
 #include "cmDocumentationFormatterText.h"
 #include "cmDocumentationFormatterUsage.h"
 #include "cmDocumentationSection.h"
@@ -222,6 +223,7 @@ private:
   cmDocumentationFormatterHTML HTMLFormatter;
   cmDocumentationFormatterDocbook DocbookFormatter;
   cmDocumentationFormatterMan ManFormatter;
+  cmDocumentationFormatterRST RSTFormatter;
   cmDocumentationFormatterText TextFormatter;
   cmDocumentationFormatterUsage UsageFormatter;
 

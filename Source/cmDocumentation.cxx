@@ -654,6 +654,11 @@ cmDocumentation::Form cmDocumentation::GetFormFromFilename(
     return cmDocumentation::ManForm;
     }
 
+  if (ext == ".RST")
+    {
+    return cmDocumentation::RSTForm;
+    }
+
   return cmDocumentation::TextForm;
 }
 
@@ -1579,6 +1584,9 @@ void cmDocumentation::SetForm(Form f, int manSection)
     case ManForm:
       this->ManFormatter.SetManSection(manSection);
       this->CurrentFormatter = &this->ManFormatter;
+      break;
+    case RSTForm:
+      this->CurrentFormatter = &this->RSTFormatter;
       break;
     case TextForm:
       this->CurrentFormatter = &this->TextFormatter;

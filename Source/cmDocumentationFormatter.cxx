@@ -81,7 +81,7 @@ cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
     {
     if(name.find("Global") != name.npos)
       {
-      return "prop_global";
+      return "prop_gbl";
       }
     else if(name.find("Direct") != name.npos)
       {
@@ -99,10 +99,34 @@ cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
       {
       return "prop_sf";
       }
+    else if(name.find("Cache") != name.npos)
+      {
+      return "prop_cache";
+      }
     return "property";
     }
   else if(name.find("Variable") != name.npos)
     {
+    if(name.find("Information") != name.npos)
+      {
+      return "var_info";
+      }
+    else if(name.find("Behavior") != name.npos)
+      {
+      return "var_cmake";
+      }
+    else if(name.find("Describe") != name.npos)
+      {
+      return "var_sys";
+      }
+    else if(name.find("Control") != name.npos)
+      {
+      return "var_build";
+      }
+    else if(name.find("Languages") != name.npos)
+      {
+      return "var_lang";
+      }
     return "variable";
     }
   else if(name.find("Polic") != name.npos)
@@ -128,7 +152,7 @@ cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
     }
   else if(name.find("Generators") != name.npos)
     {
-    return "gen";
+    return "generator";
     }
   else if(name.find("Options") != name.npos)
     {
