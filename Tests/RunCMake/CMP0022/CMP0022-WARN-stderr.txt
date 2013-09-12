@@ -5,4 +5,13 @@ CMake Warning \(dev\) in CMakeLists.txt:
 
   Target "bar" has a INTERFACE_LINK_LIBRARIES property which differs from its
   LINK_INTERFACE_LIBRARIES properties.
+
+  INTERFACE_LINK_LIBRARIES:
+
+    foo
+
+  LINK_INTERFACE_LIBRARIES:
+
+    bat
+
 This warning is for project developers.  Use -Wno-dev to suppress it.$
