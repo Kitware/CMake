@@ -15,7 +15,6 @@
 #include "cmake.h"
 #include "cmDocumentation.h"
 #include "cmCPackDocumentVariables.h"
-#include "cmCPackDocumentMacros.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackGenerator.h"
 #include "cmake.h"
@@ -42,18 +41,6 @@ static const char * cmDocumentationUsage[][3] =
   {0,
    "  cpack -G <generator> [options]",
    0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char * cmDocumentationDescription[][3] =
-{
-  {0,
-   "The \"cpack\" executable is the CMake packaging program.  "
-   "CMake-generated build trees created for projects that use "
-   "the INSTALL_* commands have packaging support.  "
-   "This program will generate the package.", 0},
-  CMAKE_STANDARD_INTRODUCTION,
   {0,0,0}
 };
 
@@ -127,14 +114,6 @@ static const char * cmDocumentationOptions[][3] =
     "format is determined depending on the filename suffix. Supported are man "
     "page, HTML, DocBook and plain text."},
     {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char * cmDocumentationSeeAlso[][3] =
-{
-    {0, "cmake", 0},
-    {0, "ccmake", 0},
-    {0, 0, 0}
 };
 
 //----------------------------------------------------------------------------
@@ -533,21 +512,7 @@ int main (int argc, char *argv[])
     doc.SetName("cpack");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
-    doc.SetSection("Description",cmDocumentationDescription);
     doc.PrependSection("Options",cmDocumentationOptions);
-
-    // statically (in C++ code) defined variables
-    cmCPackDocumentVariables::DefineVariables(&cminst);
-
-    std::vector<cmDocumentationEntry> commands;
-
-    std::map<std::string,cmDocumentationSection *> propDocs;
-    cminst.GetPropertiesDocumentation(propDocs);
-    doc.SetSections(propDocs);
-    cminst.GetCommandDocumentation(commands,true,false);
-    // statically (in C++ code) defined macros/commands
-    cmCPackDocumentMacros::GetMacrosDocumentation(commands);
-    doc.SetSection("Commands",commands);
 
     std::vector<cmDocumentationEntry> v;
     cmCPackGeneratorFactory::DescriptionsMap::const_iterator generatorIt;
@@ -563,7 +528,6 @@ int main (int argc, char *argv[])
       }
     doc.SetSection("Generators",v);
 
-    doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #undef cout
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
 #define cout no_cout_use_cmCPack_Log

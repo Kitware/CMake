@@ -499,7 +499,6 @@ set(CPACK_SRCS
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
   CPack/cmCPackDocumentVariables.cxx
-  CPack/cmCPackDocumentMacros.cxx
   )
 
 if(CYGWIN)

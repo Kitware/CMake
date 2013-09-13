@@ -38,22 +38,6 @@ public:
   ~cmDocumentation();
 
   /**
-   * An helper type pair for [structured] documented modules.
-   * The comment of those module contains structure markup
-   * which makes it possible to retrieve the documentation
-   * of variables, macros and functions defined in the module.
-   * - first is the filename of the module
-   * - second is the section of the doc the module belongs too
-   */
-  typedef std::pair<std::string,std::string> documentedModuleSectionPair_t;
-  /**
-   * A list of documented module(s).
-   */
-  typedef std::list<documentedModuleSectionPair_t>  documentedModulesList_t;
-
-  // High-level interface for standard documents:
-
-  /**
    * Check command line arguments for documentation options.  Returns
    * true if documentation options are found, and false otherwise.
    * When true is returned, PrintRequestedDocumentation should be
@@ -73,7 +57,7 @@ public:
   bool PrintRequestedDocumentation(std::ostream& os);
 
   /** Print help of the given type.  */
-  bool PrintDocumentation(Type ht, std::ostream& os, const char* docname=0);
+  bool PrintDocumentation(Type ht, std::ostream& os);
 
   void SetShowGenerators(bool showGen) { this->ShowGenerators = showGen; }
 
@@ -81,7 +65,7 @@ public:
   void SetName(const char* name);
 
   /** Set a section of the documentation. Typical sections include Name,
-      Usage, Description, Options, SeeAlso */
+      Usage, Description, Options */
   void SetSection(const char *sectionName,
                   cmDocumentationSection *section);
   void SetSection(const char *sectionName,
@@ -123,16 +107,11 @@ public:
    */
   void AddSectionToPrint(const char *section);
 
-  void SetSeeAlsoList(const char *data[][3]);
-
   /** Clear all previously added sections of help.  */
   void ClearSections();
 
   /** Set cmake root so we can find installed files */
   void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
-
-  /** Set CMAKE_MODULE_PATH so we can find additional cmake modules */
-  void SetCMakeModulePath(const char* path)  { this->CMakeModulePath = path;}
 
   static Form GetFormFromFilename(const std::string& filename,
                                   int* ManSection);
@@ -149,62 +128,21 @@ public:
   /** Add the CPack standard documentation section(s) */
   void addCPackStandardDocSections();
 
-  /** Add automatic variables sections */
-  void addAutomaticVariableSections(const std::string& section);
-
 private:
   void SetForm(Form f, int manSection);
-  void SetDocName(const char* docname);
 
-  bool CreateSingleModule(const char* fname,
-                          const char* moduleName,
-                          cmDocumentationSection &sec);
-  void CreateModuleDocsForDir(cmsys::Directory& dir,
-                              cmDocumentationSection &moduleSection);
-  bool CreateModulesSection();
-  bool CreateCustomModulesSection();
-  void CreateFullDocumentation();
-
-  void AddDocumentIntroToPrint(const char* intro[2]);
-
-  bool PrintCopyright(std::ostream& os);
   bool PrintVersion(std::ostream& os);
-  bool PrintDocumentationGeneric(std::ostream& os, const char *section);
-  bool PrintDocumentationList(std::ostream& os, const char *section);
-  bool PrintDocumentationSingle(std::ostream& os);
-  bool PrintDocumentationSingleModule(std::ostream& os);
-  bool PrintDocumentationSingleProperty(std::ostream& os);
-  bool PrintDocumentationSinglePolicy(std::ostream& os);
-  bool PrintDocumentationSingleVariable(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
-  bool PrintDocumentationFull(std::ostream& os);
-  bool PrintDocumentationModules(std::ostream& os);
-  bool PrintDocumentationCustomModules(std::ostream& os);
-  bool PrintDocumentationPolicies(std::ostream& os);
-  bool PrintDocumentationProperties(std::ostream& os);
-  bool PrintDocumentationVariables(std::ostream& os);
-  bool PrintDocumentationCurrentCommands(std::ostream& os);
-  bool PrintDocumentationCompatCommands(std::ostream& os);
-  void PrintDocumentationCommand(std::ostream& os,
-                                 const cmDocumentationEntry &entry);
-
 
   const char* GetNameString() const;
-  const char* GetDocName(bool fallbackToNameString = true) const;
-  const char* GetDefaultDocName(Type ht) const;
   bool IsOption(const char* arg) const;
 
   bool ShowGenerators;
 
   std::string NameString;
-  std::string DocName;
   std::map<std::string,cmDocumentationSection*> AllSections;
 
-  std::string SeeAlsoString;
   std::string CMakeRoot;
-  std::string CMakeModulePath;
-  std::set<std::string> ModulesFound;
-  std::vector< char* > ModuleStrings;
   std::vector<const cmDocumentationSection *> PrintSections;
   std::string CurrentArgument;
 
@@ -226,9 +164,6 @@ private:
   cmDocumentationFormatterRST RSTFormatter;
   cmDocumentationFormatterText TextFormatter;
   cmDocumentationFormatterUsage UsageFormatter;
-
-  std::vector<std::string> PropertySections;
-  std::vector<std::string> VariableSections;
 };
 
 #endif

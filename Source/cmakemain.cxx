@@ -44,19 +44,6 @@ static const char * cmDocumentationUsage[][3] =
   {0,0,0}
 };
 
-//----------------------------------------------------------------------------
-static const char * cmDocumentationDescription[][3] =
-{
-  {0,
-   "The \"cmake\" executable is the CMake command-line interface.  It may "
-   "be used to configure projects in scripts.  Project configuration "
-   "settings "
-   "may be specified on the command line with the -D option.  The -i option "
-   "will cause cmake to interactively prompt for such settings.", 0},
-  CMAKE_STANDARD_INTRODUCTION,
-  {0,0,0}
-};
-
 #define CMAKE_BUILD_OPTIONS                                             \
   "  <dir>          = Project binary directory to be built.\n"          \
   "  --target <tgt> = Build <tgt> instead of default targets.\n"        \
@@ -245,29 +232,6 @@ static const char * cmDocumentationOptions[][3] =
   {0,0,0}
 };
 
-//----------------------------------------------------------------------------
-static const char * cmDocumentationSeeAlso[][3] =
-{
-  {0, "ccmake", 0},
-  {0, "cpack", 0},
-  {0, "ctest", 0},
-  {0, "cmakecommands", 0},
-  {0, "cmakecompat", 0},
-  {0, "cmakemodules", 0},
-  {0, "cmakeprops", 0},
-  {0, "cmakevars", 0},
-  {0, 0, 0}
-};
-
-//----------------------------------------------------------------------------
-static const char * cmDocumentationNOTE[][3] =
-{
-  {0,
-   "CMake no longer configures a project when run with no arguments.  "
-   "In order to configure the project in the current directory, run\n"
-   "  cmake .", 0},
-  {0,0,0}
-};
 #endif
 
 int do_cmake(int ac, char** av);
@@ -381,57 +345,18 @@ int do_cmake(int ac, char** av)
       args.push_back(av[i]);
       }
     hcm.SetCacheArgs(args);
-    const char* modulePath = hcm.GetCacheDefinition("CMAKE_MODULE_PATH");
-    if (modulePath)
-      {
-      doc.SetCMakeModulePath(modulePath);
-      }
 
-    std::vector<cmDocumentationEntry> commands;
-    std::vector<cmDocumentationEntry> policies;
-    std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> generators;
-    std::map<std::string,cmDocumentationSection *> propDocs;
 
-    hcm.GetPolicyDocumentation(policies);
-    hcm.GetCommandDocumentation(commands, true, false);
-    hcm.GetCommandDocumentation(compatCommands, false, true);
-    hcm.GetPropertiesDocumentation(propDocs);
     hcm.GetGeneratorDocumentation(generators);
 
     doc.SetName("cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
-    doc.SetSection("Description",cmDocumentationDescription);
     doc.AppendSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
-    doc.SetSection("Commands",commands);
-    doc.SetSection("Policies",policies);
-    doc.AppendSection("Compatibility Commands",compatCommands);
-    doc.SetSections(propDocs);
 
-    cmDocumentationEntry e;
-    e.Brief =
-      "variables defined by cmake, that give information about the project, "
-      "and cmake";
-    doc.PrependSection("Variables that Provide Information",e);
-
-    doc.SetSeeAlsoList(cmDocumentationSeeAlso);
-    int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
-
-    // If we were run with no arguments, but a CMakeLists.txt file
-    // exists, the user may have been trying to use the old behavior
-    // of cmake to build a project in-source.  Print a message
-    // explaining the change to standard error and return an error
-    // condition in case the program is running from a script.
-    if((ac == 1) && cmSystemTools::FileExists("CMakeLists.txt"))
-      {
-      doc.ClearSections();
-      doc.SetSection("NOTE", cmDocumentationNOTE);
-      doc.Print(cmDocumentation::UsageForm, 0, std::cerr);
-      return 1;
-      }
-    return result;
+    return doc.PrintRequestedDocumentation(std::cout)? 0:1;
     }
 #else
   if ( ac == 1 )

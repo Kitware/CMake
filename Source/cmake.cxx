@@ -1995,45 +1995,6 @@ void cmake::UpdateProgress(const char *msg, float prog)
     }
 }
 
-void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
-                                    bool withCurrentCommands,
-                                    bool withCompatCommands) const
-{
-  for(RegisteredCommandsMap::const_iterator j = this->Commands.begin();
-      j != this->Commands.end(); ++j)
-    {
-    if (((  withCompatCommands == false) && ( (*j).second->IsDiscouraged()))
-        || ((withCurrentCommands == false) && (!(*j).second->IsDiscouraged()))
-        || (!((*j).second->ShouldAppearInDocumentation()))
-        )
-      {
-      continue;
-      }
-
-    cmDocumentationEntry e((*j).second->GetName(),
-                           (*j).second->GetTerseDocumentation(),
-                           (*j).second->GetFullDocumentation());
-    v.push_back(e);
-    }
-}
-
-void cmake::GetPolicyDocumentation(std::vector<cmDocumentationEntry>& v)
-{
-  this->Policies->GetDocumentation(v);
-}
-
-void cmake::GetPropertiesDocumentation(std::map<std::string,
-                                       cmDocumentationSection *>& v)
-{
-  // loop over the properties and put them into the doc structure
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::iterator i;
-  i = this->PropertyDefinitions.begin();
-  for (;i != this->PropertyDefinitions.end(); ++i)
-    {
-    i->second.GetPropertiesDocumentation(v);
-    }
-}
-
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
 {
   for(RegisteredGeneratorsVector::const_iterator i =

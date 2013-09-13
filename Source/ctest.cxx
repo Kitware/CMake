@@ -36,16 +36,6 @@ static const char * cmDocumentationUsage[][3] =
 };
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationDescription[][3] =
-{
-  {0,
-   "The \"ctest\" executable is the CMake test driver program.  "
-   "CMake-generated build trees created for projects that use "
-   "the ENABLE_TESTING and ADD_TEST commands have testing support.  "
-   "This program will run the tests and report results.", 0},
-  {0,0,0}
-};
-
 //----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][3] =
 {
@@ -261,14 +251,6 @@ static const char * cmDocumentationOptions[][3] =
   {0,0,0}
 };
 
-//----------------------------------------------------------------------------
-static const char * cmDocumentationSeeAlso[][3] =
-{
-  {0, "cmake", 0},
-  {0, "ccmake", 0},
-  {0, 0, 0}
-};
-
 // this is a test driver program for cmCTest.
 int main (int argc, char *argv[])
 {
@@ -309,20 +291,15 @@ int main (int argc, char *argv[])
     if(doc.CheckOptions(argc, argv))
       {
       // Construct and print requested documentation.
-      std::vector<cmDocumentationEntry> commands;
       cmCTestScriptHandler* ch =
                  static_cast<cmCTestScriptHandler*>(inst.GetHandler("script"));
       ch->CreateCMake();
-      ch->GetCommandDocumentation(commands);
 
       doc.SetShowGenerators(false);
       doc.SetName("ctest");
       doc.SetSection("Name",cmDocumentationName);
       doc.SetSection("Usage",cmDocumentationUsage);
-      doc.SetSection("Description",cmDocumentationDescription);
       doc.PrependSection("Options",cmDocumentationOptions);
-      doc.SetSection("Commands",commands);
-      doc.SetSeeAlsoList(cmDocumentationSeeAlso);
 #ifdef cout
 #  undef cout
 #endif

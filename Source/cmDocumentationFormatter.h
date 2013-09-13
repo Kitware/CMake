@@ -27,8 +27,8 @@ public:
   enum Type
   { None, Usage, Single, SingleModule, SingleProperty, SingleVariable,
     List, ModuleList, PropertyList, VariableList, PolicyList,
-    Full, Properties, Variables, Modules, CustomModules, Commands,
-    CompatCommands, Copyright, Version, Policies, SinglePolicy };
+    Properties, Variables, Modules, Commands,
+    Copyright, Version, Policies, SinglePolicy };
 
   /** Forms of documentation output.  */
   enum Form { TextForm, HTMLForm, RSTForm, ManForm, UsageForm, DocbookForm };

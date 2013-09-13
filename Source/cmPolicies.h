@@ -116,9 +116,6 @@ public:
   ///! return an error string for when a required policy is unspecified
   std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
 
-  ///! Get docs for policies
-  void GetDocumentation(std::vector<cmDocumentationEntry>& v);
-
   /** Represent a set of policy values.  */
   typedef std::map<PolicyID, PolicyStatus> PolicyMap;
 

@@ -269,20 +269,7 @@ class cmake
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 
-  /** Get the documentation entries for the supported commands.
-   *  If withCurrentCommands is true, the documentation for the
-   *  recommended set of commands is included.
-   *  If withCompatCommands is true, the documentation for discouraged
-   *  (compatibility) commands is included.
-   *  You probably don't want to set both to false.
-   */
-  void GetCommandDocumentation(std::vector<cmDocumentationEntry>& entries,
-                               bool withCurrentCommands = true,
-                               bool withCompatCommands = true) const;
-  void GetPropertiesDocumentation(std::map<std::string,
-                                  cmDocumentationSection *>&);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
-  void GetPolicyDocumentation(std::vector<cmDocumentationEntry>& entries);
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
@@ -519,13 +506,4 @@ private:
    "Enable warnings that are meant for the author"\
    " of the CMakeLists.txt files."}
 
-
-#define CMAKE_STANDARD_INTRODUCTION \
-  {0, \
-   "CMake is a cross-platform build system generator.  Projects " \
-   "specify their build process with platform-independent CMake listfiles " \
-   "included in each directory of a source tree with the name " \
-   "CMakeLists.txt. " \
-   "Users build a project by using CMake to generate a build system " \
-   "for a native tool on their platform.", 0}
 #endif

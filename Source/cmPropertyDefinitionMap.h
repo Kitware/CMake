@@ -32,9 +32,6 @@ public:
 
   // is a named property set to chain
   bool IsPropertyChained(const char *name);
-
-  void GetPropertiesDocumentation(std::map<std::string,
-                                  cmDocumentationSection *>&) const;
 };
 
 #endif
