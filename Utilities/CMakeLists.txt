@@ -130,34 +130,3 @@ install(FILES
 
 # Drive documentation generation.
 add_custom_target(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
-
-# Documentation testing.
-if(BUILD_TESTING)
-  find_package(LibXml2 QUIET)
-  if(NOT DEFINED LIBXML2_XMLLINT_EXECUTABLE)
-    find_program(LIBXML2_XMLLINT_EXECUTABLE xmllint)
-  endif()
-  mark_as_advanced(LIBXML2_XMLLINT_EXECUTABLE)
-  if(LIBXML2_XMLLINT_EXECUTABLE)
-    execute_process(COMMAND ${LIBXML2_XMLLINT_EXECUTABLE} --help
-      OUTPUT_VARIABLE _help ERROR_VARIABLE _err)
-    if("${_help}" MATCHES "--path" AND "${_help}" MATCHES "--nonet")
-      # We provide DTDs in the 'xml' directory so that xmllint can run without
-      # network access.  Note that xmllints's --path option accepts a
-      # space-separated list of url-encoded paths.
-      set(_dtd_dir "${CMAKE_CURRENT_SOURCE_DIR}/xml")
-      string(REPLACE " " "%20" _dtd_dir "${_dtd_dir}")
-      string(REPLACE ":" "%3A" _dtd_dir "${_dtd_dir}")
-      add_test(CMake.HTML
-        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
-        --path ${_dtd_dir}/xhtml1
-        ${HTML_FILES}
-        )
-      add_test(CMake.DocBook
-        ${LIBXML2_XMLLINT_EXECUTABLE} --valid --noout --nonet
-        --path ${_dtd_dir}/docbook-4.5
-        ${DOCBOOK_FILES}
-        )
-    endif()
-  endif()
-endif()
