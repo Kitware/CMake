@@ -257,7 +257,7 @@ static std::string stripExportInterface(const std::string &input,
 {
   std::string result;
 
-  int nestingLevel = 1;
+  int nestingLevel = 0;
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
   while (true)
