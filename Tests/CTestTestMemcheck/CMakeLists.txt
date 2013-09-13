@@ -37,7 +37,7 @@ add_subdirectory(NoLogDummyChecker)
 
 if(APPLE)
   # filter out additional messages by Guard Malloc integrated in Xcode
-  set(guard_malloc_msg "ctest\([0-9]+\) malloc: ")
+  set(guard_malloc_msg "ctest\\([0-9]+\\) malloc: ")
   set(guard_malloc_lines "(${guard_malloc_msg}[^\n]*\n)*")
   set(guard_malloc_output "${guard_malloc_msg}|")
 else()
