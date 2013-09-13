@@ -56,9 +56,7 @@ static const char *cmDocumentationGeneratorsHeader[][3] =
 
 //----------------------------------------------------------------------------
 cmDocumentation::cmDocumentation()
-:CurrentFormatter(0)
 {
-  this->SetForm(TextForm, 0);
   this->addCommonStandardDocSections();
   this->ShowGenerators = true;
 }
@@ -80,22 +78,6 @@ bool cmDocumentation::PrintVersion(std::ostream& os)
   os << this->GetNameString() << " version "
      << cmVersion::GetCMakeVersion() << "\n";
   return true;
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::AddSectionToPrint(const char *section)
-{
-  if (this->AllSections.find(section) != this->AllSections.end())
-    {
-    this->PrintSections.push_back(this->AllSections[section]);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::ClearSections()
-{
-  this->PrintSections.erase(this->PrintSections.begin(),
-                            this->PrintSections.end());
 }
 
 //----------------------------------------------------------------------------
@@ -147,7 +129,6 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
       i != this->RequestedHelpItems.end();
       ++i)
     {
-    this->SetForm(i->HelpForm, i->ManSection);
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
@@ -193,38 +174,27 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
         };
 
 
-cmDocumentation::Form cmDocumentation::GetFormFromFilename(
-                                                   const std::string& filename,
-                                                   int* manSection)
+void cmDocumentation::WarnFormFromFilename(
+  cmDocumentation::RequestedHelpItem& request)
 {
-  std::string ext = cmSystemTools::GetFilenameLastExtension(filename);
+  std::string ext = cmSystemTools::GetFilenameLastExtension(request.Filename);
   ext = cmSystemTools::UpperCase(ext);
   if ((ext == ".HTM") || (ext == ".HTML"))
     {
-    return cmDocumentation::HTMLForm;
+    request.HelpType = cmDocumentation::None;
+    cmSystemTools::Message("Warning: HTML help format no longer supported");
     }
-
-  if (ext == ".DOCBOOK")
+  else if (ext == ".DOCBOOK")
     {
-    return cmDocumentation::DocbookForm;
+    request.HelpType = cmDocumentation::None;
+    cmSystemTools::Message("Warning: Docbook help format no longer supported");
     }
-
   // ".1" to ".9" should be manpages
-  if ((ext.length()==2) && (ext[1] >='1') && (ext[1]<='9'))
+  else if ((ext.length()==2) && (ext[1] >='1') && (ext[1]<='9'))
     {
-    if (manSection)
-      {
-      *manSection = ext[1] - '0';
-      }
-    return cmDocumentation::ManForm;
+    request.HelpType = cmDocumentation::None;
+    cmSystemTools::Message("Warning: Man help format no longer supported");
     }
-
-  if (ext == ".RST")
-    {
-    return cmDocumentation::RSTForm;
-    }
-
-  return cmDocumentation::TextForm;
 }
 
 //----------------------------------------------------------------------------
@@ -274,7 +244,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
     {
     RequestedHelpItem help;
     help.HelpType = cmDocumentation::Usage;
-    help.HelpForm = cmDocumentation::UsageForm;
     this->RequestedHelpItems.push_back(help);
     return true;
     }
@@ -298,7 +267,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
        (strcmp(argv[i], "-H") == 0))
       {
       help.HelpType = cmDocumentation::Usage;
-      help.HelpForm = cmDocumentation::UsageForm;
       GET_OPT_ARGUMENT(help.Argument);
       help.Argument = cmSystemTools::LowerCase(help.Argument);
       // special case for single command
@@ -312,32 +280,28 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-properties.7";
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-policies") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-policies.7";
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-variables") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-variables.7";
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-modules") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-modules.7";
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-custom-modules") == 0)
       {
@@ -351,8 +315,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-commands.7";
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-compatcommands") == 0)
       {
@@ -385,40 +348,35 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
       help.Argument = cmSystemTools::LowerCase(help.Argument);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-module") == 0)
       {
       help.HelpType = cmDocumentation::OneModule;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-property") == 0)
       {
       help.HelpType = cmDocumentation::OneProperty;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-policy") == 0)
       {
       help.HelpType = cmDocumentation::OnePolicy;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-variable") == 0)
       {
       help.HelpType = cmDocumentation::OneVariable;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
+      this->WarnFormFromFilename(help);
       }
     else if(strcmp(argv[i], "--help-manual") == 0)
       {
@@ -431,31 +389,26 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       {
       help.HelpType = cmDocumentation::ListCommands;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-module-list") == 0)
       {
       help.HelpType = cmDocumentation::ListModules;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-property-list") == 0)
       {
       help.HelpType = cmDocumentation::ListProperties;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-variable-list") == 0)
       {
       help.HelpType = cmDocumentation::ListVariables;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-policy-list") == 0)
       {
       help.HelpType = cmDocumentation::ListPolicies;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::TextForm;
       }
     else if(strcmp(argv[i], "--help-manual-list") == 0)
       {
@@ -474,7 +427,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       {
       help.HelpType = cmDocumentation::Version;
       GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::UsageForm;
       }
     if(help.HelpType != None)
       {
@@ -484,28 +436,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       }
     }
   return result;
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::Print(Form f, int manSection, std::ostream& os)
-{
-  this->SetForm(f, manSection);
-  this->Print(os);
-}
-
-//----------------------------------------------------------------------------
-void cmDocumentation::Print(std::ostream& os)
-{
-  // if the formatter supports it, print a master index for
-  // all sections
-  this->CurrentFormatter->PrintIndex(os, this->PrintSections);
-  for(unsigned int i=0; i < this->PrintSections.size(); ++i)
-    {
-    std::string name = this->PrintSections[i]->
-      GetName((this->CurrentFormatter->GetForm()));
-    this->CurrentFormatter->PrintSection(os,*this->PrintSections[i],
-                                         name.c_str());
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -864,44 +794,27 @@ bool cmDocumentation::PrintHelpListVariables(std::ostream& os)
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
 {
-  this->ClearSections();
-  this->AddSectionToPrint("Usage");
-  this->AddSectionToPrint("Options");
+  std::map<std::string,cmDocumentationSection*>::iterator si;
+  si = this->AllSections.find("Usage");
+  if(si != this->AllSections.end())
+    {
+    this->Formatter.PrintSection(os, *si->second);
+    }
+  si = this->AllSections.find("Options");
+  if(si != this->AllSections.end())
+    {
+    this->Formatter.PrintSection(os, *si->second);
+    }
   if(this->ShowGenerators)
     {
-    this->AddSectionToPrint("Generators");
+    si = this->AllSections.find("Generators");
+    if(si != this->AllSections.end())
+      {
+      this->Formatter.PrintSection(os, *si->second);
+      }
     }
-  this->Print(os);
   return true;
 }
-
-//----------------------------------------------------------------------------
-void cmDocumentation::SetForm(Form f, int manSection)
-{
-  switch(f)
-  {
-    case HTMLForm:
-      this->CurrentFormatter = &this->HTMLFormatter;
-      break;
-    case DocbookForm:
-      this->CurrentFormatter = &this->DocbookFormatter;
-      break;
-    case ManForm:
-      this->ManFormatter.SetManSection(manSection);
-      this->CurrentFormatter = &this->ManFormatter;
-      break;
-    case RSTForm:
-      this->CurrentFormatter = &this->RSTFormatter;
-      break;
-    case TextForm:
-      this->CurrentFormatter = &this->TextFormatter;
-      break;
-    case UsageForm:
-      this->CurrentFormatter = & this->UsageFormatter;
-      break;
-  }
-}
-
 
 //----------------------------------------------------------------------------
 const char* cmDocumentation::GetNameString() const

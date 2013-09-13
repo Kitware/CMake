@@ -20,7 +20,7 @@
 #include "cmFileTimeComparison.h"
 #include "cmSourceFile.h"
 #include "cmTest.h"
-#include "cmDocumentationFormatterText.h"
+#include "cmDocumentationFormatter.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmGraphVizWriter.h"
@@ -3009,7 +3009,7 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   // Add the message text.
   {
   msg << ":\n";
-  cmDocumentationFormatterText formatter;
+  cmDocumentationFormatter formatter;
   formatter.SetIndent("  ");
   formatter.PrintFormatted(msg, text.c_str());
   }

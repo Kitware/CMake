@@ -15,12 +15,6 @@
 #include "cmStandardIncludes.h"
 #include "cmProperty.h"
 #include "cmDocumentationFormatter.h"
-#include "cmDocumentationFormatterHTML.h"
-#include "cmDocumentationFormatterDocbook.h"
-#include "cmDocumentationFormatterMan.h"
-#include "cmDocumentationFormatterRST.h"
-#include "cmDocumentationFormatterText.h"
-#include "cmDocumentationFormatterUsage.h"
 #include "cmDocumentationSection.h"
 #include "cmake.h"
 
@@ -89,32 +83,8 @@ public:
   void AppendSection(const char *sectionName,
                      cmDocumentationEntry &docs);
 
-  /**
-   * Print documentation in the given form.  All previously added
-   * sections will be generated.
-   */
-  void Print(Form f, int manSection, std::ostream& os);
-
-  /**
-   * Print documentation in the current form.  All previously added
-   * sections will be generated.
-   */
-  void Print(std::ostream& os);
-
-  /**
-   * Add a section of documentation. This can be used to generate custom help
-   * documents.
-   */
-  void AddSectionToPrint(const char *section);
-
-  /** Clear all previously added sections of help.  */
-  void ClearSections();
-
   /** Set cmake root so we can find installed files */
   void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
-
-  static Form GetFormFromFilename(const std::string& filename,
-                                  int* ManSection);
 
   /** Add common (to all tools) documentation section(s) */
   void addCommonStandardDocSections();
@@ -129,7 +99,6 @@ public:
   void addCPackStandardDocSections();
 
 private:
-  void SetForm(Form f, int manSection);
 
   void GlobHelp(std::vector<std::string>& files, std::string const& pattern);
   void PrintNames(std::ostream& os, std::string const& pattern);
@@ -159,27 +128,20 @@ private:
   std::map<std::string,cmDocumentationSection*> AllSections;
 
   std::string CMakeRoot;
-  std::vector<const cmDocumentationSection *> PrintSections;
   std::string CurrentArgument;
 
   struct RequestedHelpItem
   {
-    RequestedHelpItem():HelpForm(TextForm), HelpType(None), ManSection(1) {}
-    cmDocumentationEnums::Form HelpForm;
+    RequestedHelpItem(): HelpType(None) {}
     cmDocumentationEnums::Type HelpType;
     std::string Filename;
     std::string Argument;
-    int ManSection;
   };
 
   std::vector<RequestedHelpItem> RequestedHelpItems;
-  cmDocumentationFormatter* CurrentFormatter;
-  cmDocumentationFormatterHTML HTMLFormatter;
-  cmDocumentationFormatterDocbook DocbookFormatter;
-  cmDocumentationFormatterMan ManFormatter;
-  cmDocumentationFormatterRST RSTFormatter;
-  cmDocumentationFormatterText TextFormatter;
-  cmDocumentationFormatterUsage UsageFormatter;
+  cmDocumentationFormatter Formatter;
+
+  static void WarnFormFromFilename(RequestedHelpItem& request);
 };
 
 #endif

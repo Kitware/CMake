@@ -159,12 +159,6 @@ set(SRCS
   cmDependsJavaParserHelper.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
-  cmDocumentationFormatterHTML.cxx
-  cmDocumentationFormatterDocbook.cxx
-  cmDocumentationFormatterMan.cxx
-  cmDocumentationFormatterRST.cxx
-  cmDocumentationFormatterText.cxx
-  cmDocumentationFormatterUsage.cxx
   cmDocumentationSection.cxx
   cmDocumentCompileDefinitions.h
   cmDocumentGeneratorExpressions.h
