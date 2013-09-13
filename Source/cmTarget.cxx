@@ -6449,7 +6449,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
             << newExplicitLibraries
             << "\n"
             << linkIfaceProp << ":\n  "
-            << explicitLibraries << "\n";
+            << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
           // Fall through
