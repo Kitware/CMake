@@ -230,7 +230,6 @@ CMAKE_CXX_SOURCES="\
   cmDepends \
   cmDependsC \
   cmDocumentationFormatter \
-  cmDocumentationFormatterText \
   cmPolicies \
   cmProperty \
   cmPropertyMap \

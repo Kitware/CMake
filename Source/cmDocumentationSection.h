@@ -24,8 +24,8 @@ class cmDocumentationSection
 {
 public:
   /** Create a cmSection, with a special name for man-output mode. */
-  cmDocumentationSection(const char* name, const char* manName)
-    :Name(name), ManName(manName)       {}
+  cmDocumentationSection(const char* name, const char*)
+    :Name(name) {}
 
   /** Has any content been added to this section or is it empty ? */
   bool IsEmpty() const { return this->Entries.empty(); }
@@ -33,10 +33,9 @@ public:
   /** Clear contents. */
   void Clear() { this->Entries.clear(); }
 
-  /** Return the name of this section for the given output form. */
-  const char* GetName(cmDocumentationEnums::Form form) const
-  { return (form==cmDocumentationEnums::ManForm ?
-            this->ManName.c_str() : this->Name.c_str()); }
+  /** Return the name of this section. */
+  const char* GetName() const
+  { return this->Name.c_str(); }
 
   /** Return a pointer to the first entry of this section. */
   const std::vector<cmDocumentationEntry> &GetEntries() const
@@ -61,7 +60,6 @@ public:
 
 private:
   std::string Name;
-  std::string ManName;
   std::vector<cmDocumentationEntry> Entries;
 };
 
