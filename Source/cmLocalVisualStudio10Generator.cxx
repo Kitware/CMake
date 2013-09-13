@@ -76,6 +76,10 @@ void cmLocalVisualStudio10Generator::Generate()
   cmTargets &tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
     {
+    if(l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
        ->TargetIsFortranOnly(l->second))
       {

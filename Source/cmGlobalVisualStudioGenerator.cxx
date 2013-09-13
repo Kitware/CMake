@@ -349,6 +349,10 @@ cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmTarget* target)
 void cmGlobalVisualStudioGenerator::FollowLinkDepends(
   cmTarget* target, std::set<cmTarget*>& linked)
 {
+  if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return;
+    }
   if(linked.insert(target).second &&
      target->GetType() == cmTarget::STATIC_LIBRARY)
     {
