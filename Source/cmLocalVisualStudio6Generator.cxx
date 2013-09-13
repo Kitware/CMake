@@ -152,7 +152,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
         this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
       case cmTarget::INTERFACE_LIBRARY:
-        break;
+        continue;
       default:
         cmSystemTools::Error("Bad target type: ", l->first.c_str());
         break;

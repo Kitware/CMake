@@ -409,6 +409,10 @@ void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   for(OrderedTargetDependSet::const_iterator i = depends.begin();
       i != depends.end(); ++i)
     {
+    if((*i)->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     std::string guid = this->GetGUID((*i)->GetName());
     fout << "\t\t{" << guid << "} = {" << guid << "}\n";
     }
