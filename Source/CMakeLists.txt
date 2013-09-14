@@ -166,6 +166,8 @@ set(SRCS
   cmDocumentationFormatterUsage.cxx
   cmDocumentationSection.cxx
   cmDocumentCompileDefinitions.h
+  cmDocumentConcepts.h
+  cmDocumentConcepts.cxx
   cmDocumentGeneratorExpressions.h
   cmDocumentLocationUndefined.h
   cmDocumentVariables.cxx

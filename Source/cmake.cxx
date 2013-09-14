@@ -25,6 +25,7 @@
 #include "cmVersion.h"
 #include "cmTest.h"
 #include "cmDocumentationFormatterText.h"
+#include "cmDocumentConcepts.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmGraphVizWriter.h"
@@ -2772,6 +2773,11 @@ void cmake::GetCommandDocumentation(std::vector<cmDocumentationEntry>& v,
 void cmake::GetPolicyDocumentation(std::vector<cmDocumentationEntry>& v)
 {
   this->Policies->GetDocumentation(v);
+}
+
+void cmake::GetConceptDocumentation(std::vector<cmDocumentationEntry>& v)
+{
+  cmDocumentConcepts::GetDocumentation(v);
 }
 
 void cmake::GetPropertiesDocumentation(std::map<std::string,
