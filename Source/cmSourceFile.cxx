@@ -417,6 +417,16 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "By default it is empty.");
 
   cm->DefineProperty
+    ("AUTORCC_OPTIONS", cmProperty::SOURCE_FILE,
+     "Additional options for rcc when using autorcc (see the AUTORCC target "
+     "property)",
+     "This property holds additional command line options "
+     "which will be used when rcc is executed during the build via autorcc, "
+     "i.e. it is equivalent to the optional OPTIONS argument of the "
+     "qt4_add_resources() macro.\n"
+     "By default it is empty.");
+
+  cm->DefineProperty
     ("COMPILE_FLAGS", cmProperty::SOURCE_FILE,
      "Additional flags to be added when compiling this source file.",
      "These flags will be added to the list of compile flags when "
