@@ -889,6 +889,7 @@ cmExportFileGenerator
       break;
     case cmTarget::UNKNOWN_LIBRARY:
       os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
+      break;
     case cmTarget::INTERFACE_LIBRARY:
       os << "add_library(" << targetName << " INTERFACE IMPORTED)\n";
       break;
