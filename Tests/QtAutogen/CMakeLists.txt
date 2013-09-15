@@ -36,6 +36,7 @@ add_definitions(-DFOO -DSomeDefine="Barx")
 set(CMAKE_AUTOMOC_RELAXED_MODE TRUE)
 
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 # create an executable and two library targets, each requiring automoc:
 add_library(codeeditorLib STATIC codeeditor.cpp)
@@ -43,7 +44,9 @@ add_library(codeeditorLib STATIC codeeditor.cpp)
 add_library(privateSlot OBJECT private_slot.cpp)
 
 add_executable(QtAutogen main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
-               xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>)
+               xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
+               test.qrc resourcetester.cpp
+)
 
 set_target_properties(QtAutogen codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 

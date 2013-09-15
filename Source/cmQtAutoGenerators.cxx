@@ -118,6 +118,7 @@ cmQtAutoGenerators::cmQtAutoGenerators()
 ,ColorOutput(true)
 ,RunMocFailed(false)
 ,RunUicFailed(false)
+,RunRccFailed(false)
 ,GenerateAll(false)
 {
 
@@ -264,9 +265,18 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     {
     toolNames.push_back("uic");
     }
+  if (target->GetPropertyAsBool("AUTORCC"))
+    {
+    toolNames.push_back("rcc");
+    }
 
   std::string tools = toolNames[0];
   toolNames.erase(toolNames.begin());
+  while (toolNames.size() > 1)
+    {
+    tools += ", " + toolNames[0];
+    toolNames.erase(toolNames.begin());
+    }
   if (toolNames.size() == 1)
     {
     tools += " and " + toolNames[0];
@@ -340,6 +350,10 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   if (target->GetPropertyAsBool("AUTOUIC"))
     {
     this->SetupAutoUicTarget(target);
+    }
+  if (target->GetPropertyAsBool("AUTORCC"))
+    {
+    this->SetupAutoRccTarget(target);
     }
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
@@ -602,6 +616,104 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget* target)
     }
 }
 
+void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget* target)
+{
+  std::string _rcc_files;
+  const char* sepRccFiles = "";
+  cmMakefile *makefile = target->GetMakefile();
+
+  std::vector<cmSourceFile*> newFiles;
+
+  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+
+  std::string rccFileFiles;
+  std::string rccFileOptions;
+  const char *sep = "";
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+      fileIt != srcFiles.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string ext = sf->GetExtension();
+    if (ext == "qrc")
+      {
+      std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                  sf->GetFullPath().c_str());
+      bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
+
+      if (!skip)
+        {
+        _rcc_files += sepRccFiles;
+        _rcc_files += absFile;
+        sepRccFiles = ";";
+
+        std::string basename = cmsys::SystemTools::
+                                      GetFilenameWithoutLastExtension(absFile);
+
+        std::string rcc_output_file = makefile->GetCurrentOutputDirectory();
+        rcc_output_file += "/qrc_" + basename + ".cpp";
+        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                                rcc_output_file.c_str(), false);
+        cmSourceFile* rccCppSource
+                = makefile->GetOrCreateSource(rcc_output_file.c_str(), true);
+        newFiles.push_back(rccCppSource);
+
+        if (const char *prop = sf->GetProperty("AUTORCC_OPTIONS"))
+          {
+          rccFileFiles += sep;
+          rccFileFiles += absFile;
+          rccFileOptions += sep;
+          std::string opts = prop;
+          cmSystemTools::ReplaceString(opts, ";", "@list_sep@");
+          rccFileOptions += opts;
+          sep = ";";
+          }
+        }
+      }
+    }
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = newFiles.begin();
+      fileIt != newFiles.end();
+      ++fileIt)
+    {
+    target->AddSourceFile(*fileIt);
+    }
+
+  makefile->AddDefinition("_rcc_files",
+          cmLocalGenerator::EscapeForCMake(_rcc_files.c_str()).c_str());
+
+  makefile->AddDefinition("_qt_rcc_options_files",
+              cmLocalGenerator::EscapeForCMake(rccFileFiles.c_str()).c_str());
+  makefile->AddDefinition("_qt_rcc_options_options",
+            cmLocalGenerator::EscapeForCMake(rccFileOptions.c_str()).c_str());
+
+  const char *qtRcc = makefile->GetSafeDefinition("QT_RCC_EXECUTABLE");
+  makefile->AddDefinition("_qt_rcc_executable", qtRcc);
+
+  const char* targetName = target->GetName();
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+  if (strcmp(qtVersion, "5") == 0)
+    {
+    cmTarget *qt5Rcc = makefile->FindTargetToUse("Qt5::rcc");
+    if (!qt5Rcc)
+      {
+      cmSystemTools::Error("Qt5::rcc target not found ",
+                          targetName);
+      return;
+      }
+    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
+    }
+  else
+    {
+    if (strcmp(qtVersion, "4") != 0)
+      {
+      cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
+                          "Qt 5 ", targetName);
+      }
+    }
+}
+
 bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 {
   bool success = true;
@@ -666,6 +778,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                                      "AM_Qt5Core_VERSION_MAJOR");
     }
   this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
+  this->RccSources = makefile->GetSafeDefinition("AM_RCC_SOURCES");
   this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
   this->SkipUic = makefile->GetSafeDefinition("AM_SKIP_UIC");
   this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
@@ -675,6 +788,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   this->Builddir = makefile->GetSafeDefinition("AM_CMAKE_CURRENT_BINARY_DIR");
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
+  this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
   std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
   std::string compileDefsProp = compileDefsPropOrig;
   if(config)
@@ -720,6 +834,28 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
     {
     cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
     this->UicOptions[*fileIt] = *optionIt;
+    }
+  }
+  {
+  const char *rccOptionsFiles
+                        = makefile->GetSafeDefinition("AM_RCC_OPTIONS_FILES");
+  const char *rccOptionsOptions
+                      = makefile->GetSafeDefinition("AM_RCC_OPTIONS_OPTIONS");
+  std::vector<std::string> rccFilesVec;
+  cmSystemTools::ExpandListArgument(rccOptionsFiles, rccFilesVec);
+  std::vector<std::string> rccOptionsVec;
+  cmSystemTools::ExpandListArgument(rccOptionsOptions, rccOptionsVec);
+  if (rccFilesVec.size() != rccOptionsVec.size())
+    {
+    return false;
+    }
+  for (std::vector<std::string>::iterator fileIt = rccFilesVec.begin(),
+                                            optionIt = rccOptionsVec.begin();
+                                            fileIt != rccFilesVec.end();
+                                            ++fileIt, ++optionIt)
+    {
+    cmSystemTools::ReplaceString(*optionIt, "@list_sep@", ";");
+    this->RccOptions[*fileIt] = *optionIt;
     }
   }
   this->CurrentCompileSettingsStr = this->MakeCompileSettingsString(makefile);
@@ -972,6 +1108,11 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     this->GenerateUi(*it);
     }
 
+  if(!this->RccExecutable.empty())
+    {
+    this->GenerateQrc();
+    }
+
   cmsys_ios::stringstream outStream;
   outStream << "/* This file is autogenerated, do not edit*/\n";
 
@@ -1007,6 +1148,11 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   if (this->RunUicFailed)
     {
     std::cerr << "uic failed..."<< std::endl;
+    return false;
+    }
+  if (this->RunRccFailed)
+    {
+    std::cerr << "rcc failed..."<< std::endl;
     return false;
     }
   outStream.flush();
@@ -1589,6 +1735,71 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& uiFileName)
               " failed:\n" << output << std::endl;
     this->RunUicFailed = true;
     cmSystemTools::RemoveFile(ui_output_file.c_str());
+    }
+  return true;
+}
+
+bool cmQtAutoGenerators::GenerateQrc()
+{
+  std::vector<std::string> sourceFiles;
+  cmSystemTools::ExpandListArgument(this->RccSources, sourceFiles);
+
+  for(std::vector<std::string>::const_iterator si = sourceFiles.begin();
+      si != sourceFiles.end(); ++si)
+    {
+    std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
+
+    if (ext != ".qrc")
+      {
+      continue;
+      }
+    std::vector<cmStdString> command;
+    command.push_back(this->RccExecutable);
+
+    std::string basename = cmsys::SystemTools::
+                                  GetFilenameWithoutLastExtension(*si);
+
+    std::string rcc_output_file = "qrc_" + basename + ".cpp";
+
+    std::string options;
+    std::map<std::string, std::string>::const_iterator optionIt
+            = this->RccOptions.find(*si);
+    if (optionIt != this->RccOptions.end())
+      {
+      std::vector<std::string> opts;
+      cmSystemTools::ExpandListArgument(optionIt->second, opts);
+      for(std::vector<std::string>::const_iterator optIt = opts.begin();
+          optIt != opts.end();
+          ++optIt)
+        {
+        command.push_back(*optIt);
+        }
+      }
+
+    command.push_back("-o");
+    command.push_back(rcc_output_file);
+    command.push_back(*si);
+
+    if (this->Verbose)
+      {
+      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+          cmdIt != command.end();
+          ++cmdIt)
+        {
+        std::cout << *cmdIt << " ";
+        }
+      std::cout << std::endl;
+      }
+    std::string output;
+    int retVal = 0;
+    bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
+    if (!result || retVal)
+      {
+      std::cerr << "AUTORCC: error: process for " << rcc_output_file <<
+                " failed:\n" << output << std::endl;
+      this->RunRccFailed = true;
+      cmSystemTools::RemoveFile(rcc_output_file.c_str());
+      }
     }
   return true;
 }
