@@ -155,6 +155,8 @@ Variables that Control the Build
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS
    /variable/CMAKE_AUTOMOC
+   /variable/CMAKE_AUTORCC
+   /variable/CMAKE_AUTORCC_OPTIONS
    /variable/CMAKE_AUTOUIC
    /variable/CMAKE_AUTOUIC_OPTIONS
    /variable/CMAKE_BUILD_WITH_INSTALL_RPATH

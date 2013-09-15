@@ -32,6 +32,7 @@ private:
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
   void SetupAutoUicTarget(cmTarget* target);
+  void SetupAutoRccTarget(cmTarget* target);
 
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
                                            const char* targetDirectory);
@@ -49,6 +50,7 @@ private:
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
   bool GenerateUi(const std::string& uiFileName);
+  bool GenerateQrc();
   void ParseCppFile(const std::string& absFilename,
                     const std::vector<std::string>& headerExtensions,
                     std::map<std::string, std::string>& includedMocs,
@@ -83,8 +85,12 @@ private:
   void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
 
+  void MergeRccOptions(std::vector<std::string> &opts,
+                       const std::vector<std::string> &fileOpts, bool isQt5);
+
   std::string QtMajorVersion;
   std::string Sources;
+  std::string RccSources;
   std::string SkipMoc;
   std::string SkipUic;
   std::string Headers;
@@ -93,6 +99,7 @@ private:
   std::string Builddir;
   std::string MocExecutable;
   std::string UicExecutable;
+  std::string RccExecutable;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
@@ -109,11 +116,13 @@ private:
   std::vector<std::string> MocOptions;
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
+  std::map<std::string, std::string> RccOptions;
 
   bool Verbose;
   bool ColorOutput;
   bool RunMocFailed;
   bool RunUicFailed;
+  bool RunRccFailed;
   bool GenerateAll;
   bool RelaxedMode;
 
