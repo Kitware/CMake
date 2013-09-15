@@ -268,6 +268,22 @@ void cmTarget::DefineProperties(cmake *cm)
      "autouic targets together in an IDE, e.g. in MSVS.");
 
   cm->DefineProperty
+    ("AUTORCC", cmProperty::TARGET,
+     "Should the target be processed with autorcc (for Qt projects).",
+     "AUTORCC is a boolean specifying whether CMake will handle "
+     "the Qt rcc code generator automatically, i.e. without having to use "
+     "the QT4_ADD_RESOURCES() or QT5_ADD_RESOURCES() macro. Currently Qt4 "
+     "and Qt5 are supported.  "
+     "When this property is set to TRUE, CMake will handle .qrc files added "
+     "as target sources at build time and invoke rcc accordingly.  "
+     "This property is initialized by the value of the variable "
+     "CMAKE_AUTORCC if it is set when a target is created.\n"
+     "Additional command line options for rcc can be set via the "
+     "RCC_OPTIONS source file property on the .qrc file.\n"
+     "The global property AUTOGEN_TARGETS_FOLDER can be used to group the"
+     "autorcc targets together in an IDE, e.g. in MSVS.");
+
+  cm->DefineProperty
     ("AUTOMOC_MOC_OPTIONS", cmProperty::TARGET,
     "Additional options for moc when using automoc (see the AUTOMOC property)",
      "This property is only used if the AUTOMOC property is set to TRUE for "
@@ -1667,6 +1683,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
   this->SetPropertyDefault("AUTOUIC", 0);
+  this->SetPropertyDefault("AUTORCC", 0);
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
