@@ -25,10 +25,11 @@ class cmDocumentationEnums
 public:
   /** Types of help provided.  */
   enum Type
-  { None, Usage, Single, SingleModule, SingleProperty, SingleVariable,
-    List, ModuleList, PropertyList, VariableList, PolicyList,
-    Properties, Variables, Modules, Commands,
-    Copyright, Version, Policies, SinglePolicy };
+  {
+    None, Version, Usage, ListManuals,
+    ListCommands, ListModules, ListProperties, ListVariables, ListPolicies,
+    OneManual, OneCommand, OneModule, OneProperty, OneVariable, OnePolicy
+  };
 
   /** Forms of documentation output.  */
   enum Form { TextForm, HTMLForm, RSTForm, ManForm, UsageForm, DocbookForm };

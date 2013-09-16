@@ -131,7 +131,23 @@ public:
 private:
   void SetForm(Form f, int manSection);
 
+  void GlobHelp(std::vector<std::string>& files, std::string const& pattern);
+  void PrintNames(std::ostream& os, std::string const& pattern);
+  bool PrintFiles(std::ostream& os, std::string const& pattern);
+
   bool PrintVersion(std::ostream& os);
+  bool PrintHelpOneManual(std::ostream& os);
+  bool PrintHelpOneCommand(std::ostream& os);
+  bool PrintHelpOneModule(std::ostream& os);
+  bool PrintHelpOnePolicy(std::ostream& os);
+  bool PrintHelpOneProperty(std::ostream& os);
+  bool PrintHelpOneVariable(std::ostream& os);
+  bool PrintHelpListManuals(std::ostream& os);
+  bool PrintHelpListCommands(std::ostream& os);
+  bool PrintHelpListModules(std::ostream& os);
+  bool PrintHelpListProperties(std::ostream& os);
+  bool PrintHelpListVariables(std::ostream& os);
+  bool PrintHelpListPolicies(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
 
   const char* GetNameString() const;
