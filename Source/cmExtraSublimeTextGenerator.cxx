@@ -45,13 +45,6 @@ void cmExtraSublimeTextGenerator
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates Sublime Text 2 project files.";
-  entry.Full =
-    "Project files for Sublime Text 2 will be created in the top directory "
-    "and in every subdirectory which features a CMakeLists.txt file "
-    "containing a PROJECT() call. "
-    "Additionally Makefiles (or build.ninja files) are generated into the "
-    "build tree.  The appropriate make program can build the project through "
-    "the default make target.  A \"make install\" target is also provided.";
 }
 
 cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()

@@ -17,7 +17,6 @@ cmDocumentationEntry cmPropertyDefinition::GetDocumentation() const
   cmDocumentationEntry e;
   e.Name = this->Name;
   e.Brief = this->ShortDescription;
-  e.Full = this->FullDescription;
   return e;
 }
 

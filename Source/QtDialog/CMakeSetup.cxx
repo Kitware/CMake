@@ -23,27 +23,27 @@
 #include <cmsys/SystemTools.hxx>
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationName[][3] =
+static const char * cmDocumentationName[][2] =
 {
   {0,
-   "  cmake-gui - CMake GUI.", 0},
-  {0,0,0}
+   "  cmake-gui - CMake GUI."},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationUsage[][3] =
+static const char * cmDocumentationUsage[][2] =
 {
   {0,
    "  cmake-gui [options]\n"
    "  cmake-gui [options] <path-to-source>\n"
-   "  cmake-gui [options] <path-to-existing-build>", 0},
-  {0,0,0}
+   "  cmake-gui [options] <path-to-existing-build>"},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationOptions[][3] =
+static const char * cmDocumentationOptions[][2] =
 {
-  {0,0,0}
+  {0,0}
 };
 
 int main(int argc, char** argv)

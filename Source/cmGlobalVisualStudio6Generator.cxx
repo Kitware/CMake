@@ -405,7 +405,6 @@ void cmGlobalVisualStudio6Generator
 {
   entry.Name = cmGlobalVisualStudio6Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 6 project files.";
-  entry.Full = "";
 }
 
 //----------------------------------------------------------------------------
