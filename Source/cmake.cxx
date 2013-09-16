@@ -1865,11 +1865,6 @@ int cmake::Generate()
     {
     return -1;
     }
-  if (this->GetProperty("REPORT_UNDEFINED_PROPERTIES"))
-    {
-    this->ReportUndefinedPropertyAccesses
-      (this->GetProperty("REPORT_UNDEFINED_PROPERTIES"));
-    }
   // Save the cache again after a successful Generate so that any internal
   // variables created during Generate are saved. (Specifically target GUIDs
   // for the Visual Studio and Xcode generators.)
@@ -2644,112 +2639,6 @@ cmPropertyDefinition *cmake
     return &(this->PropertyDefinitions[scope][name]);
     }
   return 0;
-}
-
-void cmake::RecordPropertyAccess(const char *name,
-                                 cmProperty::ScopeType scope)
-{
-  this->AccessedProperties.insert
-    (std::pair<cmStdString,cmProperty::ScopeType>(name,scope));
-}
-
-void cmake::ReportUndefinedPropertyAccesses(const char *filename)
-{
-  if(!this->GlobalGenerator)
-    { return; }
-  FILE *progFile = fopen(filename,"w");
-  if(!progFile)
-    { return; }
-
-  // what are the enabled languages?
-  std::vector<std::string> enLangs;
-  this->GlobalGenerator->GetEnabledLanguages(enLangs);
-
-  // Common configuration names.
-  // TODO: Compute current configuration(s).
-  std::vector<std::string> enConfigs;
-  enConfigs.push_back("");
-  enConfigs.push_back("DEBUG");
-  enConfigs.push_back("RELEASE");
-  enConfigs.push_back("MINSIZEREL");
-  enConfigs.push_back("RELWITHDEBINFO");
-
-  // take all the defined properties and add definitions for all the enabled
-  // languages
-  std::set<std::pair<cmStdString,cmProperty::ScopeType> > aliasedProperties;
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::iterator i;
-  i = this->PropertyDefinitions.begin();
-  for (;i != this->PropertyDefinitions.end(); ++i)
-    {
-    cmPropertyDefinitionMap::iterator j;
-    for (j = i->second.begin(); j != i->second.end(); ++j)
-      {
-      // TODO: What if both <LANG> and <CONFIG> appear?
-      if (j->first.find("<CONFIG>") != std::string::npos)
-        {
-        std::vector<std::string>::const_iterator k;
-        for (k = enConfigs.begin(); k != enConfigs.end(); ++k)
-          {
-          std::string tmp = j->first;
-          cmSystemTools::ReplaceString(tmp, "<CONFIG>", k->c_str());
-          // add alias
-          aliasedProperties.insert
-            (std::pair<cmStdString,cmProperty::ScopeType>(tmp,i->first));
-          }
-        }
-      if (j->first.find("<LANG>") != std::string::npos)
-        {
-        std::vector<std::string>::const_iterator k;
-        for (k = enLangs.begin(); k != enLangs.end(); ++k)
-          {
-          std::string tmp = j->first;
-          cmSystemTools::ReplaceString(tmp, "<LANG>", k->c_str());
-          // add alias
-          aliasedProperties.insert
-            (std::pair<cmStdString,cmProperty::ScopeType>(tmp,i->first));
-          }
-        }
-      }
-    }
-
-  std::set<std::pair<cmStdString,cmProperty::ScopeType> >::const_iterator ap;
-  ap = this->AccessedProperties.begin();
-  for (;ap != this->AccessedProperties.end(); ++ap)
-    {
-    if (!this->IsPropertyDefined(ap->first.c_str(),ap->second) &&
-        aliasedProperties.find(std::pair<cmStdString,cmProperty::ScopeType>
-                               (ap->first,ap->second)) ==
-        aliasedProperties.end())
-      {
-      const char *scopeStr = "";
-      switch (ap->second)
-        {
-        case cmProperty::TARGET:
-          scopeStr = "TARGET";
-          break;
-        case cmProperty::SOURCE_FILE:
-          scopeStr = "SOURCE_FILE";
-        break;
-        case cmProperty::DIRECTORY:
-          scopeStr = "DIRECTORY";
-          break;
-        case cmProperty::TEST:
-          scopeStr = "TEST";
-          break;
-        case cmProperty::VARIABLE:
-          scopeStr = "VARIABLE";
-          break;
-        case cmProperty::CACHED_VARIABLE:
-          scopeStr = "CACHED_VARIABLE";
-          break;
-        default:
-          scopeStr = "unknown";
-        break;
-        }
-      fprintf(progFile, "%s with scope %s\n", ap->first.c_str(), scopeStr);
-      }
-    }
-  fclose(progFile);
 }
 
 bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)

@@ -1778,14 +1778,6 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
     return;
     }
 
-#ifdef CMAKE_STRICT
-  if (this->GetCMakeInstance())
-    {
-    this->GetCMakeInstance()->
-      RecordPropertyAccess(name,cmProperty::VARIABLE);
-    }
-#endif
-
   this->Internal->VarStack.top().Set(name, value);
   if (this->Internal->VarUsageStack.size() &&
       this->VariableInitialized(name))
@@ -2448,13 +2440,6 @@ bool cmMakefile::IsDefinitionSet(const char* name) const
 
 const char* cmMakefile::GetDefinition(const char* name) const
 {
-#ifdef CMAKE_STRICT
-  if (this->GetCMakeInstance())
-    {
-    this->GetCMakeInstance()->
-      RecordPropertyAccess(name,cmProperty::VARIABLE);
-    }
-#endif
   if (this->WarnUnused)
     {
     this->Internal->VarUsageStack.top().insert(name);

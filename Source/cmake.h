@@ -358,10 +358,6 @@ class cmake
       debugging configurations.*/
   std::vector<std::string> const& GetDebugConfigs();
 
-  // record accesses of properties and variables
-  void RecordPropertyAccess(const char *name, cmProperty::ScopeType scope);
-  void ReportUndefinedPropertyAccesses(const char *filename);
-
   // Define the properties
   static void DefineProperties(cmake *cm);
 

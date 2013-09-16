@@ -536,10 +536,6 @@ configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/DartLocal.conf"
   COPYONLY)
 
-option(CMAKE_STRICT
-  "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
-mark_as_advanced(CMAKE_STRICT)
-
 if(NOT CMake_VERSION_IS_RELEASE)
   if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
       NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
