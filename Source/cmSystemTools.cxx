@@ -200,6 +200,13 @@ std::string cmSystemTools::EscapeQuotes(const char* str)
   return result;
 }
 
+std::string cmSystemTools::HelpFileName(std::string name)
+{
+  cmSystemTools::ReplaceString(name, "<", "");
+  cmSystemTools::ReplaceString(name, ">", "");
+  return name;
+}
+
 std::string cmSystemTools::TrimWhitespace(const std::string& s)
 {
   std::string::const_iterator start = s.begin();
