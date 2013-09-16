@@ -52,9 +52,6 @@ public:
   bool GetPropertyAsBool(const char *prop) const;
   cmPropertyMap &GetProperties() { return this->Properties; };
 
-  // Define the properties
-  static void DefineProperties(cmake *cm);
-
   /** Get the cmMakefile instance that owns this test.  */
   cmMakefile *GetMakefile() { return this->Makefile;};
 

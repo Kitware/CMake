@@ -279,7 +279,6 @@ CMAKE_CXX_SOURCES="\
   cmTest \
   cmCustomCommand \
   cmCustomCommandGenerator \
-  cmDocumentVariables \
   cmCacheManager \
   cmListFileCache \
   cmComputeLinkDepends \

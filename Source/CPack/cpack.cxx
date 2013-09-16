@@ -14,7 +14,6 @@
 // Need these for documentation support.
 #include "cmake.h"
 #include "cmDocumentation.h"
-#include "cmCPackDocumentVariables.h"
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackGenerator.h"
 #include "cmake.h"

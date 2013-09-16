@@ -345,9 +345,6 @@ class cmake
       debugging configurations.*/
   std::vector<std::string> const& GetDebugConfigs();
 
-  // Define the properties
-  static void DefineProperties(cmake *cm);
-
   void SetCMakeEditCommand(const char* s)
     {
       this->CMakeEditCommand = s;
