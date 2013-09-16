@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmake.h"
-#include "cmDocumentVariables.h"
 #include "cmCacheManager.h"
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
@@ -219,12 +218,8 @@ void cmake::InitializeProperties()
   this->PropertyDefinitions.clear();
 
   // initialize properties
-  cmCacheManager::DefineProperties(this);
-  cmSourceFile::DefineProperties(this);
   cmTarget::DefineProperties(this);
   cmMakefile::DefineProperties(this);
-  cmTest::DefineProperties(this);
-  cmake::DefineProperties(this);
 }
 
 void cmake::CleanupCommandsAndMacros()
@@ -2377,203 +2372,6 @@ void cmake::GenerateGraphViz(const char* fileName) const
 
 #endif
 }
-
-void cmake::DefineProperties(cmake *cm)
-{
-  cm->DefineProperty
-    ("REPORT_UNDEFINED_PROPERTIES", cmProperty::GLOBAL,
-     "If set, report any undefined properties to this file.",
-     "If this property is set to a filename then when CMake runs "
-     "it will report any properties or variables that were accessed "
-     "but not defined into the filename specified in this property."
-     );
-
-  cm->DefineProperty
-    ("TARGET_SUPPORTS_SHARED_LIBS", cmProperty::GLOBAL,
-     "Does the target platform support shared libraries.",
-     "TARGET_SUPPORTS_SHARED_LIBS is a boolean specifying whether the target "
-     "platform supports shared libraries. Basically all current general "
-     "general purpose OS do so, the exception are usually embedded systems "
-     "with no or special OSs.");
-
-  cm->DefineProperty
-    ("TARGET_ARCHIVES_MAY_BE_SHARED_LIBS", cmProperty::GLOBAL,
-     "Set if shared libraries may be named like archives.",
-     "On AIX shared libraries may be named \"lib<name>.a\".  "
-     "This property is set to true on such platforms.");
-
-  cm->DefineProperty
-    ("FIND_LIBRARY_USE_LIB64_PATHS", cmProperty::GLOBAL,
-     "Whether FIND_LIBRARY should automatically search lib64 directories.",
-     "FIND_LIBRARY_USE_LIB64_PATHS is a boolean specifying whether the "
-     "FIND_LIBRARY command should automatically search the lib64 variant of "
-     "directories called lib in the search path when building 64-bit "
-     "binaries.");
-  cm->DefineProperty
-    ("FIND_LIBRARY_USE_OPENBSD_VERSIONING", cmProperty::GLOBAL,
-     "Whether FIND_LIBRARY should find OpenBSD-style shared libraries.",
-     "This property is a boolean specifying whether the FIND_LIBRARY "
-     "command should find shared libraries with OpenBSD-style versioned "
-     "extension: \".so.<major>.<minor>\".  "
-     "The property is set to true on OpenBSD and false on other platforms.");
-  cm->DefineProperty
-    ("ENABLED_FEATURES", cmProperty::GLOBAL,
-     "List of features which are enabled during the CMake run.",
-     "List of features which are enabled during the CMake run. By default "
-     "it contains the names of all packages which were found. This is "
-     "determined using the <NAME>_FOUND variables. Packages which are "
-     "searched QUIET are not listed. A project can add its own features to "
-     "this list. "
-     "This property is used by the macros in FeatureSummary.cmake.");
-  cm->DefineProperty
-    ("DISABLED_FEATURES", cmProperty::GLOBAL,
-     "List of features which are disabled during the CMake run.",
-     "List of features which are disabled during the CMake run. By default "
-     "it contains the names of all packages which were not found. This is "
-     "determined using the <NAME>_FOUND variables. Packages which are "
-     "searched QUIET are not listed. A project can add its own features to "
-     "this list. "
-     "This property is used by the macros in FeatureSummary.cmake.");
-  cm->DefineProperty
-    ("PACKAGES_FOUND", cmProperty::GLOBAL,
-     "List of packages which were found during the CMake run.",
-     "List of packages which were found during the CMake run. Whether a "
-     "package has been found is determined using the <NAME>_FOUND variables.");
-  cm->DefineProperty
-    ("PACKAGES_NOT_FOUND", cmProperty::GLOBAL,
-     "List of packages which were not found during the CMake run.",
-     "List of packages which were not found during the CMake run. Whether a "
-     "package has been found is determined using the <NAME>_FOUND variables.");
-
-  cm->DefineProperty(
-    "DEBUG_CONFIGURATIONS", cmProperty::GLOBAL,
-    "Specify which configurations are for debugging.",
-    "The value must be a semi-colon separated list of configuration names.  "
-    "Currently this property is used only by the target_link_libraries "
-    "command (see its documentation for details).  "
-    "Additional uses may be defined in the future.  "
-    "\n"
-    "This property must be set at the top level of the project and before "
-    "the first target_link_libraries command invocation.  "
-    "If any entry in the list does not match a valid configuration for "
-    "the project the behavior is undefined.");
-
-  cm->DefineProperty(
-    "GLOBAL_DEPENDS_DEBUG_MODE", cmProperty::GLOBAL,
-    "Enable global target dependency graph debug mode.",
-    "CMake automatically analyzes the global inter-target dependency graph "
-    "at the beginning of native build system generation.  "
-    "This property causes it to display details of its analysis to stderr.");
-
-  cm->DefineProperty(
-    "GLOBAL_DEPENDS_NO_CYCLES", cmProperty::GLOBAL,
-    "Disallow global target dependency graph cycles.",
-    "CMake automatically analyzes the global inter-target dependency graph "
-    "at the beginning of native build system generation.  "
-    "It reports an error if the dependency graph contains a cycle that "
-    "does not consist of all STATIC library targets.  "
-    "This property tells CMake to disallow all cycles completely, even "
-    "among static libraries.");
-
-  cm->DefineProperty(
-    "ALLOW_DUPLICATE_CUSTOM_TARGETS", cmProperty::GLOBAL,
-    "Allow duplicate custom targets to be created.",
-    "Normally CMake requires that all targets built in a project have "
-    "globally unique logical names (see policy CMP0002).  "
-    "This is necessary to generate meaningful project file names in "
-    "Xcode and VS IDE generators.  "
-    "It also allows the target names to be referenced unambiguously.\n"
-    "Makefile generators are capable of supporting duplicate custom target "
-    "names.  "
-    "For projects that care only about Makefile generators and do "
-    "not wish to support Xcode or VS IDE generators, one may set this "
-    "property to true to allow duplicate custom targets.  "
-    "The property allows multiple add_custom_target command calls in "
-    "different directories to specify the same target name.  "
-    "However, setting this property will cause non-Makefile generators "
-    "to produce an error and refuse to generate the project."
-    );
-
-  cm->DefineProperty
-    ("IN_TRY_COMPILE", cmProperty::GLOBAL,
-     "Read-only property that is true during a try-compile configuration.",
-     "True when building a project inside a TRY_COMPILE or TRY_RUN command.");
-  cm->DefineProperty
-    ("ENABLED_LANGUAGES", cmProperty::GLOBAL,
-     "Read-only property that contains the list of currently "
-     "enabled languages",
-     "Set to list of currently enabled languages.");
-
-  cm->DefineProperty
-    ("RULE_LAUNCH_COMPILE", cmProperty::GLOBAL,
-     "Specify a launcher for compile rules.",
-     "Makefile generators prefix compiler commands with the given "
-     "launcher command line.  "
-     "This is intended to allow launchers to intercept build problems "
-     "with high granularity.  "
-     "Non-Makefile generators currently ignore this property.");
-  cm->DefineProperty
-    ("RULE_LAUNCH_LINK", cmProperty::GLOBAL,
-     "Specify a launcher for link rules.",
-     "Makefile generators prefix link and archive commands with the given "
-     "launcher command line.  "
-     "This is intended to allow launchers to intercept build problems "
-     "with high granularity.  "
-     "Non-Makefile generators currently ignore this property.");
-  cm->DefineProperty
-    ("RULE_LAUNCH_CUSTOM", cmProperty::GLOBAL,
-     "Specify a launcher for custom rules.",
-     "Makefile generators prefix custom commands with the given "
-     "launcher command line.  "
-     "This is intended to allow launchers to intercept build problems "
-     "with high granularity.  "
-     "Non-Makefile generators currently ignore this property.");
-
-  cm->DefineProperty
-    ("RULE_MESSAGES", cmProperty::GLOBAL,
-     "Specify whether to report a message for each make rule.",
-     "This property specifies whether Makefile generators should add a "
-     "progress message describing what each build rule does.  "
-     "If the property is not set the default is ON.  "
-     "Set the property to OFF to disable granular messages and report only "
-     "as each target completes.  "
-     "This is intended to allow scripted builds to avoid the build time "
-     "cost of detailed reports.  "
-     "If a CMAKE_RULE_MESSAGES cache entry exists its value initializes "
-     "the value of this property.  "
-     "Non-Makefile generators currently ignore this property.");
-
-  cm->DefineProperty
-    ("USE_FOLDERS", cmProperty::GLOBAL,
-     "Use the FOLDER target property to organize targets into folders.",
-     "If not set, CMake treats this property as OFF by default. "
-     "CMake generators that are capable of organizing into a "
-     "hierarchy of folders use the values of the FOLDER target "
-     "property to name those folders. See also the documentation "
-     "for the FOLDER target property.");
-
-  cm->DefineProperty
-    ("AUTOMOC_TARGETS_FOLDER", cmProperty::GLOBAL,
-     "Name of FOLDER for *_automoc targets that are added automatically by "
-     "CMake for targets for which AUTOMOC is enabled.",
-     "If not set, CMake uses the FOLDER property of the parent target as a "
-     "default value for this property. See also the documentation for the "
-     "FOLDER target property and the AUTOMOC target property.");
-
-  cm->DefineProperty
-    ("PREDEFINED_TARGETS_FOLDER", cmProperty::GLOBAL,
-     "Name of FOLDER for targets that are added automatically by CMake.",
-     "If not set, CMake uses \"CMakePredefinedTargets\" as a default "
-     "value for this property. Targets such as INSTALL, PACKAGE and "
-     "RUN_TESTS will be organized into this FOLDER. See also the "
-     "documentation for the FOLDER target property.");
-
-  // ================================================================
-  // define variables as well
-  // ================================================================
-  cmDocumentVariables::DefineVariables(cm);
-}
-
 
 void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
                            const char *ShortDescription,

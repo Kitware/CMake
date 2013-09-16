@@ -160,10 +160,8 @@ set(SRCS
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDocumentationSection.cxx
-  cmDocumentCompileDefinitions.h
   cmDocumentGeneratorExpressions.h
   cmDocumentLocationUndefined.h
-  cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
   ${ELF_SRCS}
@@ -494,7 +492,6 @@ set(CPACK_SRCS
   CPack/cmCPackTarBZip2Generator.cxx
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPackDocumentVariables.cxx
   )
 
 if(CYGWIN)
