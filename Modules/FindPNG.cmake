@@ -58,15 +58,19 @@ if(ZLIB_FOUND)
     list(APPEND PNG_NAMES png${v} libpng${v})
     list(APPEND PNG_NAMES_DEBUG png${v}d libpng${v}d)
   endforeach()
-message(STATUS "PNG r: ${PNG_NAMES} d: ${PNG_NAMES_DEBUG}")
   unset(_PNG_VERSION_SUFFIXES)
-  find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES})
-  find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG})
+  # For compatiblity with versions prior to this multi-config search, honor
+  # any PNG_LIBRARY that is already specified and skip the search.
+  if(NOT PNG_LIBRARY)
+    find_library(PNG_LIBRARY_RELEASE NAMES ${PNG_NAMES})
+    find_library(PNG_LIBRARY_DEBUG NAMES ${PNG_NAMES_DEBUG})
+    include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
+    select_library_configurations(PNG)
+    mark_as_advanced(PNG_LIBRARY_RELEASE PNG_LIBRARY_DEBUG)
+  endif()
   unset(PNG_NAMES)
   unset(PNG_NAMES_DEBUG)
 
-  include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
-  select_library_configurations(PNG)
   # Set by select_library_configurations(), but we want the one from
   # find_package_handle_standard_args() below.
   unset(PNG_FOUND)
