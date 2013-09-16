@@ -49,6 +49,4 @@ void cmGlobalMinGWMakefileGenerator
 {
   entry.Name = cmGlobalMinGWMakefileGenerator::GetActualName();
   entry.Brief = "Generates a make file for use with mingw32-make.";
-  entry.Full = "The makefiles generated use cmd.exe as the shell.  "
-    "They do not require msys or a unix shell.";
 }

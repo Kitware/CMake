@@ -48,11 +48,11 @@ public:
   { this->Entries.insert(this->Entries.end(),entries.begin(),entries.end()); }
 
   /** Append an entry to this section using NULL terminated chars */
-  void Append(const char *[][3]);
-  void Append(const char *n, const char *b, const char *f);
+  void Append(const char *[][2]);
+  void Append(const char *n, const char *b);
 
   /** prepend some documentation to this section */
-  void Prepend(const char *[][3]);
+  void Prepend(const char *[][2]);
   void Prepend(const std::vector<cmDocumentationEntry> &entries)
   { this->Entries.insert(this->Entries.begin(),
                          entries.begin(),entries.end()); }

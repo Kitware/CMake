@@ -3671,7 +3671,6 @@ void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalXCodeGenerator::GetActualName();
   entry.Brief = "Generate Xcode project files.";
-  entry.Full = "";
 }
 
 //----------------------------------------------------------------------------

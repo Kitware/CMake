@@ -23,27 +23,27 @@
 #include <form.h>
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationName[][3] =
+static const char * cmDocumentationName[][2] =
 {
   {0,
-   "  ccmake - Curses Interface for CMake.", 0},
-  {0,0,0}
+   "  ccmake - Curses Interface for CMake."},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationUsage[][3] =
+static const char * cmDocumentationUsage[][2] =
 {
   {0,
    "  ccmake <path-to-source>\n"
-   "  ccmake <path-to-existing-build>", 0},
-  {0,0,0}
+   "  ccmake <path-to-existing-build>"},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationOptions[][3] =
+static const char * cmDocumentationOptions[][2] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
-  {0,0,0}
+  {0,0}
 };
 
 cmCursesForm* cmCursesForm::CurrentForm=0;

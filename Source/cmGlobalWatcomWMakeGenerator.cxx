@@ -62,5 +62,4 @@ void cmGlobalWatcomWMakeGenerator
 {
   entry.Name = cmGlobalWatcomWMakeGenerator::GetActualName();
   entry.Brief = "Generates Watcom WMake makefiles.";
-  entry.Full = "";
 }

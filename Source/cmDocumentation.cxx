@@ -23,35 +23,23 @@
 #include <algorithm>
 
 //----------------------------------------------------------------------------
-static const char *cmDocumentationStandardOptions[][3] =
+static const char *cmDocumentationStandardOptions[][2] =
 {
-  {"--copyright [file]", "Print the CMake copyright and exit.",
-   "If a file is specified, the copyright is written into it."},
-  {"--help,-help,-usage,-h,-H,/?", "Print usage information and exit.",
-   "Usage describes the basic command line interface and its options."},
-  {"--help-full [file]", "Print full help and exit.",
-   "Full help displays most of the documentation provided by the UNIX "
-   "man page.  It is provided for use on non-UNIX platforms, but is "
-   "also convenient if the man page is not installed.  If a file is "
-   "specified, the help is written into it."},
-  {"--help-html [file]", "Print full help in HTML format.",
-   "This option is used by CMake authors to help produce web pages.  "
-   "If a file is specified, the help is written into it."},
-  {"--help-man [file]", "Print full help as a UNIX man page and exit.",
-   "This option is used by the cmake build to generate the UNIX man page.  "
-   "If a file is specified, the help is written into it."},
-  {"--version,-version,/V [file]",
-   "Show program name/version banner and exit.",
-   "If a file is specified, the version is written into it."},
-  {0,0,0}
+  {"--copyright [file]", "Print the CMake copyright and exit."},
+  {"--help,-help,-usage,-h,-H,/?", "Print usage information and exit."},
+  {"--help-full [file]", "Print full help and exit."},
+  {"--help-html [file]", "Print full help in HTML format."},
+  {"--help-man [file]", "Print full help as a UNIX man page and exit."},
+  {"--version,-version,/V [file]"},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
-static const char *cmDocumentationGeneratorsHeader[][3] =
+static const char *cmDocumentationGeneratorsHeader[][2] =
 {
   {0,
-   "The following generators are available on this platform:", 0},
-  {0,0,0}
+   "The following generators are available on this platform:"},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
@@ -468,7 +456,7 @@ void cmDocumentation::SetSection(const char *name,
 
 //----------------------------------------------------------------------------
 void cmDocumentation::SetSection(const char *name,
-                                 const char *docs[][3])
+                                 const char *docs[][2])
 {
   cmDocumentationSection *sec =
     new cmDocumentationSection(name,
@@ -490,7 +478,7 @@ void cmDocumentation
 
 //----------------------------------------------------------------------------
 void cmDocumentation::PrependSection(const char *name,
-                                     const char *docs[][3])
+                                     const char *docs[][2])
 {
   cmDocumentationSection *sec = 0;
   if (this->AllSections.find(name) == this->AllSections.end())
@@ -526,7 +514,7 @@ void cmDocumentation::PrependSection(const char *name,
 
 //----------------------------------------------------------------------------
 void cmDocumentation::AppendSection(const char *name,
-                                    const char *docs[][3])
+                                    const char *docs[][2])
 {
   cmDocumentationSection *sec = 0;
   if (this->AllSections.find(name) == this->AllSections.end())

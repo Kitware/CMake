@@ -59,5 +59,4 @@ void cmGlobalBorlandMakefileGenerator
 {
   entry.Name = cmGlobalBorlandMakefileGenerator::GetActualName();
   entry.Brief = "Generates Borland makefiles.";
-  entry.Full = "";
 }

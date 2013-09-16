@@ -65,5 +65,4 @@ void cmGlobalJOMMakefileGenerator
 {
   entry.Name = cmGlobalJOMMakefileGenerator::GetActualName();
   entry.Brief = "Generates JOM makefiles.";
-  entry.Full = "";
 }

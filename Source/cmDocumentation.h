@@ -65,19 +65,19 @@ public:
   void SetSection(const char *sectionName,
                   std::vector<cmDocumentationEntry> &docs);
   void SetSection(const char *sectionName,
-                  const char *docs[][3]);
+                  const char *docs[][2]);
   void SetSections(std::map<std::string,cmDocumentationSection *>
                    &sections);
 
   /** Add the documentation to the beginning/end of the section */
   void PrependSection(const char *sectionName,
-                      const char *docs[][3]);
+                      const char *docs[][2]);
   void PrependSection(const char *sectionName,
                       std::vector<cmDocumentationEntry> &docs);
   void PrependSection(const char *sectionName,
                       cmDocumentationEntry &docs);
   void AppendSection(const char *sectionName,
-                     const char *docs[][3]);
+                     const char *docs[][2]);
   void AppendSection(const char *sectionName,
                      std::vector<cmDocumentationEntry> &docs);
   void AppendSection(const char *sectionName,

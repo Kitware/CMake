@@ -470,10 +470,6 @@ void cmGlobalNinjaGenerator
 {
   entry.Name = cmGlobalNinjaGenerator::GetActualName();
   entry.Brief = "Generates build.ninja files (experimental).";
-  entry.Full =
-    "A build.ninja file is generated into the build tree. Recent "
-    "versions of the ninja program can build the project through the "
-    "\"all\" target.  An \"install\" target is also provided.";
 }
 
 // Implemented in all cmGlobaleGenerator sub-classes.
