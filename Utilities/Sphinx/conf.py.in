@@ -1,0 +1,47 @@
+#=============================================================================
+# CMake - Cross Platform Makefile Generator
+# Copyright 2000-2013 Kitware, Inc., Insight Software Consortium
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+import sys
+
+sys.path.insert(0, r'@conf_path@')
+
+source_suffix = '.rst'
+master_doc = 'index'
+project = 'CMake'
+copyright = '@conf_copyright@'
+
+version = '@conf_version@' # feature version
+release = '@conf_release@' # full version string
+
+primary_domain = 'cmake'
+
+exclude_patterns = []
+
+extensions = ['cmake']
+
+man_pages = [
+    ('manual/cmake.1', 'cmake', 'CMake Command-Line Reference', [], 1),
+    ('manual/ccmake.1', 'ccmake', 'CMake Curses Dialog Command-Line Reference', [], 1),
+    ('manual/cmake-gui.1', 'cmake-gui', 'CMake GUI Command-Line  Reference', [], 1),
+    ('manual/cpack.1', 'cpack', 'CPack Command-Line Reference', [], 1),
+    ('manual/ctest.1', 'ctest', 'CTest Command-Line Reference', [], 1),
+    ('manual/cmake-commands.7', 'cmake-commands', 'CMake Language Command Reference', [], 7),
+    ('manual/cmake-generators.7', 'cmake-generators', 'CMake Generators Reference', [], 7),
+    ('manual/cmake-modules.7', 'cmake-modules', 'CMake Modules Reference', [], 7),
+    ('manual/cmake-policies.7', 'cmake-policies', 'CMake Policies Reference', [], 7),
+    ('manual/cmake-properties.7', 'cmake-properties', 'CMake Properties Reference', [], 7),
+    ('manual/cmake-variables.7', 'cmake-variables', 'CMake Variables Reference', [], 7),
+]
+man_show_urls = False
+
+html_show_sourcelink = True
+html_static_path = ['@conf_path@/static']
+html_style = 'cmake.css'

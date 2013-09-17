@@ -1,0 +1,282 @@
+#=============================================================================
+# CMake - Cross Platform Makefile Generator
+# Copyright 2000-2013 Kitware, Inc., Insight Software Consortium
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+import os
+import re
+
+from docutils.parsers.rst import Directive, directives
+from docutils.transforms import Transform
+from docutils.utils.error_reporting import SafeString, ErrorString
+from docutils import io, nodes
+
+from sphinx.directives import ObjectDescription
+from sphinx.domains import Domain, ObjType
+from sphinx.roles import XRefRole
+from sphinx.util.nodes import make_refnode
+from sphinx import addnodes
+
+class CMakeModule(Directive):
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = True
+    option_spec = {'encoding': directives.encoding}
+
+    def __init__(self, *args, **keys):
+        self.re_start = re.compile(r'^#\[(?P<eq>=*)\[\.rst:$')
+        self.re_end = re.compile(r'^#?\](?P<eq>=*)\]$')
+        Directive.__init__(self, *args, **keys)
+
+    def run(self):
+        settings = self.state.document.settings
+        if not settings.file_insertion_enabled:
+            raise self.warning('"%s" directive disabled.' % self.name)
+
+        env = self.state.document.settings.env
+        rel_path, path = env.relfn2path(self.arguments[0])
+        path = os.path.normpath(path)
+        encoding = self.options.get('encoding', settings.input_encoding)
+        e_handler = settings.input_encoding_error_handler
+        try:
+            settings.record_dependencies.add(path)
+            f = io.FileInput(source_path=path, encoding=encoding,
+                             error_handler=e_handler)
+        except UnicodeEncodeError, error:
+            raise self.severe('Problems with "%s" directive path:\n'
+                              'Cannot encode input file path "%s" '
+                              '(wrong locale?).' %
+                              (self.name, SafeString(path)))
+        except IOError, error:
+            raise self.severe('Problems with "%s" directive path:\n%s.' %
+                      (self.name, ErrorString(error)))
+        raw_lines = f.read().splitlines()
+        f.close()
+        rst = None
+        lines = []
+        for line in raw_lines:
+            if line == '#.rst:':
+                rst = '#'
+                line = ''
+            elif rst == '#':
+                if line == '#' or line[:2] == '# ':
+                    line = line[2:]
+                else:
+                    rst = None
+                    line = ''
+            else:
+                line = ''
+            lines.append(line)
+        self.state_machine.insert_input(lines, path)
+        return []
+
+class _cmake_index_entry:
+    def __init__(self, desc):
+        self.desc = desc
+
+    def __call__(self, title, targetid):
+        return ('pair', u'%s ; %s' % (self.desc, title), targetid, 'main')
+
+_cmake_index_objs = {
+    'command':    _cmake_index_entry('command'),
+    'generator':  _cmake_index_entry('generator'),
+    'manual':     _cmake_index_entry('manual'),
+    'module':     _cmake_index_entry('module'),
+    'policy':     _cmake_index_entry('policy'),
+    'prop_cache': _cmake_index_entry('cache property'),
+    'prop_dir':   _cmake_index_entry('directory property'),
+    'prop_gbl':   _cmake_index_entry('global property'),
+    'prop_sf':    _cmake_index_entry('source file property'),
+    'prop_test':  _cmake_index_entry('test property'),
+    'prop_tgt':   _cmake_index_entry('target property'),
+    'variable':   _cmake_index_entry('variable'),
+    }
+
+def _cmake_object_inventory(env, document, line, objtype, targetid):
+    inv = env.domaindata['cmake']['objects']
+    if targetid in inv:
+        document.reporter.warning(
+            'CMake object "%s" also described in "%s".' %
+            (targetid, env.doc2path(inv[targetid][0])), line=line)
+    inv[targetid] = (env.docname, objtype)
+
+class CMakeTransform(Transform):
+
+    # Run this transform early since we insert nodes we want
+    # treated as if they were written in the documents.
+    default_priority = 210
+
+    def __init__(self, document, startnode):
+        Transform.__init__(self, document, startnode)
+        self.titles = {}
+
+    def parse_title(self, docname):
+        """Parse a document title as the first line starting in [A-Za-z0-9<]
+           or fall back to the document basename if no such line exists.
+           The cmake --help-*-list commands also depend on this convention.
+           Return the title or False if the document file does not exist.
+        """
+        env = self.document.settings.env
+        title = self.titles.get(docname)
+        if title is None:
+            fname = os.path.join(env.srcdir, docname+'.rst')
+            try:
+                f = open(fname, 'r')
+            except IOError:
+                title = False
+            else:
+                for line in f:
+                    if len(line) > 0 and (line[0].isalnum() or line[0] == '<'):
+                        title = line.rstrip()
+                        break
+                f.close()
+                if title is None:
+                    title = os.path.basename(docname)
+            self.titles[docname] = title
+        return title
+
+    def apply(self):
+        env = self.document.settings.env
+
+        # Treat some documents as cmake domain objects.
+        objtype, sep, tail = env.docname.rpartition('/')
+        make_index_entry = _cmake_index_objs.get(objtype)
+        if make_index_entry:
+            title = self.parse_title(env.docname)
+            # Insert the object link target.
+            targetid = '%s:%s' % (objtype, title)
+            targetnode = nodes.target('', '', ids=[targetid])
+            self.document.insert(0, targetnode)
+            # Insert the object index entry.
+            indexnode = addnodes.index()
+            indexnode['entries'] = [make_index_entry(title, targetid)]
+            self.document.insert(0, indexnode)
+            # Add to cmake domain object inventory
+            _cmake_object_inventory(env, self.document, 1, objtype, targetid)
+
+class CMakeObject(ObjectDescription):
+
+    def handle_signature(self, sig, signode):
+        # called from sphinx.directives.ObjectDescription.run()
+        signode += addnodes.desc_name(sig, sig)
+        return sig
+
+    def add_target_and_index(self, name, sig, signode):
+        targetid = '%s:%s' % (self.objtype, name)
+        if targetid not in self.state.document.ids:
+            signode['names'].append(targetid)
+            signode['ids'].append(targetid)
+            signode['first'] = (not self.names)
+            self.state.document.note_explicit_target(signode)
+            _cmake_object_inventory(self.env, self.state.document,
+                                    self.lineno, self.objtype, targetid)
+
+        make_index_entry = _cmake_index_objs.get(self.objtype)
+        if make_index_entry:
+            self.indexnode['entries'].append(make_index_entry(name, targetid))
+
+class CMakeXRefRole(XRefRole):
+
+    # See sphinx.util.nodes.explicit_title_re; \x00 escapes '<'.
+    _re = re.compile(r'^(.+?)(\s*)(?<!\x00)<(.*?)>$', re.DOTALL)
+    _re_sub = re.compile(r'^([^()\s]+)\s*\(([^()]*)\)$', re.DOTALL)
+
+    def __call__(self, typ, rawtext, text, *args, **keys):
+        # Translate CMake command cross-references of the form:
+        #  `command_name(SUB_COMMAND)`
+        # to have an explicit target:
+        #  `command_name(SUB_COMMAND) <command_name>`
+        if typ == 'cmake:command':
+            m = CMakeXRefRole._re_sub.match(text)
+            if m:
+                text = '%s <%s>' % (text, m.group(1))
+        # CMake cross-reference targets frequently contain '<' so escape
+        # any explicit `<target>` with '<' not preceded by whitespace.
+        while True:
+            m = CMakeXRefRole._re.match(text)
+            if m and len(m.group(2)) == 0:
+                text = '%s\x00<%s>' % (m.group(1), m.group(3))
+            else:
+                break
+        return XRefRole.__call__(self, typ, rawtext, text, *args, **keys)
+
+class CMakeDomain(Domain):
+    """CMake domain."""
+    name = 'cmake'
+    label = 'CMake'
+    object_types = {
+        'command':    ObjType('command',    'command'),
+        'generator':  ObjType('generator',  'generator'),
+        'variable':   ObjType('variable',   'variable'),
+        'module':     ObjType('module',     'module'),
+        'policy':     ObjType('policy',     'policy'),
+        'prop_cache': ObjType('prop_cache', 'prop_cache'),
+        'prop_dir':   ObjType('prop_dir',   'prop_dir'),
+        'prop_gbl':   ObjType('prop_gbl',   'prop_gbl'),
+        'prop_sf':    ObjType('prop_sf',    'prop_sf'),
+        'prop_test':  ObjType('prop_test',  'prop_test'),
+        'prop_tgt':   ObjType('prop_tgt',   'prop_tgt'),
+        'manual':     ObjType('manual',     'manual'),
+    }
+    directives = {
+        'command':    CMakeObject,
+        'variable':   CMakeObject,
+        # Other object types cannot be created except by the CMakeTransform
+        # 'generator':  CMakeObject,
+        # 'module':     CMakeObject,
+        # 'policy':     CMakeObject,
+        # 'prop_cache': CMakeObject,
+        # 'prop_dir':   CMakeObject,
+        # 'prop_gbl':   CMakeObject,
+        # 'prop_sf':    CMakeObject,
+        # 'prop_test':  CMakeObject,
+        # 'prop_tgt':   CMakeObject,
+        # 'manual':     CMakeObject,
+    }
+    roles = {
+        'command':    CMakeXRefRole(fix_parens = True, lowercase = True),
+        'generator':  CMakeXRefRole(),
+        'variable':   CMakeXRefRole(),
+        'module':     CMakeXRefRole(),
+        'policy':     CMakeXRefRole(),
+        'prop_cache': CMakeXRefRole(),
+        'prop_dir':   CMakeXRefRole(),
+        'prop_gbl':   CMakeXRefRole(),
+        'prop_sf':    CMakeXRefRole(),
+        'prop_test':  CMakeXRefRole(),
+        'prop_tgt':   CMakeXRefRole(),
+        'manual':     CMakeXRefRole(),
+    }
+    initial_data = {
+        'objects': {},  # fullname -> docname, objtype
+    }
+
+    def clear_doc(self, docname):
+        for fullname, (fn, _) in self.data['objects'].items():
+            if fn == docname:
+                del self.data['objects'][fullname]
+
+    def resolve_xref(self, env, fromdocname, builder,
+                     typ, target, node, contnode):
+        targetid = '%s:%s' % (typ, target)
+        obj = self.data['objects'].get(targetid)
+        if obj is None:
+            # TODO: warn somehow?
+            return None
+        return make_refnode(builder, fromdocname, obj[0], targetid,
+                            contnode, target)
+
+    def get_objects(self):
+        for refname, (docname, type) in self.data['objects'].iteritems():
+            yield (refname, refname, type, docname, refname, 1)
+
+def setup(app):
+    app.add_directive('cmake-module', CMakeModule)
+    app.add_transform(CMakeTransform)
+    app.add_domain(CMakeDomain)

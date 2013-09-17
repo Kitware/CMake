@@ -10,3 +10,5 @@
 # See the License for more information.
 #=============================================================================
 subdirs(Doxygen KWStyle)
+
+add_subdirectory(Sphinx)
