@@ -54,24 +54,6 @@ public:
    */
   virtual const char* GetName() const { return "endwhile";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Ends a list of commands in a while block.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  endwhile(expression)\n"
-      "See the while command.";
-    }
-
   cmTypeMacro(cmEndWhileCommand, cmCommand);
 };
 

@@ -68,32 +68,6 @@ public:
    */
   virtual const char* GetName() const { return "while";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Evaluate a group of commands while a condition is true";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  while(condition)\n"
-      "    COMMAND1(ARGS ...)\n"
-      "    COMMAND2(ARGS ...)\n"
-      "    ...\n"
-      "  endwhile(condition)\n"
-      "All commands between while and the matching endwhile are recorded "
-      "without being invoked.  Once the endwhile is evaluated, the "
-      "recorded list of commands is invoked as long as the condition "
-      "is true. The condition is evaluated using the same logic as the "
-      "if command.";
-    }
-
   cmTypeMacro(cmWhileCommand, cmCommand);
 };
 

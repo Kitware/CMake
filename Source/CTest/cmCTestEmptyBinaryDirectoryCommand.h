@@ -50,26 +50,6 @@ public:
    */
   virtual const char* GetName() const { return "ctest_empty_binary_directory";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "empties the binary directory";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  ctest_empty_binary_directory( directory )\n"
-      "Removes a binary directory. This command will perform some checks "
-      "prior to deleting the directory in an attempt to avoid malicious "
-      "or accidental directory deletion.";
-    }
-
   cmTypeMacro(cmCTestEmptyBinaryDirectoryCommand, cmCTestCommand);
 
 };

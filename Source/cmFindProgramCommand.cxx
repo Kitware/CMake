@@ -17,37 +17,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-void cmFindProgramCommand::GenerateDocumentation()
-{
-  this->cmFindBase::GenerateDocumentation();
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "FIND_XXX", "find_program");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_XXX_PATH", "CMAKE_PROGRAM_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_XXX_MAC_PATH",
-                               "CMAKE_APPBUNDLE_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_MAC_PATH",
-                               "CMAKE_SYSTEM_APPBUNDLE_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "XXX_SYSTEM", "");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_PATH",
-                               "CMAKE_SYSTEM_PROGRAM_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "SEARCH_XXX_DESC", "program");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "SEARCH_XXX", "program");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "XXX_SUBDIR", "[s]bin");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "XXX_EXTRA_PREFIX_ENTRY", "");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_FIND_ROOT_PATH_MODE_XXX",
-                               "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM");
-}
-
 // cmFindProgramCommand
 bool cmFindProgramCommand
 ::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)

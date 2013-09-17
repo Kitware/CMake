@@ -40,34 +40,6 @@ public:
    */
   virtual const char* GetName() const { return "ctest_configure";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Configure the project build tree.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  ctest_configure([BUILD build_dir] [SOURCE source_dir] [APPEND]\n"
-      "                  [OPTIONS options] [RETURN_VALUE res])\n"
-      "Configures the given build directory and stores results in "
-      "Configure.xml. "
-      "If no BUILD is given, the CTEST_BINARY_DIRECTORY variable is used. "
-      "If no SOURCE is given, the CTEST_SOURCE_DIRECTORY variable is used. "
-      "The OPTIONS argument specifies command line arguments to pass to "
-      "the configuration tool. "
-      "The RETURN_VALUE option specifies a variable in which to store the "
-      "return value of the native build tool."
-      "\n"
-      CTEST_COMMAND_APPEND_OPTION_DOCS;
-    }
-
   cmTypeMacro(cmCTestConfigureCommand, cmCTestHandlerCommand);
 
 protected:

@@ -51,18 +51,8 @@ public:
    */
   virtual const char* GetName() const {return "find_path";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Find the directory containing a file.";
-    }
-
   cmTypeMacro(cmFindPathCommand, cmFindBase);
   bool IncludeFileInPath;
-protected:
-  virtual void GenerateDocumentation();
 private:
   std::string FindHeaderInFramework(std::string const& file,
                                     std::string const& dir);

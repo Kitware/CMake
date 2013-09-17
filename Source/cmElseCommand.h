@@ -47,24 +47,6 @@ public:
    */
   virtual const char* GetName() const { return "else";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Starts the else portion of an if block.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  else(expression)\n"
-      "See the if command.";
-    }
-
   cmTypeMacro(cmElseCommand, cmCommand);
 };
 

@@ -51,13 +51,6 @@ public:
    */
   virtual const char* GetName() const {return "find_library";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Find a library.";
-    }
   cmTypeMacro(cmFindLibraryCommand, cmFindBase);
 
 protected:
@@ -67,7 +60,6 @@ protected:
                            const char* suffix,
                            bool fresh = true);
   std::string FindLibrary();
-  virtual void GenerateDocumentation();
 private:
   std::string FindNormalLibrary();
   std::string FindNormalLibraryNamesPerDir();

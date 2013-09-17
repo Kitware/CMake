@@ -66,24 +66,6 @@ public:
    */
   virtual const char* GetName() const { return this->Args[0].c_str(); }
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-  {
-    std::string docs = "Function named: ";
-    docs += this->GetName();
-    return docs.c_str();
-  }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-  {
-    return this->GetTerseDocumentation();
-  }
-
   cmTypeMacro(cmFunctionHelperCommand, cmCommand);
 
   std::vector<std::string> Args;
