@@ -138,6 +138,8 @@ if(WIN32 AND NOT CYGWIN)
     select_library_configurations(LIB_EAY)
     select_library_configurations(SSL_EAY)
 
+    mark_as_advanced(LIB_EAY_LIBRARY_DEBUG LIB_EAY_LIBRARY_RELEASE
+                     SSL_EAY_LIBRARY_DEBUG SSL_EAY_LIBRARY_RELEASE)
     set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   elseif(MINGW)
     # same player, for MinGW
