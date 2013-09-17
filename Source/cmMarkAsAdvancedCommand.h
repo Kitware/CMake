@@ -56,7 +56,7 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
-      "  mark_as_advanced([CLEAR|FORCE] VAR VAR2 VAR...)\n"
+      "  mark_as_advanced([CLEAR|FORCE] VAR [VAR2 ...])\n"
       "Mark the named cached variables as advanced.  An advanced variable "
       "will not be displayed in any of the cmake GUIs unless the show "
       "advanced option is on.  "
