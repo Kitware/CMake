@@ -370,8 +370,10 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
     set(GTK2_${_var}_LIBRARY ${GTK2_${_var}_LIBRARY} PARENT_SCOPE)
     set(GTK2_${_var}_FOUND ${GTK2_${_var}_FOUND} PARENT_SCOPE)
 
-    set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${GTK2_${_var}_LIBRARY})
-    set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
+    if(GTK2_${_var}_FOUND)
+        set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${GTK2_${_var}_LIBRARY})
+        set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
+    endif()
 
     if(GTK2_DEBUG)
         message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
