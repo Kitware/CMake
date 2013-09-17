@@ -292,6 +292,7 @@ static void cmListFileLexerInit(cmListFileLexer* lexer)
 /*--------------------------------------------------------------------------*/
 static void cmListFileLexerDestroy(cmListFileLexer* lexer)
 {
+  cmListFileLexerSetToken(lexer, 0, 0);
   if(lexer->file || lexer->string_buffer)
     {
     cmListFileLexer_yylex_destroy(lexer->scanner);
