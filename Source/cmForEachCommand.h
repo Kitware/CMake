@@ -61,52 +61,6 @@ public:
    */
   virtual const char* GetName() const { return "foreach";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Evaluate a group of commands for each value in a list.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  foreach(loop_var arg1 arg2 ...)\n"
-      "    COMMAND1(ARGS ...)\n"
-      "    COMMAND2(ARGS ...)\n"
-      "    ...\n"
-      "  endforeach(loop_var)\n"
-      "All commands between foreach and the matching endforeach are recorded "
-      "without being invoked.  Once the endforeach is evaluated, the "
-      "recorded list of commands is invoked once for each argument listed "
-      "in the original foreach command.  Before each iteration of the loop "
-      "\"${loop_var}\" will be set as a variable with "
-      "the current value in the list.\n"
-      "  foreach(loop_var RANGE total)\n"
-      "  foreach(loop_var RANGE start stop [step])\n"
-      "Foreach can also iterate over a generated range of numbers. "
-      "There are three types of this iteration:\n"
-      "* When specifying single number, the range will have elements "
-      "0 to \"total\".\n"
-      "* When specifying two numbers, the range will have elements from "
-      "the first number to the second number.\n"
-      "* The third optional number is the increment used to iterate from "
-      "the first number to the second number."
-      "\n"
-      "  foreach(loop_var IN [LISTS [list1 [...]]]\n"
-      "                      [ITEMS [item1 [...]]])\n"
-      "Iterates over a precise list of items.  "
-      "The LISTS option names list-valued variables to be traversed, "
-      "including empty elements (an empty string is a zero-length list).  "
-      "The ITEMS option ends argument parsing and includes all arguments "
-      "following it in the iteration."
-      ;
-    }
-
   cmTypeMacro(cmForEachCommand, cmCommand);
 private:
   bool HandleInMode(std::vector<std::string> const& args);

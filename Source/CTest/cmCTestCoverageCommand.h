@@ -41,32 +41,6 @@ public:
    */
   virtual const char* GetName() const { return "ctest_coverage";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Collect coverage tool results.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  ctest_coverage([BUILD build_dir] [RETURN_VALUE res] [APPEND]\n"
-      "                 [LABELS label1 [label2 [...]]])\n"
-      "Perform the coverage of the given build directory and stores results "
-      "in Coverage.xml. The second argument is a variable that will hold "
-      "value."
-      "\n"
-      "The LABELS option filters the coverage report to include only "
-      "source files labeled with at least one of the labels specified."
-      "\n"
-      CTEST_COMMAND_APPEND_OPTION_DOCS;
-    }
-
   cmTypeMacro(cmCTestCoverageCommand, cmCTestHandlerCommand);
 
 protected:

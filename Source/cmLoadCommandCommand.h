@@ -42,31 +42,6 @@ public:
    */
   virtual const char* GetName() const {return "load_command";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Load a command into a running CMake.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  load_command(COMMAND_NAME <loc1> [loc2 ...])\n"
-      "The given locations are searched for a library whose name is "
-      "cmCOMMAND_NAME.  If found, it is loaded as a module and the command "
-      "is added to the set of available CMake commands.  Usually, "
-      "TRY_COMPILE is used before this command to compile the module. "
-      "If the command is successfully loaded a variable named\n"
-      "  CMAKE_LOADED_COMMAND_<COMMAND_NAME>\n"
-      "will be set to the full path of the module that was loaded.  "
-      "Otherwise the variable will not be set.";
-    }
-
   cmTypeMacro(cmLoadCommandCommand, cmCommand);
 };
 

@@ -47,27 +47,6 @@ public:
    */
   virtual const char* GetName() const {return "build_name";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return
-      "Deprecated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  build_name(variable)\n"
-      "Sets the specified variable to a string representing the platform "
-      "and compiler settings.  These values are now available through the "
-      "CMAKE_SYSTEM and CMAKE_CXX_COMPILER variables.";
-    }
-
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

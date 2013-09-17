@@ -37,53 +37,6 @@ public:
   virtual const char* GetName() const { return "set_property";}
 
   /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Set a named property in a given scope.";
-    }
-
-  /**
-   * Longer documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-      return
-        "  set_property(<GLOBAL                            |\n"
-        "                DIRECTORY [dir]                   |\n"
-        "                TARGET    [target1 [target2 ...]] |\n"
-        "                SOURCE    [src1 [src2 ...]]       |\n"
-        "                TEST      [test1 [test2 ...]]     |\n"
-        "                CACHE     [entry1 [entry2 ...]]>\n"
-        "               [APPEND] [APPEND_STRING]\n"
-        "               PROPERTY <name> [value1 [value2 ...]])\n"
-        "Set one property on zero or more objects of a scope.  "
-        "The first argument determines the scope in which the property "
-        "is set.  It must be one of the following:\n"
-        "GLOBAL scope is unique and does not accept a name.\n"
-        "DIRECTORY scope defaults to the current directory but another "
-        "directory (already processed by CMake) may be named by full or "
-        "relative path.\n"
-        "TARGET scope may name zero or more existing targets.\n"
-        "SOURCE scope may name zero or more source files.  "
-        "Note that source file properties are visible only to targets "
-        "added in the same directory (CMakeLists.txt).\n"
-        "TEST scope may name zero or more existing tests.\n"
-        "CACHE scope must name zero or more cache existing entries.\n"
-        "The required PROPERTY option is immediately followed by the name "
-        "of the property to set.  Remaining arguments are used to "
-        "compose the property value in the form of a semicolon-separated "
-        "list.  "
-        "If the APPEND option is given the list is appended to any "
-        "existing property value."
-        "If the APPEND_STRING option is given the string is append to any "
-        "existing property value as string, i.e. it results in a longer "
-        "string and not a list of strings."
-        ;
-    }
-
-  /**
    * This determines if the command is invoked when in script mode.
    */
   virtual bool IsScriptable() const { return true; }

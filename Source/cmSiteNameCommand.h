@@ -47,23 +47,6 @@ public:
    */
   virtual const char* GetName() const {return "site_name";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Set the given variable to the name of the computer.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  site_name(variable)\n";
-    }
-
   cmTypeMacro(cmSiteNameCommand, cmCommand);
 };
 

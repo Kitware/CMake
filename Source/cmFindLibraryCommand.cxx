@@ -20,62 +20,6 @@ cmFindLibraryCommand::cmFindLibraryCommand()
   this->NamesPerDirAllowed = true;
 }
 
-//----------------------------------------------------------------------------
-void cmFindLibraryCommand::GenerateDocumentation()
-{
-  this->cmFindBase::GenerateDocumentation();
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "FIND_XXX", "find_library");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_XXX_PATH", "CMAKE_LIBRARY_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_XXX_MAC_PATH",
-                               "CMAKE_FRAMEWORK_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_MAC_PATH",
-                               "CMAKE_SYSTEM_FRAMEWORK_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "XXX_SYSTEM", "LIB");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_SYSTEM_XXX_PATH",
-                               "CMAKE_SYSTEM_LIBRARY_PATH");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "SEARCH_XXX_DESC", "library");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "SEARCH_XXX", "library");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "XXX_SUBDIR", "lib");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "NAMES name1 [name2 ...]",
-                               "NAMES name1 [name2 ...] [NAMES_PER_DIR]");
-  cmSystemTools::ReplaceString(
-    this->GenericDocumentation,
-    "XXX_EXTRA_PREFIX_ENTRY",
-    "   <prefix>/lib/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and\n");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "CMAKE_FIND_ROOT_PATH_MODE_XXX",
-                               "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY");
-  this->GenericDocumentation +=
-    "\n"
-    "When more than one value is given to the NAMES option this command "
-    "by default will consider one name at a time and search every directory "
-    "for it.  "
-    "The NAMES_PER_DIR option tells this command to consider one directory "
-    "at a time and search for all names in it."
-    "\n"
-    "If the library found is a framework, then VAR will be set to "
-    "the full path to the framework <fullPath>/A.framework. "
-    "When a full path to a framework is used as a library, "
-    "CMake will use a -framework A, and a -F<fullPath> to "
-    "link the framework to the target."
-    "\n"
-    "If the global property FIND_LIBRARY_USE_LIB64_PATHS is set all search "
-    "paths will be tested as normal, with \"64/\" appended, and with all "
-    "matches of \"lib/\" replaced with \"lib64/\". This property is "
-    "automatically set for the platforms that are known to need it if at "
-    "least one of the languages supported by the PROJECT command is enabled.";
-}
-
 // cmFindLibraryCommand
 bool cmFindLibraryCommand
 ::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)

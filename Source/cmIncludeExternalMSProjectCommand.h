@@ -44,38 +44,6 @@ public:
    */
   virtual const char* GetName() const {return "include_external_msproject";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Include an external Microsoft project file in a workspace.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  include_external_msproject(projectname location\n"
-      "                             [TYPE projectTypeGUID]\n"
-      "                             [GUID projectGUID]\n"
-      "                             [PLATFORM platformName]\n"
-      "                             dep1 dep2 ...)\n"
-      "Includes an external Microsoft project in the generated workspace "
-      "file.  Currently does nothing on UNIX. This will create a "
-      "target named [projectname].  This can be used in the add_dependencies "
-      "command to make things depend on the external project."
-      "\n"
-      "TYPE, GUID and PLATFORM are optional parameters that allow one "
-      "to specify the type of project, id (GUID) of the project and "
-      "the name of the target platform.  "
-      "This is useful for projects requiring values other than the default "
-      "(e.g. WIX projects). "
-      "These options are not supported by the Visual Studio 6 generator.";
-    }
-
   cmTypeMacro(cmIncludeExternalMSProjectCommand, cmCommand);
 };
 

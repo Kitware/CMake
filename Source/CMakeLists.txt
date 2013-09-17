@@ -160,8 +160,6 @@ set(SRCS
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
   cmDocumentationSection.cxx
-  cmDocumentGeneratorExpressions.h
-  cmDocumentLocationUndefined.h
   cmDynamicLoader.cxx
   cmDynamicLoader.h
   ${ELF_SRCS}

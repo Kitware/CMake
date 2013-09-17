@@ -43,29 +43,6 @@ public:
   virtual const char* GetName() const {return "option";}
 
   /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Provides an option that the user can optionally select.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  option(<option_variable> \"help string describing option\"\n"
-      "         [initial value])\n"
-      "Provide an option for the user to select as ON or OFF.  If no "
-      "initial value is provided, OFF is used.\n"
-      "If you have options that depend on the values of other "
-      "options, see the module help for CMakeDependentOption."
-      ;
-    }
-
-  /**
    * This determines if the command is invoked when in script mode.
    */
   virtual bool IsScriptable() const { return true; }

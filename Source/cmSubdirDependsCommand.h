@@ -44,25 +44,6 @@ public:
    */
   virtual const char* GetName() const { return "subdir_depends";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Deprecated.  Does nothing.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  subdir_depends(subdir dep1 dep2 ...)\n"
-      "Does not do anything.  This command used to help projects order "
-      "parallel builds correctly.  This functionality is now automatic.";
-    }
-
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

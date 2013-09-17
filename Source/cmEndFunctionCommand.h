@@ -54,24 +54,6 @@ public:
    */
   virtual const char* GetName() const { return "endfunction";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Ends a list of commands in a function block.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  endfunction(expression)\n"
-      "See the function command.";
-    }
-
   cmTypeMacro(cmEndFunctionCommand, cmCommand);
 };
 

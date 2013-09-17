@@ -13,7 +13,6 @@
 #define cmAddTestCommand_h
 
 #include "cmCommand.h"
-#include "cmDocumentGeneratorExpressions.h"
 
 /** \class cmAddTestCommand
  * \brief Add a test to the lists of tests to run.
@@ -42,59 +41,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return "add_test";}
-
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Add a test to the project with the specified arguments.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  add_test(testname Exename arg1 arg2 ... )\n"
-      "If the ENABLE_TESTING command has been run, this command adds a "
-      "test target to the current directory. If ENABLE_TESTING has not "
-      "been run, this command does nothing.  "
-      "The tests are run by the testing subsystem by executing Exename "
-      "with the specified arguments.  Exename can be either an executable "
-      "built by this project or an arbitrary executable on the "
-      "system (like tclsh).  The test will be run with the current working "
-      "directory set to the CMakeList.txt files corresponding directory "
-      "in the binary tree.  Tests added using this signature do not support "
-      "generator expressions.\n"
-      "\n"
-      "  add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]\n"
-      "           [WORKING_DIRECTORY dir]\n"
-      "           COMMAND <command> [arg1 [arg2 ...]])\n"
-      "Add a test called <name>.  "
-      "The test name may not contain spaces, quotes, or other characters "
-      "special in CMake syntax.  "
-      "If COMMAND specifies an executable target (created by "
-      "add_executable) it will automatically be replaced by the location "
-      "of the executable created at build time.  "
-      "If a CONFIGURATIONS option is given then the test will be executed "
-      "only when testing under one of the named configurations.  "
-      "If a WORKING_DIRECTORY option is given then the test will be executed "
-      "in the given directory."
-      "\n"
-      "Arguments after COMMAND may use \"generator expressions\" with the "
-      "syntax \"$<...>\".  "
-      CM_DOCUMENT_ADD_TEST_GENERATOR_EXPRESSIONS
-      "Example usage:\n"
-      "  add_test(NAME mytest\n"
-      "           COMMAND testDriver --config $<CONFIGURATION>\n"
-      "                              --exe $<TARGET_FILE:myexe>)\n"
-      "This creates a test \"mytest\" whose command runs a testDriver "
-      "tool passing the configuration name and the full path to the "
-      "executable file produced by target \"myexe\"."
-      ;
-    }
 
   cmTypeMacro(cmAddTestCommand, cmCommand);
 private:
