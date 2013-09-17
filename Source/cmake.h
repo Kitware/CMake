@@ -350,8 +350,6 @@ class cmake
                       bool chain = false,
                       const char *variableGroup = 0);
 
-  bool GetIsPropertyDefined(const char *name, cmProperty::ScopeType scope);
-
   // get property definition
   cmPropertyDefinition *GetPropertyDefinition
   (const char *name, cmProperty::ScopeType scope);

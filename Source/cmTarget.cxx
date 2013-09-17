@@ -6886,7 +6886,7 @@ void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
       pi != props.end(); ++pi)
     {
     if (depender->GetMakefile()->GetCMakeInstance()
-                      ->GetIsPropertyDefined(pi->c_str(),
+                      ->IsPropertyDefined(pi->c_str(),
                                               cmProperty::TARGET))
       {
       cmOStringStream e;
