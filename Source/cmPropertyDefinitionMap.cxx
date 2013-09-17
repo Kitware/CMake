@@ -17,7 +17,6 @@ void cmPropertyDefinitionMap
 ::DefineProperty(const char *name, cmProperty::ScopeType scope,
                  const char *ShortDescription,
                  const char *FullDescription,
-                 const char *DocumentationSection,
                  bool chain)
 {
   if (!name)
@@ -31,7 +30,7 @@ void cmPropertyDefinitionMap
     {
     prop = &(*this)[name];
     prop->DefineProperty(name,scope,ShortDescription, FullDescription,
-                         DocumentationSection, chain);
+                         chain);
     }
 }
 

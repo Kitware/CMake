@@ -24,7 +24,6 @@ public:
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
-                      const char *DocumentaitonSection,
                       bool chain);
 
   // has a named property been defined

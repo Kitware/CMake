@@ -2376,11 +2376,10 @@ void cmake::GenerateGraphViz(const char* fileName) const
 void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
                            const char *ShortDescription,
                            const char *FullDescription,
-                           bool chained, const char *docSection)
+                           bool chained)
 {
   this->PropertyDefinitions[scope].DefineProperty(name,scope,ShortDescription,
                                                   FullDescription,
-                                                  docSection,
                                                   chained);
 }
 

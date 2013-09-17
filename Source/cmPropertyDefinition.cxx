@@ -12,19 +12,10 @@
 #include "cmPropertyDefinition.h"
 #include "cmSystemTools.h"
 
-cmDocumentationEntry cmPropertyDefinition::GetDocumentation() const
-{
-  cmDocumentationEntry e;
-  e.Name = this->Name;
-  e.Brief = this->ShortDescription;
-  return e;
-}
-
 void cmPropertyDefinition
 ::DefineProperty(const char *name, cmProperty::ScopeType scope,
                  const char *shortDescription,
                  const char *fullDescription,
-                 const char *sec,
                  bool chain)
 {
   this->Name = name;
@@ -37,10 +28,6 @@ void cmPropertyDefinition
   if (fullDescription)
     {
     this->FullDescription = fullDescription;
-    }
-  if (sec)
-    {
-    this->DocumentationSection = sec;
     }
 }
 

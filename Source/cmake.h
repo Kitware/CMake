@@ -330,8 +330,7 @@ class cmake
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
-                      bool chain = false,
-                      const char *variableGroup = 0);
+                      bool chain = false);
 
   // get property definition
   cmPropertyDefinition *GetPropertyDefinition
