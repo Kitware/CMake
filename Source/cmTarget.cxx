@@ -6964,13 +6964,16 @@ void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
 
   std::vector<std::string> props;
   cmSystemTools::ExpandListArgument(prop, props);
+  std::string pdir =
+    dependee->GetMakefile()->GetRequiredDefinition("CMAKE_ROOT");
+  pdir += "/Help/prop_tgt/";
 
   for(std::vector<std::string>::iterator pi = props.begin();
       pi != props.end(); ++pi)
     {
-    if (depender->GetMakefile()->GetCMakeInstance()
-                      ->IsPropertyDefined(pi->c_str(),
-                                              cmProperty::TARGET))
+    std::string pname = cmSystemTools::HelpFileName(*pi);
+    std::string pfile = pdir + pname + ".rst";
+    if(cmSystemTools::FileExists(pfile.c_str(), true))
       {
       cmOStringStream e;
       e << "Target \"" << dependee->GetName() << "\" has property \""
