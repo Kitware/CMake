@@ -428,7 +428,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "PROJECT command.",false,
      "Variables that Provide Information");
   cm->DefineProperty
-    ("[Project name]_BINARY_DIR", cmProperty::VARIABLE,
+    ("<PROJECT-NAME>_BINARY_DIR", cmProperty::VARIABLE,
      "Top level binary directory for the named project.",
      "A variable is created with the name used in the PROJECT "
      "command, and is the binary directory for the project.  "
@@ -436,7 +436,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "several projects.",false,
      "Variables that Provide Information");
   cm->DefineProperty
-    ("[Project name]_SOURCE_DIR", cmProperty::VARIABLE,
+    ("<PROJECT-NAME>_SOURCE_DIR", cmProperty::VARIABLE,
      "Top level source directory for the named project.",
      "A variable is created with the name used in the PROJECT "
      "command, and is the source directory for the project."
@@ -1477,7 +1477,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "On most compilers this is \"-L\".",false,
      "Variables that Control the Build");
   cm->DefineProperty
-    ("CMAKE_LINK_DEF_FILE_FLAG  ", cmProperty::VARIABLE,
+    ("CMAKE_LINK_DEF_FILE_FLAG", cmProperty::VARIABLE,
      "Linker flag to be used to specify a .def file for dll creation.",
      "The flag will be used to add a .def file when creating "
      "a dll on Windows; this is only defined on Windows."
@@ -1853,7 +1853,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
-    ("CMAKE_<LANG>_LINK_EXECUTABLE ", cmProperty::VARIABLE,
+    ("CMAKE_<LANG>_LINK_EXECUTABLE", cmProperty::VARIABLE,
      "Rule variable to link an executable.",
      "Rule variable to link an executable for the given language."
      ,false,
@@ -1939,8 +1939,6 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
   cm->DefineProperty("CMAKE_<LANG>_FLAGS_RELWITHDEBINFO_INIT",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_INFORMATION_LOADED",
-                     cmProperty::VARIABLE,0,0);
-  cm->DefineProperty("CMAKE_<LANG>_LINK_EXECUTABLE",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_LINK_FLAGS",
                      cmProperty::VARIABLE,0,0);
