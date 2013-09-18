@@ -766,9 +766,6 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
             GTK2_GLIB_INCLUDE_DIR
             GTK2_GLIBCONFIG_INCLUDE_DIR
             GTK2_GLIB_LIBRARY
-
-            FREETYPE_INCLUDE_DIR_ft2build
-            FREETYPE_INCLUDE_DIR_freetype2
         )
     elseif(_GTK2_component STREQUAL "gtkmm")
         FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK2_${_COMPONENT_UPPER} "Some or all of the gtkmm libraries were not found."
