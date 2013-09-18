@@ -370,8 +370,10 @@ function(_GTK2_FIND_LIBRARY _var _lib _expand_vc _append_version)
     set(GTK2_${_var}_LIBRARY ${GTK2_${_var}_LIBRARY} PARENT_SCOPE)
     set(GTK2_${_var}_FOUND ${GTK2_${_var}_FOUND} PARENT_SCOPE)
 
-    set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${GTK2_${_var}_LIBRARY})
-    set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
+    if(GTK2_${_var}_FOUND)
+        set(GTK2_LIBRARIES ${GTK2_LIBRARIES} ${GTK2_${_var}_LIBRARY})
+        set(GTK2_LIBRARIES ${GTK2_LIBRARIES} PARENT_SCOPE)
+    endif()
 
     if(GTK2_DEBUG)
         message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}]     "
@@ -479,7 +481,9 @@ function(_GTK2_ADD_TARGET_INCLUDE_DIRS _var)
 
     if(TARGET GTK2::${_basename})
         foreach(_include ${ARGN})
-            set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${_include}")
+            if(${_include})
+                set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${_include}")
+            endif()
         endforeach()
     endif()
 endfunction()
@@ -569,7 +573,9 @@ endif()
 #
 
 find_package(Freetype QUIET)
-list(APPEND GTK2_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+if(${FREETYPE_INCLUDE_DIR_ft2build} AND ${FREETYPE_INCLUDE_DIR_freetype2})
+    list(APPEND GTK2_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+endif()
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     if(_GTK2_component STREQUAL "gtk")
