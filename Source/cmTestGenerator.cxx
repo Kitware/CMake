@@ -39,29 +39,8 @@ cmTestGenerator
 void cmTestGenerator::GenerateScriptConfigs(std::ostream& os,
                                             Indent const& indent)
 {
-  // First create the tests.
+  // Create the tests.
   this->cmScriptGenerator::GenerateScriptConfigs(os, indent);
-
-  // Now generate the test properties.
-  if(this->TestGenerated)
-    {
-    cmTest* test = this->Test;
-    cmMakefile* mf = test->GetMakefile();
-    cmLocalGenerator* lg = mf->GetLocalGenerator();
-    std::ostream& fout = os;
-    cmPropertyMap::const_iterator pit;
-    cmPropertyMap* mpit = &test->GetProperties();
-    if ( mpit->size() )
-      {
-      fout << "SET_TESTS_PROPERTIES(" << test->GetName() << " PROPERTIES ";
-      for ( pit = mpit->begin(); pit != mpit->end(); ++ pit )
-        {
-        fout << " " << pit->first
-             << " " << lg->EscapeForCMake(pit->second.GetValue());
-        }
-      fout << ")" << std::endl;
-      }
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -127,6 +106,21 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Finish the test command.
   os << ")\n";
+
+  // Output properties for the test.
+  cmPropertyMap& pm = this->Test->GetProperties();
+  if(!pm.empty())
+    {
+    os << indent << "set_tests_properties(" << this->Test->GetName()
+       << " PROPERTIES ";
+    for(cmPropertyMap::const_iterator i = pm.begin();
+        i != pm.end(); ++i)
+      {
+      os << " " << i->first
+         << " " << lg->EscapeForCMake(i->second.GetValue());
+      }
+    os << ")" << std::endl;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -181,4 +175,21 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout,
     fout << "\"";
     }
   fout << ")" << std::endl;
+
+  // Output properties for the test.
+  cmMakefile* mf = this->Test->GetMakefile();
+  cmLocalGenerator* lg = mf->GetLocalGenerator();
+  cmPropertyMap& pm = this->Test->GetProperties();
+  if(!pm.empty())
+    {
+    fout << indent << "set_tests_properties(" << this->Test->GetName()
+         << " PROPERTIES ";
+    for(cmPropertyMap::const_iterator i = pm.begin();
+        i != pm.end(); ++i)
+      {
+      fout << " " << i->first
+           << " " << lg->EscapeForCMake(i->second.GetValue());
+      }
+    fout << ")" << std::endl;
+    }
 }
