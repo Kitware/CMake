@@ -29,6 +29,7 @@ function(_FIND_ECLIPSE_VERSION)
   set(_ECLIPSE_VERSION_NAME_3.6 "Helios" )
   set(_ECLIPSE_VERSION_NAME_3.7 "Indigo" )
   set(_ECLIPSE_VERSION_NAME_4.2 "Juno" )
+  set(_ECLIPSE_VERSION_NAME_4.3 "Kepler" )
 
   if(NOT DEFINED CMAKE_ECLIPSE_VERSION)
     if(CMAKE_ECLIPSE_EXECUTABLE)
@@ -63,6 +64,7 @@ function(_FIND_ECLIPSE_VERSION)
                                                             "3.6 (${_ECLIPSE_VERSION_NAME_3.6})"
                                                             "3.7 (${_ECLIPSE_VERSION_NAME_3.7})"
                                                             "4.2 (${_ECLIPSE_VERSION_NAME_4.2})"
+                                                            "4.3 (${_ECLIPSE_VERSION_NAME_4.3})"
               )
 endfunction()
 
