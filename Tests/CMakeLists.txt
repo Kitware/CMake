@@ -604,6 +604,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project GeneratorExpression
     --build-options -DCMAKE_BUILD_TYPE=\${CTEST_CONFIGURATION_TYPE}
+    --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/GeneratorExpression")
 
