@@ -65,7 +65,9 @@ class cmake
     INTERNAL_ERROR,
     MESSAGE,
     WARNING,
-    LOG
+    LOG,
+    DEPRECATION_ERROR,
+    DEPRECATION_WARNING
   };
 
 
