@@ -17,3 +17,31 @@ target_include_directories(upstream SYSTEM PUBLIC
 add_library(consumer consumer.cpp)
 target_link_libraries(consumer upstream)
 target_compile_options(consumer PRIVATE -Werror=unused-variable)
+
+add_library(iface IMPORTED INTERFACE)
+set_property(TARGET iface PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/systemlib_header_only")
+
+add_library(imported_consumer imported_consumer.cpp)
+target_link_libraries(imported_consumer iface)
+target_compile_options(imported_consumer PRIVATE -Werror=unused-variable)
+
+macro(do_try_compile error_option)
+  set(TC_ARGS
+    IFACE_TRY_COMPILE_${error_option}
+    "${CMAKE_CURRENT_BINARY_DIR}/try_compile_iface" "${CMAKE_CURRENT_SOURCE_DIR}/imported_consumer.cpp"
+    LINK_LIBRARIES iface
+  )
+  if (${error_option} STREQUAL WITH_ERROR)
+    list(APPEND TC_ARGS COMPILE_DEFINITIONS -Werror=unused-variable)
+  endif()
+  try_compile(${TC_ARGS})
+endmacro()
+
+do_try_compile(NO_ERROR)
+if (NOT IFACE_TRY_COMPILE_NO_ERROR)
+  message(SEND_ERROR "try_compile failed with imported target.")
+endif()
+do_try_compile(WITH_ERROR)
+if (NOT IFACE_TRY_COMPILE_WITH_ERROR)
+  message(SEND_ERROR "try_compile failed with imported target with error option.")
+endif()
