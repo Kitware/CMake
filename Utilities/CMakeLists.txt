@@ -127,7 +127,6 @@ install(FILES
   ${DOCBOOK_FILES}
   DESTINATION ${CMAKE_DOC_DIR}
   )
-install(FILES cmake.m4 DESTINATION share/aclocal)
 
 # Drive documentation generation.
 add_custom_target(documentation ALL DEPENDS ${DOC_FILES} ${CMake_BINARY_DIR}/Docs/cmake.txt )
