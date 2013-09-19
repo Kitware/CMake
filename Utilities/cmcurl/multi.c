@@ -763,7 +763,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   struct Curl_message *msg = NULL;
   bool connected;
   bool async;
-  bool protocol_connect;
+  bool protocol_connect = 0;
   bool dophase_done;
   bool done;
   CURLMcode result = CURLM_OK;

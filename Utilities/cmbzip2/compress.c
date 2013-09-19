@@ -239,7 +239,7 @@ static
 void sendMTFValues ( EState* s )
 {
    Int32 v, t, i, j, gs, ge, totc, bt, bc, iter;
-   Int32 nSelectors, alphaSize, minLen, maxLen, selCtr;
+   Int32 nSelectors = 0, alphaSize, minLen, maxLen, selCtr;
    Int32 nGroups, nBytes;
 
    /*--
