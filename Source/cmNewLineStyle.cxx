@@ -78,7 +78,7 @@ const std::string cmNewLineStyle::GetCharacters() const
       return "\r\n";
     default:
       ;
-    };
+    }
   return "";
 }
 
