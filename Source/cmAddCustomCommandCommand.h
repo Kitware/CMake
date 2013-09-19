@@ -16,9 +16,7 @@
 #include "cmDocumentGeneratorExpressions.h"
 
 /** \class cmAddCustomCommandCommand
- * \brief
- *
- *  cmAddCustomCommandCommand defines a new command (rule) that can
+ * \brief cmAddCustomCommandCommand defines a new command (rule) that can
  *  be executed within the build process
  *
  */
