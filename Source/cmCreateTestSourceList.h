@@ -15,7 +15,7 @@
 #include "cmCommand.h"
 
 /** \class cmCreateTestSourceList
- * \brief
+ * \brief Test driver generation command
  *
  */
 
