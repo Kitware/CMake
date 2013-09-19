@@ -154,11 +154,11 @@ public:
   /**
    * Retrieve the list of documented module located in
    * path which match the globing expression globExpr.
-   * @param[in] path, directory where to start the search
+   * @param[in] path directory where to start the search
    *                  we will recurse into it.
-   * @param[in] globExpr, the globing expression used to
+   * @param[in] globExpr the globing expression used to
    *                      match the file in path.
-   * @param[out] the list of obtained pairs (may be empty)
+   * @param[out] docModuleList the list of obtained pairs (may be empty)
    * @return 0 on success 1 on error or empty list
    */
   int getDocumentedModulesListInDir(
@@ -180,10 +180,9 @@ public:
    * @param[in] fname the script file name to be parsed for documentation
    * @param[in,out] commands the vector of command/macros documentation
    *                entry found in the script file.
-   * @param[in,out] the cmake object instance to which variable documentation
-   *                will be attached (using @see cmake::DefineProperty)
-   * @param[in] the documentation section in which the property will be
-   *            inserted.
+   * @param[in,out] cm the cmake object instance to which variable
+   *                documentation will be attached
+   *                (using @see cmake::DefineProperty)
    * @return the number of documented items (command and variable)
    *         found in the file.
    */

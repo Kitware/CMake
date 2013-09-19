@@ -2330,7 +2330,7 @@ void cmDependsJava_yyset_extra (YY_EXTRA_TYPE  user_defined , yyscan_t yyscanner
 }
 
 /** Set the current line number.
- * @param line_number
+ * @param line_number The line number to set.
  * @param yyscanner The scanner object.
  */
 void cmDependsJava_yyset_lineno (int  line_number , yyscan_t yyscanner)
@@ -2345,7 +2345,7 @@ void cmDependsJava_yyset_lineno (int  line_number , yyscan_t yyscanner)
 }
 
 /** Set the current column.
- * @param column_no
+ * @param column_no The column number to set.
  * @param yyscanner The scanner object.
  */
 void cmDependsJava_yyset_column (int  column_no , yyscan_t yyscanner)
