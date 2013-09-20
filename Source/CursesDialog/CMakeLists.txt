@@ -11,6 +11,7 @@
 #=============================================================================
 
 set( CURSES_SRCS
+              CursesDialog/cmCursesOptionsWidget
               CursesDialog/cmCursesBoolWidget
               CursesDialog/cmCursesCacheEntryComposite
               CursesDialog/cmCursesDummyWidget

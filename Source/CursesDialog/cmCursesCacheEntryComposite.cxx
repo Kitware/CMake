@@ -10,6 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCursesCacheEntryComposite.h"
+#include "cmCursesOptionsWidget.h"
 #include "cmCursesStringWidget.h"
 #include "cmCursesLabelWidget.h"
 #include "cmCursesBoolWidget.h"
@@ -69,9 +70,27 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         it.GetValue());
       break;
     case cmCacheManager::STRING:
-      this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
-      static_cast<cmCursesStringWidget*>(this->Entry)->SetString(
-        it.GetValue());
+      if(it.PropertyExists("STRINGS"))
+        {
+        cmCursesOptionsWidget* ow =
+          new cmCursesOptionsWidget(this->EntryWidth, 1, 1, 1);
+        this->Entry = ow;
+        std::vector<std::string> options;
+        cmSystemTools::ExpandListArgument(
+          std::string(it.GetProperty("STRINGS")), options);
+        for(std::vector<std::string>::iterator
+              si = options.begin(); si != options.end(); ++si)
+          {
+          ow->AddOption(*si);
+          }
+        ow->SetOption(it.GetValue());
+        }
+      else
+        {
+        this->Entry = new cmCursesStringWidget(this->EntryWidth, 1, 1, 1);
+        static_cast<cmCursesStringWidget*>(this->Entry)->SetString(
+          it.GetValue());
+        }
       break;
     case cmCacheManager::UNINITIALIZED:
       cmSystemTools::Error("Found an undefined variable: ", it.GetName());
