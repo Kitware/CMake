@@ -210,6 +210,8 @@ set_property(TEST echo-configuration PROPERTY
 add_test(NAME echo-target-file COMMAND echo $<TARGET_FILE:echo>)
 set_property(TEST echo-target-file PROPERTY
   PASS_REGULAR_EXPRESSION "/echo${CMAKE_EXECUTABLE_SUFFIX}\n$")
+set_property(TEST echo-target-file PROPERTY
+  REQUIRED_FILES "$<TARGET_FILE:echo>")
 
 add_test(NAME working-dir-arg
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/WorkingDirectory/$<CONFIGURATION>"
