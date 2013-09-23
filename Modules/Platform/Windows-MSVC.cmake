@@ -144,7 +144,7 @@ if(WINCE)
   set(CMAKE_C_STANDARD_LIBRARIES_INIT "coredll.lib ole32.lib oleaut32.lib uuid.lib commctrl.lib")
   set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:oldnames.lib")
 
-  if (MSVC_VERSION LESS 1500)
+  if (MSVC_VERSION LESS 1600)
     set(CMAKE_C_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT} corelibc.lib")
   endif ()
 else()
