@@ -63,7 +63,7 @@ _ctest()
             ;;
         --help-command)
             COMPREPLY=( $( compgen -W '$( ctest --help-command-list 2>/dev/null|
-                tail -n +2 )' -- "$cur" ) )
+                grep -v "^ctest version " )' -- "$cur" ) )
             return
             ;;
     esac
