@@ -595,8 +595,8 @@ install(
                               WORLD_READ WORLD_EXECUTE
   )
 
-# process docs related install
-add_subdirectory(Docs)
+# Install auxiliary files integrating with other tools.
+add_subdirectory(Auxiliary)
 
 #-----------------------------------------------------------------------
 # End of the main section of the CMakeLists file
