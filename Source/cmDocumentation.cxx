@@ -371,6 +371,9 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
         this->PrintDocumentationList(os,i->c_str());
         }
       return true;
+    case cmDocumentation::PolicyList:
+      this->PrintDocumentationList(os,"Policies");
+      return true;
     case cmDocumentation::Full:
       return this->PrintDocumentationFull(os);
     case cmDocumentation::Modules:
@@ -1253,6 +1256,12 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
     else if(strcmp(argv[i], "--help-variable-list") == 0)
       {
       help.HelpType = cmDocumentation::VariableList;
+      GET_OPT_ARGUMENT(help.Filename);
+      help.HelpForm = cmDocumentation::TextForm;
+      }
+    else if(strcmp(argv[i], "--help-policy-list") == 0)
+      {
+      help.HelpType = cmDocumentation::PolicyList;
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::TextForm;
       }

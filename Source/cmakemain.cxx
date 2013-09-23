@@ -195,6 +195,12 @@ static const char * cmDocumentationOptions[][3] =
    "If a file is specified, the documentation is written into and the output "
    "format is determined depending on the filename suffix. Supported are man "
    "page, HTML, DocBook and plain text."},
+  {"--help-policy-list [file]", "List available policies and exit.",
+   "The list contains all policies for which help may be obtained by using "
+   "the --help-policy argument followed by a policy name. "
+   "If a file is specified, the documentation is written into and the output "
+   "format is determined depending on the filename suffix. Supported are man "
+   "page, HTML, DocBook and plain text."},
   {"--help-policies [file]", "Print help for all policies and exit.",
    "Full documentation for all policies is displayed."
    "If a file is specified, the documentation is written into and the output "
