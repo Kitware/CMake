@@ -33,7 +33,7 @@ protected:
   cmCursesOptionsWidget(const cmCursesOptionsWidget& from);
   void operator=(const cmCursesOptionsWidget&);
   std::vector<std::string> Options;
-  unsigned int CurrentOption;
+  std::vector<std::string>::size_type CurrentOption;
 };
 
 #endif // __cmCursesOptionsWidget_h
