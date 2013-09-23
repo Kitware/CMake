@@ -2869,16 +2869,26 @@ set_time_tru64(int fd, int mode, const char *name,
     time_t ctime, long ctime_nsec)
 {
 	struct attr_timbuf tstamp;
-	struct timeval times[3];
+#ifdef __hpux
+	tstamp.atime.tv_sec = atime;
+  tstamp.atime.tv_nsec = atime_nsec;
+  tstamp.mtime.tv_sec = mtime;
+  tstamp.mtime.tv_nsec = mtime_nsec;
+  tstamp.ctime.tv_sec = ctime;
+  tstamp.ctime.tv_nsec = ctime_nsec / 1000;
+#else // __hpux
+  struct timeval times[3];
 	times[0].tv_sec = atime;
 	times[0].tv_usec = atime_nsec / 1000;
 	times[1].tv_sec = mtime;
 	times[1].tv_usec = mtime_nsec / 1000;
 	times[2].tv_sec = ctime;
 	times[2].tv_usec = ctime_nsec / 1000;
+
 	tstamp.atime = times[0];
 	tstamp.mtime = times[1];
 	tstamp.ctime = times[2];
+#endif // __hpux
 	return (fcntl(fd,F_SETTIMES,&tstamp));
 }
 #endif /* Tru64 */
