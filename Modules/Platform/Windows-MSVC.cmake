@@ -141,7 +141,7 @@ if(WINCE)
 
   set(_RTC1 "")
   set(_FLAGS_CXX " /GR /EHsc")
-  set(CMAKE_C_STANDARD_LIBRARIES_INIT "coredll.lib ole32.lib oleaut32.lib uuid.lib commctrl.lib")
+  set(CMAKE_C_STANDARD_LIBRARIES_INIT "coredll.lib corelibc.lib ole32.lib oleaut32.lib uuid.lib commctrl.lib")
   set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:oldnames.lib")
 
   if (MSVC_VERSION LESS 1500)
