@@ -49,6 +49,11 @@
 #
 #       add_jar(example ENTRY_POINT com/examples/MyProject/Main)
 #
+#   To define a custom manifest for the jar, you can set it with the manifest
+#   named argument:
+#
+#       add_jar(example MANIFEST /path/to/manifest)
+#
 #   To add a VERSION to the target output name you can set it using
 #   the VERSION named argument to add_jar. This will create a jar file with the
 #   name shibboleet-1.0.0.jar and will create a symlink shibboleet.jar
@@ -246,7 +251,7 @@ function(add_jar _TARGET_NAME)
 
     cmake_parse_arguments(_add_jar
       ""
-      "VERSION;OUTPUT_DIR;OUTPUT_NAME;ENTRY_POINT"
+      "VERSION;OUTPUT_DIR;OUTPUT_NAME;ENTRY_POINT;MANIFEST"
       "SOURCES;INCLUDE_JARS"
       ${ARGN}
     )
@@ -260,6 +265,11 @@ function(add_jar _TARGET_NAME)
     if (_add_jar_ENTRY_POINT)
         set(_ENTRY_POINT_OPTION e)
         set(_ENTRY_POINT_VALUE ${_add_jar_ENTRY_POINT})
+    endif ()
+
+    if (_add_jar_MANIFEST)
+        set(_MANIFEST_OPTION m)
+        set(_MANIFEST_VALUE ${_add_jar_MANIFEST})
     endif ()
 
     if (LIBRARY_OUTPUT_PATH)
@@ -405,7 +415,7 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf${_ENTRY_POINT_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE}
+                -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
@@ -425,7 +435,7 @@ function(add_jar _TARGET_NAME)
         add_custom_command(
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
-                -cf${_ENTRY_POINT_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE}
+                -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
                 ${_JAVA_RESOURCE_FILES} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
