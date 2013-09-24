@@ -2704,8 +2704,7 @@ void cmTarget::FinalizeSystemIncludeDirectories()
       }
     if (tgt->IsImported()
         && tgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")
-        && !this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED")
-        && !this->Makefile->GetCMakeInstance()->GetIsInTryCompile())
+        && !this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED"))
       {
       std::string includeGenex = "$<TARGET_PROPERTY:" +
                                 it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
