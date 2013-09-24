@@ -18,7 +18,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
-#include "cmQtAutomoc.h"
+#include "cmQtAutoGenerators.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTargetExport.h"
@@ -1049,8 +1049,8 @@ void cmGlobalGenerator::Generate()
     }
 
   // Iterate through all targets and set up automoc for those which have
-  // the AUTOMOC property set
-  this->CreateAutomocTargets();
+  // the AUTOMOC, AUTOUIC or AUTORCC property set
+  this->CreateQtAutoGeneratorsTargets();
 
   // For each existing cmLocalGenerator
   unsigned int i;
@@ -1206,10 +1206,10 @@ bool cmGlobalGenerator::CheckTargets()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateAutomocTargets()
+void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  typedef std::vector<std::pair<cmQtAutomoc, cmTarget*> > Automocs;
+  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > Automocs;
   Automocs automocs;
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
@@ -1227,7 +1227,7 @@ void cmGlobalGenerator::CreateAutomocTargets()
         {
         if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
           {
-          cmQtAutomoc automoc;
+          cmQtAutoGenerators automoc;
           if(automoc.InitializeMocSourceFile(&target))
             {
             automocs.push_back(std::make_pair(automoc, &target));
@@ -1239,7 +1239,7 @@ void cmGlobalGenerator::CreateAutomocTargets()
   for (Automocs::iterator it = automocs.begin(); it != automocs.end();
        ++it)
     {
-    it->first.SetupAutomocTarget(it->second);
+    it->first.SetupAutoGenerateTarget(it->second);
     }
 #endif
 }

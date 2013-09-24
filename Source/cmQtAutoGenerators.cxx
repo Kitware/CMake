@@ -29,7 +29,7 @@
 #include <unistd.h>
 #endif
 
-#include "cmQtAutomoc.h"
+#include "cmQtAutoGenerators.h"
 
 
 static bool requiresMocing(const std::string& text, std::string &macroName)
@@ -113,7 +113,7 @@ static void copyTargetProperty(cmTarget* destinationTarget,
 }
 
 
-cmQtAutomoc::cmQtAutomoc()
+cmQtAutoGenerators::cmQtAutoGenerators()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,ColorOutput(true)
 ,RunMocFailed(false)
@@ -135,7 +135,7 @@ cmQtAutomoc::cmQtAutomoc()
     }
 }
 
-bool cmQtAutomoc::InitializeMocSourceFile(cmTarget* target)
+bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
@@ -201,7 +201,7 @@ static void GetCompileDefinitionsAndDirectories(cmTarget *target,
     }
 }
 
-void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
+void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
@@ -466,7 +466,7 @@ void cmQtAutomoc::SetupAutomocTarget(cmTarget* target)
 }
 
 
-bool cmQtAutomoc::Run(const char* targetDirectory, const char *config)
+bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 {
   bool success = true;
   cmake cm;
@@ -492,7 +492,7 @@ bool cmQtAutomoc::Run(const char* targetDirectory, const char *config)
 }
 
 
-cmGlobalGenerator* cmQtAutomoc::CreateGlobalGenerator(cmake* cm,
+cmGlobalGenerator* cmQtAutoGenerators::CreateGlobalGenerator(cmake* cm,
                                                   const char* targetDirectory)
 {
   cmGlobalGenerator* gg = new cmGlobalGenerator();
@@ -509,7 +509,7 @@ cmGlobalGenerator* cmQtAutomoc::CreateGlobalGenerator(cmake* cm,
 }
 
 
-bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
+bool cmQtAutoGenerators::ReadAutomocInfoFile(cmMakefile* makefile,
                                       const char* targetDirectory,
                                       const char *config)
 {
@@ -569,7 +569,7 @@ bool cmQtAutomoc::ReadAutomocInfoFile(cmMakefile* makefile,
 }
 
 
-std::string cmQtAutomoc::MakeCompileSettingsString(cmMakefile* makefile)
+std::string cmQtAutoGenerators::MakeCompileSettingsString(cmMakefile* makefile)
 {
   std::string s;
   s += makefile->GetSafeDefinition("AM_MOC_COMPILE_DEFINITIONS");
@@ -586,7 +586,7 @@ std::string cmQtAutomoc::MakeCompileSettingsString(cmMakefile* makefile)
 }
 
 
-bool cmQtAutomoc::ReadOldMocDefinitionsFile(cmMakefile* makefile,
+bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
                                             const char* targetDirectory)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
@@ -602,7 +602,8 @@ bool cmQtAutomoc::ReadOldMocDefinitionsFile(cmMakefile* makefile,
 }
 
 
-void cmQtAutomoc::WriteOldMocDefinitionsFile(const char* targetDirectory)
+void
+cmQtAutoGenerators::WriteOldMocDefinitionsFile(const char* targetDirectory)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
@@ -619,7 +620,7 @@ void cmQtAutomoc::WriteOldMocDefinitionsFile(const char* targetDirectory)
 }
 
 
-void cmQtAutomoc::Init()
+void cmQtAutoGenerators::Init()
 {
   this->OutMocCppFilename = this->Builddir;
   this->OutMocCppFilename += this->TargetName;
@@ -706,7 +707,7 @@ void cmQtAutomoc::Init()
 }
 
 
-bool cmQtAutomoc::RunAutomoc(cmMakefile* makefile)
+bool cmQtAutoGenerators::RunAutomoc(cmMakefile* makefile)
 {
   if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
     || (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr))
@@ -830,7 +831,7 @@ bool cmQtAutomoc::RunAutomoc(cmMakefile* makefile)
 }
 
 
-void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
+void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs)
 {
@@ -1011,7 +1012,7 @@ void cmQtAutomoc::ParseCppFile(const std::string& absFilename,
 }
 
 
-void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
+void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs)
 {
@@ -1124,7 +1125,8 @@ void cmQtAutomoc::StrictParseCppFile(const std::string& absFilename,
 }
 
 
-void cmQtAutomoc::SearchHeadersForCppFile(const std::string& absFilename,
+void
+cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders)
 {
@@ -1160,7 +1162,7 @@ void cmQtAutomoc::SearchHeadersForCppFile(const std::string& absFilename,
 }
 
 
-void cmQtAutomoc::ParseHeaders(const std::set<std::string>& absHeaders,
+void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
                         const std::map<std::string, std::string>& includedMocs,
                         std::map<std::string, std::string>& notIncludedMocs)
 {
@@ -1194,7 +1196,7 @@ void cmQtAutomoc::ParseHeaders(const std::set<std::string>& absHeaders,
 }
 
 
-bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
+bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                               const std::string& mocFileName)
 {
   const std::string mocFilePath = this->Builddir + mocFileName;
@@ -1271,7 +1273,7 @@ bool cmQtAutomoc::GenerateMoc(const std::string& sourceFile,
 }
 
 
-std::string cmQtAutomoc::Join(const std::vector<std::string>& lst,
+std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
                               char separator)
 {
     if (lst.empty())
@@ -1291,13 +1293,15 @@ std::string cmQtAutomoc::Join(const std::vector<std::string>& lst,
 }
 
 
-bool cmQtAutomoc::StartsWith(const std::string& str, const std::string& with)
+bool cmQtAutoGenerators::StartsWith(const std::string& str,
+                                    const std::string& with)
 {
   return (str.substr(0, with.length()) == with);
 }
 
 
-bool cmQtAutomoc::EndsWith(const std::string& str, const std::string& with)
+bool cmQtAutoGenerators::EndsWith(const std::string& str,
+                                  const std::string& with)
 {
   if (with.length() > (str.length()))
     {
@@ -1307,7 +1311,7 @@ bool cmQtAutomoc::EndsWith(const std::string& str, const std::string& with)
 }
 
 
-std::string cmQtAutomoc::ReadAll(const std::string& filename)
+std::string cmQtAutoGenerators::ReadAll(const std::string& filename)
 {
   std::ifstream file(filename.c_str());
   cmsys_ios::stringstream stream;

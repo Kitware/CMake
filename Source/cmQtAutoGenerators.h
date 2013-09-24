@@ -11,20 +11,20 @@
   See the License for more information.
 ============================================================================*/
 
-#ifndef cmQtAutomoc_h
-#define cmQtAutomoc_h
+#ifndef cmQtAutoGenerators_h
+#define cmQtAutoGenerators_h
 
 class cmGlobalGenerator;
 class cmMakefile;
 
-class cmQtAutomoc
+class cmQtAutoGenerators
 {
 public:
-  cmQtAutomoc();
+  cmQtAutoGenerators();
   bool Run(const char* targetDirectory, const char *config);
 
   bool InitializeMocSourceFile(cmTarget* target);
-  void SetupAutomocTarget(cmTarget* target);
+  void SetupAutoGenerateTarget(cmTarget* target);
 
 private:
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
