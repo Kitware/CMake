@@ -150,6 +150,13 @@ static const char * cmDocumentationOptions[][3] =
   {"-U, --union", "Take the Union of -I and -R",
    "When both -R and -I are specified by default the intersection of "
    "tests are run. By specifying -U the union of tests is run instead."},
+  {"--rerun-failed", "Run only the tests that failed previously",
+   "This option tells ctest to perform only the tests that failed during its "
+   "previous run. When this option is specified, ctest ignores all other "
+   "options intended to modify the list of tests to run "
+   "(-L, -R, -E, -LE, -I, etc). In the event that CTest runs and no tests "
+   "fail, subsequent calls to ctest with the --rerun-failed option will "
+   "run the set of tests that most recently failed (if any)."},
   {"--max-width <width>", "Set the max width for a test name to output",
    "Set the maximum width for each test name to show in the output.  This "
    "allows the user to widen the output to avoid clipping the test name which "
