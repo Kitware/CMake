@@ -2147,6 +2147,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set_tests_properties(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*CheckChild *\\.+ *Passed")
 
+  add_test(
+    NAME CTestTestRerunFailed
+    COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed
+    WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
+  set_tests_properties(CTestTestRerunFailed PROPERTIES
+    PASS_REGULAR_EXPRESSION "1 tests failed out of 1" DEPENDS CTestTestTimeout)
+
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestZeroTimeout/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/test.cmake"
