@@ -166,6 +166,14 @@ bool cmAddLibraryCommand
       this->SetError(e.str().c_str());
       return false;
       }
+    if(aliasedTarget->IsImported())
+      {
+      cmOStringStream e;
+      e << "cannot create ALIAS target \"" << libName
+        << "\" because target \"" << aliasedName << "\" is IMPORTED.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     this->Makefile->AddAlias(libName.c_str(), aliasedTarget);
     return true;
     }
