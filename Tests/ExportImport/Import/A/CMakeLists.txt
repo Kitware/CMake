@@ -284,10 +284,15 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
     target_compile_options(test_system_exp PRIVATE -Wunused-variable -Werror=unused-variable)
 
     unset(EXP_ERROR_VARIABLE CACHE)
-    set(CMAKE_REQUIRED_LIBRARIES exp_systemlib)
-    check_cxx_compiler_flag(-Wunused-variable -Werror=unused-variable EXP_ERROR_VARIABLE)
-    if(EXP_ERROR_VARIABLE)
-      message(SEND_ERROR "EXP_ERROR_VARIABLE try_compile succeeded, but it was expected to fail.")
+    try_compile(EXP_ERROR_VARIABLE
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+      COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
+      LINK_LIBRARIES exp_systemlib
+      OUTPUT_VARIABLE OUTPUT
+      )
+    if(NOT EXP_ERROR_VARIABLE)
+      message(SEND_ERROR "EXP_ERROR_VARIABLE try_compile failed, but it was expected to succeed ${OUTPUT}.")
     endif()
 
     add_executable(test_system_bld test_system.cpp)
@@ -295,10 +300,15 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
     target_compile_options(test_system_bld PRIVATE -Wunused-variable -Werror=unused-variable)
 
     unset(BLD_ERROR_VARIABLE CACHE)
-    set(CMAKE_REQUIRED_LIBRARIES bld_systemlib)
-    check_cxx_compiler_flag(-Wunused-variable -Werror=unused-variable BLD_ERROR_VARIABLE)
-    if(BLD_ERROR_VARIABLE)
-      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile succeeded, but it was expected to fail.")
+    try_compile(BLD_ERROR_VARIABLE
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+      "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+      COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
+      LINK_LIBRARIES bld_systemlib
+      OUTPUT_VARIABLE OUTPUT
+      )
+    if(NOT BLD_ERROR_VARIABLE)
+      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed.")
     endif()
   endif()
 endif()
