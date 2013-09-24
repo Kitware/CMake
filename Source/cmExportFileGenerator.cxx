@@ -739,9 +739,10 @@ cmExportFileGenerator
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
                                 iface->Languages, properties, missingTargets);
 
+    std::vector<std::string> dummy;
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_DEPENDENT_LIBRARIES",
-                                iface->SharedDeps, properties, missingTargets);
+                                iface->SharedDeps, properties, dummy);
     if(iface->Multiplicity > 0)
       {
       std::string prop = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
