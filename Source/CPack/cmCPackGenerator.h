@@ -160,9 +160,10 @@ protected:
    * CPack specific generator may mangle CPACK_PACKAGE_FILE_NAME
    * with CPACK_COMPONENT_xxxx_<NAME>_DISPLAY_NAME if
    * CPACK_<GEN>_USE_DISPLAY_NAME_IN_FILENAME is ON.
-   * @param[in] initialPackageFileName
-   * @param[in] groupOrComponentName
-   * @param[in] isGroupName
+   * @param[in] initialPackageFileName the initial package name to be mangled
+   * @param[in] groupOrComponentName the name of the group/component
+   * @param[in] isGroupName true if previous name refers to a group,
+   *            false otherwise
    */
   virtual std::string GetComponentPackageFileName(
       const std::string& initialPackageFileName,
@@ -172,7 +173,7 @@ protected:
   /**
    * Package the list of files and/or components which
    * has been prepared by the beginning of DoPackage.
-   * @pre @ref toplevel has been filled-in
+   * @pre the @ref toplevel has been filled-in
    * @pre the list of file @ref files has been populated
    * @pre packageFileNames contains at least 1 entry
    * @post packageFileNames may have been updated and contains
