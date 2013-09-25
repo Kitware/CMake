@@ -63,7 +63,7 @@ _ctest()
             ;;
         --help-command)
             COMPREPLY=( $( compgen -W '$( ctest --help-command-list 2>/dev/null|
-                grep -v "^cmake version " )' -- "$cur" ) )
+                grep -v "^ctest version " )' -- "$cur" ) )
             return
             ;;
     esac
