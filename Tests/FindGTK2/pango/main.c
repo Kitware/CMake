@@ -2,6 +2,6 @@
 
 int main(int argc, char *argv[])
 {
-    int version = pango_version();
+    gboolean ret = pango_color_parse(NULL, "#ffffff");
     return 0;
 }
