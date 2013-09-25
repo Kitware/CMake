@@ -104,8 +104,9 @@ find_program(DVIPDF_CONVERTER
 
 if (WIN32)
   find_program(PS2PDF_CONVERTER
-    NAMES ps2pdf14.bat
+    NAMES ps2pdf14.bat ps2pdf
     PATHS ${GHOSTSCRIPT_LIBRARY_PATH}
+          ${MIKTEX_BINARY_PATH}
   )
 else ()
   find_program(PS2PDF_CONVERTER
