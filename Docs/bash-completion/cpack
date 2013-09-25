@@ -20,7 +20,7 @@ _cpack()
         -D)
             [[ $cur == *=* ]] && return # no completion for values
             COMPREPLY=( $( compgen -W '$( cpack --help-variable-list \
-                2>/dev/null | grep -v "^cmake version " )' -S = -- "$cur" ) )
+                2>/dev/null | grep -v "^cpack version " )' -S = -- "$cur" ) )
             compopt -o nospace
             return
             ;;
@@ -38,12 +38,12 @@ _cpack()
             ;;
         --help-command)
             COMPREPLY=( $( compgen -W '$( cpack --help-command-list 2>/dev/null|
-                grep -v "^cmake version " )' -- "$cur" ) )
+                grep -v "^cpack version " )' -- "$cur" ) )
             return
             ;;
         --help-variable)
             COMPREPLY=( $( compgen -W '$( cpack --help-variable-list \
-                2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
+                2>/dev/null | grep -v "^cpack version " )' -- "$cur" ) )
             return
             ;;
     esac
