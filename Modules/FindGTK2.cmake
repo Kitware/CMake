@@ -457,7 +457,7 @@ function(_GTK2_ADD_TARGET _var)
 
     string(TOLOWER "${_var}" _basename)
 
-    cmake_parse_arguments(_${_var} "" "" "GTK2_DEPENDS;EXTRA_INCLUDES" ${ARGN})
+    cmake_parse_arguments(_${_var} "" "" "GTK2_DEPENDS;GTK2_OPTIONAL_DEPENDS;EXTRA_INCLUDES" ${ARGN})
 
     # Do not create the target if dependencies are missing
     foreach(_dep ${_${_var}_GTK2_DEPENDS})
@@ -498,7 +498,7 @@ function(_GTK2_ADD_TARGET _var)
         endif()
 
         if(_${_var}_GTK2_DEPENDS)
-            _GTK2_ADD_TARGET_DEPENDS(${_var} ${_${_var}_GTK2_DEPENDS})
+            _GTK2_ADD_TARGET_DEPENDS(${_var} ${_${_var}_GTK2_DEPENDS} ${_${_var}_GTK2_OPTIONAL_DEPENDS})
         endif()
 
         if(_${_var}_EXTRA_INCLUDES)
@@ -665,7 +665,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         else()
             _GTK2_FIND_LIBRARY    (GTK gtk-win32 false true)
         endif()
-        _GTK2_ADD_TARGET (GTK GTK2_DEPENDS gdk atk gio pangoft2 pangocairo pango cairo gdk_pixbuf gthread gobject glib)
+        _GTK2_ADD_TARGET (GTK GTK2_DEPENDS gdk atk pangoft2 pangocairo pango cairo gdk_pixbuf gthread gobject glib
+                              GTK2_OPTIONAL_DEPENDS gio)
 
         # Left for compatibility with previous versions. It doesn't seem to be required
         _GTK2_FIND_INCLUDE_DIR(FONTCONFIG fontconfig/fontconfig.h)
@@ -700,20 +701,23 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(PANGOMM pangomm.h)
         _GTK2_FIND_INCLUDE_DIR(PANGOMMCONFIG pangommconfig.h)
         _GTK2_FIND_LIBRARY    (PANGOMM pangomm true true)
-        _GTK2_ADD_TARGET      (PANGOMM GTK2_DEPENDS glibmm cairomm pangocairo sigc++ pango cairo gobject glib
+        _GTK2_ADD_TARGET      (PANGOMM GTK2_DEPENDS glibmm pangocairo sigc++ pango cairo gobject glib
+                                       GTK2_OPTIONAL_DEPENDS cairomm
                                        EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
 
         _GTK2_FIND_INCLUDE_DIR(GDKMM gdkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GDKMMCONFIG gdkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GDKMM gdkmm true true)
-        _GTK2_ADD_TARGET      (GDKMM GTK2_DEPENDS giomm pangomm gtk glibmm cairomm sigc++ gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib
+        _GTK2_ADD_TARGET      (GDKMM GTK2_DEPENDS pangomm gtk glibmm sigc++ gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib
+                                     GTK2_OPTIONAL_DEPENDS giomm cairomm gio
                                      EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
         _GTK2_FIND_INCLUDE_DIR(GTKMM gtkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GTKMMCONFIG gtkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTKMM gtkmm true true)
-        _GTK2_ADD_TARGET      (GTKMM GTK2_DEPENDS atkmm gdkmm giomm pangomm gtk glibmm cairomm sigc++ gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
+        _GTK2_ADD_TARGET      (GTKMM GTK2_DEPENDS atkmm gdkmm pangomm gtk glibmm sigc++ gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
+                                     GTK2_OPTIONAL_DEPENDS giomm cairomm gio
                                      EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     elseif(_GTK2_component STREQUAL "glade")
@@ -728,7 +732,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GLADEMM libglademm.h)
         _GTK2_FIND_INCLUDE_DIR(GLADEMMCONFIG libglademmconfig.h)
         _GTK2_FIND_LIBRARY    (GLADEMM glademm true true)
-        _GTK2_ADD_TARGET      (GLADEMM GTK2_DEPENDS gtkmm glade atkmm gdkmm giomm pangomm glibmm cairomm sigc++ gtk gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
+        _GTK2_ADD_TARGET      (GLADEMM GTK2_DEPENDS gtkmm glade atkmm gdkmm giomm pangomm glibmm sigc++ gtk gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
+                                       GTK2_OPTIONAL_DEPENDS giomm cairomm gio
                                        EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     else()
