@@ -307,13 +307,6 @@ void cmDocumentation::AddDocumentIntroToPrint(const char* intro[2])
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
                                          const char* docname)
 {
-  if ((this->CurrentFormatter->GetForm() != HTMLForm)
-       && (this->CurrentFormatter->GetForm() != DocbookForm)
-       && (this->CurrentFormatter->GetForm() != ManForm))
-    {
-    this->PrintVersion(os);
-    }
-
   // Handle Document Name. docname==0 disables intro.
   this->SetDocName("");
   if (docname)
@@ -394,7 +387,7 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
     case cmDocumentation::Copyright:
       return this->PrintCopyright(os);
     case cmDocumentation::Version:
-      return true;
+      return this->PrintVersion(os);
     default: return false;
     }
 }
