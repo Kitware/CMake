@@ -136,7 +136,7 @@ _cmake()
             ;;
          --help-concept)
             COMPREPLY=( $( compgen -W '$( cmake --help-concept-list \
-                2>/dev/null | tail -n +2 )' -- "$cur" ) )
+                2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
     esac
