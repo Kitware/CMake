@@ -1776,7 +1776,10 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   for (int i = 0; i < numFiles; ++i)
     {
     std::string fileName = directory.GetFile(i);
-    if (fileName.compare(0, pattern.length(), pattern) != 0)
+    // bcc crashes if we attempt a normal substring comparison,
+    // hence the following workaround
+    std::string fileNameSubstring = fileName.substr(0, pattern.length());
+    if (fileNameSubstring.compare(pattern) != 0)
       {
       continue;
       }
