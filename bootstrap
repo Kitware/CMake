@@ -23,6 +23,15 @@ cmake_version_component()
 "
 }
 
+# Install destination extraction function.
+cmake_install_dest_default()
+{
+  cat "${cmake_source_dir}/Source/CMakeInstallDestinations.cmake" | sed -n '
+/^ *set(CMAKE_'"${1}"'_DIR_DEFAULT.*) # '"${2}"'$/ {
+  s/^ *set(CMAKE_'"${1}"'_DIR_DEFAULT *"\([^"]*\)").*$/\1/;p;q;}
+'
+}
+
 cmake_toupper()
 {
     echo "$1" | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
@@ -47,9 +56,12 @@ if [ "$cmake_version_rc" != "" ]; then
   cmake_version="${cmake_version}-rc${cmake_version_rc}"
 fi
 
-cmake_data_dir="share/cmake-${cmake_version_major}.${cmake_version_minor}"
-cmake_doc_dir="doc/cmake-${cmake_version_major}.${cmake_version_minor}"
-cmake_man_dir="man"
+cmake_data_dir_keyword="OTHER"
+cmake_doc_dir_keyword="OTHER"
+cmake_man_dir_keyword="OTHER"
+cmake_data_dir=""
+cmake_doc_dir=""
+cmake_man_dir=""
 cmake_init_file=""
 cmake_bootstrap_system_libs=""
 cmake_bootstrap_qt_gui=""
@@ -58,6 +70,8 @@ cmake_bootstrap_qt_qmake=""
 # Determine whether this is a Cygwin environment.
 if echo "${cmake_system}" | grep CYGWIN >/dev/null 2>&1; then
   cmake_system_cygwin=true
+  cmake_doc_dir_keyword="CYGWIN"
+  cmake_man_dir_keyword="CYGWIN"
 else
   cmake_system_cygwin=false
 fi
@@ -79,6 +93,8 @@ fi
 # Determine whether this is BeOS
 if echo "${cmake_system}" | grep BeOS >/dev/null 2>&1; then
   cmake_system_beos=true
+  cmake_doc_dir_keyword="HAIKU"
+  cmake_man_dir_keyword="HAIKU"
 else
   cmake_system_beos=false
 fi
@@ -86,6 +102,8 @@ fi
 # Determine whether this is Haiku
 if echo "${cmake_system}" | grep Haiku >/dev/null 2>&1; then
   cmake_system_haiku=true
+  cmake_doc_dir_keyword="HAIKU"
+  cmake_man_dir_keyword="HAIKU"
 else
   cmake_system_haiku=false
 fi
@@ -164,11 +182,14 @@ if ${cmake_system_mingw}; then
   fi
 elif ${cmake_system_haiku}; then
   cmake_default_prefix=`finddir B_COMMON_DIRECTORY`
-  cmake_man_dir="documentation/man"
-  cmake_doc_dir="documentation/doc/cmake-${cmake_version}"
 else
   cmake_default_prefix="/usr/local"
 fi
+
+# Lookup default install destinations.
+cmake_data_dir_default="`cmake_install_dest_default DATA ${cmake_data_dir_keyword}`"
+cmake_doc_dir_default="`cmake_install_dest_default DOC ${cmake_doc_dir_keyword}`"
+cmake_man_dir_default="`cmake_install_dest_default MAN ${cmake_man_dir_keyword}`"
 
 CMAKE_KNOWN_C_COMPILERS="cc gcc xlc icc tcc"
 CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ c++ icc como "
@@ -360,11 +381,11 @@ Directory and file names:
   --prefix=PREFIX         install files in tree rooted at PREFIX
                           ['"${cmake_default_prefix}"']
   --datadir=DIR           install data files in PREFIX/DIR
-                          ['"${cmake_data_dir}"']
+                          ['"${cmake_data_dir_default}"']
   --docdir=DIR            install documentation files in PREFIX/DIR
-                          ['"${cmake_doc_dir}"']
+                          ['"${cmake_doc_dir_default}"']
   --mandir=DIR            install man pages files in PREFIX/DIR/manN
-                          ['"${cmake_man_dir}"']
+                          ['"${cmake_man_dir_default}"']
 '
   exit 10
 }
@@ -1408,7 +1429,7 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_versi
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_TWEAK ${cmake_version_tweak}"
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/${cmake_data_dir}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 
 # Regenerate configured headers

@@ -432,27 +432,8 @@ set(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
 # install tree.
 set(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
-set(CMAKE_DATA_DIR "share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
-  "Install location for data (relative to prefix).")
-set(CMAKE_DOC_DIR "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
-  "Install location for documentation (relative to prefix).")
-set(CMAKE_MAN_DIR "man" CACHE STRING
-  "Install location for man pages (relative to prefix).")
-mark_as_advanced(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
-if(CYGWIN AND EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
-  # Force doc, data and man dirs to conform to cygwin layout.
-  set(CMAKE_DOC_DIR  "share/doc/cmake-${CMake_VERSION}")
-  set(CMAKE_DATA_DIR "share/cmake-${CMake_VERSION}")
-  set(CMAKE_MAN_DIR  "share/man")
-  # let the user know we just forced these values
-  message(STATUS "Setup for Cygwin packaging")
-  message(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
-  message(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
-  message(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
-endif()
-string(REGEX REPLACE "^/" "" CMAKE_DATA_DIR "${CMAKE_DATA_DIR}")
-string(REGEX REPLACE "^/" "" CMAKE_DOC_DIR "${CMAKE_DOC_DIR}")
-string(REGEX REPLACE "^/" "" CMAKE_MAN_DIR "${CMAKE_MAN_DIR}")
+# Load install destinations.
+include(Source/CMakeInstallDestinations.cmake)
 
 if(BUILD_TESTING)
   include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
