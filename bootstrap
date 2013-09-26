@@ -42,6 +42,10 @@ cmake_version_tweak="`cmake_version_component TWEAK`"
 if [ "$cmake_version_tweak" != "0" ]; then
   cmake_version="${cmake_version}.${cmake_version_tweak}"
 fi
+cmake_version_rc="`cmake_version_component RC`"
+if [ "$cmake_version_rc" != "" ]; then
+  cmake_version="${cmake_version}-rc${cmake_version_rc}"
+fi
 
 cmake_data_dir="share/cmake-${cmake_version_major}.${cmake_version_minor}"
 cmake_doc_dir="doc/cmake-${cmake_version_major}.${cmake_version_minor}"
