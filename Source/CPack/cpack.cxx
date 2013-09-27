@@ -541,27 +541,6 @@ int main (int argc, char *argv[])
 
     std::vector<cmDocumentationEntry> commands;
 
-    std::string                              docedFile;
-    std::string                              docPath;
-    cmDocumentation::documentedModulesList_t docedModList;
-
-    docedFile = globalMF->GetModulesFile("CPack.cmake");
-    if (docedFile.length()!=0)
-      {
-      docPath = cmSystemTools::GetFilenamePath(docedFile.c_str());
-      doc.getDocumentedModulesListInDir(docPath,"CPack*.cmake",docedModList);
-      }
-
-    // parse the files for documentation.
-    cmDocumentation::documentedModulesList_t::iterator docedIt;
-    for (docedIt = docedModList.begin();
-         docedIt!= docedModList.end(); ++docedIt)
-      {
-          doc.GetStructuredDocFromFile(
-              (docedIt->first).c_str(),
-              commands,&cminst);
-      }
-
     std::map<std::string,cmDocumentationSection *> propDocs;
     cminst.GetPropertiesDocumentation(propDocs);
     doc.SetSections(propDocs);
