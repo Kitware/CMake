@@ -70,6 +70,10 @@ private:
 
   //! Handle coverage using xdebug php coverage
   int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
+
+  //! Handle coverage for Python with coverage.py
+  int HandlePythonCoverage(cmCTestCoverageHandlerContainer* cont);
+
   //! Handle coverage for mumps
   int HandleMumpsCoverage(cmCTestCoverageHandlerContainer* cont);
 

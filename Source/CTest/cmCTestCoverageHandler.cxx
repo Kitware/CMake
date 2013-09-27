@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmCTestCoverageHandler.h"
 #include "cmParsePHPCoverage.h"
+#include "cmParsePythonCoverage.h"
 #include "cmParseGTMCoverage.h"
 #include "cmParseCacheCoverage.h"
 #include "cmCTest.h"
@@ -392,6 +393,12 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     return error;
     }
+  file_count += this->HandlePythonCoverage(&cont);
+  if ( file_count < 0 )
+    {
+    return error;
+    }
+
   file_count += this->HandleMumpsCoverage(&cont);
   error = cont.Error;
   if ( file_count < 0 )
@@ -761,6 +768,32 @@ int cmCTestCoverageHandler::HandlePHPCoverage(
     }
   return static_cast<int>(cont->TotalCoverage.size());
 }
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandlePythonCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmParsePythonCoverage cov(*cont, this->CTest);
+
+  // Assume the coverage.xml is in the source directory
+  std::string coverageXMLFile = cont->SourceDir + "/coverage.xml";
+
+  if(cmSystemTools::FileExists(coverageXMLFile.c_str()))
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Parsing coverage.py XML file: " << coverageXMLFile
+               << std::endl);
+    cov.ReadCoverageXML(coverageXMLFile.c_str());
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+               "Cannot find coverage.py XML file: " << coverageXMLFile
+               << std::endl);
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+}
+
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleMumpsCoverage(
   cmCTestCoverageHandlerContainer* cont)
