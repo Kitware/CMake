@@ -459,20 +459,20 @@ function(_GTK2_ADD_TARGET _var)
 
     cmake_parse_arguments(_${_var} "" "" "GTK2_DEPENDS;GTK2_OPTIONAL_DEPENDS;EXTRA_INCLUDES" ${ARGN})
 
-    # Do not create the target if dependencies are missing
-    foreach(_dep ${_${_var}_GTK2_DEPENDS})
-        if(NOT TARGET GTK2::${_dep})
-            return()
-        endif()
-    endforeach()
-
-    foreach(_include ${_${_var}_EXTRA_INCLUDES})
-        if(NOT _include)
-            return()
-        endif()
-    endforeach()
-
     if(GTK2_${_var}_FOUND AND NOT TARGET GTK2::${_basename})
+        # Do not create the target if dependencies are missing
+        foreach(_dep ${_${_var}_GTK2_DEPENDS})
+            if(NOT TARGET GTK2::${_dep})
+                message(WARNING "FindGTK2: target GTK2::${_dep} not found while creating target GTK2::${_basename}")
+            endif()
+        endforeach()
+
+        foreach(_include ${_${_var}_EXTRA_INCLUDES})
+            if(NOT _include)
+                message(WARNING "FindGTK2: ${_include} not found while creating target GTK2::${_basename}")
+            endif()
+        endforeach()
+
         add_library(GTK2::${_basename} UNKNOWN IMPORTED)
 
         if(GTK2_${_var}_LIBRARY_RELEASE)
