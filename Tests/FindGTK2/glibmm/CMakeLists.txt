@@ -4,6 +4,17 @@ project(glibmm)
 
 find_package(GTK2 COMPONENTS gtk gtkmm REQUIRED)
 
+include(CMakePrintHelpers)
+cmake_print_properties(TARGETS GTK2::glibmm
+                       PROPERTIES IMPORTED_CONFIGURATIONS
+                                  IMPORTED_LOCATION_RELEASE
+                                  IMPORTED_LOCATION_DEBUG
+                                  IMPORTED_LINK_INTERFACE_LIBRARIES_RELEASE
+                                  IMPORTED_LINK_INTERFACE_LIBRARIES_DEBUG
+                                  INTERFACE_LINK_LIBRARIES
+                                  INTERFACE_INCLUDE_DIRECTORIES
+                                  INTERFACE_COMPILE_DEFINITIONS)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(glibmm WIN32 main.cpp)
