@@ -46,6 +46,7 @@ protected:
           }
 
           std::string line;
+          curFileLines.push_back(-1);
           while(cmSystemTools::GetLineFromStream(fin, line))
           {
             curFileLines.push_back(-1);
