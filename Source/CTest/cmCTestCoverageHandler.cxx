@@ -776,7 +776,7 @@ int cmCTestCoverageHandler::HandlePythonCoverage(
   cmParsePythonCoverage cov(*cont, this->CTest);
 
   // Assume the coverage.xml is in the source directory
-  std::string coverageXMLFile = cont->SourceDir + "/coverage.xml";
+  std::string coverageXMLFile = this->CTest->GetBinaryDir() + "/coverage.xml";
 
   if(cmSystemTools::FileExists(coverageXMLFile.c_str()))
     {
