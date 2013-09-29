@@ -30,7 +30,7 @@ protected:
       {
         if(strcmp(atts[tagCount], "filename") == 0)
         {
-          cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "filename: "
+          cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Reading file: "
                      << atts[tagCount+1] << std::endl);
           this->CurFileName = this->Coverage.SourceDir + "/" +
                                  atts[tagCount+1];
@@ -83,15 +83,9 @@ protected:
         ++tagCount;
       }
     }
-/*    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Starting tag: " << name
-               << std::endl);*/
   }
 
-  virtual void EndElement(const char* name)
-  {
-/*    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Ending tag: " << name
-               << std::endl);*/
-  }
+  virtual void EndElement(const char* name) {}
 
 private:
 
