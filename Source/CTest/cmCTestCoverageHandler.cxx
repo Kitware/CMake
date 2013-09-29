@@ -394,6 +394,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     return error;
     }
   file_count += this->HandlePythonCoverage(&cont);
+  error = cont.Error;
   if ( file_count < 0 )
     {
     return error;

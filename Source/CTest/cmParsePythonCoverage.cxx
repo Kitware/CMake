@@ -39,9 +39,10 @@ protected:
           std::ifstream fin(this->CurFileName.c_str());
           if(!fin)
           {
-            cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+            cmCTestLog(this->CTest, ERROR_MESSAGE,
                        "Python Coverage: Error opening " << this->CurFileName
                        << std::endl);
+            this->Coverage.Error++;
             break;
           }
 
