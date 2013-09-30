@@ -457,22 +457,16 @@ function(_GTK2_ADD_TARGET _var)
 
     string(TOLOWER "${_var}" _basename)
 
-    cmake_parse_arguments(_${_var} "" "" "GTK2_DEPENDS;GTK2_OPTIONAL_DEPENDS;EXTRA_INCLUDES" ${ARGN})
-
-    # Do not create the target if dependencies are missing
-    foreach(_dep ${_${_var}_GTK2_DEPENDS})
-        if(NOT TARGET GTK2::${_dep})
-            return()
-        endif()
-    endforeach()
-
-    foreach(_include ${_${_var}_EXTRA_INCLUDES})
-        if(NOT _include)
-            return()
-        endif()
-    endforeach()
+    cmake_parse_arguments(_${_var} "" "" "GTK2_DEPENDS;GTK2_OPTIONAL_DEPENDS;OPTIONAL_INCLUDES" ${ARGN})
 
     if(GTK2_${_var}_FOUND AND NOT TARGET GTK2::${_basename})
+        # Do not create the target if dependencies are missing
+        foreach(_dep ${_${_var}_GTK2_DEPENDS})
+            if(NOT TARGET GTK2::${_dep})
+                return()
+            endif()
+        endforeach()
+
         add_library(GTK2::${_basename} UNKNOWN IMPORTED)
 
         if(GTK2_${_var}_LIBRARY_RELEASE)
@@ -501,8 +495,8 @@ function(_GTK2_ADD_TARGET _var)
             _GTK2_ADD_TARGET_DEPENDS(${_var} ${_${_var}_GTK2_DEPENDS} ${_${_var}_GTK2_OPTIONAL_DEPENDS})
         endif()
 
-        if(_${_var}_EXTRA_INCLUDES)
-            _GTK2_ADD_TARGET_INCLUDE_DIRS(${_var} ${_${_var}_EXTRA_INCLUDES})
+        if(_${_var}_OPTIONAL_INCLUDES)
+            _GTK2_ADD_TARGET_INCLUDE_DIRS(${_var} ${_${_var}_OPTIONAL_INCLUDES})
         endif()
 
         if(GTK2_USE_IMPORTED_TARGETS)
@@ -644,11 +638,11 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
 
         _GTK2_FIND_LIBRARY    (PANGOFT2 pangoft2 false true)
         _GTK2_ADD_TARGET      (PANGOFT2 GTK2_DEPENDS pango gobject glib
-                                        EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
         _GTK2_FIND_LIBRARY    (PANGOXFT pangoxft false true)
         _GTK2_ADD_TARGET      (PANGOXFT GTK2_DEPENDS pangoft2 pango gobject glib
-                                        EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
         _GTK2_FIND_INCLUDE_DIR(GDK gdk/gdk.h)
         _GTK2_FIND_INCLUDE_DIR(GDKCONFIG gdkconfig.h)
@@ -696,14 +690,14 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(CAIROMMCONFIG cairommconfig.h)
         _GTK2_FIND_LIBRARY    (CAIROMM cairomm true true)
         _GTK2_ADD_TARGET      (CAIROMM GTK2_DEPENDS cairo sigc++
-                                       EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
         _GTK2_FIND_INCLUDE_DIR(PANGOMM pangomm.h)
         _GTK2_FIND_INCLUDE_DIR(PANGOMMCONFIG pangommconfig.h)
         _GTK2_FIND_LIBRARY    (PANGOMM pangomm true true)
         _GTK2_ADD_TARGET      (PANGOMM GTK2_DEPENDS glibmm pangocairo sigc++ pango cairo gobject glib
                                        GTK2_OPTIONAL_DEPENDS cairomm
-                                       EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
 
         _GTK2_FIND_INCLUDE_DIR(GDKMM gdkmm.h)
@@ -711,21 +705,21 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (GDKMM gdkmm true true)
         _GTK2_ADD_TARGET      (GDKMM GTK2_DEPENDS pangomm gtk glibmm sigc++ gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib
                                      GTK2_OPTIONAL_DEPENDS giomm cairomm gio
-                                     EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
         _GTK2_FIND_INCLUDE_DIR(GTKMM gtkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GTKMMCONFIG gtkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTKMM gtkmm true true)
         _GTK2_ADD_TARGET      (GTKMM GTK2_DEPENDS atkmm gdkmm pangomm gtk glibmm sigc++ gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
                                      GTK2_OPTIONAL_DEPENDS giomm cairomm gio
-                                     EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     elseif(_GTK2_component STREQUAL "glade")
 
         _GTK2_FIND_INCLUDE_DIR(GLADE glade/glade.h)
         _GTK2_FIND_LIBRARY    (GLADE glade false true)
         _GTK2_ADD_TARGET      (GLADE GTK2_DEPENDS gtk gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib
-                                     EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     elseif(_GTK2_component STREQUAL "glademm")
 
@@ -734,7 +728,7 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (GLADEMM glademm true true)
         _GTK2_ADD_TARGET      (GLADEMM GTK2_DEPENDS gtkmm glade atkmm gdkmm giomm pangomm glibmm sigc++ gtk gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
                                        GTK2_OPTIONAL_DEPENDS giomm cairomm gio
-                                       EXTRA_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     else()
         message(FATAL_ERROR "Unknown GTK2 component ${_component}")
