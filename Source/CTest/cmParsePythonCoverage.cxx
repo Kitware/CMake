@@ -91,8 +91,8 @@ private:
 
   typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
      FileLinesType;
-  cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
+  cmCTestCoverageHandlerContainer& Coverage;
   std::string CurFileName;
 
 };
