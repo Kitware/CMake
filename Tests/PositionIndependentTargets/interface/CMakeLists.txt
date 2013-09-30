@@ -5,18 +5,16 @@ set_property(TARGET piciface PROPERTY INTERFACE_POSITION_INDEPENDENT_CODE ON)
 add_executable(test_empty_iface "${CMAKE_CURRENT_SOURCE_DIR}/../pic_main.cpp")
 target_link_libraries(test_empty_iface piciface)
 
-include(GenerateExportHeader)
-
 add_library(sharedlib SHARED "${CMAKE_CURRENT_SOURCE_DIR}/../pic_lib.cpp")
 target_link_libraries(sharedlib piciface)
-generate_export_header(sharedlib)
+set_property(TARGET sharedlib PROPERTY DEFINE_SYMBOL PIC_TEST_BUILD_DLL)
 
 add_executable(test_iface_via_shared "${CMAKE_CURRENT_SOURCE_DIR}/../pic_main.cpp")
 target_link_libraries(test_iface_via_shared sharedlib)
 
 add_library(sharedlibpic SHARED "${CMAKE_CURRENT_SOURCE_DIR}/../pic_lib.cpp")
 set_property(TARGET sharedlibpic PROPERTY INTERFACE_POSITION_INDEPENDENT_CODE ON)
-generate_export_header(sharedlibpic)
+set_property(TARGET sharedlibpic PROPERTY DEFINE_SYMBOL PIC_TEST_BUILD_DLL)
 
 add_library(shared_iface INTERFACE)
 target_link_libraries(shared_iface INTERFACE sharedlibpic)
