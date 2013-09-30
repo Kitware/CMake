@@ -1967,6 +1967,25 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       PASS_REGULAR_EXPRESSION
       "Process file.*XINDEX.m.*Total LOC:.*125.*Percentage Coverage: 85.60.*"
       ENVIRONMENT COVFILE=)
+
+  # Adding a test case for Python Coverage
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/PythonCoverage/coverage.xml.in"
+     "${CMake_BINARY_DIR}/Testing/PythonCoverage/coverage.xml")
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/PythonCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/PythonCoverage/DartConfiguration.tcl")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/PythonCoverage/coveragetest"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/PythonCoverage")
+  add_test(NAME CTestPythonCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/PythonCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestPythonCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*foo.py.*Total LOC:.*13.*Percentage Coverage: 84.62.*"
+      ENVIRONMENT COVFILE=)
+
   # Use macro, not function so that build can still be driven by CMake 2.4.
   # After 2.6 is required, this could be a function without the extra 'set'
   # calls.
