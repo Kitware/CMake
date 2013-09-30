@@ -12,7 +12,6 @@ public:
   XMLParser(cmCTest* ctest, cmCTestCoverageHandlerContainer& cont)
     : CTest(ctest), Coverage(cont)
   {
-    cmXMLParser::cmXMLParser();
   }
 
   virtual ~XMLParser()
