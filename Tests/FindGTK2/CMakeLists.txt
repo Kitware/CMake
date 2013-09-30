@@ -30,7 +30,7 @@ endif()
 
 
 # Test GTK2 targets
-if(GTK2_GLIB_FOUND)
+if(TARGET GTK2::glib)
   add_test(GTK2Targets.glib ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/glib"
@@ -43,7 +43,7 @@ if(GTK2_GLIB_FOUND)
     )
 endif()
 
-if(GTK2_GOBJECT_FOUND)
+if(TARGET GTK2::gobject)
   add_test(GTK2Targets.gobject ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gobject"
@@ -56,7 +56,7 @@ if(GTK2_GOBJECT_FOUND)
     )
 endif()
 
-if(GTK2_GIO_FOUND)
+if(TARGET GTK2::gio)
   add_test(GTK2Targets.gio ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gio"
@@ -69,7 +69,7 @@ if(GTK2_GIO_FOUND)
     )
 endif()
 
-if(GTK2_GMODULE_FOUND)
+if(TARGET GTK2::gmodule)
   add_test(GTK2Targets.gmodule ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gmodule"
@@ -82,7 +82,7 @@ if(GTK2_GMODULE_FOUND)
     )
 endif()
 
-if(GTK2_GTHREAD_FOUND)
+if(TARGET GTK2::gthread)
   add_test(GTK2Targets.gthread ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gthread"
@@ -95,7 +95,7 @@ if(GTK2_GTHREAD_FOUND)
     )
 endif()
 
-if(GTK2_ATK_FOUND)
+if(TARGET GTK2::atk)
   add_test(GTK2Targets.atk ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/atk"
@@ -108,7 +108,7 @@ if(GTK2_ATK_FOUND)
     )
 endif()
 
-if(GTK2_GDK_PIXBUF_FOUND)
+if(TARGET GTK2::gdk_pixbuf)
   add_test(GTK2Targets.gdk_pixbuf ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gdk_pixbuf"
@@ -121,7 +121,7 @@ if(GTK2_GDK_PIXBUF_FOUND)
     )
 endif()
 
-if(GTK2_CAIRO_FOUND)
+if(TARGET GTK2::cairo)
   add_test(GTK2Targets.cairo ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/cairo"
@@ -134,7 +134,7 @@ if(GTK2_CAIRO_FOUND)
     )
 endif()
 
-if(GTK2_PANGO_FOUND)
+if(TARGET GTK2::pango)
   add_test(GTK2Targets.pango ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/pango"
@@ -147,7 +147,7 @@ if(GTK2_PANGO_FOUND)
     )
 endif()
 
-if(GTK2_PANGOCAIRO_FOUND)
+if(TARGET GTK2::pangocairo)
   add_test(GTK2Targets.pangocairo ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/pangocairo"
@@ -160,7 +160,7 @@ if(GTK2_PANGOCAIRO_FOUND)
     )
 endif()
 
-if(GTK2_PANGOXFT_FOUND)
+if(TARGET GTK2::pangoxft)
   add_test(GTK2Targets.pangoxft ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/pangoxft"
@@ -173,7 +173,7 @@ if(GTK2_PANGOXFT_FOUND)
     )
 endif()
 
-if(GTK2_PANGOFT2_FOUND)
+if(TARGET GTK2::pangoft2)
   add_test(GTK2Targets.pangoft2 ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/pangoft2"
@@ -186,7 +186,7 @@ if(GTK2_PANGOFT2_FOUND)
     )
 endif()
 
-if(GTK2_GDK_FOUND)
+if(TARGET GTK2::gdk)
   add_test(GTK2Targets.gdk ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gdk"
@@ -199,7 +199,7 @@ if(GTK2_GDK_FOUND)
     )
 endif()
 
-if(GTK2_GTK_FOUND)
+if(TARGET GTK2::gtk)
   add_test(GTK2Targets.gtk ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gtk"
@@ -212,7 +212,7 @@ if(GTK2_GTK_FOUND)
     )
 endif()
 
-if(GTK2_SIGC++_FOUND)
+if(TARGET GTK2::sigc++)
   add_test(GTK2Targets.sigc++ ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/sigc++"
@@ -225,7 +225,7 @@ if(GTK2_SIGC++_FOUND)
     )
 endif()
 
-if(GTK2_GLIBMM_FOUND)
+if(TARGET GTK2::glibmm)
   add_test(GTK2Targets.glibmm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/glibmm"
@@ -238,7 +238,7 @@ if(GTK2_GLIBMM_FOUND)
     )
 endif()
 
-if(GTK2_GIOMM_FOUND)
+if(TARGET GTK2::giomm)
   add_test(GTK2Targets.giomm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/giomm"
@@ -251,7 +251,7 @@ if(GTK2_GIOMM_FOUND)
     )
 endif()
 
-if(GTK2_ATKMM_FOUND)
+if(TARGET GTK2::atkmm)
   add_test(GTK2Targets.atkmm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/atkmm"
@@ -264,7 +264,7 @@ if(GTK2_ATKMM_FOUND)
     )
 endif()
 
-if(GTK2_CAIROMM_FOUND)
+if(TARGET GTK2::cairomm)
   add_test(GTK2Targets.cairomm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/cairomm"
@@ -277,7 +277,7 @@ if(GTK2_CAIROMM_FOUND)
     )
 endif()
 
-if(GTK2_PANGOMM_FOUND)
+if(TARGET GTK2::pangomm)
   add_test(GTK2Targets.pangomm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/pangomm"
@@ -290,7 +290,7 @@ if(GTK2_PANGOMM_FOUND)
     )
 endif()
 
-if(GTK2_GDKMM_FOUND)
+if(TARGET GTK2::gdkmm)
   add_test(GTK2Targets.gdkmm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gdkmm"
@@ -303,7 +303,7 @@ if(GTK2_GDKMM_FOUND)
     )
 endif()
 
-if(GTK2_GTKMM_FOUND)
+if(TARGET GTK2::gtkmm)
   add_test(GTK2Targets.gtkmm ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/FindGTK2/gtkmm"
