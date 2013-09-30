@@ -86,7 +86,6 @@ if(NOT WIN32)
 endif()
 add_RunCMake_test(CompatibleInterface)
 
-add_RunCMake_test(add_custom_command)
 add_RunCMake_test(add_dependencies)
 add_RunCMake_test(build_command)
 add_RunCMake_test(find_package)
