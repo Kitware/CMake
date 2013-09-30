@@ -1,9 +1,0 @@
-CMake Warning \(dev\) at DuplicateOutput.cmake:6 \(add_custom_command\):
-  Attempt to add a custom command to generate
-
-    .*/Tests/RunCMake/add_custom_command/DuplicateOutput-build/out.h
-
-  but source file "out.h.in" already has a custom command to generate it.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
