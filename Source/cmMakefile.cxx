@@ -1069,6 +1069,18 @@ void
 cmMakefile::UpdateOutputToSourceMap(std::string const& output,
                                     cmSourceFile* source)
 {
+  OutputToSourceMap::iterator i = this->OutputToSource.find(output);
+  if(i != this->OutputToSource.end())
+    {
+    cmOStringStream m;
+    m <<
+      "Attempt to add a custom command to generate\n"
+      "  " << output << "\n"
+      "but source file \"" << i->second->GetLocation().GetName() <<
+      "\" already has a custom command to generate it.";
+    this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
+    return;
+    }
   this->OutputToSource[output] = source;
 }
 
