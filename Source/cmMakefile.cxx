@@ -1033,6 +1033,19 @@ void
 cmMakefile::UpdateOutputToSourceMap(std::string const& output,
                                     cmSourceFile* source)
 {
+  OutputToSourceMap::iterator i = this->OutputToSource.find(output);
+  if(i != this->OutputToSource.end())
+    {
+    // Multiple custom commands produce the same output but may
+    // be attached to a different source file (MAIN_DEPENDENCY).
+    // LinearGetSourceFileWithOutput would return the first one,
+    // so keep the mapping for the first one.
+    //
+    // TODO: Warn the user about this case.  However, the VS 8 generator
+    // triggers it for separate generate.stamp rules in ZERO_CHECK and
+    // individual targets.
+    return;
+    }
   this->OutputToSource[output] = source;
 }
 
