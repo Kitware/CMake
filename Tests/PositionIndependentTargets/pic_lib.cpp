@@ -3,7 +3,6 @@
 
 class PIC_TEST_EXPORT Dummy
 {
-public:
   int dummy();
 };
 
