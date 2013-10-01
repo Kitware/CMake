@@ -317,58 +317,14 @@ registry on non-Windows platforms.
 9.  Search paths specified by the PATHS option.  These are typically
 hard-coded guesses.
 
-On Darwin or systems supporting OS X Frameworks, the cmake variable
-CMAKE_FIND_FRAMEWORK can be set to empty or one of the following:
+.. |FIND_XXX| replace:: find_package
+.. |FIND_ARGS_XXX| replace:: <package>
+.. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
+   CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
 
-::
-
-   "FIRST"  - Try to find frameworks before standard
-              libraries or headers. This is the default on Darwin.
-   "LAST"   - Try to find frameworks after standard
-              libraries or headers.
-   "ONLY"   - Only try to find frameworks.
-   "NEVER" - Never try to find frameworks.
-
-On Darwin or systems supporting OS X Application Bundles, the cmake
-variable CMAKE_FIND_APPBUNDLE can be set to empty or one of the
-following:
-
-::
-
-   "FIRST"  - Try to find application bundles before standard
-              programs. This is the default on Darwin.
-   "LAST"   - Try to find application bundles after standard
-              programs.
-   "ONLY"   - Only try to find application bundles.
-   "NEVER" - Never try to find application bundles.
-
-The CMake variable CMAKE_FIND_ROOT_PATH specifies one or more
-directories to be prepended to all other search directories.  This
-effectively "re-roots" the entire search under given locations.  By
-default it is empty.  It is especially useful when cross-compiling to
-point to the root directory of the target environment and CMake will
-search there too.  By default at first the directories listed in
-CMAKE_FIND_ROOT_PATH and then the non-rooted directories will be
-searched.  The default behavior can be adjusted by setting
-CMAKE_FIND_ROOT_PATH_MODE_PACKAGE.  This behavior can be manually
-overridden on a per-call basis.  By using CMAKE_FIND_ROOT_PATH_BOTH
-the search order will be as described above.  If
-NO_CMAKE_FIND_ROOT_PATH is used then CMAKE_FIND_ROOT_PATH will not be
-used.  If ONLY_CMAKE_FIND_ROOT_PATH is used then only the re-rooted
-directories will be searched.
-
-The default search order is designed to be most-specific to
-least-specific for common use cases.  Projects may override the order
-by simply calling the command multiple times and using the NO_*
-options:
-
-::
-
-   find_package(<package> PATHS paths... NO_DEFAULT_PATH)
-   find_package(<package>)
-
-Once one of the calls succeeds the result variable will be set and
-stored in the cache so that no call will search again.
+.. include:: FIND_XXX_MAC.txt
+.. include:: FIND_XXX_ROOT.txt
+.. include:: FIND_XXX_ORDER.txt
 
 Every non-REQUIRED find_package() call can be disabled by setting the
 variable CMAKE_DISABLE_FIND_PACKAGE_<package> to TRUE.  See the
