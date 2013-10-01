@@ -85,10 +85,7 @@ protected:
     }
   }
 
-  virtual void EndElement(const char* name)
-  {
-    (void) name;
-  }
+  virtual void EndElement(const char*) {}
 
 private:
 
