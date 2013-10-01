@@ -1,3 +1,542 @@
+Changes in CMake 2.8.12-rc3 (since 2.8.12-rc2)
+----------------------------------------------
+Robert Maynard (1):
+      cmMakefile: Do not track CMake temporary files.
+
+Changes in CMake 2.8.12-rc2 (since 2.8.12-rc1)
+----------------------------------------------
+Brad King (2):
+      Fix RunCMake.Configure test expectation newline matching
+      Clean up install rules of CMake itself (#14371)
+
+Clinton Stimpson (1):
+      OSX: Allow an empty INSTALL_NAME_DIR to override MACOSX_RPATH.
+
+Eric Bélanger (1):
+      FindImageMagick: Find libraries named with HDRI support (#14348)
+
+Raphael Kubo da Costa (1):
+      FindTCL: Add BSD paths for Tcl/Tk 8.6
+
+Robert Maynard (2):
+      VS: Generate ToolsVersion matching each VS version
+      cmMakefile: Do not track configured files known to be temporary
+
+Rolf Eike Beer (1):
+      CheckC*CompilerFlag: add documentation what to expect from a positive result
+
+Stephen Kelly (6):
+      Fix OLD behavior of CMP0021.
+      try_compile: Extract IMPORTED targets from LINK_DEPENDENT_LIBRARIES
+      try_compile: Extract IMPORTED targets from INTERFACE_LINK_LIBRARIES
+      Genex: Fix evaluation of MAP_IMPORTED_CONFIG_<CONFIG>
+      Fix some whitespace errors in docs.
+      Normalize system directories from the interface target property
+
+Yury G. Kudryashov (1):
+      CPack: Fix a typo in documentation
+
+Zack Galbreath (1):
+      CTest: Fix GTM coverage parsing line offset bug
+
+Changes in CMake 2.8.12-rc1 (since 2.8.11.2)
+--------------------------------------------
+Adam J. Weigold (1):
+      CPackWIX: Add support for custom WiX templates
+
+Alex Neundorf (12):
+      CMakeSystem: include toolchain file after setting CMAKE_HOST_ (#13796)
+      Add support files for C, C++ and ASM for the IAR toolchain.
+      Add regexps for the IAR toolchain to the vendor list.
+      Add IAR to the CMakeDetectC(XX)CompilerID.c(pp).in
+      cmake-gui: use shortcut F only for "Find in Output"
+      Eclipse: fix #14204 and #14205: no file links to directories
+      automoc: add a global AUTOMOC_TARGETS_FOLDER property
+      install: do not strip dll import libraries (#14123)
+      ExportTargets: add one more comment to the generated file.
+      Add documentation for the --graphviz support
+      graphvizoptions: add copyright notice
+      add macros cmake_print_properties() and cmake_print_variables()
+
+Alexander Mohr (1):
+      VS: Detect MSVC compiler id on ARM toolchain
+
+Andreas Mohr (10):
+      Fix spelling and typos (affecting users)
+      Fix spelling and typos (affecting binary data / module messages)
+      Fix spelling and typos (non-binary)
+      Fix spelling and typos (product names)
+      FindwxWidgets: add DOC strings with usual style
+      Explain distribution of Win9x binary on all Windows versions.
+      VS10: add detailed comment about MIDL processing
+      Docs: Update description of CMAKE_(BUILD_TYPE|CONFIGURATION_TYPES)
+      Docs: Clarify that CMAKE_*_(PREFIX|SUFFIX) affect filenames
+      Docs: Clarify wording "flag used" => "flag (to|will) be used"
+
+Ben Boeckel (12):
+      set_property: Do not remove a property when APPENDing nothing
+      Tests/RunCMake: Document stripping of expected output
+      export: Error when exporting a target without a language
+      variable_watch: Store client data as pointers
+      variable_watch: Add a deleter for the client data
+      variable_watch: Match client_data when finding duplicates
+      variable_watch: Allow specifying the data to match in RemoveWatch
+      variable_watch: Prevent making extra entries in the watch map
+      variable_watch: Fix a typo in the error message
+      variable_watch: Don't share memory for callbacks
+      variable_watch: Check newValue for NULL
+      variable_watch: Add test for watching a variable multiple times
+
+Bill Hoffman (1):
+      Do not set CMAKE_MATCH_ variables when not neeeded
+
+Bjoern Thiel (1):
+      SelectLibraryConfigurations: Fix for cached <base>_LIBRARY
+
+Brad King (91):
+      VS: Separate compiler and linker PDB files (#11899, #14062)
+      MSVC: Invoke 'link' directly for executables
+      Ninja: Fix OBJECT_DIR placeholder path conversion
+      VS 10: Escape ; as %3B in preprocessor definitions (#14073)
+      CTest: Simplify ctest_* command source/build dir lookup
+      get_filename_component: Add explicit unit tests
+      get_filename_component: Add DIRECTORY option (#14091)
+      Xcode: Use explicitFileType to mark source types (#14093)
+      Check{C,CXX}CompilerFlag: Test using C locale (#14102)
+      Windows: Search '/' prefix only when cross compiling (#10994)
+      Recognize ld with toolchain prefix (#13960)
+      VS: Always initialize CMAKE_CONFIGURATION_TYPES in IDE generators
+      Begin post-2.8.11 development
+      Sanitize linker name to parse implicit link line (#14154)
+      VS: Allow /Fa to set AssemblerListingLocation (#14153)
+      Tests/IncludeDirectories: Avoid shared library with no symbols
+      if: Add test for IS_DIRECTORY
+      try_compile: Add test for bad call error cases
+      try_compile: Refactor argument processing
+      variable_watch: Add test for MODIFIED_ACCESS report
+      bootstrap: Compile KWSys SystemTools with UTIME(S|NSAT) values
+      variable_watch: Remove leftover debugging code (#14187)
+      variable_watch: Print accesses as "CMake Debug Log" messages
+      Docs: Clarify CMAKE_PARENT_LIST_FILE (#14194)
+      get_filename_component: Test ABSOLUTE of .. after root component
+      try_compile: Add signature to allow multiple SOURCES
+      enable_language: Clarify documentation
+      Split cmBootstrapCommands.cxx into two sources
+      Document CMAKE_INSTALL_PREFIX in CMAKE_SYSTEM_PREFIX_PATH
+      cmake: Document "-E tar" support for .zip (#14225)
+      FindBoost: Clarify failure on missing 'static' libs (#14235)
+      CMakeDetermineVSServicePack: Improve documentation
+      CMakeDetermineVSServicePack: Add VS 11 update 1 and 2 (#14239)
+      Document ENV syntax as a "variable" (#14245)
+      Embarcadero: Use response files only for includes, objects, and libs
+      Escape target flags taken from COMPILE_OPTIONS
+      Refactor target COMPILE_OPTIONS and COMPILE_FLAGS handling
+      CMakeDetermineVSServicePack: Add VS 11 update 3
+      Document removal of 'register' from flex/bison output
+      VS12: Find proper MSBuild for VSProjectInSubdir test
+      Fortran: Use explicit type in Fortran 90 check
+      project: Document top-level CMakeLists.txt requirement
+      ExternalProject: Document multiple COMMAND lines
+      include: Clarify variable access scope for included file
+      VS: Fix /MAP:mapfile flag mapping (#14282)
+      cmake: On configure error suggest looking at CMake*.log files
+      try_compile: Escape CMAKE_<lang>_FLAGS in test projects (#14268)
+      try_compile: Add COPY_FILE_ERROR option to capture failure
+      FindPNG: Add versioned library names for 1.6 (#14289)
+      cmake: Fix resource leak reported by cppcheck
+      VS,Xcode: Drop incorrect legacy dependency trace (#14291)
+      OS X: Add copyright notices to Darwin-*-Fortran.cmake
+      VS: Avoid leaking child process output back to IDE (#14266)
+      Fix ExportImport test cmp0022NEW build on Watcom
+      add_test: Document test name restrictions (#14298)
+      UseJava: Update notice of copyright by Kitware
+      add_custom_command: Manage backtrace memory correctly (#14299)
+      Teach compiler ABI check to tolerate try_compile COPY_FILE failure
+      Test COMPILE_DEFINITIONS target property get/set/get round-trip
+      Check*CompilerFlag: Document use of CMAKE_REQUIRED_DEFINITIONS (#14309)
+      sha2: Avoid type-punned pointer dereference (#14314)
+      VS 6: Tell BuildDepends test to tolerate ninjadep failure
+      cmMakefile: Do not track configured files known to be temporary
+      libarchive: Update README-CMake.txt for new snapshot
+      libarchive: Include cm_zlib.h to get zlib used by CMake
+      libarchive: Silence API deprecation warnings
+      libarchive: Avoid struct init with variable
+      libarchive: Remove build options not used by CMake
+      libarchive: Backport to CMake 2.8.2
+      VS10: Honor user-specified /SUBSYSTEM: flag (#14326)
+      VS10: Escape include paths in XML project files (#14331)
+      OS X: Search for SDK based on deployment target (#14324)
+      bootstrap: Do not suppress CMAKE_OSX_SYSROOT if CFLAGS have -isysroot (#14324)
+      OS X: Enable command-line build without tools in PATH
+      VS 6,7: Refactor local generators to avoid GetSourceFileWithOutput
+      cmake-gui: Fix build rules for Qt5 on Windows
+      Include cmMakefile.h before cm*Lexer.h to get stdint.h first
+      Skip CTestLimitDashJ test on Borland
+      Add RunCMake.Syntax test to cover argument parsing
+      cmListFileLexer: Fix line number after backslash in string
+      cmListFileLexer: Split normal and legacy unquoted arguments
+      cmListFileArgument: Generalize 'Quoted' bool to 'Delimeter' enum
+      Add RunCMake.Syntax test cases for command invocation styles
+      cmListFileCache: Convert CMake language parser to class
+      Warn about arguments not separated by whitespace
+      Warn about unquoted arguments that look like long brackets
+      cmListFileLexer: Modify flex output to avoid Borland warning
+      Cygwin: Avoid legacy warnings in RunCMake.* tests
+      Update version introducing CMP0021, CMP0022, and CMP0023
+      OS X: Do not default to non-existent deployment target SDK
+      Do not warn about left paren not separated by a space
+
+Christian Maaser (1):
+      VS: Add support for .NET target framework version
+
+Clinton Stimpson (12):
+      Improve documentation for CPACK_PACKAGE_INSTALL_REGISTRY_KEY.
+      Refactor how bundles and frameworks are supported.
+      Xcode: Add support for shared library versioning
+      OS X:  Fix getting of CFBundle LOCATION property.
+      OS X: Add RPATH support for Mac.
+      Xcode: Add rpath support in Xcode generator.
+      OS X: Add support for @rpath in export files.
+      OS X: Add test for rpaths on Mac.
+      OS X: Improvements for getting install name of dylib.
+      OS X: Enable rpath support on Mac OS X when find_library() is used.
+      OS X: Fix regression handling frameworks for Ninja
+      OS X: If necessary, use xcrun to help find otool used to query install names.
+
+Cédric OCHS (1):
+      Xcode: Support XCODE_ATTRIBUTE_ with [variant=<config>] (#12532)
+
+Daniele E. Domenichelli (15):
+      FindGTK2: Move check for pangocairo in gtk module
+      FindGTK2: Detect gthread library
+      FindFreetype: Detect Freetype installed by GtkMM installer for win
+      FindGTK2: Do not fail on MSVC11 if vc100 libraries are available
+      FindGTK2: Add GTK2_DEFINITIONS variable
+      SelectLibraryConfigurations: Do not cache the _LIBRARY variable
+      SelectLibraryConfigurations: Use -NOTFOUND instead of copying the vars
+      FindGTK2: Use GTK_XXX_LIBRARY_DEBUG libraries in debug mode
+      FindGTK2: Append _LIBRARY to var name in _GTK2_FIND_LIBRARY
+      FindGTK2: Append _INCLUDE_DIR to var name in _GTK2_FIND_INCLUDE_DIR
+      FindGTK2: Update local changelog
+      FindGTK2: Remove GTK2_SKIP_MARK_AS_ADVANCED option
+      FindGTK2: gthread-2.0 folder does not exist
+      FindGTK2: Detect gmodule library
+      FindGTK2: Detect pangoft2 and pangoxft libraries
+
+David Coppa (1):
+      OpenBSD: Enable ELF parsing and editing (#14241)
+
+David Golub (1):
+      CPack/NSIS: Obtain path from which to uninstall from registry (#14124)
+
+Eric NOULARD (5):
+      Add support for componentized USER spec file
+      CPackRPM add mechanism to remove path from generated list of file in RPM spec.
+      CPackRPM add /usr/lib64 to the list of builtin to-be-excluded path
+      CPackRPM protect '@' character in filename processed in the spec file.
+      CPackRPM make the changelog line conform to expected format
+
+Fredrik Axelsson (1):
+      CPackWIX: Handle CPACK_PACKAGE_EXECUTABLES (#13967)
+
+Funda Wang (1):
+      FindImageMagick: Find v6 include dir (#14174)
+
+Graham Markall (2):
+      OS X: Add Fortran library version flags (#14249)
+      UseJava: Pass sources to javac using response file (#13028)
+
+Gregoire Lejeune (1):
+      Allow using Java in a cross-compilation toolchain
+
+Ian Monroe (2):
+      Ninja: use cd /D to set directory on Windows
+      CPackWIX: Fix MSI package layout regression from parent
+
+Igor Murzov (2):
+      bash-completion: Add -S,-SP options arguments completion
+      bash-completion: Fix/improve generator names extraction
+
+Jack O'Connor (1):
+      Eclipse: Add a missing space in the documentation
+
+Jason Spiro (1):
+      MinGW: Find mingw32-make included with Code::Blocks IDE (#14302)
+
+John Farrier (2):
+      VS: Add Windows Forms Support
+      VS: Add VS_GLOBAL_ROOTNAMESPACE target property
+
+Jonas Andersen (1):
+      VS: Add Resx configuration to the vcxproj file
+
+LibArchive Upstream (1):
+      libarchive 3.1.2 (reduced)
+
+Marc Bartholomaeus (4):
+      cmake-gui: Add search functions for Output window (#9733)
+      cmake-gui: Add search functions to the context menu of the Output widget
+      cmake-gui: Change shortcut of the search field from Ctrl-F to Alt-E
+      cmake-gui: Add function for going to next error message in Output window
+
+Marcel Loose (1):
+      FindCUDA: Remove duplicate entries from INCLUDE_DIRECTORIES.
+
+Marius Schamschula (1):
+      FindX11: Search in /opt/X11 for OS X 10.8 (#14232)
+
+Mathias Gaunard (1):
+      FindCUDA: CUDA_COMPUTE_BUILD_PATH uses relative paths to binary dir.
+
+Matt McCormick (1):
+      ExternalProject: Allow blank SVN_USERNAME/SVN_PASSWORD (#14128)
+
+Matthew Bentham (1):
+      Xcode: Honor CMAKE_(MODULE|SHARED)_LINKER_FLAGS_<CONFIG> (#14161)
+
+Matthew Woehlke (3):
+      UseJava.cmake: fully use cmake_parse_arguments in add_jar
+      FindProtobuf: also find pthread
+      UseJava.cmake: document add_jar compat shim
+
+Nicolas Despres (1):
+      Optimize custom command full-path dependency lookup
+
+Nils Gladitz (1):
+      Add cmake_host_system_information command
+
+Patrick Gansterer (20):
+      Add option to use stdout/stderr of original terminal in cmake --build
+      Unify the way the flags of a static library are read
+      Add support for CMAKE_STATIC_LINKER_FLAGS
+      Add CMAKE_STATIC_LINKER_FLAGS to CMakeCommonLanguageInclude
+      Add documentation for the missing CMAKE_*_LINKER_FLAGS_* variables
+      Add additonal tests for the linker flags
+      VS6: Add handling of CMAKE_*_LINKER_FLAGS_<CONFIG> variables
+      VS6: Hardcode id_machine_6 for compiler detection
+      VS10: Do not set the TargetMachine when detecting the compiler
+      VS: Set CMAKE_VS_PLATFORM_NAME for VS7 and VS71 too
+      VS: Replace ArchitectureId with PlatformName
+      VS12: Remove duplicated overload of UseFolderProperty()
+      Fix detection of WinCE SDKs with 64bit verion of CMake
+      VS: Unify how the name of the generator is specified
+      VS10: Add support for assembler code (#11536)
+      WIN: Use COFF file header header for architecture detection (#14083)
+      Improve const-correctness in cmVisualStudioGeneratorOptions
+      Fix setting of the entry point symbol for Windows CE (#14088)
+      Add support for new Windows CE compiler
+      VS11: Add support for Windows CE SDKs
+
+Paul Kunysch (1):
+      CTest: Add test for running many tests in parallel
+
+Pavel Shramov (1):
+      cmDependsC: Collapse relative include paths
+
+Petr Kmoch (5):
+      Add projectDir parameter to GenerateBuildCommand
+      VS: Create parser for Visual Studio .sln files
+      VS: Use .sln parser to build targets in subdirs with msbuild (#13623)
+      VS: Add test for building MSBuild project in subdir
+      ctest_build: Pass projectDir to GenerateBuildCommand
+
+Reid Kleckner (1):
+      Ninja: Make cmcldeps depfile output more consistent with 'ninja -t msvc'
+
+Richard Ulrich (3):
+      CPackWIX: Handle multiple shortcuts in the start menu
+      CPackWIX: Add option to specify the language(s) of the installer
+      CMakeCPack: Provide an upgrade guid for WiX
+
+Robert Maynard (9):
+      cmMakefile: Refactor AddCMakeDependFile  and AddCMakeOutputFile.
+      Ninja: Track configured files so we can regenerate them.
+      cmMakefile: Track configured files so we can regenerate them (#13582)
+      Add a test to expose a bug with add_custom_command and ninja.
+      Ninja: GlobalNinjaGenerator WriteBuild and WritePhonyBuild non static
+      Ninja: Custom Command file depends don't need to exist before building
+      FindCUDA: Search for libraries in <prefix>/lib/<arch>/nvidida-current.
+      Ninja: Properly convert all paths to unix style before we do set intersection.
+      Ninja: Update BuildDepends test to verify cmcldeps depfiles.
+
+Robin Lee (1):
+      FindOpenSSL: Fix spelling of CMAKE_CROSSCOMPILING (#14075)
+
+Rolf Eike Beer (25):
+      FindOpenGL: simplify OS selection code
+      FindOpenGL: require headers to be found on non-Windows platforms (#13746)
+      Tests: create output files for all memory checkers
+      CTest: use an output file for Valgrind (#14110)
+      CTest: remove unreachable code and CTestTestMemcheckUnknown test
+      Tests: remove code duplication in CTestTestMemCheck tests
+      Tests: verify that memory checker output files are always present
+      CTest: drop suppression for gcc 2.9.6 errors from default Valgrind flags
+      Tests: add test for non-existent Valgrind suppression file
+      CTest: fix comment documenting cmBoundsCheckerParser class
+      Tests: add a test with custom options passed to valgrind
+      CTest: make sure never to report negative test times (#14132)
+      Doc: fix example for FAIL_REGULAR_EXPRESSION
+      CTest: break after first regex match on output
+      Tests: ignore Guard Malloc messages in MemChecker tests
+      CTest: avoid useless changing of directory
+      Tests: fix build of dummy memtester on AIX
+      wizard: fix warnings
+      wizard: simplify control flow
+      cmTarget: drop the unused local typedef LinkLine
+      Tests: ignore GuardMalloc messages on all Apple build, not just XCode ones
+      replace string(... MATCHES "^const$) with string(... STREQUAL "const")
+      Revert "CTest: fix pre and post test commands with spaces" (#13887)
+      FindPNG: improve library detection (#14301)
+      CTest: create one output file per memcheck (#14303)
+
+Sean McBride (1):
+      Remove some uses of obsolete 'register' storage specifier
+
+Sebastian Leske (1):
+      Document CMAKE_<LANG>_FLAGS variable (#14305)
+
+Stephen Kelly (126):
+      Make the QtAutomoc test compile with either Qt 4 or Qt 5
+      Add a test for Qt5Automoc
+      Remove an endif() followed by an if() for the same condition.
+      Fix some copyastos in the DetermineRCCompiler file.
+      Test transitive includes from setting the LINK_LIBRARIES property.
+      Test the use of target transitive compile definitions with moc.
+      Fix handling of commas in arbitrary content in genexes.
+      Fix style.
+      Remove unused marker for a variable which is now used.
+      Extract the ProcessArbitraryContent method.
+      Rename the method determining if a genex accepts arbitrary content.
+      Make it possible for any genex to have arbitrary content at the end.
+      Add the JOIN generator expression.
+      Test that linking using the debug keyword to tll works.
+      automoc: Read target defines unconditionally
+      Remove unused typedef.
+      Fix brace indentation.
+      Add EXPORT_NAME property.
+      Remove unused vector population.
+      Sublime: Honor source-level COMPILE_FLAGS property
+      Docs: cmake -G selects a "build system" generator
+      Recognize shared library files with a numerical suffix
+      FindQt4: Fix QUIET failure with Qt 5 but not Qt 4
+      Error on relative path in INCLUDE_DIRECTORIES target property.
+      include_directories: Fix handling of empty or space-only entries
+      CTest: Read CTEST_PARALLEL_LEVEL from environment
+      string: Add MAKE_C_IDENTIFIER subcommand
+      GenerateExportHeader: Add newlines to separate the compiler output.
+      GenerateExportHeader: Allow use of of this macro with MODULEs.
+      file: Add GENERATE command to produce files at generate time
+      Tests/Module/GenerateExportHeader: Test exported free-function
+      Add $<LINK_LANGUAGE> generator expression
+      GenerateExportHeader: Generate only C identifiers as defines
+      Tests/CompileDefinitions: Avoid spaces in defines on VS 6
+      Use the qt5::moc imported target instead of a variable.
+      QtAutomoc: Get the Qt version through the target link interface
+      Fix indentation.
+      VS6: Rename some variables to correspond to config values.
+      Add cmLocalGenerator::GetCompileOptions.
+      Add <LANG>_COMPILER_ID generator expressions.
+      cmTarget: Rename struct to be more re-usable.
+      cmTarget: Rename LinkInterfaceIncludeDirectoriesEntries
+      Add COMPILE_OPTIONS target property.
+      Add target_compile_options command.
+      Introduce target property <LANG>_VISIBILITY_PRESET
+      Add a COMPILE_OPTION for a VISIBILITY_INLINES_HIDDEN target property.
+      Qt4Macros: Allow specifying a TARGET in invokations of macros.
+      Introduce add_compile_options command.
+      Remove unused cmAddDefinitionsCommand::ParseDefinition method.
+      Add some spaces to the INCLUDE_DIRECTORIES documentation.
+      CLI: Suppress the unused warning if the key value pair is cached.
+      Use --sysroot when cross compiling.
+      Add missing 'seen' check for evaluating COMPILE_OPTIONS.
+      Find targets in INTERFACE_COMPILE_OPTIONS when exporting for try_compile.
+      Use a preprocessor loop to manage the valid transitive properties.
+      Generate INTERFACE_COMPILE_OPTIONS on export.
+      Genex: Fix indentation in docs.
+      cmSystemTools: Fix typo in comment.
+      Style: Don't put an else after a return.
+      Add compiler target compile options.
+      QtAutomoc: Fix handling of list separator for compile definitions.
+      QtAutomoc: Use config-dependent compile definitions and includes.
+      De-duplicate version comparison code.
+      Add generator expressions for version comparision.
+      Don't run the WarnUnusedCliUnused test on Windows.
+      Add whitespace after colons in error messages.
+      Add missing return after error report.
+      Genex: Make LINK_LANGUAGE report an error when evaluating link libraries.
+      Genex: Extend EvaluatingLinkLibraries to also check the top target name.
+      Genex: Report error if a target file is needed to evaluate link libraries.
+      Add generator expressions for compiler versions.
+      Split the GeneratorExpression test into a third part.
+      Remove unused variable.
+      Add Target API to determine if an include is a system include.
+      Store system include directories in the cmTarget.
+      Extend the cmTargetPropCommandBase interface property handling.
+      Add a SYSTEM parameter to target_include_directories (#14180)
+      Add entire link interface transitive closure as target depends.
+      Test non-IMPORTED libraries in the INTERFACE of IMPORTED libraries.
+      GenexEval: Add abstracted access to link interface for a target.
+      Introduce the LINK_ONLY generator expression.
+      Introduce the INTERFACE_LINK_LIBRARIES property.
+      Export: Generate INTERFACE_LINK_LIBRARIES property on targets.
+      TLL: Don't populate old link interface if CMP0022 is NEW.
+      Overload cmLocalGenerator::AppendDefines to add a list.
+      Add an overload of cmIDEOptions::AddDefines taking a vector of strings.
+      Refactor cmTarget::GetCompileDefinitions to use an out-vector, not a string.
+      Document some variables for deprecation control.
+      Genex: Make CMP0021 and CMP0022 usable with TARGET_POLICY
+      Revert "Use --sysroot when cross compiling."
+      Add target property debugging for COMPILE_DEFINITIONS
+      Mark qt4_use_modules and qt4_automoc as obsolete.
+      Add the INTERFACE_SYSTEM_INCLUDE_DIRECTORIES target property.
+      Don't add trailing whitespace to error message.
+      Remove TODO to uniq COMPILE_OPTIONS
+      Remove the LINK_LANGUAGE generator expression.
+      Genex: Fix $<CONFIG> with IMPORTED targets and multiple locations.
+      FindQt4: Don't use Qt component _FOUND vars before they're defined (#14286)
+      Add a convenient way to add the includes install dir to the INTERFACE.
+      Use linked frameworks as a source of include directories.
+      target_link_libraries: Add PUBLIC/PRIVATE/INTERFACE keyword signature
+      FindQt4: Re-add QAxServer to the QT_MODULES.
+      FindQt4: Populate the INTERFACE_LINK_LIBRARIES of IMPORTED targets.
+      Genex: Allow relative paths in INSTALL_INTERFACE.
+      cmTarget: Fix property name typo in docs.
+      Docs: Document file(GENERATE) CONDITION as optional.
+      Qt4Macros: Remove unneeded generate CONDITION.
+      Qt4Macros: Remove undefined varible use.
+      Qt4Macros: Simplify some variable population.
+      Docs: Document existing target property debugging options.
+      Docs: Trim trailing whitespace in generated doc.
+      Docs: Generalize and de-duplicate VISIBILITY_PREFIX docs.
+      Docs: Document variables for default visibility values.
+      Export: Fix typo of LINK_INTERFACE_LIBRARIES.
+      cmTarget: Remove duplicates when printing traces of tll signatures
+      cmTarget: Fix iface libraries and languages for static libraries.
+      Genex: Disallow LINKER_LANGUAGE only when used on a static library.
+      install: Remove error condition using INCLUDES DESTINATION without EXPORT.
+      Fix crash on export of target with empty INTERFACE_INCLUDE_DIRECTORIES.
+      Allow target commands to be invoked with no items (#14325).
+      Docs: Fix typo in CMAKE_DEBUG_TARGET_PROPERTIES
+      cmTarget: Add NAME property
+      Export: Process generator expressions from INCLUDES DESTINATION.
+      Add the ALIAS target concept for libraries and executables.
+      Revert "Add compiler target compile options."
+      Genex: Fix segfault when parsing ends with parameter expectation.
+
+Vadim Zhukov (1):
+      Add cmake_reset_check_state() macro
+
+Victor Zverovich (1):
+      Use GmakeErrorParser instead of deprecated MakeErrorParser (fixes bug 0013699)
+
+Yichao Yu (1):
+      variable_watch: Add missing string enumeration entry (#14188)
+
+Ömer Fadıl USTA (3):
+      ccmake: Add missing initializers reported by cppcheck
+      libarchive: Fix free() order to avoid accessing freed memory
+      cmcurl: Fix resource leak reported by cppcheck
+
 Changes in CMake 2.8.11.2 (since 2.8.11.1)
 ------------------------------------------
 Alex Neundorf (1):
