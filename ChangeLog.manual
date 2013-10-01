@@ -1,3 +1,28 @@
+Changes in CMake 2.8.12-rc4 (since 2.8.12-rc3)
+----------------------------------------------
+Brad King (8):
+      VS: Future-proof Intel project format selection
+      MSVC: Drop /link from executable link lines with Ninja
+      FindCUDA: Always list custom command outputs in their targets
+      FindPNG: Honor old PNG_LIBRARY if provided (#14398)
+      FindHDF5: Fix regression in per-configuration library selection
+      bash-completion: Future-proof --help-*-list "cXXXX version" filtering
+      OS X: Search system SDKs for frameworks
+      Use first custom command for the same output (#14446)
+
+Patrick Gansterer (3):
+      MSVC: Fix version test for linking corelibc on Windows CE (#14420)
+      MSVC: Fix WinCE arch family preprocessor symbol (#14436)
+      VS: Use version-specific subsystem for WinCE compiler id (#14440)
+
+Rolf Eike Beer (1):
+      bootstrap: try better workaround for builds on Linux/HPPA
+
+Stephen Kelly (3):
+      Add differing target property content to policy CMP0022 warning
+      Fix CMP0022 warning when no old-style property is set
+      genex: Fix preprocessing with incomplete content (#14410).
+
 Changes in CMake 2.8.12-rc3 (since 2.8.12-rc2)
 ----------------------------------------------
 Robert Maynard (1):
