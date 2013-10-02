@@ -206,8 +206,6 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
 
-  bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
-
   // create a custom target for running automoc at buildtime:
   std::string automocTargetName = targetName;
   automocTargetName += "_automoc";
@@ -338,6 +336,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
           cmLocalGenerator::EscapeForCMake(_moc_files.c_str()).c_str());
   makefile->AddDefinition("_moc_headers",
           cmLocalGenerator::EscapeForCMake(_moc_headers.c_str()).c_str());
+  bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
   std::string _moc_incs;
