@@ -1,0 +1,8 @@
+include(RunCMake)
+
+run_cmake(CheckStructHasMemberOk)
+run_cmake(CheckStructHasMemberUnknownLanguage)
+run_cmake(CheckStructHasMemberMissingLanguage)
+run_cmake(CheckStructHasMemberMissingKey)
+run_cmake(CheckStructHasMemberTooManyArguments)
+run_cmake(CheckStructHasMemberWrongKey)
