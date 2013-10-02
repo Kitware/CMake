@@ -30,7 +30,7 @@ private:
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
                                            const char* targetDirectory);
 
-  bool ReadAutomocInfoFile(cmMakefile* makefile,
+  bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const char* targetDirectory,
                            const char *config);
   bool ReadOldMocDefinitionsFile(cmMakefile* makefile,
