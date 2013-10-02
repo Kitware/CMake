@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(gdk C)
 
+message(STATUS "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)")
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
 find_package(GTK2 COMPONENTS gtk REQUIRED)
 
 include(CMakePrintHelpers)
