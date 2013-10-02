@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(pangocairo)
+project(pangocairo C)
 
 find_package(GTK2 COMPONENTS gtk REQUIRED)
 

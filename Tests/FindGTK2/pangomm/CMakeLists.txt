@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(pangomm)
+project(pangomm CXX)
 
 find_package(GTK2 COMPONENTS gtk gtkmm REQUIRED)
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(gdk_pixbuf)
+project(gdk_pixbuf C)
 
 find_package(GTK2 COMPONENTS gtk REQUIRED)
 

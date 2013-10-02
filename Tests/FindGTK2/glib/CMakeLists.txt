@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(glib)
+project(glib C)
 
 find_package(GTK2 COMPONENTS gtk REQUIRED)
 
