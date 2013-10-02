@@ -1209,8 +1209,8 @@ bool cmGlobalGenerator::CheckTargets()
 void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > Automocs;
-  Automocs automocs;
+  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > Autogens;
+  Autogens autogens;
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
@@ -1227,16 +1227,16 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
         {
         if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
           {
-          cmQtAutoGenerators automoc;
-          if(automoc.InitializeMocSourceFile(&target))
+          cmQtAutoGenerators autogen;
+          if(autogen.InitializeMocSourceFile(&target))
             {
-            automocs.push_back(std::make_pair(automoc, &target));
+            autogens.push_back(std::make_pair(autogen, &target));
             }
           }
         }
       }
     }
-  for (Automocs::iterator it = automocs.begin(); it != automocs.end();
+  for (Autogens::iterator it = autogens.begin(); it != autogens.end();
        ++it)
     {
     it->first.SetupAutoGenerateTarget(it->second);
