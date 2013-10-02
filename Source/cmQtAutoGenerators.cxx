@@ -207,13 +207,13 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   const char* targetName = target->GetName();
 
   // create a custom target for running automoc at buildtime:
-  std::string automocTargetName = targetName;
-  automocTargetName += "_automoc";
+  std::string autogenTargetName = targetName;
+  autogenTargetName += "_automoc";
 
   std::string targetDir = makefile->GetCurrentOutputDirectory();
   targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
   targetDir += "/";
-  targetDir += automocTargetName;
+  targetDir += autogenTargetName;
   targetDir += ".dir/";
 
   cmCustomCommandLine currentLine;
@@ -264,7 +264,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
 #endif
     {
     cmTarget* automocTarget = makefile->AddUtilityCommand(
-                                automocTargetName.c_str(), true,
+                                autogenTargetName.c_str(), true,
                                 workingDirectory.c_str(), depends,
                                 commandLines, false, automocComment.c_str());
     // Set target folder
@@ -280,7 +280,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
       copyTargetProperty(automocTarget, target, "FOLDER");
       }
 
-    target->AddUtility(automocTargetName.c_str());
+    target->AddUtility(autogenTargetName.c_str());
     }
 
   // configure a file to get all information to automoc at buildtime:
@@ -329,7 +329,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   static_cast<void>(varScope);
 
   makefile->AddDefinition("_moc_target_name",
-          cmLocalGenerator::EscapeForCMake(automocTargetName.c_str()).c_str());
+          cmLocalGenerator::EscapeForCMake(autogenTargetName.c_str()).c_str());
   makefile->AddDefinition("_moc_options",
           cmLocalGenerator::EscapeForCMake(_moc_options.c_str()).c_str());
   makefile->AddDefinition("_moc_files",
@@ -408,7 +408,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     if (!qt5Moc)
       {
       cmSystemTools::Error("Qt5::moc target not found ",
-                          automocTargetName.c_str());
+                          autogenTargetName.c_str());
       return;
       }
     makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
@@ -418,7 +418,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     if (strcmp(qtVersion, "4") != 0)
       {
       cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
-                          "Qt 5 ", automocTargetName.c_str());
+                          "Qt 5 ", autogenTargetName.c_str());
       }
     }
 
