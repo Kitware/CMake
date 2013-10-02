@@ -472,7 +472,7 @@ bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
   cmGlobalGenerator* gg = this->CreateGlobalGenerator(&cm, targetDirectory);
   cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
 
-  this->ReadAutomocInfoFile(makefile, targetDirectory, config);
+  this->ReadAutogenInfoFile(makefile, targetDirectory, config);
   this->ReadOldMocDefinitionsFile(makefile, targetDirectory);
 
   this->Init();
@@ -508,7 +508,7 @@ cmGlobalGenerator* cmQtAutoGenerators::CreateGlobalGenerator(cmake* cm,
 }
 
 
-bool cmQtAutoGenerators::ReadAutomocInfoFile(cmMakefile* makefile,
+bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                                       const char* targetDirectory,
                                       const char *config)
 {
