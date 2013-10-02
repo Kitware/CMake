@@ -221,7 +221,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   cmCustomCommandLine currentLine;
   currentLine.push_back(makefile->GetSafeDefinition("CMAKE_COMMAND"));
   currentLine.push_back("-E");
-  currentLine.push_back("cmake_automoc");
+  currentLine.push_back("cmake_autogen");
   currentLine.push_back(targetDir);
   currentLine.push_back("$<CONFIGURATION>");
 
