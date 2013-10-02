@@ -1031,18 +1031,21 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         }
       }
 
-    // Add object library contents as external objects. (Equivalent to
-    // the externalObjFiles above, except each one is not a cmSourceFile
-    // within the target.)
-    std::vector<std::string> objs;
-    this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
-    for(std::vector<std::string>::const_iterator
-          oi = objs.begin(); oi != objs.end(); ++oi)
+    if(this->XcodeVersion < 50)
       {
-      std::string obj = *oi;
-      cmXCodeObject* xsf =
-        this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
-      externalObjFiles.push_back(xsf);
+      // Add object library contents as external objects. (Equivalent to
+      // the externalObjFiles above, except each one is not a cmSourceFile
+      // within the target.)
+      std::vector<std::string> objs;
+      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+      for(std::vector<std::string>::const_iterator
+            oi = objs.begin(); oi != objs.end(); ++oi)
+        {
+        std::string obj = *oi;
+        cmXCodeObject* xsf =
+          this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
+        externalObjFiles.push_back(xsf);
+        }
       }
 
     // some build phases only apply to bundles and/or frameworks
@@ -2769,13 +2772,6 @@ void cmGlobalXCodeGenerator
       }
     }
 
-  // Skip link information for static libraries.
-  if(cmtarget->GetType() == cmTarget::OBJECT_LIBRARY ||
-     cmtarget->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    return;
-    }
-
   // Loop over configuration types and set per-configuration info.
   for(std::vector<std::string>::iterator i =
         this->CurrentConfigurationTypes.begin();
@@ -2786,6 +2782,31 @@ void cmGlobalXCodeGenerator
     if(!*configName)
       {
       configName = 0;
+      }
+
+    if(this->XcodeVersion >= 50)
+      {
+      // Add object library contents as link flags.
+      std::string linkObjs;
+      const char* sep = "";
+      std::vector<std::string> objs;
+      this->GetGeneratorTarget(cmtarget)->UseObjectLibraries(objs);
+      for(std::vector<std::string>::const_iterator
+            oi = objs.begin(); oi != objs.end(); ++oi)
+        {
+        linkObjs += sep;
+        sep = " ";
+        linkObjs += this->XCodeEscapePath(oi->c_str());
+        }
+      this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
+                                        linkObjs.c_str(), configName);
+      }
+
+    // Skip link information for object libraries.
+    if(cmtarget->GetType() == cmTarget::OBJECT_LIBRARY ||
+       cmtarget->GetType() == cmTarget::STATIC_LIBRARY)
+      {
+      continue;
       }
 
     // Compute the link library and directory information.
