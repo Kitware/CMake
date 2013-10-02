@@ -11,6 +11,9 @@
 #=============================================================================
 cmake_minimum_required(VERSION 2.8.2 FATAL_ERROR)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
+if(POLICY CMP0025)
+  cmake_policy(SET CMP0025 NEW)
+endif()
 project(CMake)
 
 if(CMAKE_BOOTSTRAP)
