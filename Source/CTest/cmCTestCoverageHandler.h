@@ -67,6 +67,10 @@ private:
   //! Handle coverage using GCC's GCov
   int HandleGCovCoverage(cmCTestCoverageHandlerContainer* cont);
   void FindGCovFiles(std::vector<std::string>& files);
+  
+  //! Handle coverage using Intel compiler and LCOV
+  int HandleLCovCoverage(cmCTestCoverageHandlerContainer* cont);
+  void FindLCovFiles(std::vector<std::string>& files);
 
   //! Handle coverage using xdebug php coverage
   int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
