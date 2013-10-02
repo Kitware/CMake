@@ -632,7 +632,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       return cmcmd::ExecuteEchoColor(args);
       }
-    else if (args[1] == "cmake_automoc")
+    else if (args[1] == "cmake_autogen")
       {
         cmQtAutoGenerators autogen;
         const char *config = args[3].empty() ? 0 : args[3].c_str();
