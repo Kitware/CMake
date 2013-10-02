@@ -19,6 +19,8 @@ add_CMakeOnly_test(CheckCXXCompilerFlag)
 
 add_CMakeOnly_test(CheckLanguage)
 
+add_CMakeOnly_test(CheckStructHasMember)
+
 add_CMakeOnly_test(CompilerIdC)
 add_CMakeOnly_test(CompilerIdCXX)
 if(CMAKE_Fortran_COMPILER)
