@@ -4489,6 +4489,15 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     {
     msg << "CMake Debug Log";
     }
+  else if(t == cmake::DEPRECATION_ERROR)
+    {
+    msg << "CMake Deprecation Error";
+    isError = true;
+    }
+  else if (t == cmake::DEPRECATION_WARNING)
+    {
+    msg << "CMake Deprecation Warning";
+    }
   else
     {
     msg << "CMake Warning";
