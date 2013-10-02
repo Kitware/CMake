@@ -9,7 +9,7 @@ set(SRCS)
 # and also generate assembler files from C:
 if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode" AND
     NOT CMAKE_OSX_ARCHITECTURES)
-  if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|Clang|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
+  if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|Clang|AppleClang|HP|SunPro|XL)$") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel"  AND  UNIX))
     set(C_FLAGS "${CMAKE_C_FLAGS}")
     separate_arguments(C_FLAGS)
     if(CMAKE_OSX_SYSROOT AND CMAKE_C_SYSROOT_FLAG AND NOT ";${C_FLAGS};" MATCHES ";${CMAKE_C_SYSROOT_FLAG};")

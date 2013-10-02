@@ -1606,6 +1606,7 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Possible values include:\n"
      "  Absoft = Absoft Fortran (absoft.com)\n"
      "  ADSP = Analog VisualDSP++ (analog.com)\n"
+     "  AppleClang = Apple Clang (apple.com)\n"
      "  Clang = LLVM Clang (clang.llvm.org)\n"
      "  Cray = Cray Compiler (cray.com)\n"
      "  Embarcadero, Borland = Embarcadero (embarcadero.com)\n"
