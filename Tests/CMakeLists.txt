@@ -264,7 +264,7 @@ if(BUILD_TESTING)
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
 
   if(NOT QT4_FOUND)
-    find_package(Qt4)
+    find_package(Qt4 QUIET)
   endif()
 
   if(QT4_FOUND)
