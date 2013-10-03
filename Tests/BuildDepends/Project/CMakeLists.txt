@@ -7,8 +7,8 @@ function(test_for_xcode4 result_var)
     execute_process(COMMAND xcodebuild -version
       OUTPUT_VARIABLE ov RESULT_VARIABLE rv
       )
-    if("${rv}" STREQUAL "0")
-      if(ov MATCHES "^Xcode 4.[0-9].*$")
+    if("${rv}" STREQUAL "0" AND ov MATCHES "^Xcode ([0-9]+)\\.")
+      if(NOT CMAKE_MATCH_1 VERSION_LESS 4)
         set(${result_var} 1 PARENT_SCOPE)
       endif()
     endif()
