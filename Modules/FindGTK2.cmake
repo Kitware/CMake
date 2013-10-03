@@ -651,7 +651,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         else()
             _GTK2_FIND_LIBRARY    (GDK gdk-win32 false true)
         endif()
-        _GTK2_ADD_TARGET (GDK GTK2_DEPENDS pangocairo pango cairo gdk_pixbuf gobject glib)
+        _GTK2_ADD_TARGET (GDK GTK2_DEPENDS pango gdk_pixbuf gobject glib
+                              GTK2_OPTIONAL_DEPENDS pangocairo cairo)
 
         _GTK2_FIND_INCLUDE_DIR(GTK gtk/gtk.h)
         if(UNIX)
@@ -659,8 +660,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         else()
             _GTK2_FIND_LIBRARY    (GTK gtk-win32 false true)
         endif()
-        _GTK2_ADD_TARGET (GTK GTK2_DEPENDS gdk atk pangoft2 pangocairo pango cairo gdk_pixbuf gthread gobject glib
-                              GTK2_OPTIONAL_DEPENDS gio)
+        _GTK2_ADD_TARGET (GTK GTK2_DEPENDS gdk atk pangoft2 pango gdk_pixbuf gthread gobject glib
+                              GTK2_OPTIONAL_DEPENDS gio pangocairo cairo)
 
         # Left for compatibility with previous versions. It doesn't seem to be required
         _GTK2_FIND_INCLUDE_DIR(FONTCONFIG fontconfig/fontconfig.h)
@@ -695,30 +696,31 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(PANGOMM pangomm.h)
         _GTK2_FIND_INCLUDE_DIR(PANGOMMCONFIG pangommconfig.h)
         _GTK2_FIND_LIBRARY    (PANGOMM pangomm true true)
-        _GTK2_ADD_TARGET      (PANGOMM GTK2_DEPENDS glibmm pangocairo sigc++ pango cairo gobject glib
-                                       GTK2_OPTIONAL_DEPENDS cairomm
+        _GTK2_ADD_TARGET      (PANGOMM GTK2_DEPENDS glibmm sigc++ pango gobject glib
+                                       GTK2_OPTIONAL_DEPENDS cairomm pangocairo cairo
                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
 
         _GTK2_FIND_INCLUDE_DIR(GDKMM gdkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GDKMMCONFIG gdkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GDKMM gdkmm true true)
-        _GTK2_ADD_TARGET      (GDKMM GTK2_DEPENDS pangomm gtk glibmm sigc++ gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib
-                                     GTK2_OPTIONAL_DEPENDS giomm cairomm gio
+        _GTK2_ADD_TARGET      (GDKMM GTK2_DEPENDS pangomm gtk glibmm sigc++ gdk atk pangoft2 gdk_pixbuf pango gobject glib
+                                     GTK2_OPTIONAL_DEPENDS giomm cairomm gio pangocairo cairo
                                      OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
         _GTK2_FIND_INCLUDE_DIR(GTKMM gtkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GTKMMCONFIG gtkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTKMM gtkmm true true)
-        _GTK2_ADD_TARGET      (GTKMM GTK2_DEPENDS atkmm gdkmm pangomm gtk glibmm sigc++ gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
-                                     GTK2_OPTIONAL_DEPENDS giomm cairomm gio
+        _GTK2_ADD_TARGET      (GTKMM GTK2_DEPENDS atkmm gdkmm pangomm gtk glibmm sigc++ gdk atk pangoft2 gdk_pixbuf pango gthread gobject glib
+                                     GTK2_OPTIONAL_DEPENDS giomm cairomm gio pangocairo cairo
                                      OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     elseif(_GTK2_component STREQUAL "glade")
 
         _GTK2_FIND_INCLUDE_DIR(GLADE glade/glade.h)
         _GTK2_FIND_LIBRARY    (GLADE glade false true)
-        _GTK2_ADD_TARGET      (GLADE GTK2_DEPENDS gtk gdk atk gio pangoft2 pangocairo gdk_pixbuf cairo pango gobject glib
+        _GTK2_ADD_TARGET      (GLADE GTK2_DEPENDS gtk gdk atk gio pangoft2 gdk_pixbuf pango gobject glib
+                                     GTK2_OPTIONAL_DEPENDS pangocairo cairo
                                      OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     elseif(_GTK2_component STREQUAL "glademm")
@@ -726,8 +728,8 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(GLADEMM libglademm.h)
         _GTK2_FIND_INCLUDE_DIR(GLADEMMCONFIG libglademmconfig.h)
         _GTK2_FIND_LIBRARY    (GLADEMM glademm true true)
-        _GTK2_ADD_TARGET      (GLADEMM GTK2_DEPENDS gtkmm glade atkmm gdkmm giomm pangomm glibmm sigc++ gtk gdk atk pangoft2 pangocairo gdk_pixbuf cairo pango gthread gobject glib
-                                       GTK2_OPTIONAL_DEPENDS giomm cairomm gio
+        _GTK2_ADD_TARGET      (GLADEMM GTK2_DEPENDS gtkmm glade atkmm gdkmm giomm pangomm glibmm sigc++ gtk gdk atk pangoft2 gdk_pixbuf pango gthread gobject glib
+                                       GTK2_OPTIONAL_DEPENDS giomm cairomm gio pangocairo cairo
                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
 
     else()
