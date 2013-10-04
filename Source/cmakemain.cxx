@@ -84,6 +84,17 @@ static const char * cmDocumentationOptions[][2] =
 
 #endif
 
+static int do_command(int ac, char** av)
+{
+  std::vector<std::string> args;
+  args.push_back(av[0]);
+  for(int i = 2; i < ac; ++i)
+    {
+    args.push_back(av[i]);
+    }
+  return cmcmd::ExecuteCMakeCommand(args);
+}
+
 int do_cmake(int ac, char** av);
 static int do_build(int ac, char** av);
 
@@ -157,9 +168,16 @@ int main(int ac, char** av)
 {
   cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::FindExecutableDirectory(av[0]);
-  if(ac > 1 && strcmp(av[1], "--build") == 0)
+  if(ac > 1)
     {
-    return do_build(ac, av);
+    if(strcmp(av[1], "--build") == 0)
+      {
+      return do_build(ac, av);
+      }
+    else if(strcmp(av[1], "-E") == 0)
+      {
+      return do_command(ac, av);
+      }
     }
   int ret = do_cmake(ac, av);
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -180,7 +198,7 @@ int do_cmake(int ac, char** av)
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
-  if(doc.CheckOptions(ac, av, "-E"))
+  if(doc.CheckOptions(ac, av))
     {
     // Construct and print requested documentation.
     cmake hcm;
@@ -220,7 +238,6 @@ int do_cmake(int ac, char** av)
 
   bool wiz = false;
   bool sysinfo = false;
-  bool command = false;
   bool list_cached = false;
   bool list_all_cached = false;
   bool list_help = false;
@@ -229,43 +246,37 @@ int do_cmake(int ac, char** av)
   std::vector<std::string> args;
   for(int i =0; i < ac; ++i)
     {
-    if(!command && strcmp(av[i], "-i") == 0)
+    if(strcmp(av[i], "-i") == 0)
       {
       wiz = true;
       }
-    else if(!command && strcmp(av[i], "--system-information") == 0)
+    else if(strcmp(av[i], "--system-information") == 0)
       {
       sysinfo = true;
       }
-    // if command has already been set, then
-    // do not eat the -E
-    else if (!command && strcmp(av[i], "-E") == 0)
-      {
-      command = true;
-      }
-    else if (!command && strcmp(av[i], "-N") == 0)
+    else if (strcmp(av[i], "-N") == 0)
       {
       view_only = true;
       }
-    else if (!command && strcmp(av[i], "-L") == 0)
+    else if (strcmp(av[i], "-L") == 0)
       {
       list_cached = true;
       }
-    else if (!command && strcmp(av[i], "-LA") == 0)
+    else if (strcmp(av[i], "-LA") == 0)
       {
       list_all_cached = true;
       }
-    else if (!command && strcmp(av[i], "-LH") == 0)
+    else if (strcmp(av[i], "-LH") == 0)
       {
       list_cached = true;
       list_help = true;
       }
-    else if (!command && strcmp(av[i], "-LAH") == 0)
+    else if (strcmp(av[i], "-LAH") == 0)
       {
       list_all_cached = true;
       list_help = true;
       }
-    else if (!command && strncmp(av[i], "-P", strlen("-P")) == 0)
+    else if (strncmp(av[i], "-P", strlen("-P")) == 0)
       {
       if ( i == ac -1 )
         {
@@ -279,8 +290,8 @@ int do_cmake(int ac, char** av)
         args.push_back(av[i]);
         }
       }
-    else if (!command && strncmp(av[i], "--find-package",
-                                 strlen("--find-package")) == 0)
+    else if (strncmp(av[i], "--find-package",
+                     strlen("--find-package")) == 0)
       {
       workingMode = cmake::FIND_PACKAGE_MODE;
       args.push_back(av[i]);
@@ -289,11 +300,6 @@ int do_cmake(int ac, char** av)
       {
       args.push_back(av[i]);
       }
-    }
-  if(command)
-    {
-    int ret = cmcmd::ExecuteCMakeCommand(args);
-    return ret;
     }
   if (wiz)
     {
