@@ -17,6 +17,7 @@
 #endif
 
 #include "cmake.h"
+#include "cmcmd.h"
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
 #include "cmakewizard.h"
@@ -532,7 +533,7 @@ int do_cmake(int ac, char** av)
     }
   if(command)
     {
-    int ret = cmake::ExecuteCMakeCommand(args);
+    int ret = cmcmd::ExecuteCMakeCommand(args);
     return ret;
     }
   if (wiz)

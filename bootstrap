@@ -197,6 +197,7 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
   cmakewizard  \
+  cmcmd  \
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
