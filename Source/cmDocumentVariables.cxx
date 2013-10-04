@@ -1675,6 +1675,28 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
      "Variables for Languages");
 
   cm->DefineProperty
+    ("CMAKE_<LANG>_SIMULATE_ID", cmProperty::VARIABLE,
+     "Identification string of \"simulated\" compiler.",
+     "Some compilers simulate other compilers to serve as drop-in "
+     "replacements.  "
+     "When CMake detects such a compiler it sets this variable to what "
+     "would have been the CMAKE_<LANG>_COMPILER_ID for the simulated "
+     "compiler.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
+    ("CMAKE_<LANG>_SIMULATE_VERSION", cmProperty::VARIABLE,
+     "Version string of \"simulated\" compiler.",
+     "Some compilers simulate other compilers to serve as drop-in "
+     "replacements.  "
+     "When CMake detects such a compiler it sets this variable to what "
+     "would have been the CMAKE_<LANG>_COMPILER_VERSION for the simulated "
+     "compiler.",
+     false,
+     "Variables for Languages");
+
+  cm->DefineProperty
     ("CMAKE_<LANG>_SIZEOF_DATA_PTR", cmProperty::VARIABLE,
      "Size of pointer-to-data types for language <LANG>.",
      "This holds the size (in bytes) of pointer-to-data types in the target "
