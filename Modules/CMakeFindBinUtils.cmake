@@ -30,8 +30,10 @@
 #  License text for the above reference.)
 
 # if it's the MS C/CXX compiler, search for link
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC"
-   OR "${CMAKE_C_COMPILER_ID}" MATCHES "MSVC"
+if("${CMAKE_C_SIMULATE_ID}" STREQUAL "MSVC"
+   OR "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC"
+   OR "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC"
+   OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"
    OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
 
   find_program(CMAKE_LINKER NAMES link HINTS ${_CMAKE_TOOLCHAIN_LOCATION})

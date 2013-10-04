@@ -1,6 +1,6 @@
 
 #=============================================================================
-# Copyright 2002-2012 Kitware, Inc.
+# Copyright 2001-2013 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -13,22 +13,20 @@
 #  License text for the above reference.)
 
 # This module is shared by multiple languages; use include blocker.
-if(__COMPILER_CLANG)
+if(__WINDOWS_CLANG)
   return()
 endif()
-set(__COMPILER_CLANG 1)
+set(__WINDOWS_CLANG 1)
 
 if(CMAKE_C_SIMULATE_ID STREQUAL "MSVC"
     OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
-  macro(__compiler_clang lang)
+  include(Platform/Windows-MSVC)
+  macro(__windows_compiler_clang lang)
+    __windows_compiler_msvc(${lang})
   endmacro()
 else()
-  include(Compiler/GNU)
-
-  macro(__compiler_clang lang)
-    __compiler_gnu(${lang})
-    set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "-fPIE")
-    set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
-    set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
+  include(Platform/Windows-GNU)
+  macro(__windows_compiler_clang lang)
+    __windows_compiler_gnu(${lang})
   endmacro()
 endif()
