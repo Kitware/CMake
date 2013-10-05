@@ -147,12 +147,6 @@ extern const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #  define OS_CODE  0x0f
 #endif
 
-/* Haiku defines both __HAIKU__ and __BEOS__ (for now) */
-/* many BeOS workarounds are no longer needed in Haiku */
-#if defined(__HAIKU__) && defined(__BEOS__)
-#undef __BEOS__
-#endif
-
 #if defined(_BEOS_) || defined(RISCOS) 
 #  define fdopen(fd,mode) NULL /* No fdopen() */
 #endif
