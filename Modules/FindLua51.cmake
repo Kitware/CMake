@@ -54,7 +54,7 @@ find_library(LUA_LIBRARY
 
 if(LUA_LIBRARY)
   # include the math library for Unix
-  if(UNIX AND NOT APPLE AND NOT BEOS)
+  if(UNIX AND NOT APPLE AND NOT BEOS AND NOT HAIKU)
     find_library(LUA_MATH_LIBRARY m)
     set( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
   # For Windows and Mac, don't need to explicitly include the math library
