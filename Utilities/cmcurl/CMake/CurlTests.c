@@ -38,7 +38,7 @@ main ()
 # define PLATFORM_AIX_V3
 #endif
 
-#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || (defined(__BEOS__) && !defined(__HAIKU__))
+#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || defined(__BEOS__)
 #error "O_NONBLOCK does not work on this platform"
 #endif
   int socket;

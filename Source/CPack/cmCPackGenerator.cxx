@@ -26,7 +26,8 @@
 #include <algorithm>
 
 #if defined(__HAIKU__)
-#include <StorageKit.h>
+#include <FindDirectory.h>
+#include <StorageDefs.h>
 #endif
 
 //----------------------------------------------------------------------
@@ -1263,14 +1264,14 @@ const char* cmCPackGenerator::GetInstallPath()
   this->InstallPath += "-";
   this->InstallPath += this->GetOption("CPACK_PACKAGE_VERSION");
 #elif defined(__HAIKU__)
-  BPath dir;
-  if (find_directory(B_COMMON_DIRECTORY, &dir) == B_OK)
+  char dir[B_PATH_NAME_LENGTH];
+  if (find_directory(B_SYSTEM_DIRECTORY, -1, false, dir, sizeof(dir)) == B_OK)
     {
-    this->InstallPath = dir.Path();
+    this->InstallPath = dir;
     }
   else
     {
-    this->InstallPath = "/boot/common";
+    this->InstallPath = "/boot/system";
     }
 #else
   this->InstallPath = "/usr/local/";
