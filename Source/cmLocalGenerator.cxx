@@ -353,7 +353,8 @@ void cmLocalGenerator::GenerateInstallRules()
   char dir[B_PATH_NAME_LENGTH];
   if (!prefix)
     {
-    if (find_directory(B_SYSTEM_DIRECTORY, -1, false, dir, sizeof(dir)) == B_OK)
+    if (find_directory(B_SYSTEM_DIRECTORY, -1, false, dir, sizeof(dir))
+        == B_OK)
       {
       prefix = dir;
       }
