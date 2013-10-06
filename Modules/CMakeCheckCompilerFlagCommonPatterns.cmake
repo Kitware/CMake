@@ -36,5 +36,6 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
      FAIL_REGEX "File with unknown suffix passed to linker" # PGI
      FAIL_REGEX "WARNING: unknown flag:"                    # Open64
      FAIL_REGEX "Incorrect command line option:"            # Borland
+     FAIL_REGEX "Warning: illegal option"                   # SunStudio 12
    )
 endmacro ()
