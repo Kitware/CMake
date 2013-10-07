@@ -49,7 +49,7 @@ unset(FortranCInterface_COMPILED CACHE)
 # Locate the sample project executable.
 if(FortranCInterface_COMPILED)
   find_program(FortranCInterface_EXE
-    NAMES FortranCInterface
+    NAMES FortranCInterface${CMAKE_EXECUTABLE_SUFFIX}
     PATHS ${FortranCInterface_BINARY_DIR} ${FortranCInterface_BINARY_DIR}/Debug
     NO_DEFAULT_PATH
     )
