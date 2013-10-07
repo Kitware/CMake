@@ -71,7 +71,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   cmTarget *currentTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
-  if (!this->NeedsParsing)
+  if (!this->NeedsEvaluation)
     {
     return this->Input.c_str();
     }
@@ -129,9 +129,9 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens =
                                               l.Tokenize(this->Input.c_str());
-  this->NeedsParsing = l.GetSawGeneratorExpression();
+  this->NeedsEvaluation = l.GetSawGeneratorExpression();
 
-  if (this->NeedsParsing)
+  if (this->NeedsEvaluation)
     {
     cmGeneratorExpressionParser p(tokens);
     p.Parse(this->Evaluators);
