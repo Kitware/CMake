@@ -40,6 +40,9 @@
   "is exported using export(), or when the target is used by another "  \
   "target in the same buildsystem. Expands to the empty string "        \
   "otherwise.\n"                                                        \
+  "  $<PLATFORM_ID>            = The CMake-id of the platform "         \
+  "  $<PLATFORM_ID:comp>       = '1' if the The CMake-id of the "       \
+  "platform matches comp, otherwise '0'.\n"                             \
   "  $<C_COMPILER_ID>          = The CMake-id of the C compiler "       \
   "used.\n"                                                             \
   "  $<C_COMPILER_ID:comp>     = '1' if the CMake-id of the C "         \
