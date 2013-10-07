@@ -167,11 +167,11 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   if (require2_8_13)
     {
-    this->GenerateRequiredCMakeVersion(os, "2.8.11.20130815");
+    this->GenerateRequiredCMakeVersion(os, "2.8.12.20131007");
     }
   else if (require2_8_12)
     {
-    this->GenerateRequiredCMakeVersion(os, "2.8.11");
+    this->GenerateRequiredCMakeVersion(os, "2.8.12");
     }
 
   // Now load per-configuration properties for them.
