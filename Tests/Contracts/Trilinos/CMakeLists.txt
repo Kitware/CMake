@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(Trilinos-10-6)
+project(Trilinos)
 
 include(ExternalProject)
 
@@ -27,12 +27,12 @@ endif()
 message(STATUS "HOME='${HOME}'")
 
 if(NOT DEFINED url)
-  set(url "http://www.cmake.org/files/contracts/trilinos-10.6.1.tar.gz")
+  set(url "http://www.cmake.org/files/contracts/trilinos-11.4.1.tar.gz")
 endif()
 message(STATUS "url='${url}'")
 
 if(NOT DEFINED md5)
-  set(md5 "690230465dd21a76e3c6636fd07bd2f0")
+  set(md5 "28b6a3c7c0fb317b3a237997293faa8b")
 endif()
 message(STATUS "md5='${md5}'")
 

@@ -14,7 +14,7 @@ set(ENV{CTEST_SITE} "${CTEST_SITE}")
 
 # Allow override of the environment on a per-client basis:
 #
-set(ENV_SCRIPT "$ENV{CMAKE_CONTRACT_Trilinos_10_6_ENV_SCRIPT}")
+set(ENV_SCRIPT "$ENV{CMAKE_CONTRACT_Trilinos_ENV_SCRIPT}")
 if(ENV_SCRIPT AND EXISTS "${ENV_SCRIPT}")
   include("${ENV_SCRIPT}")
 endif()
@@ -49,7 +49,7 @@ endif()
 #
 execute_process(COMMAND
   "${CMAKE_CTEST_COMMAND}"
-  -S "${CTEST_SOURCE_DIRECTORY}/cmake/ctest/experimental_build_test.cmake"
+  -S "${CTEST_SOURCE_DIRECTORY}/cmake/tribits/ctest/experimental_build_test.cmake"
   -VV
   WORKING_DIRECTORY "${CTEST_BINARY_DIRECTORY}"
   RESULT_VARIABLE rv
