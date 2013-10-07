@@ -71,7 +71,7 @@ protected:
 
   virtual bool VSLinksDependencies() const { return false; }
 
-  void AddCheckTarget();
+  bool AddCheckTarget();
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void WriteSLNHeader(std::ostream& fout);
