@@ -829,10 +829,10 @@ int cmDocumentation::GetStructuredDocFromFile(
         std::vector<cmDocumentationEntry>& commands,
         cmake* cm)
 {
-    typedef enum sdoce {
+    enum sdoce {
         SDOC_NONE, SDOC_MODULE, SDOC_MACRO, SDOC_FUNCTION, SDOC_VARIABLE,
         SDOC_SECTION,
-        SDOC_UNKNOWN} sdoc_t;
+        SDOC_UNKNOWN};
     int nbDocItemFound = 0;
     int docCtxIdx      = 0;
     std::vector<int> docContextStack(60);
