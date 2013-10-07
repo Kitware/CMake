@@ -73,7 +73,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   cmGeneratorExpression ge(this->Test->GetBacktrace());
 
   // Start the test command.
-  os << indent << "ADD_TEST(" << this->Test->GetName() << " ";
+  os << indent << "add_test(" << this->Test->GetName() << " ";
 
   // Get the test command line to be executed.
   std::vector<std::string> const& command = this->Test->GetCommand();
@@ -128,7 +128,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os,
                                              Indent const& indent)
 {
-  os << indent << "ADD_TEST(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
+  os << indent << "add_test(" << this->Test->GetName() << " NOT_AVAILABLE)\n";
 }
 
 //----------------------------------------------------------------------------
@@ -152,7 +152,7 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout,
   std::string exe = command[0];
   cmSystemTools::ConvertToUnixSlashes(exe);
   fout << indent;
-  fout << "ADD_TEST(";
+  fout << "add_test(";
   fout << this->Test->GetName() << " \"" << exe << "\"";
 
   for(std::vector<std::string>::const_iterator argit = command.begin()+1;

@@ -185,9 +185,9 @@ void cmScriptGenerator::GenerateScriptActionsOnce(std::ostream& os,
     {
     // Generate a per-configuration block.
     std::string config_test = this->CreateConfigTest(this->Configurations);
-    os << indent << "IF(" << config_test << ")\n";
+    os << indent << "if(" << config_test << ")\n";
     this->GenerateScriptActions(os, indent.Next());
-    os << indent << "ENDIF(" << config_test << ")\n";
+    os << indent << "endif(" << config_test << ")\n";
     }
 }
 
@@ -219,7 +219,7 @@ void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
         {
         // Generate a per-configuration block.
         std::string config_test = this->CreateConfigTest(config);
-        os << indent << (first? "IF(" : "ELSEIF(") << config_test << ")\n";
+        os << indent << (first? "if(" : "elseif(") << config_test << ")\n";
         this->GenerateScriptForConfig(os, config, indent.Next());
         first = false;
         }
@@ -228,10 +228,10 @@ void cmScriptGenerator::GenerateScriptActionsPerConfig(std::ostream& os,
       {
       if(this->NeedsScriptNoConfig())
         {
-        os << indent << "ELSE()\n";
+        os << indent << "else()\n";
         this->GenerateScriptNoConfig(os, indent.Next());
         }
-      os << indent << "ENDIF()\n";
+      os << indent << "endif()\n";
       }
     }
 }

@@ -249,7 +249,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "ADD_TEST";}
+  virtual const char* GetName() const { return "add_test";}
 
   // Unused methods
   virtual const char* GetTerseDocumentation() const { return ""; }
@@ -297,7 +297,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "SET_TESTS_PROPERTIES";}
+  virtual const char* GetName() const { return "set_tests_properties";}
 
   // Unused methods
   virtual const char* GetTerseDocumentation() const { return ""; }
