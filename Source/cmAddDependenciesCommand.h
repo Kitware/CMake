@@ -56,14 +56,14 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
-      "  add_dependencies(target-name depend-target1\n"
-      "                   depend-target2 ...)\n"
-      "Make a top-level target depend on other top-level targets.  A "
-      "top-level target is one created by ADD_EXECUTABLE, ADD_LIBRARY, "
-      "or ADD_CUSTOM_TARGET.  Adding dependencies with this command "
-      "can be used to make sure one target is built before another target.  "
+      "  add_dependencies(<target> [<target-dependency>]...)\n"
+      "Make a top-level <target> depend on other top-level targets to "
+      "ensure that they build before <target> does.  "
+      "A top-level target is one created by ADD_EXECUTABLE, ADD_LIBRARY, "
+      "or ADD_CUSTOM_TARGET.  "
       "Dependencies added to an IMPORTED target are followed transitively "
       "in its place since the target itself does not build.  "
+      "\n"
       "See the DEPENDS option of ADD_CUSTOM_TARGET "
       "and ADD_CUSTOM_COMMAND for adding file-level dependencies in custom "
       "rules.  See the OBJECT_DEPENDS option in "
