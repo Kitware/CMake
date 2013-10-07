@@ -146,9 +146,17 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
   const char* cname = this->GetCMakeInstance()->
     GetCacheManager()->GetCacheValue(langComp.c_str());
   std::string changeVars;
-  if(cname && (path != cname) && (optional==false))
+  if(cname && !optional)
     {
-    std::string cnameString = cname;
+    std::string cnameString;
+    if(!cmSystemTools::FileIsFullPath(cname))
+      {
+      cnameString = cmSystemTools::FindProgram(cname);
+      }
+    else
+      {
+      cnameString = cname;
+      }
     std::string pathString = path;
     // get rid of potentially multiple slashes:
     cmSystemTools::ConvertToUnixSlashes(cnameString);
