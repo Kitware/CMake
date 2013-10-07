@@ -1,6 +1,5 @@
 # - Function for generation of export macros for libraries
-# This module provides the function GENERATE_EXPORT_HEADER() and the
-# accompanying ADD_COMPILER_EXPORT_FLAGS() function.
+# This module provides the function GENERATE_EXPORT_HEADER().
 #
 # The GENERATE_EXPORT_HEADER function can be used to generate a file suitable
 # for preprocessor inclusion which contains EXPORT macros to be used in
@@ -18,20 +17,17 @@
 #             [PREFIX_NAME <prefix_name>]
 # )
 #
-# ADD_COMPILER_EXPORT_FLAGS( [<output_variable>] )
+# The target properties CXX_VISIBILITY_PRESET and VISIBILITY_INLINES_HIDDEN
+# can be used to add the appropriate compile flags for targets. See the
+# documentation of those target properties, and the convenience variables
+# CMAKE_CXX_VISIBILITY_PRESET and CMAKE_VISIBILITY_INLINES_HIDDEN.
 #
 # By default GENERATE_EXPORT_HEADER() generates macro names in a file name
-# determined by the name of the library. The ADD_COMPILER_EXPORT_FLAGS function
-# adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on
-# Windows which does not need extra compiler flags for exporting support. You
-# may optionally pass a single argument to ADD_COMPILER_EXPORT_FLAGS that will
-# be populated with the required CXX_FLAGS required to enable visibility support
-# for the compiler/architecture in use.
+# determined by the name of the library. This means that in the simplest case,
+# users of generate_export_header will be equivalent to:
 #
-# This means that in the simplest case, users of these functions will be
-# equivalent to:
-#
-#   add_compiler_export_flags()
+#   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+#   set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 #   add_library(somelib someclass.cpp)
 #   generate_export_header(somelib)
 #   install(TARGETS somelib DESTINATION ${LIBRARY_INSTALL_DIR})
@@ -128,6 +124,20 @@
 #   generate_export_header(somelib PREFIX_NAME VTK_)
 #
 # Generates the macros VTK_SOMELIB_EXPORT etc.
+#
+#
+# ADD_COMPILER_EXPORT_FLAGS( [<output_variable>] )
+#
+# The ADD_COMPILER_EXPORT_FLAGS function
+# adds -fvisibility=hidden to CMAKE_CXX_FLAGS if supported, and is a no-op on
+# Windows which does not need extra compiler flags for exporting support. You
+# may optionally pass a single argument to ADD_COMPILER_EXPORT_FLAGS that will
+# be populated with the required CXX_FLAGS required to enable visibility support
+# for the compiler/architecture in use.
+#
+# This function is deprecated. Set the target properties CXX_VISIBILITY_PRESET
+# and VISIBILITY_INLINES_HIDDEN instead.
+#
 
 #=============================================================================
 # Copyright 2011 Stephen Kelly <steveire@gmail.com>
@@ -326,6 +336,17 @@ function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
 endfunction()
 
 function(add_compiler_export_flags)
+  if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.12)
+    if(CMAKE_WARN_DEPRECATED)
+      set(messageType WARNING)
+    endif()
+    if(CMAKE_ERROR_DEPRECATED)
+      set(messageType FATAL_ERROR)
+    endif()
+    if(messageType)
+      message(${messageType} "The add_compiler_export_flags function is obsolete. Use the CXX_VISIBILITY_PRESET and VISIBILITY_INLINES_HIDDEN target properties instead.")
+    endif()
+  endif()
 
   _test_compiler_hidden_visibility()
   _test_compiler_has_deprecated()
