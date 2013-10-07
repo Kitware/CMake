@@ -238,9 +238,12 @@ static void prefixItems(const std::string &content, std::string &result,
 {
   std::vector<std::string> entries;
   cmGeneratorExpression::Split(content, entries);
+  const char *sep = "";
   for(std::vector<std::string>::const_iterator ei = entries.begin();
       ei != entries.end(); ++ei)
     {
+    result += sep;
+    sep = ";";
     if (!cmSystemTools::FileIsFullPath(ei->c_str())
         && cmGeneratorExpression::Find(*ei) == std::string::npos)
       {
