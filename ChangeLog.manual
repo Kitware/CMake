@@ -1,3 +1,14 @@
+Changes in CMake 2.8.12 (since 2.8.12-rc4)
+------------------------------------------
+Brad King (4):
+      Xcode: Fix test architecture selection for Xcode >= 5
+      Xcode: Teach Tests/BuildDepends to allow LINK_DEPENDS_NO_SHARED failure
+      Xcode: Drop XCODE_DEPEND_HELPER for Xcode >= 5
+      Xcode: Fix OBJECT library support for Xcode 5 (#14254)
+
+Stephen Kelly (1):
+      Genex: Fix processing multiple include directories for relative paths
+
 Changes in CMake 2.8.12-rc4 (since 2.8.12-rc3)
 ----------------------------------------------
 Brad King (8):
