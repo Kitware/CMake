@@ -55,6 +55,15 @@ set(GetPrerequisites_PreArgs
   )
 AddCMakeTest(GetPrerequisites "${GetPrerequisites_PreArgs}")
 
+if(GIT_EXECUTABLE)
+  set(PolicyCheck_PreArgs
+    "-DCMake_BINARY_DIR:PATH=${CMake_BINARY_DIR}"
+    "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
+    "-DGIT_EXECUTABLE:STRING=${GIT_EXECUTABLE}"
+    )
+  AddCMakeTest(PolicyCheck "${PolicyCheck_PreArgs}")
+endif()
+
 # Run CheckSourceTree as the very last test in the CMake/CTest/CPack test
 # suite. It detects if any changes have been made to the CMake source tree
 # by any previous configure, build or test steps.
