@@ -53,7 +53,7 @@
 #     Default   : TRUE
 ##end
 ##variable
-#  GRAPHVIZ_MODULE_LIBS - Set this to FALSE to exclude static libraries from the generated graphs.
+#  GRAPHVIZ_MODULE_LIBS - Set this to FALSE to exclude module libraries from the generated graphs.
 #     Mandatory : NO
 #     Default   : TRUE
 ##end
