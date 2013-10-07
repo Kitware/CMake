@@ -147,7 +147,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
         this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
       default:
-        cmSystemTools::Error("Bad target type", l->first.c_str());
+        cmSystemTools::Error("Bad target type: ", l->first.c_str());
         break;
       }
     // INCLUDE_EXTERNAL_MSPROJECT command only affects the workspace
@@ -165,7 +165,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
         dir += l->first.substr(0, pos);
         if(!cmSystemTools::MakeDirectory(dir.c_str()))
           {
-          cmSystemTools::Error("Error creating directory ", dir.c_str());
+          cmSystemTools::Error("Error creating directory: ", dir.c_str());
           }
         }
       this->CreateSingleDSP(l->first.c_str(),l->second);

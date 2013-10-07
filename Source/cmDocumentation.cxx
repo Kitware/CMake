@@ -1617,7 +1617,7 @@ bool cmDocumentation::PrintDocumentationSinglePolicy(std::ostream& os)
     return true;
     }
 
-  // Argument was not a command.  Complain.
+  // Argument was not a policy.  Complain.
   os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-policy is not a CMake policy.\n";
   return false;
@@ -1639,7 +1639,7 @@ bool cmDocumentation::PrintDocumentationSingleVariable(std::ostream& os)
     return true;
     }
 
-  // Argument was not a command.  Complain.
+  // Argument was not a variable.  Complain.
   os << "Argument \"" << this->CurrentArgument.c_str()
      << "\" to --help-variable is not a defined variable.  "
      << "Use --help-variable-list to see all defined variables.\n";
