@@ -209,11 +209,6 @@ class cmake
   void AddCacheEntry(const char* key, const char* value,
                      const char* helpString,
                      int type);
-  /**
-   * Execute commands during the build process. Supports options such
-   * as echo, remove file etc.
-   */
-  static int ExecuteCMakeCommand(std::vector<std::string>&);
 
   /**
    * Get the system information and write it to the file specified
@@ -448,29 +443,6 @@ protected:
 
   void GenerateGraphViz(const char* fileName) const;
 
-  static int SymlinkLibrary(std::vector<std::string>& args);
-  static int SymlinkExecutable(std::vector<std::string>& args);
-  static bool SymlinkInternal(std::string const& file,
-                              std::string const& link);
-  static int ExecuteEchoColor(std::vector<std::string>& args);
-  static int ExecuteLinkScript(std::vector<std::string>& args);
-  static int WindowsCEEnvironment(const char* version,
-                                  const std::string& name);
-  static int VisualStudioLink(std::vector<std::string>& args, int type);
-  static int VisualStudioLinkIncremental(std::vector<std::string>& args,
-                                         int type,
-                                         bool verbose);
-  static int VisualStudioLinkNonIncremental(std::vector<std::string>& args,
-                                            int type,
-                                            bool hasManifest,
-                                            bool verbose);
-  static int ParseVisualStudioLinkCommand(std::vector<std::string>& args,
-                                          std::vector<cmStdString>& command,
-                                          std::string& targetName);
-  static bool RunCommand(const char* comment,
-                         std::vector<cmStdString>& command,
-                         bool verbose,
-                         int* retCodeOut = 0);
   cmVariableWatch* VariableWatch;
 
   ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
