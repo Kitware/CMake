@@ -39,6 +39,7 @@ man_pages = [
     ('manual/cmake-policies.7', 'cmake-policies', 'CMake Policies Reference', [], 7),
     ('manual/cmake-properties.7', 'cmake-properties', 'CMake Properties Reference', [], 7),
     ('manual/cmake-variables.7', 'cmake-variables', 'CMake Variables Reference', [], 7),
+    ('manual/cmake-generator-expressions.7', 'cmake-generator-expressions', 'CMake Generator Expressions', [], 7),
 ]
 man_show_urls = False
 
