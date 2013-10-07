@@ -159,7 +159,7 @@ set_property(TARGET testLibRequired APPEND PROPERTY
     $<BUILD_INTERFACE:$<TARGET_PROPERTY:testLibIncludeRequired5,INTERFACE_INCLUDE_DIRECTORIES>>
     # Test that the below is non-fatal
     $<$<STREQUAL:one,two>:$<TARGET_PROPERTY:not_a_target,INTERFACE_INCLUDE_DIRECTORIES>>
-    $<INSTALL_INTERFACE:include/testLibIncludeRequired7>
+    $<INSTALL_INTERFACE:include/testLibIncludeRequired7;include/testLibIncludeRequired4>
 )
 
 set_property(TARGET testLibRequired APPEND PROPERTY
