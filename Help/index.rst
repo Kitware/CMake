@@ -19,6 +19,7 @@ CMake Reference Documentation
    /manual/cmake-policies.7
    /manual/cmake-properties.7
    /manual/cmake-variables.7
+   /manual/cmake-generator-expressions.7
 
 .. only:: html
 
