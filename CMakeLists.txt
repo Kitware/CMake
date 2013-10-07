@@ -573,7 +573,9 @@ if(BUILD_TESTING)
   CMAKE_SET_TARGET_FOLDER(CMakeLibTests "Tests")
 endif()
 CMAKE_SET_TARGET_FOLDER(cmw9xcom "Utilities/Win9xCompat")
-CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
+if(TARGET documentation)
+  CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
+endif()
 
 # add a test
 add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
