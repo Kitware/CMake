@@ -192,11 +192,12 @@ static std::string stripAllGeneratorExpressions(const std::string &input)
   std::string result;
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
+  int nestingLevel = 0;
   while((pos = input.find("$<", lastPos)) != input.npos)
     {
     result += input.substr(lastPos, pos - lastPos);
     pos += 2;
-    int nestingLevel = 1;
+    nestingLevel = 1;
     const char *c = input.c_str() + pos;
     const char * const cStart = c;
     for ( ; *c; ++c)
@@ -224,7 +225,10 @@ static std::string stripAllGeneratorExpressions(const std::string &input)
     pos += traversed;
     lastPos = pos;
     }
-  result += input.substr(lastPos);
+  if (nestingLevel == 0)
+    {
+    result += input.substr(lastPos);
+    }
   return cmGeneratorExpression::StripEmptyListElements(result);
 }
 
@@ -234,9 +238,12 @@ static void prefixItems(const std::string &content, std::string &result,
 {
   std::vector<std::string> entries;
   cmGeneratorExpression::Split(content, entries);
+  const char *sep = "";
   for(std::vector<std::string>::const_iterator ei = entries.begin();
       ei != entries.end(); ++ei)
     {
+    result += sep;
+    sep = ";";
     if (!cmSystemTools::FileIsFullPath(ei->c_str())
         && cmGeneratorExpression::Find(*ei) == std::string::npos)
       {
@@ -253,6 +260,7 @@ static std::string stripExportInterface(const std::string &input,
 {
   std::string result;
 
+  int nestingLevel = 0;
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
   while (true)
@@ -282,7 +290,7 @@ static std::string stripExportInterface(const std::string &input,
     const bool gotInstallInterface = input[pos + 2] == 'I';
     pos += gotInstallInterface ? sizeof("$<INSTALL_INTERFACE:") - 1
                                : sizeof("$<BUILD_INTERFACE:") - 1;
-    int nestingLevel = 1;
+    nestingLevel = 1;
     const char *c = input.c_str() + pos;
     const char * const cStart = c;
     for ( ; *c; ++c)
@@ -331,7 +339,10 @@ static std::string stripExportInterface(const std::string &input,
     pos += traversed;
     lastPos = pos;
     }
-  result += input.substr(lastPos);
+  if (nestingLevel == 0)
+    {
+    result += input.substr(lastPos);
+    }
 
   return cmGeneratorExpression::StripEmptyListElements(result);
 }

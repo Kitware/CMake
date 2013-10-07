@@ -111,12 +111,12 @@ _cmake()
             ;;
         --help-command)
             COMPREPLY=( $( compgen -W '$( cmake --help-command-list 2>/dev/null|
-                tail -n +2 )' -- "$cur" ) )
+                grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
         --help-module)
             COMPREPLY=( $( compgen -W '$( cmake --help-module-list 2>/dev/null|
-                tail -n +2 )' -- "$cur" ) )
+                grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
          --help-policy)
@@ -126,12 +126,12 @@ _cmake()
             ;;
          --help-property)
             COMPREPLY=( $( compgen -W '$( cmake --help-property-list \
-                2>/dev/null | tail -n +2 )' -- "$cur" ) )
+                2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
          --help-variable)
             COMPREPLY=( $( compgen -W '$( cmake --help-variable-list \
-                2>/dev/null | tail -n +2 )' -- "$cur" ) )
+                2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
     esac

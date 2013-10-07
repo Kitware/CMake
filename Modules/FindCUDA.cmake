@@ -1292,22 +1292,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       # Make sure the build system knows the file is generated.
       set_source_files_properties(${generated_file} PROPERTIES GENERATED TRUE)
 
-      # Don't add the object file to the list of generated files if we are using
-      # visual studio and we are attaching the build rule to the cuda file.  VS
-      # will add our object file to the linker automatically for us.
-      set(cuda_add_generated_file TRUE)
-
-      if(NOT compile_to_ptx AND CMAKE_GENERATOR MATCHES "Visual Studio" AND CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE)
-        # Visual Studio 8 crashes when you close the solution when you don't add the object file.
-        if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 8")
-          #message("Not adding ${generated_file}")
-          set(cuda_add_generated_file FALSE)
-        endif()
-      endif()
-
-      if(cuda_add_generated_file)
-        list(APPEND _cuda_wrap_generated_files ${generated_file})
-      endif()
+      list(APPEND _cuda_wrap_generated_files ${generated_file})
 
       # Add the other files that we want cmake to clean on a cleanup ##########
       list(APPEND CUDA_ADDITIONAL_CLEAN_FILES "${cmake_dependency_file}")

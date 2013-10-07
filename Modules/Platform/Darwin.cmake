@@ -294,6 +294,15 @@ endif()
 # set up the default search directories for frameworks
 set(CMAKE_SYSTEM_FRAMEWORK_PATH
   ~/Library/Frameworks
+  )
+if(_CMAKE_OSX_SYSROOT_PATH)
+  list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
+    ${_CMAKE_OSX_SYSROOT_PATH}/Library/Frameworks
+    ${_CMAKE_OSX_SYSROOT_PATH}/Network/Library/Frameworks
+    ${_CMAKE_OSX_SYSROOT_PATH}/System/Library/Frameworks
+    )
+endif()
+list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
   /Library/Frameworks
   /Network/Library/Frameworks
   /System/Library/Frameworks)

@@ -1964,22 +1964,26 @@ cmLocalVisualStudio7Generator
 
   // Compute the version of the Intel plugin to the VS IDE.
   // If the key does not exist then use a default guess.
-  std::string intelVersion = "9.10";
+  std::string intelVersion;
   std::string vskey = gg->GetRegistryBase();
   vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
   cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
                                    cmSystemTools::KeyWOW64_32);
-  if (intelVersion.find("13") == 0 ||
-      intelVersion.find("12") == 0 ||
-      intelVersion.find("11") == 0)
+  unsigned int intelVersionNumber = ~0u;
+  sscanf(intelVersion.c_str(), "%u", &intelVersionNumber);
+  if(intelVersionNumber >= 11)
     {
-    // Version 11.x, 12.x, and 13.x actually use 11.0 in project files!
-    intelVersion = "11.0" ;
+    // Default to latest known project file version.
+    intelVersion = "11.0";
     }
-  else if(intelVersion.find("10") == 0)
+  else if(intelVersionNumber == 10)
     {
     // Version 10.x actually uses 9.10 in project files!
     intelVersion = "9.10";
+    }
+  else
+    {
+    // Version <= 9: use ProductVersion from registry.
     }
 
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"

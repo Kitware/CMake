@@ -692,7 +692,10 @@ if ${cmake_system_linux}; then
   # avoid binutils problem with large binaries, e.g. when building CMake in debug mode
   # See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50230
   if ${cmake_machine_parisc}; then
-    cmake_ld_flags="${LDFLAGS} -Wl,--unique=.text.*"
+    # if -O[s23] is given the effect is inverted, so do not use the flag then
+    if [ "`echo "${CXXFLAGS}" | sed -r '/^(.* )?(-O[s234])( .*)?$/s/.*/-Os/'`" != "-Os" ]; then
+      cmake_ld_flags="${LDFLAGS} -Wl,--unique=.text.*"
+    fi
   fi
 fi
 

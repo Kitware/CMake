@@ -431,13 +431,16 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
 
   // Add XCODE depend helper
   std::string dir = mf->GetCurrentOutputDirectory();
-  cmCustomCommandLine makecommand;
-  makecommand.push_back("make");
-  makecommand.push_back("-C");
-  makecommand.push_back(dir.c_str());
-  makecommand.push_back("-f");
-  makecommand.push_back(this->CurrentXCodeHackMakefile.c_str());
-  makecommand.push_back(""); // placeholder, see below
+  cmCustomCommandLine makeHelper;
+  if(this->XcodeVersion < 50)
+    {
+    makeHelper.push_back("make");
+    makeHelper.push_back("-C");
+    makeHelper.push_back(dir.c_str());
+    makeHelper.push_back("-f");
+    makeHelper.push_back(this->CurrentXCodeHackMakefile.c_str());
+    makeHelper.push_back(""); // placeholder, see below
+    }
 
   // Add ZERO_CHECK
   bool regenerate = !mf->IsOn("CMAKE_SUPPRESS_REGENERATION");
@@ -477,17 +480,18 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       // run the depend check makefile as a post build rule
       // this will make sure that when the next target is built
       // things are up-to-date
-      if((target.GetType() == cmTarget::EXECUTABLE ||
+      if(!makeHelper.empty() &&
+         (target.GetType() == cmTarget::EXECUTABLE ||
 // Nope - no post-build for OBJECT_LIRBRARY
 //          target.GetType() == cmTarget::OBJECT_LIBRARY ||
           target.GetType() == cmTarget::STATIC_LIBRARY ||
           target.GetType() == cmTarget::SHARED_LIBRARY ||
           target.GetType() == cmTarget::MODULE_LIBRARY))
         {
-        makecommand[makecommand.size()-1] =
+        makeHelper[makeHelper.size()-1] = // fill placeholder
           this->PostBuildMakeTarget(target.GetName(), "$(CONFIGURATION)");
         cmCustomCommandLines commandLines;
-        commandLines.push_back(makecommand);
+        commandLines.push_back(makeHelper);
         lg->GetMakefile()->AddCustomCommandToTarget(target.GetName(),
                                                     no_depends,
                                                     commandLines,
@@ -1032,18 +1036,21 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         }
       }
 
-    // Add object library contents as external objects. (Equivalent to
-    // the externalObjFiles above, except each one is not a cmSourceFile
-    // within the target.)
-    std::vector<std::string> objs;
-    this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
-    for(std::vector<std::string>::const_iterator
-          oi = objs.begin(); oi != objs.end(); ++oi)
+    if(this->XcodeVersion < 50)
       {
-      std::string obj = *oi;
-      cmXCodeObject* xsf =
-        this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
-      externalObjFiles.push_back(xsf);
+      // Add object library contents as external objects. (Equivalent to
+      // the externalObjFiles above, except each one is not a cmSourceFile
+      // within the target.)
+      std::vector<std::string> objs;
+      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+      for(std::vector<std::string>::const_iterator
+            oi = objs.begin(); oi != objs.end(); ++oi)
+        {
+        std::string obj = *oi;
+        cmXCodeObject* xsf =
+          this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
+        externalObjFiles.push_back(xsf);
+        }
       }
 
     // some build phases only apply to bundles and/or frameworks
@@ -2783,13 +2790,6 @@ void cmGlobalXCodeGenerator
       }
     }
 
-  // Skip link information for static libraries.
-  if(cmtarget->GetType() == cmTarget::OBJECT_LIBRARY ||
-     cmtarget->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    return;
-    }
-
   // Loop over configuration types and set per-configuration info.
   for(std::vector<std::string>::iterator i =
         this->CurrentConfigurationTypes.begin();
@@ -2800,6 +2800,31 @@ void cmGlobalXCodeGenerator
     if(!*configName)
       {
       configName = 0;
+      }
+
+    if(this->XcodeVersion >= 50)
+      {
+      // Add object library contents as link flags.
+      std::string linkObjs;
+      const char* sep = "";
+      std::vector<std::string> objs;
+      this->GetGeneratorTarget(cmtarget)->UseObjectLibraries(objs);
+      for(std::vector<std::string>::const_iterator
+            oi = objs.begin(); oi != objs.end(); ++oi)
+        {
+        linkObjs += sep;
+        sep = " ";
+        linkObjs += this->XCodeEscapePath(oi->c_str());
+        }
+      this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
+                                        linkObjs.c_str(), configName);
+      }
+
+    // Skip link information for object libraries.
+    if(cmtarget->GetType() == cmTarget::OBJECT_LIBRARY ||
+       cmtarget->GetType() == cmTarget::STATIC_LIBRARY)
+      {
+      continue;
       }
 
     // Compute the link library and directory information.
@@ -3361,8 +3386,11 @@ void cmGlobalXCodeGenerator
     cmXCodeObject* t = *i;
     this->AddDependAndLinkInformation(t);
     }
-  // now create xcode depend hack makefile
-  this->CreateXCodeDependHackTarget(targets);
+  if(this->XcodeVersion < 50)
+    {
+    // now create xcode depend hack makefile
+    this->CreateXCodeDependHackTarget(targets);
+    }
   // now add all targets to the root object
   cmXCodeObject* allTargets = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   for(std::vector<cmXCodeObject*>::iterator i = targets.begin();

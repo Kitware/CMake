@@ -6468,7 +6468,13 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                 ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
             << "Target \"" << this->GetName() << "\" has a "
               "INTERFACE_LINK_LIBRARIES property which differs from its "
-            << linkIfaceProp << " properties.";
+            << linkIfaceProp << " properties."
+              "\n"
+              "INTERFACE_LINK_LIBRARIES:\n  "
+            << newExplicitLibraries
+            << "\n"
+            << linkIfaceProp << ":\n  "
+            << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
           // Fall through
