@@ -21,6 +21,7 @@
 #include "cmTarget.h"
 #include "cmake.h"
 #include "cmComputeLinkInformation.h"
+#include "cmGeneratorExpression.h"
 
 #include "cmMakefileExecutableTargetGenerator.h"
 #include "cmMakefileLibraryTargetGenerator.h"
@@ -131,7 +132,14 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
      this->Makefile->GetProperty
      ("ADDITIONAL_MAKE_CLEAN_FILES"))
     {
-    cmSystemTools::ExpandListArgument(additional_clean_files,
+    const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                            ge.Parse(additional_clean_files);
+
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile, config,
+                                                  false, this->Target, 0, 0),
                                       this->CleanFiles);
     }
 
