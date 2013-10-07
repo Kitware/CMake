@@ -298,6 +298,14 @@ set_property(TARGET cmp0022OLD APPEND PROPERTY LINK_INTERFACE_LIBRARIES testLib3
 
 add_library(noIncludesInterface empty.cpp)
 
+add_library(systemlib SHARED systemlib.cpp)
+install(FILES systemlib.h DESTINATION include/systemlib)
+target_include_directories(systemlib
+  INTERFACE
+    $<INSTALL_INTERFACE:include/systemlib>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
 install(TARGETS testLibRequired
         EXPORT RequiredExp DESTINATION lib
         INCLUDES DESTINATION
@@ -366,6 +374,7 @@ install(
   testLib6
   testLibCycleA testLibCycleB
   cmp0022NEW cmp0022OLD
+  systemlib
   EXPORT exp
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib NAMELINK_SKIP
@@ -417,6 +426,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
   testSharedLibRequired testSharedLibRequiredUser testSharedLibRequiredUser2
   testSharedLibDepends renamed_on_export
   cmp0022NEW cmp0022OLD
+  systemlib
   NAMESPACE bld_
   FILE ExportBuildTree.cmake
   )
