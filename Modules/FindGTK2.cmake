@@ -463,7 +463,7 @@ function(_GTK2_ADD_TARGET _var)
         # Do not create the target if dependencies are missing
         foreach(_dep ${_${_var}_GTK2_DEPENDS})
             if(NOT TARGET GTK2::${_dep})
-                message(WARNING "FindGTK2: target GTK2::${_dep} not found while creating target GTK2::${_basename}")
+                return()
             endif()
         endforeach()
 
