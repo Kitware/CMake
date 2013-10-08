@@ -152,11 +152,6 @@ public:
 #define _chdir chdir
 #endif
 
-#if defined(__HAIKU__)
-#include <os/kernel/OS.h>
-#include <os/storage/Path.h>
-#endif
-
 #if defined(__BEOS__) && !defined(__ZETA__)
 #include <be/kernel/OS.h>
 #include <be/storage/Path.h>

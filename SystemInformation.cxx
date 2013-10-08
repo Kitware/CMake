@@ -1734,12 +1734,12 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
       {
       char host[NI_MAXHOST]={'\0'};
 
-      socklen_t addrlen
+      const size_t addrlen
         = (fam==AF_INET?sizeof(struct sockaddr_in):sizeof(struct sockaddr_in6));
 
       ierr=getnameinfo(
             ifa->ifa_addr,
-            addrlen,
+            static_cast<socklen_t>(addrlen),
             host,
             NI_MAXHOST,
             NULL,
@@ -3836,7 +3836,8 @@ bool SystemInformationImplementation::QueryLinuxMemory()
     unsigned long temp;
     unsigned long cachedMem;
     unsigned long buffersMem;
-    char *r=fgets(buffer, sizeof(buffer), fd); // Skip "total: used:..."
+    // Skip "total: used:..."
+    char *r=fgets(buffer, static_cast<int>(sizeof(buffer)), fd);
     int status=0;
     if(r==buffer)
       {
