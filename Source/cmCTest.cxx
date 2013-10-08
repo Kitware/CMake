@@ -2187,6 +2187,12 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
     this->GetHandler("memcheck")->
       SetPersistentOption("ExcludeRegularExpression", args[i].c_str());
     }
+
+  if(this->CheckArgument(arg, "--rerun-failed"))
+    {
+    this->GetHandler("test")->SetPersistentOption("RerunFailed", "true");
+    this->GetHandler("memcheck")->SetPersistentOption("RerunFailed", "true");
+    }
 }
 
 //----------------------------------------------------------------------

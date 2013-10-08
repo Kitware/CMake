@@ -44,6 +44,12 @@ public:
   void SetUseUnion(bool val) { this->UseUnion = val; }
 
   /**
+   * Set whether or not CTest should only execute the tests that failed
+   * on the previous run.  By default this is false.
+   */
+  void SetRerunFailed(bool val) { this->RerunFailed = val; }
+
+  /**
    * This method is called when reading CTest custom file
    */
   void PopulateCustomVectors(cmMakefile *mf);
@@ -213,6 +219,12 @@ private:
   // based on union regex and -I stuff
   void ComputeTestList();
 
+  // compute the lists of tests that will actually run
+  // based on LastTestFailed.log
+  void ComputeTestListForRerunFailed();
+
+  void UpdateMaxTestNameWidth();
+
   bool GetValue(const char* tag,
                 std::string& value,
                 std::ifstream& fin);
@@ -235,6 +247,7 @@ private:
 
   const char* GetTestStatus(int status);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
+  void ExpandTestsToRunInformationForRerunFailed();
 
   std::vector<cmStdString> CustomPreTest;
   std::vector<cmStdString> CustomPostTest;
@@ -268,6 +281,8 @@ private:
   cmsys::RegularExpression DartStuff;
 
   std::ostream* LogFile;
+
+  bool RerunFailed;
 };
 
 #endif

@@ -20,6 +20,7 @@
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Base64.h>
+#include <cmsys/Directory.hxx>
 #include "cmMakefile.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -537,6 +538,7 @@ int cmCTestTestHandler::ProcessHandler()
     this->UseExcludeRegExp();
     this->SetExcludeRegExp(val);
     }
+  this->SetRerunFailed(cmSystemTools::IsOn(this->GetOption("RerunFailed")));
 
   this->TestResults.clear();
 
@@ -819,6 +821,13 @@ void cmCTestTestHandler::ComputeTestList()
 {
   this->TestList.clear(); // clear list of test
   this->GetListOfTests();
+
+  if (this->RerunFailed)
+    {
+    this->ComputeTestListForRerunFailed();
+    return;
+    }
+
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
   // how many tests are in based on RegExp?
   int inREcnt = 0;
@@ -881,9 +890,47 @@ void cmCTestTestHandler::ComputeTestList()
   this->TotalNumberOfTests = this->TestList.size();
   // Set the TestList to the final list of all test
   this->TestList = finalList;
+
+  this->UpdateMaxTestNameWidth();
+}
+
+void cmCTestTestHandler::ComputeTestListForRerunFailed()
+{
+  this->ExpandTestsToRunInformationForRerunFailed();
+
+  cmCTestTestHandler::ListOfTests::iterator it;
+  ListOfTests finalList;
+  int cnt = 0;
+  for ( it = this->TestList.begin(); it != this->TestList.end(); it ++ )
+    {
+    cnt ++;
+
+    // if this test is not in our list of tests to run, then skip it.
+    if ((this->TestsToRun.size() &&
+         std::find(this->TestsToRun.begin(), this->TestsToRun.end(), cnt)
+         == this->TestsToRun.end()))
+      {
+      continue;
+      }
+
+    it->Index = cnt;
+    finalList.push_back(*it);
+    }
+
+  // Save the total number of tests before exclusions
+  this->TotalNumberOfTests = this->TestList.size();
+
+  // Set the TestList to the list of failed tests to rerun
+  this->TestList = finalList;
+
+  this->UpdateMaxTestNameWidth();
+}
+
+void cmCTestTestHandler::UpdateMaxTestNameWidth()
+{
   std::string::size_type max = this->CTest->GetMaxTestNameWidth();
-  for (it = this->TestList.begin();
-       it != this->TestList.end(); it ++ )
+  for ( cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
+        it != this->TestList.end(); it ++ )
     {
     cmCTestTestProperties& p = *it;
     if(max < p.Name.size())
@@ -1706,6 +1753,91 @@ void cmCTestTestHandler::ExpandTestsToRunInformation(size_t numTests)
   std::vector<int>::iterator new_end =
     std::unique(this->TestsToRun.begin(), this->TestsToRun.end());
   this->TestsToRun.erase(new_end, this->TestsToRun.end());
+}
+
+void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
+{
+
+  std::string dirName = this->CTest->GetBinaryDir() + "/Testing/Temporary";
+
+  cmsys::Directory directory;
+  if (directory.Load(dirName.c_str()) == 0)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to read the contents of "
+      << dirName << std::endl);
+    return;
+    }
+
+  int numFiles = static_cast<int>
+    (cmsys::Directory::GetNumberOfFilesInDirectory(dirName.c_str()));
+  std::string pattern = "LastTestsFailed";
+  std::string logName = "";
+
+  for (int i = 0; i < numFiles; ++i)
+    {
+    std::string fileName = directory.GetFile(i);
+    // bcc crashes if we attempt a normal substring comparison,
+    // hence the following workaround
+    std::string fileNameSubstring = fileName.substr(0, pattern.length());
+    if (fileNameSubstring.compare(pattern) != 0)
+      {
+      continue;
+      }
+    if (logName == "")
+      {
+      logName = fileName;
+      }
+    else
+      {
+      // if multiple matching logs were found we use the most recently
+      // modified one.
+      int res;
+      cmSystemTools::FileTimeCompare(logName.c_str(), fileName.c_str(), &res);
+      if (res == -1)
+        {
+        logName = fileName;
+        }
+      }
+    }
+
+  std::string lastTestsFailedLog = this->CTest->GetBinaryDir()
+    + "/Testing/Temporary/" + logName;
+
+  if ( !cmSystemTools::FileExists(lastTestsFailedLog.c_str()) )
+    {
+    if ( !this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() )
+      {
+      cmCTestLog(this->CTest, ERROR_MESSAGE, lastTestsFailedLog
+        << " does not exist!" << std::endl);
+      }
+    return;
+    }
+
+  // parse the list of tests to rerun from LastTestsFailed.log
+  std::ifstream ifs(lastTestsFailedLog.c_str());
+  if ( ifs )
+    {
+    std::string line;
+    std::string::size_type pos;
+    while ( cmSystemTools::GetLineFromStream(ifs, line) )
+      {
+      pos = line.find(':', 0);
+      if (pos == line.npos)
+        {
+        continue;
+        }
+
+      int val = atoi(line.substr(0, pos).c_str());
+      this->TestsToRun.push_back(val);
+      }
+    ifs.close();
+    }
+  else if ( !this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() )
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem reading file: "
+      << lastTestsFailedLog.c_str() <<
+      " while generating list of previously failed tests." << std::endl);
+    }
 }
 
 //----------------------------------------------------------------------

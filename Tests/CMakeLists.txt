@@ -2140,6 +2140,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set_tests_properties(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*CheckChild *\\.+ *Passed")
 
+  # this test only runs correctly if WORKING_DIRECTORY is honored.
+  if (NOT CMAKE_VERSION VERSION_LESS "2.8.4")
+    add_test(
+      NAME CTestTestRerunFailed
+      COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed)
+    set_tests_properties(CTestTestRerunFailed PROPERTIES
+      PASS_REGULAR_EXPRESSION "1/1 Test #1: TestTimeout" DEPENDS CTestTestTimeout
+      WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
+  endif ()
+
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestZeroTimeout/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/test.cmake"
