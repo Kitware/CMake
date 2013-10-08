@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(IncludeDirectories)
 
 if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
-    OR CMAKE_C_COMPILER_ID STREQUAL Clang)
+    OR CMAKE_C_COMPILER_ID STREQUAL Clang OR CMAKE_C_COMPILER_ID STREQUAL AppleClang)
     AND (CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja"))
   include(CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)

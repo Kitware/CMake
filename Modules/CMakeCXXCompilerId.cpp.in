@@ -34,7 +34,12 @@
 # endif
 
 #elif defined(__clang__)
-# define COMPILER_ID "Clang"
+# if defined(__apple_build_version__)
+#  define COMPILER_ID "AppleClang"
+#  define COMPILER_VERSION_TWEAK DEC(__apple_build_version__)
+# else
+#  define COMPILER_ID "Clang"
+# endif
 # define COMPILER_VERSION_MAJOR DEC(__clang_major__)
 # define COMPILER_VERSION_MINOR DEC(__clang_minor__)
 # define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)

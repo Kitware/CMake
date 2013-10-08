@@ -383,6 +383,8 @@ private:
   void WriteSummary();
   void WriteSummary(cmTarget* target);
 
+  void CheckCompilerIdCompatibility(cmMakefile* mf, std::string lang);
+
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
   // track files replaced during a Generate

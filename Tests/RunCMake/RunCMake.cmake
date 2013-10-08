@@ -36,6 +36,9 @@ function(run_cmake test)
   if(NOT DEFINED RunCMake_TEST_OPTIONS)
     set(RunCMake_TEST_OPTIONS "")
   endif()
+  if(APPLE)
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
+  endif()
   execute_process(
     COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
               -G "${RunCMake_GENERATOR}"

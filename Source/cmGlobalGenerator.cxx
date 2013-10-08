@@ -624,6 +624,9 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       {
       this->LanguageToOriginalSharedLibFlags[lang] = sharedLibFlags;
       }
+
+    // Translate compiler ids for compatibility.
+    this->CheckCompilerIdCompatibility(mf, lang);
     } // end for each language
 
   // Now load files that can override any settings on the platform or for
@@ -636,6 +639,44 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   if(cmSystemTools::FileExists(projectCompatibility.c_str()))
     {
     mf->ReadListFile(0,projectCompatibility.c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
+                                                     std::string lang)
+{
+  std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
+  const char* compilerId = mf->GetDefinition(compilerIdVar.c_str());
+  if(compilerId && strcmp(compilerId, "AppleClang") == 0)
+    {
+    cmPolicies* policies = this->CMakeInstance->GetPolicies();
+    switch(mf->GetPolicyStatus(cmPolicies::CMP0025))
+      {
+      case cmPolicies::WARN:
+        if(!this->CMakeInstance->GetIsInTryCompile())
+          {
+          cmOStringStream w;
+          w << policies->GetPolicyWarning(cmPolicies::CMP0025) << "\n"
+            "Converting " << lang <<
+            " compiler id \"AppleClang\" to \"Clang\" for compatibility."
+            ;
+          mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          }
+      case cmPolicies::OLD:
+        // OLD behavior is to convert AppleClang to Clang.
+        mf->AddDefinition(compilerIdVar.c_str(), "Clang");
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        mf->IssueMessage(
+          cmake::FATAL_ERROR,
+          policies->GetRequiredPolicyError(cmPolicies::CMP0025)
+          );
+      case cmPolicies::NEW:
+        // NEW behavior is to keep AppleClang.
+        break;
+      }
     }
 }
 

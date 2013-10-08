@@ -620,6 +620,23 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to not to allow including the "
     "result of an export() command.",
     2,8,13,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0025, "CMP0025",
+    "Compiler id for Apple Clang is now AppleClang.",
+    "CMake >= 2.8.13 recognize that Apple Clang is a different compiler "
+    "than upstream Clang and that they have different version numbers.  "
+    "CMake now prefers to present this to projects by setting "
+    "CMAKE_<LANG>_COMPILER_ID to \"AppleClang\" instead of \"Clang\".  "
+    "However, existing projects may assume the compiler id for Apple Clang "
+    "is just \"Clang\" as it was in CMake < 2.8.13.  "
+    "Therefore this policy determines for Apple Clang which compiler id "
+    "to report in CMAKE_<LANG>_COMPILER_ID after <LANG> is enabled by "
+    "the project() or enable_language() command."
+    "\n"
+    "The OLD behavior for this policy is to use compiler id \"Clang\".  "
+    "The NEW behavior for this policy is to use compiler id \"AppleClang\".",
+    2,8,13,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
