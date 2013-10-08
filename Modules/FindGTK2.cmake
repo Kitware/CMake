@@ -240,6 +240,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
         PATH_SUFFIXES
             ${_suffixes}
     )
+    mark_as_advanced(GTK2_${_var}_INCLUDE_DIR)
 
     if(${_var}_INCLUDE_DIR)
         set(GTK2_INCLUDE_DIRS ${GTK2_INCLUDE_DIRS} ${${_var}_INCLUDE_DIR} PARENT_SCOPE)
@@ -449,7 +450,7 @@ endif()
 # Find all components
 #
 
-find_package(Freetype)
+find_package(Freetype QUIET)
 list(APPEND GTK2_INCLUDE_DIRS ${FREETYPE_INCLUDE_DIRS})
 list(APPEND GTK2_LIBRARIES ${FREETYPE_LIBRARIES})
 
@@ -585,6 +586,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     string(TOUPPER ${_GTK2_component} _COMPONENT_UPPER)
+
+    set(GTK2_${_COMPONENT_UPPER}_FIND_QUIETLY ${GTK2_FIND_QUIETLY})
 
     if(_GTK2_component STREQUAL "gtk")
         FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTK2_${_COMPONENT_UPPER} "Some or all of the gtk libraries were not found."
