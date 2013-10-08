@@ -60,9 +60,8 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
-      "  message([STATUS|WARNING|AUTHOR_WARNING|FATAL_ERROR|SEND_ERROR]\n"
-      "          \"message to display\" ...)\n"
-      "The optional keyword determines the type of message:\n"
+      "  message([<mode>] \"message to display\" ...)\n"
+      "The optional <mode> keyword determines the type of message:\n"
       "  (none)         = Important information\n"
       "  STATUS         = Incidental information\n"
       "  WARNING        = CMake Warning, continue processing\n"
@@ -70,6 +69,9 @@ public:
       "  SEND_ERROR     = CMake Error, continue processing,\n"
       "                                but skip generation\n"
       "  FATAL_ERROR    = CMake Error, stop processing and generation\n"
+      "  DEPRECATION    = CMake Deprecation Error or Warning if variable\n"
+      "                   CMAKE_ERROR_DEPRECATED or CMAKE_WARN_DEPRECATED\n"
+      "                   is enabled, respectively, else no message.\n"
       "The CMake command-line tool displays STATUS messages on stdout "
       "and all other message types on stderr.  "
       "The CMake GUI displays all messages in its log area.  "
