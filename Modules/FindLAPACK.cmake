@@ -229,57 +229,61 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
     else()
       find_package(Threads REQUIRED)
     endif()
+
+    set(LAPACK_SEARCH_LIBS "")
+
     if (BLA_F95)
-      if(NOT LAPACK95_LIBRARIES)
-        # old
-        check_lapack_libraries(
-          LAPACK95_LIBRARIES
-          LAPACK
-          cheev
-          ""
-          "mkl_lapack95"
-          "${BLAS95_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LM}"
-          )
-      endif()
-      if(NOT LAPACK95_LIBRARIES)
-        # new >= 10.3
-        check_lapack_libraries(
-          LAPACK95_LIBRARIES
-          LAPACK
-          CHEEV
-          ""
-          "mkl_intel_lp64"
-          "${BLAS95_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LM}"
-          )
-      endif()
+      set(LAPACK_mkl_SEARCH_SYMBOL "CHEEV")
+      set(_LIBRARIES LAPACK95_LIBRARIES)
+      set(_BLAS_LIBRARIES ${BLAS95_LIBRARIES})
+
+      # old
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack95")
+      # new >= 10.3
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_intel_c")
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_intel_lp64")
     else()
-      if(NOT LAPACK_LIBRARIES)
-        # old
-        check_lapack_libraries(
-          LAPACK_LIBRARIES
-          LAPACK
-          cheev
-          ""
-          "mkl_lapack"
-          "${BLAS_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LM}"
-          )
-      endif()
-      if(NOT LAPACK_LIBRARIES)
-        # new >= 10.3
-        check_lapack_libraries(
-          LAPACK_LIBRARIES
-          LAPACK
-          cheev
-          ""
-          "mkl_gf_lp64"
-          "${BLAS_LIBRARIES}"
-          "${CMAKE_THREAD_LIBS_INIT};${LM}"
-          )
-      endif()
+      set(LAPACK_mkl_SEARCH_SYMBOL "cheev")
+      set(_LIBRARIES LAPACK_LIBRARIES)
+      set(_BLAS_LIBRARIES ${BLAS_LIBRARIES})
+
+      # old
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_lapack")
+      # new >= 10.3
+      list(APPEND LAPACK_SEARCH_LIBS
+        "mkl_gf_lp64")
     endif()
+
+    # First try empty lapack libs
+    if (NOT ${_LIBRARIES})
+      check_lapack_libraries(
+        ${_LIBRARIES}
+        BLAS
+        ${LAPACK_mkl_SEARCH_SYMBOL}
+        ""
+        ""
+        "${_BLAS_LIBRARIES}"
+        "${CMAKE_THREAD_LIBS_INIT};${LM}"
+        )
+    endif ()
+    # Then try the search libs
+    foreach (IT ${LAPACK_SEARCH_LIBS})
+      if (NOT ${_LIBRARIES})
+        check_lapack_libraries(
+          ${_LIBRARIES}
+          BLAS
+          ${LAPACK_mkl_SEARCH_SYMBOL}
+          ""
+          "${IT}"
+          "${_BLAS_LIBRARIES}"
+          "${CMAKE_THREAD_LIBS_INIT};${LM}"
+          )
+      endif ()
+    endforeach ()
   endif ()
 endif()
 else()
