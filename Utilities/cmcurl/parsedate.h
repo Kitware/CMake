@@ -1,5 +1,5 @@
 #ifndef __PARSEDATE_H
-#define __PARSEDATEL_H
+#define __PARSEDATE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

@@ -534,8 +534,8 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           ostr << this->GraphNodePrefix << cnt++;
           this->TargetNamesNodes[libName] = ostr.str();
           this->TargetPtrs[libName] = NULL;
-          //str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
-          //<<  "\" shape=\"ellipse\"];" << std::endl;
+          // str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
+          // <<  "\" shape=\"ellipse\"];" << std::endl;
           }
         }
       }

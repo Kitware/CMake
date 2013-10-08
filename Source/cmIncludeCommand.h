@@ -15,9 +15,7 @@
 #include "cmCommand.h"
 
 /** \class cmIncludeCommand
- * \brief
- *
- *  cmIncludeCommand defines a list of distant
+ * \brief cmIncludeCommand defines a list of distant
  *  files that can be "included" in the current list file.
  *  In almost every sense, this is identical to a C/C++
  *  #include command.  Arguments are first expended as usual.
