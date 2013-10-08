@@ -91,6 +91,11 @@ void cmLocalVisualStudio6Generator::AddCMakeListsRules()
   for(cmTargets::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
+    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
+
     // Add a rule to regenerate the build system when the target
     // specification source changes.
     const char* suppRegenRule =
@@ -146,6 +151,8 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       case cmTarget::GLOBAL_TARGET:
         this->SetBuildType(UTILITY, l->first.c_str(), l->second);
         break;
+      case cmTarget::INTERFACE_LIBRARY:
+        continue;
       default:
         cmSystemTools::Error("Bad target type: ", l->first.c_str());
         break;
@@ -1839,7 +1846,8 @@ void cmLocalVisualStudio6Generator
       options +=
         this->ConvertToOptionallyRelativeOutputPath(l->Value.c_str());
       }
-    else
+    else if (!l->Target
+        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
       {
       options += l->Value;
       }

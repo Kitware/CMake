@@ -378,11 +378,14 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 
   if (!info)
     {
-    cmMakefile* mf = target->GetMakefile();
-    cmOStringStream e;
-    e << "Exporting the target \"" << target->GetName() << "\" is not "
-         "allowed since its linker language cannot be determined";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+      {
+      cmMakefile* mf = target->GetMakefile();
+      cmOStringStream e;
+      e << "Exporting the target \"" << target->GetName() << "\" is not "
+          "allowed since its linker language cannot be determined";
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
     return;
     }
 
@@ -887,6 +890,9 @@ cmExportFileGenerator
       break;
     case cmTarget::UNKNOWN_LIBRARY:
       os << "add_library(" << targetName << " UNKNOWN IMPORTED)\n";
+      break;
+    case cmTarget::INTERFACE_LIBRARY:
+      os << "add_library(" << targetName << " INTERFACE IMPORTED)\n";
       break;
     default:  // should never happen
       break;

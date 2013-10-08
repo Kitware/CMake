@@ -1794,6 +1794,10 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   ItemVector const& items = cli.GetItems();
   for(ItemVector::const_iterator li = items.begin(); li != items.end(); ++li)
     {
+    if(li->Target && li->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     if(li->IsPath)
       {
       linkLibs += this->ConvertToLinkReference(li->Value);
@@ -1995,6 +1999,10 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
         return true;
       case cmTarget::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.
+        // This was listed to get the target-level dependency.
+        return false;
+      case cmTarget::INTERFACE_LIBRARY:
+        // An interface library has no file on which to depend.
         // This was listed to get the target-level dependency.
         return false;
       case cmTarget::UTILITY:

@@ -490,6 +490,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
         break;
       case cmTarget::GLOBAL_TARGET:
       case cmTarget::UNKNOWN_LIBRARY:
+      case cmTarget::INTERFACE_LIBRARY:
         break;
       }
     configType += "</ConfigurationType>\n";
@@ -1701,7 +1702,8 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
       libstring += sep;
       libstring += path;
       }
-    else
+    else if (!l->Target
+        || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
       {
       libstring += sep;
       libstring += l->Value;
@@ -1836,6 +1838,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
        i != depends.end(); ++i)
     {
     cmTarget* dt = *i;
+    if(dt->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     // skip fortran targets as they can not be processed by MSBuild
     // the only reference will be in the .sln file
     if(static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)

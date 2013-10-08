@@ -45,3 +45,6 @@ get_property(_alt2 TARGET PREFIX::Foo PROPERTY ALIASED_TARGET)
 if (NOT ${_alt2} STREQUAL foo)
   message(SEND_ERROR "ALIASED_TARGET is not foo.")
 endif()
+
+add_library(iface INTERFACE)
+add_library(Alias::Iface ALIAS iface)

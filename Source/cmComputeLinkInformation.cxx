@@ -655,6 +655,11 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
         (this->UseImportLibrary &&
          (impexe || tgt->GetType() == cmTarget::SHARED_LIBRARY));
 
+      if(tgt->GetType() == cmTarget::INTERFACE_LIBRARY)
+        {
+        this->Items.push_back(Item(std::string(), true, tgt));
+        return;
+        }
       // Pass the full path to the target file.
       std::string lib = tgt->GetFullPath(config, implib, true);
       if(!this->LinkDependsNoShared ||
