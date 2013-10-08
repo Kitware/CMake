@@ -171,6 +171,8 @@ bool cmExportCommand
   ebfg.SetCommand(this);
   ebfg.SetExportOld(this->ExportOld.IsEnabled());
 
+  this->Makefile->AddExportedTargetsFile(fname);
+
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes;
   this->Makefile->GetConfigurations(configurationTypes);

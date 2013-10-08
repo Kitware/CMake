@@ -601,6 +601,25 @@ cmPolicies::cmPolicies()
     "The NEW behavior for this policy is to not to allow mixing of the "
     "keyword and plain signatures.",
     2,8,12,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0024, "CMP0024",
+    "Disallow include export result.",
+    "CMake 2.8.12 and lower allowed use of the include() command with the "
+    "result of the export() command.  This relies on the assumption that "
+    "the export() command has an immediate effect at configure-time during a "
+    "cmake run.  Certain properties of targets are not fully determined "
+    "until later at generate-time, such as the link language and complete "
+    "list of link libraries.  Future refactoring will change the effect of "
+    "the export() command to be executed at generate-time.  Use ALIAS "
+    "targets instead in cases where the goal is to refer to targets by "
+    "another name"
+    "\n"
+    "The OLD behavior for this policy is to allow including the result "
+    "of an export() command.  "
+    "The NEW behavior for this policy is to not to allow including the "
+    "result of an export() command.",
+    2,8,13,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
