@@ -26,36 +26,30 @@
 #  License text for the above reference.)
 
 include(CheckCSourceCompiles)
+include(CMakeCheckCompilerFlagCommonPatterns)
 
 macro (CHECK_C_COMPILER_FLAG _FLAG _RESULT)
    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+
    # Normalize locale during test compilation.
    set(_CheckCCompilerFlag_LOCALE_VARS LC_ALL LC_MESSAGES LANG)
    foreach(v ${_CheckCCompilerFlag_LOCALE_VARS})
      set(_CheckCCompilerFlag_SAVED_${v} "$ENV{${v}}")
      set(ENV{${v}} C)
    endforeach()
+   CHECK_COMPILER_FLAG_COMMON_PATTERNS(_CheckCCompilerFlag_COMMON_PATTERNS)
    CHECK_C_SOURCE_COMPILES("int main(void) { return 0; }" ${_RESULT}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "command line option .* is valid for .* but not for C" # GNU
-     FAIL_REGEX "unrecognized .*option"                     # GNU
-     FAIL_REGEX "unknown .*option"                          # Clang
-     FAIL_REGEX "ignoring unknown option"                   # MSVC
-     FAIL_REGEX "warning D9002"                             # MSVC, any lang
-     FAIL_REGEX "option.*not supported"                     # Intel
-     FAIL_REGEX "invalid argument .*option"                 # Intel
-     FAIL_REGEX "ignoring option .*argument required"       # Intel
-     FAIL_REGEX "[Uu]nknown option"                         # HP
-     FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
-     FAIL_REGEX "command option .* is not recognized"       # XL
-     FAIL_REGEX "WARNING: unknown flag:"                    # Open64
+     ${_CheckCCompilerFlag_COMMON_PATTERNS}
      )
    foreach(v ${_CheckCCompilerFlag_LOCALE_VARS})
      set(ENV{${v}} ${_CheckCCompilerFlag_SAVED_${v}})
      unset(_CheckCCompilerFlag_SAVED_${v})
    endforeach()
    unset(_CheckCCompilerFlag_LOCALE_VARS)
+   unset(_CheckCCompilerFlag_COMMON_PATTERNS)
 
    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro ()

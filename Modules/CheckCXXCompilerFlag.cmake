@@ -26,6 +26,7 @@
 #  License text for the above reference.)
 
 include(CheckCXXSourceCompiles)
+include(CMakeCheckCompilerFlagCommonPatterns)
 
 macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
@@ -37,28 +38,18 @@ macro (CHECK_CXX_COMPILER_FLAG _FLAG _RESULT)
      set(_CheckCXXCompilerFlag_SAVED_${v} "$ENV{${v}}")
      set(ENV{${v}} C)
    endforeach()
-   CHECK_CXX_SOURCE_COMPILES("int main() { return 0;}" ${_RESULT}
+   CHECK_COMPILER_FLAG_COMMON_PATTERNS(_CheckCXXCompilerFlag_COMMON_PATTERNS)
+   CHECK_CXX_SOURCE_COMPILES("int main() { return 0; }" ${_RESULT}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "command line option .* is valid for .* but not for C\\\\+\\\\+" # GNU
-     FAIL_REGEX "unrecognized .*option"                     # GNU
-     FAIL_REGEX "unknown .*option"                          # Clang
-     FAIL_REGEX "ignoring unknown option"                   # MSVC
-     FAIL_REGEX "warning D9002"                             # MSVC, any lang
-     FAIL_REGEX "option.*not supported"                     # Intel
-     FAIL_REGEX "invalid argument .*option"                 # Intel
-     FAIL_REGEX "ignoring option .*argument required"       # Intel
-     FAIL_REGEX "[Uu]nknown option"                         # HP
-     FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
-     FAIL_REGEX "command option .* is not recognized"       # XL
-     FAIL_REGEX "not supported in this configuration; ignored"       # AIX
-     FAIL_REGEX "File with unknown suffix passed to linker" # PGI
-     FAIL_REGEX "WARNING: unknown flag:"                    # Open64
+     ${_CheckCXXCompilerFlag_COMMON_PATTERNS}
      )
    foreach(v ${_CheckCXXCompilerFlag_LOCALE_VARS})
      set(ENV{${v}} ${_CheckCXXCompilerFlag_SAVED_${v}})
      unset(_CheckCXXCompilerFlag_SAVED_${v})
    endforeach()
    unset(_CheckCXXCompilerFlag_LOCALE_VARS)
+   unset(_CheckCXXCompilerFlag_COMMON_PATTERNS)
 
    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
 endmacro ()
