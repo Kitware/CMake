@@ -38,6 +38,12 @@
 # define COMPILER_VERSION_MAJOR DEC(__clang_major__)
 # define COMPILER_VERSION_MINOR DEC(__clang_minor__)
 # define COMPILER_VERSION_PATCH DEC(__clang_patchlevel__)
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
 
 #elif defined(__BORLANDC__) && defined(__CODEGEARC_VERSION__)
 # define COMPILER_ID "Embarcadero"
@@ -199,6 +205,9 @@
    because some compilers will just produce instructions to fill the
    array rather than assigning a pointer to a static array.  */
 char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
+#ifdef SIMULATE_ID
+char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
+#endif
 
 @CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT@
 
@@ -211,6 +220,12 @@ int main(int argc, char* argv[])
   require += info_platform[argc];
 #ifdef COMPILER_VERSION_MAJOR
   require += info_version[argc];
+#endif
+#ifdef SIMULATE_ID
+  require += info_simulate[argc];
+#endif
+#ifdef SIMULATE_VERSION_MAJOR
+  require += info_simulate_version[argc];
 #endif
   (void)argv;
   return require;

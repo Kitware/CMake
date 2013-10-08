@@ -65,7 +65,11 @@ else()
 endif()
 
 if(NOT MSVC_VERSION)
-  if(CMAKE_C_COMPILER_VERSION)
+  if(CMAKE_C_SIMULATE_VERSION)
+    set(_compiler_version ${CMAKE_C_SIMULATE_VERSION})
+  elseif(CMAKE_CXX_SIMULATE_VERSION)
+    set(_compiler_version ${CMAKE_CXX_SIMULATE_VERSION})
+  elseif(CMAKE_C_COMPILER_VERSION)
     set(_compiler_version ${CMAKE_C_COMPILER_VERSION})
   else()
     set(_compiler_version ${CMAKE_CXX_COMPILER_VERSION})
@@ -220,7 +224,7 @@ set (CMAKE_MODULE_LINKER_FLAGS_RELEASE_INIT ${CMAKE_EXE_LINKER_FLAGS_RELEASE_INI
 set (CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL_INIT ${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT})
 
 macro(__windows_compiler_msvc lang)
-  if(NOT "${CMAKE_${lang}_COMPILER_VERSION}" VERSION_LESS 14)
+  if(NOT MSVC_VERSION LESS 1400)
     # for 2005 make sure the manifest is put in the dll with mt
     set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll ")
     set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe ")
