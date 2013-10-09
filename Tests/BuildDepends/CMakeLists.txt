@@ -13,7 +13,7 @@ project(BuildDepends)
 set(CMAKE_SUPPRESS_REGENERATION 1)
 
 # Xcode needs some help with the fancy dependencies in this test.
-if("${CMAKE_GENERATOR}" MATCHES "Xcode")
+if(XCODE AND XCODE_VERSION VERSION_LESS 5)
   set(HELP_XCODE 1)
 endif()
 function(help_xcode_depends)
