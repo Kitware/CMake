@@ -2485,11 +2485,6 @@ void cmake::DefineProperties(cmake *cm)
      "package has been found is determined using the <NAME>_FOUND variables.");
 
   cm->DefineProperty(
-    "__CMAKE_DELETE_CACHE_CHANGE_VARS_", cmProperty::GLOBAL,
-    "Internal property",
-    "Used to detect compiler changes, Do not set.");
-
-  cm->DefineProperty(
     "DEBUG_CONFIGURATIONS", cmProperty::GLOBAL,
     "Specify which configurations are for debugging.",
     "The value must be a semi-colon separated list of configuration names.  "
