@@ -469,8 +469,45 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
     set(BLAS_mkl_SEARCH_SYMBOL SGEMM)
     set(_LIBRARIES BLAS95_LIBRARIES)
     if (WIN32)
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_blas95 mkl_intel_c mkl_intel_thread mkl_core libguide40")
+      if (BLA_STATIC)
+        set(BLAS_mkl_DLL_SUFFIX "")
+      else()
+        set(BLAS_mkl_DLL_SUFFIX "_dll")
+      endif()
+
+      # Find the main file (32-bit or 64-bit)
+      set(BLAS_SEARCH_LIBS_WIN_MAIN "")
+      if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
+          "mkl_blas95${BLAS_mkl_DLL_SUFFIX} mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
+      endif()
+      if (BLA_VENDOR STREQUAL "Intel10_64lp*" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
+          "mkl_blas95_lp64${BLAS_mkl_DLL_SUFFIX} mkl_intel_lp64${BLAS_mkl_DLL_SUFFIX}")
+      endif ()
+
+      # Add threading/sequential libs
+      set(BLAS_SEARCH_LIBS_WIN_THREAD "")
+      if (BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
+      endif()
+      if (NOT BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+        # old version
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "libguide40 mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+        # mkl >= 10.3
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+      endif()
+
+      # Cartesian product of the above
+      foreach (MAIN ${BLAS_SEARCH_LIBS_WIN_MAIN})
+        foreach (THREAD ${BLAS_SEARCH_LIBS_WIN_THREAD})
+          list(APPEND BLAS_SEARCH_LIBS
+            "${MAIN} ${THREAD} mkl_core${BLAS_mkl_DLL_SUFFIX}")
+        endforeach()
+      endforeach()
     else ()
       if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS
@@ -490,17 +527,54 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
             "mkl_blas95_lp64 mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
         endif ()
       endif ()
-    endif ()
-    if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_blas95_lp64 mkl_intel_lp64 mkl_sequential mkl_core")
+      if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS
+          "mkl_intel_lp64 mkl_sequential mkl_core")
+      endif ()
     endif ()
   else ()
     set(BLAS_mkl_SEARCH_SYMBOL sgemm)
     set(_LIBRARIES BLAS_LIBRARIES)
     if (WIN32)
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_c_dll mkl_intel_thread_dll mkl_core_dll libguide40")
+      if (BLA_STATIC)
+        set(BLAS_mkl_DLL_SUFFIX "")
+      else()
+        set(BLAS_mkl_DLL_SUFFIX "_dll")
+      endif()
+
+      # Find the main file (32-bit or 64-bit)
+      set(BLAS_SEARCH_LIBS_WIN_MAIN "")
+      if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
+          "mkl_intel_c${BLAS_mkl_DLL_SUFFIX}")
+      endif()
+      if (BLA_VENDOR STREQUAL "Intel10_64lp*" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS_WIN_MAIN
+          "mkl_intel_lp64${BLAS_mkl_DLL_SUFFIX}")
+      endif ()
+
+      # Add threading/sequential libs
+      set(BLAS_SEARCH_LIBS_WIN_THREAD "")
+      if (NOT BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+        # old version
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "libguide40 mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+        # mkl >= 10.3
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "libiomp5md mkl_intel_thread${BLAS_mkl_DLL_SUFFIX}")
+      endif()
+      if (BLA_VENDOR STREQUAL "*_seq" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS_WIN_THREAD
+          "mkl_sequential${BLAS_mkl_DLL_SUFFIX}")
+      endif()
+
+      # Cartesian product of the above
+      foreach (MAIN ${BLAS_SEARCH_LIBS_WIN_MAIN})
+        foreach (THREAD ${BLAS_SEARCH_LIBS_WIN_THREAD})
+          list(APPEND BLAS_SEARCH_LIBS
+            "${MAIN} ${THREAD} mkl_core${BLAS_mkl_DLL_SUFFIX}")
+        endforeach()
+      endforeach()
     else ()
       if (BLA_VENDOR STREQUAL "Intel10_32" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS
@@ -521,6 +595,10 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
             "mkl_intel_lp64 mkl_intel_thread mkl_core iomp5")
         endif ()
       endif ()
+      if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
+        list(APPEND BLAS_SEARCH_LIBS
+          "mkl_intel_lp64 mkl_sequential mkl_core")
+      endif ()
 
       #older vesions of intel mkl libs
       if (BLA_VENDOR STREQUAL "Intel" OR BLA_VENDOR STREQUAL "All")
@@ -531,10 +609,6 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
         list(APPEND BLAS_SEARCH_LIBS
           "mkl_em64t")
       endif ()
-    endif ()
-    if (BLA_VENDOR STREQUAL "Intel10_64lp_seq" OR BLA_VENDOR STREQUAL "All")
-      list(APPEND BLAS_SEARCH_LIBS
-        "mkl_intel_lp64 mkl_sequential mkl_core")
     endif ()
   endif ()
 
