@@ -99,7 +99,7 @@ private:
     int& branchCovered,
     int& totalBranches,
     int& percentBranch);
-  bool GetNextInt(std::string const& inputLine, // not needed for intel
+  bool GetNextInt(std::string const& inputLine,
                   std::string::size_type& pos,
                   int& value);
   //! Handle Python coverage using Python's Trace.py
