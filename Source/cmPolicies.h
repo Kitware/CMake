@@ -75,6 +75,7 @@ public:
     CMP0022, ///< INTERFACE_LINK_LIBRARIES defines the link interface
     CMP0023, ///< Disallow mixing keyword and plain tll signatures
     CMP0024, ///< Disallow including export() result.
+    CMP0025, ///< Compiler id for Apple Clang is now AppleClang
 
     /** \brief Always the last entry.
      *
