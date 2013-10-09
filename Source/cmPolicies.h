@@ -76,6 +76,7 @@ public:
     CMP0023, ///< Disallow mixing keyword and plain tll signatures
     CMP0024, ///< Disallow including export() result.
     CMP0025, ///< Compiler id for Apple Clang is now AppleClang
+    CMP0026, ///< Disallow use of the LOCATION target property.
 
     /** \brief Always the last entry.
      *
