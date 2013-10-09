@@ -49,7 +49,13 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
     this->Makefile->RemoveCacheDefinition(variable);
     return true;
     }
-  // ERROR: second argument isn't CACHE
+  // unset(VAR PARENT_SCOPE)
+  else if ((args.size() == 2) && (args[1] == "PARENT_SCOPE"))
+    {
+    this->Makefile->RaiseScope(variable, 0);
+    return true;
+    }
+  // ERROR: second argument isn't CACHE or PARENT_SCOPE
   else
     {
     this->SetError("called with an invalid second argument");

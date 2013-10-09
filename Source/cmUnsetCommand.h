@@ -61,10 +61,13 @@ public:
   virtual const char* GetFullDocumentation() const
     {
     return
-      "  unset(<variable> [CACHE])\n"
+      "  unset(<variable> [CACHE | PARENT_SCOPE])\n"
       "Removes the specified variable causing it to become undefined.  "
       "If CACHE is present then the variable is removed from the cache "
       "instead of the current scope.\n"
+      "If PARENT_SCOPE is present then the variable is removed from the "
+      "scope above the current scope.  See the same option in the set() "
+      "command for further details.\n"
       "<variable> can be an environment variable such as:\n"
       "  unset(ENV{LD_LIBRARY_PATH})\n"
       "in which case the variable will be removed from the current "
