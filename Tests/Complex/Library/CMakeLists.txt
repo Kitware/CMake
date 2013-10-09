@@ -51,7 +51,7 @@ define_property(
   FULL_DOCS "A simple etst proerty that means nothign and is used for nothing"
   )
 set_target_properties(CMakeTestCLibraryShared PROPERTIES FOO BAR)
-if(NOT BEOS AND NOT WIN32)  # No libm on BeOS.
+if(NOT BEOS AND NOT WIN32 AND NOT HAIKU)  # No libm on BeOS.
   set_target_properties(CMakeTestCLibraryShared PROPERTIES LINK_FLAGS "-lm")
 endif()
 get_target_property(FOO_BAR_VAR CMakeTestCLibraryShared FOO)

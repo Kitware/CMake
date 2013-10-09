@@ -19,7 +19,9 @@
 #endif
 
 #if defined(__HAIKU__)
-#include <StorageKit.h>
+#include <string.h>
+#include <FindDirectory.h>
+#include <StorageDefs.h>
 #endif
 
 void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
@@ -1584,12 +1586,14 @@ void cmFindPackageCommand::AddPrefixesUserRegistry()
 #if defined(_WIN32) && !defined(__CYGWIN__)
   this->LoadPackageRegistryWinUser();
 #elif defined(__HAIKU__)
-  BPath dir;
-  if (find_directory(B_USER_SETTINGS_DIRECTORY, &dir) == B_OK)
+  char dir[B_PATH_NAME_LENGTH];
+  if (find_directory(B_USER_SETTINGS_DIRECTORY, -1, false, dir, sizeof(dir)) ==
+      B_OK)
     {
-    dir.Append("cmake/packages");
-    dir.Append(this->Name.c_str());
-    this->LoadPackageRegistryDir(dir.Path());
+    std::string fname = dir;
+    fname += "/cmake/packages/";
+    fname += Name;
+    this->LoadPackageRegistryDir(fname);
     }
 #else
   if(const char* home = cmSystemTools::GetEnv("HOME"))
