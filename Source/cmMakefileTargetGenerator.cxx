@@ -292,7 +292,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
 
     // Add include directory flags.
     this->LocalGenerator->
-      AppendFlags(flags,this->GetFrameworkFlags().c_str());
+      AppendFlags(flags,this->GetFrameworkFlags(l).c_str());
 
     // Add target-specific flags.
     this->LocalGenerator->AddCompileOptions(flags, this->Target,
@@ -1519,12 +1519,20 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
 }
 
 //----------------------------------------------------------------------------
-std::string cmMakefileTargetGenerator::GetFrameworkFlags()
+std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
 {
  if(!this->Makefile->IsOn("APPLE"))
    {
    return std::string();
    }
+
+  std::string fwSearchFlagVar = "CMAKE_" + l + "_FRAMEWORK_SEARCH_FLAG";
+  const char* fwSearchFlag =
+    this->Makefile->GetDefinition(fwSearchFlagVar.c_str());
+  if(!(fwSearchFlag && *fwSearchFlag))
+    {
+    return std::string();
+    }
 
  std::set<cmStdString> emitted;
 #ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
@@ -1560,7 +1568,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags()
       {
       if(emitted.insert(*i).second)
         {
-        flags += "-F";
+        flags += fwSearchFlag;
         flags += this->Convert(i->c_str(),
                                cmLocalGenerator::START_OUTPUT,
                                cmLocalGenerator::SHELL, true);

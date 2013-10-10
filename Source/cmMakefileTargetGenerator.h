@@ -124,7 +124,7 @@ protected:
   void DriveCustomCommands(std::vector<std::string>& depends);
 
   // Return the a string with -F flags on apple
-  std::string GetFrameworkFlags();
+  std::string GetFrameworkFlags(std::string const& l);
 
   void AppendFortranFormatFlags(std::string& flags, cmSourceFile& source);
 
