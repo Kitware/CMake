@@ -93,7 +93,9 @@ bool cmIncludeCommand
       cmSystemTools::CollapseFullPath(fname.c_str(),
                                       this->Makefile->GetStartDirectory());
 
-  if (this->Makefile->IsExportedTargetsFile(fname_abs))
+  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
+                                        ->GetGlobalGenerator();
+  if (gg->IsExportedTargetsFile(fname_abs))
     {
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;

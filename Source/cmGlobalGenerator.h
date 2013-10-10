@@ -293,6 +293,18 @@ public:
 
   void ProcessEvaluationFiles();
 
+  void AddExportedTargetsFile(const std::string &filename)
+  {
+    this->ExportedTargetsFiles.insert(filename);
+  }
+
+  bool IsExportedTargetsFile(const std::string &filename) const
+  {
+    const std::set<std::string>::const_iterator it
+                                  = this->ExportedTargetsFiles.find(filename);
+    return it != this->ExportedTargetsFiles.end();
+  }
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
@@ -372,6 +384,7 @@ private:
   std::map<cmStdString, cmStdString> ExtensionToLanguage;
   std::map<cmStdString, int> LanguageToLinkerPreference;
   std::map<cmStdString, cmStdString> LanguageToOriginalSharedLibFlags;
+  std::set<std::string> ExportedTargetsFiles;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };
