@@ -432,8 +432,8 @@ cmExportInstallFileGenerator::HandleMissingTarget(
     }
   else
     {
-    // We are not appending, so all exported targets should be
-    // known here.  This is probably user-error.
+    // All exported targets should be known here and should be unique.
+    // This is probably user-error.
     this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
     }
 }
