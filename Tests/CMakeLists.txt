@@ -2000,12 +2000,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "Process file.*foo.py.*Total LOC:.*13.*Percentage Coverage: 84.62.*"
       ENVIRONMENT COVFILE=)
 
-  # Use macro, not function so that build can still be driven by CMake 2.4.
-  # After 2.6 is required, this could be a function without the extra 'set'
-  # calls.
-  #
-  macro(add_config_tests cfg)
-    set(cfg "${cfg}")
+  function(add_config_tests cfg)
     set(base "${CMake_BINARY_DIR}/Tests/CTestConfig")
 
     # Test -S script with a -C config arg to ctest:
@@ -2029,7 +2024,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     add_test(CTestConfig.Dashboard.${cfg} ${CMAKE_CMAKE_COMMAND}
       -P "${base}/${cfg}-dashboard.cmake" -VV
       )
-  endmacro()
+  endfunction()
 
   add_config_tests(Debug)
   add_config_tests(MinSizeRel)
@@ -2180,15 +2175,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   set_tests_properties(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*CheckChild *\\.+ *Passed")
 
-  # this test only runs correctly if WORKING_DIRECTORY is honored.
-  if (NOT CMAKE_VERSION VERSION_LESS "2.8.4")
-    add_test(
-      NAME CTestTestRerunFailed
-      COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed)
-    set_tests_properties(CTestTestRerunFailed PROPERTIES
-      PASS_REGULAR_EXPRESSION "1/1 Test #1: TestTimeout" DEPENDS CTestTestTimeout
-      WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
-  endif ()
+  add_test(
+    NAME CTestTestRerunFailed
+    COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed)
+  set_tests_properties(CTestTestRerunFailed PROPERTIES
+    PASS_REGULAR_EXPRESSION "1/1 Test #1: TestTimeout" DEPENDS CTestTestTimeout
+    WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestZeroTimeout/test.cmake.in"
@@ -2249,20 +2241,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/testOutput.log"
     )
 
-  # Use macro, not function so that build can still be driven by CMake 2.4.
-  # After 2.6 is required, this could be a function without the extra 'set'
-  # calls.
-  #
-  macro(add_failed_submit_test name source build in out log regex)
-    # Have variables named source, build and drop_method because the
-    # configure_file call expects those variables to be defined.
-    #
-    set(source "${source}")
-    set(build "${build}")
+  function(add_failed_submit_test name source build in out log regex)
     configure_file("${in}" "${out}" @ONLY)
     add_test(${name} ${CMAKE_CTEST_COMMAND} -S "${out}" -V --output-log "${log}")
     set_tests_properties(${name} PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
-  endmacro()
+  endfunction()
 
   set(regex "(Problems when submitting via S*CP")
   set(regex "${regex}|Error message was: ")
