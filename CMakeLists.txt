@@ -9,8 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 #=============================================================================
-cmake_minimum_required(VERSION 2.8.2 FATAL_ERROR)
-set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
+cmake_minimum_required(VERSION 2.8.4 FATAL_ERROR)
 if(POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
 endif()
@@ -196,15 +195,8 @@ mark_as_advanced(CMAKE_USE_FOLDERS)
 macro(CMAKE_SET_TARGET_FOLDER tgt folder)
   if(CMAKE_USE_FOLDERS)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-    # Really, I just want this to be an "if(TARGET ${tgt})" ...
-    # but I'm not sure that our min req'd., CMake 2.4.5 can handle
-    # that... so I'm just activating this for now, with a version
-    # compare, and only for MSVC builds.
-    if(MSVC)
-      if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
-        set_property(TARGET "${tgt}" PROPERTY FOLDER "${folder}")
-      endif()
+    if(MSVC AND TARGET ${tgt})
+      set_property(TARGET "${tgt}" PROPERTY FOLDER "${folder}")
     endif()
   else()
     set_property(GLOBAL PROPERTY USE_FOLDERS OFF)
@@ -326,11 +318,7 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build or use system libarchive for CMake and CTest.
   if(CMAKE_USE_SYSTEM_LIBARCHIVE)
-    if(EXISTS ${CMAKE_ROOT}/Modules/FindLibArchive.cmake) # added in 2.8.3
-      find_package(LibArchive)
-    else()
-      include(${CMake_SOURCE_DIR}/Modules/FindLibArchive.cmake)
-    endif()
+    find_package(LibArchive)
     if(NOT LibArchive_FOUND)
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBARCHIVE is ON but LibArchive is not found!")
     endif()
