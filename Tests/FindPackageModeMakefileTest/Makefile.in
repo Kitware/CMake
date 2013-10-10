@@ -1,5 +1,5 @@
 
-include "cmakeExecutable.mk"
+include cmakeExecutable.mk
 
 CMAKE_CURRENT_BINARY_DIR = "@CMAKE_CURRENT_BINARY_DIR@"
 CMAKE_CXX_COMPILER = "@CMAKE_CXX_COMPILER@"
