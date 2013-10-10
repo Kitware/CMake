@@ -60,7 +60,8 @@ protected:
                                    cmTarget* dependee);
 
   void ComplainAboutMissingTarget(cmTarget* depender,
-                                  cmTarget* dependee);
+                                  cmTarget* dependee,
+                                  int occurrences);
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(const char* config,
@@ -69,6 +70,9 @@ protected:
                                  ImportPropertyMap& properties);
 
   std::string InstallNameDir(cmTarget* target, const std::string& config);
+
+  std::vector<std::string>
+  FindNamespaces(cmMakefile* mf, const std::string& name);
 
   std::vector<std::string> Targets;
   std::vector<cmTarget*> Exports;
