@@ -51,14 +51,12 @@ set(DOCBOOK_FILES
   )
 
 macro(ADD_DOCS target dependency)
-  # Generate documentation for "ctest" executable.
-  get_target_property(CMD ${target} LOCATION)
   # only generate the documentation if the target is actually built
-  if(CMD)
+  if(${target})
     add_custom_command(
       OUTPUT ${CMake_BINARY_DIR}/Docs/${target}.txt
       ${${target}-PATH} # Possibly set PATH, see below.
-      COMMAND ${CMD}
+      COMMAND $<TARGET_FILE:${target}>
       ARGS --help-full ${CMake_BINARY_DIR}/Docs/${target}.txt
            --help-full ${CMake_BINARY_DIR}/Docs/${target}.html
            --help-full ${CMake_BINARY_DIR}/Docs/${target}.1
@@ -95,10 +93,9 @@ ADD_DOCS(cmake-gui ${CMake_SOURCE_DIR}/Utilities/Doxygen/doxyfile.in)
 
 # add the documentation for cmake itself
 
-get_target_property(CMD cmake LOCATION)
 add_custom_command(
   OUTPUT ${CMake_BINARY_DIR}/Docs/cmake.txt
-  COMMAND ${CMD}
+  COMMAND $<TARGET_FILE:cmake>
   ARGS --copyright ${CMake_BINARY_DIR}/Docs/Copyright.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.txt
        --help-full ${CMake_BINARY_DIR}/Docs/cmake.html
