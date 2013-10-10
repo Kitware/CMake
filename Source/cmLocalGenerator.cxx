@@ -1253,6 +1253,12 @@ std::string cmLocalGenerator::GetIncludeFlags(
     sysIncludeFlag = this->Makefile->GetDefinition(sysFlagVar.c_str());
     }
 
+  std::string fwSearchFlagVar = "CMAKE_";
+  fwSearchFlagVar += lang;
+  fwSearchFlagVar += "_FRAMEWORK_SEARCH_FLAG";
+  const char* fwSearchFlag =
+    this->Makefile->GetDefinition(fwSearchFlagVar.c_str());
+
   bool flagUsed = false;
   std::set<cmStdString> emitted;
 #ifdef __APPLE__
@@ -1261,7 +1267,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   std::vector<std::string>::const_iterator i;
   for(i = includes.begin(); i != includes.end(); ++i)
     {
-    if(this->Makefile->IsOn("APPLE")
+    if(fwSearchFlag && *fwSearchFlag && this->Makefile->IsOn("APPLE")
        && cmSystemTools::IsPathToFramework(i->c_str()))
       {
       std::string frameworkDir = *i;
@@ -1271,8 +1277,8 @@ std::string cmLocalGenerator::GetIncludeFlags(
         {
         OutputFormat format = forResponseFile? RESPONSE : SHELL;
         includeFlags
-          << "-F" << this->Convert(frameworkDir.c_str(),
-                                   START_OUTPUT, format, true)
+          << fwSearchFlag << this->Convert(frameworkDir.c_str(),
+                                           START_OUTPUT, format, true)
           << " ";
         }
       continue;
@@ -1770,13 +1776,21 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     }
 
   // Append the framework search path flags.
-  std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
-  for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
-      fdi != fwDirs.end(); ++fdi)
+  std::string fwSearchFlagVar = "CMAKE_";
+  fwSearchFlagVar += linkLanguage;
+  fwSearchFlagVar += "_FRAMEWORK_SEARCH_FLAG";
+  const char* fwSearchFlag =
+    this->Makefile->GetDefinition(fwSearchFlagVar.c_str());
+  if(fwSearchFlag && *fwSearchFlag)
     {
-    frameworkPath += "-F";
-    frameworkPath += this->Convert(fdi->c_str(), NONE, SHELL, false);
-    frameworkPath += " ";
+    std::vector<std::string> const& fwDirs = cli.GetFrameworkPaths();
+    for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
+        fdi != fwDirs.end(); ++fdi)
+      {
+      frameworkPath += fwSearchFlag;
+      frameworkPath += this->Convert(fdi->c_str(), NONE, SHELL, false);
+      frameworkPath += " ";
+      }
     }
 
   // Append the library search path flags.
