@@ -108,8 +108,6 @@ bool cmExportCommand
     fname += this->Filename.GetString();
     }
 
-  // Collect the targets to be exported.
-  std::vector<cmTarget*> targets;
   for(std::vector<std::string>::const_iterator
       currentTarget = this->Targets.GetVector().begin();
       currentTarget != this->Targets.GetVector().end();
@@ -128,15 +126,7 @@ bool cmExportCommand
        this->Makefile->GetLocalGenerator()->
        GetGlobalGenerator()->FindTarget(0, currentTarget->c_str()))
       {
-      if((target->GetType() == cmTarget::EXECUTABLE) ||
-         (target->GetType() == cmTarget::STATIC_LIBRARY) ||
-         (target->GetType() == cmTarget::SHARED_LIBRARY) ||
-         (target->GetType() == cmTarget::MODULE_LIBRARY) ||
-         (target->GetType() == cmTarget::INTERFACE_LIBRARY))
-        {
-        targets.push_back(target);
-        }
-      else if(target->GetType() == cmTarget::OBJECT_LIBRARY)
+      if(target->GetType() == cmTarget::OBJECT_LIBRARY)
         {
         cmOStringStream e;
         e << "given OBJECT library \"" << *currentTarget
@@ -144,37 +134,28 @@ bool cmExportCommand
         this->SetError(e.str().c_str());
         return false;
         }
-      else
-        {
-        cmOStringStream e;
-        e << "given target \"" << *currentTarget
-          << "\" which is not an executable or library.";
-        this->SetError(e.str().c_str());
-        return false;
-        }
       }
-    else
+    }
+
+  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
+                                        ->GetGlobalGenerator();
+  if (this->Append.IsEnabled())
+    {
+    if (cmExportBuildFileGenerator *ebfg = gg->GetExportedTargetsFile(fname))
       {
-      cmOStringStream e;
-      e << "given target \"" << *currentTarget
-        << "\" which is not built by this project.";
-      this->SetError(e.str().c_str());
-      return false;
+      ebfg->AppendTargets(this->Targets.GetVector());
+      return true;
       }
     }
 
   // Setup export file generation.
-  cmExportBuildFileGenerator ebfg;
-  ebfg.SetExportFile(fname.c_str());
-  ebfg.SetNamespace(this->Namespace.GetCString());
-  ebfg.SetAppendMode(this->Append.IsEnabled());
-  ebfg.SetExports(&targets);
-  ebfg.SetCommand(this);
-  ebfg.SetExportOld(this->ExportOld.IsEnabled());
-
-  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
-                                        ->GetGlobalGenerator();
-  gg->AddExportedTargetsFile(fname);
+  cmExportBuildFileGenerator *ebfg = new cmExportBuildFileGenerator;
+  ebfg->SetExportFile(fname.c_str());
+  ebfg->SetNamespace(this->Namespace.GetCString());
+  ebfg->SetAppendMode(this->Append.IsEnabled());
+  ebfg->SetTargets(this->Targets.GetVector());
+  ebfg->SetMakefile(this->Makefile);
+  ebfg->SetExportOld(this->ExportOld.IsEnabled());
 
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes;
@@ -185,27 +166,15 @@ bool cmExportCommand
           ci = configurationTypes.begin();
         ci != configurationTypes.end(); ++ci)
       {
-      ebfg.AddConfiguration(ci->c_str());
+      ebfg->AddConfiguration(ci->c_str());
       }
     }
   else
     {
-    ebfg.AddConfiguration("");
+    ebfg->AddConfiguration("");
     }
 
-  // Generate the import file.
-  if(!ebfg.GenerateImportFile() && this->ErrorMessage.empty())
-    {
-    this->SetError("could not write export file.");
-    return false;
-    }
-
-  // Report generated error message if any.
-  if(!this->ErrorMessage.empty())
-    {
-    this->SetError(this->ErrorMessage.c_str());
-    return false;
-    }
+  gg->AddBuildExportSet(ebfg);
 
   return true;
 }

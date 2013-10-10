@@ -85,7 +85,9 @@ public:
       "should never be installed.  "
       "See the install(EXPORT) command to export targets from an "
       "installation tree."
-      CM_LOCATION_UNDEFINED_BEHAVIOR("passing it to this command")
+      "\n"
+      "The properties set on the generated IMPORTED targets will have the "
+      "same values as the final values of the input TARGETS."
       "\n"
       "  export(PACKAGE <name>)\n"
       "Store the current build directory in the CMake user package registry "

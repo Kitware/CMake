@@ -52,6 +52,12 @@ void cmExportFileGenerator::SetExportFile(const char* mainFile)
 }
 
 //----------------------------------------------------------------------------
+const char* cmExportFileGenerator::GetMainExportFileName() const
+{
+  return this->MainImportFile.c_str();
+}
+
+//----------------------------------------------------------------------------
 bool cmExportFileGenerator::GenerateImportFile()
 {
   // Open the output file to generate it.

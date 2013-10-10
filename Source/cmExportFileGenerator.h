@@ -33,9 +33,11 @@ public:
 
   /** Set the full path to the export file to generate.  */
   void SetExportFile(const char* mainFile);
+  const char *GetMainExportFileName() const;
 
   /** Set the namespace in which to place exported target names.  */
   void SetNamespace(const char* ns) { this->Namespace = ns; }
+  std::string GetNamespace() const { return this->Namespace; }
 
   void SetExportOld(bool exportOld) { this->ExportOld = exportOld; }
 
