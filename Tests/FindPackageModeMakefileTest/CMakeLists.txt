@@ -24,9 +24,6 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile")
         CONTENT "CMAKE = \"$<TARGET_FILE:cmake>\"\n"
       )
     else()
-      if(POLICY CMP0026)
-        cmake_policy(SET CMP0026 OLD)
-      endif()
       get_target_property(cmakeLocation cmake LOCATION)
       file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cmakeExecutable.mk"
         "CMAKE = \"${cmakeLocation}\"\n"
