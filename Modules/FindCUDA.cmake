@@ -263,6 +263,12 @@
 #                           Only available for CUDA version 3.2+.
 #  CUDA_npp_LIBRARY      -- NVIDIA Performance Primitives library.
 #                           Only available for CUDA version 4.0+.
+#  CUDA_nppc_LIBRARY      -- NVIDIA Performance Primitives library (core).
+#                           Only available for CUDA version 5.5+.
+#  CUDA_nppi_LIBRARY      -- NVIDIA Performance Primitives library (image processing).
+#                           Only available for CUDA version 5.5+.
+#  CUDA_npps_LIBRARY      -- NVIDIA Performance Primitives library (signal processing).
+#                           Only available for CUDA version 5.5+.
 #  CUDA_nvcuvenc_LIBRARY -- CUDA Video Encoder library.
 #                           Only available for CUDA version 3.2+.
 #                           Windows only.
