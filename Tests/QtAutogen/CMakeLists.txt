@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(QtAutomoc)
+project(QtAutogen)
 
 if (QT_TEST_VERSION STREQUAL 4)
   find_package(Qt4 REQUIRED)
