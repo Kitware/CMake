@@ -4,6 +4,26 @@
 #endif
 #if defined(__INTEL_COMPILER) || defined(__ICC)
         PRINT *, 'INFO:compiler[Intel]'
+# if defined(_MSC_VER)
+        PRINT *, 'INFO:simulate[MSVC]'
+#  if _MSC_VER >= 1800
+        PRINT *, 'INFO:simulate_version[018.00]'
+#  elif _MSC_VER >= 1700
+        PRINT *, 'INFO:simulate_version[017.00]'
+#  elif _MSC_VER >= 1600
+        PRINT *, 'INFO:simulate_version[016.00]'
+#  elif _MSC_VER >= 1500
+        PRINT *, 'INFO:simulate_version[015.00]'
+#  elif _MSC_VER >= 1400
+        PRINT *, 'INFO:simulate_version[014.00]'
+#  elif _MSC_VER >= 1310
+        PRINT *, 'INFO:simulate_version[013.01]'
+#  elif _MSC_VER >= 1300
+        PRINT *, 'INFO:simulate_version[013.00]'
+#  elif _MSC_VER >= 1200
+        PRINT *, 'INFO:simulate_version[012.00]'
+#  endif
+# endif
 #elif defined(__SUNPRO_F90) || defined(__SUNPRO_F95)
         PRINT *, 'INFO:compiler[SunPro]'
 #elif defined(_CRAYFTN)
