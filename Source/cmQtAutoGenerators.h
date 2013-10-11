@@ -27,6 +27,11 @@ public:
   void SetupAutoGenerateTarget(cmTarget* target);
 
 private:
+  void SetupAutoMocTarget(cmTarget* target,
+                          const std::string &autogenTargetName,
+                          std::map<std::string, std::string> &configIncludes,
+                          std::map<std::string, std::string> &configDefines);
+
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
                                            const char* targetDirectory);
 

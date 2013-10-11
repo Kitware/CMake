@@ -310,7 +310,61 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     target->AddUtility(autogenTargetName.c_str());
     }
 
-  // configure a file to get all information to automoc at buildtime:
+  std::map<std::string, std::string> configIncludes;
+  std::map<std::string, std::string> configDefines;
+
+  this->SetupAutoMocTarget(target, autogenTargetName,
+                           configIncludes, configDefines);
+
+  const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
+  std::string inputFile = cmakeRoot;
+  inputFile += "/Modules/AutogenInfo.cmake.in";
+  std::string outputFile = targetDir;
+  outputFile += "/AutogenInfo.cmake";
+  makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
+                          false, true, false);
+
+  if (!configDefines.empty() || !configIncludes.empty())
+    {
+    std::ofstream infoFile(outputFile.c_str(), std::ios::app);
+    if ( !infoFile )
+      {
+      std::string error = "Internal CMake error when trying to open file: ";
+      error += outputFile.c_str();
+      error += " for writing.";
+      cmSystemTools::Error(error.c_str());
+      return;
+      }
+    if (!configDefines.empty())
+      {
+      for (std::map<std::string, std::string>::iterator
+            it = configDefines.begin(), end = configDefines.end();
+            it != end; ++it)
+        {
+        infoFile << "set(AM_MOC_COMPILE_DEFINITIONS_" << it->first <<
+          " " << it->second << ")\n";
+        }
+      }
+    if (!configIncludes.empty())
+      {
+      for (std::map<std::string, std::string>::iterator
+            it = configIncludes.begin(), end = configIncludes.end();
+            it != end; ++it)
+        {
+        infoFile << "set(AM_MOC_INCLUDES_" << it->first <<
+          " " << it->second << ")\n";
+        }
+      }
+    }
+}
+
+void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
+                          const std::string &autogenTargetName,
+                          std::map<std::string, std::string> &configIncludes,
+                          std::map<std::string, std::string> &configDefines)
+{
+  cmMakefile* makefile = target->GetMakefile();
+
   std::string _moc_files;
   std::string _moc_headers;
   const char* sepFiles = "";
@@ -371,9 +425,6 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   makefile->AddDefinition("_moc_compile_defs",
           cmLocalGenerator::EscapeForCMake(_moc_compile_defs.c_str()).c_str());
 
-  std::map<std::string, std::string> configIncludes;
-  std::map<std::string, std::string> configDefines;
-
   for (std::vector<std::string>::const_iterator li = configs.begin();
        li != configs.end(); ++li)
     {
@@ -402,11 +453,10 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
       }
     }
 
-  {
   const char *qtMoc = makefile->GetSafeDefinition("QT_MOC_EXECUTABLE");
   makefile->AddDefinition("_qt_moc_executable", qtMoc);
-  }
 
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
   if (strcmp(qtVersion, "5") == 0)
     {
     cmTarget *qt5Moc = makefile->FindTargetToUse("Qt5::moc");
@@ -426,49 +476,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
                           "Qt 5 ", autogenTargetName.c_str());
       }
     }
-
-  const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
-  std::string inputFile = cmakeRoot;
-  inputFile += "/Modules/AutogenInfo.cmake.in";
-  std::string outputFile = targetDir;
-  outputFile += "/AutogenInfo.cmake";
-  makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
-                          false, true, false);
-
-  if (!configDefines.empty() || !configIncludes.empty())
-    {
-    std::ofstream infoFile(outputFile.c_str(), std::ios::app);
-    if ( !infoFile )
-      {
-      std::string error = "Internal CMake error when trying to open file: ";
-      error += outputFile.c_str();
-      error += " for writing.";
-      cmSystemTools::Error(error.c_str());
-      return;
-      }
-    if (!configDefines.empty())
-      {
-      for (std::map<std::string, std::string>::iterator
-            it = configDefines.begin(), end = configDefines.end();
-            it != end; ++it)
-        {
-        infoFile << "set(AM_MOC_COMPILE_DEFINITIONS_" << it->first <<
-          " " << it->second << ")\n";
-        }
-      }
-    if (!configIncludes.empty())
-      {
-      for (std::map<std::string, std::string>::iterator
-            it = configIncludes.begin(), end = configIncludes.end();
-            it != end; ++it)
-        {
-        infoFile << "set(AM_MOC_INCLUDES_" << it->first <<
-          " " << it->second << ")\n";
-        }
-      }
-    }
 }
-
 
 bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 {
