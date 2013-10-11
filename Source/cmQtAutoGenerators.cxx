@@ -378,6 +378,9 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
 
   const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
 
+  std::string skip_moc;
+  const char *sep = "";
+
   for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
       fileIt != srcFiles.end();
       ++fileIt)
@@ -388,22 +391,31 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
     bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
     bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
 
-    if ((skip==false) && (generated == false))
+    if (!generated)
       {
-      std::string ext = sf->GetExtension();
-      cmSystemTools::FileFormat fileType = cmSystemTools::GetFileFormat(
-                                                                  ext.c_str());
-      if (fileType == cmSystemTools::CXX_FILE_FORMAT)
+      if (skip)
         {
-        _moc_files += sepFiles;
-        _moc_files += absFile;
-        sepFiles = ";";
+        skip_moc += sep;
+        skip_moc += absFile;
+        sep = ";";
         }
-      else if (fileType == cmSystemTools::HEADER_FILE_FORMAT)
+      else
         {
-        _moc_headers += sepHeaders;
-        _moc_headers += absFile;
-        sepHeaders = ";";
+        std::string ext = sf->GetExtension();
+        cmSystemTools::FileFormat fileType = cmSystemTools::GetFileFormat(
+                                                                ext.c_str());
+        if (fileType == cmSystemTools::CXX_FILE_FORMAT)
+          {
+          _moc_files += sepFiles;
+          _moc_files += absFile;
+          sepFiles = ";";
+          }
+        else if (fileType == cmSystemTools::HEADER_FILE_FORMAT)
+          {
+          _moc_headers += sepHeaders;
+          _moc_headers += absFile;
+          sepHeaders = ";";
+          }
         }
       }
     }
@@ -414,6 +426,8 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
           cmLocalGenerator::EscapeForCMake(_moc_options.c_str()).c_str());
   makefile->AddDefinition("_moc_files",
           cmLocalGenerator::EscapeForCMake(_moc_files.c_str()).c_str());
+  makefile->AddDefinition("_skip_moc",
+          cmLocalGenerator::EscapeForCMake(skip_moc.c_str()).c_str());
   makefile->AddDefinition("_moc_headers",
           cmLocalGenerator::EscapeForCMake(_moc_headers.c_str()).c_str());
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
