@@ -269,11 +269,16 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
                                 workingDirectory.c_str(), depends,
                                 commandLines, false, autogenComment.c_str());
     // Set target folder
-    const char* automocFolder = makefile->GetCMakeInstance()->GetProperty(
+    const char* autogenFolder = makefile->GetCMakeInstance()->GetProperty(
                                                      "AUTOMOC_TARGETS_FOLDER");
-    if (automocFolder && *automocFolder)
+    if (!autogenFolder)
       {
-      autogenTarget->SetProperty("FOLDER", automocFolder);
+      autogenFolder = makefile->GetCMakeInstance()->GetProperty(
+                                                     "AUTOGEN_TARGETS_FOLDER");
+      }
+    if (autogenFolder && *autogenFolder)
+      {
+      autogenTarget->SetProperty("FOLDER", autogenFolder);
       }
     else
       {
