@@ -69,6 +69,8 @@ if(NOT MSVC_VERSION)
     set(_compiler_version ${CMAKE_C_SIMULATE_VERSION})
   elseif(CMAKE_CXX_SIMULATE_VERSION)
     set(_compiler_version ${CMAKE_CXX_SIMULATE_VERSION})
+  elseif(CMAKE_Fortran_SIMULATE_VERSION)
+    set(_compiler_version ${CMAKE_Fortran_SIMULATE_VERSION})
   elseif(CMAKE_C_COMPILER_VERSION)
     set(_compiler_version ${CMAKE_C_COMPILER_VERSION})
   else()
@@ -182,12 +184,15 @@ set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 # executable linker flags
 set (CMAKE_LINK_DEF_FILE_FLAG "/DEF:")
 # set the machine type
-set(_MACHINE_ARCH_FLAG ${MSVC_C_ARCHITECTURE_ID})
-if(NOT _MACHINE_ARCH_FLAG)
-  set(_MACHINE_ARCH_FLAG ${MSVC_CXX_ARCHITECTURE_ID})
+if(MSVC_C_ARCHITECTURE_ID)
+  set(_MACHINE_ARCH_FLAG "/machine:${MSVC_C_ARCHITECTURE_ID}")
+elseif(MSVC_CXX_ARCHITECTURE_ID)
+  set(_MACHINE_ARCH_FLAG "/machine:${MSVC_CXX_ARCHITECTURE_ID}")
+elseif(MSVC_Fortran_ARCHITECTURE_ID)
+  set(_MACHINE_ARCH_FLAG "/machine:${MSVC_Fortran_ARCHITECTURE_ID}")
 endif()
-set (CMAKE_EXE_LINKER_FLAGS_INIT
-    "${CMAKE_EXE_LINKER_FLAGS_INIT} /machine:${_MACHINE_ARCH_FLAG}")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} ${_MACHINE_ARCH_FLAG}")
+unset(_MACHINE_ARCH_FLAG)
 
 # add /debug and /INCREMENTAL:YES to DEBUG and RELWITHDEBINFO also add pdbtype
 # on versions that support it
