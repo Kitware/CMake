@@ -1,4 +1,5 @@
 set(AM_SOURCES @_moc_files@ )
+set(AM_SKIP_MOC @_skip_moc@ )
 set(AM_HEADERS @_moc_headers@ )
 set(AM_MOC_COMPILE_DEFINITIONS @_moc_compile_defs@)
 set(AM_MOC_INCLUDES @_moc_incs@)
