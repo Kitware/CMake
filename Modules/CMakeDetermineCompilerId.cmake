@@ -248,7 +248,10 @@ Id flags: ${testflags}
   endif()
 
   # Check the result of compilation.
-  if(CMAKE_${lang}_COMPILER_ID_RESULT)
+  if(CMAKE_${lang}_COMPILER_ID_RESULT
+     # Intel Fortran warns and ignores preprocessor lines without /fpp
+     OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "Bad # preprocessor line"
+     )
     # Compilation failed.
     set(MSG
       "Compiling the ${lang} compiler identification source file \"${src}\" failed.
