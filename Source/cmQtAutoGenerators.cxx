@@ -159,7 +159,8 @@ bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
     mocCppFile += "/";
     mocCppFile += automocTargetName;
     mocCppFile += ".cpp";
-    cmSourceFile* mocCppSource = makefile->GetOrCreateSource(mocCppFile.c_str(),
+    cmSourceFile* mocCppSource = makefile->GetOrCreateSource(
+                                                          mocCppFile.c_str(),
                                                           true);
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                             mocCppFile.c_str(), false);
@@ -899,7 +900,8 @@ bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
 }
 
 
-void cmQtAutoGenerators::WriteOldMocDefinitionsFile(const char* targetDirectory)
+void
+cmQtAutoGenerators::WriteOldMocDefinitionsFile(const char* targetDirectory)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
@@ -1532,7 +1534,8 @@ void cmQtAutoGenerators::ParseForUic(const std::string&,
 }
 
 
-void cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
+void
+cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders)
 {
@@ -1824,13 +1827,15 @@ std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
 }
 
 
-bool cmQtAutoGenerators::StartsWith(const std::string& str, const std::string& with)
+bool cmQtAutoGenerators::StartsWith(const std::string& str,
+                                    const std::string& with)
 {
   return (str.substr(0, with.length()) == with);
 }
 
 
-bool cmQtAutoGenerators::EndsWith(const std::string& str, const std::string& with)
+bool cmQtAutoGenerators::EndsWith(const std::string& str,
+                                  const std::string& with)
 {
   if (with.length() > (str.length()))
     {
