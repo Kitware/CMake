@@ -206,9 +206,30 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
 
+  // forget the variables added here afterwards again:
+  cmMakefile::ScopePushPop varScope(makefile);
+  static_cast<void>(varScope);
+
+  const char *qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
+  if (!qtVersion)
+    {
+    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
+    }
+  if (const char *targetQtVersion =
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+    {
+    qtVersion = targetQtVersion;
+    }
+  if (qtVersion)
+    {
+    makefile->AddDefinition("_target_qt_version", qtVersion);
+    }
   // create a custom target for running generators at buildtime:
   std::string autogenTargetName = targetName;
   autogenTargetName += "_automoc";
+
+  makefile->AddDefinition("_moc_target_name",
+          cmLocalGenerator::EscapeForCMake(autogenTargetName.c_str()).c_str());
 
   std::string targetDir = makefile->GetCurrentOutputDirectory();
   targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
@@ -329,13 +350,6 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
 
   const char* tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
   std::string _moc_options = (tmp!=0 ? tmp : "");
-
-  // forget the variables added here afterwards again:
-  cmMakefile::ScopePushPop varScope(makefile);
-  static_cast<void>(varScope);
-
-  makefile->AddDefinition("_moc_target_name",
-          cmLocalGenerator::EscapeForCMake(autogenTargetName.c_str()).c_str());
   makefile->AddDefinition("_moc_options",
           cmLocalGenerator::EscapeForCMake(_moc_options.c_str()).c_str());
   makefile->AddDefinition("_moc_files",
@@ -386,21 +400,6 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
         _moc_compile_defs = config_moc_compile_defs;
         }
       }
-    }
-
-  const char *qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
-  if (!qtVersion)
-    {
-    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
-    }
-  if (const char *targetQtVersion =
-      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
-    {
-    qtVersion = targetQtVersion;
-    }
-  if (qtVersion)
-    {
-    makefile->AddDefinition("_target_qt_version", qtVersion);
     }
 
   {
