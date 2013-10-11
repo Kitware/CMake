@@ -245,7 +245,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "By setting the CMAKE_AUTOMOC_RELAXED_MODE variable to TRUE the rules "
      "for searching the files which will be processed by moc can be relaxed. "
      "See the documentation for this variable for more details.\n"
-     "The global property AUTOMOC_TARGETS_FOLDER can be used to group the "
+     "The global property AUTOGEN_TARGETS_FOLDER can be used to group the "
      "automoc targets together in an IDE, e.g. in MSVS.");
 
   cm->DefineProperty
