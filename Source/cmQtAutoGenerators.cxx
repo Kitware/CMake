@@ -206,7 +206,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   cmMakefile* makefile = target->GetMakefile();
   const char* targetName = target->GetName();
 
-  // create a custom target for running automoc at buildtime:
+  // create a custom target for running generators at buildtime:
   std::string autogenTargetName = targetName;
   autogenTargetName += "_automoc";
 
@@ -230,8 +230,9 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
                                     "", makefile->GetCurrentOutputDirectory());
 
   std::vector<std::string> depends;
-  std::string automocComment = "Automoc for target ";
-  automocComment += targetName;
+  std::string tools = "moc";
+  std::string autogenComment = "Automatic " + tools + " for target ";
+  autogenComment += targetName;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
@@ -254,7 +255,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
     std::vector<std::string> no_output;
     cmCustomCommand cc(makefile, no_output, depends,
-                       commandLines, automocComment.c_str(),
+                       commandLines, autogenComment.c_str(),
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
@@ -263,21 +264,21 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   else
 #endif
     {
-    cmTarget* automocTarget = makefile->AddUtilityCommand(
+    cmTarget* autogenTarget = makefile->AddUtilityCommand(
                                 autogenTargetName.c_str(), true,
                                 workingDirectory.c_str(), depends,
-                                commandLines, false, automocComment.c_str());
+                                commandLines, false, autogenComment.c_str());
     // Set target folder
     const char* automocFolder = makefile->GetCMakeInstance()->GetProperty(
                                                      "AUTOMOC_TARGETS_FOLDER");
     if (automocFolder && *automocFolder)
       {
-      automocTarget->SetProperty("FOLDER", automocFolder);
+      autogenTarget->SetProperty("FOLDER", automocFolder);
       }
     else
       {
       // inherit FOLDER property from target (#13688)
-      copyTargetProperty(automocTarget, target, "FOLDER");
+      copyTargetProperty(autogenTarget, target, "FOLDER");
       }
 
     target->AddUtility(autogenTargetName.c_str());
