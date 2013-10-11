@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include <QApplication>
+#include <QTimer>
 
 #include "codeeditor.h"
 #include "calwidget.h"
@@ -49,6 +50,7 @@
 #include "xyz.h"
 #include "yaf.h"
 #include "libC.h"
+#include "resourcetester.h"
 
 int main(int argv, char **args)
 {
@@ -56,10 +58,9 @@ int main(int argv, char **args)
 
   CodeEditor editor;
   editor.setWindowTitle(QObject::tr("Code Editor Example"));
-  editor.show();
 
   Window w;
-  w.show();
+  w.setWindowTitle(QObject::tr("Window Example"));
 
   Foo foo;
   foo.doFoo();
@@ -81,6 +82,10 @@ int main(int argv, char **args)
 
   LibC lc;
   lc.foo();
+
+  ResourceTester rt;
+
+  QTimer::singleShot(0, &rt, SLOT(doTest()));
 
   return app.exec();
 }

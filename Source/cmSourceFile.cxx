@@ -288,6 +288,17 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
     }
 
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
+
+  std::string ext =
+          cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
+  if (ext == ".ui")
+    {
+    cmMakefile* mf = this->Location.GetMakefile();
+    if (strcmp(prop, "AUTOUIC_OPTIONS") == 0)
+      {
+      mf->AddQtUiFileWithOptions(this);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -394,6 +405,26 @@ void cmSourceFile::DefineProperties(cmake *cm)
      "represents a class that is abstract. This only makes sense for "
      "languages that have a notion of an abstract class and it is "
      "only used by some tools that wrap classes into other languages.");
+
+  cm->DefineProperty
+    ("AUTOUIC_OPTIONS", cmProperty::SOURCE_FILE,
+     "Additional options for uic when using autouic (see the AUTOUIC target "
+     "property)",
+     "This property holds additional command line options "
+     "which will be used when uic is executed during the build via autouic, "
+     "i.e. it is equivalent to the optional OPTIONS argument of the "
+     "qt4_wrap_ui() macro.\n"
+     "By default it is empty.");
+
+  cm->DefineProperty
+    ("AUTORCC_OPTIONS", cmProperty::SOURCE_FILE,
+     "Additional options for rcc when using autorcc (see the AUTORCC target "
+     "property)",
+     "This property holds additional command line options "
+     "which will be used when rcc is executed during the build via autorcc, "
+     "i.e. it is equivalent to the optional OPTIONS argument of the "
+     "qt4_add_resources() macro.\n"
+     "By default it is empty.");
 
   cm->DefineProperty
     ("COMPILE_FLAGS", cmProperty::SOURCE_FILE,

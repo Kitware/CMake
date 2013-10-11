@@ -18,7 +18,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmake.h"
 #include "cmMakefile.h"
-#include "cmQtAutomoc.h"
+#include "cmQtAutoGenerators.h"
 #include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmTargetExport.h"
@@ -1049,8 +1049,8 @@ void cmGlobalGenerator::Generate()
     }
 
   // Iterate through all targets and set up automoc for those which have
-  // the AUTOMOC property set
-  this->CreateAutomocTargets();
+  // the AUTOMOC, AUTOUIC or AUTORCC property set
+  this->CreateQtAutoGeneratorsTargets();
 
   // For each existing cmLocalGenerator
   unsigned int i;
@@ -1206,11 +1206,11 @@ bool cmGlobalGenerator::CheckTargets()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateAutomocTargets()
+void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  typedef std::vector<std::pair<cmQtAutomoc, cmTarget*> > Automocs;
-  Automocs automocs;
+  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > Autogens;
+  Autogens autogens;
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
@@ -1225,21 +1225,24 @@ void cmGlobalGenerator::CreateAutomocTargets()
          target.GetType() == cmTarget::MODULE_LIBRARY ||
          target.GetType() == cmTarget::OBJECT_LIBRARY)
         {
-        if(target.GetPropertyAsBool("AUTOMOC") && !target.IsImported())
+        if((target.GetPropertyAsBool("AUTOMOC")
+              || target.GetPropertyAsBool("AUTOUIC")
+              || target.GetPropertyAsBool("AUTORCC"))
+            && !target.IsImported())
           {
-          cmQtAutomoc automoc;
-          if(automoc.InitializeMocSourceFile(&target))
+          cmQtAutoGenerators autogen;
+          if(autogen.InitializeMocSourceFile(&target))
             {
-            automocs.push_back(std::make_pair(automoc, &target));
+            autogens.push_back(std::make_pair(autogen, &target));
             }
           }
         }
       }
     }
-  for (Automocs::iterator it = automocs.begin(); it != automocs.end();
+  for (Autogens::iterator it = autogens.begin(); it != autogens.end();
        ++it)
     {
-    it->first.SetupAutomocTarget(it->second);
+    it->first.SetupAutoGenerateTarget(it->second);
     }
 #endif
 }

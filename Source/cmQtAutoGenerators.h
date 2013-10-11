@@ -11,26 +11,33 @@
   See the License for more information.
 ============================================================================*/
 
-#ifndef cmQtAutomoc_h
-#define cmQtAutomoc_h
+#ifndef cmQtAutoGenerators_h
+#define cmQtAutoGenerators_h
 
 class cmGlobalGenerator;
 class cmMakefile;
 
-class cmQtAutomoc
+class cmQtAutoGenerators
 {
 public:
-  cmQtAutomoc();
+  cmQtAutoGenerators();
   bool Run(const char* targetDirectory, const char *config);
 
   bool InitializeMocSourceFile(cmTarget* target);
-  void SetupAutomocTarget(cmTarget* target);
+  void SetupAutoGenerateTarget(cmTarget* target);
 
 private:
+  void SetupAutoMocTarget(cmTarget* target,
+                          const std::string &autogenTargetName,
+                          std::map<std::string, std::string> &configIncludes,
+                          std::map<std::string, std::string> &configDefines);
+  void SetupAutoUicTarget(cmTarget* target);
+  void SetupAutoRccTarget(cmTarget* target);
+
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
                                            const char* targetDirectory);
 
-  bool ReadAutomocInfoFile(cmMakefile* makefile,
+  bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const char* targetDirectory,
                            const char *config);
   bool ReadOldMocDefinitionsFile(cmMakefile* makefile,
@@ -39,22 +46,34 @@ private:
 
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
-  bool RunAutomoc(cmMakefile* makefile);
+  bool RunAutogen(cmMakefile* makefile);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
+  bool GenerateUi(const std::string& uiFileName);
+  bool GenerateQrc();
   void ParseCppFile(const std::string& absFilename,
                     const std::vector<std::string>& headerExtensions,
-                    std::map<std::string, std::string>& includedMocs);
+                    std::map<std::string, std::string>& includedMocs,
+                          std::vector<std::string>& includedUis);
   void StrictParseCppFile(const std::string& absFilename,
                           const std::vector<std::string>& headerExtensions,
-                          std::map<std::string, std::string>& includedMocs);
+                          std::map<std::string, std::string>& includedMocs,
+                          std::vector<std::string>& includedUis);
   void SearchHeadersForCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders);
 
   void ParseHeaders(const std::set<std::string>& absHeaders,
                     const std::map<std::string, std::string>& includedMocs,
-                    std::map<std::string, std::string>& notIncludedMocs);
+                    std::map<std::string, std::string>& notIncludedMocs,
+                          std::vector<std::string>& includedUis);
+
+  void ParseForUic(const std::string& fileName,
+                   const std::string& contentsString,
+                   std::vector<std::string>& includedUis);
+
+  void ParseForUic(const std::string& fileName,
+                   std::vector<std::string>& includedUis);
 
   void Init();
 
@@ -65,11 +84,16 @@ private:
 
   std::string QtMajorVersion;
   std::string Sources;
+  std::string RccSources;
+  std::string SkipMoc;
+  std::string SkipUic;
   std::string Headers;
   bool IncludeProjectDirsBefore;
   std::string Srcdir;
   std::string Builddir;
   std::string MocExecutable;
+  std::string UicExecutable;
+  std::string RccExecutable;
   std::string MocCompileDefinitionsStr;
   std::string MocIncludesStr;
   std::string MocOptionsStr;
@@ -84,10 +108,14 @@ private:
   std::list<std::string> MocIncludes;
   std::list<std::string> MocDefinitions;
   std::vector<std::string> MocOptions;
+  std::map<std::string, std::string> UicOptions;
+  std::map<std::string, std::string> RccOptions;
 
   bool Verbose;
   bool ColorOutput;
   bool RunMocFailed;
+  bool RunUicFailed;
+  bool RunRccFailed;
   bool GenerateAll;
   bool RelaxedMode;
 
