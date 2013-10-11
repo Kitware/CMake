@@ -492,7 +492,7 @@ bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    success = this->RunAutomoc(makefile);
+    success = this->RunAutogen(makefile);
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
@@ -718,7 +718,7 @@ void cmQtAutoGenerators::Init()
 }
 
 
-bool cmQtAutoGenerators::RunAutomoc(cmMakefile* makefile)
+bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 {
   if (!cmsys::SystemTools::FileExists(this->OutMocCppFilename.c_str())
     || (this->OldCompileSettingsStr != this->CurrentCompileSettingsStr))
