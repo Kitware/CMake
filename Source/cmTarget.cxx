@@ -273,7 +273,10 @@ void cmTarget::DefineProperties(cmake *cm)
      "Additional flags to use when compiling this target's sources.",
      "The COMPILE_FLAGS property sets additional compiler flags used "
      "to build sources within the target.  Use COMPILE_DEFINITIONS "
-     "to pass additional preprocessor definitions.");
+     "to pass additional preprocessor definitions."
+     "\n"
+     "This property is deprecated. Use the COMPILE_OPTIONS property or the "
+     "target_compile_options command instead.");
 
   cm->DefineProperty
     ("COMPILE_DEFINITIONS", cmProperty::TARGET,
