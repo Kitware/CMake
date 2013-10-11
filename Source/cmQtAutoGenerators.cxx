@@ -429,9 +429,9 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
-  inputFile += "/Modules/AutomocInfo.cmake.in";
+  inputFile += "/Modules/AutogenInfo.cmake.in";
   std::string outputFile = targetDir;
-  outputFile += "/AutomocInfo.cmake";
+  outputFile += "/AutogenInfo.cmake";
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
                           false, true, false);
 
@@ -519,7 +519,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
-  filename += "/AutomocInfo.cmake";
+  filename += "/AutogenInfo.cmake";
 
   if (!makefile->ReadListFile(0, filename.c_str()))
     {
