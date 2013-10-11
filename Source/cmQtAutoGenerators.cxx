@@ -149,18 +149,21 @@ bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
     return false;
     }
 
-  std::string automocTargetName = target->GetName();
-  automocTargetName += "_automoc";
-  std::string mocCppFile = makefile->GetCurrentOutputDirectory();
-  mocCppFile += "/";
-  mocCppFile += automocTargetName;
-  mocCppFile += ".cpp";
-  cmSourceFile* mocCppSource = makefile->GetOrCreateSource(mocCppFile.c_str(),
-                                                         true);
-  makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                           mocCppFile.c_str(), false);
+  if (target->GetPropertyAsBool("AUTOMOC"))
+    {
+    std::string automocTargetName = target->GetName();
+    automocTargetName += "_automoc";
+    std::string mocCppFile = makefile->GetCurrentOutputDirectory();
+    mocCppFile += "/";
+    mocCppFile += automocTargetName;
+    mocCppFile += ".cpp";
+    cmSourceFile* mocCppSource = makefile->GetOrCreateSource(mocCppFile.c_str(),
+                                                          true);
+    makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                            mocCppFile.c_str(), false);
 
-  target->AddSourceFile(mocCppSource);
+    target->AddSourceFile(mocCppSource);
+    }
   return true;
 }
 
@@ -313,8 +316,11 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   std::map<std::string, std::string> configIncludes;
   std::map<std::string, std::string> configDefines;
 
-  this->SetupAutoMocTarget(target, autogenTargetName,
-                           configIncludes, configDefines);
+  if (target->GetPropertyAsBool("AUTOMOC"))
+    {
+    this->SetupAutoMocTarget(target, autogenTargetName,
+                             configIncludes, configDefines);
+    }
 
   const char* cmakeRoot = makefile->GetSafeDefinition("CMAKE_ROOT");
   std::string inputFile = cmakeRoot;
