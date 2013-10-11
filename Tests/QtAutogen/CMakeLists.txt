@@ -40,10 +40,10 @@ add_library(codeeditorLib STATIC codeeditor.cpp)
 
 add_library(privateSlot OBJECT private_slot.cpp)
 
-add_executable(foo main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
+add_executable(QtAutogen main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>)
 
-set_target_properties(foo codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
+set_target_properties(QtAutogen codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 
 include(GenerateExportHeader)
 # The order is relevant here. B depends on A, and B headers depend on A
@@ -59,7 +59,7 @@ set_target_properties(libC PROPERTIES AUTOMOC TRUE)
 generate_export_header(libC)
 target_link_libraries(libC LINK_PUBLIC libB)
 
-target_link_libraries(foo codeeditorLib ${QT_LIBRARIES} libC)
+target_link_libraries(QtAutogen codeeditorLib ${QT_LIBRARIES} libC)
 
 add_library(empty STATIC empty.cpp)
 set_target_properties(empty PROPERTIES AUTOMOC TRUE)
