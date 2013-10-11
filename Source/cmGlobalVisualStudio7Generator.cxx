@@ -76,7 +76,6 @@ void cmGlobalVisualStudio7Generator
 {
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  mf->AddDefinition("CMAKE_GENERATOR_FC", "ifort");
   this->AddPlatformDefinitions(mf);
   if(!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
     {
