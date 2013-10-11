@@ -56,10 +56,9 @@ int main(int argv, char **args)
 
   CodeEditor editor;
   editor.setWindowTitle(QObject::tr("Code Editor Example"));
-  editor.show();
 
   Window w;
-  w.show();
+  w.setWindowTitle(QObject::tr("Window Example"));
 
   Foo foo;
   foo.doFoo();
