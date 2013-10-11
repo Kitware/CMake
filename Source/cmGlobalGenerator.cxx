@@ -210,7 +210,8 @@ bool cmGlobalGenerator::GenerateImportFile(const std::string &file)
   return false;
 }
 
-bool cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
+bool
+cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
 {
   const std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it
                                       = this->BuildExportSets.find(filename);
