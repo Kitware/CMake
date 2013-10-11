@@ -753,7 +753,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     const std::string &absFilename = *it;
     if (this->Verbose)
       {
-      std::cout << "AUTOMOC: Checking " << absFilename << std::endl;
+      std::cout << "AUTOGEN: Checking " << absFilename << std::endl;
       }
     if (this->RelaxedMode)
       {
@@ -854,7 +854,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
   const std::string contentsString = this->ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOMOC: warning: " << absFilename << ": file is empty\n"
+    std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
               << std::endl;
     return;
     }
@@ -914,7 +914,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
           }
         else
           {
-          std::cerr << "AUTOMOC: error: " << absFilename << " The file "
+          std::cerr << "AUTOGEN: error: " << absFilename << " The file "
                     << "includes the moc file \"" << currentMoc << "\", "
                     << "but could not find header \"" << basename
                     << '{' << this->Join(headerExtensions, ',') << "}\" ";
@@ -945,7 +945,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
             fileToMoc = headerToMoc;
             if ((requiresMoc==false) &&(basename==scannedFileBasename))
               {
-              std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+              std::cerr << "AUTOGEN: warning: " << absFilename << ": The file "
                             "includes the moc file \"" << currentMoc <<
                             "\", but does not contain a " << macroName
                             << " macro. Running moc on "
@@ -956,7 +956,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
               }
             else
               {
-              std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+              std::cerr << "AUTOGEN: warning: " << absFilename << ": The file "
                             "includes the moc file \"" << currentMoc <<
                             "\" instead of \"moc_" << basename << ".cpp\". "
                             "Running moc on "
@@ -968,7 +968,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
             }
           else
             {
-            std::cerr <<"AUTOMOC: error: " << absFilename << ": The file "
+            std::cerr <<"AUTOGEN: error: " << absFilename << ": The file "
                         "includes the moc file \"" << currentMoc <<
                         "\", which seems to be the moc file from a different "
                         "source file. CMake also could not find a matching "
@@ -996,7 +996,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
     if (mocUnderscoreIncluded == true)
       {
       // this is for KDE4 compatibility:
-      std::cerr << "AUTOMOC: warning: " << absFilename << ": The file "
+      std::cerr << "AUTOGEN: warning: " << absFilename << ": The file "
                 << "contains a " << macroName << " macro, but does not "
                 "include "
                 << "\"" << scannedFileBasename << ".moc\", but instead "
@@ -1012,7 +1012,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
     else
       {
       // otherwise always error out since it will not compile:
-      std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
+      std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
                 << "contains a " << macroName << " macro, but does not "
                 "include "
                 << "\"" << scannedFileBasename << ".moc\" !\n"
@@ -1035,7 +1035,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
   const std::string contentsString = this->ReadAll(absFilename);
   if (contentsString.empty())
     {
-    std::cerr << "AUTOMOC: warning: " << absFilename << ": file is empty\n"
+    std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
               << std::endl;
     return;
     }
@@ -1082,7 +1082,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
           }
         else
           {
-          std::cerr << "AUTOMOC: error: " << absFilename << " The file "
+          std::cerr << "AUTOGEN: error: " << absFilename << " The file "
                     << "includes the moc file \"" << currentMoc << "\", "
                     << "but could not find header \"" << basename
                     << '{' << this->Join(headerExtensions, ',') << "}\" ";
@@ -1103,7 +1103,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
         {
         if (basename != scannedFileBasename)
           {
-          std::cerr <<"AUTOMOC: error: " << absFilename << ": The file "
+          std::cerr <<"AUTOGEN: error: " << absFilename << ": The file "
                       "includes the moc file \"" << currentMoc <<
                       "\", which seems to be the moc file from a different "
                       "source file. This is not supported. "
@@ -1127,7 +1127,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
                                                      macroName)))
     {
     // otherwise always error out since it will not compile:
-    std::cerr << "AUTOMOC: error: " << absFilename << ": The file "
+    std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
               << "contains a " << macroName << " macro, but does not include "
               << "\"" << scannedFileBasename << ".moc\" !\n"
               << std::endl;
@@ -1188,7 +1188,7 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
       {
       if (this->Verbose)
         {
-        std::cout << "AUTOMOC: Checking " << headerName << std::endl;
+        std::cout << "AUTOGEN: Checking " << headerName << std::endl;
         }
 
       const std::string basename = cmsys::SystemTools::
@@ -1274,7 +1274,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
     bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
     if (!result || retVal)
       {
-      std::cerr << "AUTOMOC: error: process for " << mocFilePath <<" failed:\n"
+      std::cerr << "AUTOGEN: error: process for " << mocFilePath <<" failed:\n"
                 << output << std::endl;
       this->RunMocFailed = true;
       cmSystemTools::RemoveFile(mocFilePath.c_str());
