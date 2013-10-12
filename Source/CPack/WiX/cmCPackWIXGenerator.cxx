@@ -703,7 +703,7 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(const std::string& path)
   std::string identifier;
   std::string currentComponent;
 
-  for(std::size_t i = 1; i < components.size(); ++i)
+  for(size_t i = 1; i < components.size(); ++i)
     {
     if(i != 1) identifier += '.';
 
@@ -775,7 +775,7 @@ std::string cmCPackWIXGenerator::NormalizeComponentForId(
   std::string result;
   result.resize(component.size());
 
-  for(std::size_t i = 0; i < component.size(); ++i)
+  for(size_t i = 0; i < component.size(); ++i)
     {
     char c = component[i];
     if(IsLegalIdCharacter(c))
