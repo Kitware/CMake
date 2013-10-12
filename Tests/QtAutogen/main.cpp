@@ -54,13 +54,11 @@
 
 int main(int argv, char **args)
 {
-  QApplication app(argv, args);
-
-  CodeEditor editor;
-  editor.setWindowTitle(QObject::tr("Code Editor Example"));
-
-  Window w;
-  w.setWindowTitle(QObject::tr("Window Example"));
+  QApplication app(argv, args
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+    , QApplication::Tty
+#endif
+    );
 
   Foo foo;
   foo.doFoo();
