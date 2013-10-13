@@ -4458,3 +4458,137 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
     pm[pid] = this->GetPolicyStatus(pid);
     }
 }
+
+#define FEATURE_STRING(F) , #F
+
+static const char * const CXX_FEATURES[] = {
+  0
+  FOR_EACH_CXX_FEATURE(FEATURE_STRING)
+};
+
+static const char * const CXX_STANDARDS[] = {
+    "98"
+  , "11"
+};
+
+bool cmMakefile::
+AddRequiredTargetFeature(cmTarget *target, const char *feature) const
+{
+  bool isCxxFeature = std::find_if(cmArrayBegin(CXX_FEATURES) + 1,
+              cmArrayEnd(CXX_FEATURES), cmStrCmp(feature))
+              != cmArrayEnd(CXX_FEATURES);
+  if (!isCxxFeature)
+    {
+    return false;
+    }
+
+  const char* featuresKnown =
+    this->GetDefinition("CMAKE_CXX_COMPILER_FEATURES");
+
+  if (!featuresKnown)
+    {
+    cmOStringStream e;
+    e << "The compiler feature \"" << feature
+      << "\" is not known to compiler \""
+      << this->GetDefinition("CMAKE_CXX_COMPILER_ID") << "\".";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    return false;
+    }
+
+  std::vector<std::string> availableFeatures;
+  cmSystemTools::ExpandListArgument(featuresKnown, availableFeatures);
+  if (std::find(availableFeatures.begin(),
+                availableFeatures.end(),
+                feature) == availableFeatures.end())
+    {
+    return false;
+    }
+
+  bool need98 = true;
+  bool need11 = false;
+  bool needExt = false;
+
+  if (const char *prop98 =
+                        this->GetDefinition("CMAKE_CXX98_COMPILER_FEATURES"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop98, props);
+    need98 = std::find(props.begin(), props.end(), feature) != props.end();
+    }
+  if (const char *prop11 =
+          this->GetDefinition("CMAKE_CXX11_COMPILER_FEATURES"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop11, props);
+    need11 = std::find(props.begin(), props.end(), feature) != props.end();
+    }
+
+  if (const char *prop98ext =
+          this->GetDefinition("CMAKE_CXX98_COMPILER_EXTENSIONS"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop98ext, props);
+    needExt = std::find(props.begin(), props.end(), feature) != props.end();
+    }
+  if (const char *prop11ext =
+          this->GetDefinition("CMAKE_CXX11_COMPILER_EXTENSIONS"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(prop11ext, props);
+    bool need11Ext = std::find(props.begin(), props.end(), feature)
+                      != props.end();
+    need11 = need11Ext;
+    needExt = needExt || need11Ext;
+    }
+
+  const char *existingStandard = target->GetProperty("CXX_STANDARD");
+  if (existingStandard)
+    {
+    if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+                  cmStrCmp(existingStandard)) == cmArrayEnd(CXX_STANDARDS))
+      {
+      cmOStringStream e;
+      e << "The CXX_STANDARD property on target \"" << target->GetName()
+        << "\" contained an invalid value: \"" << existingStandard << "\".";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+      return false;
+      }
+    }
+  const char * const *existingIt = existingStandard
+                                    ? std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                      cmArrayEnd(CXX_STANDARDS),
+                                      cmStrCmp(existingStandard))
+                                    : cmArrayEnd(CXX_STANDARDS);
+
+  bool set11 = need11 && !existingStandard;
+  bool set98 = need98 && !existingStandard;
+  if (existingStandard && existingIt <
+                                    std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                      cmArrayEnd(CXX_STANDARDS),
+                                      cmStrCmp("11")))
+    {
+    set11 = true;
+    }
+  else if(existingStandard && existingIt <
+                                    std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                      cmArrayEnd(CXX_STANDARDS),
+                                      cmStrCmp("98")))
+    {
+    set98 = true;
+    }
+
+  if (set11)
+    {
+    target->SetProperty("CXX_STANDARD", "11");
+    }
+  else if (set98)
+    {
+    target->SetProperty("CXX_STANDARD", "98");
+    }
+  bool existingExt = target->GetPropertyAsBool("CXX_EXTENSIONS");
+  if (needExt && !existingExt)
+    {
+    target->SetProperty("CXX_EXTENSIONS", "1");
+    }
+  return true;
+}
