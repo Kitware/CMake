@@ -1015,9 +1015,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
-  # The Bullseye appears to not be able to run the executable.
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE out ERROR_VARIABLE out)
-  if("x${out}" MATCHES "Bullseye")
+  # On Windows there is no RPATH, so while Qt might be available for building,
+  # the required dlls may not be in the PATH, so we can't run the executables
+  # on that platform.
+  if(WIN32)
     set(run_autogen_test ${CMAKE_CTEST_COMMAND} -V)
   else()
     set(run_autogen_test QtAutogen)
