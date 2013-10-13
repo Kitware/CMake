@@ -281,6 +281,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("MACOSX_BUNDLE", 0);
   this->SetPropertyDefault("MACOSX_RPATH", 0);
   this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", 0);
+  this->SetPropertyDefault("CXX_STANDARD", 0);
 
 
   // Collect the set of configuration types.
