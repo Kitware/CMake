@@ -2165,6 +2165,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
   ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.target_compile_options target_compile_options)
+  ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
   ADD_TEST_MACRO(compile_features compile_features)
 
   configure_file(
