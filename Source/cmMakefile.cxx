@@ -44,6 +44,7 @@
 #define FOR_EACH_CXX_FEATURE(F) \
   F(cxx_delegating_constructors) \
   F(cxx_variadic_templates) \
+  F(cxx_binary_literals) \
   F(gnuxx_typeof) \
   F(msvcxx_sealed)
 

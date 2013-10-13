@@ -32,4 +32,11 @@ target_compile_features(lib_delegating_constructors
 add_executable(lib_user lib_user.cpp)
 target_link_libraries(lib_user lib_delegating_constructors)
 
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang")
+  add_executable(binary_literals binary_literals.cpp)
+  target_compile_features(binary_literals
+    PRIVATE cxx_binary_literals
+  )
+endif()
+
 add_subdirectory(feature_conditional_link)
