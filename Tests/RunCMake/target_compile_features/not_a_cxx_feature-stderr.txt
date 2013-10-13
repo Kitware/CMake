@@ -1,0 +1,4 @@
+CMake Error at not_a_cxx_feature.cmake:3 \(target_compile_features\):
+  target_compile_features specified unknown feature "cxx_not_a_feature".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:4 \(include\)
