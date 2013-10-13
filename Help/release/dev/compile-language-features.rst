@@ -12,3 +12,7 @@ target-language-features
   information to ensure that the compiler in use is capable of building
   the target, and to add any necessary compile flags to support language
   features.
+
+* New :command:`target_compile_features` command allows populating the
+  :prop_tgt:`COMPILE_FEATURES` target property, just like any other
+  build variable.

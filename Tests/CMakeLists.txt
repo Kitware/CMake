@@ -200,6 +200,7 @@ if(BUILD_TESTING)
   if(CMAKE_CXX_COMPILER_ID STREQUAL GNU
       AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
     ADD_TEST_MACRO(CompileFeatures CompileFeatures)
+    ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
   endif()
   # assume no resources building to test
   set(TEST_RESOURCES FALSE)
