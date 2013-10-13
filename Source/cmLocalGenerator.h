@@ -147,6 +147,8 @@ public:
                                 const char *lang);
   void AddConfigVariableFlags(std::string& flags, const char* var,
                               const char* config);
+  void AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
+                                  const char *lang);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   virtual void AppendFlagEscape(std::string& flags, const char* rawFlag);

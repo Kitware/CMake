@@ -1384,6 +1384,7 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlagEscape(flags, i->c_str());
       }
     }
+  this->AddCompilerRequirementFlag(flags, target, lang);
 }
 
 //----------------------------------------------------------------------------
@@ -2067,6 +2068,36 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
     flagsVar += lang;
     flagsVar += "_FLAGS";
     this->AppendFlags(flags, this->Makefile->GetDefinition(flagsVar.c_str()));
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmLocalGenerator::
+AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
+                           const char *lang)
+{
+  if (!lang)
+    {
+    return;
+    }
+  std::string l(lang);
+  std::string stdProp = l + "_STANDARD";
+  const char *standard = target->GetProperty(stdProp.c_str());
+  if (!standard)
+    {
+    return;
+    }
+  std::string extProp = l + "_EXTENSIONS";
+  bool ext = target->GetPropertyAsBool(extProp.c_str());
+  std::string type = ext ? "EXTENSION" : "STANDARD";
+
+  std::string compile_option =
+            "CMAKE_" + l + std::string(standard)
+                     + "_" + type + "_COMPILE_OPTION";
+  if (const char *opt =
+                target->GetMakefile()->GetDefinition(compile_option.c_str()))
+    {
+    this->AppendFlags(flags, opt);
     }
 }
 
