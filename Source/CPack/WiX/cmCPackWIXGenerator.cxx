@@ -189,6 +189,8 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     return false;
     }
 
+  AppendUserSuppliedExtraSources();
+
   std::stringstream objectFiles;
   for(size_t i = 0; i < wixSources.size(); ++i)
     {
@@ -205,7 +207,33 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     objectFiles << " " << QuotePath(objectFilename);
     }
 
+  AppendUserSuppliedExtraObjects(objectFiles);
+
   return RunLightCommand(objectFiles.str());
+}
+
+void cmCPackWIXGenerator::AppendUserSuppliedExtraSources()
+{
+  const char *cpackWixExtraSources = GetOption("CPACK_WIX_EXTRA_SOURCES");
+  if(!cpackWixExtraSources) return;
+
+  cmSystemTools::ExpandListArgument(cpackWixExtraSources, wixSources);
+}
+
+void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
+{
+  const char *cpackWixExtraObjects = GetOption("CPACK_WIX_EXTRA_OBJECTS");
+  if(!cpackWixExtraObjects) return;
+
+  std::vector<std::string> expandedExtraObjects;
+
+  cmSystemTools::ExpandListArgument(
+    cpackWixExtraObjects, expandedExtraObjects);
+
+  for(size_t i = 0; i < expandedExtraObjects.size(); ++i)
+    {
+      stream << " " << QuotePath(expandedExtraObjects[i]);
+    }
 }
 
 bool cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()

@@ -102,6 +102,20 @@
 # If this variable is not set, the default MSI template included with CMake will be used.
 #
 ##end
+##variable
+# CPACK_WIX_EXTRA_SOURCES - Extra WiX source files
+#
+# This variable provides an optional list of extra WiX source files (.wxs)
+# that should be compiled and linked. The full path to source files is required.
+#
+##end
+##variable
+# CPACK_WIX_EXTRA_OBJECTS - Extra WiX object files or libraries
+#
+# This variable provides an optional list of extra WiX object (.wixobj) and/or
+# WiX library (.wixlib) files. The full path to objects and libraries is required.
+#
+##end
 
 #=============================================================================
 # Copyright 2012 Kitware, Inc.

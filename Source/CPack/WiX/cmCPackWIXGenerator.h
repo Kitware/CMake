@@ -68,6 +68,10 @@ private:
 
   bool CreateWiXSourceFiles();
 
+  void AppendUserSuppliedExtraSources();
+
+  void AppendUserSuppliedExtraObjects(std::ostream& stream);
+
   bool CreateLicenseFile();
 
   bool RunWiXCommand(const std::string& command);
