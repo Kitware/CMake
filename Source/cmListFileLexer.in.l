@@ -107,7 +107,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t])*\"
   return 1;
 }
 
-[A-Za-z_][A-Za-z0-9_]+ {
+[A-Za-z_][A-Za-z0-9_]* {
   lexer->token.type = cmListFileLexer_Token_Identifier;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
