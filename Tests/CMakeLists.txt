@@ -261,7 +261,9 @@ if(BUILD_TESTING)
       PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked)")
   endif()
 
-  if(CMAKE_GENERATOR MATCHES Make AND NOT BORLAND)
+  if(CMAKE_TEST_GENERATOR MATCHES Make
+      AND NOT CMAKE_TEST_GENERATOR MATCHES BORLAND
+      AND NOT CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
     add_test(InterfaceBuildTargets ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/InterfaceBuildTargets"
