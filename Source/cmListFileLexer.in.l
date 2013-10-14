@@ -328,19 +328,68 @@ cmListFileLexer* cmListFileLexer_New()
 /*--------------------------------------------------------------------------*/
 void cmListFileLexer_Delete(cmListFileLexer* lexer)
 {
-  cmListFileLexer_SetFileName(lexer, 0);
+  cmListFileLexer_SetFileName(lexer, 0, 0);
   free(lexer);
 }
 
 /*--------------------------------------------------------------------------*/
-int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name)
+static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
+{
+  unsigned char b[2];
+  if(fread(b, 1, 2, f) == 2)
+    {
+    if(b[0] == 0xEF && b[1] == 0xBB)
+      {
+      if(fread(b, 1, 1, f) == 1 && b[0] == 0xBF)
+        {
+        return cmListFileLexer_BOM_UTF8;
+        }
+      }
+    else if(b[0] == 0xFE && b[1] == 0xFF)
+      {
+      /* UTF-16 BE */
+      return cmListFileLexer_BOM_UTF16BE;
+      }
+    else if(b[0] == 0 && b[1] == 0)
+      {
+      if(fread(b, 1, 2, f) == 2 && b[0] == 0xFE && b[1] == 0xFF)
+        {
+        return cmListFileLexer_BOM_UTF32BE;
+        }
+      }
+    else if(b[0] == 0xFF && b[1] == 0xFE)
+      {
+      fpos_t p;
+      fgetpos(f, &p);
+      if(fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0)
+        {
+        return cmListFileLexer_BOM_UTF32LE;
+        }
+      fsetpos(f, &p);
+      return cmListFileLexer_BOM_UTF16LE;
+      }
+    }
+  rewind(f);
+  return cmListFileLexer_BOM_None;
+}
+
+/*--------------------------------------------------------------------------*/
+int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
+                                cmListFileLexer_BOM* bom)
 {
   int result = 1;
   cmListFileLexerDestroy(lexer);
   if(name)
     {
     lexer->file = fopen(name, "r");
-    if(!lexer->file)
+    if(lexer->file)
+      {
+      if(bom)
+        {
+        *bom = cmListFileLexer_ReadBOM(lexer->file);
+        }
+      }
+    else
       {
       result = 0;
       }
@@ -386,7 +435,7 @@ cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer* lexer)
     }
   else
     {
-    cmListFileLexer_SetFileName(lexer, 0);
+    cmListFileLexer_SetFileName(lexer, 0, 0);
     return 0;
     }
 }

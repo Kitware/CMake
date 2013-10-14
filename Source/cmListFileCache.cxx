@@ -57,10 +57,23 @@ cmListFileParser::~cmListFileParser()
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
-  if(!cmListFileLexer_SetFileName(this->Lexer, this->FileName))
+  cmListFileLexer_BOM bom;
+  if(!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom))
     {
     cmSystemTools::Error("cmListFileCache: error can not open file ",
                          this->FileName);
+    return false;
+    }
+
+  // Verify the Byte-Order-Mark, if any.
+  if(bom != cmListFileLexer_BOM_None &&
+     bom != cmListFileLexer_BOM_UTF8)
+    {
+    cmListFileLexer_SetFileName(this->Lexer, 0, 0);
+    cmOStringStream m;
+    m << "File\n  " << this->FileName << "\n"
+      << "starts with a Byte-Order-Mark that is not UTF-8.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
     return false;
     }
 

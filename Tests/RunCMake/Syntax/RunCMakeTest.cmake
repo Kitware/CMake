@@ -1,5 +1,10 @@
 include(RunCMake)
 
+run_cmake(BOM-UTF-8)
+run_cmake(BOM-UTF-16-LE)
+run_cmake(BOM-UTF-16-BE)
+run_cmake(BOM-UTF-32-LE)
+run_cmake(BOM-UTF-32-BE)
 run_cmake(CommandSpaces)
 run_cmake(CommandTabs)
 run_cmake(CommandNewlines)
