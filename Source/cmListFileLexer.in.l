@@ -46,6 +46,7 @@ struct cmListFileLexer_s
   int column;
   int size;
   FILE* file;
+  size_t cr;
   char* string_buffer;
   char* string_position;
   int string_left;
@@ -264,7 +265,38 @@ static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
     {
     if(lexer->file)
       {
-      return (int)fread(buffer, 1, bufferSize, lexer->file);
+      /* Convert CRLF -> LF explicitly.  The C FILE "t"ext mode
+         does not convert newlines on all platforms.  Move any
+         trailing CR to the start of the buffer for the next read. */
+      size_t cr = lexer->cr;
+      size_t n;
+      buffer[0] = '\r';
+      n = fread(buffer+cr, 1, bufferSize-cr, lexer->file);
+      if(n)
+        {
+        char* o = buffer;
+        const char* i = buffer;
+        const char* e;
+        n += cr;
+        cr = (buffer[n-1] == '\r')? 1:0;
+        e = buffer + n - cr;
+        while(i != e)
+          {
+          if(i[0] == '\r' && i[1] == '\n')
+            {
+            ++i;
+            }
+          *o++ = *i++;
+          }
+        n = o - buffer;
+        }
+      else
+        {
+        n = cr;
+        cr = 0;
+        }
+      lexer->cr = cr;
+      return n;
       }
     else if(lexer->string_left)
       {
@@ -381,7 +413,7 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
   cmListFileLexerDestroy(lexer);
   if(name)
     {
-    lexer->file = fopen(name, "r");
+    lexer->file = fopen(name, "rb");
     if(lexer->file)
       {
       if(bom)

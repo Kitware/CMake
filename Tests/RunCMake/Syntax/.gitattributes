@@ -1,1 +1,2 @@
 CommandTabs.cmake   whitespace=-tab-in-indent
+StringCRLF.cmake    whitespace=cr-at-eol      -crlf
