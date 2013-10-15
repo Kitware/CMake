@@ -13,7 +13,7 @@
 #include "cmMakefile.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
-#include "cmQtAutoGenerators.h"
+#include "cmQtAutomoc.h"
 #include "cmVersion.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -637,12 +637,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       return cmcmd::ExecuteEchoColor(args);
       }
-    else if (args[1] == "cmake_autogen")
+    else if (args[1] == "cmake_automoc")
       {
-        cmQtAutoGenerators autogen;
+        cmQtAutomoc automoc;
         const char *config = args[3].empty() ? 0 : args[3].c_str();
-        bool autogenSuccess = autogen.Run(args[2].c_str(), config);
-        return autogenSuccess ? 0 : 1;
+        bool automocSuccess = automoc.Run(args[2].c_str(), config);
+        return automocSuccess ? 0 : 1;
       }
 #endif
 

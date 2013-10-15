@@ -259,8 +259,8 @@ set(SRCS
   cmPropertyDefinitionMap.h
   cmPropertyMap.cxx
   cmPropertyMap.h
-  cmQtAutoGenerators.cxx
-  cmQtAutoGenerators.h
+  cmQtAutomoc.cxx
+  cmQtAutomoc.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx

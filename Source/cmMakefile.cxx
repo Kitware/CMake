@@ -4682,13 +4682,3 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
     pm[pid] = this->GetPolicyStatus(pid);
     }
 }
-
-void cmMakefile::AddQtUiFileWithOptions(cmSourceFile *sf)
-{
-  this->QtUiFilesWithOptions.push_back(sf);
-}
-
-std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
-{
-  return this->QtUiFilesWithOptions;
-}
