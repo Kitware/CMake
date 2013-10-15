@@ -1,11 +1,18 @@
-# - Try to find BZip2
+#.rst:
+# FindBZip2
+# ---------
+#
+# Try to find BZip2
+#
 # Once done this will define
 #
-#  BZIP2_FOUND - system has BZip2
-#  BZIP2_INCLUDE_DIR - the BZip2 include directory
-#  BZIP2_LIBRARIES - Link these to use BZip2
-#  BZIP2_NEED_PREFIX - this is set if the functions are prefixed with BZ2_
-#  BZIP2_VERSION_STRING - the version of BZip2 found (since CMake 2.8.8)
+# ::
+#
+#   BZIP2_FOUND - system has BZip2
+#   BZIP2_INCLUDE_DIR - the BZip2 include directory
+#   BZIP2_LIBRARIES - Link these to use BZip2
+#   BZIP2_NEED_PREFIX - this is set if the functions are prefixed with BZ2_
+#   BZIP2_VERSION_STRING - the version of BZip2 found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2006-2012 Kitware, Inc.

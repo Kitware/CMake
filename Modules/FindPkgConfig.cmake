@@ -1,11 +1,26 @@
-# - a pkg-config module for CMake
+#.rst:
+# FindPkgConfig
+# -------------
+#
+# a pkg-config module for CMake
+#
+#
 #
 # Usage:
-#   pkg_check_modules(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
-#     checks for all the given modules
 #
-#   pkg_search_module(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
-#     checks for given modules and uses the first working one
+# ::
+#
+#    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
+#      checks for all the given modules
+#
+#
+#
+# ::
+#
+#    pkg_search_module(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
+#      checks for given modules and uses the first working one
+#
+#
 #
 # When the 'REQUIRED' argument was set, macros will fail with an error
 # when module(s) could not be found
@@ -13,63 +28,110 @@
 # When the 'QUIET' argument is set, no status messages will be printed.
 #
 # It sets the following variables:
-#   PKG_CONFIG_FOUND          ... if pkg-config executable was found
-#   PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
-#   PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
-#                                 (since CMake 2.8.8)
+#
+# ::
+#
+#    PKG_CONFIG_FOUND          ... if pkg-config executable was found
+#    PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
+#    PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
+#                                  (since CMake 2.8.8)
+#
+#
 #
 # For the following variables two sets of values exist; first one is the
-# common one and has the given PREFIX. The second set contains flags
+# common one and has the given PREFIX.  The second set contains flags
 # which are given out when pkgconfig was called with the '--static'
 # option.
-#   <XPREFIX>_FOUND          ... set to 1 if module(s) exist
-#   <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
-#   <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
-#   <XPREFIX>_LDFLAGS        ... all required linker flags
-#   <XPREFIX>_LDFLAGS_OTHER  ... all other linker flags
-#   <XPREFIX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (w/o the '-I')
-#   <XPREFIX>_CFLAGS         ... all required cflags
-#   <XPREFIX>_CFLAGS_OTHER   ... the other compiler flags
 #
-#   <XPREFIX> = <PREFIX>        for common case
-#   <XPREFIX> = <PREFIX>_STATIC for static linking
+# ::
 #
-# There are some special variables whose prefix depends on the count
-# of given modules. When there is only one module, <PREFIX> stays
-# unchanged. When there are multiple modules, the prefix will be
+#    <XPREFIX>_FOUND          ... set to 1 if module(s) exist
+#    <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
+#    <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
+#    <XPREFIX>_LDFLAGS        ... all required linker flags
+#    <XPREFIX>_LDFLAGS_OTHER  ... all other linker flags
+#    <XPREFIX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (w/o the '-I')
+#    <XPREFIX>_CFLAGS         ... all required cflags
+#    <XPREFIX>_CFLAGS_OTHER   ... the other compiler flags
+#
+#
+#
+# ::
+#
+#    <XPREFIX> = <PREFIX>        for common case
+#    <XPREFIX> = <PREFIX>_STATIC for static linking
+#
+#
+#
+# There are some special variables whose prefix depends on the count of
+# given modules.  When there is only one module, <PREFIX> stays
+# unchanged.  When there are multiple modules, the prefix will be
 # changed to <PREFIX>_<MODNAME>:
-#   <XPREFIX>_VERSION    ... version of the module
-#   <XPREFIX>_PREFIX     ... prefix-directory of the module
-#   <XPREFIX>_INCLUDEDIR ... include-dir of the module
-#   <XPREFIX>_LIBDIR     ... lib-dir of the module
 #
-#   <XPREFIX> = <PREFIX>  when |MODULES| == 1, else
-#   <XPREFIX> = <PREFIX>_<MODNAME>
+# ::
+#
+#    <XPREFIX>_VERSION    ... version of the module
+#    <XPREFIX>_PREFIX     ... prefix-directory of the module
+#    <XPREFIX>_INCLUDEDIR ... include-dir of the module
+#    <XPREFIX>_LIBDIR     ... lib-dir of the module
+#
+#
+#
+# ::
+#
+#    <XPREFIX> = <PREFIX>  when |MODULES| == 1, else
+#    <XPREFIX> = <PREFIX>_<MODNAME>
+#
+#
 #
 # A <MODULE> parameter can have the following formats:
-#   {MODNAME}            ... matches any version
-#   {MODNAME}>={VERSION} ... at least version <VERSION> is required
-#   {MODNAME}={VERSION}  ... exactly version <VERSION> is required
-#   {MODNAME}<={VERSION} ... modules must not be newer than <VERSION>
+#
+# ::
+#
+#    {MODNAME}            ... matches any version
+#    {MODNAME}>={VERSION} ... at least version <VERSION> is required
+#    {MODNAME}={VERSION}  ... exactly version <VERSION> is required
+#    {MODNAME}<={VERSION} ... modules must not be newer than <VERSION>
+#
+#
 #
 # Examples
-#   pkg_check_modules (GLIB2   glib-2.0)
 #
-#   pkg_check_modules (GLIB2   glib-2.0>=2.10)
-#     requires at least version 2.10 of glib2 and defines e.g.
-#       GLIB2_VERSION=2.10.3
+# ::
 #
-#   pkg_check_modules (FOO     glib-2.0>=2.10 gtk+-2.0)
-#     requires both glib2 and gtk2, and defines e.g.
-#       FOO_glib-2.0_VERSION=2.10.3
-#       FOO_gtk+-2.0_VERSION=2.8.20
+#    pkg_check_modules (GLIB2   glib-2.0)
 #
-#   pkg_check_modules (XRENDER REQUIRED xrender)
-#     defines e.g.:
-#       XRENDER_LIBRARIES=Xrender;X11
-#       XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
 #
-#   pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
+#
+# ::
+#
+#    pkg_check_modules (GLIB2   glib-2.0>=2.10)
+#      requires at least version 2.10 of glib2 and defines e.g.
+#        GLIB2_VERSION=2.10.3
+#
+#
+#
+# ::
+#
+#    pkg_check_modules (FOO     glib-2.0>=2.10 gtk+-2.0)
+#      requires both glib2 and gtk2, and defines e.g.
+#        FOO_glib-2.0_VERSION=2.10.3
+#        FOO_gtk+-2.0_VERSION=2.8.20
+#
+#
+#
+# ::
+#
+#    pkg_check_modules (XRENDER REQUIRED xrender)
+#      defines e.g.:
+#        XRENDER_LIBRARIES=Xrender;X11
+#        XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
+#
+#
+#
+# ::
+#
+#    pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

@@ -1,8 +1,15 @@
-# - try to find GTK (and glib) and GTKGLArea
-#  GTK_INCLUDE_DIR   - Directories to include to use GTK
-#  GTK_LIBRARIES     - Files to link against to use GTK
-#  GTK_FOUND         - GTK was found
-#  GTK_GL_FOUND      - GTK's GL features were found
+#.rst:
+# FindGTK
+# -------
+#
+# try to find GTK (and glib) and GTKGLArea
+#
+# ::
+#
+#   GTK_INCLUDE_DIR   - Directories to include to use GTK
+#   GTK_LIBRARIES     - Files to link against to use GTK
+#   GTK_FOUND         - GTK was found
+#   GTK_GL_FOUND      - GTK's GL features were found
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

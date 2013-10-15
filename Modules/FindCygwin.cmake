@@ -1,5 +1,8 @@
-# - this module looks for Cygwin
+#.rst:
+# FindCygwin
+# ----------
 #
+# this module looks for Cygwin
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

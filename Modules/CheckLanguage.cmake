@@ -1,19 +1,32 @@
-# - Check if a language can be enabled
+#.rst:
+# CheckLanguage
+# -------------
+#
+# Check if a language can be enabled
+#
 # Usage:
-#  check_language(<lang>)
+#
+# ::
+#
+#   check_language(<lang>)
+#
 # where <lang> is a language that may be passed to enable_language()
 # such as "Fortran".  If CMAKE_<lang>_COMPILER is already defined the
 # check does nothing.  Otherwise it tries enabling the language in a
 # test project.  The result is cached in CMAKE_<lang>_COMPILER as the
-# compiler that was found, or NOTFOUND if the language cannot be enabled.
+# compiler that was found, or NOTFOUND if the language cannot be
+# enabled.
 #
 # Example:
-#  check_language(Fortran)
-#  if(CMAKE_Fortran_COMPILER)
-#    enable_language(Fortran)
-#  else()
-#    message(STATUS "No Fortran support")
-#  endif()
+#
+# ::
+#
+#   check_language(Fortran)
+#   if(CMAKE_Fortran_COMPILER)
+#     enable_language(Fortran)
+#   else()
+#     message(STATUS "No Fortran support")
+#   endif()
 
 #=============================================================================
 # Copyright 2009-2012 Kitware, Inc.

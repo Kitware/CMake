@@ -1,12 +1,25 @@
+#.rst:
+# FindGit
+# -------
+#
+#
+#
 # The module defines the following variables:
-#   GIT_EXECUTABLE - path to git command line client
-#   GIT_FOUND - true if the command line client was found
-#   GIT_VERSION_STRING - the version of git found (since CMake 2.8.8)
+#
+# ::
+#
+#    GIT_EXECUTABLE - path to git command line client
+#    GIT_FOUND - true if the command line client was found
+#    GIT_VERSION_STRING - the version of git found (since CMake 2.8.8)
+#
 # Example usage:
-#   find_package(Git)
-#   if(GIT_FOUND)
-#     message("git found: ${GIT_EXECUTABLE}")
-#   endif()
+#
+# ::
+#
+#    find_package(Git)
+#    if(GIT_FOUND)
+#      message("git found: ${GIT_EXECUTABLE}")
+#    endif()
 
 #=============================================================================
 # Copyright 2010 Kitware, Inc.

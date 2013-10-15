@@ -1,18 +1,25 @@
-# - Check if a C function can be linked
+#.rst:
+# CheckFunctionExists
+# -------------------
+#
+# Check if a C function can be linked
+#
 # CHECK_FUNCTION_EXISTS(<function> <variable>)
 #
 # Check that the <function> is provided by libraries on the system and
 # store the result in a <variable>.  This does not verify that any
-# system header file declares the function, only that it can be found
-# at link time (consider using CheckSymbolExists).
+# system header file declares the function, only that it can be found at
+# link time (consider using CheckSymbolExists).
 #
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_INCLUDES = list of include directories
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
 # Copyright 2002-2011 Kitware, Inc.

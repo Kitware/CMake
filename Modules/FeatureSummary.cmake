@@ -1,167 +1,244 @@
-# - Macros for generating a summary of enabled/disabled features
+#.rst:
+# FeatureSummary
+# --------------
 #
-# This module provides the macros feature_summary(), set_package_properties() and
-# add_feature_info().
-# For compatibility it also still provides set_package_info(), set_feature_info(),
+# Macros for generating a summary of enabled/disabled features
+#
+#
+#
+# This module provides the macros feature_summary(),
+# set_package_properties() and add_feature_info().  For compatibility it
+# also still provides set_package_info(), set_feature_info(),
 # print_enabled_features() and print_disabled_features().
 #
 # These macros can be used to generate a summary of enabled and disabled
 # packages and/or feature for a build tree:
 #
-#    -- The following OPTIONAL packages have been found:
-#    LibXml2 (required version >= 2.4) , XML processing library. , <http://xmlsoft.org>
-#       * Enables HTML-import in MyWordProcessor
-#       * Enables odt-export in MyWordProcessor
-#    PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
-#       * Enables saving screenshots
-#    -- The following OPTIONAL packages have not been found:
-#    Lua51 , The Lua scripting language. , <http://www.lua.org>
-#       * Enables macros in MyWordProcessor
-#    Foo , Foo provides cool stuff.
+# ::
+#
+#     -- The following OPTIONAL packages have been found:
+#     LibXml2 (required version >= 2.4) , XML processing library. , <http://xmlsoft.org>
+#        * Enables HTML-import in MyWordProcessor
+#        * Enables odt-export in MyWordProcessor
+#     PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
+#        * Enables saving screenshots
+#     -- The following OPTIONAL packages have not been found:
+#     Lua51 , The Lua scripting language. , <http://www.lua.org>
+#        * Enables macros in MyWordProcessor
+#     Foo , Foo provides cool stuff.
 #
 #
-#    FEATURE_SUMMARY( [FILENAME <file>]
-#                     [APPEND]
-#                     [VAR <variable_name>]
-#                     [INCLUDE_QUIET_PACKAGES]
-#                     [FATAL_ON_MISSING_REQUIRED_PACKAGES]
-#                     [DESCRIPTION "Found packages:"]
-#                     WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
-#                          | ENABLED_FEATURES | DISABLED_FEATURES]
-#                   )
 #
-# The FEATURE_SUMMARY() macro can be used to print information about enabled
-# or disabled packages or features of a project.
-# By default, only the names of the features/packages will be printed and their
-# required version when one was specified. Use SET_PACKAGE_PROPERTIES() to add more
-# useful information, like e.g. a download URL for the respective package or their
-# purpose in the project.
 #
-# The WHAT option is the only mandatory option. Here you specify what information
-# will be printed:
-#    ALL: print everything
-#    ENABLED_FEATURES: the list of all features which are enabled
-#    DISABLED_FEATURES: the list of all features which are disabled
-#    PACKAGES_FOUND: the list of all packages which have been found
-#    PACKAGES_NOT_FOUND: the list of all packages which have not been found
-#    OPTIONAL_PACKAGES_FOUND: only those packages which have been found which have the type OPTIONAL
-#    OPTIONAL_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type OPTIONAL
-#    RECOMMENDED_PACKAGES_FOUND: only those packages which have been found which have the type RECOMMENDED
-#    RECOMMENDED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RECOMMENDED
-#    REQUIRED_PACKAGES_FOUND: only those packages which have been found which have the type REQUIRED
-#    REQUIRED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type REQUIRED
-#    RUNTIME_PACKAGES_FOUND: only those packages which have been found which have the type RUNTIME
-#    RUNTIME_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RUNTIME
 #
-# If a FILENAME is given, the information is printed into this file. If APPEND
-# is used, it is appended to this file, otherwise the file is overwritten if
-# it already existed.
-# If the VAR option is used, the information is "printed" into the specified
-# variable.
-# If FILENAME is not used, the information is printed to the terminal.
-# Using the DESCRIPTION option a description or headline can be set which will
-# be printed above the actual content.
-# If INCLUDE_QUIET_PACKAGES is given, packages which have been searched with find_package(... QUIET) will
-# also be listed. By default they are skipped.
-# If FATAL_ON_MISSING_REQUIRED_PACKAGES is given, CMake will abort if a package which is marked as REQUIRED
-# has not been found.
+# ::
+#
+#     FEATURE_SUMMARY( [FILENAME <file>]
+#                      [APPEND]
+#                      [VAR <variable_name>]
+#                      [INCLUDE_QUIET_PACKAGES]
+#                      [FATAL_ON_MISSING_REQUIRED_PACKAGES]
+#                      [DESCRIPTION "Found packages:"]
+#                      WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
+#                           | ENABLED_FEATURES | DISABLED_FEATURES]
+#                    )
+#
+#
+#
+# The FEATURE_SUMMARY() macro can be used to print information about
+# enabled or disabled packages or features of a project.  By default,
+# only the names of the features/packages will be printed and their
+# required version when one was specified.  Use SET_PACKAGE_PROPERTIES()
+# to add more useful information, like e.g.  a download URL for the
+# respective package or their purpose in the project.
+#
+# The WHAT option is the only mandatory option.  Here you specify what
+# information will be printed:
+#
+# ::
+#
+#     ALL: print everything
+#     ENABLED_FEATURES: the list of all features which are enabled
+#     DISABLED_FEATURES: the list of all features which are disabled
+#     PACKAGES_FOUND: the list of all packages which have been found
+#     PACKAGES_NOT_FOUND: the list of all packages which have not been found
+#     OPTIONAL_PACKAGES_FOUND: only those packages which have been found which have the type OPTIONAL
+#     OPTIONAL_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type OPTIONAL
+#     RECOMMENDED_PACKAGES_FOUND: only those packages which have been found which have the type RECOMMENDED
+#     RECOMMENDED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RECOMMENDED
+#     REQUIRED_PACKAGES_FOUND: only those packages which have been found which have the type REQUIRED
+#     REQUIRED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type REQUIRED
+#     RUNTIME_PACKAGES_FOUND: only those packages which have been found which have the type RUNTIME
+#     RUNTIME_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RUNTIME
+#
+#
+#
+# If a FILENAME is given, the information is printed into this file.  If
+# APPEND is used, it is appended to this file, otherwise the file is
+# overwritten if it already existed.  If the VAR option is used, the
+# information is "printed" into the specified variable.  If FILENAME is
+# not used, the information is printed to the terminal.  Using the
+# DESCRIPTION option a description or headline can be set which will be
+# printed above the actual content.  If INCLUDE_QUIET_PACKAGES is given,
+# packages which have been searched with find_package(...  QUIET) will
+# also be listed.  By default they are skipped.  If
+# FATAL_ON_MISSING_REQUIRED_PACKAGES is given, CMake will abort if a
+# package which is marked as REQUIRED has not been found.
 #
 # Example 1, append everything to a file:
-#   feature_summary(WHAT ALL
-#                   FILENAME ${CMAKE_BINARY_DIR}/all.log APPEND)
 #
-# Example 2, print the enabled features into the variable enabledFeaturesText, including QUIET packages:
-#   feature_summary(WHAT ENABLED_FEATURES
-#                   INCLUDE_QUIET_PACKAGES
-#                   DESCRIPTION "Enabled Features:"
-#                   VAR enabledFeaturesText)
-#   message(STATUS "${enabledFeaturesText}")
+# ::
+#
+#    feature_summary(WHAT ALL
+#                    FILENAME ${CMAKE_BINARY_DIR}/all.log APPEND)
 #
 #
-#    SET_PACKAGE_PROPERTIES(<name> PROPERTIES [ URL <url> ]
-#                                             [ DESCRIPTION <description> ]
-#                                             [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
-#                                             [ PURPOSE <purpose> ]
-#                          )
 #
-# Use this macro to set up information about the named package, which can
-# then be displayed via FEATURE_SUMMARY().
-# This can be done either directly in the Find-module or in the project
-# which uses the module after the find_package() call.
-# The features for which information can be set are added automatically by the
-# find_package() command.
+# Example 2, print the enabled features into the variable
+# enabledFeaturesText, including QUIET packages:
 #
-# URL: this should be the homepage of the package, or something similar. Ideally this is set
-# already directly in the Find-module.
+# ::
 #
-# DESCRIPTION: A short description what that package is, at most one sentence.
+#    feature_summary(WHAT ENABLED_FEATURES
+#                    INCLUDE_QUIET_PACKAGES
+#                    DESCRIPTION "Enabled Features:"
+#                    VAR enabledFeaturesText)
+#    message(STATUS "${enabledFeaturesText}")
+#
+#
+#
+#
+#
+# ::
+#
+#     SET_PACKAGE_PROPERTIES(<name> PROPERTIES [ URL <url> ]
+#                                              [ DESCRIPTION <description> ]
+#                                              [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
+#                                              [ PURPOSE <purpose> ]
+#                           )
+#
+#
+#
+# Use this macro to set up information about the named package, which
+# can then be displayed via FEATURE_SUMMARY().  This can be done either
+# directly in the Find-module or in the project which uses the module
+# after the find_package() call.  The features for which information can
+# be set are added automatically by the find_package() command.
+#
+# URL: this should be the homepage of the package, or something similar.
 # Ideally this is set already directly in the Find-module.
 #
-# TYPE: What type of dependency has the using project on that package. Default is OPTIONAL.
-# In this case it is a package which can be used by the project when available at buildtime,
-# but it also work without. RECOMMENDED is similar to OPTIONAL, i.e. the project will build
-# if the package is not present, but the functionality of the resulting binaries will be severly
-# limited. If a REQUIRED package is not available at buildtime, the project may not even build. This
-# can be combined with the FATAL_ON_MISSING_REQUIRED_PACKAGES argument for feature_summary().
-# Last, a RUNTIME package is a package which is actually not used at all during the build, but
-# which is required for actually running the resulting binaries. So if such a package is missing,
-# the project can still be built, but it may not work later on. If set_package_properties() is called
-# multiple times for the same package with different TYPEs, the TYPE is only changed to higher
-# TYPEs ( RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED ), lower TYPEs are ignored.
-# The TYPE property is project-specific, so it cannot be set by the Find-module, but must be set in the project.
+# DESCRIPTION: A short description what that package is, at most one
+# sentence.  Ideally this is set already directly in the Find-module.
 #
-# PURPOSE: This describes which features this package enables in the project, i.e. it tells the user
-# what functionality he gets in the resulting binaries.
-# If set_package_properties() is called multiple times for a package, all PURPOSE properties are appended
-# to a list of purposes of the package in the project.
-# As the TYPE property, also the PURPOSE property
-# is project-specific, so it cannot be set by the Find-module, but must be set in the project.
+# TYPE: What type of dependency has the using project on that package.
+# Default is OPTIONAL.  In this case it is a package which can be used
+# by the project when available at buildtime, but it also work without.
+# RECOMMENDED is similar to OPTIONAL, i.e.  the project will build if
+# the package is not present, but the functionality of the resulting
+# binaries will be severly limited.  If a REQUIRED package is not
+# available at buildtime, the project may not even build.  This can be
+# combined with the FATAL_ON_MISSING_REQUIRED_PACKAGES argument for
+# feature_summary().  Last, a RUNTIME package is a package which is
+# actually not used at all during the build, but which is required for
+# actually running the resulting binaries.  So if such a package is
+# missing, the project can still be built, but it may not work later on.
+# If set_package_properties() is called multiple times for the same
+# package with different TYPEs, the TYPE is only changed to higher TYPEs
+# ( RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED ), lower TYPEs are
+# ignored.  The TYPE property is project-specific, so it cannot be set
+# by the Find-module, but must be set in the project.
+#
+# PURPOSE: This describes which features this package enables in the
+# project, i.e.  it tells the user what functionality he gets in the
+# resulting binaries.  If set_package_properties() is called multiple
+# times for a package, all PURPOSE properties are appended to a list of
+# purposes of the package in the project.  As the TYPE property, also
+# the PURPOSE property is project-specific, so it cannot be set by the
+# Find-module, but must be set in the project.
+#
 #
 #
 # Example for setting the info for a package:
-#   find_package(LibXml2)
-#   set_package_properties(LibXml2 PROPERTIES DESCRIPTION "A XML processing library."
-#                                             URL "http://xmlsoft.org/")
 #
-#   set_package_properties(LibXml2 PROPERTIES TYPE RECOMMENDED
-#                                             PURPOSE "Enables HTML-import in MyWordProcessor")
-#   ...
-#   set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL
-#                                             PURPOSE "Enables odt-export in MyWordProcessor")
+# ::
 #
-#   find_package(DBUS)
-#   set_package_properties(DBUS PROPERTIES TYPE RUNTIME
-#                                             PURPOSE "Necessary to disable the screensaver during a presentation" )
+#    find_package(LibXml2)
+#    set_package_properties(LibXml2 PROPERTIES DESCRIPTION "A XML processing library."
+#                                              URL "http://xmlsoft.org/")
 #
-#    ADD_FEATURE_INFO(<name> <enabled> <description>)
-# Use this macro to add information about a feature with the given <name>.
-# <enabled> contains whether this feature is enabled or not, <description>
-# is a text describing the feature.
-# The information can be displayed using feature_summary() for ENABLED_FEATURES
-# and DISABLED_FEATURES respectively.
+#
+#
+# ::
+#
+#    set_package_properties(LibXml2 PROPERTIES TYPE RECOMMENDED
+#                                              PURPOSE "Enables HTML-import in MyWordProcessor")
+#    ...
+#    set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL
+#                                              PURPOSE "Enables odt-export in MyWordProcessor")
+#
+#
+#
+# ::
+#
+#    find_package(DBUS)
+#    set_package_properties(DBUS PROPERTIES TYPE RUNTIME
+#                                              PURPOSE "Necessary to disable the screensaver during a presentation" )
+#
+#
+#
+# ::
+#
+#     ADD_FEATURE_INFO(<name> <enabled> <description>)
+#
+# Use this macro to add information about a feature with the given
+# <name>.  <enabled> contains whether this feature is enabled or not,
+# <description> is a text describing the feature.  The information can
+# be displayed using feature_summary() for ENABLED_FEATURES and
+# DISABLED_FEATURES respectively.
 #
 # Example for setting the info for a feature:
-#   option(WITH_FOO "Help for foo" ON)
-#   add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
+#
+# ::
+#
+#    option(WITH_FOO "Help for foo" ON)
+#    add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
 #
 #
-# The following macros are provided for compatibility with previous CMake versions:
 #
-#    SET_PACKAGE_INFO(<name> <description> [<url> [<purpose>] ] )
-# Use this macro to set up information about the named package, which can
-# then be displayed via FEATURE_SUMMARY().
-# This can be done either directly in the Find-module or in the project
-# which uses the module after the find_package() call.
-# The features for which information can be set are added automatically by the
-# find_package() command.
 #
-#    PRINT_ENABLED_FEATURES()
-# Does the same as FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
 #
-#    PRINT_DISABLED_FEATURES()
-# Does the same as FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
+# The following macros are provided for compatibility with previous
+# CMake versions:
 #
-#    SET_FEATURE_INFO(<name> <description> [<url>] )
+# ::
+#
+#     SET_PACKAGE_INFO(<name> <description> [<url> [<purpose>] ] )
+#
+# Use this macro to set up information about the named package, which
+# can then be displayed via FEATURE_SUMMARY().  This can be done either
+# directly in the Find-module or in the project which uses the module
+# after the find_package() call.  The features for which information can
+# be set are added automatically by the find_package() command.
+#
+# ::
+#
+#     PRINT_ENABLED_FEATURES()
+#
+# Does the same as FEATURE_SUMMARY(WHAT ENABLED_FEATURES DESCRIPTION
+# "Enabled features:")
+#
+# ::
+#
+#     PRINT_DISABLED_FEATURES()
+#
+# Does the same as FEATURE_SUMMARY(WHAT DISABLED_FEATURES DESCRIPTION
+# "Disabled features:")
+#
+# ::
+#
+#     SET_FEATURE_INFO(<name> <description> [<url>] )
+#
 # Does the same as SET_PACKAGE_INFO(<name> <description> <url> )
 
 #=============================================================================

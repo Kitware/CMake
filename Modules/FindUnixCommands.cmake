@@ -1,6 +1,10 @@
-# - Find unix commands from cygwin
-# This module looks for some usual Unix commands.
+#.rst:
+# FindUnixCommands
+# ----------------
 #
+# Find unix commands from cygwin
+#
+# This module looks for some usual Unix commands.
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

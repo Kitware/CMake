@@ -1,13 +1,25 @@
-# - Try to find the OpenSSL encryption library
+#.rst:
+# FindOpenSSL
+# -----------
+#
+# Try to find the OpenSSL encryption library
+#
 # Once done this will define
 #
-#  OPENSSL_ROOT_DIR - Set this variable to the root installation of OpenSSL
+# ::
+#
+#   OPENSSL_ROOT_DIR - Set this variable to the root installation of OpenSSL
+#
+#
 #
 # Read-Only variables:
-#  OPENSSL_FOUND - system has the OpenSSL library
-#  OPENSSL_INCLUDE_DIR - the OpenSSL include directory
-#  OPENSSL_LIBRARIES - The libraries needed to use OpenSSL
-#  OPENSSL_VERSION - This is set to $major.$minor.$revision$path (eg. 0.9.8s)
+#
+# ::
+#
+#   OPENSSL_FOUND - system has the OpenSSL library
+#   OPENSSL_INCLUDE_DIR - the OpenSSL include directory
+#   OPENSSL_LIBRARIES - The libraries needed to use OpenSSL
+#   OPENSSL_VERSION - This is set to $major.$minor.$revision$path (eg. 0.9.8s)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

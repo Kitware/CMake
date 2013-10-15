@@ -1,27 +1,32 @@
+#.rst:
+# InstallRequiredSystemLibraries
+# ------------------------------
+#
+#
+#
 # By including this file, all library files listed in the variable
 # CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS will be installed with
-# install(PROGRAMS ...) into bin for WIN32 and lib
-# for non-WIN32. If CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP is set to TRUE
-# before including this file, then the INSTALL command is not called.
-# The user can use the variable CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS to use a
-# custom install command and install them however they want.
-# If it is the MSVC compiler, then the microsoft run
-# time libraries will be found and automatically added to the
-# CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS, and installed.
-# If CMAKE_INSTALL_DEBUG_LIBRARIES is set and it is the MSVC
-# compiler, then the debug libraries are installed when available.
-# If CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY is set then only the debug
-# libraries are installed when both debug and release are available.
-# If CMAKE_INSTALL_MFC_LIBRARIES is set then the MFC run time
-# libraries are installed as well as the CRT run time libraries.
-# If CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION is set then the libraries are
-# installed to that directory rather than the default.
-# If CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS is NOT set, then this file
-# warns about required files that do not exist. You can set this variable to
-# ON before including this file to avoid the warning. For example, the Visual
-# Studio Express editions do not include the redistributable files, so if you
-# include this file on a machine with only VS Express installed, you'll get
-# the warning.
+# install(PROGRAMS ...) into bin for WIN32 and lib for non-WIN32.  If
+# CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP is set to TRUE before including
+# this file, then the INSTALL command is not called.  The user can use
+# the variable CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS to use a custom install
+# command and install them however they want.  If it is the MSVC
+# compiler, then the microsoft run time libraries will be found and
+# automatically added to the CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS, and
+# installed.  If CMAKE_INSTALL_DEBUG_LIBRARIES is set and it is the MSVC
+# compiler, then the debug libraries are installed when available.  If
+# CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY is set then only the debug
+# libraries are installed when both debug and release are available.  If
+# CMAKE_INSTALL_MFC_LIBRARIES is set then the MFC run time libraries are
+# installed as well as the CRT run time libraries.  If
+# CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION is set then the libraries are
+# installed to that directory rather than the default.  If
+# CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS is NOT set, then this
+# file warns about required files that do not exist.  You can set this
+# variable to ON before including this file to avoid the warning.  For
+# example, the Visual Studio Express editions do not include the
+# redistributable files, so if you include this file on a machine with
+# only VS Express installed, you'll get the warning.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

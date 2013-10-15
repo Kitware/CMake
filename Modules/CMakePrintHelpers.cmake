@@ -1,29 +1,52 @@
-# - Convenience macros for printing properties and variables, useful e.g. for debugging.
+#.rst:
+# CMakePrintHelpers
+# -----------------
+#
+# Convenience macros for printing properties and variables, useful e.g. for debugging.
 #
 #
-# CMAKE_PRINT_PROPERTIES([TARGETS target1 .. targetN]
-#                        [SOURCES source1 .. sourceN]
-#                        [DIRECTORIES dir1 .. dirN]
-#                        [TESTS test1 .. testN]
-#                        [CACHE_ENTRIES entry1 .. entryN]
-#                        PROPERTIES prop1 .. propN )
+#
+#
+#
+# CMAKE_PRINT_PROPERTIES([TARGETS target1 ..  targetN]
+#
+# ::
+#
+#                         [SOURCES source1 .. sourceN]
+#                         [DIRECTORIES dir1 .. dirN]
+#                         [TESTS test1 .. testN]
+#                         [CACHE_ENTRIES entry1 .. entryN]
+#                         PROPERTIES prop1 .. propN )
+#
+#
 #
 # This macro prints the values of the properties of the given targets,
-# source files, directories, tests or cache entries. Exactly one of the
-# scope keywords must be used.
-# Example:
-#   cmake_print_properties(TARGETS foo bar PROPERTIES LOCATION INTERFACE_INCLUDE_DIRS)
-# This will print the LOCATION and INTERFACE_INCLUDE_DIRS properties for both
-# targets foo and bar.
+# source files, directories, tests or cache entries.  Exactly one of the
+# scope keywords must be used.  Example:
+#
+# ::
+#
+#    cmake_print_properties(TARGETS foo bar PROPERTIES LOCATION INTERFACE_INCLUDE_DIRS)
+#
+# This will print the LOCATION and INTERFACE_INCLUDE_DIRS properties for
+# both targets foo and bar.
 #
 #
-# CMAKE_PRINT_VARIABLES(var1 var2 .. varN)
+#
+# CMAKE_PRINT_VARIABLES(var1 var2 ..  varN)
 #
 # This macro will print the name of each variable followed by its value.
 # Example:
-#   cmake_print_variables(CMAKE_C_COMPILER CMAKE_MAJOR_VERSION THIS_ONE_DOES_NOT_EXIST)
+#
+# ::
+#
+#    cmake_print_variables(CMAKE_C_COMPILER CMAKE_MAJOR_VERSION THIS_ONE_DOES_NOT_EXIST)
+#
 # Gives:
-#   -- CMAKE_C_COMPILER="/usr/bin/gcc" ; CMAKE_MAJOR_VERSION="2" ; THIS_ONE_DOES_NOT_EXIST=""
+#
+# ::
+#
+#    -- CMAKE_C_COMPILER="/usr/bin/gcc" ; CMAKE_MAJOR_VERSION="2" ; THIS_ONE_DOES_NOT_EXIST=""
 
 #=============================================================================
 # Copyright 2013 Alexander Neundorf, <neundorf@kde.org>

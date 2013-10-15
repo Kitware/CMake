@@ -1,4 +1,8 @@
-# - Find an ITK installation or build tree.
+#.rst:
+# FindITK
+# -------
+#
+# Find an ITK installation or build tree.
 
 # When ITK is found, the ITKConfig.cmake file is sourced to setup the
 # location and configuration of ITK.  Please read this file, or

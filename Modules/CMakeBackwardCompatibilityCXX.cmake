@@ -1,10 +1,17 @@
-# - define a bunch of backwards compatibility variables
-#  CMAKE_ANSI_CXXFLAGS - flag for ansi c++
-#  CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
-#  include(TestForANSIStreamHeaders)
-#  include(CheckIncludeFileCXX)
-#  include(TestForSTDNamespace)
-#  include(TestForANSIForScope)
+#.rst:
+# CMakeBackwardCompatibilityCXX
+# -----------------------------
+#
+# define a bunch of backwards compatibility variables
+#
+# ::
+#
+#   CMAKE_ANSI_CXXFLAGS - flag for ansi c++
+#   CMAKE_HAS_ANSI_STRING_STREAM - has <strstream>
+#   include(TestForANSIStreamHeaders)
+#   include(CheckIncludeFileCXX)
+#   include(TestForSTDNamespace)
+#   include(TestForANSIForScope)
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.

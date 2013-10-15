@@ -1,6 +1,11 @@
-# - DocumentationVTK.cmake
-# This file provides support for the VTK documentation framework.
-# It relies on several tools (Doxygen, Perl, etc).
+#.rst:
+# Documentation
+# -------------
+#
+# DocumentationVTK.cmake
+#
+# This file provides support for the VTK documentation framework.  It
+# relies on several tools (Doxygen, Perl, etc).
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

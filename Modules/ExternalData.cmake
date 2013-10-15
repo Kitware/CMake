@@ -1,146 +1,194 @@
-# - Manage data files stored outside source tree
-# Use this module to unambiguously reference data files stored outside the
-# source tree and fetch them at build time from arbitrary local and remote
-# content-addressed locations.  Functions provided by this module recognize
-# arguments with the syntax "DATA{<name>}" as references to external data,
-# replace them with full paths to local copies of those data, and create build
-# rules to fetch and update the local copies.
+#.rst:
+# ExternalData
+# ------------
+#
+# Manage data files stored outside source tree
+#
+# Use this module to unambiguously reference data files stored outside
+# the source tree and fetch them at build time from arbitrary local and
+# remote content-addressed locations.  Functions provided by this module
+# recognize arguments with the syntax "DATA{<name>}" as references to
+# external data, replace them with full paths to local copies of those
+# data, and create build rules to fetch and update the local copies.
 #
 # The DATA{} syntax is literal and the <name> is a full or relative path
-# within the source tree.  The source tree must contain either a real data
-# file at <name> or a "content link" at <name><ext> containing a hash of the
-# real file using a hash algorithm corresponding to <ext>.  For example, the
-# argument "DATA{img.png}" may be satisfied by either a real "img.png" file in
-# the current source directory or a "img.png.md5" file containing its MD5 sum.
+# within the source tree.  The source tree must contain either a real
+# data file at <name> or a "content link" at <name><ext> containing a
+# hash of the real file using a hash algorithm corresponding to <ext>.
+# For example, the argument "DATA{img.png}" may be satisfied by either a
+# real "img.png" file in the current source directory or a "img.png.md5"
+# file containing its MD5 sum.
 #
-# The 'ExternalData_Expand_Arguments' function evaluates DATA{} references
-# in its arguments and constructs a new list of arguments:
-#  ExternalData_Expand_Arguments(
-#    <target>   # Name of data management target
-#    <outVar>   # Output variable
-#    [args...]  # Input arguments, DATA{} allowed
-#    )
-# It replaces each DATA{} reference in an argument with the full path of a
-# real data file on disk that will exist after the <target> builds.
+# The 'ExternalData_Expand_Arguments' function evaluates DATA{}
+# references in its arguments and constructs a new list of arguments:
+#
+# ::
+#
+#   ExternalData_Expand_Arguments(
+#     <target>   # Name of data management target
+#     <outVar>   # Output variable
+#     [args...]  # Input arguments, DATA{} allowed
+#     )
+#
+# It replaces each DATA{} reference in an argument with the full path of
+# a real data file on disk that will exist after the <target> builds.
 #
 # The 'ExternalData_Add_Test' function wraps around the CMake add_test()
 # command but supports DATA{} references in its arguments:
-#  ExternalData_Add_Test(
-#    <target>   # Name of data management target
-#    ...        # Arguments of add_test(), DATA{} allowed
-#    )
+#
+# ::
+#
+#   ExternalData_Add_Test(
+#     <target>   # Name of data management target
+#     ...        # Arguments of add_test(), DATA{} allowed
+#     )
+#
 # It passes its arguments through ExternalData_Expand_Arguments and then
 # invokes add_test() using the results.
 #
-# The 'ExternalData_Add_Target' function creates a custom target to manage
-# local instances of data files stored externally:
-#  ExternalData_Add_Target(
-#    <target>   # Name of data management target
-#    )
-# It creates custom commands in the target as necessary to make data files
-# available for each DATA{} reference previously evaluated by other functions
-# provided by this module.  A list of URL templates must be provided in the
-# variable ExternalData_URL_TEMPLATES using the placeholders "%(algo)" and
-# "%(hash)" in each template.  Data fetch rules try each URL template in order
-# by substituting the hash algorithm name for "%(algo)" and the hash value for
-# "%(hash)".
+# The 'ExternalData_Add_Target' function creates a custom target to
+# manage local instances of data files stored externally:
+#
+# ::
+#
+#   ExternalData_Add_Target(
+#     <target>   # Name of data management target
+#     )
+#
+# It creates custom commands in the target as necessary to make data
+# files available for each DATA{} reference previously evaluated by
+# other functions provided by this module.  A list of URL templates must
+# be provided in the variable ExternalData_URL_TEMPLATES using the
+# placeholders "%(algo)" and "%(hash)" in each template.  Data fetch
+# rules try each URL template in order by substituting the hash
+# algorithm name for "%(algo)" and the hash value for "%(hash)".
 #
 # The following hash algorithms are supported:
-#    %(algo)     <ext>     Description
-#    -------     -----     -----------
-#    MD5         .md5      Message-Digest Algorithm 5, RFC 1321
-#    SHA1        .sha1     US Secure Hash Algorithm 1, RFC 3174
-#    SHA224      .sha224   US Secure Hash Algorithms, RFC 4634
-#    SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
-#    SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
-#    SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
+#
+# ::
+#
+#     %(algo)     <ext>     Description
+#     -------     -----     -----------
+#     MD5         .md5      Message-Digest Algorithm 5, RFC 1321
+#     SHA1        .sha1     US Secure Hash Algorithm 1, RFC 3174
+#     SHA224      .sha224   US Secure Hash Algorithms, RFC 4634
+#     SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
+#     SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
+#     SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
+#
 # Note that the hashes are used only for unique data identification and
 # download verification.  This is not security software.
 #
 # Example usage:
-#   include(ExternalData)
-#   set(ExternalData_URL_TEMPLATES "file:///local/%(algo)/%(hash)"
-#                                  "http://data.org/%(algo)/%(hash)")
-#   ExternalData_Add_Test(MyData
-#     NAME MyTest
-#     COMMAND MyExe DATA{MyInput.png}
-#     )
-#   ExternalData_Add_Target(MyData)
-# When test "MyTest" runs the "DATA{MyInput.png}" argument will be replaced by
-# the full path to a real instance of the data file "MyInput.png" on disk.  If
-# the source tree contains a content link such as "MyInput.png.md5" then the
-# "MyData" target creates a real "MyInput.png" in the build tree.
+#
+# ::
+#
+#    include(ExternalData)
+#    set(ExternalData_URL_TEMPLATES "file:///local/%(algo)/%(hash)"
+#                                   "http://data.org/%(algo)/%(hash)")
+#    ExternalData_Add_Test(MyData
+#      NAME MyTest
+#      COMMAND MyExe DATA{MyInput.png}
+#      )
+#    ExternalData_Add_Target(MyData)
+#
+# When test "MyTest" runs the "DATA{MyInput.png}" argument will be
+# replaced by the full path to a real instance of the data file
+# "MyInput.png" on disk.  If the source tree contains a content link
+# such as "MyInput.png.md5" then the "MyData" target creates a real
+# "MyInput.png" in the build tree.
 #
 # The DATA{} syntax can be told to fetch a file series using the form
-# "DATA{<name>,:}", where the ":" is literal.  If the source tree contains a
-# group of files or content links named like a series then a reference to one
-# member adds rules to fetch all of them.  Although all members of a series
-# are fetched, only the file originally named by the DATA{} argument is
-# substituted for it.  The default configuration recognizes file series names
-# ending with "#.ext", "_#.ext", ".#.ext", or "-#.ext" where "#" is a sequence
-# of decimal digits and ".ext" is any single extension.  Configure it with a
-# regex that parses <number> and <suffix> parts from the end of <name>:
-#  ExternalData_SERIES_PARSE = regex of the form (<number>)(<suffix>)$
+# "DATA{<name>,:}", where the ":" is literal.  If the source tree
+# contains a group of files or content links named like a series then a
+# reference to one member adds rules to fetch all of them.  Although all
+# members of a series are fetched, only the file originally named by the
+# DATA{} argument is substituted for it.  The default configuration
+# recognizes file series names ending with "#.ext", "_#.ext", ".#.ext",
+# or "-#.ext" where "#" is a sequence of decimal digits and ".ext" is
+# any single extension.  Configure it with a regex that parses <number>
+# and <suffix> parts from the end of <name>:
+#
+# ::
+#
+#   ExternalData_SERIES_PARSE = regex of the form (<number>)(<suffix>)$
+#
 # For more complicated cases set:
-#  ExternalData_SERIES_PARSE = regex with at least two () groups
-#  ExternalData_SERIES_PARSE_PREFIX = <prefix> regex group number, if any
-#  ExternalData_SERIES_PARSE_NUMBER = <number> regex group number
-#  ExternalData_SERIES_PARSE_SUFFIX = <suffix> regex group number
+#
+# ::
+#
+#   ExternalData_SERIES_PARSE = regex with at least two () groups
+#   ExternalData_SERIES_PARSE_PREFIX = <prefix> regex group number, if any
+#   ExternalData_SERIES_PARSE_NUMBER = <number> regex group number
+#   ExternalData_SERIES_PARSE_SUFFIX = <suffix> regex group number
+#
 # Configure series number matching with a regex that matches the
 # <number> part of series members named <prefix><number><suffix>:
-#  ExternalData_SERIES_MATCH = regex matching <number> in all series members
+#
+# ::
+#
+#   ExternalData_SERIES_MATCH = regex matching <number> in all series members
+#
 # Note that the <suffix> of a series does not include a hash-algorithm
 # extension.
 #
-# The DATA{} syntax can alternatively match files associated with the named
-# file and contained in the same directory.  Associated files may be specified
-# by options using the syntax DATA{<name>,<opt1>,<opt2>,...}.  Each option may
-# specify one file by name or specify a regular expression to match file names
-# using the syntax REGEX:<regex>.  For example, the arguments
-#   DATA{MyData/MyInput.mhd,MyInput.img}                   # File pair
-#   DATA{MyData/MyFrames00.png,REGEX:MyFrames[0-9]+\\.png} # Series
-# will pass MyInput.mha and MyFrames00.png on the command line but ensure
-# that the associated files are present next to them.
+# The DATA{} syntax can alternatively match files associated with the
+# named file and contained in the same directory.  Associated files may
+# be specified by options using the syntax
+# DATA{<name>,<opt1>,<opt2>,...}.  Each option may specify one file by
+# name or specify a regular expression to match file names using the
+# syntax REGEX:<regex>.  For example, the arguments
 #
-# The DATA{} syntax may reference a directory using a trailing slash and a
-# list of associated files.  The form DATA{<name>/,<opt1>,<opt2>,...} adds
-# rules to fetch any files in the directory that match one of the associated
-# file options.  For example, the argument DATA{MyDataDir/,REGEX:.*} will pass
-# the full path to a MyDataDir directory on the command line and ensure that
-# the directory contains files corresponding to every file or content link in
-# the MyDataDir source directory.
+# ::
 #
-# The variable ExternalData_LINK_CONTENT may be set to the name of a supported
-# hash algorithm to enable automatic conversion of real data files referenced
-# by the DATA{} syntax into content links.  For each such <file> a content
-# link named "<file><ext>" is created.  The original file is renamed to the
-# form ".ExternalData_<algo>_<hash>" to stage it for future transmission to
-# one of the locations in the list of URL templates (by means outside the
-# scope of this module).  The data fetch rule created for the content link
-# will use the staged object if it cannot be found using any URL template.
+#    DATA{MyData/MyInput.mhd,MyInput.img}                   # File pair
+#    DATA{MyData/MyFrames00.png,REGEX:MyFrames[0-9]+\\.png} # Series
+#
+# will pass MyInput.mha and MyFrames00.png on the command line but
+# ensure that the associated files are present next to them.
+#
+# The DATA{} syntax may reference a directory using a trailing slash and
+# a list of associated files.  The form DATA{<name>/,<opt1>,<opt2>,...}
+# adds rules to fetch any files in the directory that match one of the
+# associated file options.  For example, the argument
+# DATA{MyDataDir/,REGEX:.*} will pass the full path to a MyDataDir
+# directory on the command line and ensure that the directory contains
+# files corresponding to every file or content link in the MyDataDir
+# source directory.
+#
+# The variable ExternalData_LINK_CONTENT may be set to the name of a
+# supported hash algorithm to enable automatic conversion of real data
+# files referenced by the DATA{} syntax into content links.  For each
+# such <file> a content link named "<file><ext>" is created.  The
+# original file is renamed to the form ".ExternalData_<algo>_<hash>" to
+# stage it for future transmission to one of the locations in the list
+# of URL templates (by means outside the scope of this module).  The
+# data fetch rule created for the content link will use the staged
+# object if it cannot be found using any URL template.
 #
 # The variable ExternalData_OBJECT_STORES may be set to a list of local
 # directories that store objects using the layout <dir>/%(algo)/%(hash).
-# These directories will be searched first for a needed object.  If the object
-# is not available in any store then it will be fetched remotely using the URL
-# templates and added to the first local store listed.  If no stores are
-# specified the default is a location inside the build tree.
+# These directories will be searched first for a needed object.  If the
+# object is not available in any store then it will be fetched remotely
+# using the URL templates and added to the first local store listed.  If
+# no stores are specified the default is a location inside the build
+# tree.
 #
 # The variable ExternalData_SOURCE_ROOT may be set to the highest source
-# directory containing any path named by a DATA{} reference.  The default is
-# CMAKE_SOURCE_DIR.  ExternalData_SOURCE_ROOT and CMAKE_SOURCE_DIR must refer
-# to directories within a single source distribution (e.g. they come together
-# in one tarball).
+# directory containing any path named by a DATA{} reference.  The
+# default is CMAKE_SOURCE_DIR.  ExternalData_SOURCE_ROOT and
+# CMAKE_SOURCE_DIR must refer to directories within a single source
+# distribution (e.g.  they come together in one tarball).
 #
-# The variable ExternalData_BINARY_ROOT may be set to the directory to hold
-# the real data files named by expanded DATA{} references.  The default is
-# CMAKE_BINARY_DIR.  The directory layout will mirror that of content links
-# under ExternalData_SOURCE_ROOT.
+# The variable ExternalData_BINARY_ROOT may be set to the directory to
+# hold the real data files named by expanded DATA{} references.  The
+# default is CMAKE_BINARY_DIR.  The directory layout will mirror that of
+# content links under ExternalData_SOURCE_ROOT.
 #
-# Variables ExternalData_TIMEOUT_INACTIVITY and ExternalData_TIMEOUT_ABSOLUTE
-# set the download inactivity and absolute timeouts, in seconds.  The defaults
-# are 60 seconds and 300 seconds, respectively.  Set either timeout to 0
-# seconds to disable enforcement.
+# Variables ExternalData_TIMEOUT_INACTIVITY and
+# ExternalData_TIMEOUT_ABSOLUTE set the download inactivity and absolute
+# timeouts, in seconds.  The defaults are 60 seconds and 300 seconds,
+# respectively.  Set either timeout to 0 seconds to disable enforcement.
 
 #=============================================================================
 # Copyright 2010-2013 Kitware, Inc.

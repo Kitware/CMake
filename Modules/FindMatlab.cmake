@@ -1,10 +1,18 @@
-# - this module looks for Matlab
+#.rst:
+# FindMatlab
+# ----------
+#
+# this module looks for Matlab
+#
 # Defines:
-#  MATLAB_INCLUDE_DIR: include path for mex.h, engine.h
-#  MATLAB_LIBRARIES:   required libraries: libmex, etc
-#  MATLAB_MEX_LIBRARY: path to libmex.lib
-#  MATLAB_MX_LIBRARY:  path to libmx.lib
-#  MATLAB_ENG_LIBRARY: path to libeng.lib
+#
+# ::
+#
+#   MATLAB_INCLUDE_DIR: include path for mex.h, engine.h
+#   MATLAB_LIBRARIES:   required libraries: libmex, etc
+#   MATLAB_MEX_LIBRARY: path to libmex.lib
+#   MATLAB_MX_LIBRARY:  path to libmx.lib
+#   MATLAB_ENG_LIBRARY: path to libeng.lib
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.

@@ -1,13 +1,24 @@
-# - Check if the Fortran function exists.
+#.rst:
+# CheckFortranFunctionExists
+# --------------------------
+#
+# macro which checks if the Fortran function exists
+#
 # CHECK_FORTRAN_FUNCTION_EXISTS(FUNCTION VARIABLE)
-# - macro which checks if the Fortran function exists
-#  FUNCTION - the name of the Fortran function
-#  VARIABLE - variable to store the result
 #
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+# ::
 #
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#   FUNCTION - the name of the Fortran function
+#   VARIABLE - variable to store the result
+#
+#
+#
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
+#
+# ::
+#
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

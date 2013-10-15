@@ -1,14 +1,19 @@
-# This module searches giflib and defines
-# GIF_LIBRARIES - libraries to link to in order to use GIF
-# GIF_FOUND, if false, do not try to link
-# GIF_INCLUDE_DIR, where to find the headers
-# GIF_VERSION, reports either version 4 or 3 (for everything before version 4)
+#.rst:
+# FindGIF
+# -------
+#
+#
+#
+# This module searches giflib and defines GIF_LIBRARIES - libraries to
+# link to in order to use GIF GIF_FOUND, if false, do not try to link
+# GIF_INCLUDE_DIR, where to find the headers GIF_VERSION, reports either
+# version 4 or 3 (for everything before version 4)
 #
 # The minimum required version of giflib can be specified using the
-# standard syntax, e.g. find_package(GIF 4)
+# standard syntax, e.g.  find_package(GIF 4)
 #
-# $GIF_DIR is an environment variable that would
-# correspond to the ./configure --prefix=$GIF_DIR
+# $GIF_DIR is an environment variable that would correspond to the
+# ./configure --prefix=$GIF_DIR
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

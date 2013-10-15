@@ -1,12 +1,25 @@
+#.rst:
+# FindHg
+# ------
+#
+#
+#
 # The module defines the following variables:
-#   HG_EXECUTABLE - path to mercurial command line client (hg)
-#   HG_FOUND - true if the command line client was found
-#   HG_VERSION_STRING - the version of mercurial found
+#
+# ::
+#
+#    HG_EXECUTABLE - path to mercurial command line client (hg)
+#    HG_FOUND - true if the command line client was found
+#    HG_VERSION_STRING - the version of mercurial found
+#
 # Example usage:
-#   find_package(Hg)
-#   if(HG_FOUND)
-#     message("hg found: ${HG_EXECUTABLE}")
-#   endif()
+#
+# ::
+#
+#    find_package(Hg)
+#    if(HG_FOUND)
+#      message("hg found: ${HG_EXECUTABLE}")
+#    endif()
 
 #=============================================================================
 # Copyright 2010-2012 Kitware, Inc.

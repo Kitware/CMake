@@ -1,18 +1,32 @@
-# - Find python interpreter
-# This module finds if Python interpreter is installed and determines where the
-# executables are. This code sets the following variables:
+#.rst:
+# FindPythonInterp
+# ----------------
 #
-#  PYTHONINTERP_FOUND         - Was the Python executable found
-#  PYTHON_EXECUTABLE          - path to the Python interpreter
+# Find python interpreter
 #
-#  PYTHON_VERSION_STRING      - Python version found e.g. 2.5.2
-#  PYTHON_VERSION_MAJOR       - Python major version found e.g. 2
-#  PYTHON_VERSION_MINOR       - Python minor version found e.g. 5
-#  PYTHON_VERSION_PATCH       - Python patch version found e.g. 2
+# This module finds if Python interpreter is installed and determines
+# where the executables are.  This code sets the following variables:
 #
-# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list of
-# version numbers that should be taken into account when searching for Python.
-# You need to set this variable before calling find_package(PythonInterp).
+# ::
+#
+#   PYTHONINTERP_FOUND         - Was the Python executable found
+#   PYTHON_EXECUTABLE          - path to the Python interpreter
+#
+#
+#
+# ::
+#
+#   PYTHON_VERSION_STRING      - Python version found e.g. 2.5.2
+#   PYTHON_VERSION_MAJOR       - Python major version found e.g. 2
+#   PYTHON_VERSION_MINOR       - Python minor version found e.g. 5
+#   PYTHON_VERSION_PATCH       - Python patch version found e.g. 2
+#
+#
+#
+# The Python_ADDITIONAL_VERSIONS variable can be used to specify a list
+# of version numbers that should be taken into account when searching
+# for Python.  You need to set this variable before calling
+# find_package(PythonInterp).
 
 #=============================================================================
 # Copyright 2005-2010 Kitware, Inc.

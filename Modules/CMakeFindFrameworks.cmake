@@ -1,4 +1,8 @@
-# - helper module to find OSX frameworks
+#.rst:
+# CMakeFindFrameworks
+# -------------------
+#
+# helper module to find OSX frameworks
 
 #=============================================================================
 # Copyright 2003-2009 Kitware, Inc.

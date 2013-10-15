@@ -1,27 +1,41 @@
-# - Find Perl libraries
-# This module finds if PERL is installed and determines where the include files
-# and libraries are. It also determines what the name of the library is. This
-# code sets the following variables:
+#.rst:
+# FindPerlLibs
+# ------------
 #
-#  PERLLIBS_FOUND    = True if perl.h & libperl were found
-#  PERL_INCLUDE_PATH = path to where perl.h is found
-#  PERL_LIBRARY      = path to libperl
-#  PERL_EXECUTABLE   = full path to the perl binary
+# Find Perl libraries
+#
+# This module finds if PERL is installed and determines where the
+# include files and libraries are.  It also determines what the name of
+# the library is.  This code sets the following variables:
+#
+# ::
+#
+#   PERLLIBS_FOUND    = True if perl.h & libperl were found
+#   PERL_INCLUDE_PATH = path to where perl.h is found
+#   PERL_LIBRARY      = path to libperl
+#   PERL_EXECUTABLE   = full path to the perl binary
+#
+#
 #
 # The minimum required version of Perl can be specified using the
-# standard syntax, e.g. find_package(PerlLibs 6.0)
+# standard syntax, e.g.  find_package(PerlLibs 6.0)
 #
-#  The following variables are also available if needed
-#  (introduced after CMake 2.6.4)
+# ::
 #
-#  PERL_SITESEARCH    = path to the sitesearch install dir
-#  PERL_SITELIB       = path to the sitelib install directory
-#  PERL_VENDORARCH    = path to the vendor arch install directory
-#  PERL_VENDORLIB     = path to the vendor lib install directory
-#  PERL_ARCHLIB       = path to the arch lib install directory
-#  PERL_PRIVLIB       = path to the priv lib install directory
-#  PERL_EXTRA_C_FLAGS = Compilation flags used to build perl
+#   The following variables are also available if needed
+#   (introduced after CMake 2.6.4)
 #
+#
+#
+# ::
+#
+#   PERL_SITESEARCH    = path to the sitesearch install dir
+#   PERL_SITELIB       = path to the sitelib install directory
+#   PERL_VENDORARCH    = path to the vendor arch install directory
+#   PERL_VENDORLIB     = path to the vendor lib install directory
+#   PERL_ARCHLIB       = path to the arch lib install directory
+#   PERL_PRIVLIB       = path to the priv lib install directory
+#   PERL_EXTRA_C_FLAGS = Compilation flags used to build perl
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
