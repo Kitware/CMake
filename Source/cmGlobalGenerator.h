@@ -319,7 +319,7 @@ protected:
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS();
 
   bool CheckTargets();
-  void CreateQtAutoGeneratorsTargets();
+  void CreateAutomocTargets();
 
 
   // Fill the ProjectMap, this must be called after LocalGenerators

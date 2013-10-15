@@ -2605,16 +2605,6 @@ void cmake::DefineProperties(cmake *cm)
     ("AUTOMOC_TARGETS_FOLDER", cmProperty::GLOBAL,
      "Name of FOLDER for *_automoc targets that are added automatically by "
      "CMake for targets for which AUTOMOC is enabled.",
-     "This property is obsolete.  Use AUTOGEN_TARGETS_FOLDER instead."
-     "\n"
-     "If not set, CMake uses the FOLDER property of the parent target as a "
-     "default value for this property. See also the documentation for the "
-     "FOLDER target property and the AUTOMOC target property.");
-
-  cm->DefineProperty
-    ("AUTOGEN_TARGETS_FOLDER", cmProperty::GLOBAL,
-     "Name of FOLDER for *_autogen targets that are added automatically by "
-     "CMake for targets for which AUTOMOC is enabled.",
      "If not set, CMake uses the FOLDER property of the parent target as a "
      "default value for this property. See also the documentation for the "
      "FOLDER target property and the AUTOMOC target property.");
