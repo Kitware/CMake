@@ -4,32 +4,24 @@
 #
 # Cygwin CPack generator (Cygwin).
 #
-# #section Variables specific to CPack Cygwin generator #end #module The
+# Variables specific to CPack Cygwin generator
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# The
 # following variable is specific to installers build on and/or for
-# Cygwin: #end
+# Cygwin:
 #
-# #variable
+# .. variable:: CPACK_CYGWIN_PATCH_NUMBER
 #
-# ::
+#  The Cygwin patch number.  FIXME: This documentation is incomplete.
 #
-#    CPACK_CYGWIN_PATCH_NUMBER - The Cygwin patch number.
-#    FIXME: This documentation is incomplete.
+# .. variable:: CPACK_CYGWIN_PATCH_FILE
 #
-# #end #variable
+#  The Cygwin patch file.  FIXME: This documentation is incomplete.
 #
-# ::
+# .. variable:: CPACK_CYGWIN_BUILD_SCRIPT
 #
-#    CPACK_CYGWIN_PATCH_FILE - The Cygwin patch file.
-#    FIXME: This documentation is incomplete.
-#
-# #end #variable
-#
-# ::
-#
-#    CPACK_CYGWIN_BUILD_SCRIPT - The Cygwin build script.
-#    FIXME: This documentation is incomplete.
-#
-# #end
+#  The Cygwin build script.  FIXME: This documentation is incomplete.
 
 #=============================================================================
 # Copyright 2006-2012 Kitware, Inc.
