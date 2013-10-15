@@ -114,7 +114,11 @@ Id flags: ${testflags}
     set(id_platform ${CMAKE_VS_PLATFORM_NAME})
     set(id_lang "${lang}")
     set(id_cl cl.exe)
-    if(NOT "${vs_version}" VERSION_LESS 10)
+    if(lang STREQUAL Fortran)
+      set(v Intel-11)
+      set(ext vfproj)
+      set(id_cl ifort.exe)
+    elseif(NOT "${vs_version}" VERSION_LESS 10)
       set(v 10)
       set(ext vcxproj)
     elseif(NOT "${vs_version}" VERSION_LESS 7)
@@ -248,7 +252,10 @@ Id flags: ${testflags}
   endif()
 
   # Check the result of compilation.
-  if(CMAKE_${lang}_COMPILER_ID_RESULT)
+  if(CMAKE_${lang}_COMPILER_ID_RESULT
+     # Intel Fortran warns and ignores preprocessor lines without /fpp
+     OR CMAKE_${lang}_COMPILER_ID_OUTPUT MATCHES "Bad # preprocessor line"
+     )
     # Compilation failed.
     set(MSG
       "Compiling the ${lang} compiler identification source file \"${src}\" failed.
