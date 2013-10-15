@@ -554,6 +554,8 @@ public:
   { return this->TargetTypeValue == STATIC_LIBRARY; }
 
 private:
+  bool HandleLocationPropertyPolicy();
+
   // The set of include directories that are marked as system include
   // directories.
   std::set<cmStdString> SystemIncludeDirectories;
