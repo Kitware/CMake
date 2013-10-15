@@ -11,40 +11,38 @@
 ============================================================================*/
 #include "cmExportBuildFileGenerator.h"
 
-#include "cmExportCommand.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 {
-  this->ExportCommand = 0;
+  this->Makefile = 0;
 }
 
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::vector<cmTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
-  for(std::vector<cmTarget*>::const_iterator
-        tei = this->Exports->begin();
-      tei != this->Exports->end(); ++tei)
+  for(std::vector<std::string>::const_iterator
+        tei = this->Targets.begin();
+      tei != this->Targets.end(); ++tei)
     {
-    expectedTargets += sep + this->Namespace + (*tei)->GetExportName();
+    cmTarget *te = this->Makefile->FindTargetToUse(tei->c_str());
+    expectedTargets += sep + this->Namespace + te->GetExportName();
     sep = " ";
-    cmTarget* te = *tei;
     if(this->ExportedTargets.insert(te).second)
       {
-      allTargets.push_back(te);
+      this->Exports.push_back(te);
       }
     else
       {
-      if(this->ExportCommand && this->ExportCommand->ErrorMessage.empty())
-        {
-        cmOStringStream e;
-        e << "given target \"" << te->GetName() << "\" more than once.";
-        this->ExportCommand->ErrorMessage = e.str();
-        }
+      cmOStringStream e;
+      e << "given target \"" << te->GetName() << "\" more than once.";
+      this->Makefile->GetCMakeInstance()
+          ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(), this->Backtrace);
       return false;
       }
     if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -60,8 +58,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Create all the imported targets.
   for(std::vector<cmTarget*>::const_iterator
-        tei = allTargets.begin();
-      tei != allTargets.end(); ++tei)
+        tei = this->Exports.begin();
+      tei != this->Exports.end(); ++tei)
     {
     cmTarget* te = *tei;
     this->GenerateImportTargetCode(os, te);
@@ -116,8 +114,8 @@ cmExportBuildFileGenerator
                             std::vector<std::string> &missingTargets)
 {
   for(std::vector<cmTarget*>::const_iterator
-        tei = this->Exports->begin();
-      tei != this->Exports->end(); ++tei)
+        tei = this->Exports.begin();
+      tei != this->Exports.end(); ++tei)
     {
     // Collect import properties for this target.
     cmTarget* target = *tei;
@@ -198,40 +196,95 @@ cmExportBuildFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator::HandleMissingTarget(
-  std::string& link_libs, std::vector<std::string>&,
-  cmMakefile*, cmTarget* depender, cmTarget* dependee)
+  std::string& link_libs, std::vector<std::string>& missingTargets,
+  cmMakefile* mf, cmTarget* depender, cmTarget* dependee)
 {
   // The target is not in the export.
   if(!this->AppendMode)
     {
-    // We are not appending, so all exported targets should be
-    // known here.  This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee);
+    const std::string name = dependee->GetName();
+    std::vector<std::string> namespaces = this->FindNamespaces(mf, name);
+
+    int targetOccurrences = (int)namespaces.size();
+    if (targetOccurrences == 1)
+      {
+      std::string missingTarget = namespaces[0];
+
+      missingTarget += dependee->GetExportName();
+      link_libs += missingTarget;
+      missingTargets.push_back(missingTarget);
+      return;
+      }
+    else
+      {
+      // We are not appending, so all exported targets should be
+      // known here.  This is probably user-error.
+      this->ComplainAboutMissingTarget(depender, dependee, targetOccurrences);
+      }
     }
   // Assume the target will be exported by another command.
   // Append it with the export namespace.
   link_libs += this->Namespace;
   link_libs += dependee->GetExportName();
+//   if generate time {}
+}
+
+
+//----------------------------------------------------------------------------
+std::vector<std::string>
+cmExportBuildFileGenerator
+::FindNamespaces(cmMakefile* mf, const std::string& name)
+{
+  std::vector<std::string> namespaces;
+  cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
+
+  std::map<std::string, cmExportBuildFileGenerator*>& exportSets
+                                                  = gg->GetBuildExportSets();
+
+  for(std::map<std::string, cmExportBuildFileGenerator*>::const_iterator
+      expIt = exportSets.begin(); expIt != exportSets.end(); ++expIt)
+    {
+    const cmExportBuildFileGenerator* exportSet = expIt->second;
+    std::vector<std::string> const& targets = exportSet->GetTargets();
+
+    if (std::find(targets.begin(), targets.end(), name) != targets.end())
+      {
+      namespaces.push_back(exportSet->GetNamespace());
+      }
+    }
+
+  return namespaces;
 }
 
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
 ::ComplainAboutMissingTarget(cmTarget* depender,
-                             cmTarget* dependee)
+                             cmTarget* dependee,
+                             int occurrences)
 {
-  if(!this->ExportCommand || !this->ExportCommand->ErrorMessage.empty())
+  if(cmSystemTools::GetErrorOccuredFlag())
     {
     return;
     }
 
   cmOStringStream e;
-  e << "called with target \"" << depender->GetName()
-    << "\" which requires target \"" << dependee->GetName()
-    << "\" that is not in the export list.\n"
-    << "If the required target is not easy to reference in this call, "
+  e << "export called with target \"" << depender->GetName()
+    << "\" which requires target \"" << dependee->GetName() << "\" ";
+  if (occurrences == 0)
+    {
+    e << "that is not in the export set.\n";
+    }
+  else
+    {
+    e << "that is not in this export set, but " << occurrences
+    << " times in others.\n";
+    }
+  e << "If the required target is not easy to reference in this call, "
     << "consider using the APPEND option with multiple separate calls.";
-  this->ExportCommand->ErrorMessage = e.str();
+
+  this->Makefile->GetCMakeInstance()
+      ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(), this->Backtrace);
 }
 
 std::string
