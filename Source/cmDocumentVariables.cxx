@@ -1977,6 +1977,8 @@ void cmDocumentVariables::DefineVariables(cmake* cm)
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_FLAGS_RELWITHDEBINFO_INIT",
                      cmProperty::VARIABLE,0,0);
+  cm->DefineProperty("CMAKE_<LANG>_FRAMEWORK_SEARCH_FLAG",
+                     cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_INFORMATION_LOADED",
                      cmProperty::VARIABLE,0,0);
   cm->DefineProperty("CMAKE_<LANG>_LINK_FLAGS",
