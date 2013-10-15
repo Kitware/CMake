@@ -4,8 +4,10 @@
 #
 # The builtin (binary) CPack Deb generator (Unix only)
 #
-# #section Variables specific to CPack Debian (DEB) generator #end
-# #module CPackDeb may be used to create Deb package using CPack.
+# Variables specific to CPack Debian (DEB) generator
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# CPackDeb may be used to create Deb package using CPack.
 # CPackDeb is a CPack generator thus it uses the CPACK_XXX variables
 # used by CPack : http://www.cmake.org/Wiki/CMake:CPackConfiguration.
 # CPackDeb generator should work on any linux host but it will produce
@@ -14,203 +16,179 @@
 #
 # CPackDeb has specific features which are controlled by the specifics
 # CPACK_DEBIAN_XXX variables.You'll find a detailed usage on the wiki:
-#
-# ::
-#
-#   http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
+# http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
 #
 # However as a handy reminder here comes the list of specific variables:
-# #end
 #
-# #variable CPACK_DEBIAN_PACKAGE_NAME
+# .. variable:: CPACK_DEBIAN_PACKAGE_NAME
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : CPACK_PACKAGE_NAME (lower case)
 #
-#      Mandatory : YES
-#      Default   : CPACK_PACKAGE_NAME (lower case)
-#      The debian package summary
+#  The debian package summary
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_VERSION
+# .. variable:: CPACK_DEBIAN_PACKAGE_VERSION
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : CPACK_PACKAGE_VERSION
 #
-#      Mandatory : YES
-#      Default   : CPACK_PACKAGE_VERSION
-#      The debian package version
+#  The debian package version
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+# .. variable:: CPACK_DEBIAN_PACKAGE_ARCHITECTURE
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : Output of dpkg --print-architecture (or i386 if dpkg is not found)
 #
-#      Mandatory : YES
-#      Default   : Output of dpkg --print-architecture (or i386 if dpkg is not found)
-#      The debian package architecture
+#  The debian package architecture
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_DEPENDS
+# .. variable:: CPACK_DEBIAN_PACKAGE_DEPENDS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      May be used to set deb dependencies.
+#  May be used to set deb dependencies.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_MAINTAINER
+# .. variable:: CPACK_DEBIAN_PACKAGE_MAINTAINER
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : CPACK_PACKAGE_CONTACT
 #
-#      Mandatory : YES
-#      Default   : CPACK_PACKAGE_CONTACT
-#      The debian package maintainer
+#  The debian package maintainer
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_DESCRIPTION
+# .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
 #
-#      Mandatory : YES
-#      Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
-#      The debian package description
+#  The debian package description
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_SECTION
+# .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : 'devel'
 #
-#      Mandatory : YES
-#      Default   : 'devel'
-#      The debian package section
+#  The debian package section
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_PRIORITY
+# .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
 #
-# ::
+#  * Mandatory : YES
+#  * Default   : 'optional'
 #
-#      Mandatory : YES
-#      Default   : 'optional'
-#      The debian package priority
+#  The debian package priority
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_HOMEPAGE
+# .. variable:: CPACK_DEBIAN_PACKAGE_HOMEPAGE
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      The URL of the web site for this package, preferably (when applicable) the
-#      site from which the original source can be obtained and any additional
-#      upstream documentation or information may be found.
-#      The content of this field is a simple URL without any surrounding
-#      characters such as <>.
+#  The URL of the web site for this package, preferably (when applicable) the
+#  site from which the original source can be obtained and any additional
+#  upstream documentation or information may be found.
+#  The content of this field is a simple URL without any surrounding
+#  characters such as <>.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_SHLIBDEPS
+# .. variable:: CPACK_DEBIAN_PACKAGE_SHLIBDEPS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : OFF
 #
-#      Mandatory : NO
-#      Default   : OFF
-#      May be set to ON in order to use dpkg-shlibdeps to generate
-#      better package dependency list.
-#      You may need set CMAKE_INSTALL_RPATH toi appropriate value
-#      if you use this feature, because if you don't dpkg-shlibdeps
-#      may fail to find your own shared libs.
-#      See http://www.cmake.org/Wiki/CMake_RPATH_handling.
+#  May be set to ON in order to use dpkg-shlibdeps to generate
+#  better package dependency list.
+#  You may need set CMAKE_INSTALL_RPATH toi appropriate value
+#  if you use this feature, because if you don't dpkg-shlibdeps
+#  may fail to find your own shared libs.
+#  See http://www.cmake.org/Wiki/CMake_RPATH_handling.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_DEBUG
+# .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      May be set when invoking cpack in order to trace debug information
-#      during CPackDeb run.
+#  May be set when invoking cpack in order to trace debug information
+#  during CPackDeb run.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_PREDEPENDS
+# .. variable:: CPACK_DEBIAN_PACKAGE_PREDEPENDS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      This field is like Depends, except that it also forces dpkg to complete installation of
-#      the packages named before even starting the installation of the package which declares
-#      the pre-dependency.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  This field is like Depends, except that it also forces dpkg to complete installation of
+#  the packages named before even starting the installation of the package which declares
+#  the pre-dependency.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_ENHANCES
+# .. variable:: CPACK_DEBIAN_PACKAGE_ENHANCES
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      This field is similar to Suggests but works in the opposite direction.
-#      It is used to declare that a package can enhance the functionality of another package.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  This field is similar to Suggests but works in the opposite direction.
+#  It is used to declare that a package can enhance the functionality of another package.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_BREAKS
+# .. variable:: CPACK_DEBIAN_PACKAGE_BREAKS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      When one binary package declares that it breaks another, dpkg will refuse to allow the
-#      package which declares Breaks be installed unless the broken package is deconfigured first,
-#      and it will refuse to allow the broken package to be reconfigured.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  When one binary package declares that it breaks another, dpkg will refuse to allow the
+#  package which declares Breaks be installed unless the broken package is deconfigured first,
+#  and it will refuse to allow the broken package to be reconfigured.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_CONFLICTS
+# .. variable:: CPACK_DEBIAN_PACKAGE_CONFLICTS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      When one binary package declares a conflict with another using a Conflicts field,
-#      dpkg will refuse to allow them to be installed on the system at the same time.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  When one binary package declares a conflict with another using a Conflicts field,
+#  dpkg will refuse to allow them to be installed on the system at the same time.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_PROVIDES
+# .. variable:: CPACK_DEBIAN_PACKAGE_PROVIDES
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      A virtual package is one which appears in the Provides control field of another package.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  A virtual package is one which appears in the Provides control field of another package.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_REPLACES
+# .. variable:: CPACK_DEBIAN_PACKAGE_REPLACES
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      Packages can declare in their control file that they should overwrite
-#      files in certain other packages, or completely replace other packages.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  Packages can declare in their control file that they should overwrite
+#  files in certain other packages, or completely replace other packages.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_RECOMMENDS
+# .. variable:: CPACK_DEBIAN_PACKAGE_RECOMMENDS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      Allows packages to declare a strong, but not absolute, dependency on other packages.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  Allows packages to declare a strong, but not absolute, dependency on other packages.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_SUGGESTS
+# .. variable:: CPACK_DEBIAN_PACKAGE_SUGGESTS
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
-#      Allows packages to declare a suggested package install grouping.
+#  see http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
+#  Allows packages to declare a suggested package install grouping.
 #
-# #end #variable CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+# .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
 #
-# ::
+#  * Mandatory : NO
+#  * Default   : -
 #
-#      Mandatory : NO
-#      Default   : -
-#      This variable allow advanced user to add custom script to the control.tar.gz
-#      Typical usage is for conffiles, postinst, postrm, prerm.
-#      Usage: set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-#             "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
+#  This variable allow advanced user to add custom script to the
+#  control.tar.gz Typical usage is for conffiles, postinst, postrm, prerm.
+#  Usage::
 #
-# #end
+#   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+#       "${CMAKE_CURRENT_SOURCE_DIR/prerm;${CMAKE_CURRENT_SOURCE_DIR}/postrm")
 
 
 #=============================================================================

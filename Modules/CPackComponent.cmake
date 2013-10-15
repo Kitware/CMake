@@ -4,7 +4,8 @@
 #
 # Build binary and source package installers
 #
-# #section Variables concerning CPack Components #end #module
+# Variables concerning CPack Components
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # The CPackComponent module is the module which handles the component
 # part of CPack.  See CPack module for general information about CPack.
@@ -23,84 +24,64 @@
 # of components to install during the install process.  Installation
 # components are identified by the COMPONENT argument of CMake's INSTALL
 # commands, and should be further described by the following CPack
-# commands: #end
+# commands:
 #
-# #variable
+# .. variable:: CPACK_COMPONENTS_ALL
 #
-# ::
+#  The list of component to install.
 #
-#   CPACK_COMPONENTS_ALL - The list of component to install.
+#  The default value of this variable is computed by CPack and contains all
+#  components defined by the project.  The user may set it to only include the
+#  specified components.
 #
+# .. variable:: CPACK_<GENNAME>_COMPONENT_INSTALL
 #
+#  Enable/Disable component install for CPack generator <GENNAME>.
 #
-# The default value of this variable is computed by CPack and contains
-# all components defined by the project.  The user may set it to only
-# include the specified components.  #end
+#  Each CPack Generator (RPM, DEB, ARCHIVE, NSIS, DMG, etc...) has a legacy
+#  default behavior.  e.g.  RPM builds monolithic whereas NSIS builds
+#  component.  One can change the default behavior by setting this variable to
+#  0/1 or OFF/ON.
 #
-# #variable
+# .. variable:: CPACK_COMPONENTS_GROUPING
 #
-# ::
+#  Specify how components are grouped for multi-package component-aware CPack
+#  generators.
 #
-#   CPACK_<GENNAME>_COMPONENT_INSTALL - Enable/Disable component install for
-#   CPack generator <GENNAME>.
+#  Some generators like RPM or ARCHIVE family (TGZ, ZIP, ...) generates
+#  several packages files when asked for component packaging.  They group
+#  the component differently depending on the value of this variable:
 #
+#  * ONE_PER_GROUP (default): creates one package file per component group
+#  * ALL_COMPONENTS_IN_ONE : creates a single package with all (requested) component
+#  * IGNORE : creates one package per component, i.e. IGNORE component group
 #
+#  One can specify different grouping for different CPack generator by
+#  using a CPACK_PROJECT_CONFIG_FILE.
 #
-# Each CPack Generator (RPM, DEB, ARCHIVE, NSIS, DMG, etc...) has a
-# legacy default behavior.  e.g.  RPM builds monolithic whereas NSIS
-# builds component.  One can change the default behavior by setting this
-# variable to 0/1 or OFF/ON.  #end #variable
+# .. variable:: CPACK_COMPONENT_<compName>_DISPLAY_NAME
 #
-# ::
+#  The name to be displayed for a component.
 #
-#   CPACK_COMPONENTS_GROUPING - Specify how components are grouped for multi-package
-#   component-aware CPack generators.
+# .. variable:: CPACK_COMPONENT_<compName>_DESCRIPTION
 #
+#  The description of a component.
 #
+# .. variable:: CPACK_COMPONENT_<compName>_GROUP
 #
-# Some generators like RPM or ARCHIVE family (TGZ, ZIP, ...) generates
-# several packages files when asked for component packaging.  They group
-# the component differently depending on the value of this variable:
+#  The group of a component.
 #
-# ::
+# .. variable:: CPACK_COMPONENT_<compName>_DEPENDS
 #
-#   - ONE_PER_GROUP (default): creates one package file per component group
-#   - ALL_COMPONENTS_IN_ONE : creates a single package with all (requested) component
-#   - IGNORE : creates one package per component, i.e. IGNORE component group
+#  The dependencies (list of components) on which this component depends.
 #
-# One can specify different grouping for different CPack generator by
-# using a CPACK_PROJECT_CONFIG_FILE.  #end #variable
+# .. variable:: CPACK_COMPONENT_<compName>_REQUIRED
 #
-# ::
+#  True is this component is required.
 #
-#   CPACK_COMPONENT_<compName>_DISPLAY_NAME - The name to be displayed for a component.
+# .. command:: cpack_add_component
 #
-# #end #variable
-#
-# ::
-#
-#   CPACK_COMPONENT_<compName>_DESCRIPTION - The description of a component.
-#
-# #end #variable
-#
-# ::
-#
-#   CPACK_COMPONENT_<compName>_GROUP - The group of a component.
-#
-# #end #variable
-#
-# ::
-#
-#   CPACK_COMPONENT_<compName>_DEPENDS - The dependencies (list of components)
-#   on which this component depends.
-#
-# #end #variable
-#
-# ::
-#
-#   CPACK_COMPONENT_<compName>_REQUIRED - True is this component is required.
-#
-# #end #macro cpack_add_component - Describes a CPack installation
+# Describes a CPack installation
 # component named by the COMPONENT argument to a CMake INSTALL command.
 #
 # ::
@@ -170,10 +151,10 @@
 # be used for downloaded components.  If not supplied, CPack will create
 # a file with some name based on CPACK_PACKAGE_FILE_NAME and the name of
 # the component.  See cpack_configure_downloads for more information.
-# #end
 #
-# #macro cpack_add_component_group - Describes a group of related CPack
-# installation components.
+# .. command:: cpack_add_component_group
+#
+# Describes a group of related CPack installation components.
 #
 # ::
 #
@@ -217,9 +198,11 @@
 # single entry.
 #
 # BOLD_TITLE indicates that the group title should appear in bold, to
-# call the user's attention to the group.  #end
+# call the user's attention to the group.
 #
-# #macro cpack_add_install_type - Add a new installation type containing
+# .. command:: cpack_add_install_type
+#
+# Add a new installation type containing
 # a set of predefined component selections to the graphical installer.
 #
 # ::
@@ -239,9 +222,11 @@
 #
 # DISPLAY_NAME is the displayed name of the install type, which will
 # typically show up in a drop-down box within a graphical installer.
-# This value can be any string.  #end
+# This value can be any string.
 #
-# #macro cpack_configure_downloads - Configure CPack to download
+# .. command:: cpack_configure_downloads
+#
+# Configure CPack to download
 # selected components on-the-fly as part of the installation process.
 #
 # ::
@@ -297,7 +282,7 @@
 # that can be called from Windows' Add/Remove Programs dialog (via the
 # "Modify" button) to change the set of installed components.
 # NO_ADD_REMOVE turns off this behavior.  This option is ignored on Mac
-# OS X.  #endmacro
+# OS X.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
