@@ -286,7 +286,6 @@ class cmake
                                   cmDocumentationSection *>&);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
   void GetPolicyDocumentation(std::vector<cmDocumentationEntry>& entries);
-  void GetConceptDocumentation(std::vector<cmDocumentationEntry>&);
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);

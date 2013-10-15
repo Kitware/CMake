@@ -128,14 +128,6 @@ static const char *cmDocumentationGeneratorsHeader[][3] =
 };
 
 //----------------------------------------------------------------------------
-static const char *cmDocumentationConceptsHeader[][3] =
-{
-  {0,
-   "The following concepts are central to using CMake.", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
 static const char *cmDocumentationStandardSeeAlso[][3] =
 {
   {0,
@@ -213,8 +205,6 @@ DOCUMENT_INTRO(Properties, "cmakeprops",
   "Reference of CMake properties.");
 DOCUMENT_INTRO(Variables, "cmakevars",
   "Reference of CMake variables.");
-DOCUMENT_INTRO(Concepts, "cmakeconcepts",
-  "Reference of CMake concepts.");
 DOCUMENT_INTRO(Commands, "cmakecommands",
   "Reference of available CMake commands.");
 DOCUMENT_INTRO(CompatCommands, "cmakecompat",
@@ -348,8 +338,6 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
       return this->PrintDocumentationSingleProperty(os);
     case cmDocumentation::SingleVariable:
       return this->PrintDocumentationSingleVariable(os);
-    case cmDocumentation::SingleConcept:
-      return this->PrintDocumentationSingleConcept(os);
     case cmDocumentation::List:
       this->PrintDocumentationList(os,"Commands");
       this->PrintDocumentationList(os,"Compatibility Commands");
@@ -383,9 +371,6 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
         this->PrintDocumentationList(os,i->c_str());
         }
       return true;
-    case cmDocumentation::ConceptList:
-      this->PrintDocumentationList(os,"Concepts");
-      return true;
     case cmDocumentation::Full:
       return this->PrintDocumentationFull(os);
     case cmDocumentation::Modules:
@@ -402,8 +387,6 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os,
       return this->PrintDocumentationCurrentCommands(os);
     case cmDocumentation::CompatCommands:
       return this->PrintDocumentationCompatCommands(os);
-    case cmDocumentation::Concepts:
-      return this->PrintDocumentationConcepts(os);
 
     case cmDocumentation::Copyright:
       return this->PrintCopyright(os);
@@ -722,10 +705,6 @@ void cmDocumentation::addCMakeStandardDocSections()
     sec = new cmDocumentationSection("Generators","GENERATORS");
     sec->Append(cmDocumentationGeneratorsHeader);
     this->AllSections["Generators"] = sec;
-
-    sec = new cmDocumentationSection("CMake Concepts","CONCEPTS");
-    sec->Append(cmDocumentationConceptsHeader);
-    this->AllSections["Concepts"] = sec;
 
     this->PropertySections.push_back("Properties of Global Scope");
     this->PropertySections.push_back("Properties on Directories");
@@ -1192,13 +1171,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpForm = this->GetFormFromFilename(help.Filename,
                                                 &help.ManSection);
       }
-    else if(strcmp(argv[i], "--help-concepts") == 0)
-      {
-      help.HelpType = cmDocumentation::Concepts;
-      GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
-      }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
       help.HelpType = cmDocumentation::Full;
@@ -1260,14 +1232,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpForm = this->GetFormFromFilename(help.Filename,
                                                 &help.ManSection);
       }
-    else if(strcmp(argv[i], "--help-concept") == 0)
-      {
-      help.HelpType = cmDocumentation::SingleConcept;
-      GET_OPT_ARGUMENT(help.Argument);
-      GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = this->GetFormFromFilename(help.Filename,
-                                                &help.ManSection);
-      }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {
       help.HelpType = cmDocumentation::List;
@@ -1289,12 +1253,6 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
     else if(strcmp(argv[i], "--help-variable-list") == 0)
       {
       help.HelpType = cmDocumentation::VariableList;
-      GET_OPT_ARGUMENT(help.Filename);
-      help.HelpForm = cmDocumentation::TextForm;
-      }
-    else if(strcmp(argv[i], "--help-concept-list") == 0)
-      {
-      help.HelpType = cmDocumentation::ConceptList;
       GET_OPT_ARGUMENT(help.Filename);
       help.HelpForm = cmDocumentation::TextForm;
       }
@@ -1666,20 +1624,6 @@ bool cmDocumentation::PrintDocumentationSinglePolicy(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::PrintDocumentationSingleConcept(std::ostream& os)
-{
-  if (this->PrintDocumentationGeneric(os,"Concepts"))
-    {
-    return true;
-    }
-
-  // Argument was not a concept.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
-     << "\" to --help-concept is not a CMake concept.\n";
-  return false;
-}
-
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationSingleVariable(std::ostream& os)
 {
   bool done = false;
@@ -1840,20 +1784,6 @@ bool cmDocumentation::PrintDocumentationVariables(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::PrintDocumentationConcepts(std::ostream& os)
-{
-  this->ClearSections();
-  this->AddDocumentIntroToPrint(GET_DOCUMENT_INTRO(Concepts));
-  this->AddSectionToPrint("Concepts");
-  this->AddSectionToPrint("Copyright");
-  this->AddSectionToPrint("Standard See Also");
-  this->CurrentFormatter->PrintHeader(GetDocName(), GetNameString(), os);
-  this->Print(os);
-  this->CurrentFormatter->PrintFooter(os);
-  return true;
-}
-
-//----------------------------------------------------------------------------
 bool cmDocumentation::PrintDocumentationCurrentCommands(std::ostream& os)
 {
   this->ClearSections();
@@ -1919,8 +1849,6 @@ void cmDocumentation::CreateFullDocumentation()
   emitted.insert("Generators");
   this->AddSectionToPrint("Commands");
   emitted.insert("Commands");
-  this->AddSectionToPrint("Concepts");
-  emitted.insert("Concepts");
 
 
   this->AddSectionToPrint("Properties Description");
@@ -2030,7 +1958,6 @@ const char* cmDocumentation::GetDefaultDocName(Type ht) const
     CASE_DEFAULT_DOCNAME(Variables)
     CASE_DEFAULT_DOCNAME(Commands)
     CASE_DEFAULT_DOCNAME(CompatCommands)
-    CASE_DEFAULT_DOCNAME(Concepts)
     default: break;
     }
   return 0;

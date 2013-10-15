@@ -214,7 +214,6 @@ private:
   bool PrintDocumentationSingleProperty(std::ostream& os);
   bool PrintDocumentationSinglePolicy(std::ostream& os);
   bool PrintDocumentationSingleVariable(std::ostream& os);
-  bool PrintDocumentationSingleConcept(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
   bool PrintDocumentationFull(std::ostream& os);
   bool PrintDocumentationModules(std::ostream& os);
@@ -222,7 +221,6 @@ private:
   bool PrintDocumentationPolicies(std::ostream& os);
   bool PrintDocumentationProperties(std::ostream& os);
   bool PrintDocumentationVariables(std::ostream& os);
-  bool PrintDocumentationConcepts(std::ostream& os);
   bool PrintDocumentationCurrentCommands(std::ostream& os);
   bool PrintDocumentationCompatCommands(std::ostream& os);
   void PrintDocumentationCommand(std::ostream& os,
