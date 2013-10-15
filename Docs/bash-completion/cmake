@@ -134,11 +134,6 @@ _cmake()
                 2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
             return
             ;;
-         --help-concept)
-            COMPREPLY=( $( compgen -W '$( cmake --help-concept-list \
-                2>/dev/null | grep -v "^cmake version " )' -- "$cur" ) )
-            return
-            ;;
     esac
 
     $split && return

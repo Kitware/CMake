@@ -146,10 +146,6 @@ cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
     {
     return "single_item";
     }
-  else if(name.find("Concepts") != name.npos)
-    {
-    return "concept";
-    }
   else
     {
     std::cerr

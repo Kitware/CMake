@@ -24,7 +24,6 @@ set(MAN_FILES
   ${CMake_BINARY_DIR}/Docs/cmakepolicies.1
   ${CMake_BINARY_DIR}/Docs/cmakevars.1
   ${CMake_BINARY_DIR}/Docs/cmakemodules.1
-  ${CMake_BINARY_DIR}/Docs/cmakeconcepts.1
   )
 set(TEXT_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.txt
@@ -34,7 +33,6 @@ set(TEXT_FILES
   ${CMake_BINARY_DIR}/Docs/cmake-modules.txt
   ${CMake_BINARY_DIR}/Docs/cmake-commands.txt
   ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
-  ${CMake_BINARY_DIR}/Docs/cmake-concepts.txt
   )
 set(HTML_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.html
@@ -44,7 +42,6 @@ set(HTML_FILES
   ${CMake_BINARY_DIR}/Docs/cmake-modules.html
   ${CMake_BINARY_DIR}/Docs/cmake-commands.html
   ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
-  ${CMake_BINARY_DIR}/Docs/cmake-concepts.html
   )
 set(DOCBOOK_FILES
   ${CMake_BINARY_DIR}/Docs/cmake.docbook
@@ -119,9 +116,6 @@ add_custom_command(
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.txt
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmake-compatcommands.html
        --help-compatcommands ${CMake_BINARY_DIR}/Docs/cmakecompat.1
-       --help-concepts ${CMake_BINARY_DIR}/Docs/cmake-concepts.txt
-       --help-concepts ${CMake_BINARY_DIR}/Docs/cmake-concepts.html
-       --help-concepts ${CMake_BINARY_DIR}/Docs/cmakeconcepts.1
   DEPENDS cmake
   MAIN_DEPENDENCY ${CMake_SOURCE_DIR}/Utilities/Doxygen/authors.txt
   )

@@ -255,7 +255,6 @@ CMAKE_CXX_SOURCES="\
   cmTest \
   cmCustomCommand \
   cmCustomCommandGenerator \
-  cmDocumentConcepts \
   cmDocumentVariables \
   cmCacheManager \
   cmListFileCache \
