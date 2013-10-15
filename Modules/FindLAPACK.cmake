@@ -1,27 +1,37 @@
-# - Find LAPACK library
-# This module finds an installed fortran library that implements the LAPACK
-# linear-algebra interface (see http://www.netlib.org/lapack/).
+#.rst:
+# FindLAPACK
+# ----------
 #
-# The approach follows that taken for the autoconf macro file, acx_lapack.m4
-# (distributed at http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
+# Find LAPACK library
+#
+# This module finds an installed fortran library that implements the
+# LAPACK linear-algebra interface (see http://www.netlib.org/lapack/).
+#
+# The approach follows that taken for the autoconf macro file,
+# acx_lapack.m4 (distributed at
+# http://ac-archive.sourceforge.net/ac-archive/acx_lapack.html).
 #
 # This module sets the following variables:
-#  LAPACK_FOUND - set to true if a library implementing the LAPACK interface
-#    is found
-#  LAPACK_LINKER_FLAGS - uncached list of required linker flags (excluding -l
-#    and -L).
-#  LAPACK_LIBRARIES - uncached list of libraries (using full path name) to
-#    link against to use LAPACK
-#  LAPACK95_LIBRARIES - uncached list of libraries (using full path name) to
-#    link against to use LAPACK95
-#  LAPACK95_FOUND - set to true if a library implementing the LAPACK f95
-#    interface is found
-#  BLA_STATIC  if set on this determines what kind of linkage we do (static)
-#  BLA_VENDOR  if set checks only the specified vendor, if not set checks
-#     all the possibilities
-#  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
-### List of vendors (BLA_VENDOR) valid in this module
-##  Intel(mkl), ACML,Apple, NAS, Generic
+#
+# ::
+#
+#   LAPACK_FOUND - set to true if a library implementing the LAPACK interface
+#     is found
+#   LAPACK_LINKER_FLAGS - uncached list of required linker flags (excluding -l
+#     and -L).
+#   LAPACK_LIBRARIES - uncached list of libraries (using full path name) to
+#     link against to use LAPACK
+#   LAPACK95_LIBRARIES - uncached list of libraries (using full path name) to
+#     link against to use LAPACK95
+#   LAPACK95_FOUND - set to true if a library implementing the LAPACK f95
+#     interface is found
+#   BLA_STATIC  if set on this determines what kind of linkage we do (static)
+#   BLA_VENDOR  if set checks only the specified vendor, if not set checks
+#      all the possibilities
+#   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
+#
+# ## List of vendors (BLA_VENDOR) valid in this module # Intel(mkl),
+# ACML,Apple, NAS, Generic
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

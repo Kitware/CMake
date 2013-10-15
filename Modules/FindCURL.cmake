@@ -1,10 +1,17 @@
-# - Find curl
+#.rst:
+# FindCURL
+# --------
+#
+# Find curl
+#
 # Find the native CURL headers and libraries.
 #
-#  CURL_INCLUDE_DIRS   - where to find curl/curl.h, etc.
-#  CURL_LIBRARIES      - List of libraries when using curl.
-#  CURL_FOUND          - True if curl found.
-#  CURL_VERSION_STRING - the version of curl found (since CMake 2.8.8)
+# ::
+#
+#   CURL_INCLUDE_DIRS   - where to find curl/curl.h, etc.
+#   CURL_LIBRARIES      - List of libraries when using curl.
+#   CURL_FOUND          - True if curl found.
+#   CURL_VERSION_STRING - the version of curl found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

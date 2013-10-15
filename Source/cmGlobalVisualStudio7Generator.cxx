@@ -840,7 +840,6 @@ void cmGlobalVisualStudio7Generator
 {
   entry.Name = cmGlobalVisualStudio7Generator::GetActualName();
   entry.Brief = "Generates Visual Studio .NET 2002 project files.";
-  entry.Full = "";
 }
 
 //----------------------------------------------------------------------------

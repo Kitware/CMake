@@ -90,9 +90,6 @@ public:
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
 
-  // Define the properties
-  static void DefineProperties(cmake *cm);
-
   /**
    * Check whether the given source file location could refer to this
    * source.

@@ -11,7 +11,10 @@
 ============================================================================*/
 #include "cmDocumentationFormatter.h"
 
-cmDocumentationFormatter::cmDocumentationFormatter()
+#include "cmDocumentationSection.h"
+
+cmDocumentationFormatter::cmDocumentationFormatter():
+  TextWidth(77), TextIndent("")
 {
 }
 
@@ -66,91 +69,162 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
     }
 }
 
-//----------------------------------------------------------------------------
-std::string
-cmDocumentationFormatter::ComputeSectionLinkPrefix(std::string const& name)
+void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
+                                                     const char* text)
 {
-  // Map from section name to a prefix for links pointing within the
-  // section.  For example, the commands section should have HTML
-  // links to each command with names like #command:ADD_EXECUTABLE.
-  if(name.find("Command") != name.npos)
+  bool newline = true;
+  for(const char* ptr = text; *ptr; ++ptr)
     {
-    return "command";
-    }
-  else if(name.find("Propert") != name.npos)
-    {
-    if(name.find("Global") != name.npos)
+    if(newline && *ptr != '\n')
       {
-      return "prop_global";
+      os << this->TextIndent;
+      newline = false;
       }
-    else if(name.find("Direct") != name.npos)
+    os << *ptr;
+    if(*ptr == '\n')
       {
-      return "prop_dir";
+      newline = true;
       }
-    else if(name.find("Target") != name.npos)
+    }
+  os << "\n";
+}
+
+void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
+                                              const char* text)
+{
+  os << this->TextIndent;
+  this->PrintColumn(os, text);
+  os << "\n";
+}
+
+void cmDocumentationFormatter::SetIndent(const char* indent)
+{
+  this->TextIndent = indent;
+}
+
+void cmDocumentationFormatter::PrintColumn(std::ostream& os,
+                                           const char* text)
+{
+  // Print text arranged in an indented column of fixed witdh.
+  const char* l = text;
+  long column = 0;
+  bool newSentence = false;
+  bool firstLine = true;
+  int width = this->TextWidth - static_cast<int>(strlen(this->TextIndent));
+
+  // Loop until the end of the text.
+  while(*l)
+    {
+    // Parse the next word.
+    const char* r = l;
+    while(*r && (*r != '\n') && (*r != ' ')) { ++r; }
+
+    // Does it fit on this line?
+    if(r-l < (width-column-(newSentence?1:0)))
       {
-      return "prop_tgt";
+      // Word fits on this line.
+      if(r > l)
+        {
+        if(column)
+          {
+          // Not first word on line.  Separate from the previous word
+          // by a space, or two if this is a new sentence.
+          if(newSentence)
+            {
+            os << "  ";
+            column += 2;
+            }
+          else
+            {
+            os << " ";
+            column += 1;
+            }
+          }
+        else
+          {
+          // First word on line.  Print indentation unless this is the
+          // first line.
+          os << (firstLine?"":this->TextIndent);
+          }
+
+        // Print the word.
+        os.write(l, static_cast<long>(r-l));
+        newSentence = (*(r-1) == '.');
+        }
+
+      if(*r == '\n')
+        {
+        // Text provided a newline.  Start a new line.
+        os << "\n";
+        ++r;
+        column = 0;
+        firstLine = false;
+        }
+      else
+        {
+        // No provided newline.  Continue this line.
+        column += static_cast<long>(r-l);
+        }
       }
-    else if(name.find("Test") != name.npos)
+    else
       {
-      return "prop_test";
+      // Word does not fit on this line.  Start a new line.
+      os << "\n";
+      firstLine = false;
+      if(r > l)
+        {
+        os << this->TextIndent;
+        os.write(l, static_cast<long>(r-l));
+        column = static_cast<long>(r-l);
+        newSentence = (*(r-1) == '.');
+        }
+      else
+        {
+        column = 0;
+        }
       }
-    else if(name.find("Source") != name.npos)
+
+    // Move to beginning of next word.  Skip over whitespace.
+    l = r;
+    while(*l && (*l == ' ')) { ++l; }
+    }
+}
+
+void cmDocumentationFormatter
+::PrintSection(std::ostream& os,
+               cmDocumentationSection const& section)
+{
+  os << section.GetName() << "\n";
+
+  const std::vector<cmDocumentationEntry> &entries =
+    section.GetEntries();
+  for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
+      op != entries.end(); ++op)
+    {
+    if(op->Name.size())
       {
-      return "prop_sf";
+      os << "  " << op->Name;
+      this->TextIndent = "                                ";
+      int align = static_cast<int>(strlen(this->TextIndent))-4;
+      for(int i = static_cast<int>(op->Name.size()); i < align; ++i)
+        {
+        os << " ";
+        }
+      if (op->Name.size() > strlen(this->TextIndent)-4 )
+        {
+        os << "\n";
+        os.write(this->TextIndent, strlen(this->TextIndent)-2);
+        }
+      os << "= ";
+      this->PrintColumn(os, op->Brief.c_str());
+      os << "\n";
       }
-    return "property";
+    else
+      {
+      os << "\n";
+      this->TextIndent = "";
+      this->PrintFormatted(os, op->Brief.c_str());
+      }
     }
-  else if(name.find("Variable") != name.npos)
-    {
-    return "variable";
-    }
-  else if(name.find("Polic") != name.npos)
-    {
-    return "policy";
-    }
-  else if(name.find("Module") != name.npos)
-    {
-    return "module";
-    }
-  else if(name.find("Name") != name.npos ||
-          name.find("Introduction") != name.npos)
-    {
-    return "name";
-    }
-  else if(name.find("Usage") != name.npos)
-    {
-    return "usage";
-    }
-  else if(name.find("Description") != name.npos)
-    {
-    return "desc";
-    }
-  else if(name.find("Generators") != name.npos)
-    {
-    return "gen";
-    }
-  else if(name.find("Options") != name.npos)
-    {
-    return "opt";
-    }
-  else if(name.find("Copyright") != name.npos)
-    {
-    return "copy";
-    }
-  else if(name.find("See Also") != name.npos)
-    {
-    return "see";
-    }
-  else if(name.find("SingleItem") != name.npos)
-    {
-    return "single_item";
-    }
-  else
-    {
-    std::cerr
-      << "WARNING: ComputeSectionLinkPrefix failed for \"" << name << "\""
-      << std::endl;
-    return "other";
-    }
+  os << "\n";
 }

@@ -1,22 +1,41 @@
-# - Check if the given struct or class has the specified member variable
+#.rst:
+# CheckStructHasMember
+# --------------------
+#
+# Check if the given struct or class has the specified member variable
+#
 # CHECK_STRUCT_HAS_MEMBER (<struct> <member> <header> <variable>
-#                          [LANGUAGE <language>])
 #
-#  <struct> - the name of the struct or class you are interested in
-#  <member> - the member which existence you want to check
-#  <header> - the header(s) where the prototype should be declared
-#  <variable> - variable to store the result
-#  <language> - the compiler to use (C or CXX)
+# ::
 #
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+#                           [LANGUAGE <language>])
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_INCLUDES = list of include directories
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 #
-# Example: CHECK_STRUCT_HAS_MEMBER("struct timeval" tv_sec sys/select.h HAVE_TIMEVAL_TV_SEC LANGUAGE C)
+#
+# ::
+#
+#   <struct> - the name of the struct or class you are interested in
+#   <member> - the member which existence you want to check
+#   <header> - the header(s) where the prototype should be declared
+#   <variable> - variable to store the result
+#   <language> - the compiler to use (C or CXX)
+#
+#
+#
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
+#
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#
+#
+#
+# Example: CHECK_STRUCT_HAS_MEMBER("struct timeval" tv_sec sys/select.h
+# HAVE_TIMEVAL_TV_SEC LANGUAGE C)
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

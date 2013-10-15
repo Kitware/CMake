@@ -71,23 +71,6 @@ public:
    */
   virtual const char* GetName() const { return info.Name; }
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-      if (this->info.GetTerseDocumentation)
-        {
-        cmLoadedCommand::InstallSignalHandlers(info.Name);
-        const char* ret = info.GetTerseDocumentation();
-        cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
-        return ret;
-        }
-      else
-        {
-        return "LoadedCommand without any additional documentation";
-        }
-    }
   static const char* LastName;
   static void TrapsForSignals(int sig)
     {
@@ -117,24 +100,6 @@ public:
         signal(SIGBUS,  0);
 #endif
         signal(SIGILL,  0);
-        }
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-      if (this->info.GetFullDocumentation)
-        {
-        cmLoadedCommand::InstallSignalHandlers(info.Name);
-        const char* ret = info.GetFullDocumentation();
-        cmLoadedCommand::InstallSignalHandlers(info.Name, 1);
-        return ret;
-        }
-      else
-        {
-        return "LoadedCommand without any additional documentation";
         }
     }
 

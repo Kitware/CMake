@@ -1,19 +1,33 @@
-# - Check if the include file exists.
-#  CHECK_INCLUDE_FILE_CXX(INCLUDE VARIABLE)
+#.rst:
+# CheckIncludeFileCXX
+# -------------------
 #
-#  INCLUDE  - name of include file
-#  VARIABLE - variable to return result
+# Check if the include file exists.
 #
-# An optional third argument is the CFlags to add to the compile line
-# or you can use CMAKE_REQUIRED_FLAGS.
+# ::
 #
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+#   CHECK_INCLUDE_FILE_CXX(INCLUDE VARIABLE)
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_INCLUDES = list of include directories
 #
+#
+# ::
+#
+#   INCLUDE  - name of include file
+#   VARIABLE - variable to return result
+#
+#
+#
+# An optional third argument is the CFlags to add to the compile line or
+# you can use CMAKE_REQUIRED_FLAGS.
+#
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
+#
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_INCLUDES = list of include directories
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.

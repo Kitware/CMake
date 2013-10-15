@@ -1,6 +1,12 @@
+#.rst:
+# UseJavaSymlinks
+# ---------------
+#
+#
+#
+#
 #
 # Helper script for UseJava.cmake
-#
 
 #=============================================================================
 # Copyright 2010-2011 Andreas schneider <asn@redhat.com>

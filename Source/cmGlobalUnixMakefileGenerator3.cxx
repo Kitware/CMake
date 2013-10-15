@@ -65,10 +65,6 @@ void cmGlobalUnixMakefileGenerator3
 {
   entry.Name = cmGlobalUnixMakefileGenerator3::GetActualName();
   entry.Brief = "Generates standard UNIX makefiles.";
-  entry.Full =
-    "A hierarchy of UNIX makefiles is generated into the build tree.  Any "
-    "standard UNIX-style make program can build the project through the "
-    "default make target.  A \"make install\" target is also provided.";
 }
 
 //----------------------------------------------------------------------------

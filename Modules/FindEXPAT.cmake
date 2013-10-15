@@ -1,9 +1,16 @@
-# - Find expat
+#.rst:
+# FindEXPAT
+# ---------
+#
+# Find expat
+#
 # Find the native EXPAT headers and libraries.
 #
-#  EXPAT_INCLUDE_DIRS - where to find expat.h, etc.
-#  EXPAT_LIBRARIES    - List of libraries when using expat.
-#  EXPAT_FOUND        - True if expat found.
+# ::
+#
+#   EXPAT_INCLUDE_DIRS - where to find expat.h, etc.
+#   EXPAT_LIBRARIES    - List of libraries when using expat.
+#   EXPAT_FOUND        - True if expat found.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

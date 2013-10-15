@@ -46,27 +46,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return "qt_wrap_cpp";}
-
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Create Qt Wrappers.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  qt_wrap_cpp(resultingLibraryName DestName\n"
-      "              SourceLists ...)\n"
-      "Produce moc files for all the .h files listed in the SourceLists.  "
-      "The moc files will be added to the library using the DestName "
-      "source list.";
-    }
 };
 
 

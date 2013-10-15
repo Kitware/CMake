@@ -1,12 +1,19 @@
-# - Try to find the Cups printing system
+#.rst:
+# FindCups
+# --------
+#
+# Try to find the Cups printing system
+#
 # Once done this will define
 #
-#  CUPS_FOUND - system has Cups
-#  CUPS_INCLUDE_DIR - the Cups include directory
-#  CUPS_LIBRARIES - Libraries needed to use Cups
-#  CUPS_VERSION_STRING - version of Cups found (since CMake 2.8.8)
-#  Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
-#  features this function (i.e. at least 1.1.19)
+# ::
+#
+#   CUPS_FOUND - system has Cups
+#   CUPS_INCLUDE_DIR - the Cups include directory
+#   CUPS_LIBRARIES - Libraries needed to use Cups
+#   CUPS_VERSION_STRING - version of Cups found (since CMake 2.8.8)
+#   Set CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE to TRUE if you need a version which
+#   features this function (i.e. at least 1.1.19)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

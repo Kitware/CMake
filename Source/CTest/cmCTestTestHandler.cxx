@@ -61,10 +61,6 @@ public:
    */
   virtual const char* GetName() const { return "subdirs";}
 
-  // Unused methods
-  virtual const char* GetTerseDocumentation() const { return ""; }
-  virtual const char* GetFullDocumentation() const { return ""; }
-
   cmTypeMacro(cmCTestSubdirCommand, cmCommand);
 
   cmCTestTestHandler* TestHandler;
@@ -162,10 +158,6 @@ public:
    */
   virtual const char* GetName() const { return "add_subdirectory";}
 
-  // Unused methods
-  virtual const char* GetTerseDocumentation() const { return ""; }
-  virtual const char* GetFullDocumentation() const { return ""; }
-
   cmTypeMacro(cmCTestAddSubdirectoryCommand, cmCommand);
 
   cmCTestTestHandler* TestHandler;
@@ -252,10 +244,6 @@ public:
    */
   virtual const char* GetName() const { return "add_test";}
 
-  // Unused methods
-  virtual const char* GetTerseDocumentation() const { return ""; }
-  virtual const char* GetFullDocumentation() const { return ""; }
-
   cmTypeMacro(cmCTestAddTestCommand, cmCommand);
 
   cmCTestTestHandler* TestHandler;
@@ -299,10 +287,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   virtual const char* GetName() const { return "set_tests_properties";}
-
-  // Unused methods
-  virtual const char* GetTerseDocumentation() const { return ""; }
-  virtual const char* GetFullDocumentation() const { return ""; }
 
   cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
 

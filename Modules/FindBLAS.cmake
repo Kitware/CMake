@@ -1,31 +1,41 @@
-# - Find BLAS library
-# This module finds an installed fortran library that implements the BLAS
-# linear-algebra interface (see http://www.netlib.org/blas/).
-# The list of libraries searched for is taken
-# from the autoconf macro file, acx_blas.m4 (distributed at
+#.rst:
+# FindBLAS
+# --------
+#
+# Find BLAS library
+#
+# This module finds an installed fortran library that implements the
+# BLAS linear-algebra interface (see http://www.netlib.org/blas/).  The
+# list of libraries searched for is taken from the autoconf macro file,
+# acx_blas.m4 (distributed at
 # http://ac-archive.sourceforge.net/ac-archive/acx_blas.html).
 #
 # This module sets the following variables:
-#  BLAS_FOUND - set to true if a library implementing the BLAS interface
-#    is found
-#  BLAS_LINKER_FLAGS - uncached list of required linker flags (excluding -l
-#    and -L).
-#  BLAS_LIBRARIES - uncached list of libraries (using full path name) to
-#    link against to use BLAS
-#  BLAS95_LIBRARIES - uncached list of libraries (using full path name)
-#    to link against to use BLAS95 interface
-#  BLAS95_FOUND - set to true if a library implementing the BLAS f95 interface
-#    is found
-#  BLA_STATIC  if set on this determines what kind of linkage we do (static)
-#  BLA_VENDOR  if set checks only the specified vendor, if not set checks
-#     all the possibilities
-#  BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
-##########
-### List of vendors (BLA_VENDOR) valid in this module
-##  Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32 (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread model, lp64 model),
-##  Intel10_64lp_seq (intel mkl v10 64 bit,sequential code, lp64 model),
-##  Intel( older versions of mkl 32 and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic
-# C/CXX should be enabled to use Intel mkl
+#
+# ::
+#
+#   BLAS_FOUND - set to true if a library implementing the BLAS interface
+#     is found
+#   BLAS_LINKER_FLAGS - uncached list of required linker flags (excluding -l
+#     and -L).
+#   BLAS_LIBRARIES - uncached list of libraries (using full path name) to
+#     link against to use BLAS
+#   BLAS95_LIBRARIES - uncached list of libraries (using full path name)
+#     to link against to use BLAS95 interface
+#   BLAS95_FOUND - set to true if a library implementing the BLAS f95 interface
+#     is found
+#   BLA_STATIC  if set on this determines what kind of linkage we do (static)
+#   BLA_VENDOR  if set checks only the specified vendor, if not set checks
+#      all the possibilities
+#   BLA_F95     if set on tries to find the f95 interfaces for BLAS/LAPACK
+#
+# ######### ## List of vendors (BLA_VENDOR) valid in this module #
+# Goto,ATLAS PhiPACK,CXML,DXML,SunPerf,SCSL,SGIMATH,IBMESSL,Intel10_32
+# (intel mkl v10 32 bit),Intel10_64lp (intel mkl v10 64 bit,lp thread
+# model, lp64 model), # Intel10_64lp_seq (intel mkl v10 64
+# bit,sequential code, lp64 model), # Intel( older versions of mkl 32
+# and 64 bit), ACML,ACML_MP,ACML_GPU,Apple, NAS, Generic C/CXX should be
+# enabled to use Intel mkl
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

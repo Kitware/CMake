@@ -47,32 +47,6 @@ public:
    */
   virtual const char* GetName() const {return "return";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Return from a file, directory or function.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  return()\n"
-      "Returns from a file, directory or function. When this command is "
-      "encountered in an included file (via include() or find_package()), "
-      "it causes processing of the current file to stop and control is "
-      "returned to the including file. If it is encountered in a file which "
-      "is not included by another file, e.g. a CMakeLists.txt, control is "
-      "returned to the parent directory if there is one. "
-      "If return is called in a function, control is returned to the caller "
-      "of the function. Note that a macro "
-      "is not a function and does not handle return like a function does.";
-    }
-
   cmTypeMacro(cmReturnCommand, cmCommand);
 };
 

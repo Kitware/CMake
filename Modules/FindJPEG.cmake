@@ -1,11 +1,22 @@
-# - Find JPEG
-# Find the native JPEG includes and library
-# This module defines
-#  JPEG_INCLUDE_DIR, where to find jpeglib.h, etc.
-#  JPEG_LIBRARIES, the libraries needed to use JPEG.
-#  JPEG_FOUND, If false, do not try to use JPEG.
+#.rst:
+# FindJPEG
+# --------
+#
+# Find JPEG
+#
+# Find the native JPEG includes and library This module defines
+#
+# ::
+#
+#   JPEG_INCLUDE_DIR, where to find jpeglib.h, etc.
+#   JPEG_LIBRARIES, the libraries needed to use JPEG.
+#   JPEG_FOUND, If false, do not try to use JPEG.
+#
 # also defined, but not for general use are
-#  JPEG_LIBRARY, where to find the JPEG library.
+#
+# ::
+#
+#   JPEG_LIBRARY, where to find the JPEG library.
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

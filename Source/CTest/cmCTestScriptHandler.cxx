@@ -361,12 +361,6 @@ void cmCTestScriptHandler::CreateCMake()
   this->AddCTestCommand(new cmCTestUploadCommand);
 }
 
-void cmCTestScriptHandler::GetCommandDocumentation(
-                                    std::vector<cmDocumentationEntry>& v) const
-{
-  this->CMake->GetCommandDocumentation(v);
-}
-
 //----------------------------------------------------------------------
 // this sets up some variables for the script to use, creates the required
 // cmake instance and generators, and then reads in the script

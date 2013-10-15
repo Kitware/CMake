@@ -1,8 +1,16 @@
-# - Find the OpenGL Extension Wrangler Library (GLEW)
+#.rst:
+# FindGLEW
+# --------
+#
+# Find the OpenGL Extension Wrangler Library (GLEW)
+#
 # This module defines the following variables:
-#  GLEW_INCLUDE_DIRS - include directories for GLEW
-#  GLEW_LIBRARIES - libraries to link against GLEW
-#  GLEW_FOUND - true if GLEW has been found and can be used
+#
+# ::
+#
+#   GLEW_INCLUDE_DIRS - include directories for GLEW
+#   GLEW_LIBRARIES - libraries to link against GLEW
+#   GLEW_FOUND - true if GLEW has been found and can be used
 
 #=============================================================================
 # Copyright 2012 Benjamin Eikel

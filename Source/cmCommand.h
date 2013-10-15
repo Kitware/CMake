@@ -127,16 +127,6 @@ public:
   virtual const char* GetName() const = 0;
 
   /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const = 0;
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const = 0;
-
-  /**
    * Enable the command.
    */
   void EnabledOn()

@@ -1,12 +1,19 @@
-# - Try to find the LibXml2 xml processing library
+#.rst:
+# FindLibXml2
+# -----------
+#
+# Try to find the LibXml2 xml processing library
+#
 # Once done this will define
 #
-#  LIBXML2_FOUND - System has LibXml2
-#  LIBXML2_INCLUDE_DIR - The LibXml2 include directory
-#  LIBXML2_LIBRARIES - The libraries needed to use LibXml2
-#  LIBXML2_DEFINITIONS - Compiler switches required for using LibXml2
-#  LIBXML2_XMLLINT_EXECUTABLE - The XML checking tool xmllint coming with LibXml2
-#  LIBXML2_VERSION_STRING - the version of LibXml2 found (since CMake 2.8.8)
+# ::
+#
+#   LIBXML2_FOUND - System has LibXml2
+#   LIBXML2_INCLUDE_DIR - The LibXml2 include directory
+#   LIBXML2_LIBRARIES - The libraries needed to use LibXml2
+#   LIBXML2_DEFINITIONS - Compiler switches required for using LibXml2
+#   LIBXML2_XMLLINT_EXECUTABLE - The XML checking tool xmllint coming with LibXml2
+#   LIBXML2_VERSION_STRING - the version of LibXml2 found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

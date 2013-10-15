@@ -1,16 +1,27 @@
-# - Finds OpenMP support
-# This module can be used to detect OpenMP support in a compiler.
-# If the compiler supports OpenMP, the flags required to compile with
+#.rst:
+# FindOpenMP
+# ----------
+#
+# Finds OpenMP support
+#
+# This module can be used to detect OpenMP support in a compiler.  If
+# the compiler supports OpenMP, the flags required to compile with
 # OpenMP support are returned in variables for the different languages.
 # The variables may be empty if the compiler does not need a special
 # flag to support OpenMP.
 #
 # The following variables are set:
-#   OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
-#   OpenMP_CXX_FLAGS - flags to add to the CXX compiler for OpenMP support
-#   OPENMP_FOUND - true if openmp is detected
 #
-# Supported compilers can be found at http://openmp.org/wp/openmp-compilers/
+# ::
+#
+#    OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
+#    OpenMP_CXX_FLAGS - flags to add to the CXX compiler for OpenMP support
+#    OPENMP_FOUND - true if openmp is detected
+#
+#
+#
+# Supported compilers can be found at
+# http://openmp.org/wp/openmp-compilers/
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.

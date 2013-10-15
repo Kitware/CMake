@@ -1,4 +1,14 @@
-#  WRITE_BASIC_CONFIG_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
+#.rst:
+# WriteBasicConfigVersionFile
+# ---------------------------
+#
+#
+#
+# ::
+#
+#   WRITE_BASIC_CONFIG_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
+#
+#
 #
 # Deprecated, see WRITE_BASIC_PACKAGE_VERSION_FILE(), it is identical.
 

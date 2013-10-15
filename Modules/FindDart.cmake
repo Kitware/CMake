@@ -1,7 +1,11 @@
-# - Find DART
-# This module looks for the dart testing software and sets DART_ROOT
-# to point to where it found it.
+#.rst:
+# FindDart
+# --------
 #
+# Find DART
+#
+# This module looks for the dart testing software and sets DART_ROOT to
+# point to where it found it.
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

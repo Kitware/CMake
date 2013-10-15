@@ -48,43 +48,6 @@ public:
    */
   virtual const char* GetName() const { return "get_filename_component";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Get a specific component of a full filename.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  get_filename_component(<VAR> <FileName> <COMP> [CACHE])\n"
-      "Set <VAR> to a component of <FileName>, where <COMP> is one of:\n"
-      " DIRECTORY = Directory without file name\n"
-      " NAME      = File name without directory\n"
-      " EXT       = File name longest extension (.b.c from d/a.b.c)\n"
-      " NAME_WE   = File name without directory or longest extension\n"
-      " ABSOLUTE  = Full path to file\n"
-      " REALPATH  = Full path to existing file with symlinks resolved\n"
-      " PATH      = Legacy alias for DIRECTORY (use for CMake <= 2.8.11)\n"
-      "Paths are returned with forward slashes and have no trailing slahes. "
-      "The longest file extension is always considered. "
-      "If the optional CACHE argument is specified, the result variable is "
-      "added to the cache.\n"
-      "  get_filename_component(<VAR> FileName\n"
-      "                         PROGRAM [PROGRAM_ARGS <ARG_VAR>]\n"
-      "                         [CACHE])\n"
-      "The program in FileName will be found in the system search path or "
-      "left as a full path.  If PROGRAM_ARGS is present with PROGRAM, then "
-      "any command-line arguments present in the FileName string are split "
-      "from the program name and stored in <ARG_VAR>.  This is used to "
-      "separate a program name from its arguments in a command line string.";
-    }
-
   cmTypeMacro(cmGetFilenameComponentCommand, cmCommand);
 };
 

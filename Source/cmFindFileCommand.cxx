@@ -16,15 +16,3 @@ cmFindFileCommand::cmFindFileCommand()
 {
   this->IncludeFileInPath = true;
 }
-
-void cmFindFileCommand::GenerateDocumentation()
-{
-  this->cmFindPathCommand::GenerateDocumentation();
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "find_path", "find_file");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "directory containing the named file",
-                               "full path to named file");
-  cmSystemTools::ReplaceString(this->GenericDocumentation,
-                               "file in a directory", "full path to a file");
-}

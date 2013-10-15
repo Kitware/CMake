@@ -269,20 +269,7 @@ class cmake
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 
-  /** Get the documentation entries for the supported commands.
-   *  If withCurrentCommands is true, the documentation for the
-   *  recommended set of commands is included.
-   *  If withCompatCommands is true, the documentation for discouraged
-   *  (compatibility) commands is included.
-   *  You probably don't want to set both to false.
-   */
-  void GetCommandDocumentation(std::vector<cmDocumentationEntry>& entries,
-                               bool withCurrentCommands = true,
-                               bool withCompatCommands = true) const;
-  void GetPropertiesDocumentation(std::map<std::string,
-                                  cmDocumentationSection *>&);
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
-  void GetPolicyDocumentation(std::vector<cmDocumentationEntry>& entries);
 
   ///! Set/Get a property of this target file
   void SetProperty(const char *prop, const char *value);
@@ -343,8 +330,7 @@ class cmake
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
-                      bool chain = false,
-                      const char *variableGroup = 0);
+                      bool chain = false);
 
   // get property definition
   cmPropertyDefinition *GetPropertyDefinition
@@ -357,13 +343,6 @@ class cmake
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
   std::vector<std::string> const& GetDebugConfigs();
-
-  // record accesses of properties and variables
-  void RecordPropertyAccess(const char *name, cmProperty::ScopeType scope);
-  void ReportUndefinedPropertyAccesses(const char *filename);
-
-  // Define the properties
-  static void DefineProperties(cmake *cm);
 
   void SetCMakeEditCommand(const char* s)
     {
@@ -484,52 +463,12 @@ private:
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
-  {"-C <initial-cache>", "Pre-load a script to populate the cache.", \
-   "When cmake is first run in an empty build tree, it creates a " \
-   "CMakeCache.txt file and populates it with customizable settings " \
-   "for the project.  This option may be used to specify a file from " \
-   "which to load cache entries before the first pass through " \
-   "the project's cmake listfiles.  The loaded entries take priority " \
-   "over the project's default values.  The given file should be a CMake " \
-   "script containing SET commands that use the CACHE option, " \
-   "not a cache-format file."}, \
-  {"-D <var>:<type>=<value>", "Create a cmake cache entry.", \
-   "When cmake is first run in an empty build tree, it creates a " \
-   "CMakeCache.txt file and populates it with customizable settings " \
-   "for the project.  This option may be used to specify a setting " \
-   "that takes priority over the project's default value.  The option " \
-   "may be repeated for as many cache entries as desired."}, \
-  {"-U <globbing_expr>", "Remove matching entries from CMake cache.", \
-   "This option may be used to remove one or more variables from the " \
-   "CMakeCache.txt file, globbing expressions using * and ? are supported. "\
-   "The option may be repeated for as many cache entries as desired.\n" \
-   "Use with care, you can make your CMakeCache.txt non-working."}, \
-  {"-G <generator-name>", "Specify a build system generator.", \
-   "CMake may support multiple native build systems on certain platforms.  " \
-   "A generator is responsible for generating a particular build " \
-   "system.  Possible generator names are specified in the Generators " \
-   "section."},\
-  {"-T <toolset-name>", "Specify toolset name if supported by generator.", \
-   "Some CMake generators support a toolset name to be given to the " \
-   "native build system to choose a compiler.  " \
-   "This is supported only on specific generators:\n" \
-   "  Visual Studio >= 10\n" \
-   "  Xcode >= 3.0\n" \
-   "See native build system documentation for allowed toolset names."}, \
-  {"-Wno-dev", "Suppress developer warnings.",\
-   "Suppress warnings that are meant for the author"\
-   " of the CMakeLists.txt files."},\
-  {"-Wdev", "Enable developer warnings.",\
-   "Enable warnings that are meant for the author"\
-   " of the CMakeLists.txt files."}
+  {"-C <initial-cache>", "Pre-load a script to populate the cache."}, \
+  {"-D <var>:<type>=<value>", "Create a cmake cache entry."}, \
+  {"-U <globbing_expr>", "Remove matching entries from CMake cache."}, \
+  {"-G <generator-name>", "Specify a build system generator."},\
+  {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
+  {"-Wno-dev", "Suppress developer warnings."},\
+  {"-Wdev", "Enable developer warnings."}
 
-
-#define CMAKE_STANDARD_INTRODUCTION \
-  {0, \
-   "CMake is a cross-platform build system generator.  Projects " \
-   "specify their build process with platform-independent CMake listfiles " \
-   "included in each directory of a source tree with the name " \
-   "CMakeLists.txt. " \
-   "Users build a project by using CMake to generate a build system " \
-   "for a native tool on their platform.", 0}
 #endif

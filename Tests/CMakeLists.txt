@@ -526,9 +526,6 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SubProject")
   endif()
 
-  if (CMAKE_STRICT)
-    ADD_TEST_MACRO(DocTest DocTest)
-  endif ()
   # macro to add a test that will build a nightly release
   # of CMake for given platform using the release scripts
   macro(ADD_NIGHTLY_BUILD_TEST name script)

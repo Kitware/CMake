@@ -43,30 +43,6 @@ public:
    */
   virtual const char* GetName() const {return "include_regular_expression";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Set the regular expression used for dependency checking.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  include_regular_expression(regex_match [regex_complain])\n"
-      "Set the regular expressions used in dependency checking.  Only files "
-      "matching regex_match will be traced as dependencies.  Only files "
-      "matching regex_complain will generate warnings if they cannot be "
-      "found "
-      "(standard header paths are not searched).  The defaults are:\n"
-      "  regex_match    = \"^.*$\" (match everything)\n"
-      "  regex_complain = \"^$\" (match empty string only)";
-    }
-
   cmTypeMacro(cmIncludeRegularExpressionCommand, cmCommand);
 };
 

@@ -1,6 +1,10 @@
-# - ADD_FILE_DEPENDENCIES(source_file depend_files...)
-# Adds the given files as dependencies to source_file
+#.rst:
+# AddFileDependencies
+# -------------------
 #
+# ADD_FILE_DEPENDENCIES(source_file depend_files...)
+#
+# Adds the given files as dependencies to source_file
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

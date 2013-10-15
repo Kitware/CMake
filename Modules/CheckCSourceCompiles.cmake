@@ -1,15 +1,26 @@
-# - Check if given C source compiles and links into an executable
-# CHECK_C_SOURCE_COMPILES(<code> <var> [FAIL_REGEX <fail-regex>])
-#  <code>       - source code to try to compile, must define 'main'
-#  <var>        - variable to store whether the source code compiled
-#  <fail-regex> - fail if test output matches this regex
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+#.rst:
+# CheckCSourceCompiles
+# --------------------
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_INCLUDES = list of include directories
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+# Check if given C source compiles and links into an executable
+#
+# CHECK_C_SOURCE_COMPILES(<code> <var> [FAIL_REGEX <fail-regex>])
+#
+# ::
+#
+#   <code>       - source code to try to compile, must define 'main'
+#   <var>        - variable to store whether the source code compiled
+#   <fail-regex> - fail if test output matches this regex
+#
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
+#
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.

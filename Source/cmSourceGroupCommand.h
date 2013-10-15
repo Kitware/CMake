@@ -43,36 +43,6 @@ public:
    */
   virtual const char* GetName() const {return "source_group";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Define a grouping for sources in the makefile.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  source_group(name [REGULAR_EXPRESSION regex] "
-      "[FILES src1 src2 ...])\n"
-      "Defines a group into which sources will be placed in project files.  "
-      "This is mainly used to setup file tabs in Visual Studio.  "
-      "Any file whose name is listed or matches the regular expression will "
-      "be placed in this group.  If a file matches multiple groups, the LAST "
-      "group that explicitly lists the file will be favored, if any.  If no "
-      "group explicitly lists the file, the LAST group whose regular "
-      "expression matches the file will be favored.\n"
-      "The name of the group may contain backslashes to specify subgroups:\n"
-      "  source_group(outer\\\\inner ...)\n"
-      "For backwards compatibility, this command also supports the "
-      "format:\n"
-      "  source_group(name regex)";
-    }
-
   cmTypeMacro(cmSourceGroupCommand, cmCommand);
 };
 

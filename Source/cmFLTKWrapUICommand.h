@@ -54,28 +54,6 @@ public:
    */
   virtual const char* GetName() const { return "fltk_wrap_ui";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Create FLTK user interfaces Wrappers.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  fltk_wrap_ui(resultingLibraryName source1\n"
-      "               source2 ... sourceN )\n"
-      "Produce .h and .cxx files for all the .fl and .fld files listed.  "
-      "The resulting .h and .cxx files will be added to a variable named "
-      "resultingLibraryName_FLTK_UI_SRCS which should be added to your "
-      "library.";
-    }
-
 private:
   /**
    * List of produced files.

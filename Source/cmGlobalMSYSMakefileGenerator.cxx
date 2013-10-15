@@ -110,6 +110,4 @@ void cmGlobalMSYSMakefileGenerator
 {
   entry.Name = cmGlobalMSYSMakefileGenerator::GetActualName();
   entry.Brief = "Generates MSYS makefiles.";
-  entry.Full = "The makefiles use /bin/sh as the shell.  "
-    "They require msys to be installed on the machine.";
 }

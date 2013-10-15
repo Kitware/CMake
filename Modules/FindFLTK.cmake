@@ -1,33 +1,58 @@
-# - Find the native FLTK includes and library
+#.rst:
+# FindFLTK
+# --------
 #
-# By default FindFLTK.cmake will search for all of the FLTK components and
-# add them to the FLTK_LIBRARIES variable.
+# Find the native FLTK includes and library
 #
-#   You can limit the components which get placed in FLTK_LIBRARIES by
-#   defining one or more of the following three options:
 #
-#     FLTK_SKIP_OPENGL, set to true to disable searching for opengl and
-#                       the FLTK GL library
-#     FLTK_SKIP_FORMS, set to true to disable searching for fltk_forms
-#     FLTK_SKIP_IMAGES, set to true to disable searching for fltk_images
 #
-#     FLTK_SKIP_FLUID, set to true if the fluid binary need not be present
-#                      at build time
+# By default FindFLTK.cmake will search for all of the FLTK components
+# and add them to the FLTK_LIBRARIES variable.
+#
+# ::
+#
+#    You can limit the components which get placed in FLTK_LIBRARIES by
+#    defining one or more of the following three options:
+#
+#
+#
+# ::
+#
+#      FLTK_SKIP_OPENGL, set to true to disable searching for opengl and
+#                        the FLTK GL library
+#      FLTK_SKIP_FORMS, set to true to disable searching for fltk_forms
+#      FLTK_SKIP_IMAGES, set to true to disable searching for fltk_images
+#
+#
+#
+# ::
+#
+#      FLTK_SKIP_FLUID, set to true if the fluid binary need not be present
+#                       at build time
+#
+#
 #
 # The following variables will be defined:
-#     FLTK_FOUND, True if all components not skipped were found
-#     FLTK_INCLUDE_DIR, where to find include files
-#     FLTK_LIBRARIES, list of fltk libraries you should link against
-#     FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
-#     FLTK_WRAP_UI, This enables the FLTK_WRAP_UI command
+#
+# ::
+#
+#      FLTK_FOUND, True if all components not skipped were found
+#      FLTK_INCLUDE_DIR, where to find include files
+#      FLTK_LIBRARIES, list of fltk libraries you should link against
+#      FLTK_FLUID_EXECUTABLE, where to find the Fluid tool
+#      FLTK_WRAP_UI, This enables the FLTK_WRAP_UI command
+#
+#
 #
 # The following cache variables are assigned but should not be used.
 # See the FLTK_LIBRARIES variable instead.
 #
-#     FLTK_BASE_LIBRARY   = the full path to fltk.lib
-#     FLTK_GL_LIBRARY     = the full path to fltk_gl.lib
-#     FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
-#     FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
+# ::
+#
+#      FLTK_BASE_LIBRARY   = the full path to fltk.lib
+#      FLTK_GL_LIBRARY     = the full path to fltk_gl.lib
+#      FLTK_FORMS_LIBRARY  = the full path to fltk_forms.lib
+#      FLTK_IMAGES_LIBRARY = the full path to fltk_images.lib
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

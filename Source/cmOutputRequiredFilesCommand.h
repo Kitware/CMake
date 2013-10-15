@@ -42,30 +42,6 @@ public:
    */
   virtual const char* GetName() const { return "output_required_files";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Deprecated.  Approximate C preprocessor dependency scanning.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "This command exists only because ancient CMake versions provided it.  "
-      "CMake handles preprocessor dependency scanning automatically using a "
-      "more advanced scanner.\n"
-      "  output_required_files(srcfile outputfile)\n"
-      "Outputs a list of all the source files that are required by the "
-      "specified srcfile. This list is written into outputfile. This is "
-      "similar to writing out the dependencies for srcfile except that it "
-      "jumps from .h files into .cxx, .c and .cpp files if possible.";
-    }
-
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

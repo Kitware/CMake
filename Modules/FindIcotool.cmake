@@ -1,10 +1,17 @@
-# - Find icotool
-# This module looks for icotool. This module defines the
-# following values:
-#  ICOTOOL_EXECUTABLE: the full path to the icotool tool.
-#  ICOTOOL_FOUND: True if icotool has been found.
-#  ICOTOOL_VERSION_STRING: the version of icotool found.
+#.rst:
+# FindIcotool
+# -----------
 #
+# Find icotool
+#
+# This module looks for icotool.  This module defines the following
+# values:
+#
+# ::
+#
+#   ICOTOOL_EXECUTABLE: the full path to the icotool tool.
+#   ICOTOOL_FOUND: True if icotool has been found.
+#   ICOTOOL_VERSION_STRING: the version of icotool found.
 
 #=============================================================================
 # Copyright 2012 Aleksey Avdeev <solo@altlinux.ru>

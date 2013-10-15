@@ -41,34 +41,6 @@ public:
    */
   virtual const char* GetName() const { return "variable_requires";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Deprecated. Use the if() command instead.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "Assert satisfaction of an option's required variables.\n"
-      "  variable_requires(TEST_VARIABLE RESULT_VARIABLE\n"
-      "                    REQUIRED_VARIABLE1\n"
-      "                    REQUIRED_VARIABLE2 ...)\n"
-      "The first argument (TEST_VARIABLE) is the name of the variable to be "
-      "tested, if that variable is false nothing else is done. If "
-      "TEST_VARIABLE is true, then "
-      "the next argument (RESULT_VARIABLE) is a variable that is set to true "
-      "if all the required variables are set. "
-      "The rest of the arguments are variables that must be true or not "
-      "set to NOTFOUND to avoid an error.  If any are not true, an error "
-      "is reported.";
-    }
-
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

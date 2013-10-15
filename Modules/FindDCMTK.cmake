@@ -1,5 +1,8 @@
-# - find DCMTK libraries and applications
+#.rst:
+# FindDCMTK
+# ---------
 #
+# find DCMTK libraries and applications
 
 #  DCMTK_INCLUDE_DIRS   - Directories to include to use DCMTK
 #  DCMTK_LIBRARIES     - Files to link against to use DCMTK

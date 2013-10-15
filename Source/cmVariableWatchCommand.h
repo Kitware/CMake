@@ -56,27 +56,6 @@ public:
    */
   virtual const char* GetName() const { return "variable_watch";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Watch the CMake variable for change.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  variable_watch(<variable name> [<command to execute>])\n"
-      "If the specified variable changes, the message will be printed about "
-      "the variable being changed. If the command is specified, the command "
-      "will be executed. The command will receive the following arguments:"
-      " COMMAND(<variable> <access> <value> <current list file> <stack>)";
-    }
-
   cmTypeMacro(cmVariableWatchCommand, cmCommand);
 
 protected:

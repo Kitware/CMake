@@ -1,49 +1,62 @@
-# - Find HDF5, a library for reading and writing self describing array data.
+#.rst:
+# FindHDF5
+# --------
+#
+# Find HDF5, a library for reading and writing self describing array data.
+#
+#
 #
 # This module invokes the HDF5 wrapper compiler that should be installed
-# alongside HDF5.  Depending upon the HDF5 Configuration, the wrapper compiler
-# is called either h5cc or h5pcc.  If this succeeds, the module will then call
-# the compiler with the -show argument to see what flags are used when compiling
-# an HDF5 client application.
+# alongside HDF5.  Depending upon the HDF5 Configuration, the wrapper
+# compiler is called either h5cc or h5pcc.  If this succeeds, the module
+# will then call the compiler with the -show argument to see what flags
+# are used when compiling an HDF5 client application.
 #
-# The module will optionally accept the COMPONENTS argument.  If no COMPONENTS
-# are specified, then the find module will default to finding only the HDF5 C
-# library.  If one or more COMPONENTS are specified, the module will attempt to
-# find the language bindings for the specified components.  The only valid
-# components are C, CXX, Fortran, HL, and Fortran_HL.  If the COMPONENTS
-# argument is not given, the module will attempt to find only the C bindings.
+# The module will optionally accept the COMPONENTS argument.  If no
+# COMPONENTS are specified, then the find module will default to finding
+# only the HDF5 C library.  If one or more COMPONENTS are specified, the
+# module will attempt to find the language bindings for the specified
+# components.  The only valid components are C, CXX, Fortran, HL, and
+# Fortran_HL.  If the COMPONENTS argument is not given, the module will
+# attempt to find only the C bindings.
 #
-# On UNIX systems, this module will read the variable HDF5_USE_STATIC_LIBRARIES
-# to determine whether or not to prefer a static link to a dynamic link for HDF5
-# and all of it's dependencies.  To use this feature, make sure that the
-# HDF5_USE_STATIC_LIBRARIES variable is set before the call to find_package.
+# On UNIX systems, this module will read the variable
+# HDF5_USE_STATIC_LIBRARIES to determine whether or not to prefer a
+# static link to a dynamic link for HDF5 and all of it's dependencies.
+# To use this feature, make sure that the HDF5_USE_STATIC_LIBRARIES
+# variable is set before the call to find_package.
 #
-# To provide the module with a hint about where to find your HDF5 installation,
-# you can set the environment variable HDF5_ROOT.  The Find module will then
-# look in this path when searching for HDF5 executables, paths, and libraries.
+# To provide the module with a hint about where to find your HDF5
+# installation, you can set the environment variable HDF5_ROOT.  The
+# Find module will then look in this path when searching for HDF5
+# executables, paths, and libraries.
 #
-# In addition to finding the includes and libraries required to compile an HDF5
-# client application, this module also makes an effort to find tools that come
-# with the HDF5 distribution that may be useful for regression testing.
+# In addition to finding the includes and libraries required to compile
+# an HDF5 client application, this module also makes an effort to find
+# tools that come with the HDF5 distribution that may be useful for
+# regression testing.
 #
 # This module will define the following variables:
-#  HDF5_INCLUDE_DIRS - Location of the hdf5 includes
-#  HDF5_INCLUDE_DIR - Location of the hdf5 includes (deprecated)
-#  HDF5_DEFINITIONS - Required compiler definitions for HDF5
-#  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
-#  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
-#  HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
-#  HDF5_HL_LIBRARIES - Required libraries for the HDF5 high level API
-#  HDF5_Fortran_HL_LIBRARIES - Required libraries for the high level Fortran
-#                              bindings.
-#  HDF5_LIBRARIES - Required libraries for all requested bindings
-#  HDF5_FOUND - true if HDF5 was found on the system
-#  HDF5_LIBRARY_DIRS - the full set of library directories
-#  HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
-#  HDF5_C_COMPILER_EXECUTABLE - the path to the HDF5 C wrapper compiler
-#  HDF5_CXX_COMPILER_EXECUTABLE - the path to the HDF5 C++ wrapper compiler
-#  HDF5_Fortran_COMPILER_EXECUTABLE - the path to the HDF5 Fortran wrapper compiler
-#  HDF5_DIFF_EXECUTABLE - the path to the HDF5 dataset comparison tool
+#
+# ::
+#
+#   HDF5_INCLUDE_DIRS - Location of the hdf5 includes
+#   HDF5_INCLUDE_DIR - Location of the hdf5 includes (deprecated)
+#   HDF5_DEFINITIONS - Required compiler definitions for HDF5
+#   HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
+#   HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
+#   HDF5_Fortran_LIBRARIES - Required libraries for the HDF5 Fortran bindings
+#   HDF5_HL_LIBRARIES - Required libraries for the HDF5 high level API
+#   HDF5_Fortran_HL_LIBRARIES - Required libraries for the high level Fortran
+#                               bindings.
+#   HDF5_LIBRARIES - Required libraries for all requested bindings
+#   HDF5_FOUND - true if HDF5 was found on the system
+#   HDF5_LIBRARY_DIRS - the full set of library directories
+#   HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
+#   HDF5_C_COMPILER_EXECUTABLE - the path to the HDF5 C wrapper compiler
+#   HDF5_CXX_COMPILER_EXECUTABLE - the path to the HDF5 C++ wrapper compiler
+#   HDF5_Fortran_COMPILER_EXECUTABLE - the path to the HDF5 Fortran wrapper compiler
+#   HDF5_DIFF_EXECUTABLE - the path to the HDF5 dataset comparison tool
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.

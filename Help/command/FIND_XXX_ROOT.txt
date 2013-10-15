@@ -1,0 +1,14 @@
+The CMake variable CMAKE_FIND_ROOT_PATH specifies one or more
+directories to be prepended to all other search directories.  This
+effectively "re-roots" the entire search under given locations.  By
+default it is empty.  It is especially useful when cross-compiling to
+point to the root directory of the target environment and CMake will
+search there too.  By default at first the directories listed in
+CMAKE_FIND_ROOT_PATH and then the non-rooted directories will be
+searched.  The default behavior can be adjusted by setting
+|CMAKE_FIND_ROOT_PATH_MODE_XXX|.  This behavior can be manually
+overridden on a per-call basis.  By using CMAKE_FIND_ROOT_PATH_BOTH
+the search order will be as described above.  If
+NO_CMAKE_FIND_ROOT_PATH is used then CMAKE_FIND_ROOT_PATH will not be
+used.  If ONLY_CMAKE_FIND_ROOT_PATH is used then only the re-rooted
+directories will be searched.

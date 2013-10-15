@@ -1,19 +1,32 @@
+#.rst:
+# CMakeExpandImportedTargets
+# --------------------------
+#
+#
+#
 # CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN
-#                                     [CONFIGURATION <config>] )
+#
+# ::
+#
+#                                      [CONFIGURATION <config>] )
+#
+#
 #
 # CMAKE_EXPAND_IMPORTED_TARGETS() takes a list of libraries and replaces
-# all imported targets contained in this list with their actual file paths
-# of the referenced libraries on disk, including the libraries from their
-# link interfaces.
-# If a CONFIGURATION is given, it uses the respective configuration of the
-# imported targets if it exists. If no CONFIGURATION is given, it uses
-# the first configuration from ${CMAKE_CONFIGURATION_TYPES} if set, otherwise
-# ${CMAKE_BUILD_TYPE}.
-# This macro is used by all Check*.cmake files which use
-# try_compile() or try_run() and support CMAKE_REQUIRED_LIBRARIES , so that
-# these checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
-#    cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
-#                                               CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
+# all imported targets contained in this list with their actual file
+# paths of the referenced libraries on disk, including the libraries
+# from their link interfaces.  If a CONFIGURATION is given, it uses the
+# respective configuration of the imported targets if it exists.  If no
+# CONFIGURATION is given, it uses the first configuration from
+# ${CMAKE_CONFIGURATION_TYPES} if set, otherwise ${CMAKE_BUILD_TYPE}.
+# This macro is used by all Check*.cmake files which use try_compile()
+# or try_run() and support CMAKE_REQUIRED_LIBRARIES , so that these
+# checks support imported targets in CMAKE_REQUIRED_LIBRARIES:
+#
+# ::
+#
+#     cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
+#                                                CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
 
 
 #=============================================================================

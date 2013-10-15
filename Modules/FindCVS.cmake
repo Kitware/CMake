@@ -1,11 +1,24 @@
+#.rst:
+# FindCVS
+# -------
+#
+#
+#
 # The module defines the following variables:
-#   CVS_EXECUTABLE - path to cvs command line client
-#   CVS_FOUND - true if the command line client was found
+#
+# ::
+#
+#    CVS_EXECUTABLE - path to cvs command line client
+#    CVS_FOUND - true if the command line client was found
+#
 # Example usage:
-#   find_package(CVS)
-#   if(CVS_FOUND)
-#     message("CVS found: ${CVS_EXECUTABLE}")
-#   endif()
+#
+# ::
+#
+#    find_package(CVS)
+#    if(CVS_FOUND)
+#      message("CVS found: ${CVS_EXECUTABLE}")
+#    endif()
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.

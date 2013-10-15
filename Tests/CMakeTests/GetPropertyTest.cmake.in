@@ -11,17 +11,6 @@ if (NOT FOO_FULL STREQUAL "NOTFOUND")
   message(SEND_ERROR "property FOO has FULL_DOCS set to '${FOO_FULL}'")
 endif ()
 
-get_property(test_brief GLOBAL PROPERTY ENABLED_FEATURES BRIEF_DOCS)
-get_property(test_full GLOBAL PROPERTY ENABLED_FEATURES FULL_DOCS)
-
-if(test_brief STREQUAL "NOTFOUND")
-  message(SEND_ERROR "property ENABLED_FEATURES has no BRIEF_DOCS")
-endif()
-
-if(test_full STREQUAL "NOTFOUND")
-  message(SEND_ERROR "property ENABLED_FEATURES has no FULL_DOCS")
-endif()
-
 set(test_var alpha)
 get_property(result VARIABLE PROPERTY test_var)
 if(NOT result STREQUAL "alpha")
