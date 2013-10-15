@@ -54,6 +54,9 @@ protected:
     }
 
 private:
+  typedef std::map<std::string, std::string> id_map_t;
+  typedef std::map<std::string, size_t> ambiguity_map_t;
+
   bool InitializeWiXConfiguration();
 
   bool PackageFilesImpl();
@@ -82,12 +85,9 @@ private:
     cmWIXSourceWriter& directoryDefinitions,
     cmWIXSourceWriter& fileDefinitions,
     cmWIXSourceWriter& featureDefinitions,
-    size_t& directoryCounter,
-    size_t& fileCounter,
     const std::vector<std::string>& pkgExecutables,
     std::vector<std::string>& dirIdExecutables
     );
-
 
   bool RequireOption(const std::string& name, std::string& value) const;
 
@@ -99,7 +99,21 @@ private:
 
   static std::string GetRightmostExtension(const std::string& filename);
 
+  std::string PathToId(const std::string& path);
+
+  std::string CreateNewIdForPath(const std::string& path);
+
+  static std::string CreateHashedId(
+    const std::string& path, const std::string& normalizedFilename);
+
+  std::string NormalizeComponentForId(
+    const std::string& component, size_t& replacementCount);
+
+  static bool IsLegalIdCharacter(char c);
+
   std::vector<std::string> wixSources;
+  id_map_t pathToIdMap;
+  ambiguity_map_t idAmbiguityCounter;
 };
 
 #endif

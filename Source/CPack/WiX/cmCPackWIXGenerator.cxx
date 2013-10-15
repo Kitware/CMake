@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2012 Kitware, Inc., Insight Software Consortium
+  Copyright 2000-2013 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -14,6 +14,7 @@
 
 #include <cmSystemTools.h>
 #include <cmGeneratedFileStream.h>
+#include <cmCryptoHash.h>
 #include <CPack/cmCPackLog.h>
 #include <CPack/cmCPackComponentGroup.h>
 
@@ -319,9 +320,6 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     directoryDefinitions.AddAttribute("Name", install_root[i]);
   }
 
-  size_t directoryCounter = 0;
-  size_t fileCounter = 0;
-
   std::string fileDefinitionsFilename =
     cpackTopLevel + "/files.wxs";
 
@@ -367,7 +365,8 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     if (!cpackVendor || !cpackPkgName)
       {
       cmCPackLogger(cmCPackLog::LOG_WARNING, "CPACK_PACKAGE_VENDOR and "
-                    "CPACK_PACKAGE_NAME must be defined for shortcut creation" << std::endl);
+        "CPACK_PACKAGE_NAME must be defined for shortcut creation"
+        << std::endl);
       cpackPkgExecutables.clear();
       }
     else
@@ -380,7 +379,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   AddDirectoryAndFileDefinitons(
     toplevel, "INSTALL_ROOT",
     directoryDefinitions, fileDefinitions, featureDefinitions,
-    directoryCounter, fileCounter, cpackPkgExecutables, dirIdExecutables);
+    cpackPkgExecutables, dirIdExecutables);
 
   directoryDefinitions.EndElement();
   directoryDefinitions.EndElement();
@@ -403,7 +402,10 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
       std::string directoryId = *it;
 
       fileDefinitions.BeginElement("Shortcut");
-      std::string shortcutName = fileName; // the iconName is mor likely to contain blanks early on
+
+      // the iconName is more likely to contain blanks early on
+      std::string shortcutName = fileName;
+
       std::string::size_type const dotPos = shortcutName.find('.');
       if(std::string::npos == dotPos)
         { shortcutName = shortcutName.substr(0, dotPos); }
@@ -531,8 +533,6 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmWIXSourceWriter& directoryDefinitions,
   cmWIXSourceWriter& fileDefinitions,
   cmWIXSourceWriter& featureDefinitions,
-  size_t& directoryCounter,
-  size_t& fileCounter,
   const std::vector<std::string>& pkgExecutables,
   std::vector<std::string>& dirIdExecutables)
 {
@@ -550,11 +550,14 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
 
     std::string fullPath = topdir + "/" + fileName;
 
+    std::string relativePath = cmSystemTools::RelativePath(
+      toplevel.c_str(), fullPath.c_str());
+
+    std::string id = PathToId(relativePath);
+
     if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
       {
-      std::stringstream tmp;
-      tmp << "DIR_ID_" << ++directoryCounter;
-      std::string subDirectoryId = tmp.str();
+      std::string subDirectoryId = std::string("CM_D") + id;
 
       directoryDefinitions.BeginElement("Directory");
       directoryDefinitions.AddAttribute("Id", subDirectoryId);
@@ -565,20 +568,14 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         directoryDefinitions,
         fileDefinitions,
         featureDefinitions,
-        directoryCounter,
-        fileCounter,
         pkgExecutables,
         dirIdExecutables);
       directoryDefinitions.EndElement();
       }
     else
       {
-      std::stringstream tmp;
-      tmp << "_ID_" << ++fileCounter;
-      std::string idSuffix = tmp.str();
-
-      std::string componentId = std::string("CMP") + idSuffix;
-      std::string fileId = std::string("FILE") + idSuffix;
+      std::string componentId = std::string("CM_C") + id;
+      std::string fileId = std::string("CM_F") + id;
 
       fileDefinitions.BeginElement("DirectoryRef");
       fileDefinitions.AddAttribute("Id", directoryId);
@@ -685,4 +682,120 @@ std::string cmCPackWIXGenerator::GetRightmostExtension(
     }
 
   return cmSystemTools::LowerCase(extension);
+}
+
+std::string cmCPackWIXGenerator::PathToId(const std::string& path)
+{
+  id_map_t::const_iterator i = pathToIdMap.find(path);
+  if(i != pathToIdMap.end()) return i->second;
+
+  std::string id = CreateNewIdForPath(path);
+  return id;
+}
+
+std::string cmCPackWIXGenerator::CreateNewIdForPath(const std::string& path)
+{
+  std::vector<std::string> components;
+  cmSystemTools::SplitPath(path.c_str(), components, false);
+
+  size_t replacementCount = 0;
+
+  std::string identifier;
+  std::string currentComponent;
+
+  for(size_t i = 1; i < components.size(); ++i)
+    {
+    if(i != 1) identifier += '.';
+
+    currentComponent = NormalizeComponentForId(
+      components[i], replacementCount);
+
+    identifier += currentComponent;
+    }
+
+  std::string idPrefix = "P";
+  size_t replacementPercent = replacementCount * 100 / identifier.size();
+  if(replacementPercent > 33 || identifier.size() > 60)
+    {
+    identifier = CreateHashedId(path, currentComponent);
+    idPrefix = "H";
+    }
+
+  std::stringstream result;
+  result << idPrefix << "_" << identifier;
+
+  size_t ambiguityCount = ++idAmbiguityCounter[identifier];
+
+  if(ambiguityCount > 999)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "Error while trying to generate a unique Id for '" <<
+      path << "'" << std::endl);
+
+    return std::string();
+    }
+  else if(ambiguityCount > 1)
+    {
+    result << "_" << ambiguityCount;
+    }
+
+  std::string resultString = result.str();
+
+  pathToIdMap[path] = resultString;
+
+  return resultString;
+}
+
+std::string cmCPackWIXGenerator::CreateHashedId(
+  const std::string& path, const std::string& normalizedFilename)
+{
+  cmsys::auto_ptr<cmCryptoHash> sha1 = cmCryptoHash::New("SHA1");
+  std::string hash = sha1->HashString(path.c_str());
+
+  std::string identifier;
+  identifier += hash.substr(0, 7) + "_";
+
+  const size_t maxFileNameLength = 52;
+  if(normalizedFilename.length() > maxFileNameLength)
+    {
+    identifier += normalizedFilename.substr(0, maxFileNameLength - 3);
+    identifier += "...";
+    }
+  else
+    {
+    identifier += normalizedFilename;
+    }
+
+  return identifier;
+}
+
+std::string cmCPackWIXGenerator::NormalizeComponentForId(
+  const std::string& component, size_t& replacementCount)
+{
+  std::string result;
+  result.resize(component.size());
+
+  for(size_t i = 0; i < component.size(); ++i)
+    {
+    char c = component[i];
+    if(IsLegalIdCharacter(c))
+      {
+      result[i] = c;
+      }
+    else
+      {
+      result[i] = '_';
+      ++ replacementCount;
+      }
+    }
+
+  return result;
+}
+
+bool cmCPackWIXGenerator::IsLegalIdCharacter(char c)
+{
+  return (c >= '0' && c <= '9') ||
+      (c >= 'a' && c <= 'z') ||
+      (c >= 'A' && c <= 'Z') ||
+      c == '_' || c == '.';
 }
