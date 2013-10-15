@@ -261,9 +261,11 @@ if(BUILD_TESTING)
       PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked)")
   endif()
 
-  if(CMAKE_TEST_GENERATOR MATCHES Make
-      AND NOT CMAKE_TEST_GENERATOR MATCHES BORLAND
-      AND NOT CMAKE_TEST_GENERATOR MATCHES "Watcom WMake")
+  if(CMAKE_TEST_GENERATOR MATCHES Make)
+    set(InterfaceBuildTargets_libname testlib)
+    if (CMAKE_TEST_GENERATOR MATCHES "Borland|Watcom")
+      set(InterfaceBuildTargets_libname testlib.lib)
+    endif()
     add_test(InterfaceBuildTargets ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/InterfaceBuildTargets"
@@ -272,7 +274,7 @@ if(BUILD_TESTING)
       ${build_generator_args}
       --build-project InterfaceBuildTargets
       --build-target iface
-      --test-command ${CMAKE_CMAKE_COMMAND} -E touch_nocreate testlib
+      --test-command ${CMAKE_CMAKE_COMMAND} -E touch_nocreate ${InterfaceBuildTargets_libname}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceBuildTargets")
   endif()
