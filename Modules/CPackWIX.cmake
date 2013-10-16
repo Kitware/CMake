@@ -12,7 +12,7 @@
 #
 # .. variable:: CPACK_WIX_UPGRADE_GUID
 #
-#  Upgrade GUID (Product/@UpgradeCode)
+#  Upgrade GUID (Product/\@UpgradeCode)
 #
 #  Will be automatically generated unless explicitly provided.
 #
@@ -33,7 +33,7 @@
 #
 # .. variable:: CPACK_WIX_PRODUCT_GUID
 #
-#  Product GUID (Product/@Id)
+#  Product GUID (Product/\@Id)
 #
 #  Will be automatically generated unless explicitly provided.
 #
