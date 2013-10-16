@@ -27,9 +27,6 @@
 
 #include <ctype.h> // for isspace
 
-// Package GUID of Intel Visual Fortran plugin to VS IDE
-#define CM_INTEL_PLUGIN_GUID "{B68A201D-CB9B-47AF-A52F-7EEC72E217E4}"
-
 static bool cmLVS6G_IsFAT(const char* dir);
 
 class cmLocalVisualStudio7GeneratorInternals
@@ -1961,35 +1958,10 @@ cmLocalVisualStudio7Generator
 
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
-
-  // Compute the version of the Intel plugin to the VS IDE.
-  // If the key does not exist then use a default guess.
-  std::string intelVersion;
-  std::string vskey = gg->GetRegistryBase();
-  vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
-  cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
-                                   cmSystemTools::KeyWOW64_32);
-  unsigned int intelVersionNumber = ~0u;
-  sscanf(intelVersion.c_str(), "%u", &intelVersionNumber);
-  if(intelVersionNumber >= 11)
-    {
-    // Default to latest known project file version.
-    intelVersion = "11.0";
-    }
-  else if(intelVersionNumber == 10)
-    {
-    // Version 10.x actually uses 9.10 in project files!
-    intelVersion = "9.10";
-    }
-  else
-    {
-    // Version <= 9: use ProductVersion from registry.
-    }
-
   fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectCreator=\"Intel Fortran\"\n"
-       << "\tVersion=\"" << intelVersion << "\"\n";
+       << "\tVersion=\"" << gg->GetIntelProjectVersion() << "\"\n";
   const char* keyword = target.GetProperty("VS_KEYWORD");
   if(!keyword)
     {
