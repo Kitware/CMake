@@ -781,17 +781,14 @@ cmGlobalUnixMakefileGenerator3
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands, true);
 
-      if(t->second.GetType() != cmTarget::INTERFACE_LIBRARY)
+      // add the all/all dependency
+      if(!this->IsExcluded(this->LocalGenerators[0], t->second))
         {
-        // add the all/all dependency
-        if(!this->IsExcluded(this->LocalGenerators[0], t->second))
-          {
-          depends.clear();
-          depends.push_back(localName);
-          commands.clear();
-          lg->WriteMakeRule(ruleFileStream, "Include target in all.",
-                            "all", depends, commands, true);
-          }
+        depends.clear();
+        depends.push_back(localName);
+        commands.clear();
+        lg->WriteMakeRule(ruleFileStream, "Include target in all.",
+                          "all", depends, commands, true);
         }
 
       // Write the rule.
