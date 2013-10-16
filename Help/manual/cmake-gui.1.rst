@@ -1,15 +1,17 @@
 cmake-gui(1)
 ************
 
-::
-
-  cmake-gui - CMake GUI.
+Synopsis
+========
 
 ::
 
   cmake-gui [options]
   cmake-gui [options] <path-to-source>
   cmake-gui [options] <path-to-existing-build>
+
+Description
+===========
 
 The "cmake-gui" executable is the CMake GUI.  Project configuration
 settings may be specified interactively.  Brief instructions are
@@ -51,24 +53,7 @@ native tool on their platform.
 
   If a file is specified, the version is written into it.
 
-The following resources are available to get help using CMake:
+See Also
+========
 
-* ``Home Page``: http://www.cmake.org
-
-  The primary starting point for learning about CMake.
-
-* ``Frequently Asked Questions``: http://www.cmake.org/Wiki/CMake_FAQ
-
-  A Wiki is provided containing answers to frequently asked questions.
-
-* ``Online Documentation``: http://www.cmake.org/HTML/Documentation.html
-
-  Links to available documentation may be found on this web page.
-
-* ``Mailing List``: http://www.cmake.org/HTML/MailingLists.html
-
-  For help and discussion about using cmake, a mailing list is
-  provided at cmake@cmake.org.  The list is member-post-only but one
-  may sign up on the CMake web page.  Please first read the full
-  documentation at http://www.cmake.org before posting questions to
-  the list.
+.. include:: LINKS.txt

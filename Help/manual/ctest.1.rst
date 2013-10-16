@@ -1,13 +1,15 @@
 ctest(1)
 ********
 
-::
-
-  ctest - Testing driver provided by CMake.
+Synopsis
+========
 
 ::
 
   ctest [options]
+
+Description
+===========
 
 The "ctest" executable is the CMake test driver program.
 CMake-generated build trees created for projects that use the
@@ -344,24 +346,7 @@ program will run the tests and report results.
 
   If a file is specified, the version is written into it.
 
-The following resources are available to get help using CMake:
+See Also
+========
 
-* ``Home Page``: http://www.cmake.org
-
-  The primary starting point for learning about CMake.
-
-* ``Frequently Asked Questions``: http://www.cmake.org/Wiki/CMake_FAQ
-
-  A Wiki is provided containing answers to frequently asked questions.
-
-* ``Online Documentation``: http://www.cmake.org/HTML/Documentation.html
-
-  Links to available documentation may be found on this web page.
-
-* ``Mailing List``: http://www.cmake.org/HTML/MailingLists.html
-
-  For help and discussion about using cmake, a mailing list is
-  provided at cmake@cmake.org.  The list is member-post-only but one
-  may sign up on the CMake web page.  Please first read the full
-  documentation at http://www.cmake.org before posting questions to
-  the list.
+.. include:: LINKS.txt
