@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectCreator="Intel Fortran"
 	Keyword="Console Application"
-	Version="11.0"
+	Version="@CMAKE_VS_INTEL_Fortran_PROJECT_VERSION@"
 	ProjectIdGuid="{AB67BAB7-D7AE-4E97-B492-FE5420447509}"
 	>
 	<Platforms>
