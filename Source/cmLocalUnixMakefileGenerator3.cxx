@@ -1159,27 +1159,25 @@ cmLocalUnixMakefileGenerator3
                      const std::vector<std::string>& files,
                      cmTarget& target, const char* filename)
 {
+  std::string cleanfile = this->Makefile->GetCurrentOutputDirectory();
+  cleanfile += "/";
+  cleanfile += this->GetTargetDirectory(target);
+  cleanfile += "/cmake_clean";
+  if(filename)
+    {
+    cleanfile += "_";
+    cleanfile += filename;
+    }
+  cleanfile += ".cmake";
+  std::string cleanfilePath = this->Convert(cleanfile.c_str(), FULL);
+  std::ofstream fout(cleanfilePath.c_str());
+  if(!fout)
+    {
+    cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
+    }
   if(!files.empty())
     {
-    std::string cleanfile = this->Makefile->GetCurrentOutputDirectory();
-    cleanfile += "/";
-    cleanfile += this->GetTargetDirectory(target);
-    cleanfile += "/cmake_clean";
-    if(filename)
-      {
-      cleanfile += "_";
-      cleanfile += filename;
-      }
-    cleanfile += ".cmake";
-    std::string cleanfilePath = this->Convert(cleanfile.c_str(), FULL);
-    std::ofstream fout(cleanfilePath.c_str());
-    if(!fout)
-      {
-      cmSystemTools::Error("Could not create ", cleanfilePath.c_str());
-      }
     fout << "file(REMOVE_RECURSE\n";
-    std::string remove = "$(CMAKE_COMMAND) -P ";
-    remove += this->Convert(cleanfile.c_str(), START_OUTPUT, SHELL);
     for(std::vector<std::string>::const_iterator f = files.begin();
         f != files.end(); ++f)
       {
@@ -1187,27 +1185,29 @@ cmLocalUnixMakefileGenerator3
       fout << "  " << this->EscapeForCMake(fc.c_str()) << "\n";
       }
     fout << ")\n";
-    commands.push_back(remove);
+    }
+  std::string remove = "$(CMAKE_COMMAND) -P ";
+  remove += this->Convert(cleanfile.c_str(), START_OUTPUT, SHELL);
+  commands.push_back(remove);
 
-    // For the main clean rule add per-language cleaning.
-    if(!filename)
+  // For the main clean rule add per-language cleaning.
+  if(!filename)
+    {
+    // Get the set of source languages in the target.
+    std::set<cmStdString> languages;
+    target.GetLanguages(languages);
+    fout << "\n"
+         << "# Per-language clean rules from dependency scanning.\n"
+         << "foreach(lang";
+    for(std::set<cmStdString>::const_iterator l = languages.begin();
+        l != languages.end(); ++l)
       {
-      // Get the set of source languages in the target.
-      std::set<cmStdString> languages;
-      target.GetLanguages(languages);
-      fout << "\n"
-           << "# Per-language clean rules from dependency scanning.\n"
-           << "foreach(lang";
-      for(std::set<cmStdString>::const_iterator l = languages.begin();
-          l != languages.end(); ++l)
-        {
-        fout << " " << *l;
-        }
-      fout << ")\n"
-           << "  include(" << this->GetTargetDirectory(target)
-           << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
-           << "endforeach()\n";
+      fout << " " << *l;
       }
+    fout << ")\n"
+         << "  include(" << this->GetTargetDirectory(target)
+         << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
+         << "endforeach()\n";
     }
 }
 
