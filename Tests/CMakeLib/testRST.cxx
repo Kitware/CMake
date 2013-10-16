@@ -28,6 +28,10 @@ void reportLine(std::ostream& os, bool ret, std::string line, bool eol)
 int testRST(int, char*[])
 {
   std::string dir = cmSystemTools::GetFilenamePath(__FILE__);
+  if(dir.empty())
+    {
+    dir = ".";
+    }
   std::string a_name = "testRST.actual";
   std::string e_name = dir + "/testRST.expect";
 
