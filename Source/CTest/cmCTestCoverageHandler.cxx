@@ -843,7 +843,10 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     = this->CTest->GetCTestConfiguration("CoverageCommand");
   std::string gcovExtraFlags
     = this->CTest->GetCTestConfiguration("CoverageExtraFlags");
-
+  if ( gcovCommand != "codecov" )
+    {
+    return 0;
+    }
   // Style 1
   std::string st1gcovOutputRex1
     = "[0-9]+\\.[0-9]+% of [0-9]+ (source |)lines executed in file (.*)$";
@@ -905,8 +908,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   // These are binary files that you give as input to gcov so that it will
   // give us text output we can analyze to summarize coverage.
   //
-  if ( gcovCommand != "codecov" )
-    {
     for ( it = files.begin(); it != files.end(); ++ it )
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
@@ -920,7 +921,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
           gcovExtraFlags + " " +
           "-o \"" + fileDir + "\" " +
           "\"" + *it + "\"";
-      
+
 
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, command.c_str()
         << std::endl);
@@ -1260,7 +1261,6 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "    ");
         }
       }
-    }
   cmSystemTools::ChangeDirectory(currentDirectory.c_str());
   return file_count;
 }
@@ -1334,13 +1334,10 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   // files is a list of *.da and *.gcda files with coverage data in them.
   // These are binary files that you give as input to gcov so that it will
   // give us text output we can analyze to summarize coverage.
-<<<<<<< HEAD
-  // IN intel compiler we have to call codecov only once. It collects all dyn
+
+  // In intel compiler we have to call codecov only once. It collects all dyn
   // files to generate lcov file. So files.size = 1
-=======
-  /// IN intel compiler we have to call codecov only once. It collects all dyn files to generate lcov file. So files.size = 1
->>>>>>> cdcd486f624f8a99a21fc41e9ab0e95fcd1b329b
-  //
+
   for ( it = files.begin(); it != files.end(); ++ it )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
@@ -1401,7 +1398,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       cmCTestLog(this->CTest, DEBUG, "Line: [" << line->c_str() << "]"
         << std::endl);
 
-<<<<<<< HEAD
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started"
         << st1re1.find(line->c_str()) << " finished " << std::endl);
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started"
@@ -1419,19 +1415,6 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started"
       << st2re6.find(line->c_str()) << " finished " << std::endl);
 
-=======
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st1re1.find(line->c_str()) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st1re2.find(line->c_str()) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st2re1.find(line->c_str()) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st2re2.find(line->c_str()) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st2re3.find(line->c_str()) << " finished " << std::endl);
-    //cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "nmatch" << st2re3.match(2) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st2re4.find(line->c_str()) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st2re5.find(line->c_str()) << " finished " << std::endl);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "started" << st2re6.find(line->c_str()) << " finished " << std::endl);
-    
-    
->>>>>>> cdcd486f624f8a99a21fc41e9ab0e95fcd1b329b
       if ( line->size() == 0 )
         {
         // Ignore empty line; probably style 2
@@ -1444,7 +1427,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 1 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e1"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e1"
             << std::endl);
           cont->Error ++;
           break;
@@ -1461,7 +1444,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 1 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e2"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e2"
             << std::endl);
           cont->Error ++;
           break;
@@ -1477,7 +1460,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 2 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e3"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e3"
             << std::endl);
           cont->Error ++;
           break;
@@ -1494,7 +1477,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 2 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e4"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e4"
             << std::endl);
           cont->Error ++;
           break;
@@ -1508,20 +1491,15 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 2 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e5"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e5"
             << std::endl);
           cont->Error ++;
           break;
           }
 
         gcovFile = st2re3.match(0); // was 2
-<<<<<<< HEAD
         cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Gcov File: "
           << gcovFile << std::endl);
-=======
-        cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Gcov File: " << gcovFile
-            << std::endl);
->>>>>>> cdcd486f624f8a99a21fc41e9ab0e95fcd1b329b
         }
       else if ( st2re4.find(line->c_str() ) )
         {
@@ -1531,7 +1509,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 2 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e6"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e6"
             << std::endl);
           cont->Error ++;
           break;
@@ -1548,7 +1526,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 2 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e7"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e7"
             << std::endl);
           cont->Error ++;
           break;
@@ -1565,7 +1543,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
           }
         if ( gcovStyle != 2 )
           {
-          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown gcov output style e8"
+          cmCTestLog(this->CTest, ERROR_MESSAGE, "Unknown lcov output style e8"
             << std::endl);
           cont->Error ++;
           break;
@@ -1780,11 +1758,7 @@ void cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
     if(prevBinaryDir.compare(this->CTest->GetBinaryDir()))
       {
       cmSystemTools::ChangeDirectory(this->CTest->GetBinaryDir().c_str());
-<<<<<<< HEAD
       cmSystemTools::RunSingleCommand("profmerge");
-=======
-      system("profmerge");
->>>>>>> cdcd486f624f8a99a21fc41e9ab0e95fcd1b329b
       prevBinaryDir = this->CTest->GetBinaryDir();
 
 
@@ -1807,11 +1781,7 @@ void cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
       }
    }
    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-<<<<<<< HEAD
                 "Now I'm in: " << this->CTest->GetBinaryDir() << std::endl);
-=======
-                "im in this directory now: " << this->CTest->GetBinaryDir() << std::endl);
->>>>>>> cdcd486f624f8a99a21fc41e9ab0e95fcd1b329b
 }
 
 //----------------------------------------------------------------------
@@ -2414,6 +2384,19 @@ int cmCTestCoverageHandler::HandleBullseyeCoverage(
              << std::endl);
   return 1;
 }
+// int cmCTestCoverageHandler::HandleIntelCoverage(
+//   cmCTestCoverageHandlerContainer* cont)
+// {
+//   if(!this->RunIntelSourceSummary(cont))
+//     {
+//     cmCTestLog(this->CTest, ERROR_MESSAGE,
+//                "Error running intel summary.\n");
+//     return 0;
+//     }
+//   cmCTestLog(this->CTest, DEBUG, "HandleIntelCoverage return 1 "
+//              << std::endl);
+//   return 1;
+// }
 
 bool cmCTestCoverageHandler::GetNextInt(std::string const& inputLine,
                                         std::string::size_type& pos,
