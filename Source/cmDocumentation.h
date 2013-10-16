@@ -84,7 +84,7 @@ public:
                      cmDocumentationEntry &docs);
 
   /** Set cmake root so we can find installed files */
-  void SetCMakeRoot(const char* root)  { this->CMakeRoot = root;}
+  void SetCMakeRoot(const char* root) { this->CMakeRoot = root? root:"";}
 
   /** Add common (to all tools) documentation section(s) */
   void addCommonStandardDocSections();

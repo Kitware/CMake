@@ -107,10 +107,6 @@ static const char * cmDocumentationOptions[][2] =
   {"--http1.0", "Submit using HTTP 1.0."},
   {"--no-compress-output", "Do not compress test output when submitting."},
   {"--print-labels", "Print all available test labels."},
-  {"--help-command <cmd> [<file>]",
-   "Show help for a single command and exit."},
-  {"--help-command-list [<file>]", "List available commands and exit."},
-  {"--help-commands [<file>]", "Print help for all commands and exit."},
   {0,0}
 };
 
@@ -153,6 +149,10 @@ int main (int argc, char *argv[])
     doc.addCTestStandardDocSections();
     if(doc.CheckOptions(argc, argv))
       {
+      cmake hcm;
+      hcm.AddCMakePaths();
+      doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
+
       // Construct and print requested documentation.
       cmCTestScriptHandler* ch =
                  static_cast<cmCTestScriptHandler*>(inst.GetHandler("script"));
