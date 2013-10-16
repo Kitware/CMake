@@ -14,7 +14,6 @@
 #define cmTargetPropCommandBase_h
 
 #include "cmCommand.h"
-#include "cmDocumentGeneratorExpressions.h"
 
 class cmTarget;
 

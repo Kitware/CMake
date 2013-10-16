@@ -1,7 +1,14 @@
-# - Test for compiler support of ANSI sstream header
-# check if the compiler supports the standard ANSI sstream header
-#  CMAKE_NO_ANSI_STRING_STREAM - defined by the results
+#.rst:
+# TestForSSTREAM
+# --------------
 #
+# Test for compiler support of ANSI sstream header
+#
+# check if the compiler supports the standard ANSI sstream header
+#
+# ::
+#
+#   CMAKE_NO_ANSI_STRING_STREAM - defined by the results
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

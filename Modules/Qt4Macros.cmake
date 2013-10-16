@@ -1,3 +1,9 @@
+#.rst:
+# Qt4Macros
+# ---------
+#
+#
+#
 # This file is included by FindQt4.cmake, don't include it directly.
 
 #=============================================================================

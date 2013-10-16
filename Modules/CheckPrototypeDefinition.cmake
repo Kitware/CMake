@@ -1,23 +1,38 @@
-# - Check if the protoype we expect is correct.
-# check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
-#  FUNCTION - The name of the function (used to check if prototype exists)
-#  PROTOTYPE- The prototype to check.
-#  RETURN - The return value of the function.
-#  HEADER - The header files required.
-#  VARIABLE - The variable to store the result.
-# Example:
-#  check_prototype_definition(getpwent_r
-#   "struct passwd *getpwent_r(struct passwd *src, char *buf, int buflen)"
-#   "NULL"
-#   "unistd.h;pwd.h"
-#   SOLARIS_GETPWENT_R)
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+#.rst:
+# CheckPrototypeDefinition
+# ------------------------
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_INCLUDES = list of include directories
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+# Check if the protoype we expect is correct.
+#
+# check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
+#
+# ::
+#
+#   FUNCTION - The name of the function (used to check if prototype exists)
+#   PROTOTYPE- The prototype to check.
+#   RETURN - The return value of the function.
+#   HEADER - The header files required.
+#   VARIABLE - The variable to store the result.
+#
+# Example:
+#
+# ::
+#
+#   check_prototype_definition(getpwent_r
+#    "struct passwd *getpwent_r(struct passwd *src, char *buf, int buflen)"
+#    "NULL"
+#    "unistd.h;pwd.h"
+#    SOLARIS_GETPWENT_R)
+#
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
+#
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.

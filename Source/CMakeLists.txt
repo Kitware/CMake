@@ -159,16 +159,7 @@ set(SRCS
   cmDependsJavaParserHelper.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
-  cmDocumentationFormatterHTML.cxx
-  cmDocumentationFormatterDocbook.cxx
-  cmDocumentationFormatterMan.cxx
-  cmDocumentationFormatterText.cxx
-  cmDocumentationFormatterUsage.cxx
   cmDocumentationSection.cxx
-  cmDocumentCompileDefinitions.h
-  cmDocumentGeneratorExpressions.h
-  cmDocumentLocationUndefined.h
-  cmDocumentVariables.cxx
   cmDynamicLoader.cxx
   cmDynamicLoader.h
   ${ELF_SRCS}
@@ -261,6 +252,8 @@ set(SRCS
   cmPropertyMap.h
   cmQtAutomoc.cxx
   cmQtAutomoc.h
+  cmRST.cxx
+  cmRST.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx
@@ -497,8 +490,6 @@ set(CPACK_SRCS
   CPack/cmCPackTarBZip2Generator.cxx
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPackDocumentVariables.cxx
-  CPack/cmCPackDocumentMacros.cxx
   )
 
 if(CYGWIN)

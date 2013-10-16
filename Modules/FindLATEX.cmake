@@ -1,15 +1,21 @@
-# - Find Latex
+#.rst:
+# FindLATEX
+# ---------
+#
+# Find Latex
+#
 # This module finds if Latex is installed and determines where the
-# executables are. This code sets the following variables:
+# executables are.  This code sets the following variables:
 #
-#  LATEX_COMPILER:       path to the LaTeX compiler
-#  PDFLATEX_COMPILER:    path to the PdfLaTeX compiler
-#  BIBTEX_COMPILER:      path to the BibTeX compiler
-#  MAKEINDEX_COMPILER:   path to the MakeIndex compiler
-#  DVIPS_CONVERTER:      path to the DVIPS converter
-#  PS2PDF_CONVERTER:     path to the PS2PDF converter
-#  LATEX2HTML_CONVERTER: path to the LaTeX2Html converter
+# ::
 #
+#   LATEX_COMPILER:       path to the LaTeX compiler
+#   PDFLATEX_COMPILER:    path to the PdfLaTeX compiler
+#   BIBTEX_COMPILER:      path to the BibTeX compiler
+#   MAKEINDEX_COMPILER:   path to the MakeIndex compiler
+#   DVIPS_CONVERTER:      path to the DVIPS converter
+#   PS2PDF_CONVERTER:     path to the PS2PDF converter
+#   LATEX2HTML_CONVERTER: path to the LaTeX2Html converter
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.

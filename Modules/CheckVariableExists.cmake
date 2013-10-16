@@ -1,17 +1,32 @@
-# - Check if the variable exists.
-#  CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+#.rst:
+# CheckVariableExists
+# -------------------
 #
-#  VAR      - the name of the variable
-#  VARIABLE - variable to store the result
+# Check if the variable exists.
+#
+# ::
+#
+#   CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+#
+#
+#
+# ::
+#
+#   VAR      - the name of the variable
+#   VARIABLE - variable to store the result
+#
+#
 #
 # This macro is only for C variables.
 #
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.

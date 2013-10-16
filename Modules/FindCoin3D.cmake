@@ -1,13 +1,20 @@
-# - Find Coin3D (Open Inventor)
-# Coin3D is an implementation of the Open Inventor API.
-# It provides data structures and algorithms for 3D visualization
+#.rst:
+# FindCoin3D
+# ----------
+#
+# Find Coin3D (Open Inventor)
+#
+# Coin3D is an implementation of the Open Inventor API.  It provides
+# data structures and algorithms for 3D visualization
 # http://www.coin3d.org/
 #
 # This module defines the following variables
-#  COIN3D_FOUND         - system has Coin3D - Open Inventor
-#  COIN3D_INCLUDE_DIRS  - where the Inventor include directory can be found
-#  COIN3D_LIBRARIES     - Link to this to use Coin3D
 #
+# ::
+#
+#   COIN3D_FOUND         - system has Coin3D - Open Inventor
+#   COIN3D_INCLUDE_DIRS  - where the Inventor include directory can be found
+#   COIN3D_LIBRARIES     - Link to this to use Coin3D
 
 #=============================================================================
 # Copyright 2008-2009 Kitware, Inc.

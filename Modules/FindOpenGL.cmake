@@ -1,19 +1,33 @@
-# - Try to find OpenGL
+#.rst:
+# FindOpenGL
+# ----------
+#
+# Try to find OpenGL
+#
 # Once done this will define
 #
-#  OPENGL_FOUND        - system has OpenGL
-#  OPENGL_XMESA_FOUND  - system has XMESA
-#  OPENGL_GLU_FOUND    - system has GLU
-#  OPENGL_INCLUDE_DIR  - the GL include directory
-#  OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
+# ::
+#
+#   OPENGL_FOUND        - system has OpenGL
+#   OPENGL_XMESA_FOUND  - system has XMESA
+#   OPENGL_GLU_FOUND    - system has GLU
+#   OPENGL_INCLUDE_DIR  - the GL include directory
+#   OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
+#
+#
 #
 # If you want to use just GL you can use these values
-#  OPENGL_gl_LIBRARY   - Path to OpenGL Library
-#  OPENGL_glu_LIBRARY  - Path to GLU Library
 #
-# On OSX default to using the framework version of opengl
-# People will have to change the cache values of OPENGL_glu_LIBRARY
-# and OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX
+# ::
+#
+#   OPENGL_gl_LIBRARY   - Path to OpenGL Library
+#   OPENGL_glu_LIBRARY  - Path to GLU Library
+#
+#
+#
+# On OSX default to using the framework version of opengl People will
+# have to change the cache values of OPENGL_glu_LIBRARY and
+# OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

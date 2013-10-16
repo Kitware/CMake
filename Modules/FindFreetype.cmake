@@ -1,16 +1,25 @@
-# - Locate FreeType library
-# This module defines
-#  FREETYPE_LIBRARIES, the library to link against
-#  FREETYPE_FOUND, if false, do not try to link to FREETYPE
-#  FREETYPE_INCLUDE_DIRS, where to find headers.
-#  FREETYPE_VERSION_STRING, the version of freetype found (since CMake 2.8.8)
-#  This is the concatenation of the paths:
-#  FREETYPE_INCLUDE_DIR_ft2build
-#  FREETYPE_INCLUDE_DIR_freetype2
+#.rst:
+# FindFreetype
+# ------------
 #
-# $FREETYPE_DIR is an environment variable that would
-# correspond to the ./configure --prefix=$FREETYPE_DIR
-# used in building FREETYPE.
+# Locate FreeType library
+#
+# This module defines
+#
+# ::
+#
+#   FREETYPE_LIBRARIES, the library to link against
+#   FREETYPE_FOUND, if false, do not try to link to FREETYPE
+#   FREETYPE_INCLUDE_DIRS, where to find headers.
+#   FREETYPE_VERSION_STRING, the version of freetype found (since CMake 2.8.8)
+#   This is the concatenation of the paths:
+#   FREETYPE_INCLUDE_DIR_ft2build
+#   FREETYPE_INCLUDE_DIR_freetype2
+#
+#
+#
+# $FREETYPE_DIR is an environment variable that would correspond to the
+# ./configure --prefix=$FREETYPE_DIR used in building FREETYPE.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

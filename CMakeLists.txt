@@ -411,27 +411,8 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
-include(Source/CMakeVersion.cmake)
-# Releases define a small tweak level.
-if("${CMake_VERSION_TWEAK}" VERSION_LESS 20000000)
-  set(CMake_VERSION_IS_RELEASE 1)
-  set(CMake_VERSION_SOURCE "")
-else()
-  set(CMake_VERSION_IS_RELEASE 0)
-  include(${CMake_SOURCE_DIR}/Source/CMakeVersionSource.cmake)
-endif()
-
-# Compute the full version string.
-set(CMake_VERSION ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH})
-if(${CMake_VERSION_TWEAK} GREATER 0)
-  set(CMake_VERSION ${CMake_VERSION}.${CMake_VERSION_TWEAK})
-endif()
-if(CMake_VERSION_RC)
-  set(CMake_VERSION ${CMake_VERSION}-rc${CMake_VERSION_RC})
-endif()
-if(CMake_VERSION_SOURCE)
-  set(CMake_VERSION ${CMake_VERSION}-${CMake_VERSION_SOURCE})
-endif()
+# Compute CMake_VERSION, etc.
+include(Source/CMakeVersionCompute.cmake)
 
 # Include the standard Dart testing module
 enable_testing()
@@ -451,27 +432,8 @@ set(LIBRARY_OUTPUT_PATH "" CACHE INTERNAL
 # install tree.
 set(CMAKE_SKIP_RPATH ON CACHE INTERNAL "CMake does not need RPATHs.")
 
-set(CMAKE_DATA_DIR "share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
-  "Install location for data (relative to prefix).")
-set(CMAKE_DOC_DIR "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}" CACHE STRING
-  "Install location for documentation (relative to prefix).")
-set(CMAKE_MAN_DIR "man" CACHE STRING
-  "Install location for man pages (relative to prefix).")
-mark_as_advanced(CMAKE_DATA_DIR CMAKE_DOC_DIR CMAKE_MAN_DIR)
-if(CYGWIN AND EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
-  # Force doc, data and man dirs to conform to cygwin layout.
-  set(CMAKE_DOC_DIR  "share/doc/cmake-${CMake_VERSION}")
-  set(CMAKE_DATA_DIR "share/cmake-${CMake_VERSION}")
-  set(CMAKE_MAN_DIR  "share/man")
-  # let the user know we just forced these values
-  message(STATUS "Setup for Cygwin packaging")
-  message(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
-  message(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
-  message(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
-endif()
-string(REGEX REPLACE "^/" "" CMAKE_DATA_DIR "${CMAKE_DATA_DIR}")
-string(REGEX REPLACE "^/" "" CMAKE_DOC_DIR "${CMAKE_DOC_DIR}")
-string(REGEX REPLACE "^/" "" CMAKE_MAN_DIR "${CMAKE_MAN_DIR}")
+# Load install destinations.
+include(Source/CMakeInstallDestinations.cmake)
 
 if(BUILD_TESTING)
   include(${CMake_SOURCE_DIR}/Tests/CMakeInstall.cmake)
@@ -574,10 +536,6 @@ configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/DartLocal.conf"
   COPYONLY)
 
-option(CMAKE_STRICT
-  "Perform strict testing to record property and variable access. Can be used to report any undefined properties or variables" OFF)
-mark_as_advanced(CMAKE_STRICT)
-
 if(NOT CMake_VERSION_IS_RELEASE)
   if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
       NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
@@ -611,7 +569,9 @@ if(BUILD_TESTING)
   CMAKE_SET_TARGET_FOLDER(CMakeLibTests "Tests")
 endif()
 CMAKE_SET_TARGET_FOLDER(cmw9xcom "Utilities/Win9xCompat")
-CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
+if(TARGET documentation)
+  CMAKE_SET_TARGET_FOLDER(documentation "Documentation")
+endif()
 
 # add a test
 add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
@@ -622,7 +582,7 @@ install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
 
 # Install script directories.
 install(
-  DIRECTORY Modules Templates
+  DIRECTORY Help Modules Templates
   DESTINATION ${CMAKE_DATA_DIR}
   FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
   DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
@@ -633,8 +593,8 @@ install(
                               WORLD_READ WORLD_EXECUTE
   )
 
-# process docs related install
-add_subdirectory(Docs)
+# Install auxiliary files integrating with other tools.
+add_subdirectory(Auxiliary)
 
 #-----------------------------------------------------------------------
 # End of the main section of the CMakeLists file

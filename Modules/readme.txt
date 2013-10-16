@@ -58,36 +58,54 @@ descriptions of any the users can use to control stuff.
 You really should also provide backwards compatibility any old settings that were actually in use.
 Make sure you comment them as deprecated, so that no-one starts using them.
 
-To correctly document a module, create a comment block at the top with # comments.
-There are three types of comments that can be in the block:
+To add a module to the CMake documentation, follow these steps:
 
-1. The brief description of the module, this is done by:
-# - a small description
+1. Add file ``Help/module/FindXxx.rst`` containing just the line::
 
-2. A paragraph of text.  This is done with all text that has a single
-space between the # and the text.  To create a new paragraph, just
-put a # with no text on the line.
+    .. cmake-module:: ../../Modules/FindXxx.cmake
 
-3. A verbatim line.  This is done with two spaces between the # and the text.
+2. Modify ``Help/manual/cmake-modules.7.rst`` to reference the module in the
+   toctree directive as::
 
-For example:
+    /module/FindXxx
 
-# - This is a cool module
-# This module does really cool stuff.
-# It can do even more than you think.
-#
-# It even needs to paragraphs to tell you about it.
-# And it defines the following variables:
-#  VAR_COOL - this is great isn't it?
-#  VAR_REALLY_COOL - cool right?
-#
+   Keep the toctree in sorted order!
 
-Test the documentation formatting by running "cmake --help-module FindXxx".
-Edit the comments until the output of this command looks satisfactory.
+3. Add to the top of ``Modules/FindXxx.cmake`` a #-comment of the form::
 
-To have a .cmake file in this directory NOT show up in the
-modules documentation, you should start the file with a blank
-line.
+    #.rst:
+    # FindXxx
+    # -------
+    #
+    # ...reStructuredText documentation of module...
+
+   Comment blocks starting with the line ``#.rst:`` may appear anywhere
+   in the file.
+
+For example::
+
+ #.rst
+ # FindXxx
+ # -------
+ #
+ # This is a cool module.
+ # This module does really cool stuff.
+ # It can do even more than you think.
+ #
+ # It even needs two paragraphs to tell you about it.
+ # And it defines the following variables:
+ #
+ # * VAR_COOL: this is great isn't it?
+ # * VAR_REALLY_COOL: cool right?
+
+Test the documentation formatting by running "cmake --help-module FindXxx",
+and ideally by enabling the SPHINX_HTML and SPHINX_MAN options to build the
+documentation.  Edit the comments until generated documentation looks
+satisfactory.
+
+To have a .cmake file in this directory NOT show up in the modules
+documentation, simply leave out the ``Help/module/<module>.rst`` file and the
+``Help/manual/cmake-modules.7.rst`` toctree entry.
 
 After the documentation, leave a *BLANK* line, and then add a
 copyright and licence notice block like this one:

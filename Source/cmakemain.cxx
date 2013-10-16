@@ -28,33 +28,20 @@
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------------
-static const char * cmDocumentationName[][3] =
+static const char * cmDocumentationName[][2] =
 {
   {0,
-   "  cmake - Cross-Platform Makefile Generator.", 0},
-  {0,0,0}
+   "  cmake - Cross-Platform Makefile Generator."},
+  {0,0}
 };
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationUsage[][3] =
+static const char * cmDocumentationUsage[][2] =
 {
   {0,
    "  cmake [options] <path-to-source>\n"
-   "  cmake [options] <path-to-existing-build>", 0},
-  {0,0,0}
-};
-
-//----------------------------------------------------------------------------
-static const char * cmDocumentationDescription[][3] =
-{
-  {0,
-   "The \"cmake\" executable is the CMake command-line interface.  It may "
-   "be used to configure projects in scripts.  Project configuration "
-   "settings "
-   "may be specified on the command line with the -D option.  The -i option "
-   "will cause cmake to interactively prompt for such settings.", 0},
-  CMAKE_STANDARD_INTRODUCTION,
-  {0,0,0}
+   "  cmake [options] <path-to-existing-build>"},
+  {0,0}
 };
 
 #define CMAKE_BUILD_OPTIONS                                             \
@@ -70,198 +57,52 @@ static const char * cmDocumentationDescription[][3] =
   "  --             = Pass remaining options to the native tool.\n"
 
 //----------------------------------------------------------------------------
-static const char * cmDocumentationOptions[][3] =
+static const char * cmDocumentationOptions[][2] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
-  {"-E", "CMake command mode.",
-   "For true platform independence, CMake provides a list of commands "
-   "that can be used on all systems. Run with -E help for the usage "
-   "information. Commands available are: chdir, compare_files, copy, "
-   "copy_directory, copy_if_different, echo, echo_append, environment, "
-   "make_directory, md5sum, remove, remove_directory, rename, tar, time, "
-   "touch, touch_nocreate. In addition, some platform specific commands "
-   "are available. "
-   "On Windows: comspec, delete_regv, write_regv. "
-   "On UNIX: create_symlink."},
-  {"-i", "Run in wizard mode.",
-   "Wizard mode runs cmake interactively without a GUI.  The user is "
-   "prompted to answer questions about the project configuration.  "
-   "The answers are used to set cmake cache values."},
-  {"-L[A][H]", "List non-advanced cached variables.",
-   "List cache variables will run CMake and list all the variables from the "
-   "CMake cache that are not marked as INTERNAL or ADVANCED. This will "
-   "effectively display current CMake settings, which can then be changed "
-   "with -D option. Changing some of the variables may result in more "
-   "variables being created. If A is specified, then it will display also "
-   "advanced variables. If H is specified, it will also display help for "
-   "each variable."},
-  {"--build <dir>", "Build a CMake-generated project binary tree.",
-   "This abstracts a native build tool's command-line interface with the "
-   "following options:\n"
-   CMAKE_BUILD_OPTIONS
-   "Run cmake --build with no options for quick help."},
-  {"-N", "View mode only.",
-   "Only load the cache. Do not actually run configure and generate steps."},
-  {"-P <file>", "Process script mode.",
-   "Process the given cmake file as a script written in the CMake language.  "
-   "No configure or generate step is performed and the cache is not"
-   " modified. If variables are defined using -D, this must be done "
-   "before the -P argument."},
-  {"--find-package", "Run in pkg-config like mode.",
-   "Search a package using find_package() and print the resulting flags "
-   "to stdout. This can be used to use cmake instead of pkg-config to find "
-   "installed libraries in plain Makefile-based projects or in "
-   "autoconf-based projects (via share/aclocal/cmake.m4)."},
+  {"-E", "CMake command mode."},
+  {"-i", "Run in wizard mode."},
+  {"-L[A][H]", "List non-advanced cached variables."},
+  {"--build <dir>", "Build a CMake-generated project binary tree."},
+  {"-N", "View mode only."},
+  {"-P <file>", "Process script mode."},
+  {"--find-package", "Run in pkg-config like mode."},
   {"--graphviz=[file]", "Generate graphviz of dependencies, see "
-   "CMakeGraphVizOptions.cmake for more.",
-   "Generate a graphviz input file that will contain all the library and "
-   "executable dependencies in the project. See the documentation for "
-   "CMakeGraphVizOptions.cmake for more details. "},
-  {"--system-information [file]", "Dump information about this system.",
-   "Dump a wide range of information about the current system. If run "
-   "from the top of a binary tree for a CMake project it will dump "
-   "additional information such as the cache, log files etc."},
+   "CMakeGraphVizOptions.cmake for more."},
+  {"--system-information [file]", "Dump information about this system."},
   {"--debug-trycompile", "Do not delete the try_compile build tree. Only "
-   "useful on one try_compile at a time.",
-   "Do not delete the files and directories created for try_compile calls. "
-   "This is useful in debugging failed try_compiles. It may however "
-   "change the results of the try-compiles as old junk from a previous "
-   "try-compile may cause a different test to either pass or fail "
-   "incorrectly.  This option is best used for one try-compile at a time, "
-   "and only when debugging." },
-  {"--debug-output", "Put cmake in a debug mode.",
-   "Print extra stuff during the cmake run like stack traces with "
-   "message(send_error ) calls."},
-  {"--trace", "Put cmake in trace mode.",
-   "Print a trace of all calls made and from where with "
-   "message(send_error ) calls."},
-  {"--warn-uninitialized", "Warn about uninitialized values.",
-   "Print a warning when an uninitialized variable is used."},
-  {"--warn-unused-vars", "Warn about unused variables.",
-   "Find variables that are declared or set, but not used."},
-  {"--no-warn-unused-cli", "Don't warn about command line options.",
-   "Don't find variables that are declared on the command line, but not "
-   "used."},
+   "useful on one try_compile at a time."},
+  {"--debug-output", "Put cmake in a debug mode."},
+  {"--trace", "Put cmake in trace mode."},
+  {"--warn-uninitialized", "Warn about uninitialized values."},
+  {"--warn-unused-vars", "Warn about unused variables."},
+  {"--no-warn-unused-cli", "Don't warn about command line options."},
   {"--check-system-vars", "Find problems with variable usage in system "
-   "files.", "Normally, unused and uninitialized variables are searched for "
-   "only in CMAKE_SOURCE_DIR and CMAKE_BINARY_DIR. This flag tells CMake to "
-   "warn about other files as well."},
-  {"--help-command cmd [file]", "Print help for a single command and exit.",
-   "Full documentation specific to the given command is displayed. "
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-command-list [file]", "List available listfile commands and exit.",
-   "The list contains all commands for which help may be obtained by using "
-   "the --help-command argument followed by a command name. "
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-commands [file]", "Print help for all commands and exit.",
-   "Full documentation specific for all current commands is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-compatcommands [file]", "Print help for compatibility commands. ",
-   "Full documentation specific for all compatibility commands is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-module module [file]", "Print help for a single module and exit.",
-   "Full documentation specific to the given module is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-module-list [file]", "List available modules and exit.",
-   "The list contains all modules for which help may be obtained by using "
-   "the --help-module argument followed by a module name. "
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-modules [file]", "Print help for all modules and exit.",
-   "Full documentation for all modules is displayed. "
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
+   "files."},
+  {"--help-command cmd [file]", "Print help for a single command and exit."},
+  {"--help-command-list [file]", "List available listfile commands and exit."},
+  {"--help-commands [file]", "Print help for all commands and exit."},
+  {"--help-compatcommands [file]", "Print help for compatibility commands. "},
+  {"--help-module module [file]", "Print help for a single module and exit."},
+  {"--help-module-list [file]", "List available modules and exit."},
+  {"--help-modules [file]", "Print help for all modules and exit."},
   {"--help-custom-modules [file]" , "Print help for all custom modules and "
-   "exit.",
-   "Full documentation for all custom modules is displayed. "
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
+   "exit."},
   {"--help-policy cmp [file]",
-   "Print help for a single policy and exit.",
-   "Full documentation specific to the given policy is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-policies [file]", "Print help for all policies and exit.",
-   "Full documentation for all policies is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
+   "Print help for a single policy and exit."},
+  {"--help-policy-list [file]", "List available policies and exit."},
+  {"--help-policies [file]", "Print help for all policies and exit."},
   {"--help-property prop [file]",
-   "Print help for a single property and exit.",
-   "Full documentation specific to the given property is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-property-list [file]", "List available properties and exit.",
-   "The list contains all properties for which help may be obtained by using "
-   "the --help-property argument followed by a property name.  If a file is "
-   "specified, the help is written into it."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-properties [file]", "Print help for all properties and exit.",
-   "Full documentation for all properties is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
+   "Print help for a single property and exit."},
+  {"--help-property-list [file]", "List available properties and exit."},
+  {"--help-properties [file]", "Print help for all properties and exit."},
   {"--help-variable var [file]",
-   "Print help for a single variable and exit.",
-   "Full documentation specific to the given variable is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-variable-list [file]", "List documented variables and exit.",
-   "The list contains all variables for which help may be obtained by using "
-   "the --help-variable argument followed by a variable name.  If a file is "
-   "specified, the help is written into it."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {"--help-variables [file]", "Print help for all variables and exit.",
-   "Full documentation for all variables is displayed."
-   "If a file is specified, the documentation is written into and the output "
-   "format is determined depending on the filename suffix. Supported are man "
-   "page, HTML, DocBook and plain text."},
-  {0,0,0}
+   "Print help for a single variable and exit."},
+  {"--help-variable-list [file]", "List documented variables and exit."},
+  {"--help-variables [file]", "Print help for all variables and exit."},
+  {0,0}
 };
 
-//----------------------------------------------------------------------------
-static const char * cmDocumentationSeeAlso[][3] =
-{
-  {0, "ccmake", 0},
-  {0, "cpack", 0},
-  {0, "ctest", 0},
-  {0, "cmakecommands", 0},
-  {0, "cmakecompat", 0},
-  {0, "cmakemodules", 0},
-  {0, "cmakeprops", 0},
-  {0, "cmakevars", 0},
-  {0, 0, 0}
-};
-
-//----------------------------------------------------------------------------
-static const char * cmDocumentationNOTE[][3] =
-{
-  {0,
-   "CMake no longer configures a project when run with no arguments.  "
-   "In order to configure the project in the current directory, run\n"
-   "  cmake .", 0},
-  {0,0,0}
-};
 #endif
 
 int do_cmake(int ac, char** av);
@@ -375,57 +216,18 @@ int do_cmake(int ac, char** av)
       args.push_back(av[i]);
       }
     hcm.SetCacheArgs(args);
-    const char* modulePath = hcm.GetCacheDefinition("CMAKE_MODULE_PATH");
-    if (modulePath)
-      {
-      doc.SetCMakeModulePath(modulePath);
-      }
 
-    std::vector<cmDocumentationEntry> commands;
-    std::vector<cmDocumentationEntry> policies;
-    std::vector<cmDocumentationEntry> compatCommands;
     std::vector<cmDocumentationEntry> generators;
-    std::map<std::string,cmDocumentationSection *> propDocs;
 
-    hcm.GetPolicyDocumentation(policies);
-    hcm.GetCommandDocumentation(commands, true, false);
-    hcm.GetCommandDocumentation(compatCommands, false, true);
-    hcm.GetPropertiesDocumentation(propDocs);
     hcm.GetGeneratorDocumentation(generators);
 
     doc.SetName("cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
-    doc.SetSection("Description",cmDocumentationDescription);
     doc.AppendSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
-    doc.SetSection("Commands",commands);
-    doc.SetSection("Policies",policies);
-    doc.AppendSection("Compatibility Commands",compatCommands);
-    doc.SetSections(propDocs);
 
-    cmDocumentationEntry e;
-    e.Brief =
-      "variables defined by cmake, that give information about the project, "
-      "and cmake";
-    doc.PrependSection("Variables that Provide Information",e);
-
-    doc.SetSeeAlsoList(cmDocumentationSeeAlso);
-    int result = doc.PrintRequestedDocumentation(std::cout)? 0:1;
-
-    // If we were run with no arguments, but a CMakeLists.txt file
-    // exists, the user may have been trying to use the old behavior
-    // of cmake to build a project in-source.  Print a message
-    // explaining the change to standard error and return an error
-    // condition in case the program is running from a script.
-    if((ac == 1) && cmSystemTools::FileExists("CMakeLists.txt"))
-      {
-      doc.ClearSections();
-      doc.SetSection("NOTE", cmDocumentationNOTE);
-      doc.Print(cmDocumentation::UsageForm, 0, std::cerr);
-      return 1;
-      }
-    return result;
+    return doc.PrintRequestedDocumentation(std::cout)? 0:1;
     }
 #else
   if ( ac == 1 )

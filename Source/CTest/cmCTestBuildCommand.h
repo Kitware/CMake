@@ -45,34 +45,8 @@ public:
    */
   virtual const char* GetName() const { return "ctest_build";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Build the project.";
-    }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  ctest_build([BUILD build_dir] [TARGET target] [RETURN_VALUE res]\n"
-      "              [APPEND][NUMBER_ERRORS val] [NUMBER_WARNINGS val])\n"
-      "Builds the given build directory and stores results in Build.xml. "
-      "If no BUILD is given, the CTEST_BINARY_DIRECTORY variable is used.\n"
-      "The TARGET variable can be used to specify a build target.  If none "
-      "is specified, the \"all\" target will be built.\n"
-      "The RETURN_VALUE option specifies a variable in which to store the "
-      "return value of the native build tool. "
-      "The NUMBER_ERRORS and NUMBER_WARNINGS options specify variables in "
-      "which to store the number of build errors and warnings detected."
-      "\n"
-      CTEST_COMMAND_APPEND_OPTION_DOCS;
-    }
 
   cmTypeMacro(cmCTestBuildCommand, cmCTestHandlerCommand);
 

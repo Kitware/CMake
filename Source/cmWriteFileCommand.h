@@ -46,32 +46,6 @@ public:
    */
   virtual const char* GetName() const { return "write_file";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Deprecated. Use the file(WRITE ) command instead.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  write_file(filename \"message to write\"... [APPEND])\n"
-      "The first argument is the file name, the rest of the arguments are "
-      "messages to write. If the argument APPEND is specified, then "
-      "the message will be appended.\n"
-      "NOTE 1: file(WRITE ... and file(APPEND ... do exactly the same as "
-      "this one but add some more functionality.\n"
-      "NOTE 2: When using write_file the produced file cannot be used as an "
-      "input to CMake (CONFIGURE_FILE, source file ...) because it will "
-      "lead to an infinite loop. Use configure_file if you want to generate "
-      "input files to CMake.";
-    }
-
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

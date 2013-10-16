@@ -48,25 +48,6 @@ public:
    */
   virtual const char* GetName() const { return "ctest_read_custom_files";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "read CTestCustom files.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  ctest_read_custom_files( directory ... )\n"
-      "Read all the CTestCustom.ctest or CTestCustom.cmake files from "
-      "the given directory.";
-    }
-
   cmTypeMacro(cmCTestReadCustomFilesCommand, cmCTestCommand);
 
 };

@@ -1,7 +1,12 @@
-# - Use Module for QT4
-# Sets up C and C++ to use Qt 4.  It is assumed that FindQt.cmake
-# has already been loaded.  See FindQt.cmake for information on
-# how to load Qt 4 into your CMake project.
+#.rst:
+# UseQt4
+# ------
+#
+# Use Module for QT4
+#
+# Sets up C and C++ to use Qt 4.  It is assumed that FindQt.cmake has
+# already been loaded.  See FindQt.cmake for information on how to load
+# Qt 4 into your CMake project.
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.

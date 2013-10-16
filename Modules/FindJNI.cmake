@@ -1,17 +1,23 @@
-# - Find JNI java libraries.
+#.rst:
+# FindJNI
+# -------
+#
+# Find JNI java libraries.
+#
 # This module finds if Java is installed and determines where the
-# include files and libraries are. It also determines what the name of
-# the library is. This code sets the following variables:
+# include files and libraries are.  It also determines what the name of
+# the library is.  This code sets the following variables:
 #
-#  JNI_INCLUDE_DIRS      = the include dirs to use
-#  JNI_LIBRARIES         = the libraries to use
-#  JNI_FOUND             = TRUE if JNI headers and libraries were found.
-#  JAVA_AWT_LIBRARY      = the path to the jawt library
-#  JAVA_JVM_LIBRARY      = the path to the jvm library
-#  JAVA_INCLUDE_PATH     = the include path to jni.h
-#  JAVA_INCLUDE_PATH2    = the include path to jni_md.h
-#  JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
+# ::
 #
+#   JNI_INCLUDE_DIRS      = the include dirs to use
+#   JNI_LIBRARIES         = the libraries to use
+#   JNI_FOUND             = TRUE if JNI headers and libraries were found.
+#   JAVA_AWT_LIBRARY      = the path to the jawt library
+#   JAVA_JVM_LIBRARY      = the path to the jvm library
+#   JAVA_INCLUDE_PATH     = the include path to jni.h
+#   JAVA_INCLUDE_PATH2    = the include path to jni_md.h
+#   JAVA_AWT_INCLUDE_PATH = the include path to jawt.h
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

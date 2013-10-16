@@ -1,14 +1,26 @@
+#.rst:
+# FindGDAL
+# --------
+#
+#
+#
 # Locate gdal
 #
 # This module accepts the following environment variables:
 #
-#    GDAL_DIR or GDAL_ROOT - Specify the location of GDAL
+# ::
+#
+#     GDAL_DIR or GDAL_ROOT - Specify the location of GDAL
+#
+#
 #
 # This module defines the following CMake variables:
 #
-#    GDAL_FOUND - True if libgdal is found
-#    GDAL_LIBRARY - A variable pointing to the GDAL library
-#    GDAL_INCLUDE_DIR - Where to find the headers
+# ::
+#
+#     GDAL_FOUND - True if libgdal is found
+#     GDAL_LIBRARY - A variable pointing to the GDAL library
+#     GDAL_INCLUDE_DIR - Where to find the headers
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

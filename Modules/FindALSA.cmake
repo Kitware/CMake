@@ -1,15 +1,25 @@
-# - Find alsa
+#.rst:
+# FindALSA
+# --------
+#
+# Find alsa
+#
 # Find the alsa libraries (asound)
 #
-#  This module defines the following variables:
-#     ALSA_FOUND       - True if ALSA_INCLUDE_DIR & ALSA_LIBRARY are found
-#     ALSA_LIBRARIES   - Set when ALSA_LIBRARY is found
-#     ALSA_INCLUDE_DIRS - Set when ALSA_INCLUDE_DIR is found
+# ::
 #
-#     ALSA_INCLUDE_DIR - where to find asoundlib.h, etc.
-#     ALSA_LIBRARY     - the asound library
-#     ALSA_VERSION_STRING - the version of alsa found (since CMake 2.8.8)
+#   This module defines the following variables:
+#      ALSA_FOUND       - True if ALSA_INCLUDE_DIR & ALSA_LIBRARY are found
+#      ALSA_LIBRARIES   - Set when ALSA_LIBRARY is found
+#      ALSA_INCLUDE_DIRS - Set when ALSA_INCLUDE_DIR is found
 #
+#
+#
+# ::
+#
+#      ALSA_INCLUDE_DIR - where to find asoundlib.h, etc.
+#      ALSA_LIBRARY     - the asound library
+#      ALSA_VERSION_STRING - the version of alsa found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2009-2011 Kitware, Inc.

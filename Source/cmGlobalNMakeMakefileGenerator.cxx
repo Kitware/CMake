@@ -65,5 +65,4 @@ void cmGlobalNMakeMakefileGenerator
 {
   entry.Name = cmGlobalNMakeMakefileGenerator::GetActualName();
   entry.Brief = "Generates NMake makefiles.";
-  entry.Full = "";
 }

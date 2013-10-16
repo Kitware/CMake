@@ -65,11 +65,6 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
     entry.Name = vs8generatorName;
     entry.Brief = "Generates Visual Studio 8 2005 project files.";
-    entry.Full =
-      "It is possible to append a space followed by the platform name "
-      "to create project files for a specific target platform. E.g. "
-      "\"Visual Studio 8 2005 Win64\" will create project files for "
-      "the x64 processor.";
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
@@ -147,7 +142,6 @@ void cmGlobalVisualStudio8Generator
 {
   entry.Name = cmGlobalVisualStudio8Generator::GetActualName();
   entry.Brief = "Generates Visual Studio 8 2005 project files.";
-  entry.Full = "";
 }
 
 //----------------------------------------------------------------------------

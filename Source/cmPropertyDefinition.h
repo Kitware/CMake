@@ -30,21 +30,13 @@ public:
   void DefineProperty(const char *name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
-                      const char *DocumentationSection,
                       bool chained);
-
-  /// Get the documentation string
-  cmDocumentationEntry GetDocumentation() const;
 
   /// Default constructor
   cmPropertyDefinition() { this->Chained = false; };
 
   /// Is the property chained?
   bool IsChained() const { return this->Chained; };
-
-  /// Get the section if any
-  const std::string &GetDocumentationSection() const {
-    return this->DocumentationSection; };
 
   /// Get the scope
   cmProperty::ScopeType GetScope() const {
@@ -62,7 +54,6 @@ protected:
   std::string Name;
   std::string ShortDescription;
   std::string FullDescription;
-  std::string DocumentationSection;
   cmProperty::ScopeType Scope;
   bool Chained;
 };

@@ -935,52 +935,6 @@ cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
   return pos->second->Status;
 }
 
-void cmPolicies::GetDocumentation(std::vector<cmDocumentationEntry>& v)
-{
-  // now loop over all the policies and set them as appropriate
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
-    = this->Policies.begin();
-  for (;i != this->Policies.end(); ++i)
-    {
-    cmOStringStream full;
-    full << i->second->LongDescription;
-    full << "\nThis policy was introduced in CMake version ";
-    full << i->second->GetVersionString() << ".";
-    if(i->first != cmPolicies::CMP0000)
-      {
-      full << "  "
-           << "CMake version " << cmVersion::GetCMakeVersion() << " ";
-      // add in some more text here based on status
-      switch (i->second->Status)
-        {
-        case cmPolicies::WARN:
-          full << "warns when the policy is not set and uses OLD behavior.  "
-               << "Use the cmake_policy command to set it to OLD or NEW "
-               << "explicitly.";
-          break;
-        case cmPolicies::OLD:
-          full << "defaults to the OLD behavior for this policy.";
-          break;
-        case cmPolicies::NEW:
-          full << "defaults to the NEW behavior for this policy.";
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-          full << "requires the policy to be set to NEW if you use it.  "
-               << "Use the cmake_policy command to set it to NEW.";
-          break;
-        case cmPolicies::REQUIRED_ALWAYS:
-          full << "requires the policy to be set to NEW.  "
-               << "Use the cmake_policy command to set it to NEW.";
-          break;
-        }
-      }
-    cmDocumentationEntry e(i->second->IDString.c_str(),
-                           i->second->ShortDescription.c_str(),
-                           full.str().c_str());
-    v.push_back(e);
-    }
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)

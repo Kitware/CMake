@@ -1,15 +1,26 @@
-# - Check if the given C source code compiles and runs.
-# CHECK_C_SOURCE_RUNS(<code> <var>)
-#  <code>   - source code to try to compile
-#  <var>    - variable to store the result
-#             (1 for success, empty for failure)
-# The following variables may be set before calling this macro to
-# modify the way the check is run:
+#.rst:
+# CheckCSourceRuns
+# ----------------
 #
-#  CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#  CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#  CMAKE_REQUIRED_INCLUDES = list of include directories
-#  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+# Check if the given C source code compiles and runs.
+#
+# CHECK_C_SOURCE_RUNS(<code> <var>)
+#
+# ::
+#
+#   <code>   - source code to try to compile
+#   <var>    - variable to store the result
+#              (1 for success, empty for failure)
+#
+# The following variables may be set before calling this macro to modify
+# the way the check is run:
+#
+# ::
+#
+#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
+#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
+#   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

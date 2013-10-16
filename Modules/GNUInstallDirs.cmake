@@ -1,32 +1,49 @@
-# - Define GNU standard installation directories
+#.rst:
+# GNUInstallDirs
+# --------------
+#
+# Define GNU standard installation directories
+#
 # Provides install directory variables as defined for GNU software:
-#  http://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+#
+# ::
+#
+#   http://www.gnu.org/prep/standards/html_node/Directory-Variables.html
+#
 # Inclusion of this module defines the following variables:
-#  CMAKE_INSTALL_<dir>      - destination for files of a given type
-#  CMAKE_INSTALL_FULL_<dir> - corresponding absolute path
+#
+# ::
+#
+#   CMAKE_INSTALL_<dir>      - destination for files of a given type
+#   CMAKE_INSTALL_FULL_<dir> - corresponding absolute path
+#
 # where <dir> is one of:
-#  BINDIR           - user executables (bin)
-#  SBINDIR          - system admin executables (sbin)
-#  LIBEXECDIR       - program executables (libexec)
-#  SYSCONFDIR       - read-only single-machine data (etc)
-#  SHAREDSTATEDIR   - modifiable architecture-independent data (com)
-#  LOCALSTATEDIR    - modifiable single-machine data (var)
-#  LIBDIR           - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
-#  INCLUDEDIR       - C header files (include)
-#  OLDINCLUDEDIR    - C header files for non-gcc (/usr/include)
-#  DATAROOTDIR      - read-only architecture-independent data root (share)
-#  DATADIR          - read-only architecture-independent data (DATAROOTDIR)
-#  INFODIR          - info documentation (DATAROOTDIR/info)
-#  LOCALEDIR        - locale-dependent data (DATAROOTDIR/locale)
-#  MANDIR           - man documentation (DATAROOTDIR/man)
-#  DOCDIR           - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
-# Each CMAKE_INSTALL_<dir> value may be passed to the DESTINATION options of
-# install() commands for the corresponding file type.  If the includer does
-# not define a value the above-shown default will be used and the value will
-# appear in the cache for editing by the user.
-# Each CMAKE_INSTALL_FULL_<dir> value contains an absolute path constructed
-# from the corresponding destination by prepending (if necessary) the value
-# of CMAKE_INSTALL_PREFIX.
+#
+# ::
+#
+#   BINDIR           - user executables (bin)
+#   SBINDIR          - system admin executables (sbin)
+#   LIBEXECDIR       - program executables (libexec)
+#   SYSCONFDIR       - read-only single-machine data (etc)
+#   SHAREDSTATEDIR   - modifiable architecture-independent data (com)
+#   LOCALSTATEDIR    - modifiable single-machine data (var)
+#   LIBDIR           - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
+#   INCLUDEDIR       - C header files (include)
+#   OLDINCLUDEDIR    - C header files for non-gcc (/usr/include)
+#   DATAROOTDIR      - read-only architecture-independent data root (share)
+#   DATADIR          - read-only architecture-independent data (DATAROOTDIR)
+#   INFODIR          - info documentation (DATAROOTDIR/info)
+#   LOCALEDIR        - locale-dependent data (DATAROOTDIR/locale)
+#   MANDIR           - man documentation (DATAROOTDIR/man)
+#   DOCDIR           - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+#
+# Each CMAKE_INSTALL_<dir> value may be passed to the DESTINATION
+# options of install() commands for the corresponding file type.  If the
+# includer does not define a value the above-shown default will be used
+# and the value will appear in the cache for editing by the user.  Each
+# CMAKE_INSTALL_FULL_<dir> value contains an absolute path constructed
+# from the corresponding destination by prepending (if necessary) the
+# value of CMAKE_INSTALL_PREFIX.
 
 #=============================================================================
 # Copyright 2011 Nikita Krupen'ko <krnekit@gmail.com>

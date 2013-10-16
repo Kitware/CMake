@@ -40,19 +40,7 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
     this->erase(name);
     return;
     }
-#ifdef CMAKE_STRICT
-  if (!this->CMakeInstance)
-    {
-    cmSystemTools::Error("CMakeInstance not set on a property map!");
-    abort();
-    }
-  else
-    {
-    this->CMakeInstance->RecordPropertyAccess(name,scope);
-    }
-#else
   (void)scope;
-#endif
 
   cmProperty *prop = this->GetOrCreateProperty(name);
   prop->Set(name,value);
@@ -66,19 +54,7 @@ void cmPropertyMap::AppendProperty(const char* name, const char* value,
     {
     return;
     }
-#ifdef CMAKE_STRICT
-  if (!this->CMakeInstance)
-    {
-    cmSystemTools::Error("CMakeInstance not set on a property map!");
-    abort();
-    }
-  else
-    {
-    this->CMakeInstance->RecordPropertyAccess(name,scope);
-    }
-#else
   (void)scope;
-#endif
 
   cmProperty *prop = this->GetOrCreateProperty(name);
   prop->Append(name,value,asString);
@@ -94,19 +70,6 @@ const char *cmPropertyMap
     {
     return 0;
     }
-
-  // has the property been defined?
-#ifdef CMAKE_STRICT
-  if (!this->CMakeInstance)
-    {
-    cmSystemTools::Error("CMakeInstance not set on a property map!");
-    abort();
-    }
-  else
-    {
-    this->CMakeInstance->RecordPropertyAccess(name,scope);
-    }
-#endif
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end())

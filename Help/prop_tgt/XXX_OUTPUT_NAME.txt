@@ -1,0 +1,6 @@
+Output name for |XXX| target files.
+
+This property specifies the base name for |xxx| target files.  It
+overrides OUTPUT_NAME and OUTPUT_NAME_<CONFIG> properties.
+
+.. include:: TARGET_FILE_TYPES.txt

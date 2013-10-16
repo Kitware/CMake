@@ -321,14 +321,12 @@ struct cmDocumentationEntry
 {
   std::string Name;
   std::string Brief;
-  std::string Full;
   cmDocumentationEntry(){};
-  cmDocumentationEntry(const char *doc[3])
+  cmDocumentationEntry(const char *doc[2])
   { if (doc[0]) this->Name = doc[0];
-  if (doc[1]) this->Brief = doc[1];
-  if (doc[2]) this->Full = doc[2]; };
-  cmDocumentationEntry(const char *n, const char *b, const char *f)
-  { if (n) this->Name = n; if (b) this->Brief = b; if (f) this->Full = f; };
+  if (doc[1]) this->Brief = doc[1];};
+  cmDocumentationEntry(const char *n, const char *b)
+  { if (n) this->Name = n; if (b) this->Brief = b; };
 };
 
 /** Data structure to represent a single command line.  */

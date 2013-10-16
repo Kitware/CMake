@@ -49,6 +49,9 @@ public:
   ///! Escape quotes in a string.
   static std::string EscapeQuotes(const char* str);
 
+  /** Map help document name to file name.  */
+  static std::string HelpFileName(std::string);
+
   /**
    * Returns a string that has whitespace removed from the start and the end.
    */

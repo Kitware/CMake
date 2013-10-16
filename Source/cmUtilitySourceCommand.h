@@ -46,35 +46,6 @@ public:
    */
   virtual const char* GetName() const { return "utility_source";}
 
-  /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Specify the source tree of a third-party utility.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  utility_source(cache_entry executable_name\n"
-      "                 path_to_source [file1 file2 ...])\n"
-      "When a third-party utility's source is included in the distribution, "
-      "this command specifies its location and name.  The cache entry will "
-      "not be set unless the path_to_source and all listed files exist.  It "
-      "is assumed that the source tree of the utility will have been built "
-      "before it is needed.\n"
-      "When cross compiling CMake will print a warning if a utility_source() "
-      "command is executed, because in many cases it is used to build an "
-      "executable which is executed later on. This doesn't work when "
-      "cross compiling, since the executable can run only on their target "
-      "platform. So in this case the cache entry has to be adjusted manually "
-      "so it points to an executable which is runnable on the build host.";
-    }
-
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const
     {

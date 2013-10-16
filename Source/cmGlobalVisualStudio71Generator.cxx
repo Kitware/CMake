@@ -313,5 +313,4 @@ void cmGlobalVisualStudio71Generator
 {
   entry.Name = cmGlobalVisualStudio71Generator::GetActualName();
   entry.Brief = "Generates Visual Studio .NET 2003 project files.";
-  entry.Full = "";
 }

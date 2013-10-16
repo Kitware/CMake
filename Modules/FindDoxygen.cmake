@@ -1,23 +1,36 @@
-# - This module looks for Doxygen and the path to Graphviz's dot
+#.rst:
+# FindDoxygen
+# -----------
+#
+# This module looks for Doxygen and the path to Graphviz's dot
+#
 # Doxygen is a documentation generation tool.  Please see
 # http://www.doxygen.org
 #
 # This module accepts the following optional variables:
 #
-#   DOXYGEN_SKIP_DOT       = If true this module will skip trying to find Dot
-#                            (an optional component often used by Doxygen)
+# ::
+#
+#    DOXYGEN_SKIP_DOT       = If true this module will skip trying to find Dot
+#                             (an optional component often used by Doxygen)
+#
+#
 #
 # This modules defines the following variables:
 #
-#   DOXYGEN_EXECUTABLE     = The path to the doxygen command.
-#   DOXYGEN_FOUND          = Was Doxygen found or not?
-#   DOXYGEN_VERSION        = The version reported by doxygen --version
+# ::
 #
-#   DOXYGEN_DOT_EXECUTABLE = The path to the dot program used by doxygen.
-#   DOXYGEN_DOT_FOUND      = Was Dot found or not?
-#   DOXYGEN_DOT_PATH       = The path to dot not including the executable
+#    DOXYGEN_EXECUTABLE     = The path to the doxygen command.
+#    DOXYGEN_FOUND          = Was Doxygen found or not?
+#    DOXYGEN_VERSION        = The version reported by doxygen --version
 #
 #
+#
+# ::
+#
+#    DOXYGEN_DOT_EXECUTABLE = The path to the dot program used by doxygen.
+#    DOXYGEN_DOT_FOUND      = Was Dot found or not?
+#    DOXYGEN_DOT_PATH       = The path to dot not including the executable
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.

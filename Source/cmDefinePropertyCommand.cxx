@@ -12,7 +12,6 @@
 #include "cmDefinePropertyCommand.h"
 #include "cmake.h"
 
-// cmDefinePropertiesCommand
 bool cmDefinePropertyCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {

@@ -48,27 +48,6 @@ public:
   virtual const char* GetName() const { return "use_mangled_mesa";}
 
   /**
-   * Succinct documentation.
-   */
-  virtual const char* GetTerseDocumentation() const
-    {
-    return "Copy mesa headers for use in combination with system GL.";
-    }
-
-  /**
-   * More documentation.
-   */
-  virtual const char* GetFullDocumentation() const
-    {
-    return
-      "  use_mangled_mesa(PATH_TO_MESA OUTPUT_DIRECTORY)\n"
-      "The path to mesa includes, should contain gl_mangle.h.  "
-      "The mesa headers are copied to the specified output directory.  "
-      "This allows mangled mesa headers to override other GL headers by "
-      "being added to the include directory path earlier.";
-    }
-
-  /**
    * This determines if the command is invoked when in script mode.
    */
   virtual bool IsScriptable() const { return true; }

@@ -1,11 +1,19 @@
-# - Find the PostgreSQL installation.
-# In Windows, we make the assumption that, if the PostgreSQL files are installed, the default directory
-# will be C:\Program Files\PostgreSQL.
+#.rst:
+# FindPostgreSQL
+# --------------
+#
+# Find the PostgreSQL installation.
+#
+# In Windows, we make the assumption that, if the PostgreSQL files are
+# installed, the default directory will be C:\Program Files\PostgreSQL.
 #
 # This module defines
-#  PostgreSQL_LIBRARIES - the PostgreSQL libraries needed for linking
-#  PostgreSQL_INCLUDE_DIRS - the directories of the PostgreSQL headers
-#  PostgreSQL_VERSION_STRING - the version of PostgreSQL found (since CMake 2.8.8)
+#
+# ::
+#
+#   PostgreSQL_LIBRARIES - the PostgreSQL libraries needed for linking
+#   PostgreSQL_INCLUDE_DIRS - the directories of the PostgreSQL headers
+#   PostgreSQL_VERSION_STRING - the version of PostgreSQL found (since CMake 2.8.8)
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.

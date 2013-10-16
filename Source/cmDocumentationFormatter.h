@@ -25,19 +25,16 @@ class cmDocumentationEnums
 public:
   /** Types of help provided.  */
   enum Type
-  { None, Usage, Single, SingleModule, SingleProperty, SingleVariable,
-    List, ModuleList, PropertyList, VariableList,
-    Full, Properties, Variables, Modules, CustomModules, Commands,
-    CompatCommands, Copyright, Version, Policies, SinglePolicy };
-
-  /** Forms of documentation output.  */
-  enum Form { TextForm, HTMLForm, ManForm, UsageForm, DocbookForm };
+  {
+    None, Version, Usage, ListManuals,
+    ListCommands, ListModules, ListProperties, ListVariables, ListPolicies,
+    OneManual, OneCommand, OneModule, OneProperty, OneVariable, OnePolicy
+  };
 };
 
 class cmDocumentationSection;
 
-/** Base class for printing the documentation in the various supported
-   formats. */
+/** Print documentation in a simple text format. */
 class cmDocumentationFormatter
 {
 public:
@@ -45,23 +42,15 @@ public:
   virtual ~cmDocumentationFormatter();
   void PrintFormatted(std::ostream& os, const char* text);
 
-  virtual cmDocumentationEnums::Form GetForm() const = 0;
-
-  virtual void PrintHeader(const char* /*docname*/,
-                           const char* /*appname*/,
-                           std::ostream& /*os*/) {}
-  virtual void PrintFooter(std::ostream& /*os*/) {}
   virtual void PrintSection(std::ostream& os,
-                    const cmDocumentationSection& section,
-                    const char* name) = 0;
-  virtual void PrintPreformatted(std::ostream& os, const char* text) = 0;
-  virtual void PrintParagraph(std::ostream& os, const char* text) = 0;
-  virtual void PrintIndex(std::ostream& ,
-                          std::vector<const cmDocumentationSection *>&)
-    {}
-
-  /** Compute a prefix for links into a section (#\<prefix\>_SOMETHING). */
-  std::string ComputeSectionLinkPrefix(std::string const& name);
+                            cmDocumentationSection const& section);
+  virtual void PrintPreformatted(std::ostream& os, const char* text);
+  virtual void PrintParagraph(std::ostream& os, const char* text);
+  void PrintColumn(std::ostream& os, const char* text);
+  void SetIndent(const char* indent);
+private:
+  int TextWidth;
+  const char* TextIndent;
 };
 
 #endif
