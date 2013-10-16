@@ -304,47 +304,7 @@ program will run the tests and report results.
   This option will not run any tests, it will simply print the list of
   all labels associated with the test set.
 
-* ``--help-command <cmd> [<file>]``: Show help for a single command and exit.
-
-  Prints the help for the command to stdout or to the specified file.
-
-* ``--help-command-list [<file>]``: List available commands and exit.
-
-  Prints the list of all available listfile commands to stdout or the
-  specified file.
-
-* ``--help-commands [<file>]``: Print help for all commands and exit.
-
-  Prints the help for all commands to stdout or to the specified file.
-
-* ``--copyright [file]``: Print the CMake copyright and exit.
-
-  If a file is specified, the copyright is written into it.
-
-* ``--help,-help,-usage,-h,-H,/?``: Print usage information and exit.
-
-  Usage describes the basic command line interface and its options.
-
-* ``--help-full [file]``: Print full help and exit.
-
-  Full help displays most of the documentation provided by the UNIX
-  man page.  It is provided for use on non-UNIX platforms, but is also
-  convenient if the man page is not installed.  If a file is
-  specified, the help is written into it.
-
-* ``--help-html [file]``: Print full help in HTML format.
-
-  This option is used by CMake authors to help produce web pages.  If
-  a file is specified, the help is written into it.
-
-* ``--help-man [file]``: Print full help as a UNIX man page and exit.
-
-  This option is used by the cmake build to generate the UNIX man
-  page.  If a file is specified, the help is written into it.
-
-* ``--version,-version,/V [file]``: Show program name/version banner and exit.
-
-  If a file is specified, the version is written into it.
+.. include:: OPTIONS_HELP.txt
 
 See Also
 ========

@@ -58,12 +58,7 @@ int main(int argc, char** argv)
     // Construct and print requested documentation.
     cmake hcm;
     hcm.AddCMakePaths();
-    // just incase the install is bad avoid a seg fault
-    const char* root = hcm.GetCacheDefinition("CMAKE_ROOT");
-    if(root)
-      {
-      doc.SetCMakeRoot(root);
-      }
+    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
 
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);

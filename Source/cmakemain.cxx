@@ -79,27 +79,6 @@ static const char * cmDocumentationOptions[][2] =
   {"--no-warn-unused-cli", "Don't warn about command line options."},
   {"--check-system-vars", "Find problems with variable usage in system "
    "files."},
-  {"--help-command cmd [file]", "Print help for a single command and exit."},
-  {"--help-command-list [file]", "List available listfile commands and exit."},
-  {"--help-commands [file]", "Print help for all commands and exit."},
-  {"--help-compatcommands [file]", "Print help for compatibility commands. "},
-  {"--help-module module [file]", "Print help for a single module and exit."},
-  {"--help-module-list [file]", "List available modules and exit."},
-  {"--help-modules [file]", "Print help for all modules and exit."},
-  {"--help-custom-modules [file]" , "Print help for all custom modules and "
-   "exit."},
-  {"--help-policy cmp [file]",
-   "Print help for a single policy and exit."},
-  {"--help-policy-list [file]", "List available policies and exit."},
-  {"--help-policies [file]", "Print help for all policies and exit."},
-  {"--help-property prop [file]",
-   "Print help for a single property and exit."},
-  {"--help-property-list [file]", "List available properties and exit."},
-  {"--help-properties [file]", "Print help for all properties and exit."},
-  {"--help-variable var [file]",
-   "Print help for a single variable and exit."},
-  {"--help-variable-list [file]", "List documented variables and exit."},
-  {"--help-variables [file]", "Print help for all variables and exit."},
   {0,0}
 };
 

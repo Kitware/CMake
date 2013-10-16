@@ -86,6 +86,8 @@ int main(int argc, char** argv)
   if(doc.CheckOptions(argc, argv))
     {
     cmake hcm;
+    hcm.AddCMakePaths();
+    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("ccmake");
