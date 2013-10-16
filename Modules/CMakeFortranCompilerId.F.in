@@ -18,10 +18,8 @@
         PRINT *, 'INFO:simulate_version[014.00]'
 #  elif _MSC_VER >= 1310
         PRINT *, 'INFO:simulate_version[013.01]'
-#  elif _MSC_VER >= 1300
+#  else
         PRINT *, 'INFO:simulate_version[013.00]'
-#  elif _MSC_VER >= 1200
-        PRINT *, 'INFO:simulate_version[012.00]'
 #  endif
 # endif
 #elif defined(__SUNPRO_F90) || defined(__SUNPRO_F95)
