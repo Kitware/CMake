@@ -273,7 +273,6 @@ if(BUILD_TESTING)
       --build-two-config
       ${build_generator_args}
       --build-project InterfaceBuildTargets
-      --build-target iface
       --test-command ${CMAKE_CMAKE_COMMAND} -E touch_nocreate ${InterfaceBuildTargets_libname}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceBuildTargets")
