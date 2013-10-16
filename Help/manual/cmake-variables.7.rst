@@ -61,6 +61,7 @@ Variables that Provide Information
    /variable/CMAKE_TWEAK_VERSION
    /variable/CMAKE_VERBOSE_MAKEFILE
    /variable/CMAKE_VERSION
+   /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
    /variable/CMAKE_VS_PLATFORM_TOOLSET
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT_BINARY_DIR
