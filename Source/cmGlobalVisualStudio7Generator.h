@@ -101,6 +101,8 @@ public:
       LinkLibraryDependencies and link to .sln dependencies. */
   virtual bool NeedLinkLibraryDependencies(cmTarget&) { return false; }
 
+  std::string const& GetIntelProjectVersion() const
+    { return this->IntelProjectVersion; }
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 
@@ -159,6 +161,10 @@ protected:
   // There is one SLN file per project.
   std::string CurrentProject;
   std::string PlatformName;
+
+private:
+  void InitIntelProjectVersion();
+  std::string IntelProjectVersion;
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

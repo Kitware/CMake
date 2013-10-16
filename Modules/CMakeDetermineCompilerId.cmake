@@ -115,7 +115,7 @@ Id flags: ${testflags}
     set(id_lang "${lang}")
     set(id_cl cl.exe)
     if(lang STREQUAL Fortran)
-      set(v Intel-11)
+      set(v Intel)
       set(ext vfproj)
       set(id_cl ifort.exe)
     elseif(NOT "${vs_version}" VERSION_LESS 10)
