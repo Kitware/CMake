@@ -24,3 +24,17 @@ elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++0x")
   set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=gnu++0x")
 endif()
+
+set(CMAKE_CXX11_COMPILER_FEATURES)
+
+include("${CMAKE_ROOT}/Modules/Compiler/CxxFeatureTesting.cmake")
+
+macro(_get_gcc_features std_version list)
+  record_cxx_compiler_features("-std=${std_version}" ${list})
+endmacro()
+
+_get_gcc_features(c++11 CMAKE_CXX11_COMPILER_FEATURES)
+
+set(CMAKE_CXX_COMPILER_FEATURES
+  ${CMAKE_CXX11_COMPILER_FEATURES}
+)
