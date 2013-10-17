@@ -12,6 +12,7 @@
 #include "cmRST.h"
 
 #include "cmSystemTools.h"
+#include "cmVersion.h"
 
 #include <ctype.h>
 
@@ -41,6 +42,7 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
                "((\\|[^| \t\r\n]([^|\r\n]*[^| \t\r\n])?\\|)(__|_|))"
                "([^A-Za-z0-9_]|$)")
 {
+  this->Replace["|release|"] = cmVersion::GetCMakeVersion();
 }
 
 //----------------------------------------------------------------------------
