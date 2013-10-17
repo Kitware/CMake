@@ -210,30 +210,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
   // and we don't want to be iterating a list while removing from it
   TestSet depends = this->Tests[test];
   size_t totalDepends = depends.size();
-  if(totalDepends)
-    {
-    for(TestSet::const_iterator i = depends.begin();
-        i != depends.end(); ++i)
-      {
-      // if the test is not already running then start it
-      if(!this->TestRunningMap[*i])
-        {
-        // this test might be finished, but since
-        // this is a copy of the depend map we might
-        // still have it
-        if(!this->TestFinishMap[*i])
-          {
-          // only start one test in this function
-          return this->StartTest(*i);
-          }
-        else
-          {
-          // the depend has been and finished
-          totalDepends--;
-          }
-        }
-      }
-    }
+
   // if there are no depends left then run this test
   if(totalDepends == 0)
     {
@@ -262,25 +239,17 @@ void cmCTestMultiProcessHandler::StartNextTests()
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
-    //in case this test has already been started due to dependency
-    if(this->TestRunningMap[*test] || this->TestFinishMap[*test])
-      {
-      continue;
-      }
     size_t processors = GetProcessorsUsed(*test);
-    if(processors > numToStart)
+
+    if(processors <= numToStart && this->StartTest(*test))
       {
-      return;
+        if(this->StopTimePassed)
+          {
+          return;
+          }
+        numToStart -= processors;
       }
-    if(this->StartTest(*test))
-      {
-      if(this->StopTimePassed)
-        {
-        return;
-        }
-      numToStart -= processors;
-      }
-    if(numToStart == 0)
+    else if(numToStart == 0)
       {
       return;
       }
