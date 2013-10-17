@@ -77,8 +77,6 @@ public:
     CMP0024, ///< Disallow including export() result.
     CMP0025, ///< Compiler id for Apple Clang is now AppleClang
     CMP0026, ///< Disallow use of the LOCATION target property.
-    CMP0027, ///< Conditionally linked imported targets with missing include
-    /// directories.
 
     /** \brief Always the last entry.
      *

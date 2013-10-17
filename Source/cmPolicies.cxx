@@ -236,27 +236,6 @@ cmPolicies::cmPolicies()
     CMP0026, "CMP0026",
     "Disallow use of the LOCATION target property.",
     2,8,13,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0027, "CMP0027",
-    "Conditionally linked imported targets with missing include directories.",
-    "CMake 2.8.11 introduced introduced the concept of "
-    "INTERFACE_INCLUDE_DIRECTORIES, and a check at cmake time that the "
-    "entries in the INTERFACE_INCLUDE_DIRECTORIES of an IMPORTED target "
-    "actually exist.  CMake 2.8.11 also introduced generator expression "
-    "support in the target_link_libraries command.  However, if an imported "
-    "target is linked as a result of a generator expression evaluation, the "
-    "entries in the INTERFACE_INCLUDE_DIRECTORIES of that target were not "
-    "checked for existence as they should be."
-    "\n"
-    "The OLD behavior of this policy is to report a warning if an entry in "
-    "the INTERFACE_INCLUDE_DIRECTORIES of a generator-expression "
-    "conditionally linked IMPORTED target does not exist."
-    "\n"
-    "The NEW behavior of this policy is to report an error if an entry in "
-    "the INTERFACE_INCLUDE_DIRECTORIES of a generator-expression "
-    "conditionally linked IMPORTED target does not exist.",
-    2,8,13,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
