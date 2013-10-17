@@ -55,13 +55,6 @@ static const char * cmDocumentationOptions[][2] =
     {"-R <package version>","override/define CPACK_PACKAGE_VERSION"},
     {"-B <package directory>","override/define CPACK_PACKAGE_DIRECTORY"},
     {"--vendor <vendor name>","override/define CPACK_PACKAGE_VENDOR"},
-    {"--help-command cmd [file]", "Print help for a single command and exit."},
-    {"--help-command-list [file]", "List available commands and exit."},
-    {"--help-commands [file]", "Print help for all commands and exit."},
-    {"--help-variable var [file]",
-     "Print help for a single variable and exit."},
-    {"--help-variable-list [file]", "List documented variables and exit."},
-    {"--help-variables [file]", "Print help for all variables and exit."},
     {0,0}
 };
 
@@ -235,6 +228,7 @@ int main (int argc, char *argv[])
 
   // This part is used for cpack documentation lookup as well.
   cminst.AddCMakePaths();
+  doc.SetCMakeRoot(cminst.GetCacheDefinition("CMAKE_ROOT"));
 
   if ( parsed && !help )
     {
