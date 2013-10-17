@@ -236,6 +236,11 @@ cmPolicies::cmPolicies()
     CMP0026, "CMP0026",
     "Disallow use of the LOCATION target property.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0027, "CMP0027",
+    "Conditionally linked imported targets with missing include directories.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
