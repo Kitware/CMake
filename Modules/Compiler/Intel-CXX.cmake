@@ -15,11 +15,14 @@ set(CMAKE_CXX_CREATE_ASSEMBLY_SOURCE "<CMAKE_CXX_COMPILER> <DEFINES> <FLAGS> -S 
 
 set(CMAKE_CXX11_COMPILER_FEATURES)
 
+include("${CMAKE_ROOT}/Modules/Compiler/CxxFeatureTesting.cmake")
+
 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.1)
   if (CMAKE_CXX_SIMULATE_ID STREQUAL MSVC)
     set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "/Qstd=c++0x")
   else()
     set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++0x")
+    record_cxx_compiler_features("-std=c++0x" CMAKE_CXX11_COMPILER_FEATURES)
     # TODO: Does intel support GNU extensions and -std=gnu++0x etc?
   endif()
 endif()
@@ -29,14 +32,9 @@ if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 13)
     set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "/Qstd=c++11")
   else()
     set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++11")
+    record_cxx_compiler_features("-std=c++11" CMAKE_CXX11_COMPILER_FEATURES)
   endif()
 endif()
-
-set(CMAKE_CXX11_COMPILER_FEATURES)
-
-include("${CMAKE_ROOT}/Modules/Compiler/CxxFeatureTesting.cmake")
-
-record_cxx_compiler_features("-std=c++11" CMAKE_CXX11_COMPILER_FEATURES)
 
 set(CMAKE_CXX_COMPILER_FEATURES
   ${CMAKE_CXX11_COMPILER_FEATURES}

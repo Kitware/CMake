@@ -12,15 +12,13 @@ set(CMAKE_CXX_COMPILE_OBJECT
 
 set(CMAKE_CXX11_COMPILER_FEATURES)
 
-if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
-   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-qlanglvl=extended0x")
-endif()
-
-set(CMAKE_CXX11_COMPILER_FEATURES)
-
 include("${CMAKE_ROOT}/Modules/Compiler/CxxFeatureTesting.cmake")
 
-record_cxx_compiler_features("-qlanglvl=extended0x" CMAKE_CXX11_COMPILER_FEATURES)
+if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.1)
+   set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-qlanglvl=extended0x")
+   record_cxx_compiler_features("-qlanglvl=extended0x" CMAKE_CXX11_COMPILER_FEATURES)
+endif()
+
 
 set(CMAKE_CXX_COMPILER_FEATURES
   ${CMAKE_CXX11_COMPILER_FEATURES}
