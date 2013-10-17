@@ -32,7 +32,7 @@ generate_export_header(depA)
 add_library(depB SHARED depB.cpp)
 generate_export_header(depB)
 
-target_link_libraries(depB LINK_PRIVATE depA)
+target_link_libraries(depB LINK_PRIVATE depA LINK_PRIVATE depA)
 
 add_library(libgenex SHARED libgenex.cpp)
 generate_export_header(libgenex)
@@ -44,11 +44,11 @@ set_property(TARGET depB APPEND PROPERTY
 add_library(depC SHARED depC.cpp)
 generate_export_header(depC)
 
-target_link_libraries(depC LINK_PUBLIC depA)
+target_link_libraries(depC LINK_PUBLIC depA LINK_PUBLIC depA)
 
 assert_property(depA LINK_INTERFACE_LIBRARIES "")
 assert_property(depB LINK_INTERFACE_LIBRARIES "")
-assert_property(depC LINK_INTERFACE_LIBRARIES "depA")
+assert_property(depC LINK_INTERFACE_LIBRARIES "depA;depA")
 
 add_executable(targetA targetA.cpp)
 

@@ -151,7 +151,8 @@ bool cmTargetLinkLibrariesCommand
     else if(args[i] == "LINK_PUBLIC")
       {
       if(i != 1
-          && this->CurrentProcessingState != ProcessingPlainPrivateInterface)
+          && this->CurrentProcessingState != ProcessingPlainPrivateInterface
+          && this->CurrentProcessingState != ProcessingPlainPublicInterface)
         {
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
@@ -181,7 +182,8 @@ bool cmTargetLinkLibrariesCommand
     else if(args[i] == "LINK_PRIVATE")
       {
       if(i != 1
-          && this->CurrentProcessingState != ProcessingPlainPublicInterface)
+          && this->CurrentProcessingState != ProcessingPlainPublicInterface
+          && this->CurrentProcessingState != ProcessingPlainPrivateInterface)
         {
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
