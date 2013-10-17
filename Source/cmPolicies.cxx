@@ -19,14 +19,13 @@ public:
   cmPolicy(cmPolicies::PolicyID iD,
             const char *idString,
             const char *shortDescription,
-            const char *longDescription,
             unsigned int majorVersionIntroduced,
             unsigned int minorVersionIntroduced,
             unsigned int patchVersionIntroduced,
             unsigned int tweakVersionIntroduced,
             cmPolicies::PolicyStatus status)
   {
-    if (!idString || !shortDescription || ! longDescription)
+    if (!idString || !shortDescription)
       {
       cmSystemTools::Error("Attempt to define a policy without "
         "all parameters being specified!");
@@ -35,7 +34,6 @@ public:
     this->ID = iD;
     this->IDString = idString;
     this->ShortDescription = shortDescription;
-    this->LongDescription = longDescription;
     this->MajorVersionIntroduced = majorVersionIntroduced;
     this->MinorVersionIntroduced = minorVersionIntroduced;
     this->PatchVersionIntroduced = patchVersionIntroduced;
@@ -90,7 +88,6 @@ public:
   cmPolicies::PolicyID ID;
   std::string IDString;
   std::string ShortDescription;
-  std::string LongDescription;
   unsigned int MajorVersionIntroduced;
   unsigned int MinorVersionIntroduced;
   unsigned int PatchVersionIntroduced;
@@ -104,560 +101,140 @@ cmPolicies::cmPolicies()
   this->DefinePolicy(
     CMP0000, "CMP0000",
     "A minimum required CMake version must be specified.",
-    "CMake requires that projects specify the version of CMake to which "
-    "they have been written.  "
-    "This policy has been put in place so users trying to build the project "
-    "may be told when they need to update their CMake.  "
-    "Specifying a version also helps the project build with CMake versions "
-    "newer than that specified.  "
-    "Use the cmake_minimum_required command at the top of your main "
-    " CMakeLists.txt file:\n"
-    "  cmake_minimum_required(VERSION <major>.<minor>)\n"
-    "where \"<major>.<minor>\" is the version of CMake you want to support "
-    "(such as \"2.6\").  "
-    "The command will ensure that at least the given version of CMake is "
-    "running and help newer versions be compatible with the project.  "
-    "See documentation of cmake_minimum_required for details.\n"
-    "Note that the command invocation must appear in the CMakeLists.txt "
-    "file itself; a call in an included file is not sufficient.  "
-    "However, the cmake_policy command may be called to set policy "
-    "CMP0000 to OLD or NEW behavior explicitly.  "
-    "The OLD behavior is to silently ignore the missing invocation.  "
-    "The NEW behavior is to issue an error instead of a warning.  "
-    "An included file may set CMP0000 explicitly to affect how this "
-    "policy is enforced for the main CMakeLists.txt file.",
     2,6,0,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
     CMP0001, "CMP0001",
     "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.",
-    "The OLD behavior is to check CMAKE_BACKWARDS_COMPATIBILITY and present "
-    "it to the user.  "
-    "The NEW behavior is to ignore CMAKE_BACKWARDS_COMPATIBILITY "
-    "completely.\n"
-    "In CMake 2.4 and below the variable CMAKE_BACKWARDS_COMPATIBILITY was "
-    "used to request compatibility with earlier versions of CMake.  "
-    "In CMake 2.6 and above all compatibility issues are handled by policies "
-    "and the cmake_policy command.  "
-    "However, CMake must still check CMAKE_BACKWARDS_COMPATIBILITY for "
-    "projects written for CMake 2.4 and below.",
     2,6,0,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
     CMP0002, "CMP0002",
     "Logical target names must be globally unique.",
-    "Targets names created with "
-    "add_executable, add_library, or add_custom_target "
-    "are logical build target names.  "
-    "Logical target names must be globally unique because:\n"
-    "  - Unique names may be referenced unambiguously both in CMake\n"
-    "    code and on make tool command lines.\n"
-    "  - Logical names are used by Xcode and VS IDE generators\n"
-    "    to produce meaningful project names for the targets.\n"
-    "The logical name of executable and library targets does not "
-    "have to correspond to the physical file names built.  "
-    "Consider using the OUTPUT_NAME target property to create two "
-    "targets with the same physical name while keeping logical "
-    "names distinct.  "
-    "Custom targets must simply have globally unique names (unless one "
-    "uses the global property ALLOW_DUPLICATE_CUSTOM_TARGETS with a "
-    "Makefiles generator).",
     2,6,0,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
     CMP0003, "CMP0003",
     "Libraries linked via full path no longer produce linker search paths.",
-    "This policy affects how libraries whose full paths are NOT known "
-    "are found at link time, but was created due to a change in how CMake "
-    "deals with libraries whose full paths are known.  "
-    "Consider the code\n"
-    "  target_link_libraries(myexe /path/to/libA.so)\n"
-    "CMake 2.4 and below implemented linking to libraries whose full paths "
-    "are known by splitting them on the link line into separate components "
-    "consisting of the linker search path and the library name.  "
-    "The example code might have produced something like\n"
-    "  ... -L/path/to -lA ...\n"
-    "in order to link to library A.  "
-    "An analysis was performed to order multiple link directories such that "
-    "the linker would find library A in the desired location, but there "
-    "are cases in which this does not work.  "
-    "CMake versions 2.6 and above use the more reliable approach of passing "
-    "the full path to libraries directly to the linker in most cases.  "
-    "The example code now produces something like\n"
-    "  ... /path/to/libA.so ....\n"
-    "Unfortunately this change can break code like\n"
-    "  target_link_libraries(myexe /path/to/libA.so B)\n"
-    "where \"B\" is meant to find \"/path/to/libB.so\".  "
-    "This code is wrong because the user is asking the linker to find "
-    "library B but has not provided a linker search path (which may be "
-    "added with the link_directories command).  "
-    "However, with the old linking implementation the code would work "
-    "accidentally because the linker search path added for library A "
-    "allowed library B to be found."
-    "\n"
-    "In order to support projects depending on linker search paths "
-    "added by linking to libraries with known full paths, the OLD "
-    "behavior for this policy will add the linker search paths even "
-    "though they are not needed for their own libraries.  "
-    "When this policy is set to OLD, CMake will produce a link line such as\n"
-    "  ... -L/path/to /path/to/libA.so -lB ...\n"
-    "which will allow library B to be found as it was previously.  "
-    "When this policy is set to NEW, CMake will produce a link line such as\n"
-    "  ... /path/to/libA.so -lB ...\n"
-    "which more accurately matches what the project specified."
-    "\n"
-    "The setting for this policy used when generating the link line is that "
-    "in effect when the target is created by an add_executable or "
-    "add_library command.  For the example described above, the code\n"
-    "  cmake_policy(SET CMP0003 OLD) # or cmake_policy(VERSION 2.4)\n"
-    "  add_executable(myexe myexe.c)\n"
-    "  target_link_libraries(myexe /path/to/libA.so B)\n"
-    "will work and suppress the warning for this policy.  "
-    "It may also be updated to work with the corrected linking approach:\n"
-    "  cmake_policy(SET CMP0003 NEW) # or cmake_policy(VERSION 2.6)\n"
-    "  link_directories(/path/to) # needed to find library B\n"
-    "  add_executable(myexe myexe.c)\n"
-    "  target_link_libraries(myexe /path/to/libA.so B)\n"
-    "Even better, library B may be specified with a full path:\n"
-    "  add_executable(myexe myexe.c)\n"
-    "  target_link_libraries(myexe /path/to/libA.so /path/to/libB.so)\n"
-    "When all items on the link line have known paths CMake does not check "
-    "this policy so it has no effect.\n"
-    "Note that the warning for this policy will be issued for at most "
-    "one target.  This avoids flooding users with messages for every "
-    "target when setting the policy once will probably fix all targets.",
     2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0004, "CMP0004",
     "Libraries linked may not have leading or trailing whitespace.",
-    "CMake versions 2.4 and below silently removed leading and trailing "
-    "whitespace from libraries linked with code like\n"
-    "  target_link_libraries(myexe \" A \")\n"
-    "This could lead to subtle errors in user projects.\n"
-    "The OLD behavior for this policy is to silently remove leading and "
-    "trailing whitespace.  "
-    "The NEW behavior for this policy is to diagnose the existence of "
-    "such whitespace as an error.  "
-    "The setting for this policy used when checking the library names is "
-    "that in effect when the target is created by an add_executable or "
-    "add_library command.",
     2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0005, "CMP0005",
     "Preprocessor definition values are now escaped automatically.",
-    "This policy determines whether or not CMake should generate escaped "
-    "preprocessor definition values added via add_definitions.  "
-    "CMake versions 2.4 and below assumed that only trivial values would "
-    "be given for macros in add_definitions calls.  "
-    "It did not attempt to escape non-trivial values such as string "
-    "literals in generated build rules.  "
-    "CMake versions 2.6 and above support escaping of most values, but "
-    "cannot assume the user has not added escapes already in an attempt to "
-    "work around limitations in earlier versions.\n"
-    "The OLD behavior for this policy is to place definition values given "
-    "to add_definitions directly in the generated build rules without "
-    "attempting to escape anything.  "
-    "The NEW behavior for this policy is to generate correct escapes "
-    "for all native build tools automatically.  "
-    "See documentation of the COMPILE_DEFINITIONS target property for "
-    "limitations of the escaping implementation.",
     2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0006, "CMP0006",
     "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.",
-    "This policy determines whether the install(TARGETS) command must be "
-    "given a BUNDLE DESTINATION when asked to install a target with the "
-    "MACOSX_BUNDLE property set.  "
-    "CMake 2.4 and below did not distinguish application bundles from "
-    "normal executables when installing targets.  "
-    "CMake 2.6 provides a BUNDLE option to the install(TARGETS) command "
-    "that specifies rules specific to application bundles on the Mac.  "
-    "Projects should use this option when installing a target with the "
-    "MACOSX_BUNDLE property set.\n"
-    "The OLD behavior for this policy is to fall back to the RUNTIME "
-    "DESTINATION if a BUNDLE DESTINATION is not given.  "
-    "The NEW behavior for this policy is to produce an error if a bundle "
-    "target is installed without a BUNDLE DESTINATION.",
     2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0007, "CMP0007",
     "list command no longer ignores empty elements.",
-    "This policy determines whether the list command will "
-    "ignore empty elements in the list. "
-    "CMake 2.4 and below list commands ignored all empty elements"
-    " in the list.  For example, a;b;;c would have length 3 and not 4. "
-    "The OLD behavior for this policy is to ignore empty list elements. "
-    "The NEW behavior for this policy is to correctly count empty "
-    "elements in a list. ",
     2,6,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0008, "CMP0008",
     "Libraries linked by full-path must have a valid library file name.",
-    "In CMake 2.4 and below it is possible to write code like\n"
-    "  target_link_libraries(myexe /full/path/to/somelib)\n"
-    "where \"somelib\" is supposed to be a valid library file name "
-    "such as \"libsomelib.a\" or \"somelib.lib\".  "
-    "For Makefile generators this produces an error at build time "
-    "because the dependency on the full path cannot be found.  "
-    "For VS IDE and Xcode generators this used to work by accident because "
-    "CMake would always split off the library directory and ask the "
-    "linker to search for the library by name (-lsomelib or somelib.lib).  "
-    "Despite the failure with Makefiles, some projects have code like this "
-    "and build only with VS and/or Xcode.  "
-    "This version of CMake prefers to pass the full path directly to the "
-    "native build tool, which will fail in this case because it does "
-    "not name a valid library file."
-    "\n"
-    "This policy determines what to do with full paths that do not appear "
-    "to name a valid library file.  "
-    "The OLD behavior for this policy is to split the library name from the "
-    "path and ask the linker to search for it.  "
-    "The NEW behavior for this policy is to trust the given path and "
-    "pass it directly to the native build tool unchanged.",
     2,6,1,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0009, "CMP0009",
     "FILE GLOB_RECURSE calls should not follow symlinks by default.",
-    "In CMake 2.6.1 and below, FILE GLOB_RECURSE calls would follow "
-    "through symlinks, sometimes coming up with unexpectedly large "
-    "result sets because of symlinks to top level directories that "
-    "contain hundreds of thousands of files."
-    "\n"
-    "This policy determines whether or not to follow symlinks "
-    "encountered during a FILE GLOB_RECURSE call. "
-    "The OLD behavior for this policy is to follow the symlinks. "
-    "The NEW behavior for this policy is not to follow the symlinks "
-    "by default, but only if FOLLOW_SYMLINKS is given as an additional "
-    "argument to the FILE command.",
     2,6,2,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0010, "CMP0010",
     "Bad variable reference syntax is an error.",
-    "In CMake 2.6.2 and below, incorrect variable reference syntax such as "
-    "a missing close-brace (\"${FOO\") was reported but did not stop "
-    "processing of CMake code.  "
-    "This policy determines whether a bad variable reference is an error.  "
-    "The OLD behavior for this policy is to warn about the error, leave "
-    "the string untouched, and continue. "
-    "The NEW behavior for this policy is to report an error.",
     2,6,3,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0011, "CMP0011",
     "Included scripts do automatic cmake_policy PUSH and POP.",
-    "In CMake 2.6.2 and below, CMake Policy settings in scripts loaded by "
-    "the include() and find_package() commands would affect the includer.  "
-    "Explicit invocations of cmake_policy(PUSH) and cmake_policy(POP) were "
-    "required to isolate policy changes and protect the includer.  "
-    "While some scripts intend to affect the policies of their includer, "
-    "most do not.  "
-    "In CMake 2.6.3 and above, include() and find_package() by default PUSH "
-    "and POP an entry on the policy stack around an included script, "
-    "but provide a NO_POLICY_SCOPE option to disable it.  "
-    "This policy determines whether or not to imply NO_POLICY_SCOPE for "
-    "compatibility.  "
-    "The OLD behavior for this policy is to imply NO_POLICY_SCOPE for "
-    "include() and find_package() commands.  "
-    "The NEW behavior for this policy is to allow the commands to do their "
-    "default cmake_policy PUSH and POP.",
     2,6,3,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0012, "CMP0012",
     "if() recognizes numbers and boolean constants.",
-    "In CMake versions 2.6.4 and lower the if() command implicitly "
-    "dereferenced arguments corresponding to variables, even those named "
-    "like numbers or boolean constants, except for 0 and 1.  "
-    "Numbers and boolean constants such as true, false, yes, no, "
-    "on, off, y, n, notfound, ignore (all case insensitive) were recognized "
-    "in some cases but not all.  "
-    "For example, the code \"if(TRUE)\" might have evaluated as false.  "
-    "Numbers such as 2 were recognized only in "
-    "boolean expressions like \"if(NOT 2)\" (leading to false) "
-    "but not as a single-argument like \"if(2)\" (also leading to false). "
-    "Later versions of CMake prefer to treat numbers and boolean constants "
-    "literally, so they should not be used as variable names."
-    "\n"
-    "The OLD behavior for this policy is to implicitly dereference variables "
-    "named like numbers and boolean constants. "
-    "The NEW behavior for this policy is to recognize numbers and "
-    "boolean constants without dereferencing variables with such names.",
     2,8,0,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0013, "CMP0013",
     "Duplicate binary directories are not allowed.",
-    "CMake 2.6.3 and below silently permitted add_subdirectory() calls "
-    "to create the same binary directory multiple times.  "
-    "During build system generation files would be written and then "
-    "overwritten in the build tree and could lead to strange behavior.  "
-    "CMake 2.6.4 and above explicitly detect duplicate binary directories.  "
-    "CMake 2.6.4 always considers this case an error.  "
-    "In CMake 2.8.0 and above this policy determines whether or not "
-    "the case is an error.  "
-    "The OLD behavior for this policy is to allow duplicate binary "
-    "directories.  "
-    "The NEW behavior for this policy is to disallow duplicate binary "
-    "directories with an error.",
     2,8,0,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0014, "CMP0014",
     "Input directories must have CMakeLists.txt.",
-    "CMake versions before 2.8 silently ignored missing CMakeLists.txt "
-    "files in directories referenced by add_subdirectory() or subdirs(), "
-    "treating them as if present but empty.  "
-    "In CMake 2.8.0 and above this policy determines whether or not "
-    "the case is an error.  "
-    "The OLD behavior for this policy is to silently ignore the problem.  "
-    "The NEW behavior for this policy is to report an error.",
     2,8,0,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0015, "CMP0015",
     "link_directories() treats paths relative to the source dir.",
-    "In CMake 2.8.0 and lower the link_directories() command passed relative "
-    "paths unchanged to the linker.  "
-    "In CMake 2.8.1 and above the link_directories() command prefers to "
-    "interpret relative paths with respect to CMAKE_CURRENT_SOURCE_DIR, "
-    "which is consistent with include_directories() and other commands.  "
-    "The OLD behavior for this policy is to use relative paths verbatim in "
-    "the linker command.  "
-    "The NEW behavior for this policy is to convert relative paths to "
-    "absolute paths by appending the relative path to "
-    "CMAKE_CURRENT_SOURCE_DIR.",
     2,8,1,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0016, "CMP0016",
     "target_link_libraries() reports error if its only argument "
     "is not a target.",
-    "In CMake 2.8.2 and lower the target_link_libraries() command silently "
-    "ignored if it was called with only one argument, and this argument "
-    "wasn't a valid target. "
-    "In CMake 2.8.3 and above it reports an error in this case.",
     2,8,3,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0017, "CMP0017",
     "Prefer files from the CMake module directory when including from there.",
-    "Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e. "
-    "located in the CMake module directory) calls include() or "
-    "find_package(), the files located in the CMake module directory are "
-    "preferred over the files in CMAKE_MODULE_PATH.  "
-    "This makes sure that the modules belonging to "
-    "CMake always get those files included which they expect, and against "
-    "which they were developed and tested.  "
-    "In all other cases, the files found in "
-    "CMAKE_MODULE_PATH still take precedence over the ones in "
-    "the CMake module directory.  "
-    "The OLD behaviour is to always prefer files from CMAKE_MODULE_PATH over "
-    "files from the CMake modules directory.",
     2,8,4,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0018, "CMP0018",
     "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.",
-    "CMake 2.8.8 and lower compiled sources in SHARED and MODULE libraries "
-    "using the value of the undocumented CMAKE_SHARED_LIBRARY_<Lang>_FLAGS "
-    "platform variable.  The variable contained platform-specific flags "
-    "needed to compile objects for shared libraries.  Typically it included "
-    "a flag such as -fPIC for position independent code but also included "
-    "other flags needed on certain platforms.  CMake 2.8.9 and higher "
-    "prefer instead to use the POSITION_INDEPENDENT_CODE target property to "
-    "determine what targets should be position independent, and new "
-    "undocumented platform variables to select flags while ignoring "
-    "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS completely."
-    "\n"
-    "The default for either approach produces identical compilation flags, "
-    "but if a project modifies CMAKE_SHARED_LIBRARY_<Lang>_FLAGS from its "
-    "original value this policy determines which approach to use."
-    "\n"
-    "The OLD behavior for this policy is to ignore the "
-    "POSITION_INDEPENDENT_CODE property for all targets and use the modified "
-    "value of CMAKE_SHARED_LIBRARY_<Lang>_FLAGS for SHARED and MODULE "
-    "libraries."
-    "\n"
-    "The NEW behavior for this policy is to ignore "
-    "CMAKE_SHARED_LIBRARY_<Lang>_FLAGS whether it is modified or not and "
-    "honor the POSITION_INDEPENDENT_CODE target property.",
     2,8,9,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0019, "CMP0019",
     "Do not re-expand variables in include and link information.",
-    "CMake 2.8.10 and lower re-evaluated values given to the "
-    "include_directories, link_directories, and link_libraries "
-    "commands to expand any leftover variable references at the "
-    "end of the configuration step.  "
-    "This was for strict compatibility with VERY early CMake versions "
-    "because all variable references are now normally evaluated during "
-    "CMake language processing.  "
-    "CMake 2.8.11 and higher prefer to skip the extra evaluation."
-    "\n"
-    "The OLD behavior for this policy is to re-evaluate the values "
-    "for strict compatibility.  "
-    "The NEW behavior for this policy is to leave the values untouched.",
     2,8,11,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0020, "CMP0020",
     "Automatically link Qt executables to qtmain target on Windows.",
-    "CMake 2.8.10 and lower required users of Qt to always specify a link "
-    "dependency to the qtmain.lib static library manually on Windows.  CMake "
-    "2.8.11 gained the ability to evaluate generator expressions while "
-    "determining the link dependencies from IMPORTED targets.  This allows "
-    "CMake itself to automatically link executables which link to Qt to the "
-    "qtmain.lib library when using IMPORTED Qt targets.  For applications "
-    "already linking to qtmain.lib, this should have little impact.  For "
-    "applications which supply their own alternative WinMain implementation "
-    "and for applications which use the QAxServer library, this automatic "
-    "linking will need to be disabled as per the documentation."
-    "\n"
-    "The OLD behavior for this policy is not to link executables to "
-    "qtmain.lib automatically when they link to the QtCore IMPORTED"
-    "target.  "
-    "The NEW behavior for this policy is to link executables to "
-    "qtmain.lib automatically when they link to QtCore IMPORTED target.",
     2,8,11,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0021, "CMP0021",
     "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",
-    "CMake 2.8.10.2 and lower allowed the INCLUDE_DIRECTORIES target "
-    "property to contain relative paths.  The base path for such relative "
-    "entries is not well defined.  CMake 2.8.12 issues a FATAL_ERROR if the "
-    "INCLUDE_DIRECTORIES property contains a relative path."
-    "\n"
-    "The OLD behavior for this policy is not to warn about relative paths in "
-    "the INCLUDE_DIRECTORIES target property.  "
-    "The NEW behavior for this policy is to issue a FATAL_ERROR if "
-    "INCLUDE_DIRECTORIES contains a relative path.",
     2,8,12,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0022, "CMP0022",
     "INTERFACE_LINK_LIBRARIES defines the link interface.",
-    "CMake 2.8.11 constructed the 'link interface' of a target from "
-    "properties matching (IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.  "
-    "The modern way to specify config-sensitive content is to use generator "
-    "expressions and the IMPORTED_ prefix makes uniform processing of the "
-    "link interface with generator expressions impossible.  The "
-    "INTERFACE_LINK_LIBRARIES target property was introduced as a "
-    "replacement in CMake 2.8.12. This new property is named consistently "
-    "with the INTERFACE_COMPILE_DEFINITIONS, INTERFACE_INCLUDE_DIRECTORIES "
-    "and INTERFACE_COMPILE_OPTIONS properties.  For in-build targets, CMake "
-    "will use the INTERFACE_LINK_LIBRARIES property as the source of the "
-    "link interface only if policy CMP0022 is NEW.  "
-    "When exporting a target which has this policy set to NEW, only the "
-    "INTERFACE_LINK_LIBRARIES property will be processed and generated for "
-    "the IMPORTED target by default.  A new option to the install(EXPORT) "
-    "and export commands allows export of the old-style properties for "
-    "compatibility with downstream users of CMake versions older than "
-    "2.8.12.  "
-    "The target_link_libraries command will no longer populate the "
-    "properties matching LINK_INTERFACE_LIBRARIES(_<CONFIG>)? if this policy "
-    "is NEW."
-    "\n"
-    "The OLD behavior for this policy is to ignore the "
-    "INTERFACE_LINK_LIBRARIES property for in-build targets.  "
-    "The NEW behavior for this policy is to use the INTERFACE_LINK_LIBRARIES "
-    "property for in-build targets, and ignore the old properties matching "
-    "(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?.",
     2,8,12,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0023, "CMP0023",
     "Plain and keyword target_link_libraries signatures cannot be mixed.",
-    "CMake 2.8.12 introduced the target_link_libraries signature using "
-    "the PUBLIC, PRIVATE, and INTERFACE keywords to generalize the "
-    "LINK_PUBLIC and LINK_PRIVATE keywords introduced in CMake 2.8.7.  "
-    "Use of signatures with any of these keywords sets the link interface "
-    "of a target explicitly, even if empty.  "
-    "This produces confusing behavior when used in combination with the "
-    "historical behavior of the plain target_link_libraries signature.  "
-    "For example, consider the code:\n"
-    " target_link_libraries(mylib A)\n"
-    " target_link_libraries(mylib PRIVATE B)\n"
-    "After the first line the link interface has not been set explicitly "
-    "so CMake would use the link implementation, A, as the link interface.  "
-    "However, the second line sets the link interface to empty.  "
-    "In order to avoid this subtle behavior CMake now prefers to disallow "
-    "mixing the plain and keyword signatures of target_link_libraries for "
-    "a single target."
-    "\n"
-    "The OLD behavior for this policy is to allow keyword and plain "
-    "target_link_libraries signatures to be mixed.  "
-    "The NEW behavior for this policy is to not to allow mixing of the "
-    "keyword and plain signatures.",
     2,8,12,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0024, "CMP0024",
     "Disallow include export result.",
-    "CMake 2.8.12 and lower allowed use of the include() command with the "
-    "result of the export() command.  This relies on the assumption that "
-    "the export() command has an immediate effect at configure-time during a "
-    "cmake run.  Certain properties of targets are not fully determined "
-    "until later at generate-time, such as the link language and complete "
-    "list of link libraries.  Future refactoring will change the effect of "
-    "the export() command to be executed at generate-time.  Use ALIAS "
-    "targets instead in cases where the goal is to refer to targets by "
-    "another name"
-    "\n"
-    "The OLD behavior for this policy is to allow including the result "
-    "of an export() command.  "
-    "The NEW behavior for this policy is to not to allow including the "
-    "result of an export() command.",
     2,8,13,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0025, "CMP0025",
     "Compiler id for Apple Clang is now AppleClang.",
-    "CMake >= 2.8.13 recognize that Apple Clang is a different compiler "
-    "than upstream Clang and that they have different version numbers.  "
-    "CMake now prefers to present this to projects by setting "
-    "CMAKE_<LANG>_COMPILER_ID to \"AppleClang\" instead of \"Clang\".  "
-    "However, existing projects may assume the compiler id for Apple Clang "
-    "is just \"Clang\" as it was in CMake < 2.8.13.  "
-    "Therefore this policy determines for Apple Clang which compiler id "
-    "to report in CMAKE_<LANG>_COMPILER_ID after <LANG> is enabled by "
-    "the project() or enable_language() command."
-    "\n"
-    "The OLD behavior for this policy is to use compiler id \"Clang\".  "
-    "The NEW behavior for this policy is to use compiler id \"AppleClang\".",
     2,8,13,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0026, "CMP0026",
     "Disallow use of the LOCATION target property.",
-    "CMake 2.8.12 and lower allowed reading the LOCATION target property to "
-    "determine the eventual location of build targets.  This relies on the "
-    "assumption that all necessary information is available at "
-    "configure-time to determine the final location and filename of the "
-    "target.  However, this property is not fully determined until later at "
-    "generate-time.  At generate time, the $<TARGET_FILE> generator "
-    "expression can be used to determine the eventual LOCATION of a target "
-    "output."
-    "\n"
-    "Code which reads the LOCATION target property can be ported to use the "
-    "$<TARGET_FILE> generator expression together with the file(GENERATE) "
-    "subcommand to generate a file containing the target location."
-    "\n"
-    "The OLD behavior for this policy is to allow reading the LOCATION "
-    "property from build-targets.  "
-    "The NEW behavior for this policy is to not to allow reading the "
-    "LOCATION property from build-targets.",
     2,8,13,0, cmPolicies::WARN);
 
   this->DefinePolicy(
@@ -696,7 +273,6 @@ cmPolicies::~cmPolicies()
 void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               const char *idString,
                               const char *shortDescription,
-                              const char *longDescription,
                               unsigned int majorVersionIntroduced,
                               unsigned int minorVersionIntroduced,
                               unsigned int patchVersionIntroduced,
@@ -713,7 +289,6 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
 
   this->Policies[iD] = new cmPolicy(iD, idString,
                                     shortDescription,
-                                    longDescription,
                                     majorVersionIntroduced,
                                     minorVersionIntroduced,
                                     patchVersionIntroduced,

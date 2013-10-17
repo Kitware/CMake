@@ -99,7 +99,6 @@ public:
   void DefinePolicy(cmPolicies::PolicyID id,
                     const char *stringID,
                     const char *shortDescription,
-                    const char *longDescription,
                     unsigned int majorVersionIntroduced,
                     unsigned int minorVersionIntroduced,
                     unsigned int patchVersionIntroduced,
