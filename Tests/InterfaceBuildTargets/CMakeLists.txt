@@ -1,6 +1,6 @@
 project(InterfaceBuildTargets)
 
-add_library(testlib EXCLUDE_FROM_ALL testlib.cxx)
+add_library(testlib testlib.cxx)
 set_property(TARGET testlib PROPERTY PREFIX "")
 if(CMAKE_GENERATOR MATCHES "Borland|Watcom")
   # These librarians add the .lib suffix anyway.
