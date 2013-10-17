@@ -1911,56 +1911,19 @@ static void processIncludeDirectories(cmTarget *tgt,
         }
       }
     std::string usedIncludes;
-    cmListFileBacktrace lfbt;
     for(std::vector<std::string>::iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
       {
-      std::string targetName = (*it)->TargetName;
-      std::string evaluatedTargetName;
-      {
-      cmGeneratorExpression ge(lfbt);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(targetName);
-      evaluatedTargetName = cge->Evaluate(mf, config, false, tgt, 0, 0);
-      }
-
-      cmTarget *dependentTarget = mf->FindTargetToUse(targetName.c_str());
+      cmTarget *dependentTarget =
+                              mf->FindTargetToUse((*it)->TargetName.c_str());
 
       const bool fromImported = dependentTarget
                              && dependentTarget->IsImported();
 
-      cmTarget *evaluatedDependentTarget =
-        (targetName != evaluatedTargetName)
-          ? mf->FindTargetToUse(evaluatedTargetName.c_str())
-          : 0;
-
-      targetName = evaluatedTargetName;
-
-      const bool fromEvaluatedImported = evaluatedDependentTarget
-                             && evaluatedDependentTarget->IsImported();
-
-      if ((fromImported || fromEvaluatedImported)
-          && !cmSystemTools::FileExists(li->c_str()))
+      if (fromImported && !cmSystemTools::FileExists(li->c_str()))
         {
         cmOStringStream e;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
-        if (fromEvaluatedImported)
-          {
-          switch(mf->GetPolicyStatus(cmPolicies::CMP0027))
-            {
-            case cmPolicies::WARN:
-              e << (mf->GetPolicies()
-                    ->GetPolicyWarning(cmPolicies::CMP0027)) << "\n";
-            case cmPolicies::OLD:
-              messageType = cmake::AUTHOR_WARNING;
-              break;
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::NEW:
-              break;
-            }
-          }
-        e << "Imported target \"" << targetName << "\" includes "
+        e << "Imported target \"" << (*it)->TargetName << "\" includes "
              "non-existent path\n  \"" << *li << "\"\nin its "
              "INTERFACE_INCLUDE_DIRECTORIES. Possible reasons include:\n"
              "* The path was deleted, renamed, or moved to another "
@@ -1969,7 +1932,7 @@ static void processIncludeDirectories(cmTarget *tgt,
              "successfully.\n"
              "* The installation package was faulty and references files it "
              "does not provide.\n";
-        tgt->GetMakefile()->IssueMessage(messageType, e.str().c_str());
+        tgt->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
         return;
         }
 
@@ -1978,9 +1941,9 @@ static void processIncludeDirectories(cmTarget *tgt,
         cmOStringStream e;
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
-        if (!targetName.empty())
+        if (!(*it)->TargetName.empty())
           {
-          e << "Target \"" << targetName << "\" contains relative "
+          e << "Target \"" << (*it)->TargetName << "\" contains relative "
             "path in its INTERFACE_INCLUDE_DIRECTORIES:\n"
             "  \"" << *li << "\"";
           }
