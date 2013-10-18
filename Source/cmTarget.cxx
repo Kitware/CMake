@@ -2013,7 +2013,6 @@ static void processIncludeDirectories(cmTarget *tgt,
             {
             case cmPolicies::WARN:
               {
-              cmOStringStream w;
               e << (mf->GetPolicies()
                     ->GetPolicyWarning(cmPolicies::CMP0021)) << "\n";
               messageType = cmake::AUTHOR_WARNING;
