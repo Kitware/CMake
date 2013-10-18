@@ -246,6 +246,11 @@ cmPolicies::cmPolicies()
     CMP0028, "CMP0028",
     "Double colon in target name means ALIAS or IMPORTED target.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0029, "CMP0029",
+    "The subdir_depends command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

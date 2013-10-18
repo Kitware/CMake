@@ -11,10 +11,10 @@
 ============================================================================*/
 #include "cmSubdirDependsCommand.h"
 
-// cmSubdirDependsCommand
 bool cmSubdirDependsCommand::InitialPass(std::vector<std::string> const& ,
                                          cmExecutionStatus &)
 {
+  this->Disallowed(cmPolicies::CMP0029,
+    "The subdir_depends command should not be called; see CMP0029.");
   return true;
 }
-
