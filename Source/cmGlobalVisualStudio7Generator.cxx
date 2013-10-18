@@ -21,6 +21,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   const char* platformName)
 {
   this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
+  this->IntelProjectVersion = 0;
 
   if (!platformName)
     {
@@ -29,6 +30,45 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   this->PlatformName = platformName;
 }
 
+cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
+{
+  free(this->IntelProjectVersion);
+}
+
+// Package GUID of Intel Visual Fortran plugin to VS IDE
+#define CM_INTEL_PLUGIN_GUID "{B68A201D-CB9B-47AF-A52F-7EEC72E217E4}"
+
+const char* cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
+{
+  if(!this->IntelProjectVersion)
+    {
+    // Compute the version of the Intel plugin to the VS IDE.
+    // If the key does not exist then use a default guess.
+    std::string intelVersion;
+    std::string vskey = this->GetRegistryBase();
+    vskey += "\\Packages\\" CM_INTEL_PLUGIN_GUID ";ProductVersion";
+    cmSystemTools::ReadRegistryValue(vskey.c_str(), intelVersion,
+                                     cmSystemTools::KeyWOW64_32);
+    unsigned int intelVersionNumber = ~0u;
+    sscanf(intelVersion.c_str(), "%u", &intelVersionNumber);
+    if(intelVersionNumber >= 11)
+      {
+      // Default to latest known project file version.
+      intelVersion = "11.0";
+      }
+    else if(intelVersionNumber == 10)
+      {
+      // Version 10.x actually uses 9.10 in project files!
+      intelVersion = "9.10";
+      }
+    else
+      {
+      // Version <= 9: use ProductVersion from registry.
+      }
+    this->IntelProjectVersion = strdup(intelVersion.c_str());
+    }
+  return this->IntelProjectVersion;
+}
 
 void cmGlobalVisualStudio7Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
@@ -36,7 +76,6 @@ void cmGlobalVisualStudio7Generator
 {
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  mf->AddDefinition("CMAKE_GENERATOR_FC", "ifort");
   this->AddPlatformDefinitions(mf);
   if(!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
     {
@@ -156,6 +195,8 @@ void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
+  mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
+                    this->GetIntelProjectVersion());
 }
 
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)

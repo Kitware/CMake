@@ -27,6 +27,8 @@ class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
   cmGlobalVisualStudio7Generator(const char* platformName = NULL);
+  ~cmGlobalVisualStudio7Generator();
+
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalVisualStudio7Generator>(); }
@@ -101,6 +103,8 @@ public:
       LinkLibraryDependencies and link to .sln dependencies. */
   virtual bool NeedLinkLibraryDependencies(cmTarget&) { return false; }
 
+  const char* GetIntelProjectVersion();
+
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 
@@ -159,6 +163,9 @@ protected:
   // There is one SLN file per project.
   std::string CurrentProject;
   std::string PlatformName;
+
+private:
+  char* IntelProjectVersion;
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

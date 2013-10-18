@@ -24,6 +24,12 @@
   /* __INTEL_COMPILER_BUILD_DATE = YYYYMMDD */
 #  define COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
 # endif
+# if defined(_MSC_VER)
+#  define SIMULATE_ID "MSVC"
+   /* _MSC_VER = VVRR */
+#  define SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
+#  define SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif
 
 #elif defined(__PATHCC__)
 # define COMPILER_ID "PathScale"
