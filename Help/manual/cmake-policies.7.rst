@@ -1,6 +1,13 @@
 cmake-policies(7)
 *****************
 
+.. only:: html or latex
+
+   .. contents::
+
+Introduction
+============
+
 Policies in CMake are used to preserve backward compatible behavior
 across multiple releases.  When a new policy is introduced, newer CMake
 versions will begin to warn about the backward compatible behavior.  It
@@ -17,10 +24,6 @@ behavior.
 The CMAKE_MINIMUM_REQUIRED_VERSION variable may also be used to
 determine whether to report an error on use of deprecated macros or
 functions.
-
-.. only:: html or latex
-
-   .. contents::
 
 All Policies
 ============
