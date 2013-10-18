@@ -176,12 +176,13 @@ if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
 endif ()
 
-include(${CMAKE_ROOT}/Modules/CMakeClDeps.cmake)
 include(CMakeFindBinUtils)
 if(MSVC_C_ARCHITECTURE_ID)
+  include(${CMAKE_ROOT}/Modules/CMakeClDeps.cmake)
   set(SET_MSVC_C_ARCHITECTURE_ID
     "set(MSVC_C_ARCHITECTURE_ID ${MSVC_C_ARCHITECTURE_ID})")
 endif()
+
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeCCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCCompiler.cmake
