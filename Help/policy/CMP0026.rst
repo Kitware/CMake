@@ -20,6 +20,6 @@ The OLD behavior for this policy is to allow reading the LOCATION
 property from build-targets.  The NEW behavior for this policy is to
 not to allow reading the LOCATION property from build-targets.
 
-This policy was introduced in CMake version 2.8.13.  CMake version
+This policy was introduced in CMake version 3.0.0.  CMake version
 |release| warns when the policy is not set and uses OLD behavior.  Use
 the cmake_policy command to set it to OLD or NEW explicitly.

@@ -225,17 +225,17 @@ cmPolicies::cmPolicies()
   this->DefinePolicy(
     CMP0024, "CMP0024",
     "Disallow include export result.",
-    2,8,13,0, cmPolicies::WARN);
+    3,0,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0025, "CMP0025",
     "Compiler id for Apple Clang is now AppleClang.",
-    2,8,13,0, cmPolicies::WARN);
+    3,0,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0026, "CMP0026",
     "Disallow use of the LOCATION target property.",
-    2,8,13,0, cmPolicies::WARN);
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
