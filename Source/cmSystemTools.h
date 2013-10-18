@@ -191,23 +191,6 @@ public:
   static std::string ComputeStringMD5(const char* input);
 
   /**
-   * Run an executable command and put the stdout in output.
-   * A temporary file is created in the binaryDir for storing the
-   * output because windows does not have popen.
-   *
-   * If verbose is false, no user-viewable output from the program
-   * being run will be generated.
-   *
-   * If timeout is specified, the command will be terminated after
-   * timeout expires.
-   */
-  static bool RunCommand(const char* command, std::string& output,
-                         const char* directory = 0,
-                         bool verbose = true, int timeout = 0);
-  static bool RunCommand(const char* command, std::string& output,
-                         int &retVal, const char* directory = 0,
-                         bool verbose = true, int timeout = 0);
-  /**
    * Run a single executable command
    *
    * Output is controlled with outputflag. If outputflag is OUTPUT_NONE, no
@@ -311,14 +294,6 @@ public:
    * Determine the file type based on the extension
    */
   static FileFormat GetFileFormat(const char* ext);
-
-  /**
-   * On Windows 9x we need a comspec (command.com) substitute to run
-   * programs correctly. This string has to be constant available
-   * through the running of program. This method does not create a copy.
-   */
-  static void SetWindows9xComspecSubstitute(const char*);
-  static const char* GetWindows9xComspecSubstitute();
 
   /** Windows if this is true, the CreateProcess in RunCommand will
    *  not show new consol windows when running programs.
@@ -488,8 +463,6 @@ private:
   static void* s_ErrorCallbackClientData;
   static void* s_StdoutCallbackClientData;
   static void* s_InterruptCallbackClientData;
-
-  static std::string s_Windows9xComspecSubstitute;
 };
 
 #endif

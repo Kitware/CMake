@@ -171,10 +171,6 @@ int main (int argc, char *argv[])
       }
     }
 
-#ifdef _WIN32
-  std::string comspec = "cmw9xcom.exe";
-  cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
-#endif
   // copy the args to a vector
   std::vector<std::string> args;
   for(int i =0; i < argc; ++i)
