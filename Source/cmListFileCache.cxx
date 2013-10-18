@@ -29,14 +29,14 @@ struct cmListFileParser
   ~cmListFileParser();
   bool ParseFile();
   bool ParseFunction(const char* name, long line);
-  void AddArgument(cmListFileLexer_Token* token,
+  bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
   cmListFile* ListFile;
   cmMakefile* Makefile;
   const char* FileName;
   cmListFileLexer* Lexer;
   cmListFileFunction Function;
-  enum { SeparationOkay, SeparationWarning } Separation;
+  enum { SeparationOkay, SeparationWarning, SeparationError} Separation;
 };
 
 //----------------------------------------------------------------------------
@@ -57,10 +57,23 @@ cmListFileParser::~cmListFileParser()
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
-  if(!cmListFileLexer_SetFileName(this->Lexer, this->FileName))
+  cmListFileLexer_BOM bom;
+  if(!cmListFileLexer_SetFileName(this->Lexer, this->FileName, &bom))
     {
     cmSystemTools::Error("cmListFileCache: error can not open file ",
                          this->FileName);
+    return false;
+    }
+
+  // Verify the Byte-Order-Mark, if any.
+  if(bom != cmListFileLexer_BOM_None &&
+     bom != cmListFileLexer_BOM_UTF8)
+    {
+    cmListFileLexer_SetFileName(this->Lexer, 0, 0);
+    cmOStringStream m;
+    m << "File\n  " << this->FileName << "\n"
+      << "starts with a Byte-Order-Mark that is not UTF-8.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
     return false;
     }
 
@@ -76,6 +89,10 @@ bool cmListFileParser::ParseFile()
     else if(token->type == cmListFileLexer_Token_Newline)
       {
       haveNewline = true;
+      }
+    else if(token->type == cmListFileLexer_Token_CommentBracket)
+      {
+      haveNewline = false;
       }
     else if(token->type == cmListFileLexer_Token_Identifier)
       {
@@ -288,7 +305,10 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       {
       parenDepth++;
       this->Separation = SeparationOkay;
-      this->AddArgument(token, cmListFileArgument::Unquoted);
+      if(!this->AddArgument(token, cmListFileArgument::Unquoted))
+        {
+        return false;
+        }
       }
     else if(token->type == cmListFileLexer_Token_ParenRight)
       {
@@ -298,19 +318,40 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
         }
       parenDepth--;
       this->Separation = SeparationOkay;
-      this->AddArgument(token, cmListFileArgument::Unquoted);
+      if(!this->AddArgument(token, cmListFileArgument::Unquoted))
+        {
+        return false;
+        }
       this->Separation = SeparationWarning;
       }
     else if(token->type == cmListFileLexer_Token_Identifier ||
             token->type == cmListFileLexer_Token_ArgumentUnquoted)
       {
-      this->AddArgument(token, cmListFileArgument::Unquoted);
+      if(!this->AddArgument(token, cmListFileArgument::Unquoted))
+        {
+        return false;
+        }
       this->Separation = SeparationWarning;
       }
     else if(token->type == cmListFileLexer_Token_ArgumentQuoted)
       {
-      this->AddArgument(token, cmListFileArgument::Quoted);
+      if(!this->AddArgument(token, cmListFileArgument::Quoted))
+        {
+        return false;
+        }
       this->Separation = SeparationWarning;
+      }
+    else if(token->type == cmListFileLexer_Token_ArgumentBracket)
+      {
+      if(!this->AddArgument(token, cmListFileArgument::Bracket))
+        {
+        return false;
+        }
+      this->Separation = SeparationError;
+      }
+    else if(token->type == cmListFileLexer_Token_CommentBracket)
+      {
+      this->Separation = SeparationError;
       }
     else
       {
@@ -338,42 +379,32 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 }
 
 //----------------------------------------------------------------------------
-void cmListFileParser::AddArgument(cmListFileLexer_Token* token,
+bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
                                    cmListFileArgument::Delimiter delim)
 {
   cmListFileArgument a(token->text, delim, this->FileName, token->line);
   this->Function.Arguments.push_back(a);
-  if(delim == cmListFileArgument::Unquoted)
-    {
-    // Warn about a future behavior change.
-    const char* c = a.Value.c_str();
-    if(*c++ == '[')
-      {
-      while(*c == '=')
-        { ++c; }
-      if(*c == '[')
-        {
-        cmOStringStream m;
-        m << "Syntax Warning in cmake code at\n"
-          << "  " << this->FileName << ":" << token->line << ":"
-          << token->column << "\n"
-          << "A future version of CMake may treat unquoted argument:\n"
-          << "  " << a.Value << "\n"
-          << "as an opening long bracket.  Double-quote the argument.";
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str().c_str());
-        }
-      }
-    }
   if(this->Separation == SeparationOkay)
     {
-    return;
+    return true;
     }
+  bool isError = (this->Separation == SeparationError ||
+                  delim == cmListFileArgument::Bracket);
   cmOStringStream m;
-  m << "Syntax Warning in cmake code at\n"
+  m << "Syntax " << (isError? "Error":"Warning") << " in cmake code at\n"
     << "  " << this->FileName << ":" << token->line << ":"
     << token->column << "\n"
     << "Argument not separated from preceding token by whitespace.";
-  this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str().c_str());
+  if(isError)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str().c_str());
+    return false;
+    }
+  else
+    {
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str().c_str());
+    return true;
+    }
 }
 
 //----------------------------------------------------------------------------

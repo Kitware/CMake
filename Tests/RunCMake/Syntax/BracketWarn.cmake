@@ -1,1 +1,0 @@
-message(STATUS [[ [=[ [=x [==[x)
