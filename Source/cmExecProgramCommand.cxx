@@ -12,6 +12,8 @@
 #include "cmExecProgramCommand.h"
 #include "cmSystemTools.h"
 
+#include <cmsys/Process.h>
+
 // cmExecProgramCommand
 bool cmExecProgramCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -103,13 +105,13 @@ bool cmExecProgramCommand
   if(args.size() - count == 2)
     {
     cmSystemTools::MakeDirectory(args[1].c_str());
-    result = cmSystemTools::RunCommand(command.c_str(), output, retVal,
-                                       args[1].c_str(), verbose);
+    result = cmExecProgramCommand::RunCommand(command.c_str(), output, retVal,
+                                              args[1].c_str(), verbose);
     }
   else
     {
-    result = cmSystemTools::RunCommand(command.c_str(), output,
-                                       retVal, 0, verbose);
+    result = cmExecProgramCommand::RunCommand(command.c_str(), output,
+                                              retVal, 0, verbose);
     }
   if(!result)
     {
@@ -143,3 +145,189 @@ bool cmExecProgramCommand
   return true;
 }
 
+bool cmExecProgramCommand::RunCommand(const char* command,
+                                      std::string& output,
+                                      int &retVal,
+                                      const char* dir,
+                                      bool verbose)
+{
+  if(cmSystemTools::GetRunCommandOutput())
+    {
+    verbose = false;
+    }
+
+#if defined(WIN32) && !defined(__CYGWIN__)
+  // if the command does not start with a quote, then
+  // try to find the program, and if the program can not be
+  // found use system to run the command as it must be a built in
+  // shell command like echo or dir
+  int count = 0;
+  std::string shortCmd;
+  if(command[0] == '\"')
+    {
+    // count the number of quotes
+    for(const char* s = command; *s != 0; ++s)
+      {
+      if(*s == '\"')
+        {
+        count++;
+        if(count > 2)
+          {
+          break;
+          }
+        }
+      }
+    // if there are more than two double quotes use
+    // GetShortPathName, the cmd.exe program in windows which
+    // is used by system fails to execute if there are more than
+    // one set of quotes in the arguments
+    if(count > 2)
+      {
+      cmsys::RegularExpression quoted("^\"([^\"]*)\"[ \t](.*)");
+      if(quoted.find(command))
+        {
+        std::string cmd = quoted.match(1);
+        std::string args = quoted.match(2);
+        if(! cmSystemTools::FileExists(cmd.c_str()) )
+          {
+          shortCmd = cmd;
+          }
+        else if(!cmSystemTools::GetShortPath(cmd.c_str(), shortCmd))
+          {
+         cmSystemTools::Error("GetShortPath failed for " , cmd.c_str());
+          return false;
+          }
+        shortCmd += " ";
+        shortCmd += args;
+
+        command = shortCmd.c_str();
+        }
+      else
+        {
+        cmSystemTools::Error("Could not parse command line with quotes ",
+                             command);
+        }
+      }
+    }
+#endif
+
+  // Allocate a process instance.
+  cmsysProcess* cp = cmsysProcess_New();
+  if(!cp)
+    {
+    cmSystemTools::Error("Error allocating process instance.");
+    return false;
+    }
+
+#if defined(WIN32) && !defined(__CYGWIN__)
+  if(dir)
+    {
+    cmsysProcess_SetWorkingDirectory(cp, dir);
+    }
+  if(cmSystemTools::GetRunCommandHideConsole())
+    {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+    }
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_Verbatim, 1);
+  const char* cmd[] = {command, 0};
+  cmsysProcess_SetCommand(cp, cmd);
+#else
+  std::string commandInDir;
+  if(dir)
+    {
+    commandInDir = "cd \"";
+    commandInDir += dir;
+    commandInDir += "\" && ";
+    commandInDir += command;
+    }
+  else
+    {
+    commandInDir = command;
+    }
+#ifndef __VMS
+  commandInDir += " 2>&1";
+#endif
+  command = commandInDir.c_str();
+  if(verbose)
+    {
+    cmSystemTools::Stdout("running ");
+    cmSystemTools::Stdout(command);
+    cmSystemTools::Stdout("\n");
+    }
+  fflush(stdout);
+  fflush(stderr);
+  const char* cmd[] = {"/bin/sh", "-c", command, 0};
+  cmsysProcess_SetCommand(cp, cmd);
+#endif
+
+  cmsysProcess_Execute(cp);
+
+  // Read the process output.
+  int length;
+  char* data;
+  int p;
+  while((p = cmsysProcess_WaitForData(cp, &data, &length, 0), p))
+    {
+    if(p == cmsysProcess_Pipe_STDOUT || p == cmsysProcess_Pipe_STDERR)
+      {
+      if(verbose)
+        {
+        cmSystemTools::Stdout(data, length);
+        }
+      output.append(data, length);
+      }
+    }
+
+  // All output has been read.  Wait for the process to exit.
+  cmsysProcess_WaitForExit(cp, 0);
+
+  // Check the result of running the process.
+  std::string msg;
+  switch(cmsysProcess_GetState(cp))
+    {
+    case cmsysProcess_State_Exited:
+      retVal = cmsysProcess_GetExitValue(cp);
+      break;
+    case cmsysProcess_State_Exception:
+      retVal = -1;
+      msg += "\nProcess terminated due to: ";
+      msg += cmsysProcess_GetExceptionString(cp);
+      break;
+    case cmsysProcess_State_Error:
+      retVal = -1;
+      msg += "\nProcess failed because: ";
+      msg += cmsysProcess_GetErrorString(cp);
+      break;
+    case cmsysProcess_State_Expired:
+      retVal = -1;
+      msg += "\nProcess terminated due to timeout.";
+      break;
+    }
+  if(!msg.empty())
+    {
+#if defined(WIN32) && !defined(__CYGWIN__)
+    // Old Windows process execution printed this info.
+    msg += "\n\nfor command: ";
+    msg += command;
+    if(dir)
+      {
+      msg += "\nin dir: ";
+      msg += dir;
+      }
+    msg += "\n";
+    if(verbose)
+      {
+      cmSystemTools::Stdout(msg.c_str());
+      }
+    output += msg;
+#else
+    // Old UNIX process execution only put message in output.
+    output += msg;
+#endif
+    }
+
+  // Delete the process instance.
+  cmsysProcess_Delete(cp);
+
+  return true;
+}
