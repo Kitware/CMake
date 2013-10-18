@@ -261,6 +261,11 @@ cmPolicies::cmPolicies()
     CMP0031, "CMP0031",
     "The load_command command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0032, "CMP0032",
+    "The output_required_files command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

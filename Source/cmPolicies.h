@@ -83,6 +83,7 @@ public:
     CMP0029, ///< Disallow command: subdir_depends
     CMP0030, ///< Disallow command: use_mangled_mesa
     CMP0031, ///< Disallow command: load_command
+    CMP0032, ///< Disallow command: output_required_files
 
     /** \brief Always the last entry.
      *
