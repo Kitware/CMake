@@ -362,8 +362,7 @@ class cmake
             const std::string& target,
             const std::string& config,
             const std::vector<std::string>& nativeOptions,
-            bool clean,
-            cmSystemTools::OutputOption outputflag);
+            bool clean);
 
   void UnwatchUnusedCli(const char* var);
   void WatchUnusedCli(const char* var);
