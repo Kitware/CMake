@@ -6,7 +6,8 @@
 #
 # ::
 #
-#   CHECK_TYPE_SIZE(TYPE VARIABLE [BUILTIN_TYPES_ONLY])
+#   CHECK_TYPE_SIZE(TYPE VARIABLE [BUILTIN_TYPES_ONLY]
+#                                 [LANGUAGE <language>])
 #
 # Check if the type exists and determine its size.  On return,
 # "HAVE_${VARIABLE}" holds the existence of the type, and "${VARIABLE}"
@@ -35,6 +36,9 @@
 # in HAVE_SYS_TYPES_H, HAVE_STDINT_H, and HAVE_STDDEF_H.  The type size
 # check automatically includes the available headers, thus supporting
 # checks of types defined in the headers.
+#
+# If LANGUAGE is set, the specified compiler will be used to perform the
+# check. Acceptable values are C and CXX
 #
 # Despite the name of the macro you may use it to check the size of more
 # complex expressions, too.  To check e.g.  for the size of a struct
@@ -79,7 +83,7 @@ get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 #-----------------------------------------------------------------------------
 # Helper function.  DO NOT CALL DIRECTLY.
-function(__check_type_size_impl type var map builtin)
+function(__check_type_size_impl type var map builtin language)
   message(STATUS "Check size of ${type}")
 
   # Include header files.
@@ -101,8 +105,13 @@ function(__check_type_size_impl type var map builtin)
 
   # Perform the check.
 
-
-  set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.c)
+  if("${language}" STREQUAL "C")
+    set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.c)
+  elseif("${language}" STREQUAL "CXX")
+    set(src ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.cpp)
+  else()
+    message(FATAL_ERROR "Unknown language:\n  ${language}\nSupported languages: C, CXX.\n")
+  endif()
   set(bin ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.bin)
   configure_file(${__check_type_size_dir}/CheckTypeSize.c.in ${src} @ONLY)
   try_compile(HAVE_${var} ${CMAKE_BINARY_DIR} ${src}
@@ -176,8 +185,36 @@ endfunction()
 
 #-----------------------------------------------------------------------------
 macro(CHECK_TYPE_SIZE TYPE VARIABLE)
+  # parse arguments
+  unset(doing)
+  foreach(arg ${ARGN})
+    if("x${arg}" STREQUAL "xBUILTIN_TYPES_ONLY")
+      set(_CHECK_TYPE_SIZE_${arg} 1)
+      unset(doing)
+    elseif("x${arg}" STREQUAL "xLANGUAGE") # change to MATCHES for more keys
+      set(doing "${arg}")
+      set(_CHECK_TYPE_SIZE_${doing} "")
+    elseif("x${doing}" STREQUAL "xLANGUAGE")
+      set(_CHECK_TYPE_SIZE_${doing} "${arg}")
+      unset(doing)
+    else()
+      message(FATAL_ERROR "Unknown argument:\n  ${arg}\n")
+    endif()
+  endforeach()
+  if("x${doing}" MATCHES "^x(LANGUAGE)$")
+    message(FATAL_ERROR "Missing argument:\n  ${doing} arguments requires a value\n")
+  endif()
+  if(DEFINED _CHECK_TYPE_SIZE_LANGUAGE)
+    if(NOT "x${_CHECK_TYPE_SIZE_LANGUAGE}" MATCHES "^x(C|CXX)$")
+      message(FATAL_ERROR "Unknown language:\n  ${_CHECK_TYPE_SIZE_LANGUAGE}.\nSupported languages: C, CXX.\n")
+    endif()
+    set(_language ${_CHECK_TYPE_SIZE_LANGUAGE})
+  else()
+    set(_language C)
+  endif()
+
   # Optionally check for standard headers.
-  if("${ARGV2}" STREQUAL "BUILTIN_TYPES_ONLY")
+  if(_CHECK_TYPE_SIZE_BUILTIN_TYPES_ONLY)
     set(_builtin 0)
   else()
     set(_builtin 1)
@@ -190,7 +227,7 @@ macro(CHECK_TYPE_SIZE TYPE VARIABLE)
   set(${VARIABLE}_KEYS)
   set(_map_file ${CMAKE_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${VARIABLE}.cmake)
   if(NOT DEFINED HAVE_${VARIABLE})
-    __check_type_size_impl(${TYPE} ${VARIABLE} ${_map_file} ${_builtin})
+    __check_type_size_impl(${TYPE} ${VARIABLE} ${_map_file} ${_builtin} ${_language})
   endif()
   include(${_map_file} OPTIONAL)
   set(_map_file)
