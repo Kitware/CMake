@@ -146,13 +146,6 @@ public:
     { return this->LocalGenerator;}
 
   /**
-   * Test whether compatibility is set to a given version or lower.
-   */
-  bool NeedBackwardsCompatibility(unsigned int major,
-                                  unsigned int minor,
-                                  unsigned int patch = 0xFFu);
-
-  /**
    * Help enforce global target name uniqueness.
    */
   bool EnforceUniqueName(std::string const& name, std::string& msg,

@@ -24,32 +24,6 @@
 #include <StorageDefs.h>
 #endif
 
-void cmFindPackageNeedBackwardsCompatibility(const std::string& variable,
-  int access_type, void*, const char* newValue,
-  const cmMakefile*)
-{
-  (void)newValue;
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  if(access_type == cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS)
-    {
-    std::string message = "An attempt was made to access a variable: ";
-    message += variable;
-    message +=
-      " that has not been defined. This variable is created by the "
-      "FIND_PACKAGE command. CMake version 1.6 always converted the "
-      "variable name to upper-case, but this behavior is no longer the "
-      "case.  To fix this you might need to set the cache value of "
-      "CMAKE_BACKWARDS_COMPATIBILITY to 1.6 or less.  If you are writing a "
-      "CMake listfile, you should change the variable reference to use "
-      "the case of the argument to FIND_PACKAGE.";
-    cmSystemTools::Error(message.c_str());
-    }
-#else
-  (void)variable;
-  (void)access_type;
-#endif
-}
-
 //----------------------------------------------------------------------------
 cmFindPackageCommand::cmFindPackageCommand()
 {
@@ -128,11 +102,6 @@ bool cmFindPackageCommand
   std::set<std::string> requiredComponents;
   std::set<std::string> optionalComponents;
 
-  // Check ancient compatibility.
-  this->Compatibility_1_6 =
-    this->Makefile->GetLocalGenerator()
-    ->NeedBackwardsCompatibility(1, 6);
-
   // Always search directly in a generated path.
   this->SearchPathSuffixes.push_back("");
 
@@ -154,7 +123,6 @@ bool cmFindPackageCommand
     else if(args[i] == "EXACT")
       {
       this->VersionExact = true;
-      this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "MODULE")
@@ -179,75 +147,63 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "COMPONENTS")
       {
-      this->Compatibility_1_6 = false;
       doing = DoingComponents;
       }
     else if(args[i] == "OPTIONAL_COMPONENTS")
       {
-      this->Compatibility_1_6 = false;
       doing = DoingOptionalComponents;
       }
     else if(args[i] == "NAMES")
       {
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingNames;
       }
     else if(args[i] == "PATHS")
       {
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingPaths;
       }
     else if(args[i] == "HINTS")
       {
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingHints;
       }
     else if(args[i] == "PATH_SUFFIXES")
       {
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingPathSuffixes;
       }
     else if(args[i] == "CONFIGS")
       {
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingConfigs;
       }
     else if(args[i] == "NO_POLICY_SCOPE")
       {
       this->PolicyScope = false;
-      this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_PACKAGE_REGISTRY")
       {
       this->NoUserRegistry = true;
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_SYSTEM_PACKAGE_REGISTRY")
       {
       this->NoSystemRegistry = true;
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(args[i] == "NO_CMAKE_BUILDS_PATH")
       {
       this->NoBuilds = true;
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if(this->CheckCommonArgument(args[i]))
       {
       configArgs.insert(i);
-      this->Compatibility_1_6 = false;
       doing = DoingNone;
       }
     else if((doing == DoingComponents) || (doing == DoingOptionalComponents))
@@ -642,24 +598,9 @@ bool cmFindPackageCommand::HandlePackageMode()
   std::string upperFound = cmSystemTools::UpperCase(this->Name);
   upperDir += "_DIR";
   upperFound += "_FOUND";
-  if(upperDir == this->Variable)
-    {
-    this->Compatibility_1_6 = false;
-    }
 
   // Try to find the config file.
   const char* def = this->Makefile->GetDefinition(this->Variable.c_str());
-  if(this->Compatibility_1_6 && cmSystemTools::IsOff(def))
-    {
-    // Use the setting of the old name of the variable to provide the
-    // value of the new.
-    const char* oldDef = this->Makefile->GetDefinition(upperDir.c_str());
-    if(!cmSystemTools::IsOff(oldDef))
-      {
-      this->Makefile->AddDefinition(this->Variable.c_str(), oldDef);
-      def = this->Makefile->GetDefinition(this->Variable.c_str());
-      }
-    }
 
   // Try to load the config file if the directory is known
   bool fileFound = false;
@@ -880,43 +821,6 @@ bool cmFindPackageCommand::HandlePackageMode()
     {
     this->Makefile->RemoveDefinition(fileVar.c_str());
     }
-
-  // Handle some ancient compatibility stuff.
-  if(this->Compatibility_1_6)
-    {
-    // Listfiles will be looking for the capitalized version of the
-    // name.  Provide it.
-    this->Makefile->AddDefinition
-      (upperDir.c_str(),
-       this->Makefile->GetDefinition(this->Variable.c_str()));
-    this->Makefile->AddDefinition
-      (upperFound.c_str(),
-       this->Makefile->GetDefinition(foundVar.c_str()));
-    }
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  if(!(upperDir == this->Variable))
-    {
-    if(this->Compatibility_1_6)
-      {
-      // Listfiles may use the capitalized version of the name.
-      // Remove any previously added watch.
-      this->Makefile->GetVariableWatch()->RemoveWatch(
-        upperDir.c_str(),
-        cmFindPackageNeedBackwardsCompatibility
-        );
-      }
-    else
-      {
-      // Listfiles should not be using the capitalized version of the
-      // name.  Add a watch to warn the user.
-      this->Makefile->GetVariableWatch()->AddWatch(
-        upperDir.c_str(),
-        cmFindPackageNeedBackwardsCompatibility
-        );
-      }
-    }
-#endif
 
   std::string consideredConfigsVar = this->Name;
   consideredConfigsVar += "_CONSIDERED_CONFIGS";

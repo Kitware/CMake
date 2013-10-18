@@ -117,7 +117,6 @@ private:
   unsigned int RequiredCMakeVersion;
   bool Quiet;
   bool Required;
-  bool Compatibility_1_6;
   bool UseConfigFiles;
   bool UseFindModules;
   bool NoUserRegistry;

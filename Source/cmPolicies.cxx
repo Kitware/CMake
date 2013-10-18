@@ -357,15 +357,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   if (majorVer < 2 || (majorVer == 2 && minorVer < 4))
     {
     mf->IssueMessage(cmake::FATAL_ERROR,
-      "An attempt was made to set the policy version of CMake to something "
-      "earlier than \"2.4\".  "
-      "In CMake 2.4 and below backwards compatibility was handled with the "
-      "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
-      "In order to get compatibility features supporting versions earlier "
-      "than 2.4 set policy CMP0001 to OLD to tell CMake to check the "
-      "CMAKE_BACKWARDS_COMPATIBILITY variable.  "
-      "One way to do this is to set the policy version to 2.4 exactly."
-      );
+      "Compatibility with CMake < 2.4 is not supported by CMake >= 3.0.  "
+      "For compatibility with older versions please use any CMake 2.8.x "
+      "release or lower.");
     return false;
     }
 

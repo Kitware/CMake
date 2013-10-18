@@ -624,29 +624,6 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
           {
           cmSystemTools::RemoveFile(compilerLangFile.c_str());
           }
-        else
-          {
-          // load backwards compatibility stuff for C and CXX
-          // for old versions of CMake ListFiles C and CXX had some
-          // backwards compatibility files they have to load
-          // These files have a bunch of try compiles in them so
-          // should only be done
-          if (mf->NeedBackwardsCompatibility(1,4))
-            {
-            if(strcmp(lang, "C") == 0)
-              {
-              ifpath =
-                mf->GetModulesFile("CMakeBackwardCompatibilityC.cmake");
-              mf->ReadListFile(0,ifpath.c_str());
-              }
-            if(strcmp(lang, "CXX") == 0)
-              {
-              ifpath =
-                mf->GetModulesFile("CMakeBackwardCompatibilityCXX.cmake");
-              mf->ReadListFile(0,ifpath.c_str());
-              }
-            }
-          }
         } // end if in try compile
       } // end need test language
     // Store the shared library flags so that we can satisfy CMP0018
