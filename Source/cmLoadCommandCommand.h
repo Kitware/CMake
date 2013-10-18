@@ -14,34 +14,14 @@
 
 #include "cmCommand.h"
 
-/** \class cmLoadCommandCommand
- * \brief Load in a Command plugin
- *
- * cmLoadCommandCommand loads a command into CMake
- */
 class cmLoadCommandCommand : public cmCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  virtual cmCommand* Clone()
-    {
-    return new cmLoadCommandCommand;
-    }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
+  virtual cmCommand* Clone() { return new cmLoadCommandCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
   virtual const char* GetName() const {return "load_command";}
-
+  virtual bool IsDiscouraged() const { return true; }
   cmTypeMacro(cmLoadCommandCommand, cmCommand);
 };
 

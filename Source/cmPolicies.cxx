@@ -256,6 +256,11 @@ cmPolicies::cmPolicies()
     CMP0030, "CMP0030",
     "The use_mangled_mesa command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0031, "CMP0031",
+    "The load_command command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

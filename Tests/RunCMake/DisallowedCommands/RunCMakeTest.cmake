@@ -3,6 +3,7 @@ include(RunCMake)
 foreach(p
     CMP0029
     CMP0030
+    CMP0031
     )
   run_cmake(${p}-WARN)
   run_cmake(${p}-OLD)
