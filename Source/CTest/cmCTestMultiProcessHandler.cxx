@@ -441,11 +441,41 @@ int cmCTestMultiProcessHandler::SearchByName(std::string name)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateTestCostList()
 {
+  std::list<TestSet> priorityStack;
+  priorityStack.push_back(TestSet());
+  TestSet &topLevel = priorityStack.back();
+
+  for(TestMap::const_iterator i = this->Tests.begin();
+    i != this->Tests.end(); ++i)
+    {
+    topLevel.insert(i->first);
+    }
+
+  while(priorityStack.back().size())
+    {
+    TestSet &previousSet = priorityStack.back();
+    priorityStack.push_back(TestSet());
+    TestSet &currentSet = priorityStack.back();
+
+    for(TestSet::iterator i = previousSet.begin();
+      i != previousSet.end(); ++i)
+      {
+      TestSet const& dependencies = this->Tests[*i];
+      currentSet.insert(dependencies.begin(), dependencies.end());
+      }
+
+    for(TestSet::iterator i = currentSet.begin();
+      i != currentSet.end(); ++i)
+      {
+      previousSet.erase(*i);
+      }
+    }
+
+  priorityStack.pop_back();
+
   for(TestMap::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
-    SortedTests.push_back(i->first);
-
     //If the test failed last time, it should be run first, so max the cost.
     //Only do this for parallel runs; in non-parallel runs, avoid clobbering
     //the test's explicitly set cost.
@@ -457,8 +487,19 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
       }
     }
 
-  TestComparator comp(this);
-  std::stable_sort(SortedTests.begin(), SortedTests.end(), comp);
+  for(std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
+    i != priorityStack.rend(); ++i)
+    {
+    TestSet &currentSet = *i;
+    TestComparator comp(this);
+
+    TestList sortedCopy;
+    sortedCopy.insert(sortedCopy.end(), currentSet.begin(), currentSet.end());
+    std::stable_sort(sortedCopy.begin(), sortedCopy.end(), comp);
+
+    this->SortedTests.insert(this->SortedTests.end(),
+      sortedCopy.begin(), sortedCopy.end());
+    }
 }
 
 //---------------------------------------------------------
