@@ -5,6 +5,7 @@ foreach(p
     CMP0030
     CMP0031
     CMP0032
+    CMP0033
     )
   run_cmake(${p}-WARN)
   run_cmake(${p}-OLD)

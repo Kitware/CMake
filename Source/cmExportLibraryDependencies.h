@@ -14,49 +14,18 @@
 
 #include "cmCommand.h"
 
-/** \class cmExportLibraryDependenciesCommand
- * \brief Add a test to the lists of tests to run.
- *
- * cmExportLibraryDependenciesCommand adds a test to the list of tests to run
- *
- */
 class cmExportLibraryDependenciesCommand : public cmCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  virtual cmCommand* Clone()
-    {
-    return new cmExportLibraryDependenciesCommand;
-    }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
+  cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
+  virtual cmCommand* Clone() { return new cmExportLibraryDependenciesCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
+  virtual const char* GetName() const { return "export_library_dependencies";}
+  virtual bool IsDiscouraged() const { return true; }
 
-  /**
-   * This is called at the end after all the information
-   * specified by the command is accumulated.
-   */
   virtual void FinalPass();
   virtual bool HasFinalPass() const { return true; }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual const char* GetName() const { return "export_library_dependencies";}
-
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
-  cmTypeMacro(cmExportLibraryDependenciesCommand, cmCommand);
 
 private:
   std::string Filename;
