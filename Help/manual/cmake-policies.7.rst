@@ -59,3 +59,4 @@ All Policies
    /policy/CMP0027
    /policy/CMP0028
    /policy/CMP0029
+   /policy/CMP0030

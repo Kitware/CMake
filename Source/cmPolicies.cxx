@@ -251,6 +251,11 @@ cmPolicies::cmPolicies()
     CMP0029, "CMP0029",
     "The subdir_depends command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0030, "CMP0030",
+    "The use_mangled_mesa command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

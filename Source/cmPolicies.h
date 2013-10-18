@@ -81,6 +81,7 @@ public:
     /// directories.
     CMP0028, ///< Double colon in target name means ALIAS or IMPORTED target.
     CMP0029, ///< Disallow command: subdir_depends
+    CMP0030, ///< Disallow command: use_mangled_mesa
 
     /** \brief Always the last entry.
      *
