@@ -109,7 +109,11 @@ Id flags: ${testflags}
 ")
 
   # Compile the compiler identification source.
-  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([0-9]+)")
+  if(CMAKE_GENERATOR STREQUAL "Visual Studio 6" AND
+      lang STREQUAL "Fortran")
+    set(CMAKE_${lang}_COMPILER_ID_RESULT 1)
+    set(CMAKE_${lang}_COMPILER_ID_OUTPUT "No Intel Fortran in VS 6")
+  elseif("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([0-9]+)")
     set(vs_version ${CMAKE_MATCH_1})
     set(id_platform ${CMAKE_VS_PLATFORM_NAME})
     set(id_lang "${lang}")
