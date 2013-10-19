@@ -2590,34 +2590,17 @@ bool cmTarget::HandleLocationPropertyPolicy() const
     {
     return true;
     }
-  const char *modal = 0;
-  cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0026))
-    {
-    case cmPolicies::WARN:
-      modal = "should";
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::NEW:
-      modal = "may";
-      messageType = cmake::FATAL_ERROR;
-    }
 
-  if (modal)
-    {
-    cmOStringStream e;
-    e << (this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0026)) << "\n";
-    e << "The LOCATION property " << modal << " not be read from target \""
-      << this->GetName() << "\".  Use the target name directly with "
-      "add_custom_command, or use the generator expression $<TARGET_FILE>, "
-      "as appropriate.\n";
-    this->Makefile->IssueMessage(messageType, e.str().c_str());
-    }
+  cmOStringStream e;
+  e << (this->Makefile->GetPolicies()
+        ->GetPolicyWarning(cmPolicies::CMP0026)) << "\n";
+  e << "The LOCATION property may not be read from target \""
+    << this->GetName() << "\".  Use the target name directly with "
+    "add_custom_command, or use the generator expression $<TARGET_FILE>, "
+    "as appropriate.\n";
+  this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
 
-  return messageType != cmake::FATAL_ERROR;
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -2668,7 +2651,7 @@ const char *cmTarget::GetProperty(const char* prop,
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
       // CMake time.
-      this->Properties.SetProperty("LOCATION", this->GetLocation(0),
+      this->Properties.SetProperty("LOCATION", this->ImportedGetLocation(0),
                                    cmProperty::TARGET);
       }
 
@@ -2681,8 +2664,8 @@ const char *cmTarget::GetProperty(const char* prop,
         }
       std::string configName = prop+9;
       this->Properties.SetProperty(prop,
-                                   this->GetLocation(configName.c_str()),
-                                   cmProperty::TARGET);
+                                this->ImportedGetLocation(configName.c_str()),
+                                cmProperty::TARGET);
       }
     }
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
