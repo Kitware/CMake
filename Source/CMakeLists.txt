@@ -363,8 +363,6 @@ if (WIN32)
       cmVisualStudioSlnParser.cxx
       cmVisualStudioWCEPlatformParser.h
       cmVisualStudioWCEPlatformParser.cxx
-      cmWin32ProcessExecution.cxx
-      cmWin32ProcessExecution.h
       )
   endif()
 endif ()
@@ -539,16 +537,6 @@ endif()
 # Build CMake executable
 add_executable(cmake cmakemain.cxx cmcmd.cxx cmcmd.h)
 target_link_libraries(cmake CMakeLib)
-
-# Build special executable for running programs on Windows 98.
-# Included on any Windows (unconditional packaging required!).
-if(WIN32)
-  if(NOT UNIX)
-    add_executable(cmw9xcom cmw9xcom.cxx)
-    target_link_libraries(cmw9xcom CMakeLib)
-    install(TARGETS cmw9xcom DESTINATION bin)
-  endif()
-endif()
 
 # Build CTest executable
 add_executable(ctest ctest.cxx)

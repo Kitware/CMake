@@ -302,8 +302,7 @@ CMAKE_CXX_SOURCES="\
 if ${cmake_system_mingw}; then
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES}\
     cmGlobalMSYSMakefileGenerator \
-    cmGlobalMinGWMakefileGenerator \
-    cmWin32ProcessExecution"
+    cmGlobalMinGWMakefileGenerator"
 fi
 
 CMAKE_C_SOURCES="\

@@ -403,11 +403,6 @@ int main (int argc, char *argv[])
             }
           if ( parsed )
             {
-#ifdef _WIN32
-            std::string comspec = "cmw9xcom.exe";
-            cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
-#endif
-
             const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
             cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: "
               << cpackGenerator->GetNameOfClass() << std::endl);

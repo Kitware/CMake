@@ -33,7 +33,7 @@ native tool on their platform.
   copy_directory, copy_if_different, echo, echo_append, environment,
   make_directory, md5sum, remove, remove_directory, rename, tar, time,
   touch, touch_nocreate.  In addition, some platform specific commands
-  are available.  On Windows: comspec, delete_regv, write_regv.  On
+  are available.  On Windows: delete_regv, write_regv.  On
   UNIX: create_symlink.
 
 * ``-i``: Run in wizard mode.
