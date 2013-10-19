@@ -771,9 +771,11 @@ cmGlobalUnixMakefileGenerator3
         progressDir += t->first;
         lg->AppendEcho(commands,progressDir.c_str());
         }
-
+      else
+        {
+        depends.clear();
+        }
       this->AppendGlobalTargetDepends(depends,t->second);
-
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands, true);
 
