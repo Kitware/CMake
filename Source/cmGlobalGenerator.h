@@ -313,7 +313,6 @@ public:
   void AddBuildExportSet(cmExportBuildFileGenerator*);
   void AddBuildExportExportSet(cmExportBuildFileGenerator*);
   bool IsExportedTargetsFile(const std::string &filename) const;
-  bool GenerateImportFile(const std::string &file);
   cmExportBuildFileGenerator*
   GetExportedTargetsFile(const std::string &filename) const;
   void AddCMP0042WarnTarget(const std::string& target);
