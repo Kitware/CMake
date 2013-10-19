@@ -111,6 +111,7 @@ protected:
   std::set<cmCTestRunTest*> RunningTests;  // current running tests
   cmCTestTestHandler * TestHandler;
   cmCTest* CTest;
+  bool HasCycles;
 };
 
 #endif

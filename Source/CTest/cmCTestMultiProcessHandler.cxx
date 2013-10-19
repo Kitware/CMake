@@ -41,6 +41,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->Completed = 0;
   this->RunningCount = 0;
   this->StopTimePassed = false;
+  this->HasCycles = false;
 }
 
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
@@ -65,6 +66,11 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
   if(!this->CTest->GetShowOnly())
     {
     this->ReadCostData();
+    this->HasCycles = !this->CheckCycles();
+    if(this->HasCycles)
+      {
+      return;
+      }
     this->CreateTestCostList();
     }
 }
@@ -79,7 +85,7 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
-  if(!this->CheckCycles())
+  if(this->HasCycles)
     {
     return;
     }
