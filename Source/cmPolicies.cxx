@@ -244,7 +244,7 @@ cmPolicies::cmPolicies()
 
   this->DefinePolicy(
     CMP0028, "CMP0028",
-    "Double semicolon in target name means ALIAS or IMPORTED target.",
+    "Double colon in target name means ALIAS or IMPORTED target.",
     3,0,0,0, cmPolicies::WARN);
 }
 
