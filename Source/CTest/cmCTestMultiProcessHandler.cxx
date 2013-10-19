@@ -448,7 +448,16 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(TestMap::const_iterator i = this->Tests.begin();
     i != this->Tests.end(); ++i)
     {
-    topLevel.insert(i->first);
+    if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+       this->Properties[i->first]->Name) != this->LastTestsFailed.end())
+      {
+      //If the test failed last time, it should be run first.
+      this->SortedTests.push_back(i->first);
+      }
+    else
+      {
+      topLevel.insert(i->first);
+      }
     }
 
   while(priorityStack.back().size())
@@ -472,20 +481,6 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     }
 
   priorityStack.pop_back();
-
-  for(TestMap::iterator i = this->Tests.begin();
-      i != this->Tests.end(); ++i)
-    {
-    //If the test failed last time, it should be run first, so max the cost.
-    //Only do this for parallel runs; in non-parallel runs, avoid clobbering
-    //the test's explicitly set cost.
-    if(this->ParallelLevel > 1 &&
-       std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
-       this->Properties[i->first]->Name) != this->LastTestsFailed.end())
-      {
-      this->Properties[i->first]->Cost = FLT_MAX;
-      }
-    }
 
   for(std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
     i != priorityStack.rend(); ++i)
