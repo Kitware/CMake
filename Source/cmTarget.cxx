@@ -985,15 +985,20 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
   i += this->PrevLinkedLibraries.size();
   for( ; i != libs.end(); ++i )
     {
+    const char *lib = i->first.c_str();
     // We call this so that the dependencies get written to the cache
-    this->AddLinkLibrary( mf, selfname, i->first.c_str(), i->second );
+    this->AddLinkLibrary( mf, selfname, lib, i->second );
 
     if (this->GetType() == cmTarget::STATIC_LIBRARY)
       {
-      this->AppendProperty("INTERFACE_LINK_LIBRARIES",
-            ("$<LINK_ONLY:" +
-            this->GetDebugGeneratorExpressions(i->first.c_str(), i->second) +
-            ">").c_str());
+      if (cmGeneratorExpression::IsValidTargetName(lib)
+          || cmGeneratorExpression::Find(lib) != std::string::npos)
+        {
+        this->AppendProperty("INTERFACE_LINK_LIBRARIES",
+              ("$<LINK_ONLY:" +
+              this->GetDebugGeneratorExpressions(lib, i->second)
+              + ">").c_str());
+        }
       }
     }
   this->PrevLinkedLibraries = libs;
