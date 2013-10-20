@@ -395,10 +395,14 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       {
       if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
         {
-        this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+        if (cmGeneratorExpression::IsValidTargetName(lib)
+            || cmGeneratorExpression::Find(lib) != std::string::npos)
+          {
+          this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
                   ("$<LINK_ONLY:" +
                   this->Target->GetDebugGeneratorExpressions(lib, llt) +
                   ">").c_str());
+          }
         }
       // Not a 'public' or 'interface' library. Do not add to interface
       // property.
