@@ -776,6 +776,10 @@ cmGlobalUnixMakefileGenerator3
         depends.clear();
         }
       this->AppendGlobalTargetDepends(depends,t->second);
+      if(depends.empty() && this->EmptyRuleHackDepends != "")
+        {
+        depends.push_back(this->EmptyRuleHackDepends);
+        }
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands, true);
 
