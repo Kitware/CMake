@@ -922,6 +922,42 @@ void cmGlobalNinjaGenerator::WriteTargetAliases(std::ostream& os)
   }
 }
 
+std::set<std::string> cmGlobalNinjaGenerator::GetImportedTargetOutputs()
+{
+  std::set<std::string> importedTargetOutputs;
+  cmLocalNinjaGenerator *ng =
+      static_cast<cmLocalNinjaGenerator *>(this->LocalGenerators[0]);
+
+  bool platformUsesImportLibraries =
+      !!ng->GetMakefile()->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX");
+
+  for (std::vector<cmLocalGenerator*>::const_iterator localGeneratorItr =
+           this->LocalGenerators.begin();
+       localGeneratorItr != this->LocalGenerators.end(); ++localGeneratorItr)
+    {
+    const std::vector<cmTarget*>& importedTargets =
+        (*localGeneratorItr)->GetMakefile()->GetOwnedImportedTargets();
+
+    for(std::vector<cmTarget*>::const_iterator importedTargetsItr =
+             importedTargets.begin();
+         importedTargetsItr != importedTargets.end(); ++importedTargetsItr)
+      {
+      cmTarget& target = **importedTargetsItr;
+      bool targetUsesImportLibraries =
+          platformUsesImportLibraries &&
+          target.GetType() == cmTarget::SHARED_LIBRARY;
+
+      std::string libraryPath = ng->ConvertToNinjaPath(
+          target.GetFullPath(ng->GetConfigName(), targetUsesImportLibraries)
+              .c_str());
+
+      if (!cmSystemTools::IsNOTFOUND(libraryPath.c_str()))
+        importedTargetOutputs.insert(libraryPath);
+      }
+    }
+  return importedTargetOutputs;
+}
+
 void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
 {
   //now write out the unknown explicit dependencies.
@@ -1006,6 +1042,12 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
 
   std::vector<std::string> unkownExplicitDepends;
   this->CombinedBuildExplicitDependencies.erase("all");
+
+  // Add in outputs from imported targets
+  std::set<std::string> importedTargetOutputs =
+      this->GetImportedTargetOutputs();
+  this->CombinedBuildExplicitDependencies.insert(importedTargetOutputs.begin(),
+                                                 importedTargetOutputs.end());
 
   std::set_difference(this->CombinedBuildExplicitDependencies.begin(),
                       this->CombinedBuildExplicitDependencies.end(),

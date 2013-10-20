@@ -322,6 +322,7 @@ private:
 
   void WriteTargetAliases(std::ostream& os);
   void WriteUnknownExplicitDependencies(std::ostream& os);
+  std::set<std::string> GetImportedTargetOutputs();
 
   void WriteBuiltinTargets(std::ostream& os);
   void WriteTargetAll(std::ostream& os);
