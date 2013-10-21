@@ -236,11 +236,9 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
                 "$DESC",
                 "Rule for running custom commands.",
                 /*depfile*/ "",
-                /*deptype*/ "",
                 /*rspfile*/ "",
                 /*rspcontent*/ "",
-                /*restat*/ true,
-                /*generator*/ false);
+                /*restat*/ true);
 }
 
 void
@@ -249,7 +247,7 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                                 const std::string& comment,
                                                 const cmNinjaDeps& outputs,
                                                 const cmNinjaDeps& deps,
-                                                const cmNinjaDeps& orderOnlyDeps)
+                                              const cmNinjaDeps& orderOnlyDeps)
 {
   std::string cmd = command;
 #ifdef _WIN32
@@ -289,13 +287,9 @@ cmGlobalNinjaGenerator::AddMacOSXContentRule()
   this->AddRule("COPY_OSX_CONTENT",
                 cmd.str(),
                 "Copying OS X Content $out",
-                "Rule for copying OS X bundle content file.",
+                "Rule for copying OS X bundle content file."
                 /*depfile*/ "",
-                /*deptype*/ "",
-                /*rspfile*/ "",
-                /*rspcontent*/ "",
-                /*restat*/ false,
-                /*generator*/ false);
+                /*rspfile*/ "");
 }
 
 void
@@ -326,7 +320,6 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
                                        const std::string& description,
                                        const std::string& comment,
                                        const std::string& depfile,
-                                       const std::string& deptype,
                                        const std::string& rspfile,
                                        const std::string& rspcontent,
                                        bool restat,
@@ -360,13 +353,6 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
     {
     cmGlobalNinjaGenerator::Indent(os, 1);
     os << "depfile = " << depfile << "\n";
-    }
-
-  // Write the deptype if any.
-  if (!deptype.empty())
-    {
-    cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "deps = " << deptype << "\n";
     }
 
   // Write the command.
@@ -593,7 +579,6 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                      const std::string& description,
                                      const std::string& comment,
                                      const std::string& depfile,
-                                     const std::string& deptype,
                                      const std::string& rspfile,
                                      const std::string& rspcontent,
                                      bool restat,
@@ -612,7 +597,6 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                     description,
                                     comment,
                                     depfile,
-                                    deptype,
                                     rspfile,
                                     rspcontent,
                                     restat,
@@ -1101,7 +1085,6 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             "Re-running CMake...",
             "Rule for re-running cmake.",
             /*depfile=*/ "",
-            /*deptype=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
             /*restat=*/ false,
@@ -1155,7 +1138,6 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             "Cleaning all built files...",
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
-            /*deptype=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
             /*restat=*/ false,
@@ -1178,7 +1160,6 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",
-            /*deptype=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
             /*restat=*/ false,

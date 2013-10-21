@@ -120,7 +120,6 @@ public:
                         const std::string& description,
                         const std::string& comment,
                         const std::string& depfile,
-                        const std::string& deptype,
                         const std::string& rspfile,
                         const std::string& rspcontent,
                         bool restat,
@@ -240,12 +239,11 @@ public:
                const std::string& command,
                const std::string& description,
                const std::string& comment,
-               const std::string& depfile,
-               const std::string& deptype,
-               const std::string& rspfile,
-               const std::string& rspcontent,
-               bool restat,
-               bool generator);
+               const std::string& depfile = "",
+               const std::string& rspfile = "",
+               const std::string& rspcontent = "",
+               bool restat = false,
+               bool generator = false);
 
   bool HasRule(const std::string& name);
 
