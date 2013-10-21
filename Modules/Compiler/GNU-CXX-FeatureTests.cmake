@@ -1,4 +1,6 @@
 
+set(_cmake_compiler_test_macro __GNUC__)
+
 set(_cmake_feature_test_gnuxx_typeof "!defined(__STRICT_ANSI__)")
 
 # For GCC 4.7, we can test the standard __cplusplus macro, ...
