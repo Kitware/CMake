@@ -524,6 +524,8 @@ public:
 
   void GetCompileOptions(std::vector<std::string> &result,
                          const char *config) const;
+  void GetCompileFeatures(std::vector<std::string> &result,
+                           const char *config);
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
@@ -682,6 +684,7 @@ private:
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
+  mutable bool DebugCompileFeaturesDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
 
