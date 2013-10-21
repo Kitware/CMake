@@ -22,7 +22,10 @@ typedef enum cmListFileLexer_Type_e
   cmListFileLexer_Token_ParenRight,
   cmListFileLexer_Token_ArgumentUnquoted,
   cmListFileLexer_Token_ArgumentQuoted,
+  cmListFileLexer_Token_ArgumentBracket,
+  cmListFileLexer_Token_CommentBracket,
   cmListFileLexer_Token_BadCharacter,
+  cmListFileLexer_Token_BadBracket,
   cmListFileLexer_Token_BadString
 } cmListFileLexer_Type;
 
@@ -36,6 +39,17 @@ struct cmListFileLexer_Token_s
   int column;
 };
 
+enum cmListFileLexer_BOM_e
+{
+  cmListFileLexer_BOM_None,
+  cmListFileLexer_BOM_UTF8,
+  cmListFileLexer_BOM_UTF16BE,
+  cmListFileLexer_BOM_UTF16LE,
+  cmListFileLexer_BOM_UTF32BE,
+  cmListFileLexer_BOM_UTF32LE
+};
+typedef enum cmListFileLexer_BOM_e cmListFileLexer_BOM;
+
 typedef struct cmListFileLexer_s cmListFileLexer;
 
 #ifdef __cplusplus
@@ -44,7 +58,8 @@ extern "C"
 #endif
 
 cmListFileLexer* cmListFileLexer_New();
-int cmListFileLexer_SetFileName(cmListFileLexer*, const char*);
+int cmListFileLexer_SetFileName(cmListFileLexer*, const char*,
+                                cmListFileLexer_BOM* bom);
 int cmListFileLexer_SetString(cmListFileLexer*, const char*);
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer*);
 long cmListFileLexer_GetCurrentLine(cmListFileLexer*);
