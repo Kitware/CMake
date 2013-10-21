@@ -31,3 +31,5 @@ target_compile_features(lib_delegating_constructors
 
 add_executable(lib_user lib_user.cpp)
 target_link_libraries(lib_user lib_delegating_constructors)
+
+add_subdirectory(feature_conditional_link)
