@@ -59,10 +59,11 @@ for <target>:
 If an <item> is a library in a Mac OX framework, the Headers directory
 of the framework will also be processed as a "usage requirement".
 This has the same effect as passing the framework directory as an
-include directory.  target_link_libraries(<target>
+include directory.
 
 ::
 
+  target_link_libraries(<target>
                       <PRIVATE|PUBLIC|INTERFACE> <lib> ...
                       [<PRIVATE|PUBLIC|INTERFACE> <lib> ... ] ...])
 
