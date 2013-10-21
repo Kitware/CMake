@@ -412,6 +412,11 @@ if(BUILD_TESTING)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Module/ExternalData")
 
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
+  if ((CMAKE_CXX_COMPILER_ID STREQUAL GNU AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
+      OR CMAKE_CXX_COMPILER_ID STREQUAL Clang
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL MSVC AND NOT MSVC_VERSION VERSION_LESS 1400))
+    ADD_TEST_MACRO(Module.WriteCompilerDetectionHeader WriteCompilerDetectionHeader)
+  endif()
 
   if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     include(CheckCXXCompilerFlag)
