@@ -66,6 +66,23 @@ Generator :generator:`Some Generator` with space.
    endif()
    # |not replaced in literal|
 
+A literal block starts after a line consisting of two colons
+
+::
+
+    Literal block.
+   Common Indentation Removed
+   # |not replaced in literal|
+
+or after a paragraph ending in two colons::
+
+    Literal block.
+   Common Indentation Removed
+   # |not replaced in literal|
+
+but not after a line ending in two colons::
+in the middle of a paragraph.
+
 .. |substitution| replace::
    |nested substitution|
    with multiple lines becomes one line

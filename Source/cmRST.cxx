@@ -22,6 +22,7 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
   DocRoot(docroot),
   IncludeDepth(0),
   OutputLinePending(false),
+  LastLineEndedInColonColon(false),
   Markup(MarkupNone),
   Directive(DirectiveNone),
   CMakeDirective("^.. (cmake:)?("
@@ -125,6 +126,7 @@ void cmRST::Reset()
     {
     case DirectiveNone: break;
     case DirectiveParsedLiteral: this->ProcessDirectiveParsedLiteral(); break;
+    case DirectiveLiteralBlock: this->ProcessDirectiveLiteralBlock(); break;
     case DirectiveCodeBlock: this->ProcessDirectiveCodeBlock(); break;
     case DirectiveReplace: this->ProcessDirectiveReplace(); break;
     case DirectiveTocTree: this->ProcessDirectiveTocTree(); break;
@@ -137,6 +139,9 @@ void cmRST::Reset()
 //----------------------------------------------------------------------------
 void cmRST::ProcessLine(std::string const& line)
 {
+  bool lastLineEndedInColonColon = this->LastLineEndedInColonColon;
+  this->LastLineEndedInColonColon = false;
+
   // A line starting in .. is an explicit markup start.
   if(line == ".." || (line.size() >= 3 && line[0] == '.' &&
                       line[1] == '.' && isspace(line[2])))
@@ -211,10 +216,21 @@ void cmRST::ProcessLine(std::string const& line)
       this->MarkupLines.push_back(line);
       }
     }
+  // A blank line following a paragraph ending in "::" starts a literal block.
+  else if(lastLineEndedInColonColon && line.empty())
+    {
+    // Record the literal lines to output after whole block.
+    this->Markup = MarkupNormal;
+    this->Directive = DirectiveLiteralBlock;
+    this->MarkupLines.push_back("");
+    this->OutputLine("", false);
+    }
   // Print non-markup lines.
   else
     {
     this->NormalLine(line);
+    this->LastLineEndedInColonColon = (line.size() >= 2
+      && line[line.size()-2] == ':' && line[line.size()-1] == ':');
     }
 }
 
@@ -341,6 +357,12 @@ bool cmRST::ProcessInclude(std::string file, IncludeType type)
 void cmRST::ProcessDirectiveParsedLiteral()
 {
   this->OutputMarkupLines(true);
+}
+
+//----------------------------------------------------------------------------
+void cmRST::ProcessDirectiveLiteralBlock()
+{
+  this->OutputMarkupLines(false);
 }
 
 //----------------------------------------------------------------------------

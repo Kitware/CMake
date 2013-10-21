@@ -38,6 +38,7 @@ private:
   {
     DirectiveNone,
     DirectiveParsedLiteral,
+    DirectiveLiteralBlock,
     DirectiveCodeBlock,
     DirectiveReplace,
     DirectiveTocTree
@@ -53,6 +54,7 @@ private:
   void OutputMarkupLines(bool inlineMarkup);
   bool ProcessInclude(std::string file, IncludeType type);
   void ProcessDirectiveParsedLiteral();
+  void ProcessDirectiveLiteralBlock();
   void ProcessDirectiveCodeBlock();
   void ProcessDirectiveReplace();
   void ProcessDirectiveTocTree();
@@ -62,6 +64,7 @@ private:
   std::string DocRoot;
   int IncludeDepth;
   bool OutputLinePending;
+  bool LastLineEndedInColonColon;
   MarkupType Markup;
   DirectiveType Directive;
   cmsys::RegularExpression CMakeDirective;
