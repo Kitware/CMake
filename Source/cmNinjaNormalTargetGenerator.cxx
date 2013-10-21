@@ -261,11 +261,8 @@ cmNinjaNormalTargetGenerator
                                         description.str(),
                                         comment.str(),
                                         /*depfile*/ "",
-                                        /*deptype*/ "",
                                         rspfile,
-                                        rspcontent,
-                                        /*restat*/ false,
-                                        /*generator*/ false);
+                                        rspcontent);
   }
 
   if (this->TargetNameOut != this->TargetNameReal &&
@@ -280,26 +277,14 @@ cmNinjaNormalTargetGenerator
                                           " -E cmake_symlink_executable"
                                           " $in $out && $POST_BUILD",
                                           "Creating executable symlink $out",
-                                          "Rule for creating executable symlink.",
-                                          /*depfile*/ "",
-                                          /*deptype*/ "",
-                                          /*rspfile*/ "",
-                                          /*rspcontent*/ "",
-                                          /*restat*/ false,
-                                          /*generator*/ false);
+                                      "Rule for creating executable symlink.");
     else
       this->GetGlobalGenerator()->AddRule("CMAKE_SYMLINK_LIBRARY",
                                           cmakeCommand +
                                           " -E cmake_symlink_library"
                                           " $in $SONAME $out && $POST_BUILD",
                                           "Creating library symlink $out",
-                                          "Rule for creating library symlink.",
-                                          /*depfile*/ "",
-                                          /*deptype*/ "",
-                                          /*rspfile*/ "",
-                                          /*rspcontent*/ "",
-                                          /*restat*/ false,
-                                          /*generator*/ false);
+                                         "Rule for creating library symlink.");
   }
 }
 

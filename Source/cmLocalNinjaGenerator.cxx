@@ -48,21 +48,7 @@ void cmLocalNinjaGenerator::Generate()
   this->WriteProcessedMakefile(this->GetRulesFileStream());
 #endif
 
-  // We do that only once for the top CMakeLists.txt file.
-  if(this->isRootMakefile())
-    {
-    this->WriteBuildFileTop();
-
-    const std::string showIncludesPrefix = this->GetMakefile()
-             ->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
-    if (!showIncludesPrefix.empty())
-      {
-      cmGlobalNinjaGenerator::WriteComment(this->GetRulesFileStream(),
-                                           "localized /showIncludes string");
-      this->GetRulesFileStream()
-            << "msvc_deps_prefix = " << showIncludesPrefix << "\n\n";
-      }
-    }
+  this->WriteBuildFileTop();
 
   cmTargets& targets = this->GetMakefile()->GetTargets();
   for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
@@ -177,6 +163,10 @@ bool cmLocalNinjaGenerator::isRootMakefile() const
 
 void cmLocalNinjaGenerator::WriteBuildFileTop()
 {
+  // We do that only once for the top CMakeLists.txt file.
+  if(!this->isRootMakefile())
+    return;
+
   // For the build file.
   this->WriteProjectHeader(this->GetBuildFileStream());
   this->WriteNinjaFilesInclusion(this->GetBuildFileStream());

@@ -20,7 +20,7 @@
 # in front of each include path, so it can remove it.
 #
 
-if(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
+if(MSVC_C_ARCHITECTURE_ID AND CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
   string(REPLACE "cmake.exe" "cmcldeps.exe"  CMAKE_CMCLDEPS_EXECUTABLE ${CMAKE_COMMAND})
   set(showdir ${CMAKE_BINARY_DIR}/CMakeFiles/ShowIncludes)
   file(WRITE ${showdir}/foo.h "\n")
@@ -30,5 +30,5 @@ if(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_C_COMPILER AND CMAKE_COMMAND)
   string(REGEX MATCH "\n([^:]*:[^:]*:[ \t]*)" tmp "${outLine}")
   set(localizedPrefix "${CMAKE_MATCH_1}")
   set(SET_CMAKE_CMCLDEPS_EXECUTABLE   "set(CMAKE_CMCLDEPS_EXECUTABLE \"${CMAKE_CMCLDEPS_EXECUTABLE}\")")
-  set(SET_CMAKE_CL_SHOWINCLUDES_PREFIX "set(CMAKE_CL_SHOWINCLUDES_PREFIX \"${localizedPrefix}\")")
+  set(SET_CMAKE_CL_SHOWINCLUDE_PREFIX "set(CMAKE_CL_SHOWINCLUDE_PREFIX \"${localizedPrefix}\")")
 endif()
