@@ -261,6 +261,23 @@ if(BUILD_TESTING)
       PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked)")
   endif()
 
+  if(CMAKE_TEST_GENERATOR MATCHES Make)
+    set(InterfaceBuildTargets_libname testlib)
+    if (CMAKE_TEST_GENERATOR MATCHES "Borland|Watcom")
+      set(InterfaceBuildTargets_libname testlib.lib)
+    endif()
+    add_test(InterfaceBuildTargets ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/InterfaceBuildTargets"
+      "${CMake_BINARY_DIR}/Tests/InterfaceBuildTargets"
+      --build-two-config
+      ${build_generator_args}
+      --build-project InterfaceBuildTargets
+      --test-command ${CMAKE_CMAKE_COMMAND} -E touch_nocreate ${InterfaceBuildTargets_libname}
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceBuildTargets")
+  endif()
+
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
 
   if(NOT QT4_FOUND)
