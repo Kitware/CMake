@@ -19,7 +19,7 @@
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionToken
 {
-  cmGeneratorExpressionToken(unsigned type, const char *c, unsigned l)
+  cmGeneratorExpressionToken(unsigned type, const char *c, size_t l)
     : TokenType(type), Content(c), Length(l)
   {
   }
@@ -32,7 +32,7 @@ struct cmGeneratorExpressionToken
   };
   unsigned TokenType;
   const char *Content;
-  unsigned Length;
+  size_t Length;
 };
 
 /** \class cmGeneratorExpressionLexer

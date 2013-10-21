@@ -235,7 +235,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
     return;
   }
 
-  int contentLength = ((this->it - 1)->Content
+  size_t contentLength = ((this->it - 1)->Content
                     - startToken->Content)
                     + (this->it - 1)->Length;
   GeneratorExpressionContent *content = new GeneratorExpressionContent(
