@@ -104,7 +104,7 @@ public:
                                const std::string& comment,
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
-                             const cmNinjaDeps& orderOnly = cmNinjaDeps());
+                             const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
   void WriteMacOSXContentBuild(const std::string& input,
                                const std::string& output);
 
@@ -120,7 +120,6 @@ public:
                         const std::string& description,
                         const std::string& comment,
                         const std::string& depfile,
-                        const std::string& deptype,
                         const std::string& rspfile,
                         const std::string& rspcontent,
                         bool restat,
@@ -240,12 +239,11 @@ public:
                const std::string& command,
                const std::string& description,
                const std::string& comment,
-               const std::string& depfile,
-               const std::string& deptype,
-               const std::string& rspfile,
-               const std::string& rspcontent,
-               bool restat,
-               bool generator);
+               const std::string& depfile = "",
+               const std::string& rspfile = "",
+               const std::string& rspcontent = "",
+               bool restat = false,
+               bool generator = false);
 
   bool HasRule(const std::string& name);
 
