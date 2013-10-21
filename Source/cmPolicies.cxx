@@ -271,6 +271,11 @@ cmPolicies::cmPolicies()
     CMP0033, "CMP0033",
     "The export_library_dependencies command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0034, "CMP0034",
+    "The utility_source command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
