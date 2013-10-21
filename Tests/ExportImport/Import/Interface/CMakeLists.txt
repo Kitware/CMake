@@ -21,7 +21,7 @@ include(CheckCXXSourceCompiles)
 
 macro(do_try_compile prefix)
 
-  set(CMAKE_REQUIRED_LIBRARIES ${prefix}headeronly)
+  set(CMAKE_REQUIRED_LIBRARIES ${prefix}::headeronly)
   check_cxx_source_compiles(
     "
   #include \"headeronly.h\"
@@ -42,7 +42,7 @@ macro(do_try_compile prefix)
   endif()
 endmacro()
 
-do_try_compile(bld::)
+do_try_compile(bld)
 
 add_executable(headeronlytest_exp headeronlytest.cpp)
 target_link_libraries(headeronlytest_exp exp::headeronly)
@@ -52,4 +52,4 @@ set_property(TARGET exp::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES de
 add_executable(interfacetest_exp interfacetest.cpp)
 target_link_libraries(interfacetest_exp exp::sharediface)
 
-do_try_compile(exp::)
+do_try_compile(exp)
