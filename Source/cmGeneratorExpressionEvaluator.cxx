@@ -1101,10 +1101,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
 
     context->HadContextSensitiveCondition = true;
 
-    for (size_t i = 1;
-         i < (sizeof(targetPolicyWhitelist) /
-              sizeof(*targetPolicyWhitelist));
-         ++i)
+    for (size_t i = 1; i < cmArraySize(targetPolicyWhitelist); ++i)
       {
       const char *policy = targetPolicyWhitelist[i];
       if (parameters.front() == policy)
