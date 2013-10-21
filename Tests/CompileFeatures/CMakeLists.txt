@@ -27,13 +27,29 @@ foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+    AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+  list(REMOVE_ITEM CXX_non_features
+    cxx_alignof
+  )
+endif()
+
 if (CMAKE_CXX_COMPILE_FEATURES)
-  include(CheckCXXSourceCompiles)
   foreach(feature ${CXX_non_features})
-    check_cxx_source_compiles("#include \"${CMAKE_CURRENT_SOURCE_DIR}/${feature}.cpp\"\nint main() { return 0; }\n" ${feature}_works)
+    message("Testing feature : ${feature}")
+    try_compile(${feature}_works
+      "${CMAKE_CURRENT_BINARY_DIR}/${feature}_test"
+      "${CMAKE_CURRENT_SOURCE_DIR}/feature_test.cpp"
+      COMPILE_DEFINITIONS "-DTEST=${CMAKE_CURRENT_SOURCE_DIR}/${feature}.cpp"
+      CMAKE_FLAGS "-DCMAKE_CXX_STANDARD=11"
+      OUTPUT_VARIABLE OUTPUT
+    )
     if (${feature}_works)
       message(SEND_ERROR
-        "Feature ${feature} expected not to work for ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}.  Update the supported features or blacklist it.")
+        "Feature ${feature} expected not to work for ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}.
+Update the supported features or blacklist it.\n${OUTPUT}")
+    else()
+      message("Testing feature : ${feature} -- Fails, as expected.")
     endif()
   endforeach()
 endif()
