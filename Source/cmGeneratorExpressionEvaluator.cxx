@@ -704,17 +704,6 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
 }
 
 //----------------------------------------------------------------------------
-struct TransitiveWhitelistCompare
-{
-  explicit TransitiveWhitelistCompare(const std::string &needle)
-    : Needle(needle) {}
-  bool operator() (const char *item)
-  { return strcmp(item, this->Needle.c_str()) == 0; }
-private:
-  std::string Needle;
-};
-
-//----------------------------------------------------------------------------
 static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 {
   TargetPropertyNode() {}
@@ -864,8 +853,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
     case cmGeneratorExpressionDAGChecker::ALREADY_SEEN:
       for (size_t i = 1;
-          i < (sizeof(targetPropertyTransitiveWhitelist) /
-                sizeof(*targetPropertyTransitiveWhitelist));
+          i < cmArraySize(targetPropertyTransitiveWhitelist);
           ++i)
         {
         if (targetPropertyTransitiveWhitelist[i] == propertyName)
@@ -928,12 +916,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
 
-    const char **transBegin = targetPropertyTransitiveWhitelist + 1;
-    const char **transEnd = targetPropertyTransitiveWhitelist
-              + (sizeof(targetPropertyTransitiveWhitelist) /
-              sizeof(*targetPropertyTransitiveWhitelist));
+    const char * const *transBegin =
+                        cmArrayBegin(targetPropertyTransitiveWhitelist) + 1;
+    const char * const *transEnd =
+                        cmArrayEnd(targetPropertyTransitiveWhitelist);
+
     if (std::find_if(transBegin, transEnd,
-              TransitiveWhitelistCompare(propertyName)) != transEnd)
+                     cmStrCmp(propertyName)) != transEnd)
       {
 
       std::vector<std::string> libs;
@@ -949,7 +938,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       }
     else if (std::find_if(transBegin, transEnd,
-              TransitiveWhitelistCompare(interfacePropertyName)) != transEnd)
+                          cmStrCmp(interfacePropertyName)) != transEnd)
       {
       const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
                                                     context->Config,
@@ -996,8 +985,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 
     for (size_t i = 1;
-         i < (sizeof(targetPropertyTransitiveWhitelist) /
-              sizeof(*targetPropertyTransitiveWhitelist));
+         i < cmArraySize(targetPropertyTransitiveWhitelist);
          ++i)
       {
       if (targetPropertyTransitiveWhitelist[i] == interfacePropertyName)
