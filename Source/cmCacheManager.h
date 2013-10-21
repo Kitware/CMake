@@ -179,7 +179,6 @@ private:
   // the commands should never use the cmCacheManager directly
   friend class cmMakefile; // allow access to add cache values
   friend class cmake; // allow access to add cache values
-  friend class cmakewizard; // allow access to add cache values
   friend class cmMarkAsAdvancedCommand; // allow access to add cache values
 };
 
