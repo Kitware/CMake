@@ -26,6 +26,7 @@ Variable :variable:`VARIABLE_<PLACEHOLDER> <target>` with trailing placeholder a
 Generator :generator:`Some Generator` with space.
 
 .. |not replaced| replace:: not replaced through toctree
+.. |not replaced in literal| replace:: replaced in parsed literal
 
 .. toctree::
    :maxdepth: 2
@@ -55,6 +56,7 @@ Generator :generator:`Some Generator` with space.
 
     Parsed-literal included without directive.
    Common Indentation Removed
+   # |not replaced in literal|
 
 .. code-block:: cmake
 
@@ -62,6 +64,7 @@ Generator :generator:`Some Generator` with space.
    if(condition)
      message(indented)
    endif()
+   # |not replaced in literal|
 
 .. |substitution| replace::
    |nested substitution|

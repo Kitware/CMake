@@ -45,11 +45,13 @@ More CMake Module Content
 
   Parsed-literal included without directive.
  Common Indentation Removed
+ # replaced in parsed literal
 
  # Sample CMake code block
  if(condition)
    message(indented)
  endif()
+ # |not replaced in literal|
 
 substituted text with multiple lines becomes one line
 

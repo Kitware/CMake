@@ -222,35 +222,42 @@ void cmRST::ProcessLine(std::string const& line)
 void cmRST::NormalLine(std::string const& line)
 {
   this->Reset();
-  this->OutputLine(line);
+  this->OutputLine(line, true);
 }
 
 //----------------------------------------------------------------------------
-void cmRST::OutputLine(std::string const& line_in)
+void cmRST::OutputLine(std::string const& line_in, bool inlineMarkup)
 {
   if(this->OutputLinePending)
     {
     this->OS << "\n";
     this->OutputLinePending = false;
     }
-  std::string line = this->ReplaceSubstitutions(line_in);
-  std::string::size_type pos = 0;
-  while(this->CMakeRole.find(line.c_str()+pos))
+  if(inlineMarkup)
     {
-    this->OS << line.substr(pos, this->CMakeRole.start());
-    std::string text = this->CMakeRole.match(3);
-    // If a command reference has no explicit target and
-    // no explicit "(...)" then add "()" to the text.
-    if(this->CMakeRole.match(2) == "command" &&
-       this->CMakeRole.match(5).empty() &&
-       text.find_first_of("()") == text.npos)
+    std::string line = this->ReplaceSubstitutions(line_in);
+    std::string::size_type pos = 0;
+    while(this->CMakeRole.find(line.c_str()+pos))
       {
-      text += "()";
+      this->OS << line.substr(pos, this->CMakeRole.start());
+      std::string text = this->CMakeRole.match(3);
+      // If a command reference has no explicit target and
+      // no explicit "(...)" then add "()" to the text.
+      if(this->CMakeRole.match(2) == "command" &&
+         this->CMakeRole.match(5).empty() &&
+         text.find_first_of("()") == text.npos)
+        {
+        text += "()";
+        }
+      this->OS << "``" << text << "``";
+      pos += this->CMakeRole.end();
       }
-    this->OS << "``" << text << "``";
-    pos += this->CMakeRole.end();
+    this->OS << line.substr(pos) << "\n";
     }
-  this->OS << line.substr(pos) << "\n";
+  else
+    {
+    this->OS << line_in << "\n";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -281,6 +288,22 @@ std::string cmRST::ReplaceSubstitutions(std::string const& line)
     }
   out += line.substr(pos);
   return out;
+}
+
+//----------------------------------------------------------------------------
+void cmRST::OutputMarkupLines(bool inlineMarkup)
+{
+  for(std::vector<std::string>::iterator i = this->MarkupLines.begin();
+      i != this->MarkupLines.end(); ++i)
+    {
+    std::string line = *i;
+    if(!line.empty())
+      {
+      line = " " + line;
+      }
+    this->OutputLine(line, inlineMarkup);
+    }
+  this->OutputLinePending = true;
 }
 
 //----------------------------------------------------------------------------
@@ -317,25 +340,13 @@ bool cmRST::ProcessInclude(std::string file, IncludeType type)
 //----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveParsedLiteral()
 {
-  // Output markup lines as literal text.
-  for(std::vector<std::string>::iterator i = this->MarkupLines.begin();
-      i != this->MarkupLines.end(); ++i)
-    {
-    std::string line = *i;
-    if(!line.empty())
-      {
-      line = " " + line;
-      }
-    this->OutputLine(line);
-    }
-  this->OutputLinePending = true;
+  this->OutputMarkupLines(true);
 }
 
 //----------------------------------------------------------------------------
 void cmRST::ProcessDirectiveCodeBlock()
 {
-  // Treat markup lines the same as a parsed literal.
-  this->ProcessDirectiveParsedLiteral();
+  this->OutputMarkupLines(false);
 }
 
 //----------------------------------------------------------------------------

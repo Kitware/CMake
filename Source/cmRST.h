@@ -48,8 +48,9 @@ private:
   void Reset();
   void ProcessLine(std::string const& line);
   void NormalLine(std::string const& line);
-  void OutputLine(std::string const& line);
+  void OutputLine(std::string const& line, bool inlineMarkup);
   std::string ReplaceSubstitutions(std::string const& line);
+  void OutputMarkupLines(bool inlineMarkup);
   bool ProcessInclude(std::string file, IncludeType type);
   void ProcessDirectiveParsedLiteral();
   void ProcessDirectiveCodeBlock();
