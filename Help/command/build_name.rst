@@ -1,7 +1,9 @@
 build_name
 ----------
 
-Deprecated.  Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.
+Disallowed.  See CMake Policy :policy:`CMP0036`.
+
+Use ${CMAKE_SYSTEM} and ${CMAKE_CXX_COMPILER} instead.
 
 ::
 

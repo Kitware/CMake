@@ -87,6 +87,7 @@ public:
     CMP0033, ///< Disallow command: export_library_dependencies
     CMP0034, ///< Disallow command: utility_source
     CMP0035, ///< Disallow command: variable_requires
+    CMP0036, ///< Disallow command: build_name
 
     /** \brief Always the last entry.
      *

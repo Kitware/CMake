@@ -281,6 +281,11 @@ cmPolicies::cmPolicies()
     CMP0035, "CMP0035",
     "The variable_requires command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0036, "CMP0036",
+    "The build_name command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
