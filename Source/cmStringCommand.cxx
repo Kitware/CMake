@@ -73,6 +73,10 @@ bool cmStringCommand
     {
     return this->HandleLengthCommand(args);
     }
+  else if(subCommand == "CONCAT")
+    {
+    return this->HandleConcatCommand(args);
+    }
   else if(subCommand == "SUBSTRING")
     {
     return this->HandleSubstringCommand(args);
@@ -763,6 +767,27 @@ bool cmStringCommand
   sprintf(buffer, "%d", static_cast<int>(length));
 
   this->Makefile->AddDefinition(variableName.c_str(), buffer);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand
+::HandleConcatCommand(std::vector<std::string> const& args)
+{
+  if(args.size() < 2)
+    {
+    this->SetError("sub-command CONCAT requires at least one argument.");
+    return false;
+    }
+
+  std::string const& variableName = args[1];
+  std::string value;
+  for(unsigned int i = 2; i < args.size(); ++i)
+    {
+    value += args[i];
+    }
+
+  this->Makefile->AddDefinition(variableName.c_str(), value.c_str());
   return true;
 }
 
