@@ -1431,6 +1431,13 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlagEscape(flags, i->c_str());
       }
     }
+  std::vector<std::string> features;
+  target->GetCompileFeatures(features, config);
+  for(std::vector<std::string>::const_iterator it = features.begin();
+      it != features.end(); ++it)
+    {
+    this->Makefile->AddRequiredTargetFeature(target, it->c_str());
+    }
   this->AddCompilerRequirementFlag(flags, target, lang);
 }
 
