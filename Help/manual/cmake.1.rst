@@ -58,10 +58,7 @@ native tool on their platform.
     --config <cfg> = For multi-configuration tools, choose <cfg>.
     --clean-first  = Build target 'clean' first, then build.
                      (To clean only, use --target 'clean'.)
-    --use-stderr   = Don't merge stdout/stderr output and pass the
-                     original stdout/stderr handles to the native
-                     tool so it can use the capabilities of the
-                     calling terminal (e.g. colored output).
+    --use-stderr   = Ignored.  Behavior is default in CMake >= 3.0.
     --             = Pass remaining options to the native tool.
 
   Run cmake --build with no options for quick help.
