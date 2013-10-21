@@ -211,14 +211,8 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
       }
     }
 
-  // copy the depend tests locally because when
-  // a test is finished it will be removed from the depend list
-  // and we don't want to be iterating a list while removing from it
-  TestSet depends = this->Tests[test];
-  size_t totalDepends = depends.size();
-
   // if there are no depends left then run this test
-  if(totalDepends == 0)
+  if(this->Tests[test].empty())
     {
     this->StartTestProcess(test);
     return true;
