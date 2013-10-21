@@ -57,6 +57,10 @@ public:
     }
 
   cmTypeMacro(cmExecProgramCommand, cmCommand);
+private:
+  static bool RunCommand(const char* command, std::string& output,
+                         int &retVal, const char* directory = 0,
+                         bool verbose = true);
 };
 
 #endif

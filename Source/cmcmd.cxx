@@ -29,10 +29,6 @@
 #include "cmVisualStudioWCEPlatformParser.h"
 #endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-# include "cmWin32ProcessExecution.h"
-#endif
-
 #include <time.h>
 
 #include <stdlib.h> // required for atoi
@@ -79,7 +75,6 @@ void CMakeCommandUsage(const char* program)
     << "  touch_nocreate file       - touch a file but do not create it.\n"
 #if defined(_WIN32) && !defined(__CYGWIN__)
     << "Available on Windows only:\n"
-    << "  comspec                   - on windows 9x use this for RunCommand\n"
     << "  delete_regv key           - delete registry value\n"
     << "  env_vs8_wince sdkname     - displays a batch file which sets the "
        "environment for the provided Windows CE SDK installed in VS2005\n"
@@ -743,13 +738,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Remove file
     else if (args[1] == "comspec" && args.size() > 2)
       {
-      unsigned int cc;
-      std::string command = args[2];
-      for ( cc = 3; cc < args.size(); cc ++ )
-        {
-        command += " " + args[cc];
-        }
-      return cmWin32ProcessExecution::Windows9xHack(command.c_str());
+      std::cerr << "Win9x helper \"cmake -E comspec\" no longer supported\n";
+      return 1;
       }
     else if (args[1] == "env_vs8_wince" && args.size() == 3)
       {
