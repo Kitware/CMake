@@ -57,3 +57,4 @@ All Policies
    /policy/CMP0025
    /policy/CMP0026
    /policy/CMP0027
+   /policy/CMP0028

@@ -5505,6 +5505,46 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       {
       continue;
       }
+    cmTarget *tgt = this->Makefile->FindTargetToUse(li->c_str());
+
+    if(!tgt && std::string(item).find("::") != std::string::npos)
+      {
+      bool noMessage = false;
+      cmake::MessageType messageType = cmake::FATAL_ERROR;
+      cmOStringStream e;
+      switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
+        {
+        case cmPolicies::WARN:
+          {
+          e << (this->Makefile->GetPolicies()
+                ->GetPolicyWarning(cmPolicies::CMP0028)) << "\n";
+          messageType = cmake::AUTHOR_WARNING;
+          }
+          break;
+        case cmPolicies::OLD:
+          noMessage = true;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          // Issue the fatal message.
+          break;
+        }
+
+      if(!noMessage)
+        {
+        e << "Target \"" << this->GetName() << "\" links to target \"" << item
+          << "\" but the target was not found.  Perhaps a find_package() "
+          "call is missing for an IMPORTED target, or a ALIAS target is "
+          "missing?";
+        this->Makefile->GetCMakeInstance()->IssueMessage(messageType,
+                                                      e.str(),
+                                                      this->GetBacktrace());
+        if (messageType == cmake::FATAL_ERROR)
+          {
+          return;
+          }
+        }
+      }
     // The entry is meant for this configuration.
     impl.Libraries.push_back(item);
     }

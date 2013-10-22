@@ -10,18 +10,18 @@ set_property(TARGET define_iface PROPERTY
   INTERFACE_COMPILE_DEFINITIONS DEFINE_IFACE_DEFINE)
 
 add_executable(headeronlytest_bld headeronlytest.cpp)
-target_link_libraries(headeronlytest_bld bld_headeronly)
+target_link_libraries(headeronlytest_bld bld::headeronly)
 
-set_property(TARGET bld_sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
+set_property(TARGET bld::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
 
 add_executable(interfacetest_bld interfacetest.cpp)
-target_link_libraries(interfacetest_bld bld_sharediface)
+target_link_libraries(interfacetest_bld bld::sharediface)
 
 include(CheckCXXSourceCompiles)
 
 macro(do_try_compile prefix)
 
-  set(CMAKE_REQUIRED_LIBRARIES ${prefix}headeronly)
+  set(CMAKE_REQUIRED_LIBRARIES ${prefix}::headeronly)
   check_cxx_source_compiles(
     "
   #include \"headeronly.h\"
@@ -42,14 +42,14 @@ macro(do_try_compile prefix)
   endif()
 endmacro()
 
-do_try_compile(bld_)
+do_try_compile(bld)
 
 add_executable(headeronlytest_exp headeronlytest.cpp)
-target_link_libraries(headeronlytest_exp exp_headeronly)
+target_link_libraries(headeronlytest_exp exp::headeronly)
 
-set_property(TARGET exp_sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
+set_property(TARGET exp::sharediface APPEND PROPERTY INTERFACE_LINK_LIBRARIES define_iface)
 
 add_executable(interfacetest_exp interfacetest.cpp)
-target_link_libraries(interfacetest_exp exp_sharediface)
+target_link_libraries(interfacetest_exp exp::sharediface)
 
-do_try_compile(exp_)
+do_try_compile(exp)
