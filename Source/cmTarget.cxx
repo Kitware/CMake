@@ -991,14 +991,14 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
 
     if (this->GetType() == cmTarget::STATIC_LIBRARY)
       {
+      std::string configLib = this->GetDebugGeneratorExpressions(lib,
+                                                                 i->second);
       if (cmGeneratorExpression::IsValidTargetName(lib)
           || cmGeneratorExpression::Find(lib) != std::string::npos)
         {
-        this->AppendProperty("INTERFACE_LINK_LIBRARIES",
-              ("$<LINK_ONLY:" +
-              this->GetDebugGeneratorExpressions(lib, i->second)
-              + ">").c_str());
+        configLib = "$<LINK_ONLY:" + configLib + ">";
         }
+        this->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib.c_str());
       }
     }
   this->PrevLinkedLibraries = libs;
