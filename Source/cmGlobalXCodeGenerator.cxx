@@ -876,10 +876,20 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     ext = realExt.substr(1);
     }
 
-  std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
-
-  fileRef->AddAttribute("explicitFileType",
-                        this->CreateString(sourcecode.c_str()));
+  // If fullpath references a directory, then we need to specify
+  // lastKnownFileType as folder in order for Xcode to be able to open the
+  // contents of the folder (Xcode 4.6 does not like explicitFileType=folder).
+  if(cmSystemTools::FileIsDirectory(fullpath.c_str()))
+    {
+    fileRef->AddAttribute("lastKnownFileType",
+                          this->CreateString("folder"));
+    }
+  else
+    {
+    std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
+    fileRef->AddAttribute("explicitFileType",
+                          this->CreateString(sourcecode.c_str()));
+    }
 
   // Store the file path relative to the top of the source tree.
   std::string path = this->RelativeToSource(fullpath.c_str());
@@ -1009,7 +1019,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       cmTarget::SourceFileFlags tsFlags =
         cmtarget.GetTargetSourceFileFlags(*i);
 
-      if(strcmp(filetype->GetString(), "compiled.mach-o.objfile") == 0)
+      if(filetype &&
+         strcmp(filetype->GetString(), "compiled.mach-o.objfile") == 0)
         {
         externalObjFiles.push_back(xsf);
         }
