@@ -4441,6 +4441,11 @@ static const char * const CXX_STANDARDS[] = {
 bool cmMakefile::
 AddRequiredTargetFeature(cmTarget *target, const char *feature) const
 {
+  if (cmGeneratorExpression::Find(feature) != std::string::npos)
+    {
+    target->AppendProperty("COMPILER_FEATURES", feature);
+    return true;
+    }
   bool isCxxFeature = std::find_if(cmArrayBegin(CXX_FEATURES) + 1,
               cmArrayEnd(CXX_FEATURES), cmStrCmp(feature))
               != cmArrayEnd(CXX_FEATURES);
