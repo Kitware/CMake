@@ -17,12 +17,74 @@ Help
 Modules
 =======
 
-Note to authors of FindXxx.cmake files
+The ``Modules`` directory contains CMake-language ``.cmake`` module files.
 
-We would like all FindXxx.cmake files to produce consistent variable
-names.
+Module Documentation
+--------------------
 
-Please use the following consistent variable names for general use.
+To add a module to the CMake documentation, follow these steps:
+
+1. Add file ``Help/module/<module-name>.rst`` containing just the line::
+
+    .. cmake-module:: ../../Modules/<module-name>.cmake
+
+2. Modify ``Help/manual/cmake-modules.7.rst`` to reference the module in the
+   toctree directive as::
+
+    /module/<module-name>
+
+   Keep the toctree in sorted order!
+
+3. Add to the top of ``Modules/<module-name>.cmake`` a #-comment of the form::
+
+    #.rst:
+    # <module-name>
+    # -------------
+    #
+    # ...reStructuredText documentation of module...
+
+   Comment blocks starting with the line ``#.rst:`` may appear anywhere
+   in the file.  The ``cmake-module`` directive used above will scan the
+   file to extract reStructuredText markup from such comments.
+
+For example, a ``Modules/Findxxx.cmake`` module may contain:
+
+.. code-block:: cmake
+
+ #.rst:
+ # FindXxx
+ # -------
+ #
+ # This is a cool module.
+ # This module does really cool stuff.
+ # It can do even more than you think.
+ #
+ # It even needs two paragraphs to tell you about it.
+ # And it defines the following variables:
+ #
+ # * VAR_COOL: this is great isn't it?
+ # * VAR_REALLY_COOL: cool right?
+
+ <code>
+
+ #.rst:
+ # .. command:: xxx_do_something
+ #
+ #  This command does something for Xxx::
+ #
+ #   xxx_do_something(some arguments)
+ macro(xxx_do_something)
+   <code>
+ endmacro()
+
+Find Modules
+------------
+
+A "find module" is a ``Modules/Find<package>.cmake`` file to be loaded
+by the :command:`find_package` command when invoked for ``<package>``.
+
+We would like all ``FindXxx.cmake`` files to produce consistent variable
+names.  Please use the following consistent variable names for general use.
 
 Xxx_INCLUDE_DIRS
  The final set of include directories listed in one variable for use by client
@@ -122,52 +184,14 @@ You really should also provide backwards compatibility any old settings that
 were actually in use.  Make sure you comment them as deprecated, so that
 no-one starts using them.
 
-To add a module to the CMake documentation, follow these steps:
-
-1. Add file ``Help/module/FindXxx.rst`` containing just the line::
-
-    .. cmake-module:: ../../Modules/FindXxx.cmake
-
-2. Modify ``Help/manual/cmake-modules.7.rst`` to reference the module in the
-   toctree directive as::
-
-    /module/FindXxx
-
-   Keep the toctree in sorted order!
-
-3. Add to the top of ``Modules/FindXxx.cmake`` a #-comment of the form::
-
-    #.rst:
-    # FindXxx
-    # -------
-    #
-    # ...reStructuredText documentation of module...
-
-   Comment blocks starting with the line ``#.rst:`` may appear anywhere
-   in the file.
-
-For example::
-
- #.rst:
- # FindXxx
- # -------
- #
- # This is a cool module.
- # This module does really cool stuff.
- # It can do even more than you think.
- #
- # It even needs two paragraphs to tell you about it.
- # And it defines the following variables:
- #
- # * VAR_COOL: this is great isn't it?
- # * VAR_REALLY_COOL: cool right?
-
-Test the documentation formatting by running cmake --help-module FindXxx,
-and ideally by enabling the SPHINX_HTML and SPHINX_MAN options to
-build the documentation.  Edit the comments until generated documentation
-looks satisfactory.  To have a .cmake file in this directory NOT show up in
-the modules documentation, simply leave out the ``Help/module/<module>.rst``
-file and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
+To add a module to the CMake documentation, follow the steps in the
+`Module Documentation`_ section above.  Test the documentation formatting
+by running ``cmake --help-module FindXxx``, and also by enabling the
+``SPHINX_HTML`` and ``SPHINX_MAN`` options to build the documentation.
+Edit the comments until generated documentation looks satisfactory.
+To have a .cmake file in this directory NOT show up in the modules
+documentation, simply leave out the ``Help/module/<module-name>.rst`` file
+and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
 
 After the documentation, leave a *BLANK* line, and then add a
 copyright and licence notice block like this one::
