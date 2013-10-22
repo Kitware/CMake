@@ -14,6 +14,11 @@ cxx_delegating_constructors
 
 .. _N1986: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
 
+cxx_variadic_templates
+  Variadic templates, as defined in N2242_.
+
+.. _N2242: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2242.pdf
+
 gnuxx_typeof
   The GNU typeof extension.
 
