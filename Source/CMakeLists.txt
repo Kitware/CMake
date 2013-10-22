@@ -281,8 +281,6 @@ set(SRCS
   cmXMLSafe.h
   cmake.cxx
   cmake.h
-  cmakewizard.cxx
-  cmakewizard.h
 
   cm_sha2.h
   cm_sha2.c

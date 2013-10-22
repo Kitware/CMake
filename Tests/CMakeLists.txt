@@ -2526,11 +2526,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
   endif()
 
-  add_test(CMakeWizardTest ${CMAKE_CMAKE_COMMAND}
-    -D build_dir:STRING=${CMAKE_CURRENT_BINARY_DIR}/CMakeWizardTest
-    -D source_dir:STRING=${CMAKE_CURRENT_SOURCE_DIR}/Tutorial/Step3
-    -D CMAKE_CTEST_COMMAND:STRING=${CMAKE_CTEST_COMMAND}
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeWizardTest.cmake)
+  add_test(NAME CMakeWizardTest COMMAND cmake -i)
+  set_property(TEST CMakeWizardTest PROPERTY PASS_REGULAR_EXPRESSION
+    "The \"cmake -i\" wizard mode is no longer supported.")
+
   # If the cache variable CMAKE_CONTRACT_PROJECTS is set
   # then the dashboard will run a contract with CMake test of that
   # name.  For example CMAKE_CONTRACT_PROJECTS = vtk542 would run

@@ -20,7 +20,6 @@
 #include "cmcmd.h"
 #include "cmCacheManager.h"
 #include "cmListFileCache.h"
-#include "cmakewizard.h"
 #include "cmSourceFile.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -61,7 +60,6 @@ static const char * cmDocumentationOptions[][2] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
   {"-E", "CMake command mode."},
-  {"-i", "Run in wizard mode."},
   {"-L[A][H]", "List non-advanced cached variables."},
   {"--build <dir>", "Build a CMake-generated project binary tree."},
   {"-N", "View mode only."},
@@ -236,7 +234,6 @@ int do_cmake(int ac, char** av)
     }
 #endif
 
-  bool wiz = false;
   bool sysinfo = false;
   bool list_cached = false;
   bool list_all_cached = false;
@@ -248,7 +245,11 @@ int do_cmake(int ac, char** av)
     {
     if(strcmp(av[i], "-i") == 0)
       {
-      wiz = true;
+      std::cerr <<
+        "The \"cmake -i\" wizard mode is no longer supported.\n"
+        "Use the -D option to set cache values on the command line.\n"
+        "Use cmake-gui or ccmake for an interactive dialog.\n";
+      return 1;
       }
     else if(strcmp(av[i], "--system-information") == 0)
       {
@@ -300,11 +301,6 @@ int do_cmake(int ac, char** av)
       {
       args.push_back(av[i]);
       }
-    }
-  if (wiz)
-    {
-    cmakewizard wizard;
-    return wizard.RunWizard(args);
     }
   if (sysinfo)
     {

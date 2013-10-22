@@ -36,12 +36,6 @@ native tool on their platform.
   are available.  On Windows: delete_regv, write_regv.  On
   UNIX: create_symlink.
 
-* ``-i``: Run in wizard mode.
-
-  Wizard mode runs cmake interactively without a GUI.  The user is
-  prompted to answer questions about the project configuration.  The
-  answers are used to set cmake cache values.
-
 * ``-L[A][H]``: List non-advanced cached variables.
 
   List cache variables will run CMake and list all the variables from
