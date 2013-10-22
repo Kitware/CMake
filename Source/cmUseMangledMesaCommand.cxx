@@ -14,10 +14,12 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-// cmUseMangledMesaCommand
 bool cmUseMangledMesaCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
+  if(this->Disallowed(cmPolicies::CMP0030,
+      "The use_mangled_mesa command should not be called; see CMP0030."))
+    { return true; }
   // expected two arguments:
   // arguement one: the full path to gl_mangle.h
   // arguement two : directory for output of edited headers

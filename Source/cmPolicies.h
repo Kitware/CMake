@@ -80,6 +80,14 @@ public:
     CMP0027, ///< Conditionally linked imported targets with missing include
     /// directories.
     CMP0028, ///< Double colon in target name means ALIAS or IMPORTED target.
+    CMP0029, ///< Disallow command: subdir_depends
+    CMP0030, ///< Disallow command: use_mangled_mesa
+    CMP0031, ///< Disallow command: load_command
+    CMP0032, ///< Disallow command: output_required_files
+    CMP0033, ///< Disallow command: export_library_dependencies
+    CMP0034, ///< Disallow command: utility_source
+    CMP0035, ///< Disallow command: variable_requires
+    CMP0036, ///< Disallow command: build_name
 
     /** \brief Always the last entry.
      *

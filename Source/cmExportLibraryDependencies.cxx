@@ -21,6 +21,10 @@
 bool cmExportLibraryDependenciesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
+  if(this->Disallowed(cmPolicies::CMP0033,
+      "The export_library_dependencies command should not be called; "
+      "see CMP0033."))
+    { return true; }
   if(args.size() < 1 )
     {
     this->SetError("called with incorrect number of arguments");

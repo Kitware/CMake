@@ -14,40 +14,15 @@
 
 #include "cmCommand.h"
 
-/** \class cmVariableRequiresCommand
- * \brief Displays a message to the user
- *
- */
 class cmVariableRequiresCommand : public cmCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  virtual cmCommand* Clone()
-    {
-    return new cmVariableRequiresCommand;
-    }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
+  cmTypeMacro(cmVariableRequiresCommand, cmCommand);
+  virtual cmCommand* Clone() { return new cmVariableRequiresCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
   virtual const char* GetName() const { return "variable_requires";}
-
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
-  cmTypeMacro(cmVariableRequiresCommand, cmCommand);
+  virtual bool IsDiscouraged() const { return true; }
 };
 
 

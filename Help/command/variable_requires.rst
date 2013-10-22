@@ -1,7 +1,9 @@
 variable_requires
 -----------------
 
-Deprecated. Use the if() command instead.
+Disallowed.  See CMake Policy :policy:`CMP0035`.
+
+Use the if() command instead.
 
 Assert satisfaction of an option's required variables.
 

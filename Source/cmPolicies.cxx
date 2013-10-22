@@ -246,6 +246,46 @@ cmPolicies::cmPolicies()
     CMP0028, "CMP0028",
     "Double colon in target name means ALIAS or IMPORTED target.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0029, "CMP0029",
+    "The subdir_depends command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0030, "CMP0030",
+    "The use_mangled_mesa command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0031, "CMP0031",
+    "The load_command command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0032, "CMP0032",
+    "The output_required_files command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0033, "CMP0033",
+    "The export_library_dependencies command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0034, "CMP0034",
+    "The utility_source command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0035, "CMP0035",
+    "The variable_requires command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0036, "CMP0036",
+    "The build_name command should not be called.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
