@@ -411,6 +411,12 @@ void getCompatibleInterfaceProperties(cmTarget *target,
     getPropertyContents(li->Target,
                         "COMPATIBLE_INTERFACE_STRING",
                         ifaceProperties);
+    getPropertyContents(li->Target,
+                        "COMPATIBLE_INTERFACE_NUMBER_MIN",
+                        ifaceProperties);
+    getPropertyContents(li->Target,
+                        "COMPATIBLE_INTERFACE_NUMBER_MAX",
+                        ifaceProperties);
     }
 }
 
@@ -423,11 +429,19 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
                                 target, properties);
   this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_STRING",
                                 target, properties);
+  this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_NUMBER_MIN",
+                                target, properties);
+  this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_NUMBER_MAX",
+                                target, properties);
 
   std::set<std::string> ifaceProperties;
 
   getPropertyContents(target, "COMPATIBLE_INTERFACE_BOOL", ifaceProperties);
   getPropertyContents(target, "COMPATIBLE_INTERFACE_STRING", ifaceProperties);
+  getPropertyContents(target, "COMPATIBLE_INTERFACE_NUMBER_MIN",
+                      ifaceProperties);
+  getPropertyContents(target, "COMPATIBLE_INTERFACE_NUMBER_MAX",
+                      ifaceProperties);
 
   getCompatibleInterfaceProperties(target, ifaceProperties, 0);
 

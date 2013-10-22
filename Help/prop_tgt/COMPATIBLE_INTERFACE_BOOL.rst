@@ -14,4 +14,6 @@ property is set, then it must have the same boolean value as all
 others, and if the property is not set, then it is ignored.  Note that
 for each dependee, the set of properties from this property must not
 intersect with the set of properties from the
-COMPATIBLE_INTERFACE_STRING property.
+:prop_tgt:`COMPATIBLE_INTERFACE_STRING`,
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MIN` or
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` property.
