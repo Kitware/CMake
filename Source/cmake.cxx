@@ -2871,8 +2871,7 @@ int cmake::Build(const std::string& dir,
                  const std::string& target,
                  const std::string& config,
                  const std::vector<std::string>& nativeOptions,
-                 bool clean,
-                 cmSystemTools::OutputOption outputflag)
+                 bool clean)
 {
   if(!cmSystemTools::FileIsDirectory(dir.c_str()))
     {
@@ -2914,7 +2913,8 @@ int cmake::Build(const std::string& dir,
                     projName.c_str(), target.c_str(),
                     &output,
                     makeProgram.c_str(),
-                    config.c_str(), clean, false, 0, outputflag,
+                    config.c_str(), clean, false, 0,
+                    cmSystemTools::OUTPUT_PASSTHROUGH,
                     0, nativeOptions);
 }
 
