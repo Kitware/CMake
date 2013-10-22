@@ -59,6 +59,14 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     "HGCommand", "CTEST_HG_COMMAND");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "P4Command", "CTEST_P4_COMMAND");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "P4UpdateOptions", "CTEST_P4_UPDATE_OPTIONS");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "P4Client", "CTEST_P4_CLIENT");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "P4Options", "CTEST_P4_OPTIONS");
 
   cmCTestGenericHandler* handler
     = this->CTest->GetInitializedHandler("update");

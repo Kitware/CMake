@@ -44,6 +44,7 @@ public:
     e_BZR,
     e_GIT,
     e_HG,
+    e_P4,
     e_LAST
   };
 
