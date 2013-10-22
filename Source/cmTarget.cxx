@@ -4452,7 +4452,7 @@ const char *getTypedProperty<const char *>(cmTarget *tgt, const char *prop,
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-bool consistentProperty(PropertyType lhs, PropertyType rhs);
+PropertyType consistentProperty(PropertyType lhs, PropertyType rhs);
 
 //----------------------------------------------------------------------------
 template<>
@@ -4463,13 +4463,21 @@ bool consistentProperty(bool lhs, bool rhs)
 
 //----------------------------------------------------------------------------
 template<>
-bool consistentProperty(const char *lhs, const char *rhs)
+const char* consistentProperty(const char *lhs, const char *rhs)
 {
   if (!lhs && !rhs)
-    return true;
-  if (!lhs || !rhs)
-    return false;
-  return strcmp(lhs, rhs) == 0;
+    {
+    return "";
+    }
+  if (!lhs)
+    {
+    return rhs ? rhs : "";
+    }
+  if (!rhs)
+    {
+    return lhs ? lhs : "";
+    }
+  return strcmp(lhs, rhs) == 0 ? lhs : 0;
 }
 
 template<typename PropertyType>
