@@ -4511,6 +4511,8 @@ AddRequiredTargetFeature(cmTarget *target, const char *feature) const
     return false;
     }
 
+  target->AppendProperty("COMPILE_FEATURES", feature);
+
   bool needCxx98 = true;
   bool needCxx11 = false;
   bool needCxxExt = false;
