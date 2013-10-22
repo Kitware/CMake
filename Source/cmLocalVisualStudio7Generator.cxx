@@ -2050,6 +2050,11 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\"\n";
     }
   this->WriteProjectSCC(fout, target);
+  if(const char* targetFrameworkVersion =
+     target.GetProperty("VS_DOTNET_TARGET_FRAMEWORK_VERSION"))
+    {
+    fout << "\tTargetFrameworkVersion=\"" << targetFrameworkVersion << "\"\n";
+    }
   fout << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
        << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
