@@ -34,6 +34,9 @@ Sphinx-generated html and man pages.
 The command-line help processor supports the following constructs
 defined by reStructuredText, Sphinx, and a CMake extension to Sphinx.
 
+..
+ Note: This list must be kept consistent with the cmRST implementation.
+
 CMake Domain directives
  Directives defined in the `CMake Domain`_ for defining CMake
  documentation objects are printed in command-line help output as
