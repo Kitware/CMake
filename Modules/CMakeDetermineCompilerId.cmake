@@ -232,7 +232,7 @@ Id flags: ${testflags}
   else()
     if(COMMAND EXECUTE_PROCESS)
       execute_process(
-        COMMAND ${CMAKE_${lang}_COMPILER}
+        COMMAND "${CMAKE_${lang}_COMPILER}"
                 ${CMAKE_${lang}_COMPILER_ID_ARG1}
                 ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
                 ${testflags}
@@ -244,7 +244,7 @@ Id flags: ${testflags}
         )
     else()
       exec_program(
-        ${CMAKE_${lang}_COMPILER} ${CMAKE_${lang}_COMPILER_ID_DIR}
+        "${CMAKE_${lang}_COMPILER}" ${CMAKE_${lang}_COMPILER_ID_DIR}
         ARGS ${CMAKE_${lang}_COMPILER_ID_ARG1}
              ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
              ${testflags}
@@ -476,7 +476,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_VENDOR lang)
     set(flags ${CMAKE_${lang}_COMPILER_ID_VENDOR_FLAGS_${vendor}})
     set(regex ${CMAKE_${lang}_COMPILER_ID_VENDOR_REGEX_${vendor}})
     execute_process(
-      COMMAND ${CMAKE_${lang}_COMPILER}
+      COMMAND "${CMAKE_${lang}_COMPILER}"
       ${CMAKE_${lang}_COMPILER_ID_ARG1}
       ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
       ${flags}

@@ -34,7 +34,7 @@ if(CMAKE_CXX_COMPILER_ID)
 endif()
 
 set(CMAKE_BASE_NAME)
-get_filename_component(CMAKE_BASE_NAME ${CMAKE_CXX_COMPILER} NAME_WE)
+get_filename_component(CMAKE_BASE_NAME "${CMAKE_CXX_COMPILER}" NAME_WE)
 # since the gnu compiler has several names force g++
 if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_BASE_NAME g++)
