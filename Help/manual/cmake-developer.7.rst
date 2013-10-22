@@ -253,6 +253,21 @@ Add to the top of ``Modules/<module-name>.cmake`` a #-comment of the form:
  #
  # <reStructuredText documentation of module>
 
+or a bracket-comment of the form:
+
+.. code-block:: cmake
+
+ #[[.rst:
+ <module-name>
+ -------------
+
+ <reStructuredText documentation of module>
+ #]]
+
+Any number of ``=`` may be used in the opening and closing brackets
+as long as they match.  Content on the line containing the closing
+bracket is excluded if and only if the line starts in ``#``.
+
 Additional such ``.rst:`` comments may appear anywhere in the module file.
 All such comments must start with ``#`` in the first column.
 
@@ -276,12 +291,13 @@ For example, a ``Modules/Findxxx.cmake`` module may contain:
 
  <code>
 
- #.rst:
- # .. command:: xxx_do_something
- #
- #  This command does something for Xxx::
- #
- #   xxx_do_something(some arguments)
+ #[========================================[.rst:
+ .. command:: xxx_do_something
+
+  This command does something for Xxx::
+
+   xxx_do_something(some arguments)
+ #]========================================]
  macro(xxx_do_something)
    <code>
  endmacro()

@@ -34,6 +34,7 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
   ReplaceDirective("^.. (\\|[^|]+\\|) replace::[ \t]*(.*)$"),
   IncludeDirective("^.. include::[ \t]+([^ \t\n]+)$"),
   TocTreeDirective("^.. toctree::[ \t]*(.*)$"),
+  ModuleRST("^#\\[(=*)\\[\\.rst:$"),
   CMakeRole("(:cmake)?:("
             "command|generator|variable|module|policy|"
             "prop_cache|prop_dir|prop_gbl|prop_sf|prop_test|prop_tgt|"
@@ -85,28 +86,55 @@ void cmRST::ProcessModule(std::istream& is)
   std::string rst;
   while(cmSystemTools::GetLineFromStream(is, line))
     {
-    if(rst == "#")
+    if(!rst.empty() && rst != "#")
       {
-      if(line == "#")
+      // Bracket mode: check for end bracket
+      std::string::size_type pos = line.find(rst);
+      if(pos == line.npos)
         {
-        this->ProcessLine("");
-        continue;
-        }
-      else if(line.substr(0, 2) == "# ")
-        {
-        this->ProcessLine(line.substr(2, line.npos));
-        continue;
+        this->ProcessLine(line);
         }
       else
         {
+        if(line[0] != '#')
+          {
+          this->ProcessLine(line.substr(0, pos));
+          }
         rst = "";
         this->Reset();
         this->OutputLinePending = true;
         }
       }
-    if(line == "#.rst:")
+    else
       {
-      rst = "#";
+      // Line mode: check for .rst start (bracket or line)
+      if(rst == "#")
+        {
+        if(line == "#")
+          {
+          this->ProcessLine("");
+          continue;
+          }
+        else if(line.substr(0, 2) == "# ")
+          {
+          this->ProcessLine(line.substr(2, line.npos));
+          continue;
+          }
+        else
+          {
+          rst = "";
+          this->Reset();
+          this->OutputLinePending = true;
+          }
+        }
+      if(line == "#.rst:")
+        {
+        rst = "#";
+        }
+      else if(this->ModuleRST.find(line))
+        {
+        rst = "]" + this->ModuleRST.match(1) + "]";
+        }
       }
     }
   if(rst == "#")

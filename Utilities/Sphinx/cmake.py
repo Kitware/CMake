@@ -31,7 +31,6 @@ class CMakeModule(Directive):
 
     def __init__(self, *args, **keys):
         self.re_start = re.compile(r'^#\[(?P<eq>=*)\[\.rst:$')
-        self.re_end = re.compile(r'^#?\](?P<eq>=*)\]$')
         Directive.__init__(self, *args, **keys)
 
     def run(self):
@@ -61,18 +60,36 @@ class CMakeModule(Directive):
         rst = None
         lines = []
         for line in raw_lines:
-            if line == '#.rst:':
-                rst = '#'
-                line = ''
-            elif rst == '#':
-                if line == '#' or line[:2] == '# ':
-                    line = line[2:]
-                else:
+            if rst is not None and rst != '#':
+                # Bracket mode: check for end bracket
+                pos = line.find(rst)
+                if pos >= 0:
+                    if line[0] == '#':
+                        line = ''
+                    else:
+                        line = line[0:pos]
                     rst = None
-                    line = ''
             else:
-                line = ''
+                # Line mode: check for .rst start (bracket or line)
+                m = self.re_start.match(line)
+                if m:
+                    rst = ']%s]' % m.group('eq')
+                    line = ''
+                elif line == '#.rst:':
+                    rst = '#'
+                    line = ''
+                elif rst == '#':
+                    if line == '#' or line[:2] == '# ':
+                        line = line[2:]
+                    else:
+                        rst = None
+                        line = ''
+                elif rst is None:
+                    line = ''
             lines.append(line)
+        if rst is not None and rst != '#':
+            raise self.warning('"%s" found unclosed bracket "#[%s[.rst:" in %s' %
+                               (self.name, rst[1:-1], path))
         self.state_machine.insert_input(lines, path)
         return []
 
