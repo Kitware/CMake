@@ -1459,17 +1459,14 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlagEscape(flags, *i);
       }
     }
-  if (const char* featureProp = target->GetProperty("COMPILE_FEATURES"))
+  std::vector<std::string> features;
+  target->GetCompileFeatures(features);
+  for(std::vector<std::string>::const_iterator it = features.begin();
+      it != features.end(); ++it)
     {
-    std::vector<std::string> features;
-    cmSystemTools::ExpandListArgument(featureProp, features);
-    for(std::vector<std::string>::const_iterator it = features.begin();
-        it != features.end(); ++it)
+     if (!this->Makefile->AddRequiredTargetFeature(target, *it))
       {
-      if (!this->Makefile->AddRequiredTargetFeature(target, *it))
-        {
-        return;
-        }
+      return;
       }
     }
   this->AddCompilerRequirementFlag(flags, target, lang);

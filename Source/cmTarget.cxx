@@ -2617,6 +2617,22 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::GetCompileFeatures(std::vector<std::string> &features) const
+{
+  assert(this->GetType() != INTERFACE_LIBRARY);
+  for(std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
+      si = this->Internal->CompileFeaturesEntries.begin();
+      si != this->Internal->CompileFeaturesEntries.end(); ++si)
+    {
+    cmSystemTools::ExpandListArgument((*si)->ge->Evaluate(this->Makefile,
+                                        "",
+                                        false,
+                                        this),
+                                      features);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::MaybeInvalidatePropertyCache(const std::string& prop)
 {
   // Wipe out maps caching information affected by this property.

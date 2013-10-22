@@ -545,6 +545,7 @@ public:
                          const std::string& config) const;
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const std::string& config) const;
+  void GetCompileFeatures(std::vector<std::string> &features) const;
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
