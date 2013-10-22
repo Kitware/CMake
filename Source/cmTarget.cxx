@@ -6488,6 +6488,25 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
           {
           case cmPolicies::WARN:
             {
+            std::string oldLibraries;
+            std::string newLibraries;
+            const char *sep = "";
+            for(std::vector<std::string>::const_iterator it
+                = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
+              {
+              oldLibraries += sep;
+              oldLibraries += *it;
+              sep = ";";
+              }
+            sep = "";
+            for(std::vector<std::string>::const_iterator it
+                = ifaceLibs.begin(); it != ifaceLibs.end(); ++it)
+              {
+              newLibraries += sep;
+              newLibraries += *it;
+              sep = ";";
+              }
+
             cmOStringStream w;
             w << (this->Makefile->GetPolicies()
                   ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
@@ -6495,7 +6514,13 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                 "INTERFACE_LINK_LIBRARIES property.  This should be preferred "
                 "as the source of the link interface for this library.  "
                 "Ignoring the property and using the link implementation "
-                "as the link interface instead.";
+                "as the link interface instead."
+                "\n"
+                "INTERFACE_LINK_LIBRARIES:\n  "
+              << newLibraries
+              << "\n"
+              << "Link implementation:\n  "
+              << oldLibraries << "\n";
             this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
             }
             // Fall through
