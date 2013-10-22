@@ -187,6 +187,7 @@ cmTargetInternals::~cmTargetInternals()
 {
   deleteAndClear(this->CachedLinkInterfaceIncludeDirectoriesEntries);
   deleteAndClear(this->CachedLinkInterfaceCompileOptionsEntries);
+  deleteAndClear(this->CachedLinkInterfaceCompileFeaturesEntries);
   deleteAndClear(this->CachedLinkInterfaceCompileDefinitionsEntries);
 }
 
@@ -1722,6 +1723,17 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
+  if(strcmp(prop,"COMPILE_FEATURES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    deleteAndClear(this->Internal->CompileFeaturesEntries);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->CompileFeaturesEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
+    return;
+    }
   if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
     {
     cmListFileBacktrace lfbt;
@@ -1784,6 +1796,15 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
     this->Internal->CompileOptionsEntries.push_back(
+              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    return;
+    }
+  if(strcmp(prop,"COMPILE_FEATURES") == 0)
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->CompileFeaturesEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
@@ -2381,6 +2402,13 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
     {
     this->Internal->CacheLinkInterfaceCompileOptionsDone[configString] = true;
     }
+  std::vector<std::string> features;
+  this->GetCompileFeatures(features, config);
+  for(std::vector<std::string>::const_iterator it = features.begin();
+      it != features.end(); ++it)
+    {
+    this->Makefile->AddRequiredTargetFeature(this, it->c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -2960,6 +2988,24 @@ const char *cmTarget::GetProperty(const char* prop,
     for (std::vector<TargetPropertyEntry*>::const_iterator
         it = this->Internal->CompileOptionsEntries.begin(),
         end = this->Internal->CompileOptionsEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += (*it)->ge->GetInput();
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  if(strcmp(prop,"COMPILE_FEATURES") == 0)
+    {
+    static std::string output;
+    output = "";
+    std::string sep;
+    typedef cmTargetInternals::TargetPropertyEntry
+                                TargetPropertyEntry;
+    for (std::vector<TargetPropertyEntry*>::const_iterator
+        it = this->Internal->CompileFeaturesEntries.begin(),
+        end = this->Internal->CompileFeaturesEntries.end();
         it != end; ++it)
       {
       output += sep;
@@ -6217,6 +6263,7 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
 {
   deleteAndClear(this->Pointer->IncludeDirectoriesEntries);
   deleteAndClear(this->Pointer->CompileOptionsEntries);
+  deleteAndClear(this->Pointer->CompileFeaturesEntries);
   deleteAndClear(this->Pointer->CompileDefinitionsEntries);
   delete this->Pointer;
 }
