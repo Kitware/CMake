@@ -24,7 +24,7 @@ generate_export_header(staticlib2)
 add_library(staticlib3 STATIC staticlib3.cpp)
 generate_export_header(staticlib3)
 target_link_libraries(staticlib1 LINK_PUBLIC staticlib2)
-target_link_libraries(staticlib1 LINK_PRIVATE "-L${CMAKE_CURRENT_BINARY_DIR} -Wl,--start-group -lstaticlib3 -Wl,--end-group")
+target_link_libraries(staticlib1 LINK_PRIVATE "-Wl,--start-group -lstaticlib3 -Wl,--end-group")
 
 add_executable(staticlib_exe staticlib_exe.cpp)
 target_link_libraries(staticlib_exe staticlib1)
