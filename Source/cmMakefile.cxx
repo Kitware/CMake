@@ -4471,6 +4471,8 @@ AddRequiredTargetFeature(cmTarget *target, const char *feature) const
     return false;
     }
 
+  target->AppendProperty("COMPILER_FEATURES", feature);
+
   bool need98 = true;
   bool need11 = false;
   bool needExt = false;
