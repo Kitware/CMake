@@ -14,6 +14,211 @@ source tree itself.
 Help
 ====
 
+The ``Help`` directory contains CMake help manual source files.
+They are written using the `reStructuredText`_ markup syntax and
+processed by `Sphinx`_ to generate the CMake help manuals.
+
+.. _`reStructuredText`: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _`Sphinx`: http://sphinx-doc.org
+
+Markup Constructs
+-----------------
+
+In addition to using Sphinx to generate the CMake help manuals, we
+also use a C++-implemented document processor to print documents for
+the ``--help-*`` command-line help options.  It supports a subset of
+reStructuredText markup.  When authoring or modifying documents,
+please verify that the command-line help looks good in addition to the
+Sphinx-generated html and man pages.
+
+The command-line help processor supports the following constructs
+defined by reStructuredText, Sphinx, and a CMake extension to Sphinx.
+
+CMake Domain directives
+ Directives defined in the `CMake Domain`_ for defining CMake
+ documentation objects are printed in command-line help output as
+ if the lines were normal paragraph text with interpretation.
+
+CMake Domain interpreted text roles
+ Interpreted text roles defined in the `CMake Domain`_ for
+ cross-referencing CMake documentation objects are replaced by their
+ link text in command-line help output.  Other roles are printed
+ literally and not processed.
+
+``code-block`` directive
+ Add a literal code block without interpretation.  The command-line
+ help processor prints the block content without the leading directive
+ line and with common indentation replaced by one space.
+
+``include`` directive
+ Include another document source file.  The command-line help
+ processor prints the included document inline with the referencing
+ document.
+
+literal block after ``::``
+ A paragraph ending in ``::`` followed by a blank line treats
+ the following indented block as literal text without interpretation.
+ The command-line help processor prints the ``::`` literally and
+ prints the block content with common indentation replaced by one
+ space.  We prefer the ``::`` to appear at the end of a paragraph
+ line instead of as its own line.
+
+``parsed-literal`` directive
+ Add a literal block with markup interpretation.  The command-line
+ help processor prints the block content without the leading
+ directive line and with common indentation replaced by one space.
+
+``replace`` directive
+ Define a ``|substitution|`` replacement.
+ The command-line help processor requires a substitution replacement
+ to be defined before it is referenced.
+
+``|substitution|`` reference
+ Reference a substitution replacement previously defined by
+ the ``replace`` directive.  The command-line help processor
+ performs the substitution and replaces all newlines in the
+ replacement text with spaces.
+
+``toctree`` directive
+ Include other document sources in the Table-of-Contents
+ document tree.  The command-line help processor prints
+ the referenced documents inline as part of the referencing
+ document.
+
+Inline markup constructs not listed above are printed literally in the
+command-line help output.  We prefer to use inline markup constructs that
+look correct in source form, so avoid use of \\-escapes in favor of inline
+literals when possible.
+
+Explicit markup blocks not matching directives listed above are removed from
+command-line help output.  Do not use them, except for plain ``..`` comments
+that are removed by Sphinx too.
+
+Note that nested indentation of blocks is not recognized by the
+command-line help processor.  Therefore:
+
+* Explicit markup blocks are recognized only when not indented
+  inside other blocks.
+
+* Literal blocks after paragraphs ending in ``::`` but not
+  at the top indentation level may consume all indented lines
+  following them.
+
+Try to avoid these cases in practice.
+
+CMake Domain
+------------
+
+CMake adds a `Sphinx Domain`_ called ``cmake``, also called the
+"CMake Domain".  It defines several "object" types for CMake
+documentation:
+
+``command``
+ A CMake language command.
+
+``generator``
+ A CMake native build system generator.
+ See the :manual:`cmake(1)` command-line tool's ``-G`` option.
+
+``manual``
+ A CMake manual page, like this :manual:`cmake-developer(7)` manual.
+
+``module``
+ A CMake module.
+ See the :manual:`cmake-modules(7)` manual
+ and the :command:`include` command.
+
+``policy``
+ A CMake policy.
+ See the :manual:`cmake-policies(7)` manual
+ and the :command:`cmake_policy` command.
+
+``prop_cache, prop_dir, prop_gbl, prop_sf, prop_test, prop_tgt``
+ A CMake cache, directory, global, source file, test, or target
+ property, respectively.  See the :manual:`cmake-properties(7)` manual
+ and the :command:`set_property` command.
+
+``variable``
+ A CMake language variable.
+ See the :manual:`cmake-variables(7)` manual
+ and the :command:`set` command.
+
+Documentation objects in the CMake Domain come from two sources.
+First, the CMake extension to Sphinx transforms every document named
+with the form ``Help/<type>/<file-name>.rst`` to a domain object with
+type ``<type>``.  The object name is extracted from the document title,
+which is expected to be of the form::
+
+ <object-name>
+ -------------
+
+and to appear at or near the top of the ``.rst`` file before any other
+lines starting in a letter, digit, or ``<``.  If no such title appears
+literally in the ``.rst`` file, the object name is the ``<file-name>``.
+If a title does appear, it is expected that ``<file-name>`` is equal
+to ``<object-name>`` with any ``<`` and ``>`` characters removed.
+
+Second, the CMake Domain provides directives to define objects inside
+other documents:
+
+.. code-block:: rst
+
+ .. command:: <command-name>
+
+  This indented block documents <command-name>.
+
+ .. variable:: <variable-name>
+
+  This indented block documents <variable-name>.
+
+Object types for which no directive is available must be defined using
+the first approach above.
+
+.. _`Sphinx Domain`: http://sphinx-doc.org/domains.html
+
+Cross-References
+----------------
+
+Sphinx uses reStructuredText interpreted text roles to provide
+cross-reference syntax.  The `CMake Domain`_ provides for each
+domain object type a role of the same name to cross-reference it.
+CMake Domain roles are inline markup of the forms::
+
+ :type:`name`
+ :type:`text <name>`
+
+where ``type`` is the domain object type and ``name`` is the
+domain object name.  In the first form the link text will be
+``name`` (or ``name()`` if the type is ``command``) and in
+the second form the link text will be the explicit ``text``.
+For example, the code:
+
+.. code-block:: rst
+
+ * The :command:`list` command.
+ * The :command:`list(APPEND)` sub-command.
+ * The :command:`list() command <list>`.
+ * The :command:`list(APPEND) sub-command <list>`.
+ * The :variable:`CMAKE_VERSION` variable.
+ * The :prop_tgt:`OUTPUT_NAME_<CONFIG>` target property.
+
+produces:
+
+* The :command:`list` command.
+* The :command:`list(APPEND)` sub-command.
+* The :command:`list() command <list>`.
+* The :command:`list(APPEND) sub-command <list>`.
+* The :variable:`CMAKE_VERSION` variable.
+* The :prop_tgt:`OUTPUT_NAME_<CONFIG>` target property.
+
+Note that CMake Domain roles differ from Sphinx and reStructuredText
+convention in that the form ``a<b>``, without a space preceding ``<``,
+is interpreted as a name instead of link text with an explicit target.
+This is necessary because we use ``<placeholders>`` frequently in
+object names like ``OUTPUT_NAME_<CONFIG>``.  The form ``a <b>``,
+with a space preceding ``<``, is still interpreted as a link text
+with an explicit target.
+
 Modules
 =======
 
