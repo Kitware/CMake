@@ -4450,20 +4450,34 @@ const char *getTypedProperty<const char *>(cmTarget *tgt, const char *prop,
   return tgt->GetProperty(prop);
 }
 
+enum CompatibleType
+{
+  BoolType,
+  StringType
+};
+
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType consistentProperty(PropertyType lhs, PropertyType rhs);
+PropertyType consistentProperty(PropertyType lhs, PropertyType rhs,
+                                CompatibleType t);
 
 //----------------------------------------------------------------------------
 template<>
-bool consistentProperty(bool lhs, bool rhs)
+bool consistentProperty(bool lhs, bool rhs, CompatibleType)
 {
   return lhs == rhs;
 }
 
 //----------------------------------------------------------------------------
+const char * consistentStringProperty(const char *lhs, const char *rhs)
+{
+  return strcmp(lhs, rhs) == 0 ? lhs : 0;
+}
+
+//----------------------------------------------------------------------------
 template<>
-const char* consistentProperty(const char *lhs, const char *rhs)
+const char* consistentProperty(const char *lhs, const char *rhs,
+                               CompatibleType t)
 {
   if (!lhs && !rhs)
     {
@@ -4477,7 +4491,16 @@ const char* consistentProperty(const char *lhs, const char *rhs)
     {
     return lhs ? lhs : "";
     }
-  return strcmp(lhs, rhs) == 0 ? lhs : 0;
+  switch(t)
+  {
+  case BoolType:
+    assert(!"consistentProperty for strings called with BoolType");
+    return 0;
+  case StringType:
+    return consistentStringProperty(lhs, rhs);
+  }
+  assert(!"Unreachable!");
+  return 0;
 }
 
 template<typename PropertyType>
@@ -4499,6 +4522,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
                                           const std::string &p,
                                           const char *config,
                                           const char *defaultValue,
+                                          CompatibleType t,
                                           PropertyType *)
 {
   PropertyType propContent = getTypedProperty<PropertyType>(tgt, p.c_str(),
@@ -4545,7 +4569,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       if (ifaceIsSet)
         {
         PropertyType consistent = consistentProperty(propContent,
-                                                     ifacePropContent);
+                                                     ifacePropContent, t);
         if (!consistent)
           {
           cmOStringStream e;
@@ -4575,7 +4599,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       if (ifaceIsSet)
         {
         PropertyType consistent = consistentProperty(propContent,
-                                                     ifacePropContent);
+                                                     ifacePropContent, t);
         if (!consistent)
           {
           cmOStringStream e;
@@ -4607,7 +4631,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
         if (propInitialized)
           {
           PropertyType consistent = consistentProperty(propContent,
-                                                       ifacePropContent);
+                                                       ifacePropContent, t);
           if (!consistent)
             {
             cmOStringStream e;
@@ -4646,7 +4670,7 @@ bool cmTarget::GetLinkInterfaceDependentBoolProperty(const std::string &p,
                                                      const char *config)
 {
   return checkInterfacePropertyCompatibility<bool>(this, p, config, "FALSE",
-                                                   0);
+                                                   BoolType, 0);
 }
 
 //----------------------------------------------------------------------------
@@ -4657,7 +4681,8 @@ const char * cmTarget::GetLinkInterfaceDependentStringProperty(
   return checkInterfacePropertyCompatibility<const char *>(this,
                                                            p,
                                                            config,
-                                                           "empty", 0);
+                                                           "empty",
+                                                           StringType, 0);
 }
 
 //----------------------------------------------------------------------------
@@ -5683,23 +5708,35 @@ template<typename PropertyType>
 PropertyType getLinkInterfaceDependentProperty(cmTarget *tgt,
                                                const std::string prop,
                                                const char *config,
+                                               CompatibleType,
                                                PropertyType *);
 
 template<>
 bool getLinkInterfaceDependentProperty(cmTarget *tgt,
-                                         const std::string prop,
-                                         const char *config, bool *)
+                                       const std::string prop,
+                                       const char *config,
+                                       CompatibleType, bool *)
 {
   return tgt->GetLinkInterfaceDependentBoolProperty(prop, config);
 }
 
 template<>
 const char * getLinkInterfaceDependentProperty(cmTarget *tgt,
-                                                 const std::string prop,
-                                                 const char *config,
-                                                 const char **)
+                                               const std::string prop,
+                                               const char *config,
+                                               CompatibleType t,
+                                               const char **)
 {
-  return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+  switch(t)
+  {
+  case BoolType:
+    assert(!"String compatibility check function called for boolean");
+    return 0;
+  case StringType:
+    return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+  }
+  assert(!"Unreachable!");
+  return 0;
 }
 
 //----------------------------------------------------------------------------
@@ -5708,6 +5745,7 @@ void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
                               const char *propName,
                               std::set<cmStdString> &emitted,
                               const char *config,
+                              CompatibleType t,
                               PropertyType *)
 {
   const char *prop = dependee->GetProperty(propName);
@@ -5740,7 +5778,7 @@ void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
     if(emitted.insert(*pi).second)
       {
       getLinkInterfaceDependentProperty<PropertyType>(depender, *pi, config,
-                                                      0);
+                                                      t, 0);
       if (cmSystemTools::GetErrorOccuredFlag())
         {
         return;
@@ -5769,14 +5807,15 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 
     checkPropertyConsistency<bool>(this, li->Target,
                                    "COMPATIBLE_INTERFACE_BOOL",
-                                   emittedBools, config, 0);
+                                   emittedBools, config, BoolType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;
       }
     checkPropertyConsistency<const char *>(this, li->Target,
                                            "COMPATIBLE_INTERFACE_STRING",
-                                           emittedStrings, config, 0);
+                                           emittedStrings, config,
+                                           StringType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;
