@@ -1446,7 +1446,7 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
 //----------------------------------------------------------------------------
 GeneratorExpressionContent::GeneratorExpressionContent(
                                                     const char *startContent,
-                                                    unsigned int length)
+                                                    size_t length)
   : StartContent(startContent), ContentLength(length)
 {
 
