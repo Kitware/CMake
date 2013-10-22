@@ -4544,7 +4544,9 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       {
       if (ifaceIsSet)
         {
-        if (!consistentProperty(propContent, ifacePropContent))
+        PropertyType consistent = consistentProperty(propContent,
+                                                     ifacePropContent);
+        if (!consistent)
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
@@ -4557,6 +4559,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
         else
           {
           // Agree
+          propContent = consistent;
           continue;
           }
         }
@@ -4571,7 +4574,9 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       propContent = impliedValue<PropertyType>(propContent);
       if (ifaceIsSet)
         {
-        if (!consistentProperty(propContent, ifacePropContent))
+        PropertyType consistent = consistentProperty(propContent,
+                                                     ifacePropContent);
+        if (!consistent)
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
@@ -4585,6 +4590,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
         else
           {
           // Agree
+          propContent = consistent;
           continue;
           }
         }
@@ -4600,7 +4606,9 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
         {
         if (propInitialized)
           {
-          if (!consistentProperty(propContent, ifacePropContent))
+          PropertyType consistent = consistentProperty(propContent,
+                                                       ifacePropContent);
+          if (!consistent)
             {
             cmOStringStream e;
             e << "The INTERFACE_" << p << " property of \""
@@ -4613,6 +4621,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
           else
             {
             // Agree.
+            propContent = consistent;
             continue;
             }
           }
