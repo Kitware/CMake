@@ -44,7 +44,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   endforeach()
 
   # If the compiler is still unknown, try to query its vendor.
-  if(NOT CMAKE_${lang}_COMPILER_ID)
+  if(CMAKE_${lang}_COMPILER AND NOT CMAKE_${lang}_COMPILER_ID)
     CMAKE_DETERMINE_COMPILER_ID_VENDOR(${lang})
   endif()
 
