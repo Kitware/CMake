@@ -52,6 +52,13 @@ GITCommand: @GITCOMMAND@
 GITUpdateOptions: @GIT_UPDATE_OPTIONS@
 GITUpdateCustom: @CTEST_GIT_UPDATE_CUSTOM@
 
+# Perforce options
+P4Command: @P4COMMAND@
+P4Client: @CTEST_P4_CLIENT@
+P4Options: @CTEST_P4_OPTIONS@
+P4UpdateOptions: @CTEST_P4_UPDATE_OPTIONS@
+P4UpdateCustom: @CTEST_P4_UPDATE_CUSTOM@
+
 # Generic update command
 UpdateCommand: @UPDATE_COMMAND@
 UpdateOptions: @UPDATE_OPTIONS@

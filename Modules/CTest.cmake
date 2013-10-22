@@ -149,6 +149,7 @@ if(BUILD_TESTING)
   find_program(BZRCOMMAND bzr)
   find_program(HGCOMMAND hg)
   find_program(GITCOMMAND git)
+  find_program(P4COMMAND p4)
 
   if(NOT UPDATE_TYPE)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/CVS")
@@ -180,6 +181,9 @@ if(BUILD_TESTING)
   elseif("${_update_type}" STREQUAL "git")
     set(UPDATE_COMMAND "${GITCOMMAND}")
     set(UPDATE_OPTIONS "${GIT_UPDATE_OPTIONS}")
+  elseif("${_update_type}" STREQUAL "p4")
+    set(UPDATE_COMMAND "${P4COMMAND}")
+    set(UPDATE_OPTIONS "${P4_UPDATE_OPTIONS}")
   endif()
 
   set(DART_TESTING_TIMEOUT 1500 CACHE STRING
@@ -275,6 +279,7 @@ if(BUILD_TESTING)
     CVS_UPDATE_OPTIONS
     DART_TESTING_TIMEOUT
     GITCOMMAND
+    P4COMMAND
     HGCOMMAND
     MAKECOMMAND
     MEMORYCHECK_COMMAND
