@@ -12,7 +12,7 @@ CMake Warning \(dev\) in CMakeLists.txt:
 
     foo
 
-  Link interface:
+  Link implementation:
 
     bat
 

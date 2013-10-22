@@ -5347,7 +5347,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                 "INTERFACE_LINK_LIBRARIES:\n  "
               << newLibraries
               << "\n"
-              << "Link interface" << ":\n  "
+              << "Link implementation:\n  "
               << oldLibraries << "\n";
             this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
             }
