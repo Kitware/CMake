@@ -11,5 +11,6 @@ property "FOO" appears in the list, then for each dependee, the
 equal with each other, and with the "FOO" property in the dependee.
 If the property is not set, then it is ignored.  Note that for each
 dependee, the set of properties from this property must not intersect
-with the set of properties from the COMPATIBLE_INTERFACE_BOOL
+with the set of properties from the COMPATIBLE_INTERFACE_BOOL,
+COMPATIBLE_INTERFACE_NUMBER_MIN or COMPATIBLE_INTERFACE_NUMBER_MAX
 property.

@@ -4453,7 +4453,9 @@ const char *getTypedProperty<const char *>(cmTarget *tgt, const char *prop,
 enum CompatibleType
 {
   BoolType,
-  StringType
+  StringType,
+  NumberMinType,
+  NumberMaxType
 };
 
 //----------------------------------------------------------------------------
@@ -4472,6 +4474,29 @@ bool consistentProperty(bool lhs, bool rhs, CompatibleType)
 const char * consistentStringProperty(const char *lhs, const char *rhs)
 {
   return strcmp(lhs, rhs) == 0 ? lhs : 0;
+}
+
+//----------------------------------------------------------------------------
+const char * consistentNumberProperty(const char *lhs, const char *rhs,
+                               CompatibleType t)
+{
+  double lnum;
+  double rnum;
+  bool result;
+  if(sscanf(lhs, "%lg", &lnum) != 1 ||
+      sscanf(rhs, "%lg", &rnum) != 1)
+    {
+    return 0;
+    }
+
+  if (t == NumberMaxType)
+    {
+    return std::max(lnum, rnum) == lnum ? lhs : rhs;
+    }
+  else
+    {
+    return std::min(lnum, rnum) == lnum ? lhs : rhs;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -4498,6 +4523,9 @@ const char* consistentProperty(const char *lhs, const char *rhs,
     return 0;
   case StringType:
     return consistentStringProperty(lhs, rhs);
+  case NumberMinType:
+  case NumberMaxType:
+    return consistentNumberProperty(lhs, rhs, t);
   }
   assert(!"Unreachable!");
   return 0;
@@ -4686,6 +4714,30 @@ const char * cmTarget::GetLinkInterfaceDependentStringProperty(
 }
 
 //----------------------------------------------------------------------------
+const char * cmTarget::GetLinkInterfaceDependentNumberMinProperty(
+                                                      const std::string &p,
+                                                      const char *config)
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty",
+                                                           NumberMinType, 0);
+}
+
+//----------------------------------------------------------------------------
+const char * cmTarget::GetLinkInterfaceDependentNumberMaxProperty(
+                                                      const std::string &p,
+                                                      const char *config)
+{
+  return checkInterfacePropertyCompatibility<const char *>(this,
+                                                           p,
+                                                           config,
+                                                           "empty",
+                                                           NumberMaxType, 0);
+}
+
+//----------------------------------------------------------------------------
 bool isLinkDependentProperty(cmTarget *tgt, const std::string &p,
                              const char *interfaceProperty,
                              const char *config)
@@ -4750,6 +4802,30 @@ bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
     return false;
     }
   return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_STRING",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
+                                    const char *config)
+{
+  if (this->TargetTypeValue == OBJECT_LIBRARY)
+    {
+    return false;
+    }
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_NUMBER_MIN",
+                                 config);
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
+                                    const char *config)
+{
+  if (this->TargetTypeValue == OBJECT_LIBRARY)
+    {
+    return false;
+    }
+  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_NUMBER_MAX",
                                  config);
 }
 
@@ -5734,6 +5810,10 @@ const char * getLinkInterfaceDependentProperty(cmTarget *tgt,
     return 0;
   case StringType:
     return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
+  case NumberMinType:
+    return tgt->GetLinkInterfaceDependentNumberMinProperty(prop, config);
+  case NumberMaxType:
+    return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
   }
   assert(!"Unreachable!");
   return 0;
@@ -5787,6 +5867,50 @@ void checkPropertyConsistency(cmTarget *depender, cmTarget *dependee,
     }
 }
 
+static cmStdString intersect(const std::set<cmStdString> &s1,
+                             const std::set<cmStdString> &s2)
+{
+  std::set<cmStdString> intersect;
+  std::set_intersection(s1.begin(),s1.end(),
+                        s2.begin(),s2.end(),
+                      std::inserter(intersect,intersect.begin()));
+  if (!intersect.empty())
+    {
+    return *intersect.begin();
+    }
+  return "";
+}
+static cmStdString intersect(const std::set<cmStdString> &s1,
+                       const std::set<cmStdString> &s2,
+                       const std::set<cmStdString> &s3)
+{
+  cmStdString result;
+  result = intersect(s1, s2);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s3);
+  if (!result.empty())
+    return result;
+  return intersect(s2, s3);
+}
+static cmStdString intersect(const std::set<cmStdString> &s1,
+                       const std::set<cmStdString> &s2,
+                       const std::set<cmStdString> &s3,
+                       const std::set<cmStdString> &s4)
+{
+  cmStdString result;
+  result = intersect(s1, s2);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s3);
+  if (!result.empty())
+    return result;
+  result = intersect(s1, s4);
+  if (!result.empty())
+    return result;
+  return intersect(s2, s3, s4);
+}
+
 //----------------------------------------------------------------------------
 void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                           const char* config)
@@ -5795,6 +5919,8 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 
   std::set<cmStdString> emittedBools;
   std::set<cmStdString> emittedStrings;
+  std::set<cmStdString> emittedMinNumbers;
+  std::set<cmStdString> emittedMaxNumbers;
 
   for(cmComputeLinkInformation::ItemVector::const_iterator li =
       deps.begin();
@@ -5820,23 +5946,71 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       {
       return;
       }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_NUMBER_MIN",
+                                           emittedMinNumbers, config,
+                                           NumberMinType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
+    checkPropertyConsistency<const char *>(this, li->Target,
+                                           "COMPATIBLE_INTERFACE_NUMBER_MAX",
+                                           emittedMaxNumbers, config,
+                                           NumberMaxType, 0);
+    if (cmSystemTools::GetErrorOccuredFlag())
+      {
+      return;
+      }
     }
 
-  for(std::set<cmStdString>::const_iterator li = emittedBools.begin();
-      li != emittedBools.end(); ++li)
+  std::string prop = intersect(emittedBools,
+                               emittedStrings,
+                               emittedMinNumbers,
+                               emittedMaxNumbers);
+
+  if (!prop.empty())
     {
-    const std::set<cmStdString>::const_iterator si = emittedStrings.find(*li);
-    if (si != emittedStrings.end())
+    std::set<std::string> props;
+    std::set<cmStdString>::const_iterator i = emittedBools.find(prop);
+    if (i != emittedBools.end())
       {
-      cmOStringStream e;
-      e << "Property \"" << *li << "\" appears in both the "
-      "COMPATIBLE_INTERFACE_BOOL and the COMPATIBLE_INTERFACE_STRING "
-      "property in the dependencies of target \"" << this->GetName() <<
-      "\".  This is not allowed. A property may only require compatibility "
-      "in a boolean interpretation or a string interpretation, but not both.";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-      break;
+      props.insert("COMPATIBLE_INTERFACE_BOOL");
       }
+    i = emittedStrings.find(prop);
+    if (i != emittedStrings.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_STRING");
+      }
+    i = emittedMinNumbers.find(prop);
+    if (i != emittedMinNumbers.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
+      }
+    i = emittedMaxNumbers.find(prop);
+    if (i != emittedMaxNumbers.end())
+      {
+      props.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
+      }
+
+    std::string propsString = *props.begin();
+    props.erase(props.begin());
+    while (props.size() > 1)
+      {
+      propsString += ", " + *props.begin();
+      props.erase(props.begin());
+      }
+   if (props.size() == 1)
+     {
+     propsString += " and the " + *props.begin();
+     }
+    cmOStringStream e;
+    e << "Property \"" << prop << "\" appears in both the "
+      << propsString <<
+    " property in the dependencies of target \"" << this->GetName() <<
+    "\".  This is not allowed. A property may only require compatibility "
+    "in a boolean interpretation or a string interpretation, but not both.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
 }
 
