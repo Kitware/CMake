@@ -222,7 +222,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 }
 
 <STRING>\\\n {
-  cmListFileLexerAppend(lexer, yytext, yyleng);
+  /* Continuation: text is not part of string */
   ++lexer->line;
   lexer->column = 1;
 }

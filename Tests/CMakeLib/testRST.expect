@@ -27,6 +27,12 @@ CMake Module Content
 
 More CMake Module Content
 
+Bracket Comment Content
+
+[
+Bracket Comment Content
+]
+
 .. cmake:command:: some_cmd
 
    Command some_cmd description.
