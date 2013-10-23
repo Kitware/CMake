@@ -12,5 +12,6 @@ with each other and with the "FOO" property in the depender.  When reading
 the FOO property at generate time, the minimum value will be returned.
 If the property is not set, then it is ignored.  Note that for each
 dependee, the set of properties from this property must not intersect
-with the set of properties from the COMPATIBLE_INTERFACE_BOOL,
-COMPATIBLE_INTERFACE_STRING or COMPATIBLE_INTERFACE_NUMBER_MAX property.
+with the set of properties from the :prop_tgt:`COMPATIBLE_INTERFACE_BOOL`,
+:prop_tgt:`COMPATIBLE_INTERFACE_STRING` or
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` property.

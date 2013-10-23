@@ -4487,7 +4487,6 @@ const char * consistentNumberProperty(const char *lhs, const char *rhs,
 {
   double lnum;
   double rnum;
-  bool result;
   if(sscanf(lhs, "%lg", &lnum) != 1 ||
       sscanf(rhs, "%lg", &rnum) != 1)
     {
