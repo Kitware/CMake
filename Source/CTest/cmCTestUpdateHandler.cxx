@@ -28,6 +28,7 @@
 #include "cmCTestBZR.h"
 #include "cmCTestGIT.h"
 #include "cmCTestHG.h"
+#include "cmCTestP4.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -51,7 +52,8 @@ static const char* cmCTestUpdateHandlerUpdateStrings[] =
   "SVN",
   "BZR",
   "GIT",
-  "HG"
+  "HG",
+  "P4"
 };
 
 static const char* cmCTestUpdateHandlerUpdateToString(int type)
@@ -146,6 +148,10 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
       {
       return cmCTestUpdateHandler::e_HG;
       }
+    if ( stype.find("p4") != std::string::npos )
+      {
+      return cmCTestUpdateHandler::e_P4;
+      }
     }
   else
     {
@@ -171,6 +177,10 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
     if ( stype.find("hg") != std::string::npos )
       {
       return cmCTestUpdateHandler::e_HG;
+      }
+    if ( stype.find("p4") != std::string::npos )
+      {
+      return cmCTestUpdateHandler::e_P4;
       }
     }
   return cmCTestUpdateHandler::e_UNKNOWN;
@@ -223,6 +233,7 @@ int cmCTestUpdateHandler::ProcessHandler()
     case e_BZR: vc.reset(new cmCTestBZR(this->CTest, ofs)); break;
     case e_GIT: vc.reset(new cmCTestGIT(this->CTest, ofs)); break;
     case e_HG:  vc.reset(new cmCTestHG(this->CTest, ofs)); break;
+    case e_P4:  vc.reset(new cmCTestP4(this->CTest, ofs)); break;
     default:    vc.reset(new cmCTestVC(this->CTest, ofs));  break;
     }
   vc->SetCommandLineTool(this->UpdateCommand);
@@ -350,6 +361,18 @@ int cmCTestUpdateHandler::DetectVCS(const char* dir)
     {
     return cmCTestUpdateHandler::e_HG;
     }
+  sourceDirectory = dir;
+  sourceDirectory += "/.p4";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_P4;
+    }
+  sourceDirectory = dir;
+  sourceDirectory += "/.p4config";
+  if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
+    {
+    return cmCTestUpdateHandler::e_P4;
+    }
   return cmCTestUpdateHandler::e_UNKNOWN;
 }
 
@@ -380,6 +403,7 @@ bool cmCTestUpdateHandler::SelectVCS()
       case e_BZR: key = "BZRCommand"; break;
       case e_GIT: key = "GITCommand"; break;
       case e_HG:  key = "HGCommand";  break;
+      case e_P4:  key = "P4Command";  break;
       default: break;
       }
     if (key)

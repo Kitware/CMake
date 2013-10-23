@@ -465,6 +465,8 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestGIT.h
   CTest/cmCTestHG.cxx
   CTest/cmCTestHG.h
+  CTest/cmCTestP4.cxx
+  CTest/cmCTestP4.h
   )
 
 # Build CTestLib

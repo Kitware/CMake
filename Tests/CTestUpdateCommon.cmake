@@ -216,7 +216,7 @@ function(run_dashboard_script bin_dir)
     )
 
   # Verify the updates reported by CTest.
-  list(APPEND UPDATE_MAYBE Updated{subdir})
+  list(APPEND UPDATE_MAYBE Updated{subdir} Updated{CTestConfig.cmake})
   check_updates(${bin_dir}
     Updated{foo.txt}
     Updated{bar.txt}

@@ -1878,6 +1878,26 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateHG_DIR}")
     endif()
+
+    # Test CTest Update with P4
+    find_program(P4_EXECUTABLE NAMES p4)
+    find_program(P4D_EXECUTABLE NAMES p4d)
+    mark_as_advanced(P4_EXECUTABLE P4D_EXECUTABLE)
+    set(CTEST_TEST_UPDATE_P4 0)
+    if(P4_EXECUTABLE AND P4D_EXECUTABLE)
+      if(NOT "${P4_EXECUTABLE};${P4D_EXECUTABLE}" MATCHES "cygwin" OR UNIX)
+        set(CTEST_TEST_UPDATE_P4 1)
+      endif()
+    endif()
+    if(CTEST_TEST_UPDATE_P4)
+      set(CTestUpdateP4_DIR "CTestUpdateP4")
+      configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateP4.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake" @ONLY)
+      add_test(CTest.UpdateP4 ${CMAKE_CMAKE_COMMAND}
+        -P "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake"
+        )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateP4_DIR}")
+    endif()
   endif()
 
   configure_file(
