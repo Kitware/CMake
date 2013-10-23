@@ -174,6 +174,9 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
 bool cmOutputRequiredFilesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
+  if(this->Disallowed(cmPolicies::CMP0032,
+      "The output_required_files command should not be called; see CMP0032."))
+    { return true; }
   if(args.size() != 2 )
     {
     this->SetError("called with incorrect number of arguments");

@@ -1,6 +1,8 @@
 utility_source
 --------------
 
+Disallowed.  See CMake Policy :policy:`CMP0034`.
+
 Specify the source tree of a third-party utility.
 
 ::

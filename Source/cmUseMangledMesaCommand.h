@@ -14,54 +14,19 @@
 
 #include "cmCommand.h"
 
-#include "cmSourceFile.h"
-
-/** \class cmUseMangledMesaCommand
- * \brief Create Tcl Wrappers for VTK classes.
- *
- * cmUseMangledMesaCommand is used to define a CMake variable include
- * path location by specifying a file and list of directories.
- */
 class cmUseMangledMesaCommand : public cmCommand
 {
 public:
   cmTypeMacro(cmUseMangledMesaCommand, cmCommand);
-
-  /**
-   * This is a virtual constructor for the command.
-   */
-  virtual cmCommand* Clone()
-    {
-    return new cmUseMangledMesaCommand;
-    }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
+  virtual cmCommand* Clone() { return new cmUseMangledMesaCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
   virtual const char* GetName() const { return "use_mangled_mesa";}
-
-  /**
-   * This determines if the command is invoked when in script mode.
-   */
   virtual bool IsScriptable() const { return true; }
-
-  /** This command is kept for compatibility with older CMake versions. */
-  virtual bool IsDiscouraged() const
-    {
-    return true;
-    }
-
+  virtual bool IsDiscouraged() const { return true; }
 protected:
   void CopyAndFullPathMesaHeader(const char* source,
                                  const char* outdir);
 };
-
 
 #endif

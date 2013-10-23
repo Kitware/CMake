@@ -15,6 +15,9 @@
 bool cmUtilitySourceCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
+  if(this->Disallowed(cmPolicies::CMP0034,
+      "The utility_source command should not be called; see CMP0034."))
+    { return true; }
   if(args.size() < 3)
     {
     this->SetError("called with incorrect number of arguments");

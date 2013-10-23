@@ -1,7 +1,9 @@
 output_required_files
 ---------------------
 
-Deprecated.  Approximate C preprocessor dependency scanning.
+Disallowed.  See CMake Policy :policy:`CMP0032`.
+
+Approximate C preprocessor dependency scanning.
 
 This command exists only because ancient CMake versions provided it.
 CMake handles preprocessor dependency scanning automatically using a

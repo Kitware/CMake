@@ -16,6 +16,9 @@
 bool cmVariableRequiresCommand
 ::InitialPass(std::vector<std::string>const& args, cmExecutionStatus &)
 {
+  if(this->Disallowed(cmPolicies::CMP0035,
+      "The variable_requires command should not be called; see CMP0035."))
+    { return true; }
   if(args.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");

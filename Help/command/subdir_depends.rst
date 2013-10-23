@@ -1,7 +1,9 @@
 subdir_depends
 --------------
 
-Deprecated.  Does nothing.
+Disallowed.  See CMake Policy :policy:`CMP0029`.
+
+Does nothing.
 
 ::
 

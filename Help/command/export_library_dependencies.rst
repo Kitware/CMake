@@ -1,7 +1,9 @@
 export_library_dependencies
 ---------------------------
 
-Deprecated.  Use INSTALL(EXPORT) or EXPORT command.
+Disallowed.  See CMake Policy :policy:`CMP0033`.
+
+Use :command:`install(EXPORT)` or :command:`export` command.
 
 This command generates an old-style library dependencies file.
 Projects requiring CMake 2.6 or later should not use the command.  Use

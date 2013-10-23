@@ -1,6 +1,8 @@
 load_command
 ------------
 
+Disallowed.  See CMake Policy :policy:`CMP0031`.
+
 Load a command into a running CMake.
 
 ::
