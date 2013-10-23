@@ -266,6 +266,7 @@ set(SRCS
   cmSystemTools.h
   cmTarget.cxx
   cmTarget.h
+  cmTargetCompilerFeaturesCommand.cxx
   cmTargetExport.h
   cmTest.cxx
   cmTest.h
