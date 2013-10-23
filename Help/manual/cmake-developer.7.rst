@@ -230,30 +230,31 @@ The ``Modules`` directory contains CMake-language ``.cmake`` module files.
 Module Documentation
 --------------------
 
-To add a module to the CMake documentation, follow these steps:
+To document CMake module ``Modules/<module-name>.cmake``, modify
+``Help/manual/cmake-modules.7.rst`` to reference the module in the
+``toctree`` directive, in sorted order, as::
 
-1. Add file ``Help/module/<module-name>.rst`` containing just the line::
+ /module/<module-name>
 
-    .. cmake-module:: ../../Modules/<module-name>.cmake
+Then add the module document file ``Help/module/<module-name>.rst``
+containing just the line::
 
-2. Modify ``Help/manual/cmake-modules.7.rst`` to reference the module in the
-   toctree directive as::
+ .. cmake-module:: ../../Modules/<module-name>.cmake
 
-    /module/<module-name>
+The ``cmake-module`` directive will scan the module file to extract
+reStructuredText markup from comment blocks that start in ``.rst:``.
+Add to the top of ``Modules/<module-name>.cmake`` a #-comment of the form:
 
-   Keep the toctree in sorted order!
+.. code-block:: cmake
 
-3. Add to the top of ``Modules/<module-name>.cmake`` a #-comment of the form::
+ #.rst:
+ # <module-name>
+ # -------------
+ #
+ # <reStructuredText documentation of module>
 
-    #.rst:
-    # <module-name>
-    # -------------
-    #
-    # ...reStructuredText documentation of module...
-
-   Comment blocks starting with the line ``#.rst:`` may appear anywhere
-   in the file.  The ``cmake-module`` directive used above will scan the
-   file to extract reStructuredText markup from such comments.
+Additional such ``.rst:`` comments may appear anywhere in the module file.
+All such comments must start with ``#`` in the first column.
 
 For example, a ``Modules/Findxxx.cmake`` module may contain:
 
