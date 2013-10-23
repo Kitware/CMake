@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+project(CTestTestSerialInDepends)
+
 enable_testing()
 
 function(my_add_test NAME COST)

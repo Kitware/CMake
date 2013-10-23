@@ -470,14 +470,18 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     priorityStack.push_back(TestSet());
     TestSet &currentSet = priorityStack.back();
 
-    for(TestSet::iterator i = previousSet.begin();
+    for(TestSet::const_iterator i = previousSet.begin();
       i != previousSet.end(); ++i)
       {
       TestSet const& dependencies = this->Tests[*i];
-      currentSet.insert(dependencies.begin(), dependencies.end());
+      for(TestSet::const_iterator j = dependencies.begin();
+        j != dependencies.end(); ++j)
+        {
+        currentSet.insert(*j);
+        }
       }
 
-    for(TestSet::iterator i = currentSet.begin();
+    for(TestSet::const_iterator i = currentSet.begin();
       i != currentSet.end(); ++i)
       {
       previousSet.erase(*i);
@@ -492,15 +496,24 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
     i != priorityStack.rend(); ++i)
     {
-    TestSet &currentSet = *i;
+    TestSet const& currentSet = *i;
     TestComparator comp(this);
 
     TestList sortedCopy;
-    sortedCopy.insert(sortedCopy.end(), currentSet.begin(), currentSet.end());
+
+    for(TestSet::const_iterator j = currentSet.begin();
+      j != currentSet.end(); ++j)
+      {
+      sortedCopy.push_back(*j);
+      }
+
     std::stable_sort(sortedCopy.begin(), sortedCopy.end(), comp);
 
-    this->SortedTests.insert(this->SortedTests.end(),
-      sortedCopy.begin(), sortedCopy.end());
+    for(TestList::const_iterator j = sortedCopy.begin();
+      j != sortedCopy.end(); ++j)
+      {
+      this->SortedTests.push_back(*j);
+      }
     }
 }
 
