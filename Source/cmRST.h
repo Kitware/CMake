@@ -16,6 +16,16 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+/** \class cmRST
+ * \brief Perform basic .rst processing for command-line help
+ *
+ * This class implements a subset of reStructuredText and Sphinx
+ * document processing.  It is used to print command-line help.
+ *
+ * If you modify the capabilities of this class, be sure to update
+ * the Help/manual/cmake-developer.7.rst documentation and to update
+ * the Tests/CMakeLib/testRST.(rst|expect) test input and output.
+ */
 class cmRST
 {
 public:
