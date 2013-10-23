@@ -536,20 +536,12 @@ public:
                                             const char *config);
   bool IsLinkInterfaceDependentStringProperty(const std::string &p,
                                               const char *config);
-  bool IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                                                 const char *config);
-  bool IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                                                 const char *config);
 
   bool GetLinkInterfaceDependentBoolProperty(const std::string &p,
                                              const char *config);
 
   const char *GetLinkInterfaceDependentStringProperty(const std::string &p,
                                                       const char *config);
-  const char *GetLinkInterfaceDependentNumberMinProperty(const std::string &p,
-                                                         const char *config);
-  const char *GetLinkInterfaceDependentNumberMaxProperty(const std::string &p,
-                                                         const char *config);
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt);

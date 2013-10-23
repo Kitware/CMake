@@ -23,19 +23,6 @@
 #error Expected STRING_PROP3
 #endif
 
-template<bool test>
-struct CMakeStaticAssert;
-
-template<>
-struct CMakeStaticAssert<true> {};
-
-enum {
-  NumericMaxTest1 = sizeof(CMakeStaticAssert<NUMBER_MAX_PROP1 == 100>),
-  NumericMaxTest2 = sizeof(CMakeStaticAssert<NUMBER_MAX_PROP2 == 250>),
-  NumericMinTest1 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP1 == 50>),
-  NumericMinTest2 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP2 == 200>)
-};
-
 #include "iface2.h"
 
 int main(int argc, char **argv)

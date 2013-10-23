@@ -980,54 +980,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                         context->Config))
-        {
-        context->HadContextSensitiveCondition = true;
-        const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMinProperty(
-                                                propertyName,
-                                                context->Config);
-        return propContent ? propContent : "";
-        }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                         context->Config))
-        {
-        context->HadContextSensitiveCondition = true;
-        const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMaxProperty(
-                                                propertyName,
-                                                context->Config);
-        return propContent ? propContent : "";
-        }
 
       return linkedTargetsContent;
       }
 
-    if (!target->IsImported()
-        && dagCheckerParent && !dagCheckerParent->EvaluatingLinkLibraries())
-      {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                        context->Config))
-        {
-        context->HadContextSensitiveCondition = true;
-        const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMinProperty(
-                                                propertyName,
-                                                context->Config);
-        return propContent ? propContent : "";
-        }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                        context->Config))
-        {
-        context->HadContextSensitiveCondition = true;
-        const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMaxProperty(
-                                                propertyName,
-                                                context->Config);
-        return propContent ? propContent : "";
-        }
-      }
     for (size_t i = 1;
          i < cmArraySize(targetPropertyTransitiveWhitelist);
          ++i)
