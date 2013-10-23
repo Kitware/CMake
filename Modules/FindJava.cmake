@@ -111,7 +111,7 @@ if(Java_JAVA_EXECUTABLE)
       if(${Java_FIND_REQUIRED})
         message( FATAL_ERROR "Error executing java -version" )
       else()
-        message( STATUS "Warning, could not run java --version")
+        message( STATUS "Warning, could not run java -version")
       endif()
     else()
       # extract major/minor version and patch level from "java -version" output
