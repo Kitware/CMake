@@ -377,6 +377,34 @@ static thisClass* SafeDownCast(cmObject *c) \
   return 0;\
 }
 
+#if defined(_MSC_VER) && _MSC_VER < 1300
 
+#define cmArrayBegin(a) a
+#define cmArraySize(a) (sizeof(a)/sizeof(*a))
+#define cmArrayEnd(a) a + cmArraySize(a)
+
+#else
+
+template<typename T, size_t N>
+const T* cmArrayBegin(const T (&a)[N]) { return a; }
+template<typename T, size_t N>
+const T* cmArrayEnd(const T (&a)[N]) { return a + N; }
+template<typename T, size_t N>
+size_t cmArraySize(const T (&)[N]) { return N; }
+
+#endif
+
+struct cmStrCmp {
+  cmStrCmp(const char *test) : m_test(test) {}
+  cmStrCmp(std::string &test) : m_test(test.c_str()) {}
+
+  bool operator()(const char * input)
+  {
+    return strcmp(input, m_test) == 0;
+  }
+
+private:
+  const char *m_test;
+};
 
 #endif
