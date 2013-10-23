@@ -41,6 +41,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->Completed = 0;
   this->RunningCount = 0;
   this->StopTimePassed = false;
+  this->HasCycles = false;
 }
 
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
@@ -65,6 +66,11 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
   if(!this->CTest->GetShowOnly())
     {
     this->ReadCostData();
+    this->HasCycles = !this->CheckCycles();
+    if(this->HasCycles)
+      {
+      return;
+      }
     this->CreateTestCostList();
     }
 }
@@ -79,7 +85,7 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
-  if(!this->CheckCycles())
+  if(this->HasCycles)
     {
     return;
     }
@@ -205,37 +211,8 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
       }
     }
 
-  // copy the depend tests locally because when
-  // a test is finished it will be removed from the depend list
-  // and we don't want to be iterating a list while removing from it
-  TestSet depends = this->Tests[test];
-  size_t totalDepends = depends.size();
-  if(totalDepends)
-    {
-    for(TestSet::const_iterator i = depends.begin();
-        i != depends.end(); ++i)
-      {
-      // if the test is not already running then start it
-      if(!this->TestRunningMap[*i])
-        {
-        // this test might be finished, but since
-        // this is a copy of the depend map we might
-        // still have it
-        if(!this->TestFinishMap[*i])
-          {
-          // only start one test in this function
-          return this->StartTest(*i);
-          }
-        else
-          {
-          // the depend has been and finished
-          totalDepends--;
-          }
-        }
-      }
-    }
   // if there are no depends left then run this test
-  if(totalDepends == 0)
+  if(this->Tests[test].empty())
     {
     this->StartTestProcess(test);
     return true;
@@ -262,25 +239,17 @@ void cmCTestMultiProcessHandler::StartNextTests()
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
-    //in case this test has already been started due to dependency
-    if(this->TestRunningMap[*test] || this->TestFinishMap[*test])
-      {
-      continue;
-      }
     size_t processors = GetProcessorsUsed(*test);
-    if(processors > numToStart)
+
+    if(processors <= numToStart && this->StartTest(*test))
       {
-      return;
+        if(this->StopTimePassed)
+          {
+          return;
+          }
+        numToStart -= processors;
       }
-    if(this->StartTest(*test))
-      {
-      if(this->StopTimePassed)
-        {
-        return;
-        }
-      numToStart -= processors;
-      }
-    if(numToStart == 0)
+    else if(numToStart == 0)
       {
       return;
       }
@@ -472,24 +441,67 @@ int cmCTestMultiProcessHandler::SearchByName(std::string name)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateTestCostList()
 {
-  for(TestMap::iterator i = this->Tests.begin();
-      i != this->Tests.end(); ++i)
-    {
-    SortedTests.push_back(i->first);
+  std::list<TestSet> priorityStack;
+  priorityStack.push_back(TestSet());
+  TestSet &topLevel = priorityStack.back();
 
-    //If the test failed last time, it should be run first, so max the cost.
-    //Only do this for parallel runs; in non-parallel runs, avoid clobbering
-    //the test's explicitly set cost.
-    if(this->ParallelLevel > 1 &&
-       std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+  // Add previously failed tests to the front of the cost list
+  // and queue other tests for further sorting
+  for(TestMap::const_iterator i = this->Tests.begin();
+    i != this->Tests.end(); ++i)
+    {
+    if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
        this->Properties[i->first]->Name) != this->LastTestsFailed.end())
       {
-      this->Properties[i->first]->Cost = FLT_MAX;
+      //If the test failed last time, it should be run first.
+      this->SortedTests.push_back(i->first);
+      }
+    else
+      {
+      topLevel.insert(i->first);
       }
     }
 
-  TestComparator comp(this);
-  std::stable_sort(SortedTests.begin(), SortedTests.end(), comp);
+  // Repeatedly move dependencies of the tests on the current dependency level
+  // to the next level until no further dependencies exist.
+  while(priorityStack.back().size())
+    {
+    TestSet &previousSet = priorityStack.back();
+    priorityStack.push_back(TestSet());
+    TestSet &currentSet = priorityStack.back();
+
+    for(TestSet::iterator i = previousSet.begin();
+      i != previousSet.end(); ++i)
+      {
+      TestSet const& dependencies = this->Tests[*i];
+      currentSet.insert(dependencies.begin(), dependencies.end());
+      }
+
+    for(TestSet::iterator i = currentSet.begin();
+      i != currentSet.end(); ++i)
+      {
+      previousSet.erase(*i);
+      }
+    }
+
+  // Remove the empty dependency level
+  priorityStack.pop_back();
+
+  // Reverse iterate over the different dependency levels (deepest first).
+  // Sort tests within each level by COST and append them to the cost list.
+  for(std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
+    i != priorityStack.rend(); ++i)
+    {
+    TestSet &currentSet = *i;
+    TestComparator comp(this);
+
+    TestList sortedCopy;
+    sortedCopy.insert(sortedCopy.end(), currentSet.begin(), currentSet.end());
+    std::stable_sort(sortedCopy.begin(), sortedCopy.end(), comp);
+
+    this->SortedTests.insert(this->SortedTests.end(),
+      sortedCopy.begin(), sortedCopy.end());
+    }
 }
 
 //---------------------------------------------------------
