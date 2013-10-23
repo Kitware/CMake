@@ -1412,13 +1412,6 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     includeBinaryDir = true;
     }
 
-  // CMake versions below 2.0 would add the source tree to the -I path
-  // automatically.  Preserve compatibility.
-  if(this->NeedBackwardsCompatibility(1,9))
-    {
-    includeSourceDir = true;
-    }
-
   // Hack for VTK 4.0 - 4.4 which depend on the old behavior but do
   // not set the backwards compatibility level automatically.
   const char* vtkSourceDir =
@@ -3071,7 +3064,7 @@ cmLocalGenerator
     // Decide whether this language wants to replace the source
     // extension with the object extension.  For CMake 2.4
     // compatibility do this by default.
-    bool replaceExt = this->NeedBackwardsCompatibility(2, 4);
+    bool replaceExt = this->NeedBackwardsCompatibility_2_4();
     if(!replaceExt)
       {
       if(const char* lang = source.GetLanguage())
@@ -3318,9 +3311,7 @@ unsigned int cmLocalGenerator::GetBackwardsCompatibility()
 }
 
 //----------------------------------------------------------------------------
-bool cmLocalGenerator::NeedBackwardsCompatibility(unsigned int major,
-                                                  unsigned int minor,
-                                                  unsigned int patch)
+bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 {
   // Check the policy to decide whether to pay attention to this
   // variable.
@@ -3348,7 +3339,7 @@ bool cmLocalGenerator::NeedBackwardsCompatibility(unsigned int major,
   // equal to or lower than the given version.
   unsigned int actual_compat = this->GetBackwardsCompatibility();
   return (actual_compat &&
-          actual_compat <= CMake_VERSION_ENCODE(major, minor, patch));
+          actual_compat <= CMake_VERSION_ENCODE(2, 4, 255));
 }
 
 //----------------------------------------------------------------------------

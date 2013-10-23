@@ -25,17 +25,12 @@ bool cmAddCustomTargetCommand
   // Check the target name.
   if(args[0].find_first_of("/\\") != args[0].npos)
     {
-    if(!this->Makefile->NeedBackwardsCompatibility(2,2))
-      {
-      cmOStringStream e;
-      e << "called with invalid target name \"" << args[0]
-        << "\".  Target names may not contain a slash.  "
-        << "Use ADD_CUSTOM_COMMAND to generate files.  "
-        << "Set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 "
-        << "or lower to skip this check.";
-      this->SetError(e.str().c_str());
-      return false;
-      }
+    cmOStringStream e;
+    e << "called with invalid target name \"" << args[0]
+      << "\".  Target names may not contain a slash.  "
+      << "Use ADD_CUSTOM_COMMAND to generate files.";
+    this->SetError(e.str().c_str());
+    return false;
     }
 
   // Accumulate one command line at a time.

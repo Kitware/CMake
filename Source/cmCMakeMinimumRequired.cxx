@@ -114,6 +114,9 @@ bool cmCMakeMinimumRequired
 
   if (required_major < 2 || (required_major == 2 && required_minor < 4))
   {
+    this->Makefile->IssueMessage(
+      cmake::AUTHOR_WARNING,
+      "Compatibility with CMake < 2.4 is not supported by CMake >= 3.0.");
     this->Makefile->SetPolicyVersion("2.4");
   }
   else

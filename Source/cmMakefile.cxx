@@ -799,22 +799,6 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
 
-bool cmMakefile::NeedBackwardsCompatibility(unsigned int major,
-                                            unsigned int minor,
-                                            unsigned int patch)
-{
-  if(this->LocalGenerator)
-    {
-    return
-      this->LocalGenerator->NeedBackwardsCompatibility(major, minor, patch);
-    }
-  else
-    {
-    return false;
-    }
-}
-
-
 namespace
 {
   struct file_not_persistent
@@ -871,13 +855,15 @@ void cmMakefile::ConfigureFinalPass()
   this->FinalPass();
   const char* oldValue
     = this->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY");
-  if (oldValue && atof(oldValue) <= 1.2)
+  if (oldValue && cmSystemTools::VersionCompare(
+        cmSystemTools::OP_LESS, oldValue, "2.4"))
     {
-    cmSystemTools::Error("You have requested backwards compatibility "
-                         "with CMake version 1.2 or earlier. This version "
-                         "of CMake only supports backwards compatibility "
-                         "with CMake 1.4 or later. For compatibility with "
-                         "1.2 or earlier please use CMake 2.0");
+    this->IssueMessage(
+      cmake::FATAL_ERROR,
+      "You have set CMAKE_BACKWARDS_COMPATIBILITY to a CMake version less "
+      "than 2.4. This version of CMake only supports backwards compatibility "
+      "with CMake 2.4 or later. For compatibility with older versions please "
+      "use any CMake 2.8.x release or lower.");
     }
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); l++)
@@ -1456,8 +1442,6 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
       this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib);
     if(tgt)
       {
-      // CMake versions below 2.4 allowed linking to modules.
-      bool allowModules = this->NeedBackwardsCompatibility(2,2);
       // if it is not a static or shared library then you can not link to it
       if(!((tgt->GetType() == cmTarget::STATIC_LIBRARY) ||
            (tgt->GetType() == cmTarget::SHARED_LIBRARY) ||
@@ -1470,24 +1454,7 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
           << " may not be linked into another target.  "
           << "One may link only to STATIC or SHARED libraries, or "
           << "to executables with the ENABLE_EXPORTS property set.";
-        // in older versions of cmake linking to modules was allowed
-        if( tgt->GetType() == cmTarget::MODULE_LIBRARY )
-          {
-          e << "\n"
-            << "If you are developing a new project, re-organize it to avoid "
-            << "linking to modules.  "
-            << "If you are just trying to build an existing project, "
-            << "set CMAKE_BACKWARDS_COMPATIBILITY to 2.2 or lower to allow "
-            << "linking to modules.";
-          }
-        // if no modules are allowed then this is always an error
-        if(!allowModules ||
-           // if we allow modules but the type is not a module then it is
-           // still an error
-           (allowModules && tgt->GetType() != cmTarget::MODULE_LIBRARY))
-          {
-          this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
-          }
+        this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
         }
       }
     i->second.AddLinkLibrary( *this, target, lib, llt );

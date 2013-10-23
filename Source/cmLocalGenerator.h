@@ -324,9 +324,7 @@ public:
   /**
    * Test whether compatibility is set to a given version or lower.
    */
-  bool NeedBackwardsCompatibility(unsigned int major,
-                                  unsigned int minor,
-                                  unsigned int patch = 0xFFu);
+  bool NeedBackwardsCompatibility_2_4();
 
   /**
    * Generate a Mac OS X application bundle Info.plist file.

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.1)
+cmake_minimum_required(VERSION 2.4)
 
 # Settings:
 set(CTEST_DASHBOARD_ROOT                "@CMake_BINARY_DIR@/Tests/CTestTest")

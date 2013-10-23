@@ -1,7 +1,7 @@
 #
 # A more complex test case
 #
-set(CMAKE_BACKWARDS_COMPATIBILITY 1.4)
+cmake_minimum_required(VERSION 2.4)
 project (Complex)
 
 # Try setting a new policy.  The IF test is for coverage.
