@@ -11,5 +11,6 @@ property "FOO" appears in the list, then for each dependee, the
 equal with each other, and with the "FOO" property in the dependee.
 If the property is not set, then it is ignored.  Note that for each
 dependee, the set of properties from this property must not intersect
-with the set of properties from the COMPATIBLE_INTERFACE_BOOL
-property.
+with the set of properties from the :prop_tgt:`COMPATIBLE_INTERFACE_BOOL`,
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MIN` or
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` property.
