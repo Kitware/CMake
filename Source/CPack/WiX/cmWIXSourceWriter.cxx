@@ -21,7 +21,8 @@ cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
   bool isIncludeFile):
     Logger(logger),
     file(filename.c_str()),
-    state(DEFAULT)
+    state(DEFAULT),
+    filename(filename)
 {
   WriteXMLDeclaration();
 
@@ -39,10 +40,15 @@ cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
 
 cmWIXSourceWriter::~cmWIXSourceWriter()
 {
-  while(elements.size())
+  if(elements.size() > 1)
     {
-    EndElement();
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      elements.size() - 1 << " WiX elements were still open when closing '" <<
+      filename << "'" << std::endl);
+    return;
     }
+
+  EndElement(elements.back());
 }
 
 void cmWIXSourceWriter::BeginElement(const std::string& name)
@@ -60,12 +66,22 @@ void cmWIXSourceWriter::BeginElement(const std::string& name)
   state = BEGIN;
 }
 
-void cmWIXSourceWriter::EndElement()
+void cmWIXSourceWriter::EndElement(std::string const& name)
 {
   if(elements.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "can not end WiX element with no open elements" << std::endl);
+      "can not end WiX element with no open elements in '" <<
+      filename << "'" << std::endl);
+    return;
+    }
+
+  if(elements.back() != name)
+    {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+      "WiX element <" << elements.back() <<
+      "> can not be closed by </" << name << "> in '" <<
+      filename << "'" << std::endl);
     return;
     }
 
@@ -172,6 +188,9 @@ std::string cmWIXSourceWriter::EscapeAttributeValue(
       {
     case '<':
       result += "&lt;";
+      break;
+    case '>':
+      result += "&gt;";
       break;
     case '&':
       result +="&amp;";

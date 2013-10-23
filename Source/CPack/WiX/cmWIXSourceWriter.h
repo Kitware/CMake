@@ -32,7 +32,7 @@ public:
 
   void BeginElement(const std::string& name);
 
-  void EndElement();
+  void EndElement(const std::string& name);
 
   void AddProcessingInstruction(
     const std::string& target, const std::string& content);
@@ -62,6 +62,8 @@ private:
   State state;
 
   std::vector<std::string> elements;
+
+  std::string filename;
 };
 
 #endif
