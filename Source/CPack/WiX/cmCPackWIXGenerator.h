@@ -18,6 +18,12 @@
 #include <string>
 #include <map>
 
+struct cmWIXShortcut
+{
+  std::string textLabel;
+  std::string workingDirectoryId;
+};
+
 class cmWIXSourceWriter;
 
 /** \class cmCPackWIXGenerator
@@ -56,6 +62,7 @@ protected:
 private:
   typedef std::map<std::string, std::string> id_map_t;
   typedef std::map<std::string, size_t> ambiguity_map_t;
+  typedef std::map<std::string, cmWIXShortcut> shortcut_map_t;
 
   bool InitializeWiXConfiguration();
 
@@ -70,6 +77,15 @@ private:
     const std::string& name, const std::string& value);
 
   bool CreateWiXSourceFiles();
+
+  bool CreateStartMenuShortcuts(
+    cmWIXSourceWriter& directoryDefinitions,
+    cmWIXSourceWriter& fileDefinitions,
+    cmWIXSourceWriter& featureDefinitions);
+
+  void CreateUninstallShortcut(
+    std::string const& packageName,
+    cmWIXSourceWriter& fileDefinitions);
 
   void AppendUserSuppliedExtraSources();
 
@@ -89,9 +105,7 @@ private:
     cmWIXSourceWriter& directoryDefinitions,
     cmWIXSourceWriter& fileDefinitions,
     cmWIXSourceWriter& featureDefinitions,
-    const std::vector<std::string>& pkgExecutables,
-    std::vector<std::string>& dirIdExecutables
-    );
+    const std::vector<std::string>& pkgExecutables);
 
   bool RequireOption(const std::string& name, std::string& value) const;
 
@@ -118,6 +132,7 @@ private:
   std::vector<std::string> wixSources;
   id_map_t pathToIdMap;
   ambiguity_map_t idAmbiguityCounter;
+  shortcut_map_t shortcutMap;
 };
 
 #endif
