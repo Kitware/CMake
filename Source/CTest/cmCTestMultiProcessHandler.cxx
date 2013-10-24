@@ -496,11 +496,20 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     TestComparator comp(this);
 
     TestList sortedCopy;
-    sortedCopy.insert(sortedCopy.end(), currentSet.begin(), currentSet.end());
+
+    for(TestSet::const_iterator j = currentSet.begin();
+      j != currentSet.end(); ++j)
+      {
+      sortedCopy.push_back(*j);
+      }
+
     std::stable_sort(sortedCopy.begin(), sortedCopy.end(), comp);
 
-    this->SortedTests.insert(this->SortedTests.end(),
-      sortedCopy.begin(), sortedCopy.end());
+    for(TestList::const_iterator j = sortedCopy.begin();
+      j != sortedCopy.end(); ++j)
+      {
+      this->SortedTests.push_back(*j);
+      }
     }
 }
 
