@@ -42,6 +42,8 @@ public:
 
   std::string GetTargetName() const;
 
+  bool needsDepFile(const std::string& lang);
+
 protected:
 
   bool SetMsvcTargetPdbVariable(cmNinjaVars&) const;
