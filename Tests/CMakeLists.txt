@@ -1905,7 +1905,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       endif()
     endif()
     if(CTEST_TEST_UPDATE_P4)
-      set(CTestUpdateP4_DIR "CTestUpdateP4")
+      set(CTestUpdateP4_DIR "CTest UpdateP4")
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestUpdateP4.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestUpdateP4.cmake" @ONLY)
       add_test(CTest.UpdateP4 ${CMAKE_CMAKE_COMMAND}

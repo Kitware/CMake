@@ -25,7 +25,7 @@ message(" p4d = ${P4D}")
 
 set(P4_CLIENT -c ctest_p4)
 set(P4_OPTIONS -H ${P4_HOST} -p ${P4_PORT})
-list(APPEND P4 ${P4_OPTIONS})
+set(P4CMD ${P4} ${P4_OPTIONS})
 
 #-----------------------------------------------------------------------------
 # Start the Perforce server
@@ -37,7 +37,7 @@ if(UNIX)
   # Stop a previous instance of Perforce running
   execute_process(
     WORKING_DIRECTORY ${TOP}
-    COMMAND ${P4} admin stop
+    COMMAND ${P4CMD} admin stop
     OUTPUT_QUIET
     ERROR_QUIET
   )
@@ -84,7 +84,7 @@ file(APPEND ${TOP}/depot.spec "Type: local\n")
 file(APPEND ${TOP}/depot.spec "Map: ctest/...\n")
 run_child(
   WORKING_DIRECTORY ${TOP}
-  COMMAND ${P4} depot -i
+  COMMAND ${P4CMD} depot -i
   INPUT_FILE ${TOP}/depot.spec
 )
 
@@ -99,27 +99,27 @@ file(APPEND ${TOP}/client.spec "Root: ${TOP}/user-source\n")
 file(APPEND ${TOP}/client.spec "View: //ctest/... //ctest_p4/...\n")
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} client -i
+  COMMAND ${P4CMD} client -i
   INPUT_FILE ${TOP}/client.spec
 )
 
 # After creating the depot and the client view, all P4 commands need to
 # have the client spec passed to them
-list(APPEND P4 ${P4_CLIENT})
+list(APPEND P4CMD ${P4_CLIENT})
 
 message("Adding files to repository")
 file(GLOB_RECURSE files ${TOP}/user-source/*)
 foreach(filename ${files})
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
-    COMMAND ${P4} add ${filename}
+    COMMAND ${P4CMD} add ${filename}
   )
 endforeach()
 
 message("Submitting changes to repository")
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} submit -d "CTEST: Initial content"
+  COMMAND ${P4CMD} submit -d "CTEST: Initial content"
 )
 message("Tagging the repository")
 file(WRITE  ${TOP}/label.spec "Label: r1\n")
@@ -127,13 +127,13 @@ file(APPEND ${TOP}/label.spec "View: //ctest/...\n")
 
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} label -i
+  COMMAND ${P4CMD} label -i
   INPUT_FILE ${TOP}/label.spec
 )
 
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} labelsync -l r1
+  COMMAND ${P4CMD} labelsync -l r1
 )
 
 #-----------------------------------------------------------------------------
@@ -144,13 +144,13 @@ foreach(filename ${files_added})
   message("add: ${filename}")
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
-    COMMAND ${P4} add ${TOP}/user-source/${filename}
+    COMMAND ${P4CMD} add ${TOP}/user-source/${filename}
   )
 endforeach()
 foreach(filename ${files_removed})
   run_child(
     WORKING_DIRECTORY ${TOP}/user-source
-    COMMAND ${P4} delete ${TOP}/user-source/${filename}
+    COMMAND ${P4CMD} delete ${TOP}/user-source/${filename}
   )
 endforeach()
 
@@ -159,7 +159,7 @@ endforeach()
 message("Committing revision 2...")
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} submit -d "CTEST: Changed content"
+  COMMAND ${P4CMD} submit -d "CTEST: Changed content"
 )
 
 #-----------------------------------------------------------------------------
@@ -167,13 +167,13 @@ run_child(
 message("Changing content again...")
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} edit //ctest/...
+  COMMAND ${P4CMD} edit //ctest/...
 )
 
 change_content(user-source)
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} revert -a //ctest/...
+  COMMAND ${P4CMD} revert -a //ctest/...
 )
 
 #-----------------------------------------------------------------------------
@@ -181,7 +181,7 @@ run_child(
 message("Committing revision 3...")
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} submit -d "CTEST: Changed content again"
+  COMMAND ${P4CMD} submit -d "CTEST: Changed content again"
 )
 
 #-----------------------------------------------------------------------------
@@ -189,19 +189,19 @@ run_child(
 message("Backing up to revision 1...")
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} sync @r1
+  COMMAND ${P4CMD} sync @r1
   )
 
 # Create a modified file.
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} sync @r1
+  COMMAND ${P4CMD} sync @r1
   )
 
 # We should p4 open any files that modify_content creates
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} open ${TOP}/user-source/CTestConfig.cmake
+  COMMAND ${P4CMD} open ${TOP}/user-source/CTestConfig.cmake
 )
 modify_content(user-source)
 
@@ -213,7 +213,7 @@ message("Running CTest Dashboard Command Line...")
 create_build_tree(user-source user-binary)
 file(APPEND ${TOP}/user-binary/CTestConfiguration.ini
   "# P4 command configuration
-UpdateCommand: @P4_EXECUTABLE@
+UpdateCommand: ${P4}
 P4Client: ctest_p4
 P4Options: -H ${P4_HOST} -p ${P4_PORT}
 ")
@@ -224,7 +224,7 @@ run_dashboard_command_line(user-binary)
 # Revert the modified files
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${P4} revert ${TOP}/user-source/CTestConfig.cmake
+  COMMAND ${P4CMD} revert ${TOP}/user-source/CTestConfig.cmake
 )
 
 #-----------------------------------------------------------------------------
@@ -237,7 +237,7 @@ file(WRITE  ${TOP}/client2.spec "Client: ctest2_p4\n")
 file(APPEND ${TOP}/client2.spec "Root: ${TOP}/dash-source\n")
 file(APPEND ${TOP}/client2.spec "View: //ctest/... //ctest2_p4/...\n")
 run_child(
-  COMMAND ${P4} client -i
+  COMMAND ${P4CMD} client -i
   INPUT_FILE ${TOP}/client2.spec
 )
 
@@ -245,10 +245,9 @@ file(MAKE_DIRECTORY ${TOP}/dash-source)
 
 create_dashboard_script(dash-binary
   "# P4 command configuration
-set(CTEST_P4_COMMAND \"${P4}\")
 set(CTEST_P4_CLIENT \"ctest2_p4\")
 set(CTEST_P4_OPTIONS \"-H ${P4_HOST} -p ${P4_PORT}\")
-set(CTEST_UPDATE_COMMAND \"p4\")
+set(CTEST_UPDATE_COMMAND \"${P4}\")
 ")
 
 # Run the dashboard script with CTest.
@@ -259,5 +258,5 @@ run_dashboard_script(dash-binary)
 message("Shutting down p4d")
 run_child(
     WORKING_DIRECTORY ${TOP}
-    COMMAND ${P4} admin stop
+    COMMAND ${P4CMD} admin stop
 )
