@@ -13,7 +13,9 @@ macro(record_cxx_compiler_features compile_flags feature_list)
   endforeach()
   file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.cxx" "\n};\n")
 
-  execute_process(COMMAND "${CMAKE_CXX_COMPILER}" ${compile_flags} "-c" "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.cxx"
+  string(REPLACE "<FLAGS>" "${compile_flags}" _compile_object_command "${_CMAKE_CXX_CREATE_OBJECT_FILE}" )
+  string(REPLACE "<SOURCE>" "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.cxx" _compile_object_command "${_compile_object_command}" )
+  execute_process(COMMAND ${_compile_object_command}
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMakeFiles"
     ERROR_VARIABLE _error
     OUTPUT_VARIABLE _output
