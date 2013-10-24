@@ -4476,6 +4476,16 @@ const char * consistentStringProperty(const char *lhs, const char *rhs)
   return strcmp(lhs, rhs) == 0 ? lhs : 0;
 }
 
+#if defined(_MSC_VER) && _MSC_VER <= 1200
+template<typename T> const T&
+cmMaximum(const T& l, const T& r) {return l > r ? l : r;}
+template<typename T> const T&
+cmMinimum(const T& l, const T& r) {return l < r ? l : r;}
+#else
+#define cmMinimum std::min
+#define cmMaximum std::max
+#endif
+
 //----------------------------------------------------------------------------
 const char * consistentNumberProperty(const char *lhs, const char *rhs,
                                CompatibleType t)
@@ -4490,11 +4500,11 @@ const char * consistentNumberProperty(const char *lhs, const char *rhs,
 
   if (t == NumberMaxType)
     {
-    return std::max(lnum, rnum) == lnum ? lhs : rhs;
+    return cmMaximum(lnum, rnum) == lnum ? lhs : rhs;
     }
   else
     {
-    return std::min(lnum, rnum) == lnum ? lhs : rhs;
+    return cmMinimum(lnum, rnum) == lnum ? lhs : rhs;
     }
 }
 
