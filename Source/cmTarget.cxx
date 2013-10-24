@@ -4541,14 +4541,14 @@ const char* consistentProperty(const char *lhs, const char *rhs,
 }
 
 template<typename PropertyType>
-PropertyType impliedValue();
+PropertyType impliedValue(PropertyType);
 template<>
-bool impliedValue<bool>()
+bool impliedValue<bool>(bool)
 {
   return false;
 }
 template<>
-const char* impliedValue<const char*>()
+const char* impliedValue<const char*>(const char*)
 {
   return "";
 }
@@ -4632,7 +4632,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget *tgt,
       }
     else if (impliedByUse)
       {
-      propContent = impliedValue<PropertyType>();
+      propContent = impliedValue<PropertyType>(propContent);
       if (ifaceIsSet)
         {
         PropertyType consistent = consistentProperty(propContent,
