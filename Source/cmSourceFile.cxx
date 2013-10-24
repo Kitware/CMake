@@ -287,6 +287,17 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
     }
 
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
+
+  std::string ext =
+          cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
+  if (ext == ".ui")
+    {
+    cmMakefile* mf = this->Location.GetMakefile();
+    if (strcmp(prop, "AUTOUIC_OPTIONS") == 0)
+      {
+      mf->AddQtUiFileWithOptions(this);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------

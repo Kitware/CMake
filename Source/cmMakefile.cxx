@@ -4223,6 +4223,18 @@ bool cmMakefile::EnforceUniqueDir(const char* srcPath, const char* binPath)
 }
 
 //----------------------------------------------------------------------------
+void cmMakefile::AddQtUiFileWithOptions(cmSourceFile *sf)
+{
+  this->QtUiFilesWithOptions.push_back(sf);
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
+{
+  return this->QtUiFilesWithOptions;
+}
+
+//----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id)
 {
