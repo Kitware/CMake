@@ -7,12 +7,14 @@ add_library(mylib mylib.cpp)
 add_executable(my-libapp mylibapp.cpp)
 target_link_libraries(my-libapp mylib)
 
+add_executable(my-other-app myotherapp.cpp)
+
 install(TARGETS mylib
   ARCHIVE
   DESTINATION lib
   COMPONENT libraries)
 
-install(TARGETS my-libapp
+install(TARGETS my-libapp my-other-app
   RUNTIME
   DESTINATION bin
   COMPONENT applications)
@@ -36,7 +38,11 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
 
 set(CPACK_WIX_UPGRADE_GUID "BF20CE5E-7F7C-401D-8F7C-AB45E8D170E6")
 set(CPACK_WIX_UNINSTALL "1")
-set(CPACK_PACKAGE_EXECUTABLES "my-libapp; CPack Wix Test")
+
+set(CPACK_PACKAGE_EXECUTABLES
+  "my-libapp" "CPack WiX Test"
+  "my-other-app" "Second CPack WiX Test"
+)
 
 include(CPack)
 

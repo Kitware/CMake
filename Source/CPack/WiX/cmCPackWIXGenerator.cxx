@@ -666,10 +666,10 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       featureDefinitions.AddAttribute("Id", componentId);
       featureDefinitions.EndElement("ComponentRef");
 
-      for(size_t i = 0; i < packageExecutables.size(); ++i)
+      for(size_t j = 0; j < packageExecutables.size(); ++j)
         {
-        std::string const& executableName = packageExecutables[i++];
-        std::string const& textLabel = packageExecutables[i++];
+        std::string const& executableName = packageExecutables[j++];
+        std::string const& textLabel = packageExecutables[j];
 
         if(cmSystemTools::LowerCase(fileName) ==
             cmSystemTools::LowerCase(executableName) + ".exe")
