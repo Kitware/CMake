@@ -1127,7 +1127,7 @@ case 17:
 YY_RULE_SETUP
 #line 224 "cmListFileLexer.in.l"
 {
-  cmListFileLexerAppend(lexer, yytext, yyleng);
+  /* Continuation: text is not part of string */
   ++lexer->line;
   lexer->column = 1;
 }
