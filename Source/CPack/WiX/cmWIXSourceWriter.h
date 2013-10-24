@@ -63,7 +63,7 @@ private:
 
   std::vector<std::string> elements;
 
-  std::string filename;
+  std::string sourceFilename;
 };
 
 #endif
