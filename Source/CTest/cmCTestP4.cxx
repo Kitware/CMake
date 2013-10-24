@@ -148,7 +148,7 @@ private:
         // See if we need to remove the //depot prefix
         if(Path.length() > 2 && Path[0] == '/' && Path[1] == '/')
           {
-          std::size_t found = Path.find('/', 2);
+          size_t found = Path.find('/', 2);
           if(found != std::string::npos)
             {
             Path = Path.substr(found + 1);
@@ -303,7 +303,7 @@ private:
     std::string Path = this->RegexDiff.match(1);
     if(Path.length() > 2 && Path[0] == '/' && Path[1] == '/')
       {
-      std::size_t found = Path.find('/', 2);
+      size_t found = Path.find('/', 2);
       if(found != std::string::npos)
         {
         Path = Path.substr(found + 1);
@@ -367,11 +367,10 @@ void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
     }
 
   CommandOptions.clear();
-  std::vector<std::string>::size_type i;
-
-  for(i=0; i<P4Options.size(); i++)
+  for(std::vector<std::string>::iterator i = P4Options.begin();
+      i != P4Options.end(); ++i)
     {
-    CommandOptions.push_back(P4Options[i].c_str());
+    CommandOptions.push_back(i->c_str());
     }
 }
 
@@ -466,12 +465,13 @@ void cmCTestP4::LoadRevisions()
 
   //p4 describe -s ...@1111111,2222222
   std::vector<char const*> p4_describe;
-  for(int i=ChangeLists.size()-1; i >= 0; i--)
+  for(std::vector<std::string>::reverse_iterator i = ChangeLists.rbegin();
+      i != ChangeLists.rend(); ++i)
     {
     SetP4Options(p4_describe);
     p4_describe.push_back("describe");
     p4_describe.push_back("-s");
-    p4_describe.push_back(ChangeLists[i].c_str());
+    p4_describe.push_back(i->c_str());
     p4_describe.push_back(0);
 
     DescribeParser outDescribe(this, "describe-out> ");
