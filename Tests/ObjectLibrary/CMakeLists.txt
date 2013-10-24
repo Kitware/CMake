@@ -58,3 +58,5 @@ target_compile_definitions(ABmain PUBLIC $<TARGET_PROPERTY:B,INTERFACE_COMPILE_D
 add_executable(UseABinternal ${dummy}
   $<TARGET_OBJECTS:ABmain> $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:B>
   )
+
+add_subdirectory(ExportLanguages)
