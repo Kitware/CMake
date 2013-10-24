@@ -138,15 +138,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
   if((path.size() == 0 || !cmSystemTools::FileExists(path.c_str()))
       && (optional==false))
     {
-    std::string message = "your ";
-    message += lang;
-    message += " compiler: \"";
-    message +=  name;
-    message += "\" was not found.   Please set ";
-    message += langComp;
-    message += " to a valid compiler path or name.";
-    cmSystemTools::Error(message.c_str());
-    path = name;
+    return;
     }
   std::string doc = lang;
   doc += " compiler.";
@@ -334,7 +326,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 
 void
 cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
-                                  cmMakefile *mf, bool)
+                                  cmMakefile *mf, bool optional)
 {
   if(languages.size() == 0)
     {
@@ -369,6 +361,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         }
       }
     }
+
+  bool fatalError = false;
 
   mf->AddDefinition("RUN_CONFIGURE", true);
   std::string rootBin = mf->GetHomeOutputDirectory();
@@ -556,6 +550,65 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       this->SetLanguageEnabled("NONE", mf);
       continue;
       }
+
+    // Check that the compiler was found.
+    std::string compilerName = "CMAKE_";
+    compilerName += lang;
+    compilerName += "_COMPILER";
+    std::string compilerEnv = "CMAKE_";
+    compilerEnv += lang;
+    compilerEnv += "_COMPILER_ENV_VAR";
+    cmOStringStream noCompiler;
+    const char* compilerFile = mf->GetDefinition(compilerName.c_str());
+    if(!compilerFile || !*compilerFile ||
+       cmSystemTools::IsNOTFOUND(compilerFile))
+      {
+      noCompiler <<
+        "No " << compilerName << " could be found.\n"
+        ;
+      }
+    else if(strcmp(lang, "RC") != 0)
+      {
+      if(!cmSystemTools::FileIsFullPath(compilerFile))
+        {
+        noCompiler <<
+          "The " << compilerName << ":\n"
+          "  " << compilerFile << "\n"
+          "is not a full path and was not found in the PATH.\n"
+          ;
+        }
+      else if(!cmSystemTools::FileExists(compilerFile))
+        {
+        noCompiler <<
+          "The " << compilerName << ":\n"
+          "  " << compilerFile << "\n"
+          "is not a full path to an existing compiler tool.\n"
+          ;
+        }
+      }
+    if(!noCompiler.str().empty())
+      {
+      // Skip testing this language since the compiler is not found.
+      needTestLanguage[lang] = false;
+      if(!optional)
+        {
+        // The compiler was not found and it is not optional.  Remove
+        // CMake(LANG)Compiler.cmake so we try again next time CMake runs.
+        std::string compilerLangFile = rootBin;
+        compilerLangFile += "/CMake";
+        compilerLangFile += lang;
+        compilerLangFile += "Compiler.cmake";
+        cmSystemTools::RemoveFile(compilerLangFile.c_str());
+        if(!this->CMakeInstance->GetIsInTryCompile())
+          {
+          this->PrintCompilerAdvice(noCompiler, lang,
+                                    mf->GetDefinition(compilerEnv.c_str()));
+          mf->IssueMessage(cmake::FATAL_ERROR, noCompiler.str());
+          fatalError = true;
+          }
+        }
+      }
+
     std::string langLoadedVar = "CMAKE_";
     langLoadedVar += lang;
     langLoadedVar += "_INFORMATION_LOADED";
@@ -582,26 +635,12 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       }
     this->LanguagesReady.insert(lang);
 
-    std::string compilerName = "CMAKE_";
-    compilerName += lang;
-    compilerName += "_COMPILER";
-    std::string compilerLangFile = rootBin;
-    compilerLangFile += "/CMake";
-    compilerLangFile += lang;
-    compilerLangFile += "Compiler.cmake";
     // Test the compiler for the language just setup
     // (but only if a compiler has been actually found)
     // At this point we should have enough info for a try compile
     // which is used in the backward stuff
     // If the language is untested then test it now with a try compile.
-    if (!mf->IsSet(compilerName.c_str()))
-      {
-      // if the compiler did not work, then remove the
-      // CMake(LANG)Compiler.cmake file so that it will get tested the
-      // next time cmake is run
-      cmSystemTools::RemoveFile(compilerLangFile.c_str());
-      }
-    else if(needTestLanguage[lang])
+    if(needTestLanguage[lang])
       {
       if (!this->CMakeInstance->GetIsInTryCompile())
         {
@@ -622,6 +661,10 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         // next time cmake is run
         if(!mf->IsOn(compilerWorks.c_str()))
           {
+          std::string compilerLangFile = rootBin;
+          compilerLangFile += "/CMake";
+          compilerLangFile += lang;
+          compilerLangFile += "Compiler.cmake";
           cmSystemTools::RemoveFile(compilerLangFile.c_str());
           }
         else
@@ -675,6 +718,33 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     {
     mf->ReadListFile(0,projectCompatibility.c_str());
     }
+
+  if(fatalError)
+    {
+    cmSystemTools::SetFatalErrorOccured();
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
+                                            std::string lang,
+                                            const char* envVar)
+{
+  // Subclasses override this method if they do not support this advice.
+  os <<
+    "Tell CMake where to find the compiler by setting "
+    ;
+  if(envVar)
+    {
+    os <<
+      "either the environment variable \"" << envVar << "\" or "
+      ;
+    }
+  os <<
+    "the CMake cache entry CMAKE_" << lang << "_COMPILER "
+    "to the full path to the compiler, or to the compiler name "
+    "if it is in the PATH."
+    ;
 }
 
 //----------------------------------------------------------------------------
