@@ -72,8 +72,6 @@ else()
     set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
 endif()
 
-message(STATUS "names ${_Python_NAMES}")
-message(STATUS "other versions ${_PYTHON_FIND_OTHER_VERSIONS}")
 list(APPEND _Python_NAMES python)
 
 # Search for the current active python version first
