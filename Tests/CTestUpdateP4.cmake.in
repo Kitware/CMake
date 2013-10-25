@@ -54,21 +54,19 @@ if(UNIX)
   message("Server command line: ${P4_SERVER}")
 
   execute_process(
-    COMMAND sh -c "${P4_SERVER}"
-  )
-
-  message("Waiting two seconds for p4d to initialize")
-  find_program(SLEEP sleep)
-  if(SLEEP)
-    execute_process (
-      COMMAND "${SLEEP}" 2
-      TIMEOUT 2
-      ERROR_QUIET
-      OUTPUT_QUIET
+    COMMAND sh -c "
+${P4_SERVER}
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  echo 'Waiting for server to start...'
+  sleep 1
+  if '${P4}' -H ${P4_HOST} -p ${P4_PORT} help >/dev/null 2>&1; then
+    echo 'Server started.'
+    exit
+  fi
+done
+echo 'Gave up waiting for server to start.'
+"
     )
-  else()
-    message("The sleep command was not found")
-  endif()
 endif()
 
 #-----------------------------------------------------------------------------
