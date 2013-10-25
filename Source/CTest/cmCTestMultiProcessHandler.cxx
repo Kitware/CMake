@@ -496,7 +496,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(std::list<TestSet>::const_reverse_iterator i = priorityStack.rbegin();
     i != priorityStack.rend(); ++i)
     {
-    TestSet &currentSet = *i;
+    TestSet const& currentSet = *i;
     TestComparator comp(this);
 
     TestList sortedCopy;
