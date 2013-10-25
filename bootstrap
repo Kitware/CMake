@@ -28,7 +28,13 @@ cmake_install_dest_default()
 {
   cat "${cmake_source_dir}/Source/CMakeInstallDestinations.cmake" | sed -n '
 /^ *set(CMAKE_'"${1}"'_DIR_DEFAULT.*) # '"${2}"'$/ {
-  s/^ *set(CMAKE_'"${1}"'_DIR_DEFAULT *"\([^"]*\)").*$/\1/;p;q;}
+  s/^ *set(CMAKE_'"${1}"'_DIR_DEFAULT *"\([^"]*\)").*$/\1/
+  s/${CMake_VERSION_MAJOR}/'"${cmake_version_major}"'/
+  s/${CMake_VERSION_MINOR}/'"${cmake_version_minor}"'/
+  s/${CMake_VERSION_PATCH}/'"${cmake_version_patch}"'/
+  p
+  q
+}
 '
 }
 
