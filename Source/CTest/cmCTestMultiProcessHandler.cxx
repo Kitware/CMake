@@ -474,7 +474,11 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
       i != previousSet.end(); ++i)
       {
       TestSet const& dependencies = this->Tests[*i];
-      currentSet.insert(dependencies.begin(), dependencies.end());
+      for(TestSet::iterator j = dependencies.begin();
+        j != dependencies.end(); ++j)
+        {
+        currentSet.insert(*j);
+        }
       }
 
     for(TestSet::iterator i = currentSet.begin();
