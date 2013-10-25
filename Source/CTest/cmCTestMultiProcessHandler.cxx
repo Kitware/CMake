@@ -470,18 +470,18 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     priorityStack.push_back(TestSet());
     TestSet &currentSet = priorityStack.back();
 
-    for(TestSet::iterator i = previousSet.begin();
+    for(TestSet::const_iterator i = previousSet.begin();
       i != previousSet.end(); ++i)
       {
       TestSet const& dependencies = this->Tests[*i];
-      for(TestSet::iterator j = dependencies.begin();
+      for(TestSet::const_iterator j = dependencies.begin();
         j != dependencies.end(); ++j)
         {
         currentSet.insert(*j);
         }
       }
 
-    for(TestSet::iterator i = currentSet.begin();
+    for(TestSet::const_iterator i = currentSet.begin();
       i != currentSet.end(); ++i)
       {
       previousSet.erase(*i);
@@ -493,7 +493,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
 
   // Reverse iterate over the different dependency levels (deepest first).
   // Sort tests within each level by COST and append them to the cost list.
-  for(std::list<TestSet>::reverse_iterator i = priorityStack.rbegin();
+  for(std::list<TestSet>::const_reverse_iterator i = priorityStack.rbegin();
     i != priorityStack.rend(); ++i)
     {
     TestSet &currentSet = *i;
