@@ -1,13 +1,15 @@
 # Keep formatting here consistent with bootstrap script expectations.
-set(CMAKE_DATA_DIR_DEFAULT "share/cmake-${CMake_VERSION}") # OTHER
 if(BEOS)
+  set(CMAKE_DATA_DIR_DEFAULT "share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}") # HAIKU
   set(CMAKE_MAN_DIR_DEFAULT "documentation/man") # HAIKU
-  set(CMAKE_DOC_DIR_DEFAULT "documentation/doc/cmake-${CMake_VERSION}") # HAIKU
+  set(CMAKE_DOC_DIR_DEFAULT "documentation/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}") # HAIKU
 elseif(CYGWIN)
+  set(CMAKE_DATA_DIR_DEFAULT "share/cmake-${CMake_VERSION}") # CYGWIN
   set(CMAKE_DOC_DIR_DEFAULT "share/doc/cmake-${CMake_VERSION}") # CYGWIN
   set(CMAKE_MAN_DIR_DEFAULT "share/man") # CYGWIN
 else()
-  set(CMAKE_DOC_DIR_DEFAULT "doc/cmake-${CMake_VERSION}") # OTHER
+  set(CMAKE_DATA_DIR_DEFAULT "share/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}") # OTHER
+  set(CMAKE_DOC_DIR_DEFAULT "doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}") # OTHER
   set(CMAKE_MAN_DIR_DEFAULT "man") # OTHER
 endif()
 
