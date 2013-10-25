@@ -1,4 +1,3 @@
-
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
 #
@@ -87,7 +86,7 @@ endfunction()
 #-----------------------------------------------------------------------------
 # Function to write the compiler id source file.
 function(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
-  find_file(src_in ${src}.in PATHS ${CMAKE_ROOT}/Modules ${CMAKE_MODULE_PATH})
+  find_file(src_in ${src}.in PATHS ${CMAKE_ROOT}/Modules ${CMAKE_MODULE_PATH} NO_DEFAULT_PATH)
   file(READ ${src_in} ID_CONTENT_IN)
   unset(src_in CACHE)
   string(CONFIGURE "${ID_CONTENT_IN}" ID_CONTENT_OUT @ONLY)
