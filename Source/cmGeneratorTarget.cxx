@@ -114,7 +114,10 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles()
 void cmGeneratorTarget::ClassifySources()
 {
   cmsys::RegularExpression header(CM_HEADER_REGEX);
-  bool isObjLib = this->Target->GetType() == cmTarget::OBJECT_LIBRARY;
+
+  cmTarget::TargetType targetType = this->Target->GetType();
+  bool isObjLib = targetType == cmTarget::OBJECT_LIBRARY;
+
   std::vector<cmSourceFile*> badObjLib;
   std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
@@ -125,6 +128,10 @@ void cmGeneratorTarget::ClassifySources()
     if(sf->GetCustomCommand())
       {
       this->CustomCommands.push_back(sf);
+      }
+    else if(targetType == cmTarget::UTILITY)
+      {
+      this->ExtraSources.push_back(sf);
       }
     else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
