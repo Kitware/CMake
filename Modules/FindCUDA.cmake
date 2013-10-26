@@ -649,19 +649,15 @@ endforeach()
 ###############################################################################
 ###############################################################################
 
-# Check to see if the CUDA_TOOLKIT_ROOT_DIR and CUDA_SDK_ROOT_DIR have changed,
-# if they have then clear the cache variables, so that will be detected again.
-if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
-  unset(CUDA_NVCC_EXECUTABLE CACHE)
+macro(cuda_unset_include_and_libraries)
   unset(CUDA_TOOLKIT_INCLUDE CACHE)
   unset(CUDA_CUDART_LIBRARY CACHE)
+  unset(CUDA_CUDA_LIBRARY CACHE)
   # Make sure you run this before you unset CUDA_VERSION.
   if(CUDA_VERSION VERSION_EQUAL "3.0")
     # This only existed in the 3.0 version of the CUDA toolkit
     unset(CUDA_CUDARTEMU_LIBRARY CACHE)
   endif()
-  unset(CUDA_VERSION CACHE)
-  unset(CUDA_CUDA_LIBRARY CACHE)
   unset(CUDA_cupti_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
@@ -675,6 +671,19 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
+endmacro()
+
+# Check to see if the CUDA_TOOLKIT_ROOT_DIR and CUDA_SDK_ROOT_DIR have changed,
+# if they have then clear the cache variables, so that will be detected again.
+if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
+  unset(CUDA_TOOLKIT_TARGET_DIR CACHE)
+  unset(CUDA_NVCC_EXECUTABLE CACHE)
+  unset(CUDA_VERSION CACHE)
+  cuda_unset_include_and_libraries()
+endif()
+
+if(NOT "${CUDA_TOOLKIT_TARGET_DIR}" STREQUAL "${CUDA_TOOLKIT_TARGET_DIR_INTERNAL}")
+  cuda_unset_include_and_libraries()
 endif()
 
 if(NOT "${CUDA_SDK_ROOT_DIR}" STREQUAL "${CUDA_SDK_ROOT_DIR_INTERNAL}")
@@ -749,10 +758,27 @@ endif()
 # Always set this convenience variable
 set(CUDA_VERSION_STRING "${CUDA_VERSION}")
 
+# Support for arm cross compilation with CUDA 5.5
+if(CUDA_VERSION VERSION_GREATER "5.0" AND CMAKE_CROSSCOMPILING AND ${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm" AND EXISTS "${CUDA_TOOLKIT_ROOT_DIR}/targets/armv7-linux-gnueabihf")
+  set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT_DIR}/targets/armv7-linux-gnueabihf" CACHE PATH "Toolkit target location.")
+else()
+  set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT_DIR}" CACHE PATH "Toolkit target location.")
+endif()
+mark_as_advanced(CUDA_TOOLKIT_TARGET_DIR)
+
+# Target CPU architecture
+if(CUDA_VERSION VERSION_GREATER "5.0" AND CMAKE_CROSSCOMPILING AND ${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+  set(_cuda_target_cpu_arch_initial "ARM")
+else()
+  set(_cuda_target_cpu_arch_initial "")
+endif()
+set(CUDA_TARGET_CPU_ARCH ${_cuda_target_cpu_arch_initial} CACHE STRING "Specify the name of the class of CPU architecture for which the input files must be compiled.")
+mark_as_advanced(CUDA_TARGET_CPU_ARCH)
+
 # CUDA_TOOLKIT_INCLUDE
 find_path(CUDA_TOOLKIT_INCLUDE
   device_functions.h # Header included in toolkit
-  PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+  PATHS "${CUDA_TOOLKIT_TARGET_DIR}" "${CUDA_TOOLKIT_ROOT_DIR}"
   ENV CUDA_PATH
   ENV CUDA_INC_PATH
   PATH_SUFFIXES include
@@ -776,7 +802,7 @@ macro(cuda_find_library_local_first_with_path_ext _var _names _doc _path_ext )
   # (lib/Win32) and the old path (lib).
   find_library(${_var}
     NAMES ${_names}
-    PATHS "${CUDA_TOOLKIT_ROOT_DIR}"
+    PATHS "${CUDA_TOOLKIT_TARGET_DIR}" "${CUDA_TOOLKIT_ROOT_DIR}"
     ENV CUDA_PATH
     ENV CUDA_LIB_PATH
     PATH_SUFFIXES ${_cuda_64bit_lib_dir} "${_path_ext}lib/Win32" "${_path_ext}lib" "${_path_ext}libWin32"
@@ -967,6 +993,8 @@ set(CUDA_FOUND TRUE)
 
 set(CUDA_TOOLKIT_ROOT_DIR_INTERNAL "${CUDA_TOOLKIT_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_TOOLKIT_ROOT_DIR was set successfully." FORCE)
+set(CUDA_TOOLKIT_TARGET_DIR_INTERNAL "${CUDA_TOOLKIT_TARGET_DIR}" CACHE INTERNAL
+  "This is the value of the last time CUDA_TOOLKIT_TARGET_DIR was set successfully." FORCE)
 set(CUDA_SDK_ROOT_DIR_INTERNAL "${CUDA_SDK_ROOT_DIR}" CACHE INTERNAL
   "This is the value of the last time CUDA_SDK_ROOT_DIR was set successfully." FORCE)
 
@@ -1189,6 +1217,10 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     set(nvcc_flags ${nvcc_flags} -m64)
   else()
     set(nvcc_flags ${nvcc_flags} -m32)
+  endif()
+
+  if(CUDA_TARGET_CPU_ARCH)
+    set(nvcc_flags ${nvcc_flags} "--target-cpu-architecture=${CUDA_TARGET_CPU_ARCH}")
   endif()
 
   # This needs to be passed in at this stage, because VS needs to fill out the
