@@ -3,6 +3,9 @@ set(QNXNTO 1)
 # The QNX GCC does not seem to have -isystem so remove the flag.
 set(CMAKE_INCLUDE_SYSTEM_FLAG_C)
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)
+# ... Nor does the driver support appropriate flags to create depfiles.
+set(CMAKE_DEPFILE_FLAGS_C)
+set(CMAKE_DEPFILE_FLAGS_CXX)
 
 set(CMAKE_DL_LIBS "")
 set(CMAKE_SHARED_LIBRARY_C_FLAGS "")
