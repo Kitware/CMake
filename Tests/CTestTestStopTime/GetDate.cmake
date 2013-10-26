@@ -46,7 +46,7 @@ macro(GET_DATE)
 
   # Retrieve the current date and time in the format:
   #
-  # 01/12/2006  8:55:12
+  # 01/12/2006  08:55:12
   # mm/dd/YYYY HH:MM:SS
   #
   string(TIMESTAMP "${GD_PREFIX}OV" "%m/%d/%Y %H:%M:%S")
@@ -65,39 +65,35 @@ macro(GET_DATE)
     message(STATUS "")
   endif()
 
-  if("${${GD_PREFIX}RV}" STREQUAL "0")
-    #
-    # Extract eight individual components by matching a regex with paren groupings.
-    # Use the replace functionality and \\1 thru \\6 to extract components.
-    #
-    set(${GD_PREFIX}REGEX "([^/]+)/([^/]+)/([^ ]+) +([^:]+):([^:]+):([^\\.]+)")
+  #
+  # Extract six individual components by matching a regex with paren groupings.
+  # Use the replace functionality and \\1 thru \\6 to extract components.
+  #
+  set(${GD_PREFIX}REGEX "([^/]+)/([^/]+)/([^ ]+) +([^:]+):([^:]+):([^\\.]+)")
 
-    string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\1" ${GD_PREFIX}MONTH "${${GD_PREFIX}OV}")
-    string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\2" ${GD_PREFIX}DAY "${${GD_PREFIX}OV}")
-    string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\3" ${GD_PREFIX}YEAR "${${GD_PREFIX}OV}")
-    string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\4" ${GD_PREFIX}HOUR "${${GD_PREFIX}OV}")
-    string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\5" ${GD_PREFIX}MINUTE "${${GD_PREFIX}OV}")
-    string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\6" ${GD_PREFIX}SECOND "${${GD_PREFIX}OV}")
+  string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\1" ${GD_PREFIX}MONTH "${${GD_PREFIX}OV}")
+  string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\2" ${GD_PREFIX}DAY "${${GD_PREFIX}OV}")
+  string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\3" ${GD_PREFIX}YEAR "${${GD_PREFIX}OV}")
+  string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\4" ${GD_PREFIX}HOUR "${${GD_PREFIX}OV}")
+  string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\5" ${GD_PREFIX}MINUTE "${${GD_PREFIX}OV}")
+  string(REGEX REPLACE "${${GD_PREFIX}REGEX}" "\\6" ${GD_PREFIX}SECOND "${${GD_PREFIX}OV}")
 
-    if(${GD_PREFIX}VERBOSE)
-      message(STATUS "${GD_PREFIX}REGEX='${${GD_PREFIX}REGEX}'")
-      message(STATUS "${GD_PREFIX}YEAR='${${GD_PREFIX}YEAR}'")
-      message(STATUS "${GD_PREFIX}MONTH='${${GD_PREFIX}MONTH}'")
-      message(STATUS "${GD_PREFIX}DAY='${${GD_PREFIX}DAY}'")
-      message(STATUS "${GD_PREFIX}HOUR='${${GD_PREFIX}HOUR}'")
-      message(STATUS "${GD_PREFIX}MINUTE='${${GD_PREFIX}MINUTE}'")
-      message(STATUS "${GD_PREFIX}SECOND='${${GD_PREFIX}SECOND}'")
-      message(STATUS "")
-      message(STATUS "Counters that change...")
-      message(STATUS "")
-      message(STATUS "        every second : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}${${GD_PREFIX}DAY}${${GD_PREFIX}HOUR}${${GD_PREFIX}MINUTE}${${GD_PREFIX}SECOND}")
-      message(STATUS "               daily : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}${${GD_PREFIX}DAY}")
-      message(STATUS "             monthly : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}")
-      message(STATUS "            annually : ${${GD_PREFIX}YEAR}")
-      message(STATUS "")
-    endif()
-  else()
-    message(SEND_ERROR "ERROR: macro(GET_DATE) failed. ${GD_PREFIX}CMD='${${GD_PREFIX}CMD}' ${GD_PREFIX}ARGS='${${GD_PREFIX}ARGS}' ${GD_PREFIX}OV='${${GD_PREFIX}OV}'")
+  if(${GD_PREFIX}VERBOSE)
+    message(STATUS "${GD_PREFIX}REGEX='${${GD_PREFIX}REGEX}'")
+    message(STATUS "${GD_PREFIX}YEAR='${${GD_PREFIX}YEAR}'")
+    message(STATUS "${GD_PREFIX}MONTH='${${GD_PREFIX}MONTH}'")
+    message(STATUS "${GD_PREFIX}DAY='${${GD_PREFIX}DAY}'")
+    message(STATUS "${GD_PREFIX}HOUR='${${GD_PREFIX}HOUR}'")
+    message(STATUS "${GD_PREFIX}MINUTE='${${GD_PREFIX}MINUTE}'")
+    message(STATUS "${GD_PREFIX}SECOND='${${GD_PREFIX}SECOND}'")
+    message(STATUS "")
+    message(STATUS "Counters that change...")
+    message(STATUS "")
+    message(STATUS "        every second : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}${${GD_PREFIX}DAY}${${GD_PREFIX}HOUR}${${GD_PREFIX}MINUTE}${${GD_PREFIX}SECOND}")
+    message(STATUS "               daily : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}${${GD_PREFIX}DAY}")
+    message(STATUS "             monthly : ${${GD_PREFIX}YEAR}${${GD_PREFIX}MONTH}")
+    message(STATUS "            annually : ${${GD_PREFIX}YEAR}")
+    message(STATUS "")
   endif()
 
   if(${GD_PREFIX}VERBOSE)
