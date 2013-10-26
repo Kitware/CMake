@@ -449,3 +449,7 @@ set_property(SOURCE perconfig.out PROPERTY SYMBOLIC 1)
 add_custom_target(perconfig_target ALL
   COMMAND ${CMAKE_COMMAND} -E echo "perconfig=$<TARGET_FILE:perconfig>" "config=$<CONFIGURATION>"
   DEPENDS perconfig.out)
+
+# Test SOURCES in add_custom_target() with COMPILE_DEFINITIONS (Issue #14511)
+add_custom_target(issue14511 SOURCES issue14511.cpp)
+set_property(SOURCE issue14511 PROPERTY COMPILE_DEFINITIONS "TEST")
