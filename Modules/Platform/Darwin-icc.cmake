@@ -60,12 +60,6 @@ if(EXISTS /Developer/SDKs/MacOSX10.4u.sdk)
     CACHE STRING "Build architectures for OSX")
 endif()
 
-
-if("${CMAKE_BACKWARDS_COMPATIBILITY}" MATCHES "^1\\.[0-6]$")
-  set(CMAKE_SHARED_MODULE_CREATE_C_FLAGS
-    "${CMAKE_SHARED_MODULE_CREATE_C_FLAGS} -flat_namespace -undefined suppress")
-endif()
-
 if(NOT XCODE)
   # Enable shared library versioning.  This flag is not actually referenced
   # but the fact that the setting exists will cause the generators to support

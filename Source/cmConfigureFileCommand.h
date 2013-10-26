@@ -41,9 +41,6 @@ public:
    */
   virtual bool IsScriptable() const { return true; }
 
-  virtual void FinalPass();
-  virtual bool HasFinalPass() const { return !this->Immediate; }
-
 private:
   int ConfigureFile();
 
@@ -53,7 +50,6 @@ private:
   std::string OutputFile;
   bool CopyOnly;
   bool EscapeQuotes;
-  bool Immediate;
   bool AtOnly;
 };
 
