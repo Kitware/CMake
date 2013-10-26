@@ -377,7 +377,8 @@ static thisClass* SafeDownCast(cmObject *c) \
   return 0;\
 }
 
-#if defined(_MSC_VER) && _MSC_VER < 1300
+#if defined(_MSC_VER) && _MSC_VER < 1300 \
+  || defined(__GNUC__) && __GNUC__ < 3
 
 #define cmArrayBegin(a) a
 #define cmArraySize(a) (sizeof(a)/sizeof(*a))
