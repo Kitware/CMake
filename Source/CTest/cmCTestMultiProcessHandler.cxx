@@ -445,12 +445,13 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   priorityStack.push_back(TestSet());
   TestSet &topLevel = priorityStack.back();
 
-  // Add previously failed tests to the front of the cost list
-  // and queue other tests for further sorting
+  // In parallel test runs add previously failed tests to the front
+  // of the cost list and queue other tests for further sorting
   for(TestMap::const_iterator i = this->Tests.begin();
     i != this->Tests.end(); ++i)
     {
-    if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+    if(this->ParallelLevel > 1 &&
+       std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
        this->Properties[i->first]->Name) != this->LastTestsFailed.end())
       {
       //If the test failed last time, it should be run first.
