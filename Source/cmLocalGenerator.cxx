@@ -1710,7 +1710,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       if(target->GetType() >= cmTarget::EXECUTABLE &&
          target->GetType() <= cmTarget::MODULE_LIBRARY)
         {
-        tLocation = target->Target->GetLocation(config);
+        tLocation = target->GetLocation(config);
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         tLocation = cmSystemTools::CollapseFullPath(tLocation);
         }
@@ -1733,7 +1733,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
       case cmTarget::SHARED_LIBRARY:
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::UNKNOWN_LIBRARY:
-        dep = target->Target->GetLocation(config);
+        dep = target->GetLocation(config);
         return true;
       case cmTarget::OBJECT_LIBRARY:
         // An object library has no single file on which to depend.
