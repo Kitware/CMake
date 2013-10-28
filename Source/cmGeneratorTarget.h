@@ -26,6 +26,10 @@ class cmGeneratorTarget
 public:
   cmGeneratorTarget(cmTarget*);
 
+  bool IsImported() const;
+  const char *GetLocation(const char* config) const;
+  const char *NormalGetLocation(const char* config) const;
+
   int GetType() const;
   const char *GetName() const;
   const char *GetProperty(const char *prop) const;

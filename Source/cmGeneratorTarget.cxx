@@ -181,6 +181,60 @@ cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& srcs) const
 }
 
 //----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetLocation(const char* config) const
+{
+  if (this->Target->IsImported())
+    {
+    return this->Target->ImportedGetLocation(config);
+    }
+  else
+    {
+    return this->NormalGetLocation(config);
+    }
+}
+
+bool cmGeneratorTarget::IsImported() const
+{
+  return this->Target->IsImported();
+}
+
+//----------------------------------------------------------------------------
+const char* cmGeneratorTarget::NormalGetLocation(const char* config) const
+{
+  // Handle the configuration-specific case first.
+  static std::string location;
+  if(config)
+    {
+    location = this->Target->GetFullPath(config, false);
+    return location.c_str();
+    }
+
+  // Now handle the deprecated build-time configuration location.
+  location = this->Target->GetDirectory();
+  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+  if(cfgid && strcmp(cfgid, ".") != 0)
+    {
+    location += "/";
+    location += cfgid;
+    }
+
+  if(this->Target->IsAppBundleOnApple())
+    {
+    std::string macdir = this->Target->BuildMacContentDirectory("",
+                                                                config,
+                                                                false);
+    if(!macdir.empty())
+      {
+      location += "/";
+      location += macdir;
+      }
+    }
+  location += "/";
+  location += this->Target->GetFullName(config, false);
+  return location.c_str();
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {
@@ -607,7 +661,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     }
 
   // Check for a target with this name.
-  if(cmTarget* t = this->Makefile->FindTargetToUse(util.c_str()))
+  if(cmGeneratorTarget* t
+                    = this->Makefile->FindGeneratorTargetToUse(util.c_str()))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
