@@ -347,12 +347,6 @@ public:
   void GetTargetVersion(bool soversion, int& major, int& minor, int& patch);
 
   /**
-   * Trace through the source files in this target and add al source files
-   * that they depend on, used by all generators
-   */
-  void TraceDependencies();
-
-  /**
    * Make sure the full path to all source files is known.
    */
   bool FindSourceFiles();
@@ -409,9 +403,6 @@ public:
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0);
-
-  /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const char* config);
 
   /**
    * Compute whether this target must be relinked before installing.
@@ -663,6 +654,11 @@ private:
                                        const char* config,
                                        bool contentOnly);
 
+  struct SourceEntry { std::vector<cmSourceFile*> Depends; };
+  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
+
+  SourceEntriesType GetSourceEntries() const;
+
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -739,6 +735,8 @@ private:
 
   // Internal representation details.
   friend class cmTargetInternals;
+  friend class cmGeneratorTarget;
+  friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
   void ConstructSourceFileFlags();

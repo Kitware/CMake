@@ -257,10 +257,11 @@ void cmLocalGenerator::ConfigureFinalPass()
 void cmLocalGenerator::TraceDependencies()
 {
   // Generate the rule files for each target.
-  cmTargets& targets = this->Makefile->GetTargets();
-  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::iterator t = targets.begin();
+      t != targets.end(); ++t)
     {
-    t->second.TraceDependencies();
+    t->second->TraceDependencies();
     }
 }
 
@@ -530,10 +531,11 @@ void cmLocalGenerator::GenerateTargetManifest()
   this->Makefile->GetConfigurations(configNames);
 
   // Add our targets to the manifest for each configuration.
-  cmTargets& targets = this->Makefile->GetTargets();
-  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
+  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::iterator t = targets.begin();
+      t != targets.end(); ++t)
     {
-    cmTarget& target = t->second;
+    cmGeneratorTarget& target = *t->second;
     if(configNames.empty())
       {
       target.GenerateTargetManifest(0);
