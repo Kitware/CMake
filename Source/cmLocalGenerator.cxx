@@ -2021,7 +2021,8 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     }
 
   // Look for a CMake target with the given name.
-  if(cmTarget* target = this->Makefile->FindTargetToUse(name.c_str()))
+  if(cmGeneratorTarget* target
+                    = this->Makefile->FindGeneratorTargetToUse(name.c_str()))
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName

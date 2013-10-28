@@ -341,10 +341,7 @@ public:
       pdb output directory is given.  */
   std::string GetPDBDirectory(const char* config = 0) const;
 
-  /** Get the location of the target in the build tree for the given
-      configuration.  This location is suitable for use as the LOCATION
-      target property.  */
-  const char* GetLocation(const char* config) const;
+  const char* ImportedGetLocation(const char* config) const;
 
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
@@ -652,9 +649,6 @@ private:
 
   // Get the target base name.
   std::string GetOutputName(const char* config, bool implib) const;
-
-  const char* ImportedGetLocation(const char* config) const;
-  const char* NormalGetLocation(const char* config) const;
 
   std::string GetFullNameImported(const char* config, bool implib) const;
 

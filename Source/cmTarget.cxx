@@ -2460,62 +2460,10 @@ std::string cmTarget::GetPDBDirectory(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLocation(const char* config) const
-{
-  if (this->IsImported())
-    {
-    return this->ImportedGetLocation(config);
-    }
-  else
-    {
-    return this->NormalGetLocation(config);
-    }
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const char* config) const
 {
   static std::string location;
   location = this->ImportedGetFullPath(config, false);
-  return location.c_str();
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::NormalGetLocation(const char* config) const
-{
-  static std::string location;
-  // Handle the configuration-specific case first.
-  if(config)
-    {
-    location = this->GetFullPath(config, false);
-    return location.c_str();
-    }
-
-  // Now handle the deprecated build-time configuration location.
-  location = this->GetDirectory();
-  if(!location.empty())
-    {
-    location += "/";
-    }
-  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  if(cfgid && strcmp(cfgid, ".") != 0)
-    {
-    location += "/";
-    location += cfgid;
-    location += "/";
-    }
-
-  if(this->IsAppBundleOnApple())
-    {
-    std::string macdir = this->BuildMacContentDirectory("", config, false);
-    if(!macdir.empty())
-      {
-      location += "/";
-      location += macdir;
-      }
-    }
-  location += "/";
-  location += this->GetFullName(config, false);
   return location.c_str();
 }
 

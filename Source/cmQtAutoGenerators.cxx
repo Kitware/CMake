@@ -562,7 +562,8 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable",
+                            qt5Moc->ImportedGetLocation(0));
     }
   else
     {
@@ -751,7 +752,8 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
       }
     else
       {
-      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
+      makefile->AddDefinition("_qt_uic_executable",
+                              qt5Uic->ImportedGetLocation(0));
       }
     }
   else
@@ -940,7 +942,8 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
                           targetName);
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable",
+                            qt5Rcc->ImportedGetLocation(0));
     }
   else
     {
