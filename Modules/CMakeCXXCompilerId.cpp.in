@@ -221,6 +221,7 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 #endif
 
 @CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT@
+@CMAKE_CXX_COMPILER_ID_ERROR_FOR_TEST@
 
 /*--------------------------------------------------------------------------*/
 

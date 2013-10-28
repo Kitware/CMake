@@ -210,6 +210,7 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  void PrintCompilerAdvice(std::ostream&, std::string, const char*) {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   std::string GetObjectsNormalDirectory(

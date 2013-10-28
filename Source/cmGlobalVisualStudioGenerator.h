@@ -107,6 +107,7 @@ protected:
   const char* AdditionalPlatformDefinition;
 
 private:
+  void PrintCompilerAdvice(std::ostream&, std::string, const char*) {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void FollowLinkDepends(cmTarget* target, std::set<cmTarget*>& linked);
