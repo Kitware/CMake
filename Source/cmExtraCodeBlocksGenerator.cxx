@@ -593,7 +593,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       {
       cmGeneratorTarget* gt =
           this->GlobalGenerator->GetGeneratorTarget(target);
-      location = gt->Target->GetLocation(buildType);
+      location = gt->GetLocation(buildType);
       }
 
     fout<<"         <Option output=\"" << location
