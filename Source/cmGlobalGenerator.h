@@ -52,6 +52,10 @@ public:
   ///! Get the name for this generator
   virtual const char *GetName() const { return "Generic"; };
 
+  /** Check whether the given name matches the current generator.  */
+  virtual bool MatchesGeneratorName(const char* name) const
+  { return strcmp(this->GetName(), name) == 0; }
+
   /** Set the generator-specific toolset name.  Returns true if toolset
       is supported and false otherwise.  */
   virtual bool SetGeneratorToolset(std::string const& ts);

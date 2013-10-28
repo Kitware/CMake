@@ -13,42 +13,54 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 
-static const char vs11generatorName[] = "Visual Studio 11";
+static const char vs11generatorName[] = "Visual Studio 11 2012";
+
+// Map generator name without year to name with year.
+static const char* cmVS11GenName(const char* name, std::string& genName)
+{
+  if(strncmp(name, vs11generatorName, sizeof(vs11generatorName)-6) != 0)
+    {
+    return 0;
+    }
+  const char* p = name + sizeof(vs11generatorName) - 6;
+  if(strncmp(p, " 2012", 5) == 0)
+    {
+    p += 5;
+    }
+  genName = std::string(vs11generatorName) + p;
+  return p;
+}
 
 class cmGlobalVisualStudio11Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(strstr(name, vs11generatorName) != name)
-      {
-      return 0;
-      }
-
-    const char* p = name + sizeof(vs11generatorName) - 1;
-    if(p[0] == '\0')
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const
+    {
+    std::string genName;
+    const char* p = cmVS11GenName(name, genName);
+    if(!p)
+      { return 0; }
+    name = genName.c_str();
+    if(strcmp(p, "") == 0)
       {
       return new cmGlobalVisualStudio11Generator(
         name, NULL, NULL);
       }
-
-    if(p[0] != ' ')
+    if(strcmp(p, " Win64") == 0)
       {
-      return 0;
+      return new cmGlobalVisualStudio11Generator(
+        name, "x64", "CMAKE_FORCE_WIN64");
       }
-
-    ++p;
-
-    if(!strcmp(p, "ARM"))
+    if(strcmp(p, " ARM") == 0)
       {
       return new cmGlobalVisualStudio11Generator(
         name, "ARM", NULL);
       }
 
-    if(!strcmp(p, "Win64"))
+    if(*p++ != ' ')
       {
-      return new cmGlobalVisualStudio11Generator(
-        name, "x64", "CMAKE_FORCE_WIN64");
+      return 0;
       }
 
     std::set<std::string> installedSDKs =
@@ -63,14 +75,16 @@ public:
       new cmGlobalVisualStudio11Generator(name, p, NULL);
     ret->WindowsCEVersion = "8.00";
     return ret;
-  }
+    }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    entry.Name = "Visual Studio 11";
-    entry.Brief = "Generates Visual Studio 11 (2012) project files.";
-  }
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+    {
+    entry.Name = vs11generatorName;
+    entry.Brief = "Generates Visual Studio 11 (VS 2012) project files.";
+    }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const {
+  virtual void GetGenerators(std::vector<std::string>& names) const
+    {
     names.push_back(vs11generatorName);
     names.push_back(vs11generatorName + std::string(" ARM"));
     names.push_back(vs11generatorName + std::string(" Win64"));
@@ -80,9 +94,9 @@ public:
     for(std::set<std::string>::const_iterator i =
         installedSDKs.begin(); i != installedSDKs.end(); ++i)
       {
-      names.push_back("Visual Studio 11 " + *i);
+      names.push_back(std::string(vs11generatorName) + " " + *i);
       }
-  }
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -104,6 +118,18 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\11.0\\Setup\\VC;"
     "ProductDir", vc11Express, cmSystemTools::KeyWOW64_32);
   this->PlatformToolset = "v110";
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio11Generator::MatchesGeneratorName(const char* name) const
+{
+  std::string genName;
+  if(cmVS11GenName(name, genName))
+    {
+    return genName == this->GetName();
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

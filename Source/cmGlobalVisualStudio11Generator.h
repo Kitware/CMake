@@ -24,6 +24,8 @@ public:
     const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
+  virtual bool MatchesGeneratorName(const char* name) const;
+
   virtual void WriteSLNHeader(std::ostream& fout);
 
   ///! create the correct local generator

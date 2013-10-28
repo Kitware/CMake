@@ -1468,9 +1468,9 @@ int cmake::ActualConfigure()
         {"7.1", "Visual Studio 7 .NET 2003"},
         {"8.0", "Visual Studio 8 2005"},
         {"9.0", "Visual Studio 9 2008"},
-        {"10.0", "Visual Studio 10"},
-        {"11.0", "Visual Studio 11"},
-        {"12.0", "Visual Studio 12"},
+        {"10.0", "Visual Studio 10 2010"},
+        {"11.0", "Visual Studio 11 2012"},
+        {"12.0", "Visual Studio 12 2013"},
         {0, 0}};
       for(int i=0; version[i].MSVersion != 0; i++)
         {
@@ -1509,7 +1509,7 @@ int cmake::ActualConfigure()
   const char* genName = this->CacheManager->GetCacheValue("CMAKE_GENERATOR");
   if(genName)
     {
-    if(strcmp(this->GlobalGenerator->GetName(), genName) != 0)
+    if(!this->GlobalGenerator->MatchesGeneratorName(genName))
       {
       std::string message = "Error: generator : ";
       message += this->GlobalGenerator->GetName();
