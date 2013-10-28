@@ -34,6 +34,8 @@ class cmGlobalGenerator;
 class cmComputeLinkInformation;
 class cmListFileBacktrace;
 class cmTarget;
+class cmGeneratorTarget;
+class cmTargetTraceDependencies;
 
 struct cmTargetLinkInformationMap:
   public std::map<std::pair<cmTarget*, std::string>, cmComputeLinkInformation*>
