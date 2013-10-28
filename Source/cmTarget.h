@@ -374,9 +374,6 @@ public:
       compiler pdb output directory is given.  */
   std::string GetCompilePDBDirectory(const std::string& config = "") const;
 
-  /** Get the location of the target in the build tree for the given
-      configuration.  */
-  const char* GetLocation(const std::string& config) const;
   const char* ImportedGetLocation(const std::string& config) const;
 
   /** Get the location of the target in the build tree with a placeholder
