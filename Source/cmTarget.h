@@ -566,6 +566,9 @@ private:
 
   std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
 
+  struct SourceEntry { std::vector<cmSourceFile*> Depends; };
+  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
+
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
    */
@@ -653,9 +656,6 @@ private:
   std::string BuildMacContentDirectory(const std::string& base,
                                        const char* config,
                                        bool contentOnly);
-
-  struct SourceEntry { std::vector<cmSourceFile*> Depends; };
-  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
 
   SourceEntriesType GetSourceEntries() const;
 
