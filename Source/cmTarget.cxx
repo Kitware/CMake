@@ -274,7 +274,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->SetPropertyDefault("GNUtoMS", 0);
   this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
   this->SetPropertyDefault("AUTOMOC", 0);
+  this->SetPropertyDefault("AUTOUIC", 0);
+  this->SetPropertyDefault("AUTORCC", 0);
   this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
+  this->SetPropertyDefault("AUTOUIC_OPTIONS", 0);
+  this->SetPropertyDefault("AUTORCC_OPTIONS", 0);
   this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", 0);
   this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
   this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
