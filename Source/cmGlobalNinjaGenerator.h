@@ -64,6 +64,7 @@ public:
   static std::string EncodeIdent(const std::string &ident, std::ostream &vars);
   static std::string EncodeLiteral(const std::string &lit);
   static std::string EncodePath(const std::string &path);
+  static std::string EncodeDepfileSpace(const std::string &path);
 
   /**
    * Write the given @a comment to the output stream @a os. It
@@ -104,7 +105,7 @@ public:
                                const std::string& comment,
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
-                             const cmNinjaDeps& orderOnlyDeps = cmNinjaDeps());
+                               const cmNinjaDeps& orderOnly = cmNinjaDeps());
   void WriteMacOSXContentBuild(const std::string& input,
                                const std::string& output);
 
@@ -120,6 +121,7 @@ public:
                         const std::string& description,
                         const std::string& comment,
                         const std::string& depfile,
+                        const std::string& deptype,
                         const std::string& rspfile,
                         const std::string& rspcontent,
                         bool restat,
@@ -239,11 +241,12 @@ public:
                const std::string& command,
                const std::string& description,
                const std::string& comment,
-               const std::string& depfile = "",
-               const std::string& rspfile = "",
-               const std::string& rspcontent = "",
-               bool restat = false,
-               bool generator = false);
+               const std::string& depfile,
+               const std::string& deptype,
+               const std::string& rspfile,
+               const std::string& rspcontent,
+               bool restat,
+               bool generator);
 
   bool HasRule(const std::string& name);
 
