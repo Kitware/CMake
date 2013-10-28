@@ -28,6 +28,9 @@ public:
 
   cmLocalGenerator* GetLocalGenerator() const;
 
+  bool IsImported() const;
+  const char *GetLocation(const std::string& config) const;
+
   int GetType() const;
   std::string GetName() const;
   const char *GetProperty(const std::string& prop) const;

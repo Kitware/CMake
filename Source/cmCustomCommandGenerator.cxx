@@ -48,7 +48,7 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
      (target->Target->IsImported()
       || !this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")))
     {
-    return target->Target->GetLocation(this->Config);
+    return target->GetLocation(this->Config);
     }
   return this->GE->Parse(argv0)->Evaluate(this->LG->GetMakefile(), this->Config);
 }

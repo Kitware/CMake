@@ -2739,21 +2739,6 @@ std::string cmTarget::GetCompilePDBDirectory(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLocation(const std::string& config) const
-{
-  static std::string location;
-  if (this->IsImported())
-    {
-    location = this->ImportedGetFullPath(config, false);
-    }
-  else
-    {
-    location = this->GetFullPath(config, false);
-    }
-  return location.c_str();
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const std::string& config) const
 {
   static std::string location;

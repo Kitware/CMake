@@ -520,6 +520,26 @@ void cmGeneratorTarget
 }
 
 //----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetLocation(const std::string& config) const
+{
+  static std::string location;
+  if (this->Target->IsImported())
+    {
+    location = this->Target->ImportedGetFullPath(config, false);
+    }
+  else
+    {
+    location = this->Target->GetFullPath(config, false);
+    }
+  return location.c_str();
+}
+
+bool cmGeneratorTarget::IsImported() const
+{
+  return this->Target->IsImported();
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                               const std::string& config) const
 {
@@ -834,7 +854,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     }
 
   // Check for a target with this name.
-  if(cmTarget* t = this->Makefile->FindTargetToUse(util))
+  if(cmGeneratorTarget* t
+                    = this->Makefile->FindGeneratorTargetToUse(util))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
@@ -846,7 +867,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         {
         // This is really only for compatibility so we do not need to
         // worry about configuration names and output names.
-        std::string tLocation = t->GetLocationForBuild();
+        std::string tLocation = t->Target->GetLocationForBuild();
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
         depLocation = cmSystemTools::CollapseFullPath(depLocation);
