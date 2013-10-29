@@ -318,9 +318,13 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
     cdCmd << cdStr << this->ConvertToOutputFormat(wd, SHELL);
     cmdLines.push_back(cdCmd.str());
   }
+
+  std::string launcher = this->MakeCustomLauncher(*cc);
+
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
-    cmdLines.push_back(this->ConvertToOutputFormat(ccg.GetCommand(i).c_str(),
-                                                   SHELL));
+    cmdLines.push_back(launcher +
+      this->ConvertToOutputFormat(ccg.GetCommand(i).c_str(), SHELL));
+
     std::string& cmd = cmdLines.back();
     ccg.AppendArguments(i, cmd);
   }
@@ -406,4 +410,40 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 
     this->WriteCustomCommandBuildStatement(i->first, ccTargetDeps);
   }
+}
+
+std::string cmLocalNinjaGenerator::MakeCustomLauncher(
+  const cmCustomCommand& cc)
+{
+  const char* property = "RULE_LAUNCH_CUSTOM";
+  const char* property_value = this->Makefile->GetProperty(property);
+
+  if(!property_value || !*property_value)
+  {
+    return std::string();
+  }
+
+  // Expand rules in the empty string.  It may insert the launcher and
+  // perform replacements.
+  RuleVariables vars;
+  vars.RuleLauncher = property;
+  std::string output;
+  const std::vector<std::string>& outputs = cc.GetOutputs();
+  if(!outputs.empty())
+  {
+    RelativeRoot relative_root =
+      cc.GetWorkingDirectory() ? NONE : START_OUTPUT;
+
+    output = this->Convert(outputs[0].c_str(), relative_root, SHELL);
+  }
+  vars.Output = output.c_str();
+
+  std::string launcher;
+  this->ExpandRuleVariables(launcher, vars);
+  if(!launcher.empty())
+  {
+    launcher += " ";
+  }
+
+  return launcher;
 }
