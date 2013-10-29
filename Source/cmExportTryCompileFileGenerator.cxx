@@ -32,7 +32,7 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
       ImportPropertyMap properties;
 
 #define FIND_TARGETS(PROPERTY) \
-      this->FindTargets(#PROPERTY, te, emittedDeps);
+      this->FindTargets("INTERFACE_" #PROPERTY, te, emittedDeps);
 
       CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
 
