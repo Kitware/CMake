@@ -90,8 +90,12 @@ list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   )
 
 # mingw can also link against dlls which can also be in /bin, so list this too
+if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
+  list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+    "${CMAKE_INSTALL_PREFIX}/bin"
+  )
+endif()
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
-  "${CMAKE_INSTALL_PREFIX}/bin"
   "${_CMAKE_INSTALL_DIR}/bin"
   /bin
   )
