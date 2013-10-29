@@ -34,7 +34,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   std::string outputVariable;
   std::string copyFile;
   std::string copyFileError;
-  std::vector<cmTarget*> targets;
+  std::vector<const cmTarget*> targets;
   std::string libsToLink = " ";
   bool useOldLinkLibs = true;
   char targetNameBuf[64];

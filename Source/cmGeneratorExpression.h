@@ -80,12 +80,12 @@ class cmCompiledGeneratorExpression
 public:
   const char* Evaluate(cmMakefile* mf, const char* config,
                        bool quiet = false,
-                       cmTarget *headTarget = 0,
-                       cmTarget *currentTarget = 0,
+                       const cmTarget* headTarget = 0,
+                       const cmTarget* currentTarget = 0,
                        cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
   const char* Evaluate(cmMakefile* mf, const char* config,
                        bool quiet,
-                       cmTarget *headTarget,
+                       const cmTarget* headTarget,
                        cmGeneratorExpressionDAGChecker *dagChecker) const;
 
   /** Get set of targets found during evaluations.  */
@@ -95,7 +95,7 @@ public:
   std::set<cmStdString> const& GetSeenTargetProperties() const
     { return this->SeenTargetProperties; }
 
-  std::set<cmTarget*> const& GetAllTargetsSeen() const
+  std::set<const cmTarget*> const& GetAllTargetsSeen() const
     { return this->AllTargetsSeen; }
 
   ~cmCompiledGeneratorExpression();
@@ -129,7 +129,7 @@ private:
   bool NeedsEvaluation;
 
   mutable std::set<cmTarget*> DependTargets;
-  mutable std::set<cmTarget*> AllTargetsSeen;
+  mutable std::set<const cmTarget*> AllTargetsSeen;
   mutable std::set<cmStdString> SeenTargetProperties;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;

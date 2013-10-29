@@ -384,8 +384,13 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
         }
     }
 
-  // Handle normal case first.
-  if(this->CurrentProcessingState != ProcessingKeywordLinkInterface
+  if(this->CurrentProcessingState == ProcessingLinkLibraries
+        && !this->Target->GetProperty("LINK_INTERFACE_LIBRARIES"))
+    {
+    this->Makefile
+      ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
+    }
+  else if(this->CurrentProcessingState != ProcessingKeywordLinkInterface
       && this->CurrentProcessingState != ProcessingPlainLinkInterface)
     {
     this->Makefile

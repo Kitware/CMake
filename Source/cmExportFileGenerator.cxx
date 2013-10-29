@@ -463,7 +463,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget *target,
+void cmExportFileGenerator::GenerateInterfaceProperties(const cmTarget* target,
                                         std::ostream& os,
                                         const ImportPropertyMap &properties)
 {
@@ -885,7 +885,7 @@ void cmExportFileGenerator::GenerateExpectedTargetsCode(std::ostream& os,
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::GenerateImportTargetCode(std::ostream& os, cmTarget* target)
+::GenerateImportTargetCode(std::ostream& os, const cmTarget* target)
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
@@ -951,7 +951,7 @@ cmExportFileGenerator
 void
 cmExportFileGenerator
 ::GenerateImportPropertyCode(std::ostream& os, const char* config,
-                             cmTarget* target,
+                             const cmTarget* target,
                              ImportPropertyMap const& properties)
 {
   // Construct the imported target name.

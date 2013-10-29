@@ -21,7 +21,7 @@ class cmExportTryCompileFileGenerator: public cmExportFileGenerator
 {
 public:
   /** Set the list of targets to export.  */
-  void SetExports(const std::vector<cmTarget*> &exports)
+  void SetExports(const std::vector<const cmTarget*> &exports)
     { this->Exports = exports; }
   void SetConfig(const char *config) { this->Config = config; }
 protected:
@@ -39,18 +39,18 @@ protected:
                                    cmTarget*,
                                    cmTarget*) {}
 
-  void PopulateProperties(cmTarget* target,
+  void PopulateProperties(const cmTarget* target,
                           ImportPropertyMap& properties,
-                          std::set<cmTarget*> &emitted);
+                          std::set<const cmTarget*> &emitted);
 
   std::string InstallNameDir(cmTarget* target,
                              const std::string& config);
 private:
-  std::string FindTargets(const char *prop, cmTarget *tgt,
-                   std::set<cmTarget*> &emitted);
+  std::string FindTargets(const char *prop, const cmTarget* tgt,
+                   std::set<const cmTarget*> &emitted);
 
 
-  std::vector<cmTarget*> Exports;
+  std::vector<const cmTarget*> Exports;
   const char *Config;
 };
 
