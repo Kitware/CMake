@@ -15,6 +15,7 @@ if(NOT CMake_SOURCE_DIR)
   set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 2.8.4 is required
   get_filename_component(tmp "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
   get_filename_component(CMake_SOURCE_DIR "${tmp}" PATH)
+  include(${CMake_SOURCE_DIR}/Modules/CTestUseLaunchers.cmake)
   include(${CMake_SOURCE_DIR}/Source/CMakeVersionCompute.cmake)
   include(${CMake_SOURCE_DIR}/Source/CMakeInstallDestinations.cmake)
   unset(CMAKE_DATA_DIR)
