@@ -286,7 +286,6 @@ public:
   void Trace();
 private:
   cmTarget* Target;
-  cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   cmGlobalGenerator* GlobalGenerator;
   typedef cmTarget::SourceEntry SourceEntry;
@@ -308,7 +307,7 @@ private:
 //----------------------------------------------------------------------------
 cmTargetTraceDependencies
 ::cmTargetTraceDependencies(cmGeneratorTarget* target):
-  Target(target->Target), GeneratorTarget(target)
+  Target(target->Target)
 {
   // Convenience.
   this->Makefile = this->Target->GetMakefile();
