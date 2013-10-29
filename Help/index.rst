@@ -1,3 +1,5 @@
+.. title:: CMake Reference Documentation
+
 Command-Line Tools
 ##################
 
