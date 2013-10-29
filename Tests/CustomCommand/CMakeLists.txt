@@ -449,3 +449,10 @@ set_property(SOURCE perconfig.out PROPERTY SYMBOLIC 1)
 add_custom_target(perconfig_target ALL
   COMMAND ${CMAKE_COMMAND} -E echo "perconfig=$<TARGET_FILE:perconfig>" "config=$<CONFIGURATION>"
   DEPENDS perconfig.out)
+
+# Test SOURCES in add_custom_target() with COMPILE_DEFINITIONS
+# which previously caused a crash in the makefile generators.
+add_custom_target(source_in_custom_target SOURCES source_in_custom_target.cpp)
+set_property(SOURCE source_in_custom_target
+  PROPERTY COMPILE_DEFINITIONS "TEST"
+)
