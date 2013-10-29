@@ -88,11 +88,8 @@ Properties on Targets
    /prop_tgt/COMPILE_DEFINITIONS
    /prop_tgt/COMPILE_FLAGS
    /prop_tgt/COMPILE_OPTIONS
-   /prop_tgt/COMPILER_FEATURES
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
-   /prop_tgt/CXX_STANDARD
-   /prop_tgt/CXX_EXTENSIONS
    /prop_tgt/DEBUG_POSTFIX
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/EchoString
