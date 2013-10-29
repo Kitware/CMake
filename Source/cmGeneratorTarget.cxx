@@ -282,7 +282,6 @@ private:
   cmMakefile* Makefile;
   cmGlobalGenerator* GlobalGenerator;
   typedef cmTarget::SourceEntry SourceEntry;
-  cmTarget::SourceEntriesType SourceEntries;
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
@@ -307,7 +306,6 @@ cmTargetTraceDependencies
   this->GlobalGenerator =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
   this->CurrentEntry = 0;
-  this->SourceEntries = this->Target->GetSourceEntries();
 
   // Queue all the source files already specified for the target.
   std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
@@ -332,7 +330,7 @@ void cmTargetTraceDependencies::Trace()
     // Get the next source from the queue.
     cmSourceFile* sf = this->SourceQueue.front();
     this->SourceQueue.pop();
-    this->CurrentEntry = &this->SourceEntries[sf];
+    this->CurrentEntry = &this->Target->GetSourceEntries()[sf];
 
     // Queue dependencies added explicitly by the user.
     if(const char* additionalDeps = sf->GetProperty("OBJECT_DEPENDS"))

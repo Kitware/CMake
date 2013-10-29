@@ -152,7 +152,7 @@ public:
   std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
 };
 
-cmTarget::SourceEntriesType cmTarget::GetSourceEntries() const
+cmTarget::SourceEntriesType& cmTarget::GetSourceEntries() const
 {
   return this->Internal.Get()->SourceEntries;
 }
