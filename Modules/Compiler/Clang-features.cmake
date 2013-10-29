@@ -1,6 +1,4 @@
 
-set(compiler_test_macro __clang__)
-
 set(testable_features
   cxx_delegating_constructors
 )
