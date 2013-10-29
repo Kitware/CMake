@@ -273,7 +273,7 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
 
 //----------------------------------------------------------------------------
 cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
-                                       cmTarget* target,
+                                       cmTarget const* target,
                                        const char* purpose)
 {
   this->GlobalGenerator = gg;
