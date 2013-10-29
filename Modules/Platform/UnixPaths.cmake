@@ -37,10 +37,13 @@ list(APPEND CMAKE_SYSTEM_PREFIX_PATH
 
   # CMake install location
   "${_CMAKE_INSTALL_DIR}"
-
-  # Project install destination.
-  "${CMAKE_INSTALL_PREFIX}"
   )
+if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH
+    # Project install destination.
+    "${CMAKE_INSTALL_PREFIX}"
+  )
+endif()
 
 # List common include file locations not under the common prefixes.
 list(APPEND CMAKE_SYSTEM_INCLUDE_PATH

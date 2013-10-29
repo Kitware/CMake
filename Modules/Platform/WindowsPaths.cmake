@@ -73,11 +73,13 @@ get_filename_component(_CMAKE_INSTALL_DIR "${CMAKE_ROOT}" PATH)
 get_filename_component(_CMAKE_INSTALL_DIR "${_CMAKE_INSTALL_DIR}" PATH)
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH "${_CMAKE_INSTALL_DIR}")
 
-# Add other locations.
-list(APPEND CMAKE_SYSTEM_PREFIX_PATH
-  # Project install destination.
-  "${CMAKE_INSTALL_PREFIX}"
-  )
+if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
+  # Add other locations.
+  list(APPEND CMAKE_SYSTEM_PREFIX_PATH
+    # Project install destination.
+    "${CMAKE_INSTALL_PREFIX}"
+    )
+endif()
 
 if(CMAKE_CROSSCOMPILING AND NOT CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
   # MinGW (useful when cross compiling from linux with CMAKE_FIND_ROOT_PATH set)
@@ -88,8 +90,12 @@ list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
   )
 
 # mingw can also link against dlls which can also be in /bin, so list this too
+if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
+  list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+    "${CMAKE_INSTALL_PREFIX}/bin"
+  )
+endif()
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
-  "${CMAKE_INSTALL_PREFIX}/bin"
   "${_CMAKE_INSTALL_DIR}/bin"
   /bin
   )
