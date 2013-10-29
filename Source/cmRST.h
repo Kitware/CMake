@@ -84,6 +84,8 @@ private:
   cmsys::RegularExpression ReplaceDirective;
   cmsys::RegularExpression IncludeDirective;
   cmsys::RegularExpression TocTreeDirective;
+  cmsys::RegularExpression ProductionListDirective;
+  cmsys::RegularExpression NoteDirective;
   cmsys::RegularExpression ModuleRST;
   cmsys::RegularExpression CMakeRole;
   cmsys::RegularExpression Substitution;

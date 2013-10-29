@@ -34,6 +34,8 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
   ReplaceDirective("^.. (\\|[^|]+\\|) replace::[ \t]*(.*)$"),
   IncludeDirective("^.. include::[ \t]+([^ \t\n]+)$"),
   TocTreeDirective("^.. toctree::[ \t]*(.*)$"),
+  ProductionListDirective("^.. productionlist::[ \t]*(.*)$"),
+  NoteDirective("^.. note::[ \t]*(.*)$"),
   ModuleRST("^#\\[(=*)\\[\\.rst:$"),
   CMakeRole("(:cmake)?:("
             "command|generator|variable|module|policy|"
@@ -226,6 +228,16 @@ void cmRST::ProcessLine(std::string const& line)
       // Record the toctree entries to process after whole block.
       this->Directive = DirectiveTocTree;
       this->MarkupLines.push_back(this->TocTreeDirective.match(1));
+      }
+    else if(this->ProductionListDirective.find(line))
+      {
+      // Output productionlist directives and their content normally.
+      this->NormalLine(line);
+      }
+    else if(this->NoteDirective.find(line))
+      {
+      // Output note directives and their content normally.
+      this->NormalLine(line);
       }
     }
   // An explicit markup start followed nothing but whitespace and a
