@@ -2874,27 +2874,34 @@ const char* cmTarget::GetLocation(const char* config)
 //----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const char* config)
 {
-  this->Location = this->ImportedGetFullPath(config, false);
-  return this->Location.c_str();
+  static std::string location;
+  location = this->ImportedGetFullPath(config, false);
+  return location.c_str();
 }
 
 //----------------------------------------------------------------------------
 const char* cmTarget::NormalGetLocation(const char* config)
 {
+  static std::string location;
   // Handle the configuration-specific case first.
   if(config)
     {
-    this->Location = this->GetFullPath(config, false);
-    return this->Location.c_str();
+    location = this->GetFullPath(config, false);
+    return location.c_str();
     }
 
   // Now handle the deprecated build-time configuration location.
-  this->Location = this->GetDirectory();
+  location = this->GetDirectory();
+  if(!location.empty())
+    {
+    location += "/";
+    }
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if(cfgid && strcmp(cfgid, ".") != 0)
     {
-    this->Location += "/";
-    this->Location += cfgid;
+    location += "/";
+    location += cfgid;
+    location += "/";
     }
 
   if(this->IsAppBundleOnApple())
@@ -2902,13 +2909,13 @@ const char* cmTarget::NormalGetLocation(const char* config)
     std::string macdir = this->BuildMacContentDirectory("", config, false);
     if(!macdir.empty())
       {
-      this->Location += "/";
-      this->Location += macdir;
+      location += "/";
+      location += macdir;
       }
     }
-  this->Location += "/";
-  this->Location += this->GetFullName(config, false);
-  return this->Location.c_str();
+  location += "/";
+  location += this->GetFullName(config, false);
+  return location.c_str();
 }
 
 //----------------------------------------------------------------------------
