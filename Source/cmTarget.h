@@ -659,7 +659,7 @@ private:
                                        const char* config,
                                        bool contentOnly);
 
-  SourceEntriesType GetSourceEntries() const;
+  SourceEntriesType& GetSourceEntries() const;
 
 private:
   std::string Name;
