@@ -203,9 +203,6 @@ Variables for Languages
 
 .. toctree::
    /variable/CMAKE_COMPILER_IS_GNULANG
-   /variable/CMAKE_CXX_COMPILER_FEATURES
-   /variable/CMAKE_CXX_KNOWN_FEATURES
-   /variable/CMAKE_CXX_STANDARD
    /variable/CMAKE_Fortran_MODDIR_DEFAULT
    /variable/CMAKE_Fortran_MODDIR_FLAG
    /variable/CMAKE_Fortran_MODOUT_FLAG

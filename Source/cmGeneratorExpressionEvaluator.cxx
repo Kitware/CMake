@@ -913,11 +913,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       interfacePropertyName = "INTERFACE_COMPILE_OPTIONS";
       }
-    else if (propertyName == "INTERFACE_COMPILER_FEATURES"
-        || propertyName == "COMPILER_FEATURES")
-      {
-      interfacePropertyName = "INTERFACE_COMPILER_FEATURES";
-      }
 
     cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
 

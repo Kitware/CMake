@@ -880,8 +880,6 @@ public:
   std::set<cmStdString> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
-  bool AddRequiredTargetFeature(cmTarget *target, const char *feature) const;
-
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);

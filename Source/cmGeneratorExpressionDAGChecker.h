@@ -20,15 +20,13 @@
   F(EvaluatingIncludeDirectories) \
   F(EvaluatingSystemIncludeDirectories) \
   F(EvaluatingCompileDefinitions) \
-  F(EvaluatingCompileOptions) \
-  F(EvaluatingCompilerFeatures)
+  F(EvaluatingCompileOptions)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(F) \
   F(INTERFACE_INCLUDE_DIRECTORIES) \
   F(INTERFACE_SYSTEM_INCLUDE_DIRECTORIES) \
   F(INTERFACE_COMPILE_DEFINITIONS) \
-  F(INTERFACE_COMPILE_OPTIONS) \
-  F(INTERFACE_COMPILER_FEATURES)
+  F(INTERFACE_COMPILE_OPTIONS)
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionDAGChecker
