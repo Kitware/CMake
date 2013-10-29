@@ -2352,14 +2352,16 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
       )
 
-    configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestLaunchers/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/test.cmake" @ONLY ESCAPE_QUOTES)
-    add_test(CTestTestLaunchers ${CMAKE_CTEST_COMMAND}
-      -S "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/test.cmake" -V
-      --output-log "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/testOutput.log"
-      )
-    set_tests_properties(CTestTestLaunchers PROPERTIES
-      PASS_REGULAR_EXPRESSION "CTEST_TEST_LAUNCHER_SUCCESS")
+    if("${CMAKE_TEST_GENERATOR}" MATCHES "Makefiles" OR "${CMAKE_TEST_GENERATOR}" MATCHES "Ninja")
+      configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestLaunchers/test.cmake.in"
+        "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/test.cmake" @ONLY ESCAPE_QUOTES)
+      add_test(CTestTestLaunchers ${CMAKE_CTEST_COMMAND}
+        -S "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/test.cmake" -V
+        --output-log "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/testOutput.log"
+        )
+      set_tests_properties(CTestTestLaunchers PROPERTIES
+        PASS_REGULAR_EXPRESSION "CTEST_TEST_LAUNCHER_SUCCESS")
+    endif()
 
     configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestChecksum/test.cmake.in"
       "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/test.cmake" @ONLY
