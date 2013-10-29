@@ -257,11 +257,10 @@ void cmLocalGenerator::ConfigureFinalPass()
 void cmLocalGenerator::TraceDependencies()
 {
   // Generate the rule files for each target.
-  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin();
-      t != targets.end(); ++t)
+  cmTargets& targets = this->Makefile->GetTargets();
+  for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
     {
-    t->second->TraceDependencies();
+    t->second.TraceDependencies();
     }
 }
 
