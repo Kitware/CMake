@@ -77,12 +77,6 @@ public:
   /** Add the target output files to the global generator manifest.  */
   void GenerateTargetManifest(const char* config);
 
-  /**
-   * Trace through the source files in this target and add al source files
-   * that they depend on, used by all generators
-   */
-  void TraceDependencies();
-
   void ClassifySources();
   void LookupObjectLibraries();
 
