@@ -109,6 +109,7 @@ add_RunCMake_test(CMP0004)
 add_RunCMake_test(TargetPolicies)
 add_RunCMake_test(alias_targets)
 add_RunCMake_test(interface_library)
+add_RunCMake_test(no_install_prefix)
 
 find_package(Qt4 QUIET)
 find_package(Qt5Core QUIET)
