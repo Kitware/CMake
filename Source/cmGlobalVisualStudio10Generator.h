@@ -28,6 +28,8 @@ public:
     const char* platformName, const char* additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
+  virtual bool MatchesGeneratorName(const char* name) const;
+
   virtual bool SetGeneratorToolset(std::string const& ts);
 
   virtual std::string
