@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Modules Reference
+
 cmake-modules(7)
 ****************
 
