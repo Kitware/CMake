@@ -142,6 +142,7 @@ void cmCTestCoverageHandler::Initialize()
   this->Superclass::Initialize();
   this->CustomCoverageExclude.clear();
   this->SourceLabels.clear();
+  this->TargetDirs.clear();
   this->LabelIdMap.clear();
   this->Labels.clear();
   this->LabelFilter.clear();
