@@ -652,7 +652,7 @@ static const struct JoinNode : public cmGeneratorExpressionNode
 } joinNode;
 
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) \
-  , "INTERFACE_" #PROPERTY
+  , #PROPERTY
 
 //----------------------------------------------------------------------------
 static const char* targetPropertyTransitiveWhitelist[] = {
