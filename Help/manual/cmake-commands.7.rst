@@ -89,6 +89,7 @@ These commands may be used freely in CMake projects.
    /command/source_group
    /command/string
    /command/target_compile_definitions
+   /command/target_compile_features
    /command/target_compile_options
    /command/target_include_directories
    /command/target_link_libraries
