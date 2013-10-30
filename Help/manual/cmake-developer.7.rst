@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Developer Reference
+
 cmake-developer(7)
 ******************
 

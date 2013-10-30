@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Properties Reference
+
 cmake-properties(7)
 *******************
 

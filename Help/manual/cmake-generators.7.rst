@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Generators Reference
+
 cmake-generators(7)
 *******************
 

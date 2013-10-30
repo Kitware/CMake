@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Variables Reference
+
 cmake-variables(7)
 ******************
 
