@@ -893,21 +893,26 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string interfacePropertyName;
 
-#define POPULATE_INTERFACE_PROPERTY_NAME(prop) \
-    if (propertyName == #prop || propertyName == "INTERFACE_" #prop) \
-      { \
-      interfacePropertyName = "INTERFACE_" #prop; \
-      } \
-    else
-
-    CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
-      // Note that the above macro terminates with an else
-    /* else */ if (strncmp(propertyName.c_str(),
-                           "COMPILE_DEFINITIONS_", 20) == 0)
+    if (propertyName == "INTERFACE_INCLUDE_DIRECTORIES"
+        || propertyName == "INCLUDE_DIRECTORIES")
+      {
+      interfacePropertyName = "INTERFACE_INCLUDE_DIRECTORIES";
+      }
+    else if (propertyName == "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES")
+      {
+      interfacePropertyName = "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES";
+      }
+    else if (propertyName == "INTERFACE_COMPILE_DEFINITIONS"
+        || propertyName == "COMPILE_DEFINITIONS"
+        || strncmp(propertyName.c_str(), "COMPILE_DEFINITIONS_", 20) == 0)
       {
       interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
       }
-#undef POPULATE_INTERFACE_PROPERTY_NAME
+    else if (propertyName == "INTERFACE_COMPILE_OPTIONS"
+        || propertyName == "COMPILE_OPTIONS")
+      {
+      interfacePropertyName = "INTERFACE_COMPILE_OPTIONS";
+      }
 
     cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
 
