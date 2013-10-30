@@ -140,6 +140,12 @@ bool cmMacroHelperCommand::InvokeInitialPass
       // Set the FilePath on the arguments to match the function since it is
       // not stored and the original values may be freed
       k->FilePath = this->FilePath.c_str();
+      if(k->Delim == cmListFileArgument::Bracket)
+        {
+        arg.Value = k->Value;
+        }
+      else
+        {
         tmps = k->Value;
         // replace formal arguments
         for (unsigned int j = 1; j < this->Args.size(); ++j)
@@ -209,6 +215,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
           }
 
         arg.Value = tmps;
+        }
       arg.Delim = k->Delim;
       arg.FilePath = k->FilePath;
       arg.Line = k->Line;
