@@ -34,6 +34,8 @@ class cmGlobalGenerator;
 class cmComputeLinkInformation;
 class cmListFileBacktrace;
 class cmTarget;
+class cmGeneratorTarget;
+class cmTargetTraceDependencies;
 
 struct cmTargetLinkInformationMap:
   public std::map<std::pair<cmTarget*, std::string>, cmComputeLinkInformation*>
@@ -127,9 +129,6 @@ public:
     {
     return this->ObjectLibraries;
     }
-
-  /** Get sources that must be built before the given source.  */
-  std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf);
 
   /**
    * Flags for a given source file as used in this target. Typically assigned
@@ -345,12 +344,6 @@ public:
       interpreted from the VERSION or SOVERSION property.  Version 0
       is returned if the property is not set or cannot be parsed.  */
   void GetTargetVersion(bool soversion, int& major, int& minor, int& patch);
-
-  /**
-   * Trace through the source files in this target and add al source files
-   * that they depend on, used by all generators
-   */
-  void TraceDependencies();
 
   /**
    * Make sure the full path to all source files is known.
@@ -735,6 +728,8 @@ private:
 
   // Internal representation details.
   friend class cmTargetInternals;
+  friend class cmGeneratorTarget;
+  friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
   void ConstructSourceFileFlags();
