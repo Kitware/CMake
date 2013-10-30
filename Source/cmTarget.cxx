@@ -6463,6 +6463,33 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
           break;
         }
       }
+    else if (!newExplicitLibraries && !explicitLibraries)
+      {
+      LinkImplementation const* impl = this->GetLinkImplementation(config,
+                                                                  headTarget);
+      if (impl->Libraries.empty())
+        {
+        return false;
+        }
+      typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> >
+                                                                    Container;
+      for(Container::const_iterator it = this->TLLCommands.begin();
+          it != this->TLLCommands.end(); ++it)
+        {
+        if (it->first == cmTarget::KeywordTLLSignature)
+          {
+          return false;
+          }
+        }
+      // Only target_link_libraries(foo bar) still signatures were used. No
+      // target_link_libraries(foo LINK_INTERFACE_LIBRARIES bar) type was
+      // used, nor was there any attempt to otherwise set a property
+      // matching LINK_INTERFACE_LIBRARIES(_<CONFIG>)?
+      // Use the link implementation as the link interface.
+      iface.Libraries = impl->Libraries;
+      iface.ImplementationIsInterface = true;
+      return true;
+      }
     }
   else if(this->GetType() == cmTarget::STATIC_LIBRARY)
     {
