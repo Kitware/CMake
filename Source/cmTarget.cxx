@@ -2725,27 +2725,34 @@ const char* cmTarget::GetLocation(const char* config)
 //----------------------------------------------------------------------------
 const char* cmTarget::ImportedGetLocation(const char* config)
 {
-  this->Location = this->ImportedGetFullPath(config, false);
-  return this->Location.c_str();
+  static std::string location;
+  location = this->ImportedGetFullPath(config, false);
+  return location.c_str();
 }
 
 //----------------------------------------------------------------------------
 const char* cmTarget::NormalGetLocation(const char* config)
 {
+  static std::string location;
   // Handle the configuration-specific case first.
   if(config)
     {
-    this->Location = this->GetFullPath(config, false);
-    return this->Location.c_str();
+    location = this->GetFullPath(config, false);
+    return location.c_str();
     }
 
   // Now handle the deprecated build-time configuration location.
-  this->Location = this->GetDirectory();
+  location = this->GetDirectory();
+  if(!location.empty())
+    {
+    location += "/";
+    }
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if(cfgid && strcmp(cfgid, ".") != 0)
     {
-    this->Location += "/";
-    this->Location += cfgid;
+    location += "/";
+    location += cfgid;
+    location += "/";
     }
 
   if(this->IsAppBundleOnApple())
@@ -2753,13 +2760,13 @@ const char* cmTarget::NormalGetLocation(const char* config)
     std::string macdir = this->BuildMacContentDirectory("", config, false);
     if(!macdir.empty())
       {
-      this->Location += "/";
-      this->Location += macdir;
+      location += "/";
+      location += macdir;
       }
     }
-  this->Location += "/";
-  this->Location += this->GetFullName(config, false);
-  return this->Location.c_str();
+  location += "/";
+  location += this->GetFullName(config, false);
+  return location.c_str();
 }
 
 //----------------------------------------------------------------------------
@@ -3914,76 +3921,6 @@ bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
     return true;
     }
   return false;
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GenerateTargetManifest(const char* config)
-{
-  cmMakefile* mf = this->Makefile;
-  cmLocalGenerator* lg = mf->GetLocalGenerator();
-  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
-
-  // Get the names.
-  std::string name;
-  std::string soName;
-  std::string realName;
-  std::string impName;
-  std::string pdbName;
-  if(this->GetType() == cmTarget::EXECUTABLE)
-    {
-    this->GetExecutableNames(name, realName, impName, pdbName, config);
-    }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY ||
-          this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->GetType() == cmTarget::MODULE_LIBRARY)
-    {
-    this->GetLibraryNames(name, soName, realName, impName, pdbName, config);
-    }
-  else
-    {
-    return;
-    }
-
-  // Get the directory.
-  std::string dir = this->GetDirectory(config, false);
-
-  // Add each name.
-  std::string f;
-  if(!name.empty())
-    {
-    f = dir;
-    f += "/";
-    f += name;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!soName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += soName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!realName.empty())
-    {
-    f = dir;
-    f += "/";
-    f += realName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!pdbName.empty())
-    {
-    f = this->GetPDBDirectory(config);
-    f += "/";
-    f += pdbName;
-    gg->AddToManifest(config? config:"", f);
-    }
-  if(!impName.empty())
-    {
-    f = this->GetDirectory(config, true);
-    f += "/";
-    f += impName;
-    gg->AddToManifest(config? config:"", f);
-    }
 }
 
 //----------------------------------------------------------------------------

@@ -74,10 +74,13 @@ public:
 
   bool IsSystemIncludeDirectory(const char *dir, const char *config);
 
-private:
+  /** Add the target output files to the global generator manifest.  */
+  void GenerateTargetManifest(const char* config);
+
   void ClassifySources();
   void LookupObjectLibraries();
 
+private:
   std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
