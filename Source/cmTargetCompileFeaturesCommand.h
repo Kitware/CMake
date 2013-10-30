@@ -12,9 +12,9 @@
 #ifndef cmTargetCompileFeaturesCommand_h
 #define cmTargetCompileFeaturesCommand_h
 
-#include "cmCommand.h"
+#include "cmTargetPropCommandBase.h"
 
-class cmTargetCompileFeaturesCommand : public cmCommand
+class cmTargetCompileFeaturesCommand : public cmTargetPropCommandBase
 {
   virtual cmCommand* Clone()
     {
@@ -26,7 +26,16 @@ class cmTargetCompileFeaturesCommand : public cmCommand
 
   virtual const char* GetName() const { return "target_compile_features";}
 
-  cmTypeMacro(cmTargetCompileFeaturesCommand, cmCommand);
+  cmTypeMacro(cmTargetCompileFeaturesCommand, cmTargetPropCommandBase);
+
+private:
+  virtual void HandleImportedTarget(const std::string &tgt);
+  virtual void HandleMissingTarget(const std::string &name);
+
+  virtual void HandleDirectContent(cmTarget *tgt,
+                                   const std::vector<std::string> &content,
+                                   bool prepend, bool system);
+  virtual std::string Join(const std::vector<std::string> &content);
 };
 
 #endif
