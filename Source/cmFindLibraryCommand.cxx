@@ -175,9 +175,6 @@ struct cmFindLibraryHelper
   typedef std::vector<std::string>::size_type size_type;
   std::string BestPath;
 
-  // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>
-  bool OpenBSD;
-
   // Current names under consideration.
   struct Name
   {
@@ -224,11 +221,6 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   cmSystemTools::ExpandListArgument(suffixes_list, this->Suffixes, true);
   this->RegexFromList(this->PrefixRegexStr, this->Prefixes);
   this->RegexFromList(this->SuffixRegexStr, this->Suffixes);
-
-  // Check whether to use OpenBSD-style library version comparisons.
-  this->OpenBSD =
-    this->Makefile->GetCMakeInstance()
-    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 }
 
 //----------------------------------------------------------------------------
@@ -314,10 +306,7 @@ void cmFindLibraryHelper::AddName(std::string const& name)
   regex += this->PrefixRegexStr;
   this->RegexFromLiteral(regex, name);
   regex += this->SuffixRegexStr;
-  if(this->OpenBSD)
-    {
-    regex += "(\\.[0-9]+\\.[0-9]+)?";
-    }
+  regex += "(\\.[0-9]+\\.[0-9]+)?";
   regex += "$";
   entry.Regex.compile(regex.c_str());
   this->Names.push_back(entry);
@@ -386,16 +375,15 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
         {
         // This is a matching file.  Check if it is better than the
         // best name found so far.  Earlier prefixes are preferred,
-        // followed by earlier suffixes.  For OpenBSD, shared library
-        // version extensions are compared.
+        // followed by earlier suffixes.  Shared library version extensions
+        // are also compared.
         size_type prefix = this->GetPrefixIndex(name.Regex.match(1));
         size_type suffix = this->GetSuffixIndex(name.Regex.match(2));
         unsigned int major = 0;
         unsigned int minor = 0;
-        if(this->OpenBSD)
-          {
-          sscanf(name.Regex.match(3).c_str(), ".%u.%u", &major, &minor);
-          }
+
+        sscanf(name.Regex.match(3).c_str(), ".%u.%u", &major, &minor);
+
         if(this->BestPath.empty() || prefix < bestPrefix ||
            (prefix == bestPrefix && suffix < bestSuffix) ||
            (prefix == bestPrefix && suffix == bestSuffix &&
