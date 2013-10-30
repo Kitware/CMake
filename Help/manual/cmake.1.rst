@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Command-Line Reference
+
 cmake(1)
 ********
 

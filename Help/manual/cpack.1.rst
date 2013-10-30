@@ -1,3 +1,5 @@
+.. cmake-manual-description: CPack Command-Line Reference
+
 cpack(1)
 ********
 

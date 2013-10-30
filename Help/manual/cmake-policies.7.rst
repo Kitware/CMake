@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Policies Reference
+
 cmake-policies(7)
 *****************
 

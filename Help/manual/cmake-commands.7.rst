@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake Language Command Reference
+
 cmake-commands(7)
 *****************
 

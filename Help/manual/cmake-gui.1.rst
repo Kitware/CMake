@@ -1,3 +1,5 @@
+.. cmake-manual-description: CMake GUI Command-Line Reference
+
 cmake-gui(1)
 ************
 

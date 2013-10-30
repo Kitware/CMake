@@ -36,6 +36,7 @@ elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
 endif()
 
+set(conf_docs "${CMake_SOURCE_DIR}/Help")
 set(conf_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(conf_copyright "2000-2013 Kitware, Inc.")
 set(conf_version "${CMake_MAJOR_VERSION}.${CMake_MINOR_VERSION}.${CMake_PATCH_VERSION}")
