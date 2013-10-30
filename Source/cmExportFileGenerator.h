@@ -60,9 +60,9 @@ protected:
   void GenerateImportHeaderCode(std::ostream& os, const char* config = 0);
   void GenerateImportFooterCode(std::ostream& os);
   void GenerateImportVersionCode(std::ostream& os);
-  void GenerateImportTargetCode(std::ostream& os, cmTarget* target);
+  void GenerateImportTargetCode(std::ostream& os, const cmTarget* target);
   void GenerateImportPropertyCode(std::ostream& os, const char* config,
-                                  cmTarget* target,
+                                  const cmTarget* target,
                                   ImportPropertyMap const& properties);
   void GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
                                       ImportPropertyMap const& properties,
@@ -115,7 +115,7 @@ protected:
                                  ImportPropertyMap &properties);
   void PopulateCompatibleInterfaceProperties(cmTarget *target,
                                  ImportPropertyMap &properties);
-  void GenerateInterfaceProperties(cmTarget *target, std::ostream& os,
+  void GenerateInterfaceProperties(const cmTarget* target, std::ostream& os,
                                    const ImportPropertyMap &properties);
   void PopulateIncludeDirectoriesInterface(
                       cmTargetExport *target,

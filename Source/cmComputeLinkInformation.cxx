@@ -239,8 +239,8 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget* target, const char* config,
-                           cmTarget *headTarget)
+::cmComputeLinkInformation(const cmTarget* target, const char* config,
+                           const cmTarget* headTarget)
 {
   // Store context information.
   this->Target = target;
