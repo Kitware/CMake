@@ -121,6 +121,7 @@ private:
 
   void WriteCustomCommandBuildStatements();
 
+  std::string MakeCustomLauncher(const cmCustomCommand& cc);
 
   std::string ConfigName;
   std::string HomeRelativeOutputPath;
