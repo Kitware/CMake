@@ -27,7 +27,7 @@ class cmTarget;
 class cmOrderDirectories
 {
 public:
-  cmOrderDirectories(cmGlobalGenerator* gg, const cmTarget* target,
+  cmOrderDirectories(cmGlobalGenerator* gg, cmTarget* target,
                      const char* purpose);
   ~cmOrderDirectories();
   void AddRuntimeLibrary(std::string const& fullPath, const char* soname = 0);
@@ -41,7 +41,7 @@ public:
   std::vector<std::string> const& GetOrderedDirectories();
 private:
   cmGlobalGenerator* GlobalGenerator;
-  const cmTarget* Target;
+  cmTarget* Target;
   std::string Purpose;
 
   bool Computed;

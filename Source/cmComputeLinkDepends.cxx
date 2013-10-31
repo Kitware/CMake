@@ -172,8 +172,7 @@ satisfy dependencies.
 
 //----------------------------------------------------------------------------
 cmComputeLinkDepends
-::cmComputeLinkDepends(const cmTarget* target, const char* config,
-                       const cmTarget* head)
+::cmComputeLinkDepends(cmTarget* target, const char* config, cmTarget* head)
 {
   // Store context information.
   this->Target = target;

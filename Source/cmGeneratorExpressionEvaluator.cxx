@@ -661,8 +661,8 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 };
 
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
-                                  const cmTarget* target,
-                                  const cmTarget* headTarget,
+                                  cmTarget *target,
+                                  cmTarget *headTarget,
                                   cmGeneratorExpressionContext *context,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   const std::string &interfacePropertyName)
@@ -726,7 +726,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmsys::RegularExpression propertyNameValidator;
     propertyNameValidator.compile("^[A-Za-z0-9_]+$");
 
-    const cmTarget* target = context->HeadTarget;
+    cmTarget* target = context->HeadTarget;
     std::string propertyName = *parameters.begin();
 
     if (!target && parameters.size() == 1)
@@ -909,8 +909,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
 
-    const cmTarget* headTarget = context->HeadTarget
-                               ? context->HeadTarget : target;
+    cmTarget *headTarget = context->HeadTarget ? context->HeadTarget : target;
 
     const char * const *transBegin =
                         cmArrayBegin(targetPropertyTransitiveWhitelist) + 1;
@@ -1087,8 +1086,7 @@ static const char* targetPolicyWhitelist[] = {
 #undef TARGET_POLICY_STRING
 };
 
-cmPolicies::PolicyStatus statusForTarget(const cmTarget* tgt,
-                                         const char *policy)
+cmPolicies::PolicyStatus statusForTarget(cmTarget *tgt, const char *policy)
 {
 #define RETURN_POLICY(POLICY) \
   if (strcmp(policy, #POLICY) == 0) \
