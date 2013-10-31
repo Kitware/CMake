@@ -441,6 +441,8 @@ int cmCTestMultiProcessHandler::SearchByName(std::string name)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateTestCostList()
 {
+  TestSet alreadySortedTests;
+
   std::list<TestSet> priorityStack;
   priorityStack.push_back(TestSet());
   TestSet &topLevel = priorityStack.back();
@@ -456,6 +458,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
       {
       //If the test failed last time, it should be run first.
       this->SortedTests.push_back(i->first);
+      alreadySortedTests.insert(i->first);
       }
     else
       {
@@ -513,7 +516,11 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
     for(TestList::const_iterator j = sortedCopy.begin();
       j != sortedCopy.end(); ++j)
       {
-      this->SortedTests.push_back(*j);
+      if(alreadySortedTests.find(*j) == alreadySortedTests.end())
+        {
+        this->SortedTests.push_back(*j);
+        alreadySortedTests.insert(*j);
+        }
       }
     }
 }
