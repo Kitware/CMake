@@ -6463,33 +6463,6 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
           break;
         }
       }
-    else if (!newExplicitLibraries && !explicitLibraries)
-      {
-      LinkImplementation const* impl = this->GetLinkImplementation(config,
-                                                                  headTarget);
-      if (impl->Libraries.empty())
-        {
-        return false;
-        }
-      typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> >
-                                                                    Container;
-      for(Container::const_iterator it = this->TLLCommands.begin();
-          it != this->TLLCommands.end(); ++it)
-        {
-        if (it->first == cmTarget::KeywordTLLSignature)
-          {
-          return false;
-          }
-        }
-      // Only target_link_libraries(foo bar) still signatures were used. No
-      // target_link_libraries(foo LINK_INTERFACE_LIBRARIES bar) type was
-      // used, nor was there any attempt to otherwise set a property
-      // matching LINK_INTERFACE_LIBRARIES(_<CONFIG>)?
-      // Use the link implementation as the link interface.
-      iface.Libraries = impl->Libraries;
-      iface.ImplementationIsInterface = true;
-      return true;
-      }
     }
   else if(this->GetType() == cmTarget::STATIC_LIBRARY)
     {
@@ -6615,11 +6588,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         }
       }
     }
-  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
-    // The implementation shouldn't be the interface if CMP0022 is NEW. That
-    // way, the LINK_LIBRARIES property can be set directly without having to
-    // empty the INTERFACE_LINK_LIBRARIES
+  else
     {
     // The link implementation is the default link interface.
     LinkImplementation const* impl = this->GetLinkImplementation(config,
