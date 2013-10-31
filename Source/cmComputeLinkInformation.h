@@ -29,8 +29,8 @@ class cmOrderDirectories;
 class cmComputeLinkInformation
 {
 public:
-  cmComputeLinkInformation(cmTarget* target, const char* config,
-                           cmTarget* headTarget);
+  cmComputeLinkInformation(cmTarget const* target, const char* config,
+                           cmTarget const* headTarget);
   ~cmComputeLinkInformation();
   bool Compute();
 
@@ -74,8 +74,8 @@ private:
   std::set<cmTarget*> SharedLibrariesLinked;
 
   // Context information.
-  cmTarget* Target;
-  cmTarget* HeadTarget;
+  cmTarget const* Target;
+  cmTarget const* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
