@@ -562,7 +562,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommand(cmSourceFile* sf)
   if(this->SourcesVisited.insert(sf).second)
     {
     if(std::vector<cmSourceFile*> const* depends =
-       this->Target->GetSourceDepends(sf))
+       this->GeneratorTarget->GetSourceDepends(sf))
       {
       for(std::vector<cmSourceFile*>::const_iterator di = depends->begin();
           di != depends->end(); ++di)
@@ -1049,7 +1049,8 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
           si = this->GeneratorTarget->ExternalObjects.begin();
         si != this->GeneratorTarget->ExternalObjects.end(); ++si)
       {
-      std::vector<cmSourceFile*> const* d=this->Target->GetSourceDepends(*si);
+      std::vector<cmSourceFile*> const* d =
+                                this->GeneratorTarget->GetSourceDepends(*si);
       this->WriteSource((d && !d->empty())? "None":"Object", *si);
       }
     }
