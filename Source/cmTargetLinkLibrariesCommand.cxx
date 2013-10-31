@@ -303,6 +303,15 @@ bool cmTargetLinkLibrariesCommand
     this->Target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
     }
 
+  // Make sure INTERFACE_LINK_LIBRARIES target property exists
+  // if any signature except the plain one was used.  Other
+  // signatures imply awareness of explicit link interfaces.
+  if(this->CurrentProcessingState != ProcessingLinkLibraries &&
+     !this->Target->GetProperty("INTERFACE_LINK_LIBRARIES"))
+    {
+    this->Target->SetProperty("INTERFACE_LINK_LIBRARIES", "");
+    }
+
   return true;
 }
 

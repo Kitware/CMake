@@ -192,6 +192,12 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
                       std::vector<std::string> &missingTargets)
 {
   const char *input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
+  if (!input)
+    {
+    // Only the plain target_link_libraries(foo bar) signature was
+    // called so use the link implementation as the link interface.
+    input = target->GetProperty("LINK_LIBRARIES");
+    }
   if (input)
     {
     std::string prepro = cmGeneratorExpression::Preprocess(input,
@@ -652,11 +658,18 @@ cmExportFileGenerator
     return;
     }
 
+  const bool newCMP0022Behavior =
+                        target->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                     && target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+
   if (iface->ImplementationIsInterface)
     {
-    this->SetImportLinkProperty(suffix, target,
+    if(!newCMP0022Behavior || this->ExportOld)
+      {
+      this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties, missingTargets);
+      }
     return;
     }
 
@@ -676,10 +689,6 @@ cmExportFileGenerator
     {
     return;
     }
-
-  const bool newCMP0022Behavior =
-                        target->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                     && target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
 
   if(newCMP0022Behavior && !this->ExportOld)
     {
