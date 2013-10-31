@@ -2,7 +2,8 @@
 macro(record_compiler_features lang compile_flags feature_list)
   include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_${lang}_COMPILER_ID}-${lang}-FeatureTests.cmake" OPTIONAL)
 
-  string(TOLOWER lang_lc ${lang})
+  string(TOLOWER ${lang} lang_lc)
+  file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.${lang_lc}" "
   extern const char features[] = {\n")
   foreach(feature ${CMAKE_${lang}_KNOWN_FEATURES})
@@ -20,13 +21,14 @@ macro(record_compiler_features lang compile_flags feature_list)
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMakeFiles"
     ERROR_VARIABLE _error
     OUTPUT_VARIABLE _output
+    RESULT_VARIABLE _result
   )
   # We need to capture these when running the process so that the output does
   # not leak and confuse unit tests. Clear the variables so they do not leak
   # to user CMake code either.
   unset(_error)
   unset(_output)
-  if (EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
+  if (_result EQUAL 0 AND EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
     file(STRINGS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}"
       features REGEX "${lang}_FEATURE:.*")
     foreach(info ${features})
