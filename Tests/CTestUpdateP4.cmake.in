@@ -8,6 +8,7 @@ set(P4_TOP "${TOP}")
 set(TOP "${TOP}/@CTestUpdateP4_DIR@")
 
 # Include code common to all update tests.
+set(REPOSITORY_FILE_PREFIX "//ctest/")
 include("@CMAKE_CURRENT_SOURCE_DIR@/CTestUpdateCommon.cmake")
 
 #-----------------------------------------------------------------------------
