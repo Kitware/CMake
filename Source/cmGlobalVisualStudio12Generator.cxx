@@ -13,42 +13,65 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 
-static const char vs12Win32generatorName[] = "Visual Studio 12";
-static const char vs12Win64generatorName[] = "Visual Studio 12 Win64";
-static const char vs12ARMgeneratorName[] = "Visual Studio 12 ARM";
+static const char vs12generatorName[] = "Visual Studio 12 2013";
+
+// Map generator name without year to name with year.
+static const char* cmVS12GenName(const char* name, std::string& genName)
+{
+  if(strncmp(name, vs12generatorName, sizeof(vs12generatorName)-6) != 0)
+    {
+    return 0;
+    }
+  const char* p = name + sizeof(vs12generatorName) - 6;
+  if(strncmp(p, " 2013", 5) == 0)
+    {
+    p += 5;
+    }
+  genName = std::string(vs12generatorName) + p;
+  return p;
+}
 
 class cmGlobalVisualStudio12Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs12Win32generatorName))
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const
+    {
+    std::string genName;
+    const char* p = cmVS12GenName(name, genName);
+    if(!p)
+      { return 0; }
+    name = genName.c_str();
+    if(strcmp(p, "") == 0)
       {
       return new cmGlobalVisualStudio12Generator(
         name, NULL, NULL);
       }
-    if(!strcmp(name, vs12Win64generatorName))
+    if(strcmp(p, " Win64") == 0)
       {
       return new cmGlobalVisualStudio12Generator(
         name, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(!strcmp(name, vs12ARMgeneratorName))
+    if(strcmp(p, " ARM") == 0)
       {
       return new cmGlobalVisualStudio12Generator(
         name, "ARM", NULL);
       }
     return 0;
-  }
+    }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    entry.Name = "Visual Studio 12";
-    entry.Brief = "Generates Visual Studio 12 (2013) project files.";
-  }
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+    {
+    entry.Name = vs12generatorName;
+    entry.Brief = "Generates Visual Studio 12 (VS 2013) project files.";
+    }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs12Win32generatorName);
-    names.push_back(vs12Win64generatorName);
-    names.push_back(vs12ARMgeneratorName); }
+  virtual void GetGenerators(std::vector<std::string>& names) const
+    {
+    names.push_back(vs12generatorName);
+    names.push_back(vs12generatorName + std::string(" ARM"));
+    names.push_back(vs12generatorName + std::string(" Win64"));
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -70,6 +93,18 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\12.0\\Setup\\VC;"
     "ProductDir", vc12Express, cmSystemTools::KeyWOW64_32);
   this->PlatformToolset = "v120";
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio12Generator::MatchesGeneratorName(const char* name) const
+{
+  std::string genName;
+  if(cmVS12GenName(name, genName))
+    {
+    return genName == this->GetName();
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

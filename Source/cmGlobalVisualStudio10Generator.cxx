@@ -18,42 +18,65 @@
 #include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
 
-static const char vs10Win32generatorName[] = "Visual Studio 10";
-static const char vs10Win64generatorName[] = "Visual Studio 10 Win64";
-static const char vs10IA64generatorName[] = "Visual Studio 10 IA64";
+static const char vs10generatorName[] = "Visual Studio 10 2010";
+
+// Map generator name without year to name with year.
+static const char* cmVS10GenName(const char* name, std::string& genName)
+{
+  if(strncmp(name, vs10generatorName, sizeof(vs10generatorName)-6) != 0)
+    {
+    return 0;
+    }
+  const char* p = name + sizeof(vs10generatorName) - 6;
+  if(strncmp(p, " 2010", 5) == 0)
+    {
+    p += 5;
+    }
+  genName = std::string(vs10generatorName) + p;
+  return p;
+}
 
 class cmGlobalVisualStudio10Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(!strcmp(name, vs10Win32generatorName))
+  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const
+    {
+    std::string genName;
+    const char* p = cmVS10GenName(name, genName);
+    if(!p)
+      { return 0; }
+    name = genName.c_str();
+    if(strcmp(p, "") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
         name, NULL, NULL);
       }
-    if(!strcmp(name, vs10Win64generatorName))
+    if(strcmp(p, " Win64") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
         name, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(!strcmp(name, vs10IA64generatorName))
+    if(strcmp(p, " IA64") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
         name, "Itanium", "CMAKE_FORCE_IA64");
       }
     return 0;
-  }
+    }
 
-  virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    entry.Name = "Visual Studio 10";
-    entry.Brief = "Generates Visual Studio 10 (2010) project files.";
-  }
+  virtual void GetDocumentation(cmDocumentationEntry& entry) const
+    {
+    entry.Name = vs10generatorName;
+    entry.Brief = "Generates Visual Studio 10 (VS 2010) project files.";
+    }
 
-  virtual void GetGenerators(std::vector<std::string>& names) const {
-    names.push_back(vs10Win32generatorName);
-    names.push_back(vs10Win64generatorName);
-    names.push_back(vs10IA64generatorName); }
+  virtual void GetGenerators(std::vector<std::string>& names) const
+    {
+    names.push_back(vs10generatorName);
+    names.push_back(vs10generatorName + std::string(" IA64"));
+    names.push_back(vs10generatorName + std::string(" Win64"));
+    }
 };
 
 //----------------------------------------------------------------------------
@@ -75,6 +98,18 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
   this->MasmEnabled = false;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::MatchesGeneratorName(const char* name) const
+{
+  std::string genName;
+  if(cmVS10GenName(name, genName))
+    {
+    return genName == this->GetName();
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

@@ -32,9 +32,9 @@ All Generators
    /generator/Sublime Text 2 - NMake Makefiles
    /generator/Sublime Text 2 - Unix Makefiles
    /generator/Unix Makefiles
-   /generator/Visual Studio 10
-   /generator/Visual Studio 11
-   /generator/Visual Studio 12
+   /generator/Visual Studio 10 2010
+   /generator/Visual Studio 11 2012
+   /generator/Visual Studio 12 2013
    /generator/Visual Studio 6
    /generator/Visual Studio 7 .NET 2003
    /generator/Visual Studio 7
