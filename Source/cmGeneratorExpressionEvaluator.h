@@ -24,13 +24,13 @@ struct cmGeneratorExpressionContext
 {
   cmListFileBacktrace Backtrace;
   std::set<cmTarget*> DependTargets;
-  std::set<const cmTarget*> AllTargets;
+  std::set<cmTarget*> AllTargets;
   std::set<cmStdString> SeenTargetProperties;
   cmMakefile *Makefile;
   const char *Config;
-  const cmTarget* HeadTarget; // The target whose property is being evaluated.
-  const cmTarget* CurrentTarget; // The dependent of HeadTarget which appears
-                                 // directly or indirectly in the property.
+  cmTarget *HeadTarget; // The target whose property is being evaluated.
+  cmTarget *CurrentTarget; // The dependent of HeadTarget which appears
+                           // directly or indirectly in the property.
   bool Quiet;
   bool HadError;
   bool HadContextSensitiveCondition;

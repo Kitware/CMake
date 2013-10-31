@@ -18,11 +18,11 @@
 //----------------------------------------------------------------------------
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::set<const cmTarget*> emitted;
-  std::set<const cmTarget*> emittedDeps;
+  std::set<cmTarget*> emitted;
+  std::set<cmTarget*> emittedDeps;
   while(!this->Exports.empty())
     {
-    const cmTarget* te = this->Exports.back();
+    cmTarget* te = this->Exports.back();
     this->Exports.pop_back();
     if (emitted.insert(te).second)
       {
@@ -45,8 +45,8 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 }
 
 std::string cmExportTryCompileFileGenerator::FindTargets(const char *propName,
-                                                const cmTarget* tgt,
-                                          std::set<const cmTarget*> &emitted)
+                                                cmTarget *tgt,
+                                                std::set<cmTarget*> &emitted)
 {
   const char *prop = tgt->GetProperty(propName);
   if(!prop)
@@ -70,8 +70,8 @@ std::string cmExportTryCompileFileGenerator::FindTargets(const char *propName,
   std::string result = cge->Evaluate(tgt->GetMakefile(), this->Config,
                                      false, &dummyHead, tgt, &dagChecker);
 
-  const std::set<const cmTarget*> &allTargets = cge->GetAllTargetsSeen();
-  for(std::set<const cmTarget*>::const_iterator li = allTargets.begin();
+  const std::set<cmTarget*> &allTargets = cge->GetAllTargetsSeen();
+  for(std::set<cmTarget*>::const_iterator li = allTargets.begin();
       li != allTargets.end(); ++li)
     {
     if(emitted.insert(*li).second)
@@ -84,9 +84,9 @@ std::string cmExportTryCompileFileGenerator::FindTargets(const char *propName,
 
 //----------------------------------------------------------------------------
 void
-cmExportTryCompileFileGenerator::PopulateProperties(const cmTarget* target,
+cmExportTryCompileFileGenerator::PopulateProperties(cmTarget* target,
                                                 ImportPropertyMap& properties,
-                                          std::set<const cmTarget*> &emitted)
+                                                std::set<cmTarget*> &emitted)
 {
   cmPropertyMap props = target->GetProperties();
   for(cmPropertyMap::const_iterator i = props.begin(); i != props.end(); ++i)

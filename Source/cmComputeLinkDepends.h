@@ -32,8 +32,7 @@ class cmake;
 class cmComputeLinkDepends
 {
 public:
-  cmComputeLinkDepends(const cmTarget* target, const char* config,
-                       const cmTarget* head);
+  cmComputeLinkDepends(cmTarget* target, const char* config, cmTarget *head);
   ~cmComputeLinkDepends();
 
   // Basic information about each link item.
@@ -59,8 +58,8 @@ public:
 private:
 
   // Context information.
-  const cmTarget* Target;
-  const cmTarget* HeadTarget;
+  cmTarget* Target;
+  cmTarget* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
