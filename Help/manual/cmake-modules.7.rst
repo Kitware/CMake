@@ -11,6 +11,8 @@ All Modules
 ===========
 
 .. toctree::
+   :maxdepth: 1
+
    /module/AddFileDependencies
    /module/BundleUtilities
    /module/CheckCCompilerFlag

@@ -11,6 +11,8 @@ Variables that Provide Information
 ==================================
 
 .. toctree::
+   :maxdepth: 1
+
    /variable/CMAKE_ARGC
    /variable/CMAKE_ARGV0
    /variable/CMAKE_AR
@@ -76,6 +78,8 @@ Variables that Change Behavior
 ==============================
 
 .. toctree::
+   :maxdepth: 1
+
    /variable/BUILD_SHARED_LIBS
    /variable/CMAKE_ABSOLUTE_DESTINATION_FILES
    /variable/CMAKE_AUTOMOC_RELAXED_MODE
@@ -116,6 +120,8 @@ Variables that Describe the System
 ==================================
 
 .. toctree::
+   :maxdepth: 1
+
    /variable/APPLE
    /variable/BORLAND
    /variable/CMAKE_CL_64
@@ -155,6 +161,8 @@ Variables that Control the Build
 ================================
 
 .. toctree::
+   :maxdepth: 1
+
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS
    /variable/CMAKE_AUTOMOC
@@ -209,6 +217,8 @@ Variables for Languages
 =======================
 
 .. toctree::
+   :maxdepth: 1
+
    /variable/CMAKE_COMPILER_IS_GNULANG
    /variable/CMAKE_Fortran_MODDIR_DEFAULT
    /variable/CMAKE_Fortran_MODDIR_FLAG
@@ -252,6 +262,8 @@ Variables for CPack
 ===================
 
 .. toctree::
+   :maxdepth: 1
+
    /variable/CPACK_ABSOLUTE_DESTINATION_FILES
    /variable/CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY
    /variable/CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION
