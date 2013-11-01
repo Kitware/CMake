@@ -15,6 +15,9 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode" AND
     if(CMAKE_OSX_SYSROOT AND CMAKE_C_SYSROOT_FLAG AND NOT ";${C_FLAGS};" MATCHES ";${CMAKE_C_SYSROOT_FLAG};")
       list(APPEND C_FLAGS ${CMAKE_C_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT})
     endif()
+    # Clang on OS X, and perhaps other compilers, do not support -g
+    # for both generating and assembling, so drop it from generating.
+    list(REMOVE_ITEM C_FLAGS -g)
     set(SRCS main.s)
     add_custom_command(
       OUTPUT main.s
