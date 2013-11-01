@@ -140,75 +140,82 @@ bool cmMacroHelperCommand::InvokeInitialPass
       // Set the FilePath on the arguments to match the function since it is
       // not stored and the original values may be freed
       k->FilePath = this->FilePath.c_str();
-      tmps = k->Value;
-      // replace formal arguments
-      for (unsigned int j = 1; j < this->Args.size(); ++j)
+      if(k->Delim == cmListFileArgument::Bracket)
         {
-        variable = "${";
-        variable += this->Args[j];
-        variable += "}";
-        cmSystemTools::ReplaceString(tmps, variable.c_str(),
-                                     expandedArgs[j-1].c_str());
+        arg.Value = k->Value;
         }
-      // replace argc
-      cmSystemTools::ReplaceString(tmps, "${ARGC}",argcDef.c_str());
-
-      // repleace ARGN
-      if (tmps.find("${ARGN}") != std::string::npos)
+      else
         {
-        if (!argnDefInitialized)
+        tmps = k->Value;
+        // replace formal arguments
+        for (unsigned int j = 1; j < this->Args.size(); ++j)
           {
-          std::vector<std::string>::const_iterator eit;
-          std::vector<std::string>::size_type cnt = 0;
-          for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
+          variable = "${";
+          variable += this->Args[j];
+          variable += "}";
+          cmSystemTools::ReplaceString(tmps, variable.c_str(),
+                                       expandedArgs[j-1].c_str());
+          }
+        // replace argc
+        cmSystemTools::ReplaceString(tmps, "${ARGC}",argcDef.c_str());
+
+        // repleace ARGN
+        if (tmps.find("${ARGN}") != std::string::npos)
+          {
+          if (!argnDefInitialized)
             {
-            if ( cnt >= this->Args.size()-1 )
+            std::vector<std::string>::const_iterator eit;
+            std::vector<std::string>::size_type cnt = 0;
+            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
               {
-              if ( argnDef.size() > 0 )
+              if ( cnt >= this->Args.size()-1 )
                 {
-                argnDef += ";";
+                if ( argnDef.size() > 0 )
+                  {
+                  argnDef += ";";
+                  }
+                argnDef += *eit;
                 }
-              argnDef += *eit;
+              cnt ++;
               }
-            cnt ++;
+            argnDefInitialized = true;
             }
-          argnDefInitialized = true;
+          cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
           }
-        cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
-        }
 
-      // if the current argument of the current function has ${ARGV in it
-      // then try replacing ARGV values
-      if (tmps.find("${ARGV") != std::string::npos)
-        {
-        char argvName[60];
-
-        // repleace ARGV, compute it only once
-        if (!argvDefInitialized)
+        // if the current argument of the current function has ${ARGV in it
+        // then try replacing ARGV values
+        if (tmps.find("${ARGV") != std::string::npos)
           {
-          std::vector<std::string>::const_iterator eit;
-          for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
+          char argvName[60];
+
+          // repleace ARGV, compute it only once
+          if (!argvDefInitialized)
             {
-            if ( argvDef.size() > 0 )
+            std::vector<std::string>::const_iterator eit;
+            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
               {
-              argvDef += ";";
+              if ( argvDef.size() > 0 )
+                {
+                argvDef += ";";
+                }
+              argvDef += *eit;
               }
-            argvDef += *eit;
+            argvDefInitialized = true;
             }
-          argvDefInitialized = true;
-          }
-        cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
+          cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
 
-        // also replace the ARGV1 ARGV2 ... etc
-        for (unsigned int t = 0; t < expandedArgs.size(); ++t)
-          {
-          sprintf(argvName,"${ARGV%i}",t);
-          cmSystemTools::ReplaceString(tmps, argvName,
-                                       expandedArgs[t].c_str());
+          // also replace the ARGV1 ARGV2 ... etc
+          for (unsigned int t = 0; t < expandedArgs.size(); ++t)
+            {
+            sprintf(argvName,"${ARGV%i}",t);
+            cmSystemTools::ReplaceString(tmps, argvName,
+                                         expandedArgs[t].c_str());
+            }
           }
+
+        arg.Value = tmps;
         }
-
-      arg.Value = tmps;
       arg.Delim = k->Delim;
       arg.FilePath = k->FilePath;
       arg.Line = k->Line;
