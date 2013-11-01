@@ -132,9 +132,9 @@
 #     add_executable(foo foo.cc)
 #   endif()
 #
-# Example to find Boost headers and some libraries::
+# Example to find Boost headers and some *static* libraries::
 #
-#   set(Boost_USE_STATIC_LIBS        ON)
+#   set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 #   set(Boost_USE_MULTITHREADED      ON)
 #   set(Boost_USE_STATIC_RUNTIME    OFF)
 #   find_package(Boost 1.36.0 COMPONENTS date_time filesystem system ...)
