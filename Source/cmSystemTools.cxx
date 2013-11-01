@@ -1619,18 +1619,23 @@ bool extract_tar(const char* outFileName, bool verbose,
                            archive_error_string(a));
       break;
       }
-    if (verbose && extract)
+    if(verbose)
       {
-      cmSystemTools::Stdout("x ");
-      cmSystemTools::Stdout(archive_entry_pathname(entry));
-      }
-    if(verbose && !extract)
-      {
-      list_item_verbose(stdout, entry);
+      if(extract)
+        {
+        cmSystemTools::Stdout("x ");
+        cmSystemTools::Stdout(archive_entry_pathname(entry));
+        }
+      else
+        {
+        list_item_verbose(stdout, entry);
+        }
+      cmSystemTools::Stdout("\n");
       }
     else if(!extract)
       {
       cmSystemTools::Stdout(archive_entry_pathname(entry));
+      cmSystemTools::Stdout("\n");
       }
     if(extract)
       {
@@ -1644,15 +1649,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         }
 
       r = archive_write_header(ext, entry);
-      if (r != ARCHIVE_OK)
-        {
-        cmSystemTools::Error("Problem with archive_write_header(): ",
-                             archive_error_string(ext));
-        cmSystemTools::Error("Current file: ",
-                             archive_entry_pathname(entry));
-        break;
-        }
-      else
+      if (r == ARCHIVE_OK)
         {
         copy_data(a, ext);
         r = archive_write_finish_entry(ext);
@@ -1663,10 +1660,14 @@ bool extract_tar(const char* outFileName, bool verbose,
           break;
           }
         }
-      }
-    if (verbose || !extract)
-      {
-      cmSystemTools::Stdout("\n");
+      else
+        {
+        cmSystemTools::Error("Problem with archive_write_header(): ",
+                             archive_error_string(ext));
+        cmSystemTools::Error("Current file: ",
+                             archive_entry_pathname(entry));
+        break;
+        }
       }
     }
   archive_read_close(a);
