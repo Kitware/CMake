@@ -22,6 +22,7 @@
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>
+#include <cmsys/Directory.hxx>
 
 // used for sleep
 #ifdef _WIN32
@@ -1056,15 +1057,71 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char *sname)
     return false;
     }
 
+  // consider non existing target directory a success
+  if(!cmSystemTools::FileExists(sname))
+    {
+    return true;
+    }
+
   // try to avoid deleting directories that we shouldn't
   std::string check = sname;
   check += "/CMakeCache.txt";
-  if(cmSystemTools::FileExists(check.c_str()) &&
-     !cmSystemTools::RemoveADirectory(sname))
+
+  if(!cmSystemTools::FileExists(check.c_str()))
     {
     return false;
     }
-  return true;
+
+  for(int i = 0; i < 5; ++i)
+    {
+    if(TryToRemoveBinaryDirectoryOnce(sname))
+      {
+      return true;
+      }
+    cmSystemTools::Delay(100);
+    }
+
+  return false;
+}
+
+//-------------------------------------------------------------------------
+bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
+  const std::string& directoryPath)
+{
+  cmsys::Directory directory;
+  directory.Load(directoryPath.c_str());
+
+  for(unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i)
+    {
+    std::string path = directory.GetFile(i);
+
+    if(path == "." || path == ".." || path == "CMakeCache.txt")
+      {
+      continue;
+      }
+
+    std::string fullPath = directoryPath + std::string("/") + path;
+
+    bool isDirectory = cmSystemTools::FileIsDirectory(fullPath.c_str()) &&
+      !cmSystemTools::FileIsSymlink(fullPath.c_str());
+
+    if(isDirectory)
+      {
+      if(!cmSystemTools::RemoveADirectory(fullPath.c_str()))
+        {
+        return false;
+        }
+      }
+    else
+      {
+      if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+        {
+        return false;
+        }
+      }
+  }
+
+  return cmSystemTools::RemoveADirectory(directoryPath.c_str());
 }
 
 //-------------------------------------------------------------------------

@@ -135,6 +135,9 @@ private:
   // Add ctest command
   void AddCTestCommand(cmCTestCommand* command);
 
+  // Try to remove the binary directory once
+  static bool TryToRemoveBinaryDirectoryOnce(const std::string& directoryPath);
+
   std::vector<cmStdString> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
 
