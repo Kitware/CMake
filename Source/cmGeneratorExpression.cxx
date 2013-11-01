@@ -53,7 +53,7 @@ cmGeneratorExpression::~cmGeneratorExpression()
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const char* config, bool quiet,
-  cmTarget *headTarget,
+  cmTarget const* headTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   return this->Evaluate(mf,
@@ -67,8 +67,8 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const char* config, bool quiet,
-  cmTarget *headTarget,
-  cmTarget *currentTarget,
+  cmTarget const* headTarget,
+  cmTarget const* currentTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   if (!this->NeedsEvaluation)
