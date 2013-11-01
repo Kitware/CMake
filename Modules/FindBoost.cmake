@@ -4,9 +4,7 @@
 #
 # Find Boost include dirs and libraries
 #
-# Use this module by invoking find_package with the form:
-#
-# ::
+# Use this module by invoking find_package with the form::
 #
 #   find_package(Boost
 #     [version] [EXACT]      # Minimum or EXACT version e.g. 1.36.0
@@ -17,9 +15,7 @@
 # This module finds headers and requested component libraries OR a CMake
 # package configuration file provided by a "Boost CMake" build.  For the
 # latter case skip to the "Boost CMake" section below.  For the former
-# case results are reported in variables:
-#
-# ::
+# case results are reported in variables::
 #
 #   Boost_FOUND            - True if headers and requested libraries were found
 #   Boost_INCLUDE_DIRS     - Boost include directories
@@ -38,11 +34,7 @@
 #                            information about Boost's automatic linking
 #                            displayed during compilation
 #
-#
-#
-# This module reads hints about search locations from variables:
-#
-# ::
+# This module reads hints about search locations from variables::
 #
 #   BOOST_ROOT             - Preferred installation prefix
 #    (or BOOSTROOT)
@@ -54,9 +46,7 @@
 #                          - List of Boost versions not known to this module
 #                            (Boost install locations may contain the version)
 #
-# and saves search results persistently in CMake cache entries:
-#
-# ::
+# and saves search results persistently in CMake cache entries::
 #
 #   Boost_INCLUDE_DIR         - Directory containing Boost headers
 #   Boost_LIBRARY_DIR         - Directory containing Boost libraries
@@ -83,9 +73,7 @@
 #
 # Boost libraries come in many variants encoded in their file name.
 # Users or projects may tell this module which variant to find by
-# setting variables:
-#
-# ::
+# setting variables::
 #
 #   Boost_USE_MULTITHREADED  - Set to OFF to use the non-multithreaded
 #                              libraries ('mt' tag).  Default is ON.
@@ -109,9 +97,7 @@
 #                              such as "pthread" or "win32".  Names with
 #                              and without this suffix will both be tried.
 #
-# Other variables one may set to control this module are:
-#
-# ::
+# Other variables one may set to control this module are::
 #
 #   Boost_DEBUG              - Set to ON to enable debug output from FindBoost.
 #                              Please enable this before filing any bug report.
@@ -132,17 +118,13 @@
 # to be linked explicitly or available in the link library search path.
 # In this case setting Boost_USE_STATIC_LIBS to OFF may not achieve
 # dynamic linking.  Boost automatic linking typically requests static
-# libraries with a few exceptions (such as Boost.Python).  Use
-#
-# ::
+# libraries with a few exceptions (such as Boost.Python).  Use::
 #
 #   add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
 #
 # to ask Boost to report information about automatic linking requests.
 #
-# Example to find Boost headers only:
-#
-# ::
+# Example to find Boost headers only::
 #
 #   find_package(Boost 1.36.0)
 #   if(Boost_FOUND)
@@ -150,9 +132,7 @@
 #     add_executable(foo foo.cc)
 #   endif()
 #
-# Example to find Boost headers and some libraries:
-#
-# ::
+# Example to find Boost headers and some libraries::
 #
 #   set(Boost_USE_STATIC_LIBS        ON)
 #   set(Boost_USE_MULTITHREADED      ON)
@@ -164,9 +144,8 @@
 #     target_link_libraries(foo ${Boost_LIBRARIES})
 #   endif()
 #
-#
-#
-# Boost CMake ----------------------------------------------------------
+# Boost CMake
+# ^^^^^^^^^^^
 #
 # If Boost was built using the boost-cmake project it provides a package
 # configuration file for use with find_package's Config mode.  This
