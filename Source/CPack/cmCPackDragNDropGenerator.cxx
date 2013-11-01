@@ -505,7 +505,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     cmOStringStream embed_sla_command;
     embed_sla_command << this->GetOption("CPACK_COMMAND_REZ");
     const char* sysroot = this->GetOption("CPACK_OSX_SYSROOT");
-    if(sysroot)
+    if(sysroot && sysroot[0] != '\0')
       {
       embed_sla_command << " -isysroot \"" << sysroot << "\"";
       }
