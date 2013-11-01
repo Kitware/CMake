@@ -519,9 +519,9 @@ cpack_set_if_not_set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
 # WiX specific variables
 cpack_set_if_not_set(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 
-# osx sysroot
+# set sysroot so SDK tools can be used
 if(CMAKE_OSX_SYSROOT)
-  set(CPACK_OSX_SYSROOT "${CMAKE_OSX_SYSROOT}")
+  cpack_set_if_not_set(CPACK_OSX_SYSROOT "${CMAKE_OSX_SYSROOT}")
 endif()
 
 if(DEFINED CPACK_COMPONENTS_ALL)
