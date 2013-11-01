@@ -37,9 +37,18 @@ function(check_updates build)
     REGEX "<(${types}|FullName)>"
     LIMIT_INPUT ${max_update_xml_size}
     )
+
   string(REGEX REPLACE
     "[ \t]*<(${types})>[ \t]*;[ \t]*<FullName>([^<]*)</FullName>"
     "\\1{\\2}" UPDATE_XML_ENTRIES "${UPDATE_XML_ENTRIES}")
+
+  # If specified, remove the given prefix from the files in Update.xml.
+  # Some VCS systems, like Perforce, return absolute locations
+  if(DEFINED REPOSITORY_FILE_PREFIX)
+    string(REPLACE
+      "${REPOSITORY_FILE_PREFIX}" ""
+      UPDATE_XML_ENTRIES "${UPDATE_XML_ENTRIES}")
+  endif()
 
   # Compare expected and actual entries
   set(EXTRA "${UPDATE_XML_ENTRIES}")
