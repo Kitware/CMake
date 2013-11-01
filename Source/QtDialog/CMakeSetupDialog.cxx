@@ -1230,7 +1230,7 @@ void CMakeSetupDialog::doOutputFindNext(bool directionForward)
 
   QString search = this->FindHistory.front();
 
-  QTextCursor cursor = this->Output->textCursor();
+  QTextCursor textCursor = this->Output->textCursor();
   QTextDocument* document = this->Output->document();
   QTextDocument::FindFlags flags;
   if (!directionForward)
@@ -1238,67 +1238,67 @@ void CMakeSetupDialog::doOutputFindNext(bool directionForward)
     flags |= QTextDocument::FindBackward;
     }
 
-  cursor = document->find(search, cursor, flags);
+  textCursor = document->find(search, textCursor, flags);
 
-  if (cursor.isNull())
+  if (textCursor.isNull())
     {
     // first search found nothing, wrap around and search again
-    cursor = this->Output->textCursor();
-    cursor.movePosition(directionForward ? QTextCursor::Start
-                                         : QTextCursor::End);
-    cursor = document->find(search, cursor, flags);
+    textCursor = this->Output->textCursor();
+    textCursor.movePosition(directionForward ? QTextCursor::Start
+                                             : QTextCursor::End);
+    textCursor = document->find(search, textCursor, flags);
     }
 
-  if (cursor.hasSelection())
+  if (textCursor.hasSelection())
     {
-    this->Output->setTextCursor(cursor);
+    this->Output->setTextCursor(textCursor);
     }
 }
 
 void CMakeSetupDialog::doOutputErrorNext()
 {
-  QTextCursor cursor = this->Output->textCursor();
+  QTextCursor textCursor = this->Output->textCursor();
   bool atEnd = false;
 
   // move cursor out of current error-block
-  if (cursor.blockCharFormat() == this->ErrorFormat)
+  if (textCursor.blockCharFormat() == this->ErrorFormat)
     {
-    atEnd = !cursor.movePosition(QTextCursor::NextBlock);
+    atEnd = !textCursor.movePosition(QTextCursor::NextBlock);
     }
 
   // move cursor to next error-block
-  while (cursor.blockCharFormat() != this->ErrorFormat && !atEnd)
+  while (textCursor.blockCharFormat() != this->ErrorFormat && !atEnd)
     {
-    atEnd = !cursor.movePosition(QTextCursor::NextBlock);
+    atEnd = !textCursor.movePosition(QTextCursor::NextBlock);
     }
 
   if (atEnd)
     {
     // first search found nothing, wrap around and search again
-    atEnd = !cursor.movePosition(QTextCursor::Start);
+    atEnd = !textCursor.movePosition(QTextCursor::Start);
 
     // move cursor to next error-block
-    while (cursor.blockCharFormat() != this->ErrorFormat && !atEnd)
+    while (textCursor.blockCharFormat() != this->ErrorFormat && !atEnd)
       {
-      atEnd = !cursor.movePosition(QTextCursor::NextBlock);
+      atEnd = !textCursor.movePosition(QTextCursor::NextBlock);
       }
     }
 
   if (!atEnd)
     {
-    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    textCursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
 
     QTextCharFormat selectionFormat;
     selectionFormat.setBackground(Qt::yellow);
-    QTextEdit::ExtraSelection extraSelection = {cursor, selectionFormat};
+    QTextEdit::ExtraSelection extraSelection = {textCursor, selectionFormat};
     this->Output->setExtraSelections(QList<QTextEdit::ExtraSelection>()
                                      << extraSelection);
 
     // make the whole error-block visible
-    this->Output->setTextCursor(cursor);
+    this->Output->setTextCursor(textCursor);
 
     // remove the selection to see the extraSelection
-    cursor.setPosition(cursor.anchor());
-    this->Output->setTextCursor(cursor);
+    textCursor.setPosition(textCursor.anchor());
+    this->Output->setTextCursor(textCursor);
     }
 }
