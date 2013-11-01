@@ -1943,6 +1943,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION "Upload\\.xml")
 
   configure_file(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestEmptyBinaryDirectory/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestEmptyBinaryDirectory/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  add_test(CTestTestEmptyBinaryDirectory ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestEmptyBinaryDirectory/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestEmptyBinaryDirectory/testOut.log"
+    )
+  set_tests_properties(CTestTestEmptyBinaryDirectory PROPERTIES
+    PASS_REGULAR_EXPRESSION "TEST_SUCCESS")
+
+  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestConfigFileInBuildDir/test1.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestConfigFileInBuildDir1/test1.cmake"
     @ONLY ESCAPE_QUOTES)
