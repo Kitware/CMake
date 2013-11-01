@@ -5180,6 +5180,26 @@ void cmTarget::GetTransitivePropertyLinkLibraries(
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::OnlyUsedWithPlainTLL() const
+{
+  if (this->TLLCommands.empty())
+    {
+    return false;
+    }
+  typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> >
+                                                                Container;
+  for(Container::const_iterator it = this->TLLCommands.begin();
+      it != this->TLLCommands.end(); ++it)
+    {
+    if (it->first == cmTarget::KeywordTLLSignature)
+      {
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                     cmTarget const* headTarget) const
 {

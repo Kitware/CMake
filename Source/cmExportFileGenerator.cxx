@@ -192,7 +192,7 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
                       std::vector<std::string> &missingTargets)
 {
   const char *input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
-  if (!input)
+  if (!input && target->OnlyUsedWithPlainTLL())
     {
     // Only the plain target_link_libraries(foo bar) signature was
     // called so use the link implementation as the link interface.
