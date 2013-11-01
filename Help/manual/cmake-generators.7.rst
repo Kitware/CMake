@@ -11,6 +11,8 @@ All Generators
 ==============
 
 .. toctree::
+   :maxdepth: 1
+
    /generator/Borland Makefiles
    /generator/CodeBlocks - MinGW Makefiles
    /generator/CodeBlocks - Ninja
