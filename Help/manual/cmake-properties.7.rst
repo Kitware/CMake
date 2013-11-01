@@ -11,6 +11,8 @@ Properties of Global Scope
 ==========================
 
 .. toctree::
+   :maxdepth: 1
+
    /prop_gbl/ALLOW_DUPLICATE_CUSTOM_TARGETS
    /prop_gbl/AUTOGEN_TARGETS_FOLDER
    /prop_gbl/AUTOMOC_TARGETS_FOLDER
@@ -39,6 +41,8 @@ Properties on Directories
 =========================
 
 .. toctree::
+   :maxdepth: 1
+
    /prop_dir/ADDITIONAL_MAKE_CLEAN_FILES
    /prop_dir/CACHE_VARIABLES
    /prop_dir/CLEAN_NO_CUSTOM
@@ -68,6 +72,8 @@ Properties on Targets
 =====================
 
 .. toctree::
+   :maxdepth: 1
+
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY
@@ -220,6 +226,8 @@ Properties on Tests
 ===================
 
 .. toctree::
+   :maxdepth: 1
+
    /prop_test/ATTACHED_FILES_ON_FAIL
    /prop_test/ATTACHED_FILES
    /prop_test/COST
@@ -241,6 +249,8 @@ Properties on Source Files
 ==========================
 
 .. toctree::
+   :maxdepth: 1
+
    /prop_sf/ABSTRACT
    /prop_sf/AUTOUIC_OPTIONS
    /prop_sf/AUTORCC_OPTIONS
@@ -265,6 +275,8 @@ Properties on Cache Entries
 ===========================
 
 .. toctree::
+   :maxdepth: 1
+
    /prop_cache/ADVANCED
    /prop_cache/HELPSTRING
    /prop_cache/MODIFIED

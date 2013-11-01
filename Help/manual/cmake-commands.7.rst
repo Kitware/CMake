@@ -13,6 +13,8 @@ Normal Commands
 These commands may be used freely in CMake projects.
 
 .. toctree::
+   :maxdepth: 1
+
    /command/add_compile_options
    /command/add_custom_command
    /command/add_custom_target
@@ -105,6 +107,8 @@ These commands are available only for compatibility with older
 versions of CMake.  Do not use them in new code.
 
 .. toctree::
+   :maxdepth: 1
+
    /command/build_name
    /command/exec_program
    /command/export_library_dependencies
@@ -128,6 +132,8 @@ CTest Commands
 These commands are available only in ctest scripts.
 
 .. toctree::
+   :maxdepth: 1
+
    /command/ctest_build
    /command/ctest_configure
    /command/ctest_coverage

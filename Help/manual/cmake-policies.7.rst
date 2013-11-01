@@ -31,6 +31,8 @@ All Policies
 ============
 
 .. toctree::
+   :maxdepth: 1
+
    /policy/CMP0000
    /policy/CMP0001
    /policy/CMP0002
