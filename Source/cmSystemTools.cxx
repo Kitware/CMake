@@ -1660,6 +1660,14 @@ bool extract_tar(const char* outFileName, bool verbose,
           break;
           }
         }
+#ifdef _WIN32
+      else if(const char* linktext = archive_entry_symlink(entry))
+        {
+        std::cerr << "cmake -E tar: warning: skipping symbolic link \""
+                  << archive_entry_pathname(entry) << "\" -> \""
+                  << linktext << "\"." << std::endl;
+        }
+#endif
       else
         {
         cmSystemTools::Error("Problem with archive_write_header(): ",
