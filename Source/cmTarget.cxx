@@ -5180,26 +5180,6 @@ void cmTarget::GetTransitivePropertyLinkLibraries(
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::OnlyUsedWithPlainTLL() const
-{
-  if (this->TLLCommands.empty())
-    {
-    return false;
-    }
-  typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> >
-                                                                Container;
-  for(Container::const_iterator it = this->TLLCommands.begin();
-      it != this->TLLCommands.end(); ++it)
-    {
-    if (it->first == cmTarget::KeywordTLLSignature)
-      {
-      return false;
-      }
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
                                     cmTarget const* headTarget) const
 {
@@ -5422,7 +5402,12 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         }
       }
     }
-  else
+  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+    // If CMP0022 is NEW then the plain tll signature sets the
+    // INTERFACE_LINK_LIBRARIES, so if we get here then the project
+    // cleared the property explicitly and we should not fall back
+    // to the link implementation.
     {
     // The link implementation is the default link interface.
     LinkImplementation const* impl = this->GetLinkImplementation(config,

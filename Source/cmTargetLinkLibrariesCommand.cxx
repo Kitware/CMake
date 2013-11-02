@@ -384,6 +384,10 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
         }
     }
 
+  bool oldCMP0022 =
+    (this->Target->GetPolicyStatusCMP0022() == cmPolicies::OLD ||
+     this->Target->GetPolicyStatusCMP0022() == cmPolicies::WARN);
+
   // Handle normal case first.
   if(this->CurrentProcessingState != ProcessingKeywordLinkInterface
       && this->CurrentProcessingState != ProcessingPlainLinkInterface)
@@ -391,7 +395,9 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
     if (this->CurrentProcessingState != ProcessingKeywordPublicInterface
-        && this->CurrentProcessingState != ProcessingPlainPublicInterface)
+        && this->CurrentProcessingState != ProcessingPlainPublicInterface
+        && (this->CurrentProcessingState != ProcessingLinkLibraries
+            || oldCMP0022))
       {
       if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
         {
@@ -414,11 +420,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
   this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
               this->Target->GetDebugGeneratorExpressions(lib, llt).c_str());
 
-  const cmPolicies::PolicyStatus policy22Status
-                      = this->Target->GetPolicyStatusCMP0022();
-
-  if (policy22Status != cmPolicies::OLD
-      && policy22Status != cmPolicies::WARN)
+  if (!oldCMP0022)
     {
     return true;
     }
