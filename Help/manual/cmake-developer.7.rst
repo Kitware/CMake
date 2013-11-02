@@ -68,10 +68,20 @@ literal block after ``::``
  space.  We prefer the ``::`` to appear at the end of a paragraph
  line instead of as its own line.
 
+``note`` directive
+ Call out a side note.  The command-line help processor prints the
+ block content as if the lines were normal paragraph text with
+ interpretation.
+
 ``parsed-literal`` directive
  Add a literal block with markup interpretation.  The command-line
  help processor prints the block content without the leading
  directive line and with common indentation replaced by one space.
+
+``productionlist`` directive
+ Render context-free grammar productions.  The command-line help
+ processor prints the block content as if the lines were normal
+ paragraph text with interpretation.
 
 ``replace`` directive
  Define a ``|substitution|`` replacement.

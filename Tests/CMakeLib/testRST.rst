@@ -83,6 +83,13 @@ or after a paragraph ending in two colons::
 but not after a line ending in two colons::
 in the middle of a paragraph.
 
+.. productionlist::
+ grammar: `production`
+ production: "content rendered"
+
+.. note::
+ Notes are called out.
+
 .. |substitution| replace::
    |nested substitution|
    with multiple lines becomes one line
