@@ -263,6 +263,12 @@
 #                           Only available for CUDA version 3.2+.
 #  CUDA_npp_LIBRARY      -- NVIDIA Performance Primitives library.
 #                           Only available for CUDA version 4.0+.
+#  CUDA_nppc_LIBRARY      -- NVIDIA Performance Primitives library (core).
+#                           Only available for CUDA version 5.5+.
+#  CUDA_nppi_LIBRARY      -- NVIDIA Performance Primitives library (image processing).
+#                           Only available for CUDA version 5.5+.
+#  CUDA_npps_LIBRARY      -- NVIDIA Performance Primitives library (signal processing).
+#                           Only available for CUDA version 5.5+.
 #  CUDA_nvcuvenc_LIBRARY -- CUDA Video Encoder library.
 #                           Only available for CUDA version 3.2+.
 #                           Windows only.
@@ -496,6 +502,9 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_curand_LIBRARY CACHE)
   unset(CUDA_cusparse_LIBRARY CACHE)
   unset(CUDA_npp_LIBRARY CACHE)
+  unset(CUDA_nppc_LIBRARY CACHE)
+  unset(CUDA_nppi_LIBRARY CACHE)
+  unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
 endif()
@@ -700,7 +709,13 @@ if(NOT CUDA_VERSION VERSION_LESS "3.2")
     find_cuda_helper_libs(nvcuvid)
   endif()
 endif()
-if(NOT CUDA_VERSION VERSION_LESS "4.0")
+if(CUDA_VERSION VERSION_GREATER "5.0")
+  # In CUDA 5.5 NPP was splitted onto 3 separate libraries.
+  find_cuda_helper_libs(nppc)
+  find_cuda_helper_libs(nppi)
+  find_cuda_helper_libs(npps)
+  set(CUDA_npp_LIBRARY "${CUDA_nppc_LIBRARY};${CUDA_nppi_LIBRARY};${CUDA_npps_LIBRARY}")
+elseif(NOT CUDA_VERSION VERSION_LESS "4.0")
   find_cuda_helper_libs(npp)
 endif()
 
