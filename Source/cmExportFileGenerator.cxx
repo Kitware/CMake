@@ -185,6 +185,10 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
+  if(!target->IsLinkable())
+    {
+    return false;
+    }
   const char *input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
   if (input)
     {
