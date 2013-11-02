@@ -144,17 +144,7 @@ private:
     if(!this->Line.empty() && this->Line[0] == '='
        && this->RegexDiff.find(this->Line))
       {
-        std::string Path = this->RegexDiff.match(1);
-        // See if we need to remove the //depot prefix
-        if(Path.length() > 2 && Path[0] == '/' && Path[1] == '/')
-          {
-          size_t found = Path.find('/', 2);
-          if(found != std::string::npos)
-            {
-            Path = Path.substr(found + 1);
-            }
-          }
-        CurrentPath = Path;
+        CurrentPath = this->RegexDiff.match(1);
         AlreadyNotified = false;
       }
     else
