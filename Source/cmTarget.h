@@ -196,7 +196,6 @@ public:
   };
   bool PushTLLCommandTrace(TLLSignature signature);
   void GetTllSignatureTraces(cmOStringStream &s, TLLSignature sig) const;
-  bool OnlyUsedWithPlainTLL() const;
 
   void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
                            const LinkLibraryVectorType& libs );
