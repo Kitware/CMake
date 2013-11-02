@@ -1242,6 +1242,7 @@ bool cmGlobalGenerator::CheckTargets()
          target.GetType() == cmTarget::STATIC_LIBRARY ||
          target.GetType() == cmTarget::SHARED_LIBRARY ||
          target.GetType() == cmTarget::MODULE_LIBRARY ||
+         target.GetType() == cmTarget::OBJECT_LIBRARY ||
          target.GetType() == cmTarget::UTILITY)
         {
         if(!target.FindSourceFiles())
