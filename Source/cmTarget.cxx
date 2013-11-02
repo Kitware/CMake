@@ -6590,9 +6590,10 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     }
   else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
         || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
-    // The implementation shouldn't be the interface if CMP0022 is NEW. That
-    // way, the LINK_LIBRARIES property can be set directly without having to
-    // empty the INTERFACE_LINK_LIBRARIES
+    // If CMP0022 is NEW then the plain tll signature sets the
+    // INTERFACE_LINK_LIBRARIES, so if we get here then the project
+    // cleared the property explicitly and we should not fall back
+    // to the link implementation.
     {
     // The link implementation is the default link interface.
     LinkImplementation const* impl = this->GetLinkImplementation(config,
