@@ -7,4 +7,13 @@ CMake Warning \(dev\) in CMakeLists.txt:
   should be preferred as the source of the link interface for this library.
   Ignoring the property and using the link implementation as the link
   interface instead.
+
+  INTERFACE_LINK_LIBRARIES:
+
+    foo
+
+  Link implementation:
+
+    bat
+
 This warning is for project developers.  Use -Wno-dev to suppress it.$
