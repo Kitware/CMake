@@ -1341,7 +1341,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "No target \"" + name + "\"");
       return std::string();
       }
-    if(target->GetType() >= cmTarget::UTILITY &&
+    if(target->GetType() >= cmTarget::OBJECT_LIBRARY &&
       target->GetType() != cmTarget::UNKNOWN_LIBRARY)
       {
       ::reportError(context, content->GetOriginalExpression(),
