@@ -2331,21 +2331,10 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
   i += this->PrevLinkedLibraries.size();
   for( ; i != libs.end(); ++i )
     {
-    const char *lib = i->first.c_str();
-    // We call this so that the dependencies get written to the cache
-    this->AddLinkLibrary( mf, selfname, lib, i->second );
-
-    if (this->GetType() == cmTarget::STATIC_LIBRARY)
-      {
-      std::string configLib = this->GetDebugGeneratorExpressions(lib,
-                                                                 i->second);
-      if (cmGeneratorExpression::IsValidTargetName(lib)
-          || cmGeneratorExpression::Find(lib) != std::string::npos)
-        {
-        configLib = "$<LINK_ONLY:" + configLib + ">";
-        }
-        this->AppendProperty("INTERFACE_LINK_LIBRARIES", configLib.c_str());
-      }
+    // This is equivalent to the target_link_libraries plain signature.
+    this->AddLinkLibrary( mf, selfname, i->first.c_str(), i->second );
+    this->AppendProperty("INTERFACE_LINK_LIBRARIES",
+      this->GetDebugGeneratorExpressions(i->first.c_str(), i->second).c_str());
     }
   this->PrevLinkedLibraries = libs;
 }
@@ -6417,12 +6406,20 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
   // An explicit list of interface libraries may be set for shared
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
-  const char* newExplicitLibraries =
-                                this->GetProperty("INTERFACE_LINK_LIBRARIES");
   std::string linkIfaceProp;
-  if(this->GetType() == cmTarget::SHARED_LIBRARY ||
-     this->IsExecutableWithExports())
+  if(this->PolicyStatusCMP0022 != cmPolicies::OLD &&
+     this->PolicyStatusCMP0022 != cmPolicies::WARN)
     {
+    // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
+    linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
+    explicitLibraries = this->GetProperty(linkIfaceProp.c_str());
+    }
+  else if(this->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->IsExecutableWithExports())
+    {
+    // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
+    // shared lib or executable.
+
     // Lookup the per-configuration property.
     linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
     linkIfaceProp += suffix;
@@ -6434,120 +6431,30 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
       linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
       explicitLibraries = this->GetProperty(linkIfaceProp.c_str());
       }
-    if (newExplicitLibraries
-        && (!explicitLibraries ||
-            (explicitLibraries
-              && strcmp(newExplicitLibraries, explicitLibraries) != 0)))
-      {
-      switch(this->GetPolicyStatusCMP0022())
-        {
-        case cmPolicies::WARN:
-          {
-          cmOStringStream w;
-          w << (this->Makefile->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
-            << "Target \"" << this->GetName() << "\" has a "
-              "INTERFACE_LINK_LIBRARIES property which differs from its "
-            << linkIfaceProp << " properties."
-              "\n"
-              "INTERFACE_LINK_LIBRARIES:\n  "
-            << newExplicitLibraries
-            << "\n"
-            << linkIfaceProp << ":\n  "
-            << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-          }
-          // Fall through
-        case cmPolicies::OLD:
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::NEW:
-          explicitLibraries = newExplicitLibraries;
-          linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-          break;
-        }
-      }
     }
-  else if(this->GetType() == cmTarget::STATIC_LIBRARY)
-    {
-    if (newExplicitLibraries)
-      {
-      cmListFileBacktrace lfbt;
-      cmGeneratorExpression ge(lfbt);
-      cmGeneratorExpressionDAGChecker dagChecker(lfbt, this->GetName(),
-                                            "INTERFACE_LINK_LIBRARIES", 0, 0);
-      std::vector<std::string> ifaceLibs;
-      cmSystemTools::ExpandListArgument(
-          ge.Parse(newExplicitLibraries)->Evaluate(
-                                          this->Makefile,
-                                          config,
-                                          false,
-                                          headTarget,
-                                          this, &dagChecker), ifaceLibs);
-      LinkImplementation const* impl = this->GetLinkImplementation(config,
-                                                                headTarget);
-      if (ifaceLibs != impl->Libraries)
-        {
-        switch(this->GetPolicyStatusCMP0022())
-          {
-          case cmPolicies::WARN:
-            {
-            std::string oldLibraries;
-            std::string newLibraries;
-            const char *sep = "";
-            for(std::vector<std::string>::const_iterator it
-                = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
-              {
-              oldLibraries += sep;
-              oldLibraries += *it;
-              sep = ";";
-              }
-            sep = "";
-            for(std::vector<std::string>::const_iterator it
-                = ifaceLibs.begin(); it != ifaceLibs.end(); ++it)
-              {
-              newLibraries += sep;
-              newLibraries += *it;
-              sep = ";";
-              }
 
-            cmOStringStream w;
-            w << (this->Makefile->GetPolicies()
-                  ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
-              << "Static library target \"" << this->GetName() << "\" has a "
-                "INTERFACE_LINK_LIBRARIES property.  This should be preferred "
-                "as the source of the link interface for this library.  "
-                "Ignoring the property and using the link implementation "
-                "as the link interface instead."
-                "\n"
-                "INTERFACE_LINK_LIBRARIES:\n  "
-              << newLibraries
-              << "\n"
-              << "Link implementation:\n  "
-              << oldLibraries << "\n";
-            this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-            }
-            // Fall through
-          case cmPolicies::OLD:
-            break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::NEW:
-            explicitLibraries = newExplicitLibraries;
-            linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-            break;
-          }
-        }
-      else
-        {
-        iface.Libraries = impl->Libraries;
-        if(this->LinkLanguagePropagatesToDependents())
-          {
-          // Targets using this archive need its language runtime libraries.
-          iface.Languages = impl->Languages;
-          }
-        }
+  if(explicitLibraries && this->PolicyStatusCMP0022 == cmPolicies::WARN)
+    {
+    // Compare the explicitly set old link interface properties to the
+    // preferred new link interface property one and warn if different.
+    const char* newExplicitLibraries =
+      this->GetProperty("INTERFACE_LINK_LIBRARIES");
+    if (newExplicitLibraries
+        && strcmp(newExplicitLibraries, explicitLibraries) != 0)
+      {
+      cmOStringStream w;
+      w <<
+        (this->Makefile->GetPolicies()
+         ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
+        "Target \"" << this->GetName() << "\" has an "
+        "INTERFACE_LINK_LIBRARIES property which differs from its " <<
+        linkIfaceProp << " properties."
+        "\n"
+        "INTERFACE_LINK_LIBRARIES:\n"
+        "  " << newExplicitLibraries << "\n" <<
+        linkIfaceProp << ":\n"
+        "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       }
     }
 
@@ -6618,11 +6525,12 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         }
       }
     }
-  else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN
-        || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
-    // The implementation shouldn't be the interface if CMP0022 is NEW. That
-    // way, the LINK_LIBRARIES property can be set directly without having to
-    // empty the INTERFACE_LINK_LIBRARIES
+  else if (this->PolicyStatusCMP0022 == cmPolicies::WARN
+        || this->PolicyStatusCMP0022 == cmPolicies::OLD)
+    // If CMP0022 is NEW then the plain tll signature sets the
+    // INTERFACE_LINK_LIBRARIES, so if we get here then the project
+    // cleared the property explicitly and we should not fall back
+    // to the link implementation.
     {
     // The link implementation is the default link interface.
     LinkImplementation const* impl = this->GetLinkImplementation(config,
@@ -6634,6 +6542,68 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
       {
       // Targets using this archive need its language runtime libraries.
       iface.Languages = impl->Languages;
+      }
+
+    if(this->PolicyStatusCMP0022 == cmPolicies::WARN)
+      {
+      // Compare the link implementation fallback link interface to the
+      // preferred new link interface property and warn if different.
+      cmListFileBacktrace lfbt;
+      cmGeneratorExpression ge(lfbt);
+      cmGeneratorExpressionDAGChecker dagChecker(lfbt, this->GetName(),
+                                      "INTERFACE_LINK_LIBRARIES", 0, 0);
+      std::vector<std::string> ifaceLibs;
+      const char* newExplicitLibraries =
+        this->GetProperty("INTERFACE_LINK_LIBRARIES");
+      cmSystemTools::ExpandListArgument(
+        ge.Parse(newExplicitLibraries)->Evaluate(this->Makefile,
+                                                 config,
+                                                 false,
+                                                 headTarget,
+                                                 this, &dagChecker),
+        ifaceLibs);
+      if (ifaceLibs != impl->Libraries)
+        {
+        std::string oldLibraries;
+        std::string newLibraries;
+        const char *sep = "";
+        for(std::vector<std::string>::const_iterator it
+              = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
+          {
+          oldLibraries += sep;
+          oldLibraries += *it;
+          sep = ";";
+          }
+        sep = "";
+        for(std::vector<std::string>::const_iterator it
+              = ifaceLibs.begin(); it != ifaceLibs.end(); ++it)
+          {
+          newLibraries += sep;
+          newLibraries += *it;
+          sep = ";";
+          }
+        if(oldLibraries.empty())
+          { oldLibraries = "(empty)"; }
+        if(newLibraries.empty())
+          { newLibraries = "(empty)"; }
+
+        cmOStringStream w;
+        w <<
+          (this->Makefile->GetPolicies()
+           ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
+          "Target \"" << this->GetName() << "\" has an "
+          "INTERFACE_LINK_LIBRARIES property.  "
+          "This should be preferred as the source of the link interface "
+          "for this library but because CMP0022 is not set CMake is "
+          "ignoring the property and using the link implementation "
+          "as the link interface instead."
+          "\n"
+          "INTERFACE_LINK_LIBRARIES:\n"
+          "  " << newLibraries << "\n"
+          "Link implementation:\n"
+          "  " << oldLibraries << "\n";
+        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        }
       }
     }
 

@@ -379,8 +379,14 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     {
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
-    if (this->CurrentProcessingState != ProcessingKeywordPublicInterface
-        && this->CurrentProcessingState != ProcessingPlainPublicInterface)
+    if(this->CurrentProcessingState == ProcessingLinkLibraries)
+      {
+      this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+        this->Target->GetDebugGeneratorExpressions(lib, llt).c_str());
+      return true;
+      }
+    else if(this->CurrentProcessingState != ProcessingKeywordPublicInterface
+            && this->CurrentProcessingState != ProcessingPlainPublicInterface)
       {
       if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
         {
