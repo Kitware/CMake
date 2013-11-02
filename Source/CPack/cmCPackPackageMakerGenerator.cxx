@@ -329,6 +329,8 @@ int cmCPackPackageMakerGenerator::PackageFiles()
 
 int cmCPackPackageMakerGenerator::InitializeInternal()
 {
+  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
+
   // Starting with Xcode 4.3, PackageMaker is a separate app, and you
   // can put it anywhere you want. So... use a variable for its location.
   // People who put it in unexpected places can use the variable to tell

@@ -41,7 +41,6 @@ int cmCPackPKGGenerator::InitializeInternal()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "cmCPackPKGGenerator::Initialize()" << std::endl);
-  this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
 
   return this->Superclass::InitializeInternal();
 }

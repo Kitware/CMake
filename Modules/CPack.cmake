@@ -455,6 +455,7 @@ if(NOT CPACK_GENERATOR)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
         option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" OFF)
+        option(CPACK_BINARY_PRODUCTBUILD "Enable to build productbuild packages" OFF)
       else()
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
       endif()
@@ -483,6 +484,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PRODUCTBUILD productbuild)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_STGZ         STGZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TBZ2         TBZ2)
@@ -531,6 +533,7 @@ mark_as_advanced(
   CPACK_BINARY_NSIS
   CPACK_BINARY_OSXX11
   CPACK_BINARY_PACKAGEMAKER
+  CPACK_BINARY_PRODUCTBUILD
   CPACK_BINARY_RPM
   CPACK_BINARY_STGZ
   CPACK_BINARY_TBZ2
