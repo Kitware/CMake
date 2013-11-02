@@ -32,13 +32,16 @@ per-configuration rules by creating and linking to IMPORTED library
 targets.  See the IMPORTED mode of the add_library command for more
 information.
 
-Library dependencies are transitive by default.  When this target is
-linked into another target then the libraries linked to this target
-will appear on the link line for the other target too.  See the
-INTERFACE_LINK_LIBRARIES target property to override the set of
-transitive link dependencies for a target.  Calls to other signatures
-of this command may set the property making any libraries linked
-exclusively by this signature private.
+Library dependencies are transitive by default with this signature.
+When this target is linked into another target then the libraries
+linked to this target will appear on the link line for the other
+target too.  This transitive "link interface" is stored in the
+INTERFACE_LINK_LIBRARIES target property when policy CMP0022 is set to
+NEW and may be overridden by setting the property directly.
+(When CMP0022 is not set to NEW, transitive linking is builtin but may
+be overridden by the LINK_INTERFACE_LIBRARIES property.  Calls to other
+signatures of this command may set the property making any libraries
+linked exclusively by this signature private.)
 
 CMake will also propagate "usage requirements" from linked library
 targets.  Usage requirements affect compilation of sources in the
