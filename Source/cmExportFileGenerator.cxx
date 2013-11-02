@@ -654,7 +654,6 @@ cmExportFileGenerator
 
   if (iface->ImplementationIsInterface)
     {
-    // Policy CMP0022 must not be NEW.
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties, missingTargets);

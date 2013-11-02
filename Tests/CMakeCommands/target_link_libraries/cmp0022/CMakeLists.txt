@@ -28,10 +28,3 @@ endif()
 
 add_executable(staticlib_exe staticlib_exe.cpp)
 target_link_libraries(staticlib_exe staticlib1)
-
-add_library(onlyplainlib1 SHARED onlyplainlib1.cpp)
-add_library(onlyplainlib2 SHARED onlyplainlib2.cpp)
-target_link_libraries(onlyplainlib2 onlyplainlib1)
-
-add_executable(onlyplainlib_user onlyplainlib_user.cpp)
-target_link_libraries(onlyplainlib_user onlyplainlib2)
