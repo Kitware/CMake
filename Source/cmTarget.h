@@ -16,6 +16,7 @@
 #include "cmPropertyMap.h"
 #include "cmPolicies.h"
 #include "cmListFileCache.h"
+#include "cmGeneratorTarget.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -568,6 +569,11 @@ public:
                             const std::string &report,
                             const std::string &compatibilityType) const;
 
+  const std::vector<cmValueWithOrigin>& GetLinkImplementationPropertyEntries();
+  const std::vector<cmGeneratorTarget::TargetPropertyEntry*>&
+                                           GetIncludeDirectoriesEntries();
+
+
 private:
   bool HandleLocationPropertyPolicy() const;
 
@@ -678,7 +684,6 @@ private:
   bool DLLPlatform;
   bool IsApple;
   bool IsImportedTarget;
-  mutable bool DebugIncludesDone;
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
