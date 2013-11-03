@@ -157,7 +157,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Get the language to use for linking this executable.
   const char* linkLanguage =
-    this->Target->GetLinkerLanguage(this->ConfigName);
+    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
   if(!linkLanguage)

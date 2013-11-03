@@ -1673,7 +1673,7 @@ std::string cmMakefileTargetGenerator::GetLinkRule(const char* linkRuleVar)
   if(this->Target->HasImplibGNUtoMS())
     {
     std::string ruleVar = "CMAKE_";
-    ruleVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
     ruleVar += "_GNUtoMS_RULE";
     if(const char* rule = this->Makefile->GetDefinition(ruleVar.c_str()))
       {
@@ -1836,7 +1836,8 @@ cmMakefileTargetGenerator
 
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
-    responseFlagVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    responseFlagVar += this->GeneratorTarget
+                           ->GetLinkerLanguage(this->ConfigName);
     responseFlagVar += "_RESPONSE_FILE_LINK_FLAG";
     const char* responseFlag =
       this->Makefile->GetDefinition(responseFlagVar.c_str());

@@ -353,10 +353,6 @@ public:
    */
   bool FindSourceFiles();
 
-  ///! Return the preferred linker language for this target
-  const char* GetLinkerLanguage(const char* config = 0,
-                                cmTarget const* head = 0) const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const char* config) const;
 

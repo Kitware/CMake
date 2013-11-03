@@ -227,6 +227,10 @@ public:
   /** Return true if builtin chrpath will work for this target */
   bool IsChrpathUsed(const char* config) const;
 
+  ///! Return the preferred linker language for this target
+  const char* GetLinkerLanguage(const char* config = 0,
+                                cmTarget const* head = 0) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };

@@ -266,8 +266,11 @@ cmComputeLinkInformation
                            "runtime search path");
   this->OrderDependentRPath = 0;
 
+  cmGeneratorTarget *gtgt = this->Target->GetMakefile()->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
   // Get the language used for linking this target.
-  this->LinkLanguage = this->Target->GetLinkerLanguage(config, headTarget);
+  this->LinkLanguage = gtgt->GetLinkerLanguage(config, headTarget);
   if(!this->LinkLanguage)
     {
     // The Compute method will do nothing, so skip the rest of the
@@ -323,9 +326,6 @@ cmComputeLinkInformation
       (this->Makefile->
        GetSafeDefinition("CMAKE_PLATFORM_REQUIRED_RUNTIME_PATH"));
 
-    cmGeneratorTarget *gtgt = this->Target->GetMakefile()->GetLocalGenerator()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(this->Target);
     this->RuntimeUseChrpath = gtgt->IsChrpathUsed(config);
 
     // Get options needed to help find dependent libraries.

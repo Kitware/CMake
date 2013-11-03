@@ -657,6 +657,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   const char* configType = "10";
   const char* projectType = 0;
   bool targetBuilds = true;
+
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   switch(target.GetType())
     {
     case cmTarget::OBJECT_LIBRARY:
@@ -688,7 +692,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(strcmp(configType, "10") != 0)
     {
     const char* linkLanguage = (this->FortranProject? "Fortran":
-                                target.GetLinkerLanguage(configName));
+                                gt->GetLinkerLanguage(configName));
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -750,8 +754,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   std::vector<std::string> targetDefines;
   target.GetCompileDefinitions(targetDefines, configName);
   targetOptions.AddDefines(targetDefines);
@@ -1544,7 +1546,7 @@ cmLocalVisualStudio7GeneratorFCInfo
       lg->GlobalGenerator->GetLanguageFromExtension
       (sf.GetExtension().c_str());
     const char* sourceLang = lg->GetSourceFileLanguage(sf);
-    const char* linkLanguage = target.GetLinkerLanguage(i->c_str());
+    const char* linkLanguage = gt->GetLinkerLanguage(i->c_str());
     bool needForceLang = false;
     // source file does not match its extension language
     if(lang && sourceLang && strcmp(lang, sourceLang) != 0)

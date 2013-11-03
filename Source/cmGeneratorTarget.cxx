@@ -420,7 +420,7 @@ bool cmGeneratorTarget::HasSOName(const char* config) const
   return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
            this->GetType() == cmTarget::MODULE_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(this->Target->GetLinkerLanguage(config,
+          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config,
                                                               this->Target)));
 }
 
@@ -462,7 +462,7 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(const char* config) const
     }
 
   // Check for rpath support on this platform.
-  if(const char* ll = this->Target->GetLinkerLanguage(config, this->Target))
+  if(const char* ll = this->GetLinkerLanguage(config, this->Target))
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     flagVar += ll;
@@ -532,7 +532,7 @@ bool cmGeneratorTarget::IsChrpathUsed(const char* config) const
 #if defined(CMAKE_USE_ELF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
-  if(const char* ll = this->Target->GetLinkerLanguage(config, this->Target))
+  if(const char* ll = this->GetLinkerLanguage(config, this->Target))
     {
     std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     sepVar += ll;
@@ -2829,7 +2829,7 @@ void cmGeneratorTarget::GetFullNameInternal(const char* config,
   const char* suffixVar = this->Target->GetSuffixVariableInternal(implib);
 
   // Check for language-specific default prefix and suffix.
-  if(const char* ll = this->Target->GetLinkerLanguage(config, this->Target))
+  if(const char* ll = this->GetLinkerLanguage(config, this->Target))
     {
     if(!targetSuffix && suffixVar && *suffixVar)
       {
@@ -2903,6 +2903,16 @@ void cmGeneratorTarget::GetFullNameInternal(const char* config,
   outSuffix = targetSuffix?targetSuffix:"";
 }
 
+
+//----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetLinkerLanguage(const char* config,
+                                                 cmTarget const* head) const
+{
+  cmTarget const* headTarget = head ? head : this->Target;
+  const char* lang = this->Target->GetLinkClosure(config, headTarget)
+                                                    ->LinkerLanguage.c_str();
+  return *lang? lang : 0;
+}
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetPDBName(const char* config) const
