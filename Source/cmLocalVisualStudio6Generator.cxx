@@ -1249,14 +1249,14 @@ void cmLocalVisualStudio6Generator
     extraLinkOptionsRelWithDebInfo += targetLinkFlags;
     }
 
-
-
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
 
   // Get standard libraries for this language.
   if(targetBuilds)
     {
     // Get the language to use for linking.
-    const char* linkLanguage = target.GetLinkerLanguage();
+    const char* linkLanguage = gt->GetLinkerLanguage();
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -1678,7 +1678,7 @@ void cmLocalVisualStudio6Generator
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
-      const char* linkLanguage = target.GetLinkerLanguage();
+      const char* linkLanguage = gt->GetLinkerLanguage();
       if(!linkLanguage)
         {
         cmSystemTools::Error

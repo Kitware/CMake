@@ -2434,16 +2434,6 @@ private:
 };
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLinkerLanguage(const char* config,
-                                        cmTarget const* head) const
-{
-  cmTarget const* headTarget = head ? head : this;
-  const char* lang = this->GetLinkClosure(config, headTarget)
-                                                    ->LinkerLanguage.c_str();
-  return *lang? lang : 0;
-}
-
-//----------------------------------------------------------------------------
 cmTarget::LinkClosure const* cmTarget::GetLinkClosure(const char* config,
                                                   cmTarget const* head) const
 {
