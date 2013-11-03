@@ -191,6 +191,10 @@ bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets)
 {
+  if(!target->IsLinkable())
+    {
+    return false;
+    }
   const char *input = target->GetProperty("INTERFACE_LINK_LIBRARIES");
   if (input)
     {
@@ -654,6 +658,7 @@ cmExportFileGenerator
 
   if (iface->ImplementationIsInterface)
     {
+    // Policy CMP0022 must not be NEW.
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LIBRARIES",
                                 iface->Libraries, properties, missingTargets);
