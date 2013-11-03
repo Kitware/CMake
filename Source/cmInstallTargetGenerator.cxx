@@ -73,7 +73,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
 {
   // Compute the build tree directory from which to copy the target.
   std::string fromDirConfig;
-  if(this->Target->Target->NeedRelinkBeforeInstall(config))
+  if(this->Target->NeedRelinkBeforeInstall(config))
     {
     fromDirConfig =
         this->Target->Target->GetMakefile()->GetCurrentBinaryDirectory();

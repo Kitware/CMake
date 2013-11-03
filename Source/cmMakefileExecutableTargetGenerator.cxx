@@ -58,7 +58,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   // write the link rules
   this->WriteExecutableRule(false);
-  if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
+  if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
     {
     // Write rules to link an installable version of the target.
     this->WriteExecutableRule(true);
