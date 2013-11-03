@@ -88,6 +88,7 @@ public:
     }
   cmTargetInternals(cmTargetInternals const& r)
     {
+    this->PolicyWarnedCMP0022 = false;
     this->SourceFileFlagsConstructed = false;
     // Only some of these entries are part of the object state.
     // Others not copied here are result caches.
