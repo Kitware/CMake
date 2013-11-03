@@ -83,10 +83,12 @@ class cmTargetInternals
 public:
   cmTargetInternals()
     {
+    this->PolicyWarnedCMP0022 = false;
     this->SourceFileFlagsConstructed = false;
     }
   cmTargetInternals(cmTargetInternals const& r)
     {
+    this->PolicyWarnedCMP0022 = false;
     this->SourceFileFlagsConstructed = false;
     // Only some of these entries are part of the object state.
     // Others not copied here are result caches.
@@ -109,6 +111,7 @@ public:
   typedef std::map<TargetConfigPair, OptionalLinkInterface>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
+  bool PolicyWarnedCMP0022;
 
   typedef std::map<cmStdString, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
@@ -6433,7 +6436,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
       }
     }
 
-  if(explicitLibraries && this->PolicyStatusCMP0022 == cmPolicies::WARN)
+  if(explicitLibraries && this->PolicyStatusCMP0022 == cmPolicies::WARN &&
+     !this->Internal->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
     // preferred new link interface property one and warn if different.
@@ -6455,6 +6459,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         linkIfaceProp << ":\n"
         "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->Internal->PolicyWarnedCMP0022 = true;
       }
     }
 
@@ -6544,7 +6549,8 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
       iface.Languages = impl->Languages;
       }
 
-    if(this->PolicyStatusCMP0022 == cmPolicies::WARN)
+    if(this->PolicyStatusCMP0022 == cmPolicies::WARN &&
+       !this->Internal->PolicyWarnedCMP0022)
       {
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
@@ -6603,6 +6609,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
           "Link implementation:\n"
           "  " << oldLibraries << "\n";
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->Internal->PolicyWarnedCMP0022 = true;
         }
       }
     }

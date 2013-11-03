@@ -9,3 +9,8 @@ set_property(TARGET bar PROPERTY LINK_INTERFACE_LIBRARIES bat)
 
 add_library(user empty.cpp)
 target_link_libraries(user bar)
+
+# Use "bar" again with a different "head" target to check
+# that the warning does not appear again.
+add_library(user2 empty_vs6_3.cpp)
+target_link_libraries(user2 bar)
