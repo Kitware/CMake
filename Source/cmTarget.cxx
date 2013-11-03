@@ -86,6 +86,7 @@ public:
     }
   cmTargetInternals(cmTargetInternals const&)
     {
+    this->PolicyWarnedCMP0022 = false;
     this->SourceFileFlagsConstructed = false;
     }
   ~cmTargetInternals();
