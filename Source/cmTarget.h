@@ -382,11 +382,6 @@ public:
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
                         const char* newExt = 0) const;
 
-  /**
-   * Compute whether this target must be relinked before installing.
-   */
-  bool NeedRelinkBeforeInstall(const char* config) const;
-
   bool HaveBuildTreeRPATH(const char *config) const;
   bool HaveInstallTreeRPATH() const;
 
