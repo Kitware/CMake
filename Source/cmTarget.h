@@ -398,9 +398,6 @@ public:
   bool HaveBuildTreeRPATH(const std::string& config) const;
   bool HaveInstallTreeRPATH() const;
 
-  /** Return true if builtin chrpath will work for this target */
-  bool IsChrpathUsed(const std::string& config) const;
-
   /** Return the install name directory for the target in the
     * build tree.  For example: "\@rpath/", "\@loader_path/",
     * or "/full/path/to/library".  */
