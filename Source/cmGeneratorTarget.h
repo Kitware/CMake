@@ -183,6 +183,11 @@ public:
                        std::string& realName, std::string& impName,
                        std::string& pdbName, const char* config) const;
 
+  /**
+   * Compute whether this target must be relinked before installing.
+   */
+  bool NeedRelinkBeforeInstall(const char* config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
