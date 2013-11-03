@@ -1353,7 +1353,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build);
         linkFlags += " ";
         }
-      std::string linkLanguage = target->Target->GetLinkerLanguage(buildType);
+      std::string linkLanguage = target->GetLinkerLanguage(buildType);
       if(linkLanguage.empty())
         {
         cmSystemTools::Error
