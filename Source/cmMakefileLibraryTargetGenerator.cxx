@@ -69,7 +69,7 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       break;
     case cmTarget::SHARED_LIBRARY:
       this->WriteSharedLibraryRules(false);
-      if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
+      if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
         {
         // Write rules to link an installable version of the target.
         this->WriteSharedLibraryRules(true);
@@ -77,7 +77,7 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       break;
     case cmTarget::MODULE_LIBRARY:
       this->WriteModuleLibraryRules(false);
-      if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
+      if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
         {
         // Write rules to link an installable version of the target.
         this->WriteModuleLibraryRules(true);
