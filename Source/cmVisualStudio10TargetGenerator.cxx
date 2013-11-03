@@ -1627,7 +1627,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
   std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const std::string& linkLanguage = this->Target->GetLinkerLanguage();
+  const std::string& linkLanguage = this->GeneratorTarget->GetLinkerLanguage();
   bool needForceLang = false;
   // source file does not match its extension language
   if(lang != sourceLang)
@@ -1891,10 +1891,40 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->Target->GetLinkerLanguage(configName.c_str());
   if(linkLanguage.empty())
     {
-    cmSystemTools::Error
-      ("CMake can not determine linker language for target: ",
-       this->Name.c_str());
-    return false;
+    const std::string& linkLanguage =
+      this->GeneratorTarget->GetLinkerLanguage(configName.c_str());
+    if(linkLanguage.empty())
+      {
+      cmSystemTools::Error
+        ("CMake can not determine linker language for target: ",
+         this->Name.c_str());
+      return false;
+      }
+    if(linkLanguage == "C" || linkLanguage == "CXX"
+       || linkLanguage == "Fortran")
+      {
+      std::string baseFlagVar = "CMAKE_";
+      baseFlagVar += linkLanguage;
+      baseFlagVar += "_FLAGS";
+      flags = this->
+        Target->GetMakefile()->GetRequiredDefinition(baseFlagVar.c_str());
+      std::string flagVar = baseFlagVar + std::string("_") +
+        cmSystemTools::UpperCase(configName);
+      flags += " ";
+      flags += this->
+        Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
+      }
+    // set the correct language
+    if(linkLanguage == "C")
+      {
+      flags += " /TC ";
+      }
+    if(linkLanguage == "CXX")
+      {
+      flags += " /TP ";
+      }
+    this->LocalGenerator->AddCompileOptions(flags, this->Target,
+                                            linkLanguage, configName.c_str());
     }
   if(linkLanguage == "C" || linkLanguage == "CXX"
      || linkLanguage == "Fortran")
@@ -2371,7 +2401,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   Options& linkOptions = *pOptions;
 
   const std::string& linkLanguage =
-    this->Target->GetLinkerLanguage(config.c_str());
+    this->GeneratorTarget->GetLinkerLanguage(config.c_str());
   if(linkLanguage.empty())
     {
     cmSystemTools::Error
