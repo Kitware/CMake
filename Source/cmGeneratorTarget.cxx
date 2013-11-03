@@ -709,8 +709,7 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
   return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
            this->GetType() == cmTarget::MODULE_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(
-            this->Target->GetLinkerLanguage(config)));
+          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
 }
 
 //----------------------------------------------------------------------------
@@ -752,7 +751,7 @@ cmGeneratorTarget::NeedRelinkBeforeInstall(const std::string& config) const
     }
 
   // Check for rpath support on this platform.
-  std::string ll = this->Target->GetLinkerLanguage(config);
+  std::string ll = this->GetLinkerLanguage(config);
   if(!ll.empty())
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
@@ -823,7 +822,7 @@ bool cmGeneratorTarget::IsChrpathUsed(const std::string& config) const
 #if defined(CMAKE_USE_ELF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
-  std::string ll = this->Target->GetLinkerLanguage(config);
+  std::string ll = this->GetLinkerLanguage(config);
   if(!ll.empty())
     {
     std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
@@ -1986,7 +1985,7 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   const char* suffixVar = this->Target->GetSuffixVariableInternal(implib);
 
   // Check for language-specific default prefix and suffix.
-  std::string ll = this->Target->GetLinkerLanguage(config);
+  std::string ll = this->GetLinkerLanguage(config);
   if(!ll.empty())
     {
     if(!targetSuffix && suffixVar && *suffixVar)
@@ -2054,6 +2053,13 @@ void cmGeneratorTarget::GetFullNameInternal(const std::string& config,
   outSuffix = targetSuffix?targetSuffix:"";
 }
 
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetLinkerLanguage(const std::string& config) const
+{
+  return this->Target->GetLinkClosure(config)->LinkerLanguage;
+}
 
 //----------------------------------------------------------------------------
 std::string cmGeneratorTarget::GetPDBName(const std::string& config) const

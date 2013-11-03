@@ -990,6 +990,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     assert(target);
 
+    cmGeneratorTarget* gtgt =
+        context->Makefile->GetGlobalGenerator()->GetGeneratorTarget(target);
+
     if (propertyName == "LINKER_LANGUAGE")
       {
       if (target->LinkLanguagePropagatesToDependents() &&
@@ -1001,7 +1004,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             "link libraries for a static library");
         return std::string();
         }
-      return target->GetLinkerLanguage(context->Config);
+      return gtgt->GetLinkerLanguage(context->Config);
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
@@ -1127,9 +1130,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                   interfacePropertyName);
         }
       }
-
-    cmGeneratorTarget* gtgt =
-        context->Makefile->GetGlobalGenerator()->GetGeneratorTarget(target);
 
     if (!prop)
       {
@@ -1600,7 +1600,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
-    std::string language = target->Target->GetLinkerLanguage(context->Config);
+    std::string language = target->GetLinkerLanguage(context->Config);
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
 
