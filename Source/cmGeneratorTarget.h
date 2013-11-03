@@ -13,6 +13,7 @@
 #define cmGeneratorTarget_h
 
 #include "cmStandardIncludes.h"
+#include "cmGeneratorExpression.h"
 
 class cmCustomCommand;
 class cmGlobalGenerator;
@@ -25,6 +26,8 @@ class cmGeneratorTarget
 {
 public:
   cmGeneratorTarget(cmTarget*);
+
+  ~cmGeneratorTarget();
 
   bool IsImported() const;
   const char *GetLocation(const char* config) const;
@@ -100,6 +103,16 @@ public:
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
+  struct TargetPropertyEntry {
+    TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
+      const std::string &targetName = std::string())
+      : ge(cge), TargetName(targetName)
+    {}
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
+    std::vector<std::string> CachedEntries;
+    const std::string TargetName;
+  };
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -118,6 +131,10 @@ private:
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+  mutable bool DebugIncludesDone;
+  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
+                                CachedLinkInterfaceIncludeDirectoriesEntries;
+  mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
