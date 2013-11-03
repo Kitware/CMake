@@ -188,6 +188,9 @@ public:
    */
   bool NeedRelinkBeforeInstall(const char* config) const;
 
+  /** Return true if builtin chrpath will work for this target */
+  bool IsChrpathUsed(const char* config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
