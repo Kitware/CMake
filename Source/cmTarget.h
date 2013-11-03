@@ -124,7 +124,7 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  std::vector<cmSourceFile*> const& GetSourceFiles();
+  std::vector<cmSourceFile*> const& GetSourceFiles() const;
   void AddSourceFile(cmSourceFile* sf);
   std::vector<std::string> const& GetObjectLibraries() const
     {
@@ -361,7 +361,7 @@ public:
   std::string GetFullName(const char* config=0, bool implib = false) const;
   void GetFullNameComponents(std::string& prefix,
                              std::string& base, std::string& suffix,
-                             const char* config=0, bool implib = false);
+                             const char* config=0, bool implib = false) const;
 
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const char* config=0) const;
@@ -373,7 +373,7 @@ public:
   std::string GetSOName(const char* config) const;
 
   /** Whether this library has \@rpath and platform supports it.  */
-  bool HasMacOSXRpath(const char* config);
+  bool HasMacOSXRpath(const char* config) const;
 
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
@@ -409,7 +409,7 @@ public:
   /**
    * Compute whether this target must be relinked before installing.
    */
-  bool NeedRelinkBeforeInstall(const char* config);
+  bool NeedRelinkBeforeInstall(const char* config) const;
 
   bool HaveBuildTreeRPATH(const char *config) const;
   bool HaveInstallTreeRPATH() const;
@@ -420,11 +420,11 @@ public:
   /** Return the install name directory for the target in the
     * build tree.  For example: "\@rpath/", "\@loader_path/",
     * or "/full/path/to/library".  */
-  std::string GetInstallNameDirForBuildTree(const char* config);
+  std::string GetInstallNameDirForBuildTree(const char* config) const;
 
   /** Return the install name directory for the target in the
     * install tree.  For example: "\@rpath/" or "\@loader_path/". */
-  std::string GetInstallNameDirForInstallTree();
+  std::string GetInstallNameDirForInstallTree() const;
 
   cmComputeLinkInformation* GetLinkInformation(const char* config,
                                                cmTarget const* head = 0) const;
@@ -497,7 +497,7 @@ public:
 
   /** @return the mac content directory for this target. */
   std::string GetMacContentDirectory(const char* config,
-                                     bool implib);
+                                     bool implib) const;
 
   /** @return whether this target have a well defined output file name. */
   bool HaveWellDefinedOutputFiles() const;

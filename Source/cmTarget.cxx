@@ -517,7 +517,7 @@ bool cmTarget::FindSourceFiles()
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmTarget::GetSourceFiles()
+std::vector<cmSourceFile*> const& cmTarget::GetSourceFiles() const
 {
   return this->SourceFiles;
 }
@@ -3245,7 +3245,7 @@ std::string cmTarget::GetSOName(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HasMacOSXRpath(const char* config)
+bool cmTarget::HasMacOSXRpath(const char* config) const
 {
   bool install_name_is_rpath = false;
   bool macosx_rpath = this->GetPropertyAsBool("MACOSX_RPATH");
@@ -3392,7 +3392,7 @@ cmTarget::GetFullNameImported(const char* config, bool implib) const
 //----------------------------------------------------------------------------
 void cmTarget::GetFullNameComponents(std::string& prefix, std::string& base,
                                      std::string& suffix, const char* config,
-                                     bool implib)
+                                     bool implib) const
 {
   this->GetFullNameInternal(config, implib, prefix, base, suffix);
 }
@@ -3828,7 +3828,7 @@ bool cmTarget::HaveInstallTreeRPATH() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::NeedRelinkBeforeInstall(const char* config)
+bool cmTarget::NeedRelinkBeforeInstall(const char* config) const
 {
   // Only executables and shared libraries can have an rpath and may
   // need relinking.
@@ -3891,7 +3891,7 @@ bool cmTarget::NeedRelinkBeforeInstall(const char* config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
+std::string cmTarget::GetInstallNameDirForBuildTree(const char* config) const
 {
   // If building directly for installation then the build tree install_name
   // is the same as the install tree.
@@ -3924,7 +3924,7 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetInstallNameDirForInstallTree()
+std::string cmTarget::GetInstallNameDirForInstallTree() const
 {
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
@@ -5941,7 +5941,7 @@ std::string cmTarget::BuildMacContentDirectory(const std::string& base,
 
 //----------------------------------------------------------------------------
 std::string cmTarget::GetMacContentDirectory(const char* config,
-                                             bool implib)
+                                             bool implib) const
 {
   // Start with the output directory for the target.
   std::string fpath = this->GetDirectory(config, implib);
