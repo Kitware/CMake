@@ -138,6 +138,24 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     }
 }
 
+static std::string getAutogenTargetName(cmTarget *target)
+{
+  std::string autogenTargetName = target->GetName();
+  autogenTargetName += "_automoc";
+  return autogenTargetName;
+}
+
+static std::string getAutogenTargetDir(cmTarget *target)
+{
+  cmMakefile* makefile = target->GetMakefile();
+  std::string targetDir = makefile->GetCurrentOutputDirectory();
+  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
+  targetDir += "/";
+  targetDir += getAutogenTargetName(target);
+  targetDir += ".dir/";
+  return targetDir;
+}
+
 bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
@@ -154,8 +172,7 @@ bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
 
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
-    std::string automocTargetName = target->GetName();
-    automocTargetName += "_automoc";
+    std::string automocTargetName = getAutogenTargetName(target);
     std::string mocCppFile = makefile->GetCurrentOutputDirectory();
     mocCppFile += "/";
     mocCppFile += automocTargetName;
@@ -232,17 +249,12 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     makefile->AddDefinition("_target_qt_version", qtVersion);
     }
   // create a custom target for running generators at buildtime:
-  std::string autogenTargetName = targetName;
-  autogenTargetName += "_automoc";
+  std::string autogenTargetName = getAutogenTargetName(target);
 
   makefile->AddDefinition("_moc_target_name",
           cmLocalGenerator::EscapeForCMake(autogenTargetName.c_str()).c_str());
 
-  std::string targetDir = makefile->GetCurrentOutputDirectory();
-  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
-  targetDir += "/";
-  targetDir += autogenTargetName;
-  targetDir += ".dir/";
+  std::string targetDir = getAutogenTargetDir(target);
 
   cmCustomCommandLine currentLine;
   currentLine.push_back(makefile->GetSafeDefinition("CMAKE_COMMAND"));
