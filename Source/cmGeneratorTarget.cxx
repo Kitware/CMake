@@ -42,16 +42,16 @@ const char *cmGeneratorTarget::GetName() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetProperty(const char *prop)
+const char *cmGeneratorTarget::GetProperty(const char *prop) const
 {
   return this->Target->GetProperty(prop);
 }
 
 //----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const*
-cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf)
+cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
 {
-  SourceEntriesType::iterator i = this->SourceEntries.find(sf);
+  SourceEntriesType::const_iterator i = this->SourceEntries.find(sf);
   if(i != this->SourceEntries.end())
     {
     return &i->second.Depends;
@@ -61,7 +61,7 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf)
 
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
-                                                 const char *config)
+                                                 const char *config) const
 {
   std::string config_upper;
   if(config && *config)
@@ -70,7 +70,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
     }
 
   typedef std::map<std::string, std::vector<std::string> > IncludeCacheType;
-  IncludeCacheType::iterator iter =
+  IncludeCacheType::const_iterator iter =
       this->SystemIncludesCache.find(config_upper);
 
   if (iter == this->SystemIncludesCache.end())
@@ -111,13 +111,13 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::GetPropertyAsBool(const char *prop)
+bool cmGeneratorTarget::GetPropertyAsBool(const char *prop) const
 {
   return this->Target->GetPropertyAsBool(prop);
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles()
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles() const
 {
   return this->Target->GetSourceFiles();
 }
@@ -270,7 +270,8 @@ void cmGeneratorTarget::LookupObjectLibraries()
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs)
+void
+cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
 {
   for(std::vector<cmTarget*>::const_iterator
         ti = this->ObjectLibraries.begin();
@@ -571,7 +572,7 @@ void cmGeneratorTarget::TraceDependencies()
 
 //----------------------------------------------------------------------------
 void cmGeneratorTarget::GetAppleArchs(const char* config,
-                             std::vector<std::string>& archVec)
+                             std::vector<std::string>& archVec) const
 {
   const char* archs = 0;
   if(config && *config)
@@ -591,7 +592,7 @@ void cmGeneratorTarget::GetAppleArchs(const char* config,
 }
 
 //----------------------------------------------------------------------------
-const char* cmGeneratorTarget::GetCreateRuleVariable()
+const char* cmGeneratorTarget::GetCreateRuleVariable() const
 {
   switch(this->GetType())
     {
@@ -617,7 +618,7 @@ std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GenerateTargetManifest(const char* config)
+void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
 {
   if (this->Target->IsImported())
     {

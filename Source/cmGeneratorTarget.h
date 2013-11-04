@@ -28,9 +28,9 @@ public:
 
   int GetType() const;
   const char *GetName() const;
-  const char *GetProperty(const char *prop);
-  bool GetPropertyAsBool(const char *prop);
-  std::vector<cmSourceFile*> const& GetSourceFiles();
+  const char *GetProperty(const char *prop) const;
+  bool GetPropertyAsBool(const char *prop) const;
+  std::vector<cmSourceFile*> const& GetSourceFiles() const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -60,22 +60,22 @@ public:
 
   std::vector<cmTarget*> ObjectLibraries;
 
-  void UseObjectLibraries(std::vector<std::string>& objs);
+  void UseObjectLibraries(std::vector<std::string>& objs) const;
 
   void GetAppleArchs(const char* config,
-                     std::vector<std::string>& archVec);
+                     std::vector<std::string>& archVec) const;
 
   ///! Return the rule variable used to create this type of target,
   //  need to add CMAKE_(LANG) for full name.
-  const char* GetCreateRuleVariable();
+  const char* GetCreateRuleVariable() const;
 
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(const char *config);
 
-  bool IsSystemIncludeDirectory(const char *dir, const char *config);
+  bool IsSystemIncludeDirectory(const char *dir, const char *config) const;
 
   /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const char* config);
+  void GenerateTargetManifest(const char* config) const;
 
   /**
    * Trace through the source files in this target and add al source files
@@ -87,14 +87,14 @@ public:
   void LookupObjectLibraries();
 
   /** Get sources that must be built before the given source.  */
-  std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf);
+  std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
 
 private:
-  std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+  mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);
