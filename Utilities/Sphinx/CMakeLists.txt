@@ -38,7 +38,7 @@ endif()
 
 set(conf_docs "${CMake_SOURCE_DIR}/Help")
 set(conf_path "${CMAKE_CURRENT_SOURCE_DIR}")
-set(conf_version "${CMake_MAJOR_VERSION}.${CMake_MINOR_VERSION}.${CMake_PATCH_VERSION}")
+set(conf_version "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
 set(conf_release "${CMake_VERSION}")
 configure_file(conf.py.in conf.py @ONLY)
 
