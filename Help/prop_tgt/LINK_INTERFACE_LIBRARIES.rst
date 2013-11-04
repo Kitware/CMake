@@ -16,7 +16,7 @@ the default set is non-empty.  This property is initialized by the
 value of the variable CMAKE_LINK_INTERFACE_LIBRARIES if it is set when
 a target is created.  This property is ignored for STATIC libraries.
 
-This property is overriden by the INTERFACE_LINK_LIBRARIES property if
+This property is overridden by the INTERFACE_LINK_LIBRARIES property if
 policy CMP0022 is NEW.
 
 This property is deprecated.  Use INTERFACE_LINK_LIBRARIES instead.
