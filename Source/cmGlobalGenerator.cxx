@@ -2170,7 +2170,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       cpackCommandLines.push_back(singleLine);
       (*targets)[editCacheTargetName] =
         this->CreateGlobalTarget(
-          editCacheTargetName, "Running CMake cache editor...",
+          editCacheTargetName, "Running cmake-gui ...",
           &cpackCommandLines, depends, 0);
       }
     else
