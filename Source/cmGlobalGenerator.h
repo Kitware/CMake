@@ -382,6 +382,7 @@ private:
 
   void WriteSummary();
   void WriteSummary(cmTarget* target);
+  void FinalizeTargetCompileDefinitions();
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
