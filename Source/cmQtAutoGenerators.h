@@ -23,7 +23,7 @@ public:
   cmQtAutoGenerators();
   bool Run(const char* targetDirectory, const char *config);
 
-  bool InitializeMocSourceFile(cmTarget* target);
+  bool InitializeAutogenTarget(cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget* target);
 
 private:

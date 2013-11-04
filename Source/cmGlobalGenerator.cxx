@@ -1281,7 +1281,7 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
             && !target.IsImported())
           {
           cmQtAutoGenerators autogen;
-          if(autogen.InitializeMocSourceFile(&target))
+          if(autogen.InitializeAutogenTarget(&target))
             {
             autogens.push_back(std::make_pair(autogen, &target));
             }

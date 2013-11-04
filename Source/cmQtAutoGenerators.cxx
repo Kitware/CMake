@@ -156,7 +156,7 @@ static std::string getAutogenTargetDir(cmTarget *target)
   return targetDir;
 }
 
-bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
+bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
