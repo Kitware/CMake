@@ -853,7 +853,7 @@ void cmTarget::DefineProperties(cmake *cm)
 
   cm->DefineProperty
     ("INTERFACE_LINK_LIBRARIES", cmProperty::TARGET,
-     "List public interface libraries for a shared library or executable.",
+     "List public interface libraries for a library.",
      "This property contains the list of transitive link dependencies.  "
      "When the target is linked into another target the libraries "
      "listed (and recursively their link interface libraries) will be "
