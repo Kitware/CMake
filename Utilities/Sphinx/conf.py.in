@@ -61,3 +61,4 @@ html_style = 'cmake.css'
 html_theme = 'default'
 html_title = 'CMake %s Documentation' % release
 html_short_title = '%s Documentation' % release
+html_favicon = 'cmake-favicon.ico'
