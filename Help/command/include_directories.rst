@@ -19,7 +19,7 @@ used by the generators.
 
 By default the directories are appended onto the current list of
 directories.  This default behavior can be changed by setting
-CMAKE_INCLUDE_DIRECTORIES_BEFORE to ON.  By using AFTER or BEFORE
+:variable:`CMAKE_INCLUDE_DIRECTORIES_BEFORE` to ON.  By using AFTER or BEFORE
 explicitly, you can select between appending and prepending,
 independent of the default.
 
