@@ -14,8 +14,7 @@ Description
 
 The "cmake" executable is the CMake command-line interface.  It may be
 used to configure projects in scripts.  Project configuration settings
-may be specified on the command line with the -D option.  The -i
-option will cause cmake to interactively prompt for such settings.
+may be specified on the command line with the -D option.
 
 CMake is a cross-platform build system generator.  Projects specify
 their build process with platform-independent CMake listfiles included
