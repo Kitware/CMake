@@ -66,32 +66,12 @@ cmGlobalGenerator::cmGlobalGenerator()
 
 cmGlobalGenerator::~cmGlobalGenerator()
 {
-  // Delete any existing cmLocalGenerators
-  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    delete this->LocalGenerators[i];
-    }
-  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
-      li = this->EvaluationFiles.begin();
-      li != this->EvaluationFiles.end();
-      ++li)
-    {
-    delete *li;
-    }
-  for(std::map<std::string, cmExportBuildFileGenerator*>::iterator
-        i = this->BuildExportSets.begin();
-      i != this->BuildExportSets.end(); ++i)
-    {
-    delete i->second;
-    }
-  this->LocalGenerators.clear();
+  this->ClearGeneratorMembers();
 
   if (this->ExtraGenerator)
     {
     delete this->ExtraGenerator;
     }
-
-  this->ClearGeneratorTargets();
 }
 
 bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
@@ -970,31 +950,7 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
 void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
-  this->ClearGeneratorTargets();
-  this->ExportSets.clear();
-  // Delete any existing cmLocalGenerators
-  unsigned int i;
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    delete this->LocalGenerators[i];
-    }
-  this->LocalGenerators.clear();
-  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
-      li = this->EvaluationFiles.begin();
-      li != this->EvaluationFiles.end();
-      ++li)
-    {
-    delete *li;
-    }
-  this->EvaluationFiles.clear();
-  this->TargetDependencies.clear();
-  this->TotalTargets.clear();
-  this->ImportedTargets.clear();
-  this->LocalGeneratorToTargetMap.clear();
-  this->ProjectMap.clear();
-  this->RuleHashes.clear();
-  this->DirectoryContentMap.clear();
-  this->BinaryDirectories.clear();
+  this->ClearGeneratorMembers();
 
   // start with this directory
   cmLocalGenerator *lg = this->CreateLocalGenerator();
@@ -1383,7 +1339,7 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::ClearGeneratorTargets()
+void cmGlobalGenerator::ClearGeneratorMembers()
 {
   for(cmGeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
       i != this->GeneratorTargets.end(); ++i)
@@ -1391,6 +1347,39 @@ void cmGlobalGenerator::ClearGeneratorTargets()
     delete i->second;
     }
   this->GeneratorTargets.clear();
+
+  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+      li = this->EvaluationFiles.begin();
+      li != this->EvaluationFiles.end();
+      ++li)
+    {
+    delete *li;
+    }
+  this->EvaluationFiles.clear();
+
+  for(std::map<std::string, cmExportBuildFileGenerator*>::iterator
+        i = this->BuildExportSets.begin();
+      i != this->BuildExportSets.end(); ++i)
+    {
+    delete i->second;
+    }
+  this->BuildExportSets.clear();
+
+  for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    delete this->LocalGenerators[i];
+    }
+  this->LocalGenerators.clear();
+
+  this->ExportSets.clear();
+  this->TargetDependencies.clear();
+  this->TotalTargets.clear();
+  this->ImportedTargets.clear();
+  this->LocalGeneratorToTargetMap.clear();
+  this->ProjectMap.clear();
+  this->RuleHashes.clear();
+  this->DirectoryContentMap.clear();
+  this->BinaryDirectories.clear();
 }
 
 //----------------------------------------------------------------------------
