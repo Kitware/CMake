@@ -138,7 +138,25 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     }
 }
 
-bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
+static std::string getAutogenTargetName(cmTarget *target)
+{
+  std::string autogenTargetName = target->GetName();
+  autogenTargetName += "_automoc";
+  return autogenTargetName;
+}
+
+static std::string getAutogenTargetDir(cmTarget *target)
+{
+  cmMakefile* makefile = target->GetMakefile();
+  std::string targetDir = makefile->GetCurrentOutputDirectory();
+  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
+  targetDir += "/";
+  targetDir += getAutogenTargetName(target);
+  targetDir += ".dir/";
+  return targetDir;
+}
+
+bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   // don't do anything if there is no Qt4 or Qt5Core (which contains moc):
@@ -154,8 +172,7 @@ bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
 
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
-    std::string automocTargetName = target->GetName();
-    automocTargetName += "_automoc";
+    std::string automocTargetName = getAutogenTargetName(target);
     std::string mocCppFile = makefile->GetCurrentOutputDirectory();
     mocCppFile += "/";
     mocCppFile += automocTargetName;
@@ -168,81 +185,10 @@ bool cmQtAutoGenerators::InitializeMocSourceFile(cmTarget* target)
 
     target->AddSourceFile(mocCppSource);
     }
-  return true;
-}
-
-static void GetCompileDefinitionsAndDirectories(cmTarget *target,
-                                                const char * config,
-                                                std::string &incs,
-                                                std::string &defs)
-{
-  cmMakefile* makefile = target->GetMakefile();
-  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
-  std::vector<std::string> includeDirs;
-  cmGeneratorTarget gtgt(target);
-  // Get the include dirs for this target, without stripping the implicit
-  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
-  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", config, false);
-  const char* sep = "";
-  incs = "";
-  for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
-      incDirIt != includeDirs.end();
-      ++incDirIt)
-    {
-    incs += sep;
-    sep = ";";
-    incs += *incDirIt;
-    }
-
-  std::set<std::string> defines;
-  localGen->AddCompileDefinitions(defines, target, config);
-
-  sep = "";
-  for(std::set<std::string>::const_iterator defIt = defines.begin();
-      defIt != defines.end();
-      ++defIt)
-    {
-    defs += sep;
-    sep = ";";
-    defs += *defIt;
-    }
-}
-
-void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
-{
-  cmMakefile* makefile = target->GetMakefile();
-  const char* targetName = target->GetName();
-
-  // forget the variables added here afterwards again:
-  cmMakefile::ScopePushPop varScope(makefile);
-  static_cast<void>(varScope);
-
-  const char *qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
-  if (!qtVersion)
-    {
-    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
-    }
-  if (const char *targetQtVersion =
-      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
-    {
-    qtVersion = targetQtVersion;
-    }
-  if (qtVersion)
-    {
-    makefile->AddDefinition("_target_qt_version", qtVersion);
-    }
   // create a custom target for running generators at buildtime:
-  std::string autogenTargetName = targetName;
-  autogenTargetName += "_automoc";
+  std::string autogenTargetName = getAutogenTargetName(target);
 
-  makefile->AddDefinition("_moc_target_name",
-          cmLocalGenerator::EscapeForCMake(autogenTargetName.c_str()).c_str());
-
-  std::string targetDir = makefile->GetCurrentOutputDirectory();
-  targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
-  targetDir += "/";
-  targetDir += autogenTargetName;
-  targetDir += ".dir/";
+  std::string targetDir = getAutogenTargetDir(target);
 
   cmCustomCommandLine currentLine;
   currentLine.push_back(makefile->GetSafeDefinition("CMAKE_COMMAND"));
@@ -284,7 +230,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     tools += " and " + toolNames[0];
     }
   std::string autogenComment = "Automatic " + tools + " for target ";
-  autogenComment += targetName;
+  autogenComment += target->GetName();
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
@@ -339,6 +285,77 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
       }
 
     target->AddUtility(autogenTargetName.c_str());
+    }
+
+  return true;
+}
+
+static void GetCompileDefinitionsAndDirectories(cmTarget *target,
+                                                const char * config,
+                                                std::string &incs,
+                                                std::string &defs)
+{
+  cmMakefile* makefile = target->GetMakefile();
+  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
+  std::vector<std::string> includeDirs;
+  cmGeneratorTarget gtgt(target);
+  // Get the include dirs for this target, without stripping the implicit
+  // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
+  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", config, false);
+  const char* sep = "";
+  incs = "";
+  for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
+      incDirIt != includeDirs.end();
+      ++incDirIt)
+    {
+    incs += sep;
+    sep = ";";
+    incs += *incDirIt;
+    }
+
+  std::set<std::string> defines;
+  localGen->AddCompileDefinitions(defines, target, config);
+
+  sep = "";
+  for(std::set<std::string>::const_iterator defIt = defines.begin();
+      defIt != defines.end();
+      ++defIt)
+    {
+    defs += sep;
+    sep = ";";
+    defs += *defIt;
+    }
+}
+
+void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
+{
+  cmMakefile* makefile = target->GetMakefile();
+
+  // forget the variables added here afterwards again:
+  cmMakefile::ScopePushPop varScope(makefile);
+  static_cast<void>(varScope);
+
+  // create a custom target for running generators at buildtime:
+  std::string autogenTargetName = getAutogenTargetName(target);
+
+  makefile->AddDefinition("_moc_target_name",
+          cmLocalGenerator::EscapeForCMake(autogenTargetName.c_str()).c_str());
+
+  std::string targetDir = getAutogenTargetDir(target);
+
+  const char *qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
+  if (!qtVersion)
+    {
+    qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
+    }
+  if (const char *targetQtVersion =
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+    {
+    qtVersion = targetQtVersion;
+    }
+  if (qtVersion)
+    {
+    makefile->AddDefinition("_target_qt_version", qtVersion);
     }
 
   std::map<std::string, std::string> configIncludes;
