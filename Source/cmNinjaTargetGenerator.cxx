@@ -398,11 +398,14 @@ cmNinjaTargetGenerator
     depfile = "$DEP_FILE";
     const std::string flagsName = "CMAKE_DEPFILE_FLAGS_" + lang;
     std::string depfileFlags = mf->GetSafeDefinition(flagsName.c_str());
-    cmSystemTools::ReplaceString(depfileFlags, "<DEPFILE>", "$DEP_FILE");
-    cmSystemTools::ReplaceString(depfileFlags, "<OBJECT>",  "$out");
-    cmSystemTools::ReplaceString(depfileFlags, "<CMAKE_C_COMPILER>",
-                                 mf->GetDefinition("CMAKE_C_COMPILER"));
-    flags += " " + depfileFlags;
+    if (!depfileFlags.empty())
+      {
+      cmSystemTools::ReplaceString(depfileFlags, "<DEPFILE>", "$DEP_FILE");
+      cmSystemTools::ReplaceString(depfileFlags, "<OBJECT>",  "$out");
+      cmSystemTools::ReplaceString(depfileFlags, "<CMAKE_C_COMPILER>",
+                                   mf->GetDefinition("CMAKE_C_COMPILER"));
+      flags += " " + depfileFlags;
+      }
     }
 
   vars.Flags = flags.c_str();
