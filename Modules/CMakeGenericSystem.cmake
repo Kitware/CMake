@@ -65,6 +65,7 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
     "Enable/Disable output of compile commands during generation."
     )
   mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
+  set(CMAKE_EDIT_COMMAND cmake-gui CACHE STRING "use cmake-gui for target edit_cache" FORCE)
 endif()
 
 # GetDefaultWindowsPrefixBase
