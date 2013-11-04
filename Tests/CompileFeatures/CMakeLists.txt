@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(CompileFeatures)
 
-if (NOT CMAKE_CXX_COMPILE_FEATURES)
+if (NOT CMAKE_C_COMPILE_FEATURES AND NOT CMAKE_CXX_COMPILE_FEATURES)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
     "int main(int,char**) { return 0; }\n"
   )
@@ -22,6 +22,10 @@ macro(run_test feature lang)
   endif()
 endmacro()
 
+get_property(c_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
+foreach(feature ${c_features})
+  run_test(${feature} C)
+endforeach()
 get_property(cxx_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
 foreach(feature ${cxx_features})
   run_test(${feature} CXX)
@@ -34,9 +38,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
   )
 endif()
 
+set(C_ext c)
+set(C_standard_flag 11)
 set(CXX_ext cpp)
 set(CXX_standard_flag 11)
-foreach(lang CXX)
+foreach(lang CXX C)
   if (CMAKE_${lang}_COMPILE_FEATURES)
     foreach(feature ${${lang}_non_features})
       message("Testing feature : ${feature}")

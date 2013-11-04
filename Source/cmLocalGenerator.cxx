@@ -2201,6 +2201,10 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     // Maintain sorted order, most recent first.
     langStdMap["CXX"].push_back("11");
     langStdMap["CXX"].push_back("98");
+
+    langStdMap["C"].push_back("11");
+    langStdMap["C"].push_back("99");
+    langStdMap["C"].push_back("90");
     }
 
   std::string standard(standardProp);

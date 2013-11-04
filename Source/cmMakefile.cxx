@@ -4973,6 +4973,10 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
 }
 
 #define FEATURE_STRING(F) , #F
+static const char * const C_FEATURES[] = {
+  0
+  FOR_EACH_C_FEATURE(FEATURE_STRING)
+};
 
 static const char * const CXX_FEATURES[] = {
   0
@@ -4980,6 +4984,11 @@ static const char * const CXX_FEATURES[] = {
 };
 #undef FEATURE_STRING
 
+static const char * const C_STANDARDS[] = {
+    "90"
+  , "99"
+  , "11"
+};
 static const char * const CXX_STANDARDS[] = {
     "98"
   , "11"
@@ -4995,10 +5004,13 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
     target->AppendProperty("COMPILE_FEATURES", feature.c_str());
     return true;
     }
+  bool isCFeature = std::find_if(cmArrayBegin(C_FEATURES) + 1,
+              cmArrayEnd(C_FEATURES), cmStrCmp(feature))
+              != cmArrayEnd(C_FEATURES);
   bool isCxxFeature = std::find_if(cmArrayBegin(CXX_FEATURES) + 1,
               cmArrayEnd(CXX_FEATURES), cmStrCmp(feature))
               != cmArrayEnd(CXX_FEATURES);
-  if (!isCxxFeature)
+  if (!isCFeature && !isCxxFeature)
     {
     cmOStringStream e;
     if (error)
@@ -5022,7 +5034,7 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
     return false;
     }
 
-  std::string lang = "CXX";
+  std::string lang = isCFeature ? "C" : "CXX";
 
   const char* featuresKnown =
     this->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
@@ -5071,6 +5083,16 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
 
   target->AppendProperty("COMPILE_FEATURES", feature.c_str());
 
+  return isCFeature
+      ? this->AddRequiredTargetCFeature(target, feature)
+      : this->AddRequiredTargetCxxFeature(target, feature);
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::
+AddRequiredTargetCxxFeature(cmTarget *target,
+                            const std::string& feature) const
+{
   bool needCxx98 = false;
   bool needCxx11 = false;
 
@@ -5133,6 +5155,96 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
   else if (setCxx98)
     {
     target->SetProperty("CXX_STANDARD", "98");
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::
+AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
+{
+  bool needC90 = false;
+  bool needC99 = false;
+  bool needC11 = false;
+
+  if (const char *propC90 =
+          this->GetDefinition("CMAKE_C90_COMPILE_FEATURES"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(propC90, props);
+    needC90 = std::find(props.begin(), props.end(), feature) != props.end();
+    }
+  if (const char *propC99 =
+          this->GetDefinition("CMAKE_C99_COMPILE_FEATURES"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(propC99, props);
+    needC99 = std::find(props.begin(), props.end(), feature) != props.end();
+    }
+  if (const char *propC11 =
+          this->GetDefinition("CMAKE_C11_COMPILE_FEATURES"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(propC11, props);
+    needC11 = std::find(props.begin(), props.end(), feature) != props.end();
+    }
+
+  const char *existingCStandard = target->GetProperty("C_STANDARD");
+  if (existingCStandard)
+    {
+    if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
+                  cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS))
+      {
+      cmOStringStream e;
+      e << "The C_STANDARD property on target \"" << target->GetName()
+        << "\" contained an invalid value: \"" << existingCStandard << "\".";
+      this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+      return false;
+      }
+    }
+  const char * const *existingCIt = existingCStandard
+                                    ? std::find_if(cmArrayBegin(C_STANDARDS),
+                                      cmArrayEnd(C_STANDARDS),
+                                      cmStrCmp(existingCStandard))
+                                    : cmArrayEnd(C_STANDARDS);
+
+  bool setC90 = needC90 && !existingCStandard;
+  bool setC99 = needC99 && !existingCStandard;
+  bool setC11 = needC11 && !existingCStandard;
+
+  if (needC11 && existingCStandard && existingCIt <
+                                    std::find_if(cmArrayBegin(C_STANDARDS),
+                                      cmArrayEnd(C_STANDARDS),
+                                      cmStrCmp("11")))
+    {
+    setC11 = true;
+    }
+  else if(needC99 && existingCStandard && existingCIt <
+                                    std::find_if(cmArrayBegin(C_STANDARDS),
+                                      cmArrayEnd(C_STANDARDS),
+                                      cmStrCmp("99")))
+    {
+    setC99 = true;
+    }
+  else if(needC90 && existingCStandard && existingCIt <
+                                    std::find_if(cmArrayBegin(C_STANDARDS),
+                                      cmArrayEnd(C_STANDARDS),
+                                      cmStrCmp("90")))
+    {
+    setC90 = true;
+    }
+
+  if (setC11)
+    {
+    target->SetProperty("C_STANDARD", "11");
+    }
+  else if (setC99)
+    {
+    target->SetProperty("C_STANDARD", "99");
+    }
+  else if (setC90)
+    {
+    target->SetProperty("C_STANDARD", "90");
     }
   return true;
 }
