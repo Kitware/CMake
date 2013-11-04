@@ -379,15 +379,26 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
     {
     this->Makefile
       ->AddLinkLibraryForTarget(this->Target->GetName(), lib, llt);
-    if (this->CurrentProcessingState != ProcessingKeywordPublicInterface
-        && this->CurrentProcessingState != ProcessingPlainPublicInterface)
+    if(this->CurrentProcessingState == ProcessingLinkLibraries)
+      {
+      this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
+        this->Target->GetDebugGeneratorExpressions(lib, llt).c_str());
+      return true;
+      }
+    else if(this->CurrentProcessingState != ProcessingKeywordPublicInterface
+            && this->CurrentProcessingState != ProcessingPlainPublicInterface)
       {
       if (this->Target->GetType() == cmTarget::STATIC_LIBRARY)
         {
+        std::string configLib = this->Target
+                                     ->GetDebugGeneratorExpressions(lib, llt);
+        if (cmGeneratorExpression::IsValidTargetName(lib)
+            || cmGeneratorExpression::Find(lib) != std::string::npos)
+          {
+          configLib = "$<LINK_ONLY:" + configLib + ">";
+          }
         this->Target->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                  ("$<LINK_ONLY:" +
-                  this->Target->GetDebugGeneratorExpressions(lib, llt) +
-                  ">").c_str());
+                                     configLib.c_str());
         }
       // Not a 'public' or 'interface' library. Do not add to interface
       // property.
