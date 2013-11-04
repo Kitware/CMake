@@ -39,7 +39,7 @@ macro(java_append_library_directories _var)
     # 1.6.0_18 + icedtea patches. However, it would be much better to base the
     # guess on the first part of the GNU config.guess platform triplet.
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-        set(_java_libarch "amd64")
+        set(_java_libarch "amd64" "i386")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
         set(_java_libarch "i386")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
@@ -52,7 +52,7 @@ macro(java_append_library_directories _var)
         # endianess of the underlying system.
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "mips" "mipsel" "mipseb")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
-        set(_java_libarch "ppc64")
+        set(_java_libarch "ppc64" "ppc")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
         set(_java_libarch "ppc")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
