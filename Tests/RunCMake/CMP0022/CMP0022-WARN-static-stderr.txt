@@ -3,10 +3,10 @@ CMake Warning \(dev\) in CMakeLists.txt:
   interface.  Run "cmake --help-policy CMP0022" for policy details.  Use the
   cmake_policy command to set the policy and suppress this warning.
 
-  Static library target "bar" has a INTERFACE_LINK_LIBRARIES property.  This
-  should be preferred as the source of the link interface for this library.
-  Ignoring the property and using the link implementation as the link
-  interface instead.
+  Target "bar" has an INTERFACE_LINK_LIBRARIES property.  This should be
+  preferred as the source of the link interface for this library but because
+  CMP0022 is not set CMake is ignoring the property and using the link
+  implementation as the link interface instead.
 
   INTERFACE_LINK_LIBRARIES:
 
