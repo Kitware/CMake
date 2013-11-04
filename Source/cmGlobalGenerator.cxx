@@ -1095,9 +1095,12 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  this->CreateQtAutoGeneratorsTargets();
+  AutogensType autogens;
+  this->CreateQtAutoGeneratorsTargets(autogens);
+#endif
 
   // For each existing cmLocalGenerator
   unsigned int i;
@@ -1130,6 +1133,14 @@ void cmGlobalGenerator::Generate()
 
   // Create per-target generator information.
   this->CreateGeneratorTargets();
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
+       ++it)
+    {
+    it->first.SetupAutoGenerateTarget(it->second);
+    }
+#endif
 
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
@@ -1256,11 +1267,9 @@ bool cmGlobalGenerator::CheckTargets()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
+void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
-  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > Autogens;
-  Autogens autogens;
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
@@ -1289,11 +1298,8 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
         }
       }
     }
-  for (Autogens::iterator it = autogens.begin(); it != autogens.end();
-       ++it)
-    {
-    it->first.SetupAutoGenerateTarget(it->second);
-    }
+#else
+  (void)autogens;
 #endif
 }
 
