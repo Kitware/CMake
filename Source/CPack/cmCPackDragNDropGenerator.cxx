@@ -474,7 +474,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     udco_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     udco_image_command << " convert \"" << temp_image << "\"";
     udco_image_command << " -format UDCO";
-    udco_image_command << " -o \"" << temp_udco << "\"";
+    udco_image_command << " -ov -o \"" << temp_udco << "\"";
 
     std::string error;
     if(!this->RunCommand(udco_image_command, &error))
@@ -504,6 +504,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     // Rez the SLA
     cmOStringStream embed_sla_command;
     embed_sla_command << this->GetOption("CPACK_COMMAND_REZ");
+    const char* sysroot = this->GetOption("CPACK_OSX_SYSROOT");
+    if(sysroot && sysroot[0] != '\0')
+      {
+      embed_sla_command << " -isysroot \"" << sysroot << "\"";
+      }
     embed_sla_command << " \"" << sla_r << "\"";
     embed_sla_command << " -a -o ";
     embed_sla_command << "\"" << temp_udco << "\"";

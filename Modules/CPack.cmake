@@ -519,6 +519,11 @@ cpack_set_if_not_set(CPACK_NSIS_INSTALLER_MUI_ICON_CODE "")
 # WiX specific variables
 cpack_set_if_not_set(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 
+# set sysroot so SDK tools can be used
+if(CMAKE_OSX_SYSROOT)
+  cpack_set_if_not_set(CPACK_OSX_SYSROOT "${CMAKE_OSX_SYSROOT}")
+endif()
+
 if(DEFINED CPACK_COMPONENTS_ALL)
   if(CPACK_MONOLITHIC_INSTALL)
     message("CPack warning: both CPACK_COMPONENTS_ALL and CPACK_MONOLITHIC_INSTALL have been set.\nDefaulting to a monolithic installation.")
