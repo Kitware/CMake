@@ -6,9 +6,9 @@ ctest(1)
 Synopsis
 ========
 
-::
+.. parsed-literal::
 
-  ctest [options]
+ ctest [<options>]
 
 Description
 ===========
@@ -18,6 +18,8 @@ CMake-generated build trees created for projects that use the
 ENABLE_TESTING and ADD_TEST commands have testing support.  This
 program will run the tests and report results.
 
+Options
+=======
 
 * ``-C <cfg>, --build-config <cfg>``: Choose configuration to test.
 

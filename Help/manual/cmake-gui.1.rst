@@ -6,11 +6,10 @@ cmake-gui(1)
 Synopsis
 ========
 
-::
+.. parsed-literal::
 
-  cmake-gui [options]
-  cmake-gui [options] <path-to-source>
-  cmake-gui [options] <path-to-existing-build>
+ cmake-gui [<options>]
+ cmake-gui [<options>] (<path-to-source> | <path-to-existing-build>)
 
 Description
 ===========
@@ -24,6 +23,9 @@ their build process with platform-independent CMake listfiles included
 in each directory of a source tree with the name CMakeLists.txt.
 Users build a project by using CMake to generate a build system for a
 native tool on their platform.
+
+Options
+=======
 
 .. include:: OPTIONS_HELP.txt
 
