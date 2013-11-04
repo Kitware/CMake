@@ -836,7 +836,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "CMAKE_LINK_INTERFACE_LIBRARIES if it is set when a target is "
      "created.  "
      "This property is ignored for STATIC libraries.\n"
-     "This property is overriden by the INTERFACE_LINK_LIBRARIES property if "
+     "This property is overridden by the INTERFACE_LINK_LIBRARIES property if "
      "policy CMP0022 is NEW.\n"
      "This property is deprecated. Use INTERFACE_LINK_LIBRARIES instead.");
 
@@ -847,7 +847,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "LINK_INTERFACE_LIBRARIES.  "
      "If set, this property completely overrides the generic property "
      "for the named configuration.\n"
-     "This property is overriden by the INTERFACE_LINK_LIBRARIES property if "
+     "This property is overridden by the INTERFACE_LINK_LIBRARIES property if "
      "policy CMP0022 is NEW.\n"
      "This property is deprecated. Use INTERFACE_LINK_LIBRARIES instead.");
 
@@ -858,7 +858,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "When the target is linked into another target the libraries "
      "listed (and recursively their link interface libraries) will be "
      "provided to the other target also.  "
-     "This property is overriden by the LINK_INTERFACE_LIBRARIES or "
+     "This property is overridden by the LINK_INTERFACE_LIBRARIES or "
      "LINK_INTERFACE_LIBRARIES_<CONFIG> property if "
      "policy CMP0022 is OLD or unset.\n"
      "\n"
