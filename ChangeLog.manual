@@ -1,3 +1,28 @@
+Changes in CMake 2.8.12.1 (since 2.8.12)
+----------------------------------------
+Brad King (9):
+      MSVC: Add /FS flag for cl >= 18 to allow parallel compilation (#14492)
+      Genex: Reject $<TARGET_FILE:...> for object libraries (#14532)
+      Check for OBJECT_LIBRARY source files at start of generation
+      CMP0022: Plain target_link_libraries must populate link interface
+      Do not export INTERFACE_LINK_LIBRARIES from non-linkable targets
+      CMP0022: Warn about a given target at most once
+      Fix summary documentation of INTERFACE_LINK_LIBRARIES
+      file(GENERATE): Clear internal records between configures
+      cmake: Validate -E cmake_automoc argument count (#14545)
+
+Modestas Vainius (1):
+      Fix spelling in INTERFACE_LINK_LIBRARIES documentation (#14542)
+
+Stephen Kelly (4):
+      CMP0022: Output link interface mismatch for static library warning
+      Don't add invalid content to static lib INTERFACE_LINK_LIBRARIES.
+      CMP0022: Add unit test for null pointer check and message.
+      CMP0022: Add test for target_link_libraries plain signature
+
+Vladislav Vinogradov (1):
+      FindCUDA: Fix NPP library search for CUDA 5.5
+
 Changes in CMake 2.8.12 (since 2.8.12-rc4)
 ------------------------------------------
 Brad King (4):
