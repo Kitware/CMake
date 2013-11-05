@@ -414,7 +414,6 @@ private:
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   void CreateGeneratorTargets();
-  void FinalizeTargetCompileDefinitions();
   void ComputeGeneratorTargetObjects();
   void ClearGeneratorTargets();
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
