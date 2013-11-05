@@ -31,6 +31,7 @@ bool cmAddCustomCommandCommand
 
   std::string source, target, main_dependency, working;
   std::string comment_buffer;
+  std::string pool;
   const char* comment = 0;
   std::vector<std::string> depends, outputs, output;
   bool verbatim = false;
@@ -58,6 +59,7 @@ bool cmAddCustomCommandCommand
     doing_outputs,
     doing_comment,
     doing_working_directory,
+    doing_pool,
     doing_nothing
   };
 
@@ -137,6 +139,10 @@ bool cmAddCustomCommandCommand
     else if (copy == "COMMENT")
       {
       doing = doing_comment;
+      }
+    else if (copy == "POOL")
+      {
+      doing = doing_pool;
       }
     else
       {
@@ -228,6 +234,9 @@ bool cmAddCustomCommandCommand
            comment_buffer = copy;
            comment = comment_buffer.c_str();
            break;
+         case doing_pool:
+           pool = copy;
+           break;
          default:
            this->SetError("Wrong syntax. Unknown type of argument.");
            return false;
@@ -317,7 +326,8 @@ bool cmAddCustomCommandCommand
                                              main_dependency.c_str(),
                                              commandLines, comment,
                                              working.c_str(), false,
-                                             escapeOldStyle);
+                                             escapeOldStyle,
+                                             pool.c_str());
 
     // Add implicit dependency scanning requests if any were given.
     if(!implicit_depends.empty())
