@@ -88,6 +88,7 @@ public:
     CMP0034, ///< Disallow command: utility_source
     CMP0035, ///< Disallow command: variable_requires
     CMP0036, ///< Disallow command: build_name
+    CMP0037, ///< Target names should match a validity pattern.
 
     /** \brief Always the last entry.
      *

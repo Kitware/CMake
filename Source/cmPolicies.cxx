@@ -286,6 +286,11 @@ cmPolicies::cmPolicies()
     CMP0036, "CMP0036",
     "The build_name command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0037, "CMP0037",
+    "Target names should match a validity pattern.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
