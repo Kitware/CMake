@@ -979,6 +979,14 @@ void cmGlobalGenerator::Configure()
     delete this->LocalGenerators[i];
     }
   this->LocalGenerators.clear();
+  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+      li = this->EvaluationFiles.begin();
+      li != this->EvaluationFiles.end();
+      ++li)
+    {
+    delete *li;
+    }
+  this->EvaluationFiles.clear();
   this->TargetDependencies.clear();
   this->TotalTargets.clear();
   this->ImportedTargets.clear();
