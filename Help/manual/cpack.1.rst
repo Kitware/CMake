@@ -6,9 +6,9 @@ cpack(1)
 Synopsis
 ========
 
-::
+.. parsed-literal::
 
-  cpack -G <generator> [options]
+ cpack -G <generator> [<options>]
 
 Description
 ===========
@@ -24,6 +24,8 @@ in each directory of a source tree with the name CMakeLists.txt.
 Users build a project by using CMake to generate a build system for a
 native tool on their platform.
 
+Options
+=======
 
 * ``-G <generator>``: Use the specified generator to generate package.
 
