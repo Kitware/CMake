@@ -2035,6 +2035,11 @@ void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
   this->CMakeInstance = cm;
 }
 
+const char* cmGlobalGenerator::GetEditCacheCommand(cmMakefile* mf) const
+{
+  return mf->GetDefinition("CMAKE_EDIT_COMMAND");
+}
+
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
@@ -2141,9 +2146,9 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 
     // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
     // Otherwise default to the interactive command-line interface.
-    if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
+    if (this->GetEditCacheCommand(mf))
       {
-      singleLine.push_back(mf->GetDefinition("CMAKE_EDIT_COMMAND"));
+      singleLine.push_back(this->GetEditCacheCommand(mf));
       singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
       singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
       cpackCommandLines.push_back(singleLine);
