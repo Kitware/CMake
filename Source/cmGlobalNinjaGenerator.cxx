@@ -1202,10 +1202,3 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
              /*orderOnlyDeps=*/ cmNinjaDeps(),
              /*variables=*/ cmNinjaVars());
 }
-
-
-const char* cmGlobalNinjaGenerator::GetEditCacheCommand(cmMakefile* mf) const
-{
-  const char* cmd = mf->GetDefinition("CMAKE_EDIT_COMMAND");
-  return cmd ? cmd : "cmake-gui";
-}
