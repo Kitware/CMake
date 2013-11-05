@@ -256,7 +256,8 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                                 const std::string& comment,
                                                 const cmNinjaDeps& outputs,
                                                 const cmNinjaDeps& deps,
-                                                const cmNinjaDeps& orderOnly)
+                                                const cmNinjaDeps& orderOnly,
+                                                const std::string& pool)
 {
   std::string cmd = command;
 #ifdef _WIN32
@@ -270,6 +271,8 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
   cmNinjaVars vars;
   vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
+  if (!pool.empty())
+    vars["pool"] = pool;
 
   this->WriteBuild(*this->BuildFileStream,
                    comment,
