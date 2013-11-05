@@ -1734,7 +1734,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       return cmake::ExecuteEchoColor(args);
       }
-    else if (args[1] == "cmake_automoc")
+    else if (args[1] == "cmake_automoc" && args.size() >= 4)
       {
         cmQtAutomoc automoc;
         const char *config = args[3].empty() ? 0 : args[3].c_str();
