@@ -296,6 +296,11 @@ cmPolicies::cmPolicies()
     CMP0038, "CMP0038",
     "Targets may not link directly to themselves.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0039, "CMP0039",
+    "Utility targets may not have link dependencies",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
