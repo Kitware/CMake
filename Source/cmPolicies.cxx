@@ -291,6 +291,11 @@ cmPolicies::cmPolicies()
     CMP0037, "CMP0037",
     "Target names should match a validity pattern.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0038, "CMP0038",
+    "Targets may not link directly to themselves.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
