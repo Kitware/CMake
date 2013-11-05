@@ -183,7 +183,6 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
 
   // For the rule file.
   this->WriteProjectHeader(this->GetRulesFileStream());
-  this->WritePools(this->GetRulesFileStream());
 }
 
 void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
@@ -193,32 +192,6 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
     << "# Project: " << this->GetMakefile()->GetProjectName() << std::endl
     << "# Configuration: " << this->ConfigName << std::endl
     ;
-  cmGlobalNinjaGenerator::WriteDivider(os);
-}
-
-void cmLocalNinjaGenerator::WritePools(std::ostream& os)
-{
-  cmGlobalNinjaGenerator::WriteDivider(os);
-
-  const char* poolsStr = this->GetCMakeInstance()->
-      GetProperty("POOLS", cmProperty::GLOBAL);
-  if (poolsStr)
-  {
-      std::vector<std::string> pools;
-      cmSystemTools::ExpandListArgument(poolsStr, pools);
-      for (size_t i = 0; i < pools.size(); ++i)
-      {
-          const std::string pool = pools[i];
-          std::string::size_type eq = pool.find("=");
-          if (eq != std::string::npos && pool.size() > eq)
-          {
-              os << "pool " << pool.substr(0, eq) << std::endl;
-              os << "  depth = " << pool.substr(eq + 1) << std::endl;
-              os << std::endl;
-          }
-      }
-  }
-
   cmGlobalNinjaGenerator::WriteDivider(os);
 }
 
@@ -395,8 +368,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       "Custom command for " + ninjaOutputs[0],
       ninjaOutputs,
       ninjaDeps,
-      orderOnlyDeps,
-      cc->GetPool());
+      orderOnlyDeps);
   }
 }
 
