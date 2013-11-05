@@ -308,7 +308,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     std::vector<std::string> no_output;
     cmCustomCommand cc(makefile, no_output, depends,
                        commandLines, autogenComment.c_str(),
-                       workingDirectory.c_str());
+                       workingDirectory.c_str(), 0);
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
     target->GetPreBuildCommands().push_back(cc);
