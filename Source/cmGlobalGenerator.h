@@ -410,8 +410,6 @@ private:
   typedef std::map<cmTarget *, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
-  virtual const char* GetEditCacheCommand(cmMakefile* mf) const;
-
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   void CreateGeneratorTargets();
