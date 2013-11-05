@@ -1095,8 +1095,6 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
-  this->FinalizeTargetCompileDefinitions();
-
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
   AutogensType autogens;
@@ -1302,11 +1300,13 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
+void cmGlobalGenerator::CreateGeneratorTargets()
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
+    cmGeneratorTargetsType generatorTargets;
+
     cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
 
     const std::vector<cmValueWithOrigin> noconfig_compile_definitions =
@@ -1321,6 +1321,7 @@ void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
       {
       cmTarget* t = &ti->second;
 
+      {
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();
           it != noconfig_compile_definitions.end(); ++it)
@@ -1337,24 +1338,7 @@ void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
                           mf->GetProperty(defPropName.c_str()));
         }
       }
-    }
-}
 
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets()
-{
-  // Construct per-target generator information.
-  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
-    {
-    cmGeneratorTargetsType generatorTargets;
-
-    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
-
-    cmTargets& targets = mf->GetTargets();
-    for(cmTargets::iterator ti = targets.begin();
-        ti != targets.end(); ++ti)
-      {
-      cmTarget* t = &ti->second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
       this->GeneratorTargets[t] = gt;
       generatorTargets[t] = gt;
