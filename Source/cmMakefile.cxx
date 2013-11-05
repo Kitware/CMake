@@ -897,7 +897,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
     // Add the command to the appropriate build step for the target.
     std::vector<std::string> no_output;
     cmCustomCommand cc(this, no_output, depends,
-                       commandLines, comment, workingDir, 0);
+                       commandLines, comment, workingDir);
     cc.SetEscapeOldStyle(escapeOldStyle);
     cc.SetEscapeAllowMakeVars(true);
     switch(type)
@@ -924,8 +924,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const char* comment,
                                      const char* workingDir,
                                      bool replace,
-                                     bool escapeOldStyle,
-                                     const char* pool)
+                                     bool escapeOldStyle)
 {
   // Make sure there is at least one output.
   if(outputs.empty())
@@ -1028,7 +1027,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     {
     cmCustomCommand* cc =
       new cmCustomCommand(this, outputs, depends2, commandLines,
-                          comment, workingDir, pool);
+                          comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     file->SetCustomCommand(cc);
@@ -1079,14 +1078,13 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
                                      const char* comment,
                                      const char* workingDir,
                                      bool replace,
-                                     bool escapeOldStyle,
-                                     const char* pool)
+                                     bool escapeOldStyle)
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
   return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
                                         commandLines, comment, workingDir,
-                                        replace, escapeOldStyle, pool);
+                                        replace, escapeOldStyle);
 }
 
 //----------------------------------------------------------------------------
