@@ -61,6 +61,7 @@ if (NOT "${CMAKE_TEST_GENERATOR}" MATCHES "Borland"
   add_RunCMake_test(CMP0037)
 endif()
 add_RunCMake_test(CMP0038)
+add_RunCMake_test(CMP0039)
 add_RunCMake_test(CTest)
 if(UNIX AND "${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles")
   add_RunCMake_test(CompilerChange)
