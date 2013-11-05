@@ -1059,14 +1059,9 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
-  this->FinalizeTargetCompileDefinitions();
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
   // the AUTOMOC, AUTOUIC or AUTORCC property set
-  AutogensType autogens;
-  this->CreateQtAutoGeneratorsTargets(autogens);
-#endif
+  this->CreateQtAutoGeneratorsTargets();
 
   // For each existing cmLocalGenerator
   unsigned int i;
@@ -1099,14 +1094,6 @@ void cmGlobalGenerator::Generate()
 
   // Create per-target generator information.
   this->CreateGeneratorTargets();
-
-#ifdef CMAKE_BUILD_WITH_CMAKE
-  for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
-       ++it)
-    {
-    it->first.SetupAutoGenerateTarget(it->second);
-    }
-#endif
 
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
@@ -1233,9 +1220,11 @@ bool cmGlobalGenerator::CheckTargets()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
+void cmGlobalGenerator::CreateQtAutoGeneratorsTargets()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
+  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > Autogens;
+  Autogens autogens;
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
     cmTargets& targets =
@@ -1264,17 +1253,22 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
         }
       }
     }
-#else
-  (void)autogens;
+  for (Autogens::iterator it = autogens.begin(); it != autogens.end();
+       ++it)
+    {
+    it->first.SetupAutoGenerateTarget(it->second);
+    }
 #endif
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
+void cmGlobalGenerator::CreateGeneratorTargets()
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
+    cmGeneratorTargetsType generatorTargets;
+
     cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
 
     const std::vector<cmValueWithOrigin> noconfig_compile_definitions =
@@ -1289,6 +1283,7 @@ void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
       {
       cmTarget* t = &ti->second;
 
+      {
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();
           it != noconfig_compile_definitions.end(); ++it)
@@ -1305,24 +1300,7 @@ void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
                           mf->GetProperty(defPropName.c_str()));
         }
       }
-    }
-}
 
-//----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets()
-{
-  // Construct per-target generator information.
-  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
-    {
-    cmGeneratorTargetsType generatorTargets;
-
-    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
-
-    cmTargets& targets = mf->GetTargets();
-    for(cmTargets::iterator ti = targets.begin();
-        ti != targets.end(); ++ti)
-      {
-      cmTarget* t = &ti->second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
       this->GeneratorTargets[t] = gt;
       generatorTargets[t] = gt;

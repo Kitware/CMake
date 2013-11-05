@@ -16,10 +16,7 @@
 
 #include <QObject>
 
-class Foo
-#ifdef FOO
-          : public QObject
-#endif
+class Foo : public QObject
 {
   Q_OBJECT
   public:
