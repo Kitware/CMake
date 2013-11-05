@@ -44,6 +44,7 @@ public:
   virtual const char* GetName() const {return "add_custom_command";}
 
   cmTypeMacro(cmAddCustomCommandCommand, cmCommand);
+
 protected:
   bool CheckOutputs(const std::vector<std::string>& outputs);
 };
