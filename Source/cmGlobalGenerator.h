@@ -416,8 +416,9 @@ private:
   void CreateGeneratorTargets();
   void FinalizeTargetCompileDefinitions();
   void ComputeGeneratorTargetObjects();
-  void ClearGeneratorTargets();
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
+
+  void ClearGeneratorMembers();
 
   // Cache directory content and target files to be built.
   struct DirectoryContent: public std::set<cmStdString>
