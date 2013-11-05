@@ -45,7 +45,7 @@
 #      set(options OPTIONAL FAST)
 #      set(oneValueArgs DESTINATION RENAME)
 #      set(multiValueArgs TARGETS CONFIGURATIONS)
-#      cmake_parse_arguments(MY_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+#      cmake_parse_arguments(MY_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}" )
 #      ...
 #
 #
@@ -118,7 +118,7 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
   set(currentArgName)
 
   # now iterate over all arguments and fill the result variables
-  foreach(currentArg ${ARGN})
+  foreach(currentArg IN LISTS ARGN)
     list(FIND _optionNames "${currentArg}" optionIndex)  # ... then this marks the end of the arguments belonging to this keyword
     list(FIND _singleArgNames "${currentArg}" singleArgIndex)  # ... then this marks the end of the arguments belonging to this keyword
     list(FIND _multiArgNames "${currentArg}" multiArgIndex)  # ... then this marks the end of the arguments belonging to this keyword
@@ -126,13 +126,13 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
     if(${optionIndex} EQUAL -1  AND  ${singleArgIndex} EQUAL -1  AND  ${multiArgIndex} EQUAL -1)
       if(insideValues)
         if("${insideValues}" STREQUAL "SINGLE")
-          set(${prefix}_${currentArgName} ${currentArg})
+          set(${prefix}_${currentArgName} "${currentArg}")
           set(insideValues FALSE)
         elseif("${insideValues}" STREQUAL "MULTI")
-          list(APPEND ${prefix}_${currentArgName} ${currentArg})
+          list(APPEND ${prefix}_${currentArgName} "${currentArg}")
         endif()
       else()
-        list(APPEND ${prefix}_UNPARSED_ARGUMENTS ${currentArg})
+        list(APPEND ${prefix}_UNPARSED_ARGUMENTS "${currentArg}")
       endif()
     else()
       if(NOT ${optionIndex} EQUAL -1)
@@ -152,9 +152,10 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
   endforeach()
 
   # propagate the result variables to the caller:
-  foreach(arg_name ${_singleArgNames} ${_multiArgNames} ${_optionNames})
-    set(${prefix}_${arg_name}  ${${prefix}_${arg_name}} PARENT_SCOPE)
+  foreach(arg_name ${_singleArgNames} ${_multiArgNames} ${_optionNames} UNPARSED_ARGUMENTS)
+    if(DEFINED ${prefix}_${arg_name})
+      set(${prefix}_${arg_name} "${${prefix}_${arg_name}}" PARENT_SCOPE)
+    endif()
   endforeach()
-  set(${prefix}_UNPARSED_ARGUMENTS ${${prefix}_UNPARSED_ARGUMENTS} PARENT_SCOPE)
 
 endfunction()
