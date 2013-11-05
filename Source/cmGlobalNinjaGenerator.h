@@ -222,6 +222,8 @@ public:
   }
   virtual const char* GetCleanTargetName()         const { return "clean"; }
 
+  virtual const char* GetEditCacheCommand(cmMakefile* mf) const {
+    return "cmake-gui"; }
 
   cmGeneratedFileStream* GetBuildFileStream() const {
     return this->BuildFileStream; }
