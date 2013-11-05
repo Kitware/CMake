@@ -89,6 +89,7 @@ public:
     CMP0035, ///< Disallow command: variable_requires
     CMP0036, ///< Disallow command: build_name
     CMP0037, ///< Target names should match a validity pattern.
+    CMP0038, ///< Targets may not link directly to themselves
 
     /** \brief Always the last entry.
      *
