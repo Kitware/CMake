@@ -222,7 +222,6 @@ public:
   }
   virtual const char* GetCleanTargetName()         const { return "clean"; }
 
-  virtual const char* GetEditCacheCommand(cmMakefile* mf) const;
 
   cmGeneratedFileStream* GetBuildFileStream() const {
     return this->BuildFileStream; }
