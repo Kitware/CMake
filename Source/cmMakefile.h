@@ -174,7 +174,6 @@ public:
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
                                 bool escapeOldStyle = true);
-
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& depends,
@@ -182,18 +181,15 @@ public:
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
-    bool escapeOldStyle = true,
-    const char *pool = 0);
-
-  cmSourceFile* AddCustomCommandToOutput(const char* output,
+    bool escapeOldStyle = true);
+  cmSourceFile* AddCustomCommandToOutput(
+    const char* output,
     const std::vector<std::string>& depends,
     const char* main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
-    bool escapeOldStyle = true,
-    const char* pool = 0);
-
+    bool escapeOldStyle = true);
   void AddCustomCommandOldStyle(const char* target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
