@@ -1363,7 +1363,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
       std::vector<std::string>(),
       cmd,
       "Creating symlinks",
-      "");
+      "", 0);
 
     postbuild.push_back(command);
     }
