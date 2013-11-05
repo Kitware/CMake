@@ -46,7 +46,7 @@ if(PHP4_FOUND_INCLUDE_PATH)
   foreach(php4_path Zend main TSRM)
     set(php4_paths ${php4_paths} "${PHP4_FOUND_INCLUDE_PATH}/${php4_path}")
   endforeach()
-  set(PHP4_INCLUDE_PATH "${php4_paths}" INTERNAL "PHP4 include paths")
+  set(PHP4_INCLUDE_PATH "${php4_paths}")
 endif()
 
 find_program(PHP4_EXECUTABLE NAMES php4 php )
