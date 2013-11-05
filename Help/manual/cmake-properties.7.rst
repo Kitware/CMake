@@ -27,6 +27,7 @@ Properties of Global Scope
    /prop_gbl/IN_TRY_COMPILE
    /prop_gbl/PACKAGES_FOUND
    /prop_gbl/PACKAGES_NOT_FOUND
+   /prop_gbl/POOLS
    /prop_gbl/PREDEFINED_TARGETS_FOLDER
    /prop_gbl/REPORT_UNDEFINED_PROPERTIES
    /prop_gbl/RULE_LAUNCH_COMPILE
@@ -98,6 +99,7 @@ Properties on Targets
    /prop_tgt/COMPILE_OPTIONS
    /prop_tgt/COMPILE_FEATURES
    /prop_tgt/CONFIG_OUTPUT_NAME
+   /prop_tgt/COMPILE_POOL
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_EXTENSIONS
@@ -165,6 +167,7 @@ Properties on Targets
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY_CONFIG
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY
    /prop_tgt/LINK_LIBRARIES
+   /prop_tgt/LINK_POOL
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
    /prop_tgt/LOCATION_CONFIG
