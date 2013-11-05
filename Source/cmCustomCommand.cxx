@@ -31,7 +31,6 @@ cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   HaveComment(r.HaveComment),
   Comment(r.Comment),
   WorkingDirectory(r.WorkingDirectory),
-  Pool(r.Pool),
   EscapeAllowMakeVars(r.EscapeAllowMakeVars),
   EscapeOldStyle(r.EscapeOldStyle),
   Backtrace(new cmListFileBacktrace(*r.Backtrace))
@@ -70,15 +69,13 @@ cmCustomCommand::cmCustomCommand(cmMakefile* mf,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
-                                 const char* workingDirectory,
-                                 const char* pool):
+                                 const char* workingDirectory):
   Outputs(outputs),
   Depends(depends),
   CommandLines(commandLines),
   HaveComment(comment?true:false),
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:""),
-  Pool(pool?pool:""),
   EscapeAllowMakeVars(false),
   EscapeOldStyle(true),
   Backtrace(new cmListFileBacktrace)
@@ -130,12 +127,6 @@ const char* cmCustomCommand::GetComment() const
 {
   const char* no_comment = 0;
   return this->HaveComment? this->Comment.c_str() : no_comment;
-}
-
-//----------------------------------------------------------------------------
-std::string cmCustomCommand::GetPool() const
-{
-  return this->Pool;
 }
 
 //----------------------------------------------------------------------------
