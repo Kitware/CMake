@@ -69,6 +69,44 @@ bool cmAddExecutableCommand
       }
     }
 
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(exename);
+  if (nameOk && !importTarget && !isAlias)
+    {
+    nameOk = exename.find(":") == std::string::npos;
+    }
+  if (!nameOk)
+    {
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    bool issueMessage = false;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
+      {
+      case cmPolicies::WARN:
+        issueMessage = true;
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        issueMessage = true;
+        messageType = cmake::FATAL_ERROR;
+      }
+    if (issueMessage)
+      {
+      cmOStringStream e;
+      e << (this->Makefile->GetPolicies()
+            ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+      e << "The target name \"" << exename << "\" is not valid for certain "
+          "CMake features, such as generator expressions, and may result "
+          "in undefined behavior.";
+      this->Makefile->IssueMessage(messageType, e.str().c_str());
+
+      if (messageType == cmake::FATAL_ERROR)
+        {
+        return false;
+        }
+      }
+    }
+
   // Special modifiers are not allowed with IMPORTED signature.
   if(importTarget
       && (use_win32 || use_macbundle || excludeFromAll))

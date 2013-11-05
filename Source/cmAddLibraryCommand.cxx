@@ -108,6 +108,45 @@ bool cmAddLibraryCommand
       break;
       }
     }
+
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(libName);
+  if (nameOk && !importTarget && !isAlias)
+    {
+    nameOk = libName.find(":") == std::string::npos;
+    }
+  if (!nameOk)
+    {
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    bool issueMessage = false;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
+      {
+      case cmPolicies::WARN:
+        issueMessage = type != cmTarget::INTERFACE_LIBRARY;
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        issueMessage = true;
+        messageType = cmake::FATAL_ERROR;
+      }
+    if (issueMessage)
+      {
+      cmOStringStream e;
+      e << (this->Makefile->GetPolicies()
+            ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+      e << "The target name \"" << libName << "\" is not valid for certain "
+          "CMake features, such as generator expressions, and may result "
+          "in undefined behavior.";
+      this->Makefile->IssueMessage(messageType, e.str().c_str());
+
+      if (messageType == cmake::FATAL_ERROR)
+        {
+        return false;
+        }
+      }
+    }
+
   if (isAlias)
     {
     if(!cmGeneratorExpression::IsValidTargetName(libName.c_str()))
