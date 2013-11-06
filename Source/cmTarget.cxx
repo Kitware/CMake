@@ -138,16 +138,16 @@ public:
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<cmValueWithOrigin> LinkInterfacePropertyEntries;
 
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
+  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
+  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceCompileOptionsEntries;
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
+  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceCompileDefinitionsEntries;
 
-  std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
-  std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
-  std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
+  mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
+  mutable std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
+  mutable std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
 };
 
 //----------------------------------------------------------------------------
@@ -1598,7 +1598,7 @@ void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry,
 }
 
 //----------------------------------------------------------------------------
-static void processIncludeDirectories(cmTarget *tgt,
+static void processIncludeDirectories(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &includes,
       std::set<std::string> &uniqueIncludes,
@@ -1767,7 +1767,8 @@ static void processIncludeDirectories(cmTarget *tgt,
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
+std::vector<std::string>
+cmTarget::GetIncludeDirectories(const char *config) const
 {
   std::vector<std::string> includes;
   std::set<std::string> uniqueIncludes;
@@ -1899,7 +1900,7 @@ std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config)
 }
 
 //----------------------------------------------------------------------------
-static void processCompileOptionsInternal(cmTarget *tgt,
+static void processCompileOptionsInternal(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
       std::set<std::string> &uniqueOptions,
@@ -1958,7 +1959,7 @@ static void processCompileOptionsInternal(cmTarget *tgt,
 }
 
 //----------------------------------------------------------------------------
-static void processCompileOptions(cmTarget *tgt,
+static void processCompileOptions(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
       std::set<std::string> &uniqueOptions,
@@ -1971,7 +1972,7 @@ static void processCompileOptions(cmTarget *tgt,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetCompileOptions(std::vector<std::string> &result,
-                                 const char *config)
+                                 const char *config) const
 {
   std::set<std::string> uniqueOptions;
   cmListFileBacktrace lfbt;
@@ -2070,7 +2071,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
 }
 
 //----------------------------------------------------------------------------
-static void processCompileDefinitions(cmTarget *tgt,
+static void processCompileDefinitions(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
       std::set<std::string> &uniqueOptions,
@@ -2084,7 +2085,7 @@ static void processCompileDefinitions(cmTarget *tgt,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
-                                            const char *config)
+                                            const char *config) const
 {
   std::set<std::string> uniqueOptions;
   cmListFileBacktrace lfbt;
