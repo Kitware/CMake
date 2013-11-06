@@ -101,6 +101,37 @@ bool cmTargetLinkLibrariesCommand
     return true;
     }
 
+  if (this->Target->GetType() == cmTarget::UTILITY)
+    {
+    const char *modal = 0;
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0039))
+      {
+      case cmPolicies::WARN:
+        modal = "should";
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::NEW:
+        modal = "must";
+        messageType = cmake::FATAL_ERROR;
+      }
+    if (modal)
+      {
+      cmOStringStream e;
+      e << this->Makefile->GetPolicies()
+                            ->GetPolicyWarning(cmPolicies::CMP0039) << "\n"
+        "Utility target \"" << this->Target->GetName() << "\" " << modal
+        << " not be used as the target of a target_link_libraries call.";
+      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      if(messageType == cmake::FATAL_ERROR)
+        {
+        return false;
+        }
+      }
+    }
+
   // but we might not have any libs after variable expansion
   if(args.size() < 2)
     {
