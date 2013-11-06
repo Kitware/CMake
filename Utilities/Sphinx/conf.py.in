@@ -13,14 +13,15 @@ import sys
 import os
 import re
 import glob
+import time
 
 sys.path.insert(0, r'@conf_path@')
 
 source_suffix = '.rst'
 master_doc = 'index'
-project = 'CMake'
-copyright = '@conf_copyright@'
 
+project = 'CMake'
+copyright = '2000-%s Kitware, Inc.' % time.strftime('%Y')
 version = '@conf_version@' # feature version
 release = '@conf_release@' # full version string
 
@@ -29,6 +30,7 @@ primary_domain = 'cmake'
 exclude_patterns = []
 
 extensions = ['cmake']
+templates_path = ['@conf_path@/templates']
 
 cmake_manuals = sorted(glob.glob(r'@conf_docs@/manual/*.rst'))
 cmake_manual_description = re.compile('^\.\. cmake-manual-description:(.*)$')
@@ -56,3 +58,7 @@ man_show_urls = False
 html_show_sourcelink = True
 html_static_path = ['@conf_path@/static']
 html_style = 'cmake.css'
+html_theme = 'default'
+html_title = 'CMake %s Documentation' % release
+html_short_title = '%s Documentation' % release
+html_favicon = 'cmake-favicon.ico'
