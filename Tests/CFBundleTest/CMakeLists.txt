@@ -30,8 +30,14 @@ if(NOT RC_COMPILER)
   message(FATAL_ERROR "could not find Rez to build resources from .r file...")
 endif()
 
+set(sysroot)
+if(CMAKE_OSX_SYSROOT)
+  set(sysroot -isysroot ${CMAKE_OSX_SYSROOT})
+endif()
+
 execute_process(COMMAND
-    ${RC_COMPILER} ${RCFILES} -useDF -o ${CMAKE_CURRENT_BINARY_DIR}/Localized.rsrc
+    ${RC_COMPILER} ${sysroot} ${RCFILES} -useDF
+    -o ${CMAKE_CURRENT_BINARY_DIR}/Localized.rsrc
     )
 
 set_source_files_properties(
