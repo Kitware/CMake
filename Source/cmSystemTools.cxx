@@ -43,6 +43,10 @@
 # include <sys/wait.h>
 #endif
 
+#if defined(__APPLE__)
+# include <mach-o/dyld.h>
+#endif
+
 #include <sys/stat.h>
 
 #if defined(_WIN32) && \
@@ -2011,16 +2015,53 @@ unsigned int cmSystemTools::RandomSeed()
 }
 
 //----------------------------------------------------------------------------
-static std::string cmSystemToolsExecutableDirectory;
-void cmSystemTools::FindExecutableDirectory(const char* argv0)
+static std::string cmSystemToolsCMakeCommand;
+static std::string cmSystemToolsCTestCommand;
+static std::string cmSystemToolsCPackCommand;
+static std::string cmSystemToolsCMakeCursesCommand;
+static std::string cmSystemToolsCMakeGUICommand;
+static std::string cmSystemToolsCMakeRoot;
+void cmSystemTools::FindCMakeResources(const char* argv0)
 {
+  std::string exe_dir;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   (void)argv0; // ignore this on windows
   char modulepath[_MAX_PATH];
   ::GetModuleFileName(NULL, modulepath, sizeof(modulepath));
-  cmSystemToolsExecutableDirectory =
-    cmSystemTools::GetFilenamePath(modulepath);
-  return;
+  exe_dir = cmSystemTools::GetFilenamePath(modulepath);
+#elif defined(__APPLE__)
+  (void)argv0; // ignore this on OS X
+  char exe_path_local[16384];
+  uint32_t exe_path_size = 16384;
+  char* exe_path = exe_path_local;
+  if(_NSGetExecutablePath(exe_path, &exe_path_size) < 0)
+    {
+    exe_path = (char*)malloc(exe_path_size);
+    _NSGetExecutablePath(exe_path, &exe_path_size);
+    }
+  exe_dir =
+    cmSystemTools::GetFilenamePath(
+      cmSystemTools::GetRealPath(exe_path));
+  if(exe_path != exe_path_local)
+    {
+    free(exe_path);
+    }
+  if(cmSystemTools::GetFilenameName(exe_dir) == "MacOS")
+    {
+    // The executable is inside an application bundle.
+    // Look for ../bin (install tree) and then fall back to
+    // ../../../bin (build tree).
+    exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
+    if(cmSystemTools::FileExists((exe_dir+"/bin/cmake").c_str()))
+      {
+      exe_dir += "/bin";
+      }
+    else
+      {
+      exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
+      exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
+      }
+    }
 #else
   std::string errorMsg;
   std::string exe;
@@ -2028,7 +2069,7 @@ void cmSystemTools::FindExecutableDirectory(const char* argv0)
     {
     // remove symlinks
     exe = cmSystemTools::GetRealPath(exe.c_str());
-    cmSystemToolsExecutableDirectory =
+    exe_dir =
       cmSystemTools::GetFilenamePath(exe.c_str());
     }
   else
@@ -2036,12 +2077,99 @@ void cmSystemTools::FindExecutableDirectory(const char* argv0)
     // ???
     }
 #endif
+  cmSystemToolsCMakeCommand = exe_dir;
+  cmSystemToolsCMakeCommand += "/cmake";
+  cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCTestCommand = exe_dir;
+  cmSystemToolsCTestCommand += "/ctest";
+  cmSystemToolsCTestCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCPackCommand = exe_dir;
+  cmSystemToolsCPackCommand += "/cpack";
+  cmSystemToolsCPackCommand += cmSystemTools::GetExecutableExtension();
+  cmSystemToolsCMakeGUICommand = exe_dir;
+  cmSystemToolsCMakeGUICommand += "/cmake-gui";
+  cmSystemToolsCMakeGUICommand += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand.c_str()))
+    {
+    cmSystemToolsCMakeGUICommand = "";
+    }
+  cmSystemToolsCMakeCursesCommand = exe_dir;
+  cmSystemToolsCMakeCursesCommand += "/ccmake";
+  cmSystemToolsCMakeCursesCommand += cmSystemTools::GetExecutableExtension();
+  if(!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand.c_str()))
+    {
+    cmSystemToolsCMakeCursesCommand = "";
+    }
+
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  // Install tree has "<prefix>/bin/cmake" and "<prefix><CMAKE_DATA_DIR>".
+  std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
+  cmSystemToolsCMakeRoot = dir + CMAKE_DATA_DIR;
+  if(!cmSystemTools::FileExists(
+       (cmSystemToolsCMakeRoot+"/Modules/CMake.cmake").c_str()))
+    {
+    // Build tree has "<build>/bin[/<config>]/cmake" and
+    // "<build>/CMakeFiles/CMakeSourceDir.txt".
+    std::string src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
+    std::ifstream fin(src_dir_txt.c_str());
+    std::string src_dir;
+    if(fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
+       cmSystemTools::FileIsDirectory(src_dir.c_str()))
+      {
+      cmSystemToolsCMakeRoot = src_dir;
+      }
+    else
+      {
+      dir = cmSystemTools::GetFilenamePath(dir);
+      src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
+      std::ifstream fin2(src_dir_txt.c_str());
+      if(fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
+         cmSystemTools::FileIsDirectory(src_dir.c_str()))
+        {
+        cmSystemToolsCMakeRoot = src_dir;
+        }
+      }
+    }
+#else
+  // Bootstrap build knows its source.
+  cmSystemToolsCMakeRoot = CMAKE_ROOT_DIR;
+#endif
 }
 
 //----------------------------------------------------------------------------
-const char* cmSystemTools::GetExecutableDirectory()
+std::string const& cmSystemTools::GetCMakeCommand()
 {
-  return cmSystemToolsExecutableDirectory.c_str();
+  return cmSystemToolsCMakeCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmSystemTools::GetCTestCommand()
+{
+  return cmSystemToolsCTestCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmSystemTools::GetCPackCommand()
+{
+  return cmSystemToolsCPackCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmSystemTools::GetCMakeCursesCommand()
+{
+  return cmSystemToolsCMakeCursesCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmSystemTools::GetCMakeGUICommand()
+{
+  return cmSystemToolsCMakeGUICommand;
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmSystemTools::GetCMakeRoot()
+{
+  return cmSystemToolsCMakeRoot;
 }
 
 //----------------------------------------------------------------------------

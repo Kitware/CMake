@@ -118,6 +118,13 @@ if(APPLE)
     # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_BUNDLE_VERSION}"
     MACOSX_BUNDLE_COPYRIGHT "Copyright 2000-2013 Kitware, Inc."
     )
+
+  # Create a symlink in the build tree to provide a "cmake-gui" next
+  # to the "cmake" executable that refers to the application bundle.
+  add_custom_command(TARGET cmake-gui POST_BUILD
+    COMMAND ln -sf ${CMAKE_BUNDLE_NAME}.app/Contents/MacOS/${CMAKE_BUNDLE_NAME}
+                   $<TARGET_FILE_DIR:cmake>/cmake-gui
+    )
 endif()
 set(CMAKE_INSTALL_DESTINATION_ARGS
   BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}")
