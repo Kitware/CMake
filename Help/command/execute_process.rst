@@ -26,6 +26,16 @@ A single standard error pipe is used for all processes.
 
 Options:
 
+COMMAND
+ A child process command line.
+
+ CMake executes the child process using operating system APIs directly.
+ All arguments are passed VERBATIM to the child process.
+ No intermediate shell is used, so shell operators such as ``>``
+ are treated as normal arguments.
+ (Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to
+ redirect stdin, stdout, and stderr.)
+
 WORKING_DIRECTORY
  The named directory will be set as the current working directory of
  the child processes.
@@ -59,3 +69,7 @@ be shared with the corresponding pipes of the CMake process itself.
 
 The :command:`execute_process` command is a newer more powerful version of
 :command:`exec_program`, but the old command has been kept for compatibility.
+Both commands run while CMake is processing the project prior to build
+system generation.  Use :command:`add_custom_target` and
+:command:`add_custom_command` to create custom commands that run at
+build time.
