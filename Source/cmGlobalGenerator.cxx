@@ -2068,7 +2068,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
   cmCustomCommandLine singleLine;
-  singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
+  singleLine.push_back(cmSystemTools::GetCPackCommand());
   if ( cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.' )
     {
     singleLine.push_back("-C");
@@ -2109,7 +2109,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
                             cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
-    singleLine.push_back(this->GetCMakeInstance()->GetCPackCommand());
+    singleLine.push_back(cmSystemTools::GetCPackCommand());
     singleLine.push_back("--config");
     configFile = mf->GetStartOutputDirectory();;
     configFile += "/CPackSourceConfig.cmake";
@@ -2135,7 +2135,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
                             cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
-    singleLine.push_back(this->GetCMakeInstance()->GetCTestCommand());
+    singleLine.push_back(cmSystemTools::GetCTestCommand());
     singleLine.push_back("--force-new-ctest-process");
     if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
       {

@@ -200,9 +200,6 @@ class cmake
   ///! get the cmCachemManager used by this invocation of cmake
   cmCacheManager *GetCacheManager() { return this->CacheManager; }
 
-  ///! set the cmake command this instance of cmake should use
-  void SetCMakeCommand(const char* cmd) { this->CMakeCommand = cmd; }
-
   /**
    * Given a variable name, return its value (as a string).
    */
@@ -301,13 +298,6 @@ class cmake
    */
   cmFileTimeComparison* GetFileComparison() { return this->FileComparison; }
 
-  /**
-   * Get the path to ctest
-   */
-  const char* GetCTestCommand();
-  const char* GetCPackCommand();
-  const char* GetCMakeCommand();
-
   // Do we want debug output during the cmake run.
   bool GetDebugOutput() { return this->DebugOutput; }
   void SetDebugOutputOn(bool b) { this->DebugOutput = b;}
@@ -344,7 +334,7 @@ class cmake
       debugging configurations.*/
   std::vector<std::string> const& GetDebugConfigs();
 
-  void SetCMakeEditCommand(const char* s)
+  void SetCMakeEditCommand(std::string const& s)
     {
       this->CMakeEditCommand = s;
     }
@@ -425,8 +415,6 @@ protected:
 
   cmVariableWatch* VariableWatch;
 
-  ///! Find the full path to one of the cmake programs like ctest, cpack, etc.
-  std::string FindCMakeProgram(const char* name) const;
 private:
   cmake(const cmake&);  // Not implemented.
   void operator=(const cmake&);  // Not implemented.
@@ -443,15 +431,12 @@ private:
   bool CheckSystemVars;
   std::map<cmStdString, bool> UsedCliVariables;
   std::string CMakeEditCommand;
-  std::string CMakeCommand;
   std::string CXXEnvironment;
   std::string CCEnvironment;
   std::string CheckBuildSystemArgument;
   std::string CheckStampFile;
   std::string CheckStampList;
   std::string VSSolutionFile;
-  std::string CTestCommand;
-  std::string CPackCommand;
   bool ClearBuildSystem;
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;

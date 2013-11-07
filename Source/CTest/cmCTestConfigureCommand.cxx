@@ -86,7 +86,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         }
 
       std::string cmakeConfigureCommand = "\"";
-      cmakeConfigureCommand += this->CTest->GetCMakeExecutable();
+      cmakeConfigureCommand += cmSystemTools::GetCMakeCommand();
       cmakeConfigureCommand += "\"";
 
       std::vector<std::string>::const_iterator it;

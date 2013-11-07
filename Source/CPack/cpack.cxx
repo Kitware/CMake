@@ -99,7 +99,7 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
 // this is CPack.
 int main (int argc, char *argv[])
 {
-  cmSystemTools::FindExecutableDirectory(argv[0]);
+  cmSystemTools::FindCMakeResources(argv[0]);
   cmCPackLog log;
 
   log.SetErrorPrefix("CPack Error: ");
@@ -228,7 +228,6 @@ int main (int argc, char *argv[])
 
   // This part is used for cpack documentation lookup as well.
   cminst.AddCMakePaths();
-  doc.SetCMakeRoot(cminst.GetCacheDefinition("CMAKE_ROOT"));
 
   if ( parsed && !help )
     {

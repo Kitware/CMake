@@ -1298,7 +1298,8 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "Test timeout computed to be: " << timeout << "\n");
-  if(cmSystemTools::SameFile(argv[0], this->CTestSelf.c_str()) &&
+  if(cmSystemTools::SameFile(
+       argv[0], cmSystemTools::GetCTestCommand().c_str()) &&
      !this->ForceNewCTestProcess)
     {
     cmCTest inst;
@@ -2257,7 +2258,6 @@ bool cmCTest::AddVariableDefinition(const std::string &arg)
 // the main entry point of ctest, called from main
 int cmCTest::Run(std::vector<std::string> &args, std::string* output)
 {
-  this->FindRunningCMake();
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
   bool executeTests = true;
@@ -2495,29 +2495,6 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
     }
 
   return 1;
-}
-
-//----------------------------------------------------------------------
-void cmCTest::FindRunningCMake()
-{
-  // Find our own executable.
-  this->CTestSelf = cmSystemTools::GetExecutableDirectory();
-  this->CTestSelf += "/ctest";
-  this->CTestSelf += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(this->CTestSelf.c_str()))
-    {
-    cmSystemTools::Error("CTest executable cannot be found at ",
-                         this->CTestSelf.c_str());
-    }
-
-  this->CMakeSelf = cmSystemTools::GetExecutableDirectory();
-  this->CMakeSelf += "/cmake";
-  this->CMakeSelf += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(this->CMakeSelf.c_str()))
-    {
-    cmSystemTools::Error("CMake executable cannot be found at ",
-                         this->CMakeSelf.c_str());
-    }
 }
 
 //----------------------------------------------------------------------

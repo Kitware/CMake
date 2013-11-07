@@ -48,7 +48,7 @@ static const char * cmDocumentationOptions[][2] =
 
 int main(int argc, char** argv)
 {
-  cmSystemTools::FindExecutableDirectory(argv[0]);
+  cmSystemTools::FindCMakeResources(argv[0]);
   // check docs first so that X is not need to get docs
   // do docs, if args were given
   cmDocumentation doc;
@@ -58,7 +58,6 @@ int main(int argc, char** argv)
     // Construct and print requested documentation.
     cmake hcm;
     hcm.AddCMakePaths();
-    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
 
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);

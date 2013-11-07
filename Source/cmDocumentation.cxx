@@ -605,7 +605,8 @@ void cmDocumentation::GlobHelp(std::vector<std::string>& files,
                                std::string const& pattern)
 {
   cmsys::Glob gl;
-  std::string findExpr = this->CMakeRoot + "/Help/" + pattern + ".rst";
+  std::string findExpr =
+    cmSystemTools::GetCMakeRoot() + "/Help/" + pattern + ".rst";
   if(gl.FindFiles(findExpr))
     {
     files = gl.GetFiles();
@@ -649,7 +650,7 @@ bool cmDocumentation::PrintFiles(std::ostream& os,
   std::vector<std::string> files;
   this->GlobHelp(files, pattern);
   std::sort(files.begin(), files.end());
-  cmRST r(os, this->CMakeRoot + "/Help");
+  cmRST r(os, cmSystemTools::GetCMakeRoot() + "/Help");
   for (std::vector<std::string>::const_iterator i = files.begin();
        i != files.end(); ++i)
     {

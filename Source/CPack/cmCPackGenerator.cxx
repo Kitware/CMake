@@ -1143,12 +1143,6 @@ int cmCPackGenerator::Initialize(const char* name, cmMakefile* mf)
 {
   this->MakefileMap = mf;
   this->Name = name;
-  if ( !this->SetCMakeRoot() )
-    {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-      "Cannot initialize the generator" << std::endl);
-    return 0;
-    }
   // set the running generator name
   this->SetOption("CPACK_GENERATOR", this->Name.c_str());
   // Load the project specific config file
@@ -1202,32 +1196,6 @@ const char* cmCPackGenerator::GetOption(const char* op) const
                   << std::endl);
     }
   return ret;
-}
-
-//----------------------------------------------------------------------
-int cmCPackGenerator::SetCMakeRoot()
-{
-  // use the CMAKE_ROOT from cmake which should have been
-  // found by now
-  const char* root=
-    this->MakefileMap->GetDefinition("CMAKE_ROOT");
-
-  if(root)
-    {
-      this->CMakeRoot = root;
-      cmCPackLogger(cmCPackLog::LOG_DEBUG, "Looking for CMAKE_ROOT: "
-                    << this->CMakeRoot.c_str() << std::endl);
-      this->SetOption("CMAKE_ROOT", this->CMakeRoot.c_str());
-      return 1;
-    }
-  cmCPackLogger(cmCPackLog::LOG_ERROR,
-                "Could not find CMAKE_ROOT !!!"
-                << std::endl
-                << "CMake has most likely not been installed correctly."
-                << std::endl
-                <<"Modules directory not found in"
-                << std::endl);
-  return 0;
 }
 
 //----------------------------------------------------------------------

@@ -38,6 +38,12 @@ configure_file(
   "${CMake_BINARY_DIR}/Source/CPack/cmCPackConfigure.h"
   )
 
+# Tell CMake executable in the build tree where to find the source tree.
+configure_file(
+  "${CMake_SOURCE_DIR}/Source/CMakeSourceDir.txt.in"
+  "${CMake_BINARY_DIR}/CMakeFiles/CMakeSourceDir.txt" @ONLY
+  )
+
 # add the include path to find the .h
 include_directories(
   "${CMake_BINARY_DIR}/Source"

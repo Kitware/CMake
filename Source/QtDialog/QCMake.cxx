@@ -33,34 +33,13 @@ QCMake::QCMake(QObject* p)
   qRegisterMetaType<QCMakeProperty>();
   qRegisterMetaType<QCMakePropertyList>();
 
-  QDir execDir(QCoreApplication::applicationDirPath());
-
-#if defined(Q_OS_MAC)
-  if(execDir.exists("../bin/cmake"))
-    {
-    execDir.cd("../bin");
-    }
-  else
-    {
-    execDir.cd("../../../");  // path to cmake in build directory (need to fix for deployment)
-    }
-#endif
-
-  QString cmakeCommand = QString("cmake")+QString::fromLocal8Bit(cmSystemTools::GetExecutableExtension());
-  cmakeCommand = execDir.filePath(cmakeCommand);
-
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
   cmSystemTools::SetErrorCallback(QCMake::errorCallback, this);
-  cmSystemTools::FindExecutableDirectory(cmakeCommand.toLocal8Bit().data());
 
   this->CMakeInstance = new cmake;
-  this->CMakeInstance->SetCMakeCommand(cmakeCommand.toLocal8Bit().data());
-#if defined(Q_OS_MAC)
-  this->CMakeInstance->SetCMakeEditCommand("cmake-gui.app/Contents/MacOS/cmake-gui");
-#else
-  this->CMakeInstance->SetCMakeEditCommand("cmake-gui");
-#endif
+  this->CMakeInstance->SetCMakeEditCommand(
+    cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(QCMake::progressCallback, this);
 
   cmSystemTools::SetInterruptCallback(QCMake::interruptCallback, this);

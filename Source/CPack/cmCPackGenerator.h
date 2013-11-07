@@ -105,9 +105,6 @@ public:
   bool IsSet(const char* name) const;
   bool IsOn(const char* name) const;
 
-  //! Set all the variables
-  int SetCMakeRoot();
-
   //! Set the logger
   void SetLogger(cmCPackLog* log) { this->Logger = log; }
 
@@ -284,10 +281,6 @@ protected:
    * PackageFiles is called.
    */
   std::vector<std::string> files;
-
-  std::string CPackSelf;
-  std::string CMakeSelf;
-  std::string CMakeRoot;
 
   std::map<std::string, cmCPackInstallationType> InstallationTypes;
   /**
