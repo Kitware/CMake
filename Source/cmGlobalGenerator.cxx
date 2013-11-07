@@ -1084,11 +1084,6 @@ void cmGlobalGenerator::Generate()
       (*targets)[tit->first] = tit->second;
       (*targets)[tit->first].SetMakefile(mf);
       }
-
-    for ( tit = targets->begin(); tit != targets->end(); ++ tit )
-      {
-      tit->second.AppendBuildInterfaceIncludes();
-      }
     }
 
   // Add generator specific helper commands
@@ -1288,6 +1283,8 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+
+      t->AppendBuildInterfaceIncludes();
 
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();
