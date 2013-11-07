@@ -1059,7 +1059,7 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
-  this->FinalizeTargetCompileDefinitions();
+  this->FinalizeTargetCompileInfo();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
@@ -1270,7 +1270,7 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
+void cmGlobalGenerator::FinalizeTargetCompileInfo()
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
