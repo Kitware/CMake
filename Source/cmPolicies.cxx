@@ -286,6 +286,21 @@ cmPolicies::cmPolicies()
     CMP0036, "CMP0036",
     "The build_name command should not be called.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0037, "CMP0037",
+    "Target names should match a validity pattern.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0038, "CMP0038",
+    "Targets may not link directly to themselves.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0039, "CMP0039",
+    "Utility targets may not have link dependencies",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

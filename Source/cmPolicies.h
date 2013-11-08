@@ -88,6 +88,9 @@ public:
     CMP0034, ///< Disallow command: utility_source
     CMP0035, ///< Disallow command: variable_requires
     CMP0036, ///< Disallow command: build_name
+    CMP0037, ///< Target names should match a validity pattern.
+    CMP0038, ///< Targets may not link directly to themselves
+    CMP0039, ///< Utility targets may not have link dependencies
 
     /** \brief Always the last entry.
      *

@@ -932,12 +932,6 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
                               const char *target, const char* lib,
                               LinkLibraryType llt)
 {
-  // Never add a self dependency, even if the user asks for it.
-  if(strcmp( target, lib ) == 0)
-    {
-    return;
-    }
-
   cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
   {
   const bool isNonImportedTarget = tgt && !tgt->IsImported();
@@ -951,7 +945,8 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   }
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos
-      || (tgt && tgt->GetType() == INTERFACE_LIBRARY))
+      || (tgt && tgt->GetType() == INTERFACE_LIBRARY)
+      || (strcmp( target, lib ) == 0))
     {
     return;
     }
@@ -5293,6 +5288,41 @@ void cmTarget::ComputeLinkImplementation(const char* config,
     std::string item = this->CheckCMP0004(*li);
     if(item == this->GetName() || item.empty())
       {
+      if(item == this->GetName())
+        {
+        bool noMessage = false;
+        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        cmOStringStream e;
+        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0038))
+          {
+          case cmPolicies::WARN:
+            {
+            e << (this->Makefile->GetPolicies()
+                  ->GetPolicyWarning(cmPolicies::CMP0038)) << "\n";
+            messageType = cmake::AUTHOR_WARNING;
+            }
+            break;
+          case cmPolicies::OLD:
+            noMessage = true;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            // Issue the fatal message.
+            break;
+          }
+
+        if(!noMessage)
+          {
+          e << "Target \"" << this->GetName() << "\" links to itself.";
+          this->Makefile->GetCMakeInstance()->IssueMessage(messageType,
+                                                        e.str(),
+                                                        this->GetBacktrace());
+          if (messageType == cmake::FATAL_ERROR)
+            {
+            return;
+            }
+          }
+        }
       continue;
       }
     cmTarget *tgt = this->Makefile->FindTargetToUse(li->c_str());
@@ -5335,6 +5365,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
           }
         }
       }
+
     // The entry is meant for this configuration.
     impl.Libraries.push_back(item);
     }
