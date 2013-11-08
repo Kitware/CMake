@@ -255,7 +255,8 @@ containing just the line::
 
 The ``cmake-module`` directive will scan the module file to extract
 reStructuredText markup from comment blocks that start in ``.rst:``.
-Add to the top of ``Modules/<module-name>.cmake`` a #-comment of the form:
+Add to the top of ``Modules/<module-name>.cmake`` a
+:ref:`Line Comment` block of the form:
 
 .. code-block:: cmake
 
@@ -265,7 +266,7 @@ Add to the top of ``Modules/<module-name>.cmake`` a #-comment of the form:
  #
  # <reStructuredText documentation of module>
 
-or a bracket-comment of the form:
+or a :ref:`Bracket Comment` of the form:
 
 .. code-block:: cmake
 
