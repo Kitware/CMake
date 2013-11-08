@@ -40,6 +40,7 @@ Other Manuals
 
    /manual/cmake-developer.7
    /manual/cmake-generator-expressions.7
+   /manual/cmake-language.7
 
 .. only:: html
 
