@@ -102,6 +102,14 @@ endif()
 set(__CMAKE_PARSE_ARGUMENTS_INCLUDED TRUE)
 
 
+define_property(DIRECTORY PROPERTY "CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY" INHERITED
+  BRIEF_DOCS "Whether empty arguments should be skipped or not by default."
+  FULL_DOCS
+  "See documentation of the cmake_parse_arguments() function in the "
+  "CMakeParseArguments module."
+  )
+
+
 function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgNames)
   # first set all result variables to empty/FALSE
   foreach(arg_name ${_singleArgNames} ${_multiArgNames})
@@ -117,8 +125,33 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
   set(insideValues FALSE)
   set(currentArgName)
 
+  get_property(_defaultSkipEmptySet DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY SET)
+  get_property(_defaultSkipEmpty    DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY)
+
+  if("x${ARGN}" MATCHES "^xCMAKE_PARSE_ARGUMENTS_(SKIP|KEEP)_EMPTY;?")
+    if("${CMAKE_MATCH_1}" STREQUAL "SKIP")
+        set(_skipEmpty 1)
+    elseif("${CMAKE_MATCH_1}" STREQUAL "KEEP")
+        set(_skipEmpty 0)
+    endif()
+    string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
+  elseif(_defaultSkipEmptySet)
+    set(_skipEmpty ${_defaultSkipEmpty})
+  elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
+    # Keep compatibility with previous releases
+    set(_skipEmpty 1)
+  else()
+    set(_skipEmpty 0)
+  endif()
+
+  if(_skipEmpty)
+    set(_loopARGN ${ARGN})
+  else()
+    set(_loopARGN IN LISTS ARGN)
+  endif()
+
   # now iterate over all arguments and fill the result variables
-  foreach(currentArg IN LISTS ARGN)
+  foreach(currentArg ${_loopARGN})
     list(FIND _optionNames "${currentArg}" optionIndex)  # ... then this marks the end of the arguments belonging to this keyword
     list(FIND _singleArgNames "${currentArg}" singleArgIndex)  # ... then this marks the end of the arguments belonging to this keyword
     list(FIND _multiArgNames "${currentArg}" multiArgIndex)  # ... then this marks the end of the arguments belonging to this keyword
@@ -126,13 +159,25 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
     if(${optionIndex} EQUAL -1  AND  ${singleArgIndex} EQUAL -1  AND  ${multiArgIndex} EQUAL -1)
       if(insideValues)
         if("${insideValues}" STREQUAL "SINGLE")
-          set(${prefix}_${currentArgName} "${currentArg}")
+          if(_skipEmpty)
+            set(${prefix}_${currentArgName} ${currentArg})
+          else()
+            set(${prefix}_${currentArgName} "${currentArg}")
+          endif()
           set(insideValues FALSE)
         elseif("${insideValues}" STREQUAL "MULTI")
-          list(APPEND ${prefix}_${currentArgName} "${currentArg}")
+          if(_skipEmpty)
+            list(APPEND ${prefix}_${currentArgName} ${currentArg})
+          else()
+            list(APPEND ${prefix}_${currentArgName} "${currentArg}")
+          endif()
         endif()
       else()
-        list(APPEND ${prefix}_UNPARSED_ARGUMENTS "${currentArg}")
+        if(_skipEmpty)
+          list(APPEND ${prefix}_UNPARSED_ARGUMENTS ${currentArg})
+        else()
+          list(APPEND ${prefix}_UNPARSED_ARGUMENTS "${currentArg}")
+        endif()
       endif()
     else()
       if(NOT ${optionIndex} EQUAL -1)
