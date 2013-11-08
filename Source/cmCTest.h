@@ -287,10 +287,6 @@ public:
   //source directory, it will become /.../relative/path/to/file
   std::string GetShortPathToFile(const char* fname);
 
-  //! Get the path to CTest
-  const char* GetCTestExecutable() { return this->CTestSelf.c_str(); }
-  const char* GetCMakeExecutable() { return this->CMakeSelf.c_str(); }
-
   enum {
     EXPERIMENTAL,
     NIGHTLY,
@@ -490,8 +486,6 @@ private:
   int                     CompatibilityMode;
 
   // information for the --build-and-test options
-  std::string              CMakeSelf;
-  std::string              CTestSelf;
   std::string              BinaryDir;
 
   std::string              NotesFiles;
@@ -545,9 +539,6 @@ private:
   //! Create note from files.
   int GenerateCTestNotesOutput(std::ostream& os,
     const VectorOfStrings& files);
-
-  ///! Find the running cmake
-  void FindRunningCMake();
 
   //! Check if the argument is the one specified
   bool CheckArgument(const std::string& arg, const char* varg1,

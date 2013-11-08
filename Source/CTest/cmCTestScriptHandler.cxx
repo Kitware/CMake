@@ -222,13 +222,13 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   // execute the script passing in the arguments to the script as well as the
   // arguments from this invocation of cmake
   std::vector<const char*> argv;
-  argv.push_back(this->CTest->GetCTestExecutable());
+  argv.push_back(cmSystemTools::GetCTestCommand().c_str());
   argv.push_back("-SR");
   argv.push_back(total_script_arg.c_str());
 
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "Executable for CTest is: " <<
-             this->CTest->GetCTestExecutable() << "\n");
+             cmSystemTools::GetCTestCommand() << "\n");
 
   // now pass through all the other arguments
   std::vector<cmStdString> &initArgs =
@@ -397,9 +397,9 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddDefinition("CTEST_SCRIPT_NAME",
                             cmSystemTools::GetFilenameName(script).c_str());
   this->Makefile->AddDefinition("CTEST_EXECUTABLE_NAME",
-                            this->CTest->GetCTestExecutable());
+                                cmSystemTools::GetCTestCommand().c_str());
   this->Makefile->AddDefinition("CMAKE_EXECUTABLE_NAME",
-                            this->CTest->GetCMakeExecutable());
+                                cmSystemTools::GetCMakeCommand().c_str());
   this->Makefile->AddDefinition("CTEST_RUN_CURRENT_SCRIPT", true);
   this->UpdateElapsedTime();
 

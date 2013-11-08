@@ -59,7 +59,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
 {
   unsigned int k;
   std::vector<std::string> args;
-  args.push_back(this->CTest->GetCMakeExecutable());
+  args.push_back(cmSystemTools::GetCMakeCommand());
   args.push_back(this->SourceDir);
   if(this->BuildGenerator.size())
     {

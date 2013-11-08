@@ -80,14 +80,13 @@ void CMakeErrorHandler(const char* message, const char* title, bool&, void* clie
 
 int main(int argc, char** argv)
 {
-  cmSystemTools::FindExecutableDirectory(argv[0]);
+  cmSystemTools::FindCMakeResources(argv[0]);
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
   if(doc.CheckOptions(argc, argv))
     {
     cmake hcm;
     hcm.AddCMakePaths();
-    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
     std::vector<cmDocumentationEntry> generators;
     hcm.GetGeneratorDocumentation(generators);
     doc.SetName("ccmake");

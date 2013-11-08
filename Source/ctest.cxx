@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
 {
   cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::FindExecutableDirectory(argv[0]);
+  cmSystemTools::FindCMakeResources(argv[0]);
 
   // Dispatch 'ctest --launch' mode directly.
   if(argc >= 2 && strcmp(argv[1], "--launch") == 0)
@@ -151,7 +151,6 @@ int main (int argc, char *argv[])
       {
       cmake hcm;
       hcm.AddCMakePaths();
-      doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
 
       // Construct and print requested documentation.
       cmCTestScriptHandler* ch =

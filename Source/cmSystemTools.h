@@ -406,13 +406,16 @@ public:
   /** Random seed generation.  */
   static unsigned int RandomSeed();
 
-  /** Find the directory containing the running executable.  Save it
-   in a global location to be queried by GetExecutableDirectory
-   later.  */
-  static void FindExecutableDirectory(const char* argv0);
+  /** Find the directory containing CMake executables.  */
+  static void FindCMakeResources(const char* argv0);
 
-  /** Get the directory containing the currently running executable.  */
-  static const char* GetExecutableDirectory();
+  /** Get the CMake resource paths, after FindCMakeResources.  */
+  static std::string const& GetCTestCommand();
+  static std::string const& GetCPackCommand();
+  static std::string const& GetCMakeCommand();
+  static std::string const& GetCMakeGUICommand();
+  static std::string const& GetCMakeCursesCommand();
+  static std::string const& GetCMakeRoot();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /** Echo a message in color using KWSys's Terminal cprintf.  */
