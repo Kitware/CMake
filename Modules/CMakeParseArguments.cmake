@@ -2,15 +2,22 @@
 # CMakeParseArguments
 # -------------------
 #
+# Parse arguments given to a macro or a function.
 #
-#
-# CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords>
-# <multi_value_keywords> args...)
-#
-# CMAKE_PARSE_ARGUMENTS() is intended to be used in macros or functions
+# cmake_parse_arguments() is intended to be used in macros or functions
 # for parsing the arguments given to that macro or function.  It
 # processes the arguments and defines a set of variables which hold the
 # values of the respective options.
+#
+# ::
+#
+#  cmake_parse_arguments(<prefix>
+#                        <options>
+#                        <one_value_keywords>
+#                        <multi_value_keywords>
+#                        [CMAKE_PARSE_ARGUMENTS_SKIP_EMPTY|CMAKE_PARSE_ARGUMENTS_KEEP_EMPTY]
+#                        args...
+#                        )
 #
 # The <options> argument contains all options for the respective macro,
 # i.e.  keywords which can be used when calling the macro without any
@@ -25,7 +32,7 @@
 # macro which can be followed by more than one value, like e.g.  the
 # TARGETS or FILES keywords of the install() command.
 #
-# When done, CMAKE_PARSE_ARGUMENTS() will have defined for each of the
+# When done, cmake_parse_arguments() will have defined for each of the
 # keywords listed in <options>, <one_value_keywords> and
 # <multi_value_keywords> a variable composed of the given <prefix>
 # followed by "_" and the name of the respective keyword.  These
@@ -35,6 +42,17 @@
 # All remaining arguments are collected in a variable
 # <prefix>_UNPARSED_ARGUMENTS, this can be checked afterwards to see
 # whether your macro was called with unrecognized parameters.
+#
+# The cmake CMAKE_PARSE_ARGUMENTS_SKIP_EMPTY (old behaviour) and
+# CMAKE_PARSE_ARGUMENTS_KEEP_EMPTY options decide how empty arguments
+# should be handled. If none of these options is set, for backwards
+# compatibility, if CMAKE_MINIMUM_REQUIRED_VERSION < 2.8.13, the default
+# behaviour is to skip empty arguments, otherwise the default behaviour
+# is to keep them. Using the CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY
+# directory property the user can explicitly set the default behaviour
+# for a folder and its subfolders.
+#
+#
 #
 # As an example here a my_install() macro, which takes similar arguments
 # as the real install() command:
@@ -80,7 +98,42 @@
 # interpreted as the beginning of the new option.  E.g.
 # my_install(TARGETS foo DESTINATION OPTIONAL) would result in
 # MY_INSTALL_DESTINATION set to "OPTIONAL", but MY_INSTALL_DESTINATION
-# would be empty and MY_INSTALL_OPTIONAL would be set to TRUE therefor.
+# would be empty and MY_INSTALL_OPTIONAL would be set to TRUE therefore.
+#
+#
+#
+# If the "CMAKE_PARSE_ARGUMENTS_SKIP_EMPTY" option is set,
+# cmake_parse_argumentswill not consider empty arguments.
+# Therefore
+#
+# ::
+#
+#    my_install(DESTINATION "" TARGETS foo "" bar)
+#
+# Will set
+#
+# ::
+#
+#    MY_INSTALL_DESTINATION = (unset)
+#    MY_INSTALL_MULTI = "foo;bar"
+#
+# Using the "CMAKE_PARSE_ARGUMENTS_SKIP_EMPTY" option instead, will set
+#
+# ::
+#
+#    MY_INSTALL_SINGLE = ""
+#    MY_INSTALL_MULTI = "foo;;bar"
+#
+#
+# It is also important to note that:
+#
+# ::
+#
+#      cmake_parse_arguments(MY_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}" )
+#      cmake_parse_arguments(MY_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+#
+# Will behave differently, because in the latter case empty arguments
+# are not passed to cmake_parse_arguments.
 
 #=============================================================================
 # Copyright 2010 Alexander Neundorf <neundorf@kde.org>
