@@ -2031,8 +2031,14 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   exe_dir = cmSystemTools::GetFilenamePath(modulepath);
 #elif defined(__APPLE__)
   (void)argv0; // ignore this on OS X
-  char exe_path_local[16384];
-  uint32_t exe_path_size = 16384;
+# define CM_EXE_PATH_LOCAL_SIZE 16384
+  char exe_path_local[CM_EXE_PATH_LOCAL_SIZE];
+# if defined(MAC_OS_X_VERSION_10_3) && !defined(MAC_OS_X_VERSION_10_4)
+  unsigned long exe_path_size = CM_EXE_PATH_LOCAL_SIZE;
+# else
+  uint32_t exe_path_size = CM_EXE_PATH_LOCAL_SIZE;
+# endif
+# undef CM_EXE_PATH_LOCAL_SIZE
   char* exe_path = exe_path_local;
   if(_NSGetExecutablePath(exe_path, &exe_path_size) < 0)
     {
