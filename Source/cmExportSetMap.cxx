@@ -23,7 +23,7 @@ cmExportSet* cmExportSetMap::operator[](const std::string &name)
   return it->second;
 }
 
-cmExportSetMap::~cmExportSetMap()
+void cmExportSetMap::clear()
 {
   for(std::map<std::string, cmExportSet*>::iterator it = this->begin();
       it != this->end();
@@ -31,4 +31,10 @@ cmExportSetMap::~cmExportSetMap()
     {
     delete it->second;
     }
+  this->derived::clear();
+}
+
+cmExportSetMap::~cmExportSetMap()
+{
+  this->clear();
 }
