@@ -7,3 +7,6 @@ foreach(feature ${testable_features})
 endforeach()
 
 set(_cmake_feature_test_gnuxx_typeof "!defined(__STRICT_ANSI__)")
+if (SIMULATED_COMPILER_ID STREQUAL MSVC)
+  set(_cmake_feature_test_msvcxx_sealed "1")
+endif()
