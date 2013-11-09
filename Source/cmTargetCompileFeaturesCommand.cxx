@@ -52,13 +52,20 @@ std::string cmTargetCompileFeaturesCommand
 }
 
 //----------------------------------------------------------------------------
-void cmTargetCompileFeaturesCommand
+bool cmTargetCompileFeaturesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                                    bool, bool)
 {
   for(std::vector<std::string>::const_iterator it = content.begin();
     it != content.end(); ++it)
     {
-    this->Makefile->AddRequiredTargetFeature(tgt, it->c_str());
+    if(!this->Makefile->AddRequiredTargetFeature(tgt, it->c_str()))
+      {
+      cmOStringStream e;
+      e << "specified unknown feature \"" << *it << "\".";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
+  return true;
 }

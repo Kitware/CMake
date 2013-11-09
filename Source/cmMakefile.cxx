@@ -42,7 +42,9 @@
 #include <assert.h>
 
 #define FOR_EACH_CXX_FEATURE(F) \
-  F(cxx_delegating_constructors)
+  F(cxx_delegating_constructors) \
+  F(gnuxx_typeof) \
+  F(msvcxx_sealed)
 
 class cmMakefile::Internals
 {
@@ -4485,7 +4487,8 @@ AddRequiredTargetFeature(cmTarget *target, const char *feature) const
     cmOStringStream e;
     e << "The compiler feature \"" << feature
       << "\" is not known to compiler \""
-      << this->GetDefinition("CMAKE_CXX_COMPILER_ID") << "\".";
+      << this->GetDefinition("CMAKE_CXX_COMPILER_ID") << "\" version "
+      << this->GetDefinition("CMAKE_CXX_COMPILER_VERSION") << ".";
     this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return false;
     }
