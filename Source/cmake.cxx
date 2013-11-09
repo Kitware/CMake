@@ -936,12 +936,14 @@ int cmake::AddCMakePaths()
   this->CacheManager->AddCacheEntry
     ("CMAKE_COMMAND", cmSystemTools::GetCMakeCommand().c_str(),
      "Path to CMake executable.", cmCacheManager::INTERNAL);
+#ifdef CMAKE_BUILD_WITH_CMAKE
   this->CacheManager->AddCacheEntry
     ("CMAKE_CTEST_COMMAND", cmSystemTools::GetCTestCommand().c_str(),
      "Path to ctest program executable.", cmCacheManager::INTERNAL);
   this->CacheManager->AddCacheEntry
     ("CMAKE_CPACK_COMMAND", cmSystemTools::GetCPackCommand().c_str(),
      "Path to cpack program executable.", cmCacheManager::INTERNAL);
+#endif
   // if the edit command is not yet in the cache,
   // or if CMakeEditCommand has been set on this object,
   // then set the CMAKE_EDIT_COMMAND in the cache
