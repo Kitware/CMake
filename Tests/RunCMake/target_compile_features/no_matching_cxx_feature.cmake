@@ -2,10 +2,9 @@
 if (NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";gnuxx_typeof;"
     AND NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";msvcxx_sealed;" )
   # Simulate passing the test.
-  message(SEND_ERROR "CMake Error at no_matching_cxx_feature.cmake:15 (target_compile_features):\
-  The compiler feature \"gnuxx_dummy\" is not known to compiler \"GNU\" version 4.8.1.\
-Call Stack (most recent call first):\
-  CMakeLists.txt:3 (include)\n")
+  message(SEND_ERROR
+    "The compiler feature \"gnuxx_dummy\" is not known to compiler \"GNU\" version 4.8.1."
+  )
   return()
 endif()
 
