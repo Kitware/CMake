@@ -10,6 +10,8 @@ else()
   set(feature gnuxx_typeof)
 endif()
 
+message("CMAKE_CXX_COMPILE_FEATURES ${CMAKE_CXX_COMPILE_FEATURES}")
+
 add_executable(main empty.cpp)
 
 target_compile_features(main
