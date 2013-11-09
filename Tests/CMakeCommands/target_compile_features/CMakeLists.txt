@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 
 project(target_compile_features)
 
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang")
+  add_executable(gnuxx_typeof_test gnuxx_typeof_test.cpp)
+endif()
+
 if (NOT ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_delegating_constructors;")
   add_executable(target_compile_features dummy.cpp)
   return()
