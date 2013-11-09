@@ -16,3 +16,6 @@ cxx_delegating_constructors
 
 gnuxx_typeof
   The GNU typeof extension.
+
+msvcxx_sealed
+  The MSVC sealed extension.
