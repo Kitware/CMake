@@ -13,3 +13,6 @@ cxx_delegating_constructors
   Delegating constructors, as defined in N1986_.
 
 .. _N1986: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
+
+gnuxx_typeof
+  The GNU typeof extension.
