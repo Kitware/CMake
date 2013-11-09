@@ -1059,7 +1059,7 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
-  this->FinalizeTargetCompileDefinitions();
+  this->FinalizeTargetCompileInfo();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   // Iterate through all targets and set up automoc for those which have
@@ -1083,11 +1083,6 @@ void cmGlobalGenerator::Generate()
       {
       (*targets)[tit->first] = tit->second;
       (*targets)[tit->first].SetMakefile(mf);
-      }
-
-    for ( tit = targets->begin(); tit != targets->end(); ++ tit )
-      {
-      tit->second.AppendBuildInterfaceIncludes();
       }
     }
 
@@ -1270,7 +1265,7 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
+void cmGlobalGenerator::FinalizeTargetCompileInfo()
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
@@ -1288,6 +1283,8 @@ void cmGlobalGenerator::FinalizeTargetCompileDefinitions()
         ti != targets.end(); ++ti)
       {
       cmTarget* t = &ti->second;
+
+      t->AppendBuildInterfaceIncludes();
 
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();
