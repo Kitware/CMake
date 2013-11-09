@@ -2228,7 +2228,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 }
 
 //----------------------------------------------------------------------------
-static void processCompileFeatures(cmTarget *tgt,
+static void processCompileFeatures(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
       std::set<std::string> &uniqueOptions,
@@ -2241,7 +2241,7 @@ static void processCompileFeatures(cmTarget *tgt,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
-                                 const char *config)
+                                 const char *config) const
 {
   std::set<std::string> uniqueFeatures;
   cmListFileBacktrace lfbt;
