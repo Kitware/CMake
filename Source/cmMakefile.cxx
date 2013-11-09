@@ -43,7 +43,8 @@
 
 #define FOR_EACH_CXX_FEATURE(F) \
   F(cxx_delegating_constructors) \
-  F(gnuxx_typeof)
+  F(gnuxx_typeof) \
+  F(msvcxx_sealed)
 
 class cmMakefile::Internals
 {
