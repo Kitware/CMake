@@ -17,7 +17,9 @@ function(cmake_determine_compile_features lang)
   if(lang STREQUAL CXX AND COMMAND cmake_record_cxx_compile_features)
     message(STATUS "Detecting ${lang} compile features")
 
+    set(CMAKE_CXX98_COMPILE_EXTENSIONS)
     set(CMAKE_CXX11_COMPILE_FEATURES)
+    set(CMAKE_CXX11_COMPILE_EXTENSIONS)
 
     include("${CMAKE_ROOT}/Modules/Internal/FeatureTesting.cmake")
 
@@ -28,14 +30,21 @@ function(cmake_determine_compile_features lang)
       return()
     endif()
 
+    string(REPLACE "${CMAKE_CXX98_COMPILE_EXTENSIONS}" "" CMAKE_CXX11_COMPILE_EXTENSIONS "${CMAKE_CXX11_COMPILE_EXTENSIONS}")
+    string(REPLACE "${CMAKE_CXX11_COMPILE_FEATURES}" "" CMAKE_CXX11_COMPILE_EXTENSIONS "${CMAKE_CXX11_COMPILE_EXTENSIONS}")
+
     if(NOT CMAKE_CXX_COMPILE_FEATURES)
       set(CMAKE_CXX_COMPILE_FEATURES
+        ${CMAKE_CXX98_COMPILE_EXTENSIONS}
         ${CMAKE_CXX11_COMPILE_FEATURES}
+        ${CMAKE_CXX11_COMPILE_EXTENSIONS}
       )
     endif()
 
     set(CMAKE_CXX_COMPILE_FEATURES ${CMAKE_CXX_COMPILE_FEATURES} PARENT_SCOPE)
+    set(CMAKE_CXX98_COMPILE_EXTENSIONS ${CMAKE_CXX98_COMPILE_EXTENSIONS} PARENT_SCOPE)
     set(CMAKE_CXX11_COMPILE_FEATURES ${CMAKE_CXX11_COMPILE_FEATURES} PARENT_SCOPE)
+    set(CMAKE_CXX11_COMPILE_EXTENSIONS ${CMAKE_CXX11_COMPILE_EXTENSIONS} PARENT_SCOPE)
 
     message(STATUS "Detecting ${lang} compile features - done")
   endif()
