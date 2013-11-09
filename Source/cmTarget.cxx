@@ -1762,7 +1762,8 @@ static void processIncludeDirectories(cmTarget const* tgt,
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmTarget::GetIncludeDirectories(const char *config) const
+std::vector<std::string>
+cmTarget::GetIncludeDirectories(const char *config) const
 {
   std::vector<std::string> includes;
   std::set<std::string> uniqueIncludes;
