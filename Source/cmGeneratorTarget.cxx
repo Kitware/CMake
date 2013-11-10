@@ -103,6 +103,84 @@ static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
 }
 
 //----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &objs) const
+{
+  objs = this->ObjectSources;
+}
+
+//----------------------------------------------------------------------------
+const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
+{
+  return this->Objects[file];
+}
+
+void cmGeneratorTarget::AddObject(cmSourceFile *sf, std::string const&name)
+{
+    this->Objects[sf] = name;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile* sf)
+{
+  this->ExplicitObjectName.insert(sf);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
+{
+  std::set<cmSourceFile const*>::const_iterator it
+                                        = this->ExplicitObjectName.find(file);
+  return it != this->ExplicitObjectName.end();
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->ResxSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->IDLSources;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetHeaderSources(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->HeaderSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->ExtraSources;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetCustomCommands(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->CustomCommands;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs) const
+{
+  srcs = this->ExpectedResxHeaders;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->ExternalObjects;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {

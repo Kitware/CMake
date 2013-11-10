@@ -3925,9 +3925,11 @@ cmGlobalXCodeGenerator
   // to avoid exact duplicate file names. Note that Mac file names are not
   // typically case sensitive, hence the LowerCase.
   std::map<cmStdString, int> counts;
+  std::vector<cmSourceFile*> objectSources;
+  gt->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-      si = gt->ObjectSources.begin();
-      si != gt->ObjectSources.end(); ++si)
+      si = objectSources.begin();
+      si != objectSources.end(); ++si)
     {
     cmSourceFile* sf = *si;
     std::string objectName =
@@ -3941,7 +3943,7 @@ cmGlobalXCodeGenerator
       // TODO: emit warning about duplicate name?
       }
 
-    gt->Objects[sf] = objectName;
+    gt->AddObject(sf, objectName);
     }
 
   const char* configName = this->GetCMakeCFGIntDir();
