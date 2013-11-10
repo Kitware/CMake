@@ -63,6 +63,7 @@ private:
   typedef std::map<std::string, std::string> id_map_t;
   typedef std::map<std::string, size_t> ambiguity_map_t;
   typedef std::map<std::string, cmWIXShortcut> shortcut_map_t;
+  typedef std::set<std::string> extension_set_t;
 
   bool InitializeWiXConfiguration();
 
@@ -129,10 +130,19 @@ private:
 
   static bool IsLegalIdCharacter(char c);
 
+  void CollectExtensions(
+       const std::string& variableName, extension_set_t& extensions);
+
+  void AddCustomFlags(
+    const std::string& variableName, std::ostream& stream);
+
   std::vector<std::string> wixSources;
   id_map_t pathToIdMap;
   ambiguity_map_t idAmbiguityCounter;
   shortcut_map_t shortcutMap;
+
+  extension_set_t candleExtensions;
+  extension_set_t lightExtensions;
 };
 
 #endif

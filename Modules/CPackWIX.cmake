@@ -123,9 +123,31 @@
 #  This variable provides an optional list of extra WiX object (.wixobj)
 #  and/or WiX library (.wixlib) files.  The full path to objects and libraries
 #  is required.
+#
+# .. variable:: CPACK_WIX_EXTENSIONS
+#
+#  This variable provides a list of additional extensions for the WiX
+#  tools light and candle.
+#
+# .. variable:: CPACK_WIX_<TOOL>_EXTENSIONS
+#
+#  This is the tool specific version of CPACK_WIX_EXTENSIONS.
+#  ``<TOOL>`` can be either LIGHT or CANDLE.
+#
+# .. variable:: CPACK_WIX_<TOOL>_EXTRA_FLAGS
+#
+#  This list variable allows you to pass additional
+#  flags to the WiX tool ``<TOOL>``.
+#
+#  Use it at your own risk.
+#  Future versions of CPack may generate flags which may be in conflict
+#  with your own flags.
+#
+#  ``<TOOL>`` can be either LIGHT or CANDLE.
+#
 
 #=============================================================================
-# Copyright 2012 Kitware, Inc.
+# Copyright 2013 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.

@@ -83,6 +83,15 @@ bool cmCPackWIXGenerator::RunCandleCommand(
   command << " -nologo";
   command << " -arch " << GetArchitecture();
   command << " -out " << QuotePath(objectFile);
+
+  for(extension_set_t::const_iterator i = candleExtensions.begin();
+      i != candleExtensions.end(); ++i)
+    {
+    command << " -ext " << QuotePath(*i);
+    }
+
+  AddCustomFlags("CPACK_WIX_CANDLE_EXTRA_FLAGS", command);
+
   command << " " << QuotePath(sourceFile);
 
   return RunWiXCommand(command.str());
@@ -100,12 +109,21 @@ bool cmCPackWIXGenerator::RunLightCommand(const std::string& objectFiles)
   command << QuotePath(executable);
   command << " -nologo";
   command << " -out " << QuotePath(packageFileNames.at(0));
-  command << " -ext WixUIExtension";
+
+  for(extension_set_t::const_iterator i = lightExtensions.begin();
+      i != lightExtensions.end(); ++i)
+    {
+    command << " -ext " << QuotePath(*i);
+    }
+
   const char* const cultures = GetOption("CPACK_WIX_CULTURES");
   if(cultures)
     {
     command << " -cultures:" << cultures;
     }
+
+  AddCustomFlags("CPACK_WIX_LIGHT_EXTRA_FLAGS", command);
+
   command << " " << objectFiles;
 
   return RunWiXCommand(command.str());
@@ -172,13 +190,20 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   if(GetOption("CPACK_PACKAGE_VENDOR") == 0)
     {
-      std::string defaultVendor = "Humanity";
-      SetOption("CPACK_PACKAGE_VENDOR", defaultVendor.c_str());
+    std::string defaultVendor = "Humanity";
+    SetOption("CPACK_PACKAGE_VENDOR", defaultVendor.c_str());
 
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-        "CPACK_PACKAGE_VENDOR implicitly set to " << defaultVendor << " . "
-        << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+      "CPACK_PACKAGE_VENDOR implicitly set to " << defaultVendor << " . "
+      << std::endl);
     }
+
+  CollectExtensions("CPACK_WIX_EXTENSIONS", candleExtensions);
+  CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", candleExtensions);
+
+  lightExtensions.insert("WixUIExtension");
+  CollectExtensions("CPACK_WIX_EXTENSIONS", lightExtensions);
+  CollectExtensions("CPACK_WIX_LIGHT_EXTENSIONS", lightExtensions);
 
   return true;
 }
@@ -864,4 +889,36 @@ bool cmCPackWIXGenerator::IsLegalIdCharacter(char c)
       (c >= 'a' && c <= 'z') ||
       (c >= 'A' && c <= 'Z') ||
       c == '_' || c == '.';
+}
+
+void cmCPackWIXGenerator::CollectExtensions(
+     const std::string& variableName, extension_set_t& extensions)
+{
+  const char *variableContent = GetOption(variableName.c_str());
+  if(!variableContent) return;
+
+  std::vector<std::string> list;
+  cmSystemTools::ExpandListArgument(variableContent, list);
+
+  for(std::vector<std::string>::const_iterator i = list.begin();
+    i != list.end(); ++i)
+    {
+    extensions.insert(*i);
+    }
+}
+
+void cmCPackWIXGenerator::AddCustomFlags(
+  const std::string& variableName, std::ostream& stream)
+{
+  const char *variableContent = GetOption(variableName.c_str());
+  if(!variableContent) return;
+
+  std::vector<std::string> list;
+  cmSystemTools::ExpandListArgument(variableContent, list);
+
+  for(std::vector<std::string>::const_iterator i = list.begin();
+    i != list.end(); ++i)
+    {
+      stream << " " << QuotePath(*i);
+    }
 }
