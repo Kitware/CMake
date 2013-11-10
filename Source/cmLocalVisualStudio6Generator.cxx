@@ -401,9 +401,9 @@ void cmLocalVisualStudio6Generator
     std::string compileFlags;
     std::vector<std::string> depends;
     std::string objectNameDir;
-    if(gt->ExplicitObjectName.find(*sf) != gt->ExplicitObjectName.end())
+    if(gt->HasExplicitObjectName(*sf))
       {
-      objectNameDir = cmSystemTools::GetFilenamePath(gt->Objects[*sf]);
+      objectNameDir = cmSystemTools::GetFilenamePath(gt->GetObjectName(*sf));
       }
 
     // Add per-source file flags.

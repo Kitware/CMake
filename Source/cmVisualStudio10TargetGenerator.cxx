@@ -376,8 +376,8 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 
 void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
 {
-  std::vector<cmSourceFile*> const& resxObjs =
-    this->GeneratorTarget->ResxSources;
+  std::vector<cmSourceFile*> resxObjs;
+    this->GeneratorTarget->GetResxSources(resxObjs);
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -550,9 +550,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
   this->SourcesVisited.clear();
+  std::vector<cmSourceFile*> customCommands;
+  this->GeneratorTarget->GetCustomCommands(customCommands);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = customCommands.begin();
+      si != customCommands.end(); ++si)
     {
     this->WriteCustomCommand(*si);
     }
@@ -740,8 +742,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteGroupSources(ti->first.c_str(), ti->second, sourceGroups);
     }
 
-  std::vector<cmSourceFile*> const& resxObjs =
-    this->GeneratorTarget->ResxSources;
+  std::vector<cmSourceFile*> resxObjs;
+    this->GeneratorTarget->GetResxSources(resxObjs);
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -813,7 +815,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteString("</Filter>\n", 2);
     }
 
-  if(!this->GeneratorTarget->ResxSources.empty())
+  if(!resxObjs.empty())
     {
     this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
     std::string guidName = "SG_Filter_Resource Files";
@@ -996,12 +998,18 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     }
   this->WriteString("<ItemGroup>\n", 1);
 
-  this->WriteSources("ClInclude", this->GeneratorTarget->HeaderSources);
-  this->WriteSources("Midl", this->GeneratorTarget->IDLSources);
+  std::vector<cmSourceFile*> headerSources;
+  this->GeneratorTarget->GetHeaderSources(headerSources);
+  this->WriteSources("ClInclude", headerSources);
+  std::vector<cmSourceFile*> idlSources;
+  this->GeneratorTarget->GetIDLSources(idlSources);
+  this->WriteSources("Midl", idlSources);
 
+  std::vector<cmSourceFile*> objectSources;
+  this->GeneratorTarget->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ObjectSources.begin();
-      si != this->GeneratorTarget->ObjectSources.end(); ++si)
+        si = objectSources.begin();
+      si != objectSources.end(); ++si)
     {
     const char* lang = (*si)->GetLanguage();
     const char* tool = NULL;
@@ -1038,19 +1046,21 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       }
     }
 
+  std::vector<cmSourceFile*> externalObjects;
+  this->GeneratorTarget->GetExternalObjects(externalObjects);
   if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
     {
     // For VS >= 11 we use LinkObjects to avoid linking custom command
     // outputs.  Use Object for all external objects, generated or not.
-    this->WriteSources("Object", this->GeneratorTarget->ExternalObjects);
+    this->WriteSources("Object", externalObjects);
     }
   else
     {
     // If an object file is generated in this target, then vs10 will use
     // it in the build, and we have to list it as None instead of Object.
     for(std::vector<cmSourceFile*>::const_iterator
-          si = this->GeneratorTarget->ExternalObjects.begin();
-        si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+          si = externalObjects.begin();
+        si != externalObjects.end(); ++si)
       {
       std::vector<cmSourceFile*> const* d =
                                 this->GeneratorTarget->GetSourceDepends(*si);
@@ -1058,7 +1068,9 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       }
     }
 
-  this->WriteSources("None", this->GeneratorTarget->ExtraSources);
+  std::vector<cmSourceFile*> extraSources;
+  this->GeneratorTarget->GetExtraSources(extraSources);
+  this->WriteSources("None", extraSources);
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;
@@ -1081,10 +1093,9 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   cmSourceFile& sf = *source;
 
   std::string objectName;
-  if(this->GeneratorTarget->ExplicitObjectName.find(&sf)
-     != this->GeneratorTarget->ExplicitObjectName.end())
+  if(this->GeneratorTarget->HasExplicitObjectName(&sf))
     {
-    objectName = this->GeneratorTarget->Objects[&sf];
+    objectName = this->GeneratorTarget->GetObjectName(&sf);
     }
   std::string flags;
   std::string defines;
@@ -1882,8 +1893,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 bool cmVisualStudio10TargetGenerator::
   IsResxHeader(const std::string& headerFile)
 {
-  std::set<std::string>::iterator it =
-      this->GeneratorTarget->ExpectedResxHeaders.find(headerFile);
+  std::set<std::string> expectedResxHeaders;
+  this->GeneratorTarget->GetExpectedResxHeaders(expectedResxHeaders);
 
-  return it != this->GeneratorTarget->ExpectedResxHeaders.end();
+  std::set<std::string>::const_iterator it =
+                                        expectedResxHeaders.find(headerFile);
+  return it != expectedResxHeaders.end();
 }
