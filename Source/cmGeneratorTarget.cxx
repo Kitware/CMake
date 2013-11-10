@@ -110,6 +110,17 @@ cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &objs) const
 }
 
 //----------------------------------------------------------------------------
+const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
+{
+  return this->Objects[file];
+}
+
+void cmGeneratorTarget::AddObject(cmSourceFile *sf, std::string const&name)
+{
+    this->Objects[sf] = name;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {

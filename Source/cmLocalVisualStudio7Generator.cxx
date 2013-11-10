@@ -1470,7 +1470,7 @@ cmLocalVisualStudio7GeneratorFCInfo
   std::string objectName;
   if(gt->ExplicitObjectName.find(&sf) != gt->ExplicitObjectName.end())
     {
-    objectName = gt->Objects[&sf];
+    objectName = gt->GetObjectName(&sf);
     }
 
   // Compute per-source, per-config information.

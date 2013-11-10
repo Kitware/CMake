@@ -33,6 +33,9 @@ public:
   std::vector<cmSourceFile*> const& GetSourceFiles() const;
 
   void GetObjectSources(std::vector<cmSourceFile*> &) const;
+  const std::string& GetObjectName(cmSourceFile const* file);
+
+  void AddObject(cmSourceFile *sf, std::string const&name);
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -49,7 +52,6 @@ public:
 
   std::string ModuleDefinitionFile;
 
-  std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
 
   std::set<std::string> ExpectedResxHeaders;
@@ -93,6 +95,7 @@ public:
   SourceEntriesType SourceEntries;
 
 private:
+  std::map<cmSourceFile const*, std::string> Objects;
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;

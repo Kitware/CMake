@@ -403,7 +403,7 @@ void cmLocalVisualStudio6Generator
     std::string objectNameDir;
     if(gt->ExplicitObjectName.find(*sf) != gt->ExplicitObjectName.end())
       {
-      objectNameDir = cmSystemTools::GetFilenamePath(gt->Objects[*sf]);
+      objectNameDir = cmSystemTools::GetFilenamePath(gt->GetObjectName(*sf));
       }
 
     // Add per-source file flags.

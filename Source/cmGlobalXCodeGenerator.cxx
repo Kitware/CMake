@@ -3943,7 +3943,7 @@ cmGlobalXCodeGenerator
       // TODO: emit warning about duplicate name?
       }
 
-    gt->Objects[sf] = objectName;
+    gt->AddObject(sf, objectName);
     }
 
   const char* configName = this->GetCMakeCFGIntDir();

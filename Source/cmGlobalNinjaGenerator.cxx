@@ -654,7 +654,7 @@ void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
     cmSourceFile* sf = *si;
     std::string objectName = gt->LocalGenerator
       ->GetObjectFileNameWithoutTarget(*sf, dir_max);
-    gt->Objects[sf] = objectName;
+    gt->AddObject(sf, objectName);
     }
 }
 

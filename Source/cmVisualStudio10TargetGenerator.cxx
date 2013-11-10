@@ -1086,7 +1086,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   if(this->GeneratorTarget->ExplicitObjectName.find(&sf)
      != this->GeneratorTarget->ExplicitObjectName.end())
     {
-    objectName = this->GeneratorTarget->Objects[&sf];
+    objectName = this->GeneratorTarget->GetObjectName(&sf);
     }
   std::string flags;
   std::string defines;

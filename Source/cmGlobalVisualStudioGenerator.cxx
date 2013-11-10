@@ -157,7 +157,7 @@ cmGlobalVisualStudioGenerator
       gt->ExplicitObjectName.insert(sf);
       objectName = lg->GetObjectFileNameWithoutTarget(*sf, dir_max);
       }
-    gt->Objects[sf] = objectName;
+    gt->AddObject(sf, objectName);
     }
 
   std::string dir = gt->Makefile->GetCurrentOutputDirectory();

@@ -132,7 +132,7 @@ cmGlobalUnixMakefileGenerator3
     std::string objectName = gt->LocalGenerator
       ->GetObjectFileNameWithoutTarget(*sf, dir_max,
                                        &hasSourceExtension);
-    gt->Objects[sf] = objectName;
+    gt->AddObject(sf, objectName);
     lg->AddLocalObjectFile(target, sf, objectName, hasSourceExtension);
     }
 }
