@@ -182,9 +182,10 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     {
     this->ExternalObjects.push_back((*si)->GetFullPath());
     }
+  std::vector<cmSourceFile*> objectSources;
+  this->GeneratorTarget->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ObjectSources.begin();
-      si != this->GeneratorTarget->ObjectSources.end(); ++si)
+        si = objectSources.begin(); si != objectSources.end(); ++si)
     {
     // Generate this object file's rule file.
     this->WriteObjectRuleFiles(**si);

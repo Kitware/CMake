@@ -129,9 +129,11 @@ cmGlobalVisualStudioGenerator
   // Count the number of object files with each name.  Note that
   // windows file names are not case sensitive.
   std::map<cmStdString, int> counts;
+  std::vector<cmSourceFile*> objectSources;
+  gt->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = gt->ObjectSources.begin();
-      si != gt->ObjectSources.end(); ++si)
+        si = objectSources.begin();
+      si != objectSources.end(); ++si)
     {
     cmSourceFile* sf = *si;
     std::string objectNameLower = cmSystemTools::LowerCase(
@@ -143,8 +145,8 @@ cmGlobalVisualStudioGenerator
   // For all source files producing duplicate names we need unique
   // object name computation.
   for(std::vector<cmSourceFile*>::const_iterator
-        si = gt->ObjectSources.begin();
-      si != gt->ObjectSources.end(); ++si)
+        si = objectSources.begin();
+      si != objectSources.end(); ++si)
     {
     cmSourceFile* sf = *si;
     std::string objectName =

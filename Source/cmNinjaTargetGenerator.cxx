@@ -477,9 +477,10 @@ cmNinjaTargetGenerator
     {
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }
+  std::vector<cmSourceFile*> objectSources;
+  this->GeneratorTarget->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ObjectSources.begin();
-      si != this->GeneratorTarget->ObjectSources.end(); ++si)
+        si = objectSources.begin(); si != objectSources.end(); ++si)
     {
     this->WriteObjectBuildStatement(*si);
     }

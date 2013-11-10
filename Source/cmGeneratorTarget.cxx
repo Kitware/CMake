@@ -103,6 +103,13 @@ static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
 }
 
 //----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &objs) const
+{
+  objs = this->ObjectSources;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {

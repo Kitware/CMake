@@ -32,6 +32,8 @@ public:
   bool GetPropertyAsBool(const char *prop) const;
   std::vector<cmSourceFile*> const& GetSourceFiles() const;
 
+  void GetObjectSources(std::vector<cmSourceFile*> &) const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
@@ -41,7 +43,6 @@ public:
   std::vector<cmSourceFile*> CustomCommands;
   std::vector<cmSourceFile*> ExtraSources;
   std::vector<cmSourceFile*> HeaderSources;
-  std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmSourceFile*> ExternalObjects;
   std::vector<cmSourceFile*> IDLSources;
   std::vector<cmSourceFile*> ResxSources;
@@ -57,8 +58,6 @@ public:
       holding object files for this target.  Includes the build
       time config name placeholder if needed for the generator.  */
   std::string ObjectDirectory;
-
-  std::vector<cmTarget*> ObjectLibraries;
 
   void UseObjectLibraries(std::vector<std::string>& objs) const;
 
@@ -94,6 +93,8 @@ public:
   SourceEntriesType SourceEntries;
 
 private:
+  std::vector<cmSourceFile*> ObjectSources;
+  std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   cmGeneratorTarget(cmGeneratorTarget const&);

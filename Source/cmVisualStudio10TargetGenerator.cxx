@@ -999,9 +999,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   this->WriteSources("ClInclude", this->GeneratorTarget->HeaderSources);
   this->WriteSources("Midl", this->GeneratorTarget->IDLSources);
 
+  std::vector<cmSourceFile*> objectSources;
+  this->GeneratorTarget->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ObjectSources.begin();
-      si != this->GeneratorTarget->ObjectSources.end(); ++si)
+        si = objectSources.begin();
+      si != objectSources.end(); ++si)
     {
     const char* lang = (*si)->GetLanguage();
     const char* tool = NULL;
