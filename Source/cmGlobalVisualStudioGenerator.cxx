@@ -154,7 +154,7 @@ cmGlobalVisualStudioGenerator
     objectName += ".obj";
     if(counts[cmSystemTools::LowerCase(objectName)] > 1)
       {
-      gt->ExplicitObjectName.insert(sf);
+      gt->AddExplicitObjectName(sf);
       objectName = lg->GetObjectFileNameWithoutTarget(*sf, dir_max);
       }
     gt->AddObject(sf, objectName);

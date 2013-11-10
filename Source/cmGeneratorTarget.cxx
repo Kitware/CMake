@@ -121,6 +121,18 @@ void cmGeneratorTarget::AddObject(cmSourceFile *sf, std::string const&name)
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile* sf)
+{
+  this->ExplicitObjectName.insert(sf);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
+{
+  return this->ExplicitObjectName.find(file) != this->ExplicitObjectName.end();
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {

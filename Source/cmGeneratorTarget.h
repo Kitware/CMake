@@ -36,6 +36,8 @@ public:
   const std::string& GetObjectName(cmSourceFile const* file);
 
   void AddObject(cmSourceFile *sf, std::string const&name);
+  bool HasExplicitObjectName(cmSourceFile const* file) const;
+  void AddExplicitObjectName(cmSourceFile* sf);
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -51,8 +53,6 @@ public:
   std::vector<cmSourceFile*> ResxSources;
 
   std::string ModuleDefinitionFile;
-
-  std::set<cmSourceFile const*> ExplicitObjectName;
 
   std::set<std::string> ExpectedResxHeaders;
 
@@ -96,6 +96,7 @@ public:
 
 private:
   std::map<cmSourceFile const*, std::string> Objects;
+  std::set<cmSourceFile const*> ExplicitObjectName;
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
