@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-set(SET CMP0025 NEW)
+cmake_policy(SET CMP0025 NEW)
 project(target_compile_features)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang")
