@@ -57,6 +57,12 @@ find_path(SDL_TTF_INCLUDE_DIR SDL_ttf.h
   PATH_SUFFIXES include/SDL include/SDL12 include/SDL11 include
 )
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(VC_LIB_PATH_SUFFIX lib/x64)
+else()
+  set(VC_LIB_PATH_SUFFIX lib/x86)
+endif()
+
 if(NOT SDL_TTF_LIBRARY AND SDLTTF_LIBRARY)
   set(SDL_TTF_LIBRARY ${SDLTTF_LIBRARY} CACHE FILEPATH "file cache entry
 initialized from old variable name")
@@ -66,7 +72,7 @@ find_library(SDL_TTF_LIBRARY
   HINTS
     ENV SDLTTFDIR
     ENV SDLDIR
-  PATH_SUFFIXES lib
+  PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
 )
 
 if(SDL_TTF_INCLUDE_DIR AND EXISTS "${SDL_TTF_INCLUDE_DIR}/SDL_ttf.h")
