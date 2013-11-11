@@ -4,7 +4,7 @@ macro(record_compiler_features lang compile_flags feature_list)
 
   string(TOLOWER ${lang} lang_lc)
   file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.${lang_lc}" "
+  file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "
   extern const char features[] = {\"\"\n")
   foreach(feature ${CMAKE_${lang}_KNOWN_FEATURES})
     if (_cmake_feature_test_${feature})
@@ -13,13 +13,13 @@ macro(record_compiler_features lang compile_flags feature_list)
       else()
         set(_feature_condition "#if ${_cmake_feature_test_${feature}}\n\"1\"\n#else\n\"0\"\n#endif\n")
       endif()
-      file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.${lang_lc}" "\"${lang}_FEATURE:\"\n${_feature_condition}\"${feature}\\n\"\n")
+      file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "\"${lang}_FEATURE:\"\n${_feature_condition}\"${feature}\\n\"\n")
     endif()
   endforeach()
-  file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.${lang_lc}" "\n};\n")
+  file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "\n};\n")
 
   string(REPLACE "<FLAGS>" "${compile_flags}" _compile_object_command "${_CMAKE_${lang}_CREATE_OBJECT_FILE}" )
-  string(REPLACE "<SOURCE>" "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.${lang_lc}" _compile_object_command "${_compile_object_command}" )
+  string(REPLACE "<SOURCE>" "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" _compile_object_command "${_compile_object_command}" )
   execute_process(COMMAND ${_compile_object_command}
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMakeFiles"
     ERROR_VARIABLE _error
