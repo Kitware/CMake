@@ -20,7 +20,8 @@ macro(record_compiler_features lang compile_flags feature_list)
 
   string(REPLACE "<FLAGS>" "${compile_flags}" _compile_object_command "${_CMAKE_${lang}_CREATE_OBJECT_FILE}" )
   string(REPLACE "<SOURCE>" "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" _compile_object_command "${_compile_object_command}" )
-  execute_process(COMMAND ${_compile_object_command}
+  execute_process(COMMAND "${CMAKE_${lang}_COMPILER}"
+    ${_compile_object_command}
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMakeFiles"
     ERROR_VARIABLE _error
     OUTPUT_VARIABLE _output
