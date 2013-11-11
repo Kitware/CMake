@@ -7,4 +7,4 @@ __windows_compiler_msvc(CXX)
 
 include("${CMAKE_ROOT}/Modules/Internal/FeatureTesting.cmake")
 
-record_compiler_features(CXX "" ${CMAKE_CXX_COMPILE_FEATURES})
+record_compiler_features(CXX "" CMAKE_CXX_COMPILE_FEATURES)
