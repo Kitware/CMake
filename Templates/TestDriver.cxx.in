@@ -18,7 +18,7 @@ typedef struct
   MainFuncPointer func;
 } functionMapEntry;
 
-functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
+static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
   @CMAKE_FUNCTION_TABLE_ENTIRES@
   {0,0}
 };
@@ -26,7 +26,7 @@ functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
 /* Allocate and create a lowercased copy of string
    (note that it has to be free'd manually) */
 
-char* lowercase(const char *string)
+static char* lowercase(const char *string)
 {
   char *new_string, *p;
 
