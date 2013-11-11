@@ -5,7 +5,7 @@ macro(record_compiler_features lang compile_flags feature_list)
   string(TOLOWER ${lang} lang_lc)
   file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/feature_tests.${lang_lc}" "
-  extern const char features[] = {\n")
+  extern const char features[] = {\"\"\n")
   foreach(feature ${CMAKE_${lang}_KNOWN_FEATURES})
     if (_cmake_feature_test_${feature})
       if (${_cmake_feature_test_${feature}} STREQUAL 1)
