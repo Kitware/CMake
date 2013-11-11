@@ -57,6 +57,12 @@ find_path(SDL_MIXER_INCLUDE_DIR SDL_mixer.h
   PATH_SUFFIXES include/SDL include/SDL12 include/SDL11 include
 )
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(VC_LIB_PATH_SUFFIX lib/x64)
+else()
+  set(VC_LIB_PATH_SUFFIX lib/x86)
+endif()
+
 if(NOT SDL_MIXER_LIBRARY AND SDLMIXER_LIBRARY)
   set(SDL_MIXER_LIBRARY ${SDLMIXER_LIBRARY} CACHE FILEPATH "file cache entry
 initialized from old variable name")
@@ -66,7 +72,7 @@ find_library(SDL_MIXER_LIBRARY
   HINTS
     ENV SDLMIXERDIR
     ENV SDLDIR
-  PATH_SUFFIXES lib
+  PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
 )
 
 if(SDL_MIXER_INCLUDE_DIR AND EXISTS "${SDL_MIXER_INCLUDE_DIR}/SDL_mixer.h")
