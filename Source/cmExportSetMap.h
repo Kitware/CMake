@@ -18,6 +18,7 @@ class cmExportSet;
 /// A name -> cmExportSet map with overloaded operator[].
 class cmExportSetMap : public std::map<std::string, cmExportSet*>
 {
+  typedef std::map<std::string, cmExportSet*> derived;
 public:
   /** \brief Overloaded operator[].
    *
@@ -25,6 +26,8 @@ public:
    * we do not want unnamed export sets.
    */
   cmExportSet* operator[](const std::string &name);
+
+  void clear();
 
   /// Overloaded destructor deletes all member export sets.
   ~cmExportSetMap();
