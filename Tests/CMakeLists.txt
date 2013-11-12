@@ -161,6 +161,9 @@ if(BUILD_TESTING)
     set(CMAKE_LONG_TEST_TIMEOUT 1500)
   endif()
 
+  add_test(NAME CMake.Copyright
+    COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCopyright.cmake)
+
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
   ADD_TEST_MACRO(FindPackageTest FindPackageTest)
