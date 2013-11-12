@@ -13,14 +13,7 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   set(CPACK_PACKAGE_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeInstall.bmp")
   # tell cpack to create links to the doc files
   set(CPACK_NSIS_MENU_LINKS
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-gui.html" "cmake-gui Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html" "CMake Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-properties.html"
-    "CMake Properties and Variables Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/ctest.html" "CTest Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-modules.html" "CMake Modules Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake-commands.html" "CMake Commands Help"
-    "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cpack.html" "CPack Help"
+    "@CMAKE_DOC_DIR@/html/index.html" "CMake Documentation"
     "http://www.cmake.org" "CMake Web Site"
     )
   # Use the icon from cmake-gui for add-remove programs
