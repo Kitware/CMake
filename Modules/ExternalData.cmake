@@ -84,6 +84,7 @@
 #
 #  include(ExternalData)
 #  set(ExternalData_URL_TEMPLATES "file:///local/%(algo)/%(hash)"
+#                                 "file:////host/share/%(algo)/%(hash)"
 #                                 "http://data.org/%(algo)/%(hash)")
 #  ExternalData_Add_Test(MyData
 #    NAME MyTest
