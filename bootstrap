@@ -62,6 +62,8 @@ if [ "$cmake_version_rc" != "" ]; then
   cmake_version="${cmake_version}-rc${cmake_version_rc}"
 fi
 
+cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/Copyright.txt"`"
+
 cmake_data_dir_keyword="OTHER"
 cmake_doc_dir_keyword="OTHER"
 cmake_man_dir_keyword="OTHER"
@@ -402,7 +404,7 @@ Directory and file names:
 # Display CMake bootstrap usage
 cmake_version_display()
 {
-  echo "CMake ${cmake_version}, Copyright 2000-2012 Kitware, Inc."
+  echo "CMake ${cmake_version}, ${cmake_copyright}"
 }
 
 # Display CMake bootstrap error, display the log file and exit
