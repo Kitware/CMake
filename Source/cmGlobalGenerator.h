@@ -397,7 +397,7 @@ private:
 
   void WriteSummary();
   void WriteSummary(cmTarget* target);
-  void FinalizeTargetCompileDefinitions();
+  void FinalizeTargetCompileInfo();
 
   virtual void PrintCompilerAdvice(std::ostream& os, std::string lang,
                                    const char* envVar);
