@@ -162,7 +162,7 @@ static void cmakemainProgressCallback(const char *m, float prog,
 int main(int ac, char** av)
 {
   cmSystemTools::EnableMSVCDebugHook();
-  cmSystemTools::FindExecutableDirectory(av[0]);
+  cmSystemTools::FindCMakeResources(av[0]);
   if(ac > 1)
     {
     if(strcmp(av[1], "--build") == 0)
@@ -198,7 +198,6 @@ int do_cmake(int ac, char** av)
     // Construct and print requested documentation.
     cmake hcm;
     hcm.AddCMakePaths();
-    doc.SetCMakeRoot(hcm.GetCacheDefinition("CMAKE_ROOT"));
 
     // the command line args are processed here so that you can do
     // -DCMAKE_MODULE_PATH=/some/path and have this value accessible here

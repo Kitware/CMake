@@ -932,34 +932,18 @@ void cmake::SetDirectoriesFromFile(const char* arg)
 // cache
 int cmake::AddCMakePaths()
 {
-  // Find the cmake executable
-  std::string cMakeSelf = cmSystemTools::GetExecutableDirectory();
-  cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
-  cMakeSelf += "/cmake";
-  cMakeSelf += cmSystemTools::GetExecutableExtension();
-#ifdef __APPLE__
-  // on the apple this might be the gui bundle
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
-    {
-    cMakeSelf = cmSystemTools::GetExecutableDirectory();
-    cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
-    cMakeSelf += "../../../..";
-    cMakeSelf = cmSystemTools::GetRealPath(cMakeSelf.c_str());
-    cMakeSelf = cmSystemTools::CollapseFullPath(cMakeSelf.c_str());
-    cMakeSelf += "/cmake";
-    std::cerr << cMakeSelf.c_str() << "\n";
-    }
-#endif
-  if(!cmSystemTools::FileExists(cMakeSelf.c_str()))
-    {
-    cmSystemTools::Error("CMake executable cannot be found at ",
-                         cMakeSelf.c_str());
-    return 0;
-    }
   // Save the value in the cache
   this->CacheManager->AddCacheEntry
-    ("CMAKE_COMMAND",cMakeSelf.c_str(), "Path to CMake executable.",
-     cmCacheManager::INTERNAL);
+    ("CMAKE_COMMAND", cmSystemTools::GetCMakeCommand().c_str(),
+     "Path to CMake executable.", cmCacheManager::INTERNAL);
+#ifdef CMAKE_BUILD_WITH_CMAKE
+  this->CacheManager->AddCacheEntry
+    ("CMAKE_CTEST_COMMAND", cmSystemTools::GetCTestCommand().c_str(),
+     "Path to ctest program executable.", cmCacheManager::INTERNAL);
+  this->CacheManager->AddCacheEntry
+    ("CMAKE_CPACK_COMMAND", cmSystemTools::GetCPackCommand().c_str(),
+     "Path to cpack program executable.", cmCacheManager::INTERNAL);
+#endif
   // if the edit command is not yet in the cache,
   // or if CMakeEditCommand has been set on this object,
   // then set the CMAKE_EDIT_COMMAND in the cache
@@ -972,20 +956,17 @@ int cmake::AddCMakePaths()
     std::string editCacheCommand;
     if(!this->CMakeEditCommand.empty())
       {
-      editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf)
-        + std::string("/")
-        + this->CMakeEditCommand
-        + cmSystemTools::GetFilenameExtension(cMakeSelf);
+      editCacheCommand = this->CMakeEditCommand;
       }
-    if( !cmSystemTools::FileExists(editCacheCommand.c_str()))
+    if(!cmSystemTools::FileExists(editCacheCommand.c_str()) &&
+       !cmSystemTools::GetCMakeCursesCommand().empty())
       {
-      editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
-        "/ccmake" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+      editCacheCommand = cmSystemTools::GetCMakeCursesCommand();
       }
-    if( !cmSystemTools::FileExists(editCacheCommand.c_str()))
+    if(!cmSystemTools::FileExists(editCacheCommand.c_str()) &&
+       !cmSystemTools::GetCMakeGUICommand().empty())
       {
-      editCacheCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
-        "/cmake-gui" + cmSystemTools::GetFilenameExtension(cMakeSelf);
+      editCacheCommand = cmSystemTools::GetCMakeGUICommand();
       }
     if(cmSystemTools::FileExists(editCacheCommand.c_str()))
       {
@@ -994,84 +975,19 @@ int cmake::AddCMakePaths()
          "Path to cache edit program executable.", cmCacheManager::INTERNAL);
       }
     }
-  std::string ctestCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
-    "/ctest" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-  if(cmSystemTools::FileExists(ctestCommand.c_str()))
-    {
-    this->CacheManager->AddCacheEntry
-      ("CMAKE_CTEST_COMMAND", ctestCommand.c_str(),
-       "Path to ctest program executable.", cmCacheManager::INTERNAL);
-    }
-  std::string cpackCommand = cmSystemTools::GetFilenamePath(cMakeSelf) +
-    "/cpack" + cmSystemTools::GetFilenameExtension(cMakeSelf);
-  if(cmSystemTools::FileExists(cpackCommand.c_str()))
-    {
-    this->CacheManager->AddCacheEntry
-      ("CMAKE_CPACK_COMMAND", cpackCommand.c_str(),
-       "Path to cpack program executable.", cmCacheManager::INTERNAL);
-    }
 
-  // do CMAKE_ROOT, look for the environment variable first
-  std::string cMakeRoot;
-  std::string modules;
-  if (getenv("CMAKE_ROOT"))
-    {
-    cMakeRoot = getenv("CMAKE_ROOT");
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-  if(!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // next try exe/..
-    cMakeRoot = cmSystemTools::GetRealPath(cMakeSelf.c_str());
-    cMakeRoot = cmSystemTools::GetProgramPath(cMakeRoot.c_str());
-    std::string::size_type slashPos = cMakeRoot.rfind("/");
-    if(slashPos != std::string::npos)
-      {
-      cMakeRoot = cMakeRoot.substr(0, slashPos);
-      }
-    // is there no Modules directory there?
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try exe/../share/cmake
-    cMakeRoot += CMAKE_DATA_DIR;
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-#ifdef CMAKE_ROOT_DIR
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try compiled in root directory
-    cMakeRoot = CMAKE_ROOT_DIR;
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-#endif
-  if (!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // try
-    cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
-    cMakeRoot += CMAKE_DATA_DIR;
-    modules = cMakeRoot +  "/Modules/CMake.cmake";
-    }
-  if(!cmSystemTools::FileExists(modules.c_str()))
-    {
-    // next try exe
-    cMakeRoot  = cmSystemTools::GetProgramPath(cMakeSelf.c_str());
-    // is there no Modules directory there?
-    modules = cMakeRoot + "/Modules/CMake.cmake";
-    }
-  if (!cmSystemTools::FileExists(modules.c_str()))
+  if(!cmSystemTools::FileExists(
+       (cmSystemTools::GetCMakeRoot()+"/Modules/CMake.cmake").c_str()))
     {
     // couldn't find modules
     cmSystemTools::Error("Could not find CMAKE_ROOT !!!\n"
       "CMake has most likely not been installed correctly.\n"
       "Modules directory not found in\n",
-      cMakeRoot.c_str());
+      cmSystemTools::GetCMakeRoot().c_str());
     return 0;
     }
   this->CacheManager->AddCacheEntry
-    ("CMAKE_ROOT", cMakeRoot.c_str(),
+    ("CMAKE_ROOT", cmSystemTools::GetCMakeRoot().c_str(),
      "Path to CMake installation.", cmCacheManager::INTERNAL);
 
   return 1;
@@ -1705,9 +1621,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return 0;
     }
 
-  // set the cmake command
-  this->CMakeCommand = args[0];
-
   if ( this->GetWorkingMode() == NORMAL_MODE )
     {
     // load the cache
@@ -1923,14 +1836,6 @@ int cmake::LoadCache()
         "permissions of the directory you are trying to run CMake on.");
       return -1;
       }
-    }
-
-  if (this->CMakeCommand.size() < 2)
-    {
-    cmSystemTools::Error(
-      "cmake command was not specified prior to loading the cache in "
-      "cmake.cxx");
-    return -1;
     }
 
   // setup CMAKE_ROOT and CMAKE_COMMAND
@@ -2237,82 +2142,6 @@ inline std::string removeQuotes(const std::string& s)
     }
   return s;
 }
-
-std::string cmake::FindCMakeProgram(const char* name) const
-{
-  std::string path;
-  if ((name) && (*name))
-    {
-    const cmMakefile* mf
-        = this->GetGlobalGenerator()->GetLocalGenerators()[0]->GetMakefile();
-#ifdef CMAKE_BUILD_WITH_CMAKE
-    path = mf->GetRequiredDefinition("CMAKE_COMMAND");
-    path = removeQuotes(path);
-    path = cmSystemTools::GetFilenamePath(path.c_str());
-    path += "/";
-    path += name;
-    path += cmSystemTools::GetExecutableExtension();
-    if(!cmSystemTools::FileExists(path.c_str()))
-    {
-      path = mf->GetRequiredDefinition("CMAKE_COMMAND");
-      path = cmSystemTools::GetFilenamePath(path.c_str());
-      path += "/Debug/";
-      path += name;
-      path += cmSystemTools::GetExecutableExtension();
-    }
-    if(!cmSystemTools::FileExists(path.c_str()))
-    {
-      path = mf->GetRequiredDefinition("CMAKE_COMMAND");
-      path = cmSystemTools::GetFilenamePath(path.c_str());
-      path += "/Release/";
-      path += name;
-      path += cmSystemTools::GetExecutableExtension();
-    }
-#else
-    // Only for bootstrap
-    path += mf->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
-    path += "/";
-    path += name;
-    path += cmSystemTools::GetExecutableExtension();
-#endif
-    }
-  return path;
-}
-
-const char* cmake::GetCTestCommand()
-{
-  if ( this->CTestCommand.empty() )
-    {
-    this->CTestCommand = this->FindCMakeProgram("ctest");
-    }
-  if ( this->CTestCommand.empty() )
-    {
-    cmSystemTools::Error("Cannot find the CTest executable");
-    this->CTestCommand = "CTEST-COMMAND-NOT-FOUND";
-    }
-  return this->CTestCommand.c_str();
-}
-
-const char* cmake::GetCPackCommand()
-{
-  if ( this->CPackCommand.empty() )
-    {
-    this->CPackCommand = this->FindCMakeProgram("cpack");
-    }
-  if ( this->CPackCommand.empty() )
-    {
-    cmSystemTools::Error("Cannot find the CPack executable");
-    this->CPackCommand = "CPACK-COMMAND-NOT-FOUND";
-    }
-    return this->CPackCommand.c_str();
-}
-
-
-const char* cmake::GetCMakeCommand()
-{
-  return this->CMakeCommand.c_str();
-}
-
 
 void cmake::MarkCliAsUsed(const std::string& variable)
 {
