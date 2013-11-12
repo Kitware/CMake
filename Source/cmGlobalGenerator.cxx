@@ -2158,11 +2158,11 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
 
-    // Use CMAKE_EDIT_COMMAND for the edit_cache rule if it is defined.
-    // Otherwise default to the interactive command-line interface.
-    if(mf->GetDefinition("CMAKE_EDIT_COMMAND"))
+    // Use generator preference for the edit_cache rule if it is defined.
+    std::string edit_cmd = this->GetEditCacheCommand();
+    if (!edit_cmd.empty())
       {
-      singleLine.push_back(mf->GetDefinition("CMAKE_EDIT_COMMAND"));
+      singleLine.push_back(edit_cmd);
       singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
       singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
       cpackCommandLines.push_back(singleLine);
@@ -2174,13 +2174,14 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     else
       {
       singleLine.push_back(cmakeCommand);
-      singleLine.push_back("-i");
-      singleLine.push_back(".");
+      singleLine.push_back("-E");
+      singleLine.push_back("echo");
+      singleLine.push_back("No interactive CMake dialog available.");
       cpackCommandLines.push_back(singleLine);
       (*targets)[editCacheTargetName] =
         this->CreateGlobalTarget(
           editCacheTargetName,
-          "Running interactive CMake command-line interface...",
+          "No interactive CMake dialog available...",
           &cpackCommandLines, depends, 0);
       }
     }

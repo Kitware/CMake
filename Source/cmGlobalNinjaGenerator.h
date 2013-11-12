@@ -308,6 +308,7 @@ protected:
 
 
 private:
+  virtual std::string GetEditCacheCommand() const;
 
   /// @see cmGlobalGenerator::ComputeTargetObjects
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;

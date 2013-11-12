@@ -640,6 +640,13 @@ bool cmGlobalNinjaGenerator::HasRule(const std::string &name)
 //----------------------------------------------------------------------------
 // Private virtual overrides
 
+std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
+{
+  // Ninja by design does not run interactive tools in the terminal,
+  // so our only choice is cmake-gui.
+  return cmSystemTools::GetCMakeGUICommand();
+}
+
 // TODO: Refactor to combine with cmGlobalUnixMakefileGenerator3 impl.
 void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
 {

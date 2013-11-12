@@ -335,9 +335,10 @@ class cmake
   std::vector<std::string> const& GetDebugConfigs();
 
   void SetCMakeEditCommand(std::string const& s)
-    {
-      this->CMakeEditCommand = s;
-    }
+    { this->CMakeEditCommand = s; }
+  std::string const& GetCMakeEditCommand() const
+    { return this->CMakeEditCommand; }
+
   void SetSuppressDevWarnings(bool v)
     {
       this->SuppressDevWarnings = v;

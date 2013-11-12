@@ -944,38 +944,6 @@ int cmake::AddCMakePaths()
     ("CMAKE_CPACK_COMMAND", cmSystemTools::GetCPackCommand().c_str(),
      "Path to cpack program executable.", cmCacheManager::INTERNAL);
 #endif
-  // if the edit command is not yet in the cache,
-  // or if CMakeEditCommand has been set on this object,
-  // then set the CMAKE_EDIT_COMMAND in the cache
-  // This will mean that the last gui to edit the cache
-  // will be the one that make edit_cache uses.
-  if(!this->GetCacheDefinition("CMAKE_EDIT_COMMAND")
-    || !this->CMakeEditCommand.empty())
-    {
-    // Find and save the command to edit the cache
-    std::string editCacheCommand;
-    if(!this->CMakeEditCommand.empty())
-      {
-      editCacheCommand = this->CMakeEditCommand;
-      }
-    if(!cmSystemTools::FileExists(editCacheCommand.c_str()) &&
-       !cmSystemTools::GetCMakeCursesCommand().empty())
-      {
-      editCacheCommand = cmSystemTools::GetCMakeCursesCommand();
-      }
-    if(!cmSystemTools::FileExists(editCacheCommand.c_str()) &&
-       !cmSystemTools::GetCMakeGUICommand().empty())
-      {
-      editCacheCommand = cmSystemTools::GetCMakeGUICommand();
-      }
-    if(cmSystemTools::FileExists(editCacheCommand.c_str()))
-      {
-      this->CacheManager->AddCacheEntry
-        ("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
-         "Path to cache edit program executable.", cmCacheManager::INTERNAL);
-      }
-    }
-
   if(!cmSystemTools::FileExists(
        (cmSystemTools::GetCMakeRoot()+"/Modules/CMake.cmake").c_str()))
     {
