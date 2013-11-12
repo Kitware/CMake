@@ -299,7 +299,7 @@ cmPolicies::cmPolicies()
 
   this->DefinePolicy(
     CMP0039, "CMP0039",
-    "Utility targets may not have link dependencies",
+    "Utility targets may not have link dependencies.",
     3,0,0,0, cmPolicies::WARN);
 }
 
