@@ -112,7 +112,7 @@ endif()
 
 if(APPLE)
   set_target_properties(cmake-gui PROPERTIES
-    OUTPUT_NAME ${CMAKE_BUNDLE_NAME}
+    OUTPUT_NAME CMake
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_BUNDLE_VERSION}"
     # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_BUNDLE_VERSION}"
@@ -122,7 +122,7 @@ if(APPLE)
   # Create a symlink in the build tree to provide a "cmake-gui" next
   # to the "cmake" executable that refers to the application bundle.
   add_custom_command(TARGET cmake-gui POST_BUILD
-    COMMAND ln -sf ${CMAKE_BUNDLE_NAME}.app/Contents/MacOS/${CMAKE_BUNDLE_NAME}
+    COMMAND ln -sf CMake.app/Contents/MacOS/CMake
                    $<TARGET_FILE_DIR:cmake>/cmake-gui
     )
 endif()
@@ -148,7 +148,7 @@ if(APPLE)
     "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
   configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postupgrade.sh.in"
     "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
-  install(CODE "execute_process(COMMAND ln -s \"../MacOS/${CMAKE_BUNDLE_NAME}\" cmake-gui
+  install(CODE "execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
                 WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
 endif()
 
@@ -157,7 +157,7 @@ if(APPLE OR WIN32)
   # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
   set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
   if(APPLE)
-    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/${CMAKE_BUNDLE_NAME}")
+    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/CMake")
   endif()
   install(CODE "
     include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
