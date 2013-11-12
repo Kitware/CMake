@@ -111,12 +111,15 @@ if(Qt_BIN_DIR)
 endif()
 
 if(APPLE)
+  file(STRINGS "${CMake_SOURCE_DIR}/Copyright.txt" copyright_line
+    LIMIT_COUNT 1 REGEX "^Copyright 2000-20[0-9][0-9] Kitware")
+
   set_target_properties(cmake-gui PROPERTIES
     OUTPUT_NAME ${CMAKE_BUNDLE_NAME}
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_BUNDLE_VERSION}"
     # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_BUNDLE_VERSION}"
-    MACOSX_BUNDLE_COPYRIGHT "Copyright 2000-2013 Kitware, Inc."
+    MACOSX_BUNDLE_COPYRIGHT "${copyright_line}"
     )
 
   # Create a symlink in the build tree to provide a "cmake-gui" next
