@@ -172,30 +172,10 @@ void cmExtraSublimeTextGenerator::
         {
         case cmTarget::GLOBAL_TARGET:
           {
-          bool insertTarget = false;
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
           if (strcmp(makefile->GetStartOutputDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
-            {
-            insertTarget = true;
-            // only add the "edit_cache" target if it's not ccmake, because
-            // this will not work within the IDE
-            if (ti->first == "edit_cache")
-              {
-              const char* editCommand = makefile->GetDefinition
-                                                        ("CMAKE_EDIT_COMMAND");
-              if (editCommand == 0)
-                {
-                insertTarget = false;
-                }
-              else if (strstr(editCommand, "ccmake")!=NULL)
-                {
-                insertTarget = false;
-                }
-              }
-            }
-          if (insertTarget)
             {
             this->AppendTarget(fout, ti->first.c_str(), *lg, 0,
                                make.c_str(), makefile, compiler.c_str(),

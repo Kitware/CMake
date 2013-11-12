@@ -77,6 +77,8 @@ public:
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
 
+  virtual void Configure();
+
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and
@@ -186,6 +188,7 @@ protected:
 
   cmGeneratedFileStream *CommandDatabase;
 private:
+  virtual std::string GetEditCacheCommand() const;
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 };
 

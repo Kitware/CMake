@@ -68,6 +68,42 @@ void cmGlobalUnixMakefileGenerator3
 }
 
 //----------------------------------------------------------------------------
+std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
+{
+  // If generating for an extra IDE, the edit_cache target cannot
+  // launch a terminal-interactive tool, so always use cmake-gui.
+  if(this->GetExtraGeneratorName())
+    {
+    return cmSystemTools::GetCMakeGUICommand();
+    }
+
+  // Use an internal cache entry to track the latest dialog used
+  // to edit the cache, and use that for the edit_cache target.
+  cmake* cm = this->GetCMakeInstance();
+  std::string editCacheCommand = cm->GetCMakeEditCommand();
+  if(!cm->GetCacheDefinition("CMAKE_EDIT_COMMAND") ||
+     !editCacheCommand.empty())
+    {
+    if(editCacheCommand.empty())
+      {
+      editCacheCommand = cmSystemTools::GetCMakeCursesCommand();
+      }
+    if(editCacheCommand.empty())
+      {
+      editCacheCommand = cmSystemTools::GetCMakeGUICommand();
+      }
+    if(!editCacheCommand.empty())
+      {
+      cm->AddCacheEntry
+        ("CMAKE_EDIT_COMMAND", editCacheCommand.c_str(),
+         "Path to cache edit program executable.", cmCacheManager::INTERNAL);
+      }
+    }
+  const char* edit_cmd = cm->GetCacheDefinition("CMAKE_EDIT_COMMAND");
+  return edit_cmd? edit_cmd : "";
+}
+
+//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
 ::ComputeTargetObjects(cmGeneratorTarget* gt) const
@@ -97,6 +133,14 @@ cmGlobalUnixMakefileGenerator3
     gt->Objects[sf] = objectName;
     lg->AddLocalObjectFile(target, sf, objectName, hasSourceExtension);
     }
+}
+
+void cmGlobalUnixMakefileGenerator3::Configure()
+{
+  // Initialize CMAKE_EDIT_COMMAND cache entry.
+  this->GetEditCacheCommand();
+
+  this->cmGlobalGenerator::Configure();
 }
 
 void cmGlobalUnixMakefileGenerator3::Generate()
