@@ -229,6 +229,7 @@ bool cmAddLibraryCommand
     yet its linker language. */
   if ((type != cmTarget::STATIC_LIBRARY) &&
       (type != cmTarget::OBJECT_LIBRARY) &&
+      (type != cmTarget::INTERFACE_LIBRARY) &&
        (this->Makefile->GetCMakeInstance()->GetPropertyAsBool(
                                       "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
