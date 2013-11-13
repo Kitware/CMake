@@ -42,3 +42,4 @@ ExternalData_Add_Target(Data1)
 
 add_subdirectory(Data2)
 add_subdirectory(Data3)
+add_subdirectory(Data4)
