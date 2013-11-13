@@ -148,7 +148,21 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
 {
-  makeCommand.push_back(makeProgram);
+  // Select the caller- or user-preferred make program, else devenv.
+  std::string makeProgramSelected =
+    this->SelectMakeProgram(makeProgram, this->GetDevEnvCommand());
+
+  // Ignore the above preference if it is msbuild.
+  // Assume any other value is either a devenv or
+  // command-line compatible with devenv.
+  std::string makeProgramLower = makeProgramSelected;
+  cmSystemTools::LowerCase(makeProgramLower);
+  if(makeProgramLower.find("msbuild") != std::string::npos)
+    {
+    makeProgramSelected = this->GetDevEnvCommand();
+    }
+
+  makeCommand.push_back(makeProgramSelected);
 
   makeCommand.push_back(std::string(projectName) + ".sln");
   bool clean = false;

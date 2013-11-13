@@ -334,6 +334,8 @@ protected:
   typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > AutogensType;
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
 
+  std::string SelectMakeProgram(const char* makeProgram,
+                                std::string makeDefault = "");
 
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.

@@ -118,24 +118,9 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   )
 {
   // now build the test
-  std::vector<std::string> mp;
-  mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio"
-               "\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
-  cmSystemTools::ExpandRegistryValues(mp[0]);
-  std::string originalCommand = makeProgram;
-  std::string makeCommandFound =
-    cmSystemTools::FindProgram(makeProgram, mp);
-  if(makeCommandFound.size() == 0)
-    {
-    std::string e = "Generator cannot find Visual Studio 6 msdev program \"";
-    e += originalCommand;
-    e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
-    e += "Please fix the setting.";
-    cmSystemTools::Error(e.c_str());
-    return;
-    }
-
-  makeCommand.push_back(makeCommandFound);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram, this->GetMSDevCommand())
+    );
 
   makeCommand.push_back(std::string(projectName)+".dsw");
   makeCommand.push_back("/MAKE");

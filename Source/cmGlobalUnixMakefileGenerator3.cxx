@@ -566,7 +566,9 @@ void cmGlobalUnixMakefileGenerator3
                        bool fast,
                        std::vector<std::string> const& makeOptions)
 {
-  makeCommand.push_back(makeProgram);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram)
+    );
 
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
