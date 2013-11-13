@@ -738,9 +738,11 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   if("${gp_tool}" STREQUAL "ldd")
     set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
-    foreach(dir ${exepath} ${dirs})
-      set(ENV{LD_LIBRARY_PATH} "${dir}:$ENV{LD_LIBRARY_PATH}")
+    set(new_ld_env "${exepath}")
+    foreach(dir ${dirs})
+      set(new_ld_env "${new_ld_env}:${dir}")
     endforeach()
+    set(ENV{LD_LIBRARY_PATH} "${new_ld_env}:$ENV{LD_LIBRARY_PATH}")
   endif()
 
 
