@@ -31,6 +31,8 @@ set(_OPENMP_REQUIRED_VARS)
 
 function(_OPENMP_FLAG_CANDIDATES LANG)
   set(OpenMP_FLAG_CANDIDATES
+    #Empty, if compiler automatically accepts openmp
+    " "
     #GNU
     "-fopenmp"
     #Microsoft Visual Studio
@@ -39,8 +41,6 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     "-Qopenmp"
     #PathScale, Intel
     "-openmp"
-    #Empty, if compiler automatically accepts openmp
-    " "
     #Sun
     "-xopenmp"
     #HP
@@ -64,6 +64,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
   set(OMP_FLAG_PGI "-mp")
   set(OMP_FLAG_SunPro "-xopenmp")
   set(OMP_FLAG_XL "-qsmp")
+  set(OMP_FLAG_Cray " ")
 
   # Move the flag that matches the compiler to the head of the list,
   # this is faster and doesn't clutter the output that much. If that
@@ -100,7 +101,7 @@ if(CMAKE_C_COMPILER_LOADED)
     include(${CMAKE_CURRENT_LIST_DIR}/CheckCSourceCompiles.cmake)
   endif()
 
-  foreach(FLAG ${OpenMP_C_FLAG_CANDIDATES})
+  foreach(FLAG IN LISTS OpenMP_C_FLAG_CANDIDATES)
     set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
     set(CMAKE_REQUIRED_FLAGS "${FLAG}")
     unset(OpenMP_FLAG_DETECTED CACHE)
@@ -134,7 +135,7 @@ if(CMAKE_CXX_COMPILER_LOADED)
     set(OpenMP_CXX_TEST_SOURCE ${OpenMP_C_TEST_SOURCE})
   endif()
 
-  foreach(FLAG ${OpenMP_CXX_FLAG_CANDIDATES})
+  foreach(FLAG IN LISTS OpenMP_CXX_FLAG_CANDIDATES)
     set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
     set(CMAKE_REQUIRED_FLAGS "${FLAG}")
     unset(OpenMP_FLAG_DETECTED CACHE)
