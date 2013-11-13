@@ -558,7 +558,7 @@ set(CPACK_COMPONENT_UNSPECIFIED_HIDDEN TRUE)
 set(CPACK_COMPONENT_UNSPECIFIED_REQUIRED TRUE)
 
 cpack_encode_variables()
-configure_file("${cpack_input_file}" "${CPACK_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
+configure_file("${cpack_input_file}" "${CPACK_OUTPUT_CONFIG_FILE}" @ONLY)
 
 # Generate source file
 cpack_set_if_not_set(CPACK_SOURCE_INSTALLED_DIRECTORIES
@@ -578,4 +578,4 @@ set(CPACK_STRIP_FILES "${CPACK_SOURCE_STRIP_FILES}")
 
 cpack_encode_variables()
 configure_file("${cpack_source_input_file}"
-  "${CPACK_SOURCE_OUTPUT_CONFIG_FILE}" @ONLY IMMEDIATE)
+  "${CPACK_SOURCE_OUTPUT_CONFIG_FILE}" @ONLY)
