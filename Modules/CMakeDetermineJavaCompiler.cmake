@@ -100,5 +100,5 @@ mark_as_advanced(CMAKE_Java_COMPILER)
 
 # configure variables set in this file for fast reload later on
 configure_file(${CMAKE_ROOT}/Modules/CMakeJavaCompiler.cmake.in
-  ${CMAKE_PLATFORM_INFO_DIR}/CMakeJavaCompiler.cmake IMMEDIATE @ONLY)
+  ${CMAKE_PLATFORM_INFO_DIR}/CMakeJavaCompiler.cmake @ONLY)
 set(CMAKE_Java_COMPILER_ENV_VAR "JAVA_COMPILER")

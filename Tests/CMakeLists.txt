@@ -2535,7 +2535,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       configure_file(
         ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
         ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestInstall.sh
-        @ONLY IMMEDIATE
+        @ONLY
         )
       add_test(ShellInstall /bin/sh ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestShellInstall.sh)
     endif()

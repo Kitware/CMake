@@ -29,7 +29,7 @@ endif()
 macro(CMAKE_EXPORT_BUILD_SETTINGS SETTINGS_FILE)
   if(${SETTINGS_FILE} MATCHES ".+")
     configure_file(${CMAKE_ROOT}/Modules/CMakeBuildSettings.cmake.in
-                   ${SETTINGS_FILE} @ONLY IMMEDIATE)
+                   ${SETTINGS_FILE} @ONLY)
   else()
     message(SEND_ERROR "CMAKE_EXPORT_BUILD_SETTINGS called with no argument.")
   endif()

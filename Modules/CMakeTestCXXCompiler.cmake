@@ -71,7 +71,7 @@ else()
   configure_file(
     ${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
     ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
-    @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+    @ONLY
     )
   include(${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake)
 

@@ -58,7 +58,7 @@ macro(TEST_BIG_ENDIAN VARIABLE)
 
     configure_file("${CMAKE_ROOT}/Modules/TestEndianess.c.in"
                    "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestEndianess.c"
-                    IMMEDIATE @ONLY)
+                   @ONLY)
 
      file(READ "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/TestEndianess.c"
           TEST_ENDIANESS_FILE_CONTENT)

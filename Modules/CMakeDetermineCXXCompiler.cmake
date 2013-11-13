@@ -185,7 +185,7 @@ endif()
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCXXCompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCXXCompiler.cmake
-  @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+  @ONLY
   )
 
 set(CMAKE_CXX_COMPILER_ENV_VAR "CXX")

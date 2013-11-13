@@ -164,7 +164,7 @@ Id flags: ${testflags}
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
     get_filename_component(id_src "${src}" NAME)
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
-      ${id_dir}/CompilerId${lang}.${ext} @ONLY IMMEDIATE)
+      ${id_dir}/CompilerId${lang}.${ext} @ONLY)
     execute_process(
       COMMAND ${CMAKE_MAKE_PROGRAM} CompilerId${lang}.${ext} ${build}
       WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
@@ -202,7 +202,7 @@ Id flags: ${testflags}
       set(ext xcode)
     endif()
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/Xcode-${v}.pbxproj.in
-      ${id_dir}/CompilerId${lang}.${ext}/project.pbxproj @ONLY IMMEDIATE)
+      ${id_dir}/CompilerId${lang}.${ext}/project.pbxproj @ONLY)
     unset(_ENV_MACOSX_DEPLOYMENT_TARGET)
     if(DEFINED ENV{MACOSX_DEPLOYMENT_TARGET})
       set(_ENV_MACOSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}")

@@ -3,7 +3,7 @@ set(CMAKE_EXECUTABLE "${CMake_BIN_DIR}/cmake")
 
 macro(AddCMakeTest TestName PreArgs)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${TestName}Test.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" @ONLY IMMEDIATE)
+    "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" @ONLY)
   add_test(NAME CMake.${TestName}
     COMMAND ${CMAKE_EXECUTABLE} ${PreArgs}
     -P "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" ${ARGN})

@@ -54,7 +54,7 @@ if (QT_FOUND AND QT_WRAP_UI)
 
 
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/foo.ui.in
-    ${CMAKE_CURRENT_BINARY_DIR}/foo.ui IMMEDIATE)
+    ${CMAKE_CURRENT_BINARY_DIR}/foo.ui)
 
   set (QT_WRAP_UI "On")
   set (QT_UIC_EXE "${QT_UIC_EXECUTABLE}")
@@ -102,6 +102,6 @@ add_dependencies(fakefluid Wrap)
 configure_file(
   ${Wrapping_SOURCE_DIR}/dummy
   ${Wrapping_BINARY_DIR}/gl.h
-  COPYONLY IMMEDIATE)
+  COPYONLY)
 use_mangled_mesa (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
 

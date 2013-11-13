@@ -31,7 +31,7 @@ MACRO (CHECK_FUNCTION_EXISTS_GLIBC _FUNC _FUNCVAR)
      SET(CHECK_STUB_FUNC_1 "__stub_${_FUNC}")
      SET(CHECK_STUB_FUNC_2 "__stub___${_FUNC}")
      CONFIGURE_FILE( ${_selfdir_CheckFunctionExistsGlibc}/CheckFuncs_stub.c.in
-       ${CMAKE_CURRENT_BINARY_DIR}/cmake.tmp/CheckFuncs_stub.c IMMEDIATE)
+       ${CMAKE_CURRENT_BINARY_DIR}/cmake.tmp/CheckFuncs_stub.c)
      TRY_COMPILE(__stub
        ${CMAKE_CURRENT_BINARY_DIR}
        ${CMAKE_CURRENT_BINARY_DIR}/cmake.tmp/CheckFuncs_stub.c

@@ -48,7 +48,7 @@ macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
     set(MACRO_CHECK_INCLUDE_FILE_FLAGS ${CMAKE_REQUIRED_FLAGS})
     set(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.c.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.c IMMEDIATE)
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.c)
     message(STATUS "Looking for ${INCLUDE}")
     if(${ARGC} EQUAL 3)
       set(CMAKE_C_FLAGS_SAVE ${CMAKE_C_FLAGS})

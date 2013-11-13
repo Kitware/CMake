@@ -45,8 +45,7 @@ MACRO(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
     SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
     SET(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/CMake/CMakeConfigurableFile.in
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
-      IMMEDIATE)
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c")
     MESSAGE(STATUS "Performing Test ${message}")
     TRY_COMPILE(${VAR}
       ${CMAKE_BINARY_DIR}

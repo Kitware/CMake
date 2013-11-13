@@ -98,7 +98,7 @@ else()
   configure_file(
     ${CMAKE_ROOT}/Modules/CMakeFortranCompiler.cmake.in
     ${CMAKE_PLATFORM_INFO_DIR}/CMakeFortranCompiler.cmake
-    @ONLY IMMEDIATE # IMMEDIATE must be here for compatibility mode <= 2.0
+    @ONLY
     )
   include(${CMAKE_PLATFORM_INFO_DIR}/CMakeFortranCompiler.cmake)
 

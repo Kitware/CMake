@@ -40,4 +40,4 @@ list(APPEND TOCLEAN_FILES "${ToClean_BINARY_DIR}/toclean_copy${CMAKE_EXECUTABLE_
 
 # Configure a file listing these build-time-generated files.
 configure_file(${ToClean_SOURCE_DIR}/ToCleanFiles.cmake.in
-               ${ToClean_BINARY_DIR}/ToCleanFiles.cmake @ONLY IMMEDIATE)
+               ${ToClean_BINARY_DIR}/ToCleanFiles.cmake @ONLY)
