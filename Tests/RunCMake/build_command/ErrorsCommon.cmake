@@ -37,9 +37,9 @@ build_command(cmd)
 message("4. cmd='${cmd}'")
 
 # Test the two-arg legacy signature:
-build_command(legacy_cmd ${CMAKE_BUILD_TOOL})
+build_command(legacy_cmd ${CMAKE_MAKE_PROGRAM})
 message("5. legacy_cmd='${legacy_cmd}'")
-message("   CMAKE_BUILD_TOOL='${CMAKE_BUILD_TOOL}'")
+message("   CMAKE_MAKE_PROGRAM='${CMAKE_MAKE_PROGRAM}'")
 
 # Test the optional KEYWORDs:
 build_command(cmd CONFIGURATION hoohaaConfig)
