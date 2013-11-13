@@ -134,6 +134,11 @@ public:
     const char *targetName, const char* config,
     bool ignoreErrors, bool fast);
 
+  /** Generate a "cmake --build" call for a given target and config.  */
+  std::string GenerateCMakeBuildCommand(const char* target,
+                                        const char* config,
+                                        const char* native,
+                                        bool ignoreErrors);
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm);
@@ -421,6 +426,8 @@ private:
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void ClearGeneratorMembers();
+
+  virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
 
   // Cache directory content and target files to be built.
   struct DirectoryContent: public std::set<cmStdString>

@@ -1707,6 +1707,46 @@ int cmGlobalGenerator::Build(
   return retVal;
 }
 
+//----------------------------------------------------------------------------
+std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
+  const char* target, const char* config, const char* native,
+  bool ignoreErrors)
+{
+  std::string makeCommand = cmSystemTools::GetCMakeCommand();
+  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
+  makeCommand += " --build .";
+  if(config && *config)
+    {
+    makeCommand += " --config \"";
+    makeCommand += config;
+    makeCommand += "\"";
+    }
+  if(target && *target)
+    {
+    makeCommand += " --target \"";
+    makeCommand += target;
+    makeCommand += "\"";
+    }
+  const char* sep = " -- ";
+  if(ignoreErrors)
+    {
+    const char* iflag = this->GetBuildIgnoreErrorsFlag();
+    if(iflag && *iflag)
+      {
+      makeCommand += sep;
+      makeCommand += iflag;
+      sep = " ";
+      }
+    }
+  if(native && *native)
+    {
+    makeCommand += sep;
+    makeCommand += native;
+    }
+  return makeCommand;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
 {
   this->LocalGenerators.push_back(lg);
