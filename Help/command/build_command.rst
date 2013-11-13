@@ -1,37 +1,44 @@
 build_command
 -------------
 
-Get the command line to build this project.
+Get a command line to build the current project.
+This is mainly intended for internal use by the :module:`CTest` module.
 
-::
+.. code-block:: cmake
 
   build_command(<variable>
                 [CONFIGURATION <config>]
-                [PROJECT_NAME <projname>]
-                [TARGET <target>])
+                [TARGET <target>]
+                [PROJECT_NAME <projname>] # legacy, causes warning
+               )
 
-Sets the given <variable> to a string containing the command line for
-building one configuration of a target in a project using the build
-tool appropriate for the current CMAKE_GENERATOR.
+Sets the given ``<variable>`` to a command-line string of the form::
 
-If CONFIGURATION is omitted, CMake chooses a reasonable default value
-for multi-configuration generators.  CONFIGURATION is ignored for
-single-configuration generators.
+ <cmake> --build . [--config <config>] [--target <target>] [-- -i]
 
-If PROJECT_NAME is omitted, the resulting command line will build the
-top level PROJECT in the current build tree.
+where ``<cmake>`` is the location of the :manual:`cmake(1)` command-line
+tool, and ``<config>`` and ``<target>`` are the values provided to the
+``CONFIGURATION`` and ``TARGET`` options, if any.  The trailing ``-- -i``
+option is added for Makefile generators.
 
-If TARGET is omitted, the resulting command line will build
-everything, effectively using build target 'all' or 'ALL_BUILD'.
+When invoked, this ``cmake --build`` command line will launch the
+underlying build system tool.
 
-::
+.. code-block:: cmake
 
   build_command(<cachevariable> <makecommand>)
 
 This second signature is deprecated, but still available for backwards
 compatibility.  Use the first signature instead.
 
-Sets the given <cachevariable> to a string containing the command to
-build this project from the root of the build tree using the build
-tool given by <makecommand>.  <makecommand> should be the full path to
-msdev, devenv, nmake, make or one of the end user build tools.
+It sets the given ``<cachevariable>`` to a command-line string as
+above but without the ``--config`` or ``--target`` options.
+The ``<makecommand>`` is ignored but should be the full path to
+msdev, devenv, nmake, make or one of the end user build tools
+for legacy invocations.
+
+.. note::
+ In CMake versions prior to 3.0 this command returned a command
+ line that directly invokes the native build tool for the current
+ generator.  Their implementation of the ``PROJECT_NAME`` option
+ had no useful effects, so CMake now warns on use of the option.

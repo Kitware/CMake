@@ -1,5 +1,7 @@
-CMake Error at BeforeProject.cmake:[0-9]+ \(build_command\):
-  build_command\(\) requires CMAKE_MAKE_PROGRAM to be defined.  Call project\(\)
-  or enable_language\(\) first.
+CMake Warning \(dev\) at BeforeProject.cmake:2 \(message\):
+  build_command\(\) returned:
+
+   .*cmake.* --build \..*
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists.txt:5 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
