@@ -110,6 +110,9 @@ public:
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 
+  std::string const& GetDevEnvCommand();
+  virtual std::string FindDevEnvCommand();
+
   static cmIDEFlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
@@ -168,6 +171,8 @@ protected:
 
 private:
   char* IntelProjectVersion;
+  std::string DevEnvCommand;
+  bool DevEnvCommandInitialized;
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

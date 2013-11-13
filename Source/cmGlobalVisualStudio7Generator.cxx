@@ -22,6 +22,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
 {
   this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
   this->IntelProjectVersion = 0;
+  this->DevEnvCommandInitialized = false;
 
   if (!platformName)
     {
@@ -110,6 +111,33 @@ void cmGlobalVisualStudio7Generator
 
 }
 
+//----------------------------------------------------------------------------
+std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
+{
+  if(!this->DevEnvCommandInitialized)
+    {
+    this->DevEnvCommandInitialized = true;
+    this->DevEnvCommand = this->FindDevEnvCommand();
+    }
+  return this->DevEnvCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
+{
+  std::string vscmd;
+  std::string vskey = this->GetRegistryBase() + ";InstallDir";
+  if(cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+                                      cmSystemTools::KeyWOW64_32))
+    {
+    cmSystemTools::ConvertToUnixSlashes(vscmd);
+    vscmd += "/";
+    }
+  vscmd += "devenv.com";
+  return vscmd;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,

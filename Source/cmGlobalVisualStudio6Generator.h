@@ -102,6 +102,10 @@ private:
                             const std::set<cmStdString>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget* target);
+  std::string MSDevCommand;
+  bool MSDevCommandInitialized;
+  std::string const& GetMSDevCommand();
+  std::string FindMSDevCommand();
 };
 
 #endif

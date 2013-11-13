@@ -98,6 +98,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
   this->MasmEnabled = false;
+  this->MSBuildCommandInitialized = false;
 }
 
 //----------------------------------------------------------------------------
@@ -255,7 +256,51 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
   return "Software\\Microsoft\\VisualStudio\\10.0\\vsmacros";
 }
 
+//----------------------------------------------------------------------------
+std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
+{
+  if(!this->MSBuildCommandInitialized)
+    {
+    this->MSBuildCommandInitialized = true;
+    this->MSBuildCommand = this->FindMSBuildCommand();
+    }
+  return this->MSBuildCommand;
+}
 
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
+{
+  std::string msbuild;
+  std::string mskey =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\";
+  mskey += this->GetToolsVersion();
+  mskey += ";MSBuildToolsPath";
+  if(cmSystemTools::ReadRegistryValue(mskey.c_str(), msbuild,
+                                      cmSystemTools::KeyWOW64_32))
+    {
+    cmSystemTools::ConvertToUnixSlashes(msbuild);
+    msbuild += "/";
+    }
+  msbuild += "MSBuild.exe";
+  return msbuild;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
+{
+  if(this->ExpressEdition)
+    {
+    // Visual Studio Express >= 10 do not have "devenv.com" or
+    // "VCExpress.exe" that we can use to build reliably.
+    // Tell the caller it needs to use MSBuild instead.
+    return "";
+    }
+  // Skip over the cmGlobalVisualStudio8Generator implementation because
+  // we expect a real devenv and do not want to look for VCExpress.
+  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,

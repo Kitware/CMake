@@ -33,6 +33,7 @@ std::string GetVS6TargetName(const std::string& targetName)
 cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
 {
   this->FindMakeProgramFile = "CMakeVS6FindMake.cmake";
+  this->MSDevCommandInitialized = false;
 }
 
 void cmGlobalVisualStudio6Generator
@@ -77,6 +78,33 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     }
 }
 
+//----------------------------------------------------------------------------
+std::string const& cmGlobalVisualStudio6Generator::GetMSDevCommand()
+{
+  if(!this->MSDevCommandInitialized)
+    {
+    this->MSDevCommandInitialized = true;
+    this->MSDevCommand = this->FindMSDevCommand();
+    }
+  return this->MSDevCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio6Generator::FindMSDevCommand()
+{
+  std::string vscmd;
+  std::string vskey = this->GetRegistryBase() + "\\Setup;VsCommonDir";
+  if(cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+                                      cmSystemTools::KeyWOW64_32))
+    {
+    cmSystemTools::ConvertToUnixSlashes(vscmd);
+    vscmd += "/MSDev98/Bin/";
+    }
+  vscmd += "msdev.exe";
+  return vscmd;
+}
+
+//----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,

@@ -94,6 +94,8 @@ public:
 protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
 
+  std::string const& GetMSBuildCommand();
+
   std::string PlatformToolset;
   bool ExpressEdition;
   bool MasmEnabled;
@@ -111,5 +113,10 @@ private:
     std::string SourceRel;
   };
   LongestSourcePath LongestSource;
+
+  std::string MSBuildCommand;
+  bool MSBuildCommandInitialized;
+  virtual std::string FindMSBuildCommand();
+  virtual std::string FindDevEnvCommand();
 };
 #endif
