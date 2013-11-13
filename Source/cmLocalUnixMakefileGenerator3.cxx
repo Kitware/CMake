@@ -699,17 +699,6 @@ cmLocalUnixMakefileGenerator3
     << "# Escaping for special characters.\n"
     << "EQUALS = =\n"
     << "\n";
-
-  if(const char* edit_cmd =
-     this->Makefile->GetDefinition("CMAKE_EDIT_COMMAND"))
-    {
-    makefileStream
-      << "# The program to use to edit the cache.\n"
-      << "CMAKE_EDIT_COMMAND = "
-      << this->ConvertShellCommand(edit_cmd, FULL) << "\n"
-      << "\n";
-    }
-
   makefileStream
     << "# The top-level source directory on which CMake was run.\n"
     << "CMAKE_SOURCE_DIR = "

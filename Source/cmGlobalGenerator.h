@@ -139,8 +139,7 @@ public:
   void SetCMakeInstance(cmake *cm);
 
   ///! Get the CMake instance
-  cmake *GetCMakeInstance() { return this->CMakeInstance; }
-  const cmake *GetCMakeInstance() const { return this->CMakeInstance; }
+  cmake *GetCMakeInstance() const { return this->CMakeInstance; }
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const {
@@ -251,6 +250,9 @@ public:
   virtual const char* GetEditCacheTargetName()     const { return 0; }
   virtual const char* GetRebuildCacheTargetName()  const { return 0; }
   virtual const char* GetCleanTargetName()         const { return 0; }
+
+  // Lookup edit_cache target command preferred by this generator.
+  virtual std::string GetEditCacheCommand() const { return ""; }
 
   // Class to track a set of dependencies.
   typedef cmTargetDependSet TargetDependSet;
