@@ -484,7 +484,6 @@ if(BUILD_QtDialog)
   if(APPLE)
     set(CMAKE_BUNDLE_VERSION
       "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
-    set(CMAKE_BUNDLE_NAME "CMake ${CMAKE_BUNDLE_VERSION}")
     set(CMAKE_BUNDLE_LOCATION "${CMAKE_INSTALL_PREFIX}")
     # make sure CMAKE_INSTALL_PREFIX ends in /
     string(LENGTH "${CMAKE_INSTALL_PREFIX}" LEN)
@@ -494,7 +493,7 @@ if(BUILD_QtDialog)
       set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
     endif()
     set(CMAKE_INSTALL_PREFIX
-      "${CMAKE_INSTALL_PREFIX}${CMAKE_BUNDLE_NAME}.app/Contents")
+      "${CMAKE_INSTALL_PREFIX}CMake.app/Contents")
   endif()
 
   set(QT_NEED_RPATH FALSE)
