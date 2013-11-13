@@ -13,7 +13,6 @@ import sys
 import os
 import re
 import glob
-import time
 
 sys.path.insert(0, r'@conf_path@')
 
@@ -21,7 +20,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'CMake'
-copyright = '2000-%s Kitware, Inc.' % time.strftime('%Y')
+copyright = '@conf_copyright@'
 version = '@conf_version@' # feature version
 release = '@conf_release@' # full version string
 

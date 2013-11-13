@@ -36,6 +36,15 @@ elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
 endif()
 
+set(copyright_line_regex "^Copyright (2000-20[0-9][0-9] Kitware.*)")
+file(STRINGS "${CMake_SOURCE_DIR}/Copyright.txt" copyright_line
+  LIMIT_COUNT 1 REGEX "${copyright_line_regex}")
+if(copyright_line MATCHES "${copyright_line_regex}")
+  set(conf_copyright "${CMAKE_MATCH_1}")
+else()
+  set(conf_copyright "Kitware, Inc.")
+endif()
+
 set(conf_docs "${CMake_SOURCE_DIR}/Help")
 set(conf_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(conf_version "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
