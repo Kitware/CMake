@@ -122,15 +122,8 @@ bool cmSetCommand
 
   if (parentScope)
     {
-    if (value.empty())
-      {
-      this->Makefile->RaiseScope(variable, 0);
-      }
-    else
-      {
-      this->Makefile->RaiseScope(variable, value.c_str());
-      }
-      return true;
+    this->Makefile->RaiseScope(variable, value.c_str());
+    return true;
     }
 
 
