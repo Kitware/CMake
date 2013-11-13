@@ -219,7 +219,8 @@ void cmVisualStudio10TargetGenerator::Generate()
 
   //get the tools version to use
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
-  std::string project_defaults="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  std::string project_defaults=
+    "<?xml version=\"1.0\" encoding=\"Windows-1252\"?>\n";
   project_defaults.append("<Project DefaultTargets=\"Build\" ToolsVersion=\"");
   project_defaults.append(toolsVer +"\" ");
   project_defaults.append(
@@ -724,7 +725,8 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
   //get the tools version to use
   const std::string toolsVer(this->GlobalGenerator->GetToolsVersion());
-  std::string project_defaults="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+  std::string project_defaults=
+    "<?xml version=\"1.0\" encoding=\"Windows-1252\"?>\n";
   project_defaults.append("<Project ToolsVersion=\"");
   project_defaults.append(toolsVer +"\" ");
   project_defaults.append(
