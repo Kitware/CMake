@@ -88,6 +88,26 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
   return false;
 }
 
+std::string cmGlobalGenerator::SelectMakeProgram(const char* makeProgram,
+                                                 std::string makeDefault)
+{
+  if(cmSystemTools::IsOff(makeProgram))
+    {
+    makeProgram =
+      this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
+    if(cmSystemTools::IsOff(makeProgram))
+      {
+      makeProgram = makeDefault.c_str();
+      }
+    if(cmSystemTools::IsOff(makeProgram) &&
+       !(makeProgram && *makeProgram))
+      {
+      makeProgram = "CMAKE_MAKE_PROGRAM-NOTFOUND";
+      }
+    }
+  return makeProgram;
+}
+
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
                                                 cmMakefile *mf,
                                                 bool optional)

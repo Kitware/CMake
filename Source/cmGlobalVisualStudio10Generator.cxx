@@ -311,23 +311,57 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   bool fast,
   std::vector<std::string> const& makeOptions)
 {
-  // now build the test
-  std::string lowerCaseCommand = makeProgram;
-  cmSystemTools::LowerCase(lowerCaseCommand);
+  // Check if the caller explicitly requested a devenv tool.
+  std::string makeProgramLower = makeProgram? makeProgram : "";
+  cmSystemTools::LowerCase(makeProgramLower);
+  bool useDevEnv =
+    (makeProgramLower.find("devenv") != std::string::npos ||
+     makeProgramLower.find("vcexpress") != std::string::npos);
 
-  // If makeProgram is devenv, parent class knows how to generate command:
-  if (lowerCaseCommand.find("devenv") != std::string::npos ||
-      lowerCaseCommand.find("VCExpress") != std::string::npos)
+  // MSBuild is preferred (and required for VS Express), but if the .sln has
+  // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
+  cmSlnData slnData;
+  {
+  std::string slnFile;
+  if(projectDir && *projectDir)
     {
+    slnFile = projectDir;
+    slnFile += "/";
+    }
+  slnFile += projectName;
+  slnFile += ".sln";
+  cmVisualStudioSlnParser parser;
+  if(parser.ParseFile(slnFile, slnData,
+                      cmVisualStudioSlnParser::DataGroupProjects))
+    {
+    std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
+    for(std::vector<cmSlnProjectEntry>::iterator i = slnProjects.begin();
+        !useDevEnv && i != slnProjects.end(); ++i)
+      {
+      std::string proj = i->GetRelativePath();
+      if(proj.size() > 7 &&
+         proj.substr(proj.size()-7) == ".vfproj")
+        {
+        useDevEnv = true;
+        // The caller-provided makeProgram did not suggest devenv,
+        // but now we need devenv, so ignore the caller suggestion.
+        makeProgram = 0;
+        }
+      }
+    }
+  }
+  if(useDevEnv)
+    {
+    // Use devenv to build solutions containing Intel Fortran projects.
     cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       makeCommand, makeProgram, projectName, projectDir,
       targetName, config, fast, makeOptions);
     return;
     }
 
-  // Otherwise, assume MSBuild command line, and construct accordingly.
-
-  makeCommand.push_back(makeProgram);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand())
+    );
 
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
   if(!targetName || strlen(targetName) == 0)
@@ -346,28 +380,11 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     if (targetProject.find('/') == std::string::npos)
       {
       // it might be in a subdir
-      cmVisualStudioSlnParser parser;
-      cmSlnData slnData;
-      std::string slnFile;
-      if (projectDir && *projectDir)
+      if (cmSlnProjectEntry const* proj =
+          slnData.GetProjectByName(targetName))
         {
-        slnFile = projectDir;
-        slnFile += '/';
-        slnFile += projectName;
-        }
-      else
-        {
-        slnFile = projectName;
-        }
-      if (parser.ParseFile(slnFile + ".sln", slnData,
-                           cmVisualStudioSlnParser::DataGroupProjects))
-        {
-        if (cmSlnProjectEntry const* proj =
-            slnData.GetProjectByName(targetName))
-          {
-          targetProject = proj->GetRelativePath();
-          cmSystemTools::ConvertToUnixSlashes(targetProject);
-          }
+        targetProject = proj->GetRelativePath();
+        cmSystemTools::ConvertToUnixSlashes(targetProject);
         }
       }
     makeCommand.push_back(targetProject);

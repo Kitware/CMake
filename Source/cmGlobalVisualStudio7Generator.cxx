@@ -148,7 +148,9 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
 {
-  makeCommand.push_back(makeProgram);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram, this->GetDevEnvCommand())
+    );
 
   makeCommand.push_back(std::string(projectName) + ".sln");
   bool clean = false;

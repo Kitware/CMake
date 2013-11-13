@@ -269,13 +269,9 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::vector<std::string> const& makeOptions)
 {
   // now build the test
-  if(makeProgram == 0 || !strlen(makeProgram))
-    {
-    cmSystemTools::Error(
-      "Generator cannot find the appropriate make command.");
-    return;
-    }
-  makeCommand.push_back(makeProgram);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram, "xcodebuild")
+    );
 
   makeCommand.push_back("-project");
   std::string projectArg = projectName;

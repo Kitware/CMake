@@ -559,7 +559,9 @@ void cmGlobalNinjaGenerator
                        bool /*fast*/,
                        std::vector<std::string> const& makeOptions)
 {
-  makeCommand.push_back(makeProgram);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram)
+    );
 
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
