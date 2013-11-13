@@ -1575,40 +1575,12 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 }
 
 std::string cmGlobalGenerator
-::GenerateBuildCommand(const char* makeProgram, const char *projectName,
-                       const char *projectDir, const char* additionalOptions,
-                       const char *targetName, const char* config,
-                       bool ignoreErrors, bool)
+::GenerateBuildCommand(const char*, const char*,
+                       const char*, const char*,
+                       const char*, const char*,
+                       bool, bool)
 {
-  // Project name & dir and config are not used yet.
-  (void)projectName;
-  (void)projectDir;
-  (void)config;
-
-  std::string makeCommand =
-    cmSystemTools::ConvertToUnixOutputPath(makeProgram);
-
-  // Since we have full control over the invocation of nmake, let us
-  // make it quiet.
-  if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
-    {
-    makeCommand += " /NOLOGO ";
-    }
-  if ( ignoreErrors )
-    {
-    makeCommand += " -i";
-    }
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  if ( targetName )
-    {
-    makeCommand += " ";
-    makeCommand += targetName;
-    }
-  return makeCommand;
+  return "cmGlobalGenerator::GenerateBuildCommand not implemented";
 }
 
 int cmGlobalGenerator::Build(
