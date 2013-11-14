@@ -1645,31 +1645,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
 
     if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio ([0-5]|[6-9][0-9])")
-      if(CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
-        set(MSBUILD_EXECUTABLE "${CMAKE_TEST_MAKEPROGRAM}")
-      else()
-        if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio (12)")
-          set(_msbuild_hints "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\${CMAKE_MATCH_1}.0;MSBuildToolsPath]")
-        else()
-          set(_FDIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkDir32]")
-          set(_FVER "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkVer32]")
-          set(_msbuild_hints ${_FDIR}/${_FVER})
-        endif()
-        find_program(MSBUILD_EXECUTABLE NAMES msbuild HINTS ${_msbuild_hints})
-      endif()
-      if(MSBUILD_EXECUTABLE)
-        add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
-          "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
-          --build-two-config
-          --build-generator ${CMAKE_TEST_GENERATOR}
-          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-          --build-makeprogram "${MSBUILD_EXECUTABLE}"
-          --build-project VSProjectInSubdir
-          --build-target test)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
-      endif()
+      # This is Visual Studio 10 or above, so the default build tool is MSBuild.
+      add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
+        "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
+        --build-two-config
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
+        --build-project VSProjectInSubdir
+        --build-target test)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
     endif()
   endif()
 
