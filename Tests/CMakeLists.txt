@@ -1492,7 +1492,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
       # Look for evidence that this is a VCExpress build. If so, avoid
       # the MFC test by default.
-      string(TOLOWER "${CMAKE_TEST_MAKEPROGRAM}" mkprog)
+      string(TOLOWER "${CMAKE_MAKE_PROGRAM};${CMAKE_TEST_MAKEPROGRAM}" mkprog)
       if(mkprog MATCHES "vcexpress")
         message(STATUS
           "CMAKE_TEST_MAKEPROGRAM indicates vcexpress, avoiding MFC test")
