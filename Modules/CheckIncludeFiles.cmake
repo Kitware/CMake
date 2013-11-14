@@ -54,7 +54,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
     set(CMAKE_CONFIGURABLE_FILE_CONTENT
       "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY IMMEDIATE)
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY)
 
     set(_INCLUDE ${INCLUDE}) # remove empty elements
     if("${_INCLUDE}" MATCHES "^([^;]+);.+;([^;]+)$")

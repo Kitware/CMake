@@ -198,14 +198,14 @@ make_directory("${Complex_BINARY_DIR}/make_dir")
 configure_file(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
-  COPYONLY IMMEDIATE)
+  COPYONLY)
 foreach (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl
          ${CMAKE_SHARED_LIBRARY_SUFFIX}.2
          ${CMAKE_STATIC_LIBRARY_SUFFIX}.2)
   configure_file(
     ${Complex_SOURCE_DIR}/Library/dummy
     ${Complex_BINARY_DIR}/Library/libdummylib${ext}
-    COPYONLY IMMEDIATE)
+    COPYONLY)
 endforeach ()
 
 find_library(FIND_DUMMY_LIB
@@ -281,7 +281,7 @@ if (WIN32)
     configure_file(
       ${Complex_SOURCE_DIR}/Library/dummy
       "${dir}/${file}"
-      COPYONLY IMMEDIATE)
+      COPYONLY)
     exec_program(${CMAKE_COMMAND} ARGS "-E write_regv \"${hkey}\" \"${dir}\"")
     find_path(REGISTRY_TEST_PATH
       ${file}

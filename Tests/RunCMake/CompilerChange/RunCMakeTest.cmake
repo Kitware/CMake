@@ -22,8 +22,8 @@ set(ccIn ${RunCMake_SOURCE_DIR}/cc.sh.in)
 set(cc1 ${RunCMake_BINARY_DIR}/cc1.sh)
 set(cc2 ${RunCMake_BINARY_DIR}/cc2.sh)
 set(cc3 CMAKE_C_COMPILER-NOTFOUND)
-configure_file(${ccIn} ${cc1} @ONLY IMMEDIATE)
-configure_file(${ccIn} ${cc2} @ONLY IMMEDIATE)
+configure_file(${ccIn} ${cc1} @ONLY)
+configure_file(${ccIn} ${cc2} @ONLY)
 
 # Use a single build tree for remaining tests without cleaning.
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ChangeCompiler-build)

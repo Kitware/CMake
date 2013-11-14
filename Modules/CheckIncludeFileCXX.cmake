@@ -52,7 +52,7 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     set(MACRO_CHECK_INCLUDE_FILE_FLAGS ${CMAKE_REQUIRED_FLAGS})
     set(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx IMMEDIATE)
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
     message(STATUS "Looking for C++ include ${INCLUDE}")
     if(${ARGC} EQUAL 3)
       set(CMAKE_CXX_FLAGS_SAVE ${CMAKE_CXX_FLAGS})

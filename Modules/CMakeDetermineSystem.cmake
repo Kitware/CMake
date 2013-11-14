@@ -181,6 +181,6 @@ if(CMAKE_BINARY_DIR)
   # configure variables set in this file for fast reload, the template file is defined at the top of this file
   configure_file(${CMAKE_ROOT}/Modules/CMakeSystem.cmake.in
                 ${CMAKE_PLATFORM_INFO_DIR}/CMakeSystem.cmake
-                IMMEDIATE @ONLY)
+                @ONLY)
 
 endif()

@@ -37,7 +37,7 @@ foreach(f ${TOCLEAN_FILES})
   set(CHECK_FILES "${CHECK_FILES}      \"${f}\",\n")
 endforeach()
 configure_file(${MakeClean_SOURCE_DIR}/check_clean.c.in
-               ${MakeClean_BINARY_DIR}/check_clean.c @ONLY IMMEDIATE)
+               ${MakeClean_BINARY_DIR}/check_clean.c @ONLY)
 add_executable(check_clean ${MakeClean_BINARY_DIR}/check_clean.c)
 
 # After the executable builds, clean the files.

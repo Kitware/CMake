@@ -170,7 +170,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/not_included.h
 configure_file(
   ${PROJECT_SOURCE_DIR}/config.h.in
   ${PROJECT_BINARY_DIR}/config.h
-  @ONLY IMMEDIATE
+  @ONLY
   )
 
 # add the executable
@@ -375,7 +375,7 @@ foreach(arg ${CHECK_ARGS} "")
 endforeach()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/check_command_line.c.in
                ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c
-               @ONLY IMMEDIATE)
+               @ONLY)
 add_executable(check_command_line
   ${CMAKE_CURRENT_BINARY_DIR}/check_command_line.c)
 set(output_name "check_command_line")
