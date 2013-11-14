@@ -1829,17 +1829,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 #        )
 
   # A test for ctest_build() with targets in subdirectories
+  set(ctest_configure_options)
   if(CMAKE_TEST_GENERATOR_TOOLSET)
-    set(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION "-T;${CMAKE_TEST_GENERATOR_TOOLSET};")
-  else()
-    set(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION)
+    list(APPEND ctest_configure_options -T ${CMAKE_TEST_GENERATOR_TOOLSET})
+  endif()
+  if(CMAKE_TEST_MAKEPROGRAM)
+    list(APPEND ctest_configure_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
   endif()
   configure_file("${CMake_SOURCE_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake.in"
                  "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake" @ONLY)
-  unset(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION)
+  unset(ctest_configure_options)
   add_test(CTest.BuildCommand.ProjectInSubdir
-    ${CMAKE_CTEST_COMMAND} -S "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake"
-                           -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+    ${CMAKE_CTEST_COMMAND} -S "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/Nested")
 
   set(CTEST_TEST_UPDATE 1)

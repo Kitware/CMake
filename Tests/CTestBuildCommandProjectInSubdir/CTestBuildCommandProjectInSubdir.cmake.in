@@ -8,5 +8,5 @@ set(CTEST_BUILD_CONFIGURATION "@CTestTest_CONFIG@")
 
 ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
 ctest_start(Experimental)
-ctest_configure(OPTIONS "@CMAKE_TEST_GENERATOR_TOOLSET_SELECTION@-DCMAKE_MAKE_PROGRAM:FILEPATH=@CMAKE_TEST_MAKEPROGRAM@")
+ctest_configure(OPTIONS "@ctest_configure_options@")
 ctest_build(TARGET test)
