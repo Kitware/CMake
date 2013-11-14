@@ -110,39 +110,9 @@ define_property(DIRECTORY PROPERTY "CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY" IN
   )
 
 
-function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgNames)
-  # first set all result variables to empty/FALSE
-  foreach(arg_name ${_singleArgNames} ${_multiArgNames})
-    set(${prefix}_${arg_name})
-  endforeach()
-
-  foreach(option ${_optionNames})
-    set(${prefix}_${option} FALSE)
-  endforeach()
-
-  set(${prefix}_UNPARSED_ARGUMENTS)
-
+function(_CMAKE_PARSE_ARGUMENTS_INTERNAL prefix _optionNames _singleArgNames _multiArgNames _skipEmpty)
   set(insideValues FALSE)
   set(currentArgName)
-
-  get_property(_defaultSkipEmptySet DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY SET)
-  get_property(_defaultSkipEmpty    DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY)
-
-  if("x${ARGN}" MATCHES "^xCMAKE_PARSE_ARGUMENTS_(SKIP|KEEP)_EMPTY;?")
-    if("${CMAKE_MATCH_1}" STREQUAL "SKIP")
-        set(_skipEmpty 1)
-    elseif("${CMAKE_MATCH_1}" STREQUAL "KEEP")
-        set(_skipEmpty 0)
-    endif()
-    string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
-  elseif(_defaultSkipEmptySet)
-    set(_skipEmpty ${_defaultSkipEmpty})
-  elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
-    # Keep compatibility with previous releases
-    set(_skipEmpty 1)
-  else()
-    set(_skipEmpty 0)
-  endif()
 
   if(_skipEmpty)
     set(_loopARGN ${ARGN})
@@ -204,3 +174,63 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
   endforeach()
 
 endfunction()
+
+
+# This "wrapper" macro is a workaround that allows to use this version of this
+# module with CMake <= 2.8.12
+# Before that version set(VAR "" PARENT_SCOPE) did not set the variable in
+# the parent scope and instead it used to unset it.
+# This wrapper calls the real function, but if necessary (i.e. when empty
+# arguments should not be skipped and CMake < 3.0.0) it parses the arguments
+# again in order to find single and multiple arguments that have not been set
+# and sets them to an empty string in the same variable scope as the caller.
+macro(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgNames)
+  # first set all result variables to empty/FALSE
+  foreach(arg_name ${_singleArgNames} ${_multiArgNames})
+    set(${prefix}_${arg_name})
+  endforeach()
+
+  foreach(option ${_optionNames})
+    set(${prefix}_${option} FALSE)
+  endforeach()
+
+  set(${prefix}_UNPARSED_ARGUMENTS)
+
+  get_property(_defaultSkipEmptySet DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY SET)
+  get_property(_defaultSkipEmpty    DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY)
+
+  if("x${ARGN}" MATCHES "^xCMAKE_PARSE_ARGUMENTS_(SKIP|KEEP)_EMPTY;?")
+    if("${CMAKE_MATCH_1}" STREQUAL "SKIP")
+        set(_skipEmpty 1)
+    elseif("${CMAKE_MATCH_1}" STREQUAL "KEEP")
+        set(_skipEmpty 0)
+    endif()
+    string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
+  elseif(_defaultSkipEmptySet)
+    set(_skipEmpty "${_defaultSkipEmpty}")
+  elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
+   # Keep compatibility with previous releases
+    set(_skipEmpty 1)
+  else()
+    set(_skipEmpty 0)
+  endif()
+
+  _cmake_parse_arguments_internal("${prefix}" "${_optionNames}" "${_singleArgNames}" "${_multiArgNames}" "${_skipEmpty}" "${ARGN}")
+
+  if(NOT _skipEmpty AND CMAKE_VERSION VERSION_LESS 3.0.0)
+    set(__singleArgNames ${_singleArgNames})
+    set(__multiArgNames ${_multiArgNames})
+    foreach(currentArg ${ARGN})
+      if(NOT DEFINED ${prefix}_${currentArg})
+        list(FIND __singleArgNames "${currentArg}" _singleArgIndex)
+        list(FIND __multiArgNames "${currentArg}" _multiArgIndex)
+        if(NOT ${_singleArgIndex} EQUAL -1  OR  NOT ${_multiArgIndex} EQUAL -1)
+          set(${prefix}_${currentArg} "")
+        endif()
+      endif()
+    endforeach()
+    unset(__singleArgNames)
+    unset(__multiArgNames)
+  endif()
+
+endmacro()
