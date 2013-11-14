@@ -1,7 +1,9 @@
 The CMake variable CMAKE_FIND_ROOT_PATH specifies one or more
 directories to be prepended to all other search directories.  This
-effectively "re-roots" the entire search under given locations.  By
-default it is empty.
+effectively "re-roots" the entire search under given locations.
+Paths which are descendants of the :variable:`CMAKE_STAGING_PREFIX` are excluded
+from this re-rooting, because that variable is always a path on the host system.
+By default the CMAKE_FIND_ROOT_PATH is empty.
 
 The :variable:`CMAKE_SYSROOT` variable can also be used to specify exactly one
 directory to use as a prefix.  Setting :variable:`CMAKE_SYSROOT` also has other
@@ -18,4 +20,4 @@ overridden on a per-call basis.  By using CMAKE_FIND_ROOT_PATH_BOTH
 the search order will be as described above.  If
 NO_CMAKE_FIND_ROOT_PATH is used then CMAKE_FIND_ROOT_PATH will not be
 used.  If ONLY_CMAKE_FIND_ROOT_PATH is used then only the re-rooted
-directories will be searched.
+directories and directories below :variable:`CMAKE_STAGING_PREFIX` will be searched.
