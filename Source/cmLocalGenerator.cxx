@@ -372,6 +372,11 @@ void cmLocalGenerator::GenerateInstallRules()
 #endif
   std::string sysrootted
                   = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  if (const char *stagingPrefix
+                  = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
+    {
+    prefix = stagingPrefix;
+    }
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;
