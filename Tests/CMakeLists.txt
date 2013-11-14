@@ -45,8 +45,13 @@ configure_file(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 
 # Testing
 if(BUILD_TESTING)
+  set(CMAKE_TEST_DEVENV "")
   if(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
     set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
+    if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio [7-9] " AND
+        NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+      set(CMAKE_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
+    endif()
   endif()
 
   if("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_TEST_GENERATOR}" MATCHES Ninja AND NOT WIN32))
@@ -1616,7 +1621,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command VSMidl)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
 
-    if(NOT MSVC60 AND NOT CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+    if(CMAKE_TEST_DEVENV)
       # The test (and tested property) works with .sln files, so it's skipped when:
       # * Using VS6, which doesn't use .sln files
       # * cmake --build is set up to use MSBuild, since the MSBuild invocation does not use the .sln file
@@ -1628,7 +1633,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
           "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
           --build-config ${config}
           --build-two-config
-          ${build_generator_args}
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-makeprogram ${CMAKE_TEST_DEVENV}
+          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
           --build-project VSExcludeFromDefaultBuild
           --test-command ${CMAKE_COMMAND}
              -D "activeConfig=${config}"
