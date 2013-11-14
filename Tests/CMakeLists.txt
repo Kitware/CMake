@@ -2417,16 +2417,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
   if(bootstrap)
-    add_test(BootstrapTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      ${CMake_SOURCE_DIR}
-      ${CMake_BINARY_DIR}/Tests/BootstrapTest
-      --build-nocmake
-      --build-noclean
-      --build-makeprogram ${bootstrap}
-      --build-generator "${CMAKE_TEST_GENERATOR}"
-      --test-command
-      ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
+    add_test(NAME BootstrapTest
+      COMMAND ${CMAKE_CMAKE_COMMAND}
+        -D "bootstrap=${bootstrap}"
+        -D "bin_dir=${CMake_BINARY_DIR}/Tests/BootstrapTest"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/BootstrapTest.cmake
+      )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
     # Make this test run early during parallel execution
     set_tests_properties(BootstrapTest PROPERTIES COST 5000)
