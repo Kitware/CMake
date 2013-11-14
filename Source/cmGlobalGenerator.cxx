@@ -1562,15 +1562,6 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
                                         this->FirstTimeProgress);
     }
 
-  std::string makeCommand = this->CMakeInstance->
-    GetCacheManager()->GetCacheValue("CMAKE_MAKE_PROGRAM");
-  if(makeCommand.size() == 0)
-    {
-    cmSystemTools::Error(
-      "Generator cannot find the appropriate make command.");
-    return 1;
-    }
-
   std::string newTarget;
   if (target && strlen(target))
     {
@@ -1590,7 +1581,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
   const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
-                     output,makeCommand.c_str(),config,false,fast,
+                     output,0,config,false,fast,
                      this->TryCompileTimeout);
 }
 
