@@ -440,6 +440,15 @@ void cmFindCommon::ComputeFinalPaths()
   // Expand list of paths inside all search roots.
   this->RerootPaths(paths);
 
+  if(const char* stagePrefix =
+      this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
+    {
+    if (!this->Makefile->IsOn("CMAKE_FIND_NO_INSTALL_PREFIX"))
+      {
+      paths.push_back(stagePrefix);
+      }
+    }
+
   // Add a trailing slash to all paths to aid the search process.
   for(std::vector<std::string>::iterator i = paths.begin();
       i != paths.end(); ++i)
